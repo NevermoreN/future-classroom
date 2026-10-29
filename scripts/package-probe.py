@@ -77,7 +77,8 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "sha256": entries[0]["sha256"],
         "features": {
             "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--native-probe <1..300>"],
-            "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation and homework; full application incomplete",
+            "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar drafts; full application incomplete",
+            "timetable_limits": "64 KiB complete document including bounded dual history; public calendar provider and full desktop rendering incomplete",
             "normal_start": "manual workbench; --autostart stays locked and hidden; creates project-only protected ProgramData deployment",
             "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; interactive QA required",
             "complete_application": "NOT_IMPLEMENTED",

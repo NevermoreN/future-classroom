@@ -1403,3 +1403,761 @@ fn corrupt_one_credential_kind_preserves_healthy_other_kind_and_repairs_only_new
     assert_eq!(repaired.recovery_version, 2);
     complete(&handle, repaired, Verification::Verified).unwrap();
 }
+
+fn timetable_document(history: bool) -> fc_domain::schedule_document::ScheduleDocument {
+    use fc_domain::{schedule::*, schedule_document::*};
+    let row = TimetableRow {
+        id: RowId::new(1).unwrap(),
+        logical_key: LogicalRowKey::new(1).unwrap(),
+        group: DayGroup::Morning,
+        kind: RowKind::Course,
+        range: MinuteRange::new(
+            Minute::from_hm(8, 20).unwrap(),
+            Minute::from_hm(9, 0).unwrap(),
+        )
+        .unwrap(),
+        enabled_days: [true, false, false, false, false, false, false],
+        courses: std::array::from_fn(|day| {
+            if day == 0 {
+                Some(CourseCell {
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher: TeacherBinding::Explicit(principal(2)),
+                })
+            } else {
+                None
+            }
+        }),
+    };
+    let mut plan = SemesterPlan {
+        semester: Semester {
+            id: SemesterId::new(1).unwrap(),
+            class_id: ClassId::new(1).unwrap(),
+            revision: Revision::default(),
+            enabled: true,
+            start: date(1),
+            end: date(31),
+            first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
+            tables: vec![WeekTable {
+                id: TableId::new(1).unwrap(),
+                role: TableRole::Single,
+                rows: vec![row],
+            }],
+        },
+        name: "秋季学期".into(),
+        timing_sync: false,
+        dual_history: None,
+        row_details: vec![RowDetails {
+            row_id: RowId::new(1).unwrap(),
+            name: "第一节".into(),
+        }],
+        cell_details: vec![CellDetails {
+            row_id: RowId::new(1).unwrap(),
+            day: Weekday::Monday,
+            room: "201".into(),
+            note: "保留教室与备注".into(),
+        }],
+    };
+    if history {
+        plan = plan
+            .enable_dual(EnableDual::Rebuild {
+                odd_id: TableId::new(2).unwrap(),
+                even_id: TableId::new(3).unwrap(),
+                odd_rows: vec![RowId::new(2).unwrap()],
+                even_rows: vec![RowId::new(3).unwrap()],
+            })
+            .unwrap()
+            .disable_dual(TableId::new(2).unwrap())
+            .unwrap();
+    }
+    let mut doc = ScheduleDocument {
+        semesters: vec![plan],
+        calendar_mode: CalendarMode::School,
+        ..ScheduleDocument::default()
+    };
+    doc.school_calendar.school_coverage = Some((date(1), date(31)));
+    doc.school_calendar.entries = vec![
+        CalendarEntry {
+            actual_semester_id: SemesterId::new(1).unwrap(),
+            date: date(30),
+            mapping: DayMapping::SourceDate(date(26)),
+        },
+        CalendarEntry {
+            actual_semester_id: SemesterId::new(1).unwrap(),
+            date: date(31),
+            mapping: DayMapping::Rest,
+        },
+    ];
+    doc.public_calendar.public_verified_years = vec![2026];
+    doc.public_calendar.entries = vec![CalendarEntry {
+        actual_semester_id: SemesterId::new(1).unwrap(),
+        date: date(1),
+        mapping: DayMapping::Rest,
+    }];
+    doc
+}
+fn schedule_request(
+    id: u64,
+    revision: u64,
+    candidate: fc_domain::schedule_document::ScheduleDocument,
+) -> fc_ports::ScheduleRequest {
+    fc_ports::ScheduleRequest {
+        command_id: CommandId::new(id).unwrap(),
+        expected_revision: Revision::new(revision),
+        candidate,
+    }
+}
+fn open_schedule_storage(
+    d: &Directory,
+    clock: Arc<Time>,
+    state: IdentityState,
+    revision: Revision,
+) -> (
+    Joined,
+    BusinessRepository<Snapshot>,
+    fc_runtime::authority::AuthorityReader<IdentityState>,
+) {
+    let (mut publisher, reader) = AuthorityStore::new(state, revision, AuthEpoch::new(1));
+    publisher.initialize().unwrap();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let factory_reader = reader.clone();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        factory_reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    (
+        Joined(Some(writer)),
+        BusinessRepository::new(handle, clock, factory).with_session_guard(Arc::new(|_, _| Ok(()))),
+        reader,
+    )
+}
+#[test]
+fn timetable_storage_uses_independent_cas_persists_both_calendars_history_and_atomic_receipts() {
+    use fc_domain::schedule_document::{DocumentErrorKind, ScheduleDocument};
+    use fc_ports::{ScheduleRepository, ScheduleRepositoryError};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (w, mut repo, _reader) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    assert_eq!(repo.schedule(&admin).unwrap(), ScheduleDocument::default());
+    let request = schedule_request(3000, 0, timetable_document(true));
+    let first = repo
+        .execute_schedule(request.clone(), &admin, &*clock)
+        .unwrap();
+    assert_eq!(first.revision, Revision::new(1));
+    assert_eq!(first.semesters[0].semester.revision, Revision::new(1));
+    assert_eq!(
+        first.semesters[0]
+            .dual_history
+            .as_ref()
+            .unwrap()
+            .cell_details
+            .len(),
+        2
+    );
+    assert_eq!(repo.load_identity().unwrap().revision, Revision::new(7));
+    let global =
+        w.0.as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap();
+    assert_eq!(global, Revision::new(8));
+    assert_eq!(
+        repo.execute_schedule(request.clone(), &admin, &*clock)
+            .unwrap(),
+        first
+    );
+    assert_eq!(
+        w.0.as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        global
+    );
+    let mut changed = request.clone();
+    changed.candidate.automatic_gaps = false;
+    assert_eq!(
+        repo.execute_schedule(changed, &admin, &*clock),
+        Err(ScheduleRepositoryError::IdempotencyConflict)
+    );
+    assert!(
+        matches!(repo.execute_schedule(schedule_request(3001,0,first.clone()),&admin,&*clock),Err(ScheduleRepositoryError::Domain(e))if matches!(e.kind,DocumentErrorKind::RevisionConflict{current}if current==Revision::new(1)))
+    );
+    assert!(repo.schedule(&actor(2, 2, TrustedOrigin::Local)).is_err());
+    assert!(repo.schedule(&actor(1, 1, TrustedOrigin::Web)).is_err());
+    repo.execute(
+        command(3002, 2, 0, "unrelated homework"),
+        &actor(2, 2, TrustedOrigin::Web),
+        &*clock,
+    )
+    .unwrap();
+    let mut candidate = first.clone();
+    candidate.automatic_gaps = false;
+    let second = repo
+        .execute_schedule(schedule_request(3003, 1, candidate), &admin, &*clock)
+        .unwrap();
+    assert_eq!(second.revision, Revision::new(2));
+    assert_eq!(second.semesters[0].semester.revision, Revision::new(1));
+    assert_eq!(second.rules_revision, Revision::new(2));
+    assert_eq!(second.school_calendar, first.school_calendar);
+    assert_eq!(second.public_calendar, first.public_calendar);
+    let state = repo.load_identity().unwrap();
+    let global =
+        w.0.as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap();
+    drop(repo);
+    drop(w);
+    let facts = fc_storage::business::startup_state(d.path()).unwrap();
+    assert_eq!(facts.identity, state);
+    assert_eq!(facts.revision, global);
+    let (_w, mut restored, _) =
+        open_schedule_storage(&d, clock.clone(), facts.identity, facts.revision);
+    assert_eq!(restored.schedule(&admin).unwrap(), second);
+    assert_eq!(
+        restored.execute_schedule(request, &admin, &*clock).unwrap(),
+        first
+    );
+    let restored_dual = second.semesters[0]
+        .enable_dual(fc_domain::schedule_document::EnableDual::RestoreHistory)
+        .unwrap();
+    assert_eq!(restored_dual.cell_details.len(), 2);
+    assert_eq!(restored_dual.semester.tables.len(), 2);
+}
+#[test]
+fn timetable_storage_preserves_id_high_water_after_deletion_and_reopen() {
+    use fc_domain::schedule_document::DraftEdit;
+    use fc_ports::ScheduleRepository;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let mut candidate = timetable_document(false);
+    let plan = &mut candidate.semesters[0];
+    let highest = RowId::new(900).unwrap();
+    plan.semester.tables[0].rows[0].id = highest;
+    plan.semester.tables[0].rows[0].logical_key = LogicalRowKey::new(900).unwrap();
+    plan.row_details[0].row_id = highest;
+    plan.cell_details[0].row_id = highest;
+    let saved = repo
+        .execute_schedule(schedule_request(3500, 0, candidate), &admin, &*clock)
+        .unwrap();
+    assert_eq!(saved.id_high_water, 900);
+    let old_row = saved.semesters[0].semester.tables[0].rows[0].clone();
+    let identity = repo.load_identity().unwrap();
+    let mut deletion = saved
+        .edit(
+            &DraftEdit::RemoveRow {
+                semester_id: saved.semesters[0].semester.id,
+                table_id: saved.semesters[0].semester.tables[0].id,
+                row_id: highest,
+            },
+            &identity,
+        )
+        .unwrap();
+    deletion.id_high_water = 0; // An untrusted candidate cannot roll back the allocator.
+    let removed = repo
+        .execute_schedule(schedule_request(3501, 1, deletion), &admin, &*clock)
+        .unwrap();
+    assert_eq!(removed.id_high_water, 900);
+    assert!(removed.semesters[0].semester.tables[0].rows.is_empty());
+    drop(repo);
+    drop(writer);
+    let facts = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), facts.identity, facts.revision);
+    let mut restored = repo.schedule(&admin).unwrap();
+    assert_eq!(restored.id_high_water, 900);
+    let mut reused = restored.clone();
+    reused.semesters[0].semester.tables[0]
+        .rows
+        .push(old_row.clone());
+    assert!(matches!(
+        repo.execute_schedule(schedule_request(3503, 2, reused), &admin, &*clock),
+        Err(fc_ports::ScheduleRepositoryError::Domain(
+            fc_domain::schedule_document::ScheduleDocumentError {
+                kind: fc_domain::schedule_document::DocumentErrorKind::RetiredIdentity,
+                ..
+            }
+        ))
+    ));
+    assert_eq!(repo.schedule(&admin).unwrap(), restored);
+    let fresh = restored.allocate_id().unwrap();
+    assert_eq!(fresh, 901);
+    let mut row = old_row;
+    row.id = RowId::new(fresh).unwrap();
+    row.logical_key = LogicalRowKey::new(fresh).unwrap();
+    let mut inserted = restored
+        .edit(
+            &DraftEdit::InsertRow {
+                semester_id: restored.semesters[0].semester.id,
+                table_id: restored.semesters[0].semester.tables[0].id,
+                index: 0,
+                row,
+            },
+            &repo.load_identity().unwrap(),
+        )
+        .unwrap();
+    inserted.id_high_water = u64::MAX; // Forged draft metadata cannot exhaust the allocator.
+    let saved = repo
+        .execute_schedule(schedule_request(3502, 2, inserted), &admin, &*clock)
+        .unwrap();
+    assert_eq!(saved.id_high_water, 901);
+    assert_eq!(saved.semesters[0].semester.tables[0].rows[0].id.get(), 901);
+    assert_eq!(
+        saved.semesters[0].semester.tables[0].rows[0]
+            .logical_key
+            .get(),
+        901
+    );
+}
+
+#[test]
+fn timetable_storage_rejects_invalid_references_catalog_revocation_and_silent_default_switch() {
+    use fc_domain::schedule::TeacherBinding;
+    use fc_ports::ScheduleRepository;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (_w, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let first = repo
+        .execute_schedule(
+            schedule_request(3100, 0, timetable_document(false)),
+            &admin,
+            &*clock,
+        )
+        .unwrap();
+    let mut broken = first.clone();
+    broken.semesters[0].semester.tables[0].rows[0].courses[0]
+        .as_mut()
+        .unwrap()
+        .teacher = TeacherBinding::Explicit(principal(99));
+    assert!(repo
+        .execute_schedule(schedule_request(3101, 1, broken), &admin, &*clock)
+        .is_err());
+    assert_eq!(repo.schedule(&admin).unwrap(), first);
+    let disabled = request(
+        3102,
+        7,
+        IdentityCommand::PutSubject {
+            id: SubjectId::new(1).unwrap(),
+            name: "Math".into(),
+            enabled: false,
+            color: Rgb {
+                red: 40,
+                green: 80,
+                blue: 160,
+            },
+            expected_revision: Some(Revision::new(1)),
+        },
+    );
+    assert_eq!(
+        repo.execute_identity(disabled, Some(&admin), &*clock),
+        Err(IdentityRepositoryError::Domain(IdentityError::InvalidScope))
+    );
+    assert!(repo.load_identity().unwrap().subjects[0].enabled);
+    repo.execute_identity(
+        request(
+            3103,
+            7,
+            IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                class_id: ClassId::new(1).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+                teacher_id: principal(2),
+            }),
+        ),
+        Some(&admin),
+        &*clock,
+    )
+    .unwrap();
+    let mut by_default = first.clone();
+    by_default.semesters[0].semester.tables[0].rows[0].courses[0]
+        .as_mut()
+        .unwrap()
+        .teacher = TeacherBinding::Default;
+    let saved = repo
+        .execute_schedule(schedule_request(3104, 1, by_default), &admin, &*clock)
+        .unwrap();
+    assert_eq!(
+        repo.execute_identity(
+            request(
+                3105,
+                8,
+                IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                    class_id: ClassId::new(1).unwrap(),
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher_id: principal(3)
+                })
+            ),
+            Some(&admin),
+            &*clock
+        ),
+        Err(IdentityRepositoryError::Domain(IdentityError::InvalidScope))
+    );
+    assert_eq!(repo.schedule(&admin).unwrap(), saved);
+}
+#[test]
+fn timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_without_truncation() {
+    use fc_domain::{schedule::*, schedule_document::*};
+    use fc_ports::{ScheduleRepository, ScheduleRepositoryError};
+    use fc_storage::{CommitCommand, Mutation};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (w, mut repo, reader) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let first = repo
+        .execute_schedule(
+            schedule_request(3200, 0, timetable_document(false)),
+            &admin,
+            &*clock,
+        )
+        .unwrap();
+    let handle = w.0.as_ref().unwrap().handle();
+    let original = handle
+        .try_get("business/schedule/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    let inject = |bytes: Vec<u8>, id: &str| {
+        let revision = handle.try_revision().unwrap().wait().unwrap();
+        let state = repo.load_identity().unwrap();
+        let snapshot = reader
+            .prepare_update(state, revision.next().unwrap(), AuthEpoch::new(1))
+            .unwrap();
+        handle
+            .try_commit(
+                CommitCommand::new(
+                    id.into(),
+                    revision,
+                    vec![Mutation::Put {
+                        key: "business/schedule/v1".into(),
+                        value: bytes,
+                    }],
+                )
+                .unwrap(),
+                snapshot,
+            )
+            .unwrap()
+            .wait()
+            .unwrap();
+    };
+    for (field, id) in [
+        ("\"unknown\":1,", "unknown-schedule"),
+        ("\"format\":1,", "duplicate-schedule"),
+    ] {
+        let mut bytes = b"{".to_vec();
+        bytes.extend_from_slice(field.as_bytes());
+        bytes.extend_from_slice(&original[1..]);
+        inject(bytes, id);
+        assert_eq!(
+            repo.schedule(&admin),
+            Err(ScheduleRepositoryError::Unavailable)
+        );
+        assert!(matches!(
+            fc_storage::business::startup_state(d.path()),
+            Err(StorageError::Database)
+        ));
+    }
+    let bad_revision = String::from_utf8(original.clone())
+        .unwrap()
+        .replace("\"revision\":1", "\"revision\":0")
+        .into_bytes();
+    inject(bad_revision, "bad-schedule-revision");
+    assert_eq!(
+        repo.schedule(&admin),
+        Err(ScheduleRepositoryError::Unavailable)
+    );
+    let without_allocator = String::from_utf8(original.clone())
+        .unwrap()
+        .replace("\"id_high_water\":1,", "")
+        .into_bytes();
+    assert_ne!(without_allocator, original);
+    inject(without_allocator, "missing-schedule-id-high-water");
+    assert_eq!(
+        repo.schedule(&admin),
+        Err(ScheduleRepositoryError::Unavailable)
+    );
+    inject(original.clone(), "restore-schedule-fixture");
+    let mut over_capacity = first.clone();
+    over_capacity.semesters = vec![first.semesters[0].clone(); 33];
+    assert!(matches!(
+        repo.execute_schedule(schedule_request(3202, 1, over_capacity), &admin, &*clock),
+        Err(ScheduleRepositoryError::Domain(ScheduleDocumentError {
+            kind: DocumentErrorKind::Capacity,
+            ..
+        }))
+    ));
+    let mut huge = first.clone();
+    let plan = &mut huge.semesters[0];
+    plan.semester.tables[0].rows.clear();
+    plan.row_details.clear();
+    plan.cell_details.clear();
+    for index in 0..128 {
+        let id = RowId::new(1000 + index).unwrap();
+        plan.semester.tables[0].rows.push(TimetableRow {
+            id,
+            logical_key: LogicalRowKey::new(1000 + index).unwrap(),
+            group: DayGroup::Morning,
+            kind: RowKind::Course,
+            range: MinuteRange::new(
+                Minute::new(index as u16).unwrap(),
+                Minute::new(index as u16 + 1).unwrap(),
+            )
+            .unwrap(),
+            enabled_days: [true; 7],
+            courses: std::array::from_fn(|_| {
+                Some(CourseCell {
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher: TeacherBinding::Explicit(principal(2)),
+                })
+            }),
+        });
+        for day in 0..7 {
+            plan.cell_details.push(CellDetails {
+                row_id: id,
+                day: Weekday::from_monday_index(day).unwrap(),
+                room: "201".into(),
+                note: "n".repeat(200),
+            });
+        }
+    }
+    assert_eq!(
+        repo.execute_schedule(schedule_request(3201, 1, huge), &admin, &*clock),
+        Err(ScheduleRepositoryError::DocumentTooLarge)
+    );
+    assert_eq!(repo.schedule(&admin).unwrap(), first);
+    // A valid document of the same revision cannot replace the original command result.
+    let mut replaced_result = String::from_utf8(original).unwrap();
+    assert!(replaced_result.contains("\"automatic_gaps\":true"));
+    replaced_result =
+        replaced_result.replace("\"automatic_gaps\":true", "\"automatic_gaps\":false");
+    let revision = handle.try_revision().unwrap().wait().unwrap();
+    let snapshot = reader
+        .prepare_update(
+            repo.load_identity().unwrap(),
+            revision.next().unwrap(),
+            AuthEpoch::new(1),
+        )
+        .unwrap();
+    handle
+        .try_commit(
+            CommitCommand::new(
+                "replace-schedule-result".into(),
+                revision,
+                vec![Mutation::Put {
+                    key: "business/result/schedule/3200".into(),
+                    value: replaced_result.into_bytes(),
+                }],
+            )
+            .unwrap(),
+            snapshot,
+        )
+        .unwrap()
+        .wait()
+        .unwrap();
+    assert_eq!(
+        repo.execute_schedule(
+            schedule_request(3200, 0, timetable_document(false)),
+            &admin,
+            &*clock,
+        ),
+        Err(ScheduleRepositoryError::Unavailable)
+    );
+    assert_eq!(repo.schedule(&admin).unwrap(), first);
+}
+
+#[test]
+fn timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_every_row() {
+    use fc_ports::ScheduleRepository;
+    use std::sync::atomic::AtomicBool;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let armed = Arc::new(AtomicBool::new(false));
+    let allowed = Arc::new(AtomicBool::new(true));
+    let (mut publisher, reader) = AuthorityStore::new(
+        IdentityState::default(),
+        Revision::default(),
+        AuthEpoch::new(1),
+    );
+    publisher.initialize().unwrap();
+    let gate = reader.gate();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let _joined = Joined(Some(writer));
+    let arm = armed.clone();
+    let permit = allowed.clone();
+    let factory = Arc::new(move |identity: &IdentityState, revision: Revision| {
+        if arm.load(Ordering::Acquire) {
+            permit.store(false, Ordering::Release);
+        }
+        reader
+            .prepare_update(identity.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let permit = allowed.clone();
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+        .with_session_guard(Arc::new(move |_, _| {
+            if permit.load(Ordering::Acquire) {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        }));
+    initialize(&mut repo, &clock);
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    armed.store(true, Ordering::Release);
+    let request = schedule_request(3300, 0, timetable_document(false));
+    assert!(repo
+        .execute_schedule(request.clone(), &admin, &*clock)
+        .is_err());
+    assert_eq!(gate.status().health, fc_runtime::health::Health::Healthy);
+    assert_eq!(handle.try_revision().unwrap().wait().unwrap(), before);
+    for key in [
+        "business/schedule/v1",
+        "business/receipt/schedule/3300",
+        "business/result/schedule/3300",
+    ] {
+        assert_eq!(handle.try_get(key.into()).unwrap().wait().unwrap(), None);
+    }
+    armed.store(false, Ordering::Release);
+    allowed.store(true, Ordering::Release);
+    assert_eq!(
+        repo.execute_schedule(request, &admin, &*clock)
+            .unwrap()
+            .revision,
+        Revision::new(1)
+    );
+}
+#[test]
+fn timetable_commit_publication_failure_blocks_old_authority_and_reopens_committed_receipt() {
+    use fc_ports::{AuthorityPublisher as Port, ScheduleRepository, ScheduleRepositoryError};
+    use fc_runtime::{
+        authority::{AuthorityPublisher, AuthorityUpdateToken},
+        health::{GateError, Health},
+    };
+    struct Broken(AuthorityPublisher<IdentityState>);
+    impl Port for Broken {
+        type Snapshot = Snapshot;
+        type Update = AuthorityUpdateToken;
+        type Error = GateError;
+        fn snapshot_revision(&self, s: &Snapshot) -> Revision {
+            self.0.snapshot_revision(s)
+        }
+        fn begin_update(&mut self) -> Result<Self::Update, GateError> {
+            self.0.begin_update()
+        }
+        fn publish(&mut self, _t: Self::Update, _s: Snapshot) -> Result<(), GateError> {
+            Err(GateError::Faulted)
+        }
+        fn rollback(&mut self, t: Self::Update) -> Result<(), GateError> {
+            self.0.rollback(t)
+        }
+        fn fault(&mut self) {
+            self.0.fault()
+        }
+    }
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (w, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let facts = fc_storage::business::StartupState {
+        identity: repo.load_identity().unwrap(),
+        revision: w
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+    };
+    drop(repo);
+    drop(w);
+    let (mut publisher, reader) =
+        AuthorityStore::new(facts.identity.clone(), facts.revision, AuthEpoch::new(1));
+    publisher.initialize().unwrap();
+    let gate = reader.gate();
+    let writer = StorageWriter::open(d.path(), 16, Broken(publisher)).unwrap();
+    let handle = writer.handle();
+    let joined = Joined(Some(writer));
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let mut repo = BusinessRepository::new(handle, clock.clone(), factory)
+        .with_session_guard(Arc::new(|_, _| Ok(())));
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let request = schedule_request(3400, 0, timetable_document(true));
+    assert_eq!(
+        repo.execute_schedule(request.clone(), &admin, &*clock),
+        Err(ScheduleRepositoryError::Faulted)
+    );
+    assert_eq!(gate.status().health, Health::Faulted);
+    assert_eq!(repo.schedule(&admin), Err(ScheduleRepositoryError::Faulted));
+    drop(repo);
+    drop(joined);
+    let facts = fc_storage::business::startup_state(d.path()).unwrap();
+    assert_eq!(facts.revision, Revision::new(8));
+    let (w, mut repo, _) = open_schedule_storage(&d, clock.clone(), facts.identity, facts.revision);
+    let committed = repo.schedule(&admin).unwrap();
+    assert_eq!(committed.revision, Revision::new(1));
+    assert_eq!(
+        repo.execute_schedule(request, &admin, &*clock).unwrap(),
+        committed
+    );
+    assert_eq!(
+        w.0.as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        facts.revision
+    );
+}

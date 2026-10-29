@@ -2,12 +2,14 @@
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
-use fc_domain::{auth::*, content::*, identity::*, ids::*, time::*};
+use fc_domain::{
+    auth::*, content::*, identity::*, ids::*, schedule_document::ScheduleDocument, time::*,
+};
 use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery,
     prepare_recovery_rotation, Clock, CredentialCrypto, CredentialIdentityRepository,
     IdentityRepositoryError, IdentityRequest, MonotonicClock, PreparedCredentialChange,
-    RandomSource, RepositoryError,
+    RandomSource, RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityStore, PreparedAuthority},
@@ -43,6 +45,7 @@ pub enum BackendError {
     Session(SessionError),
     Identity(IdentityRepositoryError),
     Content(RepositoryError),
+    Schedule(ScheduleRepositoryError),
     Storage(StorageError),
     InvalidCredentials,
     CryptoUnavailable,
@@ -63,6 +66,11 @@ impl From<IdentityRepositoryError> for BackendError {
 impl From<SessionError> for BackendError {
     fn from(e: SessionError) -> Self {
         Self::Session(e)
+    }
+}
+impl From<ScheduleRepositoryError> for BackendError {
+    fn from(error: ScheduleRepositoryError) -> Self {
+        Self::Schedule(error)
     }
 }
 impl From<RepositoryError> for BackendError {
@@ -934,6 +942,31 @@ impl Backend {
         self.apply(&transition)?;
         Ok(next)
     }
+    pub fn read_schedule(&self, lease: SessionLease) -> Result<ScheduleDocument> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .schedule(&actor)?)
+    }
+    /// The revision comes from the UI's original complete draft, never a new
+    /// identity/global revision sampled during save. Failed CAS preserves it.
+    pub fn save_schedule(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        document: ScheduleDocument,
+    ) -> Result<ScheduleDocument> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let request = ScheduleRequest {
+            command_id: self.command_id()?,
+            expected_revision,
+            candidate: document,
+        };
+        let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        Ok(repository.execute_schedule(request, &actor, self.clock.as_ref())?)
+    }
     pub fn read_content(
         &self,
         lease: SessionLease,
@@ -1535,5 +1568,112 @@ mod tests {
         assert_eq!(service.0.close_authorized(admin), Ok(()));
         assert_eq!(service.0.control.0.active_local.load(Ordering::Acquire), 0);
         assert_eq!(service.0.state(), Err(BackendError::Closed));
+    }
+    #[test]
+    fn timetable_backend_uses_ui_revision_and_recovers_independent_schedule_state() {
+        use fc_domain::{schedule::*, schedule_document::*};
+        let directory = Directory::new();
+        let clock = Arc::new(TestClock::new());
+        let mut service = open(&directory, clock.clone());
+        policy_accounts(&mut service.0);
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        assert_eq!(
+            service.0.read_schedule(admin).unwrap(),
+            ScheduleDocument::default()
+        );
+        let row = TimetableRow {
+            id: RowId::new(1).unwrap(),
+            logical_key: LogicalRowKey::new(1).unwrap(),
+            group: DayGroup::Morning,
+            kind: RowKind::Course,
+            range: MinuteRange::new(
+                Minute::from_hm(8, 20).unwrap(),
+                Minute::from_hm(9, 0).unwrap(),
+            )
+            .unwrap(),
+            enabled_days: [true, false, false, false, false, false, false],
+            courses: std::array::from_fn(|day| {
+                if day == 0 {
+                    Some(CourseCell {
+                        subject_id: SubjectId::new(1).unwrap(),
+                        teacher: TeacherBinding::Explicit(PrincipalId::new(2).unwrap()),
+                    })
+                } else {
+                    None
+                }
+            }),
+        };
+        let doc = ScheduleDocument {
+            semesters: vec![SemesterPlan {
+                semester: Semester {
+                    id: SemesterId::new(1).unwrap(),
+                    class_id: ClassId::new(1).unwrap(),
+                    revision: Revision::default(),
+                    enabled: true,
+                    start: LocalDate::new(2026, 10, 1).unwrap(),
+                    end: LocalDate::new(2026, 10, 31).unwrap(),
+                    first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
+                    tables: vec![WeekTable {
+                        id: TableId::new(1).unwrap(),
+                        role: TableRole::Single,
+                        rows: vec![row],
+                    }],
+                },
+                name: "Backend timetable".into(),
+                timing_sync: false,
+                dual_history: None,
+                row_details: Vec::new(),
+                cell_details: Vec::new(),
+            }],
+            ..ScheduleDocument::default()
+        };
+        let saved = service
+            .0
+            .save_schedule(admin, Revision::default(), doc)
+            .unwrap();
+        assert_eq!(saved.revision, Revision::new(1));
+        let identity_revision = service.0.state().unwrap().revision;
+        let mut draft = saved.clone();
+        draft.automatic_gaps = false;
+        service
+            .0
+            .content(
+                admin,
+                ContentCommand {
+                    command_id: CommandId::new(7600).unwrap(),
+                    key: ContentKey::Homework(HomeworkKey {
+                        class_id: ClassId::new(1).unwrap(),
+                        actual_date: clock.wall.date,
+                        subject_id: SubjectId::new(1).unwrap(),
+                        owner_teacher_id: PrincipalId::new(2).unwrap(),
+                    }),
+                    expected_revision: Revision::default(),
+                    text: "independent content revision".into(),
+                },
+            )
+            .unwrap();
+        let saved = service
+            .0
+            .save_schedule(admin, saved.revision, draft.clone())
+            .unwrap();
+        assert_eq!(saved.revision, Revision::new(2));
+        assert_eq!(service.0.state().unwrap().revision, identity_revision);
+        assert!(
+            matches!(service.0.save_schedule(admin,Revision::new(1),draft),Err(BackendError::Schedule(ScheduleRepositoryError::Domain(e)))if matches!(e.kind,DocumentErrorKind::RevisionConflict{current}if current==Revision::new(2)))
+        );
+        let teacher = policy_lease(&service.0, 2, TrustedOrigin::Local);
+        assert!(service.0.read_schedule(teacher).is_err());
+        assert!(service
+            .0
+            .save_schedule(teacher, saved.revision, saved.clone())
+            .is_err());
+        let global = service.0.global_revision().unwrap();
+        service.0.close().unwrap();
+        drop(service);
+        let mut restored = open(&directory, clock);
+        assert_eq!(restored.0.global_revision().unwrap(), global);
+        let admin = policy_lease(&restored.0, 1, TrustedOrigin::Local);
+        assert_eq!(restored.0.read_schedule(admin).unwrap(), saved);
+        restored.0.close().unwrap();
     }
 }

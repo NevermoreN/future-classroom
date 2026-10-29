@@ -269,6 +269,38 @@ pub trait ContentRepository {
 }
 pub use ContentRepository as Repository;
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ScheduleRequest {
+    pub command_id: fc_domain::ids::CommandId,
+    pub expected_revision: Revision,
+    pub candidate: fc_domain::schedule_document::ScheduleDocument,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ScheduleRepositoryError {
+    Domain(fc_domain::schedule_document::ScheduleDocumentError),
+    Unavailable,
+    Faulted,
+    IdempotencyConflict,
+    DocumentTooLarge,
+}
+/// Complete native-grid draft publication. Re-read the exact local/global lease,
+/// identity references and independent document CAS on the sole SQLite writer;
+/// execute domain transition to derive revisions, persist state/outcome atomically,
+/// and publish authority under the shared health gate. The explicit 64 KiB encoded
+/// document limit is separate from domain element limits; never truncate a draft.
+pub trait ScheduleRepository {
+    fn schedule(
+        &self,
+        actor: &ActorContext,
+    ) -> Result<fc_domain::schedule_document::ScheduleDocument, ScheduleRepositoryError>;
+    fn execute_schedule(
+        &mut self,
+        request: ScheduleRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::schedule_document::ScheduleDocument, ScheduleRepositoryError>;
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MeasureError {
     Unmeasurable,

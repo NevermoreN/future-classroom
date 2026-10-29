@@ -338,6 +338,7 @@ pub struct ResolvedDay {
     pub table: WeekTable,
     pub calendar: CalendarConfig,
     pub public_data_unverified: bool,
+    pub rules_revision: Revision,
 }
 impl ResolvedDay {
     pub fn lesson_key(&self, row: &TimetableRow) -> LessonInstanceKey {
@@ -356,14 +357,14 @@ impl ResolvedDay {
                 makeup_mapping_revision: self.calendar.mapping_revision,
                 source_table_id: self.table.id,
                 source_row_id: row.id,
-                rules_revision: Revision::new(1),
+                rules_revision: self.rules_revision,
             },
         }
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AcademicDay {
-    Scheduled(ResolvedDay),
+    Scheduled(Box<ResolvedDay>),
     Rest,
     Unconfirmed,
     OutOfTerm,
@@ -418,7 +419,7 @@ pub fn resolve_day(
         None => return Ok(AcademicDay::Unconfirmed),
     };
     let table = source.table_for(source_date)?.clone();
-    Ok(AcademicDay::Scheduled(ResolvedDay {
+    Ok(AcademicDay::Scheduled(Box::new(ResolvedDay {
         actual_date: date,
         class_id,
         source_date,
@@ -430,7 +431,8 @@ pub fn resolve_day(
         calendar: calendar.clone(),
         public_data_unverified: calendar.mode == CalendarMode::Public
             && !calendar.public_verified_years.contains(&date.year()),
-    }))
+        rules_revision: Revision::new(1),
+    })))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

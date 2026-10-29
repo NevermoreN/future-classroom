@@ -7,12 +7,57 @@ use zeroize::Zeroizing;
 pub struct FieldId(pub u16);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ActionId(pub u16);
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FieldKind {
     Text,
     Password,
     Multiline,
     ReadOnly,
+    Choice(Vec<Choice>),
+    TimeRange,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Choice {
+    pub value: String,
+    pub label: String,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct GridRow {
+    pub group: String,
+    pub label: String,
+    pub cells: Vec<String>,
+    pub merged: bool,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Grid {
+    pub columns: Vec<String>,
+    pub rows: Vec<GridRow>,
+    pub selected: Option<(usize, usize)>,
+    pub enabled: bool,
+}
+impl Grid {
+    pub fn validate(&self) -> Result<(), FormError> {
+        if !(2..=8).contains(&self.columns.len()) || self.rows.len() > 128 {
+            return Err(FormError::TooLarge);
+        }
+        let text = |s: &str| s.len() <= 1024 && !s.contains('\0');
+        if self.columns.iter().any(|s| !text(s))
+            || self.rows.iter().any(|r| {
+                !text(&r.group)
+                    || !text(&r.label)
+                    || r.cells.len() != if r.merged { 1 } else { self.columns.len() - 1 }
+                    || r.cells.iter().any(|s| !text(s))
+            })
+        {
+            return Err(FormError::InvalidView);
+        }
+        if self.selected.is_some_and(|(r, c)| {
+            r >= self.rows.len() || c >= self.columns.len() || self.rows[r].merged && c > 1
+        }) {
+            return Err(FormError::InvalidView);
+        }
+        Ok(())
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Field {
@@ -37,6 +82,7 @@ pub struct View {
     pub fields: Vec<Field>,
     pub actions: Vec<Action>,
     pub busy: bool,
+    pub grid: Option<Grid>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FormError {
@@ -68,6 +114,31 @@ impl View {
             {
                 return Err(FormError::InvalidView);
             }
+            match &f.kind {
+                FieldKind::Choice(choices) => {
+                    if choices.len() > 1024
+                        || choices.iter().enumerate().any(|(i, c)| {
+                            c.value.is_empty()
+                                || c.value.len() > 128
+                                || c.label.len() > 512
+                                || c.value.contains('\0')
+                                || c.label.contains('\0')
+                                || choices[..i].iter().any(|other| other.value == c.value)
+                        })
+                        || !f.value.is_empty() && !choices.iter().any(|c| c.value == f.value)
+                    {
+                        return Err(FormError::InvalidView);
+                    }
+                }
+                FieldKind::TimeRange
+                    if !f.value.is_empty()
+                        && (f.value.len() != 8
+                            || !f.value.bytes().all(|b| b.is_ascii_digit() || b == b'X')) =>
+                {
+                    return Err(FormError::InvalidView);
+                }
+                _ => {}
+            }
         }
         for (i, a) in self.actions.iter().enumerate() {
             if a.id.0 == 0
@@ -83,6 +154,9 @@ impl View {
             .any(|s| s.contains('\0'))
         {
             return Err(FormError::InvalidView);
+        }
+        if let Some(grid) = &self.grid {
+            grid.validate()?;
         }
         Ok(())
     }
@@ -137,6 +211,7 @@ pub enum Event {
     Submit(ActionId, FormData),
     Input,
     Close,
+    GridCell { row: usize, column: usize },
 }
 
 #[cfg(test)]
@@ -174,6 +249,7 @@ mod tests {
                 enabled: true,
             }],
             busy: false,
+            grid: None,
         };
         v.validate().unwrap();
         v.fields[0].value = "secret".into();
@@ -181,5 +257,72 @@ mod tests {
         v.fields[0].value.clear();
         v.fields.push(v.fields[0].clone());
         assert_eq!(v.validate(), Err(FormError::InvalidView));
+    }
+    #[test]
+    fn timetable_and_choice_contracts_reject_ambiguous_values_and_malformed_spans() {
+        let mut grid = Grid {
+            columns: vec!["时间".into(), "周一".into(), "周二".into()],
+            rows: vec![GridRow {
+                group: "上午".into(),
+                label: "第1课".into(),
+                cells: vec!["甲科".into(), "乙科".into()],
+                merged: false,
+            }],
+            selected: Some((0, 1)),
+            enabled: true,
+        };
+        grid.validate().unwrap();
+        grid.rows[0].merged = true;
+        assert_eq!(grid.validate(), Err(FormError::InvalidView));
+        grid.rows[0].cells.truncate(1);
+        grid.validate().unwrap();
+        grid.selected = Some((0, 2));
+        assert_eq!(grid.validate(), Err(FormError::InvalidView));
+        let mut view = View {
+            title: String::new(),
+            description: String::new(),
+            status: String::new(),
+            fields: vec![Field {
+                id: FieldId(1),
+                label: "科目".into(),
+                kind: FieldKind::Choice(vec![Choice {
+                    value: "stable-1".into(),
+                    label: "甲科".into(),
+                }]),
+                value: "stable-1".into(),
+                max_utf16: 128,
+            }],
+            actions: vec![],
+            busy: false,
+            grid: None,
+        };
+        view.validate().unwrap();
+        view.fields[0].kind = FieldKind::Choice(
+            (0..1024)
+                .map(|index| Choice {
+                    value: format!("stable-{index}"),
+                    label: format!("候选{index}"),
+                })
+                .collect(),
+        );
+        view.validate().unwrap();
+        if let FieldKind::Choice(choices) = &mut view.fields[0].kind {
+            choices.push(Choice {
+                value: "extra".into(),
+                label: "超限".into(),
+            });
+        }
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
+        view.fields[0].kind = FieldKind::Choice(vec![Choice {
+            value: "stable-1".into(),
+            label: "甲科".into(),
+        }]);
+        view.fields[0].value = "任意文字".into();
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
+        view.fields[0].kind = FieldKind::TimeRange;
+        view.fields[0].value = "08XX0900".into();
+        view.validate().unwrap();
+        view.fields[0].value = "08:20-09:00".into();
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
     }
 }

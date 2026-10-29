@@ -1,5 +1,7 @@
 //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
 use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View};
+#[path = "workbench/widgets.rs"]
+mod widgets;
 use std::{
     cell::{Cell, RefCell},
     collections::VecDeque,
@@ -11,6 +13,7 @@ use std::{
         Mutex,
     },
 };
+use widgets::{GridControl, MaskControl};
 use windows::{
     core::{w, Error, Result, HSTRING, PCWSTR},
     Win32::{
@@ -148,10 +151,31 @@ impl Drop for Child {
         }
     }
 }
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum NativeKind {
+    Text,
+    Password,
+    Multiline,
+    ReadOnly,
+    Choice,
+    TimeRange,
+}
+impl From<&FieldKind> for NativeKind {
+    fn from(kind: &FieldKind) -> Self {
+        match kind {
+            FieldKind::Text => Self::Text,
+            FieldKind::Password => Self::Password,
+            FieldKind::Multiline => Self::Multiline,
+            FieldKind::ReadOnly => Self::ReadOnly,
+            FieldKind::Choice(_) => Self::Choice,
+            FieldKind::TimeRange => Self::TimeRange,
+        }
+    }
+}
 #[derive(Clone, Copy)]
 struct FieldBinding {
     id: FieldId,
-    kind: FieldKind,
+    kind: NativeKind,
     hwnd: HWND,
     native_id: u16,
     max_utf16: usize,
@@ -170,9 +194,13 @@ struct Controls {
     labels: Vec<HWND>,
     description: HWND,
     status: HWND,
+    masks: Vec<MaskControl>,
+    grid: Option<GridControl>,
 }
 impl Drop for Controls {
     fn drop(&mut self) {
+        self.grid.take();
+        self.masks.clear();
         while let Some(child) = self.owned.pop() {
             drop(child);
         }
@@ -190,6 +218,7 @@ struct State {
     error: Cell<i32>,
     scroll: Cell<i32>,
     presented_secrets: RefCell<Vec<FieldId>>,
+    grid_cell: Cell<Option<(usize, usize)>>,
 }
 impl State {
     fn new() -> Self {
@@ -205,6 +234,7 @@ impl State {
             error: Cell::new(0),
             scroll: Cell::new(0),
             presented_secrets: RefCell::new(Vec::new()),
+            grid_cell: Cell::new(None),
         }
     }
     fn fail(&self, error: Error) {
@@ -227,7 +257,7 @@ impl State {
             }
         };
         for field in fields {
-            if field.kind == FieldKind::Password || presented.contains(&field.id) {
+            if field.kind == NativeKind::Password || presented.contains(&field.id) {
                 // SAFETY: only this adapter's owned Edit controls; clearing also
                 // removes native undo data. Temporary overwrite contains no secret.
                 unsafe {
@@ -246,6 +276,7 @@ impl State {
         drop(suppress);
     }
     fn discard_forms(&self) {
+        self.grid_cell.set(None);
         if let Ok(mut events) = self.events.try_borrow_mut() {
             events.clear();
             self.event_bytes.set(0);
@@ -279,8 +310,8 @@ impl State {
             .clone();
         let mut form = FormData::new();
         for field in fields {
-            if field.kind != FieldKind::ReadOnly {
-                let text = read_edit(field)?;
+            if field.kind != NativeKind::ReadOnly {
+                let text = self.read_field(field)?;
                 form.insert(field.id, text)
                     .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
             }
@@ -303,6 +334,46 @@ impl State {
         events.push_back(Event::Submit(action.id, form));
         self.event_bytes.set(next);
         Ok(())
+    }
+    fn read_field(&self, field: FieldBinding) -> Result<String> {
+        match field.kind {
+            NativeKind::Choice => {
+                // SAFETY: synchronous query of this UI thread's owned ComboBox.
+                let index = unsafe { SendMessageW(field.hwnd, CB_GETCURSEL, None, None) }.0;
+                if index < 0 {
+                    return Ok(String::new());
+                }
+                let view = self
+                    .view
+                    .try_borrow()
+                    .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+                let field = view
+                    .as_ref()
+                    .and_then(|v| v.fields.iter().find(|f| f.id == field.id))
+                    .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?;
+                match &field.kind {
+                    FieldKind::Choice(options) => options
+                        .get(index as usize)
+                        .map(|c| c.value.clone())
+                        .ok_or_else(|| Error::from_hresult(E_INVALIDARG)),
+                    _ => Err(Error::from_hresult(E_UNEXPECTED)),
+                }
+            }
+            NativeKind::TimeRange => self
+                .controls
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+                .masks
+                .iter()
+                .find(|m| m.hwnd() == field.hwnd)
+                .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?
+                .digits(),
+            _ => read_edit(field),
+        }
+    }
+    fn grid_selected(&self, row: usize, column: usize) {
+        self.grid_cell.set(Some((row, column)));
+        self.input.set(true);
     }
 }
 struct Suppress<'a> {
@@ -426,6 +497,9 @@ impl Window {
             return Ok(());
         }
         let _suppress = Suppress::new(&self.state);
+        if old.as_ref().is_some_and(|old| old.grid != view.grid) {
+            self.state.grid_cell.set(None);
+        }
         // A new page/status never retains a previously revealed recovery secret.
         // Exactly equal rerenders preserve drafts and an explicitly presented code.
         self.state.clear_passwords();
@@ -441,13 +515,16 @@ impl Window {
                         .iter()
                         .zip(&view.actions)
                         .all(|(a, b)| a.id == b.id)
-            });
+            }) && old
+                .as_ref()
+                .is_some_and(|old| old.grid.is_some() == view.grid.is_some());
         if !same_structure {
             self.state.clear_passwords();
             let controls = self.build_controls(view)?;
             let old_controls = self.state.controls.replace(controls);
             drop(old_controls);
             self.state.scroll.set(0);
+            self.state.grid_cell.set(None);
         }
         let (fields, actions, labels, description, status) = {
             let c = self
@@ -477,13 +554,27 @@ impl Window {
                         .as_ref()
                         .is_some_and(|old| old.fields[index].value != field.value)
                 {
-                    SetWindowTextW(binding.hwnd, &HSTRING::from(field.value.as_str()))?;
+                    if let FieldKind::Choice(options) = &field.kind {
+                        set_choice(binding.hwnd, options, &field.value)?;
+                    } else {
+                        SetWindowTextW(binding.hwnd, &HSTRING::from(field.value.as_str()))?;
+                    }
                 }
                 let _ = EnableWindow(binding.hwnd, !view.busy);
             }
             for (binding, action) in actions.iter().zip(&view.actions) {
                 SetWindowTextW(binding.hwnd, &HSTRING::from(action.label.as_str()))?;
                 let _ = EnableWindow(binding.hwnd, action.enabled && !view.busy);
+            }
+        }
+        if let Some(grid) = &view.grid {
+            let controls = self
+                .state
+                .controls
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+            if let Some(control) = &controls.grid {
+                control.update(grid, view.busy)?;
             }
         }
         self.state.view.replace(Some(view.clone()));
@@ -515,29 +606,76 @@ impl Window {
                 0,
             )?;
             controls.labels.push(label);
-            let kind = match field.kind {
+            let kind = match &field.kind {
                 FieldKind::Text => ES_AUTOHSCROLL,
                 FieldKind::Password => ES_AUTOHSCROLL | ES_PASSWORD,
                 FieldKind::Multiline => ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN,
                 FieldKind::ReadOnly => ES_AUTOHSCROLL | ES_READONLY,
+                FieldKind::Choice(_) => 0,
+                FieldKind::TimeRange => ES_AUTOHSCROLL,
             };
             let mut style = WS_BORDER | WS_TABSTOP | WINDOW_STYLE(kind as u32);
             if field.kind == FieldKind::Multiline {
                 style |= WS_VSCROLL;
             }
             let native_id = FIELD_ID_BASE + index as u16;
-            let hwnd = self.child(&mut controls, w!("EDIT"), &field.value, style, native_id)?;
+            let hwnd = if let FieldKind::Choice(options) = &field.kind {
+                let hwnd = self.child(
+                    &mut controls,
+                    w!("COMBOBOX"),
+                    "",
+                    WS_TABSTOP
+                        | WS_VSCROLL
+                        | WINDOW_STYLE((CBS_DROPDOWNLIST | CBS_HASSTRINGS) as u32),
+                    native_id,
+                )?;
+                set_choice(hwnd, options, &field.value)?;
+                hwnd
+            } else {
+                self.child(
+                    &mut controls,
+                    w!("EDIT"),
+                    if field.kind == FieldKind::TimeRange {
+                        ""
+                    } else {
+                        &field.value
+                    },
+                    style,
+                    native_id,
+                )?
+            };
             // SAFETY: exact owned Edit HWND and bounded numeric control messages.
             unsafe {
                 let _ = SendMessageW(hwnd, EM_SETLIMITTEXT, Some(WPARAM(field.max_utf16)), None);
             }
             controls.fields.push(FieldBinding {
                 id: field.id,
-                kind: field.kind,
+                kind: NativeKind::from(&field.kind),
                 hwnd,
                 native_id,
                 max_utf16: field.max_utf16,
             });
+            if field.kind == FieldKind::TimeRange {
+                controls
+                    .masks
+                    .push(MaskControl::attach(hwnd, &field.value)?);
+            }
+        }
+        if let Some(grid) = &view.grid {
+            let hwnd = self.child(
+                &mut controls,
+                w!("STATIC"),
+                "",
+                WS_TABSTOP | WINDOW_STYLE(0x100),
+                4000,
+            )?;
+            controls.grid = Some(GridControl::attach(
+                hwnd,
+                grid,
+                &self.state,
+                self.font.0,
+                view.busy,
+            )?);
         }
         for (index, action) in view.actions.iter().enumerate() {
             let native_id = ACTION_ID_BASE + index as u16;
@@ -608,12 +746,15 @@ impl Window {
             self.state.input.set(false);
             return Err(Error::from_hresult(windows::core::HRESULT(error)));
         }
-        let mut output = Vec::with_capacity(MAX_SUBMITS + 2);
+        let mut output = Vec::with_capacity(MAX_SUBMITS + 3);
         if self.state.close.replace(false) {
             output.push(Event::Close);
         }
         if self.state.input.replace(false) {
             output.push(Event::Input);
+        }
+        if let Some((row, column)) = self.state.grid_cell.take() {
+            output.push(Event::GridCell { row, column });
         }
         output.extend(
             self.state
@@ -641,7 +782,7 @@ impl Window {
             .find(|field| field.id == id)
             .copied()
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-        if !matches!(binding.kind, FieldKind::ReadOnly | FieldKind::Password)
+        if !matches!(binding.kind, NativeKind::ReadOnly | NativeKind::Password)
             || secret.contains('\0')
             || secret.encode_utf16().count() > binding.max_utf16
         {
@@ -736,7 +877,7 @@ impl Window {
         // in FormData and are rejected, including fields with empty values.
         let mut prepared = Vec::with_capacity(fields.len());
         for field in fields {
-            if field.kind == FieldKind::ReadOnly {
+            if field.kind == NativeKind::ReadOnly {
                 continue;
             }
             let text = WipingText(
@@ -744,6 +885,27 @@ impl Window {
                     .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
             );
             if text.0.contains('\0') || text.0.encode_utf16().count() > field.max_utf16 {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            if field.kind == NativeKind::Choice {
+                let allowed =
+                    view.fields
+                        .iter()
+                        .find(|f| f.id == field.id)
+                        .is_some_and(|f| match &f.kind {
+                            FieldKind::Choice(options) => {
+                                text.0.is_empty() || options.iter().any(|c| c.value == text.0)
+                            }
+                            _ => false,
+                        });
+                if !allowed {
+                    return Err(Error::from_hresult(E_INVALIDARG));
+                }
+            }
+            if field.kind == NativeKind::TimeRange
+                && !text.0.is_empty()
+                && (text.0.len() != 8 || !text.0.bytes().all(|b| b.is_ascii_digit() || b == b'X'))
+            {
                 return Err(Error::from_hresult(E_INVALIDARG));
             }
             prepared.push((field, text));
@@ -777,6 +939,19 @@ impl Window {
             .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
             .len();
         for (field, text) in prepared {
+            if field.kind == NativeKind::Choice {
+                let options = view
+                    .fields
+                    .iter()
+                    .find(|f| f.id == field.id)
+                    .and_then(|f| match &f.kind {
+                        FieldKind::Choice(c) => Some(c),
+                        _ => None,
+                    })
+                    .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+                set_choice(field.hwnd, options, &text.0)?;
+                continue;
+            }
             let mut utf16 = WipingUtf16(vec![0; text.0.encode_utf16().count() + 1]);
             for (slot, unit) in utf16.0.iter_mut().zip(text.0.encode_utf16()) {
                 *slot = unit;
@@ -817,6 +992,148 @@ impl Window {
         }
         Ok(())
     }
+    pub fn draft_nonsecret(&self) -> Result<FormData> {
+        let fields = self
+            .state
+            .controls
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .fields
+            .clone();
+        let mut result = FormData::new();
+        for field in fields {
+            if !matches!(field.kind, NativeKind::Password | NativeKind::ReadOnly) {
+                result
+                    .insert(field.id, self.state.read_field(field)?)
+                    .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+            }
+        }
+        Ok(result)
+    }
+    pub fn probe_select_grid(&self, row: usize, column: usize) -> Result<()> {
+        if self.is_visible() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let (hwnd, x, y) = {
+            let controls = self
+                .state
+                .controls
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+            controls
+                .grid
+                .as_ref()
+                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?
+                .point(row, column)?
+        };
+        // SAFETY: bounded coordinates target only this hidden owned grid.
+        unsafe {
+            let _ = SendMessageW(
+                hwnd,
+                WM_LBUTTONDOWN,
+                Some(WPARAM(0)),
+                Some(LPARAM(
+                    (x as u16 as usize | ((y as u16 as usize) << 16)) as isize,
+                )),
+            );
+        }
+        Ok(())
+    }
+    /// Hidden diagnostic selection through the native ComboBox notification path.
+    pub fn probe_choice(&self, id: FieldId, value: &str) -> Result<()> {
+        if self.is_visible() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let view = self
+            .state
+            .view
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .clone()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if view.busy {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let options = view
+            .fields
+            .iter()
+            .find(|f| f.id == id)
+            .and_then(|f| match &f.kind {
+                FieldKind::Choice(options) => Some(options),
+                _ => None,
+            })
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if !options.iter().any(|choice| choice.value == value) {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let field = self
+            .state
+            .controls
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .fields
+            .iter()
+            .find(|field| field.id == id)
+            .copied()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        // SAFETY: only this owned enabled ComboBox is changed, no focus/global input.
+        unsafe {
+            if !IsWindowEnabled(field.hwnd).as_bool() {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            set_choice(field.hwnd, options, value)?;
+            let _ = SendMessageW(
+                self.hwnd,
+                WM_COMMAND,
+                Some(WPARAM(
+                    field.native_id as usize | ((CBN_SELCHANGE as usize) << 16),
+                )),
+                Some(LPARAM(field.hwnd.0 as isize)),
+            );
+        }
+        Ok(())
+    }
+}
+
+fn set_choice(
+    hwnd: HWND,
+    options: &[fc_presentation::workbench::Choice],
+    value: &str,
+) -> Result<()> {
+    let index = if value.is_empty() {
+        None
+    } else {
+        Some(
+            options
+                .iter()
+                .position(|c| c.value == value)
+                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
+        )
+    };
+    // SAFETY: owned strings copied synchronously by our unsorted ComboBox.
+    unsafe {
+        let _ = SendMessageW(hwnd, CB_RESETCONTENT, None, None);
+        for option in options {
+            let text = HSTRING::from(option.label.as_str());
+            if SendMessageW(
+                hwnd,
+                CB_ADDSTRING,
+                None,
+                Some(LPARAM(text.as_ptr() as isize)),
+            )
+            .0 < 0
+            {
+                return Err(Error::from_hresult(E_OUTOFMEMORY));
+            }
+        }
+        let _ = SendMessageW(
+            hwnd,
+            CB_SETCURSEL,
+            Some(WPARAM(index.unwrap_or(usize::MAX))),
+            None,
+        );
+    }
+    Ok(())
 }
 impl Drop for Window {
     fn drop(&mut self) {
@@ -865,6 +1182,17 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
     let width = (client.right - client.left - 40).max(160);
     let mut positions = vec![(description, 20, 16, width, 58)];
     let mut y = 82;
+    if let Some(grid) = state
+        .controls
+        .try_borrow()
+        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+        .grid
+        .as_ref()
+    {
+        let height = grid.height();
+        positions.push((grid.hwnd(), 20, y, width, height));
+        y += height + 20;
+    }
     for (index, (binding, field)) in fields.iter().zip(&view.fields).enumerate() {
         positions.push((labels[index], 20, y, width, 25));
         let height = if field.kind == FieldKind::Multiline {
@@ -872,7 +1200,17 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
         } else {
             30
         };
-        positions.push((binding.hwnd, 20, y + 28, width, height));
+        positions.push((
+            binding.hwnd,
+            20,
+            y + 28,
+            width,
+            if matches!(field.kind, FieldKind::Choice(_)) {
+                240
+            } else {
+                height
+            },
+        ));
         y += height + 42;
     }
     positions.push((status, 20, y + 4, width, 58));
@@ -1005,7 +1343,9 @@ unsafe extern "system" fn window_proc(
                                 return LRESULT(0);
                             }
                         };
-                        if field.is_some() && notification == EN_CHANGE {
+                        if field.is_some()
+                            && (notification == EN_CHANGE || notification == CBN_SELCHANGE)
+                        {
                             state.input.set(true);
                         }
                         if let Some(action) = action {
@@ -1040,6 +1380,7 @@ unsafe extern "system" fn window_proc(
 #[cfg(test)]
 mod tests {
     use super::*;
+    static NATIVE_TEST_SERIAL: Mutex<()> = Mutex::new(());
     use fc_presentation::workbench::{Action, Field};
 
     fn view() -> View {
@@ -1048,6 +1389,7 @@ mod tests {
             description: "本测试窗口始终隐藏".into(),
             status: String::new(),
             busy: false,
+            grid: None,
             fields: vec![
                 Field {
                     id: FieldId(1),
@@ -1122,6 +1464,7 @@ mod tests {
     }
     #[test]
     fn hidden_native_form_preserves_drafts_masks_and_consumes_password_without_activation() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         // SAFETY: observational only, no foreground mutation.
         let foreground = unsafe { GetForegroundWindow() };
         let window = Window::new().unwrap();
@@ -1177,6 +1520,7 @@ mod tests {
     }
     #[test]
     fn busy_and_disabled_actions_refuse_commands_and_close_wipes_revealed_secret() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         let window = Window::new().unwrap();
         let mut view = view();
         window.render(&view).unwrap();
@@ -1247,6 +1591,7 @@ mod tests {
     }
     #[test]
     fn hidden_events_are_bounded_and_invalid_native_text_is_never_truncated_into_a_form() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         let window = Window::new().unwrap();
         window.render(&view()).unwrap();
         for _ in 0..MAX_SUBMITS {
@@ -1281,6 +1626,7 @@ mod tests {
     }
     #[test]
     fn repeated_hidden_render_and_submit_do_not_accumulate_native_resources() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         use windows::Win32::System::Threading::{
             GetCurrentProcess, GetGuiResources, GetProcessHandleCount, GR_GDIOBJECTS,
             GR_USEROBJECTS,
@@ -1324,6 +1670,7 @@ mod tests {
     }
     #[test]
     fn isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
         let window = Window::new().unwrap();
         let mut view = view();
         window.render(&view).unwrap();
@@ -1380,5 +1727,252 @@ mod tests {
         assert!(!window.is_visible());
         // SAFETY: observation only, no global input used by any test operation.
         assert_eq!(unsafe { GetForegroundWindow() }, foreground);
+    }
+    fn timetable_view() -> View {
+        use fc_presentation::workbench::{Choice, Grid, GridRow};
+        let mut v = view();
+        v.fields = vec![
+            Field {
+                id: FieldId(10),
+                label: "时间".into(),
+                kind: FieldKind::TimeRange,
+                value: "08200900".into(),
+                max_utf16: 8,
+            },
+            Field {
+                id: FieldId(11),
+                label: "科目".into(),
+                kind: FieldKind::Choice(vec![
+                    Choice {
+                        value: "subject-1".into(),
+                        label: "合成语文".into(),
+                    },
+                    Choice {
+                        value: "subject-2".into(),
+                        label: "合成数学".into(),
+                    },
+                ]),
+                value: "subject-1".into(),
+                max_utf16: 128,
+            },
+        ];
+        v.grid = Some(Grid {
+            columns: vec!["时段 / 时间".into(), "星期一".into(), "星期二".into()],
+            rows: vec![
+                GridRow {
+                    group: "上午".into(),
+                    label: "第1课\n08：20-09：00".into(),
+                    cells: vec!["合成语文".into(), "合成数学".into()],
+                    merged: false,
+                },
+                GridRow {
+                    group: "上午".into(),
+                    label: "活动".into(),
+                    cells: vec!["跨星期合成活动".into()],
+                    merged: true,
+                },
+                GridRow {
+                    group: "下午".into(),
+                    label: "第2课".into(),
+                    cells: vec![String::new(), "合成语文".into()],
+                    merged: false,
+                },
+            ],
+            selected: None,
+            enabled: true,
+        });
+        v
+    }
+    #[test]
+    fn native_timetable_grid_and_combo_use_bounded_stable_selections() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let window = Window::new().unwrap();
+        let mut view = timetable_view();
+        window.render(&view).unwrap();
+        window.probe_select_grid(0, 2).unwrap();
+        let events = window.take_events().unwrap();
+        assert!(events
+            .iter()
+            .any(|e| matches!(e, Event::GridCell { row: 0, column: 2 })));
+        window.probe_select_grid(1, 2).unwrap();
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::GridCell { row: 1, column: 1 })));
+        assert!(window.probe_select_grid(3, 0).is_err());
+        window.probe_choice(FieldId(11), "subject-2").unwrap();
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::Input)));
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(11)),
+            Some("subject-2")
+        );
+        assert!(window.probe_choice(FieldId(11), "合成数学").is_err());
+        let grid_hwnd = window.state.controls.borrow().grid.as_ref().unwrap().hwnd();
+        // SAFETY: keyboard notification only to our hidden owned grid, no focus/global input.
+        unsafe {
+            let _ = SendMessageW(
+                grid_hwnd,
+                WM_KEYDOWN,
+                Some(WPARAM(VK_DOWN.0 as usize)),
+                None,
+            );
+            let _ = SendMessageW(
+                grid_hwnd,
+                WM_KEYDOWN,
+                Some(WPARAM(VK_RETURN.0 as usize)),
+                None,
+            );
+        }
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::GridCell { row: 2, column: 1 })));
+        view.busy = true;
+        window.render(&view).unwrap();
+        assert!(window.probe_select_grid(0, 0).is_err());
+        assert!(window.probe_choice(FieldId(11), "subject-1").is_err());
+        view.busy = false;
+        view.grid.as_mut().unwrap().enabled = false;
+        window.render(&view).unwrap();
+        assert!(window.probe_select_grid(0, 0).is_err());
+        assert!(!window.is_visible());
+    }
+    #[test]
+    fn native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let window = Window::new().unwrap();
+        window.render(&timetable_view()).unwrap();
+        let time = field(&window, 10);
+        let display = || {
+            let mut buffer = [0u16; 32];
+            let count = unsafe { GetWindowTextW(time.hwnd, &mut buffer) };
+            String::from_utf16(&buffer[..count as usize]).unwrap()
+        };
+        assert_eq!(display(), "08：20-09：00");
+        // SAFETY: attempts to inject free text into this owned hidden mask must
+        // not replace the digit model or its fixed punctuation.
+        unsafe {
+            let replacement = HSTRING::from("arbitrary text");
+            let _ = SendMessageW(
+                time.hwnd,
+                EM_REPLACESEL,
+                Some(WPARAM(0)),
+                Some(LPARAM(replacement.as_ptr() as isize)),
+            );
+            let _ = SendMessageW(time.hwnd, WM_IME_CHAR, Some(WPARAM('课' as usize)), None);
+        }
+        assert_eq!(display(), "08：20-09：00");
+        // SAFETY: select just the minute segment in our own hidden native Edit.
+        unsafe {
+            let _ = SendMessageW(time.hwnd, EM_SETSEL, Some(WPARAM(3)), Some(LPARAM(5)));
+            let _ = SendMessageW(time.hwnd, WM_CHAR, Some(WPARAM('３' as usize)), None);
+            let _ = SendMessageW(time.hwnd, WM_CHAR, Some(WPARAM('0' as usize)), None);
+        }
+        assert_eq!(display(), "08：30-09：00");
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(10)),
+            Some("08300900")
+        );
+        unsafe {
+            let _ = SendMessageW(
+                time.hwnd,
+                WM_KEYDOWN,
+                Some(WPARAM(VK_LEFT.0 as usize)),
+                None,
+            );
+            let _ = SendMessageW(
+                time.hwnd,
+                WM_KEYDOWN,
+                Some(WPARAM(VK_DELETE.0 as usize)),
+                None,
+            );
+        }
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(10)),
+            Some("083X0900")
+        );
+        {
+            let controls = window.state.controls.borrow();
+            let mask = controls.masks.first().unwrap();
+            mask.probe_paste("０８２００９００").unwrap();
+            assert!(mask.probe_paste("08:20-09:00").is_err());
+        }
+        assert_eq!(display(), "08：20-09：00");
+        unsafe {
+            let _ = SendMessageW(time.hwnd, EM_SETSEL, Some(WPARAM(11)), Some(LPARAM(11)));
+            let _ = SendMessageW(time.hwnd, WM_CHAR, Some(WPARAM(8)), None);
+        }
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(10)),
+            Some("0820090X")
+        );
+        click(&window);
+        let form = window
+            .take_events()
+            .unwrap()
+            .into_iter()
+            .find_map(|e| match e {
+                Event::Submit(_, form) => Some(form),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(form.get(FieldId(10)), Some("0820090X"));
+        let mut busy = timetable_view();
+        busy.busy = true;
+        window.render(&busy).unwrap();
+        let before = window.draft_nonsecret().unwrap().take(FieldId(10)).unwrap();
+        unsafe {
+            let _ = SendMessageW(time.hwnd, WM_CHAR, Some(WPARAM('9' as usize)), None);
+        }
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(10)),
+            Some(before.as_str())
+        );
+    }
+    #[test]
+    fn repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        use windows::Win32::System::Threading::{
+            GetCurrentProcess, GetGuiResources, GR_GDIOBJECTS, GR_USEROBJECTS,
+        };
+        let window = Window::new().unwrap();
+        let mut view = timetable_view();
+        window.render(&view).unwrap();
+        let counts = || unsafe {
+            (
+                GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS),
+                GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS),
+            )
+        };
+        // Realize the font and native paint cache before measuring retained
+        // handles; compare the next hundred rebuilds against an already painted UI.
+        let grid = window.state.controls.borrow().grid.as_ref().unwrap().hwnd();
+        unsafe {
+            let _ = SendMessageW(grid, WM_PAINT, None, None);
+        }
+        let before = counts();
+        for index in 0..100 {
+            view.fields[1].kind = FieldKind::Choice(vec![fc_presentation::workbench::Choice {
+                value: "subject-1".into(),
+                label: format!("合成重命名 {index}"),
+            }]);
+            view.fields[1].value = "subject-1".into();
+            window.render(&view).unwrap();
+            window.probe_select_grid(0, 1).unwrap();
+            let grid = window.state.controls.borrow().grid.as_ref().unwrap().hwnd();
+            unsafe {
+                let _ = SendMessageW(grid, WM_PAINT, None, None);
+            }
+            drop(window.take_events().unwrap());
+        }
+        let after = counts();
+        assert!(after.0 <= before.0 + 2, "GDI {before:?}->{after:?}");
+        assert!(after.1 <= before.1 + 2, "USER {before:?}->{after:?}");
     }
 }

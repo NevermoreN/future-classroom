@@ -1,6 +1,8 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
 pub(crate) mod codec;
+mod schedule;
+mod schedule_codec;
 use crate::*;
 use fc_domain::{auth::*, content::*, identity::*, ids::*};
 use fc_ports::{
@@ -24,6 +26,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
         .map_err(|_| StorageError::Database)?;
     let revision = read_revision(&transaction)?;
     let identity = load_identity(&TransactionView(&transaction))?;
+    schedule::load(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
 }
@@ -702,6 +705,7 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
         let transition = state
             .transition(&request.command, self.actor.as_ref(), self.clock.now())
             .map_err(StorageError::Identity)?;
+        schedule::check_identity_change(d, &state, &transition.next)?;
         let mut mutations = Vec::new();
         if let Some((id, password, recovery)) = required {
             let c = self

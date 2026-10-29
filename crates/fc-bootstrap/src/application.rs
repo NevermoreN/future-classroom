@@ -1,7 +1,9 @@
 //! Native product composition. All KDF/SQLite/file work runs on the one shared
 //! two-thread pool; the window pump only handles bounded events and owned results.
+mod schedule_editor;
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl};
+use fc_domain::schedule_document::ScheduleDocument;
 use fc_domain::{auth::*, content::*, identity::*, ids::*};
 use fc_ports::{MonotonicClock, RandomSource};
 use fc_presentation::workbench::*;
@@ -13,6 +15,7 @@ use fc_windows::{
     workbench::Window,
     InstanceGuard, SystemRandom,
 };
+use schedule_editor::{Editor as ScheduleEditor, EditorCommand};
 use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},
@@ -51,6 +54,7 @@ const ADD_CLASS: ActionId = ActionId(13);
 const BIND_CLASS: ActionId = ActionId(14);
 const LOAD: ActionId = ActionId(15);
 const TO_ROTATE: ActionId = ActionId(16);
+const TO_SCHEDULE: ActionId = ActionId(17);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -68,6 +72,7 @@ enum Screen {
     Rotate,
     Homework,
     HomeworkEdit,
+    Schedule,
     Repair,
 }
 #[derive(Debug)]
@@ -84,6 +89,7 @@ fn fatal(error: &Failure) -> bool {
         Failure::Backend(
             BackendError::Identity(fc_ports::IdentityRepositoryError::Faulted)
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
+                | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
                 | BackendError::Storage(
                     S::AuthorityUnavailable
                         | S::Indeterminate
@@ -137,6 +143,8 @@ fn error_text(error: &Failure) -> String {
         Failure::Stopped => "未取得完成结果，请重新打开并核对已保存内容。".into(),
         Failure::Backend(e) => match e {
             BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
+            BackendError::Schedule(fc_ports::ScheduleRepositoryError::Domain(e)) => schedule_editor::problem(e.clone()),
+            BackendError::Schedule(fc_ports::ScheduleRepositoryError::DocumentTooLarge) => "课表和保留历史超过本阶段64KiB文档上限。请减少学期、行或备注；草稿仍保留，未截断或覆盖。".into(),
             BackendError::Storage(fc_storage::StorageError::LoginRateLimited {
                 retry_after_millis,
             }) => format!("请等待{}秒后重试。", retry_after_millis.div_ceil(1000)),
@@ -254,6 +262,8 @@ enum Outcome {
         key: ContentKey,
         record: Option<ContentRecord>,
     },
+    ScheduleLoaded(ScheduleDocument),
+    ScheduleSaved(ScheduleDocument),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -274,6 +284,13 @@ enum Work {
     Refresh(Arc<Mutex<Backend>>),
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
+    LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
+    SaveSchedule(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        Revision,
+        ScheduleDocument,
+    ),
 }
 impl Task for Work {
     type Output = Result<Outcome>;
@@ -283,7 +300,8 @@ impl Task for Work {
                 Some(p.as_os_str().len().saturating_mul(2))
             }
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
-            Self::Refresh(_) | Self::Shutdown(_) => Some(0),
+            Self::Refresh(_) | Self::Shutdown(_) | Self::LoadSchedule(_, _) => Some(0),
+            Self::SaveSchedule(_, _, _, document) => document.allocation_bytes(),
         }
     }
     fn run(self, context: &JobContext) -> Self::Output {
@@ -321,6 +339,20 @@ impl Task for Work {
             Self::Shutdown(backend) => {
                 backend.lock().map_err(|_| Failure::Stopped)?.close()?;
                 Ok(Outcome::Closed)
+            }
+            Self::LoadSchedule(backend, lease) => {
+                let document = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .read_schedule(lease)?;
+                Ok(Outcome::ScheduleLoaded(document))
+            }
+            Self::SaveSchedule(backend, lease, expected, document) => {
+                let document = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .save_schedule(lease, expected, document)?;
+                Ok(Outcome::ScheduleSaved(document))
             }
             Self::ValidateOffice(path) => {
                 struct Control<'a>(&'a JobContext);
@@ -639,9 +671,19 @@ struct App {
     shutdown: Option<JobTicket<Result<Outcome>>>,
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
+    schedule: Option<ScheduleEditor>,
 }
 impl App {
     fn view(&self) -> View {
+        if self.screen == Screen::Schedule {
+            if let Some(editor) = &self.schedule {
+                return editor.view(
+                    &self.state,
+                    &self.status,
+                    self.pending.is_some() || self.stopping,
+                );
+            }
+        }
         let mut view = View {
             title: "未来教室".into(),
             description: String::new(),
@@ -649,6 +691,7 @@ impl App {
             fields: Vec::new(),
             actions: Vec::new(),
             busy: self.pending.is_some() || self.stopping,
+            grid: None,
         };
         let field = |id, label: &str, kind, value: String, max_utf16| Field {
             id,
@@ -743,6 +786,7 @@ impl App {
                         action(TO_SCHOOL, "学校与班级"),
                         action(TO_SUBJECTS, "基础科目"),
                         action(TO_ACCOUNTS, "创建账号"),
+                        action(TO_SCHEDULE, "课表、作息与校历"),
                     ]);
                 }
                 if account.is_some_and(|a| a.principal.role != Role::User) {
@@ -866,6 +910,9 @@ impl App {
                 )];
                 view.actions = vec![action(SAVE, "保存作业"), action(BACK, "返回选择")];
             }
+            Screen::Schedule => {
+                view.title = "正在加载课表".into();
+            }
             Screen::Repair => {
                 view.title = "未来教室需要修复".into();
                 view.description="数据暂不可用。请保留现有文件，使用原部署Windows账号或受控备份修复；不会重新开放首次管理员注册。".into();
@@ -884,6 +931,11 @@ impl App {
         }
         if let Some(c) = &self.control {
             c.lock_local();
+        }
+        if self.screen == Screen::Schedule {
+            if let (Some(editor), Ok(data)) = (&mut self.schedule, self.window.draft_nonsecret()) {
+                editor.capture(data);
+            }
         }
         self.generation = self.generation.saturating_add(1);
         if let Some(p) = &self.pending {
@@ -958,6 +1010,29 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
+                if self.screen == Screen::Schedule && self.pending.is_none() {
+                    if let (Some(editor), Ok(data)) =
+                        (&mut self.schedule, self.window.draft_nonsecret())
+                    {
+                        if editor.input(data, &self.state) {
+                            self.render()?;
+                        }
+                    }
+                }
+            }
+            Event::GridCell { row, column } => {
+                self.last_input = Instant::now();
+                if let (Some(c), Some(l)) = (&self.control, self.lease) {
+                    let _ = c.note_input(l, self.clock.monotonic_millis());
+                }
+                if self.screen == Screen::Schedule && self.pending.is_none() && !self.stopping {
+                    if let Some(editor) = &mut self.schedule {
+                        if let Err(message) = editor.select_cell(row, column, &self.state) {
+                            self.status = message;
+                        }
+                        self.render()?;
+                    }
+                }
             }
             Event::Close => {
                 self.lock();
@@ -972,7 +1047,25 @@ impl App {
                 if self.pending.is_some() || self.stopping {
                     return Ok(());
                 }
+                if self.screen == Screen::Schedule {
+                    return self.schedule_event(action, data);
+                }
                 match action {
+                    TO_SCHEDULE => {
+                        if let Some(lease) = self.lease {
+                            if self
+                                .schedule
+                                .as_ref()
+                                .is_some_and(|e| e.owner() == lease.principal_id())
+                            {
+                                self.screen = Screen::Schedule;
+                                self.status.clear();
+                                self.render()?;
+                            } else if let Some(backend) = &self.backend {
+                                self.submit(Work::LoadSchedule(backend.clone(), lease))?;
+                            }
+                        }
+                    }
                     LOCK => {
                         self.lock();
                         self.render()?;
@@ -1033,6 +1126,61 @@ impl App {
             }
         }
         Ok(())
+    }
+    fn schedule_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if !self
+            .state
+            .account(lease.principal_id())
+            .is_ok_and(|a| a.principal.role == Role::GlobalAdmin)
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+        {
+            self.lock();
+            return self.render();
+        }
+        if action == LOCK {
+            self.lock();
+            return self.render();
+        }
+        let command =
+            self.schedule
+                .as_mut()
+                .ok_or("课表草稿不可用")?
+                .handle(action, data, &self.state);
+        match command {
+            Ok(EditorCommand::Stay) => self.status.clear(),
+            Ok(EditorCommand::Close) => {
+                self.screen = Screen::Home;
+                self.status.clear();
+            }
+            Ok(EditorCommand::Reload) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadSchedule(backend.clone(), lease))?;
+                }
+            }
+            Ok(EditorCommand::Save { expected, document }) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::SaveSchedule(
+                        backend.clone(),
+                        lease,
+                        expected,
+                        document,
+                    ))?;
+                }
+            }
+            Err(message) => self.status = message,
+        }
+        self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
         if let Some(ticket) = &mut self.shutdown {
@@ -1115,6 +1263,19 @@ impl App {
                     self.record = record;
                     self.screen = Screen::HomeworkEdit;
                     self.status.clear();
+                }
+                Ok(Outcome::ScheduleLoaded(document)) => {
+                    if let Some(lease) = self.lease {
+                        self.schedule = Some(ScheduleEditor::new(document, lease.principal_id()));
+                        self.screen = Screen::Schedule;
+                        self.status.clear();
+                    }
+                }
+                Ok(Outcome::ScheduleSaved(document)) => {
+                    if let Some(editor) = &mut self.schedule {
+                        editor.saved(document);
+                    }
+                    self.status = "课表、作息和校历已整体保存。".into();
                 }
                 Ok(Outcome::Closed) => {
                     self.stopping = true;
@@ -1301,7 +1462,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if let Some(error) = probe_error {
         return Err(error);
     }
-    if probe && (stage != 26 || !office_verified) {
+    if probe && (stage != 66 || !office_verified) {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
     Ok(())
@@ -1326,6 +1487,7 @@ fn create_app(clock: Arc<CurrentClock>) -> std::result::Result<App, String> {
         shutdown: None,
         shutdown_deadline: None,
         terminate_required: false,
+        schedule: None,
     })
 }
 
@@ -1345,7 +1507,7 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
     Ok(())
 }
 fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
@@ -1468,12 +1630,12 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             Screen::Login
         }
         19 => {
-            if app
-                .view()
-                .actions
-                .iter()
-                .any(|a| matches!(a.id, TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | EXIT))
-            {
+            if app.view().actions.iter().any(|a| {
+                matches!(
+                    a.id,
+                    TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | TO_SCHEDULE | EXIT
+                )
+            }) {
                 return Err("教师工作台暴露主管理员入口".into());
             }
             action = TO_HOMEWORK;
@@ -1514,6 +1676,54 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             Screen::Login
         }
         25 => {
+            action = TO_SCHEDULE;
+            Screen::Home
+        }
+        26..=52 | 54..=58 => {
+            return schedule_probe_step(app, stage);
+        }
+        53 => {
+            action = TO_SCHEDULE;
+            Screen::Home
+        }
+        59 => {
+            *stage += 1;
+            return Ok(());
+        }
+        60 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-admin")?;
+            put(PASSWORD, INITIAL)?;
+            Screen::Login
+        }
+        61 => {
+            action = TO_SCHEDULE;
+            Screen::Home
+        }
+        62 => {
+            use schedule_editor::*;
+            if app
+                .view()
+                .fields
+                .iter()
+                .find(|f| f.id == START)
+                .map(|f| f.value.as_str())
+                != Some("2026-")
+            {
+                return Err("锁定后未保留未完成日期草稿".into());
+            }
+            action = EDIT_BACK;
+            Screen::Schedule
+        }
+        63 => {
+            action = schedule_editor::EDIT_BACK;
+            Screen::Schedule
+        }
+        64 => {
+            action = schedule_editor::EDIT_BACK;
+            Screen::Schedule
+        }
+        65 => {
             action = EXIT;
             Screen::Home
         }
@@ -1525,9 +1735,170 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             app.status
         ));
     }
+    for f in app.view().fields {
+        if f.kind != FieldKind::ReadOnly && data.get(f.id).is_none() {
+            data.insert(f.id, f.value)
+                .map_err(|_| "原生诊断表单重复字段")?;
+        }
+    }
     app.window
         .probe_submit(action, data)
         .map_err(|_| format!("原生工作台命令未接纳：stage={stage}"))?;
+    *stage += 1;
+    Ok(())
+}
+
+fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
+    use schedule_editor::*;
+    if app.screen != Screen::Schedule {
+        return Err(format!("课表页面未打开：stage={stage}，{}", app.status));
+    }
+    let mut data = FormData::new();
+    let mut put = |id, value: &str| {
+        data.insert(id, value.into())
+            .map_err(|_| "课表诊断字段重复".to_owned())
+    };
+    let action = match *stage {
+        26 => NEW_TERM,
+        27 => {
+            put(TERM_NAME, "验证学期")?;
+            put(START, "2026-09-01")?;
+            put(END, "2027-01-31")?;
+            put(ANCHOR, "2026-08-31")?;
+            APPLY
+        }
+        28 => ADD_ROW,
+        29 => {
+            put(ROW_NAME, "第一节")?;
+            put(RANGE, "08200900")?;
+            APPLY
+        }
+        30 => {
+            app.window
+                .probe_select_grid(0, 1)
+                .map_err(|_| "原生网格选格失败")?;
+            *stage += 1;
+            return Ok(());
+        }
+        31 => {
+            let subject = app
+                .state
+                .subjects
+                .iter()
+                .find(|s| s.name == "数学")
+                .ok_or("验证科目缺失")?
+                .id;
+            app.window
+                .probe_choice(SUBJECT, &subject.get().to_string())
+                .map_err(|_| "原生科目选择失败")?;
+            *stage += 1;
+            return Ok(());
+        }
+        32 => {
+            let teacher = app
+                .state
+                .account_by_login("probe-teacher")
+                .map_err(|_| "验证教师缺失")?
+                .principal
+                .id;
+            if app
+                .view()
+                .fields
+                .iter()
+                .find(|f| f.id == TEACHER)
+                .map(|f| f.value.as_str())
+                != Some(teacher.get().to_string().as_str())
+            {
+                return Err("唯一任课教师没有自动选择".into());
+            }
+            put(ROOM, "验证教室")?;
+            put(NOTE, "备注随课程清空")?;
+            APPLY
+        }
+        33 => SAVE_ALL,
+        34 => ENABLE_DUAL,
+        35 => {
+            put(TABLE, "1")?;
+            OPEN
+        }
+        36 => {
+            app.window
+                .probe_select_grid(0, 1)
+                .map_err(|_| "原生双表选格失败")?;
+            *stage += 1;
+            return Ok(());
+        }
+        37 => {
+            put(SUBJECT, "none")?;
+            put(TEACHER, "unassigned")?;
+            APPLY
+        }
+        38 => SAVE_ALL,
+        39 => DISABLE_DUAL,
+        40 => SAVE_ALL,
+        41 => RESTORE_DUAL,
+        42 => SAVE_ALL,
+        43 => {
+            put(TABLE, "0")?;
+            OPEN
+        }
+        44 => PREVIEW,
+        45 | 46 => EDIT_BACK,
+        47 => CALENDAR,
+        48 => {
+            put(MODE, "school")?;
+            put(START, "2026-09-01")?;
+            put(END, "2027-01-31")?;
+            APPLY
+        }
+        49 => {
+            put(MAP_DATE, "2026-11-02")?;
+            put(MAP_KIND, "rest")?;
+            SET_MAPPING
+        }
+        50 => EDIT_BACK,
+        51 => SAVE_ALL,
+        52 => EDIT_BACK,
+        53 => TO_SCHEDULE,
+        54 => CANCEL,
+        55 => CONFIRM_CANCEL,
+        56 => OPEN,
+        57 => {
+            let doc = &app.schedule.as_ref().ok_or("课表草稿缺失")?.document;
+            let p = doc.semesters.first().ok_or("持久化学期丢失")?;
+            if doc.revision != Revision::new(5)
+                || p.semester.tables.len() != 2
+                || p.semester.tables[0].rows[0].courses[0].is_none()
+                || p.semester.tables[1].rows[0].courses[0].is_some()
+                || doc.calendar_mode != fc_domain::schedule::CalendarMode::School
+                || doc.school_calendar.entries.len() != 1
+                || !doc.public_calendar.entries.is_empty()
+            {
+                return Err("课表/双表差异/独立校历重读不一致".into());
+            }
+            HEADER
+        }
+        58 => {
+            put(START, "2026-")?;
+            put(TERM_NAME, "未保存名称")?;
+            LOCK
+        }
+        59 => {
+            *stage += 1;
+            return Ok(());
+        }
+        _ => return Err("课表诊断阶段无效".into()),
+    };
+    // Stage52 leaves the schedule screen; the next entry is handled by the
+    // normal workbench action path and then resumes this same stored draft.
+    for f in app.view().fields {
+        if f.kind != FieldKind::ReadOnly && data.get(f.id).is_none() {
+            data.insert(f.id, f.value).map_err(|_| "诊断表单无效")?;
+        }
+    }
+    app.window
+        .probe_submit(action, data)
+        .map_err(|_| format!("原生课表命令拒绝：stage={stage}"))?;
     *stage += 1;
     Ok(())
 }
