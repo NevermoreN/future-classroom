@@ -9,3 +9,7 @@ publish.workspace = true
 [dependencies]
 fc-domain.workspace = true
 fc-ports.workspace = true
+flate2 = { version = "=1.1.10", default-features = false, features = ["rust_backend"] }
+crc32fast = "=1.5.3"
+quick-xml = { version = "=0.42.0", features = ["encoding"] }
+sha2.workspace = true

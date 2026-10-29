@@ -4,10 +4,15 @@ FutureClassroom 0.1.0 - Windows x86 development probe
 在 PowerShell 中解压后运行：
   .\fc-bootstrap.exe --version
   .\fc-bootstrap.exe --self-check
+  .\fc-bootstrap.exe --system-probe
+  .\fc-bootstrap.exe --host-probe 2
   .\fc-bootstrap.exe --native-probe 30
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
-Windows 随机源、PBKDF2 与目录互斥；退出时清理隔离数据。
+Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开、
+持久登录限速接口、精确会话、原子改密与恢复码一次轮换；退出时清理隔离数据。
+--system-probe 只读发现系统适配，不创建正式数据目录或修改自启动。
+--host-probe <seconds> 接受1至30秒，验证自身隐藏窗口、托盘和会话通知生命周期。
 --native-probe <seconds> 接受 1 至 300 秒，验证原生透明窗口、3% 玻璃底色、
 时钟文字、点击穿透与前台避让。需在已登录的交互桌面观察实际效果。
 SSH/无交互桌面的输出不能代替前台、遮挡、缩放、点击和视觉验收。

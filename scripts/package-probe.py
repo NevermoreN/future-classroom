@@ -76,13 +76,15 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         },
         "sha256": entries[0]["sha256"],
         "features": {
-            "declared_probe_commands": ["--version", "--self-check", "--native-probe <1..300>"],
+            "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--native-probe <1..300>"],
             "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; interactive QA required",
             "complete_application": "NOT_IMPLEMENTED",
             "teacher_management_web_application": "NOT_IMPLEMENTED",
         },
         "gates": {
             "Win7_SP1_x86": "NOT_VALIDATED",
+            "Windows_10": "NOT_VALIDATED",
+            "Windows_11_complete_product": "NOT_VALIDATED",
             "formal_MSVC_baseline": "NOT_VALIDATED",
             "real_machine_acceptance": "NOT_VALIDATED",
             "release_tag": "NOT_ALLOWED",

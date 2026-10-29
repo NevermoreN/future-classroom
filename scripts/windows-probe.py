@@ -40,6 +40,7 @@ def main():
     parser.add_argument("--exe", type=Path, required=True)
     parser.add_argument("--test-metadata", type=Path)
     parser.add_argument("--native-seconds", type=int, default=5)
+    parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.native_seconds <= 30:
@@ -70,6 +71,7 @@ def main():
     task_name = ps_literal(task)
     report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN"}
     try:
+        report["platform"] = json.loads(remote.powershell("$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}|ConvertTo-Json -Compress"))
         for path in [args.exe, *tests]:
             remote.upload(path, directory)
         digest = hashlib.sha256(args.exe.read_bytes()).hexdigest()
@@ -78,9 +80,14 @@ def main():
         if actual != digest:
             raise RuntimeError("remote executable digest mismatch")
         script = child_temp + "$root=" + root + ";$exe=Join-Path $root " + ps_literal(args.exe.name) + ";$output=@(& $exe --self-check 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
-        report["selfCheck"] = json.loads(remote.powershell(script, timeout=60))
+        report["selfCheck"] = json.loads(remote.powershell(script, timeout=180))
         if report["selfCheck"]["exitCode"] != 0:
             raise RuntimeError("Windows self-check failed")
+        if args.system_host:
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$output=@(& $exe --system-probe 2>&1|ForEach-Object{\"$_\"});@{exitCode=$LASTEXITCODE;output=$output}|ConvertTo-Json -Compress"
+            report["system"] = json.loads(remote.powershell(script))
+            if report["system"]["exitCode"] != 0:
+                raise RuntimeError("read-only system probe failed")
         report["tests"] = []
         for path in tests:
             script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$output=@(& $exe --test-threads=2 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
@@ -94,6 +101,9 @@ def main():
         # It does not send keys, minimize windows, change focus, capture the desktop,
         # install services, touch production ProgramData, or alter SSH authorization.
         body = child_temp + "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';try{$out=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --native-probe " + str(args.native_seconds) + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$out;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}catch{@{exitCode=1;error=$_.Exception.Message}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}"
+        if args.system_host:
+            host_command = "$hostOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --host-probe 2 2>&1|ForEach-Object{\"$_\"});$hostCode=$LASTEXITCODE;"
+            body = body.replace("$code=$LASTEXITCODE;@{exitCode=", "$code=$LASTEXITCODE;" + host_command + "@{hostExitCode=$hostCode;hostOutput=$hostOutput;exitCode=")
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
         with tempfile.TemporaryDirectory(prefix="future-classroom-probe-script-") as local:
@@ -105,6 +115,8 @@ def main():
         report["native"] = json.loads(remote.powershell(launch, timeout=50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
+        if args.system_host and report["native"].get("hostExitCode") != 0:
+            raise RuntimeError("interactive hidden-host/tray probe failed")
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"
     except Exception as error:

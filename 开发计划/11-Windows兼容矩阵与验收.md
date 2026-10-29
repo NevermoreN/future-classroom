@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上81项规则/SQLite测试和隔离原型；整体仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上145项规则/SQLite/系统适配测试，凭据组合和隐藏宿主/托盘隔离探针；整体仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)

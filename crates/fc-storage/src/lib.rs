@@ -17,6 +17,9 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub mod business;
+pub mod login;
+
 pub const SCHEMA_VERSION: i64 = 1;
 pub const MAX_COMMAND_BYTES: usize = 4 * 1024 * 1024;
 pub const MAX_QUEUED_BYTES: usize = 4 * 1024 * 1024;
@@ -25,6 +28,17 @@ pub const MAX_VALUE_BYTES: usize = 64 * 1024;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StorageError {
     InvalidCommand,
+    LoginRateLimited {
+        retry_after_millis: u64,
+    },
+    LoginInProgress,
+    LoginCapacity,
+    LoginReservationExpired,
+    LoginStaleCredential,
+    LoginClockRegression,
+    CredentialCorrupt,
+    Content(fc_domain::content::ContentError),
+    Identity(fc_domain::identity::IdentityError),
     Busy,
     Stopping,
     WorkerDisconnected,
@@ -160,8 +174,69 @@ impl<T> Ticket<T> {
     }
 }
 
+/// A bounded view valid only during one writer transaction. It exposes owned
+/// documents, never SQLite handles. Implementations must not retain the view.
+pub trait TransactionDocuments {
+    fn get(&self, key: &str) -> Result<Option<Document>, StorageError>;
+    fn revision(&self) -> Result<Revision, StorageError>;
+}
+/// Trusted composition code only. Evaluate must be short, deterministic except
+/// its injected clock, and must never reenter the writer, perform file I/O or KDF.
+/// Use owned inputs; borrowed request clocks cannot cross the worker boundary.
+pub trait TransactionTask<S>: Send {
+    fn allocation_bytes(&self) -> usize;
+    fn evaluate(
+        self: Box<Self>,
+        documents: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError>;
+}
+pub struct TransactionDecision<S> {
+    /// Memory-only final lease/date recheck after SQL writes, immediately before
+    /// COMMIT. Never perform I/O/KDF or reenter the writer here.
+    pub precommit: Option<Box<dyn FnOnce() -> Result<(), StorageError> + Send>>,
+    pub outcome: Vec<u8>,
+    /// None performs a read-only transaction. Empty writes must use None.
+    pub commit: Option<(Vec<Mutation>, S)>,
+}
+/// Borrow SQLite's current value and enforce the allocation bound before copying.
+/// A damaged BLOB must never allocate its declared size on the Rust heap.
+pub(crate) fn read_limited_blob(
+    row: &rusqlite::Row<'_>,
+    column: usize,
+) -> rusqlite::Result<Vec<u8>> {
+    match row.get_ref(column)? {
+        rusqlite::types::ValueRef::Blob(value) if value.len() <= MAX_VALUE_BYTES => {
+            Ok(value.to_vec())
+        }
+        _ => Err(rusqlite::Error::InvalidQuery),
+    }
+}
+struct TransactionView<'a>(&'a Connection);
+impl TransactionDocuments for TransactionView<'_> {
+    fn get(&self, key: &str) -> Result<Option<Document>, StorageError> {
+        self.0
+            .query_row(
+                "SELECT value,revision FROM documents WHERE key=?1",
+                [key],
+                |row| {
+                    Ok(Document {
+                        value: read_limited_blob(row, 0)?,
+                        revision: Revision::new(row.get(1)?),
+                    })
+                },
+            )
+            .optional()
+            .map_err(|_| StorageError::Database)
+    }
+    fn revision(&self) -> Result<Revision, StorageError> {
+        read_revision(self.0)
+    }
+}
+
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
+    Login(login::Operation, Reply<login::Response>),
+    Transaction(Box<dyn TransactionTask<S>>, Reply<Vec<u8>>),
     Commit(CommitCommand, S, Reply<CommitReceipt>),
     Get(String, Reply<Option<Document>>),
     Revision(Reply<Revision>),
@@ -171,6 +246,8 @@ enum Message<S> {
 impl<S> Message<S> {
     fn queued_bytes(&self) -> Option<usize> {
         let allocations = match self {
+            Self::Login(_, _) => std::mem::size_of::<login::Operation>(),
+            Self::Transaction(task, _) => task.allocation_bytes(),
             Self::Commit(command, _, _) => command.allocation_bytes()?,
             Self::Get(key, _) => key.capacity(),
             Self::Revision(_) => 0,
@@ -237,6 +314,30 @@ impl<S> StorageHandle<S> {
             Err(mpsc::TrySendError::Disconnected(_)) => Err(StorageError::WorkerDisconnected),
         }
     }
+    /// Reserve before scheduling a KDF. Hold the opaque reservation inside the
+    /// real worker until it exits; a timeout never frees its physical CPU slot.
+    pub fn try_login_admission(
+        &self,
+        principal: fc_domain::ids::PrincipalId,
+        kind: login::CredentialKind,
+    ) -> Result<Ticket<login::Response>, StorageError> {
+        self.send(|reply| Message::Login(login::Operation::Admit(principal, kind), reply))
+    }
+    /// Invoke only after the owning KDF worker has finished. No session may be
+    /// issued until this version-checked, durable result reports Authenticated.
+    pub fn try_finish_login(
+        &self,
+        reservation: login::Reservation,
+        outcome: login::Verification,
+    ) -> Result<Ticket<login::Response>, StorageError> {
+        self.send(|reply| Message::Login(login::Operation::Finish(reservation, outcome), reply))
+    }
+    pub fn try_transaction(
+        &self,
+        task: impl TransactionTask<S> + 'static,
+    ) -> Result<Ticket<Vec<u8>>, StorageError> {
+        self.send(|reply| Message::Transaction(Box::new(task), reply))
+    }
     pub fn try_commit(
         &self,
         command: CommitCommand,
@@ -289,6 +390,22 @@ impl<S: Send + 'static> StorageWriter<S> {
     where
         P: AuthorityPublisher<Snapshot = S> + Send + 'static,
     {
+        Self::open_with_login_clock(
+            path,
+            capacity,
+            publisher,
+            Arc::new(login::ProcessClock::new()),
+        )
+    }
+    pub fn open_with_login_clock<P>(
+        path: impl AsRef<Path>,
+        capacity: usize,
+        publisher: P,
+        clock: Arc<dyn fc_ports::MonotonicClock + Send + Sync>,
+    ) -> Result<Self, StorageError>
+    where
+        P: AuthorityPublisher<Snapshot = S> + Send + 'static,
+    {
         if capacity == 0 || capacity > 128 {
             return Err(StorageError::InvalidCommand);
         }
@@ -301,7 +418,7 @@ impl<S: Send + 'static> StorageWriter<S> {
         let worker = thread::Builder::new()
             .name("fc-sqlite-writer".into())
             .spawn(move || {
-                writer_loop(path, publisher, receiver, stop, ready);
+                writer_loop(path, publisher, receiver, stop, ready, clock);
             })
             .map_err(|_| StorageError::WorkerDisconnected)?;
         match startup.recv() {
@@ -345,6 +462,9 @@ impl<S> Drop for StorageWriter<S> {
 }
 
 fn open_connection(path: &Path) -> Result<Connection, StorageError> {
+    let existed = path.try_exists().map_err(|_| StorageError::Database)?;
+    // An existing zeroed/truncated/unversioned file is recovery evidence, never
+    // a new installation. Only a path absent at startup may initialize schema 0.
     let mut db = Connection::open(path).map_err(|_| StorageError::Database)?;
     db.busy_timeout(Duration::from_millis(250))
         .map_err(|_| StorageError::Database)?;
@@ -361,6 +481,9 @@ fn open_connection(path: &Path) -> Result<Connection, StorageError> {
         return Err(StorageError::UnsupportedSchema);
     }
     if schema == 0 {
+        if existed {
+            return Err(StorageError::Database);
+        }
         let transaction = db.transaction().map_err(|_| StorageError::Database)?;
         transaction.execute_batch("CREATE TABLE state_meta (singleton INTEGER PRIMARY KEY CHECK(singleton=1), revision INTEGER NOT NULL CHECK(revision>=0));
             INSERT INTO state_meta VALUES (1,0);
@@ -397,6 +520,7 @@ fn writer_loop<P: AuthorityPublisher>(
     receiver: mpsc::Receiver<Envelope<P::Snapshot>>,
     stop: Arc<AtomicBool>,
     ready: Reply<()>,
+    clock: Arc<dyn fc_ports::MonotonicClock + Send + Sync>,
 ) {
     let mut db = match open_connection(&path) {
         Ok(db) => {
@@ -408,6 +532,7 @@ fn writer_loop<P: AuthorityPublisher>(
             return;
         }
     };
+    let mut login = login::Limiter::new(clock);
     let mut faulted = false;
     while !stop.load(Ordering::Acquire) {
         let Envelope { message, lease } = match receiver.recv_timeout(Duration::from_millis(10)) {
@@ -418,6 +543,43 @@ fn writer_loop<P: AuthorityPublisher>(
         // Queue ownership ends at pop. In-flight work is bounded to this one writer.
         drop(lease);
         match message {
+            Message::Login(operation, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else if stop.load(Ordering::Acquire) {
+                    Err(StorageError::Stopping)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        login.execute(&mut db, operation, &stop)
+                    })) {
+                        Ok(result) => result,
+                        Err(_) => {
+                            mark_fault(&mut publisher, &mut faulted);
+                            Err(StorageError::WorkerPanicked)
+                        }
+                    }
+                };
+                if matches!(result, Err(StorageError::Indeterminate)) {
+                    mark_fault(&mut publisher, &mut faulted);
+                }
+                let _ = reply.send(result);
+            }
+            Message::Transaction(task, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        execute_transaction(&mut db, &mut publisher, task, &stop, &mut faulted)
+                    })) {
+                        Ok(result) => result,
+                        Err(_) => {
+                            mark_fault(&mut publisher, &mut faulted);
+                            Err(StorageError::WorkerPanicked)
+                        }
+                    }
+                };
+                let _ = reply.send(result);
+            }
             Message::Commit(command, snapshot, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
@@ -436,7 +598,7 @@ fn writer_loop<P: AuthorityPublisher>(
                         |row| {
                             let revision: u64 = row.get(1)?;
                             Ok(Document {
-                                value: row.get(0)?,
+                                value: read_limited_blob(row, 0)?,
                                 revision: Revision::new(revision),
                             })
                         },
@@ -467,6 +629,12 @@ fn writer_loop<P: AuthorityPublisher>(
     for Envelope { message, lease } in receiver.try_iter() {
         drop(lease);
         match message {
+            Message::Login(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::Transaction(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
             Message::Commit(_, _, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }
@@ -576,6 +744,97 @@ fn mark_fault<P: AuthorityPublisher>(publisher: &mut P, faulted: &mut bool) {
     let _ = catch_unwind(AssertUnwindSafe(|| publisher.fault()));
 }
 
+/// Read authority, business rows and receipts under the very same IMMEDIATE
+/// transaction that commits them. No precomputed mutation bypasses business CAS.
+fn execute_transaction<P: AuthorityPublisher>(
+    db: &mut Connection,
+    publisher: &mut P,
+    task: Box<dyn TransactionTask<P::Snapshot>>,
+    stop: &AtomicBool,
+    faulted: &mut bool,
+) -> Result<Vec<u8>, StorageError> {
+    if stop.load(Ordering::Acquire) {
+        return Err(StorageError::Stopping);
+    }
+    let transaction = db
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::Database)?;
+    let current = read_revision(&transaction)?;
+    let decision = task.evaluate(&TransactionView(&transaction))?;
+    let Some((mutations, snapshot)) = decision.commit else {
+        transaction.rollback().map_err(|_| StorageError::Database)?;
+        return Ok(decision.outcome);
+    };
+    if stop.load(Ordering::Acquire) {
+        return Err(StorageError::Stopping);
+    }
+    let next = current.next().map_err(|_| StorageError::InvalidCommand)?;
+    let next_i64 = i64::try_from(next.get()).map_err(|_| StorageError::InvalidCommand)?;
+    // Apply the exact same allocation/key/value bounds as generic writes.
+    let validated = CommitCommand::new("transaction-validation".into(), current, mutations)?;
+    if publisher.snapshot_revision(&snapshot) != next {
+        return Err(StorageError::InvalidCommand);
+    }
+    let update = match catch_unwind(AssertUnwindSafe(|| publisher.begin_update())) {
+        Ok(Ok(update)) => update,
+        Ok(Err(_)) => return Err(StorageError::AuthorityUnavailable),
+        Err(_) => {
+            mark_fault(publisher, faulted);
+            return Err(StorageError::AuthorityUnavailable);
+        }
+    };
+    let written = (|| -> rusqlite::Result<()> {
+        for mutation in validated.mutations {
+            match mutation {
+                Mutation::Put { key, value } => {
+                    transaction.execute("INSERT INTO documents(key,value,revision) VALUES (?1,?2,?3) ON CONFLICT(key) DO UPDATE SET value=excluded.value,revision=excluded.revision", params![key,value,next_i64])?;
+                }
+                Mutation::Delete { key } => {
+                    transaction.execute("DELETE FROM documents WHERE key=?1", [key])?;
+                }
+            }
+        }
+        transaction.execute(
+            "UPDATE state_meta SET revision=?1 WHERE singleton=1",
+            [next_i64],
+        )?;
+        Ok(())
+    })();
+    let checked = if written.is_err() {
+        Err(StorageError::Database)
+    } else if stop.load(Ordering::Acquire) {
+        Err(StorageError::Stopping)
+    } else {
+        decision.precommit.map_or(Ok(()), |check| check())
+    };
+    if let Err(error) = checked {
+        if transaction.rollback().is_err() {
+            mark_fault(publisher, faulted);
+            return Err(StorageError::Indeterminate);
+        }
+        return match catch_unwind(AssertUnwindSafe(|| publisher.rollback(update))) {
+            Ok(Ok(())) => Err(error),
+            _ => {
+                mark_fault(publisher, faulted);
+                Err(StorageError::AuthorityUnavailable)
+            }
+        };
+    }
+    if transaction.commit().is_err() {
+        mark_fault(publisher, faulted);
+        return Err(StorageError::Indeterminate);
+    }
+    match catch_unwind(AssertUnwindSafe(|| publisher.publish(update, snapshot))) {
+        Ok(Ok(())) => Ok(decision.outcome),
+        _ => {
+            mark_fault(publisher, faulted);
+            Err(StorageError::PublicationFailed {
+                committed_revision: next,
+            })
+        }
+    }
+}
+
 fn execute_commit<P: AuthorityPublisher>(
     db: &mut Connection,
     publisher: &mut P,
@@ -587,7 +846,7 @@ fn execute_commit<P: AuthorityPublisher>(
         .query_row(
             "SELECT fingerprint, revision FROM command_journal WHERE command_id=?1",
             [&command.id],
-            |r| Ok((r.get(0)?, r.get(1)?)),
+            |r| Ok((read_limited_blob(r, 0)?, r.get(1)?)),
         )
         .optional()
         .map_err(|_| StorageError::Database)?;
@@ -1230,5 +1489,54 @@ mod tests {
             }]
         )
         .is_err());
+    }
+    #[test]
+    fn oversized_database_blob_is_rejected_at_borrow_before_allocating_a_document() {
+        let temp = TempDatabase::new();
+        {
+            let db = open_connection(&temp.path()).unwrap();
+            db.execute(
+                "INSERT INTO documents VALUES ('oversize',zeroblob(?1),1)",
+                [(MAX_VALUE_BYTES + 1) as u64],
+            )
+            .unwrap();
+            db.execute(
+                "INSERT INTO documents VALUES ('exact',zeroblob(?1),1)",
+                [MAX_VALUE_BYTES as u64],
+            )
+            .unwrap();
+            assert_eq!(
+                TransactionView(&db).get("oversize"),
+                Err(StorageError::Database)
+            );
+            assert_eq!(
+                TransactionView(&db)
+                    .get("exact")
+                    .unwrap()
+                    .unwrap()
+                    .value
+                    .len(),
+                MAX_VALUE_BYTES
+            );
+        }
+        let writer =
+            StorageWriter::open(temp.path(), 8, Publisher::new(PublishMode::Success)).unwrap();
+        assert_eq!(
+            writer.handle().try_get("oversize".into()).unwrap().wait(),
+            Err(StorageError::Database)
+        );
+        assert_eq!(
+            writer
+                .handle()
+                .try_get("exact".into())
+                .unwrap()
+                .wait()
+                .unwrap()
+                .unwrap()
+                .value
+                .len(),
+            MAX_VALUE_BYTES
+        );
+        writer.shutdown().unwrap();
     }
 }

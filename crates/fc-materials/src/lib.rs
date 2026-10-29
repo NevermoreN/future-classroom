@@ -1,6 +1,8 @@
-//! Bounded resource checks, not a ZIP/XML/Office validator. Container type validation,
-//! path checks, macro rejection and WIC image decoding still require native adapters.
+//! Bounded preparation and Office container validation. Native image decode remains
+//! the WIC adapter's responsibility; filenames alone never establish media validity.
 #![forbid(unsafe_code)]
+pub mod office;
+
 use std::fmt;
 use std::io::{self, Read, Write};
 use std::time::{Duration, Instant};

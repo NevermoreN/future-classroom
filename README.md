@@ -2,7 +2,7 @@
 
 按 [D11 完整开发计划](开发计划/未来教室项目完整开发计划.md) 开发的原生 Windows 教室桌面项目。正式兼容目标为 Windows 7 SP1 x86、Windows 10、Windows 11。核心采用 Rust，教师端计划使用 TypeScript/React；白板端不嵌入浏览器。
 
-当前为 **0.1.0 基础开发里程碑**，包含十二 crate、课表/权限纯规则、运行健康闸门、有界队列、真实 SQLite 单写者与一致备份、密码学、严格协议、布局和声音状态机，以及 Windows 原生绘制探针。完整桌面工作流、设置工作台、HTTP.sys 教师端、原生文件/语音管线仍待实现。**不能作为完整产品安装；Windows 7、10、11均未完成整体验收。**
+当前为 **0.1.0 基础开发里程碑**，包含十二 crate、课表规则、真实 SQLite 业务事务与权限复核、账号及独立会话、持久登录限速、密码与恢复码轮换、流式 Office ZIP/XML 校验，以及 Windows 原生绘制、隐藏宿主、系统权限和 DPAPI 适配。完整桌面工作流、设置工作台、HTTP.sys 教师端、原生文件/语音管线仍待实现。**不能作为完整产品安装；Windows 7、10、11均未完成整体验收。**
 
 [实施进度与验证记录](开发计划/10-实施进度与验证记录.md) 区分已实现范围、实测结果和未完成门槛。旧文档的“仅计划、不开发”是历史状态，已由最新开发授权取代；产品要求保持。
 
@@ -24,10 +24,14 @@ cargo run -p fc-bootstrap --locked -- --self-check
 
 ```powershell
 .\fc-bootstrap.exe --self-check
+.\fc-bootstrap.exe --system-probe
+.\fc-bootstrap.exe --host-probe 2
 .\fc-bootstrap.exe --native-probe 30
 ```
 
 自检只写独立临时数据并清理；绘制探针限时运行、透明穿透、不激活窗口，仅在确认桌面前台时显示。它不提供学校内容编辑、录音播放或教师管理服务。`rendered_frames=0` 表示没有取得桌面可见绘制证据。
+
+新构建的 Windows 自检还覆盖 DPAPI 密钥和 SQLite 重开、真实登录限速端口、改密撤权及一次性恢复；系统探针只读，宿主探针限时创建自身隐藏窗口和托盘。现有历史开发 ZIP 的命令和范围以其包内 manifest 为准，不能用新源码的验证替代旧二进制证据。
 
 Linux 上有 MinGW x86 时可交叉构建补充目标：
 

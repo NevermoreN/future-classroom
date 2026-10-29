@@ -59,6 +59,7 @@ pub enum PermissionError {
     OutsideTeachingScope,
     WebOnly,
     LocalOnly,
+    PasswordChangeRequired,
 }
 
 impl AuthorityContext {

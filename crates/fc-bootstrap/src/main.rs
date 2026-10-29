@@ -1,5 +1,7 @@
 //! Composition root. This milestone exposes isolated diagnostics, not unfinished management APIs.
 #![forbid(unsafe_code)]
+#[cfg(windows)]
+mod credential_probe;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_runtime::authority::AuthorityStore;
 use fc_storage::{CommitCommand, Mutation, StorageWriter};
@@ -22,17 +24,44 @@ fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
         [] => {
-            println!("未来教室 · Rust D11 开发里程碑\n这是基础验证程序，完整桌面与教师端尚未交付。\n--self-check             隔离验证 SQLite / 权威发布 / 密码学\n--native-probe <1..300>   Windows 原生透明绘制验证（秒）\n--version                版本及兼容状态");
+            println!("未来教室 · Rust D11 开发里程碑\n这是基础验证程序，完整桌面与教师端尚未交付。\n--self-check             隔离验证 SQLite / 权威发布 / 凭据轮换\n--system-probe           只读检查 Windows 系统适配\n--host-probe <1..30>      隐藏窗口与托盘生命周期验证（秒）\n--native-probe <1..300>   Windows 原生透明绘制验证（秒）\n--version                版本及兼容状态");
             Ok(())
         }
         [flag] if flag == "--version" => {
             println!(
-                "FutureClassroom {} / D11 / development; Win7 NOT_VALIDATED",
+                "FutureClassroom {} / D11 / development; Win7/Win10/Win11 product acceptance NOT_VALIDATED",
                 env!("CARGO_PKG_VERSION")
             );
             Ok(())
         }
         [flag] if flag == "--self-check" => self_check(),
+        [flag] if flag == "--system-probe" => {
+            #[cfg(windows)]
+            {
+                let report = fc_windows::system::probe().map_err(debug_error)?;
+                println!("system_discovery=PASS program_data_absolute={} user_sid_resolved={} thread_cpu_clock=PASS autostart_readback={:?}", report.project_data_root.is_absolute(), !report.deployment_user_sid.is_empty(), report.autostart);
+                Ok(())
+            }
+            #[cfg(not(windows))]
+            Err("system probe must run on Windows".into())
+        }
+        [flag, seconds] if flag == "--host-probe" => {
+            let seconds = seconds
+                .parse::<u32>()
+                .map_err(|_| "seconds must be an integer in 1..30")?;
+            #[cfg(windows)]
+            {
+                let report =
+                    fc_windows::host::probe_lifecycle(seconds, true).map_err(debug_error)?;
+                println!("hidden_host=PASS tray_lifecycle=PASS ticks={} elapsed_ms={} session_notifications={}",report.ticks,report.elapsed_millis,report.session_notifications_registered);
+                Ok(())
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = seconds;
+                Err("host probe must run on Windows".into())
+            }
+        }
         [flag, seconds] if flag == "--native-probe" => {
             let seconds = seconds
                 .parse::<u32>()
@@ -84,6 +113,29 @@ impl Drop for IsolatedRoot {
 fn debug_error<T: std::fmt::Debug>(e: T) -> String {
     format!("{e:?}")
 }
+/// Diagnostics always join the writer before their temporary directory is removed,
+/// including a failed assertion or an early `?` return.
+struct ProbeWriter<S: Send + 'static>(Option<StorageWriter<S>>);
+impl<S: Send + 'static> ProbeWriter<S> {
+    fn handle(&self) -> Result<fc_storage::StorageHandle<S>, String> {
+        self.0
+            .as_ref()
+            .map(StorageWriter::handle)
+            .ok_or_else(|| "probe writer is closed".into())
+    }
+    fn shutdown(&mut self) -> Result<(), String> {
+        self.0
+            .take()
+            .map_or(Ok(()), |writer| writer.shutdown().map_err(debug_error))
+    }
+}
+impl<S: Send + 'static> Drop for ProbeWriter<S> {
+    fn drop(&mut self) {
+        if let Some(writer) = self.0.take() {
+            let _ = writer.shutdown();
+        }
+    }
+}
 fn self_check() -> Result<(), String> {
     let root = IsolatedRoot::new()?;
     #[cfg(windows)]
@@ -97,9 +149,10 @@ fn self_check() -> Result<(), String> {
     let (mut publisher, reader) =
         AuthorityStore::new("initial", Revision::new(0), AuthEpoch::new(0));
     publisher.initialize().map_err(debug_error)?;
-    let writer =
-        StorageWriter::open(root.0.join("probe.db"), 128, publisher).map_err(debug_error)?;
-    let handle = writer.handle();
+    let mut writer = ProbeWriter(Some(
+        StorageWriter::open(root.0.join("probe.db"), 128, publisher).map_err(debug_error)?,
+    ));
+    let handle = writer.handle()?;
     let command = || {
         CommitCommand::new(
             "probe-commit-1".into(),
@@ -146,10 +199,11 @@ fn self_check() -> Result<(), String> {
     {
         return Err("stored value and snapshot disagree".into());
     }
-    writer.shutdown().map_err(debug_error)?;
+    writer.shutdown()?;
     println!("sqlite_commit=PASS authority_publish=PASS idempotency=PASS");
     #[cfg(windows)]
     {
+        credential_probe::run(&root.0)?;
         use fc_ports::RandomSource;
         let mut rng = fc_windows::SystemRandom;
         let mut random = [0u8; 32];

@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+pub mod identity;
 use fc_domain::{
     auth::ActorContext,
     content::{ContentCommand, ContentRecord},
