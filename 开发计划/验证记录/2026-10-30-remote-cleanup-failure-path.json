@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "exeSha256": "d38c7cf674c94299721cbcda28d1b458d3736ed7b693d67cb343b9ad21c0ef36",
+  "selfCheck": {
+    "exitCode": 7,
+    "output": []
+  },
+  "status": "FAIL",
+  "error": "Windows self-check failed",
+  "expectedResult": "Deliberate test fixture returns 7 after writing scratch under child TEMP; expected failure and complete marked-root cleanup.",
+  "validationStatus": "PASS"
+}

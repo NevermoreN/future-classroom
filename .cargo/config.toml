@@ -1,0 +1,8 @@
+[target.i686-pc-windows-gnu]
+linker = "i686-w64-mingw32-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
+
+# Supplemental Win7 GNU probe. Formal MSVC certification remains a separate gate.
+[target.i686-win7-windows-gnu]
+linker = "scripts/link-win7-gnu.sh"
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=-Wl,--major-subsystem-version,6,--minor-subsystem-version,1"]

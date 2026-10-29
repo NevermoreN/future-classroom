@@ -1,0 +1,45 @@
+[workspace]
+members = [
+    "crates/fc-domain",
+    "crates/fc-ports",
+    "crates/fc-runtime",
+    "crates/fc-application",
+    "crates/fc-storage",
+    "crates/fc-security",
+    "crates/fc-materials",
+    "crates/fc-audio",
+    "crates/fc-presentation",
+    "crates/fc-protocol",
+    "crates/fc-windows",
+    "crates/fc-bootstrap",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+rust-version = "1.97.1"
+
+[workspace.dependencies]
+fc-domain = { path = "crates/fc-domain" }
+fc-ports = { path = "crates/fc-ports" }
+fc-runtime = { path = "crates/fc-runtime" }
+fc-application = { path = "crates/fc-application" }
+fc-storage = { path = "crates/fc-storage" }
+fc-security = { path = "crates/fc-security" }
+fc-materials = { path = "crates/fc-materials" }
+fc-audio = { path = "crates/fc-audio" }
+fc-presentation = { path = "crates/fc-presentation" }
+fc-protocol = { path = "crates/fc-protocol" }
+fc-windows = { path = "crates/fc-windows" }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"
+sha2 = "=0.10.9"
+
+[profile.release]
+panic = "unwind"
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"
