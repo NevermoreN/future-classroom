@@ -8,6 +8,8 @@ pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRa
 pub mod host;
 #[cfg(windows)]
 pub mod system;
+#[cfg(windows)]
+pub mod workbench;
 
 #[cfg(not(windows))]
 pub fn probe(_seconds: u32) -> Result<(), &'static str> {

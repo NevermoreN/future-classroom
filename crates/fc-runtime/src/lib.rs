@@ -7,3 +7,4 @@ pub mod health;
 pub mod mailbox;
 pub mod observer;
 pub mod shutdown;
+pub mod worker;

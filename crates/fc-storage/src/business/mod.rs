@@ -9,6 +9,25 @@ use fc_ports::{
 };
 use serde_json::{json, Value};
 
+/// Startup-only recovery facts. The deployment must already own its exclusive
+/// instance lock; this helper closes SQLite before the sole writer is created.
+/// No healthy/fake authority is constructed to read persisted initialization facts.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StartupState {
+    pub identity: IdentityState,
+    pub revision: Revision,
+}
+pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageError> {
+    let db = open_connection(path.as_ref())?;
+    let transaction = db
+        .unchecked_transaction()
+        .map_err(|_| StorageError::Database)?;
+    let revision = read_revision(&transaction)?;
+    let identity = load_identity(&TransactionView(&transaction))?;
+    transaction.rollback().map_err(|_| StorageError::Database)?;
+    Ok(StartupState { identity, revision })
+}
+
 const IDENTITY: &str = "business/identity/v1";
 /// Bind an exact authenticated channel lease in this trusted memory-only callback.
 /// It must revalidate monotonic idle/expiry/local lock without refreshing the lease.

@@ -1,8 +1,10 @@
 //! Deployment-only system adapters. Their constructors accept no web commands.
 mod autorun;
+mod clock;
 mod crypto;
 mod paths;
 pub use autorun::{AutostartReadback, RunAtLogin};
+pub use clock::CurrentClock;
 pub use crypto::{CurrentUserDpapi, SecretBytes};
 pub use paths::{current_user_sid, DataPaths, DeploymentDirectory, DirectoryAclReadback};
 

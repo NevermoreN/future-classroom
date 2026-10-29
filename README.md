@@ -2,7 +2,7 @@
 
 按 [D11 完整开发计划](开发计划/未来教室项目完整开发计划.md) 开发的原生 Windows 教室桌面项目。正式兼容目标为 Windows 7 SP1 x86、Windows 10、Windows 11。核心采用 Rust，教师端计划使用 TypeScript/React；白板端不嵌入浏览器。
 
-当前为 **0.1.0 基础开发里程碑**，包含十二 crate、课表规则、真实 SQLite 业务事务与权限复核、账号及独立会话、持久登录限速、密码与恢复码轮换、流式 Office ZIP/XML 校验，以及 Windows 原生绘制、隐藏宿主、系统权限和 DPAPI 适配。完整桌面工作流、设置工作台、HTTP.sys 教师端、原生文件/语音管线仍待实现。**不能作为完整产品安装；Windows 7、10、11均未完成整体验收。**
+当前为 **0.1.0 原生工作台开发里程碑**。正常 Windows 启动已接入原生设置/登录、学校与班级、基础科目、账号创建、首次改密/恢复码及本人作业；SQLite、DPAPI、精确会话和固定双 worker 均用于实际运行。完整桌面展示、设置编辑器、课表网格、HTTP.sys 教师端及文件/语音发布管线仍待实现。**完整产品尚未交付；Windows 7、10、11均未完成整体验收。**
 
 [实施进度与验证记录](开发计划/10-实施进度与验证记录.md) 区分已实现范围、实测结果和未完成门槛。旧文档的“仅计划、不开发”是历史状态，已由最新开发授权取代；产品要求保持。
 
@@ -22,14 +22,17 @@ cargo run -p fc-bootstrap --locked -- --self-check
 
 ## Windows 开发探针
 
+直接运行新构建的 `fc-bootstrap.exe` 打开工作台；`--autostart` 保持锁定并隐藏窗口。首次运行会在本机 ProgramData 的项目专属目录准备保护ACL、部署标记、数据库和当前用户DPAPI密钥，需自行设置应用主管理员口令。缺失或损坏的既有数据不会重新开放首次注册。应用角色和Windows账号权限彼此独立。
+
 ```powershell
 .\fc-bootstrap.exe --self-check
 .\fc-bootstrap.exe --system-probe
 .\fc-bootstrap.exe --host-probe 2
+.\fc-bootstrap.exe --application-probe
 .\fc-bootstrap.exe --native-probe 30
 ```
 
-自检只写独立临时数据并清理；绘制探针限时运行、透明穿透、不激活窗口，仅在确认桌面前台时显示。它不提供学校内容编辑、录音播放或教师管理服务。`rendered_frames=0` 表示没有取得桌面可见绘制证据。
+诊断命令只写独立临时数据并清理；`--application-probe` 用隐藏原生控件执行真实工作台闭环，并将Office校验交给同一双worker池，不访问正式ProgramData。绘制探针限时运行、透明穿透、不激活窗口，仅在确认桌面前台时显示。`rendered_frames=0` 表示没有取得桌面可见绘制证据。完整录音播放和教师管理服务仍未交付。
 
 新构建的 Windows 自检还覆盖 DPAPI 密钥和 SQLite 重开、真实登录限速端口、改密撤权及一次性恢复；系统探针只读，宿主探针限时创建自身隐藏窗口和托盘。现有历史开发 ZIP 的命令和范围以其包内 manifest 为准，不能用新源码的验证替代旧二进制证据。
 

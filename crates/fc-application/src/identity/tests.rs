@@ -257,3 +257,54 @@ fn invalid_lifetimes_and_sequence_overflow_do_not_mutate_live_sessions() {
         .actor(&state, local, time(1), 1000, SessionPurpose::Manage)
         .is_ok());
 }
+
+#[test]
+fn verified_continuous_input_stream_preserves_exact_lease_idle_and_absolute_limits() {
+    let state = state();
+    let mut sessions = IdentitySessions::default();
+    let lease = issue(&mut sessions, &state, TrustedOrigin::Local, 0);
+    sessions
+        .local_input_stream(&state, lease, time(100), 1_200_000, 0, 1_200_000)
+        .unwrap();
+    sessions
+        .actor(&state, lease, time(100), 1_200_000, SessionPurpose::Manage)
+        .unwrap();
+    sessions
+        .local_input_stream(&state, lease, time(100), 1_250_000, 0, 1_250_000)
+        .unwrap();
+    assert_eq!(
+        sessions.local_input_stream(&state, lease, time(100), 1_250_000, 0, 1_250_001),
+        Err(SessionError::ClockRegression)
+    );
+    assert_eq!(
+        sessions.local_input_stream(&state, lease, time(100), 1_250_000, 0, 1_200_000),
+        Err(SessionError::ClockRegression)
+    );
+    assert_eq!(
+        sessions.local_input_stream(&state, lease, time(100), 3_600_000, 0, 3_600_000),
+        Err(SessionError::Expired)
+    );
+    assert_eq!(
+        sessions.actor(&state, lease, time(100), 1_550_000, SessionPurpose::Manage),
+        Err(SessionError::Expired),
+        "failed updates never refreshed the last real input"
+    );
+    let replacement = issue(&mut sessions, &state, TrustedOrigin::Local, 1_550_000);
+    assert_eq!(
+        sessions.local_input_stream(&state, lease, time(100), 1_550_000, 0, 1_550_000),
+        Err(SessionError::Revoked)
+    );
+    sessions
+        .actor(
+            &state,
+            replacement,
+            time(100),
+            1_550_000,
+            SessionPurpose::Manage,
+        )
+        .unwrap();
+    let web = issue(&mut sessions, &state, TrustedOrigin::Web, 1_550_000);
+    assert!(sessions
+        .local_input_stream(&state, web, time(100), 1_550_000, 1_550_000, 1_550_000)
+        .is_err());
+}

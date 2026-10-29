@@ -1,6 +1,8 @@
 //! Composition root. This milestone exposes isolated diagnostics, not unfinished management APIs.
 #![forbid(unsafe_code)]
 #[cfg(windows)]
+mod application;
+#[cfg(windows)]
 mod credential_probe;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_runtime::authority::AuthorityStore;
@@ -24,8 +26,31 @@ fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
         [] => {
-            println!("未来教室 · Rust D11 开发里程碑\n这是基础验证程序，完整桌面与教师端尚未交付。\n--self-check             隔离验证 SQLite / 权威发布 / 凭据轮换\n--system-probe           只读检查 Windows 系统适配\n--host-probe <1..30>      隐藏窗口与托盘生命周期验证（秒）\n--native-probe <1..300>   Windows 原生透明绘制验证（秒）\n--version                版本及兼容状态");
-            Ok(())
+            #[cfg(windows)]
+            {
+                application::run(false)
+            }
+            #[cfg(not(windows))]
+            {
+                println!("未来教室 · Rust D11 开发里程碑\n这是基础验证程序，完整桌面与教师端尚未交付。\n--self-check             隔离验证 SQLite / 权威发布 / 凭据轮换\n--system-probe           只读检查 Windows 系统适配\n--host-probe <1..30>      隐藏窗口与托盘生命周期验证（秒）\n--native-probe <1..300>   Windows 原生透明绘制验证（秒）\n--version                版本及兼容状态");
+                Ok(())
+            }
+        }
+        [flag] if flag == "--autostart" => {
+            #[cfg(windows)]
+            {
+                application::run(true)
+            }
+            #[cfg(not(windows))]
+            Err("native application must run on Windows".into())
+        }
+        [flag] if flag == "--application-probe" => {
+            #[cfg(windows)]
+            {
+                application::probe()
+            }
+            #[cfg(not(windows))]
+            Err("native application probe must run on Windows".into())
         }
         [flag] if flag == "--version" => {
             println!(

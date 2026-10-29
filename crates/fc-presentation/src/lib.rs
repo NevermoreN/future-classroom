@@ -1,5 +1,6 @@
 //! Pure presentation policy; native handles and COM remain in fc-windows.
 #![forbid(unsafe_code)]
+pub mod workbench;
 use fc_domain::time::LocalDateTime;
 use fc_ports::{MeasureError, TextMeasure};
 

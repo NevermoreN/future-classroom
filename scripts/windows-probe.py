@@ -22,7 +22,7 @@ class Remote:
         self.options = ["-i", str(identity), "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8"]
 
     def powershell(self, script, timeout=60):
-        preamble = "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);"
+        preamble = "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;"
         encoded = base64.b64encode((preamble + script).encode("utf-16-le")).decode("ascii")
         result = subprocess.run(["ssh", *self.options, self.host, "powershell.exe -NoProfile -NonInteractive -EncodedCommand " + encoded], capture_output=True, timeout=timeout)
         if result.returncode:
@@ -41,6 +41,7 @@ def main():
     parser.add_argument("--test-metadata", type=Path)
     parser.add_argument("--native-seconds", type=int, default=5)
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
+    parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.native_seconds <= 30:
@@ -104,6 +105,10 @@ def main():
         if args.system_host:
             host_command = "$hostOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --host-probe 2 2>&1|ForEach-Object{\"$_\"});$hostCode=$LASTEXITCODE;"
             body = body.replace("$code=$LASTEXITCODE;@{exitCode=", "$code=$LASTEXITCODE;" + host_command + "@{hostExitCode=$hostCode;hostOutput=$hostOutput;exitCode=")
+        if args.application:
+            app_command = "$appOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --application-probe 2>&1|ForEach-Object{\"$_\"});$appCode=$LASTEXITCODE;"
+            body = body.replace("@{exitCode=$code;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;exitCode=$code;") if not args.system_host else body.replace("@{hostExitCode=$hostCode;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;hostExitCode=$hostCode;")
+        body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
         with tempfile.TemporaryDirectory(prefix="future-classroom-probe-script-") as local:
@@ -112,11 +117,15 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        report["native"] = json.loads(remote.powershell(launch, timeout=50).lstrip("\ufeff"))
+        if args.application:
+            launch = launch.replace("AddSeconds(40)", "AddSeconds(180)")
+        report["native"] = json.loads(remote.powershell(launch, timeout=190 if args.application else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
             raise RuntimeError("interactive hidden-host/tray probe failed")
+        if args.application and report["native"].get("applicationExitCode") != 0:
+            raise RuntimeError("isolated native workbench application failed")
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"
     except Exception as error:

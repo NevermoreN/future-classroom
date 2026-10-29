@@ -207,6 +207,46 @@ impl IdentitySessions {
         session.last_input = tick;
         Ok(())
     }
+    /// Trusted coalescing adapter only. Its private stream proves that every real
+    /// input gap from first_tick through last_tick is shorter than LOCAL_IDLE_MILLIS.
+    /// Exact proof/epoch/wall/absolute lifetime are still checked here; ordinary
+    /// polling must never call this entry point or fabricate a continuity proof.
+    pub fn local_input_stream(
+        &mut self,
+        state: &IdentityState,
+        proof: SessionLease,
+        now: LocalDateTime,
+        tick: u64,
+        first_tick: u64,
+        last_tick: u64,
+    ) -> Result<(), SessionError> {
+        if proof.origin != TrustedOrigin::Local || first_tick > last_tick || last_tick > tick {
+            return Err(SessionError::ClockRegression);
+        }
+        let existing = self
+            .sessions
+            .iter()
+            .find(|s| s.proof == proof)
+            .ok_or(SessionError::Revoked)?;
+        let anchor = first_tick.max(existing.last_input);
+        if last_tick < anchor {
+            return Err(SessionError::ClockRegression);
+        }
+        let validated = self.valid(state, proof, now, anchor)?;
+        if tick >= validated.absolute_deadline
+            || tick < validated.issued
+            || tick - last_tick >= LOCAL_IDLE_MILLIS
+        {
+            return Err(SessionError::Expired);
+        }
+        let session = self
+            .sessions
+            .iter_mut()
+            .find(|s| s.proof == proof)
+            .ok_or(SessionError::Revoked)?;
+        session.last_input = last_tick;
+        Ok(())
+    }
     /// Lock screen/user switch/leave workbench revoke only local channels.
     pub fn lock_local(&mut self) {
         self.sessions

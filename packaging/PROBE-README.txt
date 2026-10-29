@@ -1,11 +1,18 @@
-FutureClassroom 0.1.0 - Windows x86 development probe
-状态：NOT_VALIDATED。此包是 Rust D11 开发里程碑，不是完整未来教室应用。
+FutureClassroom 0.1.0 - Windows x86 native workbench development build
+状态：NOT_VALIDATED。此包包含可运行原生管理工作台，完整未来教室应用尚未交付。
+
+直接运行 fc-bootstrap.exe 打开工作台；--autostart 保持锁定并隐藏窗口。
+首次运行在本机 ProgramData 的 FutureClassroom 专属目录准备保护ACL、部署标记、
+数据库和当前Windows用户的DPAPI密钥。请自行设置应用主管理员口令；无默认密码。
+支持学校/班级、基础科目、账号创建、首次改密、恢复码及今日作业。
+关闭工作台锁定本地会话；正常退出须由主管理员授权。缺失数据不会重新开放首次注册。
 
 在 PowerShell 中解压后运行：
   .\fc-bootstrap.exe --version
   .\fc-bootstrap.exe --self-check
   .\fc-bootstrap.exe --system-probe
   .\fc-bootstrap.exe --host-probe 2
+  .\fc-bootstrap.exe --application-probe
   .\fc-bootstrap.exe --native-probe 30
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
@@ -13,13 +20,15 @@ Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开
 持久登录限速接口、精确会话、原子改密与恢复码一次轮换；退出时清理隔离数据。
 --system-probe 只读发现系统适配，不创建正式数据目录或修改自启动。
 --host-probe <seconds> 接受1至30秒，验证自身隐藏窗口、托盘和会话通知生命周期。
+--application-probe 使用隐藏原生控件及隔离临时数据执行真实账号/科目/教师/作业闭环，
+并在同一固定双worker池校验合成Office文件，不写正式ProgramData或自启动。
 --native-probe <seconds> 接受 1 至 300 秒，验证原生透明窗口、3% 玻璃底色、
 时钟文字、点击穿透与前台避让。需在已登录的交互桌面观察实际效果。
 SSH/无交互桌面的输出不能代替前台、遮挡、缩放、点击和视觉验收。
 rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通过。
 
-完整桌面产品、课表/内容/资料/语音工作流、设置界面和教师管理 Web 均未交付。
-本探针不配置开机启动，不提供常驻服务、远程管理端或安装程序。
+完整桌面展示、课表网格/布局编辑、资料/语音工作流和教师管理 Web 均未交付。
+此开发构建不主动修改开机启动，不提供远程管理端或安装程序。
 
 兼容状态：
   Win7 SP1 x86、Windows 10、Windows 11 均为产品兼容目标。

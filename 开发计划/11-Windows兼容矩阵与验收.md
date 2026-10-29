@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上145项规则/SQLite/系统适配测试，凭据组合和隐藏宿主/托盘隔离探针；整体仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上169项测试、11项原生适配及隐藏控件26步实际工作台闭环；完整桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -24,7 +24,7 @@ P0-01登记实际学校使用的Windows 10版本（包括适用的LTSC/教育环
 - 任何Win10/11特有增强按运行时能力探测和窄边界隔离；共同二进制不能静态导入Win7不存在的API。安全回退保留基础绘制/功能，不能通过关闭安全保护来解决工具链故障。
 - x86程序加载的C库/DLL必须为x86，不能直接加载x64 Office/插件DLL；资料通过受控系统关联打开，跨位数真实软件行为仍要验证。
 
-当前已观察：现代GNU开发探针导入WaitOnAddress、GetSystemTimePreciseAsFileTime等新API；Win7GNU专门目标初次静态筛查没有已知风险项，却在Win11启动前崩溃；更换为保留ASLR/NX的LLD链接后，Win11隔离自检与原生离屏原型通过。因此“静态扫描零风险”不能单独证明可运行，整改后的Win11证据也不能替代正式MSVC/Win7验收。
+当前已观察：现代GNU开发探针导入WaitOnAddress、GetSystemTimePreciseAsFileTime等新API；Win7GNU专门目标初次静态筛查没有已知风险项，却在Win11启动前崩溃；更换为保留ASLR/NX的LLD链接后，Win11隔离自检、原生离屏及第三轮实际工作台闭环通过。因此“静态扫描零风险”不能单独证明可运行，整改后的Win11证据也不能替代正式MSVC/Win7验收。
 
 ## 3. 每个系统分别验收
 
@@ -45,3 +45,5 @@ Win7的系统DPI与新系统的显示能力要分别取证，不能把一种DPI�
 每项记录OS build/位数、程序target/工具链/锁哈希、设备/驱动、测试步骤、预期/实测、限制及清理。只允许PASS/FAIL/BLOCKED/NOT_RUN。一个系统中“部分原型通过”不等于该系统产品验收通过。
 
 P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声称三系统正式兼容。当前不标“全平台兼容”、不创建正式发布标签、不用未通过的Win7GNU实验产物替代正式包。新增平台需求不打断正在进行的Rust基础、Windows11隔离验证及故障整改。
+
+第三轮平台证据：[Win11最终169项及工作台闭环](验证记录/2026-10-30-windows11-application-round3.json)、[最终Win7 GNU在Win11的补充运行](验证记录/2026-10-30-win7-gnu-application-on-windows11.json)。固定源树/锁哈希与二进制SHA256均可追溯；测试临时部署与正式ProgramData隔离。当前CUI子系统、不可见控件测试与离屏渲染不能代替正式GUI、真实自启动、DPI/触控或Win10实机验收。

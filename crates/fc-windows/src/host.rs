@@ -176,8 +176,10 @@ impl HiddenHost {
             }
             // SAFETY: message produced by GetMessage; window procedures handle ABI panics.
             unsafe {
-                let _ = TranslateMessage(&message);
-                DispatchMessageW(&message);
+                if !crate::workbench::dialog_message(&message) {
+                    let _ = TranslateMessage(&message);
+                    DispatchMessageW(&message);
+                }
             }
             let hints = HostHints(self.state.hints.swap(0, Ordering::AcqRel));
             if hints.contains(HostHints::TASKBAR_RECREATED) && self.tray {
@@ -186,18 +188,17 @@ impl HiddenHost {
             if hints.contains(HostHints::TRAY_CONTEXT) {
                 self.tray_menu()?;
             }
-            if hints.0 != 0 {
-                match catch_unwind(AssertUnwindSafe(|| on_hints(hints))) {
-                    Ok(result) => result?,
-                    Err(_) => {
-                        self.state.control.fault();
-                        return Err(Error::from_hresult(E_UNEXPECTED));
-                    }
+            // Child workbench commands can produce no host hints. Always let the
+            // composition drain its bounded UI events immediately after dispatch.
+            match catch_unwind(AssertUnwindSafe(|| on_hints(hints))) {
+                Ok(result) => result?,
+                Err(_) => {
+                    self.state.control.fault();
+                    return Err(Error::from_hresult(E_UNEXPECTED));
                 }
             }
-            if hints.contains(HostHints::SHUTDOWN) {
-                return Ok(());
-            }
+            // SHUTDOWN is an intent, not completion. The composition root owns
+            // asynchronous writer/worker draining and eventually calls stop().
         }
     }
     fn icon_data(&self) -> Result<NOTIFYICONDATAW> {
@@ -418,11 +419,14 @@ mod tests {
         // SAFETY: own live hidden window only, no desktop-wide broadcast/input.
         unsafe {
             let _ = SendMessageW(host.hwnd, WM_TIMECHANGE, Some(WPARAM(0)), Some(LPARAM(0)));
+            let _ = SendMessageW(host.hwnd, WM_ENDSESSION, Some(WPARAM(1)), Some(LPARAM(0)));
         }
         let mut ticks = 0;
         let mut time_changed = false;
+        let mut shutdown_seen = false;
         host.run(|hints| {
             time_changed |= hints.contains(HostHints::TIME_CHANGED);
+            shutdown_seen |= hints.contains(HostHints::SHUTDOWN);
             if hints.contains(HostHints::TICK) {
                 ticks += 1;
             }
@@ -433,6 +437,7 @@ mod tests {
         })
         .unwrap();
         assert!(time_changed);
+        assert!(shutdown_seen);
         assert_eq!(ticks, 2);
     }
 }

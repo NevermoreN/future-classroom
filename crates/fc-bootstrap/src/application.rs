@@ -1,0 +1,1655 @@
+//! Native product composition. All KDF/SQLite/file work runs on the one shared
+//! two-thread pool; the window pump only handles bounded events and owned results.
+use fc_application::identity::SessionLease;
+use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl};
+use fc_domain::{auth::*, content::*, identity::*, ids::*};
+use fc_ports::{MonotonicClock, RandomSource};
+use fc_presentation::workbench::*;
+use fc_runtime::worker::{JobContext, JobTicket, Task, WorkerPool};
+use fc_security::{CredentialRecordCodec, Password, RecoveryCode};
+use fc_windows::{
+    host::{HiddenHost, HostHints},
+    system::{CurrentClock, CurrentUserDpapi, DataPaths, SecretBytes},
+    workbench::Window,
+    InstanceGuard, SystemRandom,
+};
+use std::{
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
+
+const SCHOOL: FieldId = FieldId(1);
+const LOGIN: FieldId = FieldId(2);
+const NAME: FieldId = FieldId(3);
+const PASSWORD: FieldId = FieldId(4);
+const CONFIRM: FieldId = FieldId(5);
+const NEW_PASSWORD: FieldId = FieldId(6);
+const CODE: FieldId = FieldId(7);
+const CLASS: FieldId = FieldId(8);
+const SUBJECT: FieldId = FieldId(9);
+const OLD_NAME: FieldId = FieldId(10);
+const COLOR: FieldId = FieldId(11);
+const ROLE: FieldId = FieldId(12);
+const OWNER: FieldId = FieldId(13);
+const CONTENT: FieldId = FieldId(14);
+const SAVE: ActionId = ActionId(1);
+const BACK: ActionId = ActionId(2);
+const LOG_IN: ActionId = ActionId(3);
+const TO_RECOVERY: ActionId = ActionId(4);
+const ACK: ActionId = ActionId(5);
+const LOCK: ActionId = ActionId(6);
+const TO_SCHOOL: ActionId = ActionId(7);
+const TO_SUBJECTS: ActionId = ActionId(8);
+const TO_ACCOUNTS: ActionId = ActionId(9);
+const TO_HOMEWORK: ActionId = ActionId(10);
+const TO_PASSWORD: ActionId = ActionId(11);
+const EXIT: ActionId = ActionId(12);
+const ADD_CLASS: ActionId = ActionId(13);
+const BIND_CLASS: ActionId = ActionId(14);
+const LOAD: ActionId = ActionId(15);
+const TO_ROTATE: ActionId = ActionId(16);
+const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Screen {
+    Starting,
+    Setup,
+    Login,
+    Recovery,
+    Code,
+    Home,
+    School,
+    Subjects,
+    Accounts,
+    Password,
+    Rotate,
+    Homework,
+    HomeworkEdit,
+    Repair,
+}
+#[derive(Debug)]
+enum Failure {
+    Backend(BackendError),
+    Input(&'static str),
+    Deployment(&'static str),
+    Stopped,
+}
+fn fatal(error: &Failure) -> bool {
+    use fc_storage::StorageError as S;
+    matches!(
+        error,
+        Failure::Backend(
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Faulted)
+                | BackendError::Content(fc_ports::RepositoryError::Faulted)
+                | BackendError::Storage(
+                    S::AuthorityUnavailable
+                        | S::Indeterminate
+                        | S::WorkerPanicked
+                        | S::PublicationFailed { .. }
+                )
+        )
+    )
+}
+impl From<BackendError> for Failure {
+    fn from(e: BackendError) -> Self {
+        Self::Backend(e)
+    }
+}
+type Result<T> = std::result::Result<T, Failure>;
+fn invalid(message: &'static str) -> Failure {
+    Failure::Input(message)
+}
+fn command_id() -> Result<CommandId> {
+    for _ in 0..4 {
+        let mut bytes = [0u8; 8];
+        SystemRandom
+            .fill(&mut bytes)
+            .map_err(|_| invalid("系统随机源不可用。"))?;
+        if let Ok(id) = CommandId::new(u64::from_le_bytes(bytes)) {
+            return Ok(id);
+        }
+    }
+    Err(invalid("无法生成本次操作标识。"))
+}
+fn text(data: &FormData, id: FieldId) -> Result<String> {
+    data.get(id)
+        .map(|s| s.trim().to_owned())
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| invalid("请填写必填项。"))
+}
+fn password(data: &mut FormData, id: FieldId) -> Result<Password> {
+    Password::new(data.take(id).ok_or_else(|| invalid("请输入口令。"))?)
+        .map_err(|_| invalid("口令须为12至128个字符。"))
+}
+fn confirm(data: &FormData, left: FieldId) -> Result<()> {
+    if data.get(left) != data.get(CONFIRM) {
+        Err(invalid("两次输入的口令不一致。"))
+    } else {
+        Ok(())
+    }
+}
+fn error_text(error: &Failure) -> String {
+    match error {
+        Failure::Input(s) | Failure::Deployment(s) => (*s).into(),
+        Failure::Stopped => "未取得完成结果，请重新打开并核对已保存内容。".into(),
+        Failure::Backend(e) => match e {
+            BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
+            BackendError::Storage(fc_storage::StorageError::LoginRateLimited {
+                retry_after_millis,
+            }) => format!("请等待{}秒后重试。", retry_after_millis.div_ceil(1000)),
+            BackendError::Session(_) => "本地会话已失效，请重新登录。".into(),
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(
+                IdentityError::RevisionConflict,
+            )) => "资料已被其他操作修改，请返回并重新打开；当前草稿仍保留在此页。".into(),
+            BackendError::Content(fc_ports::RepositoryError::Domain(
+                ContentError::RevisionConflict { .. },
+            )) => "作业版本已更新，请重新加载后再保存。".into(),
+            BackendError::Content(fc_ports::RepositoryError::Domain(ContentError::WrongDate)) => {
+                "日期已变化，请重新选择今天的作业。".into()
+            }
+            BackendError::CorruptCredential
+            | BackendError::Storage(
+                fc_storage::StorageError::Database | fc_storage::StorageError::CredentialCorrupt,
+            ) => "数据或凭据需要修复；请使用有效恢复码或受控备份，不会重新开放首次注册。".into(),
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(
+                IdentityError::DuplicateName,
+            )) => "该登录名或名称已存在。".into(),
+            _ => "操作未完成。请核对输入、任教范围和当前会话后重试。".into(),
+        },
+    }
+}
+
+/// The deployment marker makes missing key/database evidence fail closed. A
+/// partially prepared directory is never mistaken for a brand-new installation.
+fn open_backend(root: &Path, clock: Arc<CurrentClock>) -> Result<Backend> {
+    let key_path = root.join("config/credential-key.dpapi");
+    let database = root.join("state/classroom.sqlite3");
+    let marker = root.join("config/deployment.marker");
+    let key_exists = key_path
+        .try_exists()
+        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
+    let db_exists = database
+        .try_exists()
+        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
+    let marker_exists = marker
+        .try_exists()
+        .map_err(|_| Failure::Deployment("无法读取部署状态。"))?;
+    let dpapi = CurrentUserDpapi::default();
+    let codec = if marker_exists {
+        if !key_exists || !db_exists || read_bounded(&marker, 128)?.as_slice() != MANIFEST {
+            return Err(Failure::Deployment(
+                "部署数据不完整，需要修复；不会创建新管理员。",
+            ));
+        }
+        let encrypted = read_bounded(&key_path, 4096)?;
+        let secret = dpapi.unprotect(&encrypted).map_err(|_| {
+            Failure::Deployment("当前Windows账号无法解密部署凭据，请使用原部署账号或受控恢复。")
+        })?;
+        let key = <&[u8] as TryInto<[u8; 32]>>::try_into(secret.expose())
+            .map_err(|_| Failure::Deployment("部署密钥格式损坏。"))?;
+        CredentialRecordCodec::from_key(key)
+            .map_err(|_| Failure::Deployment("部署密钥格式损坏。"))?
+    } else {
+        if key_exists || db_exists {
+            return Err(Failure::Deployment(
+                "发现未完成或损坏的部署，需要修复；不会覆盖已有数据。",
+            ));
+        }
+        fc_storage::business::startup_state(&database)
+            .map_err(|_| Failure::Deployment("无法创建受控数据文件。"))?;
+        let codec = CredentialRecordCodec::generate(&mut SystemRandom)
+            .map_err(|_| Failure::Deployment("系统随机源不可用。"))?;
+        let encrypted = codec
+            .protect_key(|key| {
+                let secret = SecretBytes::new(key.to_vec())?;
+                dpapi.protect(&secret)
+            })
+            .map_err(|_| Failure::Deployment("无法保护部署凭据。"))?;
+        create_file(&key_path, &encrypted)?;
+        create_file(&marker, MANIFEST)?;
+        codec
+    };
+    Backend::open(database, codec, clock.clone(), clock).map_err(Failure::from)
+}
+fn read_bounded(path: &Path, max: usize) -> Result<Vec<u8>> {
+    let metadata =
+        fs::symlink_metadata(path).map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
+    use std::os::windows::fs::MetadataExt;
+    if !metadata.is_file() || metadata.file_attributes() & 0x400 != 0 || metadata.len() > max as u64
+    {
+        return Err(Failure::Deployment("部署文件大小或类型无效。"));
+    }
+    let mut data = Vec::with_capacity(max.min(4096));
+    File::open(path)
+        .and_then(|f| f.take(max as u64 + 1).read_to_end(&mut data))
+        .map_err(|_| Failure::Deployment("部署文件无法读取。"))?;
+    if data.len() > max {
+        return Err(Failure::Deployment("部署文件过大。"));
+    }
+    Ok(data)
+}
+fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| Failure::Deployment("部署文件已存在或无法创建，请检查数据后修复。"))?;
+    file.write_all(bytes)
+        .and_then(|_| file.sync_all())
+        .map_err(|_| Failure::Deployment("部署文件未能持久保存，请检查磁盘。"))
+}
+
+enum Outcome {
+    Opened(Arc<Mutex<Backend>>, SessionControl, IdentityState),
+    Updated {
+        state: IdentityState,
+        lease: Option<SessionLease>,
+        code: Option<RecoveryCode>,
+        next: Screen,
+    },
+    Loaded {
+        key: ContentKey,
+        record: Option<ContentRecord>,
+    },
+    Closed,
+    Office(fc_materials::office::ContainerReport),
+}
+struct Request {
+    backend: Arc<Mutex<Backend>>,
+    screen: Screen,
+    action: ActionId,
+    data: FormData,
+    lease: Option<SessionLease>,
+    state: Arc<IdentityState>,
+    key: Option<ContentKey>,
+    revision: Revision,
+    clock: Arc<CurrentClock>,
+}
+enum Work {
+    Open(PathBuf, Arc<CurrentClock>),
+    Request(Request),
+    Refresh(Arc<Mutex<Backend>>),
+    Shutdown(Arc<Mutex<Backend>>),
+    ValidateOffice(PathBuf),
+}
+impl Task for Work {
+    type Output = Result<Outcome>;
+    fn allocation_bytes(&self) -> Option<usize> {
+        match self {
+            Self::Open(p, _) | Self::ValidateOffice(p) => {
+                Some(p.as_os_str().len().saturating_mul(2))
+            }
+            Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
+            Self::Refresh(_) | Self::Shutdown(_) => Some(0),
+        }
+    }
+    fn run(self, context: &JobContext) -> Self::Output {
+        context.checkpoint().map_err(|_| Failure::Stopped)?;
+        match self {
+            Self::Open(root, clock) => {
+                let mut backend = open_backend(&root, clock)?;
+                if context.checkpoint().is_err() {
+                    backend.close()?;
+                    return Err(Failure::Stopped);
+                }
+                let state = backend.state()?;
+                let control = backend.session_control();
+                Ok(Outcome::Opened(
+                    Arc::new(Mutex::new(backend)),
+                    control,
+                    state,
+                ))
+            }
+            Self::Request(r) => execute(r),
+            Self::Refresh(backend) => {
+                let state = backend.lock().map_err(|_| Failure::Stopped)?.state()?;
+                let next = if state.installation.is_some() {
+                    Screen::Login
+                } else {
+                    Screen::Setup
+                };
+                Ok(Outcome::Updated {
+                    state,
+                    lease: None,
+                    code: None,
+                    next,
+                })
+            }
+            Self::Shutdown(backend) => {
+                backend.lock().map_err(|_| Failure::Stopped)?.close()?;
+                Ok(Outcome::Closed)
+            }
+            Self::ValidateOffice(path) => {
+                struct Control<'a>(&'a JobContext);
+                impl fc_materials::office::ValidationControl for Control<'_> {
+                    fn canceled(&self) -> bool {
+                        self.0.checkpoint().is_err()
+                    }
+                    fn thread_cpu_time(
+                        &self,
+                    ) -> std::result::Result<Duration, fc_materials::office::ContainerError>
+                    {
+                        fc_windows::system::current_thread_cpu_time()
+                            .map_err(|_| fc_materials::office::ContainerError::ClockUnavailable)
+                    }
+                }
+                let mut file = File::open(path).map_err(|_| invalid("文件无法读取。"))?;
+                let report = fc_materials::office::validate_office(
+                    &mut file,
+                    fc_materials::office::OfficeKind::Docx,
+                    &Control(context),
+                )
+                .map_err(|_| invalid("Office容器校验未通过。"))?;
+                Ok(Outcome::Office(report))
+            }
+        }
+    }
+}
+fn execute(mut r: Request) -> Result<Outcome> {
+    let mut backend = r.backend.lock().map_err(|_| Failure::Stopped)?;
+    let lease = r.lease;
+    let require_lease = || lease.ok_or_else(|| invalid("请先登录。"));
+    let mut next = Screen::Home;
+    let mut next_lease = lease;
+    let mut code = None;
+    match (r.screen, r.action) {
+        (Screen::Setup, SAVE) => {
+            confirm(&r.data, PASSWORD)?;
+            let options = Initialize {
+                school_name: text(&r.data, SCHOOL)?,
+                login_name: text(&r.data, LOGIN)?,
+                display_name: text(&r.data, NAME)?,
+            };
+            code = Some(backend.initialize(options, password(&mut r.data, PASSWORD)?)?);
+            next_lease = None;
+            next = Screen::Code;
+        }
+        (Screen::Login, LOG_IN) => {
+            let name = text(&r.data, LOGIN)?;
+            let proof = backend.login(&name, password(&mut r.data, PASSWORD)?)?;
+            let state = backend.state()?;
+            next = if state
+                .account(proof.principal_id())
+                .map_err(|_| invalid("账号不可用。"))?
+                .must_change_password
+            {
+                Screen::Password
+            } else {
+                Screen::Home
+            };
+            next_lease = Some(proof);
+        }
+        (Screen::Recovery, SAVE) => {
+            confirm(&r.data, NEW_PASSWORD)?;
+            let login = text(&r.data, LOGIN)?;
+            let recovery =
+                RecoveryCode::parse(r.data.take(CODE).ok_or_else(|| invalid("请输入恢复码。"))?)
+                    .map_err(|_| invalid("恢复码格式不正确。"))?;
+            code = Some(backend.recover(&login, recovery, password(&mut r.data, NEW_PASSWORD)?)?);
+            next_lease = None;
+            next = Screen::Code;
+        }
+        (Screen::Password, SAVE) => {
+            confirm(&r.data, NEW_PASSWORD)?;
+            let proof = require_lease()?;
+            let old = password(&mut r.data, PASSWORD)?;
+            let new = password(&mut r.data, NEW_PASSWORD)?;
+            backend.change_password(proof, old, new)?;
+            next_lease = None;
+            next = Screen::Login;
+        }
+        (Screen::Rotate, SAVE) => {
+            code =
+                Some(backend.rotate_recovery(require_lease()?, password(&mut r.data, PASSWORD)?)?);
+            next_lease = None;
+            next = Screen::Code;
+        }
+        (Screen::School, SAVE) => {
+            backend.identity_at(
+                require_lease()?,
+                r.state.revision,
+                IdentityCommand::RenameSchool {
+                    name: text(&r.data, SCHOOL)?,
+                },
+            )?;
+        }
+        (Screen::School, ADD_CLASS) => {
+            let id = ClassId::new(
+                r.state
+                    .classes
+                    .iter()
+                    .map(|c| c.id.get())
+                    .max()
+                    .unwrap_or(0)
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("班级数量已达上限。"))?,
+            )
+            .map_err(|_| invalid("班级编号不可用。"))?;
+            backend.identity_at(
+                require_lease()?,
+                r.state.revision,
+                IdentityCommand::CreateClass {
+                    id,
+                    name: text(&r.data, CLASS)?,
+                },
+            )?;
+        }
+        (Screen::School, BIND_CLASS) => {
+            let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
+            backend.identity_at(
+                require_lease()?,
+                r.state.revision,
+                IdentityCommand::BindCurrentClass { id: class },
+            )?;
+        }
+        (Screen::Subjects, SAVE) => {
+            let old = r.data.get(OLD_NAME).unwrap_or("").trim();
+            let existing = if old.is_empty() {
+                None
+            } else {
+                Some(find_subject(&r.state, old)?)
+            };
+            let id = match existing {
+                Some(id) => id,
+                None => SubjectId::new(
+                    r.state
+                        .subjects
+                        .iter()
+                        .map(|s| s.id.get())
+                        .max()
+                        .unwrap_or(0)
+                        .checked_add(1)
+                        .ok_or_else(|| invalid("科目数量已达上限。"))?,
+                )
+                .map_err(|_| invalid("科目编号不可用。"))?,
+            };
+            let expected_revision = existing.and_then(|id| {
+                r.state
+                    .subjects
+                    .iter()
+                    .find(|s| s.id == id)
+                    .map(|s| s.revision)
+            });
+            let color = parse_color(r.data.get(COLOR).unwrap_or(""))?;
+            backend.identity_at(
+                require_lease()?,
+                r.state.revision,
+                IdentityCommand::PutSubject {
+                    id,
+                    name: text(&r.data, SUBJECT)?,
+                    enabled: true,
+                    color,
+                    expected_revision,
+                },
+            )?;
+        }
+        (Screen::Accounts, SAVE) => {
+            confirm(&r.data, PASSWORD)?;
+            let role = match r.data.get(ROLE).unwrap_or("").trim() {
+                "教师管理员" => Role::TeacherAdmin,
+                "普通用户" => Role::User,
+                "主管理员" => Role::GlobalAdmin,
+                _ => return Err(invalid("角色请选择教师管理员、普通用户或主管理员。")),
+            };
+            let scopes = if role == Role::User {
+                Vec::new()
+            } else {
+                let c = r.data.get(CLASS).unwrap_or("").trim();
+                let s = r.data.get(SUBJECT).unwrap_or("").trim();
+                if role == Role::GlobalAdmin && c.is_empty() && s.is_empty() {
+                    Vec::new()
+                } else {
+                    vec![AssignmentScope {
+                        class_id: find_class(&r.state, c)?,
+                        subject_id: find_subject(&r.state, s)?,
+                    }]
+                }
+            };
+            let id = PrincipalId::new(
+                r.state
+                    .accounts
+                    .iter()
+                    .map(|a| a.principal.id.get())
+                    .max()
+                    .unwrap_or(0)
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("账号数量已达上限。"))?,
+            )
+            .map_err(|_| invalid("账号编号不可用。"))?;
+            let account = NewAccount {
+                id,
+                login_name: text(&r.data, LOGIN)?,
+                display_name: text(&r.data, NAME)?,
+                role,
+                scopes,
+            };
+            code = Some(backend.create_account_at(
+                require_lease()?,
+                r.state.revision,
+                account,
+                password(&mut r.data, PASSWORD)?,
+            )?);
+            next = Screen::Code;
+        }
+        (Screen::Homework, LOAD) => {
+            let proof = require_lease()?;
+            let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
+            let subject = find_subject(&r.state, &text(&r.data, SUBJECT)?)?;
+            let owner = r
+                .state
+                .account_by_login(&text(&r.data, OWNER)?)
+                .map_err(|_| invalid("请选择已有任课教师的登录名。"))?
+                .principal
+                .id;
+            if !r.state.is_teacher(owner, class, subject) {
+                return Err(invalid("该教师没有此班级和科目的有效任教关系。"));
+            }
+            let key = ContentKey::Homework(HomeworkKey {
+                class_id: class,
+                subject_id: subject,
+                owner_teacher_id: owner,
+                actual_date: r
+                    .clock
+                    .try_now()
+                    .map_err(|_| invalid("系统时间不可用。"))?
+                    .date,
+            });
+            let record = backend.read_content(proof, key.clone())?;
+            return Ok(Outcome::Loaded { key, record });
+        }
+        (Screen::HomeworkEdit, SAVE) => {
+            backend.content(
+                require_lease()?,
+                ContentCommand {
+                    command_id: command_id()?,
+                    key: r.key.ok_or_else(|| invalid("请重新加载作业。"))?,
+                    expected_revision: r.revision,
+                    text: r.data.get(CONTENT).unwrap_or("").to_owned(),
+                },
+            )?;
+        }
+        (_, EXIT) => {
+            backend.close_authorized(require_lease()?)?;
+            return Ok(Outcome::Closed);
+        }
+        _ => return Err(invalid("此操作在当前页面不可用。")),
+    }
+    Ok(Outcome::Updated {
+        state: backend.state()?,
+        lease: next_lease,
+        code,
+        next,
+    })
+}
+fn find_class(state: &IdentityState, name: &str) -> Result<ClassId> {
+    let key = normalized_name(name, 128).map_err(|_| invalid("请选择已有班级。"))?;
+    state
+        .classes
+        .iter()
+        .find(|c| c.enabled && normalized_name(&c.name, 128).as_ref() == Ok(&key))
+        .map(|c| c.id)
+        .ok_or_else(|| invalid("请选择已有且启用的班级。"))
+}
+fn find_subject(state: &IdentityState, name: &str) -> Result<SubjectId> {
+    let key = normalized_name(name, 64).map_err(|_| invalid("请选择已有科目。"))?;
+    state
+        .subjects
+        .iter()
+        .find(|s| s.enabled && normalized_name(&s.name, 64).as_ref() == Ok(&key))
+        .map(|s| s.id)
+        .ok_or_else(|| invalid("请选择已有且启用的科目。"))
+}
+fn parse_color(value: &str) -> Result<Rgb> {
+    let value = value.trim().trim_start_matches('#');
+    if value.len() != 6 || !value.is_ascii() {
+        return Err(invalid("科目颜色请输入六位十六进制色值，例如70A5D8。"));
+    }
+    let number = u32::from_str_radix(value, 16).map_err(|_| invalid("科目颜色格式不正确。"))?;
+    Ok(Rgb {
+        red: (number >> 16) as u8,
+        green: (number >> 8) as u8,
+        blue: number as u8,
+    })
+}
+
+struct Pending {
+    ticket: JobTicket<Result<Outcome>>,
+    generation: u64,
+    self_revokes: bool,
+}
+struct App {
+    window: Window,
+    pool: WorkerPool<Work>,
+    clock: Arc<CurrentClock>,
+    backend: Option<Arc<Mutex<Backend>>>,
+    control: Option<SessionControl>,
+    state: Arc<IdentityState>,
+    lease: Option<SessionLease>,
+    screen: Screen,
+    status: String,
+    pending: Option<Pending>,
+    generation: u64,
+    key: Option<ContentKey>,
+    record: Option<ContentRecord>,
+    last_input: Instant,
+    stopping: bool,
+    shutdown: Option<JobTicket<Result<Outcome>>>,
+    shutdown_deadline: Option<Instant>,
+    terminate_required: bool,
+}
+impl App {
+    fn view(&self) -> View {
+        let mut view = View {
+            title: "未来教室".into(),
+            description: String::new(),
+            status: self.status.clone(),
+            fields: Vec::new(),
+            actions: Vec::new(),
+            busy: self.pending.is_some() || self.stopping,
+        };
+        let field = |id, label: &str, kind, value: String, max_utf16| Field {
+            id,
+            label: label.into(),
+            kind,
+            value,
+            max_utf16,
+        };
+        let action = |id, label: &str| Action {
+            id,
+            label: label.into(),
+            enabled: true,
+        };
+        let plain = |id, label: &str, value: String| field(id, label, FieldKind::Text, value, 128);
+        let secret = |id, label: &str| field(id, label, FieldKind::Password, String::new(), 256);
+        let school = self
+            .state
+            .installation
+            .as_ref()
+            .map(|i| i.school_name.as_str())
+            .unwrap_or("未配置学校");
+        match self.screen {
+            Screen::Starting => {
+                view.title = "正在打开未来教室".into();
+                view.description = "正在核对数据和本机凭据，请稍候。".into();
+            }
+            Screen::Setup => {
+                view.title = "首次设置 · 创建主管理员".into();
+                view.description =
+                    "主管理员管理学校与账号。创建后将展示一次恢复码，请妥善保存。".into();
+                view.fields = vec![
+                    plain(SCHOOL, "学校名称", String::new()),
+                    plain(LOGIN, "主管理员登录名", String::new()),
+                    plain(NAME, "姓名", String::new()),
+                    secret(PASSWORD, "设置口令（12–128字符）"),
+                    secret(CONFIRM, "再次输入口令"),
+                ];
+                view.actions = vec![action(SAVE, "创建主管理员")];
+            }
+            Screen::Login => {
+                view.title = format!("{school} · 登录工作台");
+                view.fields = vec![
+                    plain(LOGIN, "登录名", String::new()),
+                    secret(PASSWORD, "口令"),
+                ];
+                view.actions = vec![action(LOG_IN, "登录"), action(TO_RECOVERY, "使用恢复码")];
+            }
+            Screen::Recovery => {
+                view.title = "使用恢复码重设口令".into();
+                view.description =
+                    "恢复成功后，旧恢复码和所有账号会话失效，并展示新的恢复码。".into();
+                view.fields = vec![
+                    plain(LOGIN, "登录名", String::new()),
+                    field(CODE, "恢复码", FieldKind::Password, String::new(), 128),
+                    secret(NEW_PASSWORD, "新口令"),
+                    secret(CONFIRM, "再次输入新口令"),
+                ];
+                view.actions = vec![action(SAVE, "恢复账号"), action(BACK, "返回登录")];
+            }
+            Screen::Code => {
+                view.title = "请保存恢复码".into();
+                view.description="此恢复码只展示一次。关闭窗口后将不再显示；可登录后重新生成。请将恢复码交给对应账号本人妥善保管。".into();
+                view.fields = vec![field(
+                    CODE,
+                    "一次性恢复码",
+                    FieldKind::ReadOnly,
+                    String::new(),
+                    128,
+                )];
+                view.actions = vec![action(ACK, "我已妥善保存")];
+            }
+            Screen::Home => {
+                view.title = format!("{school} · 工作台");
+                let account = self
+                    .lease
+                    .and_then(|l| self.state.account(l.principal_id()).ok());
+                view.description = account
+                    .map(|a| {
+                        format!(
+                            "{}（{}）\n关闭工作台会锁定本地会话；今日提醒请在教师网页管理。",
+                            a.display_name,
+                            match a.principal.role {
+                                Role::GlobalAdmin => "主管理员",
+                                Role::TeacherAdmin => "教师管理员",
+                                Role::User => "普通用户",
+                            }
+                        )
+                    })
+                    .unwrap_or_default();
+                if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
+                    view.actions.extend([
+                        action(TO_SCHOOL, "学校与班级"),
+                        action(TO_SUBJECTS, "基础科目"),
+                        action(TO_ACCOUNTS, "创建账号"),
+                    ]);
+                }
+                if account.is_some_and(|a| a.principal.role != Role::User) {
+                    view.actions.push(action(TO_HOMEWORK, "今天的作业"));
+                }
+                view.actions.extend([
+                    action(TO_PASSWORD, "修改本人口令"),
+                    action(TO_ROTATE, "重新生成恢复码"),
+                    action(LOCK, "锁定工作台"),
+                ]);
+                if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
+                    view.actions.push(action(EXIT, "退出未来教室"));
+                }
+            }
+            Screen::School => {
+                view.title = "学校与班级".into();
+                view.description = format!(
+                    "已有班级：{}",
+                    self.state
+                        .classes
+                        .iter()
+                        .filter(|c| c.enabled)
+                        .map(|c| c.name.as_str())
+                        .collect::<Vec<_>>()
+                        .join("、")
+                );
+                view.fields = vec![
+                    plain(SCHOOL, "学校名称", school.into()),
+                    plain(CLASS, "班级名称", String::new()),
+                ];
+                view.actions = vec![
+                    action(SAVE, "保存学校名称"),
+                    action(ADD_CLASS, "添加班级"),
+                    action(BIND_CLASS, "将本白板绑定此班级"),
+                    action(BACK, "返回"),
+                ];
+            }
+            Screen::Subjects => {
+                view.title = "学校基础科目".into();
+                view.description = format!(
+                    "已有科目：{}。修改时填写现有名称，保存后仍保留同一科目及引用。",
+                    self.state
+                        .subjects
+                        .iter()
+                        .map(|s| s.name.as_str())
+                        .collect::<Vec<_>>()
+                        .join("、")
+                );
+                view.fields = vec![
+                    plain(OLD_NAME, "现有科目（新建时留空）", String::new()),
+                    plain(SUBJECT, "科目名称", String::new()),
+                    plain(COLOR, "科目颜色（六位色值）", "70A5D8".into()),
+                ];
+                view.actions = vec![action(SAVE, "保存科目"), action(BACK, "返回")];
+            }
+            Screen::Accounts => {
+                view.title = "创建账号".into();
+                view.description="教师管理员须填写已建班级和科目，首次登录必须改密。普通用户无管理权限；主管理员可按需兼任教学。".into();
+                view.fields = vec![
+                    plain(LOGIN, "唯一登录名", String::new()),
+                    plain(NAME, "姓名", String::new()),
+                    plain(
+                        ROLE,
+                        "角色（教师管理员/普通用户/主管理员）",
+                        "教师管理员".into(),
+                    ),
+                    plain(CLASS, "任教班级（教师必填）", String::new()),
+                    plain(SUBJECT, "任教科目（教师必填）", String::new()),
+                    secret(PASSWORD, "初始口令"),
+                    secret(CONFIRM, "再次输入口令"),
+                ];
+                view.actions = vec![action(SAVE, "创建账号"), action(BACK, "返回")];
+            }
+            Screen::Password => {
+                view.title = "修改本人口令".into();
+                view.description = "首次登录须先修改初始口令。成功后请使用新口令重新登录。".into();
+                view.fields = vec![
+                    secret(PASSWORD, "原口令"),
+                    secret(NEW_PASSWORD, "新口令"),
+                    secret(CONFIRM, "再次输入新口令"),
+                ];
+                view.actions = vec![action(SAVE, "修改口令"), action(LOCK, "锁定并返回登录")];
+            }
+            Screen::Rotate => {
+                view.title = "重新生成恢复码".into();
+                view.description =
+                    "请输入本人当前口令。保存成功后旧恢复码失效，新码仅展示一次。".into();
+                view.fields = vec![secret(PASSWORD, "当前口令")];
+                view.actions = vec![action(SAVE, "生成新恢复码"), action(BACK, "返回")];
+            }
+            Screen::Homework => {
+                view.title = "选择今天的作业".into();
+                view.description =
+                    "请输入已有班级、科目和任课教师登录名。教师仅能编辑本人任教范围内的作业。"
+                        .into();
+                let login = self
+                    .lease
+                    .and_then(|l| self.state.account(l.principal_id()).ok())
+                    .map(|a| a.login_name.clone())
+                    .unwrap_or_default();
+                view.fields = vec![
+                    plain(CLASS, "班级", String::new()),
+                    plain(SUBJECT, "科目", String::new()),
+                    plain(OWNER, "任课教师登录名", login),
+                ];
+                view.actions = vec![action(LOAD, "加载今日作业"), action(BACK, "返回")];
+            }
+            Screen::HomeworkEdit => {
+                view.title = "编辑今天的作业".into();
+                view.description =
+                    "保存空正文即可清空。其他人修改或跨日后，旧草稿不能覆盖新版本。".into();
+                view.fields = vec![field(
+                    CONTENT,
+                    "作业正文",
+                    FieldKind::Multiline,
+                    self.record
+                        .as_ref()
+                        .map(|r| r.text.clone())
+                        .unwrap_or_default(),
+                    16384,
+                )];
+                view.actions = vec![action(SAVE, "保存作业"), action(BACK, "返回选择")];
+            }
+            Screen::Repair => {
+                view.title = "未来教室需要修复".into();
+                view.description="数据暂不可用。请保留现有文件，使用原部署Windows账号或受控备份修复；不会重新开放首次管理员注册。".into();
+            }
+        }
+        view
+    }
+    fn render(&self) -> std::result::Result<(), String> {
+        self.window
+            .render(&self.view())
+            .map_err(|_| "工作台渲染失败".into())
+    }
+    fn lock(&mut self) {
+        if self.backend.is_none() && self.screen == Screen::Starting {
+            return;
+        }
+        if let Some(c) = &self.control {
+            c.lock_local();
+        }
+        self.generation = self.generation.saturating_add(1);
+        if let Some(p) = &self.pending {
+            p.ticket.cancel();
+        }
+        self.lease = None;
+        self.key = None;
+        self.record = None;
+        self.screen = if self.state.installation.is_none() {
+            Screen::Setup
+        } else {
+            Screen::Login
+        };
+        self.status.clear();
+    }
+    fn begin_shutdown(&mut self) {
+        if self.stopping {
+            return;
+        }
+        self.stopping = true;
+        self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
+        self.lock();
+        self.window.hide();
+        self.schedule_shutdown();
+    }
+    fn schedule_shutdown(&mut self) {
+        if self.shutdown.is_some() {
+            return;
+        }
+        if let Some(backend) = &self.backend {
+            match self.pool.handle().try_submit(
+                Work::Shutdown(backend.clone()),
+                Instant::now() + Duration::from_secs(5),
+            ) {
+                Ok(ticket) => self.shutdown = Some(ticket),
+                Err(_) => self.pool.request_stop(),
+            }
+        } else if self.pending.is_none() {
+            self.pool.request_stop();
+        }
+    }
+    fn submit(&mut self, work: Work) -> std::result::Result<(), String> {
+        if self.pending.is_some() {
+            return Ok(());
+        }
+        // Successful own password/recovery/exit commands deliberately revoke the
+        // current local lease before their completion reaches the window pump.
+        // WTS/explicit lock still wins immediately; the heartbeat must allow this
+        // particular completion to be consumed rather than cancel its own success.
+        let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate));
+        match self
+            .pool
+            .handle()
+            .try_submit(work, Instant::now() + Duration::from_secs(90))
+        {
+            Ok(ticket) => {
+                self.pending = Some(Pending {
+                    ticket,
+                    generation: self.generation,
+                    self_revokes,
+                });
+                self.status = "正在处理，请稍候。".into();
+            }
+            Err(_) => self.status = "后台任务繁忙，请稍后重试。".into(),
+        }
+        self.render()
+    }
+    fn event(&mut self, event: Event) -> std::result::Result<(), String> {
+        match event {
+            Event::Input => {
+                self.last_input = Instant::now();
+                if let (Some(c), Some(l)) = (&self.control, self.lease) {
+                    let _ = c.note_input(l, self.clock.monotonic_millis());
+                }
+            }
+            Event::Close => {
+                self.lock();
+                self.window.hide();
+                self.render()?;
+            }
+            Event::Submit(action, data) => {
+                self.last_input = Instant::now();
+                if let (Some(c), Some(l)) = (&self.control, self.lease) {
+                    let _ = c.note_input(l, self.clock.monotonic_millis());
+                }
+                if self.pending.is_some() || self.stopping {
+                    return Ok(());
+                }
+                match action {
+                    LOCK => {
+                        self.lock();
+                        self.render()?;
+                    }
+                    ACK => {
+                        self.screen = if self.lease.is_some() {
+                            Screen::Home
+                        } else {
+                            Screen::Login
+                        };
+                        self.status.clear();
+                        self.render()?;
+                    }
+                    BACK => {
+                        self.screen = match self.screen {
+                            Screen::Recovery => Screen::Login,
+                            Screen::HomeworkEdit => Screen::Homework,
+                            _ => Screen::Home,
+                        };
+                        self.status.clear();
+                        self.render()?;
+                    }
+                    TO_RECOVERY | TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | TO_HOMEWORK
+                    | TO_PASSWORD | TO_ROTATE => {
+                        self.screen = match action {
+                            TO_RECOVERY => Screen::Recovery,
+                            TO_SCHOOL => Screen::School,
+                            TO_SUBJECTS => Screen::Subjects,
+                            TO_ACCOUNTS => Screen::Accounts,
+                            TO_HOMEWORK => Screen::Homework,
+                            TO_PASSWORD => Screen::Password,
+                            _ => Screen::Rotate,
+                        };
+                        self.status.clear();
+                        self.render()?;
+                    }
+                    _ => {
+                        if let Some(backend) = &self.backend {
+                            let request = Request {
+                                backend: backend.clone(),
+                                screen: self.screen,
+                                action,
+                                data,
+                                lease: self.lease,
+                                state: self.state.clone(),
+                                key: self.key.clone(),
+                                revision: self
+                                    .record
+                                    .as_ref()
+                                    .map(|r| r.revision)
+                                    .unwrap_or_default(),
+                                clock: self.clock.clone(),
+                            };
+                            self.submit(Work::Request(request))?;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+    fn poll(&mut self) -> std::result::Result<(), String> {
+        if let Some(ticket) = &mut self.shutdown {
+            match ticket.try_result() {
+                Ok(Some(Ok(Outcome::Closed))) => {
+                    self.shutdown = None;
+                    self.pool.request_stop();
+                }
+                Ok(None) => {}
+                _ => {
+                    self.shutdown = None;
+                    self.pool.request_stop();
+                }
+            }
+        }
+        let completed = match self.pending.as_mut() {
+            Some(p) => match p.ticket.try_result() {
+                Ok(Some(outcome)) => Some(outcome),
+                Ok(None) => None,
+                Err(_) => Some(Err(Failure::Stopped)),
+            },
+            None => None,
+        };
+        if let Some(outcome) = completed {
+            let generation = self
+                .pending
+                .take()
+                .map(|p| p.generation)
+                .unwrap_or(self.generation);
+            if generation != self.generation {
+                self.status = "已锁定；请重新登录后核对保存结果。".into();
+                if !self.stopping {
+                    if let Some(backend) = &self.backend {
+                        self.submit(Work::Refresh(backend.clone()))?;
+                    }
+                }
+                self.render()?;
+                return Ok(());
+            }
+            match outcome {
+                Ok(Outcome::Opened(backend, control, state)) => {
+                    self.backend = Some(backend);
+                    self.control = Some(control);
+                    self.state = Arc::new(state);
+                    self.screen = if self.state.installation.is_none() {
+                        Screen::Setup
+                    } else {
+                        Screen::Login
+                    };
+                    self.status.clear();
+                    if self.stopping {
+                        self.schedule_shutdown();
+                    }
+                }
+                Ok(Outcome::Updated {
+                    state,
+                    lease,
+                    code,
+                    next,
+                }) => {
+                    self.state = Arc::new(state);
+                    let previous_lease = self.lease;
+                    self.lease = lease;
+                    self.screen = next;
+                    if lease.is_some() && lease != previous_lease {
+                        self.last_input = Instant::now();
+                    }
+                    self.status = "已保存。".into();
+                    self.render()?;
+                    if let Some(code) = code {
+                        let shown = code.reveal();
+                        self.window
+                            .present_secret(CODE, &shown)
+                            .map_err(|_| "恢复码显示失败，请登录后重新生成".to_owned())?;
+                    }
+                    return Ok(());
+                }
+                Ok(Outcome::Loaded { key, record }) => {
+                    self.key = Some(key);
+                    self.record = record;
+                    self.screen = Screen::HomeworkEdit;
+                    self.status.clear();
+                }
+                Ok(Outcome::Closed) => {
+                    self.stopping = true;
+                    self.shutdown_deadline
+                        .get_or_insert(Instant::now() + Duration::from_secs(5));
+                    self.pool.request_stop();
+                    self.window.hide();
+                }
+                Ok(Outcome::Office(_)) => return Err("后台结果类型不匹配".into()),
+                Err(error) => {
+                    if fatal(&error) {
+                        if let Some(control) = &self.control {
+                            control.fault();
+                        }
+                        self.begin_shutdown();
+                    }
+                    if matches!(error, Failure::Stopped) && !self.stopping {
+                        if let Some(backend) = &self.backend {
+                            self.lease = None;
+                            if let Some(control) = &self.control {
+                                control.lock_local();
+                            }
+                            self.submit(Work::Refresh(backend.clone()))?;
+                        }
+                    }
+                    if self.backend.is_none() {
+                        self.screen = Screen::Repair;
+                    }
+                    self.status = error_text(&error);
+                }
+            }
+            self.render()?;
+        }
+        Ok(())
+    }
+}
+
+/// Manual launch opens management; --autostart remains locked and hidden.
+pub fn run(autostart: bool) -> std::result::Result<(), String> {
+    let paths = DataPaths::program_data().map_err(|_| "无法定位本机数据目录".to_owned())?;
+    run_at(paths, autostart, false)
+}
+fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result<(), String> {
+    let deployment = paths
+        .prepare_for_current_user()
+        .map_err(|_| "数据目录权限不符合部署要求，请使用原部署账号或修复权限".to_owned())?;
+    deployment
+        .read_back()
+        .map_err(|_| "数据目录权限读回失败".to_owned())?;
+    let _instance = InstanceGuard::acquire(paths.root())
+        .map_err(|_| "未来教室已运行，或数据目录被其他会话占用".to_owned())?;
+    let host = HiddenHost::new(!probe).map_err(|_| "无法创建托盘宿主".to_owned())?;
+    let stop = host.controller();
+    let clock = Arc::new(CurrentClock::new());
+    let mut app = create_app(clock.clone())?;
+    app.render()?;
+    if !autostart {
+        app.window.show(true);
+    }
+    app.submit(Work::Open(paths.root().to_owned(), clock))?;
+    let started = Instant::now();
+    let mut stage = 0u8;
+    let mut probe_error = None;
+    let mut office_verified = !probe;
+    let mut office = if probe {
+        let path = paths.root().join("quarantine/minimal.docx");
+        create_file(&path, include_bytes!("../tests/fixtures/minimal.docx"))
+            .map_err(|e| error_text(&e))?;
+        Some(
+            app.pool
+                .handle()
+                .try_submit(
+                    Work::ValidateOffice(path),
+                    Instant::now() + Duration::from_secs(30),
+                )
+                .map_err(|_| "共享材料任务未接纳".to_owned())?,
+        )
+    } else {
+        None
+    };
+    let result = host.run(|hints| {
+        if app.pool.is_faulted() && !app.terminate_required {
+            if let Some(control) = &app.control {
+                control.fault();
+            }
+            app.terminate_required = true;
+            app.begin_shutdown();
+        }
+        if hints.contains(HostHints::SHUTDOWN) {
+            app.begin_shutdown();
+        }
+        if hints.contains(HostHints::SESSION_LOCKED) || hints.contains(HostHints::SESSION_CHANGED) {
+            app.lock();
+            app.window.hide();
+            let _ = app.render();
+        }
+        if hints.contains(HostHints::OPEN_STATUS) {
+            app.window.show(true);
+        }
+        if hints.contains(HostHints::EXIT_REQUESTED) {
+            app.window.show(true);
+            app.status = "请由主管理员登录后在工作台中退出。".into();
+            let _ = app.render();
+        }
+        if app.lease.is_some()
+            && (app.last_input.elapsed() >= Duration::from_secs(300)
+                || (app
+                    .control
+                    .as_ref()
+                    .is_some_and(SessionControl::is_local_locked)
+                    && !app.pending.as_ref().is_some_and(|p| p.self_revokes)))
+        {
+            app.lock();
+            let _ = app.render();
+        }
+        for event in app.window.take_events()? {
+            if app.event(event).is_err() {
+                stop.fault();
+                return Ok(());
+            }
+        }
+        if app.poll().is_err() {
+            stop.fault();
+            return Ok(());
+        }
+        if let Some(ticket) = &mut office {
+            match ticket.try_result() {
+                Ok(Some(Ok(Outcome::Office(report))))
+                    if report.entries == 3 && report.expanded_bytes > 0 =>
+                {
+                    office_verified = true;
+                    office = None;
+                }
+                Ok(None) => {}
+                _ => {
+                    probe_error = Some("共享worker材料校验未通过".into());
+                    office = None;
+                    app.begin_shutdown();
+                }
+            }
+        }
+        if probe && !app.stopping && app.pending.is_none() {
+            if let Err(e) = probe_step(&mut app, &mut stage) {
+                probe_error = Some(e);
+                app.begin_shutdown();
+            }
+        }
+        if probe && started.elapsed() > Duration::from_secs(120) && !app.stopping {
+            probe_error = Some("原生工作台闭环超时".into());
+            app.begin_shutdown();
+        }
+        if app
+            .shutdown_deadline
+            .is_some_and(|deadline| Instant::now() >= deadline)
+            && (app.terminate_required || !app.pool.is_finished())
+        {
+            eprintln!("未来教室关闭超时，停止当前进程并保留数据供启动核对。");
+            std::process::exit(2);
+        }
+        if app.stopping && app.pool.is_finished() && !app.terminate_required {
+            stop.stop();
+        }
+        Ok(())
+    });
+    // Native pump has ended. Normal authorized exit already closed SQLite on its
+    // worker. Do not join a still-running domain from this UI owner.
+    if result.is_err() {
+        if let Some(control) = &app.control {
+            control.fault();
+        }
+        app.window.hide();
+        app.pool.request_stop();
+        eprintln!("未来教室宿主故障，终止当前进程；保留数据库供下次启动核对。");
+        std::process::exit(2);
+    }
+    app.pool.request_stop();
+    if app.pool.is_finished() {
+        app.pool
+            .join()
+            .map_err(|_| "后台执行池关闭失败".to_owned())?;
+    }
+    drop(deployment);
+    result.map_err(|_| "原生宿主已因错误关闭，请核对数据后重新启动".to_owned())?;
+    if let Some(error) = probe_error {
+        return Err(error);
+    }
+    if probe && (stage != 26 || !office_verified) {
+        return Err(format!("原生工作台闭环未结束：stage={stage}"));
+    }
+    Ok(())
+}
+fn create_app(clock: Arc<CurrentClock>) -> std::result::Result<App, String> {
+    Ok(App {
+        window: Window::new().map_err(|_| "无法创建工作台".to_owned())?,
+        pool: WorkerPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
+        clock,
+        backend: None,
+        control: None,
+        state: Arc::new(IdentityState::default()),
+        lease: None,
+        screen: Screen::Starting,
+        status: String::new(),
+        pending: None,
+        generation: 0,
+        key: None,
+        record: None,
+        last_input: Instant::now(),
+        stopping: false,
+        shutdown: None,
+        shutdown_deadline: None,
+        terminate_required: false,
+    })
+}
+
+/// Exercise the actual native commands and application controller using only a
+/// new protected temporary deployment. This never opens the user's ProgramData.
+pub fn probe() -> std::result::Result<(), String> {
+    let root = std::env::temp_dir().join(format!(
+        "FutureClassroom-Test-Application-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|_| "系统时间不可用")?
+            .as_nanos()
+    ));
+    let paths = DataPaths::isolated_test(root.clone()).map_err(|_| "隔离路径不合法")?;
+    let result = run_at(paths, true, true);
+    let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
+    result?;
+    cleanup?;
+    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    Ok(())
+}
+fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
+    const INITIAL: &str = "Probe-admin-password-2026";
+    const TEACHER: &str = "Probe-teacher-initial-2026";
+    const CHANGED: &str = "Probe-teacher-changed-2026";
+    let action;
+    let mut data = FormData::new();
+    let mut put = |id, value: &str| {
+        data.insert(id, value.to_owned())
+            .map_err(|_| "隔离表单无效".to_owned())
+    };
+    let expected = match *stage {
+        0 => {
+            action = SAVE;
+            put(SCHOOL, "隔离验证学校")?;
+            put(LOGIN, "probe-admin")?;
+            put(NAME, "验证主管理员")?;
+            put(PASSWORD, INITIAL)?;
+            put(CONFIRM, INITIAL)?;
+            Screen::Setup
+        }
+        1 => {
+            action = ACK;
+            Screen::Code
+        }
+        2 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-admin")?;
+            put(PASSWORD, INITIAL)?;
+            Screen::Login
+        }
+        3 => {
+            action = TO_SCHOOL;
+            Screen::Home
+        }
+        4 => {
+            action = ADD_CLASS;
+            put(SCHOOL, "隔离验证学校")?;
+            put(CLASS, "验证班")?;
+            Screen::School
+        }
+        5 => {
+            action = TO_SUBJECTS;
+            Screen::Home
+        }
+        6 => {
+            action = SAVE;
+            put(OLD_NAME, "")?;
+            put(SUBJECT, "数学")?;
+            put(COLOR, "70A5D8")?;
+            Screen::Subjects
+        }
+        7 => {
+            action = TO_SCHOOL;
+            Screen::Home
+        }
+        8 => {
+            action = BIND_CLASS;
+            put(SCHOOL, "隔离验证学校")?;
+            put(CLASS, "验证班")?;
+            Screen::School
+        }
+        9 => {
+            action = TO_ACCOUNTS;
+            Screen::Home
+        }
+        10 => {
+            action = SAVE;
+            put(LOGIN, "probe-teacher")?;
+            put(NAME, "验证教师")?;
+            put(ROLE, "教师管理员")?;
+            put(CLASS, "验证班")?;
+            put(SUBJECT, "数学")?;
+            put(PASSWORD, TEACHER)?;
+            put(CONFIRM, TEACHER)?;
+            Screen::Accounts
+        }
+        11 => {
+            action = ACK;
+            Screen::Code
+        }
+        12 => {
+            action = TO_HOMEWORK;
+            Screen::Home
+        }
+        13 => {
+            action = LOAD;
+            put(CLASS, "验证班")?;
+            put(SUBJECT, "数学")?;
+            put(OWNER, "probe-teacher")?;
+            Screen::Homework
+        }
+        14 => {
+            action = SAVE;
+            put(CONTENT, "验证作业：完成今天的数学练习。")?;
+            Screen::HomeworkEdit
+        }
+        15 => {
+            action = LOCK;
+            Screen::Home
+        }
+        16 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-teacher")?;
+            put(PASSWORD, TEACHER)?;
+            Screen::Login
+        }
+        17 => {
+            action = SAVE;
+            put(PASSWORD, TEACHER)?;
+            put(NEW_PASSWORD, CHANGED)?;
+            put(CONFIRM, CHANGED)?;
+            Screen::Password
+        }
+        18 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-teacher")?;
+            put(PASSWORD, CHANGED)?;
+            Screen::Login
+        }
+        19 => {
+            if app
+                .view()
+                .actions
+                .iter()
+                .any(|a| matches!(a.id, TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | EXIT))
+            {
+                return Err("教师工作台暴露主管理员入口".into());
+            }
+            action = TO_HOMEWORK;
+            Screen::Home
+        }
+        20 => {
+            action = LOAD;
+            put(CLASS, "验证班")?;
+            put(SUBJECT, "数学")?;
+            put(OWNER, "probe-teacher")?;
+            Screen::Homework
+        }
+        21 => {
+            if app.record.as_ref().map(|r| r.text.as_str())
+                != Some("验证作业：完成今天的数学练习。")
+            {
+                return Err("真实作业事务读回不一致".into());
+            }
+            put(CONTENT, "验证作业：完成今天的数学练习。")?;
+            action = BACK;
+            Screen::HomeworkEdit
+        }
+        22 => {
+            put(CLASS, "验证班")?;
+            put(SUBJECT, "数学")?;
+            put(OWNER, "probe-teacher")?;
+            action = BACK;
+            Screen::Homework
+        }
+        23 => {
+            action = LOCK;
+            Screen::Home
+        }
+        24 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-admin")?;
+            put(PASSWORD, INITIAL)?;
+            Screen::Login
+        }
+        25 => {
+            action = EXIT;
+            Screen::Home
+        }
+        _ => return Ok(()),
+    };
+    if app.screen != expected {
+        return Err(format!(
+            "原生工作台页面转换失败：stage={stage}，{}",
+            app.status
+        ));
+    }
+    app.window
+        .probe_submit(action, data)
+        .map_err(|_| format!("原生工作台命令未接纳：stage={stage}"))?;
+    *stage += 1;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    static SERIAL: Mutex<()> = Mutex::new(());
+    struct Scratch(PathBuf);
+    impl Drop for Scratch {
+        fn drop(&mut self) {
+            let result = fs::remove_dir_all(&self.0);
+            if !std::thread::panicking() {
+                result.unwrap();
+            }
+        }
+    }
+    fn fixture() -> (Scratch, App) {
+        let root = std::env::temp_dir().join(format!(
+            "FutureClassroom-Test-Lifecycle-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let paths = DataPaths::isolated_test(root.clone()).unwrap();
+        paths.prepare_for_current_user().unwrap();
+        let mut app = create_app(Arc::new(CurrentClock::new())).unwrap();
+        app.render().unwrap();
+        app.submit(Work::Open(root.clone(), app.clock.clone()))
+            .unwrap();
+        (Scratch(root), app)
+    }
+    fn wait_for(app: &mut App, condition: impl Fn(&App) -> bool) {
+        let deadline = Instant::now() + Duration::from_secs(30);
+        while !condition(app) {
+            app.poll().unwrap();
+            assert!(Instant::now() < deadline, "native lifecycle did not drain");
+            std::thread::sleep(Duration::from_millis(5));
+        }
+    }
+    fn drain(mut app: App) {
+        app.begin_shutdown();
+        wait_for(&mut app, |a| a.pool.is_finished());
+        app.pool.join().unwrap();
+    }
+    #[test]
+    fn shutdown_during_open_hands_backend_to_shutdown_worker_before_pool_stops() {
+        let _serial = SERIAL.lock().unwrap();
+        let (_scratch, mut app) = fixture();
+        app.begin_shutdown();
+        assert!(app.pending.is_some());
+        assert!(!app.pool.handle().is_faulted());
+        wait_for(&mut app, |a| a.pool.is_finished());
+        assert!(app.backend.is_some());
+        assert!(app.control.as_ref().unwrap().is_local_locked());
+        assert!(app
+            .backend
+            .as_ref()
+            .unwrap()
+            .lock()
+            .unwrap()
+            .state()
+            .is_err());
+        app.pool.join().unwrap();
+    }
+    #[test]
+    fn lost_initialization_result_refreshes_committed_state_instead_of_reopening_registration() {
+        let _serial = SERIAL.lock().unwrap();
+        let (_scratch, mut app) = fixture();
+        wait_for(&mut app, |a| a.pending.is_none());
+        assert!(app.screen == Screen::Setup);
+        let mut data = FormData::new();
+        for (id, value) in [
+            (SCHOOL, "Lifecycle School"),
+            (LOGIN, "admin"),
+            (NAME, "Admin"),
+            (PASSWORD, "Lifecycle-probe-password"),
+            (CONFIRM, "Lifecycle-probe-password"),
+        ] {
+            data.insert(id, value.into()).unwrap();
+        }
+        let request = Request {
+            backend: app.backend.as_ref().unwrap().clone(),
+            screen: Screen::Setup,
+            action: SAVE,
+            data,
+            lease: None,
+            state: app.state.clone(),
+            key: None,
+            revision: Revision::default(),
+            clock: app.clock.clone(),
+        };
+        app.submit(Work::Request(request)).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(30);
+        while !app.pending.as_ref().unwrap().ticket.is_finished() {
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        // COMMIT completed, but notification consumption lost ownership. The same
+        // product error path must read persisted state and discard the one-time code.
+        app.pending.as_ref().unwrap().ticket.cancel();
+        app.poll().unwrap();
+        wait_for(&mut app, |a| a.pending.is_none());
+        assert!(app.screen == Screen::Login);
+        assert!(app.state.installation.is_some());
+        assert_eq!(app.state.accounts.len(), 1);
+        assert!(app.lease.is_none());
+        drain(app);
+    }
+    #[test]
+    fn publication_failure_is_fatal_but_conflict_and_wrong_password_are_recoverable() {
+        assert!(fatal(&Failure::Backend(BackendError::Identity(
+            fc_ports::IdentityRepositoryError::Faulted
+        ))));
+        assert!(fatal(&Failure::Backend(BackendError::Storage(
+            fc_storage::StorageError::Indeterminate
+        ))));
+        assert!(!fatal(&Failure::Backend(BackendError::InvalidCredentials)));
+        assert!(!fatal(&Failure::Backend(BackendError::Identity(
+            fc_ports::IdentityRepositoryError::Domain(IdentityError::RevisionConflict)
+        ))));
+    }
+}
