@@ -1,0 +1,15 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+error[E0499]: cannot borrow `original.semesters` as mutable more than once at a time
+   --> crates/fc-domain/src/schedule_document/row_operations_tests.rs:309:9
+    |
+303 |     for (index, table) in original.semesters[0].semester.tables.iter_mut().enumerate() {
+    |                           ------------------------------------------------------------
+    |                           |
+    |                           first mutable borrow occurs here
+    |                           first borrow later used here
+...
+309 |         original.semesters[0].cell_details.push(CellDetails {
+    |         ^^^^^^^^^^^^^^^^^^ second mutable borrow occurs here
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `fc-domain` (lib test) due to 1 previous error

@@ -19,6 +19,7 @@ pub fn materials_probe() -> std::result::Result<(), String> {
 mod lesson_editor;
 mod materials_editor;
 mod schedule_editor;
+mod schedule_operations_probe;
 mod web_editor;
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::web::{WebService, WebServiceError};
@@ -3545,6 +3546,8 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let mut profiles_stage = 0u8;
     let mut profile_content_stage = 0usize;
     let mut profile_content_probe = profile_content_probe::State::default();
+    let mut schedule_operations_stage = 0usize;
+    let mut schedule_operations_probe = schedule_operations_probe::State::default();
     let mut probe_error = None;
     let mut office_verified = !probe;
     let mut office = if probe {
@@ -3728,6 +3731,15 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
+            } else if stage == 83 && schedule_operations_stage < schedule_operations_probe::STEPS {
+                if let Err(error) = schedule_operations_probe::run(
+                    &mut app,
+                    &mut schedule_operations_probe,
+                    &mut schedule_operations_stage,
+                ) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
             } else if let Err(e) = probe_step(&mut app, &mut stage) {
                 probe_error = Some(e);
                 app.begin_shutdown();
@@ -3796,6 +3808,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             || accounts_management != accounts_probe::MANAGEMENT_STEPS
             || profiles_stage != profiles_probe::STEPS
             || profile_content_stage != profile_content_probe::STEPS
+            || schedule_operations_stage != schedule_operations_probe::STEPS
             || !office_verified)
     {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
@@ -3887,6 +3900,10 @@ pub fn probe() -> std::result::Result<(), String> {
     println!(
         "profile_content_text_images_clear_undo_real_preview=PASS profile_content_native_steps={}",
         profile_content_probe::STEPS
+    );
+    println!(
+        "schedule_roles_activity_split_merge_confirm_native_worker=PASS schedule_operations_native_steps={}",
+        schedule_operations_probe::STEPS
     );
     Ok(())
 }

@@ -1455,5 +1455,8 @@ impl ScheduleDocument {
     }
 }
 
+mod row_operations;
+#[cfg(test)]
+mod row_operations_tests;
 #[cfg(test)]
 mod tests;

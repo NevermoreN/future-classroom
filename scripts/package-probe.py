@@ -218,6 +218,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "sha256": entries[0]["sha256"],
         "frontend": frontend,
         "features": {
+            "compound_timetable_drafts": "local global-admin Odd/Even role swap preserving physical table identity and content; lossless shared activity weekday split and compatible merge, synchronized dual-table atomic structure edits; explicit kind-change loss review/cancel/owner lock resume; only final complete-document CAS Save publishes; visible touch/DPI and three-OS acceptance incomplete",
             "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe",
                 "--web-voice-probe", "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>", "--native-probe <1..300>"],
             "native_management_workbench": "initial setup/login, school/classes/subjects, account list/create/edit/disable with multiple teaching scopes, explicit review/cancel/CAS and self-change re-login, independent busy lock action, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, local global-admin current-lesson override/restore with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",

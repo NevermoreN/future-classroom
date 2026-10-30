@@ -218,6 +218,16 @@ def main():
                 raise RuntimeError("native independent-content workflow steps incomplete or repeated")
             report["profileContentNativeStatus"] = "PASS"
             report["profileContentNativeSteps"] = len(content_steps)
+            if not any(isinstance(line, str) and "schedule_roles_activity_split_merge_confirm_native_worker=PASS schedule_operations_native_steps=65" in line for line in application):
+                raise RuntimeError("schedule operations result marker missing")
+            schedule_steps = [
+                int(line.split("step=", 1)[1].split(" ", 1)[0])
+                for line in application
+                if isinstance(line, str) and line.startswith("SCHEDULE_OPERATIONS_PROBE step=")
+            ]
+            if schedule_steps != list(range(65)):
+                raise RuntimeError("schedule operations did not complete exactly 65 ordered steps")
+            report["scheduleOperationsNativeSteps"] = len(schedule_steps)
         if args.materials and report["native"].get("materialsExitCode") != 0:
             raise RuntimeError("isolated materials integration failed")
         if args.audio_silent:

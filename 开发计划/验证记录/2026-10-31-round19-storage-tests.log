@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests/schedule_operations.rs (/tmp/fc-round19-storage-target/debug/deps/schedule_operations-15e04bab24429152)
+
+running 4 tests
+test activity_split_and_merge_preserve_both_week_contents_and_retire_all_replaced_rows ... ok
+test conversion_requires_explicit_save_clears_both_weeks_and_cannot_cross_revoked_lease has been running for over 60 seconds
+test every_published_identity_namespace_stays_retired_after_full_term_replacement_and_restart has been running for over 60 seconds
+test role_swap_publishes_selection_only_and_survives_restart_with_document_cas has been running for over 60 seconds
+test conversion_requires_explicit_save_clears_both_weeks_and_cannot_cross_revoked_lease ... ok
+test role_swap_publishes_selection_only_and_survives_restart_with_document_cas ... ok
+test every_published_identity_namespace_stays_retired_after_full_term_replacement_and_restart ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 183.14s
+

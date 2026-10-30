@@ -1,0 +1,25 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.04s
+     Running unittests src/lib.rs (/tmp/fc-round19-domain-target/debug/deps/fc_domain-2610ce4c188c5c98)
+
+running 17 tests
+test schedule_document::row_operations_tests::conversion_retains_ids_and_names_but_retires_logical_key_and_clears_each_tables_courses ... ok
+test schedule_document::row_operations_tests::bad_source_rows_duplicate_identities_and_dangling_metadata_are_rejected ... ok
+test schedule_document::row_operations_tests::activity_split_refuses_nonactivity_and_less_than_two_enabled_days ... ok
+test schedule_document::row_operations_tests::partial_week_and_all_seven_days_are_exact_and_unnamed_activities_stay_unnamed ... ok
+test schedule_document::row_operations_tests::merge_rejects_lossy_name_time_group_and_weekday_combinations_and_bad_counts ... ok
+test schedule_document::row_operations_tests::overflow_after_partial_allocation_cannot_change_the_original_or_retire_its_rows ... ok
+test schedule_document::row_operations_tests::operations_preserve_retained_history_and_allocate_above_its_highest_identity ... ok
+test schedule_document::row_operations_tests::selected_sync_shape_mismatch_or_missing_partner_rejects_before_mutation ... ok
+test schedule_document::row_operations_tests::another_tables_internal_name_conflict_rejects_joint_merge_atomically ... ok
+test schedule_document::row_operations_tests::merge_uses_earliest_selected_position_and_preserves_unselected_order_and_names ... ok
+test schedule_document::row_operations_tests::operations_allow_unrelated_incomplete_timing_dates_and_calendar_drafts ... ok
+test schedule_document::row_operations_tests::swap_rejects_single_duplicate_and_missing_roles_with_semester_location ... ok
+test schedule_document::row_operations_tests::synchronized_split_and_merge_pair_keys_but_keep_each_tables_name_and_ids ... ok
+test schedule_document::row_operations_tests::swap_only_changes_roles_and_actual_odd_even_resolution_then_swaps_back_exactly ... ok
+test schedule_document::row_operations_tests::unsynchronized_operations_only_change_the_selected_table ... ok
+test schedule_document::row_operations_tests::split_rejects_capacity_before_replacing_either_table ... ok
+test schedule_document::row_operations_tests::split_and_merge_preserve_actual_activity_days_and_labels_with_fresh_ids ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 82 filtered out; finished in 0.01s
+

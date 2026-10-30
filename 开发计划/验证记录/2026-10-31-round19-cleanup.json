@@ -1,0 +1,61 @@
+{
+  "scope": "Delete only this round owned fc-round19 top-level scratch/build/log/exe/failed-package entries after exact evidence archival; preserve intended evidence and final mnt/data artifacts",
+  "status": "PASS",
+  "liveOwnedProcessesBeforeRemoval": [],
+  "removedTopLevelEntries": 84,
+  "removedFiles": 18145,
+  "removedBytes": 9031612294,
+  "remainingOwnedScratchEntries": [],
+  "protectedBefore": {
+    "target": {
+      "exists": true,
+      "inode": 45511040,
+      "mode": "0o755"
+    },
+    "dist": {
+      "exists": true,
+      "inode": 44743611,
+      "mode": "0o755"
+    },
+    "node_modules": {
+      "exists": true,
+      "inode": 45321626,
+      "mode": "0o755"
+    },
+    "web/node_modules": {
+      "exists": false
+    },
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212": {
+      "exists": true,
+      "inode": 350322122,
+      "mode": "0o600"
+    }
+  },
+  "protectedAfter": {
+    "target": {
+      "exists": true,
+      "inode": 45511040,
+      "mode": "0o755"
+    },
+    "dist": {
+      "exists": true,
+      "inode": 44743611,
+      "mode": "0o755"
+    },
+    "node_modules": {
+      "exists": true,
+      "inode": 45321626,
+      "mode": "0o755"
+    },
+    "web/node_modules": {
+      "exists": false
+    },
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212": {
+      "exists": true,
+      "inode": 350322122,
+      "mode": "0o600"
+    }
+  },
+  "windowsReport": "2026-10-31-round19-windows-final-ssh-and-cleanup.json",
+  "persistentSshAuthorization": "PRESERVED"
+}

@@ -25,6 +25,7 @@ pub(super) const NOTE: FieldId = FieldId(118);
 pub(super) const ENABLED: FieldId = FieldId(119);
 pub(super) const AUTO_GAPS: FieldId = FieldId(120);
 pub(super) const ROW_NAME: FieldId = FieldId(121);
+pub(super) const MERGE_WITH: FieldId = FieldId(122);
 pub(super) const DAY_BASE: u16 = 130;
 pub(super) const OPEN: ActionId = ActionId(100);
 pub(super) const NEW_TERM: ActionId = ActionId(101);
@@ -48,6 +49,11 @@ pub(super) const SET_MAPPING: ActionId = ActionId(118);
 pub(super) const REMOVE_MAPPING: ActionId = ActionId(119);
 pub(super) const PREVIEW: ActionId = ActionId(120);
 pub(super) const DRAFT_TEXT: ActionId = ActionId(121);
+pub(super) const SWAP_ROLES: ActionId = ActionId(122);
+pub(super) const SPLIT_ACTIVITY: ActionId = ActionId(123);
+pub(super) const MERGE_ACTIVITY: ActionId = ActionId(124);
+pub(super) const REVIEW_APPLY: ActionId = ActionId(125);
+pub(super) const REVIEW_CANCEL: ActionId = ActionId(126);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Page {
@@ -56,6 +62,8 @@ enum Page {
     Grid,
     Row(Option<usize>),
     Cell(usize, usize),
+    Merge(usize),
+    Review,
     Calendar,
     Preview,
     Discard,
@@ -80,6 +88,15 @@ pub(super) struct Editor {
     suspended: Option<FormData>,
     dirty: bool,
     cell_subject: Option<SubjectId>,
+    review: Option<Review>,
+}
+/// The immutable candidate belongs to this editor and owner, never to a button
+/// event. Confirmation changes only the draft; Save still repeats CAS/authority.
+struct Review {
+    candidate: ScheduleDocument,
+    summary: String,
+    return_page: Page,
+    return_form: Option<FormData>,
 }
 fn date_text(d: LocalDate) -> String {
     format!("{:04}-{:02}-{:02}", d.year(), d.month(), d.day())
@@ -167,6 +184,30 @@ fn role_label(role: TableRole) -> &'static str {
         TableRole::Even => "双周表",
     }
 }
+fn short_name(value: &str) -> String {
+    let mut text: String = value.chars().take(24).collect();
+    if value.chars().count() > 24 {
+        text.push('…');
+    }
+    text
+}
+fn weekday_text(row: &TimetableRow) -> String {
+    (0..7)
+        .filter(|day| row.enabled_days[*day])
+        .map(|day| format!("星期{}", day + 1))
+        .collect::<Vec<_>>()
+        .join("、")
+}
+fn kind_label(kind: RowKind) -> &'static str {
+    match kind {
+        RowKind::Course => "课程",
+        RowKind::Activity => "活动",
+        RowKind::Rest(RestPurpose::Recess) => "课间",
+        RowKind::Rest(RestPurpose::Lunch) => "午休",
+        RowKind::Rest(RestPurpose::Other) => "其他休息",
+        RowKind::Rest(RestPurpose::Unknown) => "未确认休息用途",
+    }
+}
 pub(super) fn problem(e: ScheduleDocumentError) -> String {
     let l = e.location;
     let where_ = format!(
@@ -218,6 +259,7 @@ impl Editor {
             suspended: None,
             dirty: false,
             cell_subject: None,
+            review: None,
         }
     }
     pub(super) fn owner(&self) -> PrincipalId {
@@ -229,15 +271,16 @@ impl Editor {
         self.document = document;
         self.dirty = false;
         self.suspended = None;
+        self.review = None;
     }
     pub(super) fn has_unsaved_changes(&self) -> bool {
-        self.document != self.original || self.suspended.is_some()
+        self.document != self.original || self.suspended.is_some() || self.review.is_some()
     }
     pub(super) fn capture(&mut self, data: FormData, identity: &IdentityState) {
         self.suspended = None;
         if !matches!(
             self.page,
-            Page::Header | Page::Row(_) | Page::Cell(_, _) | Page::Calendar
+            Page::Header | Page::Row(_) | Page::Cell(_, _) | Page::Calendar | Page::Merge(_)
         ) {
             return;
         }
@@ -291,12 +334,155 @@ impl Editor {
         }
         self.dirty = true;
     }
+    fn review_candidate(
+        &mut self,
+        candidate: ScheduleDocument,
+        summary: String,
+        return_form: Option<FormData>,
+    ) {
+        self.review = Some(Review {
+            candidate,
+            summary,
+            return_page: self.page,
+            return_form,
+        });
+        self.page = Page::Review;
+    }
+    fn retained_form(&self, data: &FormData, identity: &IdentityState) -> FormData {
+        let mut retained = FormData::new();
+        for field in self.view(identity, "", false).fields {
+            if field.kind != FieldKind::ReadOnly {
+                if let Some(value) = data.get(field.id) {
+                    // Only fields from this bounded non-secret page are retained.
+                    let _ = retained.insert(field.id, value.into());
+                }
+            }
+        }
+        retained
+    }
+    fn affected_rows(&self, index: usize) -> Vec<(&WeekTable, &TimetableRow)> {
+        let (Ok(plan), Ok(table)) = (self.plan(), self.table()) else {
+            return Vec::new();
+        };
+        let Some(source) = table.rows.get(index) else {
+            return Vec::new();
+        };
+        plan.semester
+            .tables
+            .iter()
+            .filter(|t| t.id == table.id || plan.timing_sync)
+            .filter_map(|t| {
+                t.rows
+                    .iter()
+                    .find(|r| r.logical_key == source.logical_key)
+                    .map(|r| (t, r))
+            })
+            .collect()
+    }
+    fn scope_text(&self) -> &'static str {
+        if self
+            .plan()
+            .is_ok_and(|p| p.timing_sync && p.semester.tables.len() == 2)
+        {
+            "同时修改单双两张表；各表原有名称分别保留。"
+        } else {
+            "只修改当前周表，其他表及保留历史不变。"
+        }
+    }
+    fn conversion_summary(&self, index: usize, identity: &IdentityState) -> String {
+        let mut text = format!(
+            "更改作息类型。{}\n时间、分组和适用星期按本次表单应用；拆合活动请使用专用操作。\n非课程类型不保留课程、教室或备注；转为课程时不会自动恢复以前的内容。",
+            self.scope_text()
+        );
+        for (table, row) in self.affected_rows(index) {
+            text.push_str(&format!("\n{}：", role_label(table.role)));
+            let mut count = 0;
+            for (day, cell) in row.courses.iter().enumerate() {
+                if let Some(cell) = cell {
+                    count += 1;
+                    let subject = identity
+                        .subjects
+                        .iter()
+                        .find(|s| s.id == cell.subject_id)
+                        .map(|s| s.name.as_str())
+                        .unwrap_or("科目失效");
+                    let teacher = match cell.teacher {
+                        TeacherBinding::Unassigned => "未分配老师",
+                        TeacherBinding::Default => "默认老师",
+                        TeacherBinding::Explicit(id) => identity
+                            .accounts
+                            .iter()
+                            .find(|a| a.principal.id == id)
+                            .map(|a| a.display_name.as_str())
+                            .unwrap_or("老师失效"),
+                    };
+                    let details = self.plan().ok().and_then(|p| {
+                        p.cell_details
+                            .iter()
+                            .find(|d| d.row_id == row.id && d.day.index() == day)
+                    });
+                    text.push_str(&format!(
+                        "\n星期{} · {} / {}；教室{}字，备注{}字。",
+                        day + 1,
+                        short_name(subject),
+                        short_name(teacher),
+                        details.map_or(0, |d| d.room.chars().count()),
+                        details.map_or(0, |d| d.note.chars().count())
+                    ));
+                }
+            }
+            if count == 0 {
+                text.push_str("没有课程格。")
+            }
+        }
+        text.push_str("\n确认只应用到草稿；仍需保存全部才能生效。");
+        text
+    }
+    fn merge_options(&self, index: usize) -> Vec<(String, String)> {
+        let (Ok(plan), Ok(table)) = (self.plan(), self.table()) else {
+            return Vec::new();
+        };
+        let Some(source) = table.rows.get(index) else {
+            return Vec::new();
+        };
+        let name = |id| {
+            plan.row_details
+                .iter()
+                .find(|d| d.row_id == id)
+                .map(|d| d.name.as_str())
+                .unwrap_or("")
+        };
+        table
+            .rows
+            .iter()
+            .filter(|r| {
+                r.id != source.id
+                    && source.kind == RowKind::Activity
+                    && r.kind == RowKind::Activity
+                    && r.range == source.range
+                    && r.group == source.group
+                    && name(r.id) == name(source.id)
+                    && r.enabled_days.iter().any(|d| *d)
+                    && source.enabled_days.iter().any(|d| *d)
+                    && !(0..7).any(|d| r.enabled_days[d] && source.enabled_days[d])
+            })
+            .map(|r| {
+                (
+                    r.id.get().to_string(),
+                    format!("{} · {}", short_name(name(r.id)), weekday_text(r)),
+                )
+            })
+            .collect()
+    }
     pub(super) fn select_cell(
         &mut self,
         row: usize,
         column: usize,
         _identity: &IdentityState,
     ) -> std::result::Result<(), String> {
+        if matches!(self.page, Page::Review | Page::Merge(_)) {
+            return Err("请先完成或取消当前编辑，再选择作息行。".into());
+        }
         let r = self.table()?.rows.get(row).ok_or("请选择有效行。")?;
         if column > 7 {
             return Err("请选择有效星期。".into());
@@ -449,7 +635,7 @@ impl Editor {
             Page::Grid => {
                 if let (Some(p), Some(t)) = (plan, table) {
                     v.title = format!("{} · {}", p.name, role_label(t.role));
-                    v.description.push_str("\n选择时间列编辑作息，选择星期格编辑课程。活动行跨星期显示。课程与老师只可从已有项目选择。");
+                    v.description.push_str("\n选择时间列编辑作息，选择星期格编辑课程。活动按适用星期显示，可拆为逐日活动或合并兼容活动。课程与老师只可从已有项目选择。");
                     v.fields.push(choose(
                         TABLE,
                         "当前周表",
@@ -518,7 +704,10 @@ impl Editor {
                                     }
                                 })
                                 .collect::<Vec<String>>();
-                            let merged = r.kind != RowKind::Course;
+                            // A shared activity spanning only some days must not
+                            // visually claim the disabled weekdays as well.
+                            let merged =
+                                r.kind != RowKind::Course && r.enabled_days.iter().all(|d| *d);
                             if merged {
                                 cells = vec![cells
                                     .iter()
@@ -559,6 +748,7 @@ impl Editor {
                         }
                     } else {
                         v.actions.push(action(DISABLE_DUAL, "关闭双周：保留当前表"));
+                        v.actions.push(action(SWAP_ROLES, "交换单周 / 双周角色"));
                     }
                 }
             }
@@ -648,7 +838,48 @@ impl Editor {
                             action(MOVE_UP, "向上移动"),
                             action(MOVE_DOWN, "向下移动"),
                         ]);
+                        if r.is_some_and(|r| r.kind == RowKind::Activity) {
+                            if r.is_some_and(|r| r.enabled_days.iter().filter(|d| **d).count() > 1)
+                            {
+                                v.actions.push(action(SPLIT_ACTIVITY, "拆为逐日活动"));
+                            }
+                            if selected.is_some_and(|i| !self.merge_options(i).is_empty()) {
+                                v.actions.push(action(MERGE_ACTIVITY, "与另一活动合并"));
+                            }
+                        }
                     }
+                }
+            }
+            Page::Merge(index) => {
+                v.title = "选择合并活动".into();
+                v.description.push_str(&format!("\n{}仅合并时间、分组、名称相同且适用星期互不重叠的活动。可重复合并更多活动；课程与休息行不参与。", self.scope_text()));
+                let options = self.merge_options(index);
+                if let Some((value, _)) = options.first() {
+                    v.fields.push(choose(
+                        MERGE_WITH,
+                        "另一活动的适用星期",
+                        value.clone(),
+                        options,
+                    ));
+                    v.actions.push(action(APPLY, "查看合并影响"));
+                } else {
+                    v.description
+                        .push_str("\n没有可合并的活动，请返回检查各行名称、时间与星期。");
+                }
+                v.actions.push(action(EDIT_BACK, "返回原活动行"));
+            }
+            Page::Review => {
+                v.title = "确认课表草稿变更".into();
+                v.description = self
+                    .review
+                    .as_ref()
+                    .map(|r| r.summary.clone())
+                    .unwrap_or_else(|| "待确认变更已失效，请重新打开课表。".into());
+                if self.review.is_some() {
+                    v.actions.extend([
+                        action(REVIEW_APPLY, "确认应用到草稿"),
+                        action(REVIEW_CANCEL, "取消本次变更"),
+                    ]);
                 }
             }
             Page::Cell(row, day) => {
@@ -910,7 +1141,7 @@ impl Editor {
         let result = self.apply(action, &data, identity);
         if result.is_err() {
             self.capture(data, identity);
-        } else {
+        } else if action != REVIEW_CANCEL {
             self.suspended = None;
         }
         result
@@ -921,7 +1152,71 @@ impl Editor {
         data: &FormData,
         identity: &IdentityState,
     ) -> std::result::Result<EditorCommand, String> {
+        if self.page == Page::Review && !matches!(action, REVIEW_APPLY | REVIEW_CANCEL) {
+            return Err("请先确认或取消当前变更。".into());
+        }
         match action {
+            REVIEW_APPLY => {
+                if self.page != Page::Review {
+                    return Err("没有待确认的变更。".into());
+                }
+                let review = self.review.take().ok_or("没有待确认的变更。")?;
+                self.document = review.candidate;
+                self.dirty = true;
+                self.page = Page::Grid;
+            }
+            REVIEW_CANCEL => {
+                if self.page != Page::Review {
+                    return Err("没有待确认的变更。".into());
+                }
+                let review = self.review.take().ok_or("没有待确认的变更。")?;
+                self.page = review.return_page;
+                self.suspended = None;
+                if let Some(form) = review.return_form {
+                    self.capture(form, identity);
+                }
+            }
+            SWAP_ROLES => {
+                if self.page != Page::Grid {
+                    return Err("请从周表中交换角色。".into());
+                }
+                let next = self
+                    .document
+                    .swap_table_roles(self.plan()?.semester.id)
+                    .map_err(problem)?;
+                self.review_candidate(next,
+                    "交换两张表的单周 / 双周角色。课程、老师、备注、作息时间和表内排列均保留在原表；第一教学周周一不变。教学周将改用对应的新角色表。\n确认只应用到草稿，仍需保存全部。".into(), None);
+            }
+            SPLIT_ACTIVITY | MERGE_ACTIVITY => {
+                let Page::Row(Some(index)) = self.page else {
+                    return Err("请先选择已有活动行。".into());
+                };
+                let suspended = self.suspended.take();
+                let canonical = self.view(identity, "", false);
+                self.suspended = suspended;
+                if canonical
+                    .fields
+                    .iter()
+                    .any(|f| data.get(f.id).is_some_and(|v| v != f.value))
+                {
+                    return Err("请先应用本行名称、时间和星期，再拆分或合并活动。".into());
+                }
+                let row = self.table()?.rows.get(index).ok_or("活动行不存在。")?;
+                if row.kind != RowKind::Activity {
+                    return Err("只有活动行可以拆合。".into());
+                }
+                if action == MERGE_ACTIVITY {
+                    self.page = Page::Merge(index);
+                } else {
+                    let next = self
+                        .document
+                        .split_activity(self.plan()?.semester.id, self.table()?.id, row.id)
+                        .map_err(problem)?;
+                    let summary = format!("将共享活动拆为{}个逐日活动：{}。\n{}\n每行保留原时间、分组和名称，拆分前后适用星期相同；随后可分别编辑各日活动。\n确认只应用到草稿，仍需保存全部。",
+                        row.enabled_days.iter().filter(|d| **d).count(), weekday_text(row), self.scope_text());
+                    self.review_candidate(next, summary, Some(self.retained_form(data, identity)));
+                }
+            }
             SAVE_ALL => {
                 self.document.validate_draft(identity).map_err(problem)?;
                 return Ok(EditorCommand::Save {
@@ -998,10 +1293,37 @@ impl Editor {
                 self.page = match self.page {
                     Page::Terms => return Ok(EditorCommand::Close),
                     Page::Header | Page::Row(_) | Page::Cell(_, _) | Page::Preview => Page::Grid,
+                    Page::Merge(index) => Page::Row(Some(index)),
                     _ => Page::Terms,
                 }
             }
             APPLY => match self.page {
+                Page::Merge(index) => {
+                    let row = self.table()?.rows.get(index).ok_or("原活动行不存在。")?;
+                    let other = RowId::new(
+                        field_value(data, MERGE_WITH)
+                            .parse()
+                            .map_err(|_| "请选择另一活动。")?,
+                    )
+                    .map_err(|_| "请选择另一活动。")?;
+                    let partner = self
+                        .table()?
+                        .rows
+                        .iter()
+                        .find(|r| r.id == other)
+                        .ok_or("另一活动不存在。")?;
+                    let summary = format!("合并活动：{} ＋ {}。\n{}\n时间、分组与每张表自身的名称必须相同；星期集合互不重叠且全部保留。其他作息行不变。\n确认只应用到草稿，仍需保存全部。",
+                        weekday_text(row), weekday_text(partner), self.scope_text());
+                    let next = self
+                        .document
+                        .merge_activities(
+                            self.plan()?.semester.id,
+                            self.table()?.id,
+                            &[row.id, other],
+                        )
+                        .map_err(problem)?;
+                    self.review_candidate(next, summary, Some(self.retained_form(data, identity)));
+                }
                 Page::Header => {
                     let mut p = self.plan()?.clone();
                     p.name = field_value(data, TERM_NAME).trim().into();
@@ -1041,6 +1363,7 @@ impl Editor {
                             courses: std::array::from_fn(|_| None),
                         }
                     };
+                    let original_kind = row.kind;
                     row.range = range;
                     row.group = match field_value(data, GROUP) {
                         "morning" => DayGroup::Morning,
@@ -1068,6 +1391,26 @@ impl Editor {
                     let id = row.id;
                     let s = self.plan()?.semester.id;
                     let t = self.table()?.id;
+                    let changed_type = index.is_some() && original_kind != row.kind;
+                    let target_kind = row.kind;
+                    let target_days = weekday_text(&row);
+                    let target_group = match row.group {
+                        DayGroup::Morning => "上午",
+                        DayGroup::Afternoon => "下午",
+                        DayGroup::Other(_) => "其他",
+                    };
+                    let mut base = self.document.clone();
+                    if changed_type {
+                        base = base.convert_row_kind(s, t, id, row.kind).map_err(problem)?;
+                        let converted = base.semesters[self.term.unwrap()].semester.tables
+                            [self.table]
+                            .rows
+                            .iter()
+                            .find(|r| r.id == id)
+                            .ok_or("作息行不存在。")?;
+                        row.logical_key = converted.logical_key;
+                        row.courses = converted.courses.clone();
+                    }
                     let edit = if index.is_some() {
                         DraftEdit::SetRow {
                             semester_id: s,
@@ -1082,7 +1425,7 @@ impl Editor {
                             row,
                         }
                     };
-                    let mut next = self.document.edit(&edit, identity).map_err(problem)?;
+                    let mut next = base.edit(&edit, identity).map_err(problem)?;
                     let p = &mut next.semesters[self.term.unwrap()];
                     p.row_details.retain(|d| d.row_id != id);
                     let name = field_value(data, ROW_NAME).trim();
@@ -1093,9 +1436,30 @@ impl Editor {
                         });
                     }
                     next.validate_draft_metadata().map_err(problem)?;
-                    self.document = next;
-                    self.dirty = true;
-                    self.page = Page::Grid;
+                    if changed_type {
+                        let mut summary = self.conversion_summary(index.unwrap(), identity);
+                        summary.push_str(&format!(
+                            "\n本次目标：{}；时间{}；分组{}；适用{}；行名称{}。",
+                            kind_label(target_kind),
+                            field_value(data, RANGE),
+                            target_group,
+                            if target_days.is_empty() {
+                                "无启用星期"
+                            } else {
+                                &target_days
+                            },
+                            short_name(name)
+                        ));
+                        self.review_candidate(
+                            next,
+                            summary,
+                            Some(self.retained_form(data, identity)),
+                        );
+                    } else {
+                        self.document = next;
+                        self.dirty = true;
+                        self.page = Page::Grid;
+                    }
                 }
                 Page::Cell(row, day) => {
                     let p = self.plan()?;
@@ -1394,9 +1758,11 @@ fn lesson_text(state: LessonState, identity: &IdentityState) -> String {
 }
 
 #[cfg(test)]
+mod operations_tests;
+#[cfg(test)]
 mod tests {
     use super::*;
-    fn fixture() -> (Editor, IdentityState) {
+    pub(super) fn fixture() -> (Editor, IdentityState) {
         let school = SchoolId::new(1).unwrap();
         let class = ClassId::new(1).unwrap();
         let subject = SubjectId::new(1).unwrap();
@@ -1489,14 +1855,14 @@ mod tests {
         e.term = Some(0);
         (e, identity)
     }
-    fn form(v: &View) -> FormData {
+    pub(super) fn form(v: &View) -> FormData {
         let mut d = FormData::new();
         for f in &v.fields {
             d.insert(f.id, f.value.clone()).unwrap();
         }
         d
     }
-    fn set(data: &mut FormData, id: FieldId, value: &str) {
+    pub(super) fn set(data: &mut FormData, id: FieldId, value: &str) {
         data.take(id);
         data.insert(id, value.into()).unwrap();
     }
