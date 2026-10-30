@@ -2971,3 +2971,762 @@ fn desktop_content_commit_persists_new_day_before_first_frame_and_does_not_reviv
     assert!(rollback.homework.is_empty());
     assert_eq!(rollback.homework_eligible_total, 0);
 }
+
+// The storage fixture supplies already validated metadata only. Real filesystem
+// preparation and cryptographic hashing are exercised by the product adapter tests.
+struct MaterialFixture;
+impl fc_ports::MaterialPreparation for MaterialFixture {
+    type Input = fc_domain::materials::MaterialResource;
+    fn prepare(
+        &mut self,
+        input: Self::Input,
+    ) -> Result<Self::Input, fc_ports::MaterialRepositoryError> {
+        Ok(input)
+    }
+}
+fn material_scope(teacher: u64) -> fc_domain::materials::MaterialScope {
+    fc_domain::materials::MaterialScope {
+        teacher_id: principal(teacher),
+        subject_id: SubjectId::new(1).unwrap(),
+    }
+}
+fn prepared_material(
+    command: u64,
+    id: u64,
+    teacher: u64,
+    bytes: u64,
+) -> fc_ports::PreparedMaterialAppend {
+    fc_ports::prepare_material_append(
+        &mut MaterialFixture,
+        fc_domain::materials::MaterialResource {
+            version_id: ResourceVersionId::new(id + 10000).unwrap(),
+            sha256: [(id % 251) as u8; 32],
+            kind: fc_domain::materials::MaterialKind::Txt,
+            bytes,
+        },
+        fc_ports::MaterialAppendMetadata {
+            command_id: CommandId::new(command).unwrap(),
+            scope: material_scope(teacher),
+            material_id: MaterialId::new(id).unwrap(),
+            display_name: format!("Lesson-{id}.txt"),
+            allowed_class_ids: vec![ClassId::new(1).unwrap()],
+        },
+    )
+    .unwrap()
+}
+#[test]
+fn material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_survive_reopen() {
+    use fc_domain::materials::*;
+    use fc_ports::{MaterialListRequest, MaterialRepository, MaterialRepositoryError};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let teacher = actor(2, 2, TrustedOrigin::Local);
+    let other = actor(3, 2, TrustedOrigin::Local);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    // Browsing an empty directory creates its stable ID/revision before the
+    // first import. That persisted empty state must survive restart and append.
+    let empty = repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None,
+            },
+            &teacher,
+            &*clock,
+        )
+        .unwrap();
+    assert!(empty.items.is_empty());
+    assert_eq!(empty.folder.revision, Revision::new(1));
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let early_prepared = prepared_material(6000, 100, 2, 10);
+    let later_prepared = prepared_material(6001, 101, 2, 10);
+    let first = repo
+        .append_material(later_prepared, &teacher, &*clock)
+        .unwrap();
+    *clock.0.lock().unwrap() = time(29);
+    let second = repo
+        .append_material(early_prepared, &teacher, &*clock)
+        .unwrap();
+    assert_eq!((first.added_sequence, second.added_sequence), (1, 2));
+    assert!(second.added_at < first.added_at);
+    assert_eq!(
+        repo.append_material(prepared_material(6000, 100, 2, 10), &teacher, &*clock)
+            .unwrap(),
+        second
+    );
+    assert_eq!(
+        repo.append_material(prepared_material(6000, 100, 2, 11), &teacher, &*clock),
+        Err(MaterialRepositoryError::IdempotencyConflict)
+    );
+    assert!(repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None
+            },
+            &other,
+            &*clock
+        )
+        .is_err());
+    assert!(repo
+        .append_material(prepared_material(6002, 102, 3, 10), &teacher, &*clock)
+        .is_err());
+    for id in 102..123 {
+        repo.append_material(prepared_material(6100 + id, id, 2, 10), &teacher, &*clock)
+            .unwrap();
+    }
+    let page = repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None,
+            },
+            &teacher,
+            &*clock,
+        )
+        .unwrap();
+    assert_eq!(page.items.len(), 20);
+    assert_eq!(page.total, 23);
+    assert_eq!(page.items[0].id.get(), 122);
+    let tail = repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: page.next_cursor.clone(),
+            },
+            &teacher,
+            &*clock,
+        )
+        .unwrap();
+    assert_eq!(tail.items.len(), 3);
+    assert!(tail.next_cursor.is_none());
+    repo.append_material(prepared_material(6300, 123, 2, 10), &teacher, &*clock)
+        .unwrap();
+    assert_eq!(
+        repo.materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: page.next_cursor
+            },
+            &teacher,
+            &*clock
+        ),
+        Err(MaterialRepositoryError::Domain(MaterialError::StaleCursor))
+    );
+    let delete = fc_ports::MaterialDeleteRequest {
+        command_id: CommandId::new(6301).unwrap(),
+        scope: material_scope(2),
+        material_id: second.id,
+        expected_material_revision: second.revision,
+    };
+    let deleted = repo
+        .delete_material(delete.clone(), &teacher, &*clock)
+        .unwrap();
+    assert_eq!(deleted.status, MaterialStatus::Deleted);
+    assert_eq!(deleted.revision, Revision::new(2));
+    assert_eq!(
+        repo.delete_material(delete, &teacher, &*clock).unwrap(),
+        deleted
+    );
+    assert!(!repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None
+            },
+            &admin,
+            &*clock
+        )
+        .unwrap()
+        .items
+        .iter()
+        .any(|r| r.id == second.id));
+    assert!(repo
+        .managed_material(
+            material_scope(2),
+            second.id,
+            second.resource.version_id,
+            &teacher
+        )
+        .is_err());
+    let inventory = repo.resource_inventory(None).unwrap();
+    assert_eq!(inventory.original_bytes, 240);
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert_eq!(
+        repo.append_material(prepared_material(6000, 100, 2, 10), &teacher, &*clock)
+            .unwrap(),
+        second
+    );
+    assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 240);
+    assert_eq!(
+        repo.materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None
+            },
+            &teacher,
+            &*clock
+        )
+        .unwrap()
+        .total,
+        23
+    );
+}
+#[test]
+fn material_storage_original_quota_retirement_and_finalization_keep_active_references_safe() {
+    use fc_ports::{MaterialRepository, MaterialRepositoryError};
+    use fc_storage::business::materials::ResourceState;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let teacher = actor(2, 2, TrustedOrigin::Local);
+    for id in 1..=40 {
+        repo.append_material(
+            prepared_material(6500 + id, id, 2, 50 * 1024 * 1024),
+            &teacher,
+            &*clock,
+        )
+        .unwrap();
+    }
+    repo.append_material(
+        prepared_material(6541, 41, 2, 48 * 1024 * 1024),
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
+    assert_eq!(
+        repo.resource_inventory(None).unwrap().original_bytes,
+        2 * 1024 * 1024 * 1024
+    );
+    assert_eq!(
+        repo.append_material(prepared_material(6542, 42, 2, 1), &teacher, &*clock),
+        Err(MaterialRepositoryError::QuotaExceeded)
+    );
+    let entry = repo.resource_inventory(None).unwrap().entries.remove(0);
+    assert!(repo
+        .retire_resource(entry.resource.version_id, entry.revision)
+        .is_err());
+    repo.delete_material(
+        fc_ports::MaterialDeleteRequest {
+            command_id: CommandId::new(6543).unwrap(),
+            scope: material_scope(2),
+            material_id: entry.material_id,
+            expected_material_revision: Revision::new(1),
+        },
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
+    let inventory = repo.resource_inventory(None).unwrap();
+    assert_eq!(inventory.original_bytes, 2 * 1024 * 1024 * 1024);
+    let entry = inventory
+        .entries
+        .into_iter()
+        .find(|e| e.material_id == entry.material_id)
+        .unwrap();
+    assert_eq!(entry.state, ResourceState::Unreferenced);
+    let ticket = repo
+        .retire_resource(entry.resource.version_id, entry.revision)
+        .unwrap();
+    assert_eq!(
+        repo.resource_inventory(None).unwrap().original_bytes,
+        2 * 1024 * 1024 * 1024
+    );
+    // The fixture stands in for completed controlled deletion; only now may quota be released.
+    repo.finalize_resource_removal(ticket.clone()).unwrap();
+    repo.finalize_resource_removal(ticket).unwrap();
+    assert_eq!(
+        repo.resource_inventory(None).unwrap().original_bytes,
+        1998 * 1024 * 1024
+    );
+    repo.append_material(
+        prepared_material(6544, 42, 2, 50 * 1024 * 1024),
+        &teacher,
+        &*clock,
+    )
+    .unwrap();
+    assert_eq!(
+        repo.resource_inventory(None).unwrap().original_bytes,
+        2 * 1024 * 1024 * 1024
+    );
+    drop(repo);
+    drop(writer);
+    assert!(fc_storage::business::startup_state(d.path()).is_ok());
+}
+
+#[test]
+fn material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consistent() {
+    use fc_domain::{materials::*, schedule::*};
+    use fc_ports::{DisplayRepository, MaterialRepository, ScheduleRepository};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+    )));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let teacher = actor(2, 2, TrustedOrigin::Local);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        6700,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    let mut doc = timetable_document(false);
+    let mut next = doc.semesters[0].semester.tables[0].rows[0].clone();
+    next.id = RowId::new(2).unwrap();
+    next.logical_key = LogicalRowKey::new(2).unwrap();
+    next.range = MinuteRange::new(
+        Minute::from_hm(9, 10).unwrap(),
+        Minute::from_hm(9, 50).unwrap(),
+    )
+    .unwrap();
+    next.courses[0].as_mut().unwrap().teacher = TeacherBinding::Explicit(principal(3));
+    doc.semesters[0].semester.tables[0].rows.push(next);
+    let saved = repo
+        .execute_schedule(schedule_request(6701, 0, doc), &admin, &*clock)
+        .unwrap();
+    // Settle only once, after the schedule COMMIT and before this lesson ended.
+    assert!(repo
+        .desktop_facts(0, &*clock)
+        .unwrap()
+        .materials_source
+        .is_none());
+    let settled_revision = writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_revision()
+        .unwrap()
+        .wait()
+        .unwrap();
+    assert_eq!(
+        repo.desktop_facts(0, &*clock).unwrap().global_revision,
+        settled_revision
+    );
+    for id in 200..206 {
+        repo.append_material(prepared_material(6800 + id, id, 2, 10), &teacher, &*clock)
+            .unwrap();
+    }
+    repo.append_material(prepared_material(7100, 300, 3, 10), &admin, &*clock)
+        .unwrap();
+    *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 8 * 3600 + 30 * 60).unwrap();
+    let facts = repo.desktop_facts(0, &*clock).unwrap();
+    let source = facts.materials_source.clone().unwrap();
+    assert_eq!(source.kind, MaterialSourceKind::CurrentLesson);
+    assert_eq!(source.teacher_id, principal(2));
+    let page = facts.materials_page.unwrap();
+    assert_eq!(page.items.len(), 5);
+    assert_eq!(page.total, 6);
+    assert_eq!(page.items[0].id.get(), 205);
+    let tail = repo
+        .desktop_facts_with_material_cursor(0, page.next_cursor.clone(), &*clock)
+        .unwrap();
+    assert_eq!(tail.materials_page.unwrap().items[0].id.get(), 200);
+    let record = page.items[0].clone();
+    assert!(repo
+        .published_material(
+            &source,
+            SceneGeneration::new(77),
+            record.id,
+            record.resource.version_id,
+            &*clock
+        )
+        .is_err());
+    let live = Arc::new(Mutex::new(Some((source.clone(), SceneGeneration::new(77)))));
+    let guard = live.clone();
+    repo = repo.with_material_scene_guard(Arc::new(move |source, generation| {
+        if guard.lock().unwrap().as_ref() == Some(&(source.clone(), generation)) {
+            Ok(())
+        } else {
+            Err(StorageError::Material(MaterialError::InvalidContext))
+        }
+    }));
+    assert_eq!(
+        repo.published_material(
+            &source,
+            SceneGeneration::new(77),
+            record.id,
+            record.resource.version_id,
+            &*clock
+        )
+        .unwrap(),
+        record
+    );
+    let mut forged = source.clone();
+    forged.teacher_id = principal(3);
+    *live.lock().unwrap() = Some((forged.clone(), SceneGeneration::new(77)));
+    assert!(repo
+        .published_material(
+            &forged,
+            SceneGeneration::new(77),
+            record.id,
+            record.resource.version_id,
+            &*clock
+        )
+        .is_err());
+    repo.append_material(prepared_material(7101, 206, 2, 10), &teacher, &*clock)
+        .unwrap();
+    assert!(repo
+        .desktop_facts_with_material_cursor(0, page.next_cursor, &*clock)
+        .is_err());
+    *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 9 * 3600 + 5 * 60).unwrap();
+    let recess = repo.desktop_facts(0, &*clock).unwrap();
+    let break_source = recess.materials_source.clone().unwrap();
+    assert_eq!(break_source.kind, MaterialSourceKind::RetainedBreak);
+    assert_eq!(break_source.teacher_id, principal(2));
+    assert_eq!(
+        recess.materials_page.unwrap().folder.scope,
+        material_scope(2)
+    );
+    *live.lock().unwrap() = Some((break_source.clone(), SceneGeneration::new(78)));
+    assert!(repo
+        .published_material(
+            &source,
+            SceneGeneration::new(77),
+            record.id,
+            record.resource.version_id,
+            &*clock
+        )
+        .is_err());
+    assert!(repo
+        .published_material(
+            &break_source,
+            SceneGeneration::new(78),
+            record.id,
+            record.resource.version_id,
+            &*clock
+        )
+        .is_ok());
+    *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 9 * 3600 + 15 * 60).unwrap();
+    let next = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(next.materials_source.unwrap().teacher_id, principal(3));
+    assert_eq!(next.materials_page.unwrap().items[0].id.get(), 300);
+    // Editing the ended lesson during recess cannot invent its past actual teacher.
+    *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 9 * 3600 + 5 * 60).unwrap();
+    let mut changed = saved;
+    changed.semesters[0].semester.tables[0].rows[0].courses[0]
+        .as_mut()
+        .unwrap()
+        .teacher = TeacherBinding::Explicit(principal(3));
+    repo.execute_schedule(schedule_request(7102, 1, changed), &admin, &*clock)
+        .unwrap();
+    assert!(repo
+        .desktop_facts(0, &*clock)
+        .unwrap()
+        .materials_source
+        .is_none());
+    assert!(repo
+        .desktop_facts(0, &*clock)
+        .unwrap()
+        .materials_source
+        .is_none());
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert!(repo
+        .desktop_facts(0, &*clock)
+        .unwrap()
+        .materials_source
+        .is_none());
+}
+#[test]
+fn material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_and_quota() {
+    use fc_ports::MaterialRepository;
+    use std::sync::atomic::AtomicBool;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let armed = Arc::new(AtomicBool::new(false));
+    let allowed = Arc::new(AtomicBool::new(true));
+    let (mut publisher, reader) = AuthorityStore::new(
+        IdentityState::default(),
+        Revision::default(),
+        AuthEpoch::new(1),
+    );
+    publisher.initialize().unwrap();
+    let gate = reader.gate();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let _writer = Joined(Some(writer));
+    let arm = armed.clone();
+    let permit = allowed.clone();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        if arm.load(Ordering::Acquire) {
+            permit.store(false, Ordering::Release);
+        }
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let permit = allowed.clone();
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+        .with_session_guard(Arc::new(move |_, _| {
+            if permit.load(Ordering::Acquire) {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        }));
+    initialize(&mut repo, &clock);
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    armed.store(true, Ordering::Release);
+    assert!(repo
+        .append_material(
+            prepared_material(7200, 400, 2, 10),
+            &actor(2, 2, TrustedOrigin::Local),
+            &*clock
+        )
+        .is_err());
+    for key in [
+        "business/material/v1/catalog",
+        "business/material/v1/items/00000000000000000400",
+        "business/material/v1/resources/00000000000000010400",
+        "business/material/v1/receipts/00000000000000007200",
+    ] {
+        assert!(handle
+            .try_get(key.into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .is_none());
+    }
+    assert_eq!(handle.try_revision().unwrap().wait().unwrap(), before);
+    assert_eq!(gate.status().health, fc_runtime::health::Health::Healthy);
+    armed.store(false, Ordering::Release);
+    allowed.store(true, Ordering::Release);
+    assert!(repo
+        .append_material(
+            prepared_material(7200, 400, 2, 10),
+            &actor(2, 2, TrustedOrigin::Local),
+            &*clock
+        )
+        .is_ok());
+    assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 10);
+}
+
+#[test]
+fn material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startup() {
+    use fc_ports::{MaterialListRequest, MaterialRepository};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, reader) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    let teacher = actor(2, 2, TrustedOrigin::Local);
+    repo.append_material(prepared_material(7300, 500, 2, 10), &teacher, &*clock)
+        .unwrap();
+    let handle = writer.0.as_ref().unwrap().handle();
+    let item_key = "business/material/v1/items/00000000000000000500";
+    let original = handle
+        .try_get(item_key.into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    for (prefix, command) in [
+        ("\"unknown\":0,", "material-unknown"),
+        ("\"id\":500,", "material-duplicate"),
+    ] {
+        let mut damaged = b"{".to_vec();
+        damaged.extend_from_slice(prefix.as_bytes());
+        damaged.extend_from_slice(&original[1..]);
+        replace_business_blob(&handle, &reader, &repo, item_key, damaged, command);
+        assert!(repo
+            .materials(
+                MaterialListRequest {
+                    scope: material_scope(2),
+                    cursor: None
+                },
+                &teacher,
+                &*clock
+            )
+            .is_err());
+        assert!(fc_storage::business::startup_state(d.path()).is_err());
+    }
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        item_key,
+        original,
+        "material-restore-record",
+    );
+    assert!(fc_storage::business::startup_state(d.path()).is_ok());
+    let receipt_key = "business/material/v1/receipts/00000000000000007300";
+    let receipt = handle
+        .try_get(receipt_key.into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    let damaged = String::from_utf8(receipt)
+        .unwrap()
+        .replace("Lesson-500.txt", "Altered-500.txt");
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        receipt_key,
+        damaged.into_bytes(),
+        "material-receipt-tamper",
+    );
+    assert!(repo
+        .append_material(prepared_material(7300, 500, 2, 10), &teacher, &*clock)
+        .is_err());
+    // A structurally valid resource moved to the wrong stable registry key is still damage.
+    let registry_key = "business/material/v1/resources/00000000000000010500";
+    let registry = handle
+        .try_get(registry_key.into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    let damaged = String::from_utf8(registry)
+        .unwrap()
+        .replace("\"version\":10500", "\"version\":10501");
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        registry_key,
+        damaged.into_bytes(),
+        "material-registry-binding-tamper",
+    );
+    assert!(repo
+        .materials(
+            MaterialListRequest {
+                scope: material_scope(2),
+                cursor: None
+            },
+            &teacher,
+            &*clock
+        )
+        .is_err());
+    assert!(fc_storage::business::startup_state(d.path()).is_err());
+}
+
+#[test]
+fn material_postcommit_publication_fault_preserves_original_quota_and_idempotent_result() {
+    use fc_ports::{AuthorityPublisher as Port, MaterialRepository, MaterialRepositoryError};
+    use fc_runtime::{
+        authority::{AuthorityPublisher, AuthorityUpdateToken},
+        health::{GateError, Health},
+    };
+    struct Broken(AuthorityPublisher<IdentityState>);
+    impl Port for Broken {
+        type Snapshot = Snapshot;
+        type Update = AuthorityUpdateToken;
+        type Error = GateError;
+        fn snapshot_revision(&self, s: &Snapshot) -> Revision {
+            self.0.snapshot_revision(s)
+        }
+        fn begin_update(&mut self) -> Result<Self::Update, GateError> {
+            self.0.begin_update()
+        }
+        fn publish(&mut self, _: Self::Update, _: Snapshot) -> Result<(), GateError> {
+            Err(GateError::Faulted)
+        }
+        fn rollback(&mut self, t: Self::Update) -> Result<(), GateError> {
+            self.0.rollback(t)
+        }
+        fn fault(&mut self) {
+            self.0.fault()
+        }
+    }
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let before = startup.revision;
+    let (mut publisher, reader) =
+        AuthorityStore::new(startup.identity, startup.revision, AuthEpoch::new(1));
+    publisher.initialize().unwrap();
+    let gate = reader.gate();
+    let writer = StorageWriter::open(d.path(), 16, Broken(publisher)).unwrap();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let mut repo = BusinessRepository::new(writer.handle(), clock.clone(), factory)
+        .with_session_guard(Arc::new(|_, _| Ok(())));
+    let writer = Joined(Some(writer));
+    let teacher = actor(2, 2, TrustedOrigin::Local);
+    assert_eq!(
+        repo.append_material(prepared_material(7400, 600, 2, 10), &teacher, &*clock),
+        Err(MaterialRepositoryError::Faulted)
+    );
+    assert_eq!(gate.status().health, Health::Faulted);
+    assert!(repo.resource_inventory(None).is_err());
+    drop(repo);
+    drop(writer);
+    // Unknown post-COMMIT outcomes must retain the prepared original until this reconciliation.
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    assert_eq!(startup.revision, before.next().unwrap());
+    let (writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 10);
+    let committed = repo
+        .append_material(prepared_material(7400, 600, 2, 10), &teacher, &*clock)
+        .unwrap();
+    assert_eq!(committed.id.get(), 600);
+    assert_eq!(repo.resource_inventory(None).unwrap().original_bytes, 10);
+    assert_eq!(
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        before.next().unwrap()
+    );
+}

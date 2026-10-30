@@ -21,3 +21,6 @@ pub mod desktop;
 
 #[cfg(all(test, windows))]
 pub(crate) static NATIVE_TEST_SERIAL: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+#[cfg(windows)]
+pub mod materials;

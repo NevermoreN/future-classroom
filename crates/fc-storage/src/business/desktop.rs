@@ -40,6 +40,7 @@ pub(super) fn advance_watermark(
 }
 pub(super) struct ReadDesktop<S> {
     pub(super) offset: u64,
+    pub(super) material_cursor: Option<fc_domain::materials::MaterialCursor>,
     pub(super) clock: Arc<dyn Clock + Send + Sync>,
     pub(super) factory: Factory<S>,
 }
@@ -74,7 +75,9 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         let captured_at = self.clock.now();
         let previous = read_watermark(d, &identity)?;
         let date_watermark = previous.map_or(captured_at.date, |date| date.max(captured_at.date));
-        let advances = previous != Some(date_watermark);
+        let advances_day = previous != Some(date_watermark);
+        let change_confirmation = schedule::confirm_change(d, captured_at)?;
+        let advances = advances_day || change_confirmation.is_some();
         let current_revision = d.revision()?;
         let global_revision = if advances {
             current_revision
@@ -95,8 +98,19 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
             homework_eligible_total: 0,
             homework: Vec::new(),
             reminder: None,
+            materials_source: None,
+            materials_page: None,
         };
         if !facts.clock_rollback {
+            let (source, page) = materials::desktop_page(
+                d,
+                &facts.identity,
+                &facts.schedule,
+                captured_at,
+                self.material_cursor,
+            )?;
+            facts.materials_source = source;
+            facts.materials_page = page;
             if let Some(class) = facts
                 .identity
                 .installation
@@ -208,15 +222,19 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         }
         let snapshot = (self.factory)(&facts.identity, global_revision)?;
         let clock = self.clock;
+        let mut mutations = Vec::new();
+        if advances_day {
+            mutations.push(Mutation::Put {
+                key: WATERMARK.into(),
+                value: codec::bytes(&json!({"format":1,"date":codec::date(date_watermark)}))?,
+            });
+        }
+        if let Some(confirmation) = change_confirmation {
+            mutations.push(confirmation);
+        }
         Ok(TransactionDecision {
             outcome,
-            commit: Some((
-                vec![Mutation::Put {
-                    key: WATERMARK.into(),
-                    value: codec::bytes(&json!({"format":1,"date":codec::date(date_watermark)}))?,
-                }],
-                snapshot,
-            )),
+            commit: Some((mutations, snapshot)),
             precommit: Some(Box::new(move || {
                 if clock.now().date == captured_at.date {
                     Ok(())

@@ -1,7 +1,7 @@
 //! One UI-thread hidden top-level host, tray, coalesced system hints and shutdown.
 //! No writer/network joins, secret material, or privileged settings live here.
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     marker::PhantomData,
     panic::{catch_unwind, AssertUnwindSafe},
     rc::Rc,
@@ -66,12 +66,32 @@ impl HostControl {
     }
 }
 
+pub type ControlCallback = Arc<dyn Fn(HostHints) + Send + Sync>;
+
 struct State {
     hints: AtomicU32,
     control: HostControl,
     taskbar_recreated: u32,
+    control_callback: RefCell<Option<ControlCallback>>,
 }
 impl State {
+    fn control_hint(&self, hint: HostHints) {
+        self.hint(hint);
+        let callback = match self.control_callback.try_borrow() {
+            Ok(value) => value.clone(),
+            Err(_) => {
+                self.control.fault();
+                unsafe { PostQuitMessage(1) };
+                return;
+            }
+        };
+        if let Some(callback) = callback {
+            if catch_unwind(AssertUnwindSafe(|| callback(hint))).is_err() {
+                self.control.fault();
+                unsafe { PostQuitMessage(1) }
+            }
+        }
+    }
     fn hint(&self, value: HostHints) {
         self.hints.fetch_or(value.0, Ordering::Release);
     }
@@ -110,6 +130,7 @@ impl HiddenHost {
             hwnd: HWND::default(),
             state: Box::new(State {
                 hints: AtomicU32::new(0),
+                control_callback: RefCell::new(None),
                 control: HostControl(Arc::new(AtomicU32::new(0))),
                 // SAFETY: fixed application-known registered message name.
                 taskbar_recreated: unsafe { RegisterWindowMessageW(w!("TaskbarCreated")) },
@@ -174,6 +195,18 @@ impl HiddenHost {
             host.tray = true;
         }
         Ok(host)
+    }
+    /// Invoked synchronously by control-message dispatch, including native modal
+    /// nested pumps. The trusted callback must only revoke/clear in-memory state:
+    /// no database, KDF, rendering, blocking channel send or worker join is allowed.
+    /// A short UI-only borrow is released before calling it; panic faults the host.
+    pub fn set_control_callback(&self, callback: ControlCallback) -> Result<()> {
+        *self
+            .state
+            .control_callback
+            .try_borrow_mut()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))? = Some(callback);
+        Ok(())
     }
     pub fn controller(&self) -> HostControl {
         self.state.control.clone()
@@ -304,6 +337,7 @@ impl Drop for HiddenHost {
     fn drop(&mut self) {
         // SAFETY: reverse initialization order on owning thread; state remains alive
         // throughout DestroyWindow reentrancy and userdata is detached by NCDESTROY.
+        self.state.control_callback.replace(None);
         unsafe {
             FOREGROUND_TARGET.with(|target| target.set(HWND::default()));
             FOREGROUND_PENDING.with(|pending| pending.set(false));
@@ -370,16 +404,19 @@ unsafe extern "system" fn window_proc(
                     }
                     WM_TIMECHANGE => state.hint(HostHints::TIME_CHANGED),
                     WM_DISPLAYCHANGE | WM_SETTINGCHANGE => state.hint(HostHints::DISPLAY_CHANGED),
-                    WM_POWERBROADCAST => state.hint(HostHints::POWER_CHANGED),
+                    WM_POWERBROADCAST => state.control_hint(HostHints::POWER_CHANGED),
                     WM_WTSSESSION_CHANGE => {
-                        state.hint(HostHints::SESSION_CHANGED);
-                        if wparam.0 as u32 == WTS_SESSION_LOCK {
-                            state.hint(HostHints::SESSION_LOCKED);
-                        }
+                        let bits = HostHints::SESSION_CHANGED.0
+                            | if wparam.0 as u32 == WTS_SESSION_LOCK {
+                                HostHints::SESSION_LOCKED.0
+                            } else {
+                                0
+                            };
+                        state.control_hint(HostHints(bits));
                     }
                     WM_QUERYENDSESSION => return LRESULT(1),
                     WM_ENDSESSION if wparam.0 != 0 => {
-                        state.hint(HostHints::SHUTDOWN);
+                        state.control_hint(HostHints::SHUTDOWN);
                         let _ = EndMenu();
                     }
                     WM_CLOSE => {
@@ -489,11 +526,35 @@ mod tests {
             .unwrap_or_else(|p| p.into_inner());
         let host = HiddenHost::new(false).unwrap();
         let stop = host.controller();
+        let direct = Arc::new(AtomicU32::new(0));
+        let seen = direct.clone();
+        host.set_control_callback(Arc::new(move |hint| {
+            seen.fetch_or(hint.0, Ordering::Release);
+        }))
+        .unwrap();
         // SAFETY: own live hidden window only, no desktop-wide broadcast/input.
         unsafe {
             let _ = SendMessageW(host.hwnd, WM_TIMECHANGE, Some(WPARAM(0)), Some(LPARAM(0)));
+            let _ = SendMessageW(
+                host.hwnd,
+                WM_WTSSESSION_CHANGE,
+                Some(WPARAM(WTS_SESSION_LOCK as usize)),
+                Some(LPARAM(0)),
+            );
+            let _ = SendMessageW(
+                host.hwnd,
+                WM_POWERBROADCAST,
+                Some(WPARAM(0)),
+                Some(LPARAM(0)),
+            );
             let _ = SendMessageW(host.hwnd, WM_ENDSESSION, Some(WPARAM(1)), Some(LPARAM(0)));
         }
+        // The outer run loop has not started: this proves revocation reaches a
+        // nested modal dispatch directly rather than waiting for on_hints.
+        let bits = direct.load(Ordering::Acquire);
+        assert_ne!(bits & HostHints::SESSION_LOCKED.0, 0);
+        assert_ne!(bits & HostHints::POWER_CHANGED.0, 0);
+        assert_ne!(bits & HostHints::SHUTDOWN.0, 0);
         let mut ticks = 0;
         let mut time_changed = false;
         let mut shutdown_seen = false;

@@ -107,10 +107,19 @@ impl<S: Send + 'static> DisplayRepository for BusinessRepository<S> {
         offset: u64,
         _clock: &dyn Clock,
     ) -> Result<DesktopFacts, DisplayRepositoryError> {
+        self.desktop_facts_with_material_cursor(offset, None, _clock)
+    }
+    fn desktop_facts_with_material_cursor(
+        &self,
+        offset: u64,
+        cursor: Option<fc_domain::materials::MaterialCursor>,
+        _clock: &dyn Clock,
+    ) -> Result<DesktopFacts, DisplayRepositoryError> {
         let outcome = self
             .handle
             .try_transaction(super::desktop::ReadDesktop {
                 offset,
+                material_cursor: cursor,
                 clock: self.clock.clone(),
                 factory: self.factory.clone(),
             })

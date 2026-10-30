@@ -4,6 +4,8 @@
 mod application;
 #[cfg(windows)]
 mod credential_probe;
+#[cfg(windows)]
+mod material_helper;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_runtime::authority::AuthorityStore;
 use fc_storage::{CommitCommand, Mutation, StorageWriter};
@@ -25,6 +27,36 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, path] if flag == "--material-open-probe-receiver" => {
+            #[cfg(windows)]
+            {
+                material_helper::open_probe_receiver(std::path::Path::new(path))
+            }
+            #[cfg(not(windows))]
+            {
+                Err("material receiver requires Windows".into())
+            }
+        }
+        [flag] if flag == "--materials-probe" => {
+            #[cfg(windows)]
+            {
+                application::materials_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("material probe requires Windows".into())
+            }
+        }
+        [flag, path] if flag == "--material-pdf-helper" => {
+            #[cfg(windows)]
+            {
+                material_helper::pdf(std::path::Path::new(path))
+            }
+            #[cfg(not(windows))]
+            {
+                Err("material helper requires Windows".into())
+            }
+        }
         [] => {
             #[cfg(windows)]
             {

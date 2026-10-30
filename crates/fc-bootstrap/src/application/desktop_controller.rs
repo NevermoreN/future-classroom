@@ -5,10 +5,12 @@ use fc_bootstrap::backend::{Backend, SessionControl};
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
     ids::{Revision, SceneGeneration},
-    time::LocalDateTime,
+    materials::MaterialCursor,
+    schedule::AcademicDay,
+    time::{LocalDate, LocalDateTime},
 };
 use fc_presentation::{
-    scene::{build_scene, SceneSnapshot},
+    scene::{build_scene, CardContent, SceneSnapshot},
     Rect,
 };
 use fc_runtime::{
@@ -49,6 +51,7 @@ enum Navigation {
     Refresh,
     Forward { from: u64 },
     Backward { from: u64, target: u64 },
+    Material,
 }
 #[derive(Default)]
 struct BatchHistory {
@@ -56,7 +59,9 @@ struct BatchHistory {
 }
 impl BatchHistory {
     fn target(&self, scene: &SceneSnapshot, event: &DesktopEvent) -> Option<(u64, Navigation)> {
-        let DesktopEvent::HomeworkBatch { generation, offset } = *event;
+        let DesktopEvent::HomeworkBatch { generation, offset } = *event else {
+            return None;
+        };
         if generation != scene.generation {
             return None;
         }
@@ -84,6 +89,7 @@ impl BatchHistory {
     }
     fn accept(&mut self, navigation: Navigation, offset: u64) -> bool {
         match navigation {
+            Navigation::Material => true,
             Navigation::Refresh => {
                 self.previous.clear();
                 offset == 0
@@ -108,12 +114,19 @@ impl BatchHistory {
         self.previous.clear();
     }
 }
+#[derive(Clone)]
+struct Request {
+    offset: u64,
+    navigation: Navigation,
+    material_cursor: Option<MaterialCursor>,
+}
 struct Pending {
     ticket: JobTicket<super::Result<Outcome>>,
     source: Revision,
     generation: Option<SceneGeneration>,
     offset: u64,
     navigation: Navigation,
+    material_cursor: Option<MaterialCursor>,
     cancelled: bool,
 }
 #[derive(Default)]
@@ -144,7 +157,10 @@ pub(super) struct Controller {
     generation: SceneGeneration,
     work: Option<Rect>,
     pending: Option<Pending>,
-    requested: Option<(u64, Navigation)>,
+    requested: Option<Request>,
+    control: Option<SessionControl>,
+    material_events: Vec<DesktopEvent>,
+    refresh_at: Option<LocalDateTime>,
     history: BatchHistory,
     next_fetch: Instant,
     next_render: Instant,
@@ -153,6 +169,106 @@ pub(super) struct Controller {
     stopped: bool,
     probe: bool,
     probe_presented: bool,
+}
+// The read context expires at every timetable boundary, even if a layout error
+// prevented producing a SceneSnapshot. Retained material ownership is never aged
+// into a new lesson by changing captured_at on an old snapshot.
+fn next_context_boundary(facts: &DesktopFacts) -> Option<LocalDateTime> {
+    let now = facts.captured_at;
+    let d = now.date;
+    let tomorrow = LocalDate::new(d.year(), d.month(), d.day() + 1).or_else(|_| {
+        if d.month() < 12 {
+            LocalDate::new(d.year(), d.month() + 1, 1)
+        } else {
+            LocalDate::new(d.year() + 1, 1, 1)
+        }
+    });
+    let mut next = tomorrow
+        .ok()
+        .and_then(|date| LocalDateTime::new(date, 0).ok());
+    if let Some(class) = facts
+        .identity
+        .installation
+        .as_ref()
+        .and_then(|i| i.current_class)
+    {
+        if let Ok(AcademicDay::Scheduled(day)) = facts.schedule.resolve_day(class, now.date) {
+            let weekday = day.source_date.weekday();
+            for row in &day.table.rows {
+                if !row.enabled_days[weekday.index()] {
+                    continue;
+                }
+                for boundary in [row.range.begin, row.range.end] {
+                    let second = u32::from(boundary.get()) * 60;
+                    if second > now.second_of_day() {
+                        if let Ok(end) = LocalDateTime::new(now.date, second) {
+                            if next.is_none_or(|old| end < old) {
+                                next = Some(end);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    next
+}
+fn current_material_cursor(facts: &DesktopFacts) -> Option<MaterialCursor> {
+    let page = facts.materials_page.as_ref()?;
+    (page.offset > 0).then(|| MaterialCursor {
+        folder_id: page.folder.id,
+        folder_revision: page.folder.revision,
+        scope: page.folder.scope,
+        class_id: page.class_id,
+        source: page.source.clone(),
+        offset: page.offset,
+    })
+}
+fn material_page_matches(facts: &DesktopFacts, cursor: Option<&MaterialCursor>) -> bool {
+    match cursor {
+        None => facts.materials_page.as_ref().is_none_or(|p| p.offset == 0),
+        Some(cursor) => facts.materials_page.as_ref().is_some_and(|p| {
+            p.offset == cursor.offset
+                && cursor
+                    .validate(&p.folder, p.source.as_ref(), p.class_id)
+                    .is_ok()
+        }),
+    }
+}
+fn material_event_matches(scene: &SceneSnapshot, event: &DesktopEvent) -> bool {
+    scene.cards.iter().any(|card| {
+        let CardContent::Materials(content) = &card.content else {
+            return false;
+        };
+        match event {
+            DesktopEvent::MaterialOpen {
+                generation,
+                source,
+                folder_id,
+                folder_revision,
+                material_id,
+                resource_version,
+            } => {
+                *generation == scene.generation
+                    && *source == content.source
+                    && Some(*folder_id) == content.folder_id
+                    && *folder_revision == content.folder_revision
+                    && content.rows.iter().any(|r| {
+                        r.material_id == *material_id && r.resource_version == *resource_version
+                    })
+            }
+            DesktopEvent::MaterialPage {
+                generation,
+                source,
+                cursor,
+            } => {
+                *generation == scene.generation
+                    && *source == content.source
+                    && content.next_cursor.as_ref() == Some(cursor)
+            }
+            _ => false,
+        }
+    })
 }
 impl Controller {
     pub(super) fn new(probe: bool) -> Result<Self, String> {
@@ -172,6 +288,9 @@ impl Controller {
             work: None,
             pending: None,
             requested: None,
+            control: None,
+            material_events: Vec::new(),
+            refresh_at: None,
             history: BatchHistory::default(),
             next_fetch: Instant::now(),
             next_render: Instant::now(),
@@ -183,6 +302,10 @@ impl Controller {
         })
     }
     pub(super) fn hide(&mut self) {
+        if let Some(control) = &self.control {
+            control.clear_material_scene();
+        }
+        self.material_events.clear();
         self.renderer.hide();
         self.probe_presented = false;
     }
@@ -206,6 +329,9 @@ impl Controller {
     pub(super) fn probe_metrics(&self) -> DesktopMetrics {
         self.renderer.diagnostics()
     }
+    pub(super) fn take_material_events(&mut self) -> Vec<DesktopEvent> {
+        std::mem::take(&mut self.material_events)
+    }
     pub(super) fn take_notice(&mut self) -> Option<String> {
         self.notice.take()
     }
@@ -216,6 +342,33 @@ impl Controller {
         self.next_render = Instant::now() + RETRY;
     }
     fn rendered(&mut self, outcome: PresentOutcome) {
+        let visible = matches!(
+            outcome,
+            PresentOutcome::Published | PresentOutcome::Unchanged
+        ) || self.probe && outcome == PresentOutcome::Offscreen;
+        if let Some(control) = &self.control {
+            let published = visible
+                && self.scene.as_ref().is_some_and(|scene| {
+                    scene
+                        .cards
+                        .iter()
+                        .find_map(|card| match &card.content {
+                            CardContent::Materials(content) => Some(&content.source),
+                            _ => None,
+                        })
+                        .is_some_and(|source| {
+                            control.publish_material_scene(
+                                source,
+                                scene.generation,
+                                scene.source_revision,
+                            )
+                        })
+                });
+            if !published {
+                control.clear_material_scene();
+                self.material_events.clear();
+            }
+        }
         self.probe_presented = outcome == PresentOutcome::Offscreen;
         self.notice.rendered(outcome);
     }
@@ -225,6 +378,7 @@ impl Controller {
         self.scene = None;
         self.history.clear();
         self.requested = None;
+        self.refresh_at = None;
     }
     fn cancel_pending(&mut self) {
         if let Some(pending) = &mut self.pending {
@@ -283,6 +437,9 @@ impl Controller {
         if status.health != Health::Healthy
             || status.revision != facts.global_revision
             || facts.captured_at.date != now.date
+            || facts.captured_at > now
+            || next_context_boundary(&facts).is_some_and(|end| now >= end)
+            || !material_page_matches(&facts, pending.material_cursor.as_ref())
             || facts.validate().is_err()
             || !navigation_current
             || facts.homework_offset != pending.offset
@@ -297,6 +454,7 @@ impl Controller {
             self.invalidate();
             return Ok(false);
         }
+        self.refresh_at = next_context_boundary(&facts);
         self.facts = Some(facts);
         self.requested = None;
         Ok(true)
@@ -313,13 +471,22 @@ impl Controller {
         let Ok(status) = gate.check_sensitive() else {
             return Ok(());
         };
-        let (offset, navigation) = self.requested.unwrap_or((0, Navigation::Refresh));
+        let request = self.requested.clone().unwrap_or(Request {
+            offset: 0,
+            navigation: Navigation::Refresh,
+            material_cursor: None,
+        });
+        let Request {
+            offset,
+            navigation,
+            material_cursor,
+        } = request;
         let Ok(index) = usize::try_from(offset) else {
             self.invalidate();
             return Err("桌面分页超出支持范围".into());
         };
         match pool.handle().try_submit(
-            Work::Desktop(backend.clone(), index),
+            Work::Desktop(backend.clone(), index, material_cursor.clone()),
             Instant::now() + FACTS_DEADLINE,
         ) {
             Ok(ticket) => {
@@ -329,6 +496,7 @@ impl Controller {
                     generation: self.scene.as_ref().map(|s| s.generation),
                     offset,
                     navigation,
+                    material_cursor,
                     cancelled: false,
                 });
                 self.next_fetch = Instant::now() + RETRY;
@@ -352,6 +520,9 @@ impl Controller {
     ) -> Result<(), String> {
         if self.stopped {
             return Ok(());
+        }
+        if let Some(control) = control {
+            self.control = Some(control.clone());
         }
         if hints.contains(HostHints::SHUTDOWN) {
             self.stop();
@@ -399,7 +570,12 @@ impl Controller {
             return Ok(());
         }
         let stale = self.facts.as_ref().is_some_and(|f| {
-            f.global_revision != status.revision || f.captured_at.date != now.date
+            f.global_revision != status.revision
+                || f.captured_at.date != now.date
+                || !received
+                    && (hints.contains(HostHints::TIME_CHANGED)
+                        || self.last_sample.is_some_and(|previous| now < previous)
+                        || self.refresh_at.is_some_and(|end| now >= end))
         });
         if stale {
             self.invalidate();
@@ -447,8 +623,8 @@ impl Controller {
                 }
             };
             let facts = self.facts.as_mut().expect("facts checked above");
-            // Same-day lesson boundaries only reuse this coherent owned snapshot;
-            // midnight/date rollback always fetched new facts and persisted floor.
+            // Clock-only/work-area changes reuse this coherent snapshot. All lesson
+            // boundaries and wall-clock changes fetched fresh material facts above.
             facts.captured_at = now;
             let scene = match build_scene(facts, generation, work, &self.measure) {
                 Ok(scene) => scene,
@@ -484,23 +660,64 @@ impl Controller {
                 return Ok(());
             }
         };
+        self.rendered(outcome);
         let events = match self.renderer.take_events() {
             Ok(events) => events,
             Err(_) => {
-                self.render_unavailable("桌面分页输入暂不可用，已隐藏并稍后重试。");
+                self.render_unavailable("桌面资料与分页输入暂不可用，已隐藏并稍后重试。");
                 return Ok(());
             }
         };
-        if self.pending.is_none() && self.requested.is_none() {
-            for event in events {
-                if let Some(request) = self.history.target(scene, &event) {
-                    self.requested = Some(request);
-                    self.next_fetch = Instant::now();
-                    break;
+        let scene = self.scene.as_ref().expect("composed scene");
+        for event in events {
+            match &event {
+                DesktopEvent::MaterialOpen { .. } => {
+                    if material_event_matches(scene, &event)
+                        && self.control.as_ref().is_some_and(|control| match &event {
+                            DesktopEvent::MaterialOpen {
+                                source, generation, ..
+                            } => control.material_open_guard(
+                                source,
+                                *generation,
+                                scene.source_revision,
+                            ),
+                            _ => false,
+                        })
+                        && self.material_events.len() < 8
+                    {
+                        self.material_events.push(event);
+                    }
+                }
+                DesktopEvent::MaterialPage { cursor, .. } => {
+                    if self.pending.is_none()
+                        && self.requested.is_none()
+                        && material_event_matches(scene, &event)
+                    {
+                        self.requested = Some(Request {
+                            offset: self.facts.as_ref().map_or(0, |f| f.homework_offset),
+                            navigation: Navigation::Material,
+                            material_cursor: Some(cursor.clone()),
+                        });
+                        self.next_fetch = Instant::now();
+                    }
+                }
+                DesktopEvent::HomeworkBatch { .. } => {
+                    if self.pending.is_none() && self.requested.is_none() {
+                        if let Some((offset, navigation)) = self.history.target(scene, &event) {
+                            self.requested = Some(Request {
+                                offset,
+                                navigation,
+                                material_cursor: self
+                                    .facts
+                                    .as_ref()
+                                    .and_then(|f| current_material_cursor(f)),
+                            });
+                            self.next_fetch = Instant::now();
+                        }
+                    }
                 }
             }
         }
-        self.rendered(outcome);
         if self.requested.is_some() && !management_busy {
             self.submit(backend, &gate, pool)?;
         }
@@ -680,6 +897,165 @@ mod tests {
             HISTORY_LIMIT as u64 + 1
         ));
         assert_eq!(history.previous.len(), HISTORY_LIMIT);
+    }
+    fn material_scene() -> SceneSnapshot {
+        use fc_domain::{ids::*, materials::*, schedule::*, time::*};
+        let mut scene = scene();
+        let source = MaterialSource {
+            kind: MaterialSourceKind::CurrentLesson,
+            lesson: LessonInstanceKey {
+                actual_date: sample(0).date,
+                class_id: ClassId::new(1).unwrap(),
+                version: ResolvedScheduleVersion {
+                    actual_semester_id: SemesterId::new(1).unwrap(),
+                    actual_revision: Revision::new(1),
+                    source_semester_id: SemesterId::new(1).unwrap(),
+                    source_revision: Revision::new(1),
+                    calendar_mode: CalendarMode::School,
+                    calendar_mode_revision: Revision::new(1),
+                    applied_calendar_revision: Revision::new(1),
+                    makeup_mapping_revision: Revision::new(1),
+                    source_table_id: TableId::new(1).unwrap(),
+                    source_row_id: RowId::new(1).unwrap(),
+                    rules_revision: Revision::new(1),
+                },
+                range: MinuteRange::new(Minute::new(0).unwrap(), Minute::new(60).unwrap()).unwrap(),
+            },
+            subject_id: SubjectId::new(1).unwrap(),
+            teacher_id: PrincipalId::new(2).unwrap(),
+            evidence: MaterialSourceEvidence::BaseTimetableOnly,
+        };
+        let folder_id = FolderId::new(7).unwrap();
+        let folder_revision = Revision::new(9);
+        let cursor = MaterialCursor {
+            folder_id,
+            folder_revision,
+            scope: MaterialScope {
+                teacher_id: source.teacher_id,
+                subject_id: source.subject_id,
+            },
+            class_id: Some(source.lesson.class_id),
+            source: Some(source.clone()),
+            offset: 5,
+        };
+        scene.cards.push(fc_presentation::scene::SceneCard {
+            kind: ComponentKind::Materials,
+            rect: Rect {
+                x: 0.,
+                y: 0.,
+                width: 200.,
+                height: 100.,
+            },
+            font_dip: 22.,
+            component_alpha: 1.,
+            surface_alpha: 0.03,
+            edge_alpha: 0.5,
+            content: CardContent::Materials(Box::new(
+                fc_presentation::scene::MaterialListContent {
+                    source,
+                    folder_id: Some(folder_id),
+                    folder_revision,
+                    teacher_name: "老师".into(),
+                    subject_name: "语文".into(),
+                    rows: vec![fc_presentation::scene::SceneMaterialRow {
+                        material_id: MaterialId::new(5).unwrap(),
+                        resource_version: ResourceVersionId::new(55).unwrap(),
+                        name: "资料.txt".into(),
+                    }],
+                    next_cursor: Some(cursor),
+                    total: 6,
+                },
+            )),
+            page: fc_presentation::scene::PageInfo {
+                offset: 0,
+                shown: 1,
+                total: 6,
+            },
+        });
+        scene
+    }
+    #[test]
+    fn material_events_require_exact_published_generation_source_and_fixed_resource() {
+        use fc_domain::ids::*;
+        let scene = material_scene();
+        let CardContent::Materials(content) = &scene.cards[0].content else {
+            panic!()
+        };
+        let mut event = DesktopEvent::MaterialOpen {
+            generation: scene.generation,
+            source: content.source.clone(),
+            folder_id: content.folder_id.unwrap(),
+            folder_revision: content.folder_revision,
+            material_id: content.rows[0].material_id,
+            resource_version: content.rows[0].resource_version,
+        };
+        assert!(material_event_matches(&scene, &event));
+        if let DesktopEvent::MaterialOpen {
+            resource_version, ..
+        } = &mut event
+        {
+            *resource_version = ResourceVersionId::new(56).unwrap();
+        }
+        assert!(!material_event_matches(&scene, &event));
+        if let DesktopEvent::MaterialOpen {
+            resource_version,
+            generation,
+            ..
+        } = &mut event
+        {
+            *resource_version = ResourceVersionId::new(55).unwrap();
+            *generation = SceneGeneration::new(2);
+        }
+        assert!(!material_event_matches(&scene, &event));
+        if let DesktopEvent::MaterialOpen {
+            generation, source, ..
+        } = &mut event
+        {
+            *generation = scene.generation;
+            source.teacher_id = PrincipalId::new(3).unwrap();
+        }
+        assert!(!material_event_matches(&scene, &event));
+        let mut page = DesktopEvent::MaterialPage {
+            generation: scene.generation,
+            source: content.source.clone(),
+            cursor: content.next_cursor.clone().unwrap(),
+        };
+        assert!(material_event_matches(&scene, &page));
+        if let DesktopEvent::MaterialPage { cursor, .. } = &mut page {
+            cursor.offset += 1;
+        }
+        assert!(!material_event_matches(&scene, &page));
+    }
+    #[test]
+    fn material_navigation_preserves_variable_homework_page_history() {
+        let mut history = BatchHistory::default();
+        assert!(history.accept(Navigation::Refresh, 0));
+        assert!(history.accept(Navigation::Forward { from: 0 }, 29));
+        assert!(history.accept(Navigation::Material, 29));
+        assert_eq!(history.previous, vec![0]);
+        assert!(history.accept(
+            Navigation::Backward {
+                from: 29,
+                target: 0
+            },
+            0
+        ));
+        assert!(history.previous.is_empty());
+        // A material event can never masquerade as a homework batch.
+        let scene = material_scene();
+        let CardContent::Materials(content) = &scene.cards[0].content else {
+            panic!()
+        };
+        assert!(history
+            .target(
+                &scene,
+                &DesktopEvent::MaterialPage {
+                    generation: scene.generation,
+                    source: content.source.clone(),
+                    cursor: content.next_cursor.clone().unwrap()
+                }
+            )
+            .is_none());
     }
     #[test]
     fn recoverable_render_notice_is_reported_once_and_cleared_once_after_actual_success() {

@@ -31,6 +31,8 @@ pub enum StorageError {
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
+    Material(fc_domain::materials::MaterialError),
+    ResourceQuota,
     LoginRateLimited {
         retry_after_millis: u64,
     },
@@ -182,6 +184,19 @@ impl<T> Ticket<T> {
 pub trait TransactionDocuments {
     fn get(&self, key: &str) -> Result<Option<Document>, StorageError>;
     fn revision(&self) -> Result<Revision, StorageError>;
+    /// Metadata-only ordered page, valid only inside the current writer transaction.
+    /// At most 128 rows and 512 KiB of owned key/value capacity are returned.
+    /// A short page can still have a continuation: follow next_key, never len().
+    fn scan_prefix(
+        &self,
+        prefix: &str,
+        after_key: Option<&str>,
+        limit: usize,
+    ) -> Result<DocumentPage, StorageError>;
+}
+pub struct DocumentPage {
+    pub entries: Vec<(String, Document)>,
+    pub next_key: Option<String>,
 }
 /// Trusted composition code only. Evaluate must be short, deterministic except
 /// its injected clock, and must never reenter the writer, perform file I/O or KDF.
@@ -233,6 +248,73 @@ impl TransactionDocuments for TransactionView<'_> {
     }
     fn revision(&self) -> Result<Revision, StorageError> {
         read_revision(self.0)
+    }
+    fn scan_prefix(
+        &self,
+        prefix: &str,
+        after_key: Option<&str>,
+        limit: usize,
+    ) -> Result<DocumentPage, StorageError> {
+        if prefix.is_empty()
+            || prefix.len() > 128
+            || !prefix.bytes().all(|b| (0x20..=0x7e).contains(&b))
+            || limit == 0
+            || limit > 128
+            || after_key.is_some_and(|key| key.len() > 256 || !key.starts_with(prefix))
+        {
+            return Err(StorageError::InvalidCommand);
+        }
+        let mut upper = prefix.as_bytes().to_vec();
+        *upper.last_mut().ok_or(StorageError::InvalidCommand)? += 1;
+        let upper = String::from_utf8(upper).map_err(|_| StorageError::InvalidCommand)?;
+        let mut statement=self.0.prepare("SELECT key,value,revision FROM documents WHERE key>=?1 AND key<?2 AND key>?3 ORDER BY key LIMIT ?4").map_err(|_|StorageError::Database)?;
+        let mut rows = statement
+            .query(params![prefix, upper, after_key.unwrap_or(""), limit + 1])
+            .map_err(|_| StorageError::Database)?;
+        let mut entries = Vec::with_capacity(limit);
+        let mut owned = 0usize;
+        let mut more = false;
+        while let Some(row) = rows.next().map_err(|_| StorageError::Database)? {
+            let key = match row.get_ref(0).map_err(|_| StorageError::Database)? {
+                rusqlite::types::ValueRef::Text(bytes)
+                    if !bytes.is_empty() && bytes.len() <= 256 =>
+                {
+                    std::str::from_utf8(bytes).map_err(|_| StorageError::Database)?
+                }
+                _ => return Err(StorageError::Database),
+            };
+            let value = match row.get_ref(1).map_err(|_| StorageError::Database)? {
+                rusqlite::types::ValueRef::Blob(bytes) if bytes.len() <= MAX_VALUE_BYTES => bytes,
+                _ => return Err(StorageError::Database),
+            };
+            let bytes = key
+                .len()
+                .checked_add(value.len())
+                .ok_or(StorageError::Database)?;
+            if entries.len() == limit || bytes > 512 * 1024 - owned {
+                more = true;
+                break;
+            }
+            let key = key.to_owned();
+            let value = value.to_vec();
+            owned = owned
+                .checked_add(key.capacity() + value.capacity())
+                .filter(|total| *total <= 512 * 1024)
+                .ok_or(StorageError::Database)?;
+            entries.push((
+                key,
+                Document {
+                    value,
+                    revision: Revision::new(row.get(2).map_err(|_| StorageError::Database)?),
+                },
+            ));
+        }
+        let next_key = if more {
+            Some(entries.last().ok_or(StorageError::Database)?.0.clone())
+        } else {
+            None
+        };
+        Ok(DocumentPage { entries, next_key })
     }
 }
 
@@ -1512,6 +1594,10 @@ mod tests {
                 TransactionView(&db).get("oversize"),
                 Err(StorageError::Database)
             );
+            assert!(matches!(
+                TransactionView(&db).scan_prefix("over", None, 128),
+                Err(StorageError::Database)
+            ));
             assert_eq!(
                 TransactionView(&db)
                     .get("exact")
@@ -1541,5 +1627,40 @@ mod tests {
             MAX_VALUE_BYTES
         );
         writer.shutdown().unwrap();
+    }
+    #[test]
+    fn metadata_scan_short_byte_limited_pages_keep_explicit_continuation() {
+        let temp = TempDatabase::new();
+        let db = open_connection(&temp.path()).unwrap();
+        for index in 0..10 {
+            db.execute(
+                "INSERT INTO documents VALUES (?1,zeroblob(?2),1)",
+                params![format!("scan/{index:03}"), MAX_VALUE_BYTES as u64],
+            )
+            .unwrap();
+        }
+        let first = TransactionView(&db)
+            .scan_prefix("scan/", None, 128)
+            .unwrap();
+        assert_eq!(first.entries.len(), 7);
+        assert!(
+            first
+                .entries
+                .iter()
+                .map(|(key, d)| key.capacity() + d.value.capacity())
+                .sum::<usize>()
+                <= 512 * 1024
+        );
+        let second = TransactionView(&db)
+            .scan_prefix("scan/", first.next_key.as_deref(), 128)
+            .unwrap();
+        assert_eq!(second.entries.len(), 3);
+        assert!(second.next_key.is_none());
+        assert_eq!(first.entries[6].0, "scan/006");
+        assert_eq!(second.entries[0].0, "scan/007");
+        assert!(matches!(
+            TransactionView(&db).scan_prefix("scan/", Some("other"), 128),
+            Err(StorageError::InvalidCommand)
+        ));
     }
 }

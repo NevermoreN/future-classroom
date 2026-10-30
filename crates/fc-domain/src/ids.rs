@@ -27,7 +27,8 @@ ids!(
     OverrideId,
     FolderId,
     CommandId,
-    MaterialId
+    MaterialId,
+    ResourceVersionId
 );
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -342,4 +342,227 @@ pub trait DisplayRepository {
         offset: u64,
         clock: &dyn Clock,
     ) -> Result<fc_domain::desktop::DesktopFacts, DisplayRepositoryError>;
+    /// Atomic re-read of all facts while paging the current exact material source.
+    /// Cursor is a stale-state condition, never proof of publication authority.
+    fn desktop_facts_with_material_cursor(
+        &self,
+        offset: u64,
+        cursor: Option<fc_domain::materials::MaterialCursor>,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::desktop::DesktopFacts, DisplayRepositoryError>;
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialAppendMetadata {
+    pub command_id: fc_domain::ids::CommandId,
+    pub scope: fc_domain::materials::MaterialScope,
+    pub material_id: fc_domain::ids::MaterialId,
+    pub display_name: String,
+    pub allowed_class_ids: Vec<fc_domain::ids::ClassId>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialAppendRequest {
+    pub command_id: fc_domain::ids::CommandId,
+    pub scope: fc_domain::materials::MaterialScope,
+    pub append: fc_domain::materials::MaterialAppend,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialDeleteRequest {
+    pub command_id: fc_domain::ids::CommandId,
+    pub scope: fc_domain::materials::MaterialScope,
+    pub material_id: fc_domain::ids::MaterialId,
+    pub expected_material_revision: Revision,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialListRequest {
+    pub scope: fc_domain::materials::MaterialScope,
+    pub cursor: Option<fc_domain::materials::MaterialCursor>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum MaterialRepositoryError {
+    Domain(fc_domain::materials::MaterialError),
+    Unavailable,
+    Faulted,
+    IdempotencyConflict,
+    QuotaExceeded,
+    DocumentTooLarge,
+    Cancelled,
+}
+/// Trusted filesystem adapter: stream-copy, verify actual bytes/type, hash and
+/// flush the controlled final object before returning this immutable descriptor.
+/// Implementations run on the shared workers, never inside a writer transaction.
+pub trait MaterialPreparation {
+    type Input;
+    fn prepare(
+        &mut self,
+        input: Self::Input,
+    ) -> Result<fc_domain::materials::MaterialResource, MaterialRepositoryError>;
+}
+/// Opaque verified append. No Deserialize/Clone/public constructor or mutator;
+/// only the trusted preparation adapter can bind a final resource to metadata.
+pub struct PreparedMaterialAppend {
+    request: MaterialAppendRequest,
+}
+impl PreparedMaterialAppend {
+    pub fn request(&self) -> &MaterialAppendRequest {
+        &self.request
+    }
+    pub fn allocation_bytes(&self) -> Option<usize> {
+        self.request.append.allocation_bytes()
+    }
+
+    /// Storage's trusted composition path consumes the proof, then rechecks exact
+    /// actor/lease/scope/quota at commit. Never expose this plain request as HTTP.
+    pub fn into_request(self) -> MaterialAppendRequest {
+        self.request
+    }
+}
+pub fn prepare_material_append<P: MaterialPreparation>(
+    preparation: &mut P,
+    input: P::Input,
+    metadata: MaterialAppendMetadata,
+) -> Result<PreparedMaterialAppend, MaterialRepositoryError> {
+    fc_domain::materials::validate_material_name(&metadata.display_name)
+        .map_err(MaterialRepositoryError::Domain)?;
+    if metadata.allowed_class_ids.is_empty()
+        || metadata.allowed_class_ids.len() > fc_domain::identity::MAX_CLASSES
+    {
+        return Err(MaterialRepositoryError::Domain(
+            fc_domain::materials::MaterialError::Capacity,
+        ));
+    }
+    if metadata
+        .allowed_class_ids
+        .iter()
+        .enumerate()
+        .any(|(index, id)| metadata.allowed_class_ids[..index].contains(id))
+    {
+        return Err(MaterialRepositoryError::Domain(
+            fc_domain::materials::MaterialError::InvalidScope,
+        ));
+    }
+    let resource = preparation.prepare(input)?;
+    let append = fc_domain::materials::MaterialAppend {
+        material_id: metadata.material_id,
+        display_name: metadata.display_name,
+        resource,
+        allowed_class_ids: metadata.allowed_class_ids,
+    };
+    append.validate().map_err(MaterialRepositoryError::Domain)?;
+    Ok(PreparedMaterialAppend {
+        request: MaterialAppendRequest {
+            command_id: metadata.command_id,
+            scope: metadata.scope,
+            append,
+        },
+    })
+}
+/// Owner/global management is actor+exact-lease gated. Published scene lookup is
+/// a separate narrow guest capability: implementations re-resolve the actual
+/// class/date/joint schedule source from current DB state, compare source, and
+/// require a trusted publication-generation guard; never fabricate an ActorContext.
+pub trait MaterialRepository {
+    fn materials(
+        &self,
+        request: MaterialListRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::materials::MaterialPage, MaterialRepositoryError>;
+    fn append_material(
+        &mut self,
+        prepared: PreparedMaterialAppend,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::materials::MaterialRecord, MaterialRepositoryError>;
+    fn delete_material(
+        &mut self,
+        request: MaterialDeleteRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::materials::MaterialRecord, MaterialRepositoryError>;
+    fn published_material(
+        &self,
+        source: &fc_domain::materials::MaterialSource,
+        generation: fc_domain::ids::SceneGeneration,
+        material_id: fc_domain::ids::MaterialId,
+        resource_version: fc_domain::ids::ResourceVersionId,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::materials::MaterialRecord, MaterialRepositoryError>;
+}
+
+impl MaterialAppendMetadata {
+    pub fn allocation_bytes(&self) -> Option<usize> {
+        self.display_name.capacity().checked_add(
+            self.allowed_class_ids
+                .capacity()
+                .checked_mul(std::mem::size_of::<fc_domain::ids::ClassId>())?,
+        )
+    }
+}
+
+#[cfg(test)]
+mod material_preparation_tests {
+    use super::*;
+    use fc_domain::{ids::*, materials::*};
+    struct Preparation {
+        calls: usize,
+        kind: MaterialKind,
+    }
+    impl MaterialPreparation for Preparation {
+        type Input = ();
+        fn prepare(&mut self, _: ()) -> Result<MaterialResource, MaterialRepositoryError> {
+            self.calls += 1;
+            Ok(MaterialResource {
+                version_id: ResourceVersionId::new(7).unwrap(),
+                sha256: [3; 32],
+                kind: self.kind,
+                bytes: 10,
+            })
+        }
+    }
+    fn metadata() -> MaterialAppendMetadata {
+        MaterialAppendMetadata {
+            command_id: CommandId::new(1).unwrap(),
+            scope: MaterialScope {
+                teacher_id: PrincipalId::new(2).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+            },
+            material_id: MaterialId::new(8).unwrap(),
+            display_name: "课堂资料.txt".into(),
+            allowed_class_ids: vec![ClassId::new(1).unwrap()],
+        }
+    }
+    #[test]
+    fn invalid_metadata_is_rejected_before_resource_adapter_io() {
+        let mut adapter = Preparation {
+            calls: 0,
+            kind: MaterialKind::Txt,
+        };
+        let mut invalid = metadata();
+        invalid.display_name = "../x.txt".into();
+        assert!(prepare_material_append(&mut adapter, (), invalid).is_err());
+        let mut invalid = metadata();
+        invalid.allowed_class_ids.push(ClassId::new(1).unwrap());
+        assert!(prepare_material_append(&mut adapter, (), invalid).is_err());
+        assert_eq!(adapter.calls, 0);
+    }
+    #[test]
+    fn prepared_append_binds_fixed_version_hash_size_and_type() {
+        let mut adapter = Preparation {
+            calls: 0,
+            kind: MaterialKind::Txt,
+        };
+        let proof = prepare_material_append(&mut adapter, (), metadata()).unwrap();
+        assert_eq!(proof.request().append.resource.version_id.get(), 7);
+        assert_eq!(proof.request().append.resource.sha256, [3; 32]);
+        assert_eq!(proof.request().append.resource.bytes, 10);
+        assert_eq!(proof.into_request().append.material_id.get(), 8);
+        adapter.kind = MaterialKind::Pdf;
+        assert!(matches!(
+            prepare_material_append(&mut adapter, (), metadata()),
+            Err(MaterialRepositoryError::Domain(
+                MaterialError::InvalidResource
+            ))
+        ));
+    }
 }

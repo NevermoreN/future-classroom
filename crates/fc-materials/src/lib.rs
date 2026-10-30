@@ -2,6 +2,8 @@
 //! the WIC adapter's responsibility; filenames alone never establish media validity.
 #![forbid(unsafe_code)]
 pub mod office;
+pub mod pdf_validation;
+pub mod validation;
 
 use std::fmt;
 use std::io::{self, Read, Write};

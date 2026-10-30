@@ -150,6 +150,9 @@ fn fixture() -> DesktopFacts {
             updated_at: now(30000),
         })
         .collect();
+    let materials_source =
+        fc_domain::materials::resolve_material_source(&identity, &schedule, class, now(30300))
+            .unwrap();
     DesktopFacts {
         global_revision: Revision::new(100),
         captured_at: now(30300),
@@ -162,11 +165,33 @@ fn fixture() -> DesktopFacts {
         homework_eligible_total: 2,
         homework,
         reminder: None,
+        materials_source,
+        materials_page: None,
     }
 }
 fn scene(facts: &DesktopFacts) -> SceneSnapshot {
+    let mut fresh = facts.clone();
+    fresh.materials_source = if fresh.clock_rollback {
+        None
+    } else {
+        fresh
+            .identity
+            .installation
+            .as_ref()
+            .and_then(|i| i.current_class)
+            .and_then(|class| {
+                fc_domain::materials::resolve_material_source(
+                    &fresh.identity,
+                    &fresh.schedule,
+                    class,
+                    fresh.captured_at,
+                )
+                .ok()
+                .flatten()
+            })
+    };
     build_scene(
-        facts,
+        &fresh,
         SceneGeneration::new(1),
         Rect {
             x: 0.,
@@ -449,4 +474,171 @@ fn custom_minimum_constraints_grow_cards_when_space_exists() {
         .unwrap();
     assert!(material.rect.height >= 200.);
     assert!(material.rect.width >= 400.);
+}
+
+fn material_facts(count: u64) -> DesktopFacts {
+    use fc_domain::materials::*;
+    let mut facts = fixture();
+    let source = facts.materials_source.clone().unwrap();
+    let mut state = MaterialFolderState::empty(
+        FolderId::new(7).unwrap(),
+        MaterialScope {
+            teacher_id: source.teacher_id,
+            subject_id: source.subject_id,
+        },
+    );
+    let mut admin = actor();
+    admin.auth_epoch = facts
+        .identity
+        .account(admin.principal_id)
+        .unwrap()
+        .principal
+        .auth_epoch;
+    for n in 1..=count {
+        state = state
+            .append(
+                &MaterialAppend {
+                    material_id: MaterialId::new(n).unwrap(),
+                    display_name: format!("第{n}份课堂资料.txt"),
+                    resource: MaterialResource {
+                        version_id: ResourceVersionId::new(n).unwrap(),
+                        sha256: [n as u8; 32],
+                        kind: MaterialKind::Txt,
+                        bytes: 100,
+                    },
+                    allowed_class_ids: vec![source.lesson.class_id],
+                },
+                &facts.identity,
+                &admin,
+                now(30000),
+            )
+            .unwrap();
+    }
+    facts.materials_page = Some(
+        state
+            .published_page(&facts.identity, &source, None)
+            .unwrap(),
+    );
+    facts
+}
+#[test]
+fn material_rows_are_current_teacher_fixed_versions_first_five_and_not_paths() {
+    let facts = material_facts(7);
+    let view = scene(&facts);
+    let card = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Materials)
+        .unwrap();
+    let CardContent::Materials(list) = &card.content else {
+        panic!("material list expected")
+    };
+    assert_eq!(list.rows.len(), 5);
+    assert_eq!(list.rows[0].material_id.get(), 7);
+    assert_eq!(list.rows[0].resource_version.get(), 7);
+    assert_eq!(list.teacher_name, "二老师");
+    assert_eq!(list.source.teacher_id, PrincipalId::new(2).unwrap());
+    assert_eq!(list.total, 7);
+    assert_eq!(list.next_cursor.as_ref().unwrap().offset, 5);
+    assert_eq!(
+        card.page,
+        PageInfo {
+            offset: 0,
+            shown: 5,
+            total: 7
+        }
+    );
+    assert_eq!(list.rows[0].name, "第7份课堂资料.txt");
+}
+#[test]
+fn empty_material_folder_retains_correct_teacher_and_never_borrows_another() {
+    let facts = fixture();
+    let view = scene(&facts);
+    let CardContent::Materials(list) = &view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Materials)
+        .unwrap()
+        .content
+    else {
+        panic!()
+    };
+    assert_eq!(list.teacher_name, "二老师");
+    assert!(list.rows.is_empty());
+    assert_eq!(list.folder_id, None);
+    assert!(list.next_cursor.is_none());
+    let mut no_course = facts;
+    no_course.captured_at = now(12 * 3600);
+    let view = scene(&no_course);
+    assert!(matches!(
+        view.cards
+            .iter()
+            .find(|c| c.kind == ComponentKind::Materials)
+            .unwrap()
+            .content,
+        CardContent::MaterialsUnavailable
+    ));
+}
+#[test]
+fn material_source_page_cross_teacher_class_date_or_joint_revision_is_rejected() {
+    for mutation in 0..4 {
+        let mut facts = material_facts(1);
+        match mutation {
+            0 => facts.materials_source.as_mut().unwrap().teacher_id = PrincipalId::new(1).unwrap(),
+            1 => facts.materials_page.as_mut().unwrap().class_id = Some(ClassId::new(99).unwrap()),
+            2 => facts.materials_source.as_mut().unwrap().lesson.actual_date = date(29),
+            _ => {
+                facts
+                    .materials_source
+                    .as_mut()
+                    .unwrap()
+                    .lesson
+                    .version
+                    .source_revision = Revision::new(99)
+            }
+        };
+        assert!(matches!(
+            build_scene(
+                &facts,
+                SceneGeneration::new(1),
+                Rect {
+                    x: 0.,
+                    y: 0.,
+                    width: 1920.,
+                    height: 1040.
+                },
+                &Measure
+            ),
+            Err(SceneError::InvalidFacts(_))
+        ));
+    }
+}
+#[test]
+fn withheld_recess_history_is_neutral_while_missing_current_source_is_invalid() {
+    let mut facts = fixture();
+    facts.materials_source = None;
+    assert_eq!(facts.validate(), Err(DisplayError::InvalidFacts));
+    facts.captured_at = now(8 * 3600 + 45 * 60);
+    facts.validate().unwrap();
+    let view = build_scene(
+        &facts,
+        SceneGeneration::new(1),
+        Rect {
+            x: 0.,
+            y: 0.,
+            width: 1920.,
+            height: 1040.,
+        },
+        &Measure,
+    )
+    .unwrap();
+    assert!(matches!(
+        view.cards
+            .iter()
+            .find(|c| c.kind == ComponentKind::Materials)
+            .unwrap()
+            .content,
+        CardContent::MaterialsUnavailable
+    ));
+    assert!(view.cards.iter().any(|c| c.kind == ComponentKind::Recess));
 }

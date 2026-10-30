@@ -8,6 +8,7 @@ use fc_domain::{
     desktop::{DesktopFacts, DisplaySettings},
     identity::*,
     ids::*,
+    materials::*,
     schedule_document::ScheduleDocument,
     time::*,
 };
@@ -15,8 +16,9 @@ use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery,
     prepare_recovery_rotation, Clock, CredentialCrypto, CredentialIdentityRepository,
     DisplayRepository, DisplayRepositoryError, DisplayRequest, IdentityRepositoryError,
-    IdentityRequest, MonotonicClock, PreparedCredentialChange, RandomSource, RepositoryError,
-    ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
+    IdentityRequest, MaterialDeleteRequest, MaterialListRequest, MaterialRepository,
+    MaterialRepositoryError, MonotonicClock, PreparedCredentialChange, PreparedMaterialAppend,
+    RandomSource, RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityStore, PreparedAuthority},
@@ -25,6 +27,9 @@ use fc_runtime::{
 use fc_security::{
     CredentialCryptoAdapter, CredentialRecordCodec, Password, PasswordRecord, RecoveryCode,
     RecoveryRecord,
+};
+pub use fc_storage::business::materials::{
+    ResourceInventory, ResourceInventoryPage, ResourceRetirement, ResourceState,
 };
 use fc_storage::{
     business::{startup_state, BusinessRepository},
@@ -37,6 +42,7 @@ use std::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         Arc, Mutex,
     },
+    time::{Duration, Instant},
 };
 
 pub type Result<T> = std::result::Result<T, BackendError>;
@@ -54,6 +60,7 @@ pub enum BackendError {
     Content(RepositoryError),
     Schedule(ScheduleRepositoryError),
     Display(DisplayRepositoryError),
+    Material(MaterialRepositoryError),
     Storage(StorageError),
     InvalidCredentials,
     CryptoUnavailable,
@@ -86,6 +93,11 @@ impl From<DisplayRepositoryError> for BackendError {
         Self::Display(error)
     }
 }
+impl From<MaterialRepositoryError> for BackendError {
+    fn from(error: MaterialRepositoryError) -> Self {
+        Self::Material(error)
+    }
+}
 impl From<RepositoryError> for BackendError {
     fn from(e: RepositoryError) -> Self {
         Self::Content(e)
@@ -109,12 +121,100 @@ struct Control {
     input_generation: AtomicU64,
     input_first: AtomicU64,
     input_last: AtomicU64,
+    material_scene: Mutex<Option<PublishedMaterialScene>>,
+}
+#[derive(Clone)]
+struct PublishedMaterialScene {
+    source: MaterialSource,
+    generation: SceneGeneration,
+    revision: Revision,
+}
+/// Fixed metadata plus a short, memory-only final execution permission. Preparing
+/// a launch copy does not extend this permission; fetch a fresh authorization
+/// after preparation, immediately before entering the Shell execution domain.
+pub struct MaterialOpenAuthorization {
+    pub record: MaterialRecord,
+    pub guard: MaterialOpenGuard,
+}
+#[derive(Clone)]
+pub struct MaterialOpenGuard {
+    check: Arc<dyn Fn() -> bool + Send + Sync>,
+    pub expires_at: Instant,
+}
+impl MaterialOpenGuard {
+    /// Preparation-only cancellation gate. Keeps the original management/session
+    /// or scene validity without renewing it and without the dispatch-only 2s cap.
+    pub fn is_context_valid(&self) -> bool {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| (self.check)())).unwrap_or(false)
+    }
+    pub fn is_valid(&self) -> bool {
+        Instant::now() < self.expires_at && self.is_context_valid()
+    }
 }
 /// Clone into the UI. These operations never acquire the backend/session mutex or
 /// wait for SQLite, KDFs, a worker slot, or other UI input producers.
 #[derive(Clone)]
 pub struct SessionControl(Arc<Control>);
 impl SessionControl {
+    pub fn publish_material_scene(
+        &self,
+        source: &MaterialSource,
+        generation: SceneGeneration,
+        revision: Revision,
+    ) -> bool {
+        let status = self.0.health.status();
+        if self.0.closed.load(Ordering::Acquire)
+            || status.health != fc_runtime::health::Health::Healthy
+            || status.revision != revision
+        {
+            return false;
+        }
+        let Ok(mut scene) = self.0.material_scene.lock() else {
+            self.0.health.fault();
+            return false;
+        };
+        let status = self.0.health.status();
+        if status.health != fc_runtime::health::Health::Healthy || status.revision != revision {
+            return false;
+        }
+        *scene = Some(PublishedMaterialScene {
+            source: source.clone(),
+            generation,
+            revision,
+        });
+        true
+    }
+    pub fn clear_material_scene(&self) {
+        match self.0.material_scene.lock() {
+            Ok(mut scene) => {
+                *scene = None;
+            }
+            Err(poisoned) => {
+                *poisoned.into_inner() = None;
+                self.0.health.fault();
+            }
+        }
+    }
+    /// Pure memory gate for a CURRENT_SCENE launch: never waits for Backend/KDF/SQL.
+    pub fn material_open_guard(
+        &self,
+        source: &MaterialSource,
+        generation: SceneGeneration,
+        revision: Revision,
+    ) -> bool {
+        let status = self.0.health.status();
+        if self.0.closed.load(Ordering::Acquire)
+            || status.health != fc_runtime::health::Health::Healthy
+            || status.revision != revision
+        {
+            return false;
+        }
+        self.0.material_scene.lock().is_ok_and(|scene| {
+            scene.as_ref().is_some_and(|s| {
+                s.source == *source && s.generation == generation && s.revision == revision
+            })
+        })
+    }
     /// Read-only render gate; the UI can reject stale facts without taking the
     /// backend or session ledger mutex and without refreshing a management lease.
     pub fn health_gate(&self) -> HealthGate {
@@ -128,6 +228,7 @@ impl SessionControl {
         self.lock_local();
     }
     pub fn lock_local(&self) {
+        self.clear_material_scene();
         // A saturated generation remains permanently closed rather than wrap old leases.
         if self
             .0
@@ -328,7 +429,18 @@ impl Backend {
             input_generation: AtomicU64::new(0),
             input_first: AtomicU64::new(0),
             input_last: AtomicU64::new(0),
+            material_scene: Mutex::new(None),
         }));
+        let scene_control = control.clone();
+        let repository =
+            repository.with_material_scene_guard(Arc::new(move |source, generation| {
+                let revision = scene_control.health_gate().status().revision;
+                if scene_control.material_open_guard(source, generation, revision) {
+                    Ok(())
+                } else {
+                    Err(StorageError::Material(MaterialError::InvalidContext))
+                }
+            }));
         let ledger = Arc::new(Mutex::new(Ledger {
             sessions: IdentitySessions::default(),
             observed_generation: 1,
@@ -986,14 +1098,219 @@ impl Backend {
     }
     /// Trusted local presentation read. No management lease is fabricated or renewed.
     pub fn desktop_facts(&self, homework_offset: usize) -> Result<DesktopFacts> {
+        self.desktop_facts_with_material_cursor(homework_offset, None)
+    }
+    pub fn desktop_facts_with_material_cursor(
+        &self,
+        homework_offset: usize,
+        cursor: Option<MaterialCursor>,
+    ) -> Result<DesktopFacts> {
         self.check_open()?;
         let offset = u64::try_from(homework_offset).map_err(|_| BackendError::InvalidInput)?;
-        let facts = self.repository.desktop_facts(offset, self.clock.as_ref())?;
+        let facts = self.repository.desktop_facts_with_material_cursor(
+            offset,
+            cursor,
+            self.clock.as_ref(),
+        )?;
         self.check_open()?;
         if self.control.0.health.status().revision != facts.global_revision {
             return Err(BackendError::Display(DisplayRepositoryError::Unavailable));
         }
         Ok(facts)
+    }
+    pub fn materials(
+        &self,
+        lease: SessionLease,
+        request: MaterialListRequest,
+    ) -> Result<MaterialPage> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .materials(request, &actor, self.clock.as_ref())?)
+    }
+    pub fn append_material(
+        &mut self,
+        lease: SessionLease,
+        prepared: PreparedMaterialAppend,
+    ) -> Result<MaterialRecord> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .append_material(prepared, &actor, self.clock.as_ref())?)
+    }
+    pub fn delete_material(
+        &mut self,
+        lease: SessionLease,
+        request: MaterialDeleteRequest,
+    ) -> Result<MaterialRecord> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .delete_material(request, &actor, self.clock.as_ref())?)
+    }
+    pub fn resource_inventory(
+        &self,
+        after: Option<ResourceVersionId>,
+    ) -> Result<ResourceInventoryPage> {
+        self.check_open()?;
+        let result = self.repository.resource_inventory(after)?;
+        self.check_open()?;
+        Ok(result)
+    }
+    pub fn retire_resource(
+        &self,
+        id: ResourceVersionId,
+        revision: Revision,
+    ) -> Result<ResourceRetirement> {
+        self.check_open()?;
+        Ok(self.repository.retire_resource(id, revision)?)
+    }
+    pub fn finalize_resource_removal(&self, ticket: ResourceRetirement) -> Result<()> {
+        self.check_open()?;
+        Ok(self.repository.finalize_resource_removal(ticket)?)
+    }
+    pub fn material_for_owner(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        id: MaterialId,
+        version: ResourceVersionId,
+    ) -> Result<MaterialOpenAuthorization> {
+        if lease.origin() != TrustedOrigin::Local {
+            return Err(BackendError::Material(MaterialRepositoryError::Domain(
+                MaterialError::Permission(PermissionError::LocalOnly),
+            )));
+        }
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let record = self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .managed_material(scope, id, version, &actor)?;
+        let status = self
+            .control
+            .health_gate()
+            .check_sensitive()
+            .map_err(|_| BackendError::Closed)?;
+        let ledger = self.ledger.clone();
+        let control = self.control.clone();
+        let clock = self.clock.clone();
+        let monotonic = self.monotonic.clone();
+        let expires_at = Instant::now() + Duration::from_secs(2);
+        let check = Arc::new(move || {
+            let current = control.health_gate().status();
+            if current.health != fc_runtime::health::Health::Healthy
+                || current.revision != status.revision
+                || current.health_epoch != status.health_epoch
+                || current.cancellation_generation != status.cancellation_generation
+                || control.check(lease, generation).is_err()
+            {
+                return false;
+            }
+            let Ok(mut ledger) = ledger.lock() else {
+                return false;
+            };
+            ledger.synchronize(&control, &state, clock.now(), monotonic.monotonic_millis());
+            ledger
+                .sessions
+                .actor(
+                    &state,
+                    lease,
+                    clock.now(),
+                    monotonic.monotonic_millis(),
+                    SessionPurpose::Manage,
+                )
+                .is_ok()
+        });
+        Ok(MaterialOpenAuthorization {
+            record,
+            guard: MaterialOpenGuard { check, expires_at },
+        })
+    }
+    pub fn material_for_scene(
+        &self,
+        source: &MaterialSource,
+        generation: SceneGeneration,
+        id: MaterialId,
+        version: ResourceVersionId,
+    ) -> Result<MaterialOpenAuthorization> {
+        self.check_open()?;
+        let record = self.repository.published_material(
+            source,
+            generation,
+            id,
+            version,
+            self.clock.as_ref(),
+        )?;
+        let facts = self.desktop_facts(0)?;
+        if facts.materials_source.as_ref() != Some(source) {
+            return Err(BackendError::Material(MaterialRepositoryError::Domain(
+                MaterialError::InvalidContext,
+            )));
+        }
+        let status = self
+            .control
+            .health_gate()
+            .check_sensitive()
+            .map_err(|_| BackendError::Closed)?;
+        if status.revision != facts.global_revision {
+            return Err(BackendError::Material(MaterialRepositoryError::Unavailable));
+        }
+        let control = self.control.clone();
+        let clock = self.clock.clone();
+        let source = source.clone();
+        let authorized_at = clock.now();
+        if resolve_material_source(
+            &facts.identity,
+            &facts.schedule,
+            source.lesson.class_id,
+            authorized_at,
+        )
+        .ok()
+        .flatten()
+            != Some(source.clone())
+        {
+            return Err(BackendError::Material(MaterialRepositoryError::Domain(
+                MaterialError::InvalidContext,
+            )));
+        }
+        let mut context_until = LocalDateTime::new(next_day(authorized_at)?.date, 0)
+            .map_err(|_| BackendError::Overflow)?;
+        if let Ok(fc_domain::schedule::AcademicDay::Scheduled(day)) = facts
+            .schedule
+            .resolve_day(source.lesson.class_id, authorized_at.date)
+        {
+            for row in &day.table.rows {
+                if row.enabled_days[day.source_date.weekday().index()] {
+                    for minute in [row.range.begin, row.range.end] {
+                        let second = u32::from(minute.get()) * 60;
+                        if second > authorized_at.second_of_day() {
+                            let boundary = LocalDateTime::new(authorized_at.date, second)
+                                .map_err(|_| BackendError::InvalidInput)?;
+                            context_until = context_until.min(boundary);
+                        }
+                    }
+                }
+            }
+        }
+        let expires_at = Instant::now() + Duration::from_secs(2);
+        let check = Arc::new(move || {
+            let current = control.health_gate().status();
+            let now = clock.now();
+            current.health == fc_runtime::health::Health::Healthy
+                && current.revision == status.revision
+                && current.health_epoch == status.health_epoch
+                && current.cancellation_generation == status.cancellation_generation
+                && now >= authorized_at
+                && now < context_until
+                && control.material_open_guard(&source, generation, status.revision)
+        });
+        Ok(MaterialOpenAuthorization {
+            record,
+            guard: MaterialOpenGuard { check, expires_at },
+        })
     }
     pub fn read_schedule(&self, lease: SessionLease) -> Result<ScheduleDocument> {
         let state = self.state()?;
@@ -1806,5 +2123,166 @@ mod tests {
         restored.0.session_control().fault();
         assert!(restored.0.desktop_facts(0).is_err());
         restored.0.close().unwrap();
+    }
+    #[test]
+    fn material_backend_owner_and_guest_permissions_are_fresh_memory_guards() {
+        struct Fixture;
+        impl fc_ports::MaterialPreparation for Fixture {
+            type Input = MaterialResource;
+            fn prepare(
+                &mut self,
+                input: Self::Input,
+            ) -> std::result::Result<Self::Input, MaterialRepositoryError> {
+                Ok(input)
+            }
+        }
+        let directory = Directory::new();
+        let clock = Arc::new(TestClock {
+            tick: AtomicU64::new(0),
+            wall: LocalDateTime::new(LocalDate::new(2026, 10, 30).unwrap(), 8 * 3600 + 30 * 60)
+                .unwrap(),
+        });
+        let mut service = open(&directory, clock.clone());
+        policy_accounts(&mut service.0);
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        service
+            .0
+            .identity(
+                admin,
+                IdentityCommand::BindCurrentClass {
+                    id: ClassId::new(1).unwrap(),
+                },
+            )
+            .unwrap();
+        use fc_domain::{schedule::*, schedule_document::*};
+        let doc = ScheduleDocument {
+            semesters: vec![SemesterPlan {
+                semester: Semester {
+                    id: SemesterId::new(1).unwrap(),
+                    class_id: ClassId::new(1).unwrap(),
+                    revision: Revision::default(),
+                    enabled: true,
+                    start: LocalDate::new(2026, 10, 1).unwrap(),
+                    end: LocalDate::new(2026, 10, 31).unwrap(),
+                    first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
+                    tables: vec![WeekTable {
+                        id: TableId::new(1).unwrap(),
+                        role: TableRole::Single,
+                        rows: vec![TimetableRow {
+                            id: RowId::new(1).unwrap(),
+                            logical_key: LogicalRowKey::new(1).unwrap(),
+                            group: DayGroup::Morning,
+                            kind: RowKind::Course,
+                            range: MinuteRange::new(
+                                Minute::from_hm(8, 20).unwrap(),
+                                Minute::from_hm(9, 0).unwrap(),
+                            )
+                            .unwrap(),
+                            enabled_days: [true; 7],
+                            courses: std::array::from_fn(|_| {
+                                Some(CourseCell {
+                                    subject_id: SubjectId::new(1).unwrap(),
+                                    teacher: TeacherBinding::Explicit(PrincipalId::new(2).unwrap()),
+                                })
+                            }),
+                        }],
+                    }],
+                },
+                name: "Material guard fixture".into(),
+                timing_sync: false,
+                dual_history: None,
+                row_details: Vec::new(),
+                cell_details: Vec::new(),
+            }],
+            ..ScheduleDocument::default()
+        };
+        service
+            .0
+            .save_schedule(admin, Revision::default(), doc)
+            .unwrap();
+        let scope = MaterialScope {
+            teacher_id: PrincipalId::new(2).unwrap(),
+            subject_id: SubjectId::new(1).unwrap(),
+        };
+        let version = ResourceVersionId::new(7900).unwrap();
+        let id = MaterialId::new(7900).unwrap();
+        let prepared = fc_ports::prepare_material_append(
+            &mut Fixture,
+            MaterialResource {
+                version_id: version,
+                sha256: [8; 32],
+                kind: MaterialKind::Txt,
+                bytes: 10,
+            },
+            fc_ports::MaterialAppendMetadata {
+                command_id: CommandId::new(7900).unwrap(),
+                scope,
+                material_id: id,
+                display_name: "lesson.txt".into(),
+                allowed_class_ids: vec![ClassId::new(1).unwrap()],
+            },
+        )
+        .unwrap();
+        service.0.append_material(admin, prepared).unwrap();
+        let facts = service.0.desktop_facts(0).unwrap();
+        let source = facts.materials_source.unwrap();
+        let generation = SceneGeneration::new(7);
+        assert!(service
+            .0
+            .material_for_scene(&source, generation, id, version)
+            .is_err());
+        assert!(service.0.control.publish_material_scene(
+            &source,
+            generation,
+            facts.global_revision
+        ));
+        let guest = service
+            .0
+            .material_for_scene(&source, generation, id, version)
+            .unwrap();
+        assert!(guest.guard.is_valid());
+        assert!(guest.guard.is_context_valid());
+        let owner = service
+            .0
+            .material_for_owner(admin, scope, id, version)
+            .unwrap();
+        assert!(owner.guard.is_valid());
+        let mut expired_dispatch = owner.guard.clone();
+        expired_dispatch.expires_at = Instant::now() - Duration::from_secs(1);
+        assert!(!expired_dispatch.is_valid());
+        assert!(expired_dispatch.is_context_valid());
+        service.0.control.clear_material_scene();
+        assert!(!guest.guard.is_context_valid());
+        assert!(owner.guard.is_context_valid());
+        let web = policy_lease(&service.0, 2, TrustedOrigin::Web);
+        assert!(service
+            .0
+            .material_for_owner(web, scope, id, version)
+            .is_err());
+        service.0.control.lock_local();
+        assert!(!owner.guard.is_context_valid());
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        let owner = service
+            .0
+            .material_for_owner(admin, scope, id, version)
+            .unwrap();
+        service
+            .0
+            .delete_material(
+                admin,
+                MaterialDeleteRequest {
+                    command_id: CommandId::new(7901).unwrap(),
+                    scope,
+                    material_id: id,
+                    expected_material_revision: Revision::new(1),
+                },
+            )
+            .unwrap();
+        assert!(!owner.guard.is_context_valid());
+        assert!(service
+            .0
+            .material_for_owner(admin, scope, id, version)
+            .is_err());
+        service.0.close().unwrap();
     }
 }

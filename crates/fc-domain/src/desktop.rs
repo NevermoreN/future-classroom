@@ -217,6 +217,8 @@ pub struct DesktopFacts {
     pub homework_eligible_total: u64,
     pub homework: Vec<ContentRecord>,
     pub reminder: Option<ContentRecord>,
+    pub materials_source: Option<crate::materials::MaterialSource>,
+    pub materials_page: Option<crate::materials::MaterialPage>,
 }
 impl DesktopFacts {
     pub fn validate(&self) -> Result<(), DisplayError> {
@@ -267,6 +269,43 @@ impl DesktopFacts {
                 || self.homework_eligible_total != 0)
         {
             return Err(DisplayError::InvalidFacts);
+        }
+        let expected_source = if self.clock_rollback {
+            None
+        } else if let Some(class) = class {
+            crate::materials::resolve_material_source(
+                &self.identity,
+                &self.schedule,
+                class,
+                self.captured_at,
+            )
+            .map_err(|_| DisplayError::InvalidFacts)?
+        } else {
+            None
+        };
+        // Storage may deliberately withhold a retained source when committed
+        // change timestamps cannot prove the base table preceded lesson end.
+        // A neutral empty result never broadens access; a current course or any
+        // nonempty source must still match the exact schedule/class/teacher.
+        let safely_withheld_recess = self.materials_source.is_none()
+            && self.materials_page.is_none()
+            && expected_source.as_ref().is_some_and(|source| {
+                source.kind == crate::materials::MaterialSourceKind::RetainedBreak
+            });
+        if self.materials_source != expected_source && !safely_withheld_recess {
+            return Err(DisplayError::InvalidFacts);
+        }
+        if let Some(page) = &self.materials_page {
+            if page.source != self.materials_source
+                || self.materials_source.is_none()
+                || page.class_id != class
+                || page.folder.revision > self.global_revision
+                || page.items.iter().any(|r| r.revision > self.global_revision)
+            {
+                return Err(DisplayError::InvalidFacts);
+            }
+            page.validate(&self.identity, crate::materials::DESKTOP_MATERIAL_PAGE)
+                .map_err(|_| DisplayError::InvalidFacts)?;
         }
         for (i, record) in self.homework.iter().enumerate() {
             self.validate_record(record)?;
@@ -410,6 +449,8 @@ mod tests {
             homework_eligible_total: 0,
             homework: vec![],
             reminder: None,
+            materials_source: None,
+            materials_page: None,
         };
         facts.validate().unwrap();
         facts.date_watermark = LocalDate::new(2026, 10, 31).unwrap();

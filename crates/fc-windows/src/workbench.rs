@@ -821,6 +821,11 @@ impl Window {
             }
         }
     }
+    /// Owned modal picker. The workbench cannot enqueue edits behind an unowned
+    /// dialog; independent hidden-host controls still revoke WTS/power immediately.
+    pub fn select_material(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
+        crate::materials::chooser::select(Some(self.hwnd))
+    }
     pub fn hide(&self) {
         self.state.clear_passwords();
         self.state.discard_forms();

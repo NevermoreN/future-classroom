@@ -21,6 +21,7 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --system-probe
   .\fc-bootstrap.exe --host-probe 2
   .\fc-bootstrap.exe --application-probe
+  .\fc-bootstrap.exe --materials-probe
   .\fc-bootstrap.exe --native-probe 30
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
@@ -36,8 +37,15 @@ Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开
 SSH/无交互桌面的输出不能代替前台、遮挡、缩放、点击和视觉验收。
 rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通过。
 
-完整布局编辑、资料/临时换课/语音工作流和教师管理 Web 均未交付。
-图形表面合计上限16MiB；当前4K课间大卡背景超过此限，会隐藏并显示诊断，尚未完成4K支持。
+资料管理可选择本机PNG/JPEG/BMP/TXT/PDF/PPTX/DOCX/XLSX，实际校验、哈希和WIC解码后存入受控原件；
+管理页20项、桌面当前课/可信课间5项，同名独立追加。点击固定版本先复制再请求关联程序打开。
+原件总量2GiB/单件50MiB，图片10MiB/8MP；打开副本独立200MiB，按副本最后写入时间保留24小时宽限，被占用不强删。
+资料副本主动清理入口尚未完成。PDF真实解析在80MiB进程提交内存/CPU10秒/墙钟30秒的隔离子进程运行。
+--materials-probe 使用真实双worker/SQLite、合成文件及私有临时ProgID和无界面接收器验证资料链，
+不会调用本机日常Office/记事本或改变默认文件关联，不写正式ProgramData。
+完整布局编辑、临时换课/语音工作流和教师管理 Web 均未交付。
+应用图形DIB合计上限16MiB；4K自身离屏场景实测4806080字节，完整低Alpha区域背景保持。
+这不代表操作系统背景/DWM总内存或4K真实显示设备验收通过。
 原生网格尚未完成真实触控/白板笔、多DPI和全部视觉验收，当前仍为CUI开发目标。
 此开发构建不主动修改开机启动，不提供远程管理端或安装程序。
 

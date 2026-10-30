@@ -6,6 +6,7 @@ use fc_domain::{
     desktop::*,
     identity::Rgb,
     ids::*,
+    materials::{MaterialCursor, MaterialSource},
     schedule::{resolve_lesson, AcademicDay, LessonInstanceKey, LessonState, RowKind},
     time::LocalDateTime,
 };
@@ -49,6 +50,23 @@ pub struct HomeworkEntry {
     pub color: Rgb,
     pub fill_alpha: f32,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SceneMaterialRow {
+    pub material_id: MaterialId,
+    pub resource_version: ResourceVersionId,
+    pub name: String,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MaterialListContent {
+    pub source: MaterialSource,
+    pub folder_id: Option<FolderId>,
+    pub folder_revision: Revision,
+    pub teacher_name: String,
+    pub subject_name: String,
+    pub rows: Vec<SceneMaterialRow>,
+    pub next_cursor: Option<MaterialCursor>,
+    pub total: u64,
+}
 #[derive(Clone, Debug, PartialEq)]
 pub enum CardContent {
     Clock(ClockContent),
@@ -57,6 +75,7 @@ pub enum CardContent {
     Homework(Vec<HomeworkEntry>),
     Recess { deadline: LocalDateTime },
     MaterialsUnavailable,
+    Materials(Box<MaterialListContent>),
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct SceneCard {
@@ -216,7 +235,20 @@ fn measure_text(content: &CardContent) -> String {
             .iter()
             .map(|r| format!("{} · {}\n{}\n\n", r.subject_name, r.teacher_name, r.text))
             .collect(),
-        CardContent::MaterialsUnavailable => "课堂资料\n尚未配置".into(),
+        CardContent::MaterialsUnavailable => "课堂资料\n当前无有效授课老师".into(),
+        CardContent::Materials(list) => format!(
+            "{} · {}\n{}",
+            list.teacher_name,
+            list.subject_name,
+            if list.rows.is_empty() {
+                "该老师暂无课堂资料".into()
+            } else {
+                list.rows
+                    .iter()
+                    .map(|row| format!("{}\n", row.name))
+                    .collect::<String>()
+            }
+        ),
         CardContent::Recess { .. } => "00:00".into(),
     };
     // Only the layout sample is bounded. Full owned texts remain in the DTO for
@@ -381,6 +413,45 @@ pub fn build_scene(
             },
         })
     }
+    let material_content = if let Some(source) = &facts.materials_source {
+        let teacher = identity
+            .accounts
+            .iter()
+            .find(|a| a.principal.id == source.teacher_id)
+            .ok_or(SceneError::Schedule)?;
+        let subject = identity
+            .subjects
+            .iter()
+            .find(|s| s.id == source.subject_id && s.enabled)
+            .ok_or(SceneError::Schedule)?;
+        CardContent::Materials(Box::new(MaterialListContent {
+            source: source.clone(),
+            folder_id: facts.materials_page.as_ref().map(|p| p.folder.id),
+            folder_revision: facts
+                .materials_page
+                .as_ref()
+                .map_or(Revision::default(), |p| p.folder.revision),
+            teacher_name: teacher.display_name.clone(),
+            subject_name: subject.name.clone(),
+            rows: facts.materials_page.as_ref().map_or_else(Vec::new, |p| {
+                p.items
+                    .iter()
+                    .map(|r| SceneMaterialRow {
+                        material_id: r.id,
+                        resource_version: r.resource.version_id,
+                        name: r.display_name.clone(),
+                    })
+                    .collect()
+            }),
+            next_cursor: facts
+                .materials_page
+                .as_ref()
+                .and_then(|p| p.next_cursor.clone()),
+            total: facts.materials_page.as_ref().map_or(0, |p| p.total),
+        }))
+    } else {
+        CardContent::MaterialsUnavailable
+    };
     let mut entries = vec![
         (
             ComponentKind::Clock,
@@ -407,7 +478,7 @@ pub fn build_scene(
                 CardContent::Homework(homework)
             },
         ),
-        (ComponentKind::Materials, CardContent::MaterialsUnavailable),
+        (ComponentKind::Materials, material_content),
     ];
     if let Some(reminder) = &facts.reminder {
         entries.push((
@@ -498,6 +569,15 @@ pub fn build_scene(
                 shown: facts.homework.len() as u64,
                 total: facts.homework_eligible_total,
             }
+        } else if k == ComponentKind::Materials {
+            facts
+                .materials_page
+                .as_ref()
+                .map_or(PageInfo::default(), |p| PageInfo {
+                    offset: p.offset,
+                    shown: p.items.len() as u64,
+                    total: p.total,
+                })
         } else {
             PageInfo {
                 offset: 0,

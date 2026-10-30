@@ -148,7 +148,7 @@ pub(super) fn facts(d: &DesktopFacts) -> Value {
         "date_watermark":date(d.date_watermark),"clock_rollback":d.clock_rollback,
         "identity":identity(&d.identity),"schedule":schedule_codec::document(&d.schedule),"display":settings(&d.display),
         "homework_offset":d.homework_offset,"homework_eligible_total":d.homework_eligible_total,
-        "homework":d.homework.iter().map(record).collect::<Vec<_>>(),"reminder":d.reminder.as_ref().map(record)})
+        "homework":d.homework.iter().map(record).collect::<Vec<_>>(),"reminder":d.reminder.as_ref().map(record),"materials_source":d.materials_source.as_ref().map(super::materials_codec::source),"materials_page":d.materials_page.as_ref().map(super::materials_codec::page)})
 }
 pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
     object_fields(
@@ -166,6 +166,8 @@ pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
             "homework_eligible_total",
             "homework",
             "reminder",
+            "materials_source",
+            "materials_page",
         ],
     )?;
     if number(v, "format")? != 1 {
@@ -193,6 +195,16 @@ pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
             None
         } else {
             Some(read_record(&v["reminder"])?)
+        },
+        materials_source: if v["materials_source"].is_null() {
+            None
+        } else {
+            Some(super::materials_codec::read_source(&v["materials_source"])?)
+        },
+        materials_page: if v["materials_page"].is_null() {
+            None
+        } else {
+            Some(super::materials_codec::read_page(&v["materials_page"])?)
         },
     };
     facts.validate().map_err(|_| StorageError::Database)?;

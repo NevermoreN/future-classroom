@@ -41,6 +41,7 @@ def main():
     parser.add_argument("--test-metadata", type=Path)
     parser.add_argument("--native-seconds", type=int, default=5)
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
+    parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
@@ -91,7 +92,8 @@ def main():
                 raise RuntimeError("read-only system probe failed")
         report["tests"] = []
         for path in tests:
-            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$output=@(& $exe --test-threads=2 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            test_arguments = " --test-threads=2" + (" --nocapture" if path.name.startswith("fc_windows-") else "")
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
             result = json.loads(remote.powershell(script, timeout=60))
             result["binarySha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
             report["tests"].append(result)
@@ -101,13 +103,20 @@ def main():
         # The interactive task only runs our own probe, with a hidden console.
         # It does not send keys, minimize windows, change focus, capture the desktop,
         # install services, touch production ProgramData, or alter SSH authorization.
-        body = child_temp + "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';try{$out=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --native-probe " + str(args.native_seconds) + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$out;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}catch{@{exitCode=1;error=$_.Exception.Message}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}"
+        body = child_temp + "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';try{$ErrorActionPreference='Continue';$out=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --native-probe " + str(args.native_seconds) + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$out;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}catch{@{exitCode=1;error=$_.Exception.Message}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}"
         if args.system_host:
             host_command = "$hostOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --host-probe 2 2>&1|ForEach-Object{\"$_\"});$hostCode=$LASTEXITCODE;"
             body = body.replace("$code=$LASTEXITCODE;@{exitCode=", "$code=$LASTEXITCODE;" + host_command + "@{hostExitCode=$hostCode;hostOutput=$hostOutput;exitCode=")
         if args.application:
             app_command = "$appOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --application-probe 2>&1|ForEach-Object{\"$_\"});$appCode=$LASTEXITCODE;"
             body = body.replace("@{exitCode=$code;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;exitCode=$code;") if not args.system_host else body.replace("@{hostExitCode=$hostCode;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;hostExitCode=$hostCode;")
+        if args.materials:
+            material_command = "$materialsOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --materials-probe 2>&1|ForEach-Object{\"$_\"});$materialsCode=$LASTEXITCODE;"
+            anchor = "@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;")
+            if body.count(anchor) != 1:
+                raise RuntimeError("materials report insertion point is ambiguous")
+            body = body.replace(anchor, material_command + "@{materialsExitCode=$materialsCode;materialsOutput=$materialsOutput;" + anchor[2:])
+
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -117,15 +126,17 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application:
-            launch = launch.replace("AddSeconds(40)", "AddSeconds(180)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=190 if args.application else 50).lstrip("\ufeff"))
+        if args.application or args.materials:
+            launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
+        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
             raise RuntimeError("interactive hidden-host/tray probe failed")
         if args.application and report["native"].get("applicationExitCode") != 0:
             raise RuntimeError("isolated native workbench application failed")
+        if args.materials and report["native"].get("materialsExitCode") != 0:
+            raise RuntimeError("isolated materials integration failed")
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"
     except Exception as error:

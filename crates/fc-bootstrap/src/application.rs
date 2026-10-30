@@ -2,10 +2,17 @@
 //! two-thread pool; the window pump only handles bounded events and owned results.
 mod desktop_controller;
 mod display_editor;
+mod material_flow;
+mod material_probe;
+pub fn materials_probe() -> std::result::Result<(), String> {
+    material_probe::run()
+}
+mod materials_editor;
 mod schedule_editor;
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl};
 use fc_domain::desktop::{DesktopFacts, DisplaySettings};
+use fc_domain::materials::{MaterialCursor, MaterialPage};
 use fc_domain::schedule_document::ScheduleDocument;
 use fc_domain::{auth::*, content::*, identity::*, ids::*};
 use fc_ports::{MonotonicClock, RandomSource};
@@ -20,10 +27,11 @@ use fc_windows::{
 };
 use schedule_editor::{Editor as ScheduleEditor, EditorCommand};
 use std::{
+    collections::{HashMap, VecDeque},
     fs::{self, File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
     time::{Duration, Instant},
 };
 
@@ -59,6 +67,7 @@ const LOAD: ActionId = ActionId(15);
 const TO_ROTATE: ActionId = ActionId(16);
 const TO_SCHEDULE: ActionId = ActionId(17);
 const TO_DISPLAY: ActionId = ActionId(18);
+const TO_MATERIALS: ActionId = ActionId(21);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -80,6 +89,7 @@ enum Screen {
     HomeworkEdit,
     Schedule,
     Display,
+    Materials,
     ExitDraft,
     Repair,
 }
@@ -99,6 +109,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
+                | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
                 | BackendError::Storage(
                     S::AuthorityUnavailable
                         | S::Indeterminate
@@ -277,6 +288,9 @@ enum Outcome {
     DisplayLoaded(DisplaySettings),
     DisplaySaved(DisplaySettings),
     Desktop(Box<DesktopFacts>),
+    Materials(Box<MaterialPage>),
+    MaterialLaunch(Box<material_flow::PreparedLaunch>),
+    MaterialCleaned,
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -306,7 +320,9 @@ enum Work {
     ),
     LoadDisplay(Arc<Mutex<Backend>>, SessionLease),
     SaveDisplay(Arc<Mutex<Backend>>, SessionLease, Revision, DisplaySettings),
-    Desktop(Arc<Mutex<Backend>>, usize),
+    Desktop(Arc<Mutex<Backend>>, usize, Option<MaterialCursor>),
+    Material(Box<material_flow::MaterialJob>),
+    CleanupMaterial(PathBuf, PathBuf),
 }
 impl Task for Work {
     type Output = Result<Outcome>;
@@ -320,7 +336,13 @@ impl Task for Work {
             | Self::Shutdown(_)
             | Self::LoadSchedule(_, _)
             | Self::LoadDisplay(_, _)
-            | Self::Desktop(_, _) => Some(0),
+            | Self::Desktop(_, _, _) => Some(1024),
+            Self::Material(job) => job.allocation_bytes(),
+            Self::CleanupMaterial(root, path) => root
+                .as_os_str()
+                .len()
+                .checked_add(path.as_os_str().len())?
+                .checked_mul(2),
             Self::SaveSchedule(_, _, _, document) => document.allocation_bytes(),
             Self::SaveDisplay(_, _, _, settings) => settings.allocation_bytes(),
         }
@@ -334,13 +356,40 @@ impl Task for Work {
                     backend.close()?;
                     return Err(Failure::Stopped);
                 }
-                let state = backend.state()?;
-                let control = backend.session_control();
-                Ok(Outcome::Opened(
-                    Arc::new(Mutex::new(backend)),
-                    control,
-                    state,
-                ))
+                let backend = Arc::new(Mutex::new(backend));
+                let opened = (|| {
+                    let state = backend.lock().map_err(|_| Failure::Stopped)?.state()?;
+                    // Inventory maintenance requires an installed identity. A
+                    // new, valid deployment has no published resources yet;
+                    // keep the first-administrator flow available.
+                    if state.installation.is_some() {
+                        material_flow::reconcile(
+                            &fc_windows::materials::files::ControlledFiles::new(&root)
+                                .map_err(|_| invalid("资料目录不可用。"))?,
+                            &backend,
+                            context,
+                        )?;
+                    }
+                    let control = backend
+                        .lock()
+                        .map_err(|_| Failure::Stopped)?
+                        .session_control();
+                    Ok((state, control))
+                })();
+                match opened {
+                    Ok((state, control)) => Ok(Outcome::Opened(backend, control, state)),
+                    Err(error) => {
+                        // The UI has not received this writer yet. Every failed
+                        // startup path closes/joins it on this worker before the
+                        // deployment's instance guard can be released.
+                        let mut owned = backend.lock().unwrap_or_else(|p| p.into_inner());
+                        let closed = owned.close();
+                        match closed {
+                            Ok(()) => Err(error),
+                            Err(close) => Err(Failure::Backend(close)),
+                        }
+                    }
+                }
             }
             Self::Request(r) => execute(r),
             Self::Refresh(backend) => {
@@ -389,7 +438,22 @@ impl Task for Work {
                     .save_display(lease, expected, settings)?;
                 Ok(Outcome::DisplaySaved(settings))
             }
-            Self::Desktop(backend, offset) => {
+            Self::Material(job) => job.run(context),
+            Self::CleanupMaterial(root, path) => {
+                let files = fc_windows::materials::files::ControlledFiles::new(&root)
+                    .map_err(|_| invalid("副本清理目录不可用。"))?;
+                if path.parent().and_then(Path::parent)
+                    != Some(root.join("launch-copies").as_path())
+                {
+                    return Err(invalid("副本清理范围无效。"));
+                }
+                files.remove(&path).map_err(|_| invalid("副本仍被占用。"))?;
+                if let Some(parent) = path.parent() {
+                    let _ = fs::remove_dir(parent);
+                }
+                Ok(Outcome::MaterialCleaned)
+            }
+            Self::Desktop(backend, offset, cursor) => {
                 // A display refresh must never occupy the second shared worker
                 // waiting behind a management KDF/transaction holding Backend.
                 let facts = backend
@@ -399,7 +463,7 @@ impl Task for Work {
                             fc_ports::DisplayRepositoryError::Unavailable,
                         ))
                     })?
-                    .desktop_facts(offset)?;
+                    .desktop_facts_with_material_cursor(offset, cursor)?;
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 Ok(Outcome::Desktop(Box::new(facts)))
             }
@@ -724,6 +788,13 @@ struct App {
     schedule: Option<ScheduleEditor>,
     display: Option<display_editor::Editor>,
     desktop: desktop_controller::Controller,
+    root: PathBuf,
+    material_editor: Option<materials_editor::Editor>,
+    shell: fc_windows::materials::shell::ShellLauncher,
+    control_slot: Arc<OnceLock<SessionControl>>,
+    launch_paths: HashMap<u64, PathBuf>,
+    cleanup_paths: VecDeque<PathBuf>,
+    cleanup_jobs: Vec<JobTicket<Result<Outcome>>>,
 }
 impl App {
     fn view(&self) -> View {
@@ -732,6 +803,15 @@ impl App {
             (_, true) => self.status.clone(),
             _ => format!("{}\n{}", self.status, self.desktop_notice),
         };
+        if self.screen == Screen::Materials {
+            if let Some(editor) = &self.material_editor {
+                return editor.view(
+                    &self.state,
+                    &status,
+                    self.pending.is_some() || self.stopping,
+                );
+            }
+        }
         if self.screen == Screen::Display {
             if let Some(editor) = &self.display {
                 return editor.view(&status, self.pending.is_some() || self.stopping);
@@ -854,6 +934,7 @@ impl App {
                 }
                 if account.is_some_and(|a| a.principal.role != Role::User) {
                     view.actions.push(action(TO_HOMEWORK, "今天的作业"));
+                    view.actions.push(action(TO_MATERIALS, "课堂资料"));
                 }
                 view.actions.extend([
                     action(TO_PASSWORD, "修改本人口令"),
@@ -973,6 +1054,9 @@ impl App {
                 )];
                 view.actions = vec![action(SAVE, "保存作业"), action(BACK, "返回选择")];
             }
+            Screen::Materials => {
+                view.title = "课堂资料".into();
+            }
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
@@ -1038,6 +1122,7 @@ impl App {
         }
         self.stopping = true;
         self.desktop.stop();
+        self.shell.stop();
         self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
         self.lock();
         self.window.hide();
@@ -1107,6 +1192,14 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
+                if self.screen == Screen::Materials && self.pending.is_none() && !self.stopping {
+                    if let Some(editor) = &mut self.material_editor {
+                        if let Err(message) = editor.select(row, column) {
+                            self.status = message;
+                        }
+                        self.render()?;
+                    }
+                }
                 if self.screen == Screen::Schedule && self.pending.is_none() && !self.stopping {
                     if let Some(editor) = &mut self.schedule {
                         if let Err(message) = editor.select_cell(row, column, &self.state) {
@@ -1128,6 +1221,9 @@ impl App {
                 }
                 if self.pending.is_some() || self.stopping {
                     return Ok(());
+                }
+                if self.screen == Screen::Materials {
+                    return self.material_event(action, data);
                 }
                 if self.screen == Screen::Schedule {
                     return self.schedule_event(action, data);
@@ -1163,6 +1259,15 @@ impl App {
                             };
                         self.status.clear();
                         self.render()?;
+                    }
+                    TO_MATERIALS => {
+                        if let Some(lease) = self.lease {
+                            self.material_editor =
+                                Some(materials_editor::Editor::new(lease.principal_id()));
+                            self.screen = Screen::Materials;
+                            self.status.clear();
+                            self.render()?;
+                        }
                     }
                     TO_DISPLAY => {
                         if let Some(lease) = self.lease {
@@ -1319,6 +1424,173 @@ impl App {
         }
         self.render()
     }
+    fn submit_material(&mut self, job: material_flow::Job) -> std::result::Result<(), String> {
+        if let (Some(backend), Some(control)) = (&self.backend, &self.control) {
+            self.submit(Work::Material(Box::new(material_flow::MaterialJob {
+                root: self.root.clone(),
+                backend: backend.clone(),
+                control: control.clone(),
+                job,
+            })))?;
+        }
+        Ok(())
+    }
+    fn material_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        use materials_editor::Command;
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if self
+            .control
+            .as_ref()
+            .is_none_or(SessionControl::is_local_locked)
+        {
+            self.lock();
+            return self.render();
+        }
+        let command = self
+            .material_editor
+            .as_mut()
+            .ok_or("资料页面不可用")?
+            .handle(action, data, &self.state);
+        match command {
+            Ok(Command::Stay) => self.status.clear(),
+            Ok(Command::Close) => {
+                self.screen = Screen::Home;
+                self.status.clear();
+            }
+            Ok(Command::Lock) => self.lock(),
+            Ok(Command::Load(request)) => {
+                self.submit_material(material_flow::Job::Load { lease, request })?
+            }
+            Ok(Command::Delete {
+                scope,
+                material_id,
+                expected_material_revision,
+            }) => match command_id() {
+                Ok(command_id) => self.submit_material(material_flow::Job::Delete {
+                    lease,
+                    request: fc_ports::MaterialDeleteRequest {
+                        command_id,
+                        scope,
+                        material_id,
+                        expected_material_revision,
+                    },
+                })?,
+                Err(e) => self.status = error_text(&e),
+            },
+            Ok(Command::Open {
+                scope,
+                material_id,
+                resource_version,
+            }) => self.submit_material(material_flow::Job::Open(
+                material_flow::OpenRequest::Owner {
+                    lease,
+                    scope,
+                    id: material_id,
+                    version: resource_version,
+                },
+            ))?,
+            Ok(Command::Import {
+                scope,
+                allowed_class_ids,
+            }) => {
+                // Native modal loop still executes the host's independent WTS /
+                // power callback. Never refresh a stale lease when it returns.
+                match self.window.select_material() {
+                    Ok(Some(selected))
+                        if self.control.as_ref().is_some_and(|c| {
+                            c.note_input(lease, self.clock.monotonic_millis())
+                        }) =>
+                    {
+                        self.last_input = Instant::now();
+                        self.submit_material(material_flow::Job::Import {
+                            lease,
+                            scope,
+                            classes: allowed_class_ids,
+                            selected,
+                        })?;
+                    }
+                    Ok(None) => self.status = "已取消选择资料。".into(),
+                    Ok(Some(_)) => {
+                        self.lock();
+                        self.status = "会话已锁定，请重新登录后添加资料。".into();
+                    }
+                    Err(_) => self.status = "无法选择本机资料文件。".into(),
+                }
+            }
+            Err(message) => self.status = message,
+        }
+        self.render()
+    }
+    fn dispatch_material(
+        &mut self,
+        launch: material_flow::PreparedLaunch,
+    ) -> std::result::Result<(), String> {
+        use fc_windows::materials::shell::*;
+        let Some(control) = &self.control else {
+            return Ok(());
+        };
+        let copy_path = launch.path.path().to_owned();
+        let request_id = launch.request_id;
+        let gate = control.health_gate();
+        let Ok(lease) =
+            gate.lease_for_authorized_scope(MATERIAL_OPEN_SCOPE, launch.guard.expires_at)
+        else {
+            self.cleanup_paths.push_back(copy_path);
+            self.status = "打开权限已失效，请重新选择。".into();
+            return Ok(());
+        };
+        let guard = launch.guard;
+        let request = LaunchRequest {
+            request_id: launch.request_id,
+            version: launch.resource_version,
+            path: launch.path,
+            gate,
+            lease,
+            origin: if launch.from_scene {
+                LaunchOrigin::CurrentDesktop
+            } else {
+                LaunchOrigin::OwnerWorkbench
+            },
+            recheck: Arc::new(move || guard.is_valid()),
+        };
+        self.status = match self.shell.submit(request) {
+            Ok(()) => {
+                self.launch_paths.insert(request_id, copy_path);
+                "正在请求系统打开资料。".into()
+            }
+            Err(_) => {
+                self.cleanup_paths.push_back(copy_path);
+                "打开队列繁忙，请稍后重试。".into()
+            }
+        };
+        Ok(())
+    }
+    fn poll_shell(&mut self) {
+        use fc_windows::materials::shell::LaunchOutcome;
+        for result in self.shell.take_results() {
+            if let Some(path) = self.launch_paths.remove(&result.request_id) {
+                if result.outcome != LaunchOutcome::Requested {
+                    self.cleanup_paths.push_back(path);
+                }
+            }
+            self.status = match result.outcome {
+                LaunchOutcome::Requested => "已请求系统打开资料副本。".into(),
+                LaunchOutcome::AssociationMissing => "本机尚未设置此类文件的打开程序。".into(),
+                LaunchOutcome::Canceled => "打开已取消，或资料/会话/桌面状态已改变。".into(),
+                LaunchOutcome::Failed(_) => "系统未能打开资料，请检查关联程序后重试。".into(),
+            };
+            if self.screen == Screen::Materials {
+                let _ = self.render();
+            }
+        }
+    }
     fn has_unsaved_changes(&self) -> bool {
         let Some(owner) = self.current_global_owner() else {
             return false;
@@ -1404,6 +1676,19 @@ impl App {
         self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
+        self.cleanup_jobs
+            .retain_mut(|job| matches!(job.try_result(), Ok(None)));
+        if !self.stopping && self.cleanup_jobs.len() < 2 {
+            if let Some(path) = self.cleanup_paths.pop_front() {
+                match self.pool.handle().try_submit(
+                    Work::CleanupMaterial(self.root.clone(), path.clone()),
+                    Instant::now() + Duration::from_secs(5),
+                ) {
+                    Ok(ticket) => self.cleanup_jobs.push(ticket),
+                    Err(_) => self.cleanup_paths.push_front(path),
+                }
+            }
+        }
         if let Some(ticket) = &mut self.shutdown {
             match ticket.try_result() {
                 Ok(Some(Ok(Outcome::Closed))) => {
@@ -1432,6 +1717,9 @@ impl App {
                 .map(|p| p.generation)
                 .unwrap_or(self.generation);
             if generation != self.generation {
+                if let Ok(Outcome::MaterialLaunch(launch)) = &outcome {
+                    self.cleanup_paths.push_back(launch.path.path().to_owned());
+                }
                 self.status = "已锁定；请重新登录后核对保存结果。".into();
                 if !self.stopping {
                     if let Some(backend) = &self.backend {
@@ -1444,6 +1732,7 @@ impl App {
             match outcome {
                 Ok(Outcome::Opened(backend, control, state)) => {
                     self.backend = Some(backend);
+                    let _ = self.control_slot.set(control.clone());
                     self.control = Some(control);
                     self.state = Arc::new(state);
                     self.screen = if self.state.installation.is_none() {
@@ -1498,6 +1787,16 @@ impl App {
                     }
                     self.status = "课表、作息和校历已整体保存。".into();
                 }
+                Ok(Outcome::Materials(page)) => {
+                    self.material_editor
+                        .as_mut()
+                        .ok_or("资料页面已关闭")?
+                        .loaded(*page)?;
+                    self.status = "资料列表已更新。".into();
+                }
+                Ok(Outcome::MaterialLaunch(launch)) => {
+                    self.dispatch_material(*launch)?;
+                }
                 Ok(Outcome::DisplayLoaded(settings)) => {
                     if let Some(lease) = self.lease {
                         self.display =
@@ -1515,12 +1814,13 @@ impl App {
                 Ok(Outcome::Closed) => {
                     self.stopping = true;
                     self.desktop.stop();
+                    self.shell.stop();
                     self.shutdown_deadline
                         .get_or_insert(Instant::now() + Duration::from_secs(5));
                     self.pool.request_stop();
                     self.window.hide();
                 }
-                Ok(Outcome::Office(_) | Outcome::Desktop(_)) => {
+                Ok(Outcome::Office(_) | Outcome::Desktop(_) | Outcome::MaterialCleaned) => {
                     return Err("后台结果类型不匹配".into())
                 }
                 Err(error) => {
@@ -1569,6 +1869,20 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let stop = host.controller();
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
+    app.root = paths.root().to_owned();
+    let control_slot = app.control_slot.clone();
+    host.set_control_callback(Arc::new(move |hints| {
+        if hints.contains(HostHints::SESSION_LOCKED)
+            || hints.contains(HostHints::SESSION_CHANGED)
+            || hints.contains(HostHints::POWER_CHANGED)
+            || hints.contains(HostHints::SHUTDOWN)
+        {
+            if let Some(control) = control_slot.get() {
+                control.lock_local();
+            }
+        }
+    }))
+    .map_err(|_| "无法绑定会话撤销处理")?;
     app.render()?;
     if !autostart {
         app.window.show(true);
@@ -1662,6 +1976,35 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
                 app.desktop_notice = notice;
             }
         }
+        if !app.stopping {
+            for event in app.desktop.take_material_events() {
+                if let fc_windows::desktop::DesktopEvent::MaterialOpen {
+                    generation,
+                    source,
+                    material_id,
+                    resource_version,
+                    ..
+                } = event
+                {
+                    if app.pending.is_none()
+                        && app
+                            .submit_material(material_flow::Job::Open(
+                                material_flow::OpenRequest::Scene {
+                                    source,
+                                    generation,
+                                    id: material_id,
+                                    version: resource_version,
+                                },
+                            ))
+                            .is_err()
+                    {
+                        stop.fault();
+                        return Ok(());
+                    }
+                }
+            }
+            app.poll_shell();
+        }
         if let Some(ticket) = &mut office {
             match ticket.try_result() {
                 Ok(Some(Ok(Outcome::Office(report))))
@@ -1691,12 +2034,16 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         if app
             .shutdown_deadline
             .is_some_and(|deadline| Instant::now() >= deadline)
-            && (app.terminate_required || !app.pool.is_finished())
+            && (app.terminate_required || !app.pool.is_finished() || !app.shell.is_finished())
         {
             eprintln!("未来教室关闭超时，停止当前进程并保留数据供启动核对。");
             std::process::exit(2);
         }
-        if app.stopping && app.pool.is_finished() && !app.terminate_required {
+        if app.stopping
+            && app.pool.is_finished()
+            && app.shell.is_finished()
+            && !app.terminate_required
+        {
             stop.stop();
         }
         Ok(())
@@ -1752,6 +2099,13 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         schedule: None,
         display: None,
         desktop: desktop_controller::Controller::new(probe)?,
+        root: PathBuf::new(),
+        material_editor: None,
+        shell: fc_windows::materials::shell::ShellLauncher::new(),
+        control_slot: Arc::new(OnceLock::new()),
+        launch_paths: HashMap::new(),
+        cleanup_paths: VecDeque::new(),
+        cleanup_jobs: Vec::new(),
     })
 }
 
@@ -2370,7 +2724,7 @@ mod tests {
         let _serial = SERIAL.lock().unwrap();
         let (_scratch, mut app) = fixture();
         wait_for(&mut app, |a| a.pending.is_none());
-        assert!(app.screen == Screen::Setup);
+        assert!(app.screen == Screen::Setup, "{}", app.status);
         let mut data = FormData::new();
         for (id, value) in [
             (SCHOOL, "Lifecycle School"),

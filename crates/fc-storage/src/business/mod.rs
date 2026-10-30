@@ -4,6 +4,8 @@ pub(crate) mod codec;
 mod desktop;
 mod display;
 mod display_codec;
+pub mod materials;
+mod materials_codec;
 mod schedule;
 mod schedule_codec;
 use crate::*;
@@ -30,8 +32,10 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     let revision = read_revision(&transaction)?;
     let identity = load_identity(&TransactionView(&transaction))?;
     schedule::load(&TransactionView(&transaction), &identity)?;
+    schedule::change_proof(&TransactionView(&transaction))?;
     display::load(&TransactionView(&transaction), &identity)?;
     desktop::read_watermark(&TransactionView(&transaction), &identity)?;
+    materials::startup_check(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
 }
@@ -42,6 +46,11 @@ const IDENTITY: &str = "business/identity/v1";
 pub type SessionGuard =
     Arc<dyn Fn(&IdentityState, &ActorContext) -> Result<(), StorageError> + Send + Sync>;
 type Factory<S> = Arc<dyn Fn(&IdentityState, Revision) -> Result<S, StorageError> + Send + Sync>;
+pub type MaterialSceneGuard = Arc<
+    dyn Fn(&fc_domain::materials::MaterialSource, SceneGeneration) -> Result<(), StorageError>
+        + Send
+        + Sync,
+>;
 /// Factory must only prepare an owned immutable authority snapshot: no writer
 /// reentry, file access, KDF, channel effects, or externally visible publication.
 pub struct BusinessRepository<S> {
@@ -49,6 +58,7 @@ pub struct BusinessRepository<S> {
     clock: Arc<dyn Clock + Send + Sync>,
     factory: Factory<S>,
     session: SessionGuard,
+    material_scene: MaterialSceneGuard,
 }
 impl<S> Clone for BusinessRepository<S> {
     fn clone(&self) -> Self {
@@ -57,6 +67,7 @@ impl<S> Clone for BusinessRepository<S> {
             clock: self.clock.clone(),
             factory: self.factory.clone(),
             session: self.session.clone(),
+            material_scene: self.material_scene.clone(),
         }
     }
 }
@@ -71,11 +82,16 @@ impl<S: Send + 'static> BusinessRepository<S> {
             clock,
             factory,
             session: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
+            material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
         self.session = guard;
+        self
+    }
+    pub fn with_material_scene_guard(mut self, guard: MaterialSceneGuard) -> Self {
+        self.material_scene = guard;
         self
     }
     pub fn load_identity(&self) -> Result<IdentityState, StorageError> {

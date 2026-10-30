@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "27 actual Windows native tests including 4K region/DIB, stable-file publication, modal revocation, bounded STA/message pumping/idle restart; hidden synthetic scene, not DWM/visible hardware acceptance",
+  "binarySha256": "851bfa5d5f30a7c4e423a59c29ebc08c506fcf4f1ec0ad913142e85edcc968cf",
+  "sourceTreeSha256": "c379315c205ce7820a2cffb7fca9fefb63b6a090933f9e19544b110692397b5e",
+  "measurements": [
+    "FC_ROUND6_MEMORY width=1920 height=1080 before_working_set=16596992 before_private_bytes=4784128 after_working_set=25468928 after_private_bytes=12181504 context=hidden_process_before_synthetic_capture_not_DWM",
+    "FC_ROUND6_METRICS width=1920 height=1080 dib_bytes=3025792 backdrop_pixels=1127648 gdi_before=(27, 14) gdi_after=(27, 14)",
+    "FC_ROUND6_MEMORY width=3840 height=2160 before_working_set=25505792 before_private_bytes=12181504 after_working_set=28229632 after_private_bytes=15114240 context=hidden_process_before_synthetic_capture_not_DWM",
+    "FC_ROUND6_METRICS width=3840 height=2160 dib_bytes=4806080 backdrop_pixels=6375488 gdi_before=(27, 14) gdi_after=(27, 14)"
+  ],
+  "images": [
+    {
+      "path": "future-classroom-round6-materials-long-filename-tail.png",
+      "sha256": "02bd0fb37dc6dd389b57ca435ad9c7ed20ba785d346865c819d72f94f949fc42",
+      "scope": "earlier round6 owned synthetic offscreen scene; no user desktop capture"
+    },
+    {
+      "path": "future-classroom-round6-materials-own-hit-regions.png",
+      "sha256": "66871f0d3458c0f7648ce967826bce51db4370891013562a4e446b3f0fa70a25",
+      "scope": "earlier round6 owned synthetic offscreen scene; no user desktop capture"
+    },
+    {
+      "path": "future-classroom-round6-resident-1920x1080.png",
+      "sha256": "6ab0beed121796858a01ac52c4d5351af3b80639144a1e4198c6043b36518930",
+      "scope": "earlier round6 owned synthetic offscreen scene; no user desktop capture"
+    },
+    {
+      "path": "future-classroom-round6-resident-3840x2160.png",
+      "sha256": "995e4ac8bc8295a8087ad50c561e20438f6a19f0fdde478003acb6e74b842aee",
+      "scope": "earlier round6 owned synthetic offscreen scene; no user desktop capture"
+    }
+  ]
+}

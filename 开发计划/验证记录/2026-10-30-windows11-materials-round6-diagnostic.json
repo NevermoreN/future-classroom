@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "32ebb7b6d75a4325315de02f93b400212b12eb46078b9b2eb7e0e0ab079a61e6",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "applicationExitCode": 0,
+    "exitCode": 0,
+    "materialsExitCode": 1,
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=5250 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "sessionId": 1,
+    "applicationOutput": [
+      "native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+    ],
+    "materialsOutput": [
+      "MATERIALS_PASS real-dpapi-sqlite-kdf-exact-lease",
+      "FutureClassroom: materials-probe: import synthetic same.txt: materials-probe: product work: Backend(Material(Unavailable))"
+    ]
+  },
+  "status": "FAIL",
+  "error": "isolated materials integration failed"
+}

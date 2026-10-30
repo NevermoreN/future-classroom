@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "2849958d5f5fed510e742477a95418d9a5fb08ec4a9d425aab9c232ccc67d156",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=5241 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "materialsOutput": [
+      "MATERIALS_PASS real-dpapi-sqlite-kdf-exact-lease",
+      "MATERIALS_PASS same-name-independent-append-management20-cursor",
+      "MATERIALS_PASS pdf-helper-job-wic-bmp-streamed-docx",
+      "MATERIALS_PASS fixed-version-copy-delete-retirement-original-tamper",
+      "MATERIALS_PASS two-shared-workers-cancel-lock-stale-shell-private-receiver",
+      "MATERIALS_PASS restart-durable-records-orphan-reconcile",
+      "MATERIALS_PASS all-owned-processes-registry-files-cleaned"
+    ],
+    "materialsExitCode": 0,
+    "exitCode": 0,
+    "sessionId": 1
+  },
+  "status": "PASS"
+}

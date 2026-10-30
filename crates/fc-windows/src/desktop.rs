@@ -4,7 +4,8 @@ use crate::native::{Apartment, Dib};
 use fc_domain::{
     desktop::{ClockMode, ComponentKind, TextTone},
     identity::Rgb,
-    ids::SceneGeneration,
+    ids::{FolderId, MaterialId, ResourceVersionId, Revision, SceneGeneration},
+    materials::{MaterialCursor, MaterialSource},
     time::LocalDateTime,
 };
 use fc_ports::{MeasureError, TextMeasure};
@@ -26,9 +27,17 @@ use windows::{
         Foundation::*,
         Graphics::{Direct2D::Common::*, Direct2D::*, DirectWrite::*, Dxgi::Common::*, Gdi::*},
         System::{LibraryLoader::*, RemoteDesktop::*, StationsAndDesktops::*, Threading::*},
-        UI::WindowsAndMessaging::*,
+        UI::{
+            Controls::WM_MOUSELEAVE,
+            Input::KeyboardAndMouse::{TrackMouseEvent, TME_LEAVE, TRACKMOUSEEVENT},
+            WindowsAndMessaging::*,
+        },
     },
 };
+
+#[path = "desktop/backdrop.rs"]
+mod backdrop;
+use backdrop::Backdrop;
 
 pub const DESKTOP_SCOPE: u64 = 0xfc00_0001;
 pub const DIB_BUDGET: u64 = 16 * 1024 * 1024;
@@ -45,6 +54,11 @@ pub struct DesktopMetrics {
     pub components: usize,
     pub surfaces: usize,
     pub dib_bytes: u64,
+    /// Native constant-alpha GDI windows have no application DIB. Windows-managed
+    /// compositor/backing memory remains a separate real-machine measurement.
+    pub gdi_backdrop_layers: usize,
+    pub backdrop_covered_pixels: u64,
+    pub backdrop_updates: u64,
     pub drawn_frames: u64,
     pub uploaded_frames: u64,
     pub visible_windows: usize,
@@ -69,10 +83,24 @@ pub enum PresentOutcome {
     Offscreen,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)] // At most eight owned metadata events, no full scene or file bytes.
 pub enum DesktopEvent {
     HomeworkBatch {
         generation: SceneGeneration,
         offset: u64,
+    },
+    MaterialOpen {
+        generation: SceneGeneration,
+        source: MaterialSource,
+        folder_id: FolderId,
+        folder_revision: Revision,
+        material_id: MaterialId,
+        resource_version: ResourceVersionId,
+    },
+    MaterialPage {
+        generation: SceneGeneration,
+        source: MaterialSource,
+        cursor: MaterialCursor,
     },
 }
 #[derive(Clone)]
@@ -85,10 +113,33 @@ struct InputContext {
     lease: EffectLease,
     probe: bool,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)] // At most two queued actions per input component.
+enum InputAction {
+    Page(bool),
+    MaterialOpen {
+        source: MaterialSource,
+        folder_id: FolderId,
+        folder_revision: Revision,
+        material_id: MaterialId,
+        resource_version: ResourceVersionId,
+    },
+    MaterialPage {
+        source: MaterialSource,
+        cursor: MaterialCursor,
+    },
+}
+#[derive(Clone, Debug, PartialEq)]
+struct HitTarget {
+    rect: Rect,
+    action: InputAction,
+}
 struct InputState {
     context: RefCell<Option<InputContext>>,
-    pressed: Cell<Option<(SceneGeneration, bool)>>,
-    turns: RefCell<VecDeque<(SceneGeneration, bool)>>,
+    targets: RefCell<Vec<HitTarget>>,
+    layout_epoch: Cell<u64>,
+    pressed: Cell<Option<(SceneGeneration, u64, usize)>>,
+    turns: RefCell<VecDeque<(SceneGeneration, InputAction)>>,
 }
 struct InputStrip {
     surface: Surface,
@@ -120,6 +171,10 @@ impl Class {
             if RegisterClassW(&wc) == 0 {
                 return Err(Error::from_thread());
             }
+            if let Err(error) = backdrop::register(instance) {
+                let _ = UnregisterClassW(w!("FutureClassroom.Desktop.v1"), Some(instance));
+                return Err(error);
+            }
             Ok(Self { instance })
         }
     }
@@ -128,6 +183,7 @@ impl Drop for Class {
     fn drop(&mut self) {
         // SAFETY: every owned HWND is destroyed before its registration owner.
         unsafe {
+            backdrop::unregister(self.instance);
             let _ = UnregisterClassW(w!("FutureClassroom.Desktop.v1"), Some(self.instance));
         }
     }
@@ -325,6 +381,7 @@ struct Block {
     height: f32,
     fill: Option<(Rgb, f32, f32)>,
     lines: Vec<(f32, f32)>,
+    action: Option<InputAction>,
 }
 struct ContentLayout {
     blocks: Vec<Block>,
@@ -346,6 +403,7 @@ struct Card {
     body: ContentLayout,
     page: usize,
     surface: Surface,
+    backdrop: Option<Backdrop>,
     // Recess's static large card and its small clock overlay are separate, so a
     // one-second update never repaints or uploads a large work-area-sized card.
     dynamic: Option<Surface>,
@@ -353,6 +411,9 @@ struct Card {
 }
 impl Card {
     fn hide(&self) {
+        if let Some(backdrop) = &self.backdrop {
+            backdrop.hide();
+        }
         self.surface.window.hide();
         if let Some(d) = &self.dynamic {
             d.window.hide();
@@ -379,6 +440,8 @@ impl DesktopRenderer {
     fn input_strip(&self, rect: Rect) -> Result<InputStrip> {
         let state = Box::new(InputState {
             context: RefCell::new(None),
+            targets: RefCell::new(Vec::new()),
+            layout_epoch: Cell::new(0),
             pressed: Cell::new(None),
             turns: RefCell::new(VecDeque::with_capacity(2)),
         });
@@ -400,12 +463,7 @@ impl DesktopRenderer {
                 Some((&raw const *state).cast()),
             )?
         });
-        let surface = Surface {
-            window,
-            dib: Dib::new(rect.width.ceil() as i32, rect.height.ceil() as i32)?,
-            rect,
-            dirty: true,
-        };
+        let surface = make_surface(window, rect)?;
         Ok(InputStrip { surface, state })
     }
     pub fn take_events(&mut self) -> Result<Vec<DesktopEvent>> {
@@ -413,7 +471,7 @@ impl DesktopRenderer {
         for card in &mut self.cards {
             let Some(input) = &card.input else { continue };
             let turns: Vec<_> = input.state.turns.borrow_mut().drain(..).collect();
-            for (generation, forward) in turns {
+            for (generation, action) in turns {
                 if self.last_scene != Some(generation) {
                     continue;
                 }
@@ -426,6 +484,38 @@ impl DesktopRenderer {
                 if !valid {
                     continue;
                 }
+                let forward = match action {
+                    InputAction::Page(forward) => forward,
+                    InputAction::MaterialOpen {
+                        source,
+                        folder_id,
+                        folder_revision,
+                        material_id,
+                        resource_version,
+                    } => {
+                        if output.len() < 8 {
+                            output.push(DesktopEvent::MaterialOpen {
+                                generation,
+                                source,
+                                folder_id,
+                                folder_revision,
+                                material_id,
+                                resource_version,
+                            });
+                        }
+                        continue;
+                    }
+                    InputAction::MaterialPage { source, cursor } => {
+                        if output.len() < 8 {
+                            output.push(DesktopEvent::MaterialPage {
+                                generation,
+                                source,
+                                cursor,
+                            });
+                        }
+                        continue;
+                    }
+                };
                 if forward && card.page + 1 < card.body.pages.len() {
                     card.page += 1;
                     card.render_pending = true;
@@ -453,6 +543,24 @@ impl DesktopRenderer {
         Ok(output)
     }
     pub fn probe_next_page(&self, kind: ComponentKind, forward: bool) -> Result<()> {
+        self.probe_input(kind, |action| *action == InputAction::Page(forward))
+    }
+    pub fn probe_material_open(&self, id: MaterialId) -> Result<()> {
+        self.probe_input(
+            ComponentKind::Materials,
+            |action| matches!(action,InputAction::MaterialOpen{material_id,..} if *material_id==id),
+        )
+    }
+    pub fn probe_material_more(&self) -> Result<()> {
+        self.probe_input(ComponentKind::Materials, |action| {
+            matches!(action, InputAction::MaterialPage { .. })
+        })
+    }
+    fn probe_input(
+        &self,
+        kind: ComponentKind,
+        select: impl Fn(&InputAction) -> bool,
+    ) -> Result<()> {
         if !self.hidden_probe {
             return Err(Error::from_hresult(E_ACCESSDENIED));
         }
@@ -462,21 +570,31 @@ impl DesktopRenderer {
             .find(|c| c.source.kind == kind)
             .and_then(|c| c.input.as_ref())
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-        let x = if forward { 54 } else { 18 };
-        let coordinate = LPARAM(x | (12 << 16));
-        // SAFETY: own hidden button window; no global input, focus or cursor change.
+        let rect = input
+            .state
+            .targets
+            .borrow()
+            .iter()
+            .find(|target| select(&target.action))
+            .map(|target| target.rect)
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        let x = (rect.x + rect.width / 2.).round() as i32;
+        let y = (rect.y + rect.height / 2.).round() as i32;
+        let position = LPARAM(((x as u16 as u32) | ((y as u16 as u32) << 16)) as isize);
+        // SAFETY: these notifications target only a currently rendered own hidden
+        // hit rectangle. No global input, cursor movement or activation occurs.
         unsafe {
             let _ = SendMessageW(
                 input.surface.window.0,
                 WM_LBUTTONDOWN,
                 Some(WPARAM(0)),
-                Some(coordinate),
+                Some(position),
             );
             let _ = SendMessageW(
                 input.surface.window.0,
                 WM_LBUTTONUP,
                 Some(WPARAM(0)),
-                Some(coordinate),
+                Some(position),
             );
         }
         Ok(())
@@ -601,12 +719,15 @@ impl DesktopRenderer {
                 validate_card(card)?;
                 let body = prepare_content(&self.graphics, card, scene.public_calendar_unverified)?;
                 let dynamic_rect = match card.content {
-                    CardContent::Recess { .. } => Some(Rect {
-                        x: card.rect.x + 16.,
-                        y: card.rect.y + 60.,
-                        width: (card.rect.width - 32.).min(560.),
-                        height: 100.,
-                    }),
+                    CardContent::Recess { .. } => {
+                        let width = (card.rect.width - 32.).min(560.);
+                        Some(Rect {
+                            x: card.rect.x + (card.rect.width - width) / 2.,
+                            y: card.rect.y + (card.rect.height - 100.) / 2.,
+                            width,
+                            height: 100.,
+                        })
+                    }
                     CardContent::Clock(_) => Some(Rect {
                         x: card.rect.x + 16.,
                         y: card.rect.y + 42.,
@@ -615,17 +736,35 @@ impl DesktopRenderer {
                     }),
                     _ => None,
                 };
-                let input_rect = (body.pages.len() > 1
-                    || card.kind == ComponentKind::Homework
-                        && (card.page.offset > 0
-                            || card.page.offset + card.page.shown < card.page.total))
-                    .then_some(Rect {
-                        x: card.rect.x + card.rect.width - 86.,
-                        y: card.rect.y + 8.,
-                        width: 72.,
-                        height: 24.,
-                    });
-                for r in std::iter::once(card.rect)
+                let input_rect = if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
+                {
+                    Some(card.rect)
+                } else if matches!(card.content, CardContent::Materials(_)) {
+                    None
+                } else {
+                    (body.pages.len() > 1
+                        || card.kind == ComponentKind::Homework
+                            && (card.page.offset > 0
+                                || card.page.offset.saturating_add(card.page.shown)
+                                    < card.page.total))
+                        .then_some(Rect {
+                            x: card.rect.x + card.rect.width - 86.,
+                            y: card.rect.y + 8.,
+                            width: 72.,
+                            height: 24.,
+                        })
+                };
+                let static_rect = if matches!(card.content, CardContent::Recess { .. }) {
+                    Rect {
+                        x: card.rect.x,
+                        y: card.rect.y,
+                        width: card.rect.width.min(560.),
+                        height: 48.,
+                    }
+                } else {
+                    card.rect
+                };
+                for r in std::iter::once(static_rect)
                     .chain(dynamic_rect)
                     .chain(input_rect)
                 {
@@ -638,7 +777,19 @@ impl DesktopRenderer {
                     self.cards.clear();
                     return Err(Error::from_hresult(E_OUTOFMEMORY));
                 }
-                let surface = self.surface(card.rect)?;
+                let backdrop = if card.component_alpha > 0.
+                    && matches!(card.content, CardContent::Recess { .. })
+                {
+                    Some(Backdrop::new(
+                        &self.class,
+                        card.rect,
+                        card.surface_alpha,
+                        card.edge_alpha,
+                    )?)
+                } else {
+                    None
+                };
+                let surface = self.surface(static_rect)?;
                 let dynamic = dynamic_rect.map(|r| self.surface(r)).transpose()?;
                 let input = input_rect.map(|r| self.input_strip(r)).transpose()?;
                 let page = prior_pages
@@ -654,6 +805,7 @@ impl DesktopRenderer {
                     body,
                     page,
                     surface,
+                    backdrop,
                     dynamic,
                     clock_tick: None,
                 };
@@ -721,6 +873,22 @@ impl DesktopRenderer {
                 continue;
             }
             let need = self.cards[index].surface.dirty || restoring;
+            if need && self.cards[index].backdrop.is_some() {
+                for side in 0..2 {
+                    if !publication_allowed(scene, guard)? {
+                        self.hide();
+                        return Ok(PresentOutcome::Hidden);
+                    }
+                    let backdrop = self.cards[index].backdrop.as_ref().unwrap();
+                    let layer = if side == 0 {
+                        &backdrop.fill
+                    } else {
+                        &backdrop.edge
+                    };
+                    layer.apply()?;
+                    self.metrics.backdrop_updates += 1;
+                }
+            }
             if need {
                 if !publication_allowed(scene, guard)? {
                     self.hide();
@@ -772,6 +940,29 @@ impl DesktopRenderer {
                     self.hide();
                     return Ok(PresentOutcome::Hidden);
                 }
+                if self.cards[index].backdrop.is_some() {
+                    for side in 0..2 {
+                        if !publication_allowed(scene, guard)? {
+                            self.hide();
+                            return Ok(PresentOutcome::Hidden);
+                        }
+                        // SAFETY: own constant-alpha background, freshly checked,
+                        // no activation or topmost placement is requested.
+                        unsafe {
+                            let backdrop = self.cards[index].backdrop.as_ref().unwrap();
+                            let layer = if side == 0 {
+                                &backdrop.fill
+                            } else {
+                                &backdrop.edge
+                            };
+                            let _ = ShowWindow(layer.window.0, SW_SHOWNOACTIVATE);
+                        }
+                    }
+                }
+                if !publication_allowed(scene, guard)? {
+                    self.hide();
+                    return Ok(PresentOutcome::Hidden);
+                }
                 // SAFETY: exact owned HWND, after fresh system/lease/date checks.
                 unsafe {
                     let _ = ShowWindow(self.cards[index].surface.window.0, SW_SHOWNOACTIVATE);
@@ -813,19 +1004,26 @@ impl DesktopRenderer {
         })
     }
     fn surface(&self, rect: Rect) -> Result<Surface> {
-        Ok(Surface {
-            window: NativeWindow::new(&self.class)?,
-            dib: Dib::new(rect.width.ceil() as i32, rect.height.ceil() as i32)?,
-            rect,
-            dirty: true,
-        })
+        make_surface(NativeWindow::new(&self.class)?, rect)
     }
     fn refresh_metrics(&mut self) {
         self.metrics.components = self.cards.len();
+        self.metrics.gdi_backdrop_layers =
+            self.cards.iter().filter(|c| c.backdrop.is_some()).count() * 2;
+        self.metrics.backdrop_covered_pixels = self
+            .cards
+            .iter()
+            .filter(|c| c.backdrop.is_some())
+            .map(|c| c.source.rect.width.ceil() as u64 * c.source.rect.height.ceil() as u64)
+            .sum();
         self.metrics.surfaces = self
             .cards
             .iter()
-            .map(|c| 1 + usize::from(c.dynamic.is_some()) + usize::from(c.input.is_some()))
+            .map(|c| {
+                1 + usize::from(c.dynamic.is_some())
+                    + usize::from(c.input.is_some())
+                    + usize::from(c.backdrop.is_some()) * 2
+            })
             .sum();
         self.metrics.dib_bytes = self
             .cards
@@ -846,7 +1044,11 @@ impl DesktopRenderer {
             self.cards
                 .iter()
                 .filter(|c| c.source.component_alpha > 0.)
-                .map(|c| 1 + usize::from(c.dynamic.is_some()) + usize::from(c.input.is_some()))
+                .map(|c| {
+                    1 + usize::from(c.dynamic.is_some())
+                        + usize::from(c.input.is_some())
+                        + usize::from(c.backdrop.is_some()) * 2
+                })
                 .sum()
         };
         self.metrics.input_regions = if self.hidden {
@@ -854,9 +1056,10 @@ impl DesktopRenderer {
         } else {
             self.cards
                 .iter()
-                .filter(|c| c.source.component_alpha > 0. && c.input.is_some())
-                .count()
-                * 2
+                .filter(|c| c.source.component_alpha > 0.)
+                .filter_map(|c| c.input.as_ref())
+                .map(|input| input.state.targets.borrow().len())
+                .sum()
         };
         self.metrics.pages = self
             .cards
@@ -872,10 +1075,13 @@ impl DesktopRenderer {
     /// Export only the renderer's own offscreen synthetic scene, never a desktop
     /// screenshot. The one-shot BMP composition buffer is bounded to 64 MiB.
     pub fn probe_capture_bmp(&self, path: &Path) -> Result<()> {
+        self.probe_capture_bmp_for_area(path, self.work_area()?)
+    }
+    pub fn probe_capture_bmp_for_area(&self, path: &Path, work: Rect) -> Result<()> {
         if !self.hidden_probe || !path.is_absolute() {
             return Err(Error::from_hresult(E_ACCESSDENIED));
         }
-        let work = self.work_area()?;
+        surface_bytes(work)?;
         let w = work.width.ceil() as usize;
         let h = work.height.ceil() as usize;
         let bytes = w
@@ -890,6 +1096,10 @@ impl DesktopRenderer {
         for c in &self.cards {
             if c.source.component_alpha == 0. {
                 continue;
+            }
+            if let Some(backdrop) = &c.backdrop {
+                backdrop.fill.composite(&mut pixels, work, w, h)?;
+                backdrop.edge.composite(&mut pixels, work, w, h)?;
             }
             for surface in std::iter::once(&c.surface)
                 .chain(c.dynamic.iter())
@@ -936,6 +1146,29 @@ impl Drop for DesktopRenderer {
         self.hide();
         self.cards.clear();
     }
+}
+
+fn make_surface(window: NativeWindow, rect: Rect) -> Result<Surface> {
+    let dib = Dib::new(rect.width.ceil() as i32, rect.height.ceil() as i32)?;
+    // SAFETY: own still-hidden HWND is positioned without activation or z-order
+    // change, so hidden probes exercise the actual client geometry as well as DIBs.
+    unsafe {
+        SetWindowPos(
+            window.0,
+            None,
+            rect.x.round() as i32,
+            rect.y.round() as i32,
+            dib.width,
+            dib.height,
+            SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER,
+        )?;
+    }
+    Ok(Surface {
+        window,
+        dib,
+        rect,
+        dirty: true,
+    })
 }
 
 fn work_area() -> Result<Rect> {
@@ -1135,6 +1368,7 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             height,
             fill,
             lines,
+            action: None,
         });
         top += height + 8.;
         Ok(())
@@ -1177,8 +1411,63 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
                 add(r.text.clone(), false, None)?;
             }
         }
+        CardContent::Materials(list) => {
+            if list.rows.len() > fc_domain::materials::DESKTOP_MATERIAL_PAGE
+                || !list.rows.is_empty() && list.folder_id.is_none()
+            {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            add(
+                format!("{} · {}", list.subject_name, list.teacher_name),
+                false,
+                None,
+            )?;
+            if list.rows.is_empty() {
+                add("该老师暂无课堂资料".into(), false, None)?;
+            }
+            for row in &list.rows {
+                add(row.name.clone(), false, None)?;
+            }
+            if list.next_cursor.is_some() {
+                add("更多资料 ›".into(), false, None)?;
+            }
+        }
         CardContent::MaterialsUnavailable => add("资料尚未就绪".into(), false, None)?,
         _ => {}
+    }
+    if let CardContent::Materials(list) = &c.content {
+        for (block, row) in blocks.iter_mut().skip(1).zip(&list.rows) {
+            block.action = Some(InputAction::MaterialOpen {
+                source: list.source.clone(),
+                folder_id: list
+                    .folder_id
+                    .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
+                folder_revision: list.folder_revision,
+                material_id: row.material_id,
+                resource_version: row.resource_version,
+            });
+        }
+        if let Some(cursor) = &list.next_cursor {
+            blocks
+                .last_mut()
+                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?
+                .action = Some(InputAction::MaterialPage {
+                source: list.source.clone(),
+                cursor: cursor.clone(),
+            });
+        }
+        let mut y = 0.;
+        for block in &mut blocks {
+            let delta = y - block.top;
+            for (line, _) in &mut block.lines {
+                *line += delta;
+            }
+            block.top = y;
+            if block.action.is_some() {
+                block.height = block.height.max(44.);
+            }
+            y += block.height + 8.;
+        }
     }
     let total = blocks.last().map_or(0., |b| {
         b.top + b.height - if b.fill.is_none() { 8. } else { 0. }
@@ -1190,7 +1479,7 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             starts.push(b.top);
             // A course capsule that fits the viewport stays together; only
             // oversized text blocks may split on measured native line boundaries.
-            if b.fill.is_none() || b.height > viewport {
+            if b.fill.is_none() && b.action.is_none() || b.height > viewport {
                 starts.extend(b.lines.iter().map(|(y, _)| (*y).max(b.top)));
             }
         }
@@ -1287,8 +1576,10 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
         target.Clear(Some(&D2D1_COLOR_F::default()));
         if c.source.component_alpha > 0. {
             let shape = bounds(1., 1., w - 1., h - 1., 20.);
-            target.FillRoundedRectangle(&shape, &glass);
-            target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
+            if c.backdrop.is_none() {
+                target.FillRoundedRectangle(&shape, &glass);
+                target.DrawRoundedRectangle(&shape, &edge, 0.75, None);
+            }
             let heading = g.layout(
                 title(c.source.kind),
                 if c.input.is_some() {
@@ -1371,16 +1662,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
     }
     c.surface.dirty = true;
     c.render_pending = false;
-    if let Some(input) = &mut c.input {
-        render_input(
-            g,
-            input,
-            c.source.component_alpha,
-            c.tone,
-            c.page,
-            c.body.pages.len(),
-        )?;
-    }
+    render_inputs(g, c)?;
     Ok(())
 }
 fn draw_dial(target: &ID2D1DCRenderTarget, c: &Card) -> Result<()> {
@@ -1512,37 +1794,72 @@ fn input_allowed(c: &InputContext) -> bool {
 }
 
 fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option<LRESULT> {
+    let local = |screen: bool| {
+        let mut p = POINT {
+            x: lp.0 as u16 as i16 as i32,
+            y: (lp.0 >> 16) as u16 as i16 as i32,
+        };
+        if screen {
+            unsafe {
+                let _ = ScreenToClient(hwnd, &mut p);
+            }
+        }
+        p
+    };
     match msg {
         WM_MOUSEACTIVATE => Some(LRESULT(MA_NOACTIVATE as isize)),
-        WM_NCHITTEST => Some(LRESULT(
-            if state.context.borrow().as_ref().is_some_and(input_allowed) {
-                HTCLIENT as i32
+        WM_NCHITTEST => {
+            let point = local(true);
+            let allowed = state.context.borrow().as_ref().is_some_and(input_allowed)
+                && state
+                    .targets
+                    .borrow()
+                    .iter()
+                    .any(|t| t.rect.contains(point.x as f32, point.y as f32));
+            Some(LRESULT(if allowed {
+                HTCLIENT as isize
             } else {
-                HTTRANSPARENT
-            } as isize,
-        )),
+                HTTRANSPARENT as isize
+            }))
+        }
         WM_LBUTTONDOWN | WM_LBUTTONUP => {
-            let x = lp.0 as u16 as i16;
-            let y = (lp.0 >> 16) as u16 as i16;
+            let point = local(false);
             let context = state.context.borrow().clone();
             let Some(context) = context.filter(input_allowed) else {
                 state.pressed.set(None);
                 return Some(LRESULT(0));
             };
-            if !(0..72).contains(&x) || !(0..24).contains(&y) {
+            let target = state
+                .targets
+                .borrow()
+                .iter()
+                .enumerate()
+                .find(|(_, t)| t.rect.contains(point.x as f32, point.y as f32))
+                .map(|(i, t)| (i, t.action.clone()));
+            let Some((index, action)) = target else {
                 state.pressed.set(None);
                 return Some(LRESULT(0));
-            }
-            let turn = (context.generation, x >= 36);
+            };
+            let press = (context.generation, state.layout_epoch.get(), index);
             if msg == WM_LBUTTONDOWN {
-                state.pressed.set(Some(turn));
-            } else if state.pressed.replace(None) == Some(turn) {
-                let mut queue = state.turns.borrow_mut();
-                if queue.len() < 2 {
-                    queue.push_back(turn);
-                    // SAFETY: bounded asynchronous wakeup to this own HWND. The
-                    // shared host dispatches it so a local page turn need not wait
-                    // for the next one-second clock tick; no state pointer is sent.
+                state.pressed.set(Some(press));
+                // SAFETY: subscribe only this own visible button/row window to a
+                // leave notification; no cursor, focus or mouse capture is changed.
+                unsafe {
+                    if IsWindowVisible(hwnd).as_bool() {
+                        let mut tracking = TRACKMOUSEEVENT {
+                            cbSize: std::mem::size_of::<TRACKMOUSEEVENT>() as u32,
+                            dwFlags: TME_LEAVE,
+                            hwndTrack: hwnd,
+                            dwHoverTime: 0,
+                        };
+                        let _ = TrackMouseEvent(&mut tracking);
+                    }
+                }
+            } else if state.pressed.replace(None) == Some(press) {
+                let mut events = state.turns.borrow_mut();
+                if events.len() < 2 {
+                    events.push_back((context.generation, action));
                     unsafe {
                         let _ = PostMessageW(Some(hwnd), WM_NULL, WPARAM(0), LPARAM(0));
                     }
@@ -1550,11 +1867,14 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
             }
             Some(LRESULT(0))
         }
+        WM_CANCELMODE | WM_MOUSELEAVE => {
+            state.pressed.set(None);
+            Some(LRESULT(0))
+        }
         WM_CLOSE => {
             state.context.replace(None);
             state.turns.borrow_mut().clear();
             state.pressed.set(None);
-            // SAFETY: this callback's own HWND, with no outstanding mutable borrow.
             unsafe {
                 let _ = ShowWindow(hwnd, SW_HIDE);
             }
@@ -1563,36 +1883,130 @@ fn input_message(hwnd: HWND, msg: u32, lp: LPARAM, state: &InputState) -> Option
         _ => None,
     }
 }
-fn render_input(
-    g: &Graphics,
-    input: &mut InputStrip,
-    alpha: f32,
-    tone: TextTone,
-    page: usize,
-    pages: usize,
-) -> Result<()> {
+fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
+    let Some(input) = &mut c.input else {
+        return Ok(());
+    };
+    let material = matches!(c.source.content, CardContent::Materials(_));
+    let mut targets = Vec::new();
+    let pagination = !material || c.body.pages.len() > 1;
+    let origin = if material {
+        (c.source.rect.width - 86., 8.)
+    } else {
+        (0., 0.)
+    };
+    if pagination {
+        for (index, forward) in [false, true].into_iter().enumerate() {
+            targets.push(HitTarget {
+                rect: Rect {
+                    x: origin.0 + index as f32 * 36.,
+                    y: origin.1,
+                    width: 36.,
+                    height: 24.,
+                },
+                action: InputAction::Page(forward),
+            });
+        }
+    }
+    if material {
+        let top = body_top(&c.source, c.calendar_unverified);
+        let offset = c.body.pages[c.page];
+        let span = c
+            .body
+            .pages
+            .get(c.page + 1)
+            .map_or(c.source.rect.height - top - 12., |next| *next - offset);
+        for block in &c.body.blocks {
+            let Some(action) = &block.action else {
+                continue;
+            };
+            let first = (top + block.top - offset).max(top);
+            let last = (top + block.top + block.height - offset).min(top + span);
+            let visible_text = block
+                .lines
+                .iter()
+                .any(|(y, height)| *y >= offset - 0.1 && *y + *height <= offset + span + 0.1);
+            if last > first && visible_text {
+                targets.push(HitTarget {
+                    rect: Rect {
+                        x: 16.,
+                        y: first,
+                        width: c.source.rect.width - 32.,
+                        height: last - first,
+                    },
+                    action: action.clone(),
+                });
+            }
+        }
+    }
+    if *input.state.targets.borrow() != targets {
+        input.state.pressed.set(None);
+        input
+            .state
+            .layout_epoch
+            .set(input.state.layout_epoch.get().saturating_add(1));
+        input.state.targets.replace(targets.clone());
+    }
     let target = g.target(&input.surface.dib)?;
+    // SAFETY: owned small card input DIB and local layouts remain on this UI
+    // thread. Only visible row/button rectangles receive a nonzero alpha mask.
     unsafe {
-        let brush = target.CreateSolidColorBrush(&ink(tone, alpha), None)?;
-        let background = target.CreateSolidColorBrush(
+        target.BeginDraw();
+        target.Clear(Some(&D2D1_COLOR_F::default()));
+        let hit = target.CreateSolidColorBrush(
             &D2D1_COLOR_F {
-                r: 0.3,
-                g: 0.3,
-                b: 0.3,
-                a: 0.16 * alpha,
+                r: 1.,
+                g: 1.,
+                b: 1.,
+                a: 1. / 255.,
             },
             None,
         )?;
-        target.BeginDraw();
-        target.Clear(Some(&D2D1_COLOR_F::default()));
-        target.FillRoundedRectangle(&bounds(0., 0., 72., 24., 8.), &background);
-        let label = g.layout(&format!("‹ {}/{} ›", page + 1, pages), 72., 11., true)?;
-        target.DrawTextLayout(
-            xy(0., 4.).point,
-            &label,
-            &brush,
-            D2D1_DRAW_TEXT_OPTIONS_NONE,
-        );
+        if material {
+            for item in &targets {
+                if !matches!(item.action, InputAction::Page(_)) {
+                    let r = item.rect;
+                    target.FillRectangle(
+                        &D2D_RECT_F {
+                            left: r.x,
+                            top: r.y,
+                            right: r.x + r.width,
+                            bottom: r.y + r.height,
+                        },
+                        &hit,
+                    );
+                }
+            }
+        }
+        if pagination {
+            let brush =
+                target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
+            let background = target.CreateSolidColorBrush(
+                &D2D1_COLOR_F {
+                    r: 0.3,
+                    g: 0.3,
+                    b: 0.3,
+                    a: 0.16 * c.source.component_alpha,
+                },
+                None,
+            )?;
+            target.FillRoundedRectangle(
+                &bounds(origin.0, origin.1, origin.0 + 72., origin.1 + 24., 8.),
+                &background,
+            );
+            let label = g.layout(
+                &format!("‹ {}/{} ›", c.page + 1, c.body.pages.len()),
+                72.,
+                11.,
+                true,
+            )?;
+            target.DrawTextLayout(
+                xy(origin.0, origin.1 + 4.).point,
+                &label,
+                &brush,
+                D2D1_DRAW_TEXT_OPTIONS_NONE,
+            );
+        }
         target.EndDraw(None, None)?;
     }
     input.surface.dirty = true;
@@ -1780,6 +2194,8 @@ mod tests {
         let g = guard(&gate, scene.generation);
         r.present(&scene, now, &g).unwrap();
         assert_eq!(r.last_metrics().drawn_frames, 0);
+        assert_eq!(r.last_metrics().gdi_backdrop_layers, 0);
+        assert!(r.cards.iter().all(|card| card.backdrop.is_none()));
         let mut wrong = guard(&gate, SceneGeneration::new(2));
         assert_eq!(
             r.present(&scene, now, &wrong).unwrap(),
@@ -1932,6 +2348,427 @@ mod tests {
         }
         assert_eq!(r.last_metrics().drawn_frames, initial.drawn_frames);
         assert_eq!(r.last_metrics().uploaded_frames, 0);
+        assert_eq!(r.last_metrics().input_regions, 0);
+    }
+    fn material_scene(now: LocalDateTime) -> SceneSnapshot {
+        use fc_domain::materials::{MaterialScope, MaterialSourceEvidence, MaterialSourceKind};
+        let mut scene = scene(now);
+        let lesson = match &scene
+            .cards
+            .iter()
+            .find(|c| c.kind == ComponentKind::Schedule)
+            .unwrap()
+            .content
+        {
+            CardContent::Courses(rows) => rows[0].key.clone(),
+            _ => unreachable!(),
+        };
+        let source = MaterialSource {
+            kind: MaterialSourceKind::CurrentLesson,
+            lesson,
+            subject_id: SubjectId::new(1).unwrap(),
+            teacher_id: PrincipalId::new(1).unwrap(),
+            evidence: MaterialSourceEvidence::BaseTimetableOnly,
+        };
+        let folder_id = FolderId::new(7).unwrap();
+        let folder_revision = Revision::new(9);
+        let cursor = MaterialCursor {
+            folder_id,
+            folder_revision,
+            scope: MaterialScope {
+                teacher_id: source.teacher_id,
+                subject_id: source.subject_id,
+            },
+            class_id: Some(source.lesson.class_id),
+            source: Some(source.clone()),
+            offset: 5,
+        };
+        let content = fc_presentation::scene::MaterialListContent {
+            source,
+            folder_id: Some(folder_id),
+            folder_revision,
+            teacher_name: "合成教师".into(),
+            subject_name: "合成语文".into(),
+            rows: (1..=5)
+                .map(|id| fc_presentation::scene::SceneMaterialRow {
+                    material_id: MaterialId::new(id).unwrap(),
+                    resource_version: ResourceVersionId::new(id + 100).unwrap(),
+                    name: format!("合成课堂资料{id:02}.pptx"),
+                })
+                .collect(),
+            next_cursor: Some(cursor),
+            total: 8,
+        };
+        let card = scene
+            .cards
+            .iter_mut()
+            .find(|c| c.kind == ComponentKind::Materials)
+            .unwrap();
+        card.rect = Rect {
+            x: 20.,
+            y: 20.,
+            width: 460.,
+            height: 520.,
+        };
+        card.content = CardContent::Materials(Box::new(content));
+        card.page = PageInfo {
+            offset: 0,
+            shown: 5,
+            total: 8,
+        };
+        scene.cards.retain(|c| c.kind == ComponentKind::Materials);
+        scene
+    }
+    #[test]
+    fn full_1080p_and_4k_recess_regions_preserve_alpha_with_bounded_dibs() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        fn memory() -> (usize, usize) {
+            use windows::Win32::System::ProcessStatus::{
+                GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS_EX,
+            };
+            let mut counters = PROCESS_MEMORY_COUNTERS_EX {
+                cb: std::mem::size_of::<PROCESS_MEMORY_COUNTERS_EX>() as u32,
+                ..Default::default()
+            };
+            // SAFETY: own process pseudo-handle is borrowed, not closed; the EX
+            // structure extends the documented prefix and cb covers that buffer.
+            unsafe {
+                GetProcessMemoryInfo(GetCurrentProcess(), (&raw mut counters).cast(), counters.cb)
+                    .unwrap();
+            }
+            (counters.WorkingSetSize, counters.PrivateUsage)
+        }
+        let (_publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut r = DesktopRenderer::new_hidden().unwrap();
+        for (generation, width, height) in [(1, 1920., 1080.), (2, 3840., 2160.)] {
+            let mut scene = scene(now);
+            scene.generation = SceneGeneration::new(generation);
+            let x = width - 816.;
+            let mut left_y = 16.;
+            let mut right_y = 16.;
+            for card in &mut scene.cards {
+                card.rect = match card.kind {
+                    ComponentKind::Recess => Rect {
+                        x: 16.,
+                        y: 16.,
+                        width: width - 844.,
+                        height: height - 32.,
+                    },
+                    ComponentKind::Clock
+                    | ComponentKind::Date
+                    | ComponentKind::Schedule
+                    | ComponentKind::DateCountdown => {
+                        let h = match card.kind {
+                            ComponentKind::Clock => 160.,
+                            ComponentKind::Schedule => (height * 0.35).min(400.),
+                            _ => 100.,
+                        };
+                        let rect = Rect {
+                            x,
+                            y: left_y,
+                            width: 280.,
+                            height: h,
+                        };
+                        left_y += h + 12.;
+                        rect
+                    }
+                    _ => {
+                        let h = height
+                            * match card.kind {
+                                ComponentKind::Homework => 0.4,
+                                ComponentKind::Materials => 0.25,
+                                _ => 0.15,
+                            };
+                        let rect = Rect {
+                            x: x + 292.,
+                            y: right_y,
+                            width: 508.,
+                            height: h,
+                        };
+                        right_y += h + 12.;
+                        rect
+                    }
+                };
+            }
+            let before_memory = memory();
+            assert_eq!(
+                r.present(&scene, now, &guard(&gate, scene.generation))
+                    .unwrap(),
+                PresentOutcome::Offscreen
+            );
+            let recess = r
+                .cards
+                .iter()
+                .find(|c| c.source.kind == ComponentKind::Recess)
+                .unwrap();
+            let background = recess.backdrop.as_ref().unwrap();
+            background.fill.verify_native_paint().unwrap();
+            background.edge.verify_native_paint().unwrap();
+            let count = || unsafe {
+                (
+                    GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS),
+                    GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS),
+                )
+            };
+            let resources = count();
+            // Exercise forced native paint restoration at each real 1080p/4K
+            // size without changing immutable scene geometry or showing windows.
+            for iteration in 0..100 {
+                background
+                    .fill
+                    .apply()
+                    .unwrap_or_else(|e| panic!("fill iteration {iteration}: {e:?}"));
+                background
+                    .edge
+                    .apply()
+                    .unwrap_or_else(|e| panic!("edge iteration {iteration}: {e:?}"));
+            }
+            background.fill.verify_native_paint().unwrap();
+            background.edge.verify_native_paint().unwrap();
+            let after = count();
+            let after_memory = memory();
+            eprintln!("FC_ROUND6_MEMORY width={} height={} before_working_set={} before_private_bytes={} after_working_set={} after_private_bytes={} context=hidden_process_before_synthetic_capture_not_DWM", width, height, before_memory.0, before_memory.1, after_memory.0, after_memory.1);
+            assert_eq!(after, resources);
+
+            let metrics = r.last_metrics();
+            assert!(metrics.dib_bytes < DIB_BUDGET);
+            assert_eq!(metrics.gdi_backdrop_layers, 2);
+            eprintln!("FC_ROUND6_METRICS width={} height={} dib_bytes={} backdrop_pixels={} gdi_before={:?} gdi_after={:?}",width,height,metrics.dib_bytes,metrics.backdrop_covered_pixels,resources,after);
+            assert_eq!(
+                metrics.backdrop_covered_pixels,
+                ((width - 844.) * (height - 32.)) as u64
+            );
+            assert_eq!(metrics.uploaded_frames, 0);
+            assert_eq!(metrics.visible_windows, 0);
+            // Static-region fill covers the complete interior at independently
+            // quantized 3%; a different 50% hollow region provides only the edge.
+            let area = Rect {
+                x: 0.,
+                y: 0.,
+                width,
+                height,
+            };
+            let mut sample = vec![0u8; (width * height * 4.) as usize];
+            for pixel in sample.chunks_exact_mut(4) {
+                pixel.copy_from_slice(&[45, 36, 28, 255]);
+            }
+            background
+                .fill
+                .composite(&mut sample, area, width as usize, height as usize)
+                .unwrap();
+            let center = ((height as usize / 2) * width as usize + width as usize / 4) * 4;
+            assert_eq!(&sample[center..center + 3], &[51, 42, 35]);
+            let before_center = sample[center..center + 3].to_vec();
+            background
+                .edge
+                .composite(&mut sample, area, width as usize, height as usize)
+                .unwrap();
+            assert_eq!(&sample[center..center + 3], before_center.as_slice());
+            if let Some(directory) = std::env::var_os("FC_DESKTOP_CAPTURE_DIR") {
+                let path =
+                    Path::new(&directory).join(format!("resident-{width:.0}x{height:.0}.bmp"));
+                r.probe_capture_bmp_for_area(&path, area).unwrap();
+            }
+            let checksum = |renderer: &DesktopRenderer| {
+                renderer
+                    .cards
+                    .iter()
+                    .map(|c| {
+                        c.surface
+                            .dib
+                            .pixels()
+                            .iter()
+                            .fold(0u64, |a, v| a.wrapping_mul(31).wrapping_add(u64::from(*v)))
+                    })
+                    .collect::<Vec<_>>()
+            };
+            let previous = checksum(&r);
+            let draws = r.last_metrics().drawn_frames;
+            if now.second_of_day() < 86398 {
+                r.present(
+                    &scene,
+                    LocalDateTime::new(now.date, now.second_of_day() + 1).unwrap(),
+                    &guard(&gate, scene.generation),
+                )
+                .unwrap();
+                assert_eq!(r.last_metrics().drawn_frames - draws, 2);
+                assert_eq!(checksum(&r), previous);
+                assert_eq!(r.last_metrics().backdrop_updates, 0);
+            }
+        }
+    }
+    #[test]
+    fn filename_hit_rectangles_bind_source_and_resource_versions_and_reject_stale_actions() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (mut publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut scene = material_scene(now);
+        let mut r = DesktopRenderer::new_hidden().unwrap();
+        r.present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        if let Some(directory) = std::env::var_os("FC_DESKTOP_CAPTURE_DIR") {
+            r.probe_capture_bmp_for_area(
+                &Path::new(&directory).join("materials-own-hit-regions.bmp"),
+                Rect {
+                    x: 0.,
+                    y: 0.,
+                    width: 1024.,
+                    height: 768.,
+                },
+            )
+            .unwrap();
+        }
+        let expected = match &scene.cards[0].content {
+            CardContent::Materials(list) => list.as_ref().clone(),
+            _ => unreachable!(),
+        };
+        r.probe_material_open(MaterialId::new(3).unwrap()).unwrap();
+        assert_eq!(
+            r.take_events().unwrap(),
+            vec![DesktopEvent::MaterialOpen {
+                generation: scene.generation,
+                source: expected.source.clone(),
+                folder_id: expected.folder_id.unwrap(),
+                folder_revision: expected.folder_revision,
+                material_id: MaterialId::new(3).unwrap(),
+                resource_version: ResourceVersionId::new(103).unwrap()
+            }]
+        );
+        r.probe_material_more().unwrap();
+        assert_eq!(
+            r.take_events().unwrap(),
+            vec![DesktopEvent::MaterialPage {
+                generation: scene.generation,
+                source: expected.source.clone(),
+                cursor: expected.next_cursor.clone().unwrap()
+            }]
+        );
+        assert!(r.probe_material_open(MaterialId::new(99).unwrap()).is_err());
+        let input = r.cards[0].input.as_ref().unwrap();
+        let outside = POINT {
+            x: scene.cards[0].rect.x as i32 + 2,
+            y: scene.cards[0].rect.y as i32 + 2,
+        };
+        let lp = LPARAM(((outside.x as u16 as u32) | ((outside.y as u16 as u32) << 16)) as isize);
+        assert_eq!(
+            unsafe { SendMessageW(input.surface.window.0, WM_NCHITTEST, None, Some(lp)) }.0,
+            HTTRANSPARENT as isize
+        );
+        r.probe_material_open(MaterialId::new(3).unwrap()).unwrap();
+        let prepared = publisher
+            .prepare((), Revision::new(6), AuthEpoch::new(1))
+            .unwrap();
+        let update = publisher.begin_update().unwrap();
+        publisher.publish(update, prepared).unwrap();
+        scene.source_revision = Revision::new(6);
+        scene.generation = SceneGeneration::new(2);
+        if let CardContent::Materials(list) = &mut scene.cards[0].content {
+            list.folder_revision = Revision::new(10);
+            list.rows[2].resource_version = ResourceVersionId::new(999).unwrap();
+            list.next_cursor.as_mut().unwrap().folder_revision = Revision::new(10);
+        }
+        r.present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(r.take_events().unwrap().is_empty());
+        r.probe_material_open(MaterialId::new(3).unwrap()).unwrap();
+        assert!(
+            matches!(&r.take_events().unwrap()[0],DesktopEvent::MaterialOpen{generation,resource_version,folder_revision,..}if *generation==scene.generation&&resource_version.get()==999&&folder_revision.get()==10)
+        );
+        r.probe_material_open(MaterialId::new(3).unwrap()).unwrap();
+        r.hide();
+        assert!(r.take_events().unwrap().is_empty());
+        scene.generation = SceneGeneration::new(3);
+        scene.cards[0].component_alpha = 0.;
+        r.present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(r.probe_material_open(MaterialId::new(3).unwrap()).is_err());
+    }
+    #[test]
+    fn long_filename_pages_preserve_extension_and_only_visible_text_accepts_input() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut scene = material_scene(now);
+        scene.cards[0].rect.width = 230.;
+        scene.cards[0].rect.height = 160.;
+        if let CardContent::Materials(list) = &mut scene.cards[0].content {
+            list.rows[4].name = "合成中文长文件名".repeat(20) + ".pptx";
+        }
+        let mut r = DesktopRenderer::new_hidden().unwrap();
+        let g = guard(&gate, scene.generation);
+        r.present(&scene, now, &g).unwrap();
+        assert!(r.probe_material_open(MaterialId::new(5).unwrap()).is_err());
+        let pages = r.last_metrics().pages[0].pages;
+        assert!(pages > 1);
+        let filename_block=r.cards[0].body.blocks.iter().find(|b|matches!(b.action,Some(InputAction::MaterialOpen{material_id,..})if material_id.get()==5)).unwrap();
+        let mut lines = vec![DWRITE_LINE_METRICS::default(); filename_block.lines.len()];
+        let mut count = 0;
+        unsafe {
+            filename_block
+                .layout
+                .GetLineMetrics(Some(&mut lines), &mut count)
+                .unwrap();
+        }
+        let expected_units = match &scene.cards[0].content {
+            CardContent::Materials(list) => list.rows[4].name.encode_utf16().count(),
+            _ => unreachable!(),
+        };
+        assert_eq!(
+            lines.iter().map(|line| line.length as usize).sum::<usize>(),
+            expected_units
+        );
+        let mut found = false;
+        let mut extension_visible = false;
+        for _ in 0..pages {
+            if r.probe_material_open(MaterialId::new(5).unwrap()).is_ok() {
+                found = true;
+                let events = r.take_events().unwrap();
+                assert!(
+                    matches!(&events[0],DesktopEvent::MaterialOpen{material_id,..}if material_id.get()==5)
+                );
+            }
+            let card = &r.cards[0];
+            let offset = card.body.pages[card.page];
+            let end = card.body.pages.get(card.page + 1).copied().unwrap_or(
+                card.source.rect.height - body_top(&card.source, card.calendar_unverified) - 12.
+                    + offset,
+            );
+            let block=card.body.blocks.iter().find(|b|matches!(b.action,Some(InputAction::MaterialOpen{material_id,..})if material_id.get()==5)).unwrap();
+            let (line, height) = block.lines.last().unwrap();
+            if *line >= offset && *line + *height <= end + 0.1 {
+                extension_visible = true;
+                if let Some(directory) = std::env::var_os("FC_DESKTOP_CAPTURE_DIR") {
+                    r.probe_capture_bmp_for_area(
+                        &Path::new(&directory).join("materials-long-filename-tail.bmp"),
+                        Rect {
+                            x: 0.,
+                            y: 0.,
+                            width: 320.,
+                            height: 240.,
+                        },
+                    )
+                    .unwrap();
+                }
+            }
+            r.next_page(ComponentKind::Materials).unwrap();
+            r.present(&scene, now, &g).unwrap();
+        }
+        assert!(found);
+        assert!(extension_visible);
+        assert!(match &r.cards[0].source.content {
+            CardContent::Materials(list) => list.rows[4].name.ends_with(".pptx"),
+            _ => false,
+        });
+        gate.stop();
+        assert!(r.take_events().unwrap().is_empty());
+        r.hide();
         assert_eq!(r.last_metrics().input_regions, 0);
     }
 }

@@ -5,6 +5,54 @@ use super::*;
 use fc_domain::{schedule::*, schedule_document::*};
 use fc_ports::{ScheduleRepository, ScheduleRepositoryError, ScheduleRequest};
 const DOCUMENT: &str = "business/schedule/v1";
+const CHANGE: &str = "business/schedule/last-changed/v1";
+pub(super) struct ChangeProof {
+    pub(super) at: fc_domain::time::LocalDateTime,
+    pub(super) observed_at: Option<fc_domain::time::LocalDateTime>,
+}
+pub(super) fn change_proof(
+    d: &dyn TransactionDocuments,
+) -> Result<Option<ChangeProof>, StorageError> {
+    let Some(row) = d.get(CHANGE)? else {
+        return Ok(None);
+    };
+    if d.get(DOCUMENT)?.is_none() {
+        return Err(StorageError::Database);
+    }
+    let v = codec::value(&row.value)?;
+    codec::object_fields(&v, &["format", "at", "unsettled", "observed_at"])?;
+    if codec::number(&v, "format")? != 1 {
+        return Err(StorageError::Database);
+    }
+    let at = codec::read_time(&v["at"])?;
+    let unsettled = codec::boolean(&v, "unsettled")?;
+    let observed_at = if v["observed_at"].is_null() {
+        None
+    } else {
+        Some(codec::read_time(&v["observed_at"])?)
+    };
+    if unsettled != observed_at.is_none() || observed_at.is_some_and(|observed| observed < at) {
+        return Err(StorageError::Database);
+    }
+    Ok(Some(ChangeProof { at, observed_at }))
+}
+pub(super) fn confirm_change(
+    d: &dyn TransactionDocuments,
+    now: fc_domain::time::LocalDateTime,
+) -> Result<Option<Mutation>, StorageError> {
+    let Some(proof) = change_proof(d)? else {
+        return Ok(None);
+    };
+    if proof.observed_at.is_some() {
+        return Ok(None);
+    }
+    Ok(Some(Mutation::Put {
+        key: CHANGE.into(),
+        value: codec::bytes(
+            &json!({"format":1,"at":codec::time(proof.at),"unsettled":false,"observed_at":codec::time(proof.at.max(now))}),
+        )?,
+    }))
+}
 
 struct LimitedBuffer(Vec<u8>);
 impl std::io::Write for LimitedBuffer {
@@ -251,6 +299,7 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
             )
             .map_err(StorageError::Schedule)?;
         let outcome = encode(&dto::document(&next))?;
+        let changed_at = self.clock.now();
         let snapshot = (self.factory)(
             &identity,
             d.revision()?
@@ -279,6 +328,12 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
                     Mutation::Put {
                         key: journal,
                         value: journal_bytes,
+                    },
+                    Mutation::Put {
+                        key: CHANGE.into(),
+                        value: codec::bytes(
+                            &json!({"format":1,"at":codec::time(changed_at),"unsettled":true,"observed_at":null}),
+                        )?,
                     },
                 ],
                 snapshot,
