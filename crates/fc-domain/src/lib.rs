@@ -10,3 +10,5 @@ pub mod materials;
 pub mod schedule;
 pub mod schedule_document;
 pub mod time;
+
+pub mod voice;

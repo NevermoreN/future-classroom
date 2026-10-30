@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.20 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.21 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上第六轮296项/90步工作台与实际资料闭环、1080p/4K低DIB通过；完整桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上第八轮350项/104步工作台、9组资料与全零WinMM持久链通过；前轮1080p/4K低DIB通过；完整桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -66,7 +66,7 @@ P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声�
 
 原生定向应用DIB合计：1080p为3025792字节，4K为4806080字节，保持16MiB上限；系统管理的backing/compositor内存单独计，未取得可见真机性能证据。[旧修复前记录1](验证记录/2026-10-30-windows11-round6-native-4k-materials-before-fix-1.json)、[记录2](验证记录/2026-10-30-windows11-round6-native-4k-materials-before-fix-2.json)、[记录3](验证记录/2026-10-30-windows11-round6-native-4k-materials-before-fix-3.json)不删除。通过自身合成区域预算不等于实际显示器/白板4K验收，旧25501952字节背景FAIL也不再被描述为新路径当前预算。
 
-原件2GiB与launchcopies200MiB分账、管理20/桌面5项、固定版本/实际哈希、stage到提交同inode与删除回收已接代码和定向测试；副本最后写入后24小时宽限，锁定不强删，主动清理UI尚缺。本轮最终开发package及隔离资料链证据已归档，不提前宣称Win7/10/11正式兼容或创建产品Release；Windows SSH长期测试授权继续保留。
+原件2GiB与launchcopies200MiB分账、管理20/桌面5项、固定版本/实际哈希、stage到提交同inode与删除回收已接代码和定向测试；副本最后写入后24小时宽限，锁定不强删，已接本地全局管理员主动清理及真实双worker争用保留会话反例。本轮最终开发package及隔离资料链证据已归档，不提前宣称Win7/10/11正式兼容或创建产品Release；Windows SSH长期测试授权继续保留。
 
 第六轮最终[Win11 x86 296项与资料/90步工作台](验证记录/2026-10-30-windows11-materials-round6.json)、[107构建输入绑定](验证记录/2026-10-30-materials-round6-build-inputs.json)、[Win7GNU PE审计](验证记录/2026-10-30-win7-gnu-round6-imports.json)、[Win7GNU在Win11的相同资料/工作台复测](验证记录/2026-10-30-win7-gnu-materials-on-windows11-final2.json)通过对应局部门槛。错误信息路径引入的RoOriginateErrorW已移除，静态Win7已知风险触发数归零；这依然不是实际Win7/Win10、正式MSVC或完整产品验收。
 
@@ -77,3 +77,5 @@ P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声�
 实际Win10/Win7设备仍未连接，PPT/触控/DPI/完整profile布局、教师Web/WinMM、安装与72小时保留原状态。无充分课程历史时中性隐藏，可信基础课程无观测恢复尚未完成。各目标独立取证；SSH服务和长期授权保留。
 
 [第七轮Win7GNU PE审计](验证记录/2026-10-30-win7-gnu-round7-imports.json)零结构错误/零已知风险触发；[该补充EXE在Win11的98步/资料链](验证记录/2026-10-30-win7-gnu-lesson-history-on-windows11-round7.json)通过。它与[现代目标最终305项](验证记录/2026-10-30-windows11-lesson-history-round7.json)共用112输入哈希；补充nightly编译诊断保留，正式MSVC/Win7/Win10仍未验收。
+
+第八轮证据：[现代x86完整局部回归](验证记录/2026-10-30-windows11-voice-copy-round8.json)、[Win7GNU同码在Win11补充运行](验证记录/2026-10-30-win7-gnu-voice-copy-on-windows11-round8.json)。声音只输出全零PCM，未调整音量/录音/前台；不能替代真实音频通知效果或Win7/Win10设备证据。

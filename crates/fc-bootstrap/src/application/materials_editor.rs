@@ -16,11 +16,17 @@ pub(super) const NEXT: ActionId = ActionId(304);
 pub(super) const FIRST: ActionId = ActionId(305);
 pub(super) const CONFIRM_DELETE: ActionId = ActionId(306);
 pub(super) const CANCEL_DELETE: ActionId = ActionId(307);
+pub(super) const COPIES: ActionId = ActionId(308);
+pub(super) const CLEAN_COPIES: ActionId = ActionId(309);
+pub(super) const RETURN_COPIES: ActionId = ActionId(310);
 const BACK: ActionId = ActionId(2);
 const LOCK: ActionId = ActionId(6);
 
 pub(super) enum Command {
     Stay,
+    Copies {
+        clean: bool,
+    },
     Load(MaterialListRequest),
     Import {
         scope: MaterialScope,
@@ -47,6 +53,7 @@ pub(super) struct Editor {
     pending: Option<MaterialListRequest>,
     selected: Option<MaterialRecord>,
     confirmation: bool,
+    copies: Option<super::material_flow::LaunchCopyReport>,
 }
 
 fn action(id: ActionId, label: &str, enabled: bool) -> Action {
@@ -165,6 +172,7 @@ impl Editor {
             pending: None,
             selected: None,
             confirmation: false,
+            copies: None,
         }
     }
     fn displayed_scope(&self, identity: &IdentityState) -> Option<MaterialScope> {
@@ -199,9 +207,31 @@ impl Editor {
             busy,
             grid: None,
         };
+        let global = valid_role(identity, self.owner) == Some(Role::GlobalAdmin);
+        if let Some(copies) = self.copies.filter(|_| global) {
+            view.title = "打开副本管理".into();
+            view.description = format!(
+                "占用 {} 字节 / 200MiB，{} / 128 份；已到期 {} 份。本次已清理 {} 份，占用中保留 {} 份。清理只删除最后写入已满24小时且未被占用的副本。原件和未到期副本继续保留。",
+                copies.bytes, copies.count, copies.expired, copies.removed, copies.retained);
+            view.actions = vec![
+                action(COPIES, "刷新占用", !busy),
+                action(
+                    CLEAN_COPIES,
+                    "确认清理已到期副本",
+                    !busy && copies.expired > 0,
+                ),
+                action(RETURN_COPIES, "返回资料目录", !busy),
+                action(LOCK, "锁定", true),
+            ];
+            return view;
+        }
         let Some(scope) = self.displayed_scope(identity) else {
             view.description = "当前账号没有可管理的资料目录。".into();
             view.actions = vec![action(BACK, "返回", !busy), action(LOCK, "锁定", true)];
+            if global {
+                view.actions
+                    .insert(0, action(COPIES, "打开副本管理", !busy));
+            }
             return view;
         };
         if self.confirmation {
@@ -307,7 +337,15 @@ impl Editor {
             action(BACK, "返回", !busy),
             action(LOCK, "锁定", true),
         ];
+        if global {
+            view.actions
+                .insert(6, action(COPIES, "打开副本管理", !busy));
+        }
         view
+    }
+    pub(super) fn copies_loaded(&mut self, report: super::material_flow::LaunchCopyReport) {
+        self.copies = Some(report);
+        self.clear_selection();
     }
     fn clear_selection(&mut self) {
         self.selected = None;
@@ -402,6 +440,24 @@ impl Editor {
         }
         if valid_role(identity, self.owner).is_none() {
             return Err("当前账号没有资料管理权限。".into());
+        }
+        if matches!(action, COPIES | CLEAN_COPIES | RETURN_COPIES) {
+            if valid_role(identity, self.owner) != Some(Role::GlobalAdmin) {
+                return Err("只有本地全局管理员可管理共享打开副本。".into());
+            }
+            if action == RETURN_COPIES {
+                self.copies = None;
+                return Ok(Command::Stay);
+            }
+            if action == CLEAN_COPIES && self.copies.is_none() {
+                return Err("请先查看副本占用并确认清理范围。".into());
+            }
+            return Ok(Command::Copies {
+                clean: action == CLEAN_COPIES,
+            });
+        }
+        if self.copies.is_some() {
+            return Err("请先返回资料目录。".into());
         }
         if action == CANCEL_DELETE {
             self.confirmation = false;
@@ -759,5 +815,46 @@ mod tests {
             user.handle(LOCK, FormData::new(), &state),
             Ok(Command::Lock)
         ));
+    }
+    #[test]
+    fn copy_cleanup_requires_global_role_and_inspection_even_without_material_scopes() {
+        let mut state = identity();
+        let mut global = Editor::new(principal(1));
+        assert!(global
+            .handle(CLEAN_COPIES, FormData::new(), &state)
+            .is_err());
+        state.subjects.clear();
+        assert!(global
+            .view(&state, "", false)
+            .actions
+            .iter()
+            .any(|a| a.id == COPIES));
+        assert!(matches!(
+            global.handle(COPIES, FormData::new(), &state),
+            Ok(Command::Copies { clean: false })
+        ));
+        global.copies_loaded(super::super::material_flow::LaunchCopyReport {
+            count: 3,
+            bytes: 100,
+            expired: 2,
+            removed: 0,
+            retained: 0,
+        });
+        global.view(&state, "", false).validate().unwrap();
+        assert!(matches!(
+            global.handle(CLEAN_COPIES, FormData::new(), &state),
+            Ok(Command::Copies { clean: true })
+        ));
+        for id in [2, 4] {
+            let mut other = Editor::new(principal(id));
+            other.copies_loaded(global.copies.unwrap());
+            assert!(other.handle(COPIES, FormData::new(), &state).is_err());
+            assert!(other.handle(CLEAN_COPIES, FormData::new(), &state).is_err());
+        }
+        assert!(matches!(
+            global.handle(RETURN_COPIES, FormData::new(), &state),
+            Ok(Command::Stay)
+        ));
+        assert!(global.copies.is_none());
     }
 }

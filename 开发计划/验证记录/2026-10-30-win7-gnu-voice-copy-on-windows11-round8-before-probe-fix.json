@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "61da52b1974af7f26878356615e9fb0081ce53602257a8fade263b1f87506bf8",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "system": {
+    "exitCode": 0,
+    "output": [
+      "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None }"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=5006 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "materialsOutput": [
+      "MATERIALS_PASS real-dpapi-sqlite-kdf-exact-lease",
+      "MATERIALS_PASS same-name-independent-append-management20-cursor",
+      "MATERIALS_PASS pdf-helper-job-wic-bmp-streamed-docx",
+      "MATERIALS_PASS fixed-version-copy-delete-retirement-original-tamper",
+      "MATERIALS_PASS manual-copy-inspection-exclusive-age-recheck-locked-release",
+      "MATERIALS_PASS two-shared-workers-cancel-lock-stale-shell-private-receiver",
+      "MATERIALS_PASS restart-durable-records-orphan-reconcile",
+      "MATERIALS_PASS all-owned-processes-registry-files-cleaned"
+    ],
+    "hostOutput": [
+      "hidden_host=PASS tray_lifecycle=PASS ticks=2 elapsed_ms=2001 session_notifications=true"
+    ],
+    "audioExitCode": 0,
+    "materialsExitCode": 0,
+    "audioOutput": [
+      "AUDIO_SILENT_PASS WinMmProbeReport { natural_completions: 1, canceled_completions: 0, submitted_pcm_bytes: 65536, pcm_allocation_bytes: 49152, source_cleanup: true }",
+      "VOICE_PIPELINE_PASS canonical_zero_pcm_prepare_exact_web_lease_sqlite_fifo_two_natural_repeats_cancel_generation_native_release_body_cleanup=PASS"
+    ],
+    "sessionId": 1,
+    "applicationOutput": [
+      "FutureClassroom: 副本占用未通过真实worker加载：已保存。"
+    ],
+    "exitCode": 0,
+    "applicationExitCode": 1,
+    "hostExitCode": 0
+  },
+  "status": "FAIL",
+  "error": "isolated native workbench application failed",
+  "sourceBinding": {
+    "manifest": "2026-10-30-voice-copy-round8-build-inputs-before-probe-fix.json",
+    "sha256": "fa54392854cf8e7c040ed0407a10f6270570de779a5b546ceb7e74f531c8e258"
+  }
+}

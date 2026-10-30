@@ -6,6 +6,8 @@ mod application;
 mod credential_probe;
 #[cfg(windows)]
 mod material_helper;
+#[cfg(windows)]
+mod voice_pipeline_probe;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_runtime::authority::AuthorityStore;
 use fc_storage::{CommitCommand, Mutation, StorageWriter};
@@ -35,6 +37,27 @@ fn run() -> Result<(), String> {
             #[cfg(not(windows))]
             {
                 Err("material receiver requires Windows".into())
+            }
+        }
+        [flag] if flag == "--audio-silent-probe" => {
+            #[cfg(windows)]
+            {
+                match fc_windows::audio::silent_probe() {
+                    Ok(report) => {
+                        println!("AUDIO_SILENT_PASS {report:?}");
+                        Ok(())
+                    }
+                    Err(fc_ports::audio::AudioOutputError::DeviceUnavailable) => {
+                        println!("AUDIO_SILENT_NOT_RUN no compatible output endpoint");
+                        Ok(())
+                    }
+                    Err(error) => Err(format!("audio silent probe failed: {error:?}")),
+                }?;
+                voice_pipeline_probe::run()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("silent audio probe requires Windows".into())
             }
         }
         [flag] if flag == "--materials-probe" => {

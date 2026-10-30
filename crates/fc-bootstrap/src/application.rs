@@ -300,6 +300,7 @@ enum Outcome {
     Materials(Box<MaterialPage>),
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
+    LaunchCopies(material_flow::LaunchCopyReport),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -318,6 +319,7 @@ enum Work {
     Open(PathBuf, Arc<CurrentClock>),
     Request(Request),
     Refresh(Arc<Mutex<Backend>>),
+    MaintainVoice(PathBuf, Arc<Mutex<Backend>>),
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
@@ -345,7 +347,7 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
-            Self::Open(p, _) | Self::ValidateOffice(p) => {
+            Self::Open(p, _) | Self::ValidateOffice(p) | Self::MaintainVoice(p, _) => {
                 Some(p.as_os_str().len().saturating_mul(2))
             }
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
@@ -389,6 +391,11 @@ impl Task for Work {
                             context,
                         )?;
                     }
+                    let voice_files = fc_bootstrap::voice_files::ControlledVoiceFiles::new(&root)
+                        .map_err(|_| invalid("声音目录不可用。"))?;
+                    voice_files
+                        .reconcile(&mut *backend.lock().map_err(|_| Failure::Stopped)?)
+                        .map_err(|_| invalid("声音恢复清理未完成，请核对部署数据。"))?;
                     let control = backend
                         .lock()
                         .map_err(|_| Failure::Stopped)?
@@ -409,6 +416,14 @@ impl Task for Work {
                         }
                     }
                 }
+            }
+            Self::MaintainVoice(root, backend) => {
+                let mut backend = backend.try_lock().map_err(|_| Failure::Stopped)?;
+                fc_bootstrap::voice_files::ControlledVoiceFiles::new(&root)
+                    .and_then(|files| files.reconcile(&mut backend))
+                    .map_err(|_| invalid("声音数据维护未完成。"))?;
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                Ok(Outcome::MaterialCleaned)
             }
             Self::Request(r) => execute(r),
             Self::Refresh(backend) => {
@@ -823,6 +838,7 @@ struct App {
     desktop: desktop_controller::Controller,
     root: PathBuf,
     material_editor: Option<materials_editor::Editor>,
+    copies_loaded_sequence: u64,
     lesson_editor: Option<lesson_editor::Editor>,
     lesson_entry_pending: bool,
     lesson_flow_active: bool,
@@ -832,6 +848,8 @@ struct App {
     launch_paths: HashMap<u64, PathBuf>,
     cleanup_paths: VecDeque<PathBuf>,
     cleanup_jobs: Vec<JobTicket<Result<Outcome>>>,
+    voice_maintenance: Option<JobTicket<Result<Outcome>>>,
+    next_voice_maintenance: Instant,
 }
 impl App {
     fn view(&self) -> View {
@@ -1201,6 +1219,25 @@ impl App {
         if self.pending.is_some() {
             return Ok(());
         }
+        if self.offscreen_probe {
+            let kind = match &work {
+                Work::Request(_) => "request",
+                Work::Material(_) => "material",
+                Work::LoadLesson(_, _) => "lesson-load",
+                Work::ChangeLesson(..) => "lesson-change",
+                Work::SaveSchedule(..) => "schedule-save",
+                Work::LoadSchedule(..) => "schedule-load",
+                Work::LoadDisplay(..) => "display-load",
+                Work::SaveDisplay(..) => "display-save",
+                _ => "other",
+            };
+            eprintln!(
+                "PROBE_SUBMIT tick={} kind={} page={}",
+                self.clock.monotonic_millis(),
+                kind,
+                self.view().title
+            );
+        }
         // Successful own password/recovery/exit commands deliberately revoke the
         // current local lease before their completion reaches the window pump.
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
@@ -1277,6 +1314,16 @@ impl App {
                 self.render()?;
             }
             Event::Submit(mut action, data) => {
+                if self.offscreen_probe {
+                    eprintln!(
+                        "PROBE_EVENT tick={} action={} page={} pending={} generation={}",
+                        self.clock.monotonic_millis(),
+                        action.0,
+                        self.view().title,
+                        self.pending.is_some(),
+                        self.generation
+                    );
+                }
                 self.last_input = Instant::now();
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
@@ -1613,6 +1660,9 @@ impl App {
             .handle(action, data, &self.state);
         match command {
             Ok(Command::Stay) => self.status.clear(),
+            Ok(Command::Copies { clean }) => {
+                self.submit_material(material_flow::Job::Copies { lease, clean })?
+            }
             Ok(Command::Close) => {
                 self.screen = Screen::Home;
                 self.status.clear();
@@ -1829,6 +1879,44 @@ impl App {
         self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
+        if let Some(ticket) = self.voice_maintenance.as_mut() {
+            match ticket.try_result() {
+                Ok(None) => {}
+                Ok(Some(Ok(Outcome::MaterialCleaned))) => {
+                    self.voice_maintenance = None;
+                }
+                Ok(Some(Err(Failure::Stopped))) => {
+                    // Backend was occupied by a foreground management worker;
+                    // maintenance never waits behind its KDF or extends a lease.
+                    self.voice_maintenance = None;
+                    self.next_voice_maintenance = Instant::now() + Duration::from_secs(1);
+                }
+                _ if self.stopping => {
+                    self.voice_maintenance = None;
+                }
+                _ => {
+                    if let Some(control) = &self.control {
+                        control.fault();
+                    }
+                    return Err("声音数据维护失败，已停止本次运行。".into());
+                }
+            }
+        }
+        if !self.stopping
+            && self.voice_maintenance.is_none()
+            && Instant::now() >= self.next_voice_maintenance
+            && self.state.installation.is_some()
+        {
+            if let Some(backend) = &self.backend {
+                if let Ok(ticket) = self.pool.handle().try_submit(
+                    Work::MaintainVoice(self.root.clone(), backend.clone()),
+                    Instant::now() + Duration::from_secs(5),
+                ) {
+                    self.voice_maintenance = Some(ticket);
+                    self.next_voice_maintenance = Instant::now() + Duration::from_secs(15);
+                }
+            }
+        }
         self.cleanup_jobs
             .retain_mut(|job| matches!(job.try_result(), Ok(None)));
         if !self.stopping && self.cleanup_jobs.len() < 2 {
@@ -1864,6 +1952,23 @@ impl App {
             None => None,
         };
         if let Some(outcome) = completed {
+            if self.offscreen_probe {
+                let kind = match &outcome {
+                    Ok(Outcome::Updated { .. }) => "updated",
+                    Ok(Outcome::LaunchCopies(_)) => "copies",
+                    Ok(Outcome::LessonLoaded(_) | Outcome::LessonSaved(_)) => "lesson",
+                    Ok(Outcome::ScheduleLoaded(_) | Outcome::ScheduleSaved(_)) => "schedule",
+                    Ok(Outcome::DisplayLoaded(_) | Outcome::DisplaySaved(_)) => "display",
+                    Err(_) => "error",
+                    _ => "other",
+                };
+                eprintln!(
+                    "PROBE_COMPLETE tick={} kind={} page={}",
+                    self.clock.monotonic_millis(),
+                    kind,
+                    self.view().title
+                );
+            }
             let generation = self
                 .pending
                 .take()
@@ -1959,6 +2064,17 @@ impl App {
                         .ok_or("资料页面已关闭")?
                         .loaded(*page)?;
                     self.status = "资料列表已更新。".into();
+                }
+                Ok(Outcome::LaunchCopies(report)) => {
+                    self.copies_loaded_sequence = self
+                        .copies_loaded_sequence
+                        .checked_add(1)
+                        .ok_or("副本请求序号已耗尽")?;
+                    self.material_editor
+                        .as_mut()
+                        .ok_or("资料页面已关闭")?
+                        .copies_loaded(report);
+                    self.status = "打开副本占用已更新。".into();
                 }
                 Ok(Outcome::MaterialLaunch(launch)) => {
                     self.dispatch_material(*launch)?;
@@ -2057,6 +2173,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let started = Instant::now();
     let mut stage = 0u8;
     let mut lesson_stage = 0u8;
+    let mut copies_probe = CopiesProbe::default();
     let mut probe_error = None;
     let mut office_verified = !probe;
     let mut office = if probe {
@@ -2209,6 +2326,11 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
+            } else if stage == 83 && copies_probe.stage < 6 {
+                if let Err(error) = copies_probe_step(&mut app, &mut copies_probe) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
             } else if let Err(e) = probe_step(&mut app, &mut stage) {
                 probe_error = Some(e);
                 app.begin_shutdown();
@@ -2257,7 +2379,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if let Some(error) = probe_error {
         return Err(error);
     }
-    if probe && (stage != 90 || lesson_stage != 8 || !office_verified) {
+    if probe && (stage != 90 || lesson_stage != 8 || copies_probe.stage != 6 || !office_verified) {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
     Ok(())
@@ -2292,11 +2414,14 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         desktop: desktop_controller::Controller::new(probe)?,
         root: PathBuf::new(),
         material_editor: None,
+        copies_loaded_sequence: 0,
         shell: fc_windows::materials::shell::ShellLauncher::new(),
         control_slot: Arc::new(OnceLock::new()),
         launch_paths: HashMap::new(),
         cleanup_paths: VecDeque::new(),
         cleanup_jobs: Vec::new(),
+        voice_maintenance: None,
+        next_voice_maintenance: Instant::now() + Duration::from_secs(15),
     })
 }
 
@@ -2316,8 +2441,119 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
     Ok(())
+}
+#[derive(Default)]
+struct CopiesProbe {
+    stage: u8,
+    generation: u64,
+    lease: Option<SessionLease>,
+    expected_sequence: u64,
+    retries: u8,
+}
+fn copies_probe_step(app: &mut App, probe: &mut CopiesProbe) -> std::result::Result<(), String> {
+    if probe.stage == 0 {
+        probe.generation = app.generation;
+        probe.lease = app.lease;
+    } else if app.generation != probe.generation || app.lease != probe.lease {
+        return Err(format!(
+            "PROBE_SESSION_INTERRUPTED copies stage={} generation={}->{} lease_changed={}",
+            probe.stage,
+            probe.generation,
+            app.generation,
+            probe.lease != app.lease
+        ));
+    }
+    eprintln!(
+        "PROBE_COPIES tick={} stage={} page={} sequence={} retries={}",
+        app.clock.monotonic_millis(),
+        probe.stage,
+        app.view().title,
+        app.copies_loaded_sequence,
+        probe.retries
+    );
+    if matches!(probe.stage, 2 | 3) {
+        if app.copies_loaded_sequence == probe.expected_sequence {
+            if app.screen == Screen::Materials
+                && probe.retries < 3
+                && matches!(
+                    app.status.as_str(),
+                    "后台繁忙，请稍后重试。" | "后台任务繁忙，请稍后重试。"
+                )
+            {
+                // Only a read-only inspection is retried. A dedicated completion
+                // sequence and original lease/generation remain mandatory.
+                probe.retries += 1;
+                submit_copies_probe(app, materials_editor::COPIES)?;
+                return Ok(());
+            }
+            return Err(format!(
+                "副本请求没有专属回执：stage={} page={} status={}",
+                probe.stage,
+                app.view().title,
+                app.status
+            ));
+        }
+        if app.copies_loaded_sequence != probe.expected_sequence + 1 {
+            return Err("副本探针收到意外请求回执".into());
+        }
+    }
+    let action = match probe.stage {
+        0 => {
+            if app.screen != Screen::Home {
+                return Err("副本管理诊断未从工作台开始".into());
+            }
+            TO_MATERIALS
+        }
+        1 => {
+            if app.screen != Screen::Materials {
+                return Err("副本管理入口未切换资料页".into());
+            }
+            probe.expected_sequence = app.copies_loaded_sequence;
+            materials_editor::COPIES
+        }
+        2 => {
+            let view = app.view();
+            if view.title != "打开副本管理" || !view.description.contains("200MiB") {
+                return Err(format!(
+                    "副本占用回执未显示：page={} status={}",
+                    view.title, app.status
+                ));
+            }
+            probe.expected_sequence = app.copies_loaded_sequence;
+            materials_editor::COPIES
+        }
+        3 => materials_editor::RETURN_COPIES,
+        4 => BACK,
+        5 => {
+            if app.screen != Screen::Home {
+                return Err("副本管理未返回工作台".into());
+            }
+            eprintln!(
+                "PROBE_COPIES_ACK steps=6 completed_requests=2 retryable_busy={}",
+                probe.retries
+            );
+            probe.stage += 1;
+            return Ok(());
+        }
+        _ => return Err("副本管理探针阶段无效".into()),
+    };
+    submit_copies_probe(app, action)?;
+    probe.stage += 1;
+    Ok(())
+}
+fn submit_copies_probe(app: &App, action: ActionId) -> std::result::Result<(), String> {
+    let mut data = FormData::new();
+    for field in app.view().fields {
+        if field.kind != FieldKind::ReadOnly {
+            data.insert(field.id, field.value)
+                .map_err(|_| "副本探针表单无效")?;
+        }
+    }
+    app.window
+        .probe_submit(action, data)
+        .map_err(|_| "副本原生命令拒绝".into())
 }
 fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
     use fc_domain::{schedule::*, time::*};

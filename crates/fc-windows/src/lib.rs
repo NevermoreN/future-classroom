@@ -1,6 +1,8 @@
 //! Windows-only adapters. Native resources never cross into domain/port values.
 #![deny(unsafe_op_in_unsafe_fn)]
 #[cfg(windows)]
+pub mod audio;
+#[cfg(windows)]
 mod native;
 #[cfg(windows)]
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};

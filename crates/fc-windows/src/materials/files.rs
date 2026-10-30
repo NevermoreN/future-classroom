@@ -4,7 +4,7 @@ use std::{
     fs::{File, OpenOptions},
     os::windows::{
         fs::{MetadataExt, OpenOptionsExt},
-        io::AsRawHandle,
+        io::{AsRawHandle, FromRawHandle},
     },
     path::{Component, Path, PathBuf},
     sync::Arc,
@@ -16,6 +16,7 @@ use windows::{
         Storage::FileSystem::*,
         System::{
             Memory::*,
+            Threading::GetCurrentProcess,
             WindowsProgramming::{DRIVE_CDROM, DRIVE_FIXED, DRIVE_RAMDISK, DRIVE_REMOVABLE},
         },
     },
@@ -352,6 +353,15 @@ impl ControlledFiles {
         Ok(())
     }
     pub fn remove(&self, path: &Path) -> Result<bool> {
+        self.remove_when(path, |_| true)
+    }
+    /// Predicate runs against the exact exclusively pinned file immediately before
+    /// disposition. A writer cannot refresh its age between this check and deletion.
+    pub fn remove_when(
+        &self,
+        path: &Path,
+        eligible: impl FnOnce(&std::fs::Metadata) -> bool,
+    ) -> Result<bool> {
         self.check(path)?;
         let _parents = pins(path)?;
         match std::fs::symlink_metadata(path) {
@@ -371,6 +381,9 @@ impl ControlledFiles {
             .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0)
             .open(path)?;
         regular(&file)?;
+        if !eligible(&file.metadata()?) {
+            return Ok(false);
+        }
         let disposition = FILE_DISPOSITION_INFO { DeleteFile: true };
         // Delete this pinned inode, not whatever might later occupy its name.
         unsafe {
@@ -399,6 +412,40 @@ impl NewFile {
     }
     pub fn path(&self) -> &Path {
         &self.path
+    }
+    /// Downgrade the exclusively held object without closing/reopening its path.
+    /// The returned pin retains read+delete access for validation/atomic rename,
+    /// but has no write access; all original write handles are closed first.
+    pub fn seal(mut self) -> Result<LockedFile> {
+        let original = self.file.as_ref().expect("new file open");
+        original.sync_all()?;
+        regular(original)?;
+        let mut duplicate = HANDLE::default();
+        // SAFETY: both pseudo process handles are our process. DuplicateHandle
+        // creates a distinct owned handle to this same file object, with reduced
+        // rights, no inheritance and no CLOSE_SOURCE flag. Its share-0 lock and
+        // parent pins survive the write handle's close; failure leaves Drop owning
+        // the original object. The successful duplicate is transferred once to File.
+        let file = unsafe {
+            DuplicateHandle(
+                GetCurrentProcess(),
+                handle(original),
+                GetCurrentProcess(),
+                &mut duplicate,
+                FILE_GENERIC_READ.0 | DELETE.0,
+                false,
+                DUPLICATE_HANDLE_OPTIONS(0),
+            )?;
+            File::from_raw_handle(duplicate.0)
+        };
+        self.keep = true;
+        drop(self.file.take());
+        Ok(LockedFile {
+            file,
+            path: self.path.clone(),
+            _parents: std::mem::take(&mut self._parents),
+            publish_access: true,
+        })
     }
     /// Flush durable bytes before the caller may publish a database reference.
     /// The destination is a new immutable resource version, never an overwrite.

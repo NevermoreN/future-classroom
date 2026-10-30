@@ -41,6 +41,7 @@ def main():
     parser.add_argument("--test-metadata", type=Path)
     parser.add_argument("--native-seconds", type=int, default=5)
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
+    parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
     parser.add_argument("--report", type=Path, required=True)
@@ -117,6 +118,13 @@ def main():
                 raise RuntimeError("materials report insertion point is ambiguous")
             body = body.replace(anchor, material_command + "@{materialsExitCode=$materialsCode;materialsOutput=$materialsOutput;" + anchor[2:])
 
+        if args.audio_silent:
+            command = "$audioOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --audio-silent-probe 2>&1|ForEach-Object{\"$_\"});$audioCode=$LASTEXITCODE;"
+            anchor = "@{materialsExitCode=$materialsCode;" if args.materials else ("@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;"))
+            if body.count(anchor) != 1:
+                raise RuntimeError("audio report insertion point is ambiguous")
+            body = body.replace(anchor, command + "@{audioExitCode=$audioCode;audioOutput=$audioOutput;" + anchor[2:])
+
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -137,6 +145,13 @@ def main():
             raise RuntimeError("isolated native workbench application failed")
         if args.materials and report["native"].get("materialsExitCode") != 0:
             raise RuntimeError("isolated materials integration failed")
+        if args.audio_silent:
+            audio = report["native"].get("audioOutput", [])
+            if report["native"].get("audioExitCode") != 0:
+                raise RuntimeError("isolated silent WinMM integration failed")
+            report["audioStatus"] = "NOT_RUN" if any("AUDIO_SILENT_NOT_RUN" in line or "VOICE_PIPELINE_NOT_RUN" in line for line in audio) else "PASS"
+            if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio)):
+                raise RuntimeError("silent audio result missing")
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"
     except Exception as error:

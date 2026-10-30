@@ -10,6 +10,8 @@ pub mod materials;
 mod materials_codec;
 mod schedule;
 mod schedule_codec;
+pub mod voice;
+mod voice_codec;
 use crate::*;
 use fc_domain::{auth::*, content::*, identity::*, ids::*};
 use fc_ports::{
@@ -39,6 +41,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     display::load(&TransactionView(&transaction), &identity)?;
     desktop::read_watermark(&TransactionView(&transaction), &identity)?;
     materials::startup_check(&TransactionView(&transaction), &identity)?;
+    voice::startup_check(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
 }

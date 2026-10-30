@@ -2,7 +2,7 @@
 
 > 实施状态（2026-10-30）：用户已授权开始开发。本文保留 D11 设计基线；“仅计划、不开发/不测试/不同步”及“全部待实施”为历史状态，当前实现范围、证据与未完成门槛以[实施进度与验证记录](../10-实施进度与验证记录.md)为准。
 
-总计划1.20 / D11，2026-10-30；本册保留Rust开发规格，当前实现与实测状态见实施进度记录。负责M18，落实按住录音、规范WAV、默认总3遍、队列/停止与Win7原生播放。 任务与验收以[任务清单](../04-开发阶段与任务步骤.md)和[测试清单](../05-测试验收与发布清理.md)为准。
+总计划1.21 / D11，2026-10-30；本册保留Rust开发规格，当前实现与实测状态见实施进度记录。负责M18，落实按住录音、规范WAV、默认总3遍、队列/停止与Win7原生播放。 任务与验收以[任务清单](../04-开发阶段与任务步骤.md)和[测试清单](../05-测试验收与发布清理.md)为准。
 
 Rust 实施：[Rust开发与验证计划](../07-Rust开发与验证计划.md)。本手册功能、权限、配额、故障和真机验收范围全部保留；Rust 类型安全不替代这些门禁。
 ## 1. 产品行为与范围
@@ -104,3 +104,14 @@ Rust WinMM适配仍使用原规范PCM与CALLBACK_EVENT、小块流式缓冲和�
 P3-11先完成纯队列/元数据与AudioOutputPort替身；P3-13再接WinMM。Audio独占waveOut、事件及固定堆分配WAVEHDR/PCM；驱动持有时地址/容量不变，不把Vec扩容或栈对象地址交驱动。缓冲状态ALLOCATED→PREPARED→QUEUED→RETURNED→UNPREPARED→RELEASED；终止代次后reset，收齐归还，waveOutUnprepareHeader成功才释放缓冲，waveOutClose成功后关闭事件。STILLPLAYING/reset/unprepare/close失败或超时不强行Drop，不无限新建缓冲；停止接纳，有限保留至归还或受控进程结束。下一遍实际开始也需健康闸门和新鲜许可，取消DONE不计遍数。Q24/Q25分别验证假驱动状态机、编译期所有权边界与Win7真实设备。
 
 共同规范：[所有权与FFI生命周期](../08-Rust所有权与FFI生命周期.md)；[构建验证与发布门槛](../09-Rust构建验证与发布门槛.md)。本节是实施步骤，程序/目标系统验证均待执行。
+
+
+### 第八轮实施边界（2026-10-30）
+
+已实现声音领域/端口与唯一SQLite writer的预留、提交/查询/取消、逐遍驱动CAS、脱敏幂等、100条/24小时审计、过期维护、恢复及备份脱活跃引用。4条非终态/每教师2、2个未提交上传预约、16MiB正文和预留共同计费；另限32个包括待清退对象的资产，防止文件长期占用导致元数据无限增长。生产body适配直接写已计费唯一staging，完整真实规范WAV和哈希验证后，以降权同一文件句柄发布并保持至DB提交。每主体上传/提交各每60秒最多10次。
+
+WinMM使用WAVE_MAPPER/规范PCM16单声道16kHz及CALLBACK_EVENT，固定3×16KiB缓冲；实际首Write后才持久PLAYING，自然完成与释放分别提交，取消Reset的DONE不计遍数。原始Web精确会话保存在可信进程映射，持久actor不能替代原lease。首次实际Write前重新核验5分钟期限；source/open跨期限使用ExpireBeforeWrite，不伪造FirstWrite；已开始后续遍数不套首次期限。实际首写后计算有界单调预算，实际自然返回后计满1秒间隔。驱动错误停止接纳，STILLPLAYING/迟释放保留全部device/event/源pin/headers/PCM；不能通过Drop释放驱动仍持有的内存。
+
+实现参考：[waveOutOpen](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutopen)、[waveOutWrite](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutwrite)、[waveOutReset](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutreset)、[waveOutUnprepareHeader](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutunprepareheader)、[waveOutClose](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutclose)、[DuplicateHandle](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-duplicatehandle)。源码核对固定windows 0.62.2绑定；正式支持仍取三系统实测及PE证据，不能据这些API文档直接宣称产品兼容。
+
+当前只有显式全零PCM隔离诊断串起真实持久/文件/输出链；教师网页录音、HTTP超时及实际上传worker预约、正常运行播报域/托盘停止和WTS/电源联动尚未接入。正常应用启动恢复并回收旧正文，每15秒共享worker维护元数据/正文；不将原型探针列为M18全部交付。最终测试状态见实施记录。

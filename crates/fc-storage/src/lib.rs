@@ -33,6 +33,7 @@ pub enum StorageError {
     Display(fc_domain::desktop::DisplayError),
     Material(fc_domain::materials::MaterialError),
     Lesson(fc_domain::lesson_context::LessonContextError),
+    Voice(fc_domain::voice::VoiceError),
     ResourceQuota,
     LoginRateLimited {
         retry_after_millis: u64,
@@ -801,6 +802,7 @@ fn backup_database(
             }
         }
     }
+    business::voice::sanitize_backup(&mut output)?;
     let revision = read_revision(&output)?;
     let schema_version = output
         .pragma_query_value(None, "user_version", |row| row.get(0))

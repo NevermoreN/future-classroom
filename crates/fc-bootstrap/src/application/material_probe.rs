@@ -8,7 +8,10 @@ use fc_domain::materials::{MaterialRecord, MaterialScope};
 use fc_ports::{MaterialDeleteRequest, MaterialListRequest};
 use fc_runtime::worker::WorkerHandle;
 use fc_windows::materials::{chooser::SelectedFile, shell::*};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::{
+    sync::atomic::{AtomicBool, AtomicUsize, Ordering},
+    time::SystemTime,
+};
 
 type Check<T> = std::result::Result<T, String>;
 const PASSWORD: &str = "Synthetic probe password 2026!";
@@ -32,11 +35,15 @@ enum ProbeTask {
     Login(Arc<Mutex<Backend>>),
     DeleteMetadata(Arc<Mutex<Backend>>, SessionLease, MaterialDeleteRequest),
     Write(PathBuf, Vec<u8>),
+    CopyChecks(PathBuf, Arc<Mutex<Backend>>, SessionControl, SessionLease),
     Barrier(Arc<AtomicUsize>, Arc<AtomicBool>),
+    HoldBackend(Arc<Mutex<Backend>>, Arc<AtomicUsize>, Arc<AtomicBool>),
+    CheckLease(Arc<Mutex<Backend>>, SessionLease),
 }
 enum ProbeOutput {
     Work(Box<Outcome>),
     Ready(SessionLease),
+    Busy,
     Done,
 }
 impl Task for ProbeTask {
@@ -57,10 +64,32 @@ impl Task for ProbeTask {
     fn run(self, context: &JobContext) -> Self::Output {
         checked(context.checkpoint(), "worker admission")?;
         match self {
-            Self::Work(work) => work
-                .run(context)
-                .map(|outcome| ProbeOutput::Work(Box::new(outcome)))
-                .map_err(|error| format!("materials-probe: product work: {error:?}")),
+            Self::Work(work) => match work.run(context) {
+                Ok(outcome) => Ok(ProbeOutput::Work(Box::new(outcome))),
+                Err(Failure::Input("后台繁忙，请稍后重试。")) => Ok(ProbeOutput::Busy),
+                Err(error) => Err(format!("materials-probe: product work: {error:?}")),
+            },
+            Self::HoldBackend(backend, entered, release) => {
+                let _held = checked(backend.lock(), "hold actual Backend mutex")?;
+                entered.fetch_add(1, Ordering::Release);
+                while !release.load(Ordering::Acquire) {
+                    checked(context.checkpoint(), "backend hold cancellation")?;
+                    std::thread::sleep(Duration::from_millis(1));
+                }
+                Ok(ProbeOutput::Done)
+            }
+            Self::CheckLease(backend, lease) => {
+                checked(
+                    checked(backend.lock(), "check exact lease mutex")?
+                        .check_session(lease, fc_application::identity::SessionPurpose::Manage),
+                    "same exact lease remains valid after contention",
+                )?;
+                Ok(ProbeOutput::Done)
+            }
+            Self::CopyChecks(root, backend, control, lease) => {
+                copy_checks(root, backend, control, lease, context)?;
+                Ok(ProbeOutput::Done)
+            }
             Self::Login(backend) => {
                 let mut backend = checked(backend.lock(), "login lock")?;
                 let password = checked(Password::new(PASSWORD.into()), "password")?;
@@ -152,6 +181,96 @@ impl Task for ProbeTask {
         }
     }
 }
+fn copy_checks(
+    root: PathBuf,
+    backend: Arc<Mutex<Backend>>,
+    control: SessionControl,
+    lease: SessionLease,
+    context: &JobContext,
+) -> Check<()> {
+    use fc_windows::materials::files::{ControlledFiles, LockedFile};
+    let files = checked(ControlledFiles::new(&root), "copy root")?;
+    let mut paths = Vec::new();
+    for id in ["expired-unlocked", "expired-locked", "recent-write"] {
+        let dir = checked(
+            files.directory(&["launch-copies".into(), id.into()]),
+            "copy directory",
+        )?;
+        let path = dir.join("probe.txt");
+        let mut file = checked(files.create_new(&path), "new copy")?;
+        checked(file.file_mut().write_all(b"synthetic copy"), "copy content")?;
+        let path = checked(file.finish(), "copy flush")?;
+        if id != "recent-write" {
+            let file = checked(fs::OpenOptions::new().write(true).open(&path), "age copy")?;
+            checked(
+                file.set_modified(SystemTime::now() - Duration::from_secs(48 * 3600)),
+                "set copy age",
+            )?;
+        }
+        paths.push(path);
+    }
+    let held = checked(LockedFile::open(&paths[1], 1024), "hold expired copy")?;
+    let inspect = |clean| {
+        MaterialJob {
+            root: root.clone(),
+            backend: backend.clone(),
+            control: control.clone(),
+            job: Job::Copies { lease, clean },
+        }
+        .run(context)
+    };
+    let before = match checked(inspect(false), "inspect copies")? {
+        Outcome::LaunchCopies(report) => report,
+        _ => return Err("copy report missing".into()),
+    };
+    let after = match checked(inspect(true), "manual copies cleanup")? {
+        Outcome::LaunchCopies(report) => report,
+        _ => return Err("copy cleanup report missing".into()),
+    };
+    require(
+        before.expired == 2
+            && after.removed == 1
+            && after.retained == 1
+            && !paths[0].exists()
+            && paths[1].exists()
+            && paths[2].exists()
+            && after.count + 1 == before.count,
+        "expired only and locked copy retained",
+    )?;
+    // A stale metadata decision cannot delete a newly modified pinned object.
+    require(
+        !checked(
+            files.remove_when(&paths[2], |metadata| {
+                metadata
+                    .modified()
+                    .ok()
+                    .and_then(|at| SystemTime::now().duration_since(at).ok())
+                    .is_some_and(|age| age >= Duration::from_secs(24 * 3600))
+            }),
+            "pinned age recheck",
+        )? && paths[2].exists(),
+        "fresh write grace retained",
+    )?;
+    drop(held);
+    let final_report = match checked(inspect(true), "released copy cleanup")? {
+        Outcome::LaunchCopies(report) => report,
+        _ => return Err("release report missing".into()),
+    };
+    require(
+        final_report.removed == 1
+            && final_report.retained == 0
+            && !paths[1].exists()
+            && paths[2].exists(),
+        "released expired copy reclaimed",
+    )?;
+    checked(files.remove(&paths[2]), "probe fresh copy cleanup")?;
+    for path in paths {
+        if let Some(parent) = path.parent() {
+            let _ = fs::remove_dir(parent);
+        }
+    }
+    Ok(())
+}
 fn submit(
     handle: &WorkerHandle<ProbeTask>,
     task: ProbeTask,
@@ -174,6 +293,66 @@ fn ready(handle: &WorkerHandle<ProbeTask>, task: ProbeTask) -> Check<SessionLeas
         ProbeOutput::Ready(lease) => Ok(lease),
         _ => Err("materials-probe: missing exact lease".into()),
     }
+}
+struct ReleaseHeldBackend(Arc<AtomicBool>);
+impl Drop for ReleaseHeldBackend {
+    fn drop(&mut self) {
+        self.0.store(true, Ordering::Release);
+    }
+}
+fn backend_contention_check(handle: &WorkerHandle<ProbeTask>, session: &Session) -> Check<()> {
+    let entered = Arc::new(AtomicUsize::new(0));
+    let release = Arc::new(AtomicBool::new(false));
+    let _release = ReleaseHeldBackend(release.clone());
+    let holder = submit(
+        handle,
+        ProbeTask::HoldBackend(session.backend.clone(), entered.clone(), release.clone()),
+    )?;
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while entered.load(Ordering::Acquire) != 1 {
+        require(
+            Instant::now() < deadline,
+            "actual Backend lock holder entered",
+        )?;
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    // The first physical worker holds the real mutex. This Work::Material must
+    // run on the second worker and return retryable Busy, never Stopped/session.
+    let blocked = execute(
+        handle,
+        ProbeTask::Work(Box::new(session.work(Job::Copies {
+            lease: session.lease,
+            clean: false,
+        }))),
+    )?;
+    require(
+        matches!(blocked, ProbeOutput::Busy),
+        "Backend contention is retryable Busy",
+    )?;
+    require(
+        !session.control.is_local_locked(),
+        "contention must not revoke local control",
+    )?;
+    release.store(true, Ordering::Release);
+    checked(holder.wait(), "release held actual Backend")??;
+    execute(
+        handle,
+        ProbeTask::CheckLease(session.backend.clone(), session.lease),
+    )?;
+    require(
+        matches!(
+            product(
+                handle,
+                session.work(Job::Copies {
+                    lease: session.lease,
+                    clean: false
+                })
+            )?,
+            Outcome::LaunchCopies(_)
+        ),
+        "same exact lease copy inspection succeeds after contention",
+    )?;
+    Ok(())
 }
 struct Harness {
     root: PathBuf,
@@ -492,6 +671,18 @@ pub(super) fn run() -> Check<()> {
         )?;
         session.delete(&handle, &newest)?;
         pass("fixed-version-copy-delete-retirement-original-tamper");
+        execute(
+            &handle,
+            ProbeTask::CopyChecks(
+                session.root.clone(),
+                session.backend.clone(),
+                session.control.clone(),
+                session.lease,
+            ),
+        )?;
+        pass("manual-copy-inspection-exclusive-age-recheck-locked-release");
+        backend_contention_check(&handle, &session)?;
+        pass("two-workers-backend-contention-retry-preserves-exact-lease");
         // Two barriers prove both physical shared workers are occupied. Queued
         // cancellation is deterministic and cannot begin filesystem/SQLite work.
         let entered = Arc::new(AtomicUsize::new(0));

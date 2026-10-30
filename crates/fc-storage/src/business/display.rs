@@ -131,7 +131,7 @@ impl<S: Send + 'static> DisplayRepository for BusinessRepository<S> {
                 | StorageError::Lesson(_)
                 | StorageError::Material(fc_domain::materials::MaterialError::InvalidContext))
         ) {
-            self.observe_lesson()
+            self.observe_lesson_rollback_barrier()
                 .map_err(|_| DisplayRepositoryError::Unavailable)?;
         }
         let outcome = result.map_err(error)?;

@@ -269,6 +269,7 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
                     && fresh.current == context.current
                     && fresh.active_override == context.active_override
                     && fresh.history == context.history
+                    && fresh.base_trust == context.base_trust
                     && fresh.blocked_until == context.blocked_until
                 {
                     Ok(())

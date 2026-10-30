@@ -42,6 +42,13 @@ pub(super) fn load(d: &dyn TransactionDocuments) -> Result<LessonContextSnapshot
             {
                 return Err(StorageError::Database);
             }
+            if let Some(proof) = &context.base_trust {
+                if !identity.classes.iter().any(|c| c.id == proof.class_id)
+                    || proof.schedule_revision > super::schedule::load(d, &identity)?.revision
+                {
+                    return Err(StorageError::Database);
+                }
+            }
             for c in context
                 .current
                 .iter()
@@ -118,6 +125,7 @@ impl<S: Send + 'static> LessonRepository for BusinessRepository<S> {
             .handle
             .try_transaction(Task {
                 request: None,
+                rollback_only: false,
                 actor: Some(actor.clone()),
                 observations: self.lesson_observations.clone(),
                 clock: self.clock.clone(),
@@ -147,6 +155,7 @@ impl<S: Send + 'static> LessonRepository for BusinessRepository<S> {
             .handle
             .try_transaction(Task {
                 request: Some(request),
+                rollback_only: false,
                 actor: Some(actor.clone()),
                 observations: self.lesson_observations.clone(),
                 clock: self.clock.clone(),
@@ -168,9 +177,19 @@ impl<S: Send + 'static> LessonRepository for BusinessRepository<S> {
 }
 impl<S: Send + 'static> BusinessRepository<S> {
     pub(super) fn observe_lesson(&self) -> Result<(), LessonRepositoryError> {
+        self.observe_lesson_mode(false)
+    }
+    /// A rejected Facts read cannot establish positive history or baseline trust.
+    /// Only a real clock regression observed by that failed transaction may be
+    /// durably invalidated independently, so a restart cannot revive its source.
+    pub(super) fn observe_lesson_rollback_barrier(&self) -> Result<(), LessonRepositoryError> {
+        self.observe_lesson_mode(true)
+    }
+    fn observe_lesson_mode(&self, rollback_only: bool) -> Result<(), LessonRepositoryError> {
         self.handle
             .try_transaction(Task {
                 request: None,
+                rollback_only,
                 actor: None,
                 observations: self.lesson_observations.clone(),
                 clock: self.clock.clone(),
@@ -195,6 +214,7 @@ fn authorize(
 }
 struct Task<S> {
     request: Option<LessonRequest>,
+    rollback_only: bool,
     actor: Option<ActorContext>,
     observations: Observations,
     clock: Arc<dyn Clock + Send + Sync>,
@@ -210,6 +230,13 @@ impl<S: Send> TransactionTask<S> for Task<S> {
         d: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError> {
         let identity = load_identity(d)?;
+        if self.rollback_only && identity.installation.is_none() {
+            return Ok(TransactionDecision {
+                outcome: codec::bytes(&dto::snapshot(&LessonContextSnapshot::default()))?,
+                commit: None,
+                precommit: None,
+            });
+        }
         if let Some(actor) = &self.actor {
             authorize(&identity, actor, self.clock.as_ref(), &self.session)?;
         }
@@ -227,6 +254,13 @@ impl<S: Send> TransactionTask<S> for Task<S> {
             now,
             floor.into_iter().chain(date_floor).max(),
         )?;
+        if self.rollback_only && observed.blocked_until.is_none() {
+            return Ok(TransactionDecision {
+                outcome: codec::bytes(&dto::snapshot(&observed))?,
+                commit: None,
+                precommit: None,
+            });
+        }
         let mut mutations = Vec::new();
         let mut final_context = observed.clone();
         if let Some(r) = &self.request {
@@ -348,6 +382,8 @@ impl<S: Send> TransactionTask<S> for Task<S> {
                 if fresh.current != observed.current
                     || fresh.active_override != observed.active_override
                     || fresh.blocked_until != observed.blocked_until
+                    || fresh.history != observed.history
+                    || fresh.base_trust != observed.base_trust
                 {
                     return Err(StorageError::Lesson(
                         LessonContextError::LessonContextChanged,

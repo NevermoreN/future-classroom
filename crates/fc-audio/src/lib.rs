@@ -1,5 +1,6 @@
 //! Bounded single-stream broadcast state machine. This crate never claims device output.
 #![forbid(unsafe_code)]
+pub mod execution;
 use fc_domain::ids::PrincipalId;
 use std::collections::VecDeque;
 

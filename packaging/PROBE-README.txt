@@ -22,6 +22,7 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --host-probe 2
   .\fc-bootstrap.exe --application-probe
   .\fc-bootstrap.exe --materials-probe
+  .\fc-bootstrap.exe --audio-silent-probe
   .\fc-bootstrap.exe --native-probe 30
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
@@ -40,13 +41,17 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 资料管理可选择本机PNG/JPEG/BMP/TXT/PDF/PPTX/DOCX/XLSX，实际校验、哈希和WIC解码后存入受控原件；
 管理页20项、桌面当前课/可信课间5项，同名独立追加。点击固定版本先复制再请求关联程序打开。
 原件总量2GiB/单件50MiB，图片10MiB/8MP；打开副本独立200MiB，按副本最后写入时间保留24小时宽限，被占用不强删。
-资料副本主动清理入口尚未完成。PDF真实解析在80MiB进程提交内存/CPU10秒/墙钟30秒的隔离子进程运行。
+全局本地管理员可在资料管理中查看占用，并确认清理最后写入已满24小时且未占用的副本。PDF真实解析在80MiB进程提交内存/CPU10秒/墙钟30秒的隔离子进程运行。
 --materials-probe 使用真实双worker/SQLite、合成文件及私有临时ProgID和无界面接收器验证资料链，
 不会调用本机日常Office/记事本或改变默认文件关联，不写正式ProgramData。
 主管理员可在当前课程中临时换课或恢复原课；提交捕获课程实例和修订，过节/旧版本拒绝。
-实际老师区间及覆盖持久化，已记录的课程可在课间重启恢复资料；无充分历史证明时显示中性空态。
+实际老师区间及覆盖持久化，已记录的课程可在课间重启恢复资料；稳定的课前基础课信任可跨夜补全未观测课程；旧格式或无充分证明时显示中性空态。
 桌面顶部换课入口只有按钮接收点击；外部应用前台时隐藏并撤销未提交意图。
-完整profile/布局编辑、语音工作流和教师管理 Web 均未交付。
+--audio-silent-probe 只生成全零PCM，不录音、不调整音量或前台；验证原生自然完成/取消及
+受控WAV→精确Web会话→SQLite持久任务→WinMM→释放后正文清理。无兼容设备记NOT_RUN。
+声音持久核心有4任务/每教师2、16MiB（含预留）、100条/24h审计和重启中断不重播；
+这些开发诊断尚未接教师网页、正常运行播报域或托盘停止入口。
+完整profile/布局编辑、产品语音工作流和教师管理 Web 均未交付。
 应用图形DIB合计上限16MiB；4K自身离屏场景实测4806080字节，完整低Alpha区域背景保持。
 这不代表操作系统背景/DWM总内存或4K真实显示设备验收通过。
 原生网格尚未完成真实触控/白板笔、多DPI和全部视觉验收，当前仍为CUI开发目标。

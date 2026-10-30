@@ -46,6 +46,16 @@ pub struct LessonOverrideContext {
     pub actor_id: PrincipalId,
     pub created_at: LocalDateTime,
 }
+/// A continuous baseline witnessed by the single business writer.
+/// This is not a historical teacher lookup: changing either aggregate or making
+/// an override starts a new interval, which cannot prove an earlier lesson.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BaseLessonTrust {
+    pub schedule_revision: Revision,
+    pub identity_revision: Revision,
+    pub class_id: ClassId,
+    pub trusted_since: LocalDateTime,
+}
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct LessonContextSnapshot {
     pub revision: Revision,
@@ -56,6 +66,7 @@ pub struct LessonContextSnapshot {
     pub current: Option<EffectiveLessonContext>,
     pub active_override: Option<LessonOverrideContext>,
     pub history: Vec<EffectiveLessonInterval>,
+    pub base_trust: Option<BaseLessonTrust>,
 }
 impl LessonContextSnapshot {
     pub fn validate(&self) -> Result<(), LessonContextError> {
@@ -66,14 +77,16 @@ impl LessonContextSnapshot {
                 && (self.current.is_some()
                     || !self.history.is_empty()
                     || self.active_override.is_some()
-                    || self.blocked_until.is_some()))
+                    || self.blocked_until.is_some()
+                    || self.base_trust.is_some()))
         {
             return Err(invalid());
         }
         if (self.current.is_some()
             || !self.history.is_empty()
             || self.active_override.is_some()
-            || self.blocked_until.is_some())
+            || self.blocked_until.is_some()
+            || self.base_trust.is_some())
             && self.revision.get() == 0
         {
             return Err(invalid());
@@ -81,10 +94,19 @@ impl LessonContextSnapshot {
         if self.blocked_until.is_some()
             && (self.current.is_some()
                 || self.active_override.is_some()
+                || self.base_trust.is_some()
                 || !self.history.is_empty()
                 || self.blocked_until != self.observed_at)
         {
             return Err(invalid());
+        }
+        if let Some(proof) = &self.base_trust {
+            if self.class_id != Some(proof.class_id)
+                || proof.identity_revision != self.identity_revision
+                || !self.observed_at.is_some_and(|at| at >= proof.trusted_since)
+            {
+                return Err(invalid());
+            }
         }
         for c in self
             .current
@@ -253,17 +275,38 @@ impl LessonContextSnapshot {
             next.active_override = None;
             next.history.clear();
             next.class_id = class;
+            if class != self.class_id {
+                next.base_trust = None;
+            }
         }
         if rollback {
             next.blocked_until = witnessed;
             next.current = None;
             next.active_override = None;
             next.history.clear();
+            next.base_trust = None;
         }
         if next.blocked_until.is_some_and(|t| now >= t) {
             next.blocked_until = None;
         }
         let blocked = next.blocked_until.is_some();
+        if !blocked {
+            next.base_trust = class.map(|class_id| match next.base_trust.take() {
+                Some(proof)
+                    if proof.class_id == class_id
+                        && proof.identity_revision == identity.revision
+                        && proof.schedule_revision == schedule.revision =>
+                {
+                    proof
+                }
+                _ => BaseLessonTrust {
+                    class_id,
+                    identity_revision: identity.revision,
+                    schedule_revision: schedule.revision,
+                    trusted_since: now,
+                },
+            });
+        }
         let lesson = if let Some(class) = class {
             let day = schedule
                 .resolve_day(class, now.date)
@@ -313,6 +356,42 @@ impl LessonContextSnapshot {
         } else {
             next.finish(now)?;
         }
+        // Only materialize a completely unobserved baseline lesson. Any actual
+        // interval (even a terminated override) is stronger than this proof.
+        // A strict pre-start witness also prevents an override at the exact
+        // start boundary from being inferred away after its history is retired.
+        if let (Some(class), Some(proof)) = (class, &next.base_trust) {
+            if let Some((crate::materials::MaterialSourceKind::RetainedBreak, key, cell)) =
+                crate::materials::resolve_material_lesson(schedule, class, now)
+                    .map_err(|_| LessonContextError::LessonContextChanged)?
+            {
+                let begin =
+                    LocalDateTime::new(key.actual_date, u32::from(key.range.begin.get()) * 60)
+                        .map_err(|_| LessonContextError::InvalidTarget)?;
+                let end = LocalDateTime::new(key.actual_date, u32::from(key.range.end.get()) * 60)
+                    .map_err(|_| LessonContextError::InvalidTarget)?;
+                if proof.trusted_since < begin
+                    && next.current.is_none()
+                    && !next.history.iter().any(|h| h.context.key == key)
+                    && next.history.last().is_none_or(|h| h.ended_at <= begin)
+                {
+                    if next.history.len() == MAX_LESSON_INTERVALS {
+                        next.history.remove(0);
+                    }
+                    next.history.push(EffectiveLessonInterval {
+                        context: EffectiveLessonContext {
+                            teacher_id: teacher(identity, class, &cell),
+                            key,
+                            base: cell.clone(),
+                            effective: cell,
+                            effective_from: begin,
+                            effective_until: end,
+                        },
+                        ended_at: end,
+                    });
+                }
+            }
+        }
         next.identity_revision = identity.revision;
 
         if next.current != self.current
@@ -320,6 +399,8 @@ impl LessonContextSnapshot {
             || next.history != self.history
             || next.class_id != self.class_id
             || next.blocked_until != self.blocked_until
+            || next.base_trust != self.base_trust
+            || day_changed
         {
             next.bump()?;
             next.observed_at = Some(witnessed.map_or(now, |t| t.max(now)));
@@ -400,6 +481,11 @@ impl LessonContextSnapshot {
             LessonAction::Restore => None,
         };
         next.observed_at = Some(now);
+        // A command is a durable inference barrier, including Restore. It can
+        // never establish that this lesson had no earlier override.
+        if let Some(proof) = &mut next.base_trust {
+            proof.trusted_since = now;
+        }
         next.bump()?;
         next.validate()?;
         Ok(next)

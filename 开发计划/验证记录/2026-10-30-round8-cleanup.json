@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Round 8 owned test/build cleanup only",
+  "targetAbsentAtRoundStart": true,
+  "removedTargetApparentBytes": 4377332489,
+  "removedTemporaryEntries": 39,
+  "removedPythonCacheFiles": [
+    "windows-probe.cpython-312.pyc",
+    "package-probe.cpython-312.pyc"
+  ],
+  "targetExistsAfterCleanup": false,
+  "round8TempEntriesAfterCleanup": 0,
+  "windowsFinalIntegrationCleanup": "PASS",
+  "windowsFinalUnitAndNativeCleanup": "PASS",
+  "win7SupplementalFinalCleanup": "PASS",
+  "persistentWindowsAccess": {
+    "sshService": "Running",
+    "authorizedKeysPresent": true,
+    "user": "Eliora\\Elior"
+  },
+  "persistentPrivateIdentityRetained": true,
+  "persistentPrivateIdentityMode": "0600",
+  "formalArtifactsPreserved": [
+    "/mnt/data/FutureClassroom-0.1.0-voice-copy-dev.zip",
+    "prior development artifacts in /mnt/data"
+  ],
+  "failedEvidencePreserved": true,
+  "notes": [
+    "No SSH service or public-key authorization removed",
+    "No unrelated processes/directories or user teaching files removed",
+    "Source, evidence, toolchains and dependency caches retained"
+  ]
+}

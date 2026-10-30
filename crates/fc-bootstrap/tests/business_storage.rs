@@ -4075,3 +4075,564 @@ fn lesson_override_bounded_history_keeps_natural_expiry_and_unassigned_base_safe
     // Unobserved old baseline is neutral rather than fabricating an actual teacher.
     assert!(facts.lesson_context.validate().is_ok());
 }
+
+#[test]
+fn baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart() {
+    use fc_domain::materials::{MaterialSourceEvidence, MaterialSourceKind};
+    use fc_ports::DisplayRepository;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+    )));
+    let (writer, repo) = lesson_fixture(&d, clock.clone());
+    let before = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(before.lesson_context.current.is_none());
+    assert!(before.lesson_context.history.is_empty());
+    let proof = before.lesson_context.base_trust.clone().unwrap();
+    assert_eq!(proof.trusted_since, clock.now());
+    let row = writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_get("business/lesson-context/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap();
+    assert!(std::str::from_utf8(&row.value)
+        .unwrap()
+        .contains("\"format\":2"));
+    drop(repo);
+    drop(writer);
+    // There was no observation between 08:00 and 09:05, and no stored current lesson.
+    lesson_time(&clock, 9, 5, 0);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let facts = repo.desktop_facts(0, &*clock).unwrap();
+    let source = facts.materials_source.as_ref().unwrap();
+    assert_eq!(source.kind, MaterialSourceKind::RetainedBreak);
+    assert_eq!(source.teacher_id, principal(2));
+    assert!(matches!(
+        source.evidence,
+        MaterialSourceEvidence::PersistedLesson { .. }
+    ));
+    assert_eq!(facts.lesson_context.base_trust, Some(proof));
+    let interval = facts.lesson_context.history.last().unwrap();
+    assert_eq!(
+        interval.context.effective_from,
+        LocalDateTime::new(date(30), 8 * 3600 + 20 * 60).unwrap()
+    );
+    assert_eq!(
+        interval.ended_at,
+        LocalDateTime::new(date(30), 9 * 3600).unwrap()
+    );
+    let again = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(
+        again.global_revision, facts.global_revision,
+        "unchanged proof must not write per tick"
+    );
+    assert_eq!(again.lesson_context, facts.lesson_context);
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert_eq!(
+        repo.desktop_facts(0, &*clock)
+            .unwrap()
+            .materials_source
+            .unwrap(),
+        *source
+    );
+}
+
+#[test]
+fn baseline_proof_cannot_cross_postlesson_catalog_schedule_rollback_or_day_barriers() {
+    use fc_ports::{DisplayRepository, ScheduleRepository};
+    for scenario in 0..5 {
+        let d = Directory::new();
+        let clock = Arc::new(Time(Mutex::new(
+            LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+        )));
+        let (writer, mut repo) = lesson_fixture(&d, clock.clone());
+        repo.desktop_facts(0, &*clock).unwrap();
+        lesson_time(&clock, 9, 5, 0);
+        match scenario {
+            0 => {
+                // Saving after the ended lesson cannot backdate a new resolved table.
+                let mut doc = repo.schedule(&actor(1, 1, TrustedOrigin::Local)).unwrap();
+                doc.semesters[0].semester.tables[0].rows[0].courses[0]
+                    .as_mut()
+                    .unwrap()
+                    .teacher = fc_domain::schedule::TeacherBinding::Explicit(principal(3));
+                repo.execute_schedule(
+                    schedule_request(8400, doc.revision.get(), doc),
+                    &actor(1, 1, TrustedOrigin::Local),
+                    &*clock,
+                )
+                .unwrap();
+            }
+            1 => admin_catalog(
+                &mut repo,
+                &clock,
+                8401,
+                IdentityCommand::SetDefaultTeacher(DefaultTeacher {
+                    class_id: ClassId::new(1).unwrap(),
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher_id: principal(3),
+                }),
+            ),
+            2 => admin_catalog(
+                &mut repo,
+                &clock,
+                8402,
+                IdentityCommand::UpdateAccount {
+                    id: principal(3),
+                    display_name: "Changed teaching assignment".into(),
+                    role: Role::User,
+                    enabled: true,
+                    scopes: vec![],
+                },
+            ),
+            3 => {
+                // A persisted rollback barrier survives closing the writer; catching
+                // up later must not reuse the pre-rollback baseline.
+                lesson_time(&clock, 7, 59, 0);
+                assert!(repo
+                    .desktop_facts(0, &*clock)
+                    .unwrap()
+                    .lesson_context
+                    .blocked_until
+                    .is_some());
+                lesson_time(&clock, 9, 5, 0);
+            }
+            _ => {
+                *clock.0.lock().unwrap() = LocalDateTime::new(date(31), 3600).unwrap();
+                repo.desktop_facts(0, &*clock).unwrap();
+                lesson_time(&clock, 9, 5, 0);
+            }
+        }
+        drop(repo);
+        drop(writer);
+        let startup = fc_storage::business::startup_state(d.path()).unwrap();
+        let (_writer, repo, _) =
+            open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+        let facts = repo.desktop_facts(0, &*clock).unwrap();
+        assert!(
+            facts.materials_source.is_none(),
+            "scenario {scenario} fabricated a past baseline teacher"
+        );
+        assert!(facts.lesson_context.history.is_empty());
+    }
+}
+
+#[test]
+fn baseline_proof_does_not_infer_from_old_documents_cleared_history_or_changed_default() {
+    use fc_domain::{lesson_context::LessonContextSnapshot, schedule::TeacherBinding};
+    use fc_ports::{DisplayRepository, ScheduleRepository};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+    )));
+    let (_writer, repo) = lesson_fixture(&d, clock.clone());
+    let facts = repo.desktop_facts(0, &*clock).unwrap();
+    let mut identity = repo.load_identity().unwrap();
+    let mut schedule = repo.schedule(&actor(1, 1, TrustedOrigin::Local)).unwrap();
+    // Domain resolution follows a revision-bound default, never a mutable lookup
+    // pretending to prove who taught the completed lesson.
+    schedule.semesters[0].semester.tables[0].rows[0].courses[0]
+        .as_mut()
+        .unwrap()
+        .teacher = TeacherBinding::Default;
+    identity.default_teachers.push(DefaultTeacher {
+        class_id: ClassId::new(1).unwrap(),
+        subject_id: SubjectId::new(1).unwrap(),
+        teacher_id: principal(2),
+    });
+    let trusted = LessonContextSnapshot::default()
+        .observe(&identity, &schedule, clock.now())
+        .unwrap();
+    lesson_time(&clock, 9, 5, 0);
+    let restored = trusted.observe(&identity, &schedule, clock.now()).unwrap();
+    assert_eq!(
+        restored
+            .material_source(&identity, &schedule, ClassId::new(1).unwrap(), clock.now())
+            .unwrap()
+            .unwrap()
+            .teacher_id,
+        principal(2)
+    );
+    identity.default_teachers[0].teacher_id = principal(3);
+    identity.revision = identity.revision.next().unwrap();
+    let invalidated = trusted.observe(&identity, &schedule, clock.now()).unwrap();
+    assert!(invalidated.history.is_empty());
+    assert!(invalidated
+        .material_source(&identity, &schedule, ClassId::new(1).unwrap(), clock.now())
+        .unwrap()
+        .is_none());
+    let legacy = LessonContextSnapshot {
+        base_trust: None,
+        ..facts.lesson_context.clone()
+    };
+    assert!(legacy
+        .observe(&facts.identity, &facts.schedule, clock.now())
+        .unwrap()
+        .history
+        .is_empty());
+    assert!(LessonContextSnapshot::default()
+        .observe(&facts.identity, &facts.schedule, clock.now())
+        .unwrap()
+        .history
+        .is_empty());
+    let current = facts
+        .lesson_context
+        .observe(
+            &facts.identity,
+            &facts.schedule,
+            LocalDateTime::new(date(30), 8 * 3600 + 25 * 60).unwrap(),
+        )
+        .unwrap();
+    let changed = current
+        .apply(
+            current.revision,
+            &current.current.as_ref().unwrap().key,
+            replace_teacher(3),
+            OverrideId::new(8600).unwrap(),
+            &facts.identity,
+            &actor(1, 1, TrustedOrigin::Local),
+            LocalDateTime::new(date(30), 8 * 3600 + 30 * 60).unwrap(),
+        )
+        .unwrap();
+    let restored = changed
+        .apply(
+            changed.revision,
+            &changed.current.as_ref().unwrap().key,
+            fc_domain::lesson_context::LessonAction::Restore,
+            OverrideId::new(8601).unwrap(),
+            &facts.identity,
+            &actor(1, 1, TrustedOrigin::Local),
+            LocalDateTime::new(date(30), 8 * 3600 + 35 * 60).unwrap(),
+        )
+        .unwrap();
+    for mut cleared in [changed, restored] {
+        cleared.current = None;
+        cleared.active_override = None;
+        cleared.history.clear();
+        let no_invention = cleared
+            .observe(&facts.identity, &facts.schedule, clock.now())
+            .unwrap();
+        assert!(
+            no_invention.history.is_empty(),
+            "clearing actual history must not revive a pre-override baseline"
+        );
+    }
+}
+
+#[test]
+fn baseline_stable_scope_survives_offline_night_without_retaining_yesterdays_override() {
+    use fc_ports::{DisplayRepository, LessonRepository, ScheduleRepository};
+    for with_yesterday_override in [false, true] {
+        let d = Directory::new();
+        let clock = Arc::new(Time(Mutex::new(
+            LocalDateTime::new(date(29), 8 * 3600).unwrap(),
+        )));
+        let (writer, mut repo) = lesson_fixture(&d, clock.clone());
+        if with_yesterday_override {
+            let admin = actor(1, 1, TrustedOrigin::Local);
+            let mut doc = repo.schedule(&admin).unwrap();
+            doc.school_calendar
+                .entries
+                .iter_mut()
+                .find(|e| e.date == date(31))
+                .unwrap()
+                .mapping = fc_domain::schedule::DayMapping::SourceDate(date(26));
+            repo.execute_schedule(
+                schedule_request(8499, doc.revision.get(), doc),
+                &admin,
+                &*clock,
+            )
+            .unwrap();
+        }
+        let original = repo.desktop_facts(0, &*clock).unwrap();
+        assert!(original.lesson_context.history.is_empty());
+        if with_yesterday_override {
+            // Yesterday's actual override is stronger than yesterday's baseline,
+            // but it cannot replace the next day's original teacher.
+            *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 8 * 3600 + 25 * 60).unwrap();
+            let current = repo
+                .lesson_context(&actor(1, 1, TrustedOrigin::Local), &*clock)
+                .unwrap();
+            let changed = repo
+                .execute_lesson(
+                    lesson_request(8500, &current, replace_teacher(3)),
+                    &actor(1, 1, TrustedOrigin::Local),
+                    &*clock,
+                )
+                .unwrap();
+            assert_eq!(changed.current.unwrap().teacher_id, Some(principal(3)));
+            // The next day resolves the same base course; its teacher is 2.
+            *clock.0.lock().unwrap() = LocalDateTime::new(date(31), 9 * 3600 + 5 * 60).unwrap();
+        } else {
+            *clock.0.lock().unwrap() = LocalDateTime::new(date(30), 9 * 3600 + 5 * 60).unwrap();
+        }
+        drop(repo);
+        drop(writer);
+        let startup = fc_storage::business::startup_state(d.path()).unwrap();
+        let (_writer, repo, _) =
+            open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+        let recovered = repo.desktop_facts(0, &*clock).unwrap();
+        if with_yesterday_override {
+            assert!(recovered.lesson_context.current.is_none());
+            assert!(recovered.lesson_context.active_override.is_none());
+            assert_eq!(recovered.lesson_context.history.len(), 1);
+            assert_eq!(
+                recovered.lesson_context.history[0].context.key.actual_date,
+                date(31)
+            );
+            assert_eq!(recovered.materials_source.unwrap().teacher_id, principal(2));
+        } else {
+            assert_eq!(recovered.materials_source.unwrap().teacher_id, principal(2));
+            assert_eq!(recovered.lesson_context.history.len(), 1);
+            assert_eq!(
+                recovered.lesson_context.history[0].context.key.actual_date,
+                date(30)
+            );
+            assert_eq!(
+                recovered.lesson_context.base_trust.unwrap().trusted_since,
+                original.lesson_context.base_trust.unwrap().trusted_since
+            );
+        }
+    }
+}
+
+#[test]
+fn baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof() {
+    use fc_ports::DisplayRepository;
+    use fc_storage::{CommitCommand, Mutation};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+    )));
+    let (writer, repo) = lesson_fixture(&d, clock.clone());
+    let before = repo.desktop_facts(0, &*clock).unwrap();
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (writer, repo, reader) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    // An actual pre-upgrade v1 document may have a pre-class observed_at but
+    // never promised that no override/conflict intervened. Preserve that limit.
+    let legacy = format!(r#"{{"format":1,"revision":{},"identity_revision":{},"observed_at":{{"date":[2026,10,30],"second":28800}},"class":1,"blocked_until":null,"current":null,"override":null,"history":[]}}"#,
+        before.lesson_context.revision.get(),before.identity.revision.get()).into_bytes();
+    let handle = writer.0.as_ref().unwrap().handle();
+    let revision = handle.try_revision().unwrap().wait().unwrap();
+    let snapshot = reader
+        .prepare_update(
+            repo.load_identity().unwrap(),
+            revision.next().unwrap(),
+            AuthEpoch::new(1),
+        )
+        .unwrap();
+    handle
+        .try_commit(
+            CommitCommand::new(
+                "legacy-lesson-context-fixture".into(),
+                revision,
+                vec![Mutation::Put {
+                    key: "business/lesson-context/v1".into(),
+                    value: legacy,
+                }],
+            )
+            .unwrap(),
+            snapshot,
+        )
+        .unwrap()
+        .wait()
+        .unwrap();
+    drop(repo);
+    drop(writer);
+    lesson_time(&clock, 9, 5, 0);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let after = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(after.materials_source.is_none());
+    assert!(after.lesson_context.history.is_empty());
+    assert_eq!(
+        after.lesson_context.base_trust.unwrap().trusted_since,
+        clock.now()
+    );
+    let row = writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_get("business/lesson-context/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap();
+    assert!(std::str::from_utf8(&row.value)
+        .unwrap()
+        .contains("\"format\":2"));
+}
+
+#[test]
+fn failed_desktop_facts_only_persist_actual_rollback_invalidation_not_forward_baseline_observation()
+{
+    use fc_ports::{DisplayRepository, LessonRepository};
+    use std::sync::atomic::AtomicU8;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600).unwrap(),
+    )));
+    let (writer, repo) = lesson_fixture(&d, clock.clone());
+    let state = repo.load_identity().unwrap();
+    let handle = writer.0.as_ref().unwrap().handle();
+    let revision = handle.try_revision().unwrap().wait().unwrap();
+    drop(repo);
+    drop(writer);
+    let (mut publisher, reader) = AuthorityStore::new(state, revision, AuthEpoch::new(1));
+    publisher.initialize().unwrap();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let writer = Joined(Some(writer));
+    let mode = Arc::new(AtomicU8::new(1));
+    let trigger = mode.clone();
+    let wall = clock.clone();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        match trigger.load(Ordering::Acquire) {
+            1 => *wall.0.lock().unwrap() = time(31),
+            2 => {
+                *wall.0.lock().unwrap() = LocalDateTime::new(date(30), 8 * 3600 + 55 * 60).unwrap()
+            }
+            _ => {}
+        }
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+        .with_session_guard(Arc::new(|_, _| Ok(())));
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    let old_context = handle
+        .try_get("business/lesson-context/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    // Existing class-bound baseline proof is real, but a rejected cross-midnight
+    // Facts transaction must not separately create/advance another observation.
+    assert!(repo.desktop_facts(0, &*clock).is_err());
+    assert_eq!(handle.try_revision().unwrap().wait().unwrap(), before);
+    assert_eq!(
+        handle
+            .try_get("business/lesson-context/v1".into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .unwrap()
+            .value,
+        old_context
+    );
+    assert!(handle
+        .try_get("business/desktop/max-observed-day/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .is_none());
+    mode.store(0, Ordering::Release);
+    // A successful read at the witnessed date may now publish all its facts and
+    // watermark atomically. Returning to yesterday is a true clock regression.
+    repo.desktop_facts(0, &*clock).unwrap();
+    lesson_time(&clock, 8, 25, 0);
+    let blocked = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(blocked.lesson_context.blocked_until.is_some());
+    // Separate installation fixture below exercises an in-day failed read,
+    // without a next-day floor preventing the actual current override first.
+    drop(repo);
+    drop(writer);
+
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(
+        LocalDateTime::new(date(30), 8 * 3600 + 25 * 60).unwrap(),
+    )));
+    let (writer, mut repo) = lesson_fixture(&d, clock.clone());
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let current = repo.lesson_context(&admin, &*clock).unwrap();
+    lesson_time(&clock, 8, 30, 0);
+    repo.execute_lesson(
+        lesson_request(8700, &current, replace_teacher(3)),
+        &admin,
+        &*clock,
+    )
+    .unwrap();
+    let state = repo.load_identity().unwrap();
+    let revision = writer
+        .0
+        .as_ref()
+        .unwrap()
+        .handle()
+        .try_revision()
+        .unwrap()
+        .wait()
+        .unwrap();
+    drop(repo);
+    drop(writer);
+    let (mut publisher, reader) = AuthorityStore::new(state, revision, AuthEpoch::new(1));
+    publisher.initialize().unwrap();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let writer = Joined(Some(writer));
+    let mode = Arc::new(AtomicU8::new(2));
+    let trigger = mode.clone();
+    let wall = clock.clone();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        if trigger.load(Ordering::Acquire) == 2 {
+            *wall.0.lock().unwrap() = LocalDateTime::new(date(30), 8 * 3600 + 55 * 60).unwrap();
+        }
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+        .with_session_guard(Arc::new(|_, _| Ok(())));
+    lesson_time(&clock, 9, 5, 0);
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    assert!(repo.desktop_facts(0, &*clock).is_err());
+    // The failed positive Facts transaction rolled back. Its observed rollback
+    // is separately persisted as a negative-only safety barrier, exactly once.
+    assert_eq!(
+        handle.try_revision().unwrap().wait().unwrap(),
+        before.next().unwrap()
+    );
+    mode.store(0, Ordering::Release);
+    let neutral = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(neutral.lesson_context.blocked_until.is_some());
+    assert!(neutral.lesson_context.base_trust.is_none());
+    assert!(neutral.lesson_context.current.is_none());
+    assert!(neutral.lesson_context.active_override.is_none());
+    assert!(neutral.lesson_context.history.is_empty());
+    assert!(neutral.materials_source.is_none());
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert!(repo
+        .desktop_facts(0, &*clock)
+        .unwrap()
+        .materials_source
+        .is_none());
+    lesson_time(&clock, 9, 5, 0);
+    assert!(
+        repo.desktop_facts(0, &*clock)
+            .unwrap()
+            .materials_source
+            .is_none(),
+        "old actual override or preclass proof cannot revive after catching up"
+    );
+}

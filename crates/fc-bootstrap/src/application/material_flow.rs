@@ -24,6 +24,26 @@ use std::{
     time::{Duration, Instant, SystemTime},
 };
 
+static LAUNCH_PREPARING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+struct LaunchPreparation;
+impl LaunchPreparation {
+    fn take() -> Result<Self> {
+        LAUNCH_PREPARING
+            .compare_exchange(
+                false,
+                true,
+                std::sync::atomic::Ordering::AcqRel,
+                std::sync::atomic::Ordering::Acquire,
+            )
+            .map_err(|_| invalid("另一个打开副本正在准备，请稍后重试。"))?;
+        Ok(Self)
+    }
+}
+impl Drop for LaunchPreparation {
+    fn drop(&mut self) {
+        LAUNCH_PREPARING.store(false, std::sync::atomic::Ordering::Release);
+    }
+}
 pub(super) enum Job {
     Load {
         lease: SessionLease,
@@ -40,6 +60,10 @@ pub(super) enum Job {
         request: MaterialDeleteRequest,
     },
     Open(OpenRequest),
+    Copies {
+        lease: SessionLease,
+        clean: bool,
+    },
 }
 #[derive(Clone)]
 pub(super) enum OpenRequest {
@@ -276,6 +300,24 @@ impl Preparation<'_> {
         Ok(resource)
     }
 }
+/// Mutex occupancy is a retryable scheduling condition, not a revoked lease.
+/// Poisoning still faults the product rather than masquerading as contention.
+fn backend_lock_error<T>(error: std::sync::TryLockError<T>) -> Failure {
+    match error {
+        std::sync::TryLockError::WouldBlock => invalid("后台繁忙，请稍后重试。"),
+        std::sync::TryLockError::Poisoned(_) => Failure::Backend(
+            fc_bootstrap::backend::BackendError::Storage(fc_storage::StorageError::WorkerPanicked),
+        ),
+    }
+}
+fn after_committed_material(error: Failure) -> Failure {
+    match error {
+        Failure::Input("后台繁忙，请稍后重试。") => {
+            invalid("资料操作已保存。后续更新暂时繁忙，请刷新目录核对，勿重复导入。")
+        }
+        other => other,
+    }
+}
 impl MaterialJob {
     pub fn allocation_bytes(&self) -> Option<usize> {
         Some(
@@ -295,23 +337,37 @@ impl MaterialJob {
     pub fn run(self, context: &JobContext) -> Result<Outcome> {
         let files = ControlledFiles::new(&self.root).map_err(|_| io_error())?;
         match self.job {
+            Job::Copies { lease, clean } => {
+                let guard = self
+                    .backend
+                    .try_lock()
+                    .map_err(backend_lock_error)?
+                    .launch_copy_guard(lease)?;
+                let check = || context.checkpoint().is_ok() && guard.is_context_valid();
+                let report = launch_inventory(&files, clean, &check)?;
+                if !check() {
+                    return Err(Failure::Stopped);
+                }
+                Ok(Outcome::LaunchCopies(report))
+            }
             Job::Load { lease, request } => Ok(Outcome::Materials(Box::new(
                 self.backend
                     .try_lock()
-                    .map_err(|_| invalid("后台繁忙，请稍后重试。"))?
+                    .map_err(backend_lock_error)?
                     .materials(lease, request)?,
             ))),
             Job::Delete { lease, request } => {
                 let scope = request.scope;
                 self.backend
                     .try_lock()
-                    .map_err(|_| Failure::Stopped)?
+                    .map_err(backend_lock_error)?
                     .delete_material(lease, request)?;
-                reconcile(&files, &self.backend, context)?;
+                reconcile(&files, &self.backend, context).map_err(after_committed_material)?;
                 Ok(Outcome::Materials(Box::new(
                     self.backend
                         .try_lock()
-                        .map_err(|_| Failure::Stopped)?
+                        .map_err(backend_lock_error)
+                        .map_err(after_committed_material)?
                         .materials(
                             lease,
                             MaterialListRequest {
@@ -331,7 +387,7 @@ impl MaterialJob {
                 // same exact lease/scope again at the actual commit boundary.
                 self.backend
                     .try_lock()
-                    .map_err(|_| Failure::Stopped)?
+                    .map_err(backend_lock_error)?
                     .materials(
                         lease,
                         MaterialListRequest {
@@ -384,7 +440,7 @@ impl MaterialJob {
                 let mut result = self
                     .backend
                     .try_lock()
-                    .map_err(|_| Failure::Stopped)?
+                    .map_err(backend_lock_error)?
                     .append_material(lease, prepared)
                     .map_err(Failure::from);
                 // Unavailable also covers decoding a completion after COMMIT.
@@ -417,7 +473,8 @@ impl MaterialJob {
                 Ok(Outcome::Materials(Box::new(
                     self.backend
                         .try_lock()
-                        .map_err(|_| Failure::Stopped)?
+                        .map_err(backend_lock_error)
+                        .map_err(after_committed_material)?
                         .materials(
                             lease,
                             MaterialListRequest {
@@ -428,12 +485,11 @@ impl MaterialJob {
                 )))
             }
             Job::Open(request) => {
-                let initial = request.authorize(
-                    &*self
-                        .backend
-                        .try_lock()
-                        .map_err(|_| invalid("后台繁忙，请稍后重试。"))?,
-                )?;
+                // A physical reservation spans inventory/admission through the
+                // complete copy. A second worker cannot admit against stale quota.
+                let _preparation = LaunchPreparation::take()?;
+                let initial =
+                    request.authorize(&*self.backend.try_lock().map_err(backend_lock_error)?)?;
                 let record = initial.record;
                 let alive = || initial.guard.is_context_valid();
                 let control = Control {
@@ -453,7 +509,7 @@ impl MaterialJob {
                     MAX_MATERIAL_BYTES,
                 )
                 .map_err(|_| io_error())?;
-                let dir = launch_admission(&files, record.resource.bytes)?;
+                let dir = launch_admission(&files, record.resource.bytes, &|| !control.canceled())?;
                 let copy = dir.join(&record.display_name);
                 let mut out = files.create_new(&copy).map_err(|_| io_error())?;
                 let bytes = fc_materials::copy_bounded(
@@ -482,12 +538,8 @@ impl MaterialJob {
                     return Err(invalid("资料内容已改变或打开权限已撤销。"));
                 }
                 drop(original);
-                let fresh = request.authorize(
-                    &*self
-                        .backend
-                        .try_lock()
-                        .map_err(|_| invalid("后台繁忙，请稍后重试。"))?,
-                )?;
+                let fresh =
+                    request.authorize(&*self.backend.try_lock().map_err(backend_lock_error)?)?;
                 if fresh.record != record || !fresh.guard.is_valid() {
                     return Err(invalid("资料版本或权限已改变，请重新选择。"));
                 }
@@ -508,37 +560,89 @@ impl MaterialJob {
 const LAUNCH_BYTES: u64 = 200 * 1024 * 1024;
 const LAUNCH_FILES: usize = 128;
 const LAUNCH_GRACE: Duration = Duration::from_secs(24 * 60 * 60);
-fn launch_admission(files: &ControlledFiles, required: u64) -> Result<PathBuf> {
+#[derive(Clone, Copy, Default)]
+pub(super) struct LaunchCopyReport {
+    pub bytes: u64,
+    pub count: usize,
+    pub expired: usize,
+    pub removed: usize,
+    pub retained: usize,
+}
+fn expired_copy(metadata: &std::fs::Metadata) -> bool {
+    metadata
+        .modified()
+        .ok()
+        .and_then(|t| SystemTime::now().duration_since(t).ok())
+        .is_some_and(|age| age >= LAUNCH_GRACE)
+}
+fn launch_inventory(
+    files: &ControlledFiles,
+    clean: bool,
+    authorized: &dyn Fn() -> bool,
+) -> Result<LaunchCopyReport> {
     let root = files
         .directory(&["launch-copies".into()])
         .map_err(|_| io_error())?;
-    let mut bytes = 0u64;
-    let mut count = 0usize;
+    let mut report = LaunchCopyReport::default();
     for dir in files.entries(&root, LAUNCH_FILES).map_err(|_| io_error())? {
+        if !authorized() {
+            return Err(Failure::Stopped);
+        }
         if !dir.is_dir() {
             return Err(io_error());
         }
         for path in files.entries(&dir, 1).map_err(|_| io_error())? {
+            if !authorized() {
+                return Err(Failure::Stopped);
+            }
             let metadata = std::fs::symlink_metadata(&path).map_err(|_| io_error())?;
             if !metadata.is_file() {
                 return Err(io_error());
             }
-            let expired = metadata
-                .modified()
-                .ok()
-                .and_then(|t| SystemTime::now().duration_since(t).ok())
-                .is_some_and(|age| age >= LAUNCH_GRACE);
-            if expired && files.remove(&path).is_ok() {
-                continue;
+            if expired_copy(&metadata) {
+                report.expired += 1;
+                // Age and live permission are checked again while the exact file
+                // is held exclusively. No external writes can race disposition.
+                if clean {
+                    match files.remove_when(&path, |pinned| authorized() && expired_copy(pinned)) {
+                        Ok(true) => {
+                            report.removed += 1;
+                            continue;
+                        }
+                        Ok(false) => {}
+                        Err(error) if matches!(error.code().0 as u32, 0x80070020 | 0x80070021) => {
+                            report.retained += 1;
+                        }
+                        Err(_) => return Err(io_error()),
+                    }
+                }
             }
-            bytes = bytes.checked_add(metadata.len()).ok_or_else(io_error)?;
-            count += 1;
+            report.bytes = report
+                .bytes
+                .checked_add(metadata.len())
+                .ok_or_else(io_error)?;
+            report.count += 1;
         }
-        let _ = std::fs::remove_dir(&dir); // succeeds only if our known directory is empty
+        if clean {
+            let _ = std::fs::remove_dir(&dir);
+        }
     }
-    if count >= LAUNCH_FILES || bytes.checked_add(required).is_none_or(|v| v > LAUNCH_BYTES) {
+    Ok(report)
+}
+fn launch_admission(
+    files: &ControlledFiles,
+    required: u64,
+    authorized: &dyn Fn() -> bool,
+) -> Result<PathBuf> {
+    let report = launch_inventory(files, true, authorized)?;
+    if report.count >= LAUNCH_FILES
+        || report
+            .bytes
+            .checked_add(required)
+            .is_none_or(|v| v > LAUNCH_BYTES)
+    {
         return Err(invalid(
-            "打开副本空间已满（200MiB）。请关闭不用的文件并在副本到期后重试。",
+            "打开副本空间已满（200MiB/128份）。请关闭不用的文件，由全局管理员在资料管理中清理已到期副本。",
         ));
     }
     files
@@ -558,7 +662,7 @@ pub(super) fn reconcile(
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         let page = backend
             .try_lock()
-            .map_err(|_| Failure::Stopped)?
+            .map_err(backend_lock_error)?
             .resource_inventory(after)?;
         for item in page.entries {
             context.checkpoint().map_err(|_| Failure::Stopped)?;
@@ -579,7 +683,7 @@ pub(super) fn reconcile(
                 ResourceState::Unreferenced | ResourceState::Retiring => {
                     let ticket = backend
                         .try_lock()
-                        .map_err(|_| Failure::Stopped)?
+                        .map_err(backend_lock_error)?
                         .retire_resource(item.resource.version_id, item.revision)?;
                     if files.remove(&path).is_ok() {
                         if let Some(parent) = path.parent() {
@@ -587,7 +691,7 @@ pub(super) fn reconcile(
                         }
                         backend
                             .try_lock()
-                            .map_err(|_| Failure::Stopped)?
+                            .map_err(backend_lock_error)?
                             .finalize_resource_removal(ticket)?;
                     } else {
                         known.insert(path);

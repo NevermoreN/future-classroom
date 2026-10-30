@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "248bd59e243ccfb4889e5f4f67d2e0d1f5787a216a0f42e8b5b956ce8d166fba",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "system": {
+    "exitCode": 0,
+    "output": [
+      "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None }"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=5244 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "materialsOutput": [
+      "MATERIALS_PASS real-dpapi-sqlite-kdf-exact-lease",
+      "MATERIALS_PASS same-name-independent-append-management20-cursor",
+      "MATERIALS_PASS pdf-helper-job-wic-bmp-streamed-docx",
+      "MATERIALS_PASS fixed-version-copy-delete-retirement-original-tamper",
+      "MATERIALS_PASS manual-copy-inspection-exclusive-age-recheck-locked-release",
+      "MATERIALS_PASS two-shared-workers-cancel-lock-stale-shell-private-receiver",
+      "MATERIALS_PASS restart-durable-records-orphan-reconcile",
+      "MATERIALS_PASS all-owned-processes-registry-files-cleaned"
+    ],
+    "hostOutput": [
+      "hidden_host=PASS tray_lifecycle=PASS ticks=3 elapsed_ms=2992 session_notifications=true"
+    ],
+    "audioExitCode": 0,
+    "materialsExitCode": 0,
+    "audioOutput": [
+      "AUDIO_SILENT_PASS WinMmProbeReport { natural_completions: 1, canceled_completions: 0, submitted_pcm_bytes: 65536, pcm_allocation_bytes: 49152, source_cleanup: true }",
+      "VOICE_PIPELINE_PASS canonical_zero_pcm_prepare_exact_web_lease_sqlite_fifo_two_natural_repeats_cancel_generation_native_release_body_cleanup=PASS"
+    ],
+    "sessionId": 1,
+    "applicationOutput": [
+      "native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+    ],
+    "exitCode": 0,
+    "applicationExitCode": 0,
+    "hostExitCode": 0
+  },
+  "audioStatus": "PASS",
+  "status": "PASS",
+  "sourceBinding": {
+    "manifest": "2026-10-30-voice-copy-round8-build-inputs-before-probe-fix.json",
+    "files": 126,
+    "sha256": "fa54392854cf8e7c040ed0407a10f6270570de779a5b546ceb7e74f531c8e258"
+  },
+  "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+  "nativeWorkbenchSteps": 104,
+  "materialIntegrationLabels": 8,
+  "harnessSha256": "b66a1de9e3d7baafb92d85d6ba48cf7322482e9ba7e84d5f98498cffb56be9ad",
+  "modernBuildTranscript": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 49.35s\n",
+  "modernClippyTranscript": "    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.61s\n"
+}

@@ -1,6 +1,7 @@
 //! Synchronous product business service. Invoke only on the shared bounded worker
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
+mod voice;
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
 use fc_domain::{
     auth::*,
@@ -46,6 +47,7 @@ use std::{
     },
     time::{Duration, Instant},
 };
+pub use voice::{VoiceGuard, VoicePlaybackAuthorization};
 
 pub type Result<T> = std::result::Result<T, BackendError>;
 type Snapshot = PreparedAuthority<IdentityState>;
@@ -64,12 +66,18 @@ pub enum BackendError {
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
     Material(MaterialRepositoryError),
+    Voice(fc_ports::voice::VoiceRepositoryError),
     Storage(StorageError),
     InvalidCredentials,
     CryptoUnavailable,
     CorruptCredential,
     InvalidInput,
     Overflow,
+}
+impl From<fc_ports::voice::VoiceRepositoryError> for BackendError {
+    fn from(e: fc_ports::voice::VoiceRepositoryError) -> Self {
+        Self::Voice(e)
+    }
 }
 impl From<StorageError> for BackendError {
     fn from(e: StorageError) -> Self {
@@ -392,6 +400,8 @@ impl RandomSource for PlatformRandom {
 }
 
 pub struct Backend {
+    voice: voice::VoiceSessions,
+    authority: fc_runtime::authority::AuthorityReader<IdentityState>,
     writer: Option<StorageWriter<Snapshot>>,
     handle: StorageHandle<Snapshot>,
     repository: Repository,
@@ -420,12 +430,16 @@ impl Backend {
         let writer = StorageWriter::open_with_login_clock(path, 16, publisher, monotonic.clone())?;
         let handle = writer.handle();
         let health = reader.gate();
+        let authority = reader.clone();
         let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
             reader
                 .prepare_update(state.clone(), revision, AuthEpoch::new(1))
                 .map_err(|_| StorageError::AuthorityUnavailable)
         });
         let repository = BusinessRepository::new(handle.clone(), clock.clone(), factory);
+        // Exclusive deployment ownership is already held. Recovered voice work
+        // becomes Interrupted before any new output executor can be constructed.
+        repository.recover_voice()?;
         let control = SessionControl(Arc::new(Control {
             health,
             generation: AtomicU64::new(1),
@@ -455,6 +469,8 @@ impl Backend {
             local: None,
         }));
         Ok(Self {
+            voice: voice::VoiceSessions::default(),
+            authority,
             writer: Some(writer),
             handle,
             repository,
@@ -1179,6 +1195,55 @@ impl Backend {
     pub fn finalize_resource_removal(&self, ticket: ResourceRetirement) -> Result<()> {
         self.check_open()?;
         Ok(self.repository.finalize_resource_removal(ticket)?)
+    }
+    /// Shared launch copies may contain edits by different teachers. Only the
+    /// local global administrator can inspect or request their expired cleanup.
+    pub fn launch_copy_guard(&self, lease: SessionLease) -> Result<MaterialOpenGuard> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authority(actor.principal_id)
+            .and_then(|a| {
+                a.authorize_global_local(&actor, self.clock.now())
+                    .map_err(IdentityError::Permission)
+            })
+            .map_err(|_| BackendError::InvalidCredentials)?;
+        let status = self
+            .control
+            .health_gate()
+            .check_sensitive()
+            .map_err(|_| BackendError::Closed)?;
+        let ledger = self.ledger.clone();
+        let control = self.control.clone();
+        let clock = self.clock.clone();
+        let monotonic = self.monotonic.clone();
+        let expires_at = Instant::now() + Duration::from_secs(2);
+        let check = Arc::new(move || {
+            let current = control.health_gate().status();
+            if current.health != fc_runtime::health::Health::Healthy
+                || current.revision != status.revision
+                || current.health_epoch != status.health_epoch
+                || current.cancellation_generation != status.cancellation_generation
+                || control.check(lease, generation).is_err()
+            {
+                return false;
+            }
+            let Ok(mut ledger) = ledger.lock() else {
+                return false;
+            };
+            ledger.synchronize(&control, &state, clock.now(), monotonic.monotonic_millis());
+            ledger
+                .sessions
+                .actor(
+                    &state,
+                    lease,
+                    clock.now(),
+                    monotonic.monotonic_millis(),
+                    SessionPurpose::Manage,
+                )
+                .is_ok()
+        });
+        Ok(MaterialOpenGuard { check, expires_at })
     }
     pub fn material_for_owner(
         &self,

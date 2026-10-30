@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+pub mod audio;
 use fc_domain::ids::Revision;
 use fc_domain::{
     auth::{ActorContext, AuthorityContext},
@@ -595,3 +596,5 @@ pub trait LessonRepository {
         clock: &dyn Clock,
     ) -> Result<fc_domain::lesson_context::LessonContextSnapshot, LessonRepositoryError>;
 }
+
+pub mod voice;
