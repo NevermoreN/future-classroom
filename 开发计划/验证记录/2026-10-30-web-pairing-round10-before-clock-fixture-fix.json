@@ -1,0 +1,14 @@
+{
+  "command": "cargo test -p fc-bootstrap backend::web::tests --locked -- --test-threads=1",
+  "exitCode": 101,
+  "elapsedTestSeconds": 215.3,
+  "rawFinalOutput": "ok\n\nfailures:\n\n---- backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission stdout ----\n\nthread 'backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission' (11922) panicked at crates/fc-bootstrap/src/backend/web/tests.rs:516:5:\nassertion failed: matches!(service.begin_pairing(f.admin), Err(WebServiceError::Disabled))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission\n\ntest result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 215.30s\n\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n",
+  "scope": "10 tests (9 real SQLite Backend fixtures in ordinary OS temp plus 1 pure cookie boundary test), serial execution; 9 passed and 1 incorrect fixture assertion failed",
+  "sourceBinding": {
+    "compiledTestFixtureSha256": "b2fe2b966cf89e312804939e0d4ed89323c0264b34ba3723f1b62c9c73388812",
+    "currentTestFixtureSha256": "3a27f81ea1a17bc75a0a808b72fbd178c5b0da993c8de509252f61ec3c253fd7",
+    "webServiceSourceObservedAtFailureSha256": "1e347fca295095ca438a5f8e7e92e2800692ff1f301f6565e87137a7272eedcb"
+  },
+  "classification": "Fixture error only: after regression correctly revokes all Web leases, fixture kept the regressed tick and expected Disabled from begin_pairing. State.tick correctly continued Denied. Fix restores tick to previous value before asserting admission remains Disabled; no production code or fail-closed requirement relaxed.",
+  "scopeNotice": "Targeted intermediate source, followed by final source-bound whole-workspace validation; this is not final acceptance."
+}

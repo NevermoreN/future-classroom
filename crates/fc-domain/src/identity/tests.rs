@@ -406,3 +406,147 @@ fn overflow_is_atomic_and_invalid_reconstruction_fails_closed() {
     state.accounts[0].principal.enabled = false;
     assert_eq!(state.validate(), Err(IdentityError::LastAdministrator));
 }
+
+#[test]
+fn self_logout_accepts_local_and_web_and_persists_only_the_accounts_epoch() {
+    let mut state = apply(
+        catalog(),
+        IdentityCommand::CreateAccount(NewAccount {
+            id: PrincipalId::new(2).unwrap(),
+            login_name: "reader".into(),
+            display_name: "用户".into(),
+            role: Role::User,
+            scopes: vec![],
+        }),
+    );
+    state.accounts[1].must_change_password = false;
+    for origin in [TrustedOrigin::Local, TrustedOrigin::Web] {
+        let mut a = actor(&state);
+        a.principal_id = state.accounts[1].principal.id;
+        a.auth_epoch = state.accounts[1].principal.auth_epoch;
+        a.origin = origin;
+        let transition = state
+            .transition(
+                &IdentityCommand::LogoutAccount {
+                    id: a.principal_id,
+                    expected_auth_epoch: a.auth_epoch,
+                },
+                Some(&a),
+                now(),
+            )
+            .unwrap();
+        assert_eq!(
+            transition.events,
+            vec![IdentityEvent::AuthorizationRevoked(a.principal_id)]
+        );
+        assert_eq!(transition.next.revision, state.revision.next().unwrap());
+        assert_eq!(transition.next.accounts[0], state.accounts[0]);
+        assert_eq!(
+            transition.next.accounts[1].principal.auth_epoch,
+            a.auth_epoch.next().unwrap()
+        );
+        assert_eq!(
+            transition.next.accounts[1].credential_version,
+            state.accounts[1].credential_version
+        );
+        assert_eq!(
+            transition.next.accounts[1].recovery_version,
+            state.accounts[1].recovery_version
+        );
+        assert_eq!(
+            transition
+                .next
+                .authority(a.principal_id)
+                .unwrap()
+                .validate_actor(&a, now()),
+            Err(PermissionError::StaleAuthorization)
+        );
+    }
+}
+
+#[test]
+fn logout_requires_current_self_actor_and_expected_epoch_without_mutating_on_failure() {
+    let state = apply(catalog(), IdentityCommand::CreateAccount(teacher(2)));
+    let a = actor(&state);
+    let command = IdentityCommand::LogoutAccount {
+        id: admin(),
+        expected_auth_epoch: a.auth_epoch,
+    };
+    assert_eq!(
+        state.transition(&command, None, now()),
+        Err(IdentityError::Permission(PermissionError::RoleDenied))
+    );
+    assert_eq!(
+        state.transition(
+            &IdentityCommand::LogoutAccount {
+                id: PrincipalId::new(2).unwrap(),
+                expected_auth_epoch: AuthEpoch::new(1)
+            },
+            Some(&a),
+            now()
+        ),
+        Err(IdentityError::Permission(PermissionError::WrongOwner))
+    );
+    assert_eq!(
+        state.transition(
+            &IdentityCommand::LogoutAccount {
+                id: admin(),
+                expected_auth_epoch: AuthEpoch::new(2)
+            },
+            Some(&a),
+            now()
+        ),
+        Err(IdentityError::RevisionConflict)
+    );
+    let mut expired = a.clone();
+    expired.expires_at = now();
+    assert_eq!(
+        state.transition(&command, Some(&expired), now()),
+        Err(IdentityError::Permission(PermissionError::Expired))
+    );
+    let mut stale = a;
+    stale.auth_epoch = AuthEpoch::new(2);
+    assert_eq!(
+        state.transition(&command, Some(&stale), now()),
+        Err(IdentityError::Permission(
+            PermissionError::StaleAuthorization
+        ))
+    );
+    let mut initial_actor = actor(&state);
+    initial_actor.principal_id = PrincipalId::new(2).unwrap();
+    initial_actor.auth_epoch = AuthEpoch::new(1);
+    assert_eq!(
+        state.transition(
+            &IdentityCommand::LogoutAccount {
+                id: initial_actor.principal_id,
+                expected_auth_epoch: initial_actor.auth_epoch
+            },
+            Some(&initial_actor),
+            now()
+        ),
+        Err(IdentityError::PasswordChangeRequired)
+    );
+}
+
+#[test]
+fn logout_epoch_and_identity_revision_overflow_fail_atomically() {
+    let mut state = initial();
+    for (epoch, revision) in [(u64::MAX, 1), (1, u64::MAX)] {
+        state.accounts[0].principal.auth_epoch = AuthEpoch::new(epoch);
+        state.revision = Revision::new(revision);
+        let before = state.clone();
+        let a = actor(&state);
+        assert_eq!(
+            state.transition(
+                &IdentityCommand::LogoutAccount {
+                    id: admin(),
+                    expected_auth_epoch: a.auth_epoch
+                },
+                Some(&a),
+                now()
+            ),
+            Err(IdentityError::VersionOverflow)
+        );
+        assert_eq!(state, before);
+    }
+}

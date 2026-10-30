@@ -136,6 +136,12 @@ pub enum IdentityCommand {
         id: PrincipalId,
         expected_recovery_version: u64,
     },
+    /// Explicit self logout invalidates every channel of the account durably.
+    /// The trusted transport supplies its authenticated actor, never a client role.
+    LogoutAccount {
+        id: PrincipalId,
+        expected_auth_epoch: AuthEpoch,
+    },
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum IdentityEvent {
@@ -496,6 +502,16 @@ impl IdentityState {
                         return Err(IdentityError::Permission(PermissionError::WrongOwner));
                     }
                 }
+                IdentityCommand::LogoutAccount { id, .. } => {
+                    self.authority(actor.principal_id)?
+                        .validate_actor(actor, now)?;
+                    if *id != actor.principal_id {
+                        return Err(IdentityError::Permission(PermissionError::WrongOwner));
+                    }
+                    if self.account(*id)?.must_change_password {
+                        return Err(IdentityError::PasswordChangeRequired);
+                    }
+                }
                 _ => self.authorize_management(actor, now)?,
             }
         }
@@ -777,6 +793,15 @@ impl IdentityState {
                     return Err(IdentityError::RevisionConflict);
                 }
                 a.recovery_version = next_version(a.recovery_version)?;
+                next.revoke(*id, &mut events)?;
+            }
+            IdentityCommand::LogoutAccount {
+                id,
+                expected_auth_epoch,
+            } => {
+                if next.account(*id)?.principal.auth_epoch != *expected_auth_epoch {
+                    return Err(IdentityError::RevisionConflict);
+                }
                 next.revoke(*id, &mut events)?;
             }
             IdentityCommand::RecoveryConsumed {

@@ -1,0 +1,28 @@
+[
+  {
+    "label": "modernWindows",
+    "argv": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--system-host",
+      "--application",
+      "--materials",
+      "--audio-silent",
+      "--web-pairing",
+      "--exe",
+      "target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "--report",
+      "开发计划/验证记录/2026-10-30-windows11-web-pairing-round10.json",
+      "--test-metadata",
+      "/tmp/fc-round10-windows-test-metadata.jsonl"
+    ],
+    "exitCode": 1,
+    "elapsedSeconds": 113.69,
+    "stdout": "Web pairing port probe PASS; real HTTPS/TLS/browser/listening delivery remains unvalidated\nfc_security-9c7f88663f75f873.exe PASS\nfc_materials-2221de66f2e97130.exe PASS\nfc_storage-9549596680176a3f.exe PASS\nfc_windows-95fad28d15fea78d.exe PASS\nfc_protocol-186900fcb7bfa5db.exe PASS\nfc_presentation-bf0074726aa5b441.exe PASS\nfc_runtime-fad3e5e278e2d80c.exe PASS\nfc_audio-35e3156477d0188a.exe PASS\nfc_application-8ad1e6c8c699ab50.exe PASS\nfc_ports-361bddc8b2876cc0.exe PASS\nfc_domain-915566e140287178.exe PASS\nvoice_storage-bf022395eae863de.exe PASS\nruntime_storage-d7df388ce9405226.exe PASS\nbusiness_storage-17bf377bec8f2f7e.exe PASS\ncleanup: PASS\n",
+    "stderr": "Traceback (most recent call last):\n  File \"/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py\", line 191, in <module>\n    main()\n  File \"/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py\", line 112, in main\n    result = json.loads(remote.powershell(script, timeout=60))\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py\", line 27, in powershell\n    result = subprocess.run([\"ssh\", *self.options, self.host, \"powershell.exe -NoProfile -NonInteractive -EncodedCommand \" + encoded], capture_output=True, timeout=timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/config/.python/python/lib/python3.12/subprocess.py\", line 550, in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/config/.python/python/lib/python3.12/subprocess.py\", line 1209, in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/config/.python/python/lib/python3.12/subprocess.py\", line 2109, in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n  File \"/config/.python/python/lib/python3.12/subprocess.py\", line 1253, in _check_timeout\n    raise TimeoutExpired(\nsubprocess.TimeoutExpired: Command '['ssh', '-i', '/config/.local/share/future-classroom-test-access/win11-192.168.10.212', '-o', 'IdentitiesOnly=yes', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=8', 'elior@192.168.10.212', 'powershell.exe -NoProfile -NonInteractive -EncodedCommand JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AE8AdQB0AHAAdQB0AEUAbgBjAG8AZABpAG4AZwA9AFsAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABPAHUAdABwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnADsAJABlAG4AdgA6AFQARQBNAFAAPQBKAG8AaQBuAC0AUABhAHQAaAAgACcAQwA6AFwAVQBzAGUAcgBzAFwARQBsAGkAbwByAFwAQQBwAHAARABhAHQAYQBcAEwAbwBjAGEAbABcAFQAZQBtAHAAXABGAHUAdAB1AHIAZQBDAGwAYQBzAHMAcgBvAG8AbQAtAFIAdQBzAHQAUAByAG8AYgBlAC0AYQAzADYAOAAxAGQAYQAxADYAYQA5ADQANABhAGIANQA5ADIANgAzADcANwA4AGEANgAxADgAOQBlADQANQA4ACcAIAAnAHQAZQBtAHAAJwA7AE4AZQB3AC0ASQB0AGUAbQAgAC0ASQB0AGUAbQBUAHkAcABlACAARABpAHIAZQBjAHQAbwByAHkAIAAtAEYAbwByAGMAZQAgAC0AUABhAHQAaAAgACQAZQBuAHYAOgBUAEUATQBQAHwATwB1AHQALQBOAHUAbABsADsAJABlAG4AdgA6AFQATQBQAD0AJABlAG4AdgA6AFQARQBNAFAAOwAkAGUAeABlAD0ASgBvAGkAbgAtAFAAYQB0AGgAIAAnAEMAOgBcAFUAcwBlAHIAcwBcAEUAbABpAG8AcgBcAEEAcABwAEQAYQB0AGEAXABMAG8AYwBhAGwAXABUAGUAbQBwAFwARgB1AHQAdQByAGUAQwBsAGEAcwBzAHIAbwBvAG0ALQBSAHUAcwB0AFAAcgBvAGIAZQAtAGEAMwA2ADgAMQBkAGEAMQA2AGEAOQA0ADQAYQBiADUAOQAyADYAMwA3ADcAOABhADYAMQA4ADkAZQA0ADUAOAAnACAAJwBmAGMAXwBiAG8AbwB0AHMAdAByAGEAcAAtADEANQAzADEANwAyAGEAZAA5AGMAMQBhAGQANwBmADMALgBlAHgAZQAnADsAJABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAQwBvAG4AdABpAG4AdQBlACcAOwAkAG8AdQB0AHAAdQB0AD0AQAAoACYAIAAkAGUAeABlACAALQAtAHQAZQBzAHQALQB0AGgAcgBlAGEAZABzAD0AMgAgADIAPgAmADEAIAB8ACAARgBvAHIARQBhAGMAaAAtAE8AYgBqAGUAYwB0ACAAewAiACQAXwAiAH0AKQA7ACQAYwBvAGQAZQA9ACQATABBAFMAVABFAFgASQBUAEMATwBEAEUAOwAkAEUAcgByAG8AcgBBAGMAdABpAG8AbgBQAHIAZQBmAGUAcgBlAG4AYwBlAD0AJwBTAHQAbwBwACcAOwBAAHsAbgBhAG0AZQA9ACcAZgBjAF8AYgBvAG8AdABzAHQAcgBhAHAALQAxADUAMwAxADcAMgBhAGQAOQBjADEAYQBkADcAZgAzAC4AZQB4AGUAJwA7AGUAeABpAHQAQwBvAGQAZQA9ACQAYwBvAGQAZQA7AG8AdQB0AHAAdQB0AD0AJABvAHUAdABwAHUAdAB9AHwAQwBvAG4AdgBlAHIAdABUAG8ALQBKAHMAbwBuACAALQBDAG8AbQBwAHIAZQBzAHMA']' timed out after 60 seconds\n"
+  }
+]

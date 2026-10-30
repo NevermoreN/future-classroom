@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "scope": "FakeRemote Python branch coverage only; no SSH or Windows process executed; additionally bounded log-reader syntax parsed on authorized Win11 via noninteractive SSH, no files/tasks/native probe run",
+  "checks": [
+    {
+      "scenario": "default",
+      "status": "PASS",
+      "cleanup": 1,
+      "testCalls": 1,
+      "logReads": 0
+    },
+    {
+      "scenario": "override",
+      "status": "PASS",
+      "cleanup": 1,
+      "testCalls": 1,
+      "logReads": 0
+    },
+    {
+      "scenario": "partial",
+      "status": "PASS",
+      "cleanup": 1,
+      "testCalls": 1,
+      "logReads": 1
+    },
+    {
+      "scenario": "read-failure",
+      "status": "PASS",
+      "cleanup": 1,
+      "testCalls": 1,
+      "logReads": 1
+    },
+    {
+      "scenario": "missing-log",
+      "status": "PASS",
+      "cleanup": 1,
+      "testCalls": 1,
+      "logReads": 1
+    },
+    {
+      "scenario": "reject-budget-0",
+      "status": "PASS"
+    },
+    {
+      "scenario": "reject-budget-901",
+      "status": "PASS"
+    }
+  ],
+  "sourceSha256": "f60c17eb5061e54a6e01d5a756d8f878d1642b21454999ef08cc438805d96749",
+  "temporaryDirectoryRemoved": true,
+  "windowsPowerShellReadOnlySyntaxCheck": "BOUNDED_LOG_PS_PARSE_PASS"
+}

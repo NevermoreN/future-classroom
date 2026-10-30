@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "command": "cargo test -p fc-bootstrap --lib --release backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions --locked -- --exact --test-threads=1",
+  "exitCode": 0,
+  "buildAndCargoLockElapsedSeconds": 220,
+  "testElapsedSeconds": 0.98,
+  "output": "    Finished `release` profile [optimized] target(s) in 3m 40s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 1 test\ntest backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.98s\n\n",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "cf594aa1e69c38034d7e95c23937e2e6bf044887730af9dba8bf9f8b50688bba"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+      "sha256": "76e818252b5f9febd025bb301db5f930bd7c7daf6af4ac054331eb7858ec26be"
+    }
+  ],
+  "beforeReport": "/tmp/fc-round10-web-input-regression-before-fresh-issue-fix.json",
+  "comparison": "Identical deterministic test fails under old production at Granted unwrap (Denied), and passes with production sampling issue_now/issue_tick immediately before issue_approved_web while retaining both locks. Original local administrator and independent existing Web device remain valid; both old and newly granted device leases pass actual VoiceService admission.",
+  "productionChangedByThisAgent": false,
+  "cleanup": {
+    "remainingOwnWebFixtures": []
+  }
+}

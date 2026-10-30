@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "scope": "Python control-flow self-check with in-memory FakeRemote and explicitly mocked PE audit; no SSH, scheduling, TLS, browser or native binary executed",
+  "runnerScenarios": [
+    {
+      "scenario": "pass",
+      "status": "PASS",
+      "expectedReportStatus": "PASS",
+      "cleanup": 1,
+      "webCalls": 1,
+      "nativeCalls": 1,
+      "uploadedNativeHasWebCommand": false
+    },
+    {
+      "scenario": "missing-marker",
+      "status": "PASS",
+      "expectedReportStatus": "FAIL",
+      "cleanup": 1,
+      "webCalls": 1,
+      "nativeCalls": 0,
+      "uploadedNativeHasWebCommand": false
+    },
+    {
+      "scenario": "nonzero",
+      "status": "PASS",
+      "expectedReportStatus": "FAIL",
+      "cleanup": 1,
+      "webCalls": 1,
+      "nativeCalls": 0,
+      "uploadedNativeHasWebCommand": false
+    },
+    {
+      "scenario": "timeout",
+      "status": "PASS",
+      "expectedReportStatus": "FAIL",
+      "cleanup": 1,
+      "webCalls": 1,
+      "nativeCalls": 0,
+      "uploadedNativeHasWebCommand": false
+    },
+    {
+      "scenario": "baseline",
+      "status": "PASS",
+      "expectedReportStatus": "PASS",
+      "cleanup": 1,
+      "webCalls": 0,
+      "nativeCalls": 1,
+      "uploadedNativeHasWebCommand": false
+    },
+    {
+      "scenario": "manifest-and-five-member-package-mock-audit",
+      "status": "PASS",
+      "actualPEValidation": "NOT_RUN"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "scripts/windows-probe.py",
+      "sha256": "86617f09d97f1b8e075306e32f9447818e6f911942dff249fd9f50631069e6d8"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "sha256": "a9a776e08f82a53dba2ffaea094b2853f5116427fa66c15d6de61f655a13a7da"
+    },
+    {
+      "path": "packaging/PROBE-README.txt",
+      "sha256": "efdfd3b65e3be3527f38bbdcd0acc7fe6a9c0e6117a681f060bea9b7bfc67f84"
+    }
+  ],
+  "temporaryDirectoryRemoved": true,
+  "documentationFollowup": "Final manifest/README explicitly distinguish direct service pairing from synthetic trusted-TLS session/CSRF/logout request ports; POST pairing dispatch full chain is not claimed. Follow-up changes are documentation strings only; py_compile and diff-check rerun.",
+  "scopeNotice": "Mock-only script/packaging checks, not actual SSH/native/PE acceptance; separate final Windows reports follow."
+}

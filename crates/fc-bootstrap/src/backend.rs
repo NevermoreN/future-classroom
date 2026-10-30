@@ -2,6 +2,7 @@
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
 mod voice;
+pub mod web;
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
 use fc_domain::{
     auth::*,
@@ -400,6 +401,7 @@ impl RandomSource for PlatformRandom {
 }
 
 pub struct Backend {
+    web: web::WebService,
     voice: voice::VoiceService,
     writer: Option<StorageWriter<Snapshot>>,
     handle: StorageHandle<Snapshot>,
@@ -475,7 +477,15 @@ impl Backend {
             clock.clone(),
             monotonic.clone(),
         );
+        let web = web::WebService::new(
+            ledger.clone(),
+            control.clone(),
+            authority,
+            clock.clone(),
+            monotonic.clone(),
+        );
         Ok(Self {
+            web,
             voice,
             writer: Some(writer),
             handle,
@@ -490,6 +500,9 @@ impl Backend {
     }
     pub fn session_control(&self) -> SessionControl {
         self.control.clone()
+    }
+    pub fn web_service(&self) -> web::WebService {
+        self.web.clone()
     }
     fn check_open(&self) -> Result<()> {
         if self.writer.is_none() || self.control.0.closed.load(Ordering::Acquire) {
@@ -555,6 +568,7 @@ impl Backend {
     }
     /// Explicit joining close belongs on a shutdown worker/coordinator, never the UI.
     pub fn close(&mut self) -> Result<()> {
+        self.web.close();
         self.voice.invalidate_runtime();
         self.control.0.health.stop();
         self.control.0.closed.store(true, Ordering::Release);
@@ -716,6 +730,20 @@ impl Backend {
     ) -> Result<ActorContext> {
         let state = self.state()?;
         self.actor(&state, lease, purpose).map(|(actor, _)| actor)
+    }
+    /// Explicit account logout persists a new authorization epoch. All local
+    /// and Web channels for this account then fail even before event delivery.
+    /// Locking the local workbench remains a separate local-only operation.
+    pub fn logout_account(&mut self, lease: SessionLease) -> Result<()> {
+        let actor = self.check_session(lease, SessionPurpose::Manage)?;
+        self.identity(
+            lease,
+            IdentityCommand::LogoutAccount {
+                id: actor.principal_id,
+                expected_auth_epoch: actor.auth_epoch,
+            },
+        )?;
+        Ok(())
     }
     pub fn role(&self, lease: SessionLease) -> Result<Role> {
         let state = self.state()?;

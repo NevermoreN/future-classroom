@@ -1,4 +1,4 @@
-//! Password/recovery cryptography only. Callers must schedule KDF work on the bounded worker
+//! Password/recovery cryptography and Web secret primitives. Callers must schedule KDF work on the bounded worker
 //! pool and enforce authentication, persistence and rate limits separately.
 #![forbid(unsafe_code)]
 use fc_ports::RandomPort;
@@ -10,6 +10,7 @@ use zeroize::Zeroizing;
 
 mod codec;
 mod recovery;
+pub mod web;
 pub use codec::{CredentialRecordCodec, EncodedCredential, CREDENTIAL_RECORD_BYTES};
 pub use recovery::{
     create_recovery_record, verify_recovery, RecoveryCode, RecoveryRecord, RECOVERY_FORMAT,

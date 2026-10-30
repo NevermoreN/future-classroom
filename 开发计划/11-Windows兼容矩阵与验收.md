@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.22 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.23 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上第八轮350项/104步工作台、9组资料与全零WinMM持久链通过；前轮1080p/4K低DIB通过；完整桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十轮433项debug测试、release主EXE配对端口/隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -88,3 +88,24 @@ P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声�
 HTTP.sys v2基础适配仅由显式127.0.0.1合成诊断运行，正常生产监听未开放。首请求尚未归属应用前，应用级HeaderWait不能覆盖driver默认预算；连接QoS、完整TLS/配对/教师浏览器与三系统异常矩阵保留NOT_RUN。测试只创建并删除自己的URLACL，不修改系统全局HTTP超时、证书绑定、防火墙或持续SSH授权。
 
 本轮最终哈希、各类通过/失败与清理记录见[第九轮实施记录](10-实施进度与验证记录.md)。系统门槛继续独立：Win11局部回归、Win10未连接、Win7实机/正式MSVC未验证。
+
+## 8. 第十轮增量：配对、Web会话与持久账号注销
+
+本轮在共同Rust业务层实现短时码/256-bit秘密、本地精确主管理员审批、多设备独立Web lease、单设备撤销及持久self logout；应用端口新增公开状态、POST配对/POST轮询、GET session和POST logout，并将来源/framing preflight置于Cookie认证前。源码不因当前测试机为Win11而允许静态引入仅Win11可用的依赖。最终现代/Win7GNU导入和二进制必须按本轮源码重建、重新绑定证据，不能沿用前轮哈希。
+
+| 验证层 | 本轮现状 | 三系统证据边界 |
+| --- | --- | --- |
+| Host规则、真实SQLite及真实Backend应用端口 | 最终release 352项/28结果组PASS，绑定145输入 | 命令总293.56秒含编译；证明规则/持久/端口行为，不证明Windows HTTP.sys、系统证书或浏览器 |
+| Win11 x86完整隔离回归及`--web-pairing-probe` | 最终433项/16个debug测试exe及release主EXE组合PASS，远端清理PASS | 探针直接调用服务进行配对，再经request-port验证session/CSRF/logout；不是POST配对HTTP全链或实际TLS/browser |
+| Win7GNU PE及在Win11补充运行 | 最终PE结构错误0/已知触发0，补充组合probe PASS，清理PASS | 本次未运行测试exe；只作为补充工具链/API与Win11运行证据，不是Win7或Win10实机 |
+| Win7 SP1 x86、Win10 32/64位及实际希沃设备 | 保留BLOCKED/NOT_RUN的原独立门槛 | 不以Win11、Host或静态扫描代验 |
+
+本轮曾取得修复前debug Host351项/28组通过，随后发现真实UI输入进入配对账本后，旧tick签发会被ClockRegression拒绝的可用性时序。已用真实`note_input`无sleep反例在旧源码复现FAIL，生产改为签发紧前重新读取时间，修复后定向及最终release Host352项已通过。旧debug结果独立保留，不与新结果相加；现代Windows和Win7GNU补充目标均已按最终145输入重建运行，不能用旧351项或前轮Win11计数代替。具体原文与源树绑定见第十轮实施记录。
+
+Win11首轮整体FAIL并清理PASS：主release EXE的配对隔离探针通过，14/16个测试exe已有通过结果，bootstrap库debug测试exe超过runner60秒而无内部轨迹；不将首轮超时唯一归因于慢。本轮测试exe实际为未优化debug，与第九轮release测试配置不同；harness以同源码/同exe哈希、600秒有界预算及逐项日志复测后最终PASS。库exe实际36项107.44秒，bin为36项3.85秒，完整433项/16exe见[最终报告](验证记录/2026-10-30-windows11-web-pairing-round10.json)；首轮失败独立保留。主EXE仍为release，可见绘制为0及实际TLS/browser/listener均未验证，不能用局部通过代表完整产品完成。
+
+[Win7GNU在Win11的补充报告](验证记录/2026-10-30-win7-gnu-web-pairing-on-windows11-round10.json)仅运行组合probe，没有额外测试exe；[开发包](验证记录/2026-10-30-web-pairing-dev-package.json)固定五成员且独立重包字节一致，仍为NOT_VALIDATED。真实Win7/Win10、正式MSVC和产品安装门槛不随补充PE/运行通过而改变；[最终清理](验证记录/2026-10-30-round10-cleanup.json)PASS，本地清除约6.39GB本轮残留，自有Windows目录/任务/probe进程均0，SSH服务、公钥和仓库外0600私钥保留。
+
+Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑定或防火墙规则；生产HTTPS和教师浏览器仍未交付。P0/P6-11首连接头期限缺口继续保留，完整HTTP验收不能因配对/注销端口通过而完成。后续三系统分别检查实际TLS信任、Cookie/CSRF、关闭/撤权/重启、并发预算和首连接头期限；可见PPT/触控/DPI、设备音频、正式安装及72小时仍按原矩阵独立取证。
+
+测试继续沿用已授权Windows机器，保留SSH服务/公钥及仓库外长期私钥；仅清理本轮自建进程、目录、计划任务及测试构建，不中断用户已有前台工作。最终结果与清理报告统一归档至[第十轮实施记录](10-实施进度与验证记录.md)。

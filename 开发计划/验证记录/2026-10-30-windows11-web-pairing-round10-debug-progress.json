@@ -1,0 +1,30 @@
+{
+  "processes": [
+    {
+      "cpuSeconds": 53.84375,
+      "tail": [
+        "test backend::voice::tests::actor_wait_then_publish_rechecks_actual_new_binding_without_replaying_sql ... ok",
+        "test backend::voice::tests::actor_waits_for_real_publication_and_busy_preserves_exact_voice_runtime ... ok",
+        "test backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok",
+        "test backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok",
+        "test backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... ok",
+        "test backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok"
+      ],
+      "name": "fc_bootstrap-153172ad9c1ad7f3",
+      "elapsedSeconds": 27.33094
+    }
+  ],
+  "scope": "Read-only owned unit process and marked test log; no foreground input",
+  "notice": "Second Windows run only. Read-only progress cannot uniquely explain the first timeout because that first run lacked per-test output.",
+  "sourceBinding": {
+    "sourceFiles": 145,
+    "sourceTreeSha256": "2573d9f95e7058c276e2b82cd6001b04b70dfc2a2b77223d50a59c1c7c8ac361",
+    "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+  },
+  "laterObservations": [
+    {
+      "processes": [],
+      "scope": "Read-only owned unit process and marked test log; no foreground input"
+    }
+  ]
+}

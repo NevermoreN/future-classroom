@@ -8,6 +8,8 @@ mod credential_probe;
 mod material_helper;
 #[cfg(windows)]
 mod voice_pipeline_probe;
+#[cfg(windows)]
+mod web_pairing_probe;
 use fc_domain::ids::{AuthEpoch, Revision};
 use fc_runtime::authority::AuthorityStore;
 use fc_storage::{CommitCommand, Mutation, StorageWriter};
@@ -29,6 +31,16 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--web-pairing-probe" => {
+            #[cfg(windows)]
+            {
+                web_pairing_probe::run()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("Web pairing DPAPI probe requires Windows".into())
+            }
+        }
         [flag, port, marker, seconds] if flag == "--http-iocp-probe" => {
             #[cfg(windows)]
             {

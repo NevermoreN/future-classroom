@@ -1,0 +1,20 @@
+{
+  "status": "EXPECTED_REGRESSION_REPRODUCED",
+  "command": "cargo test -p fc-bootstrap --release backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions --locked -- --exact --test-threads=1",
+  "exitCode": 101,
+  "buildAndCargoLockElapsedSeconds": 411,
+  "testElapsedSeconds": 1.54,
+  "output": "    Finished `release` profile [optimized] target(s) in 6m 51s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 1 test\ntest backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions ... FAILED\n\nfailures:\n\n---- backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions stdout ----\n\nthread 'backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions' (7101) panicked at crates/fc-bootstrap/src/backend/web/tests.rs:369:33:\ncalled `Result::unwrap()` on an `Err` value: Denied\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 33 filtered out; finished in 1.54s\n\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "0ba553ae138cba5826cea165757493ef628ee0791e8902531f0c46d4181e7f40"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+      "sha256": "76e818252b5f9febd025bb301db5f930bd7c7daf6af4ac054331eb7858ec26be"
+    }
+  ],
+  "determinism": "A per-fixture clock hook restricted to the current test thread fires on poll's second monotonic read, advances t0 to t1=t0+1, and calls the real SessionControl.note_input(originalAdmin,t1). No sleep or global UI input. Assertions before the expected failure prove stale-t0 approver actor returns ClockRegression while original local administrator and an existing independently issued Web device remain valid. Old issue_approved_web(t0) then returns Denied instead of Granted.",
+  "productionChangedByThisAgent": false
+}

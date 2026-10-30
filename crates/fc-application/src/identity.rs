@@ -132,6 +132,70 @@ impl IdentitySessions {
         });
         Ok(proof)
     }
+    /// A trusted local administrator approves an existing account for one additional
+    /// Web device. The caller supplies only an account ID, never a client ActorContext.
+    /// This admission does not replace another device's independently approved lease.
+    #[allow(clippy::too_many_arguments)]
+    pub fn issue_approved_web(
+        &mut self,
+        state: &IdentityState,
+        approver: SessionLease,
+        target: PrincipalId,
+        now: LocalDateTime,
+        tick: u64,
+        lifetime_millis: u64,
+        wall_expires_at: LocalDateTime,
+    ) -> Result<SessionLease, SessionError> {
+        let actor = self.actor(state, approver, now, tick, SessionPurpose::Manage)?;
+        let authority = state
+            .authority(actor.principal_id)
+            .map_err(|_| SessionError::Identity)?;
+        authority
+            .authorize_global_local(&actor, now)
+            .map_err(|_| SessionError::Revoked)?;
+        let account = state.account(target).map_err(|_| SessionError::Identity)?;
+        if !account.principal.enabled
+            || account.principal.school_id != authority.installation_school
+        {
+            return Err(SessionError::Revoked);
+        }
+        if account.must_change_password {
+            return Err(SessionError::PasswordChangeRequired);
+        }
+        let wall_millis = wall_expires_at.date.days_since(now.date) * 86_400_000
+            + (i64::from(wall_expires_at.second_of_day()) - i64::from(now.second_of_day())) * 1000;
+        if lifetime_millis == 0
+            || lifetime_millis > MAX_SESSION_MILLIS
+            || wall_millis <= 0
+            || wall_millis > MAX_SESSION_MILLIS as i64
+        {
+            return Err(SessionError::InvalidDuration);
+        }
+        let absolute_deadline = tick
+            .checked_add(lifetime_millis)
+            .ok_or(SessionError::Overflow)?;
+        let id = self.sequence.checked_add(1).ok_or(SessionError::Overflow)?;
+        self.prune(state, now, tick);
+        if self.sessions.len() >= MAX_LIVE_LEASES {
+            return Err(SessionError::Capacity);
+        }
+        let proof = SessionLease {
+            id,
+            principal_id: account.principal.id,
+            auth_epoch: account.principal.auth_epoch,
+            origin: TrustedOrigin::Web,
+        };
+        self.sequence = id;
+        self.sessions.push(LiveSession {
+            proof,
+            issued: tick,
+            last_input: tick,
+            absolute_deadline,
+            wall_expires_at,
+            purpose: SessionPurpose::Manage,
+        });
+        Ok(proof)
+    }
     fn valid<'a>(
         &'a self,
         state: &IdentityState,
@@ -144,6 +208,16 @@ impl IdentitySessions {
             .iter()
             .find(|s| s.proof == proof)
             .ok_or(SessionError::Revoked)?;
+        Self::validate_live(state, session, now, tick)?;
+        Ok(session)
+    }
+    fn validate_live(
+        state: &IdentityState,
+        session: &LiveSession,
+        now: LocalDateTime,
+        tick: u64,
+    ) -> Result<(), SessionError> {
+        let proof = session.proof;
         if tick < session.issued || tick < session.last_input {
             return Err(SessionError::ClockRegression);
         }
@@ -160,7 +234,7 @@ impl IdentitySessions {
         if !account.principal.enabled || account.principal.auth_epoch != proof.auth_epoch {
             return Err(SessionError::Revoked);
         }
-        Ok(session)
+        Ok(())
     }
     pub fn actor(
         &self,
@@ -251,6 +325,21 @@ impl IdentitySessions {
     pub fn lock_local(&mut self) {
         self.sessions
             .retain(|s| s.proof.origin != TrustedOrigin::Local);
+    }
+    /// Revoke only the exact privately held proof, including its origin and epoch.
+    /// An old device's delayed cleanup cannot revoke a replacement or another device.
+    pub fn revoke_exact(&mut self, proof: SessionLease) -> bool {
+        let previous = self.sessions.len();
+        self.sessions.retain(|session| session.proof != proof);
+        self.sessions.len() != previous
+    }
+    /// Remove expired or invalidated leases without renewing any idle deadline.
+    /// Clock regression is fail-closed, just as it is for actor admission.
+    pub fn prune(&mut self, state: &IdentityState, now: LocalDateTime, tick: u64) -> usize {
+        let previous = self.sessions.len();
+        self.sessions
+            .retain(|session| Self::validate_live(state, session, now, tick).is_ok());
+        previous - self.sessions.len()
     }
     /// Explicit account logout revokes all channels, provided the captured initiating
     /// lease is still current. An old queued logout cannot target a replacement lease.

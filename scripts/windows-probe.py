@@ -39,15 +39,19 @@ def main():
     parser.add_argument("--identity", type=Path, required=True)
     parser.add_argument("--exe", type=Path, required=True)
     parser.add_argument("--test-metadata", type=Path)
+    parser.add_argument("--test-timeout-seconds", type=int, default=60, help="per supplied test EXE budget in seconds (1..900; default 60)")
     parser.add_argument("--native-seconds", type=int, default=5)
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
     parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
+    parser.add_argument("--web-pairing", action="store_true", help="noninteractive CNG/DPAPI/SQLite pairing and synthetic trusted-TLS metadata port probe; no HTTPS listener/browser")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.native_seconds <= 30:
         parser.error("native seconds must be in 1..30")
+    if not 1 <= args.test_timeout_seconds <= 900:
+        parser.error("test timeout seconds must be in 1..900")
     if args.host.startswith("-") or "@" not in args.host or any(c.isspace() for c in args.host):
         parser.error("host must be user@hostname")
     if not args.exe.is_file() or args.exe.suffix.lower() != ".exe" or not args.identity.is_file():
@@ -72,7 +76,7 @@ def main():
     # Each child process must also place scratch files beneath our cleanup marker.
     child_temp = "$env:TEMP=Join-Path " + root + " 'temp';New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;"
     task_name = ps_literal(task)
-    report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN"}
+    report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN", "testTimeoutSeconds": args.test_timeout_seconds}
     try:
         report["platform"] = json.loads(remote.powershell("$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}|ConvertTo-Json -Compress"))
         for path in [args.exe, *tests]:
@@ -86,17 +90,54 @@ def main():
         report["selfCheck"] = json.loads(remote.powershell(script, timeout=180))
         if report["selfCheck"]["exitCode"] != 0:
             raise RuntimeError("Windows self-check failed")
+        if args.web_pairing:
+            # This probe uses only our marked child TEMP and runs directly over
+            # noninteractive SSH; it does not need the user's foreground session.
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe --web-pairing-probe 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            report["webPairing"] = json.loads(remote.powershell(script, timeout=300))
+            report["webPairing"]["scope"] = "CNG/DPAPI/SQLite and synthetic trusted-TLS request metadata through the application port; no real HTTPS/TLS/browser/listening delivery"
+            if report["webPairing"].get("exitCode") != 0:
+                raise RuntimeError("isolated noninteractive Web pairing probe failed")
+            output = report["webPairing"].get("output", [])
+            if not isinstance(output, list) or not any(isinstance(line, str) and (line == "WEB_PAIRING_PASS" or line.startswith("WEB_PAIRING_PASS ")) for line in output):
+                raise RuntimeError("Web pairing result marker missing")
+            report["webPairing"]["status"] = "PASS"
+            print("Web pairing port probe PASS; real HTTPS/TLS/browser/listening delivery remains unvalidated", flush=True)
         if args.system_host:
             script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$output=@(& $exe --system-probe 2>&1|ForEach-Object{\"$_\"});@{exitCode=$LASTEXITCODE;output=$output}|ConvertTo-Json -Compress"
             report["system"] = json.loads(remote.powershell(script))
             if report["system"]["exitCode"] != 0:
                 raise RuntimeError("read-only system probe failed")
         report["tests"] = []
-        for path in tests:
+        for test_index, path in enumerate(tests):
             test_arguments = " --test-threads=2" + (" --nocapture" if path.name.startswith("fc_windows-") else "")
-            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
-            result = json.loads(remote.powershell(script, timeout=60))
+            log = ps_literal(directory + "\\test-" + str(test_index) + ".log")
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$log=" + log + ";$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            try:
+                result = json.loads(remote.powershell(script, timeout=args.test_timeout_seconds))
+            except subprocess.TimeoutExpired:
+                # PowerShell's Tee-Object log is UTF-16LE. Read only the tail
+                # through a bounded shared FileStream while our child may live;
+                # the unchanged outer finally then terminates owned processes.
+                timed_out = {"name": path.name, "budgetSeconds": args.test_timeout_seconds, "partialOutput": "", "partialOutputTruncated": False, "partialOutputReadLimitBytes": 64 * 1024}
+                report["timedOutTest"] = timed_out
+                read_log = "$log=" + log + ";if(!(Test-Path -LiteralPath $log)){@{output='';truncated=$false;missing=$true}|ConvertTo-Json -Compress}else{$stream=[IO.File]::Open($log,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite);try{$length=$stream.Length;$count=[int][Math]::Min([long]65536,$length);$null=$stream.Seek(-$count,[IO.SeekOrigin]::End);$bytes=New-Object byte[] $count;$read=0;while($read-lt $count){$n=$stream.Read($bytes,$read,$count-$read);if($n-eq 0){break};$read+=$n};$text=if($read-gt 0){[Text.Encoding]::Unicode.GetString($bytes,0,$read)}else{''};@{output=$text;truncated=($length-gt 65536);missing=$false}|ConvertTo-Json -Compress}finally{$stream.Dispose()}}"
+                try:
+                    partial = json.loads(remote.powershell(read_log, timeout=15))
+                    text = partial.get("output", "")
+                    if not isinstance(text, str):
+                        raise ValueError("invalid partial output")
+                    encoded = text.encode("utf-8", "replace")
+                    timed_out["partialOutput"] = encoded[-64 * 1024:].decode("utf-8", "ignore")
+                    timed_out["partialOutputTruncated"] = bool(partial.get("truncated")) or len(encoded) > 64 * 1024
+                    timed_out["partialOutputLogMissing"] = bool(partial.get("missing"))
+                except Exception as read_error:
+                    # TimeoutExpired.__str__ includes the entire encoded SSH
+                    # command. Keep diagnostics useful without copying it.
+                    timed_out["partialOutputReadError"] = type(read_error).__name__
+                raise RuntimeError(f"remote test timed out: {path.name} ({args.test_timeout_seconds}s); inspect timedOutTest") from None
             result["binarySha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            result["timeoutSeconds"] = args.test_timeout_seconds
             report["tests"].append(result)
             print(path.name, "PASS" if result["exitCode"] == 0 else "FAIL", flush=True)
             if result["exitCode"] != 0:

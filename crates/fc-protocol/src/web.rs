@@ -6,6 +6,9 @@ use fc_domain::{ids::*, voice::*};
 use fc_ports::{http::*, voice::*};
 use serde::Deserialize;
 
+pub mod pairing;
+pub mod responses;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WebError {
     Transport,
@@ -22,6 +25,10 @@ pub enum WebError {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {
     Status,
+    PairingCreate,
+    PairingPoll { request_id: u64 },
+    Session,
+    SessionLogout,
     VoiceCapabilities,
     VoiceUpload { class_id: ClassId },
     VoiceSubmit,
@@ -30,19 +37,33 @@ pub enum Route {
 }
 impl Route {
     pub fn requires_session(self) -> bool {
-        self != Self::Status
+        !matches!(
+            self,
+            Self::Status | Self::PairingCreate | Self::PairingPoll { .. }
+        )
     }
     pub fn body_limit(self) -> u64 {
         match self {
+            Self::PairingCreate | Self::PairingPoll { .. } | Self::SessionLogout => {
+                pairing::MAX_PAIRING_JSON_BYTES as u64
+            }
             Self::VoiceUpload { .. } => 2 * 1024 * 1024,
             Self::VoiceSubmit | Self::VoiceCancel { .. } => crate::MAX_JSON_BYTES as u64,
             _ => 0,
         }
     }
+    fn requires_csrf(self) -> bool {
+        self.post() && !matches!(self, Self::PairingCreate | Self::PairingPoll { .. })
+    }
     fn post(self) -> bool {
         matches!(
             self,
-            Self::VoiceUpload { .. } | Self::VoiceSubmit | Self::VoiceCancel { .. }
+            Self::PairingCreate
+                | Self::PairingPoll { .. }
+                | Self::SessionLogout
+                | Self::VoiceUpload { .. }
+                | Self::VoiceSubmit
+                | Self::VoiceCancel { .. }
         )
     }
 }
@@ -96,10 +117,20 @@ impl WebBoundary {
         let path = target.strip_prefix(&self.base).ok_or(WebError::NotFound)?;
         let route = match path {
             "status" => Route::Status,
+            "pairing/requests" => Route::PairingCreate,
+            "session" => Route::Session,
+            "session/logout" => Route::SessionLogout,
             "voice/capabilities" => Route::VoiceCapabilities,
             "voice/broadcasts" => Route::VoiceSubmit,
             _ => {
-                if let Some(id) = path.strip_prefix("voice/uploads?classId=") {
+                if let Some(id) = path
+                    .strip_prefix("pairing/requests/")
+                    .and_then(|s| s.strip_suffix("/poll"))
+                {
+                    Route::PairingPoll {
+                        request_id: decimal(id, false).ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some(id) = path.strip_prefix("voice/uploads?classId=") {
                     Route::VoiceUpload {
                         class_id: ClassId::new(decimal(id, false).ok_or(WebError::NotFound)?)
                             .map_err(|_| WebError::NotFound)?,
@@ -133,6 +164,23 @@ impl WebBoundary {
         head: &RequestHead,
         expected_csrf: Option<&str>,
     ) -> Result<Route, WebError> {
+        let route = self.preflight(head)?;
+        let supplied_csrf = unique(head, "x-fc-csrf")?;
+        if route.requires_csrf() {
+            let supplied = supplied_csrf.ok_or(WebError::Csrf)?;
+            let expected = expected_csrf
+                .filter(|v| v.len() == 64 && v.bytes().all(|b| b.is_ascii_hexdigit()))
+                .ok_or(WebError::Csrf)?;
+            if !equal_token(supplied, expected.as_bytes()) {
+                return Err(WebError::Csrf);
+            }
+        }
+        Ok(route)
+    }
+    /// Reject invalid transport, origin and framing before looking up a bearer
+    /// secret or touching a session ledger. Success does not authenticate a
+    /// session and does not authorize a private request without `check`.
+    pub fn preflight(&self, head: &RequestHead) -> Result<Route, WebError> {
         if !head.tls {
             return Err(WebError::Transport);
         }
@@ -152,15 +200,10 @@ impl WebBoundary {
                 return Err(WebError::Origin);
             }
         }
-        if route.post() {
-            let supplied = unique(head, "x-fc-csrf")?.ok_or(WebError::Csrf)?;
-            let expected = expected_csrf
-                .filter(|v| v.len() == 64 && v.bytes().all(|b| b.is_ascii_hexdigit()))
-                .ok_or(WebError::Csrf)?;
-            if !equal_token(supplied, expected.as_bytes()) {
-                return Err(WebError::Csrf);
-            }
-        }
+        // Only the two pairing bootstrap routes omit a pre-existing session
+        // CSRF token. They still require same-origin JSON requests; polling
+        // additionally proves the original unpredictable secret in its body.
+        unique(head, "x-fc-csrf")?;
         // Cookie and Authorization must not be ambiguously combined by layers.
         unique(head, "cookie")?;
         if unique(head, "authorization")?.is_some()
@@ -360,6 +403,39 @@ mod tests {
         .is_err());
     }
     #[test]
+    fn preflight_is_only_transport_admission_and_never_private_csrf_authorization() {
+        let boundary = boundary();
+        let mut request = head();
+        request
+            .headers
+            .retain(|h| !h.name.eq_ignore_ascii_case("x-fc-csrf"));
+        assert_eq!(boundary.preflight(&request), Ok(Route::VoiceSubmit));
+        assert_eq!(boundary.check(&request, None), Err(WebError::Csrf));
+        assert_eq!(
+            boundary.check(&request, Some(&"a".repeat(64))),
+            Err(WebError::Csrf)
+        );
+        request.headers.push(Header {
+            name: "X-FC-CSRF".into(),
+            value: vec![b'a'; 64],
+        });
+        assert_eq!(boundary.preflight(&request), Ok(Route::VoiceSubmit));
+        assert_eq!(boundary.check(&request, None), Err(WebError::Csrf));
+        assert_eq!(
+            boundary.check(&request, Some(&"a".repeat(64))),
+            Ok(Route::VoiceSubmit)
+        );
+        request.headers.push(Header {
+            name: "Cookie".into(),
+            value: b"token=x".to_vec(),
+        });
+        request.headers.push(Header {
+            name: "cookie".into(),
+            value: b"token=y".to_vec(),
+        });
+        assert_eq!(boundary.preflight(&request), Err(WebError::Headers));
+    }
+    #[test]
     fn routing_has_no_remote_launch_admin_or_static_fallback() {
         let b = boundary();
         for path in [
@@ -457,5 +533,110 @@ mod tests {
             br#"{"schemaVersion":1,"commandId":"2","expectedRevision":"0","jobId":"3"}"#
         )
         .is_err());
+    }
+    #[test]
+    fn pairing_alone_bootstraps_without_existing_session_csrf() {
+        let b = boundary();
+        for (target, route) in [
+            ("/fc/api/v1/pairing/requests", Route::PairingCreate),
+            (
+                "/fc/api/v1/pairing/requests/1/poll",
+                Route::PairingPoll { request_id: 1 },
+            ),
+        ] {
+            let mut h = head();
+            h.target = target.into();
+            h.headers
+                .retain(|h| !h.name.eq_ignore_ascii_case("x-fc-csrf"));
+            assert_eq!(b.check(&h, None), Ok(route));
+            assert!(!route.requires_session());
+            assert_eq!(route.body_limit(), 4096);
+            let mut missing = h.clone();
+            missing
+                .headers
+                .retain(|h| !h.name.eq_ignore_ascii_case("origin"));
+            assert_eq!(b.check(&missing, None), Err(WebError::Origin));
+            for (name, value, error) in [
+                ("Origin", "https://evil.school", WebError::Origin),
+                ("Host", "evil.school", WebError::Host),
+                ("Sec-Fetch-Site", "cross-site", WebError::Origin),
+                ("Authorization", "Bearer x", WebError::Framing),
+                ("Transfer-Encoding", "chunked", WebError::Framing),
+            ] {
+                let mut bad = h.clone();
+                bad.headers.retain(|h| !h.name.eq_ignore_ascii_case(name));
+                bad.headers.push(Header {
+                    name: name.into(),
+                    value: value.as_bytes().into(),
+                });
+                assert_eq!(b.check(&bad, None), Err(error));
+            }
+            h.headers.push(Header {
+                name: "Cookie".into(),
+                value: b"fc-session=old".into(),
+            });
+            assert_eq!(b.check(&h, None), Ok(route));
+            h.content_length = Some(4097);
+            h.headers
+                .iter_mut()
+                .find(|h| h.name.eq_ignore_ascii_case("content-length"))
+                .unwrap()
+                .value = b"4097".into();
+            assert_eq!(b.check(&h, None), Err(WebError::Body));
+        }
+        let mut logout = head();
+        logout.target = "/fc/api/v1/session/logout".into();
+        assert_eq!(b.check(&logout, None), Err(WebError::Csrf));
+        assert_eq!(
+            b.check(&logout, Some(&"a".repeat(64))),
+            Ok(Route::SessionLogout)
+        );
+        assert!(Route::SessionLogout.requires_session());
+        assert!(Route::Session.requires_session());
+        assert_eq!(b.check(&head(), None), Err(WebError::Csrf));
+    }
+    #[test]
+    fn private_session_get_forbids_body_and_pairing_urls_forbid_secrets() {
+        let b = boundary();
+        let mut h = head();
+        h.method = "GET".into();
+        h.target = "/fc/api/v1/session".into();
+        assert_eq!(b.check(&h, None), Err(WebError::Body));
+        h.has_body = false;
+        h.content_length = None;
+        h.headers
+            .retain(|h| !h.name.eq_ignore_ascii_case("content-length"));
+        assert_eq!(b.check(&h, None), Ok(Route::Session));
+        for path in [
+            "pairing/requests/01/poll",
+            "pairing/requests/0/poll",
+            "pairing/requests/18446744073709551616/poll",
+            "pairing/requests/%31/poll",
+            "pairing/requests/1/poll?pollSecret=secret",
+            "pairing/requests?code=01234567",
+            "pairing/requests/1",
+            "session?token=secret",
+            "session/logout/",
+        ] {
+            assert_eq!(
+                b.route("POST", &format!("/fc/api/v1/{path}")),
+                Err(WebError::NotFound),
+                "{path}"
+            );
+        }
+        assert_eq!(
+            b.route(
+                "POST",
+                "/fc/api/v1/pairing/requests/18446744073709551615/poll"
+            ),
+            Ok(Route::PairingPoll {
+                request_id: u64::MAX
+            })
+        );
+        assert_eq!(
+            b.route("GET", "/fc/api/v1/pairing/requests/1/poll"),
+            Err(WebError::Method)
+        );
+        assert_eq!(b.route("POST", "/fc/api/v1/session"), Err(WebError::Method));
     }
 }

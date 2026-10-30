@@ -23,6 +23,7 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --application-probe
   .\fc-bootstrap.exe --materials-probe
   .\fc-bootstrap.exe --audio-silent-probe
+  .\fc-bootstrap.exe --web-pairing-probe
   .\fc-bootstrap.exe --native-probe 30
 
 --self-check 在隔离临时目录中验证 SQLite 提交、权威快照发布、命令幂等、
@@ -53,6 +54,11 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 按需声音执行域已绑定托盘紧急停止、当前Windows会话/休眠/退出和默认输出设备变化；
 管理登录的后台锁不再阻挡音频停止。尚无对外教师网页提交入口，不能据此称录音产品已交付。
 --audio-silent-probe 额外验证正常按需执行域、独立Web会话、停止全部待播和退出顺序。
+--web-pairing-probe 在隔离临时部署中使用真实Windows CNG随机源、DPAPI及SQLite，
+直接调用配对service验证8位一次请求、本地主管理员明确批准、256位轮询秘密及独立设备租约，
+再通过合成的可信TLS请求metadata验证session/CSRF/logout端口；不代表POST配对dispatch全链。
+运行不需要交互桌面，退出清理自身数据。
+此探针没有建立真实HTTPS/TLS连接、启动正式监听或浏览器，不是这些交付或校园可达的验收证据。
 --http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120> 仅供隔离传输诊断，
 在127.0.0.1显式测试前缀运行两轮真实IOCP；需要相应系统权限/URL预留，程序不自行提权或修改配置。
 它拒绝凭证与业务请求，不能作为HTTPS、校园可达或浏览器配对通过证据；正常启动默认没有Web监听。

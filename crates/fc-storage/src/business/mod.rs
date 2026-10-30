@@ -6,6 +6,9 @@ mod display;
 mod display_codec;
 mod lesson;
 mod lesson_codec;
+#[cfg(test)]
+#[path = "tests/logout.rs"]
+mod logout_tests;
 pub mod materials;
 mod materials_codec;
 mod schedule;

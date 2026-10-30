@@ -1,0 +1,45 @@
+{
+  "status": "PASS_TARGETED_AGGREGATE",
+  "scope": "10 Web-service tests: 9 unchanged tests passed in the original serial run; the sole corrected clock-fixture test then passed an exact rerun. This is not a fresh single-command all-10 pass; whole-workspace validation remains the root integration step.",
+  "originalRun": {
+    "command": "cargo test -p fc-bootstrap backend::web::tests --locked -- --test-threads=1",
+    "exitCode": 101,
+    "testElapsedSeconds": 215.3,
+    "passedUnmodifiedTests": 9,
+    "failureRecord": "2026-10-30-web-pairing-round10-before-clock-fixture-fix.json",
+    "fixtureCorrection": "After observing true tick regression and revoked captured Web lease, restore tick by 1ms before asserting logical Web admission remains disabled."
+  },
+  "correctedTest": {
+    "command": "cargo test -p fc-bootstrap backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission --locked -- --exact --test-threads=1",
+    "exitCode": 0,
+    "testElapsedSeconds": 17.85,
+    "output": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.60s\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 1 test\ntest backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out; finished in 17.85s\n\n     Running unittests src/main.rs (target/debug/deps/fc_bootstrap-a6d541c33cc08efc)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running tests/business_storage.rs (target/debug/deps/business_storage-5d8a817026372542)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.00s\n\n     Running tests/runtime_storage.rs (target/debug/deps/runtime_storage-8d8e7a25c6b64e49)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s\n\n     Running tests/voice_storage.rs (target/debug/deps/voice_storage-acd3c79f0e71eeaf)\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s\n\n"
+  },
+  "security": {
+    "command": "cargo test -p fc-security web::tests --locked",
+    "exitCode": 0,
+    "passed": 7,
+    "testElapsedSeconds": 0.01
+  },
+  "sourceObservedAtFinalCheck": [
+    {
+      "path": "crates/fc-security/src/web.rs",
+      "sha256": "447fff04d2821183d06fa6575dafe5e92e620d8193c182b9a5fcaed993a90daf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+      "sha256": "3a27f81ea1a17bc75a0a808b72fbd178c5b0da993c8de509252f61ec3c253fd7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "1e347fca295095ca438a5f8e7e92e2800692ff1f301f6565e87137a7272eedcb"
+    }
+  ],
+  "cleanup": {
+    "allFixtureDropsCloseBackendBeforeRemovingDirectory": true,
+    "ordinaryOsTempUsed": true,
+    "remainingOwnFixtureDirectories": []
+  },
+  "productionFixesForFailedAssertion": false,
+  "scopeNotice": "Targeted intermediate source, followed by final source-bound whole-workspace validation; this is not final acceptance."
+}
