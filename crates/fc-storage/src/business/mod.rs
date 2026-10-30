@@ -1,6 +1,9 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
 pub(crate) mod codec;
+mod desktop;
+mod display;
+mod display_codec;
 mod schedule;
 mod schedule_codec;
 use crate::*;
@@ -27,6 +30,8 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     let revision = read_revision(&transaction)?;
     let identity = load_identity(&TransactionView(&transaction))?;
     schedule::load(&TransactionView(&transaction), &identity)?;
+    display::load(&TransactionView(&transaction), &identity)?;
+    desktop::read_watermark(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
 }
@@ -346,6 +351,19 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
         let value = codec::record(&record);
         let outcome = codec::bytes(&value)?;
         let receipt = codec::bytes(&json!({"fingerprint":digest,"record":value}))?;
+        let mut mutations = vec![
+            Mutation::Put {
+                key,
+                value: outcome.clone(),
+            },
+            Mutation::Put {
+                key: journal,
+                value: receipt,
+            },
+        ];
+        if let Some(watermark) = desktop::advance_watermark(d, &state, now.date)? {
+            mutations.push(watermark);
+        }
         let session = self.session.clone();
         let actor = self.actor.clone();
         let clock = self.clock.clone();
@@ -358,19 +376,7 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
                     .map_err(StorageError::Content)
             })),
             outcome: outcome.clone(),
-            commit: Some((
-                vec![
-                    Mutation::Put {
-                        key,
-                        value: outcome,
-                    },
-                    Mutation::Put {
-                        key: journal,
-                        value: receipt,
-                    },
-                ],
-                snapshot,
-            )),
+            commit: Some((mutations, snapshot)),
         })
     }
 }

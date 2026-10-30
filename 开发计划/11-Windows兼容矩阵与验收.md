@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上205项测试、14项原生适配及隐藏控件66步实际工作台/课表闭环；完整桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build 26300上242项测试、18项原生适配及隐藏控件90步工作台/课表/显示与常驻离屏场景闭环；完整桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -49,3 +49,6 @@ P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声�
 第三轮平台证据：[Win11最终169项及工作台闭环](验证记录/2026-10-30-windows11-application-round3.json)、[最终Win7 GNU在Win11的补充运行](验证记录/2026-10-30-win7-gnu-application-on-windows11.json)。固定源树/锁哈希与二进制SHA256均可追溯；测试临时部署与正式ProgramData隔离。当前CUI子系统、不可见控件测试与离屏渲染不能代替正式GUI、真实自启动、DPI/触控或Win10实机验收。
 
 第四轮新增原生网格/数字掩码、双表历史/独立校历/草稿恢复及持久高水位：[Win11最终205项与66步闭环](验证记录/2026-10-30-windows11-timetable-round4.json)、[Win7 GNU静态审计](验证记录/2026-10-30-win7-gnu-round4-imports.json)、[Win7 GNU在Win11补充运行](验证记录/2026-10-30-win7-gnu-timetable-on-windows11.json)。原生14项与100次重建稳定检查不能代替实际白板笔、多DPI、可见桌面或72小时证据；实际Win7/Win10状态不变。
+
+
+第五轮已将显示设置独立CAS、一致桌面事实、真实常驻D2D卡片、三种时钟/局部倒计时与全文分页接入生产组合：[Win11 242项及90步闭环](验证记录/2026-10-30-windows11-desktop-round5.json)、[原生18项离屏专项](验证记录/2026-10-30-windows11-round5-resident-desktop.json)。API与依赖仍受三系统共同基线约束；Win10设备尚未连接，继续独立标BLOCKED，不因Win11通过改为PASS。当前4K课间背景单张25501952字节超过16MiB总DIB预算，明确隐藏/诊断，须完成低内存背景路径及对应设备验证后才能通过该验收域。

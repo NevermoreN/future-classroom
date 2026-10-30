@@ -30,6 +30,7 @@ pub enum StorageError {
     InvalidCommand,
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
+    Display(fc_domain::desktop::DisplayError),
     LoginRateLimited {
         retry_after_millis: u64,
     },

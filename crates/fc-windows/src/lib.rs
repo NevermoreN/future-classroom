@@ -15,3 +15,9 @@ pub mod workbench;
 pub fn probe(_seconds: u32) -> Result<(), &'static str> {
     Err("Windows native probe requires Windows; host tests are not platform evidence")
 }
+
+#[cfg(windows)]
+pub mod desktop;
+
+#[cfg(all(test, windows))]
+pub(crate) static NATIVE_TEST_SERIAL: std::sync::Mutex<()> = std::sync::Mutex::new(());

@@ -308,3 +308,38 @@ pub enum MeasureError {
 pub trait TextMeasure {
     fn height(&self, text: &str, width_dip: f32, font_dip: f32) -> Result<f32, MeasureError>;
 }
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DisplayRequest {
+    pub command_id: fc_domain::ids::CommandId,
+    pub expected_revision: Revision,
+    pub candidate: fc_domain::desktop::DisplaySettings,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DisplayRepositoryError {
+    Domain(fc_domain::desktop::DisplayError),
+    Unavailable,
+    Faulted,
+    IdempotencyConflict,
+    DocumentTooLarge,
+}
+/// Global-local exact-lease/CAS writes; owned public facts are read in one writer
+/// transaction without borrowing an administrator identity. Persist the greatest
+/// observed date before publication; never return expired texts after wall rollback.
+pub trait DisplayRepository {
+    fn display(
+        &self,
+        actor: &ActorContext,
+    ) -> Result<fc_domain::desktop::DisplaySettings, DisplayRepositoryError>;
+    fn execute_display(
+        &mut self,
+        request: DisplayRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::desktop::DisplaySettings, DisplayRepositoryError>;
+    fn desktop_facts(
+        &self,
+        offset: u64,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::desktop::DesktopFacts, DisplayRepositoryError>;
+}

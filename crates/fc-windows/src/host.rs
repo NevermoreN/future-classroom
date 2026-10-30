@@ -1,6 +1,7 @@
 //! One UI-thread hidden top-level host, tray, coalesced system hints and shutdown.
 //! No writer/network joins, secret material, or privileged settings live here.
 use std::{
+    cell::Cell,
     marker::PhantomData,
     panic::{catch_unwind, AssertUnwindSafe},
     rc::Rc,
@@ -14,12 +15,19 @@ use windows::{
     Win32::{
         Foundation::*,
         System::{LibraryLoader::*, RemoteDesktop::*},
-        UI::{Shell::*, WindowsAndMessaging::*},
+        UI::{Accessibility::*, Shell::*, WindowsAndMessaging::*},
     },
 };
 
 const TIMER: usize = 0xfc01;
 const TRAY_MESSAGE: u32 = WM_APP + 41;
+const FOREGROUND_MESSAGE: u32 = WM_APP + 42;
+thread_local! {
+    // Out-of-context callbacks are delivered on the hook owner's UI thread.
+    // Only an HWND value is retained; there is no cross-thread State pointer.
+    static FOREGROUND_TARGET: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };
+    static FOREGROUND_PENDING: Cell<bool> = const { Cell::new(false) };
+}
 const STOP: u32 = 1;
 const FAULT: u32 = 2;
 
@@ -39,6 +47,7 @@ impl HostHints {
     pub const EXIT_REQUESTED: Self = Self(512);
     pub const TASKBAR_RECREATED: Self = Self(1024);
     const TRAY_CONTEXT: Self = Self(2048);
+    pub const FOREGROUND_CHANGED: Self = Self(4096);
     pub fn contains(self, hint: Self) -> bool {
         self.0 & hint.0 != 0
     }
@@ -76,6 +85,7 @@ pub struct HiddenHost {
     session_registered: bool,
     class: u16,
     instance: HINSTANCE,
+    foreground_hook: HWINEVENTHOOK,
     _thread: PhantomData<Rc<()>>,
 }
 impl HiddenHost {
@@ -108,6 +118,7 @@ impl HiddenHost {
             session_registered: false,
             class: atom,
             instance,
+            foreground_hook: HWINEVENTHOOK::default(),
             _thread: PhantomData,
         };
         if host.state.taskbar_recreated == 0 {
@@ -136,6 +147,24 @@ impl HiddenHost {
             WTSRegisterSessionNotification(host.hwnd, NOTIFY_FOR_THIS_SESSION)?;
         }
         host.session_registered = true;
+        FOREGROUND_TARGET.with(|target| target.set(host.hwnd));
+        FOREGROUND_PENDING.with(|pending| pending.set(false));
+        // SAFETY: callback is out-of-context on this UI thread and only posts a
+        // coalesced hint. Own-process settings events must not be skipped.
+        host.foreground_hook = unsafe {
+            SetWinEventHook(
+                EVENT_SYSTEM_FOREGROUND,
+                EVENT_SYSTEM_FOREGROUND,
+                None,
+                Some(foreground_event),
+                0,
+                0,
+                WINEVENT_OUTOFCONTEXT,
+            )
+        };
+        if host.foreground_hook.is_invalid() {
+            return Err(Error::from_thread());
+        }
         // SAFETY: window-owned timer has no callback/raw pointers; messages coalesce.
         if unsafe { SetTimer(Some(host.hwnd), TIMER, 1000, None) } == 0 {
             return Err(Error::from_thread());
@@ -276,6 +305,11 @@ impl Drop for HiddenHost {
         // SAFETY: reverse initialization order on owning thread; state remains alive
         // throughout DestroyWindow reentrancy and userdata is detached by NCDESTROY.
         unsafe {
+            FOREGROUND_TARGET.with(|target| target.set(HWND::default()));
+            FOREGROUND_PENDING.with(|pending| pending.set(false));
+            if !self.foreground_hook.is_invalid() {
+                let _ = UnhookWinEvent(self.foreground_hook);
+            }
             if !self.hwnd.is_invalid() {
                 if self.tray {
                     if let Ok(data) = self.icon_data() {
@@ -325,6 +359,11 @@ unsafe extern "system" fn window_proc(
                     return LRESULT(0);
                 }
                 match message {
+                    FOREGROUND_MESSAGE => {
+                        FOREGROUND_PENDING.with(|pending| pending.set(false));
+                        state.hint(HostHints::FOREGROUND_CHANGED);
+                        return LRESULT(0);
+                    }
                     WM_TIMER if wparam.0 == TIMER => {
                         state.hint(HostHints::TICK);
                         return LRESULT(0);
@@ -373,6 +412,37 @@ unsafe extern "system" fn window_proc(
     }
 }
 
+unsafe extern "system" fn foreground_event(
+    _hook: HWINEVENTHOOK,
+    _event: u32,
+    _window: HWND,
+    _object: i32,
+    _child: i32,
+    _thread: u32,
+    _time: u32,
+) {
+    // ABI containment includes TLS access. Native callback never borrows State,
+    // changes focus, or renders; ordinary dispatch re-samples the actual system.
+    if catch_unwind(|| {
+        FOREGROUND_TARGET.with(|target| {
+            let hwnd = target.get();
+            if !hwnd.is_invalid() && !FOREGROUND_PENDING.with(|pending| pending.replace(true)) {
+                // SAFETY: message carries no pointer; target is cleared before unhook.
+                if unsafe { PostMessageW(Some(hwnd), FOREGROUND_MESSAGE, WPARAM(0), LPARAM(0)) }
+                    .is_err()
+                {
+                    FOREGROUND_PENDING.with(|pending| pending.set(false));
+                }
+            }
+        })
+    })
+    .is_err()
+    {
+        // SAFETY: fail the current UI thread rather than unwind through Win32.
+        unsafe { PostQuitMessage(1) }
+    }
+}
+
 #[derive(Debug)]
 pub struct HostLifecycleReport {
     pub elapsed_millis: u128,
@@ -414,6 +484,9 @@ mod tests {
     use super::*;
     #[test]
     fn hidden_top_level_routes_events_and_control_stops_without_queue() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
         let host = HiddenHost::new(false).unwrap();
         let stop = host.controller();
         // SAFETY: own live hidden window only, no desktop-wide broadcast/input.

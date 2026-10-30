@@ -45,9 +45,9 @@ impl fc_ports::RandomSource for SystemRandom {
     }
 }
 
-struct Apartment(PhantomData<Rc<()>>);
+pub(crate) struct Apartment(PhantomData<Rc<()>>);
 impl Apartment {
-    fn new() -> Result<Self> {
+    pub(crate) fn new() -> Result<Self> {
         // SAFETY: called once on this UI thread; successful init is paired in Drop.
         unsafe {
             CoInitializeEx(None, COINIT_APARTMENTTHREADED).ok()?;
@@ -62,16 +62,17 @@ impl Drop for Apartment {
     }
 }
 
-struct Dib {
-    dc: HDC,
+pub(crate) struct Dib {
+    pub(crate) dc: HDC,
     bitmap: HBITMAP,
     old: HGDIOBJ,
-    width: i32,
-    height: i32,
+    pub(crate) width: i32,
+    pub(crate) height: i32,
+    bits: std::ptr::NonNull<u8>,
     _thread: PhantomData<Rc<()>>,
 }
 impl Dib {
-    fn new(width: i32, height: i32) -> Result<Self> {
+    pub(crate) fn new(width: i32, height: i32) -> Result<Self> {
         if width <= 0 || height <= 0 || i64::from(width) * i64::from(height) * 4 > 16 * 1024 * 1024
         {
             return Err(Error::from_hresult(E_INVALIDARG));
@@ -110,14 +111,33 @@ impl Dib {
                 let _ = DeleteDC(dc);
                 return Err(Error::from_thread());
             }
+            let Some(bits) = std::ptr::NonNull::new(bits.cast()) else {
+                let _ = SelectObject(dc, old);
+                let _ = DeleteObject(bitmap.into());
+                let _ = DeleteDC(dc);
+                return Err(Error::from_hresult(E_FAIL));
+            };
             Ok(Self {
                 dc,
                 bitmap,
                 old,
                 width,
                 height,
+                // CreateDIBSection succeeded and supplies the selected bitmap's
+                // fixed storage until this unique Dib owner deletes it.
+                bits,
                 _thread: PhantomData,
             })
+        }
+    }
+    pub(crate) fn pixels(&self) -> &[u8] {
+        // SAFETY: fixed top-down 32bpp allocation, accessed on its owning thread
+        // only after synchronous D2D EndDraw. The slice cannot outlive the bitmap.
+        unsafe {
+            std::slice::from_raw_parts(
+                self.bits.as_ptr(),
+                self.width as usize * self.height as usize * 4,
+            )
         }
     }
 }
@@ -177,7 +197,7 @@ unsafe extern "system" fn window_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPAR
     }
 }
 
-fn local_now() -> Result<LocalDateTime> {
+pub(crate) fn local_now() -> Result<LocalDateTime> {
     // SAFETY: GetLocalTime returns an owned SYSTEMTIME value, no pointers retained.
     let t = unsafe { GetLocalTime() };
     let date = LocalDate::new(i32::from(t.wYear), t.wMonth as u8, t.wDay as u8)
@@ -188,7 +208,7 @@ fn local_now() -> Result<LocalDateTime> {
     )
     .map_err(|_| Error::from_hresult(E_FAIL))
 }
-fn desktop_foreground() -> Foreground {
+pub(crate) fn desktop_foreground() -> Foreground {
     // SAFETY: sampling only; these HWNDs are neither retained nor freed by us.
     unsafe {
         let hwnd = GetForegroundWindow();
@@ -503,7 +523,7 @@ pub fn probe(seconds: u32) -> Result<NativeProbeReport> {
         Ok(report)
     }
 }
-fn input_desktop_available() -> bool {
+pub(crate) fn input_desktop_available() -> bool {
     // SAFETY: this check never switches desktop. Every successful handle is closed.
     unsafe {
         match OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, false, DESKTOP_READOBJECTS) {

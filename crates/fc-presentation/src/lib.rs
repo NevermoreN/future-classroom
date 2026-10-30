@@ -1,5 +1,6 @@
 //! Pure presentation policy; native handles and COM remain in fc-windows.
 #![forbid(unsafe_code)]
+pub mod scene;
 pub mod workbench;
 use fc_domain::time::LocalDateTime;
 use fc_ports::{MeasureError, TextMeasure};
@@ -195,6 +196,16 @@ pub fn layout(
     recess: bool,
     measure: &dyn TextMeasure,
 ) -> Result<DesktopLayout, LayoutError> {
+    layout_with_minimum(widgets, work, recess, measure, &|_| (0., 64.))
+}
+
+pub(crate) fn layout_with_minimum(
+    widgets: &[Widget],
+    work: Rect,
+    recess: bool,
+    measure: &dyn TextMeasure,
+    minimum: &dyn Fn(WidgetKind) -> (f32, f32),
+) -> Result<DesktopLayout, LayoutError> {
     if ![
         work.x,
         work.y,
@@ -224,22 +235,34 @@ pub fn layout(
     }
     let gap = 12.;
     let margin = 16.;
-    let right_width = (work.width * 0.46).clamp(420., 800.);
-    let left_width = (right_width * 0.35).max(150.);
-    let main_width = right_width - left_width - gap;
-    let right_x = work.x + work.width - margin - right_width;
-    let start = work.y + margin;
-    let bottom = work.y + work.height - margin;
-    let mut y = [start, start];
-    let mut placed = Vec::new();
     let column = |kind: WidgetKind| match kind {
         WidgetKind::Clock | WidgetKind::Date | WidgetKind::Schedule | WidgetKind::DateCountdown => {
             0
         }
         _ => 1,
     };
+    let right_width = (work.width * 0.46).clamp(420., 800.);
+    let mut minimum_width = [0_f32; 2];
+    for w in widgets.iter().filter(|w| !w.text.is_empty()) {
+        let (width, height) = minimum(w.kind);
+        if !width.is_finite() || !height.is_finite() || width < 0. || height < 32. {
+            return Err(LayoutError::ContentLimit);
+        }
+        minimum_width[column(w.kind)] = minimum_width[column(w.kind)].max(width);
+    }
+    let left_width = (right_width * 0.35).max(160.).max(minimum_width[0]);
+    let main_width = (right_width - (right_width * 0.35).max(160.) - gap).max(minimum_width[1]);
+    let right_width = left_width + gap + main_width;
+    if right_width > work.width - 2. * margin {
+        return Err(LayoutError::OutOfSpace);
+    }
+    let right_x = work.x + work.width - margin - right_width;
+    let start = work.y + margin;
+    let bottom = work.y + work.height - margin;
+    let mut y = [start, start];
+    let mut placed = Vec::new();
     for (index, w) in widgets.iter().enumerate() {
-        if w.opacity.0 == 0 || w.text.is_empty() {
+        if w.text.is_empty() {
             continue;
         }
         if w.text.len() > 16_384 || !w.font_dip.is_finite() || !(10.0..=72.0).contains(&w.font_dip)
@@ -249,12 +272,13 @@ pub fn layout(
         let col = column(w.kind);
         let width = if col == 0 { left_width } else { main_width };
         let available = bottom - y[col];
-        let following = widgets[index + 1..]
+        let minimum_height = minimum(w.kind).1;
+        let reserved: f32 = widgets[index + 1..]
             .iter()
-            .filter(|next| next.opacity.0 != 0 && !next.text.is_empty() && column(next.kind) == col)
-            .count();
-        let reserved = following as f32 * (64. + gap);
-        if available < 64. + reserved {
+            .filter(|next| !next.text.is_empty() && column(next.kind) == col)
+            .map(|next| minimum(next.kind).1 + gap)
+            .sum();
+        if available < minimum_height + reserved {
             return Err(LayoutError::OutOfSpace);
         }
         let measured = measure.height(&w.text, width - 32., w.font_dip)?;
@@ -271,8 +295,8 @@ pub fn layout(
                         0.32
                     },
             )
-            .max(64.);
-        let full_height = (measured + 32.).max(64.);
+            .max(minimum_height);
+        let full_height = (measured + 32.).max(minimum_height);
         let height = full_height.min(cap);
         if !full_height.is_finite() || full_height / height > MAX_PAGES as f32 {
             return Err(LayoutError::Measure);
@@ -356,7 +380,7 @@ mod tests {
         }));
     }
     #[test]
-    fn transparent_components_have_no_layout_and_reminders_leave_no_gap() {
+    fn transparent_components_keep_layout_and_empty_reminders_leave_no_gap() {
         let a = layout(
             &[
                 widget(WidgetKind::Reminder, ""),
@@ -373,10 +397,10 @@ mod tests {
         assert!(region.x + region.width < a.widgets[0].rect.x);
         let mut w = widget(WidgetKind::Materials, "file");
         w.opacity = Opacity(0);
-        assert!(layout(&[w], work(), false, &Measure)
-            .unwrap()
-            .widgets
-            .is_empty());
+        let transparent = layout(&[w], work(), false, &Measure).unwrap();
+        assert_eq!(transparent.widgets.len(), 1);
+        assert_eq!(transparent.widgets[0].opacity.percent(), 0);
+        assert_eq!(transparent.widgets[0].rect.y, 16.);
     }
     #[test]
     fn glass_does_not_fade_text_and_filled_course_never_has_border() {

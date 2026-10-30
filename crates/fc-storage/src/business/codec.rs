@@ -75,7 +75,12 @@ pub(super) fn bytes(value: &Value) -> Result<Vec<u8>, StorageError> {
 /// Keep duplicate keys observable during a bounded first pass, before Value
 /// could silently overwrite them. The caller must also bound its BLOB read.
 pub(crate) fn value(bytes: &[u8]) -> Result<Value, StorageError> {
-    if bytes.len() > crate::MAX_VALUE_BYTES {
+    value_with_limit(bytes, crate::MAX_VALUE_BYTES)
+}
+/// A separately budgeted aggregate response. Stored documents must continue to
+/// use `value`; the sole aggregate caller supplies its fixed 2 MiB maximum.
+pub(super) fn value_with_limit(bytes: &[u8], maximum: usize) -> Result<Value, StorageError> {
+    if bytes.len() > maximum {
         return Err(StorageError::Database);
     }
     let mut deserializer = serde_json::Deserializer::from_slice(bytes);

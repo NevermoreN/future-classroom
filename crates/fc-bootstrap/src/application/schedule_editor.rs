@@ -71,6 +71,7 @@ pub(super) enum EditorCommand {
 }
 pub(super) struct Editor {
     pub(super) document: ScheduleDocument,
+    original: ScheduleDocument,
     owner: PrincipalId,
     expected: Revision,
     page: Page,
@@ -208,6 +209,7 @@ impl Editor {
     pub(super) fn new(document: ScheduleDocument, owner: PrincipalId) -> Self {
         Self {
             expected: document.revision,
+            original: document.clone(),
             document,
             owner,
             page: Page::Terms,
@@ -223,12 +225,33 @@ impl Editor {
     }
     pub(super) fn saved(&mut self, document: ScheduleDocument) {
         self.expected = document.revision;
+        self.original = document.clone();
         self.document = document;
         self.dirty = false;
         self.suspended = None;
     }
-    pub(super) fn capture(&mut self, data: FormData) {
-        self.suspended = Some(data);
+    pub(super) fn has_unsaved_changes(&self) -> bool {
+        self.document != self.original || self.suspended.is_some()
+    }
+    pub(super) fn capture(&mut self, data: FormData, identity: &IdentityState) {
+        self.suspended = None;
+        if !matches!(
+            self.page,
+            Page::Header | Page::Row(_) | Page::Cell(_, _) | Page::Calendar
+        ) {
+            return;
+        }
+        // Compare against the actual document, never against the previous memento.
+        // Merely locking a selection/list page must not create an unsaved draft.
+        let canonical = self.view(identity, "", false);
+        if canonical
+            .fields
+            .iter()
+            .filter(|field| field.kind != FieldKind::ReadOnly)
+            .any(|field| data.get(field.id).is_some_and(|value| value != field.value))
+        {
+            self.suspended = Some(data);
+        }
     }
     fn plan(&self) -> std::result::Result<&SemesterPlan, String> {
         self.term
@@ -886,7 +909,7 @@ impl Editor {
         // Keep invalid/incomplete native values after a validation failure or lock.
         let result = self.apply(action, &data, identity);
         if result.is_err() {
-            self.suspended = Some(data);
+            self.capture(data, identity);
         } else {
             self.suspended = None;
         }
@@ -1516,7 +1539,7 @@ mod tests {
         e.page = Page::Header;
         let mut data = form(&e.view(&identity, "", false));
         set(&mut data, START, "2026-");
-        e.capture(data);
+        e.capture(data, &identity);
         assert_eq!(
             e.view(&identity, "", false)
                 .fields
@@ -1682,5 +1705,41 @@ mod tests {
         assert!(e.handle(SET_MAPPING, data, &identity).is_err());
         assert_eq!(e.document, original);
         assert!(!e.dirty);
+    }
+    #[test]
+    fn locking_unchanged_fields_or_list_pages_does_not_create_false_unsaved_drafts() {
+        let (mut e, identity) = fixture();
+        for page in [
+            Page::Terms,
+            Page::Grid,
+            Page::Header,
+            Page::Row(Some(0)),
+            Page::Cell(0, 0),
+            Page::Calendar,
+        ] {
+            e.page = page;
+            let data = form(&e.view(&identity, "", false));
+            e.capture(data, &identity);
+            assert!(!e.has_unsaved_changes(), "unchanged {page:?}");
+            assert!(e.suspended.is_none());
+        }
+    }
+    #[test]
+    fn unfinished_date_is_unsaved_and_saved_document_becomes_the_new_baseline() {
+        let (mut e, identity) = fixture();
+        e.page = Page::Header;
+        let mut data = form(&e.view(&identity, "", false));
+        set(&mut data, START, "2026-");
+        e.capture(data, &identity);
+        assert!(e.has_unsaved_changes());
+        assert_eq!(e.document, e.original);
+        e.suspended = None;
+        e.document.automatic_gaps = !e.document.automatic_gaps;
+        assert!(e.has_unsaved_changes());
+        let mut saved = e.document.clone();
+        saved.revision = Revision::new(9);
+        e.saved(saved);
+        assert!(!e.has_unsaved_changes());
+        assert_eq!(e.expected, Revision::new(9));
     }
 }

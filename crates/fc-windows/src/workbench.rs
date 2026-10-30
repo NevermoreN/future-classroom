@@ -1380,7 +1380,7 @@ unsafe extern "system" fn window_proc(
 #[cfg(test)]
 mod tests {
     use super::*;
-    static NATIVE_TEST_SERIAL: Mutex<()> = Mutex::new(());
+    use crate::NATIVE_TEST_SERIAL;
     use fc_presentation::workbench::{Action, Field};
 
     fn view() -> View {

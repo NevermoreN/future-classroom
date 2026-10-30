@@ -1,8 +1,11 @@
 //! Native product composition. All KDF/SQLite/file work runs on the one shared
 //! two-thread pool; the window pump only handles bounded events and owned results.
+mod desktop_controller;
+mod display_editor;
 mod schedule_editor;
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl};
+use fc_domain::desktop::{DesktopFacts, DisplaySettings};
 use fc_domain::schedule_document::ScheduleDocument;
 use fc_domain::{auth::*, content::*, identity::*, ids::*};
 use fc_ports::{MonotonicClock, RandomSource};
@@ -55,6 +58,9 @@ const BIND_CLASS: ActionId = ActionId(14);
 const LOAD: ActionId = ActionId(15);
 const TO_ROTATE: ActionId = ActionId(16);
 const TO_SCHEDULE: ActionId = ActionId(17);
+const TO_DISPLAY: ActionId = ActionId(18);
+const RETURN_DRAFT: ActionId = ActionId(19);
+const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -73,6 +79,8 @@ enum Screen {
     Homework,
     HomeworkEdit,
     Schedule,
+    Display,
+    ExitDraft,
     Repair,
 }
 #[derive(Debug)]
@@ -90,6 +98,7 @@ fn fatal(error: &Failure) -> bool {
             BackendError::Identity(fc_ports::IdentityRepositoryError::Faulted)
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
+                | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::Storage(
                     S::AuthorityUnavailable
                         | S::Indeterminate
@@ -144,6 +153,7 @@ fn error_text(error: &Failure) -> String {
         Failure::Backend(e) => match e {
             BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
             BackendError::Schedule(fc_ports::ScheduleRepositoryError::Domain(e)) => schedule_editor::problem(e.clone()),
+            BackendError::Display(fc_ports::DisplayRepositoryError::Domain(e)) => display_editor::problem(e),
             BackendError::Schedule(fc_ports::ScheduleRepositoryError::DocumentTooLarge) => "课表和保留历史超过本阶段64KiB文档上限。请减少学期、行或备注；草稿仍保留，未截断或覆盖。".into(),
             BackendError::Storage(fc_storage::StorageError::LoginRateLimited {
                 retry_after_millis,
@@ -264,6 +274,9 @@ enum Outcome {
     },
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
+    DisplayLoaded(DisplaySettings),
+    DisplaySaved(DisplaySettings),
+    Desktop(Box<DesktopFacts>),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -291,6 +304,9 @@ enum Work {
         Revision,
         ScheduleDocument,
     ),
+    LoadDisplay(Arc<Mutex<Backend>>, SessionLease),
+    SaveDisplay(Arc<Mutex<Backend>>, SessionLease, Revision, DisplaySettings),
+    Desktop(Arc<Mutex<Backend>>, usize),
 }
 impl Task for Work {
     type Output = Result<Outcome>;
@@ -300,8 +316,13 @@ impl Task for Work {
                 Some(p.as_os_str().len().saturating_mul(2))
             }
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
-            Self::Refresh(_) | Self::Shutdown(_) | Self::LoadSchedule(_, _) => Some(0),
+            Self::Refresh(_)
+            | Self::Shutdown(_)
+            | Self::LoadSchedule(_, _)
+            | Self::LoadDisplay(_, _)
+            | Self::Desktop(_, _) => Some(0),
             Self::SaveSchedule(_, _, _, document) => document.allocation_bytes(),
+            Self::SaveDisplay(_, _, _, settings) => settings.allocation_bytes(),
         }
     }
     fn run(self, context: &JobContext) -> Self::Output {
@@ -353,6 +374,34 @@ impl Task for Work {
                     .map_err(|_| Failure::Stopped)?
                     .save_schedule(lease, expected, document)?;
                 Ok(Outcome::ScheduleSaved(document))
+            }
+            Self::LoadDisplay(backend, lease) => {
+                let settings = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .read_display(lease)?;
+                Ok(Outcome::DisplayLoaded(settings))
+            }
+            Self::SaveDisplay(backend, lease, expected, settings) => {
+                let settings = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .save_display(lease, expected, settings)?;
+                Ok(Outcome::DisplaySaved(settings))
+            }
+            Self::Desktop(backend, offset) => {
+                // A display refresh must never occupy the second shared worker
+                // waiting behind a management KDF/transaction holding Backend.
+                let facts = backend
+                    .try_lock()
+                    .map_err(|_| {
+                        Failure::Backend(BackendError::Display(
+                            fc_ports::DisplayRepositoryError::Unavailable,
+                        ))
+                    })?
+                    .desktop_facts(offset)?;
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                Ok(Outcome::Desktop(Box::new(facts)))
             }
             Self::ValidateOffice(path) => {
                 struct Control<'a>(&'a JobContext);
@@ -662,6 +711,7 @@ struct App {
     lease: Option<SessionLease>,
     screen: Screen,
     status: String,
+    desktop_notice: String,
     pending: Option<Pending>,
     generation: u64,
     key: Option<ContentKey>,
@@ -672,14 +722,26 @@ struct App {
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
     schedule: Option<ScheduleEditor>,
+    display: Option<display_editor::Editor>,
+    desktop: desktop_controller::Controller,
 }
 impl App {
     fn view(&self) -> View {
+        let status = match (self.status.is_empty(), self.desktop_notice.is_empty()) {
+            (true, _) => self.desktop_notice.clone(),
+            (_, true) => self.status.clone(),
+            _ => format!("{}\n{}", self.status, self.desktop_notice),
+        };
+        if self.screen == Screen::Display {
+            if let Some(editor) = &self.display {
+                return editor.view(&status, self.pending.is_some() || self.stopping);
+            }
+        }
         if self.screen == Screen::Schedule {
             if let Some(editor) = &self.schedule {
                 return editor.view(
                     &self.state,
-                    &self.status,
+                    &status,
                     self.pending.is_some() || self.stopping,
                 );
             }
@@ -687,7 +749,7 @@ impl App {
         let mut view = View {
             title: "未来教室".into(),
             description: String::new(),
-            status: self.status.clone(),
+            status: status.clone(),
             fields: Vec::new(),
             actions: Vec::new(),
             busy: self.pending.is_some() || self.stopping,
@@ -787,6 +849,7 @@ impl App {
                         action(TO_SUBJECTS, "基础科目"),
                         action(TO_ACCOUNTS, "创建账号"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
+                        action(TO_DISPLAY, "桌面显示设置"),
                     ]);
                 }
                 if account.is_some_and(|a| a.principal.role != Role::User) {
@@ -913,6 +976,19 @@ impl App {
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
+            Screen::Display => {
+                view.title = "正在加载显示设置".into();
+            }
+            Screen::ExitDraft => {
+                view.title = "退出前处理未保存草稿".into();
+                view.description =
+                    "课表或显示设置有未保存修改。退出后，本次运行中的草稿将丢失。".into();
+                view.actions = vec![
+                    action(RETURN_DRAFT, "返回草稿"),
+                    action(DISCARD_EXIT, "丢弃草稿并退出"),
+                    action(LOCK, "锁定并保留草稿"),
+                ];
+            }
             Screen::Repair => {
                 view.title = "未来教室需要修复".into();
                 view.description="数据暂不可用。请保留现有文件，使用原部署Windows账号或受控备份修复；不会重新开放首次管理员注册。".into();
@@ -934,6 +1010,11 @@ impl App {
         }
         if self.screen == Screen::Schedule {
             if let (Some(editor), Ok(data)) = (&mut self.schedule, self.window.draft_nonsecret()) {
+                editor.capture(data, &self.state);
+            }
+        }
+        if self.screen == Screen::Display {
+            if let (Some(editor), Ok(data)) = (&mut self.display, self.window.draft_nonsecret()) {
                 editor.capture(data);
             }
         }
@@ -956,6 +1037,7 @@ impl App {
             return;
         }
         self.stopping = true;
+        self.desktop.stop();
         self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
         self.lock();
         self.window.hide();
@@ -1039,7 +1121,7 @@ impl App {
                 self.window.hide();
                 self.render()?;
             }
-            Event::Submit(action, data) => {
+            Event::Submit(mut action, data) => {
                 self.last_input = Instant::now();
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
@@ -1050,7 +1132,53 @@ impl App {
                 if self.screen == Screen::Schedule {
                     return self.schedule_event(action, data);
                 }
+                if self.screen == Screen::Display {
+                    return self.display_event(action, data);
+                }
+                if action == EXIT && self.has_unsaved_changes() {
+                    self.screen = Screen::ExitDraft;
+                    self.status.clear();
+                    return self.render();
+                }
+                if action == DISCARD_EXIT {
+                    if self.screen != Screen::ExitDraft {
+                        return Ok(());
+                    }
+                    action = EXIT;
+                }
                 match action {
+                    RETURN_DRAFT if self.screen == Screen::ExitDraft => {
+                        let owner = self.current_global_owner();
+                        self.screen =
+                            if self.schedule.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Schedule
+                            } else if self.display.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Display
+                            } else {
+                                Screen::Home
+                            };
+                        self.status.clear();
+                        self.render()?;
+                    }
+                    TO_DISPLAY => {
+                        if let Some(lease) = self.lease {
+                            if self
+                                .display
+                                .as_ref()
+                                .is_some_and(|e| e.owner() == lease.principal_id())
+                            {
+                                self.screen = Screen::Display;
+                                self.status.clear();
+                                self.render()?;
+                            } else if let Some(backend) = &self.backend {
+                                self.submit(Work::LoadDisplay(backend.clone(), lease))?;
+                            }
+                        }
+                    }
                     TO_SCHEDULE => {
                         if let Some(lease) = self.lease {
                             if self
@@ -1152,6 +1280,15 @@ impl App {
             self.lock();
             return self.render();
         }
+        if self
+            .schedule
+            .as_ref()
+            .is_none_or(|e| e.owner() != lease.principal_id())
+        {
+            self.screen = Screen::Home;
+            self.status = "当前账号没有可继续的课表草稿。".into();
+            return self.render();
+        }
         let command =
             self.schedule
                 .as_mut()
@@ -1175,6 +1312,90 @@ impl App {
                         lease,
                         expected,
                         document,
+                    ))?;
+                }
+            }
+            Err(message) => self.status = message,
+        }
+        self.render()
+    }
+    fn has_unsaved_changes(&self) -> bool {
+        let Some(owner) = self.current_global_owner() else {
+            return false;
+        };
+        self.schedule
+            .as_ref()
+            .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
+                .display
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+    }
+    fn current_global_owner(&self) -> Option<PrincipalId> {
+        let id = self.lease?.principal_id();
+        self.state
+            .account(id)
+            .ok()
+            .filter(|a| a.principal.enabled && a.principal.role == Role::GlobalAdmin)
+            .map(|_| id)
+    }
+    fn display_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if !self
+            .state
+            .account(lease.principal_id())
+            .is_ok_and(|a| a.principal.role == Role::GlobalAdmin)
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+        {
+            self.lock();
+            return self.render();
+        }
+        if action == LOCK {
+            self.lock();
+            return self.render();
+        }
+        if self
+            .display
+            .as_ref()
+            .is_none_or(|e| e.owner() != lease.principal_id())
+        {
+            self.screen = Screen::Home;
+            self.status = "当前账号没有可继续的显示设置草稿。".into();
+            return self.render();
+        }
+        match self
+            .display
+            .as_mut()
+            .ok_or("显示设置草稿不可用")?
+            .handle(action, data)
+        {
+            Ok(display_editor::Command::Stay) => self.status.clear(),
+            Ok(display_editor::Command::Close) => {
+                self.screen = Screen::Home;
+                self.status.clear();
+            }
+            Ok(display_editor::Command::Reload) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadDisplay(backend.clone(), lease))?;
+                }
+            }
+            Ok(display_editor::Command::Save { expected, settings }) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::SaveDisplay(
+                        backend.clone(),
+                        lease,
+                        expected,
+                        settings,
                     ))?;
                 }
             }
@@ -1277,14 +1498,31 @@ impl App {
                     }
                     self.status = "课表、作息和校历已整体保存。".into();
                 }
+                Ok(Outcome::DisplayLoaded(settings)) => {
+                    if let Some(lease) = self.lease {
+                        self.display =
+                            Some(display_editor::Editor::new(settings, lease.principal_id()));
+                        self.screen = Screen::Display;
+                        self.status.clear();
+                    }
+                }
+                Ok(Outcome::DisplaySaved(settings)) => {
+                    if let Some(editor) = &mut self.display {
+                        editor.saved(settings);
+                    }
+                    self.status = "桌面显示设置已保存，关闭工作台后在系统桌面生效。".into();
+                }
                 Ok(Outcome::Closed) => {
                     self.stopping = true;
+                    self.desktop.stop();
                     self.shutdown_deadline
                         .get_or_insert(Instant::now() + Duration::from_secs(5));
                     self.pool.request_stop();
                     self.window.hide();
                 }
-                Ok(Outcome::Office(_)) => return Err("后台结果类型不匹配".into()),
+                Ok(Outcome::Office(_) | Outcome::Desktop(_)) => {
+                    return Err("后台结果类型不匹配".into())
+                }
                 Err(error) => {
                     if fatal(&error) {
                         if let Some(control) = &self.control {
@@ -1330,7 +1568,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let host = HiddenHost::new(!probe).map_err(|_| "无法创建托盘宿主".to_owned())?;
     let stop = host.controller();
     let clock = Arc::new(CurrentClock::new());
-    let mut app = create_app(clock.clone())?;
+    let mut app = create_app(clock.clone(), probe)?;
     app.render()?;
     if !autostart {
         app.window.show(true);
@@ -1368,14 +1606,20 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             app.begin_shutdown();
         }
         if hints.contains(HostHints::SESSION_LOCKED) || hints.contains(HostHints::SESSION_CHANGED) {
+            app.desktop.hide();
             app.lock();
             app.window.hide();
             let _ = app.render();
         }
         if hints.contains(HostHints::OPEN_STATUS) {
+            app.desktop.hide();
+            if !app.window.is_visible() {
+                let _ = app.render();
+            }
             app.window.show(true);
         }
         if hints.contains(HostHints::EXIT_REQUESTED) {
+            app.desktop.hide();
             app.window.show(true);
             app.status = "请由主管理员登录后在工作台中退出。".into();
             let _ = app.render();
@@ -1400,6 +1644,23 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         if app.poll().is_err() {
             stop.fault();
             return Ok(());
+        }
+        if !app.stopping {
+            if let Err(error) = app.desktop.tick(
+                app.backend.as_ref(),
+                app.control.as_ref(),
+                &app.pool,
+                &app.clock,
+                app.window.is_visible(),
+                app.pending.is_some(),
+                hints,
+            ) {
+                probe_error = Some(error);
+                app.begin_shutdown();
+            }
+            if let Some(notice) = app.desktop.take_notice() {
+                app.desktop_notice = notice;
+            }
         }
         if let Some(ticket) = &mut office {
             match ticket.try_result() {
@@ -1462,12 +1723,12 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if let Some(error) = probe_error {
         return Err(error);
     }
-    if probe && (stage != 66 || !office_verified) {
+    if probe && (stage != 90 || !office_verified) {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
     Ok(())
 }
-fn create_app(clock: Arc<CurrentClock>) -> std::result::Result<App, String> {
+fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App, String> {
     Ok(App {
         window: Window::new().map_err(|_| "无法创建工作台".to_owned())?,
         pool: WorkerPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
@@ -1478,6 +1739,7 @@ fn create_app(clock: Arc<CurrentClock>) -> std::result::Result<App, String> {
         lease: None,
         screen: Screen::Starting,
         status: String::new(),
+        desktop_notice: String::new(),
         pending: None,
         generation: 0,
         key: None,
@@ -1488,6 +1750,8 @@ fn create_app(clock: Arc<CurrentClock>) -> std::result::Result<App, String> {
         shutdown_deadline: None,
         terminate_required: false,
         schedule: None,
+        display: None,
+        desktop: desktop_controller::Controller::new(probe)?,
     })
 }
 
@@ -1507,7 +1771,7 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
     Ok(())
 }
 fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
@@ -1633,7 +1897,7 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             if app.view().actions.iter().any(|a| {
                 matches!(
                     a.id,
-                    TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | TO_SCHEDULE | EXIT
+                    TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | TO_SCHEDULE | TO_DISPLAY | EXIT
                 )
             }) {
                 return Err("教师工作台暴露主管理员入口".into());
@@ -1724,8 +1988,59 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             Screen::Schedule
         }
         65 => {
+            action = TO_DISPLAY;
+            Screen::Home
+        }
+        66..=75 | 77 | 80..=82 => return display_probe_step(app, stage),
+        76 => {
+            action = TO_DISPLAY;
+            Screen::Home
+        }
+        78 => {
+            action = LOG_IN;
+            put(LOGIN, "probe-admin")?;
+            put(PASSWORD, INITIAL)?;
+            Screen::Login
+        }
+        79 => {
+            action = TO_DISPLAY;
+            Screen::Home
+        }
+        83 => {
+            if !app.desktop.probe_ready() {
+                return Ok(());
+            }
+            let scene = app.desktop.probe_scene().ok_or("常驻桌面没有生成场景")?;
+            let metrics = app.desktop.probe_metrics();
+            let display = app.display.as_ref().ok_or("显示草稿缺失")?;
+            if display.settings.revision!=Revision::new(2)
+                || !scene.cards.iter().any(|c| matches!(&c.content,fc_presentation::scene::CardContent::Homework(rows) if rows.iter().any(|r|r.text=="验证作业：完成今天的数学练习。")))
+                || metrics.drawn_frames==0 || metrics.visible_windows!=0 || metrics.input_regions!=0 {
+                return Err("真实事实至隐藏原生场景/持久显示修订核对失败".into());
+            }
+            action = TO_DISPLAY;
+            Screen::Home
+        }
+        84 => {
+            action = display_editor::EDIT_BACK;
+            put(display_editor::LABEL, "退出保护验证草稿")?;
+            Screen::Display
+        }
+        85 | 88 => {
             action = EXIT;
             Screen::Home
+        }
+        86 => {
+            action = RETURN_DRAFT;
+            Screen::ExitDraft
+        }
+        87 => {
+            action = display_editor::EDIT_BACK;
+            Screen::Display
+        }
+        89 => {
+            action = DISCARD_EXIT;
+            Screen::ExitDraft
         }
         _ => return Ok(()),
     };
@@ -1744,6 +2059,90 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
     app.window
         .probe_submit(action, data)
         .map_err(|_| format!("原生工作台命令未接纳：stage={stage}"))?;
+    *stage += 1;
+    Ok(())
+}
+
+fn display_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
+    use display_editor::*;
+    if app.screen != Screen::Display {
+        return Err(format!("显示设置页面错误：stage={stage}，{}", app.status));
+    }
+    let mut data = FormData::new();
+    let mut put = |id, value: &str| {
+        data.insert(id, value.into())
+            .map_err(|_| "显示诊断表单无效")
+    };
+    let action = match *stage {
+        66 => {
+            put(CLOCK, "12")?;
+            put(SECONDS, "1")?;
+            put(TARGET, "2026-12-31")?;
+            put(LABEL, "验证目标")?;
+            SAVE_ALL
+        }
+        67 => COMPONENTS,
+        68 => {
+            put(ALPHA, "0")?;
+            put(FONT, "32")?;
+            APPLY
+        }
+        69 => {
+            put(COMPONENT, "3")?;
+            SWITCH_COMPONENT
+        }
+        70 => {
+            put(ALPHA, "88")?;
+            put(FONT, "24")?;
+            APPLY
+        }
+        71 => EDIT_BACK,
+        72 => SAVE_ALL,
+        73 => CANCEL,
+        74 | 81 => CONFIRM_CANCEL,
+        82 => EDIT_BACK,
+        75 => {
+            let s = &app.display.as_ref().ok_or("显示草稿缺失")?.settings;
+            if s.revision != Revision::new(2)
+                || s.clock_mode != fc_domain::desktop::ClockMode::Digital12
+                || !s.clock_seconds
+                || s.component(fc_domain::desktop::ComponentKind::Clock)
+                    .is_none_or(|c| c.opacity_percent != 0 || c.font_dip != 32)
+                || s.component(fc_domain::desktop::ComponentKind::Homework)
+                    .is_none_or(|c| c.opacity_percent != 88 || c.font_dip != 24)
+            {
+                return Err("显示设置CAS保存并重读不一致".into());
+            }
+            EDIT_BACK
+        }
+        77 => {
+            put(TARGET, "2026-")?;
+            put(LABEL, "未保存倒计时")?;
+            LOCK
+        }
+        80 => {
+            if app
+                .view()
+                .fields
+                .iter()
+                .find(|f| f.id == TARGET)
+                .map(|f| f.value.as_str())
+                != Some("2026-")
+            {
+                return Err("显示设置锁定后半日期丢失".into());
+            }
+            CANCEL
+        }
+        _ => return Err("显示诊断阶段无效".into()),
+    };
+    for f in app.view().fields {
+        if f.kind != FieldKind::ReadOnly && data.get(f.id).is_none() {
+            data.insert(f.id, f.value).map_err(|_| "显示诊断字段重复")?;
+        }
+    }
+    app.window
+        .probe_submit(action, data)
+        .map_err(|_| format!("原生显示设置命令拒绝：stage={stage}"))?;
     *stage += 1;
     Ok(())
 }
@@ -1927,7 +2326,7 @@ mod tests {
         ));
         let paths = DataPaths::isolated_test(root.clone()).unwrap();
         paths.prepare_for_current_user().unwrap();
-        let mut app = create_app(Arc::new(CurrentClock::new())).unwrap();
+        let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
         app.render().unwrap();
         app.submit(Work::Open(root.clone(), app.clock.clone()))
             .unwrap();
@@ -2022,5 +2421,76 @@ mod tests {
         assert!(!fatal(&Failure::Backend(BackendError::Identity(
             fc_ports::IdentityRepositoryError::Domain(IdentityError::RevisionConflict)
         ))));
+    }
+    #[test]
+    fn exit_guard_returns_only_the_current_owners_unapplied_display_draft() {
+        let _serial = SERIAL.lock().unwrap();
+        let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
+        let mut sessions = fc_application::identity::IdentitySessions::default();
+        let expires = fc_domain::time::LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2030, 1, 1).unwrap(),
+            0,
+        )
+        .unwrap();
+        let account = |id| UserAccount {
+            principal: Principal {
+                id: PrincipalId::new(id).unwrap(),
+                school_id: SchoolId::new(1).unwrap(),
+                role: Role::GlobalAdmin,
+                enabled: true,
+                auth_epoch: AuthEpoch::new(1),
+            },
+            login_name: format!("admin{id}"),
+            display_name: format!("Admin{id}"),
+            must_change_password: false,
+            credential_version: 1,
+            recovery_version: 1,
+        };
+        let owner = sessions
+            .issue_verified(&account(1), TrustedOrigin::Local, 0, 3600000, expires)
+            .unwrap();
+        let other = sessions
+            .issue_verified(&account(2), TrustedOrigin::Local, 0, 3600000, expires)
+            .unwrap();
+        let mut editor =
+            display_editor::Editor::new(DisplaySettings::default(), owner.principal_id());
+        let mut data = FormData::new();
+        for f in editor.view("", false).fields {
+            let value = if f.id == display_editor::LABEL {
+                "本账号未应用的名称".into()
+            } else {
+                f.value
+            };
+            data.insert(f.id, value).unwrap();
+        }
+        assert!(matches!(
+            editor.handle(display_editor::EDIT_BACK, data),
+            Ok(display_editor::Command::Close)
+        ));
+        app.display = Some(editor);
+        app.state = Arc::new(IdentityState {
+            accounts: vec![account(1)],
+            ..IdentityState::default()
+        });
+        app.lease = Some(owner);
+        app.screen = Screen::Home;
+        app.event(Event::Submit(EXIT, FormData::new())).unwrap();
+        assert!(app.screen == Screen::ExitDraft);
+        app.event(Event::Submit(RETURN_DRAFT, FormData::new()))
+            .unwrap();
+        assert!(app.screen == Screen::Display);
+        assert!(app
+            .view()
+            .fields
+            .iter()
+            .any(|f| f.id == display_editor::LABEL && f.value == "本账号未应用的名称"));
+        app.lease = Some(other);
+        app.screen = Screen::ExitDraft;
+        assert!(!app.has_unsaved_changes());
+        app.event(Event::Submit(RETURN_DRAFT, FormData::new()))
+            .unwrap();
+        assert!(app.screen == Screen::Home);
+        assert!(app.display.as_ref().unwrap().has_unsaved_changes());
+        drain(app);
     }
 }

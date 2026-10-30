@@ -2161,3 +2161,813 @@ fn timetable_commit_publication_failure_blocks_old_authority_and_reopens_committ
         facts.revision
     );
 }
+
+fn admin_catalog(
+    repo: &mut BusinessRepository<Snapshot>,
+    clock: &Time,
+    id: u64,
+    command: IdentityCommand,
+) {
+    let revision = repo.load_identity().unwrap().revision;
+    repo.execute_identity(
+        IdentityRequest {
+            command_id: CommandId::new(id).unwrap(),
+            expected_revision: revision,
+            command,
+        },
+        Some(&actor(1, 1, TrustedOrigin::Local)),
+        clock,
+    )
+    .unwrap();
+}
+fn display_request(
+    id: u64,
+    revision: u64,
+    candidate: fc_domain::desktop::DisplaySettings,
+) -> fc_ports::DisplayRequest {
+    fc_ports::DisplayRequest {
+        command_id: CommandId::new(id).unwrap(),
+        expected_revision: Revision::new(revision),
+        candidate,
+    }
+}
+#[test]
+fn display_storage_cas_receipts_and_desktop_facts_survive_restart_and_wall_rollback() {
+    use fc_domain::desktop::*;
+    use fc_ports::{DisplayRepository, DisplayRepositoryError};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    assert_eq!(
+        repo.desktop_facts(0, &*clock),
+        Err(DisplayRepositoryError::Unavailable)
+    );
+    assert_eq!(
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        Revision::default()
+    );
+    initialize(&mut repo, &clock);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4000,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let mut settings = repo.display(&admin).unwrap();
+    assert_eq!(settings, DisplaySettings::default());
+    settings.clock_mode = ClockMode::Analog;
+    settings.clock_seconds = true;
+    settings.course_fill_percent = 100;
+    settings.homework_fill_percent = 0;
+    settings.countdown.target = Some(date(31));
+    settings.countdown.label = "考试".into();
+    let request = display_request(4001, 0, settings);
+    let saved = repo
+        .execute_display(request.clone(), &admin, &*clock)
+        .unwrap();
+    assert_eq!(saved.revision, Revision::new(1));
+    assert_eq!(
+        repo.execute_display(request.clone(), &admin, &*clock)
+            .unwrap(),
+        saved
+    );
+    let mut changed = request.clone();
+    changed.candidate.clock_seconds = false;
+    assert_eq!(
+        repo.execute_display(changed, &admin, &*clock),
+        Err(DisplayRepositoryError::IdempotencyConflict)
+    );
+    assert!(
+        matches!(repo.execute_display(display_request(4002,0,saved.clone()),&admin,&*clock),Err(DisplayRepositoryError::Domain(DisplayError::RevisionConflict{current}))if current==Revision::new(1))
+    );
+    assert!(repo.display(&actor(2, 2, TrustedOrigin::Local)).is_err());
+    assert!(repo.display(&actor(1, 1, TrustedOrigin::Web)).is_err());
+    for (id, teacher, text) in [
+        (4003, 2, "Teacher2 homework"),
+        (4004, 3, "Teacher3 homework"),
+    ] {
+        repo.execute(
+            command(id, teacher, 0, text),
+            &actor(teacher, 2, TrustedOrigin::Web),
+            &*clock,
+        )
+        .unwrap();
+    }
+    repo.execute(
+        ContentCommand {
+            command_id: CommandId::new(4005).unwrap(),
+            key: ContentKey::SharedReminder(ReminderKey {
+                class_id: ClassId::new(1).unwrap(),
+                actual_date: date(30),
+            }),
+            expected_revision: Revision::default(),
+            text: "Shared reminder".into(),
+        },
+        &actor(2, 2, TrustedOrigin::Web),
+        &*clock,
+    )
+    .unwrap();
+    let first = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(first.display, saved);
+    assert_eq!(first.homework_eligible_total, 2);
+    assert_eq!(first.homework.len(), 2);
+    assert_eq!(first.homework[0].text, "Teacher2 homework");
+    assert_eq!(first.homework[1].text, "Teacher3 homework");
+    assert_eq!(first.reminder.as_ref().unwrap().text, "Shared reminder");
+    assert_eq!(
+        first.global_revision,
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap()
+    );
+    assert_eq!(repo.desktop_facts(0, &*clock).unwrap(), first);
+    let tail = repo.desktop_facts(1, &*clock).unwrap();
+    assert_eq!(tail.homework.len(), 1);
+    assert_eq!(tail.homework[0], first.homework[1]);
+    let empty = repo.desktop_facts(u64::MAX, &*clock).unwrap();
+    assert_eq!(empty.homework_offset, 2);
+    assert!(empty.homework.is_empty());
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4008,
+        IdentityCommand::UpdateAccount {
+            id: principal(3),
+            display_name: "Teacher3".into(),
+            role: Role::TeacherAdmin,
+            enabled: false,
+            scopes: vec![AssignmentScope {
+                class_id: ClassId::new(1).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+            }],
+        },
+    );
+    let filtered = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(filtered.homework_eligible_total, 1);
+    assert_eq!(filtered.homework[0].text, "Teacher2 homework");
+    assert!(filtered.reminder.is_some());
+    *clock.0.lock().unwrap() = time(31);
+    let tomorrow = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(tomorrow.homework.is_empty());
+    assert!(tomorrow.reminder.is_none());
+    assert_eq!(tomorrow.date_watermark, date(31));
+    assert!(tomorrow.global_revision > first.global_revision);
+    drop(repo);
+    drop(writer);
+    *clock.0.lock().unwrap() = time(30);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    assert_eq!(repo.display(&admin).unwrap(), saved);
+    assert_eq!(
+        repo.execute_display(request, &admin, &*clock).unwrap(),
+        saved
+    );
+    let rollback = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(rollback.clock_rollback);
+    assert_eq!(rollback.date_watermark, date(31));
+    assert!(rollback.homework.is_empty());
+    assert!(rollback.reminder.is_none());
+    assert_eq!(rollback.homework_eligible_total, 0);
+    assert_eq!(rollback.global_revision, tomorrow.global_revision);
+    *clock.0.lock().unwrap() = time(31);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4006,
+        IdentityCommand::CreateClass {
+            id: ClassId::new(2).unwrap(),
+            name: "OtherClass".into(),
+        },
+    );
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4007,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(2).unwrap(),
+        },
+    );
+    let other = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(other.homework.is_empty());
+    assert!(other.reminder.is_none());
+}
+#[test]
+fn desktop_facts_pages_full_texts_with_explicit_totals_and_actual_json_byte_budget() {
+    use fc_ports::DisplayRepository;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (_writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4100,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    for subject in 2..=65 {
+        admin_catalog(
+            &mut repo,
+            &clock,
+            4100 + subject,
+            IdentityCommand::PutSubject {
+                id: SubjectId::new(subject).unwrap(),
+                name: format!("{}{:02}", "😀".repeat(62), subject),
+                enabled: true,
+                color: Rgb {
+                    red: 1,
+                    green: 2,
+                    blue: 3,
+                },
+                expected_revision: None,
+            },
+        );
+    }
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4200,
+        IdentityCommand::UpdateAccount {
+            id: principal(2),
+            display_name: "🙂".repeat(128),
+            role: Role::TeacherAdmin,
+            enabled: true,
+            scopes: (1..=65)
+                .map(|id| AssignmentScope {
+                    class_id: ClassId::new(1).unwrap(),
+                    subject_id: SubjectId::new(id).unwrap(),
+                })
+                .collect(),
+        },
+    );
+    let epoch = repo
+        .load_identity()
+        .unwrap()
+        .account(principal(2))
+        .unwrap()
+        .principal
+        .auth_epoch
+        .get();
+    let full_text = format!("x{}x", "\0".repeat(8192));
+    for subject in 1..=65 {
+        let mut c = command(4300 + subject, 2, 0, &full_text);
+        let ContentKey::Homework(ref mut key) = c.key else {
+            unreachable!()
+        };
+        key.subject_id = SubjectId::new(subject).unwrap();
+        repo.execute(c, &actor(2, epoch, TrustedOrigin::Web), &*clock)
+            .unwrap();
+    }
+    let mut offset = 0;
+    let mut subjects = Vec::new();
+    while offset < 65 {
+        let page = repo.desktop_facts(offset, &*clock).unwrap();
+        assert_eq!(page.homework_offset, offset);
+        assert_eq!(page.homework_eligible_total, 65);
+        assert!(!page.homework.is_empty());
+        assert!(page.homework.len() <= 64);
+        if offset == 0 {
+            assert!(
+                page.homework.len() < 64,
+                "2 MiB byte budget must page even before the 64-item limit"
+            );
+            assert_eq!(
+                page.homework.len(),
+                240_000 / full_text.encode_utf16().count()
+            );
+        }
+        assert!(
+            page.homework
+                .iter()
+                .map(|r| r.text.encode_utf16().count())
+                .sum::<usize>()
+                <= 240_000
+        );
+        for row in &page.homework {
+            assert_eq!(row.text, full_text);
+            let ContentKey::Homework(key) = &row.key else {
+                unreachable!()
+            };
+            subjects.push(key.subject_id.get());
+        }
+        offset += page.homework.len() as u64;
+    }
+    assert_eq!(subjects, (1..=65).collect::<Vec<_>>());
+    // Here 64 complete bodies alone fit 240000 units and JSON is far below
+    // 2 MiB, but valid maximum-length emoji headings require a smaller batch.
+    let shorter_text = "x".repeat(3750);
+    for subject in 1..=65 {
+        let mut c = command(4900 + subject, 2, 1, &shorter_text);
+        let ContentKey::Homework(ref mut key) = c.key else {
+            unreachable!()
+        };
+        key.subject_id = SubjectId::new(subject).unwrap();
+        repo.execute(c, &actor(2, epoch, TrustedOrigin::Web), &*clock)
+            .unwrap();
+    }
+    let page = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(page.homework.len(), 63);
+    assert_eq!(page.homework_eligible_total, 65);
+    let native_units = page
+        .homework
+        .iter()
+        .map(|r| {
+            assert_eq!(r.text, shorter_text);
+            let ContentKey::Homework(key) = &r.key else {
+                unreachable!()
+            };
+            let subject = &page
+                .identity
+                .subjects
+                .iter()
+                .find(|s| s.id == key.subject_id)
+                .unwrap()
+                .name;
+            let teacher = &page
+                .identity
+                .account(key.owner_teacher_id)
+                .unwrap()
+                .display_name;
+            r.text.encode_utf16().count() + format!("{subject} · {teacher}").encode_utf16().count()
+        })
+        .sum::<usize>();
+    assert!(native_units <= 262_000);
+    let tail = repo
+        .desktop_facts(page.homework.len() as u64, &*clock)
+        .unwrap();
+    assert_eq!(tail.homework.len(), 2);
+    assert!(tail.homework.iter().all(|r| r.text == shorter_text));
+}
+
+fn replace_business_blob(
+    handle: &fc_storage::StorageHandle<Snapshot>,
+    reader: &fc_runtime::authority::AuthorityReader<IdentityState>,
+    repo: &BusinessRepository<Snapshot>,
+    key: &str,
+    value: Vec<u8>,
+    id: &str,
+) {
+    let revision = handle.try_revision().unwrap().wait().unwrap();
+    let snapshot = reader
+        .prepare_update(
+            repo.load_identity().unwrap(),
+            revision.next().unwrap(),
+            AuthEpoch::new(1),
+        )
+        .unwrap();
+    handle
+        .try_commit(
+            fc_storage::CommitCommand::new(
+                id.into(),
+                revision,
+                vec![fc_storage::Mutation::Put {
+                    key: key.into(),
+                    value,
+                }],
+            )
+            .unwrap(),
+            snapshot,
+        )
+        .unwrap()
+        .wait()
+        .unwrap();
+}
+#[test]
+fn display_and_desktop_strict_codec_rejects_tampering_without_registering_or_cross_owner_release() {
+    use fc_ports::{DisplayRepository, DisplayRepositoryError};
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, reader) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4500,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let request = display_request(4501, 0, fc_domain::desktop::DisplaySettings::default());
+    let saved = repo
+        .execute_display(request.clone(), &admin, &*clock)
+        .unwrap();
+    let handle = writer.0.as_ref().unwrap().handle();
+    let original = handle
+        .try_get("business/display/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    for (prefix, id) in [
+        ("\"unknown\":0,", "unknown-display"),
+        ("\"format\":1,", "duplicate-display"),
+    ] {
+        let mut damaged = b"{".to_vec();
+        damaged.extend_from_slice(prefix.as_bytes());
+        damaged.extend_from_slice(&original[1..]);
+        replace_business_blob(&handle, &reader, &repo, "business/display/v1", damaged, id);
+        assert_eq!(
+            repo.display(&admin),
+            Err(DisplayRepositoryError::Unavailable)
+        );
+        assert!(matches!(
+            fc_storage::business::startup_state(d.path()),
+            Err(StorageError::Database)
+        ));
+    }
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        "business/display/v1",
+        original.clone(),
+        "restore-display-fixture",
+    );
+    assert_eq!(repo.display(&admin).unwrap(), saved);
+    let changed = String::from_utf8(original)
+        .unwrap()
+        .replace("\"clock_seconds\":false", "\"clock_seconds\":true");
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        "business/result/display/4501",
+        changed.into_bytes(),
+        "tamper-display-result",
+    );
+    assert_eq!(
+        repo.execute_display(request, &admin, &*clock),
+        Err(DisplayRepositoryError::Unavailable)
+    );
+    for teacher in [2, 3] {
+        repo.execute(
+            command(4502 + teacher, teacher, 0, &format!("Owner{teacher}")),
+            &actor(teacher, 2, TrustedOrigin::Web),
+            &*clock,
+        )
+        .unwrap();
+    }
+    assert_eq!(repo.desktop_facts(0, &*clock).unwrap().homework.len(), 2);
+    let a = "business/homework/1/2026-10-30/1/2";
+    let b = "business/homework/1/2026-10-30/1/3";
+    let original_a = handle
+        .try_get(a.into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    let other = handle
+        .try_get(b.into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .unwrap()
+        .value;
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        a,
+        other,
+        "copy-owner-b-under-owner-a",
+    );
+    assert_eq!(
+        repo.desktop_facts(0, &*clock),
+        Err(DisplayRepositoryError::Unavailable)
+    );
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        a,
+        original_a,
+        "restore-owner-a-fixture",
+    );
+    assert_eq!(repo.desktop_facts(0, &*clock).unwrap().homework.len(), 2);
+    replace_business_blob(
+        &handle,
+        &reader,
+        &repo,
+        "business/desktop/max-observed-day/v1",
+        b"{\"format\":1,\"date\":[2026,10,30],\"unknown\":0}".to_vec(),
+        "tamper-day-floor",
+    );
+    assert_eq!(
+        repo.desktop_facts(0, &*clock),
+        Err(DisplayRepositoryError::Unavailable)
+    );
+    assert!(matches!(
+        fc_storage::business::startup_state(d.path()),
+        Err(StorageError::Database)
+    ));
+}
+#[test]
+fn display_precommit_rechecks_exact_lease_and_desktop_midnight_floor_rolls_back_atomically() {
+    use fc_ports::DisplayRepository;
+    use std::sync::atomic::AtomicBool;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let armed = Arc::new(AtomicBool::new(false));
+    let allowed = Arc::new(AtomicBool::new(true));
+    let midnight = Arc::new(AtomicBool::new(false));
+    let (mut publisher, reader) = AuthorityStore::new(
+        IdentityState::default(),
+        Revision::default(),
+        AuthEpoch::new(1),
+    );
+    publisher.initialize().unwrap();
+    let gate = reader.gate();
+    let writer = StorageWriter::open(d.path(), 16, publisher).unwrap();
+    let handle = writer.handle();
+    let _joined = Joined(Some(writer));
+    let arm = armed.clone();
+    let permit = allowed.clone();
+    let crossing = midnight.clone();
+    let wall = clock.clone();
+    let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+        if arm.load(Ordering::Acquire) {
+            permit.store(false, Ordering::Release);
+        }
+        if crossing.load(Ordering::Acquire) {
+            *wall.0.lock().unwrap() = time(31);
+        }
+        reader
+            .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+            .map_err(|_| StorageError::AuthorityUnavailable)
+    });
+    let permit = allowed.clone();
+    let mut repo = BusinessRepository::new(handle.clone(), clock.clone(), factory)
+        .with_session_guard(Arc::new(move |_, _| {
+            if permit.load(Ordering::Acquire) {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        }));
+    initialize(&mut repo, &clock);
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    armed.store(true, Ordering::Release);
+    let request = display_request(4600, 0, fc_domain::desktop::DisplaySettings::default());
+    assert!(repo
+        .execute_display(request.clone(), &admin, &*clock)
+        .is_err());
+    for key in [
+        "business/display/v1",
+        "business/result/display/4600",
+        "business/receipt/display/4600",
+    ] {
+        assert!(handle
+            .try_get(key.into())
+            .unwrap()
+            .wait()
+            .unwrap()
+            .is_none());
+    }
+    assert_eq!(handle.try_revision().unwrap().wait().unwrap(), before);
+    assert_eq!(gate.status().health, fc_runtime::health::Health::Healthy);
+    armed.store(false, Ordering::Release);
+    allowed.store(true, Ordering::Release);
+    repo.execute_display(request, &admin, &*clock).unwrap();
+    let before = handle.try_revision().unwrap().wait().unwrap();
+    midnight.store(true, Ordering::Release);
+    assert!(repo.desktop_facts(0, &*clock).is_err());
+    assert!(handle
+        .try_get("business/desktop/max-observed-day/v1".into())
+        .unwrap()
+        .wait()
+        .unwrap()
+        .is_none());
+    assert_eq!(handle.try_revision().unwrap().wait().unwrap(), before);
+    assert_eq!(gate.status().health, fc_runtime::health::Health::Healthy);
+    midnight.store(false, Ordering::Release);
+    let facts = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(facts.captured_at.date, date(31));
+    assert_eq!(facts.date_watermark, date(31));
+    assert_eq!(facts.global_revision, before.next().unwrap());
+}
+
+#[test]
+fn display_and_desktop_postcommit_publication_fault_recover_committed_state_and_day_floor() {
+    use fc_ports::{AuthorityPublisher as Port, DisplayRepository, DisplayRepositoryError};
+    use fc_runtime::{
+        authority::{AuthorityPublisher, AuthorityUpdateToken},
+        health::{GateError, Health},
+    };
+    struct Broken(AuthorityPublisher<IdentityState>);
+    impl Port for Broken {
+        type Snapshot = Snapshot;
+        type Update = AuthorityUpdateToken;
+        type Error = GateError;
+        fn snapshot_revision(&self, s: &Snapshot) -> Revision {
+            self.0.snapshot_revision(s)
+        }
+        fn begin_update(&mut self) -> Result<Self::Update, GateError> {
+            self.0.begin_update()
+        }
+        fn publish(&mut self, _: Self::Update, _: Snapshot) -> Result<(), GateError> {
+            Err(GateError::Faulted)
+        }
+        fn rollback(&mut self, t: Self::Update) -> Result<(), GateError> {
+            self.0.rollback(t)
+        }
+        fn fault(&mut self) {
+            self.0.fault()
+        }
+    }
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4700,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    repo.execute(
+        command(4701, 2, 0, "Never release through faulted publication"),
+        &actor(2, 2, TrustedOrigin::Web),
+        &*clock,
+    )
+    .unwrap();
+    drop(repo);
+    drop(writer);
+    let broken = || {
+        let facts = fc_storage::business::startup_state(d.path()).unwrap();
+        let (mut publisher, reader) =
+            AuthorityStore::new(facts.identity, facts.revision, AuthEpoch::new(1));
+        publisher.initialize().unwrap();
+        let gate = reader.gate();
+        let writer = StorageWriter::open(d.path(), 16, Broken(publisher)).unwrap();
+        let factory = Arc::new(move |state: &IdentityState, revision: Revision| {
+            reader
+                .prepare_update(state.clone(), revision, AuthEpoch::new(1))
+                .map_err(|_| StorageError::AuthorityUnavailable)
+        });
+        let repo = BusinessRepository::new(writer.handle(), clock.clone(), factory)
+            .with_session_guard(Arc::new(|_, _| Ok(())));
+        (Joined(Some(writer)), repo, gate)
+    };
+    let (writer, mut repo, gate) = broken();
+    let admin = actor(1, 1, TrustedOrigin::Local);
+    let request = display_request(4702, 0, fc_domain::desktop::DisplaySettings::default());
+    assert_eq!(
+        repo.execute_display(request.clone(), &admin, &*clock),
+        Err(DisplayRepositoryError::Faulted)
+    );
+    assert_eq!(gate.status().health, Health::Faulted);
+    assert_eq!(
+        repo.desktop_facts(0, &*clock),
+        Err(DisplayRepositoryError::Faulted)
+    );
+    drop(repo);
+    drop(writer);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let committed_revision = startup.revision;
+    let (writer, mut repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let committed = repo.display(&admin).unwrap();
+    assert_eq!(committed.revision, Revision::new(1));
+    assert_eq!(
+        repo.execute_display(request, &admin, &*clock).unwrap(),
+        committed
+    );
+    assert_eq!(
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        committed_revision
+    );
+    drop(repo);
+    drop(writer);
+    *clock.0.lock().unwrap() = time(31);
+    let (writer, repo, gate) = broken();
+    assert_eq!(
+        repo.desktop_facts(0, &*clock),
+        Err(DisplayRepositoryError::Faulted)
+    );
+    assert_eq!(gate.status().health, Health::Faulted);
+    drop(repo);
+    drop(writer);
+    *clock.0.lock().unwrap() = time(30);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    assert_eq!(startup.revision, committed_revision.next().unwrap());
+    let (writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let recovered = repo.desktop_facts(0, &*clock).unwrap();
+    assert_eq!(recovered.date_watermark, date(31));
+    assert!(recovered.clock_rollback);
+    assert!(recovered.homework.is_empty());
+    assert_eq!(recovered.global_revision, startup.revision);
+    assert_eq!(
+        writer
+            .0
+            .as_ref()
+            .unwrap()
+            .handle()
+            .try_revision()
+            .unwrap()
+            .wait()
+            .unwrap(),
+        startup.revision
+    );
+}
+
+#[test]
+fn desktop_content_commit_persists_new_day_before_first_frame_and_does_not_revive_old_content() {
+    use fc_ports::DisplayRepository;
+    let d = Directory::new();
+    let clock = Arc::new(Time(Mutex::new(time(30))));
+    let (writer, mut repo, _) = open_schedule_storage(
+        &d,
+        clock.clone(),
+        IdentityState::default(),
+        Revision::default(),
+    );
+    initialize(&mut repo, &clock);
+    admin_catalog(
+        &mut repo,
+        &clock,
+        4800,
+        IdentityCommand::BindCurrentClass {
+            id: ClassId::new(1).unwrap(),
+        },
+    );
+    repo.execute(
+        command(4801, 2, 0, "Old homework must expire"),
+        &actor(2, 2, TrustedOrigin::Web),
+        &*clock,
+    )
+    .unwrap();
+    *clock.0.lock().unwrap() = time(31);
+    let mut tomorrow = command(4802, 2, 0, "Today's homework");
+    let ContentKey::Homework(ref mut key) = tomorrow.key else {
+        unreachable!()
+    };
+    key.actual_date = date(31);
+    repo.execute(tomorrow, &actor(2, 2, TrustedOrigin::Web), &*clock)
+        .unwrap();
+    // No desktop frame has been read at any point before process restart.
+    drop(repo);
+    drop(writer);
+    *clock.0.lock().unwrap() = time(30);
+    let startup = fc_storage::business::startup_state(d.path()).unwrap();
+    let (_writer, repo, _) =
+        open_schedule_storage(&d, clock.clone(), startup.identity, startup.revision);
+    let rollback = repo.desktop_facts(0, &*clock).unwrap();
+    assert!(rollback.clock_rollback);
+    assert_eq!(rollback.date_watermark, date(31));
+    assert!(rollback.homework.is_empty());
+    assert_eq!(rollback.homework_eligible_total, 0);
+}

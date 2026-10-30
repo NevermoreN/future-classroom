@@ -3,13 +3,20 @@
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
 use fc_domain::{
-    auth::*, content::*, identity::*, ids::*, schedule_document::ScheduleDocument, time::*,
+    auth::*,
+    content::*,
+    desktop::{DesktopFacts, DisplaySettings},
+    identity::*,
+    ids::*,
+    schedule_document::ScheduleDocument,
+    time::*,
 };
 use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery,
     prepare_recovery_rotation, Clock, CredentialCrypto, CredentialIdentityRepository,
-    IdentityRepositoryError, IdentityRequest, MonotonicClock, PreparedCredentialChange,
-    RandomSource, RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
+    DisplayRepository, DisplayRepositoryError, DisplayRequest, IdentityRepositoryError,
+    IdentityRequest, MonotonicClock, PreparedCredentialChange, RandomSource, RepositoryError,
+    ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityStore, PreparedAuthority},
@@ -46,6 +53,7 @@ pub enum BackendError {
     Identity(IdentityRepositoryError),
     Content(RepositoryError),
     Schedule(ScheduleRepositoryError),
+    Display(DisplayRepositoryError),
     Storage(StorageError),
     InvalidCredentials,
     CryptoUnavailable,
@@ -71,6 +79,11 @@ impl From<SessionError> for BackendError {
 impl From<ScheduleRepositoryError> for BackendError {
     fn from(error: ScheduleRepositoryError) -> Self {
         Self::Schedule(error)
+    }
+}
+impl From<DisplayRepositoryError> for BackendError {
+    fn from(error: DisplayRepositoryError) -> Self {
+        Self::Display(error)
     }
 }
 impl From<RepositoryError> for BackendError {
@@ -102,6 +115,11 @@ struct Control {
 #[derive(Clone)]
 pub struct SessionControl(Arc<Control>);
 impl SessionControl {
+    /// Read-only render gate; the UI can reject stale facts without taking the
+    /// backend or session ledger mutex and without refreshing a management lease.
+    pub fn health_gate(&self) -> HealthGate {
+        self.0.health.clone()
+    }
     /// Immediately fail the real authority gate without waiting for a backend
     /// mutex/KDF. This irreversible fault also cancels old effect permissions.
     pub fn fault(&self) {
@@ -942,6 +960,41 @@ impl Backend {
         self.apply(&transition)?;
         Ok(next)
     }
+    pub fn read_display(&self, lease: SessionLease) -> Result<DisplaySettings> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .display(&actor)?)
+    }
+    /// Publish the UI's captured independent display revision, preserving stale drafts.
+    pub fn save_display(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        settings: DisplaySettings,
+    ) -> Result<DisplaySettings> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let request = DisplayRequest {
+            command_id: self.command_id()?,
+            expected_revision,
+            candidate: settings,
+        };
+        let mut repository = self.guarded(lease, generation, SessionPurpose::Manage);
+        Ok(repository.execute_display(request, &actor, self.clock.as_ref())?)
+    }
+    /// Trusted local presentation read. No management lease is fabricated or renewed.
+    pub fn desktop_facts(&self, homework_offset: usize) -> Result<DesktopFacts> {
+        self.check_open()?;
+        let offset = u64::try_from(homework_offset).map_err(|_| BackendError::InvalidInput)?;
+        let facts = self.repository.desktop_facts(offset, self.clock.as_ref())?;
+        self.check_open()?;
+        if self.control.0.health.status().revision != facts.global_revision {
+            return Err(BackendError::Display(DisplayRepositoryError::Unavailable));
+        }
+        Ok(facts)
+    }
     pub fn read_schedule(&self, lease: SessionLease) -> Result<ScheduleDocument> {
         let state = self.state()?;
         let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
@@ -1674,6 +1727,84 @@ mod tests {
         assert_eq!(restored.0.global_revision().unwrap(), global);
         let admin = policy_lease(&restored.0, 1, TrustedOrigin::Local);
         assert_eq!(restored.0.read_schedule(admin).unwrap(), saved);
+        restored.0.close().unwrap();
+    }
+    #[test]
+    fn display_backend_uses_captured_cas_and_public_facts_do_not_renew_management() {
+        use fc_domain::desktop::{ClockMode, DisplayError};
+        let directory = Directory::new();
+        let clock = Arc::new(TestClock::new());
+        let mut service = open(&directory, clock.clone());
+        policy_accounts(&mut service.0);
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        service
+            .0
+            .identity(
+                admin,
+                IdentityCommand::BindCurrentClass {
+                    id: ClassId::new(1).unwrap(),
+                },
+            )
+            .unwrap();
+        let mut draft = service.0.read_display(admin).unwrap();
+        draft.clock_mode = ClockMode::Digital12;
+        let saved = service
+            .0
+            .save_display(admin, Revision::default(), draft.clone())
+            .unwrap();
+        assert_eq!(saved.revision, Revision::new(1));
+        assert!(
+            matches!(service.0.save_display(admin,Revision::default(),draft),Err(BackendError::Display(DisplayRepositoryError::Domain(DisplayError::RevisionConflict{current})))if current==Revision::new(1))
+        );
+        service
+            .0
+            .content(
+                admin,
+                ContentCommand {
+                    command_id: CommandId::new(7800).unwrap(),
+                    key: ContentKey::Homework(HomeworkKey {
+                        class_id: ClassId::new(1).unwrap(),
+                        actual_date: clock.wall.date,
+                        subject_id: SubjectId::new(1).unwrap(),
+                        owner_teacher_id: PrincipalId::new(2).unwrap(),
+                    }),
+                    expected_revision: Revision::default(),
+                    text: "public desktop homework".into(),
+                },
+            )
+            .unwrap();
+        clock.tick.store(299_999, Ordering::Release);
+        let facts = service.0.desktop_facts(0).unwrap();
+        assert_eq!(facts.display, saved);
+        assert_eq!(facts.homework[0].text, "public desktop homework");
+        assert_eq!(
+            service.0.session_control().health_gate().status().revision,
+            facts.global_revision
+        );
+        clock.tick.store(300_001, Ordering::Release);
+        assert!(service
+            .0
+            .check_session(admin, SessionPurpose::Manage)
+            .is_err());
+        service.0.session_control().lock_local();
+        assert_eq!(
+            service.0.desktop_facts(0).unwrap().homework[0].text,
+            "public desktop homework"
+        );
+        let teacher = policy_lease(&service.0, 2, TrustedOrigin::Local);
+        assert!(service.0.read_display(teacher).is_err());
+        assert!(service
+            .0
+            .save_display(teacher, saved.revision, saved.clone())
+            .is_err());
+        let global = service.0.global_revision().unwrap();
+        service.0.close().unwrap();
+        drop(service);
+        let mut restored = open(&directory, clock);
+        assert_eq!(restored.0.global_revision().unwrap(), global);
+        assert_eq!(restored.0.desktop_facts(0).unwrap().display, saved);
+        restored.0.session_control().fault();
+        assert!(restored.0.desktop_facts(0).is_err());
         restored.0.close().unwrap();
     }
 }
