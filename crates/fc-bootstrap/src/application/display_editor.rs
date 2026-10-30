@@ -19,6 +19,8 @@ pub(super) const MIN_WIDTH: FieldId = FieldId(214);
 pub(super) const MAX_WIDTH: FieldId = FieldId(215);
 pub(super) const MIN_HEIGHT: FieldId = FieldId(216);
 pub(super) const MAX_HEIGHT: FieldId = FieldId(217);
+pub(super) const GLASS: FieldId = FieldId(218);
+pub(super) const REFLECTION: FieldId = FieldId(219);
 pub(super) const APPLY: ActionId = ActionId(200);
 pub(super) const SAVE_ALL: ActionId = ActionId(201);
 pub(super) const COMPONENTS: ActionId = ActionId(202);
@@ -224,7 +226,7 @@ impl Editor {
         }
     }
     pub(super) fn view(&self, status: &str, busy: bool) -> View {
-        let mut v=View{title:"桌面显示设置".into(),description:"修改先保留为草稿，点击“保存全部”才生效。草稿仅在本次运行保留，退出前请保存。玻璃材质3%，边缘反射50%，文字透明度与玻璃分开。".into(),status:status.into(),fields:vec![],actions:vec![],busy,grid:None};
+        let mut v=View{title:"桌面显示设置".into(),description:"修改先保留为草稿，点击“保存全部”才生效。草稿仅在本次运行保留，退出前请保存。0%完全透明，100%不透明；玻璃填充、边缘反射和组件整体Alpha分别设置，文字不乘玻璃填充。".into(),status:status.into(),fields:vec![],actions:vec![],busy,grid:None};
         match self.page {
             Page::Main => {
                 let s = &self.settings;
@@ -248,14 +250,26 @@ impl Editor {
                     toggle(FILL, "显示科目底色", s.subject_fill),
                     plain(
                         COURSE_ALPHA,
-                        "课程胶囊填充透明度（0–100）",
+                        "课程胶囊填充不透明度（0–100%）",
                         s.course_fill_percent.to_string(),
                         3,
                     ),
                     plain(
                         HOMEWORK_ALPHA,
-                        "作业科目标记透明度（0–100）",
+                        "作业科目标记不透明度（0–100%）",
                         s.homework_fill_percent.to_string(),
+                        3,
+                    ),
+                    plain(
+                        GLASS,
+                        "玻璃填充不透明度（0–100%，默认3%）",
+                        s.glass_surface_percent.to_string(),
+                        3,
+                    ),
+                    plain(
+                        REFLECTION,
+                        "边缘反射强度（0–100%，默认50%）",
+                        s.edge_reflection_percent.to_string(),
                         3,
                     ),
                     choose(
@@ -368,7 +382,7 @@ impl Editor {
                     ClockMode::Digital24 => fc_presentation::ClockStyle::Digital24,
                     _ => fc_presentation::ClockStyle::Digital12,
                 };
-                v.description=format!("时钟示例：{}\n课程底色{}%，作业标记{}%；文字不乘底色Alpha。\n{}\n此页为参数预览。保存后关闭工作台，展示只在系统桌面前台出现；PPT、其他应用或锁屏时隐藏。",now.map(|n|fc_presentation::format_clock(n,style,s.clock_seconds)).unwrap_or("系统时间不可用".into()),s.course_fill_percent,s.homework_fill_percent,s.components.iter().map(|c|format!("{}：{}，{}%，字号{}",label(c.kind),if c.visible{"显示"}else{"隐藏"},c.opacity_percent,c.font_dip)).collect::<Vec<_>>().join("\n"));
+                v.description=format!("时钟示例：{}\n课程底色{}%，作业标记{}%；文字不乘底色Alpha。\n玻璃填充{}%，边缘反射{}%。\n{}\n此页为参数预览。保存后关闭工作台，展示只在系统桌面前台出现；PPT、其他应用或锁屏时隐藏。",now.map(|n|fc_presentation::format_clock(n,style,s.clock_seconds)).unwrap_or("系统时间不可用".into()),s.course_fill_percent,s.homework_fill_percent,s.glass_surface_percent,s.edge_reflection_percent,s.components.iter().map(|c|format!("{}：{}，{}%，字号{}",label(c.kind),if c.visible{"显示"}else{"隐藏"},c.opacity_percent,c.font_dip)).collect::<Vec<_>>().join("\n"));
                 v.actions = vec![action(EDIT_BACK, "返回显示设置")];
             }
             Page::Discard => {
@@ -480,6 +494,8 @@ impl Editor {
         next.subject_fill = yes(data, FILL)?;
         next.course_fill_percent = percent(data, COURSE_ALPHA)?;
         next.homework_fill_percent = percent(data, HOMEWORK_ALPHA)?;
+        next.glass_surface_percent = percent(data, GLASS)?;
+        next.edge_reflection_percent = percent(data, REFLECTION)?;
         next.text_tone = match raw(data, TONE) {
             "light" => TextTone::Light,
             "dark" => TextTone::Dark,
@@ -541,6 +557,35 @@ mod tests {
             .find(|f| f.id == id)
             .unwrap()
             .value
+    }
+    #[test]
+    fn material_controls_are_atomic_bounded_drafts_and_preserve_captured_revision() {
+        let mut e = editor();
+        let original = e.settings.clone();
+        let mut data = form(&e);
+        set(&mut data, GLASS, "0");
+        set(&mut data, REFLECTION, "100");
+        e.handle(APPLY, data).unwrap();
+        assert_eq!(e.settings.glass_surface_percent, 0);
+        assert_eq!(e.settings.edge_reflection_percent, 100);
+        assert_eq!(e.settings.revision, original.revision);
+        assert_eq!(e.settings.components, original.components);
+        let applied = e.settings.clone();
+        let mut data = form(&e);
+        set(&mut data, GLASS, "21");
+        set(&mut data, REFLECTION, "101");
+        assert!(e.handle(APPLY, data).is_err());
+        assert_eq!(e.settings, applied);
+        assert_eq!(value(&e, GLASS), "21");
+        assert_eq!(value(&e, REFLECTION), "101");
+        let mut data = form(&e);
+        set(&mut data, REFLECTION, "50");
+        let Command::Save { expected, settings } = e.handle(SAVE_ALL, data).unwrap() else {
+            panic!("explicit save must own the final draft")
+        };
+        assert_eq!(expected, original.revision);
+        assert_eq!(settings.glass_surface_percent, 21);
+        assert_eq!(settings.edge_reflection_percent, 50);
     }
     #[test]
     fn invalid_partial_main_survives_error_close_and_lock_capture() {

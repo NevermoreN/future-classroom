@@ -127,9 +127,7 @@ impl DisplaySettings {
         self.components.iter().find(|c| c.kind == kind)
     }
     pub fn validate(&self) -> Result<(), DisplayError> {
-        if self.glass_surface_percent != 3
-            || self.edge_reflection_percent != 50
-            || self.components.len() != 8
+        if self.components.len() != 8
             || [
                 self.course_fill_percent,
                 self.homework_fill_percent,
@@ -214,6 +212,7 @@ pub struct DesktopFacts {
     pub schedule: ScheduleDocument,
     pub lesson_context: crate::lesson_context::LessonContextSnapshot,
     pub display: DisplaySettings,
+    pub profiles: crate::profile::ProfileSelectionSnapshot,
     pub homework_offset: u64,
     pub homework_eligible_total: u64,
     pub homework: Vec<ContentRecord>,
@@ -234,6 +233,15 @@ impl DesktopFacts {
             || self.identity.revision > self.global_revision
             || self.schedule.revision > self.global_revision
             || self.display.revision > self.global_revision
+            || self.profiles.public_layout.revision > self.global_revision
+            || self
+                .profiles
+                .subject_profile
+                .as_ref()
+                .is_some_and(|profile| {
+                    profile.revision > self.global_revision
+                        || profile.layout_revision > self.global_revision
+                })
             || self.clock_rollback != (self.captured_at.date < self.date_watermark)
             || self.date_watermark < self.captured_at.date
         {
@@ -323,6 +331,14 @@ impl DesktopFacts {
             page.validate(&self.identity, crate::materials::DESKTOP_MATERIAL_PAGE)
                 .map_err(|_| DisplayError::InvalidFacts)?;
         }
+        self.profiles
+            .validate(
+                &self.identity,
+                &self.lesson_context,
+                self.captured_at,
+                self.materials_page.as_ref().map(|page| &page.folder),
+            )
+            .map_err(|_| DisplayError::InvalidFacts)?;
         for (i, record) in self.homework.iter().enumerate() {
             self.validate_record(record)?;
             let ContentKey::Homework(k) = &record.key else {
@@ -400,11 +416,19 @@ mod tests {
         (identity, actor, now)
     }
     #[test]
-    fn exact_components_bounded_percent_font_and_fixed_glass() {
+    fn exact_components_bounded_percent_font_and_global_material_defaults() {
         let settings = DisplaySettings::default();
         settings.validate().unwrap();
         assert_eq!(settings.course_fill_percent, 20);
         assert_eq!(settings.homework_fill_percent, 3);
+        assert_eq!(settings.glass_surface_percent, 3);
+        assert_eq!(settings.edge_reflection_percent, 50);
+        for percent in [0, 100] {
+            let mut candidate = settings.clone();
+            candidate.glass_surface_percent = percent;
+            candidate.edge_reflection_percent = percent;
+            candidate.validate().unwrap();
+        }
         for mutation in 0..6 {
             let mut candidate = settings.clone();
             match mutation {
@@ -412,8 +436,8 @@ mod tests {
                 1 => candidate.components[0].font_dip = 9,
                 2 => candidate.components[1].kind = ComponentKind::Clock,
                 3 => candidate.components[0].min_width = 4097,
-                4 => candidate.glass_surface_percent = 100,
-                _ => candidate.edge_reflection_percent = 0,
+                4 => candidate.glass_surface_percent = 101,
+                _ => candidate.edge_reflection_percent = 101,
             };
             assert_eq!(candidate.validate(), Err(DisplayError::InvalidSettings))
         }
@@ -462,6 +486,7 @@ mod tests {
             schedule: ScheduleDocument::default(),
             lesson_context: Default::default(),
             display: DisplaySettings::default(),
+            profiles: Default::default(),
             homework_offset: 0,
             homework_eligible_total: 0,
             homework: vec![],

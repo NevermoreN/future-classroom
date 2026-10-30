@@ -144,48 +144,74 @@ pub(super) fn read_settings(v: &Value) -> Result<DisplaySettings, StorageError> 
     Ok(result)
 }
 pub(super) fn facts(d: &DesktopFacts) -> Value {
-    json!({"format":1,"global_revision":d.global_revision.get(),"captured_at":time(d.captured_at),
+    json!({"format":2,"global_revision":d.global_revision.get(),"captured_at":time(d.captured_at),
         "date_watermark":date(d.date_watermark),"clock_rollback":d.clock_rollback,
-        "lesson_context":super::lesson_codec::snapshot(&d.lesson_context),"identity":identity(&d.identity),"schedule":schedule_codec::document(&d.schedule),"display":settings(&d.display),
+        "profiles":super::profiles_codec::selection(&d.profiles),"lesson_context":super::lesson_codec::snapshot(&d.lesson_context),"identity":identity(&d.identity),"schedule":schedule_codec::document(&d.schedule),"display":settings(&d.display),
         "homework_offset":d.homework_offset,"homework_eligible_total":d.homework_eligible_total,
         "homework":d.homework.iter().map(record).collect::<Vec<_>>(),"reminder":d.reminder.as_ref().map(record),"materials_source":d.materials_source.as_ref().map(super::materials_codec::source),"materials_page":d.materials_page.as_ref().map(super::materials_codec::page)})
 }
 pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
-    object_fields(
-        v,
-        &[
-            "format",
-            "global_revision",
-            "captured_at",
-            "date_watermark",
-            "clock_rollback",
-            "identity",
-            "schedule",
-            "lesson_context",
-            "display",
-            "homework_offset",
-            "homework_eligible_total",
-            "homework",
-            "reminder",
-            "materials_source",
-            "materials_page",
-        ],
-    )?;
-    if number(v, "format")? != 1 {
+    let format = number(v, "format")?;
+    let mut fields = vec![
+        "format",
+        "global_revision",
+        "captured_at",
+        "date_watermark",
+        "clock_rollback",
+        "identity",
+        "schedule",
+        "lesson_context",
+        "display",
+        "homework_offset",
+        "homework_eligible_total",
+        "homework",
+        "reminder",
+        "materials_source",
+        "materials_page",
+    ];
+    if format == 2 {
+        fields.push("profiles")
+    } else if format != 1 {
         return Err(StorageError::Database);
     }
+    object_fields(v, &fields)?;
     let homework = array(v, "homework")?;
     if homework.len() + usize::from(!v["reminder"].is_null()) > 64 {
         return Err(StorageError::Database);
     }
+    let identity = read_identity(&v["identity"])?;
+    let lesson_context = super::lesson_codec::read_snapshot(&v["lesson_context"])?;
+    let profiles = if format == 2 {
+        super::profiles_codec::read_selection(&v["profiles"])?
+    } else {
+        use fc_domain::profile::{ProfileSelectionReason as R, ProfileSelectionSnapshot};
+        let reason = match &lesson_context.current {
+            None => R::Public,
+            Some(c) => match c.teacher_id {
+                None => R::Unassigned,
+                Some(t) => {
+                    if identity.is_teacher(t, c.key.class_id, c.effective.subject_id) {
+                        R::Missing
+                    } else {
+                        R::InvalidAssignment
+                    }
+                }
+            },
+        };
+        ProfileSelectionSnapshot {
+            reason,
+            ..Default::default()
+        }
+    };
     let facts = DesktopFacts {
         global_revision: Revision::new(number(v, "global_revision")?),
         captured_at: read_time(&v["captured_at"])?,
         date_watermark: read_date(&v["date_watermark"])?,
         clock_rollback: boolean(v, "clock_rollback")?,
-        identity: read_identity(&v["identity"])?,
+        identity,
         schedule: schedule_codec::read_document(&v["schedule"])?,
-        lesson_context: super::lesson_codec::read_snapshot(&v["lesson_context"])?,
+        lesson_context,
+        profiles,
         display: read_settings(&v["display"])?,
         homework_offset: number(v, "homework_offset")?,
         homework_eligible_total: number(v, "homework_eligible_total")?,

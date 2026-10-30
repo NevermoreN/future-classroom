@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "startedUtc": "2026-10-30T18:04:11.962586+00:00",
+  "scope": "One separately compiled fc_windows library test EXE over authorized noninteractive SSH; separate supplemental targeted evidence, not final full-suite count",
+  "role": "Producer-owned sources executed independently from root final runner; not an independent source security audit",
+  "remoteHost": "elior@192.168.10.212",
+  "testArguments": [
+    "--test-threads=2",
+    "--nocapture"
+  ],
+  "testTimeoutSeconds": 600,
+  "metadata": "/tmp/fc-round16-native-test-metadata.jsonl",
+  "metadataSha256": "34c870500b48d69b88677a2918b076af0f4df552b18d370494f702edf9ac04bc",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-windows#0.1.0",
+    "manifest_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [],
+    "filenames": [
+      "/tmp/fc-round16-native-target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe"
+    ],
+    "executable": "/tmp/fc-round16-native-target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "fresh": true
+  },
+  "testExe": {
+    "path": "/tmp/fc-round16-native-target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "sha256": "7d72a0287b4c306bd3c87e61d88b8988d9ede1aeaf5f88e4b85b8174675eb719",
+    "bytes": 58087383,
+    "peMachine": 332
+  },
+  "sourceAggregateSha256": "b39fd78b46a43c3d90cd12d69e2e21514fc5cb7c621bb79fb3266a37b35ceb97",
+  "sourcesBefore": [
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "sha256": "0aa3a7ed8868cb71efac3ec73073e3d3a5357032fb12f62a16d44de37ff7a8e1",
+      "bytes": 15391
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "sha256": "1ceff05759bef1eafdff02d18d763a6634516747190440ac09b2d0d345a07b0a",
+      "bytes": 22745
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "sha256": "2fc5ad03110d2e766dc21d0b96bff0ec6eeba097555525b44693bbba2eb965f7",
+      "bytes": 13660
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "sha256": "ccfd6323545c7f226576edfeaaaceb72a424425971ecb06f27ed7aca07108881",
+      "bytes": 27311
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "sha256": "55a419ba9d9727e7bc1d521e8942e4c198854ccf7d2160d8f03a9fc2db0200be",
+      "bytes": 35368
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "sha256": "e1004e5697fa24979d0d5fdb796af393d43e26a72bb03760d757a757f9ebf620",
+      "bytes": 119834
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "sha256": "e151fc45dca2544cb4060dd35a22a45270b5c2ca4aacde3a3e74f0a7baa3fe2d",
+      "bytes": 67605
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "sha256": "3764ddd8f59cb289f31e54a5850b4bdad87b963cd238e8c4fb54dd053673775e",
+      "bytes": 17632
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "sha256": "ca29ef3fc39cf200fb2eb08582ae018e872c78f26dba403d1f43ae82a4733d1c",
+      "bytes": 21451
+    }
+  ],
+  "canvasFreeze": {
+    "confirmedBy": "/root/business_storage",
+    "confirmedUtc": "2026-10-30T18:03:46.973164+00:00",
+    "sources": [
+      {
+        "path": "crates/fc-windows/src/workbench.rs",
+        "sha256": "81195201b75bd094b27333c7bc80f5f7c9afb4014a4b330a15427a4db0582155"
+      },
+      {
+        "path": "crates/fc-windows/src/workbench/preview.rs",
+        "sha256": "de049603b262b19166a57c66c71dcf4bba864c5d4c0fca0c129d1636adb4379d"
+      },
+      {
+        "path": "crates/fc-presentation/src/workbench.rs",
+        "sha256": "1272585f06cc354b7ca8c8ba7a4e01702119abc3ffa9981b38a8daf58fc3248f"
+      }
+    ]
+  },
+  "scheduledTaskCreated": false,
+  "cleanup": "PASS",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "seewo": "NOT_VALIDATED",
+  "platform": {
+    "build": "26300",
+    "version": "10.0.26300",
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "sshd": "Running",
+    "sessionId": 0
+  },
+  "remoteDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec",
+  "cleanupMarker": "19c24e65a69648a1b0c2fb1a137454ec",
+  "remoteExeSha256": "7d72a0287b4c306bd3c87e61d88b8988d9ede1aeaf5f88e4b85b8174675eb719",
+  "remotePowerShellScript": "$env:TEMP=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec' 'temp';New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$exe=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec' 'fc_windows-a8df1002bc9e60b7.exe';$log=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec' 'complete-test.log';$ErrorActionPreference='Continue';$output=@(& $exe --test-threads=2 --nocapture 2>&1|ForEach-Object{\"$_\"}|Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;temp=$env:TEMP;tmp=$env:TMP;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Depth 5 -Compress",
+  "executionElapsedSeconds": 14.930799527093768,
+  "test": {
+    "output": [
+      "",
+      "running 67 tests",
+      "test audio::device::tests::endpoint_changes_ignore_capture_other_roles_and_unrelated_usb ... ok",
+      "test audio::tests::deferred_start_has_no_native_submission_and_resumes_same_source_once ... ok",
+      "test audio::tests::deferral_after_prepare_preserves_ready_block_order_and_never_counts_done_early ... ok",
+      "test audio::tests::failed_reset_even_when_all_buffers_return_releases_safely_but_forbids_reopening ... ok",
+      "test audio::tests::late_return_and_stillplaying_keep_allocations_and_admission_closed ... ok",
+      "test audio::tests::not_run_device_classification_does_not_hide_unexpected_driver_errors ... ok",
+      "test audio::tests::reset_done_releases_without_counting_natural_and_stale_stop_cannot_cancel ... ok",
+      "test audio::tests::revoked_authority_and_failed_write_use_cleanup_without_a_natural_event ... ok",
+      "test audio::tests::stream_reuses_three_fixed_addresses_and_releases_before_natural_completion ... ok",
+      "test desktop::tests::filename_hit_rectangles_bind_source_and_resource_versions_and_reject_stale_actions ... ok",
+      "FC_ROUND6_MEMORY width=1920 height=1080 before_working_set=18296832 before_private_bytes=4927488 after_working_set=27201536 after_private_bytes=12058624 context=hidden_process_before_synthetic_capture_not_DWM",
+      "FC_ROUND6_METRICS width=1920 height=1080 dib_bytes=3025792 backdrop_pixels=1127648 gdi_before=(27, 14) gdi_after=(27, 14)",
+      "FC_ROUND6_MEMORY width=3840 height=2160 before_working_set=27262976 before_private_bytes=12058624 after_working_set=29876224 after_private_bytes=15462400 context=hidden_process_before_synthetic_capture_not_DWM",
+      "FC_ROUND6_METRICS width=3840 height=2160 dib_bytes=4806080 backdrop_pixels=6375488 gdi_before=(27, 14) gdi_after=(27, 14)",
+      "test desktop::tests::full_1080p_and_4k_recess_regions_preserve_alpha_with_bounded_dibs ... ok",
+      "test desktop::tests::lesson_control_uses_only_its_button_and_cancels_old_scene_input ... ok",
+      "test desktop::tests::long_filename_pages_preserve_extension_and_only_visible_text_accepts_input ... ok",
+      "test desktop::tests::native_readonly_buttons_turn_local_pages_then_request_bounded_homework_batches ... ok",
+      "test desktop::tests::one_hundred_real_scene_rebuilds_release_handles_and_denied_ticks_do_zero_work ... ok",
+      "test desktop::tests::real_com_dib_text_pages_and_three_clocks_remain_offscreen ... ok",
+      "test desktop::tests::stale_gate_generation_revision_expired_date_and_alpha_zero_never_draw ... ok",
+      "test desktop::tree::additional_tests::material_visible_rows_and_row_gap_are_actual_native_pagination_constraints ... ok",
+      "test desktop::tree::recess_tests::four_k_recess_partitions_native_background_holes_and_combines_alpha_once ... ok",
+      "test desktop::tree::tests::combined_root_cache_and_simultaneous_scratch_are_rejected_at_original_budget ... ok",
+      "test desktop::tree::tests::empty_transparent_model_group_remains_selectable_metadata_without_a_surface ... ok",
+      "test desktop::tree::tests::native_clock_tick_changes_only_owned_patch_without_remeasuring_tree ... ok",
+      "test desktop::tree::tests::native_homework_title_and_body_share_one_leaf_and_real_pages ... ok",
+      "test desktop::tree::tests::native_tree_page_is_bound_to_exact_node_when_component_kind_repeats ... ok",
+      "test desktop::tree::tests::resident_and_preview_renderers_share_class_registration_until_last_owner ... ok",
+      "test desktop::tree::tests::true_subtree_group_has_single_alpha_in_overlap_and_no_leaf_hwnds ... ok",
+      "test http::lifecycle::tests::both_accepted_return_codes_wait_but_inline_failure_withdraws_without_packet ... ok",
+      "test http::lifecycle::tests::cancellation_ack_never_releases_the_original_io ... ok",
+      "test http::lifecycle::tests::closing_generation_cannot_publish_into_new_cycle_or_reuse_slot_early ... ok",
+      "test http::lifecycle::tests::fixed_eight_slots_bound_all_admission ... ok",
+      "test http::lifecycle::tests::original_completion_before_cancel_ack_also_retains_the_slot ... ok",
+      "test http::lifecycle::tests::sync_success_and_pending_keep_ownership_until_one_completion ... ok",
+      "test http::native::tests::captured_completion_hresult_is_decoded_without_thread_last_error ... ok",
+      "test http::native::tests::fixed_header_is_aligned_and_pointer_tables_cannot_escape_allocation ... ok",
+      "test http::native::tests::invalid_function_requires_exact_synchronously_confirmed_disconnection ... ok",
+      "test http::native::tests::native_slack_does_not_expand_wire_header_budget ... ok",
+      "test http::native::tests::raw_target_and_ssl_pointer_are_range_checked_before_use ... ok",
+      "test http::native::tests::rejected_body_and_rejected_cancel_vacate_only_their_own_records ... ok",
+      "test host::tests::hidden_top_level_routes_events_and_control_stops_without_queue ... ok",
+      "test materials::files::tests::native_file_capabilities_reject_aliases_and_oversized_enumeration ... ok",
+      "test materials::files::tests::private_file_publish_cancel_mapping_and_exclusive_cleanup ... ok",
+      "test materials::shell::tests::lazy_sta_retires_and_restarts_without_losing_a_queued_request ... ok",
+      "System.Management.Automation.RemoteException",
+      "thread 'fc-shell-sta' (39680) panicked at crates/fc-windows/src/materials/shell.rs:780:29:",
+      "injected memory-guard panic",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "test materials::shell::tests::recheck_panic_faults_gate_and_production_owner_cannot_open_from_noninteractive_session ... ok",
+      "test materials::shell::tests::sta_queue_results_and_shutdown_stay_bounded_and_private_association_is_removed ... ok",
+      "test system::autorun::tests::quoted_absolute_command_and_exclusive_test_registry_roundtrip ... ok",
+      "test system::clock::tests::native_current_clock_provides_valid_civil_and_monotonic_times ... ok",
+      "test system::crypto::tests::current_user_dpapi_roundtrip_tamper_and_bounds ... ok",
+      "test system::paths::tests::isolated_deployment_acl_and_cross_handle_exclusion ... ok",
+      "test system::tests::native_thread_cpu_clock_is_monotonic ... ok",
+      "test materials::shell::tests::stale_scope_expiry_and_memory_guard_cancel_before_any_native_open ... ok",
+      "test tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline ... ok",
+      "test tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked ... ok",
+      "test workbench::preview::tests::native_layout_preview_opaque_checker_select_drag_reorder_and_hidden_capture_is_untouched ... ok",
+      "test workbench::preview::tests::native_layout_preview_replacement_busy_clip_scope_and_lock_reject_stale_gestures ... ok",
+      "test workbench::preview::tests::native_layout_preview_strict_capacity_generations_and_owned_child_cleanup ... ok",
+      "TCP_FRONTDOOR_CANDIDATE_PASS FrontdoorProbeReport { cycles: 3, accept_submissions: 12, accept_completions: 12, canceled_accepts: 4, accepted: 8, headers: 1, deadline_closes: 6, header_limit_closes: 1, capacity_listener_closes: 2, connect_age_seconds: [1, 1, 1, 1, 1, 1, 1, 1], wire_close_nanos: [5000270700, 5000202800, 5000147800, 5000099100, 1200622900, 5001117800, 1222697300, 5001003100], delayed_poll_millis: 1200, fixed_owner_bytes: 66176, diagnostic_vector_payload_capacity_bytes: 80, cleanup_complete: true } TLS_NOT_RUN hard_kernel_bound_UNPROVEN full_TCP_to_header_5s_UNPROVEN",
+      "test tcp_frontdoor::native::tests::native_finite_admission_deadline_and_drain ... ok",
+      "test workbench::tests::busy_and_disabled_actions_refuse_commands_and_close_wipes_revealed_secret ... ok",
+      "test workbench::tests::hidden_events_are_bounded_and_invalid_native_text_is_never_truncated_into_a_form ... ok",
+      "test workbench::tests::hidden_native_form_preserves_drafts_masks_and_consumes_password_without_activation ... ok",
+      "test workbench::tests::hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields ... ok",
+      "test workbench::tests::isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes ... ok",
+      "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok",
+      "test workbench::tests::native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts ... ok",
+      "test workbench::tests::native_timetable_grid_and_combo_use_bounded_stable_selections ... ok",
+      "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... ok",
+      "test workbench::tests::repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources ... ok",
+      "test workbench::tests::repeated_hidden_render_and_submit_do_not_accumulate_native_resources ... ok",
+      "",
+      "test result: ok. 67 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.34s",
+      ""
+    ],
+    "exitCode": 0,
+    "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec\\temp",
+    "tmp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-NativeTargeted-19c24e65a69648a1b0c2fb1a137454ec\\temp",
+    "sessionId": 0
+  },
+  "stdoutLog": "/tmp/fc-round16-windows-native-targeted.log",
+  "stdoutSha256": "8080471977af5833b8b9c3508406cf5f848cc40d05815b874adccae76a8e66fe",
+  "testSummaryLines": [
+    "running 67 tests",
+    "test result: ok. 67 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.34s"
+  ],
+  "newNativeTests": {
+    "true_subtree_group_has_single_alpha_in_overlap_and_no_leaf_hwnds": true,
+    "native_tree_page_is_bound_to_exact_node_when_component_kind_repeats": true,
+    "native_clock_tick_changes_only_owned_patch_without_remeasuring_tree": true,
+    "combined_root_cache_and_simultaneous_scratch_are_rejected_at_original_budget": true,
+    "native_homework_title_and_body_share_one_leaf_and_real_pages": true,
+    "material_visible_rows_and_row_gap_are_actual_native_pagination_constraints": true,
+    "four_k_recess_partitions_native_background_holes_and_combines_alpha_once": true,
+    "resident_and_preview_renderers_share_class_registration_until_last_owner": true,
+    "empty_transparent_model_group_remains_selectable_metadata_without_a_surface": true
+  },
+  "failedTestLines": [],
+  "sourcesAfter": [
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "sha256": "0aa3a7ed8868cb71efac3ec73073e3d3a5357032fb12f62a16d44de37ff7a8e1",
+      "bytes": 15391
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "sha256": "1ceff05759bef1eafdff02d18d763a6634516747190440ac09b2d0d345a07b0a",
+      "bytes": 22745
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "sha256": "2fc5ad03110d2e766dc21d0b96bff0ec6eeba097555525b44693bbba2eb965f7",
+      "bytes": 13660
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "sha256": "ccfd6323545c7f226576edfeaaaceb72a424425971ecb06f27ed7aca07108881",
+      "bytes": 27311
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "sha256": "55a419ba9d9727e7bc1d521e8942e4c198854ccf7d2160d8f03a9fc2db0200be",
+      "bytes": 35368
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "sha256": "e1004e5697fa24979d0d5fdb796af393d43e26a72bb03760d757a757f9ebf620",
+      "bytes": 119834
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "sha256": "e151fc45dca2544cb4060dd35a22a45270b5c2ca4aacde3a3e74f0a7baa3fe2d",
+      "bytes": 67605
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "sha256": "3764ddd8f59cb289f31e54a5850b4bdad87b963cd238e8c4fb54dd053673775e",
+      "bytes": 17632
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "sha256": "ca29ef3fc39cf200fb2eb08582ae018e872c78f26dba403d1f43ae82a4733d1c",
+      "bytes": 21451
+    }
+  ],
+  "sourceFreshnessMatch": true,
+  "canvasFreshnessMatch": true,
+  "cleanupAudit": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingTasks": 0,
+    "directoryExists": false,
+    "stoppedProcesses": []
+  },
+  "privateKeyPreserved": true,
+  "privateKeyMode": "0o600",
+  "finishedUtc": "2026-10-30T18:04:30.542978+00:00",
+  "build": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--no-run",
+      "--message-format=json",
+      "--locked",
+      "--target-dir",
+      "/tmp/fc-round16-native-target"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.2842631940729916,
+    "metadataSha256": "34c870500b48d69b88677a2918b076af0f4df552b18d370494f702edf9ac04bc",
+    "stderrSha256": "5e5f0453450ade966f7fb2d529ca8e11377bdc9fc9b545fb5b52ae8375cabcc6"
+  },
+  "rawStructuredOutput": {
+    "path": "/tmp/fc-round16-windows-native-targeted-raw.json",
+    "sha256": "115e1e9c0f3e8e91b36508af99611c8ff7e91f80cbb080bc56092950d07e769f",
+    "bytes": 8796
+  },
+  "actualTests": {
+    "passed": 67,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "newNativeCasesPassed": 9,
+    "rootFinalFullSuite": "NOT_RUN_BY_THIS_TASK",
+    "supplementalOnly": true
+  },
+  "limits": [
+    "All 67 tests ran from exactly one debug opt0 x86 library test EXE on Windows11 build26300 over noninteractive SSH.",
+    "Actual synthetic own hidden HWND/D2D/GDI/socket tests; no foreground, global input, Office or real audio output requested. Audio engine unit cases use Fake drivers.",
+    "Own implementation producer performed this separate runtime verification; this is not an independent source safety audit.",
+    "Formal Windows7/Windows10/Seewo and root final release/full-suite bindings are separate.",
+    "No source edits, assertion changes, build cache cleanup, credential changes or additional remote executable uploads performed."
+  ]
+}

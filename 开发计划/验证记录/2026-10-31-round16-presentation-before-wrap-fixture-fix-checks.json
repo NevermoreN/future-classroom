@@ -1,0 +1,35 @@
+[
+  {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-presentation",
+      "--target-dir",
+      "/tmp/fc-round16-presentation-target",
+      "--lib"
+    ],
+    "exitCode": 101,
+    "elapsedSeconds": 4.123270289041102,
+    "rawLog": "/tmp/fc-round16-presentation-0.log",
+    "rawSha256": "5564d87fcb2e15775c3adf1489bdf3cb495f5da7e00d41e8dc95fc3287d9def5"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-presentation",
+      "--all-targets",
+      "--target-dir",
+      "/tmp/fc-round16-presentation-target",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 4.359858840005472,
+    "rawLog": "/tmp/fc-round16-presentation-1.log",
+    "rawSha256": "00a7674c144e40b897e17601a9fad255e0658af9744be37cace8bf3ccecc76a4"
+  }
+]

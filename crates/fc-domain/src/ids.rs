@@ -28,7 +28,9 @@ ids!(
     FolderId,
     CommandId,
     MaterialId,
-    ResourceVersionId
+    ResourceVersionId,
+    ProfileId,
+    LayoutNodeId
 );
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

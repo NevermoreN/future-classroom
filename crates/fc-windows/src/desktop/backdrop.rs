@@ -106,12 +106,24 @@ pub(super) struct Layer {
     region: Region,
     pub(super) rect: Rect,
     alpha: u8,
+    paint_region: Option<Region>,
+    paint_alpha: f32,
     region_attached: Cell<bool>,
     alpha_set: Cell<bool>,
 }
 impl Layer {
     fn new(class: &Class, rect: Rect, alpha: f32, border: bool) -> Result<Self> {
         let region = Region::shape(rect.width.ceil() as i32, rect.height.ceil() as i32, border)?;
+        Self::with_region(class, rect, alpha, region, None, alpha)
+    }
+    fn with_region(
+        class: &Class,
+        rect: Rect,
+        alpha: f32,
+        region: Region,
+        paint_region: Option<Region>,
+        paint_alpha: f32,
+    ) -> Result<Self> {
         // SAFETY: initially hidden and always transparent/non-activating/non-topmost.
         let window = NativeWindow(unsafe {
             CreateWindowExW(
@@ -134,11 +146,115 @@ impl Layer {
             region,
             rect,
             alpha: (alpha * 255.).round() as u8,
+            paint_region,
+            paint_alpha,
             region_attached: Cell::new(false),
             alpha_set: Cell::new(false),
         };
         layer.apply()?;
         Ok(layer)
+    }
+    fn partitioned(
+        class: &Class,
+        rect: Rect,
+        raw: f32,
+        component: f32,
+        border: bool,
+        fill: f32,
+        excluded: &[Rect],
+    ) -> Result<Self> {
+        let paint = Region::shape(rect.width.ceil() as i32, rect.height.ceil() as i32, border)?;
+        let region = paint.copy()?;
+        // SAFETY: each HRGN is locally owned. Difference results stay in the
+        // destination owner and are transferred only by with_region/apply.
+        unsafe {
+            if !border {
+                let edge =
+                    Region::shape(rect.width.ceil() as i32, rect.height.ceil() as i32, true)?;
+                if CombineRgn(Some(region.0), Some(region.0), Some(edge.0), RGN_DIFF) == RGN_ERROR {
+                    return Err(Error::from_thread());
+                }
+            }
+            for r in excluded {
+                let hole = Region::owned(CreateRectRgn(
+                    (r.x - rect.x).round() as i32,
+                    (r.y - rect.y).round() as i32,
+                    (r.x - rect.x).round() as i32 + r.width.ceil() as i32,
+                    (r.y - rect.y).round() as i32 + r.height.ceil() as i32,
+                ))?;
+                if CombineRgn(Some(region.0), Some(region.0), Some(hole.0), RGN_DIFF) == RGN_ERROR {
+                    return Err(Error::from_thread());
+                }
+            }
+        }
+        let native = if border { raw + fill * (1. - raw) } else { raw };
+        Self::with_region(class, rect, native * component, region, Some(paint), raw)
+    }
+    fn draw_patch(&self, target: &ID2D1DCRenderTarget, patch: Rect) -> Result<()> {
+        let Some(region) = &self.paint_region else {
+            return Ok(());
+        };
+        let rectangles = region.rectangles()?;
+        // SAFETY: only this scene's exact retained GDI region is rasterized onto
+        // its own small D2D target. It is the large card's shape, no inner frame.
+        unsafe {
+            let brush = target.CreateSolidColorBrush(
+                &D2D1_COLOR_F {
+                    r: 1.,
+                    g: 1.,
+                    b: 1.,
+                    a: self.paint_alpha,
+                },
+                None,
+            )?;
+            for r in rectangles {
+                target.FillRectangle(
+                    &D2D_RECT_F {
+                        left: self.rect.x - patch.x + r.left as f32,
+                        top: self.rect.y - patch.y + r.top as f32,
+                        right: self.rect.x - patch.x + r.right as f32,
+                        bottom: self.rect.y - patch.y + r.bottom as f32,
+                    },
+                    &brush,
+                );
+            }
+        }
+        Ok(())
+    }
+    pub(super) fn composite_scaled(
+        &self,
+        pixels: &mut [u8],
+        work: Rect,
+        width: usize,
+        height: usize,
+    ) -> Result<()> {
+        let sx = width as f32 / work.width;
+        let sy = height as f32 / work.height;
+        for r in self.region.rectangles()? {
+            let left = ((self.rect.x - work.x + r.left as f32) * sx)
+                .ceil()
+                .clamp(0., width as f32) as usize;
+            let right = ((self.rect.x - work.x + r.right as f32) * sx)
+                .ceil()
+                .clamp(0., width as f32) as usize;
+            let top = ((self.rect.y - work.y + r.top as f32) * sy)
+                .ceil()
+                .clamp(0., height as f32) as usize;
+            let bottom = ((self.rect.y - work.y + r.bottom as f32) * sy)
+                .ceil()
+                .clamp(0., height as f32) as usize;
+            for y in top..bottom {
+                for x in left..right {
+                    let p = &mut pixels[(y * width + x) * 4..(y * width + x + 1) * 4];
+                    for channel in p.iter_mut() {
+                        *channel = (self.alpha as u16
+                            + (*channel as u16 * (255 - self.alpha as u16) + 127) / 255)
+                            .min(255) as u8;
+                    }
+                }
+            }
+        }
+        Ok(())
     }
     pub(super) fn apply(&self) -> Result<()> {
         // Preserve native HRESULT only. windows::Error::new with a message would
@@ -279,6 +395,23 @@ impl Backdrop {
             fill: Layer::new(class, rect, surface_alpha, false)?,
             edge: Layer::new(class, rect, edge_alpha, true)?,
         })
+    }
+    pub(super) fn new_partitioned(
+        class: &Class,
+        rect: Rect,
+        surface: f32,
+        edge: f32,
+        component: f32,
+        excluded: &[Rect],
+    ) -> Result<Self> {
+        Ok(Self {
+            fill: Layer::partitioned(class, rect, surface, component, false, surface, excluded)?,
+            edge: Layer::partitioned(class, rect, edge, component, true, surface, excluded)?,
+        })
+    }
+    pub(super) fn draw_patch(&self, target: &ID2D1DCRenderTarget, patch: Rect) -> Result<()> {
+        self.fill.draw_patch(target, patch)?;
+        self.edge.draw_patch(target, patch)
     }
     pub(super) fn hide(&self) {
         self.fill.window.hide();

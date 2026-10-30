@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "testCase": "application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+  "arguments": [
+    "--exact",
+    "application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "environment": {
+    "RUST_BACKTRACE": "1",
+    "TEMP": "owned marked remote directory",
+    "TMP": "same owned directory"
+  },
+  "budgetSeconds": 90,
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+    "manifest_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "fc-bootstrap",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [],
+    "filenames": [
+      "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe"
+    ],
+    "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "fresh": false
+  },
+  "metadataSha256": "7abb8f4d29a60f12efc70187d433f52e9027dc59b286b080a59c805dd53c6adc",
+  "binarySha256": "5fa92fcff148607038fb8da528a40e7777d14680434a6d876c51f87fa82705e4",
+  "binaryBytes": 130956780,
+  "sourcesBefore": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "6fc9b22cc4a449c3c2813f1117ac75fab908351a90995634d0aac31f3e349708"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "sha256": "1a6352f49b9dfd0d3a403225bb37c27256c3d2aaa88f410c09a23cabca3ea35b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "sha256": "3959b7eccc070d6934d9d9cfa59662eb19847c02fb320e30ec15271f1cd24f7a"
+    }
+  ],
+  "scope": "Exact previously failing root debug binary unit test; no source edits or assertion changes, no foreground/global input/Office/audio probe invoked",
+  "cleanup": "PASS",
+  "scheduledTaskCreated": false,
+  "startedUtc": "2026-10-30T18:29:10.513581+00:00",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "sshd": "Running",
+    "arch": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "remoteDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72",
+  "remoteBinarySha256": "5fa92fcff148607038fb8da528a40e7777d14680434a6d876c51f87fa82705e4",
+  "command": "$env:TEMP=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72' 'temp';New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE='1';$exe=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72' 'fc_bootstrap-2c9facf31078f737.exe';$log=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72' 'complete-test.log';$ErrorActionPreference='Continue';$output=@(& $exe --exact 'application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft' --nocapture --test-threads=1 2>&1|ForEach-Object{\"$_\"}|Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;temp=$env:TEMP;tmp=$env:TMP;backtrace=$env:RUST_BACKTRACE;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Depth 5 -Compress",
+  "elapsedSeconds": 0.7318219852168113,
+  "test": {
+    "output": [
+      "",
+      "running 1 test",
+      "PROBE_SUBMIT tick=1 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=27 kind=other page=正在打开未来教室",
+      "test application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft ... ok",
+      "",
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 73 filtered out; finished in 0.08s",
+      ""
+    ],
+    "exitCode": 0,
+    "backtrace": "1",
+    "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72\\temp",
+    "sessionId": 0,
+    "tmp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleReaper-fa9ff4e441ac4b22955d996a0a5a7a72\\temp"
+  },
+  "rawLog": "/tmp/fc-round16-idle-fault-reaper-recheck.log",
+  "rawLogSha256": "8c274e5650290bab1c2b5f8e7e5476c8f5606a762e9928fafcc577e932c47b3a",
+  "testSummary": [
+    "running 1 test",
+    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 73 filtered out; finished in 0.08s"
+  ],
+  "cleanupAudit": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingTasks": 0,
+    "directoryExists": false
+  },
+  "sourcesAfter": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "6fc9b22cc4a449c3c2813f1117ac75fab908351a90995634d0aac31f3e349708"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "sha256": "1a6352f49b9dfd0d3a403225bb37c27256c3d2aaa88f410c09a23cabca3ea35b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "sha256": "3959b7eccc070d6934d9d9cfa59662eb19847c02fb320e30ec15271f1cd24f7a"
+    }
+  ],
+  "sourceFreshnessMatch": true,
+  "privateKeyMode": "0o600",
+  "finishedUtc": "2026-10-30T18:29:15.478907+00:00",
+  "buildTerminalObservation": {
+    "observedUtc": "2026-10-30T18:29:10.256849+00:00",
+    "buildFinished": {
+      "reason": "build-finished",
+      "success": true
+    },
+    "activeMatchingCargo": [],
+    "metadataSha256": "7abb8f4d29a60f12efc70187d433f52e9027dc59b286b080a59c805dd53c6adc"
+  },
+  "assertionEvidence": {
+    "exactCasePassed": true,
+    "meaning": "The full exact native test completed its existing assertions: healthy audio predrain, authority fault injection, idle preview revocation, unsaved draft retention, pool finished and pool.join success.",
+    "basis": "Unmodified test body completed with exitCode0; no separate runtime field instrumentation added.",
+    "additionalToRootFinalCount": false
+  },
+  "rawStructuredOutput": {
+    "path": "/tmp/fc-round16-idle-fault-reaper-recheck-raw.json",
+    "sha256": "ed28158dbdbdf3e086a4bf43a58a12f2f185b2791dc8a8ed765ab38664616f3a"
+  },
+  "priorFailureEvidencePreserved": {
+    "report": "/tmp/fc-round16-idle-fault-diagnostic.json",
+    "rawLog": "/tmp/fc-round16-idle-fault-diagnostic.log",
+    "caller": "application.rs:4884:9 audio predrain wait"
+  }
+}

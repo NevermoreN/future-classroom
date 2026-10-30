@@ -1,0 +1,95 @@
+{
+  "round": 16,
+  "scope": "UI-owned native workbench graphics preview and stable scoped tree drag/drop",
+  "recordedAt": "2026-10-30T18:01:48.982565+00:00",
+  "frozen": true,
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 97856,
+      "sha256": "81195201b75bd094b27333c7bc80f5f7c9afb4014a4b330a15427a4db0582155"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/preview.rs",
+      "bytes": 28514,
+      "sha256": "de049603b262b19166a57c66c71dcf4bba864c5d4c0fca0c129d1636adb4379d"
+    },
+    {
+      "path": "crates/fc-presentation/src/workbench.rs",
+      "bytes": 11558,
+      "sha256": "1272585f06cc354b7ca8c8ba7a4e01702119abc3ffa9981b38a8daf58fc3248f"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round16-preview-checks.log",
+      "sha256": "92659c7145b64092a09585c95e24fe78fb84b8bf97cad70dcffe80155e649dc1",
+      "text": "{\"command\": [\"cargo\", \"check\", \"-p\", \"fc-windows\", \"--target\", \"i686-pc-windows-gnu\", \"--lib\", \"--tests\", \"--locked\"]}\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.42s\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-windows\", \"--target\", \"i686-pc-windows-gnu\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.80s\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"test\", \"-p\", \"fc-presentation\", \"--lib\", \"workbench\", \"--locked\"]}\n   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.72s\n     Running unittests src/lib.rs (target/debug/deps/fc_presentation-b9cda297d671ae0a)\n\nrunning 3 tests\ntest workbench::tests::view_refuses_secret_initial_values_and_duplicate_native_bindings ... ok\ntest workbench::tests::secret_forms_reject_duplicates_and_never_debug_credentials ... ok\ntest workbench::tests::timetable_and_choice_contracts_reject_ambiguous_values_and_malformed_spans ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 37 filtered out; finished in 0.01s\n\n{\"exitCode\": 0}\n"
+    },
+    {
+      "path": "/tmp/fc-round16-preview-final-checks.log",
+      "sha256": "9c12aed36c6b2c69b3c4db3d10aea7db93486516f5016181c3c1be36453a987f",
+      "text": "{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-windows\", \"--target\", \"i686-pc-windows-gnu\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.95s\n{\"exitCode\": 0}\n{\"command\": [\"git\", \"diff\", \"--check\", \"--\", \"crates/fc-windows/src/workbench.rs\", \"crates/fc-windows/src/workbench/preview.rs\", \"crates/fc-presentation/src/workbench.rs\"]}\n{\"exitCode\": 0}\n{\"command\": [\"python3\", \"scripts/check-architecture.py\"]}\nArchitecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n{\"exitCode\": 0}\n"
+    },
+    {
+      "path": "/tmp/fc-round16-preview-relayout-check.log",
+      "sha256": "fa360abedea91c89951c5da47abba3693f00e6cb04b4164fdcb5d7628c1cf07a",
+      "text": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.88s\n"
+    },
+    {
+      "path": "/tmp/fc-round16-preview-freeze.log",
+      "sha256": "051c8bfd1b280543655dde52516101f59a8467e52b8ef2df47b2090caf214afd",
+      "text": "{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-windows\", \"--target\", \"i686-pc-windows-gnu\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.77s\n{\"exitCode\": 0}\n{\"command\": [\"rustfmt\", \"--check\", \"--edition\", \"2021\", \"--config\", \"skip_children=true\", \"crates/fc-windows/src/workbench.rs\", \"crates/fc-windows/src/workbench/preview.rs\", \"crates/fc-presentation/src/workbench.rs\"]}\n{\"exitCode\": 0}\n{\"command\": [\"git\", \"diff\", \"--check\", \"--\", \"crates/fc-windows/src/workbench.rs\", \"crates/fc-windows/src/workbench/preview.rs\", \"crates/fc-presentation/src/workbench.rs\"]}\n{\"exitCode\": 0}\n"
+    },
+    {
+      "path": "/tmp/fc-round16-preview-choice-preservation.log",
+      "sha256": "6318f40df8e2b9c583cfced6f518156585dee01fc99efa1c4810f6763bd49cdd",
+      "text": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.34s\n"
+    }
+  ],
+  "verification": {
+    "windowsCrossCheck": "cargo check -p fc-windows --target i686-pc-windows-gnu --lib --tests --locked PASS; compile only, not native execution.",
+    "windowsStrictClippy": "same target --lib --tests -- -D warnings PASS, repeated after final outline/relayout/privacy changes",
+    "format": "scoped rustfmt --check PASS",
+    "diff": "scoped git diff --check PASS",
+    "architecture": "12 crates/33 first-party edges PASS",
+    "hostContractTests": "cargo test -p fc-presentation --lib workbench --locked: 3 passed,0failed (0.01s). These are platform-neutral contract tests, not the native canvas tests."
+  },
+  "nativeTestsPendingExecution": [
+    "workbench::preview::tests::native_layout_preview_opaque_checker_select_drag_reorder_and_hidden_capture_is_untouched",
+    "workbench::preview::tests::native_layout_preview_replacement_busy_clip_scope_and_lock_reject_stale_gestures",
+    "workbench::preview::tests::native_layout_preview_strict_capacity_generations_and_owned_child_cleanup"
+  ],
+  "api": {
+    "types": "LayoutPreview{generation:u64,width:u16,height:u16,bgra:Vec<u8>,nodes:Vec<PreviewNode>}; PreviewNode{key:SceneNodeKey,parent:Option<SceneNodeKey>,rect:Rect,clip:Rect}. Coordinates must already be normalized to the preview raster.",
+    "install": "Window::set_layout_preview(Option<LayoutPreview>)->windows::core::Result<()>",
+    "clear": "Window::clear_layout_preview() releases own child/image/capture and updates scrolling",
+    "selection": "Window::set_layout_selection(Option<SceneNodeKey>)->Result<()>; purely programmatic, no Input or session renewal",
+    "hiddenProbe": "Window::probe_layout_drag(from:(u16,u16),to:(u16,u16))->Result<()>; own hidden child only; refuses visible/busy/suppressed form.",
+    "events": "LayoutSelect{generation,scope,id}; LayoutDrop{generation,scope,source,target,before:Option<LayoutNodeId>}; target=new parent and before=direct child or append None"
+  },
+  "behavior": [
+    "Premultiplied BGRA is blended once in place over synthetic checkerboard, all output alpha255; no wallpaper/desktop sampling. LayoutPreview Debug reports dimensions/counts only, never pixel data.",
+    "At most960x540 and2MiB image bytes/capacity;128nodes; bounded finite geometry, unique scoped identities, parent integrity/cycle depth and premultiplication checked before retaining.",
+    "Native STATIC child paints actual renderer raster via StretchDIBits and separate opaque selection/hover tools; 0% raster alpha does not remove node selection.",
+    "Real mouse selects the deepest clipped node; edge drop emits parent+before precise reorder, middle drop appends into target; new parent/cursor cannot cross scope, generation or move a scope root. Final cloned-tree validation belongs to editor/domain.",
+    "Canvas replacement cancels own press/capture and drops old layout events; same generation retains cached image/selection; hide/LOCK/page structure/title changes discard picture, pending gestures and layout events.",
+    "busy and suppress reject gestures, and event drain rechecks current image generation and current busy state.",
+    "Visible canvas captures only during its mouse-down gesture and releases only if GetCapture matches own HWND; hidden diagnostic mouse path never captures/focuses/activates or sends global input.",
+    "Canvas independent of View literals, integrates existing vertical workbench scroll; child handles and paint DC/temporary brushes released by owned RAII paths."
+  ],
+  "limits": [
+    "Native tests compiled but not executed by this child. Root owns unified Windows11 hidden/visible probe and Win7/10/11 matrix.",
+    "No claim of visible screenshot or actual OS input test; hidden helper dispatches SendMessage only to its own child.",
+    "This scope does not produce raster pixels: tcp_frontdoor owns native compositor producer; root supplies normalized coordinates and final session/generation integration."
+  ],
+  "historicalCompileFailures": [
+    {
+      "evidence": "Console summary only, no full raw file",
+      "cause": "STATIC_STYLES SS_NOTIFY required .0 for WINDOW_STYLE; test helper first passed slice instead of FormData.",
+      "resolution": "Corrected, final Windows cross-check and strictClippy pass."
+    }
+  ],
+  "cleanup": "No remote work, no global input, no native test runtime/process/task/artifact created here; shared target retained under parent instruction, no commit/push.",
+  "finalReviewCorrection": "Same-page selection may change ComboBox options and rebuild ordinary controls; Canvas is independent and now survives those rebuilds. Only actual page identity (title/description, field/action ids, grid presence) changes clear it. Added native regression preserves exact HWND across option changes; final Windows strictClippy passed."
+}

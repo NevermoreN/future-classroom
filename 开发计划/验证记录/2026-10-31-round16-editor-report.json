@@ -1,0 +1,147 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--offline",
+    "--manifest-path",
+    "/tmp/fc-round16-editor-harness/Cargo.toml",
+    "--lib"
+  ],
+  "exit_code": 101,
+  "elapsed_seconds": 6.923228012165055,
+  "target": "/tmp/fc-round16-editor-target/cache",
+  "initial_check_failure": "harness lacked parent LOCK and Windows CurrentClock symbols; fixed only harness with synthetic clock, no product shims",
+  "initial_test_log": "/tmp/fc-round16-editor-tests-initial.log",
+  "host_only": true,
+  "native_run": false,
+  "final_test_command": [
+    "cargo",
+    "test",
+    "--offline",
+    "--manifest-path",
+    "/tmp/fc-round16-editor-harness/Cargo.toml",
+    "--lib"
+  ],
+  "final_test_exit_code": 0,
+  "final_test_elapsed_seconds": 1.3061632439494133,
+  "initial_test_failure": "Regression changed Width preferred while Width mode was Percent, so that field is intentionally ignored. Fixed fixture to malformed Content height preferred.",
+  "final_test_log": "/tmp/fc-round16-editor-tests-final.log",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--lib"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.7510979429353029,
+      "log": "/tmp/fc-round16-editor-final-0.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.2280644970014691,
+      "log": "/tmp/fc-round16-editor-final-1.log"
+    }
+  ],
+  "final_checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--lib"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/fc-round16-editor-refresh-tests.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "log": "/tmp/fc-round16-editor-refresh-clippy.log"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/application/profiles_editor.rs"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "source_sha256": "99107ef57b9490d21ee74f4ce921835db4de618a25c245c1e24d0721e5363cbf",
+  "profile_tests": 15,
+  "reused_display_tests": 9,
+  "host_total": 24,
+  "windows_execution": "not run by this agent",
+  "harness_clock": "Synthetic fixed 2026-10-31 09:00 only for existing display text-preview; no Windows clock or native calls in harness",
+  "strict_clippy_harness": "allows unused imports/dead code for unavailable application parent only; no product lint exemptions",
+  "test_targets_retained_for_root_cleanup": [
+    "/tmp/fc-round16-domain-target",
+    "/tmp/fc-round16-editor-target/cache",
+    "/tmp/fc-round16-editor-harness"
+  ],
+  "previous_final_checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--lib"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.8461979411076754,
+      "log": "/tmp/fc-round16-editor-frozen-0.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--manifest-path",
+        "/tmp/fc-round16-editor-harness/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.7237167980056256,
+      "log": "/tmp/fc-round16-editor-frozen-1.log"
+    }
+  ],
+  "final_result": "PASS: 24 host tests; strict Clippy all-targets; own-file formatting",
+  "latest_regression": "FIRST is always available on list page as 刷新 / 回第一页. Real editor create/domain canonical transition/saved callback/CANCEL/FIRST/reload renders created profile; disable transition and same refresh renders updated status and revision.",
+  "source_frozen": true
+}

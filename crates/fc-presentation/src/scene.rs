@@ -1,6 +1,11 @@
 //! Pure, transaction-consistent desktop composition. Native visibility and health
 //! checks remain mandatory immediately before every publication.
-use crate::{layout_with_minimum, ClockStyle, LayoutError, Opacity, Rect, Widget, WidgetKind};
+use crate::layout::{compose_layout, TreeLayoutError, WidgetMeasure};
+pub use crate::layout::{
+    PaintGlass, SceneNodeKey, ScenePaintNode, ScenePaintTree, SceneProfileStamp,
+};
+use crate::{ClockStyle, LayoutError, Rect};
+use fc_domain::layout::WidgetKind;
 use fc_domain::{
     content::ContentKey,
     desktop::*,
@@ -67,6 +72,8 @@ pub struct MaterialListContent {
     pub rows: Vec<SceneMaterialRow>,
     pub next_cursor: Option<MaterialCursor>,
     pub total: u64,
+    pub visible_rows: u8,
+    pub row_gap_dip: u16,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub enum CardContent {
@@ -101,6 +108,8 @@ pub struct SceneCard {
     pub edge_alpha: f32,
     pub content: CardContent,
     pub page: PageInfo,
+    /// Maximum actual data leaves on this card's native page; complete DTO data remains owned.
+    pub visible_leaf_limit: u8,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct SceneSnapshot {
@@ -109,6 +118,8 @@ pub struct SceneSnapshot {
     pub captured_at: LocalDateTime,
     pub valid_until: Option<LocalDateTime>,
     pub cards: Vec<SceneCard>,
+    /// Production scenes always publish an authoritative composed tree.
+    pub paint_tree: Option<ScenePaintTree>,
     pub text_tone: TextTone,
     pub clock_rollback: bool,
     pub public_calendar_unverified: bool,
@@ -123,22 +134,43 @@ impl SceneSnapshot {
             && self.valid_until.is_none_or(|end| now < end)
     }
     pub fn needs_second_tick(&self) -> bool {
-        self.cards
-            .iter()
-            .filter(|c| c.component_alpha > 0.)
-            .any(|c| match c.content {
-                CardContent::Clock(clock) => clock.show_seconds,
-                CardContent::Recess { .. } => true,
-                _ => false,
-            })
+        self.cards.iter().enumerate().any(|(index, c)| {
+            let alpha = self
+                .paint_tree
+                .as_ref()
+                .and_then(|t| t.nodes.iter().find(|n| n.card_index == Some(index)))
+                .map_or(c.component_alpha, |n| n.effective_opacity);
+            alpha > 0.
+                && match c.content {
+                    CardContent::Clock(clock) => clock.show_seconds,
+                    CardContent::Recess { .. } => true,
+                    _ => false,
+                }
+        })
     }
 }
 #[derive(Debug, PartialEq, Eq)]
 pub enum SceneError {
     InvalidFacts(DisplayError),
     Layout(LayoutError),
+    TreeLayout(TreeLayoutError),
     Schedule,
     Capacity,
+}
+/// A neutral fallback is explicit; it never suggests a different teacher's profile.
+pub fn profile_configuration_warning(
+    reason: fc_domain::profile::ProfileSelectionReason,
+) -> Option<&'static str> {
+    use fc_domain::profile::ProfileSelectionReason::*;
+    Some(match reason {
+        Public | Selected => return None,
+        Missing => "科目配置缺失 · 使用公共布局",
+        Disabled => "科目配置已停用 · 使用公共布局",
+        Unassigned => "课程未分配老师 · 使用公共布局",
+        InvalidAssignment => "当前授课关系无效 · 使用公共布局",
+        FolderMismatch => "资料目录与科目配置不匹配 · 使用公共布局",
+        LayoutMismatch => "科目布局与公共布局不兼容 · 使用公共布局",
+    })
 }
 pub fn clock_label(clock: ClockContent, now: LocalDateTime) -> String {
     crate::format_clock(
@@ -203,8 +235,8 @@ pub fn soft_subject_color(raw: Rgb) -> Rgb {
         blue: ((b + m) * 255.).round() as u8,
     }
 }
-fn widget_kind(kind: ComponentKind) -> Option<WidgetKind> {
-    Some(match kind {
+fn widget_kind(kind: ComponentKind) -> WidgetKind {
+    match kind {
         ComponentKind::Clock => WidgetKind::Clock,
         ComponentKind::Date => WidgetKind::Date,
         ComponentKind::Schedule => WidgetKind::Schedule,
@@ -212,18 +244,7 @@ fn widget_kind(kind: ComponentKind) -> Option<WidgetKind> {
         ComponentKind::Materials => WidgetKind::Materials,
         ComponentKind::Reminder => WidgetKind::Reminder,
         ComponentKind::DateCountdown => WidgetKind::DateCountdown,
-        ComponentKind::Recess => return None,
-    })
-}
-fn kind(widget: WidgetKind) -> ComponentKind {
-    match widget {
-        WidgetKind::Clock => ComponentKind::Clock,
-        WidgetKind::Date => ComponentKind::Date,
-        WidgetKind::Schedule => ComponentKind::Schedule,
-        WidgetKind::Homework => ComponentKind::Homework,
-        WidgetKind::Materials => ComponentKind::Materials,
-        WidgetKind::Reminder => ComponentKind::Reminder,
-        WidgetKind::DateCountdown => ComponentKind::DateCountdown,
+        ComponentKind::Recess => WidgetKind::Recess,
     }
 }
 fn measure_text(content: &CardContent) -> String {
@@ -281,20 +302,20 @@ fn card(
     rect: Rect,
     content: CardContent,
     page: PageInfo,
+    component: &ComponentSettings,
 ) -> Result<SceneCard, SceneError> {
-    let c = settings
-        .component(k)
-        .ok_or(SceneError::InvalidFacts(DisplayError::InvalidSettings))?;
+    let c = component;
     let alpha = f32::from(c.opacity_percent) / 100.;
     Ok(SceneCard {
         kind: k,
         rect,
         font_dip: f32::from(c.font_dip),
         component_alpha: alpha,
-        surface_alpha: alpha * f32::from(settings.glass_surface_percent) / 100.,
-        edge_alpha: alpha * f32::from(settings.edge_reflection_percent) / 100.,
+        surface_alpha: f32::from(settings.glass_surface_percent) / 100.,
+        edge_alpha: f32::from(settings.edge_reflection_percent) / 100.,
         content,
         page,
+        visible_leaf_limit: 1,
     })
 }
 
@@ -306,6 +327,17 @@ pub fn build_scene(
 ) -> Result<SceneSnapshot, SceneError> {
     facts.validate().map_err(SceneError::InvalidFacts)?;
     let settings = &facts.display;
+    let profile = facts.profiles.subject_profile.as_ref();
+    let material_style = profile.map(|p| &p.materials);
+    let component = |kind| {
+        if kind == ComponentKind::Materials {
+            material_style
+                .map(|m| &m.component)
+                .or_else(|| settings.component(kind))
+        } else {
+            settings.component(kind)
+        }
+    };
     let now = facts.captured_at;
     let identity = &facts.identity;
     let class = identity.installation.as_ref().and_then(|i| i.current_class);
@@ -379,12 +411,6 @@ pub fn build_scene(
             } else {
                 subject.name.clone()
             };
-            let alpha = f32::from(
-                settings
-                    .component(ComponentKind::Schedule)
-                    .ok_or(SceneError::Schedule)?
-                    .opacity_percent,
-            ) / 100.;
             course_rows.push(CourseCapsule {
                 key,
                 subject_id: subject.id,
@@ -393,7 +419,7 @@ pub fn build_scene(
                 current,
                 temporary,
                 fill_alpha: if settings.subject_fill {
-                    f32::from(settings.course_fill_percent) / 100. * alpha
+                    f32::from(settings.course_fill_percent) / 100.
                 } else {
                     0.
                 },
@@ -432,12 +458,6 @@ pub fn build_scene(
             .iter()
             .find(|a| a.principal.id == k.owner_teacher_id)
             .ok_or(SceneError::Schedule)?;
-        let alpha = f32::from(
-            settings
-                .component(ComponentKind::Homework)
-                .ok_or(SceneError::Schedule)?
-                .opacity_percent,
-        ) / 100.;
         homework.push(HomeworkEntry {
             subject_id: subject.id,
             teacher_id: teacher.principal.id,
@@ -446,7 +466,7 @@ pub fn build_scene(
             text: r.text.clone(),
             color: soft_subject_color(subject.color),
             fill_alpha: if settings.subject_fill {
-                f32::from(settings.homework_fill_percent) / 100. * alpha
+                f32::from(settings.homework_fill_percent) / 100.
             } else {
                 0.
             },
@@ -487,6 +507,8 @@ pub fn build_scene(
                 .as_ref()
                 .and_then(|p| p.next_cursor.clone()),
             total: facts.materials_page.as_ref().map_or(0, |p| p.total),
+            visible_rows: material_style.map_or(5, |m| m.visible_rows),
+            row_gap_dip: material_style.map_or(8, |m| m.row_gap_dip),
         }))
     } else {
         CardContent::MaterialsUnavailable
@@ -538,22 +560,7 @@ pub fn build_scene(
             ))
         }
     }
-    entries.retain(|(k, _)| settings.component(*k).is_some_and(|c| c.visible));
-    let widgets: Vec<_> = entries
-        .iter()
-        .filter_map(|(k, content)| {
-            Some(Widget {
-                kind: widget_kind(*k)?,
-                text: if *k == ComponentKind::Schedule && public_unverified {
-                    format!("调休资料未核验\n{}", measure_text(content))
-                } else {
-                    measure_text(content)
-                },
-                font_dip: f32::from(settings.component(*k)?.font_dip),
-                opacity: Opacity::new(settings.component(*k)?.opacity_percent)?,
-            })
-        })
-        .collect();
+    entries.retain(|(k, _)| component(*k).is_some_and(|c| c.visible));
     let recess = if settings.recess_enabled
         && settings
             .component(ComponentKind::Recess)
@@ -641,42 +648,52 @@ pub fn build_scene(
     } else {
         work
     };
-    let minimum = |widget| {
-        settings.component(kind(widget)).map_or((0., 84.), |c| {
-            let height =
-                if c.kind == ComponentKind::Clock && settings.clock_mode == ClockMode::Analog {
-                    160.
-                } else {
-                    84.
-                };
-            (f32::from(c.min_width), f32::from(c.min_height).max(height))
+    if let Some(deadline) = recess {
+        entries.push((ComponentKind::Recess, CardContent::Recess { deadline }));
+    }
+    let specs: Vec<_> = entries.iter().map(|(k, content)| {
+        let c = component(*k).ok_or(SceneError::Schedule)?;
+        Ok(WidgetMeasure {
+            kind: widget_kind(*k),
+            text: if *k == ComponentKind::Schedule && public_unverified {
+                format!("调休资料未核验\n{}", measure_text(content))
+            } else { measure_text(content) },
+            font_dip: c.font_dip as f32, opacity: c.opacity_percent as f32 / 100.,
+            min_width: c.min_width as f32, max_width: c.max_width as f32,
+            min_height: (c.min_height as f32).max(if matches!(content, CardContent::Clock(clock) if clock.mode == ClockMode::Analog) {160.} else {84.}),
+            max_height: c.max_height as f32,
+            preferred_width: if *k == ComponentKind::Homework {480.} else {280.},
+            glass: PaintGlass { surface_alpha: settings.glass_surface_percent as f32 / 100., edge_alpha: settings.edge_reflection_percent as f32 / 100. },
         })
-    };
-    let geometry = layout_with_minimum(&widgets, work, recess.is_some(), measure, &minimum)
-        .map_err(SceneError::Layout)?;
+    }).collect::<Result<_, SceneError>>()?;
+    let mut paint_tree = compose_layout(
+        &facts.profiles.public_layout.tree,
+        profile.map(|p| &p.tree),
+        &specs,
+        work,
+        measure,
+    )
+    .map_err(SceneError::TreeLayout)?;
+    paint_tree.public_layout_revision = facts.profiles.public_layout.revision;
+    paint_tree.selection_reason = facts.profiles.reason;
+    paint_tree.subject_profile = profile.map(|p| SceneProfileStamp {
+        id: p.id,
+        key: p.key,
+        revision: p.revision,
+        layout_revision: p.layout_revision,
+    });
     let mut cards = Vec::new();
-    for placed in geometry.widgets {
-        let k = kind(placed.kind);
-        let pos = entries
-            .iter()
-            .position(|(kind, _)| *kind == k)
-            .ok_or(SceneError::Schedule)?;
-        let (_, content) = entries.remove(pos);
-        let c = settings.component(k).ok_or(SceneError::Schedule)?;
-        let mut rect = placed.rect;
-        // Configured bounds constrain derived geometry; impossible constraints fail
-        // visibly instead of moving cards beyond the work area or shrinking fonts.
-        let minimum_height = if matches!(&content, CardContent::Clock(clock) if clock.mode == ClockMode::Analog)
-        {
-            f32::from(c.min_height).max(160.)
-        } else {
-            f32::from(c.min_height).max(84.)
+    for node in &mut paint_tree.nodes {
+        let Some(widget) = node.widget_kind else {
+            continue;
         };
-        if rect.width < f32::from(c.min_width) || rect.height < minimum_height {
-            return Err(SceneError::Layout(LayoutError::OutOfSpace));
-        }
-        rect.width = rect.width.min(f32::from(c.max_width));
-        rect.height = rect.height.min(f32::from(c.max_height));
+        let k = widget.component_kind().ok_or(SceneError::Capacity)?;
+        let content = entries
+            .iter()
+            .find(|(kind, _)| *kind == k)
+            .ok_or(SceneError::Schedule)?
+            .1
+            .clone();
         let page = if k == ComponentKind::Homework {
             PageInfo {
                 offset: facts.homework_offset,
@@ -699,19 +716,42 @@ pub fn build_scene(
                 total: 1,
             }
         };
-        cards.push(card(settings, k, rect, content, page)?);
-    }
-    if let (Some(deadline), Some(rect)) = (recess, geometry.recess_region) {
+        node.card_index = Some(cards.len());
         cards.push(card(
             settings,
-            ComponentKind::Recess,
-            rect,
-            CardContent::Recess { deadline },
-            PageInfo::default(),
-        )?)
+            k,
+            node.rect,
+            content,
+            page,
+            component(k).ok_or(SceneError::Schedule)?,
+        )?);
     }
-    if cards.len() > 8 {
+    if cards.len() > 64 {
         return Err(SceneError::Capacity);
+    }
+    // Every static card costs one leaf. Distribute the remaining finite data-row
+    // slots fairly; native pages must enforce these limits, never truncate DTOs.
+    let mut remaining = 64usize.saturating_sub(cards.len());
+    loop {
+        let mut added = false;
+        for card in &mut cards {
+            let wanted = match &card.content {
+                CardContent::Courses(rows) => rows.len().max(1),
+                CardContent::Homework(rows) => rows.len().max(1),
+                CardContent::Materials(list) => {
+                    list.rows.len().max(1).min(list.visible_rows as usize)
+                }
+                _ => 1,
+            };
+            if remaining > 0 && (card.visible_leaf_limit as usize) < wanted {
+                card.visible_leaf_limit += 1;
+                remaining -= 1;
+                added = true;
+            }
+        }
+        if !added {
+            break;
+        }
     }
     Ok(SceneSnapshot {
         generation,
@@ -719,6 +759,7 @@ pub fn build_scene(
         captured_at: now,
         valid_until,
         cards,
+        paint_tree: Some(paint_tree),
         text_tone: settings.text_tone,
         clock_rollback: facts.clock_rollback,
         public_calendar_unverified: public_unverified,

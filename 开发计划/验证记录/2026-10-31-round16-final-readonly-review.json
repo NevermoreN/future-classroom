@@ -1,0 +1,600 @@
+{
+  "round": 16,
+  "reviewedAtUtc": "2026-10-30T18:41:49.077480+00:00",
+  "reviewer": "business_storage",
+  "independence": "Reviewer authored this round storage/profile repository, Backend profile facade, Canvas and profiles probe; self-review conclusions about those modules are not independent. Snapshot/package binding and cross-module packaging observations are a separate read-only review, not independent runtime tests.",
+  "newTestsExecuted": 0,
+  "windowsExecuted": false,
+  "buildExecuted": false,
+  "packageCreatedOrModified": false,
+  "sourceOrPlansModified": false,
+  "cacheDeleted": false,
+  "status": "READONLY_PASS",
+  "snapshot": {
+    "path": "/tmp/fc-round16-source-inputs-final.json",
+    "fileSha256": "6c0f2e8a0597114357459854cbd84541abaa98b228628b8269c469237f61a640",
+    "actualFiles": 266,
+    "uniquePaths": 266,
+    "fileMismatches": [],
+    "computedAggregate": "9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520",
+    "manifestSha256": "9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520",
+    "aggregateSha256": "9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520",
+    "actualCargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+    "declaredCargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+    "actualPriorRound15Aggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+    "declaredPriorRound15Aggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+    "all61WebInputsUnchangedFromRound15": true,
+    "historicalPrePackageReadme": {
+      "path": "/tmp/fc-round16-source-inputs-before-package-readme.json",
+      "aggregateSha256": "9a3f709b27fe1012402efb5a496ca2af41222ff6b9f45a9f65a8aaa205a80dde",
+      "changedFilesToFinal": [
+        {
+          "path": "packaging/PROBE-README.txt",
+          "sha256": "ed60878a43d8405421163f3b796b8edf69fbd1edd08ad68de571d68916ac8055"
+        }
+      ],
+      "sourceChangeOnlyPackagingReadme": true,
+      "note": "The initial read-only266-file match9a3f709b was before the packaging-only README update; final re-read266-file match is9c66fb8a. Rust inputs and binary semantics were not changed by this update."
+    },
+    "finalRecheckAfterPackage": {
+      "files": 266,
+      "mismatches": [],
+      "aggregate": "9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520",
+      "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+    }
+  },
+  "priorPackageVerifiedReadOnly": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-accounts-dev.zip",
+    "actualSha256": "eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1",
+    "expectedSha256": "eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1",
+    "memberCount": 13,
+    "uniqueMemberCount": 13,
+    "crcBadMember": null,
+    "payloadMismatches": [],
+    "frontendAssetCount": 6,
+    "frontendAssetBytes": 444723,
+    "frontendManifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca"
+  },
+  "featuresReview": {
+    "script": "scripts/package-probe.py",
+    "scriptSha256": "0971dc402a726268d464ee6b3322ae40dcf88d528121a47b464b721b02176977",
+    "assessment": "Public joint captured display/layout CAS, exact class/subject/teacher profile, Materials visible rows1..5 and row gap, paged catalog, stable node scope/ID, owner/draft/lock and actual synthetic graphical preview/drag match the bounded implementation. Standalone subject text/image remain unsupported. Development status, unvalidated system/product/MSVC gates, no release tag and no production TLS/listener claim are retained. No new blocking discrepancy found.",
+    "documentationLimitation": "Resolved by root packaging-only README update. Final README sha256 ed60878a43d8405421163f3b796b8edf69fbd1edd08ad68de571d68916ac8055 introduces bounded public/subject editor/preview scope and replaces the obsolete4806080-DIB-byte4K statement with the compositor16MiB admission/preview960x5402MiB limits and OS/device caveats. Prior README b831d226 was the reviewed Round15 inherited state, not the final package text.",
+    "sourceBindingLimitation": "The packager does not independently certify build provenance and does not include the266-input aggregate in its manifest. Final external report must bind final packaging-inclusive aggregate9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520, exact EXE hash/profile/metadata and Windows execution. Binary build source can legitimately match pre-package-text9a3f709b provided the only delta to final266 snapshot is the README entry documented here."
+  },
+  "storageSelfReview": {
+    "blockersFound": [],
+    "readPaths": [
+      "crates/fc-storage/src/business/profiles.rs",
+      "crates/fc-storage/src/business/profiles_codec.rs",
+      "crates/fc-storage/src/business/desktop.rs",
+      "crates/fc-bootstrap/src/backend/profiles.rs"
+    ],
+    "observations": [
+      "Joint public save always checks captured display revision as well as layout transition CAS; semantic no-op preserves component revision while receipt/global publication still commit.",
+      "Exact local Global management checks occur at writer evaluation and precommit; Backend profile flow additionally rechecks management lease before returning results.",
+      "Subject slot key is exact class/subject/teacher; stable committed profile ID is enforced for captured nonzero revision. Current Facts selects at most one profile from the same writer transaction, not catalog-wide snapshots.",
+      "Bounded catalog/page/slot/document startup checks remain strict. Historical disabled/revoked references stay manageable without being selected as active profiles.",
+      "Receipt replay validates32-byte fingerprint and result digest, typed strict result and expected revision relation; public/subject command kinds are distinct. No claim of receipt retention/compaction completion."
+    ]
+  },
+  "recommendedFinalPackageValidationSteps": [
+    "Verify266 frozen input hashes and Cargo.lock again at final binary build boundary; preserve separate test-only source alignment/failure history instead of replacing failed evidence.",
+    "Bind modern release EXE path, bytes, SHA256, build target/toolchain/profile/metadata to the exact final source aggregate and final Windows evidence. Supplemental Win7-GNU build must remain separate from formal Win7/MSVC and Win7/10 device acceptance.",
+    "If reusing tested Web assets, verify61 unchanged source inputs and extract only the previous verified ZIP manifest/assets/notices into a private explicit directory; original ZIP hash is eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1. Six assets total444723bytes, manifest8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca.",
+    "Run package-probe.py with an explicit final EXE, unique outputZIP, correct target and explicit --web-dist; do not let arbitrary workspace files enter the fixed allowlist. Keep NOT_VALIDATED and no release tag.",
+    "Read final ZIP back:13 unique members when using the current6-asset frontend,12 payload entries plus manifest; verify CRCs, every entry byte count and SHA256, strict frontend allowlist/schema/versions, exact EXE hash, licenses/notices and manifest status/gates/features.",
+    "Repack the same fixed payloads to a separate private ZIP and compare bytes/hash for reproducibility; remove only root-owned temporary extraction/repack/test artifacts after archiving final evidence.",
+    "Archive external package report with final source aggregate, ZIPsha/bytes, EXEsha/bytes, frontend reuse provenance, PE audit caveats and actual execution report links. Keep initial FAIL and diagnostic fixture corrections visible."
+  ],
+  "reviewExecution": "Python stdlib read-only SHA/JSON/AST/ZIP/CRC and byte comparisons only. No product test, Cargo, packager, Windows session or remote command was executed by reviewer.",
+  "finalWindowsEvidenceReadOnly": {
+    "path": "/tmp/fc-round16-windows-final.json",
+    "sha256": "34e1c649c62dd2e3c85959d6a524adbeb694097c5b66049c717008a44199fd32",
+    "buildChecksPath": "/tmp/fc-round16-build-checks.json",
+    "buildChecksSha256": "d2767f77e8bce2c522cc6125c927afb8e1af37b1ace4cde45913eafdad74d5d1",
+    "singleFullRunOnly": true,
+    "additionalTargetedRunsCounted": false,
+    "productTestsExecutedByReviewer": 0,
+    "note": "This is read-only verification of root-owned existing terminal Windows output and build files, not another Windows execution. Individual ok lines and one anchored terminal summary per16 executable counted once.",
+    "actualPassed": 585,
+    "actualFailed": 0,
+    "executables": 16,
+    "testArtifacts": [
+      {
+        "name": "fc_bootstrap-2c9facf31078f737.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "5fa92fcff148607038fb8da528a40e7777d14680434a6d876c51f87fa82705e4",
+        "buildSha256": "5fa92fcff148607038fb8da528a40e7777d14680434a6d876c51f87fa82705e4",
+        "actualFileSha256": "5fa92fcff148607038fb8da528a40e7777d14680434a6d876c51f87fa82705e4",
+        "bytes": 130956780,
+        "actualBytes": 130956780,
+        "passed": 74,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 74,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_windows-95fad28d15fea78d.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "3afb7ac8befb32e522046cdbdde034623df12e24a1f686c07b8bc904722917bc",
+        "buildSha256": "3afb7ac8befb32e522046cdbdde034623df12e24a1f686c07b8bc904722917bc",
+        "actualFileSha256": "3afb7ac8befb32e522046cdbdde034623df12e24a1f686c07b8bc904722917bc",
+        "bytes": 58086409,
+        "actualBytes": 58086409,
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 67,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "business_storage-17bf377bec8f2f7e.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "0d959c51a42d65d71adceb4731efb89d39fcec95c15101da4699fa206542fdb8",
+        "buildSha256": "0d959c51a42d65d71adceb4731efb89d39fcec95c15101da4699fa206542fdb8",
+        "actualFileSha256": "0d959c51a42d65d71adceb4731efb89d39fcec95c15101da4699fa206542fdb8",
+        "bytes": 46728684,
+        "actualBytes": 46728684,
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 43,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_application-8ad1e6c8c699ab50.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "7ab623617943e7155b2aef9c49949a81b356150b694d17899fe849a3513abcb2",
+        "buildSha256": "7ab623617943e7155b2aef9c49949a81b356150b694d17899fe849a3513abcb2",
+        "actualFileSha256": "7ab623617943e7155b2aef9c49949a81b356150b694d17899fe849a3513abcb2",
+        "bytes": 16540005,
+        "actualBytes": 16540005,
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 25,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_audio-35e3156477d0188a.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "0222670b8ab7ef71944436070974dfbc5dbdac889255b30dfb07ae633306769f",
+        "buildSha256": "0222670b8ab7ef71944436070974dfbc5dbdac889255b30dfb07ae633306769f",
+        "actualFileSha256": "0222670b8ab7ef71944436070974dfbc5dbdac889255b30dfb07ae633306769f",
+        "bytes": 17252998,
+        "actualBytes": 17252998,
+        "passed": 22,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 22,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "0bca5a75b3014696744c0accef7385c6bc8687f707aed43c22f8508a98520456",
+        "buildSha256": "0bca5a75b3014696744c0accef7385c6bc8687f707aed43c22f8508a98520456",
+        "actualFileSha256": "0bca5a75b3014696744c0accef7385c6bc8687f707aed43c22f8508a98520456",
+        "bytes": 119338227,
+        "actualBytes": 119338227,
+        "passed": 65,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 65,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_domain-915566e140287178.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "c45e1cdba155ea1ce32f3e1bc1556f3f6343a19c7e4255789dd2d1428d0f35d4",
+        "buildSha256": "c45e1cdba155ea1ce32f3e1bc1556f3f6343a19c7e4255789dd2d1428d0f35d4",
+        "actualFileSha256": "c45e1cdba155ea1ce32f3e1bc1556f3f6343a19c7e4255789dd2d1428d0f35d4",
+        "bytes": 17678291,
+        "actualBytes": 17678291,
+        "passed": 74,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 74,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_materials-2221de66f2e97130.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "85ec811075a751b09f321808d8cfc3e389b21e147208d146e1534dde52f3004a",
+        "buildSha256": "85ec811075a751b09f321808d8cfc3e389b21e147208d146e1534dde52f3004a",
+        "actualFileSha256": "85ec811075a751b09f321808d8cfc3e389b21e147208d146e1534dde52f3004a",
+        "bytes": 34260520,
+        "actualBytes": 34260520,
+        "passed": 35,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 35,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_ports-361bddc8b2876cc0.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "512287b2ad9c3b05c9e553392ea3d8cecd8ea502bc0d137ab7b79482e199537e",
+        "buildSha256": "512287b2ad9c3b05c9e553392ea3d8cecd8ea502bc0d137ab7b79482e199537e",
+        "actualFileSha256": "512287b2ad9c3b05c9e553392ea3d8cecd8ea502bc0d137ab7b79482e199537e",
+        "bytes": 16028779,
+        "actualBytes": 16028779,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 6,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "8136da4cddf55da7f76bcc8d1fe141b6355f8d3cf71333c06d291ad8bcda08aa",
+        "buildSha256": "8136da4cddf55da7f76bcc8d1fe141b6355f8d3cf71333c06d291ad8bcda08aa",
+        "actualFileSha256": "8136da4cddf55da7f76bcc8d1fe141b6355f8d3cf71333c06d291ad8bcda08aa",
+        "bytes": 20311514,
+        "actualBytes": 20311514,
+        "passed": 40,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 40,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_protocol-186900fcb7bfa5db.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "808fc19e27208a8f2145a736589d24170f8b573f430aba10704c1925d3f586bc",
+        "buildSha256": "808fc19e27208a8f2145a736589d24170f8b573f430aba10704c1925d3f586bc",
+        "actualFileSha256": "808fc19e27208a8f2145a736589d24170f8b573f430aba10704c1925d3f586bc",
+        "bytes": 22430492,
+        "actualBytes": 22430492,
+        "passed": 29,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 29,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_runtime-fad3e5e278e2d80c.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "4a3b7c5a01daff934da467950fdfd7db1a5555722e92b2cac64a9afe5a466339",
+        "buildSha256": "4a3b7c5a01daff934da467950fdfd7db1a5555722e92b2cac64a9afe5a466339",
+        "actualFileSha256": "4a3b7c5a01daff934da467950fdfd7db1a5555722e92b2cac64a9afe5a466339",
+        "bytes": 19713505,
+        "actualBytes": 19713505,
+        "passed": 26,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 26,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_security-9c7f88663f75f873.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "4df384054452401b7a410b1c35b8a24c81bdd4e6dccadd87d4967b0c9ba23882",
+        "buildSha256": "4df384054452401b7a410b1c35b8a24c81bdd4e6dccadd87d4967b0c9ba23882",
+        "actualFileSha256": "4df384054452401b7a410b1c35b8a24c81bdd4e6dccadd87d4967b0c9ba23882",
+        "bytes": 17362997,
+        "actualBytes": 17362997,
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 17,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "fc_storage-9549596680176a3f.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "68a58635910c8dfb6a72b32cc273a39adc2aee49a4b48d55415a2d770e045757",
+        "buildSha256": "68a58635910c8dfb6a72b32cc273a39adc2aee49a4b48d55415a2d770e045757",
+        "actualFileSha256": "68a58635910c8dfb6a72b32cc273a39adc2aee49a4b48d55415a2d770e045757",
+        "bytes": 45624265,
+        "actualBytes": 45624265,
+        "passed": 53,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 53,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "runtime_storage-d7df388ce9405226.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "2bcddd0b2267731718630c5685d24c351701710b458d85603ce1940eb0395715",
+        "buildSha256": "2bcddd0b2267731718630c5685d24c351701710b458d85603ce1940eb0395715",
+        "actualFileSha256": "2bcddd0b2267731718630c5685d24c351701710b458d85603ce1940eb0395715",
+        "bytes": 39255015,
+        "actualBytes": 39255015,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 3,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      },
+      {
+        "name": "voice_storage-bf022395eae863de.exe",
+        "exitCode": 0,
+        "actualFileExists": true,
+        "binarySha256": "ef65d27a969d8f11646574cd02efcf9b33fdca809e6c6d5f7584a3a17cca626c",
+        "buildSha256": "ef65d27a969d8f11646574cd02efcf9b33fdca809e6c6d5f7584a3a17cca626c",
+        "actualFileSha256": "ef65d27a969d8f11646574cd02efcf9b33fdca809e6c6d5f7584a3a17cca626c",
+        "bytes": 40696997,
+        "actualBytes": 40696997,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "individualOkLines": 6,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoMetadataMatchesBuildProfile": true,
+        "pass": true
+      }
+    ],
+    "fourWebMarkers": {
+      "WEB_PAIRING_PASS": true,
+      "WEB_CONTENT_PASS": true,
+      "WEB_MATERIALS_PASS": true,
+      "WEB_VOICE_PASS": true
+    },
+    "appProfile39Markers": {
+      "applicationPass": true,
+      "profilesPass": true,
+      "steps39": true,
+      "isolatedCleanup": true,
+      "exitCode": 0
+    },
+    "status": "PASS",
+    "cleanup": "PASS",
+    "modernExecutable": {
+      "target": "modern",
+      "bytes": 8682626,
+      "sha256": "de186ac4a885dcf6ee54f42a0acd9de8f4dfb5a81c88e196413d75a7897170ed",
+      "profile": "release optimized"
+    },
+    "supplementalWin7GNUExecutable": {
+      "target": "win7GNU",
+      "bytes": 8794112,
+      "sha256": "fd538a5c604c9a7d81c4ea44fa533fa4473f5dca132fd0289fa2eae0338a90ee",
+      "profile": "release optimized"
+    },
+    "cargoMetadataRawShaMatches": true,
+    "runOrderRawShaMatches": true
+  },
+  "finalPackageEvidenceReadOnly": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-profiles-dev.zip",
+    "bytes": 4289370,
+    "sha256": "be3d15dfa6fd8a91eb8c091b049d08684b9be4c004b0e151349ef5f6771ee9ac",
+    "reproPath": "/tmp/fc-round16-package-repro/FutureClassroom-0.1.0-profiles-dev.zip",
+    "reproSha256": "be3d15dfa6fd8a91eb8c091b049d08684b9be4c004b0e151349ef5f6771ee9ac",
+    "byteForByteIdentical": true,
+    "reproLog": "Created /tmp/fc-round16-package-repro/FutureClassroom-0.1.0-profiles-dev.zip\nSHA256 be3d15dfa6fd8a91eb8c091b049d08684b9be4c004b0e151349ef5f6771ee9ac\nStatus NOT_VALIDATED; Win7 NOT_VALIDATED; PE review triggers: 5\nDevelopment probe only. Formal MSVC and real machine gates do not permit a release tag.\n",
+    "uniqueMemberCount": 13,
+    "payloadEntryCount": 12,
+    "crcStatus": "PASS",
+    "allPayloadShaAndSizesMatch": true,
+    "payloads": [
+      {
+        "path": "fc-bootstrap.exe",
+        "bytes": 8682626,
+        "sha256": "de186ac4a885dcf6ee54f42a0acd9de8f4dfb5a81c88e196413d75a7897170ed",
+        "crc32": 2859243678
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1067,
+        "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+        "crc32": 2053870580
+      },
+      {
+        "path": "PROBE-README.txt",
+        "bytes": 11110,
+        "sha256": "ed60878a43d8405421163f3b796b8edf69fbd1edd08ad68de571d68916ac8055",
+        "crc32": 3399977678
+      },
+      {
+        "path": "THIRD-PARTY-NOTICES.txt",
+        "bytes": 2400197,
+        "sha256": "372382560a2d656d222d68be2d13b3d03daab01cb70e72039d4ae9e3b0ebe957",
+        "crc32": 1522630400
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "bytes": 25543,
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+        "crc32": 3845688382
+      },
+      {
+        "path": "web/assets/favicon-CXuYoSfB.svg",
+        "bytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "crc32": 1122666140
+      },
+      {
+        "path": "web/assets/index-Cr8Ck6mT.js",
+        "bytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78",
+        "crc32": 3377153578
+      },
+      {
+        "path": "web/assets/index-DFFVdc8-.css",
+        "bytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+        "crc32": 1492100276
+      },
+      {
+        "path": "web/assets/pcm-worklet-DQjgdlBf.js",
+        "bytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d",
+        "crc32": 3744227927
+      },
+      {
+        "path": "web/assets/wav-worker-LSywWbpJ.js",
+        "bytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "crc32": 3712674345
+      },
+      {
+        "path": "web/fc-assets.json",
+        "bytes": 1072,
+        "sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+        "crc32": 3097603411
+      },
+      {
+        "path": "web/index.html",
+        "bytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf",
+        "crc32": 2373134876
+      }
+    ],
+    "manifestSha256": "a2bed6444eebb232c47febee1326ccb3375af5641ec65bf80777c6df2b90a8e3",
+    "manifestFeaturesAndGatesEqualCurrentScriptLiteral": true,
+    "packagedExeMatchesRootTerminalModernExe": true,
+    "packagedReadmeMatchesFinalFrozenSource": true,
+    "allWebMembersEqualPriorRound15Zip": true,
+    "sixWebAssetManifestHashesAndSizesMatch": true,
+    "developmentStatus": "NOT_VALIDATED",
+    "releaseTag": "NOT_ALLOWED",
+    "sourceInputAggregate": "9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520",
+    "status": "PASS"
+  }
+}

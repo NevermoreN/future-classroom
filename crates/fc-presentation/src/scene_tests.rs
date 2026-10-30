@@ -165,6 +165,10 @@ fn fixture() -> DesktopFacts {
         schedule,
         lesson_context,
         display: DisplaySettings::default(),
+        profiles: fc_domain::profile::ProfileSelectionSnapshot {
+            reason: fc_domain::profile::ProfileSelectionReason::Missing,
+            ..Default::default()
+        },
         homework_offset: 0,
         homework_eligible_total: 2,
         homework,
@@ -179,6 +183,15 @@ fn scene(facts: &DesktopFacts) -> SceneSnapshot {
         .lesson_context
         .observe(&fresh.identity, &fresh.schedule, fresh.captured_at)
         .unwrap();
+    if fresh.profiles.subject_profile.is_none() {
+        fresh.profiles.reason = match fresh.lesson_context.current.as_ref() {
+            None => fc_domain::profile::ProfileSelectionReason::Public,
+            Some(c) if c.teacher_id.is_none() => {
+                fc_domain::profile::ProfileSelectionReason::Unassigned
+            }
+            Some(_) => fc_domain::profile::ProfileSelectionReason::Missing,
+        };
+    }
     fresh.materials_source = if fresh.clock_rollback {
         None
     } else {
@@ -629,6 +642,7 @@ fn withheld_recess_history_is_neutral_while_missing_current_source_is_invalid() 
         .lesson_context
         .observe(&facts.identity, &facts.schedule, facts.captured_at)
         .unwrap();
+    facts.profiles.reason = fc_domain::profile::ProfileSelectionReason::Public;
     facts.validate().unwrap();
     let view = build_scene(
         &facts,
@@ -839,4 +853,272 @@ fn actual_override_switches_capsule_color_teacher_and_recess_source_as_one_scene
     let next = scene(&facts);
     assert!(next.lesson_control.as_ref().unwrap().can_change);
     assert_eq!(facts.materials_source.as_ref().unwrap().teacher_id, id(2));
+}
+
+fn selected_profile(facts: &mut DesktopFacts) {
+    use fc_domain::profile::*;
+    let current = facts.lesson_context.current.as_ref().unwrap();
+    let key = SubjectProfileKey {
+        class_id: current.key.class_id,
+        subject_id: current.effective.subject_id,
+        teacher_id: current.teacher_id.unwrap(),
+    };
+    let mut profile = SubjectProfileDocument::new(ProfileId::new(1).unwrap(), key);
+    profile.revision = Revision::new(1);
+    profile.layout_revision = Revision::new(1);
+    facts.profiles.subject_profile = Some(profile);
+    facts.profiles.reason = ProfileSelectionReason::Selected;
+}
+#[test]
+fn exact_profile_changes_material_layout_style_and_rows_without_replacing_public_cards() {
+    let mut facts = material_facts(5);
+    let neutral = scene(&facts);
+    selected_profile(&mut facts);
+    let p = facts.profiles.subject_profile.as_mut().unwrap();
+    p.materials.visible_rows = 1;
+    p.materials.row_gap_dip = 23;
+    p.materials.component.font_dip = 32;
+    p.materials.component.opacity_percent = 50;
+    p.materials.component.max_width = 400;
+    let view = scene(&facts);
+    let tree = view.paint_tree.as_ref().unwrap();
+    assert_eq!(
+        tree.selection_reason,
+        fc_domain::profile::ProfileSelectionReason::Selected
+    );
+    assert_eq!(
+        tree.subject_profile.unwrap().key,
+        facts.profiles.subject_profile.as_ref().unwrap().key
+    );
+    for kind in [
+        ComponentKind::Clock,
+        ComponentKind::Schedule,
+        ComponentKind::Homework,
+    ] {
+        let a = neutral.cards.iter().find(|c| c.kind == kind).unwrap();
+        let b = view.cards.iter().find(|c| c.kind == kind).unwrap();
+        assert_eq!(a.rect, b.rect);
+        assert_eq!(a.content, b.content);
+    }
+    let material = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Materials)
+        .unwrap();
+    assert_eq!(material.font_dip, 32.);
+    assert_eq!(material.component_alpha, 0.5);
+    assert_eq!(material.surface_alpha, 0.03);
+    assert_eq!(material.visible_leaf_limit, 1);
+    let CardContent::Materials(list) = &material.content else {
+        panic!()
+    };
+    assert_eq!(list.rows.len(), 5);
+    assert_eq!(list.visible_rows, 1);
+    assert_eq!(list.row_gap_dip, 23);
+    let node = tree
+        .nodes
+        .iter()
+        .find(|n| {
+            n.card_index
+                .is_some_and(|i| view.cards[i].kind == ComponentKind::Materials)
+        })
+        .unwrap();
+    assert!(matches!(
+        node.key.scope,
+        fc_domain::layout::LayoutScope::Subject(_)
+    ));
+    assert_eq!(node.local_opacity, 0.5);
+}
+#[test]
+fn full_scene_rejects_profile_for_other_teacher_instead_of_borrowing_layout() {
+    let mut facts = fixture();
+    selected_profile(&mut facts);
+    let p = facts.profiles.subject_profile.as_mut().unwrap();
+    p.key.teacher_id = if p.key.teacher_id == id(1) {
+        id(2)
+    } else {
+        id(1)
+    };
+    p.tree.scope = fc_domain::layout::LayoutScope::Subject(p.key);
+    assert!(matches!(
+        build_scene(
+            &facts,
+            SceneGeneration::new(1),
+            Rect {
+                x: 0.,
+                y: 0.,
+                width: 1920.,
+                height: 1040.
+            },
+            &Measure
+        ),
+        Err(SceneError::InvalidFacts(_))
+    ));
+}
+#[test]
+fn public_fallback_retains_explicit_missing_reason_and_has_no_subject_nodes() {
+    let facts = fixture();
+    let view = scene(&facts);
+    let tree = view.paint_tree.unwrap();
+    assert_eq!(
+        tree.selection_reason,
+        fc_domain::profile::ProfileSelectionReason::Missing
+    );
+    assert!(tree.subject_profile.is_none());
+    assert!(tree
+        .nodes
+        .iter()
+        .all(|n| n.key.scope == fc_domain::layout::LayoutScope::Public));
+}
+#[test]
+fn primitive_fill_is_not_premultiplied_by_component_group_alpha() {
+    let mut facts = fixture();
+    for k in [ComponentKind::Schedule, ComponentKind::Homework] {
+        facts
+            .display
+            .components
+            .iter_mut()
+            .find(|c| c.kind == k)
+            .unwrap()
+            .opacity_percent = 40;
+    }
+    let view = scene(&facts);
+    let courses = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Schedule)
+        .unwrap();
+    let CardContent::Courses(rows) = &courses.content else {
+        panic!()
+    };
+    assert_eq!(rows[0].fill_alpha, 0.2);
+    let homework = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Homework)
+        .unwrap();
+    let CardContent::Homework(rows) = &homework.content else {
+        panic!()
+    };
+    assert_eq!(rows[0].fill_alpha, 0.03);
+    assert_eq!(courses.surface_alpha, 0.03);
+    assert_eq!(courses.edge_alpha, 0.5);
+    assert_eq!(courses.component_alpha, 0.4);
+}
+#[test]
+fn global_dynamic_leaf_limits_preserve_complete_owned_homework_and_material_dtos() {
+    let mut facts = material_facts(5);
+    let current = facts.lesson_context.current.as_ref().unwrap();
+    let class_id = current.key.class_id;
+    let subject_id = current.effective.subject_id;
+    let template = facts.homework[0].clone();
+    let mut records = Vec::new();
+    for n in 10..73 {
+        let teacher = id(n);
+        let mut a = actor();
+        a.auth_epoch = facts.identity.account(id(1)).unwrap().principal.auth_epoch;
+        facts.identity = facts
+            .identity
+            .transition(
+                &IdentityCommand::CreateAccount(NewAccount {
+                    id: teacher,
+                    login_name: format!("teacher{n}"),
+                    display_name: format!("教师{n}"),
+                    role: Role::TeacherAdmin,
+                    scopes: vec![AssignmentScope {
+                        class_id,
+                        subject_id,
+                    }],
+                }),
+                Some(&a),
+                facts.captured_at,
+            )
+            .unwrap()
+            .next;
+        let mut record = template.clone();
+        if let ContentKey::Homework(k) = &mut record.key {
+            k.owner_teacher_id = teacher;
+        }
+        record.last_actor_id = teacher;
+        records.push(record);
+    }
+    facts.global_revision = Revision::new(1000);
+    facts.homework = records;
+    facts.homework_eligible_total = 63;
+    facts.lesson_context = facts
+        .lesson_context
+        .observe(&facts.identity, &facts.schedule, facts.captured_at)
+        .unwrap();
+    facts.materials_source = facts
+        .lesson_context
+        .material_source(
+            &facts.identity,
+            &facts.schedule,
+            class_id,
+            facts.captured_at,
+        )
+        .unwrap();
+    facts.materials_page.as_mut().unwrap().source = facts.materials_source.clone();
+    let view = scene(&facts);
+    assert!(
+        view.cards
+            .iter()
+            .map(|c| c.visible_leaf_limit as usize)
+            .sum::<usize>()
+            <= 64
+    );
+    for card in &view.cards {
+        if let CardContent::Homework(rows) = &card.content {
+            assert_eq!(rows.len(), 63);
+            assert!(card.visible_leaf_limit < 63);
+        }
+        if let CardContent::Materials(rows) = &card.content {
+            assert_eq!(rows.rows.len(), 5);
+            assert!(card.visible_leaf_limit <= 5);
+        }
+    }
+}
+#[test]
+fn transparent_public_ancestor_preserves_clock_slot_and_suppresses_seconds_work() {
+    let mut facts = fixture();
+    facts.display.clock_seconds = true;
+    let before = scene(&facts);
+    assert!(before.needs_second_tick());
+    if let fc_domain::layout::NodeKind::Container(c) = &mut facts
+        .profiles
+        .public_layout
+        .tree
+        .nodes
+        .iter_mut()
+        .find(|n| n.id.get() == 2)
+        .unwrap()
+        .kind
+    {
+        c.group_opacity_percent = 0;
+    }
+    facts.profiles.public_layout.revision = Revision::new(1);
+    let after = scene(&facts);
+    assert_eq!(before.cards.len(), after.cards.len());
+    assert!(!after.needs_second_tick());
+    let a = before
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Clock)
+        .unwrap();
+    let b = after
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Clock)
+        .unwrap();
+    assert_eq!(a.rect, b.rect);
+    assert_eq!(b.component_alpha, 1.);
+    let node = after
+        .paint_tree
+        .as_ref()
+        .unwrap()
+        .nodes
+        .iter()
+        .find(|n| n.widget_kind == Some(fc_domain::layout::WidgetKind::Clock))
+        .unwrap();
+    assert_eq!(node.effective_opacity, 0.);
 }

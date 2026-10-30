@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json",
+    "--locked",
+    "--target-dir",
+    "/tmp/fc-round16-native-target"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 0.2842631940729916,
+  "metadataSha256": "34c870500b48d69b88677a2918b076af0f4df552b18d370494f702edf9ac04bc",
+  "stderrSha256": "5e5f0453450ade966f7fb2d529ca8e11377bdc9fc9b545fb5b52ae8375cabcc6"
+}

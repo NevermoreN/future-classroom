@@ -1,0 +1,120 @@
+{
+  "status": "PASS",
+  "role": "producer implementation and targeted Host validation; not independent security review",
+  "createdUtc": "2026-10-30T17:36:47.365056+00:00",
+  "sources": [
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "bytes": 15391,
+      "sha256": "0aa3a7ed8868cb71efac3ec73073e3d3a5357032fb12f62a16d44de37ff7a8e1"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 22745,
+      "sha256": "1ceff05759bef1eafdff02d18d763a6634516747190440ac09b2d0d345a07b0a"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 13660,
+      "sha256": "2fc5ad03110d2e766dc21d0b96bff0ec6eeba097555525b44693bbba2eb965f7"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 26520,
+      "sha256": "26e19f4f724e940783d5e0e85628be9d25552fa0e1b26978a711fe1be15c7101"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 35368,
+      "sha256": "55a419ba9d9727e7bc1d521e8942e4c198854ccf7d2160d8f03a9fc2db0200be"
+    }
+  ],
+  "aggregateSha256": "9420d535457e2283bc8453eac30f7a51d90a7313334b92b0abab4766844b8b82",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-presentation",
+        "--target-dir",
+        "/tmp/fc-round16-presentation-target",
+        "--lib"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.4231957020238042,
+      "rawLog": "/tmp/fc-round16-presentation-0.log",
+      "rawSha256": "da15b3d1956cb33340d9a4389b94cba9704d1f3c102a0d940868557e4a047865"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-presentation",
+        "--all-targets",
+        "--target-dir",
+        "/tmp/fc-round16-presentation-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.980298763839528,
+      "rawLog": "/tmp/fc-round16-presentation-1.log",
+      "rawSha256": "0b33e77d756423c6f66996fe52ff1a65748b5805e766553f71dcbb446627dc38"
+    }
+  ],
+  "hostTests": 40,
+  "newTests": 16,
+  "existingTests": 24,
+  "implemented": [
+    "Public and exact selected subject trees compose with scoped stable IDs, retaining the public outlet and subject root.",
+    "Finite width-first allocation, fixed/content/percent dimensions, Row/Column/Wrap, padding/gaps, anchors, explicit clips; unknown content height never becomes percent reference merely because a finite cap exists.",
+    "Paint tree preserves transparent ancestor groups, local alpha and independent primitive fills; effective alpha only for hit/diagnostic. Production build_scene always emits Some(tree).",
+    "Profile Materials component styling, visible rows 1..5, row gap, profile/version/selection-reason metadata; public protected content remains separate.",
+    "Full content DTOs stay intact; SceneCard visible_leaf_limit distributes global 64-leaf page budget. A real 63 assigned-teacher homework fixture plus material rows verifies complete ownership remains while per-page limits are smaller.",
+    "Empty/hidden nodes omit gaps; alpha zero retains geometry while ancestor-zero suppresses seconds work; Recess uses continuous remaining desktop outside public root."
+  ],
+  "counterexamplesAndCorrections": [
+    {
+      "kind": "implementation",
+      "observed": "Default selected SubjectRoot percentage width was incorrectly treated as intrinsic public Outlet minimum, producing OutOfSpace.",
+      "fix": "SubjectRoot percentage reference is resolved only after Outlet width allocation; scoped replacement and fixed-height/percent tests now pass."
+    },
+    {
+      "kind": "test-only",
+      "observed": "Exact f32 equality compared 430.54544 vs 430.54547 in percent geometry.",
+      "fix": "Percentage ratio computed before multiplication and geometric epsilon asserted."
+    },
+    {
+      "kind": "test-only",
+      "observed": "Wrong-teacher test initially chose teacher2, which was already current; 63-teacher fixture initially retained old material source context revision.",
+      "fix": "Use the actual other principal; re-observe context and bind material-page source in the same current fixture."
+    },
+    {
+      "kind": "test-only",
+      "observed": "Three independent material glass widgets combined with six protected widgets exceeded the eight-top-level bound; fixture correctly rejected.",
+      "fix": "Wrap test uses one genuine glass container with three second-level material widgets.",
+      "rawLog": "/tmp/fc-round16-presentation-before-wrap-fixture-fix.log",
+      "rawSha256": "5564d87fcb2e15775c3adf1489bdf3cb495f5da7e00d41e8dc95fc3287d9def5"
+    }
+  ],
+  "crossOwnerFindings": [
+    "Domain composition originally undercounted actual joined nodes by one and omitted joined graph depth; reported to identity_rules, who corrected count a+b and joined depth <=16 with boundary tests."
+  ],
+  "limits": [
+    "Host tests and Clippy only; no Windows execution, native pixels, Seewo, real Win7/10 or resource hard-bound evidence claimed.",
+    "Native renderer must use tree as authority, apply local alpha exactly once per group, enforce actual per-card visible_leaf_limit and actual top-glass/DIB budgets.",
+    "16MiB DIB enforcement and renderer snapshots/Windows input are root-owned and not validated by this report.",
+    "No desktop-icon inspection is invented. Caller-supplied work area and default narrow anchored public root protect the remaining continuous desktop; external icon exclusions require actual runtime input.",
+    "Future SubjectText/SubjectImage remain explicit UnsupportedWidget via domain validation.",
+    "No cleanup, remote activity, credentials changes or source commit performed."
+  ],
+  "cleanupOwner": "root; /tmp/fc-round16-presentation-target and listed /tmp/fc-round16-presentation-* remain for unified final verification and cleanup",
+  "supersededByNativeIntegration": {
+    "report": "/tmp/fc-round16-native-tree.json",
+    "aggregateSha256": "b39fd78b46a43c3d90cd12d69e2e21514fc5cb7c621bb79fb3266a37b35ceb97",
+    "reason": "Shared explicit fallback warning label added to Scene measurement to match native body; final Host40 and strict checks remain PASS."
+  }
+}

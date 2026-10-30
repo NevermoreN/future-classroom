@@ -1,0 +1,184 @@
+{
+  "status": "PASS_COMPILE_HOST_TESTS_WINDOWS_EXECUTION_PENDING",
+  "role": "Producer implementation and targeted checks, not independent safety review",
+  "createdUtc": "2026-10-30T17:58:37.139408+00:00",
+  "sources": [
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "bytes": 15391,
+      "sha256": "0aa3a7ed8868cb71efac3ec73073e3d3a5357032fb12f62a16d44de37ff7a8e1"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 22745,
+      "sha256": "1ceff05759bef1eafdff02d18d763a6634516747190440ac09b2d0d345a07b0a"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 13660,
+      "sha256": "2fc5ad03110d2e766dc21d0b96bff0ec6eeba097555525b44693bbba2eb965f7"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 27311,
+      "sha256": "ccfd6323545c7f226576edfeaaaceb72a424425971ecb06f27ed7aca07108881"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 35368,
+      "sha256": "55a419ba9d9727e7bc1d521e8942e4c198854ccf7d2160d8f03a9fc2db0200be"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 119834,
+      "sha256": "e1004e5697fa24979d0d5fdb796af393d43e26a72bb03760d757a757f9ebf620"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 67605,
+      "sha256": "e151fc45dca2544cb4060dd35a22a45270b5c2ca4aacde3a3e74f0a7baa3fe2d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "bytes": 17632,
+      "sha256": "3764ddd8f59cb289f31e54a5850b4bdad87b963cd238e8c4fb54dd053673775e"
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "bytes": 21451,
+      "sha256": "ca29ef3fc39cf200fb2eb08582ae018e872c78f26dba403d1f43ae82a4733d1c"
+    }
+  ],
+  "aggregateSha256": "b39fd78b46a43c3d90cd12d69e2e21514fc5cb7c621bb79fb3266a37b35ceb97",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-presentation",
+        "--target-dir",
+        "/tmp/fc-round16-presentation-target",
+        "--lib"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.240470132092014,
+      "rawLog": "/tmp/fc-round16-native-final-0.log",
+      "rawSha256": "8a833b80952f5103b17a1c24901b5416d1d131219f14b49423770e1d1fa80e2e"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-presentation",
+        "--all-targets",
+        "--target-dir",
+        "/tmp/fc-round16-presentation-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.782915946096182,
+      "rawLog": "/tmp/fc-round16-native-final-1.log",
+      "rawSha256": "3770e31360ae24c7e0e074f31995f7f356bee701789496fc591277fc02024090"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--tests",
+        "--target-dir",
+        "/tmp/fc-round16-native-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.638052611844614,
+      "rawLog": "/tmp/fc-round16-native-final-2.log",
+      "rawSha256": "93d501dc9a02b182d9a9cc4e825419cc86e2d86976d5c5094545ce7d58bc3aa8"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--tests",
+        "--target-dir",
+        "/tmp/fc-round16-native-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.278165366034955,
+      "rawLog": "/tmp/fc-round16-native-frozen-clippy.log",
+      "rawSha256": "5a39528ff3d0226c6d0079ccce2f37d4819b1fd4d8101234a844c62b08234120"
+    }
+  ],
+  "hostPresentationTests": 40,
+  "newNativeTestsCompiled": 9,
+  "nativeTestsExecuted": 0,
+  "implementation": [
+    "Authoritative paint-tree dispatch; legacy paint_tree=None retained for isolated old diagnostic fixtures.",
+    "Only real group roots own input HWND+DIB; leaf static/dynamic/input caches are headless with invalid HWND guarded in hide/drop.",
+    "Child primitives cache raw own fill/text. Premultiplied subtree scratch combines all children first then multiplies each local alpha once; backgrounds do not inherit fill alpha.",
+    "Same-generation Page input binds exact scoped NodeKey+immutable card_index, with original material source/resource metadata. Group InputState aggregates exact clipped current targets.",
+    "Homework title/body share one data-leaf ID, courses/files each one; actual native pages enforce SceneCard visible_leaf_limit and material visible_rows/row_gap; full blocks/text remain owned.",
+    "Count actual outer glass<=8, graph depth<=16, glass depth<=2 including course/homework child layer, and total per-card page limits<=64.",
+    "Per compositor RGBA admission includes every persistent leaf/input/dynamic/container/root DIB plus simultaneous CPU scratch Vec capacities. An additional maximum single DC target BGRA-sized reserve is charged conservatively; static targets explicitly drop before input targets.",
+    "One-second tick renders only small dynamic cache and recomposes root clip patch; Vista+ UpdateLayeredWindowIndirect prcDirty uploads only that patch for visible root HWND. Offscreen tests do not exercise actual upload calls.",
+    "Recess native GDI regions partition fill/edge and exclude static/dynamic small DIBs. Small DIBs draw original full-card region shape and raw text, then whole small result alpha once. Remaining fill and edge regions apply combined native constant alpha without overlap.",
+    "Read-only explicit hidden export downsamples own root/small DIB pixels and own region geometry to <=960x540/2MiB transparent BGRA without allocating a whole work-area image. Reports source_work and two scales.",
+    "Process-local class registration now shared by RAII owner count, allowing resident+hidden preview renderers together; unregister only after last renderer destroys HWNDs.",
+    "release_surfaces drops caches/input/last scene/revision before local preview. Root serializes production resident raster and local preview owners; export renderer drops before Canvas adopts BGRA.",
+    "Materials fallback diagnostics use a shared pure warning label, included in both Scene measurement and native body, without rewriting real teacher/subject names."
+  ],
+  "compiledNativeCases": [
+    "true_subtree_group_has_single_alpha_in_overlap_and_no_leaf_hwnds",
+    "native_tree_page_is_bound_to_exact_node_when_component_kind_repeats",
+    "native_clock_tick_changes_only_owned_patch_without_remeasuring_tree",
+    "combined_root_cache_and_simultaneous_scratch_are_rejected_at_original_budget",
+    "native_homework_title_and_body_share_one_leaf_and_real_pages",
+    "material_visible_rows_and_row_gap_are_actual_native_pagination_constraints",
+    "four_k_recess_partitions_native_background_holes_and_combines_alpha_once",
+    "resident_and_preview_renderers_share_class_registration_until_last_owner",
+    "empty_transparent_model_group_remains_selectable_metadata_without_a_surface"
+  ],
+  "primarySources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/direct2d/direct2d-layers-overview",
+      "actuallyBrowsed": true,
+      "supports": "Groups composite accumulated drawing operations; Windows 8 automatic null layer path is distinct. This implementation uses explicit CPU subtree groups, no D2D layers."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_layer_parameters",
+      "actuallyBrowsed": true,
+      "supports": "Uniform opacity applies to group result; Windows 7 baseline documented."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-updatelayeredwindowinfo",
+      "actuallyBrowsed": true,
+      "supports": "prcDirty limits source-DC update rectangle; minimum Vista, compatible API baseline for Win7/10/11."
+    }
+  ],
+  "limits": [
+    "Nine new native tests are compiled, NOT executed by this agent. Root owns final real Win11 validation and failures must not be reclassified as PASS.",
+    "No real Windows 7, Windows 10 or Seewo evidence is supplied.",
+    "16MiB accounting proves this compositor owner's explicit DIB/Vec RGBA allocations and conservative nominal software target reserve. OS GDI/compositor, driver/kernel and undocumented D2D implementation allocations are separate measurements, not a proven hard process/kernel bound.",
+    "Multiple arbitrary public renderer instances do not share a global byte permit. Production root must release resident surfaces, clear old Canvas, render/export within scoped preview owner, drop it, then publish Canvas. Root has accepted that serialized ownership contract.",
+    "Returned preview Vec capacity is checked before use against 2MiB and compositor base+capacity<=16MiB; Canvas memory belongs to its own bounded UI owner after scoped renderer drop.",
+    "No user desktop, wallpaper, external window or file is read by export. Old explicit BMP diagnostic API remains separately bounded as before.",
+    "No remote test, global system/SSH/key/firewall/foreground change, cleanup or commit performed."
+  ],
+  "cleanupOwner": "root; /tmp/fc-round16-presentation-target and /tmp/fc-round16-native-target plus current logs/reports remain for unified final checks/cleanup"
+}

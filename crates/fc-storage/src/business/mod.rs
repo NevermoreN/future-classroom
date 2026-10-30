@@ -15,6 +15,8 @@ mod lesson_codec;
 mod logout_tests;
 pub mod materials;
 mod materials_codec;
+mod profiles;
+mod profiles_codec;
 mod schedule;
 mod schedule_codec;
 pub mod voice;
@@ -46,6 +48,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     schedule::change_proof(&TransactionView(&transaction))?;
     lesson::load(&TransactionView(&transaction))?;
     display::load(&TransactionView(&transaction), &identity)?;
+    profiles::startup_check(&TransactionView(&transaction), &identity)?;
     desktop::read_watermark(&TransactionView(&transaction), &identity)?;
     materials::startup_check(&TransactionView(&transaction), &identity)?;
     voice::startup_check(&TransactionView(&transaction), &identity)?;

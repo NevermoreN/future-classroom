@@ -130,6 +130,16 @@ impl Dib {
             })
         }
     }
+    pub(crate) fn pixels_mut(&mut self) -> &mut [u8] {
+        // SAFETY: exclusive UI-thread Dib access, after every synchronous D2D
+        // EndDraw/target drop. No COM target or pixel slice is retained here.
+        unsafe {
+            std::slice::from_raw_parts_mut(
+                self.bits.as_ptr(),
+                self.width as usize * self.height as usize * 4,
+            )
+        }
+    }
     pub(crate) fn pixels(&self) -> &[u8] {
         // SAFETY: fixed top-down 32bpp allocation, accessed on its owning thread
         // only after synchronous D2D EndDraw. The slice cannot outlive the bitmap.
@@ -458,7 +468,10 @@ pub fn probe(seconds: u32) -> Result<NativeProbeReport> {
                 if allow {
                     visible_samples += 1;
                     if last_minute != Some(now.second_of_day() / 60) {
-                        let text=format!("{}\n未来教室 · Rust 原生绘制探针\n3% 玻璃 · 点击穿透 · 前台避让\n本窗口为技术验证，非完整产品",format_clock(now,ClockStyle::Digital24,false));
+                        let text = format!(
+                            "{}\n未来教室 · Rust 原生绘制探针\n3% 玻璃 · 点击穿透 · 前台避让\n本窗口为技术验证，非完整产品",
+                            format_clock(now, ClockStyle::Digital24, false)
+                        );
                         draw(&dib, &factory, &write, &text)?;
                         let size = SIZE {
                             cx: width,

@@ -1,0 +1,56 @@
+{
+  "kind": "read-only native lifecycle diagnosis",
+  "source_modified": false,
+  "test_executions_by_reviewer": 0,
+  "observed_evidence": {
+    "windows_run": "/tmp/fc-round16-windows-final.json",
+    "second_run_exact_backtrace": "/tmp/fc-round16-idle-fault-diagnostic.log",
+    "backtrace_reported_by": "/root/tcp_frontdoor",
+    "binary_prefix": "cab3",
+    "location": "application.rs:4884:9 wait_for closure #1",
+    "conclusion": "Second revision timed out during newly added audio pre-drain, after successful Open and before UI fault or final pool wait. No real driver/thread status sampled by this review."
+  },
+  "findings": [
+    {
+      "id": "IDLE-FAULT-DIAG-01",
+      "status": "confirmed source defect; matching actual backtrace from peer",
+      "title": "Detached audio pre-drain never pumps the required reaper",
+      "source": [
+        "application.rs:4882 app.audio.take(), :4883 audio.shutdown(), :4884 status-only wait",
+        "voice_runtime.rs:129 request_stop: atomics/notify only, expressly no thread spawn",
+        "voice_runtime.rs:235 reap_nonblocking: reap_locked plus start_locked",
+        "application App.poll: reaper called only for self.audio Some"
+      ],
+      "mechanism": "Removing VoiceRuntime from App disables App.poll reaper. shutdown does not create/finish the thread; status is observational only. An initially Idle runtime with needs_worker set cannot transition to Closed without its reaper.",
+      "narrow_fixture_fix": "Keep app.audio installed while shutting it down and polling (a clone can be captured by the wait predicate), or explicitly call audio.reap_nonblocking() during detached pre-drain. Preserve healthy authority until Closed and no physical thread; do not interpret status reads as progress."
+    },
+    {
+      "id": "IDLE-FAULT-DIAG-02",
+      "status": "source-established reachable path explaining original final-pool wait; actual original wait not independently backtraced",
+      "title": "Faulting before native audio shutdown cannot prove graceful idle closure using the current service",
+      "source": [
+        "SessionControl.fault: health Faulted + closed=true",
+        "VoiceService::check_open backend/voice.rs:153 rejects closed or terminal health",
+        "NativeDomain::interrupt native.rs:151 calls handle.interrupt_all; step:160 begins inventory",
+        "voice_runtime.rs:355-396 converts interrupt/step failure into stop_proven=false and Draining; finish/ack requires Idle+no native owner+stop_proven",
+        "App.schedule_shutdown waits for Closed and physical_thread_running=false before admitting Work::Shutdown",
+        "production host closure watchdog: 5 seconds then process::exit(2), absent from tests::wait_for App.poll-only harness"
+      ],
+      "mechanism": "An unstarted Idle runtime receives shutdown after control fault, then its reaper can start NativeDomain. Both durable interrupt and inventory are rejected by the already closed voice service. Runtime loops without Closed acknowledgement; shutdown is withheld and otherwise idle shared-pool threads stay alive. stop_accepting does invoke executor.fail_closed/native stop, so this is not evidence of continuing playback.",
+      "scope": "Do not fix by claiming graceful closure on unknown native ownership. The original test expected pool completion while production intentionally has a fail-closed watchdog path. Healthy pre-drain is a valid way to isolate the UI-revocation test once DIAG-01 is corrected. Product idle-fault graceful shutdown would need a separately designed proof of no owned audio resources, not bypassing writer/gate checks."
+    }
+  ],
+  "ruled_out_from_source": [
+    "No evidence the health watcher directly stops the shared worker pool. WorkerPool Control is a separate state from authority HealthGate.",
+    "No repeated Work::Shutdown loop while an admitted shutdown ticket exists: schedule_shutdown first checks self.shutdown.is_some(). After completion calls pool.request_stop; subsequent rejected admission requests only repeat stop, not spawn workers.",
+    "Backend::close takes writer once and StorageWriter.shutdown explicitly joins after stop; current evidence does not implicate SQLite join or Backend mutex.",
+    "Five additional native failures are SERIAL PoisonError fallout from the first panic, not five separately observed native lifecycle root causes."
+  ],
+  "source_sha256": {
+    "crates/fc-bootstrap/src/application.rs": "6fc9b22cc4a449c3c2813f1117ac75fab908351a90995634d0aac31f3e349708",
+    "crates/fc-bootstrap/src/voice_runtime.rs": "9b7087051a2b55aba69361d2d6b676ef3ff6481d29fd4b4659502057869e59cb",
+    "crates/fc-bootstrap/src/voice_runtime/native.rs": "edc3890c0ce646af791c187374b24b518d39edb72ca945fe88f812afc27211ac",
+    "crates/fc-bootstrap/src/backend/voice.rs": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0",
+    "crates/fc-runtime/src/worker.rs": "84f4381b268706ef68248af43471a36b991b0f90740d29e896108bb8da1426e6"
+  }
+}

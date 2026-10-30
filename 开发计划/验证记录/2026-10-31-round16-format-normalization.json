@@ -1,0 +1,49 @@
+{
+  "command": [
+    "cargo",
+    "fmt",
+    "--all"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 1.7412028312683105,
+  "stdout": "",
+  "stderr": "",
+  "changedRustFiles": [
+    {
+      "path": "crates/fc-domain/src/desktop.rs",
+      "beforeSha256": "7cd4c5452c6bc7a6d147d46850f644fcc39788709cedfef27300be1b9106cfd9",
+      "afterSha256": "e834eaf825a16c6da84f1cceced57d441993b806435dc835cced44dad82a50aa"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "beforeSha256": "2fc5ad03110d2e766dc21d0b96bff0ec6eeba097555525b44693bbba2eb965f7",
+      "afterSha256": "334e3cffd97df2a3085f05a70d968170663ea233ac636ee68f97e7a5adea18ab"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "beforeSha256": "ccfd6323545c7f226576edfeaaaceb72a424425971ecb06f27ed7aca07108881",
+      "afterSha256": "ce9bf75f32c419c6432ce3a525720491da7338d2f5e6917f3721c123a33865fe"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "beforeSha256": "55a419ba9d9727e7bc1d521e8942e4c198854ccf7d2160d8f03a9fc2db0200be",
+      "afterSha256": "51d8e0cfbccc0a18222da3c0f9a5c6659d5b2d5b57631fa6e2d39f43177aa822"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "beforeSha256": "e151fc45dca2544cb4060dd35a22a45270b5c2ca4aacde3a3e74f0a7baa3fe2d",
+      "afterSha256": "9ab03cde1cb909c3779a27666701e2e1ac90fa5264645e180ecc5cf53c1d277f"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "beforeSha256": "e1004e5697fa24979d0d5fdb796af393d43e26a72bb03760d757a757f9ebf620",
+      "afterSha256": "a0c1477fd6fa7d0ad0ffb4a983dcbb6fab068b0c2554ce559e5597ea90f70d68"
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "beforeSha256": "ca29ef3fc39cf200fb2eb08582ae018e872c78f26dba403d1f43ae82a4733d1c",
+      "afterSha256": "078f80e3bc5b4176015bcc39618ea2c87a0bb284fd457bde8044bafd01a9612a"
+    }
+  ],
+  "reason": "Normalize scoped producer formatting to workspace edition before final builds; no intentional semantic change."
+}

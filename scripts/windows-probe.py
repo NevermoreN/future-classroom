@@ -192,6 +192,12 @@ def main():
             raise RuntimeError("interactive hidden-host/tray probe failed")
         if args.application and report["native"].get("applicationExitCode") != 0:
             raise RuntimeError("isolated native workbench application failed")
+        if args.application:
+            application = report["native"].get("applicationOutput", [])
+            marker = "profiles_public_joint_cas_subject_exact_native_canvas=PASS"
+            if not isinstance(application, list) or not any(isinstance(line, str) and marker in line for line in application):
+                raise RuntimeError("native public-layout/subject-profile/canvas result marker missing")
+            report["profileNativeStatus"] = "PASS"
         if args.materials and report["native"].get("materialsExitCode") != 0:
             raise RuntimeError("isolated materials integration failed")
         if args.audio_silent:

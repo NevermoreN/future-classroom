@@ -1,0 +1,20 @@
+{
+  "command": [
+    "cargo",
+    "clippy",
+    "-p",
+    "fc-windows",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--tests",
+    "--target-dir",
+    "/tmp/fc-round16-native-target",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 3.278165366034955,
+  "rawLog": "/tmp/fc-round16-native-frozen-clippy.log",
+  "rawSha256": "5a39528ff3d0226c6d0079ccce2f37d4819b1fd4d8101234a844c62b08234120"
+}

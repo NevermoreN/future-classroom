@@ -45,6 +45,12 @@ pub(super) fn load(
     }
     Ok(settings)
 }
+pub(super) fn mutation(settings: &DisplaySettings) -> Result<Mutation, StorageError> {
+    Ok(Mutation::Put {
+        key: DOCUMENT.into(),
+        value: encode(&dto::settings(settings), MAX_VALUE_BYTES)?,
+    })
+}
 pub(super) fn error(error: StorageError) -> DisplayRepositoryError {
     match error {
         StorageError::Display(e) => DisplayRepositoryError::Domain(e),

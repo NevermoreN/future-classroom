@@ -31,6 +31,7 @@ pub enum StorageError {
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
+    Profile(fc_domain::profile::ProfileError),
     Material(fc_domain::materials::MaterialError),
     Lesson(fc_domain::lesson_context::LessonContextError),
     Voice(fc_domain::voice::VoiceError),

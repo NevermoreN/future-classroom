@@ -312,6 +312,12 @@ impl Controller {
         self.renderer.hide();
         self.probe_presented = false;
     }
+    /// The layout editor renders a separate synthetic scene. Release the hidden
+    /// classroom surfaces first so its preview cannot coexist with that cache.
+    pub(super) fn release_for_preview(&mut self) {
+        self.hide();
+        self.renderer.release_surfaces();
+    }
     pub(super) fn stop(&mut self) {
         self.stopped = true;
         self.hide();
@@ -761,6 +767,7 @@ mod tests {
             captured_at: sample(0),
             valid_until: Some(sample(60)),
             cards: Vec::new(),
+            paint_tree: None,
             text_tone: fc_domain::desktop::TextTone::Light,
             clock_rollback: false,
             public_calendar_unverified: false,
@@ -822,6 +829,7 @@ mod tests {
             surface_alpha: 0.03,
             edge_alpha: 0.5,
             content: fc_presentation::scene::CardContent::Text(String::new()),
+            visible_leaf_limit: 14,
             page: fc_presentation::scene::PageInfo {
                 offset: 71,
                 shown: 14,
@@ -979,6 +987,8 @@ mod tests {
                     }],
                     next_cursor: Some(cursor),
                     total: 6,
+                    visible_rows: 5,
+                    row_gap_dip: 8,
                 },
             )),
             page: fc_presentation::scene::PageInfo {
@@ -986,6 +996,7 @@ mod tests {
                 shown: 1,
                 total: 6,
             },
+            visible_leaf_limit: 5,
         });
         scene
     }

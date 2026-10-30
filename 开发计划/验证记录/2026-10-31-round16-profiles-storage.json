@@ -1,0 +1,151 @@
+{
+  "round": 16,
+  "scope": "Profiles persistence, strict codec, same-writer current facts, local Global Backend management APIs",
+  "recordedAt": "2026-10-30T17:38:37.567677+00:00",
+  "baseHead": "12425c02a3ad68de9029a4fcdb098cce0bebc3d3",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22035,
+      "sha256": "93ce702f9e945870625d823d0f0f5ff6fb111e7bc97b1c29789bfe8ca613f31e"
+    },
+    {
+      "path": "crates/fc-ports/src/profiles.rs",
+      "bytes": 2420,
+      "sha256": "117bdd744f1ac287aa84b2d93f9a9b35c872fddf9a4c8faad1bc74a7a8035249"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61545,
+      "sha256": "511e43ba9e2e21bbbf394df0aa770a26334213e675fa348e2a3eb6d4480cca4c"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 37258,
+      "sha256": "681be913f1a868005fad5c4ea2123e09e2871f6955b6b44d13e826bd34d6f2f2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop.rs",
+      "bytes": 12099,
+      "sha256": "92b6f64d7597ab2498c666444985b32e34aa13ea15abb7e76cca528c28de0442"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display.rs",
+      "bytes": 11471,
+      "sha256": "df1c073229fee6646f6c91c0b449a9e5f4b948a0647b1b05e01e5a986cb37ab9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display_codec.rs",
+      "bytes": 9865,
+      "sha256": "d87d0e10383e233dca9c7a1780342dd5ab1887298fa17392365bb4c61fb2acfa"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "bytes": 58852,
+      "sha256": "fbc30e45eb9ef63a7b00ad2607be277247d1430a0f5512e3f5d075519aa54333"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles.rs",
+      "bytes": 33679,
+      "sha256": "1d3f6db8ac6153bb569170b177569b09ea1f41418cd3c374b68988cb85464331"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles_codec.rs",
+      "bytes": 15099,
+      "sha256": "7cf16865c5d89b5c627a976ab6063505dc18aa8f6521332dd6ebbfe8538dafeb"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles/tests.rs",
+      "bytes": 34541,
+      "sha256": "9b6bb1a48c33577f8569233a69d96c6a28bcd25dd680100203e8296d76485fca"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles.rs",
+      "bytes": 2934,
+      "sha256": "dc7f56958d34bb45e4f3bd639800c706d5b22e8dad95732559792d7abab9d508"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles/tests.rs",
+      "bytes": 17877,
+      "sha256": "bc063feb2c2b5d5334d2872da8605f6647939a8d5a878e8a15a9ee6d5e260fb5"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round16-profiles-storage-tests.log",
+      "sha256": "c29f24dce3bd1a07ce140888694a5e15e24a6751536c7d37f1399e176898fcba",
+      "text": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.82s\n     Running unittests src/lib.rs (target/debug/deps/fc_storage-50351b439967861c)\n\nrunning 10 tests\ntest business::profiles::tests::profiles_canonical_node_water_survives_delete_restart_and_rejects_retired_ids ... ok\ntest business::profiles::tests::profiles_declared_missing_page_document_and_cross_owner_are_startup_corruption ... ok\ntest business::profiles::tests::profiles_exact_material_folder_owner_and_corrupt_receipt_are_not_silent_defaults ... ok\ntest business::profiles::tests::profiles_facts_codec_accepts_only_exact_legacy_shape_and_rejects_partial_new_data ... ok\ntest business::profiles::tests::profiles_facts_current_exact_teacher_override_break_and_real_material_pagination ... ok\ntest business::profiles::tests::profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding ... ok\ntest business::profiles::tests::profiles_paged_catalog_history_disable_and_restart_do_not_block_revocation ... ok\ntest business::profiles::tests::profiles_postcommit_publication_failure_faults_new_operations_without_losing_document ... ok\ntest business::profiles::tests::profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_global_failure ... ok\ntest business::profiles::tests::profiles_teacher_web_user_denied_and_local_lock_at_precommit_rolls_back ... ok\n\ntest result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 10.78s\n\n"
+    },
+    {
+      "path": "/tmp/fc-round16-profiles-checks.log",
+      "sha256": "62a25708f3168f68805c7f9dcf701b8fe75e0b07c606a2dea7da15a75a38004e",
+      "text": "{\"command\": [\"cargo\", \"test\", \"-p\", \"fc-bootstrap\", \"--lib\", \"backend::profiles\", \"--locked\", \"--\", \"--test-threads=1\"]}\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.62s\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 2 tests\ntest backend::profiles::tests::profiles_backend_exact_management_lease_joint_cas_and_restart ... ok\ntest backend::profiles::tests::profiles_backend_retained_disabled_owner_can_be_managed_but_not_reenabled ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 1.38s\n\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-storage\", \"-p\", \"fc-ports\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.79s\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-bootstrap\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.61s\n{\"exitCode\": 0}\n{\"command\": [\"python3\", \"scripts/check-architecture.py\"]}\nArchitecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n{\"exitCode\": 0}\n"
+    },
+    {
+      "path": "/tmp/fc-round16-profiles-stable-id-checks.log",
+      "sha256": "98d3df65665fa62fd6927a872d74922cbc2f4237670de66fdd6d846acdd773ac",
+      "text": "{\"command\": [\"cargo\", \"test\", \"-p\", \"fc-storage\", \"--lib\", \"profiles_independent_cas\", \"--locked\", \"--\", \"--test-threads=1\"]}\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.81s\n     Running unittests src/lib.rs (target/debug/deps/fc_storage-50351b439967861c)\n\nrunning 1 test\ntest business::profiles::tests::profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.60s\n\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-storage\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.79s\n{\"exitCode\": 0}\n"
+    }
+  ],
+  "verification": {
+    "storageTests": {
+      "passed": 10,
+      "failed": 0,
+      "runSeconds": 10.78,
+      "profile": "test unoptimized+debuginfo",
+      "sourceBinding": "Main run preceded final immutable existing profile id check. Final added IdMismatch assertion and production check passed separately in 1 focused test (0.60s)."
+    },
+    "backendTests": {
+      "passed": 2,
+      "failed": 0,
+      "runSeconds": 1.38,
+      "profile": "test unoptimized+debuginfo"
+    },
+    "strictClippy": "ports/storage/bootstrap --lib --tests --locked -- -D warnings PASS; storage repeated after final stable-id check",
+    "architecture": "12 crates, 33 first-party edges PASS",
+    "diffCheck": "scoped git diff --check PASS"
+  },
+  "coverage": [
+    "Independent stable class/subject/teacher slots and independent public/layout/display/profile revisions; same-class same-subject different owners remain isolated.",
+    "Joint public+display captured revision conflicts reject atomically, unchanged display does not advance; no-op saves retain independent revisions, durable receipt binds actor/key/expected/payload and digest.",
+    "Authenticated management read/write/list denies Teacher/Web/User; exact local session lock during begin_update rejects precommit and rolls back without consuming slot.",
+    "65 persisted profiles span two catalog pages; management listing reads at most 20 summaries, retained disabled-owner configuration survives account revocation and restart and can be disabled, not reenabled without assignment.",
+    "Persistent node highwater ignores caller MAX and survives deletion/reopen; retired node reuse rejected, fresh ids advance above committed water.",
+    "Folder references require exact owner/subject index, missing declared page/doc, cross-owner substitutions, duplicate JSON keys, unknown fields/format reject at startup; corrupt receipt digest rejects replay without modifying document.",
+    "Facts read only public+current exact subject profile in the existing writer transaction, actual temporary override swaps teacher, break returns public visual with retained actual teacher materials.",
+    "Real materials pagination honors profile visible_rows=2, cursor offset advances by 2 and leaves third item reachable.",
+    "Public edits producing legal individual trees but incompatible composition preserve historical profile and expose LayoutMismatch neutral public fallback. New enabled subject saves reject incompatible composition.",
+    "Facts format2 strict profiles field; exact old format1 shape migrates conservatively, partial-new/mixed/unknown shapes reject.",
+    "Publication failure after COMMIT faults new operations while reopening recovers committed profile.",
+    "Backend real IdentitySessions+SessionControl exact lock, stale double-CAS, disabled-owner management and reopen old-lease invalidation tested."
+  ],
+  "fixtureClassification": {
+    "storage": "Real SQLite and sole-writer transactions, synthetic credential blobs and explicit captured fixture channel guard; no KDF/DPAPI/password login claim.",
+    "backend": "Real Backend/SQLite, HMAC credential records and production IdentitySessions/SessionControl; setup password verifier/issued leases synthetic, no password authentication claim. Host uses explicit FakeKeyProtector transport; Windows branch CurrentUserDpapi protection/reopen not executed by this host report.",
+    "filesystem": "Material preparation fixture metadata only; no material byte or launch/FS validation claim."
+  },
+  "historicalFailures": [
+    {
+      "evidence": "Summary only, initial console retained in agent conversation; no raw log file preserved",
+      "passed": 7,
+      "failed": 1,
+      "profile": "test unoptimized+debuginfo",
+      "cause": "Test schedule contained explicit recess without a following Course, so existing domain correctly resolved Rest and produced no retained source.",
+      "resolution": "Fixture now contains Course-Recess-Course, targeted facts test and final 10-test run passed; no production rule changed."
+    }
+  ],
+  "limits": [
+    "4096 profiles, stable monotonic ids with no physical delete. Catalog pages contain 64 entries, per BLOB64KiB, management page20; only 65 profiles exercised by this host integration, not claim of complete4096 fixture.",
+    "Every stored/receipt value64KiB, Facts response2MiB, text/native budgets preserved; layout128nodes/128children/depth16, current profile only loaded for presentation.",
+    "Public save checks only its valid tree+joint display, incompatible existing profile falls back explicitly rather than scanning all4096 documents.",
+    "No background migration write on old profile-free databases; legacy defaults synthesized.",
+    "Windows DPAPI/native visible preview/render/performance and Win7/10/11 final runs remain root verification tasks."
+  ],
+  "cleanup": {
+    "profileFixtureDirs": [],
+    "backendFixtureDirs": [],
+    "method": "RAII close/join writer and remove private per-test directories",
+    "target": "Shared build cache retained per parent request; no remote actions/cleanup/commit/push"
+  },
+  "frozen": true
+}

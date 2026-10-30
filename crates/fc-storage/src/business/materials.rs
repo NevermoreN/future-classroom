@@ -205,7 +205,7 @@ fn load_record(
     }
     Ok(r)
 }
-fn find_folder(
+pub(super) fn find_folder(
     d: &dyn TransactionDocuments,
     scope: MaterialScope,
 ) -> Result<Option<TeacherMaterialFolder>, StorageError> {
@@ -384,6 +384,7 @@ pub(super) fn desktop_page(
     schedule: &ScheduleDocument,
     now: LocalDateTime,
     cursor: Option<MaterialCursor>,
+    limit: usize,
 ) -> Result<(Option<MaterialSource>, Option<MaterialPage>), StorageError> {
     let Some(class) = identity.installation.as_ref().and_then(|i| i.current_class) else {
         if cursor.is_some() {
@@ -416,7 +417,7 @@ pub(super) fn desktop_page(
         folder,
         source.clone(),
         cursor,
-        DESKTOP_MATERIAL_PAGE,
+        limit.min(DESKTOP_MATERIAL_PAGE),
     )?;
     Ok((source, Some(p)))
 }

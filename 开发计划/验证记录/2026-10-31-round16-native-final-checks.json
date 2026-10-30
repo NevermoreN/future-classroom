@@ -1,0 +1,55 @@
+[
+  {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-presentation",
+      "--target-dir",
+      "/tmp/fc-round16-presentation-target",
+      "--lib"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 3.240470132092014,
+    "rawLog": "/tmp/fc-round16-native-final-0.log",
+    "rawSha256": "8a833b80952f5103b17a1c24901b5416d1d131219f14b49423770e1d1fa80e2e"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-presentation",
+      "--all-targets",
+      "--target-dir",
+      "/tmp/fc-round16-presentation-target",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 2.782915946096182,
+    "rawLog": "/tmp/fc-round16-native-final-1.log",
+    "rawSha256": "3770e31360ae24c7e0e074f31995f7f356bee701789496fc591277fc02024090"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--tests",
+      "--target-dir",
+      "/tmp/fc-round16-native-target",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 4.638052611844614,
+    "rawLog": "/tmp/fc-round16-native-final-2.log",
+    "rawSha256": "93d501dc9a02b182d9a9cc4e825419cc86e2d86976d5c5094545ce7d58bc3aa8"
+  }
+]

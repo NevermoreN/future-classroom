@@ -211,7 +211,22 @@ pub enum Event {
     Submit(ActionId, FormData),
     Input,
     Close,
-    GridCell { row: usize, column: usize },
+    GridCell {
+        row: usize,
+        column: usize,
+    },
+    LayoutSelect {
+        generation: u64,
+        scope: fc_domain::layout::LayoutScope,
+        id: fc_domain::ids::LayoutNodeId,
+    },
+    LayoutDrop {
+        generation: u64,
+        scope: fc_domain::layout::LayoutScope,
+        source: fc_domain::ids::LayoutNodeId,
+        target: fc_domain::ids::LayoutNodeId,
+        before: Option<fc_domain::ids::LayoutNodeId>,
+    },
 }
 
 #[cfg(test)]

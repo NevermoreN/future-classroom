@@ -37,7 +37,10 @@ use windows::{
 
 #[path = "desktop/backdrop.rs"]
 mod backdrop;
+#[path = "desktop/tree.rs"]
+mod tree;
 use backdrop::Backdrop;
+pub use tree::DesktopPreview;
 
 pub const DESKTOP_SCOPE: u64 = 0xfc00_0001;
 pub const DIB_BUDGET: u64 = 16 * 1024 * 1024;
@@ -66,6 +69,10 @@ pub struct DesktopMetrics {
     pub forced_uploads: u64,
     pub denied_publications: u64,
     pub text_layouts: u64,
+    pub tree_groups: usize,
+    pub visible_leaves: usize,
+    pub scratch_peak_bytes: u64,
+    pub partial_uploads: u64,
     pub pages: Vec<PageMetrics>,
 }
 #[derive(Clone, Debug)]
@@ -121,6 +128,11 @@ struct InputContext {
 enum InputAction {
     LessonManage,
     Page(bool),
+    TreePage {
+        key: fc_presentation::scene::SceneNodeKey,
+        card_index: usize,
+        forward: bool,
+    },
     MaterialOpen {
         source: MaterialSource,
         folder_id: FolderId,
@@ -158,14 +170,24 @@ impl InputStrip {
     }
 }
 
+static CLASS_OWNERS: std::sync::Mutex<usize> = std::sync::Mutex::new(0);
 struct Class {
     instance: HINSTANCE,
 }
 impl Class {
     fn new() -> Result<Self> {
-        // SAFETY: static class name and ABI callback remain alive until all windows drop.
+        let mut owners = CLASS_OWNERS.lock().unwrap_or_else(|p| p.into_inner());
+        let next = owners
+            .checked_add(1)
+            .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
+        // SAFETY: this process-owned class registration is shared by RAII
+        // renderers; its static ABI callback outlives every renderer HWND.
         unsafe {
             let instance = HINSTANCE(GetModuleHandleW(None)?.0);
+            if *owners > 0 {
+                *owners = next;
+                return Ok(Self { instance });
+            }
             let wc = WNDCLASSW {
                 hInstance: instance,
                 lpszClassName: w!("FutureClassroom.Desktop.v1"),
@@ -179,13 +201,23 @@ impl Class {
                 let _ = UnregisterClassW(w!("FutureClassroom.Desktop.v1"), Some(instance));
                 return Err(error);
             }
+            *owners = next;
             Ok(Self { instance })
         }
     }
 }
 impl Drop for Class {
     fn drop(&mut self) {
-        // SAFETY: every owned HWND is destroyed before its registration owner.
+        let mut owners = CLASS_OWNERS.lock().unwrap_or_else(|p| p.into_inner());
+        if *owners == 0 {
+            return;
+        }
+        *owners -= 1;
+        if *owners != 0 {
+            return;
+        }
+        // SAFETY: the last renderer already destroyed all of its owned HWNDs;
+        // other renderers retained their class owner until their own HWND drops.
         unsafe {
             backdrop::unregister(self.instance);
             let _ = UnregisterClassW(w!("FutureClassroom.Desktop.v1"), Some(self.instance));
@@ -215,6 +247,9 @@ impl NativeWindow {
     }
     fn hide(&self) {
         // SAFETY: this UI-thread owner retains the live HWND; hiding cannot activate.
+        if self.0.is_invalid() {
+            return;
+        }
         unsafe {
             let _ = ShowWindow(self.0, SW_HIDE);
         }
@@ -223,8 +258,10 @@ impl NativeWindow {
 impl Drop for NativeWindow {
     fn drop(&mut self) {
         // SAFETY: unique HWND ownership, destroyed before any callback state drops.
-        unsafe {
-            let _ = DestroyWindow(self.0);
+        if !self.0.is_invalid() {
+            unsafe {
+                let _ = DestroyWindow(self.0);
+            }
         }
     }
 }
@@ -386,11 +423,13 @@ struct Block {
     fill: Option<(Rgb, f32, f32)>,
     lines: Vec<(f32, f32)>,
     action: Option<InputAction>,
+    leaf: Option<usize>,
 }
 struct ContentLayout {
     blocks: Vec<Block>,
     pages: Vec<f32>,
     units: usize,
+    visible_leaves: Vec<usize>,
 }
 struct Surface {
     window: NativeWindow,
@@ -430,6 +469,7 @@ impl Card {
 
 pub struct DesktopRenderer {
     cards: Vec<Card>,
+    tree: Option<tree::TreeRenderer>,
     graphics: Graphics,
     class: Class,
     _apartment: Apartment,
@@ -471,91 +511,36 @@ impl DesktopRenderer {
         Ok(InputStrip { surface, state })
     }
     pub fn take_events(&mut self) -> Result<Vec<DesktopEvent>> {
-        let mut output = Vec::with_capacity(2);
-        for card in &mut self.cards {
+        let mut output = tree::take_events(self)?;
+        self.take_legacy_events(&mut output)?;
+        Ok(output)
+    }
+    fn take_legacy_events(&mut self, output: &mut Vec<DesktopEvent>) -> Result<()> {
+        // Headless leaf input is aggregated by its real tree-root owner.
+        let tree_cards = self.tree.as_ref().map_or(0, |t| t.card_count);
+        for card in self.cards.iter_mut().skip(tree_cards) {
             let Some(input) = &card.input else { continue };
             let turns: Vec<_> = input.state.turns.borrow_mut().drain(..).collect();
             for (generation, action) in turns {
-                if self.last_scene != Some(generation) {
+                if self.last_scene != Some(generation)
+                    || !card.input.as_ref().is_some_and(|i| {
+                        i.state.context.borrow().as_ref().is_some_and(input_allowed)
+                    })
+                {
                     continue;
                 }
-                let valid = input
-                    .state
-                    .context
-                    .borrow()
-                    .as_ref()
-                    .is_some_and(input_allowed);
-                if !valid {
-                    continue;
-                }
-                let forward = match action {
-                    InputAction::LessonManage => {
-                        if output.len() < 8 {
-                            output.push(DesktopEvent::LessonManage { generation });
-                        }
-                        continue;
-                    }
-                    InputAction::Page(forward) => forward,
-                    InputAction::MaterialOpen {
-                        source,
-                        folder_id,
-                        folder_revision,
-                        material_id,
-                        resource_version,
-                    } => {
-                        if output.len() < 8 {
-                            output.push(DesktopEvent::MaterialOpen {
-                                generation,
-                                source,
-                                folder_id,
-                                folder_revision,
-                                material_id,
-                                resource_version,
-                            });
-                        }
-                        continue;
-                    }
-                    InputAction::MaterialPage { source, cursor } => {
-                        if output.len() < 8 {
-                            output.push(DesktopEvent::MaterialPage {
-                                generation,
-                                source,
-                                cursor,
-                            });
-                        }
-                        continue;
-                    }
-                };
-                if forward && card.page + 1 < card.body.pages.len() {
-                    card.page += 1;
-                    card.render_pending = true;
-                } else if !forward && card.page > 0 {
-                    card.page -= 1;
-                    card.render_pending = true;
-                } else if card.source.kind == ComponentKind::Homework {
-                    let offset = if forward {
-                        card.source
-                            .page
-                            .offset
-                            .saturating_add(card.source.page.shown)
-                    } else {
-                        card.source.page.offset.saturating_sub(1)
-                    };
-                    if offset < card.source.page.total
-                        && offset != card.source.page.offset
-                        && output.len() < 2
-                    {
-                        output.push(DesktopEvent::HomeworkBatch { generation, offset });
-                    }
-                }
+                route_action(card, generation, action, output)?;
             }
         }
-        Ok(output)
+        Ok(())
     }
     pub fn probe_lesson_control(&self) -> Result<()> {
         self.probe_input(ComponentKind::Schedule, |a| *a == InputAction::LessonManage)
     }
     pub fn probe_next_page(&self, kind: ComponentKind, forward: bool) -> Result<()> {
+        if self.tree.is_some() && self.cards.iter().filter(|c| c.source.kind == kind).count() > 1 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
         self.probe_input(kind, |action| *action == InputAction::Page(forward))
     }
     pub fn probe_material_open(&self, id: MaterialId) -> Result<()> {
@@ -577,9 +562,14 @@ impl DesktopRenderer {
         if !self.hidden_probe {
             return Err(Error::from_hresult(E_ACCESSDENIED));
         }
+        if let Some(result) = tree::probe_input(self, kind, &select) {
+            return result;
+        }
+        let tree_cards = self.tree.as_ref().map_or(0, |t| t.card_count);
         let input = self
             .cards
             .iter()
+            .skip(tree_cards)
             .find(|c| {
                 c.source.kind == kind
                     && c.input
@@ -630,6 +620,7 @@ impl DesktopRenderer {
         let class = Class::new()?;
         Ok(Self {
             cards: Vec::new(),
+            tree: None,
             graphics: g,
             class,
             _apartment: a,
@@ -651,6 +642,9 @@ impl DesktopRenderer {
         self.last_metrics()
     }
     pub fn hide(&mut self) {
+        if let Some(tree) = &self.tree {
+            tree.hide();
+        }
         for c in &mut self.cards {
             c.hide();
             c.surface.dirty = true;
@@ -662,9 +656,26 @@ impl DesktopRenderer {
         self.metrics.visible_windows = 0;
         self.metrics.input_regions = 0;
     }
+    /// Release this renderer's physical raster owners before a separate local
+    /// preview renderer is admitted. Re-publication always rebuilds from a fresh
+    /// guarded Scene; neither a hidden old image nor its input can reappear.
+    pub fn release_surfaces(&mut self) {
+        self.hide();
+        self.tree = None;
+        self.cards.clear();
+        self.last_scene = None;
+        self.last_revision = None;
+        self.metrics.tree_groups = 0;
+        self.metrics.visible_leaves = 0;
+        self.metrics.scratch_peak_bytes = 0;
+        self.refresh_metrics();
+    }
     /// Read-only pagination changes no domain data and receives no arbitrary path.
     /// The composition root can expose it through its explicit trusted controls.
     pub fn next_page(&mut self, kind: ComponentKind) -> Result<bool> {
+        if self.tree.is_some() && self.cards.iter().filter(|c| c.source.kind == kind).count() > 1 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
         let Some(c) = self.cards.iter_mut().find(|c| c.source.kind == kind) else {
             return Ok(false);
         };
@@ -703,6 +714,15 @@ impl DesktopRenderer {
             self.hide();
             return Ok(PresentOutcome::Hidden);
         }
+        if scene.paint_tree.is_some() {
+            return tree::present(self, scene, now, guard);
+        }
+        if self.tree.is_some() {
+            self.hide();
+            self.tree = None;
+            self.cards.clear();
+            self.last_scene = None;
+        }
         let control_card = scene.lesson_control.as_ref().map(|control| SceneCard {
             kind: ComponentKind::Schedule,
             rect: control.rect,
@@ -715,6 +735,7 @@ impl DesktopRenderer {
                 can_change: control.can_change,
             },
             page: Default::default(),
+            visible_leaf_limit: 1,
         });
         let scene_cards: Vec<_> = scene.cards.iter().chain(control_card.iter()).collect();
         let changed = self.last_scene != Some(scene.generation)
@@ -1055,6 +1076,13 @@ impl DesktopRenderer {
         make_surface(NativeWindow::new(&self.class)?, rect)
     }
     fn refresh_metrics(&mut self) {
+        if self.tree.is_some() {
+            tree::refresh_metrics(self);
+            return;
+        }
+        self.metrics.tree_groups = 0;
+        self.metrics.visible_leaves = 0;
+        self.metrics.scratch_peak_bytes = 0;
         self.metrics.components = self.cards.len();
         self.metrics.gdi_backdrop_layers =
             self.cards.iter().filter(|c| c.backdrop.is_some()).count() * 2;
@@ -1141,7 +1169,9 @@ impl DesktopRenderer {
         for p in pixels.chunks_exact_mut(4) {
             p.copy_from_slice(&[45, 36, 28, 255]);
         }
-        for c in &self.cards {
+        tree::composite_groups(self, &mut pixels, work, w, h)?;
+        let tree_cards = self.tree.as_ref().map_or(0, |t| t.card_count);
+        for c in self.cards.iter().skip(tree_cards) {
             if c.source.component_alpha == 0. {
                 continue;
             }
@@ -1192,8 +1222,70 @@ impl DesktopRenderer {
 impl Drop for DesktopRenderer {
     fn drop(&mut self) {
         self.hide();
+        self.tree = None;
         self.cards.clear();
     }
+}
+
+fn route_nonpage(generation: SceneGeneration, action: InputAction, output: &mut Vec<DesktopEvent>) {
+    if output.len() >= 8 {
+        return;
+    }
+    match action {
+        InputAction::LessonManage => output.push(DesktopEvent::LessonManage { generation }),
+        InputAction::MaterialOpen {
+            source,
+            folder_id,
+            folder_revision,
+            material_id,
+            resource_version,
+        } => output.push(DesktopEvent::MaterialOpen {
+            generation,
+            source,
+            folder_id,
+            folder_revision,
+            material_id,
+            resource_version,
+        }),
+        InputAction::MaterialPage { source, cursor } => output.push(DesktopEvent::MaterialPage {
+            generation,
+            source,
+            cursor,
+        }),
+        InputAction::Page(_) | InputAction::TreePage { .. } => {}
+    }
+}
+fn route_action(
+    card: &mut Card,
+    generation: SceneGeneration,
+    action: InputAction,
+    output: &mut Vec<DesktopEvent>,
+) -> Result<()> {
+    let InputAction::Page(forward) = action else {
+        route_nonpage(generation, action, output);
+        return Ok(());
+    };
+    if forward && card.page + 1 < card.body.pages.len() {
+        card.page += 1;
+        card.render_pending = true;
+    } else if !forward && card.page > 0 {
+        card.page -= 1;
+        card.render_pending = true;
+    } else if card.source.kind == ComponentKind::Homework {
+        let offset = if forward {
+            card.source
+                .page
+                .offset
+                .saturating_add(card.source.page.shown)
+        } else {
+            card.source.page.offset.saturating_sub(1)
+        };
+        if offset < card.source.page.total && offset != card.source.page.offset && output.len() < 8
+        {
+            output.push(DesktopEvent::HomeworkBatch { generation, offset });
+        }
+    }
+    Ok(())
 }
 
 fn make_surface(window: NativeWindow, rect: Rect) -> Result<Surface> {
@@ -1368,11 +1460,20 @@ fn xy(x: f32, y: f32) -> D2D1_ELLIPSE {
     e
 }
 fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<ContentLayout> {
+    prepare_content_with_note(g, c, unverified, None)
+}
+fn prepare_content_with_note(
+    g: &Graphics,
+    c: &SceneCard,
+    unverified: bool,
+    note: Option<&str>,
+) -> Result<ContentLayout> {
     if matches!(c.content, CardContent::LessonControl { .. }) {
         return Ok(ContentLayout {
             blocks: Vec::new(),
             pages: vec![0.],
             units: 0,
+            visible_leaves: vec![1],
         });
     }
     let width = c.rect.width - 32.;
@@ -1383,6 +1484,7 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
     let mut blocks = Vec::new();
     let mut top = 0.;
     let mut units = 0usize;
+    let leaf = Cell::new(None);
     let mut add = |text: String, center: bool, fill: Option<(Rgb, f32, f32)>| -> Result<()> {
         units = units
             .checked_add(text.encode_utf16().count())
@@ -1424,6 +1526,7 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             fill,
             lines,
             action: None,
+            leaf: leaf.get(),
         });
         top += height + 8.;
         Ok(())
@@ -1435,7 +1538,8 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             if rows.len() > 128 {
                 return Err(Error::from_hresult(E_INVALIDARG));
             }
-            for r in rows {
+            for (i, r) in rows.iter().enumerate() {
+                leaf.set(Some(i));
                 if !r.fill_alpha.is_finite()
                     || !(0. ..=1.).contains(&r.fill_alpha)
                     || !r.stroke_width.is_finite()
@@ -1466,7 +1570,8 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             if rows.len() > 64 {
                 return Err(Error::from_hresult(E_INVALIDARG));
             }
-            for r in rows {
+            for (i, r) in rows.iter().enumerate() {
+                leaf.set(Some(i));
                 add(
                     format!("{} · {}", r.subject_name, r.teacher_name),
                     false,
@@ -1476,7 +1581,12 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             }
         }
         CardContent::Materials(list) => {
+            if let Some(note) = note {
+                add(note.into(), false, None)?;
+            }
             if list.rows.len() > fc_domain::materials::DESKTOP_MATERIAL_PAGE
+                || !(1..=5).contains(&list.visible_rows)
+                || list.row_gap_dip > 64
                 || !list.rows.is_empty() && list.folder_id.is_none()
             {
                 return Err(Error::from_hresult(E_INVALIDARG));
@@ -1489,18 +1599,29 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             if list.rows.is_empty() {
                 add("该老师暂无课堂资料".into(), false, None)?;
             }
-            for row in &list.rows {
+            for (i, row) in list.rows.iter().enumerate() {
+                leaf.set(Some(i));
                 add(row.name.clone(), false, None)?;
             }
+            leaf.set(None);
             if list.next_cursor.is_some() {
                 add("更多资料 ›".into(), false, None)?;
             }
         }
-        CardContent::MaterialsUnavailable => add("资料尚未就绪".into(), false, None)?,
+        CardContent::MaterialsUnavailable => {
+            if let Some(note) = note {
+                add(note.into(), false, None)?;
+            }
+            add("资料尚未就绪".into(), false, None)?;
+        }
         _ => {}
     }
     if let CardContent::Materials(list) = &c.content {
-        for (block, row) in blocks.iter_mut().skip(1).zip(&list.rows) {
+        for (block, row) in blocks
+            .iter_mut()
+            .skip(1 + usize::from(note.is_some()))
+            .zip(&list.rows)
+        {
             block.action = Some(InputAction::MaterialOpen {
                 source: list.source.clone(),
                 folder_id: list
@@ -1530,43 +1651,79 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
             if block.action.is_some() {
                 block.height = block.height.max(44.);
             }
-            y += block.height + 8.;
+            y += block.height + list.row_gap_dip as f32;
         }
     }
     let total = blocks.last().map_or(0., |b| {
         b.top + b.height - if b.fill.is_none() { 8. } else { 0. }
     });
-    let mut pages = vec![0.];
-    if total > viewport {
-        let mut starts = Vec::new();
-        for b in &blocks {
-            starts.push(b.top);
-            // A course capsule that fits the viewport stays together; only
-            // oversized text blocks may split on measured native line boundaries.
-            if b.fill.is_none() && b.action.is_none() || b.height > viewport {
-                starts.extend(b.lines.iter().map(|(y, _)| (*y).max(b.top)));
-            }
+    if !(1..=64).contains(&c.visible_leaf_limit) {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    let limit = match &c.content {
+        CardContent::Materials(list) => {
+            (c.visible_leaf_limit as usize).min(list.visible_rows as usize)
         }
-        starts.sort_by(f32::total_cmp);
-        starts.dedup();
-        let mut offset = 0.;
-        while total - offset > viewport {
-            let next = starts
-                .iter()
-                .copied()
-                .rfind(|y| *y > offset + 0.5 && *y <= offset + viewport)
-                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-            pages.push(next);
-            offset = next;
-            if pages.len() > fc_presentation::MAX_PAGES as usize {
-                return Err(Error::from_hresult(E_INVALIDARG));
-            }
+        _ => c.visible_leaf_limit as usize,
+    };
+    let mut starts = Vec::new();
+    for b in &blocks {
+        starts.push(b.top);
+        if b.fill.is_none() && b.action.is_none() || b.height > viewport {
+            starts.extend(b.lines.iter().map(|(y, _)| (*y).max(b.top)));
         }
     }
+    starts.sort_by(f32::total_cmp);
+    starts.dedup();
+    let mut pages = vec![0.];
+    let mut visible_leaves = Vec::new();
+    let mut offset = 0.;
+    loop {
+        let mut leaves = Vec::new();
+        let mut end = (offset + viewport).min(total);
+        for b in &blocks {
+            if b.top + b.height <= offset + 0.1 || b.top >= end - 0.1 {
+                continue;
+            }
+            if let Some(leaf) = b.leaf {
+                if !leaves.contains(&leaf) {
+                    if leaves.len() == limit {
+                        end = b.top;
+                        break;
+                    }
+                    leaves.push(leaf);
+                }
+            }
+        }
+        if end >= total - 0.1 {
+            visible_leaves.push(leaves.len().max(1));
+            break;
+        }
+        let next = starts
+            .iter()
+            .copied()
+            .rfind(|y| *y > offset + 0.5 && *y <= end + 0.01)
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        let actual = blocks
+            .iter()
+            .filter(|b| b.top + b.height > offset + 0.1 && b.top < next - 0.1)
+            .filter_map(|b| b.leaf)
+            .collect::<std::collections::HashSet<_>>()
+            .len()
+            .max(1);
+        visible_leaves.push(actual);
+        pages.push(next);
+        offset = next;
+        if pages.len() > fc_presentation::MAX_PAGES as usize {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+    }
+
     Ok(ContentLayout {
         blocks,
         pages,
         units,
+        visible_leaves,
     })
 }
 fn color(rgb: Rgb, a: f32) -> D2D1_COLOR_F {
@@ -1645,6 +1802,9 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
         let text = target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
+        if let Some(b) = &c.backdrop {
+            b.draw_patch(&target, c.surface.rect)?;
+        }
         if c.source.component_alpha > 0. {
             let shape = bounds(1., 1., w - 1., h - 1., 20.);
             if c.backdrop.is_none() {
@@ -1731,6 +1891,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
         }
         target.EndDraw(None, None)?;
     }
+    drop(target);
     c.surface.dirty = true;
     c.render_pending = false;
     render_inputs(g, c)?;
@@ -1786,6 +1947,7 @@ fn render_lesson_control(
         );
         target.EndDraw(None, None)?;
     }
+    drop(target);
     c.surface.dirty = true;
     c.render_pending = false;
     render_inputs(g, c)
@@ -1830,6 +1992,9 @@ fn render_dynamic(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Result<()> 
         let brush = target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
         target.BeginDraw();
         target.Clear(Some(&D2D1_COLOR_F::default()));
+        if let Some(b) = &c.backdrop {
+            b.draw_patch(&target, surface.rect)?;
+        }
         if c.source.component_alpha > 0. {
             match c.source.content {
                 CardContent::Clock(clock) => {
@@ -1865,7 +2030,7 @@ fn render_dynamic(g: &Graphics, c: &mut Card, now: LocalDateTime) -> Result<()> 
                         );
                     } else {
                         let text = fc_presentation::scene::clock_label(clock, now);
-                        let layout = g.layout(&text, w, c.source.font_dip.min(40.), true)?;
+                        let layout = g.layout(&text, w, c.source.font_dip, true)?;
                         let mut metrics = DWRITE_TEXT_METRICS::default();
                         layout.GetMetrics(&mut metrics)?;
                         target.DrawTextLayout(
@@ -2233,6 +2398,7 @@ mod tests {
                 surface_alpha: 0.03,
                 edge_alpha: 0.5,
                 content,
+                visible_leaf_limit: 64,
                 page: PageInfo {
                     offset: 0,
                     shown: 1,
@@ -2246,6 +2412,7 @@ mod tests {
             captured_at: now,
             valid_until: None,
             cards,
+            paint_tree: None,
             text_tone: TextTone::Light,
             clock_rollback: false,
             public_calendar_unverified: true,
@@ -2508,7 +2675,7 @@ mod tests {
         assert_eq!(r.last_metrics().uploaded_frames, 0);
         assert_eq!(r.last_metrics().input_regions, 0);
     }
-    fn material_scene(now: LocalDateTime) -> SceneSnapshot {
+    pub(super) fn material_scene(now: LocalDateTime) -> SceneSnapshot {
         use fc_domain::materials::{MaterialScope, MaterialSourceEvidence, MaterialSourceKind};
         let mut scene = scene(now);
         let lesson = match &scene
@@ -2556,6 +2723,8 @@ mod tests {
                 .collect(),
             next_cursor: Some(cursor),
             total: 8,
+            visible_rows: 5,
+            row_gap_dip: 8,
         };
         let card = scene
             .cards
@@ -2688,13 +2857,19 @@ mod tests {
             background.edge.verify_native_paint().unwrap();
             let after = count();
             let after_memory = memory();
-            eprintln!("FC_ROUND6_MEMORY width={} height={} before_working_set={} before_private_bytes={} after_working_set={} after_private_bytes={} context=hidden_process_before_synthetic_capture_not_DWM", width, height, before_memory.0, before_memory.1, after_memory.0, after_memory.1);
+            eprintln!(
+                "FC_ROUND6_MEMORY width={} height={} before_working_set={} before_private_bytes={} after_working_set={} after_private_bytes={} context=hidden_process_before_synthetic_capture_not_DWM",
+                width, height, before_memory.0, before_memory.1, after_memory.0, after_memory.1
+            );
             assert_eq!(after, resources);
 
             let metrics = r.last_metrics();
             assert!(metrics.dib_bytes < DIB_BUDGET);
             assert_eq!(metrics.gdi_backdrop_layers, 2);
-            eprintln!("FC_ROUND6_METRICS width={} height={} dib_bytes={} backdrop_pixels={} gdi_before={:?} gdi_after={:?}",width,height,metrics.dib_bytes,metrics.backdrop_covered_pixels,resources,after);
+            eprintln!(
+                "FC_ROUND6_METRICS width={} height={} dib_bytes={} backdrop_pixels={} gdi_before={:?} gdi_after={:?}",
+                width, height, metrics.dib_bytes, metrics.backdrop_covered_pixels, resources, after
+            );
             assert_eq!(
                 metrics.backdrop_covered_pixels,
                 ((width - 844.) * (height - 32.)) as u64

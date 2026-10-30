@@ -1,0 +1,80 @@
+{
+  "scope": "Round16 native profile application probe",
+  "timestamp": "2026-10-30T18:06:13.268778+00:00",
+  "file": "crates/fc-bootstrap/src/application/profiles_probe.rs",
+  "bytes": 13026,
+  "sha256": "e128116a8f0b22520d393307274839f82d5f1265e52245e9f72f034ee7c89cc7",
+  "steps": 39,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--bin",
+        "fc-bootstrap",
+        "--tests",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "raw_output": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.51s\n"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--bin",
+        "fc-bootstrap",
+        "--tests",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "raw_output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.42s\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exit_code": 0,
+      "raw_output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-bootstrap/src/application/profiles_probe.rs"
+      ],
+      "exit_code": 0,
+      "raw_output": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "raw_output": ""
+    }
+  ],
+  "runtime": "Not executed by this child; root owns actual Windows11 isolated application probe. Cross-target checks are compile/static evidence only.",
+  "initial_failed_command": {
+    "command": "cargo clippy -p fc-bootstrap --target i686-pc-windows-gnu --bin future-classroom --tests --locked -- -D warnings",
+    "exit_code": 101,
+    "summary": "Cargo rejected unknown bin before compilation; corrected to fc-bootstrap."
+  },
+  "cleanup": "No test database/process/task created; Cargo cache retained for root final cleanup."
+}

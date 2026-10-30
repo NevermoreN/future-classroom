@@ -2,9 +2,14 @@
 pub mod audio;
 pub mod content_web;
 pub mod material_outcome;
+pub mod profiles;
 pub use content_web::ContentOutcomeRepository;
 pub use material_outcome::{
     MaterialCommandKind, MaterialCommandOutcome, MaterialOutcomeRepository,
+};
+pub use profiles::{
+    ProfilePage, ProfileRepository, ProfileRepositoryError, ProfileRequest, ProfileSummary,
+    PublicLayoutRequest, PublicLayoutState, PROFILE_PAGE_SIZE,
 };
 pub mod http;
 use fc_domain::ids::Revision;

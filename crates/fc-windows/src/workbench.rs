@@ -1,7 +1,10 @@
 //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
 use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View};
+#[path = "workbench/preview.rs"]
+mod preview;
 #[path = "workbench/widgets.rs"]
 mod widgets;
+pub use preview::{LayoutPreview, PreviewNode};
 use std::{
     cell::{Cell, RefCell},
     collections::VecDeque,
@@ -21,7 +24,7 @@ use windows::{
         Graphics::Gdi::*,
         System::{
             LibraryLoader::*,
-            SystemServices::{SS_LEFT, SS_NOPREFIX},
+            SystemServices::{SS_LEFT, SS_NOPREFIX, SS_NOTIFY},
         },
         UI::{Controls::*, Input::KeyboardAndMouse::*, WindowsAndMessaging::*},
     },
@@ -220,6 +223,7 @@ struct State {
     presented_secrets: RefCell<Vec<FieldId>>,
     grid_cell: Cell<Option<(usize, usize)>>,
     lock_action: Cell<Option<ActionId>>,
+    preview: RefCell<Option<preview::Canvas>>,
 }
 impl State {
     fn new() -> Self {
@@ -237,6 +241,7 @@ impl State {
             presented_secrets: RefCell::new(Vec::new()),
             grid_cell: Cell::new(None),
             lock_action: Cell::new(None),
+            preview: RefCell::new(None),
         }
     }
     fn fail(&self, error: Error) {
@@ -278,12 +283,67 @@ impl State {
         drop(suppress);
     }
     fn discard_forms(&self) {
+        self.clear_layout_preview();
         self.grid_cell.set(None);
         if let Ok(mut events) = self.events.try_borrow_mut() {
             events.clear();
             self.event_bytes.set(0);
         } else {
             self.error.set(E_UNEXPECTED.0);
+        }
+    }
+    fn clear_layout_preview(&self) {
+        let old = match self.preview.try_borrow_mut() {
+            Ok(mut preview) => preview.take(),
+            Err(_) => {
+                self.error.set(E_UNEXPECTED.0);
+                return;
+            }
+        };
+        drop(old);
+        self.discard_layout_events();
+    }
+    fn discard_layout_events(&self) {
+        if let Ok(mut events) = self.events.try_borrow_mut() {
+            events.retain(|event| {
+                !matches!(event, Event::LayoutSelect { .. } | Event::LayoutDrop { .. })
+            });
+            self.event_bytes.set(
+                events
+                    .iter()
+                    .map(|e| match e {
+                        Event::Submit(_, form) => {
+                            form.allocation_bytes().unwrap_or(MAX_EVENT_BYTES)
+                        }
+                        _ => std::mem::size_of::<Event>(),
+                    })
+                    .fold(0usize, usize::saturating_add),
+            );
+        } else {
+            self.error.set(E_UNEXPECTED.0)
+        }
+    }
+    fn queue_layout(&self, event: Event) {
+        if self.suppress.get()
+            || self.capturing.get()
+            || self
+                .view
+                .try_borrow()
+                .map_or(true, |v| v.as_ref().is_none_or(|v| v.busy))
+        {
+            return;
+        }
+        if let Ok(mut events) = self.events.try_borrow_mut() {
+            let size = std::mem::size_of::<Event>();
+            if events.len() < MAX_SUBMITS
+                && self.event_bytes.get().saturating_add(size) <= MAX_EVENT_BYTES
+            {
+                events.push_back(event);
+                self.event_bytes.set(self.event_bytes.get() + size);
+                self.input.set(true);
+            }
+        } else {
+            self.error.set(E_UNEXPECTED.0)
         }
     }
     fn submit(&self, action: ActionBinding) -> Result<()> {
@@ -542,6 +602,111 @@ impl Window {
         WORKBENCHES.with(|windows| windows.borrow_mut().push(window.hwnd));
         Ok(window)
     }
+    /// An owned bounded renderer snapshot, shown only inside this workbench.
+    /// Same-generation refreshes retain the existing image; owners/page changes
+    /// must clear it before installing a different editing context.
+    pub fn set_layout_preview(&self, image: Option<LayoutPreview>) -> Result<()> {
+        let Some(image) = image else {
+            self.clear_layout_preview();
+            return Ok(());
+        };
+        if self
+            .state
+            .view
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .is_none()
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        if let Err(error) = image.validate() {
+            self.state.clear_layout_preview();
+            return Err(error);
+        }
+        let generation = self
+            .state
+            .preview
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .as_ref()
+            .and_then(|p| p.generation());
+        if generation != Some(image.generation) {
+            self.state.discard_layout_events();
+        }
+        if self
+            .state
+            .preview
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .is_none()
+        {
+            let canvas = preview::Canvas::new(self.hwnd, &self.state, self.class.0)?;
+            self.state.preview.replace(Some(canvas));
+        }
+        self.state
+            .preview
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .as_ref()
+            .ok_or_else(|| Error::from_hresult(E_UNEXPECTED))?
+            .update(image)?;
+        layout(self.hwnd, &self.state)
+    }
+    /// Pure programmatic outline update for the editor's selected stable node.
+    /// It emits no user input, command, or authentication renewal.
+    pub fn set_layout_selection(
+        &self,
+        key: Option<fc_presentation::layout::SceneNodeKey>,
+    ) -> Result<()> {
+        let preview = self
+            .state
+            .preview
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        match preview.as_ref() {
+            Some(canvas) => canvas.select(key),
+            None if key.is_none() => Ok(()),
+            None => Err(Error::from_hresult(E_INVALIDARG)),
+        }
+    }
+    /// Isolated diagnostics only: dispatch mouse messages to this hidden owned
+    /// canvas, never global input, activation, or another process's window.
+    pub fn probe_layout_drag(&self, from: (u16, u16), to: (u16, u16)) -> Result<()> {
+        if self.is_visible() || self.state.suppress.get() || self.state.capturing.get() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        if self.state.view.borrow().as_ref().is_none_or(|v| v.busy) {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let (hwnd, x, y, tx, ty) = {
+            let preview = self
+                .state
+                .preview
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+            let canvas = preview
+                .as_ref()
+                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+            let (hwnd, x, y) = canvas.probe_point(from.0, from.1)?;
+            let (_, tx, ty) = canvas.probe_point(to.0, to.1)?;
+            (hwnd, x, y, tx, ty)
+        };
+        let pack = |x: i32, y: i32| LPARAM(((y as u16 as u32) << 16 | x as u16 as u32) as isize);
+        // SAFETY: copied HWND/coordinates refer only to our hidden child. No
+        // parent borrow survives synchronous subclass dispatch; it never captures.
+        unsafe {
+            let _ = SendMessageW(hwnd, WM_LBUTTONDOWN, Some(WPARAM(1)), Some(pack(x, y)));
+            let _ = SendMessageW(hwnd, WM_MOUSEMOVE, Some(WPARAM(1)), Some(pack(tx, ty)));
+            let _ = SendMessageW(hwnd, WM_LBUTTONUP, Some(WPARAM(0)), Some(pack(tx, ty)));
+        }
+        Ok(())
+    }
+    pub fn clear_layout_preview(&self) {
+        self.state.clear_layout_preview();
+        if let Err(error) = layout(self.hwnd, &self.state) {
+            self.state.fail(error);
+        }
+    }
     pub fn render(&self, view: &View) -> Result<()> {
         view.validate()
             .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
@@ -576,6 +741,32 @@ impl Window {
             }) && old
                 .as_ref()
                 .is_some_and(|old| old.grid.is_some() == view.grid.is_some());
+        // ComboBox options may change when selecting a different node on the
+        // same tree page. Their ordinary controls can be rebuilt independently
+        // without discarding the image or a live canvas drag/capture.
+        let page_changed = old.as_ref().is_some_and(|old| {
+            old.title != view.title
+                || old.description != view.description
+                || old
+                    .fields
+                    .iter()
+                    .map(|f| f.id)
+                    .ne(view.fields.iter().map(|f| f.id))
+                || old
+                    .actions
+                    .iter()
+                    .map(|a| a.id)
+                    .ne(view.actions.iter().map(|a| a.id))
+                || old.grid.is_some() != view.grid.is_some()
+        });
+        if page_changed {
+            self.state.clear_layout_preview();
+        } else if view.busy {
+            if let Some(canvas) = self.state.preview.borrow().as_ref() {
+                canvas.cancel();
+            }
+            self.state.discard_layout_events();
+        }
         if !same_structure {
             self.state.clear_passwords();
             let controls = self.build_controls(view)?;
@@ -818,13 +1009,37 @@ impl Window {
         if let Some((row, column)) = self.state.grid_cell.take() {
             output.push(Event::GridCell { row, column });
         }
-        output.extend(
-            self.state
-                .events
-                .try_borrow_mut()
+        let generation = self
+            .state
+            .preview
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .as_ref()
+            .and_then(|p| p.generation());
+        let enabled = !self.state.suppress.get()
+            && self
+                .state
+                .view
+                .try_borrow()
                 .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
-                .drain(..),
-        );
+                .as_ref()
+                .is_some_and(|v| !v.busy);
+        for event in self
+            .state
+            .events
+            .try_borrow_mut()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .drain(..)
+        {
+            let current = match &event {
+                Event::LayoutSelect { generation: g, .. }
+                | Event::LayoutDrop { generation: g, .. } => enabled && generation == Some(*g),
+                _ => true,
+            };
+            if current {
+                output.push(event)
+            }
+        }
         self.state.event_bytes.set(0);
         Ok(output)
     }
@@ -1354,6 +1569,17 @@ fn layout(hwnd: HWND, state: &State) -> Result<()> {
     let width = (client.right - client.left - 40).max(160);
     let mut positions = vec![(description, 20, 16, width, 58)];
     let mut y = 82;
+    if let Some(canvas) = state
+        .preview
+        .try_borrow()
+        .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+        .as_ref()
+    {
+        let (canvas_width, height) = canvas.size(width);
+        positions.push((canvas.hwnd(), 20, y, canvas_width, height));
+        y += height + 20;
+    }
+
     if let Some(grid) = state
         .controls
         .try_borrow()

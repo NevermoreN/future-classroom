@@ -101,6 +101,7 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         } else {
             current_revision
         };
+        let profiles = super::profiles::select(d, &identity, &lesson_context, captured_at)?;
         let mut facts = DesktopFacts {
             global_revision,
             captured_at,
@@ -108,6 +109,7 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
             clock_rollback: captured_at.date < date_watermark,
             schedule: schedule_document,
             lesson_context,
+            profiles,
             display: display::load(d, &identity)?,
             identity,
             homework_offset: 0,
@@ -125,6 +127,11 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
                 &facts.schedule,
                 captured_at,
                 self.material_cursor,
+                facts
+                    .profiles
+                    .subject_profile
+                    .as_ref()
+                    .map_or(5, |p| p.materials.visible_rows as usize),
             )?;
             facts.materials_source = source;
             facts.materials_page = page;

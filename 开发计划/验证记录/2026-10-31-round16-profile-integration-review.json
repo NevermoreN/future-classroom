@@ -1,0 +1,130 @@
+{
+  "kind": "read-only integration source review",
+  "reviewed_at_utc": "2026-10-30T18:04:04.453375+00:00",
+  "independence": {
+    "reviewer_authored_and_excluded": [
+      "fc-domain layout.rs/profile.rs types and domain rules",
+      "application/profiles_editor.rs implementation and pure tests",
+      "application/profiles_preview.rs implementation and tests"
+    ],
+    "root_or_other_authored_review_targets": [
+      "crates/fc-bootstrap/src/application.rs",
+      "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "crates/fc-bootstrap/src/application/desktop_controller.rs"
+    ],
+    "supporting_read_only_sources": [
+      "crates/fc-bootstrap/src/backend.rs",
+      "crates/fc-bootstrap/src/backend/profiles.rs",
+      "crates/fc-windows/src/desktop.rs",
+      "crates/fc-windows/src/desktop/tree.rs",
+      "crates/fc-windows/src/workbench.rs"
+    ],
+    "source_files_modified_by_review": []
+  },
+  "evidence_boundary": "Static source review only. This review adds zero test executions and makes no Windows/runtime evidence claim. Root native lifecycle test inspected, compiled earlier, not executed by this review.",
+  "source_sha256": {
+    "crates/fc-bootstrap/src/application.rs": "4defd3fbcb7e354e654f5addb6273a98f47cc3126f8c5bcef0b2c0ba01d2f2b1",
+    "crates/fc-bootstrap/src/application/profile_flow.rs": "3959b7eccc070d6934d9d9cfa59662eb19847c02fb320e30ec15271f1cd24f7a",
+    "crates/fc-bootstrap/src/application/desktop_controller.rs": "7bf1fa6762999c318bf9e15f68d6f770249d4dddbef5935ffca7f366471555f3"
+  },
+  "findings": [
+    {
+      "id": "R16-INTEGRATION-01",
+      "priority": "P2",
+      "blocking_for_requested_fault_lifecycle": true,
+      "status": "source-resolved by root; independently re-read; native runtime validation still pending",
+      "title": "Independent authority Faulted leaves idle management preview displayed",
+      "locations": [
+        {
+          "file": "crates/fc-bootstrap/src/application.rs",
+          "line": 3126
+        },
+        {
+          "file": "crates/fc-bootstrap/src/application.rs",
+          "line": 2635
+        },
+        {
+          "file": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+          "line": 558
+        }
+      ],
+      "trigger": "Open a profile preview with no pending foreground work. Independently fault SessionControl.health_gate() while pool remains healthy, then process host timer tick without user events.",
+      "observed_from_source": "Host shutdown only tests pool.is_faulted; App.poll has no independent authority-health check. Desktop Controller.tick sees Faulted, hides only its resident renderer, cancels its facts task and returns Ok. Existing workbench canvas is neither cleared nor locked/hidden until a profile entry/action/result/canvas event calls profiles_memory_gate.",
+      "impact": "No proof of a write/lease bypass: writer and action gates still deny real effects. However idle profile preview and management fields survive the independent Faulted state, violating the requested fail-closed UI lifecycle and stale-preview withdrawal.",
+      "narrow_fix": "At start of each App.poll or host tick, inspect the cloned authority gate without Backend/session mutex. On Faulted/Stopping, clear preview, revoke local UI authority and begin_shutdown (or the existing fail-closed stop path); do not treat Starting/Committing transient phases as fatal. Add a focused native lifecycle test with real control, empty pending, active canvas and direct gate.fault().",
+      "resolution": {
+        "file": "crates/fc-bootstrap/src/application.rs",
+        "line": 2644,
+        "detail": "App.poll now reads terminal Faulted|Stopping from independent gate before other poll operations, invokes existing begin_shutdown (clear preview, lock, generation/cancel, nonblocking worker shutdown), sets status and renders. Normal Starting/AuthorityUpdating/Healthy not treated as terminal."
+      },
+      "regression_test_source": {
+        "file": "crates/fc-bootstrap/src/application.rs",
+        "line": 4862,
+        "name": "idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+        "scope": "real isolated Backend/control and hidden native canvas, synthetic UI identity, no backend login grant; not executed in this review"
+      }
+    },
+    {
+      "id": "R16-INTEGRATION-02",
+      "priority": "P2",
+      "blocking_for_requested_fault_lifecycle": false,
+      "status": "source-resolved by root; independently re-read",
+      "title": "Successful public joint save leaves a clean display editor on old saved settings",
+      "locations": [
+        {
+          "file": "crates/fc-bootstrap/src/application.rs",
+          "line": 1986
+        },
+        {
+          "file": "crates/fc-bootstrap/src/application.rs",
+          "line": 1699
+        }
+      ],
+      "trigger": "Open Display editor, enter Profiles, jointly save public layout plus changed DisplaySettings, return Home and reopen Display.",
+      "observed_from_source": "L::Public(saved=true) updates only profiles editor. TO_DISPLAY reuses any same-owner display editor regardless of saved revision or dirtiness.",
+      "impact": "Display shows old saved values and later save receives a CAS conflict. CAS prevents overwrite; real desktop facts still refresh correctly.",
+      "narrow_fix": "After successful public joint save, update the same-owner clean display editor with saved display state. Keep any dirty display draft and its captured CAS unchanged; alternatively invalidate only clean display editor so next entry loads it on worker.",
+      "resolution": {
+        "file": "crates/fc-bootstrap/src/application.rs",
+        "line": 1986,
+        "detail": "L::Public saved=true refreshes only exact same-owner clean display editor via saved(state.display.clone()); dirty draft and captured CAS left unchanged."
+      }
+    }
+  ],
+  "reviewed_safety_paths": [
+    {
+      "area": "UI threading",
+      "result": "Profile entry/actions/canvas and outcome handling use cached owned state, atomic SessionControl checks and cloned HealthGate. Backend/session-ledger mutex plus SQLite calls occur only in Work::Profile via shared pool. Native hidden preview composition on UI uses owned data and no Backend mutex."
+    },
+    {
+      "area": "real effect authorization",
+      "result": "profile_flow begins and ends with management_identity(exact lease); Backend profiles methods obtain fresh actor/generation and guarded repository. Captured expected revisions pass unchanged to joint public/subject requests; no automatic CAS retry."
+    },
+    {
+      "area": "late and stale results",
+      "result": "App Pending generation rejects lock-era completions before profile_loaded; profile_loaded requires Profiles screen and memory gate; Preview additionally exact-checks sequence. LOCK clears canvas before generation increment/cancel. Canvas requires preview_active, matching sequence, no pending, correct screen, owner and memory gate."
+    },
+    {
+      "area": "owner and partial draft",
+      "result": "Lock captures nonsecret Profiles form without changing editor page. open_profiles preserves only same-owner dirty draft; other owner is discarded before worker directory load. Global EXIT/RETURN_DRAFT checks exact current owner across all editors. Root profile lifecycle test covers half-number, other-owner refusal, busy native LOCK and old drop event but is not execution evidence here."
+    },
+    {
+      "area": "physical preview ownership",
+      "result": "Every dispatched profile operation first clears existing canvas. Before native hidden preview render, Controller.release_for_preview hides resident surfaces and release_surfaces drops raster caches. App.tick settings_open includes visible workbench, preview_active and Profiles screen; controller returns before real present in that case. Temporary hidden preview renderer drops before returned image installation. No second worker pool or file-open effect is introduced."
+    },
+    {
+      "area": "lock, close, shutdown",
+      "result": "LOCK allowed before busy guard; locks exact local control before ticket cancel. Close and WTS route through lock and clear preview. OS SHUTDOWN invokes begin_shutdown, clears preview via lock and uses existing worker shutdown path."
+    }
+  ],
+  "finding_counts_are_not_tests": {
+    "blocking_lifecycle_findings": 1,
+    "nonblocking_coherence_findings": 1,
+    "test_executions": 0,
+    "open_blocking_lifecycle_findings": 0,
+    "open_nonblocking_coherence_findings": 0,
+    "resolved_source_findings": 2
+  },
+  "followup_reviewed_at_utc": "2026-10-30T18:04:55.593202+00:00",
+  "final_static_conclusion": "No remaining blocking issue found in reviewed root integration paths after two source fixes. This does not certify author-owned editor/preview rules independently or substitute Windows/native execution."
+}

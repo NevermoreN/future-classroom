@@ -1,0 +1,44 @@
+{
+  "source": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+  "source_sha256": "1a6352f49b9dfd0d3a403225bb37c27256c3d2aaa88f410c09a23cabca3ea35b",
+  "scope": "isolated synthetic native layout preview; no DesktopFacts, no desktop capture or visible publication, no Shell/file opening",
+  "new_tests": 3,
+  "native_test_execution": "not run by this agent; deferred to root unified Windows run",
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round16-editor-target/cache cargo check -p fc-bootstrap --tests --locked --target i686-pc-windows-gnu",
+      "exit_code": 101,
+      "log": "/tmp/fc-round16-preview-check.log",
+      "cause": "four existing desktop_controller test fixtures lacked new scene fields; root reported fixed"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round16-editor-target/cache cargo clippy -p fc-bootstrap --bin fc-bootstrap --locked --target i686-pc-windows-gnu -- -D warnings",
+      "exit_code": 101,
+      "log": "/tmp/fc-round16-preview-clippy.log",
+      "cause": "root-owned profile_flow::Loaded large_enum_variant; root notified"
+    }
+  ],
+  "final_checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round16-editor-target/cache cargo check -p fc-bootstrap --tests --locked --target i686-pc-windows-gnu",
+      "exit_code": 0,
+      "log": "/tmp/fc-round16-preview-check-final.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round16-editor-target/cache cargo clippy -p fc-bootstrap --tests --locked --target i686-pc-windows-gnu -- -D warnings",
+      "exit_code": 0,
+      "log": "/tmp/fc-round16-preview-clippy-final.log"
+    },
+    {
+      "command": "rustfmt --check --edition 2021 --config skip_children=true crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "exit_code": 0
+    }
+  ],
+  "source_frozen": true,
+  "new_tests_breakdown": {
+    "pure_sample_contract": 1,
+    "coordinate_transform": 1,
+    "real_hidden_native_render": 1
+  },
+  "resources": "Hidden renderer/COM/authority are function-local RAII values. No file, directory, task or visible window created by this module."
+}

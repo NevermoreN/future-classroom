@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.28 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.29 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -158,3 +158,12 @@ Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑�
 
 
 [本轮远端只读清理审计](验证记录/2026-10-31-round15-remote-cleanup.json)确认自有测试目录/任务/进程均0、sshd Running及仓库外私钥0600保留；[110项最终绑定复核](验证记录/2026-10-31-round15-final-review.json)与[本地清理](验证记录/2026-10-31-round15-cleanup.json)分别归档。测试通过与三系统完整产品验收继续分开记录。
+
+
+## 第十六轮增量：公共布局与科目场景
+
+[Win11现代x86最终585项/16程序](验证记录/2026-10-31-round16-windows-final.json)PASS、runner cleanup PASS，绑定[266输入](验证记录/2026-10-31-round16-source-inputs-final.json)SHA `9c66fb8a7d3c2df4dee2626885db17269fe1172f510ae7214ccb93c89dd25520`。测试程序为debug opt0/debuginfo2、线程2，主程序release；原生39步profile标记、既有工作台/资料/全零声音和四个Web标记分别通过，仍使用自身隐藏窗口、合成内容与可信请求元数据，不是可见白板或实际TLS链。现代主EXE SHA `de186ac4a885dcf6ee54f42a0acd9de8f4dfb5a81c88e196413d75a7897170ed`，8682626字节。
+
+两轮旧bin各68通过/6失败和[精确回溯](验证记录/2026-10-31-round16-idle-fault-diagnostic.json)继续保留；显式reaper修复后的单项1通过不与最终585累计。Win7GNU补充EXE SHA `fd538a5c604c9a7d81c4ea44fa533fa4473f5dca132fd0289fa2eae0338a90ee`，8794112字节；[PE检查](验证记录/2026-10-31-round16-win7-imports-stable.json)0/0；[Win11同机补充运行](验证记录/2026-10-31-round16-win7-on-windows11.json)组合与清理PASS，新增单测EXE为0。[现代PE](验证记录/2026-10-31-round16-modern-imports-stable.json)仍有5项已知Win7风险。[开发包13成员及重包一致性](验证记录/2026-10-31-round16-package.json)、[最终绑定复核](验证记录/2026-10-31-round16-final-readonly-review.json)和[远端清理](验证记录/2026-10-31-round16-remote-cleanup.json)PASS，[整轮本地清理](验证记录/2026-10-31-round16-cleanup.json)PASS，同步详见[第十六轮实施记录](10-实施进度与验证记录.md)。
+
+Windows 7 SP1 x86、Windows 10、Windows 11继续是三个正式目标。实际Win7/Win10设备本轮尚未测试；补充GNU构建/导入审计或在同一Win11上运行不能代验。隐藏原生示例画布/合成拖动不是可见希沃/PPT/触控/DPI与真实桌面图标空间的验收，独立文字/图片/TXT/分页图片和P4完整布局也未完成。严格5秒P0仍FAIL，正常可信TLS/校园网络、正式安装与72小时门槛不变。完整目标继续active，长期Windows SSH授权保留。

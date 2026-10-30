@@ -5,6 +5,7 @@
 mod account_management_tests;
 mod content_web;
 mod materials_web;
+mod profiles;
 mod voice;
 pub mod web;
 pub use content_web::{WebContentDocument, WebContentKind, WebContentScope, WebContentScopes};
@@ -74,6 +75,7 @@ pub enum BackendError {
     Schedule(ScheduleRepositoryError),
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
+    Profile(fc_ports::ProfileRepositoryError),
     Material(MaterialRepositoryError),
     Voice(fc_ports::voice::VoiceRepositoryError),
     Storage(StorageError),
@@ -116,6 +118,11 @@ impl From<LessonRepositoryError> for BackendError {
 impl From<DisplayRepositoryError> for BackendError {
     fn from(error: DisplayRepositoryError) -> Self {
         Self::Display(error)
+    }
+}
+impl From<fc_ports::ProfileRepositoryError> for BackendError {
+    fn from(error: fc_ports::ProfileRepositoryError) -> Self {
+        Self::Profile(error)
     }
 }
 impl From<MaterialRepositoryError> for BackendError {

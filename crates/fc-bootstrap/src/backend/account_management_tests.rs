@@ -25,7 +25,10 @@ impl MonotonicClock for ClockFixture {
 struct Directory(PathBuf);
 impl Directory {
     fn new() -> Self {
-        let path = std::env::temp_dir().join(format!(
+        Self::under(std::env::temp_dir())
+    }
+    fn under(root: PathBuf) -> Self {
+        let path = root.join(format!(
             "FutureClassroom-Accounts-R15-{}-{}",
             std::process::id(),
             SystemTime::now()
@@ -168,7 +171,20 @@ struct Fixture {
 }
 impl Fixture {
     fn new() -> Self {
-        let directory = Directory::new();
+        Self::with_directory(Directory::new())
+    }
+    fn control() -> Self {
+        // This case tests exact revocation and the real 100ms voice control
+        // protocol. Disk/reopen cases keep ordinary TEMP; Windows does too.
+        // NAS btrfs latency can consume the control budget independently of
+        // permission decisions, as covered by the voice module's own fixtures.
+        #[cfg(target_os = "linux")]
+        if std::path::Path::new("/dev/shm").is_dir() {
+            return Self::with_directory(Directory::under(PathBuf::from("/dev/shm")));
+        }
+        Self::new()
+    }
+    fn with_directory(directory: Directory) -> Self {
         let clock = Arc::new(ClockFixture);
         let backend = Backend::open(
             directory.database(),
@@ -710,7 +726,7 @@ impl fc_ports::voice::VoicePreparation for VoiceFixture {
 #[test]
 fn accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access() {
     use fc_ports::voice::*;
-    let mut fixture = Fixture::new();
+    let mut fixture = Fixture::control();
     let admin = fixture.admin();
     let device = fixture.pair(admin, "teacher");
     let teacher = fixture.actor_of(&device);

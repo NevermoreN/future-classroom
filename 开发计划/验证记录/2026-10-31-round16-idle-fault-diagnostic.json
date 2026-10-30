@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "status": "REPRODUCED_FAILURE",
+  "testCase": "application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+  "arguments": [
+    "--exact",
+    "application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "environment": {
+    "RUST_BACKTRACE": "1",
+    "TEMP": "owned marked remote directory",
+    "TMP": "same owned directory"
+  },
+  "budgetSeconds": 90,
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+    "manifest_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "fc-bootstrap",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [],
+    "filenames": [
+      "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe"
+    ],
+    "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "fresh": false
+  },
+  "metadataSha256": "64083251c6b9f36b405b4c2f0c725ef40553d214be47809106a00fe470d7432d",
+  "binarySha256": "cab3e5cf134de43b19f77165590d7c61197eddf174bc2106e598abd665831254",
+  "binaryBytes": 130955738,
+  "sourcesBefore": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "840e81e047a48740039fbd02b95d16ccf0c82c9ef70a5fe2915591f37fcfc7ce"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "sha256": "1a6352f49b9dfd0d3a403225bb37c27256c3d2aaa88f410c09a23cabca3ea35b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "sha256": "3959b7eccc070d6934d9d9cfa59662eb19847c02fb320e30ec15271f1cd24f7a"
+    }
+  ],
+  "scope": "Exact previously failing root debug binary unit test; no source edits or assertion changes, no foreground/global input/Office/audio probe invoked",
+  "cleanup": "PASS",
+  "scheduledTaskCreated": false,
+  "startedUtc": "2026-10-30T18:26:19.294007+00:00",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "sshd": "Running",
+    "arch": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "remoteDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340",
+  "remoteBinarySha256": "cab3e5cf134de43b19f77165590d7c61197eddf174bc2106e598abd665831254",
+  "command": "$env:TEMP=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340' 'temp';New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE='1';$exe=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340' 'fc_bootstrap-2c9facf31078f737.exe';$log=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340' 'complete-test.log';$ErrorActionPreference='Continue';$output=@(& $exe --exact 'application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft' --nocapture --test-threads=1 2>&1|ForEach-Object{\"$_\"}|Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;temp=$env:TEMP;tmp=$env:TMP;backtrace=$env:RUST_BACKTRACE;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Depth 5 -Compress",
+  "elapsedSeconds": 30.795209533069283,
+  "test": {
+    "output": [
+      "",
+      "running 1 test",
+      "PROBE_SUBMIT tick=1 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=27 kind=other page=正在打开未来教室",
+      "System.Management.Automation.RemoteException",
+      "thread 'application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft' (21884) panicked at crates/fc-bootstrap/src/application.rs:4387:13:",
+      "native lifecycle did not drain",
+      "stack backtrace:",
+      "   0: __rustc::rust_begin_unwind",
+      "             at /rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library\\std\\src/panicking.rs:689:5",
+      "   1: core::panicking::panic_fmt",
+      "             at /rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library\\core\\src/panicking.rs:80:14",
+      "   2: fc_bootstrap::application::tests::wait_for::<fc_bootstrap::application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft::{closure#1}>",
+      "             at /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:4387:13",
+      "   3: fc_bootstrap::application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+      "             at /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:4884:9",
+      "   4: fc_bootstrap::application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft::{closure#0}",
+      "             at /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:4875:92",
+      "   5: <fc_bootstrap::application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft::{closure#0} as core::ops::function::FnOnce<()>>::call_once",
+      "             at /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\\core\\src\\ops\\function.rs:250:5",
+      "   6: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once",
+      "             at /rustc/8bab26f4f68e0e26f0bb7960be334d5b520ea452/library\\core\\src\\ops/function.rs:250:5",
+      "note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.",
+      "test application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft ... FAILED",
+      "",
+      "failures:",
+      "",
+      "failures:",
+      "    application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft",
+      "",
+      "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 73 filtered out; finished in 30.12s",
+      ""
+    ],
+    "exitCode": 101,
+    "backtrace": "1",
+    "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340\\temp",
+    "sessionId": 0,
+    "tmp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-R16-IdleFault-dc8856582a4d435da289d3298fb83340\\temp"
+  },
+  "rawLog": "/tmp/fc-round16-idle-fault-diagnostic.log",
+  "rawLogSha256": "31d1daa75b4b1c2f4670d1080631d7f56ed95d20b974564fe074570dca33916c",
+  "testSummary": [
+    "running 1 test",
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 73 filtered out; finished in 30.12s"
+  ],
+  "cleanupAudit": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingTasks": 0,
+    "directoryExists": false
+  },
+  "sourcesAfter": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "840e81e047a48740039fbd02b95d16ccf0c82c9ef70a5fe2915591f37fcfc7ce"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "sha256": "1a6352f49b9dfd0d3a403225bb37c27256c3d2aaa88f410c09a23cabca3ea35b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "sha256": "3959b7eccc070d6934d9d9cfa59662eb19847c02fb320e30ec15271f1cd24f7a"
+    }
+  ],
+  "sourceFreshnessMatch": true,
+  "privateKeyMode": "0o600",
+  "finishedUtc": "2026-10-30T18:26:54.264868+00:00",
+  "diagnosis": {
+    "classification": "Reproduced second wait timeout before UI authority fault injection",
+    "panicSite": {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "line": 4387,
+      "column": 13,
+      "function": "application::tests::wait_for::<...closure#1>"
+    },
+    "caller": {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "line": 4884,
+      "column": 9,
+      "function": "application::tests::idle_authority_fault_closes_preview_without_user_input_and_preserves_partial_draft"
+    },
+    "waitCondition": "audio.status().is_ok_and(|s| s.phase == RuntimePhase::Closed && !s.physical_thread_running)",
+    "precededBy": "let audio = app.audio.take().unwrap(); audio.shutdown();",
+    "excludedByActualCaller": [
+      "initial pending.is_none && control.is_some wait",
+      "final app.pool.is_finished wait"
+    ],
+    "authorityFaultWasNotReached": true,
+    "productionStateNotSampled": "Backtrace identifies the wait, but this run did not sample runtime status fields; no inference of a live audio driver/thread is claimed."
+  },
+  "rawStructuredOutput": {
+    "path": "/tmp/fc-round16-idle-fault-diagnostic-raw.json",
+    "sha256": "d61203656ccb80baf284665d0b12dcfcb022a10a82fcc44de83c286bdd1ee7a4"
+  }
+}
