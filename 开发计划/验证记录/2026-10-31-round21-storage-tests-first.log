@@ -1,0 +1,78 @@
+   Compiling cfg-if v1.0.5
+   Compiling typenum v1.20.1
+   Compiling zerocopy v0.8.63
+   Compiling once_cell v1.21.4
+   Compiling serde_core v1.0.228
+   Compiling libsqlite3-sys v0.30.1
+   Compiling bitflags v2.13.2
+   Compiling cpufeatures v0.2.17
+   Compiling memchr v2.8.3
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling ryu v1.0.23
+   Compiling fallible-iterator v0.3.0
+   Compiling smallvec v1.16.4
+   Compiling itoa v1.0.18
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.145
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling ahash v0.8.12
+   Compiling hashbrown v0.14.5
+   Compiling hashlink v0.9.1
+   Compiling rusqlite v0.32.1
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:26:19
+   |
+26 | fn at(day: u8) -> LocalDateTime {
+   |                   ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:29:19
+   |
+29 | struct Time(Mutex<LocalDateTime>);
+   |                   ^^^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+29 | struct Time<LocalDateTime>(Mutex<LocalDateTime>);
+   |            +++++++++++++++
+
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:31:22
+   |
+31 |     fn now(&self) -> LocalDateTime {
+   |                      ^^^^^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:27:5
+   |
+27 |     LocalDateTime::new(LocalDate::new(2026, 10, day).unwrap(), 28800).unwrap()
+   |     ^^^^^^^^^^^^^ use of undeclared type `LocalDateTime`
+
+error[E0433]: cannot find type `LocalDate` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:27:24
+   |
+27 |     LocalDateTime::new(LocalDate::new(2026, 10, day).unwrap(), 28800).unwrap()
+   |                        ^^^^^^^^^ use of undeclared type `LocalDate`
+
+error[E0433]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:40:21
+   |
+40 |         expires_at: LocalDateTime::new(LocalDate::new(2027, 12, 31).unwrap(), 0).unwrap(),
+   |                     ^^^^^^^^^^^^^ use of undeclared type `LocalDateTime`
+
+error[E0433]: cannot find type `LocalDate` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:40:40
+   |
+40 |         expires_at: LocalDateTime::new(LocalDate::new(2027, 12, 31).unwrap(), 0).unwrap(),
+   |                                        ^^^^^^^^^ use of undeclared type `LocalDate`
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `fc-storage` (lib test) due to 7 previous errors

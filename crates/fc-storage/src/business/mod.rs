@@ -1,5 +1,7 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
+mod autostart;
+mod autostart_codec;
 mod calendar;
 mod calendar_codec;
 pub(crate) mod codec;
@@ -49,6 +51,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     let revision = read_revision(&transaction)?;
     let identity = load_identity(&TransactionView(&transaction))?;
     schedule::load(&TransactionView(&transaction), &identity)?;
+    autostart::startup_check(&TransactionView(&transaction))?;
     calendar::startup_check(&TransactionView(&transaction))?;
     schedule::change_proof(&TransactionView(&transaction))?;
     lesson::load(&TransactionView(&transaction))?;
@@ -67,6 +70,9 @@ const IDENTITY: &str = "business/identity/v1";
 /// It must revalidate monotonic idle/expiry/local lock without refreshing the lease.
 pub type SessionGuard =
     Arc<dyn Fn(&IdentityState, &ActorContext) -> Result<(), StorageError> + Send + Sync>;
+/// Memory-only lifetime fence for preparing an intent and marking it Applying.
+/// This callback grants no OS write permission; factual settlement remains allowed.
+pub type AutostartExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 /// Memory-only worker ownership fence for calendar writes. It grants no actor
 /// or durable policy authority; false/panic is an ordinary cancellation.
 pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
@@ -87,6 +93,7 @@ pub struct BusinessRepository<S> {
     profile_content_scene: profile_content::ProfileContentSceneGuard,
     lesson_observations: lesson::Observations,
     calendar_execution: CalendarExecutionGuard,
+    autostart_execution: AutostartExecutionGuard,
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
 }
 impl<S> Clone for BusinessRepository<S> {
@@ -100,6 +107,7 @@ impl<S> Clone for BusinessRepository<S> {
             profile_content_scene: self.profile_content_scene.clone(),
             lesson_observations: self.lesson_observations.clone(),
             calendar_execution: self.calendar_execution.clone(),
+            autostart_execution: self.autostart_execution.clone(),
             voice_timeout: self.voice_timeout.clone(),
         }
     }
@@ -119,12 +127,19 @@ impl<S: Send + 'static> BusinessRepository<S> {
             profile_content_scene: Arc::new(|_, _, _, _| Err(StorageError::AuthorityUnavailable)),
             lesson_observations: Arc::new(std::sync::Mutex::new(None)),
             calendar_execution: Arc::new(|| true),
+            autostart_execution: Arc::new(|| true),
             voice_timeout: None,
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
         self.session = guard;
+        self
+    }
+    /// Bind the shared-worker lifetime through intent/Applying writer COMMIT.
+    /// Cancellation never grants permission or suppresses factual settlement.
+    pub fn with_autostart_execution_guard(mut self, guard: AutostartExecutionGuard) -> Self {
+        self.autostart_execution = guard;
         self
     }
     /// Bind the exact shared-worker lifetime through calendar writer COMMIT.

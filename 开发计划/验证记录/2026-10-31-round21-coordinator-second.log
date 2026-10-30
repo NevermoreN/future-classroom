@@ -1,0 +1,39 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.36s
+     Running tests/autostart_coordinator.rs (/tmp/fc-round21-coordinator-target/debug/deps/autostart_coordinator-30361c974d870465)
+
+running 11 tests
+test cancellation_does_not_release_physical_gate_before_native_return ... ok
+test changed_physical_preimage_requires_a_new_review_without_overwriting_it ... ok
+test enable_disable_and_old_path_repair_are_explicit_and_release_backend_mutex has been running for over 60 seconds
+test expired_lease_before_effect_blocks_write_but_exact_ticket_can_settle has been running for over 60 seconds
+test external_policy_removal_is_drift_and_never_auto_repaired has been running for over 60 seconds
+test failures_before_and_after_effect_preserve_separate_intent_and_observation has been running for over 60 seconds
+test finalize_failure_remains_unsettled_and_startup_only_observes has been running for over 60 seconds
+test late_observation_cannot_overwrite_a_newer_journal_revision has been running for over 60 seconds
+test revocation_during_effect_records_uncertainty_without_rollback has been running for over 60 seconds
+test enable_disable_and_old_path_repair_are_explicit_and_release_backend_mutex ... ok
+test expired_lease_before_effect_blocks_write_but_exact_ticket_can_settle ... ok
+test stale_review_and_completion_cannot_overwrite_newer_intent has been running for over 60 seconds
+test external_policy_removal_is_drift_and_never_auto_repaired ... ok
+test startup_prepared_record_is_interrupted_without_replaying_registry has been running for over 60 seconds
+test failures_before_and_after_effect_preserve_separate_intent_and_observation ... ok
+test finalize_failure_remains_unsettled_and_startup_only_observes ... ok
+test late_observation_cannot_overwrite_a_newer_journal_revision ... ok
+test revocation_during_effect_records_uncertainty_without_rollback ... ok
+test stale_review_and_completion_cannot_overwrite_newer_intent ... ok
+test startup_prepared_record_is_interrupted_without_replaying_registry ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 428.86s
+

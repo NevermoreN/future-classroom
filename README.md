@@ -34,6 +34,8 @@ cargo run -p fc-bootstrap --locked -- --self-check
 
 `scripts/verify.sh` 使用独立临时构建目录并在结束时清理。核心和SQLite测试可在Linux运行，原生Windows能力必须在Windows验证。
 
+登录自启动已接入本机主管理员工作台：分开展示期望与实际状态，开启、关闭或移动路径修复均需明确核对；变更意图和实际结果持久留痕，启动时只读取并核对中断状态。实现范围与未完成验收见[自启动契约](开发计划/22-自启动与系统变更核对.md)。`--autostart-probe` 使用合成数据库、隐藏窗口及本轮独立临时注册表项，不改真实登录启动项。
+
 ## Windows 开发探针
 
 直接运行新构建的 `fc-bootstrap.exe` 打开工作台；`--autostart` 保持锁定并隐藏窗口。首次运行会在本机 ProgramData 的项目专属目录准备保护ACL、部署标记、数据库和当前用户DPAPI密钥，需自行设置应用主管理员口令。缺失或损坏的既有数据不会重新开放首次注册。应用角色和Windows账号权限彼此独立。
@@ -43,6 +45,7 @@ cargo run -p fc-bootstrap --locked -- --self-check
 .\fc-bootstrap.exe --system-probe
 .\fc-bootstrap.exe --host-probe 2
 .\fc-bootstrap.exe --application-probe
+.\fc-bootstrap.exe --autostart-probe
 .\fc-bootstrap.exe --materials-probe
 .\fc-bootstrap.exe --audio-silent-probe
 .\fc-bootstrap.exe --native-probe 30

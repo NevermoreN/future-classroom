@@ -3,6 +3,7 @@
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
 #[cfg(test)]
 mod account_management_tests;
+mod autostart;
 mod calendar;
 mod content_web;
 mod materials_web;
@@ -80,6 +81,7 @@ pub enum BackendError {
     Content(RepositoryError),
     Schedule(ScheduleRepositoryError),
     Calendar(fc_ports::CalendarRepositoryError),
+    Autostart(fc_ports::autostart::AutostartRepositoryError),
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
     Profile(fc_ports::ProfileRepositoryError),
@@ -121,6 +123,11 @@ impl From<ScheduleRepositoryError> for BackendError {
 impl From<fc_ports::CalendarRepositoryError> for BackendError {
     fn from(error: fc_ports::CalendarRepositoryError) -> Self {
         Self::Calendar(error)
+    }
+}
+impl From<fc_ports::autostart::AutostartRepositoryError> for BackendError {
+    fn from(error: fc_ports::autostart::AutostartRepositoryError) -> Self {
+        Self::Autostart(error)
     }
 }
 impl From<LessonRepositoryError> for BackendError {

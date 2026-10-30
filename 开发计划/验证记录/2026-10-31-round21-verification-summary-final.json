@@ -1,0 +1,238 @@
+{
+  "status": "PASS",
+  "scope": "Final executed frozen round21 source before one separately recorded rustfmt-only change. Host release;19 current debug test EXEs + modern release probes on actual Win11. Supplemental Win7 GNU release probes on same Win11 only.",
+  "sourceInputsAggregateSha256": "b6e4020be4bdcce16abc0aa093ae4381833fe19949d024562dcc797aa71c3932",
+  "sourceFiles": 334,
+  "hostPassed": 639,
+  "windowsPassed": 865,
+  "windowsNonzeroPrograms": 19,
+  "windowsTests": [
+    {
+      "name": "fc_materials-2221de66f2e97130.exe",
+      "passed": 39,
+      "sha256": "c062bd4bdf5d97fdd8679670ddedfc1edfb3ca7cdeff028d8b3b08fc2e5a0675"
+    },
+    {
+      "name": "fc_security-9c7f88663f75f873.exe",
+      "passed": 18,
+      "sha256": "fce60bb497db9f0d2cf405d4ac48bc36f54fa41ee7d881b6025023a1369ba67f"
+    },
+    {
+      "name": "fc_storage-9549596680176a3f.exe",
+      "passed": 128,
+      "sha256": "99e4bd976a8e895fcebd228ad436433177bd2b5eb9378ba94601c3348de8b348"
+    },
+    {
+      "name": "fc_presentation-bf0074726aa5b441.exe",
+      "passed": 58,
+      "sha256": "fc8208672e1cf698553f46d470dfbe43a777e7afe984d1da95a0d79d877bfc38"
+    },
+    {
+      "name": "fc_protocol-186900fcb7bfa5db.exe",
+      "passed": 33,
+      "sha256": "ef789ae3555386dcac898e6a45d8172fa43c5d9c38df848ffe45ebd2398132cd"
+    },
+    {
+      "name": "fc_application-8ad1e6c8c699ab50.exe",
+      "passed": 25,
+      "sha256": "14d09831d76aaec467d9415e8d5eccf150f10918f5caf5a0727a5b18c60c3ad8"
+    },
+    {
+      "name": "fc_runtime-fad3e5e278e2d80c.exe",
+      "passed": 26,
+      "sha256": "d2450a5fc7153724d558172c47166a3a670601118ef411843fdedc1fef2c53b9"
+    },
+    {
+      "name": "fc_audio-35e3156477d0188a.exe",
+      "passed": 22,
+      "sha256": "e83dd267eeb4a68da3137b6deaf41f5a2b0b93f456185a950a7a556f93587971"
+    },
+    {
+      "name": "fc_ports-361bddc8b2876cc0.exe",
+      "passed": 8,
+      "sha256": "d607ed4a1913fc805c390c2a0a69119ce331dfce0faa3d0d537fb00396055cc9"
+    },
+    {
+      "name": "fc_domain-915566e140287178.exe",
+      "passed": 127,
+      "sha256": "80465b614b335192217523519871f76263f340f1b57cfd11d99b324b528a5d60"
+    },
+    {
+      "name": "runtime_storage-658728fe8eac70c9.exe",
+      "passed": 3,
+      "sha256": "ede5001a4e4a96b0043107cbbb5b359f9874d0ce1e12e8e1a299a7abb588ac4c"
+    },
+    {
+      "name": "business_storage-ab03237ca5a481da.exe",
+      "passed": 43,
+      "sha256": "59171eeee5b1f5541e7db4ee6f82f2044f7be023835377ada23dd3f9f6092cb6"
+    },
+    {
+      "name": "fc_bootstrap-269e28898d6be620.exe",
+      "passed": 84,
+      "sha256": "72247dad2b3a30ca354b67704691cf4735c3f172221f96b6c9e4732e178da4a3"
+    },
+    {
+      "name": "schedule_operations-f20f9b45ead91420.exe",
+      "passed": 5,
+      "sha256": "bc742458d4630a156cda615465c8479c447fc36981839c6d08f0ff101821f46a"
+    },
+    {
+      "name": "voice_storage-10fa9e8ba0531412.exe",
+      "passed": 6,
+      "sha256": "a3f8cc937dee5f82f4262f75894519db341c714777c7b77819290ef47dd366b6"
+    },
+    {
+      "name": "autostart_coordinator-733f2365322a6d5e.exe",
+      "passed": 13,
+      "sha256": "f6328daba07d132bed5a5c8940b47b72958376876b9d7d55f1ea9e874ede6658"
+    },
+    {
+      "name": "fc_windows-d929a73b96b71a34.exe",
+      "passed": 102,
+      "sha256": "b3f1d4ef33ba2ace5a43bb453d6ca7c6f034d3430e7453520556169065759659"
+    },
+    {
+      "name": "calendar_execution_fence-e85336db0a9264e2.exe",
+      "passed": 4,
+      "sha256": "7f96311f22f342a4497c6d4e9552fe338e550c58844e6ccc979a777d01b16213"
+    },
+    {
+      "name": "fc_bootstrap-f1b0c0d7d7848ba5.exe",
+      "passed": 121,
+      "sha256": "2f94441d5f75ffa75952e10695b87bcc096bfd0c46a0b505c1c7a547679382f7"
+    }
+  ],
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "currentArtifactSha256Bound": true,
+  "native": [
+    {
+      "report": "windows-autostart-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "e6ff34b81f44ce1bc336657631ce0955ed9f2925f0bf98c2aa9211f79be36c76",
+      "autostartSteps": 25,
+      "contentSteps": null,
+      "scheduleSteps": null
+    },
+    {
+      "report": "win7-on-win11-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "2a521aecb098bdca915ca4543687d25aa13ac2efaec168395a005db9be4ad08a",
+      "autostartSteps": 25,
+      "contentSteps": null,
+      "scheduleSteps": null
+    },
+    {
+      "report": "win7-application-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "2a521aecb098bdca915ca4543687d25aa13ac2efaec168395a005db9be4ad08a",
+      "autostartSteps": null,
+      "contentSteps": 52,
+      "scheduleSteps": 65
+    }
+  ],
+  "modernNativeContentSteps": 52,
+  "modernNativeScheduleSteps": 65,
+  "architecture": {
+    "crates": 12,
+    "edges": 33,
+    "baseline": "D11"
+  },
+  "package": {
+    "status": "PASS",
+    "releaseStatus": "NOT_VALIDATED",
+    "path": "/mnt/data/FutureClassroom-0.1.0-autostart-dev.zip",
+    "sizeBytes": 4925605,
+    "sha256": "43fd7f9392504cde88e5a7afbfd994d88dc7bfb17ac71269e06ca25a2c8935fd",
+    "members": [
+      {
+        "path": "fc-bootstrap.exe",
+        "bytes": 10101484,
+        "sha256": "e6ff34b81f44ce1bc336657631ce0955ed9f2925f0bf98c2aa9211f79be36c76"
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1067,
+        "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40"
+      },
+      {
+        "path": "PROBE-README.txt",
+        "bytes": 13673,
+        "sha256": "df76da7d4a632415e11c399a5b43660ff5b1d37561f7c14e743d21845341378a"
+      },
+      {
+        "path": "THIRD-PARTY-NOTICES.txt",
+        "bytes": 2401720,
+        "sha256": "b611a4c99e2f65d2c5c2f1618f088dec978cab792cbdef2810937cc60d7ed6b0"
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "bytes": 25543,
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7"
+      },
+      {
+        "path": "web/assets/favicon-CXuYoSfB.svg",
+        "bytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "web/assets/index-Cr8Ck6mT.js",
+        "bytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+      },
+      {
+        "path": "web/assets/index-DFFVdc8-.css",
+        "bytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "web/assets/pcm-worklet-DQjgdlBf.js",
+        "bytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+      },
+      {
+        "path": "web/assets/wav-worker-LSywWbpJ.js",
+        "bytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "web/fc-assets.json",
+        "bytes": 1072,
+        "sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca"
+      },
+      {
+        "path": "web/index.html",
+        "bytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 24952,
+        "sha256": "afc1a045a667736fcb7528d86c78d86fc6fee2ef416896ccadec70f6fc988337"
+      }
+    ],
+    "crc": "PASS",
+    "independentRepackBytesEqual": true,
+    "exeSha256": "e6ff34b81f44ce1bc336657631ce0955ed9f2925f0bf98c2aa9211f79be36c76",
+    "sourceInputsAggregateSha256": "b6e4020be4bdcce16abc0aa093ae4381833fe19949d024562dcc797aa71c3932"
+  },
+  "formalGates": {
+    "Win7": "NOT_VALIDATED",
+    "Win10": "NOT_VALIDATED",
+    "Win11CompleteProduct": "NOT_VALIDATED",
+    "actualLogoffLogin": "NOT_RUN",
+    "visibleSeewo": "NOT_RUN",
+    "MSVC": "NOT_VALIDATED",
+    "releaseTag": "NOT_ALLOWED"
+  },
+  "committedSourceAggregateSha256": "155b69b000be1c822572a0addffe71d48154c419a9ef32d1c483e3deb18f11a0",
+  "postExecutionFormatting": "One exact rustfmt-only if-let expansion; see source-inputs-formatted.json. Executed artifact binding remains original frozen byte snapshot."
+}

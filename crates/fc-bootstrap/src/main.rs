@@ -33,6 +33,16 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--autostart-probe" => {
+            #[cfg(windows)]
+            {
+                application::autostart_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("native autostart workflow probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--calendar-probe" => {
             #[cfg(windows)]
             {

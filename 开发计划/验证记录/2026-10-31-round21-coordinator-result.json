@@ -1,0 +1,54 @@
+{
+  "scope": "Round21 autostart coordinator/facade and pure editor tests",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/autostart.rs",
+      "sha256": "59ab81cc3dd73a2be8d9ac61fdfd8a84e102974d3e005ce719062dfbb2242e0f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/autostart.rs",
+      "sha256": "c9df172086f79e28545c9e6f62605b16ca405348dd5c35d1e354fc5679b4a506"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/autostart_coordinator.rs",
+      "sha256": "c7b3316b0130fad36817aaf67e2ace8a386c46624dfab14aa913d1ca6b5ea293"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_editor_tests.rs",
+      "sha256": "71891d8ca4cb39494c8885913aef26fe7326e4a4f77dee4ac84af0972481baba"
+    }
+  ],
+  "final_checks": {
+    "strict_clippy": "/tmp/fc-round21-coordinator-clippy-second.log",
+    "rustfmt": "/tmp/fc-round21-coordinator-fmt.log",
+    "preinitialization_test": "/tmp/fc-round21-coordinator-preinit.log",
+    "editor_host_harness": "/tmp/fc-round21-coordinator-editor-host.log",
+    "reviewed_target_strict_clippy": "/tmp/fc-round21-coordinator-clippy-reviewed-target.log"
+  },
+  "original_attempt_logs": [
+    "/tmp/fc-round21-coordinator-first.log",
+    "/tmp/fc-round21-coordinator-second.log",
+    "/tmp/fc-round21-coordinator-clippy-first.log"
+  ],
+  "notes": [
+    "Initial test compilation encountered temporary concurrent NotObserved domain/codec mismatch; original log retained.",
+    "Initial strict clippy caught oversized Error and unnecessary lazy fallback; corrected with boxed diagnostic error and eager fallback.",
+    "Editor tests ran actual pure editor/test source through an owned temporary rustc harness using already built dependency rlibs. Formal Windows suite remains root-owned.",
+    "Original 11-test debug process completed successfully; fixture directories cleaned by RAII. Current-source strict clippy and 12th preinitialization test passed independently; root final whole-source tests remain required."
+  ],
+  "owned_temp_prefix": "/tmp/fc-round21-coordinator-*",
+  "do_not_remove_until_archived": true,
+  "original_debug_suite": {
+    "status": "PASS",
+    "passed": 11,
+    "failed": 0,
+    "log": "/tmp/fc-round21-coordinator-second.log",
+    "scope": "Original debug executable before final authorize_management tightening and preinitialization test addition. Root whole current-source suite still required."
+  },
+  "reviewed_target_fix": {
+    "change": "Immutable reviewed target included in command, allocation accounting, adapter mismatch rejected before intent/system effect",
+    "test_count_now": 13,
+    "new_test": "moved_executable_after_review_requires_a_new_review_before_persisting_intent",
+    "execution": "Root final release suite will run complete 13 cases; strict clippy has compiled all 13."
+  }
+}

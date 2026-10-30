@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod auth;
+pub mod autostart;
 pub mod calendar;
 pub mod content;
 pub mod desktop;

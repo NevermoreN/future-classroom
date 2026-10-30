@@ -1,0 +1,11 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1888:
+                 }
+                 if action == TO_AUTOSTART {
+                     if self.screen == Screen::Display {
+[31m-                        if let Some(editor) = &mut self.display { editor.capture(data); }
+(B[m[32m+                        if let Some(editor) = &mut self.display {
+(B[m[32m+                            editor.capture(data);
+(B[m[32m+                        }
+(B[m                     }
+                     return self.submit_autostart(fc_bootstrap::autostart::Operation::Load);
+                 }

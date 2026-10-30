@@ -1,5 +1,6 @@
 //! Trusted composition services shared by the native application and integration tests.
 #![forbid(unsafe_code)]
+pub mod autostart;
 pub mod backend;
 pub mod profile_content_cache;
 #[cfg(windows)]

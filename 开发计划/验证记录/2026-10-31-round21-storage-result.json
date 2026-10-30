@@ -1,0 +1,160 @@
+{
+  "scope": "Round21 autostart domain/ports/SQLite and implementation contract",
+  "final_host_tests": {
+    "domain": 127,
+    "ports": 8,
+    "storage": 128,
+    "new_domain": 3,
+    "new_sqlite": 29,
+    "result": "PASS"
+  },
+  "clippy": "PASS all targets -D warnings",
+  "format": "PASS owned sources",
+  "architecture": {
+    "crates": 12,
+    "first_party_edges": 33,
+    "result": "PASS"
+  },
+  "failed_attempts_preserved": [
+    "fmt-first: test child file not yet created",
+    "check-first: partially moved self in precommit closure",
+    "tests-first/second: missing fixture time imports",
+    "tests-fourth/fifth: TeacherAdmin fixture missing scope",
+    "tests-sixth/full-first: fixture subject revision zero InvalidState"
+  ],
+  "notes": [
+    "First formatter failure text copied verbatim from final poll of session 86934.",
+    "All failures fixed and rerun; full-second and clippy-first are final code verification.",
+    "No real registry or SSH action performed by storage agent.",
+    "Build target retained for parent evidence archive and authorized cleanup."
+  ],
+  "files": [
+    {
+      "path": "crates/fc-domain/src/autostart.rs",
+      "bytes": 9182,
+      "sha256": "420d4e94607dee907e252b0ee7a13bb8db182dbb72bd5bea6238a54cf8d47ec4"
+    },
+    {
+      "path": "crates/fc-domain/src/lib.rs",
+      "bytes": 317,
+      "sha256": "4770f8288f7abe2170fe39d00c34a2c7e91d13e97ddb2f4cd99e427b15a9e5d5"
+    },
+    {
+      "path": "crates/fc-ports/src/autostart.rs",
+      "bytes": 2189,
+      "sha256": "b6b756713aa67b2576aa0be56ffaaed030759c01fe440bb00e4ee53cb627f004"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22168,
+      "sha256": "38f5b77e31eb9a744bc0230a8fda3c27b83f31b46e440e9756e30262cb60b4b2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/autostart.rs",
+      "bytes": 19124,
+      "sha256": "2f0394cbe7642705854a2b9c86202f0018e459f393e68d03ed89cf46be09d37f"
+    },
+    {
+      "path": "crates/fc-storage/src/business/autostart_codec.rs",
+      "bytes": 7184,
+      "sha256": "f6b5903e5c6bc47d1a9cab833b4e0b5f7498f5324ad5fcd452a48bf3690747de"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/autostart.rs",
+      "bytes": 31183,
+      "sha256": "80f3c6ef5eba1284a7e73bfe6c453e6bb0248ab14aa6a234525416e0d532dafc"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 39306,
+      "sha256": "35d7d7fddb49afddc260b6c3a21d710f12074ddda792bf9dd07b7cade4e20307"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61661,
+      "sha256": "8eb97da8c8196a3b5a4c24c6bb7629d630128145e1758e4da58652ec6d877178"
+    },
+    {
+      "path": "开发计划/22-自启动与系统变更核对.md",
+      "bytes": 6449,
+      "sha256": "62e616a4834dfdcadc84cd20dd866766de457e45e5f08dded7f3c291db48ed38"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 23384,
+      "sha256": "70fdf9c53bc5a4bab1e4cbaeaca484c46c38f9ba05b7fc0bebaee0f4ce33b589"
+    },
+    {
+      "path": "开发计划/模块/02-设置认证权限与自启动.md",
+      "bytes": 13488,
+      "sha256": "1c4806a5ad7a5ed8a04f92c024fad0cfa06d1ed9198a799b1a259911c183439e"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round21-storage-check-first.log",
+      "bytes": 4728,
+      "sha256": "316fde4193c7970e6f222c9db48a06022fd20790184675117cd07c69ade2633d"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-clippy-first.log",
+      "bytes": 352,
+      "sha256": "4efcc07f5a0646f6a4a6dc16999eb670975769eb4b93c497580bcc70305a9c2b"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-domain-first.log",
+      "bytes": 626,
+      "sha256": "3918e42f8f17ea7da9b6ed9277de7402bd6464187558252ae1e3ba8fe2f08a61"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-fmt-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-fmt-first.log",
+      "bytes": 460,
+      "sha256": "a053e21194b796ad2af8177ce0d53ab69c97455fc11497daa693005c8a9c3c31"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-full-first.log",
+      "bytes": 28853,
+      "sha256": "37574709811356b4b285dd46d0e671899b0b20103e5210704a7a08b1444fcec6"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-full-second.log",
+      "bytes": 28501,
+      "sha256": "61be837a1b8ad177b9ed2b4a64dbd7849a3929c0cba51a63d5719287177bafc2"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-fifth.log",
+      "bytes": 4068,
+      "sha256": "21ac89481aa1f77888049092c42eb6e03ed357aa7e9261b66087b8a581794b30"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-first.log",
+      "bytes": 3255,
+      "sha256": "f1c6c93aacfda6b425e64af5de8905d60e86834cecbe22a340abe19d4aae6048"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-fourth.log",
+      "bytes": 4253,
+      "sha256": "d5f09fc449de5954997092738793cb70722a457ec25a33d71ea3f1e5db126396"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-second.log",
+      "bytes": 2347,
+      "sha256": "d7dd04a9f273e34b46f95fbf8073b745e5f164a30ef20bebfb9edd335f5598e0"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-sixth.log",
+      "bytes": 4066,
+      "sha256": "9a1fb5d96da4d5fbe19930e6dc9ed4fa744c6a21b6b6d4599a4c7d316ca45f4f"
+    },
+    {
+      "path": "/tmp/fc-round21-storage-tests-third.log",
+      "bytes": 2585,
+      "sha256": "e95ae03bcd84131d32976471379ac3f1da5e4600b8f4daf3536db19eaabb0fd3"
+    }
+  ]
+}

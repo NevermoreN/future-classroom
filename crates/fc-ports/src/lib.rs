@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 pub mod audio;
+pub mod autostart;
+pub use autostart::*;
 pub mod calendar;
 pub use calendar::*;
 pub mod content_web;

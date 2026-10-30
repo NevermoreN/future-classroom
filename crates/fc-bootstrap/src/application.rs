@@ -1,5 +1,11 @@
 //! Native product composition. All KDF/SQLite/file work runs on the one shared
 //! two-thread pool; the window pump only handles bounded events and owned results.
+mod autostart_controller;
+mod autostart_editor;
+mod autostart_probe;
+pub fn autostart_probe() -> std::result::Result<(), String> {
+    autostart_probe::run()
+}
 mod calendar_probe;
 pub fn calendar_probe() -> std::result::Result<(), String> {
     calendar_probe::run()
@@ -94,6 +100,7 @@ const TO_MATERIALS: ActionId = ActionId(21);
 const TO_LESSON: ActionId = ActionId(22);
 const TO_WEB: ActionId = ActionId(23);
 const TO_PROFILES: ActionId = ActionId(24);
+const TO_AUTOSTART: ActionId = ActionId(25);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -115,6 +122,7 @@ enum Screen {
     HomeworkEdit,
     Schedule,
     Calendar,
+    Autostart,
     Display,
     Profiles,
     ProfileContent,
@@ -127,12 +135,16 @@ enum Screen {
 #[derive(Debug)]
 enum Failure {
     Backend(BackendError),
+    Autostart(fc_bootstrap::autostart::Error),
     Web(WebServiceError),
     Input(&'static str),
     Deployment(&'static str),
     Stopped,
 }
 fn fatal(error: &Failure) -> bool {
+    if let Failure::Autostart(fc_bootstrap::autostart::Error::Unsettled { error, .. }) = error {
+        return fatal(&Failure::Backend((**error).clone()));
+    }
     use fc_storage::StorageError as S;
     matches!(
         error,
@@ -141,6 +153,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
                 | BackendError::Calendar(fc_ports::CalendarRepositoryError::Faulted)
+                | BackendError::Autostart(fc_ports::autostart::AutostartRepositoryError::Faulted)
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
@@ -158,6 +171,14 @@ fn fatal(error: &Failure) -> bool {
 impl From<BackendError> for Failure {
     fn from(e: BackendError) -> Self {
         Self::Backend(e)
+    }
+}
+impl From<fc_bootstrap::autostart::Error> for Failure {
+    fn from(error: fc_bootstrap::autostart::Error) -> Self {
+        match error {
+            fc_bootstrap::autostart::Error::Backend(error) => Self::Backend(error),
+            other => Self::Autostart(other),
+        }
     }
 }
 type Result<T> = std::result::Result<T, Failure>;
@@ -196,11 +217,14 @@ fn confirm(data: &FormData, left: FieldId) -> Result<()> {
 fn error_text(error: &Failure) -> String {
     match error {
         Failure::Input(s) | Failure::Deployment(s) => (*s).into(),
+        Failure::Autostart(fc_bootstrap::autostart::Error::Busy) => "启动项仍在核对，请稍后重新读取。".into(),
+        Failure::Autostart(_) => "本次启动项结果尚未确认，请重新打开登录自启动并核对实际状态。".into(),
         Failure::Stopped => "未取得完成结果，请重新打开并核对已保存内容。".into(),
         Failure::Web(WebServiceError::Denied) => "教师设备权限或本地会话已变化，请重新登录并刷新核对。".into(),
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Cancelled) => "本次校历任务已取消或超过处理期限，请重新读取当前状态。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Stale) => "校历候选或课表已更新，请重新加载、核对差异后再确认。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Capacity) => "校历缓存或采用资料超过容量上限，本次未生效，请保留数据并核对。".into(),
@@ -353,6 +377,7 @@ enum Outcome {
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
     Calendar(Box<calendar_flow::Loaded>),
+    Autostart(Option<PrincipalId>, Box<fc_bootstrap::autostart::Loaded>),
     CalendarMaintained {
         attempted: bool,
     },
@@ -414,6 +439,10 @@ enum Work {
     ),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
     Calendar(Box<calendar_flow::Job>),
+    Autostart(
+        Box<fc_bootstrap::autostart::Job>,
+        Option<fc_windows::system::RunScope>,
+    ),
     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
     ChangeLesson(
         Arc<Mutex<Backend>>,
@@ -479,6 +508,7 @@ impl Task for Work {
             | Self::Desktop(_, _, _) => Some(1024),
             Self::ContentPage { .. } => Some(1024),
             Self::Calendar(job) => job.allocation_bytes(),
+            Self::Autostart(job, _) => job.allocation_bytes()?.checked_add(2048),
             Self::ContentImages(job) => job.allocation_bytes(),
             Self::ProfileContent(job) => job.allocation_bytes(),
             Self::SaveAccount(_, _, operation) => {
@@ -544,6 +574,20 @@ impl Task for Work {
                     // new, valid deployment has no published resources yet;
                     // keep the first-administrator flow available.
                     if state.installation.is_some() {
+                        // Read-only recovery: never replay a saved intent or repair
+                        // a Run item during startup. Invalid current paths leave
+                        // the normal application available for relocation.
+                        if let Ok(scope) = fc_windows::system::RunScope::current_executable() {
+                            let mut system = scope
+                                .open()
+                                .map_err(|_| invalid("启动项状态读取不可用。"))?;
+                            fc_bootstrap::autostart::Job {
+                                backend: backend.clone(),
+                                lease: None,
+                                operation: fc_bootstrap::autostart::Operation::ObserveStartup,
+                            }
+                            .run(context, &mut system)?;
+                        }
                         material_flow::reconcile(
                             &fc_windows::materials::files::ControlledFiles::new(&root)
                                 .map_err(|_| invalid("资料目录不可用。"))?,
@@ -686,6 +730,16 @@ impl Task for Work {
                 }
             }
             Self::Calendar(job) => job.run(context),
+            Self::Autostart(job, scope) => {
+                let owner = job.lease.map(|lease| lease.principal_id());
+                let scope = match scope { Some(scope) => scope, None => fc_windows::system::RunScope::current_executable().map_err(|_| invalid("当前程序路径无法用于登录自启动，请将程序移至较短的本地目录后重新核对。"))? };
+                let mut system = scope
+                    .open()
+                    .map_err(|_| invalid("启动项适配器不可用，请重新读取。"))?;
+                job.run(context, &mut system)
+                    .map(|loaded| Outcome::Autostart(owner, Box::new(loaded)))
+                    .map_err(Failure::from)
+            }
             Self::LoadSchedule(backend, lease) => {
                 let document = backend
                     .lock()
@@ -1059,6 +1113,9 @@ struct App {
     terminate_required: bool,
     schedule: Option<ScheduleEditor>,
     calendar: Option<calendar_editor::Editor>,
+    autostart: Option<autostart_editor::Editor>,
+    autostart_job: Option<Pending>,
+    autostart_scope: Option<fc_windows::system::RunScope>,
     calendar_job: Option<Pending>,
     next_calendar_maintenance: Instant,
     display: Option<display_editor::Editor>,
@@ -1188,7 +1245,23 @@ impl App {
                         label: "公共布局与科目配置".into(),
                         enabled: true,
                     });
+                    view.actions.push(Action {
+                        id: TO_AUTOSTART,
+                        label: "登录自启动".into(),
+                        enabled: true,
+                    });
                 }
+                return view;
+            }
+        }
+        if self.screen == Screen::Autostart {
+            if let Some(editor) = &self.autostart {
+                let mut view = editor.view(&status, self.autostart_job.is_some() || self.stopping);
+                view.actions.push(Action {
+                    id: LOCK,
+                    label: "锁定".into(),
+                    enabled: true,
+                });
                 return view;
             }
         }
@@ -1322,7 +1395,7 @@ impl App {
                         action(TO_SUBJECTS, "基础科目"),
                         action(TO_ACCOUNTS, "账号与任教管理"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
-                        action(TO_DISPLAY, "桌面显示设置"),
+                        action(TO_DISPLAY, "桌面与启动设置"),
                         action(TO_LESSON, "本节临时换课"),
                         action(TO_WEB, "教师设备与配对"),
                     ]);
@@ -1459,6 +1532,9 @@ impl App {
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
+            Screen::Autostart => {
+                view.title = "正在读取登录自启动".into();
+            }
             Screen::Calendar => {
                 view.title = "正在加载公共校历候选".into();
             }
@@ -1546,6 +1622,10 @@ impl App {
         // A locked review is discarded; a later session must read current
         // candidates and revisions again. The physical download ticket remains.
         self.calendar = None;
+        self.autostart = None;
+        if let Some(p) = &self.autostart_job {
+            p.ticket.cancel();
+        }
         if let Some(p) = &self.calendar_job {
             p.ticket.cancel();
         }
@@ -1588,7 +1668,7 @@ impl App {
         self.schedule_shutdown();
     }
     fn schedule_shutdown(&mut self) {
-        if self.shutdown.is_some() {
+        if self.shutdown.is_some() || self.autostart_job.is_some() {
             return;
         }
         // Audio settles its old driver tokens while the unique writer remains
@@ -1795,7 +1875,7 @@ impl App {
                     self.lock();
                     return self.render();
                 }
-                if self.pending.is_some() || self.stopping {
+                if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
                 }
                 if action == TO_PROFILES {
@@ -1805,6 +1885,14 @@ impl App {
                         }
                     }
                     return self.open_profiles();
+                }
+                if action == TO_AUTOSTART {
+                    if self.screen == Screen::Display {
+                        if let Some(editor) = &mut self.display {
+                            editor.capture(data);
+                        }
+                    }
+                    return self.submit_autostart(fc_bootstrap::autostart::Operation::Load);
                 }
                 if self.screen == Screen::Profiles {
                     return self.profiles_event(action, data);
@@ -1823,6 +1911,9 @@ impl App {
                 }
                 if self.screen == Screen::Lesson {
                     return self.lesson_event(action, data);
+                }
+                if self.screen == Screen::Autostart {
+                    return self.autostart_event(action, data);
                 }
                 if self.screen == Screen::Calendar {
                     return self.calendar_event(action, data);
@@ -1857,6 +1948,10 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Schedule
+                            } else if self.autostart.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Autostart
                             } else if self.calendar.as_ref().is_some_and(|e| {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
@@ -2958,9 +3053,13 @@ impl App {
         let Some(owner) = self.current_global_owner() else {
             return false;
         };
-        self.schedule
+        self.autostart
             .as_ref()
             .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
+                .schedule
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
             || self
                 .calendar
                 .as_ref()
@@ -3230,6 +3329,7 @@ impl App {
             }
         }
         self.poll_calendar()?;
+        self.poll_autostart()?;
         self.cleanup_jobs
             .retain_mut(|job| matches!(job.try_result(), Ok(None)));
         if !self.stopping && self.cleanup_jobs.len() < 2 {
@@ -3442,6 +3542,7 @@ impl App {
                         self.status = "账号与任教范围已保存，该账号原有会话已失效。".into();
                     }
                 }
+                Ok(Outcome::Autostart(..)) => {}
                 Ok(Outcome::Calendar(loaded)) => self.calendar_loaded(*loaded),
                 Ok(Outcome::CalendarMaintained { .. }) => {}
                 Ok(Outcome::ScheduleLoaded(document)) => {
@@ -3921,6 +4022,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         terminate_required: false,
         schedule: None,
         calendar: None,
+        autostart: None,
+        autostart_job: None,
+        autostart_scope: None,
         calendar_job: None,
         next_calendar_maintenance: Instant::now() + Duration::from_secs(30),
         lesson_editor: None,

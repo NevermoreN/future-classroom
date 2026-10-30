@@ -1,0 +1,52 @@
+    Blocking waiting for file lock on build directory
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:26:19
+   |
+26 | fn at(day: u8) -> LocalDateTime {
+   |                   ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:29:19
+   |
+29 | struct Time(Mutex<LocalDateTime>);
+   |                   ^^^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+29 | struct Time<LocalDateTime>(Mutex<LocalDateTime>);
+   |            +++++++++++++++
+
+error[E0425]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:31:22
+   |
+31 |     fn now(&self) -> LocalDateTime {
+   |                      ^^^^^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:27:5
+   |
+27 |     LocalDateTime::new(LocalDate::new(2026, 10, day).unwrap(), 28800).unwrap()
+   |     ^^^^^^^^^^^^^ use of undeclared type `LocalDateTime`
+
+error[E0433]: cannot find type `LocalDate` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:27:24
+   |
+27 |     LocalDateTime::new(LocalDate::new(2026, 10, day).unwrap(), 28800).unwrap()
+   |                        ^^^^^^^^^ use of undeclared type `LocalDate`
+
+error[E0433]: cannot find type `LocalDateTime` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:40:21
+   |
+40 |         expires_at: LocalDateTime::new(LocalDate::new(2027, 12, 31).unwrap(), 0).unwrap(),
+   |                     ^^^^^^^^^^^^^ use of undeclared type `LocalDateTime`
+
+error[E0433]: cannot find type `LocalDate` in this scope
+  --> crates/fc-storage/src/business/tests/autostart.rs:40:40
+   |
+40 |         expires_at: LocalDateTime::new(LocalDate::new(2027, 12, 31).unwrap(), 0).unwrap(),
+   |                                        ^^^^^^^^^ use of undeclared type `LocalDate`
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `fc-storage` (lib test) due to 7 previous errors

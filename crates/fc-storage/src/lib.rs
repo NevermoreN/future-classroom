@@ -29,6 +29,7 @@ pub const MAX_VALUE_BYTES: usize = 64 * 1024;
 pub enum StorageError {
     InvalidCommand,
     CalendarCancelled,
+    AutostartCancelled,
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),

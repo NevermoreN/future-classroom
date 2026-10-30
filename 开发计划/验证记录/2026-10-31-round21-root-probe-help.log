@@ -1,0 +1,42 @@
+usage: windows-probe.py [-h] --host HOST --identity IDENTITY --exe EXE
+                        [--test-metadata TEST_METADATA]
+                        [--test-timeout-seconds TEST_TIMEOUT_SECONDS]
+                        [--native-seconds NATIVE_SECONDS] [--system-host]
+                        [--audio-silent] [--materials] [--autostart]
+                        [--calendar] [--calendar-download] [--application]
+                        [--web-voice] [--web-pairing] --report REPORT
+
+Run only supplied development probes in a disposable remote Windows directory.
+Credentials stay outside the repository. Existing SSH configuration is
+retained.
+
+options:
+  -h, --help            show this help message and exit
+  --host HOST
+  --identity IDENTITY
+  --exe EXE
+  --test-metadata TEST_METADATA
+  --test-timeout-seconds TEST_TIMEOUT_SECONDS
+                        per supplied test EXE budget in seconds (1..900;
+                        default 60)
+  --native-seconds NATIVE_SECONDS
+  --system-host         also run new read-only system and interactive hidden-
+                        host probes
+  --audio-silent        zero PCM only; no volume/microphone/foreground changes
+  --materials           run synthetic file/validation/SQLite/private Shell
+                        receiver integration
+  --autostart           isolated hidden native durable startup settings;
+                        generated scratch Registry leaf only
+  --calendar            isolated hidden native calendar candidate
+                        review/adoption/policy/CAS; synthetic feed
+  --calendar-download   one fixed2026 WinHTTP HTTPS feed request; no
+                        application writes
+  --application         exercise the actual workbench in an isolated hidden
+                        test deployment
+  --web-voice           interactive hidden-task authenticated voice
+                        upload/jobs and native zero-PCM three-repeat/cancel
+                        integration
+  --web-pairing         noninteractive CNG/DPAPI/SQLite pairing and synthetic
+                        trusted-TLS metadata port probe; no HTTPS
+                        listener/browser
+  --report REPORT

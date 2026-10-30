@@ -109,3 +109,5 @@ Round13 includes teacher material JSON and controlled file worker ports (TXT/Off
 Round15 adds local global-admin account paging/edit/disable/multiple teaching scopes, review/cancel/CAS and self-change re-login. Existing timetable/default/history reference conflicts reject atomically. Identity and receipt each retain the 64KiB bound; over-limit edits return Capacity without truncation or authority changes. The sole registered lock action remains available while busy and carries no form secrets; all other busy actions remain disabled.
 
 公共校历：在课表校历页打开候选下载/来源差异/明确采用。候选缓存与已采用版本分开，人工映射优先，未映射补班待确认。自动纯放假变化默认关闭，须主管理员明确授权，学校模式与人工安排不被覆盖。--calendar-probe 使用独立合成资料及隐藏原生控件，--calendar-download-probe 仅固定2026来源实际HTTPS下载一次且不写应用数据；同步WinHTTP硬抢占未证明，不能替代教师入站TLS/P0与三系统实机验收。
+
+登录自启动：主管理员在本机工作台核对期望、实际与当前程序路径后，明确确认开启/关闭/修复。SQLite意图和系统操作分阶段持久记录；启动时仅核对实际状态，不重放、不反复修复。--autostart-probe 只使用独立合成数据库、隐藏窗口和自动生成的临时Registry项，结束后清理；真实HKCU Run不变。259个UTF16命令单元加终止符为保守260上限。真实注销/登录、Win7/Win10/MSVC、安装升级与可见希沃设备验收仍未完成。

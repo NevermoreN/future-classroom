@@ -1,0 +1,572 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:2:
+ use fc_bootstrap::autostart::{Job, Operation};
+ 
+ impl App {
+[31m-    pub(super) fn submit_autostart(&mut self, operation: Operation) -> std::result::Result<(), String> {
+(B[m[31m-        let Some(lease) = self.lease else { self.lock(); return self.render(); };
+(B[m[32m+    pub(super) fn submit_autostart(
+(B[m[32m+        &mut self,
+(B[m[32m+        operation: Operation,
+(B[m[32m+    ) -> std::result::Result<(), String> {
+(B[m[32m+        let Some(lease) = self.lease else {
+(B[m[32m+            self.lock();
+(B[m[32m+            return self.render();
+(B[m[32m+        };
+(B[m         if self.current_global_owner() != Some(lease.principal_id())
+[31m-            || self.control.as_ref().is_none_or(SessionControl::is_local_locked) {
+(B[m[31m-            self.lock(); return self.render();
+(B[m[32m+            || self
+(B[m[32m+                .control
+(B[m[32m+                .as_ref()
+(B[m[32m+                .is_none_or(SessionControl::is_local_locked)
+(B[m[32m+        {
+(B[m[32m+            self.lock();
+(B[m[32m+            return self.render();
+(B[m         }
+         if self.autostart_job.is_some() {
+             self.status = "上一次启动项任务仍在核对，完成后才能继续。".into();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:13:
+             return self.render();
+         }
+[31m-        let Some(backend) = self.backend.clone() else { return Ok(()); };
+(B[m[31m-        let job = Job { backend, lease: Some(lease), operation };
+(B[m[32m+        let Some(backend) = self.backend.clone() else {
+(B[m[32m+            return Ok(());
+(B[m[32m+        };
+(B[m[32m+        let job = Job {
+(B[m[32m+            backend,
+(B[m[32m+            lease: Some(lease),
+(B[m[32m+            operation,
+(B[m[32m+        };
+(B[m         let work = Work::Autostart(Box::new(job), self.autostart_scope.clone());
+[31m-        match self.pool.handle().try_submit(work, Instant::now() + Duration::from_secs(40)) {
+(B[m[32m+        match self
+(B[m[32m+            .pool
+(B[m[32m+            .handle()
+(B[m[32m+            .try_submit(work, Instant::now() + Duration::from_secs(40))
+(B[m[32m+        {
+(B[m             Ok(ticket) => {
+[31m-                self.autostart_job = Some(Pending { ticket, generation: self.generation, self_revokes: false });
+(B[m[32m+                self.autostart_job = Some(Pending {
+(B[m[32m+                    ticket,
+(B[m[32m+                    generation: self.generation,
+(B[m[32m+                    self_revokes: false,
+(B[m[32m+                });
+(B[m                 self.status = "正在核对启动项；锁定可取消后续操作。".into();
+             }
+             Err(_) => self.status = "后台繁忙，请稍后重新读取。".into(),
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:24:
+         }
+         self.render()
+     }
+[31m-    pub(super) fn autostart_event(&mut self, action: ActionId, data: FormData) -> std::result::Result<(), String> {
+(B[m[31m-        let Some(owner) = self.current_global_owner() else { self.lock(); return self.render(); };
+(B[m[31m-        if self.control.as_ref().is_none_or(SessionControl::is_local_locked) { self.lock(); return self.render(); }
+(B[m[31m-        let Some(editor) = &mut self.autostart else { self.screen = Screen::Home; return self.render(); };
+(B[m[31m-        if editor.owner() != owner { self.lock(); return self.render(); }
+(B[m[32m+    pub(super) fn autostart_event(
+(B[m[32m+        &mut self,
+(B[m[32m+        action: ActionId,
+(B[m[32m+        data: FormData,
+(B[m[32m+    ) -> std::result::Result<(), String> {
+(B[m[32m+        let Some(owner) = self.current_global_owner() else {
+(B[m[32m+            self.lock();
+(B[m[32m+            return self.render();
+(B[m[32m+        };
+(B[m[32m+        if self
+(B[m[32m+            .control
+(B[m[32m+            .as_ref()
+(B[m[32m+            .is_none_or(SessionControl::is_local_locked)
+(B[m[32m+        {
+(B[m[32m+            self.lock();
+(B[m[32m+            return self.render();
+(B[m[32m+        }
+(B[m[32m+        let Some(editor) = &mut self.autostart else {
+(B[m[32m+            self.screen = Screen::Home;
+(B[m[32m+            return self.render();
+(B[m[32m+        };
+(B[m[32m+        if editor.owner() != owner {
+(B[m[32m+            self.lock();
+(B[m[32m+            return self.render();
+(B[m[32m+        }
+(B[m         match editor.event(action, data) {
+             Ok(autostart_editor::Command::Stay) => self.status.clear(),
+[31m-            Ok(autostart_editor::Command::Close) => { self.autostart = None; self.screen = Screen::Home; self.status.clear(); }
+(B[m[32m+            Ok(autostart_editor::Command::Close) => {
+(B[m[32m+                self.autostart = None;
+(B[m[32m+                self.screen = Screen::Home;
+(B[m[32m+                self.status.clear();
+(B[m[32m+            }
+(B[m             Ok(autostart_editor::Command::Load) => return self.submit_autostart(Operation::Load),
+[31m-            Ok(autostart_editor::Command::Change { expected, desired, previous_observed }) => return self.submit_autostart(Operation::Change { expected, desired, previous_observed }),
+(B[m[32m+            Ok(autostart_editor::Command::Change {
+(B[m[32m+                expected,
+(B[m[32m+                desired,
+(B[m[32m+                previous_observed,
+(B[m[32m+            }) => {
+(B[m[32m+                return self.submit_autostart(Operation::Change {
+(B[m[32m+                    expected,
+(B[m[32m+                    desired,
+(B[m[32m+                    previous_observed,
+(B[m[32m+                })
+(B[m[32m+            }
+(B[m             Err(message) => self.status = message,
+         }
+         self.render()
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:40:
+     }
+     pub(super) fn poll_autostart(&mut self) -> std::result::Result<(), String> {
+[31m-        let completed = self.autostart_job.as_mut().and_then(|job| match job.ticket.try_result() {
+(B[m[31m-            Ok(None) => None, Ok(Some(result)) => Some(result), Err(_) => Some(Err(Failure::Stopped)),
+(B[m[31m-        });
+(B[m[32m+        let completed = self
+(B[m[32m+            .autostart_job
+(B[m[32m+            .as_mut()
+(B[m[32m+            .and_then(|job| match job.ticket.try_result() {
+(B[m[32m+                Ok(None) => None,
+(B[m[32m+                Ok(Some(result)) => Some(result),
+(B[m[32m+                Err(_) => Some(Err(Failure::Stopped)),
+(B[m[32m+            });
+(B[m         if let Some(result) = completed {
+             let generation = self.autostart_job.take().map(|job| job.generation);
+             match result {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:48:
+[31m-                Err(error) if fatal(&error) => { if let Some(control) = &self.control { control.fault(); } self.begin_shutdown(); }
+(B[m[31m-                Ok(Outcome::Autostart(owner, loaded)) if generation == Some(self.generation) && !self.stopping && self.current_global_owner() == owner && owner.is_some() => {
+(B[m[31m-                    self.status = loaded.state.as_ref().and_then(fc_domain::autostart::AutostartState::current).map_or("已重新读取实际启动状态。".into(), |op| format!("最近结果：{}。", autostart_editor::phase(op.phase)));
+(B[m[31m-                    self.autostart = Some(autostart_editor::Editor::new(owner.expect("checked owner"), *loaded));
+(B[m[32m+                Err(error) if fatal(&error) => {
+(B[m[32m+                    if let Some(control) = &self.control {
+(B[m[32m+                        control.fault();
+(B[m[32m+                    }
+(B[m[32m+                    self.begin_shutdown();
+(B[m[32m+                }
+(B[m[32m+                Ok(Outcome::Autostart(owner, loaded))
+(B[m[32m+                    if generation == Some(self.generation)
+(B[m[32m+                        && !self.stopping
+(B[m[32m+                        && self.current_global_owner() == owner
+(B[m[32m+                        && owner.is_some() =>
+(B[m[32m+                {
+(B[m[32m+                    self.status = loaded
+(B[m[32m+                        .state
+(B[m[32m+                        .as_ref()
+(B[m[32m+                        .and_then(fc_domain::autostart::AutostartState::current)
+(B[m[32m+                        .map_or("已重新读取实际启动状态。".into(), |op| {
+(B[m[32m+                            format!("最近结果：{}。", autostart_editor::phase(op.phase))
+(B[m[32m+                        });
+(B[m[32m+                    self.autostart = Some(autostart_editor::Editor::new(
+(B[m[32m+                        owner.expect("checked owner"),
+(B[m[32m+                        *loaded,
+(B[m[32m+                    ));
+(B[m                     self.screen = Screen::Autostart;
+                     self.render()?;
+                 }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_controller.rs:55:
+[31m-                Err(error) if generation == Some(self.generation) && !self.stopping => { self.autostart = None; self.screen = Screen::Home; self.status = error_text(&error); self.render()?; }
+(B[m[32m+                Err(error) if generation == Some(self.generation) && !self.stopping => {
+(B[m[32m+                    self.autostart = None;
+(B[m[32m+                    self.screen = Screen::Home;
+(B[m[32m+                    self.status = error_text(&error);
+(B[m[32m+                    self.render()?;
+(B[m[32m+                }
+(B[m                 _ => {}
+             }
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:1:
+ //! A review captures intent, revision and physical preimage. Form fields never
+ //! supply a command, registry scope or privileged action.
+ use fc_bootstrap::autostart::Loaded;
+[31m-use fc_domain::{autostart::*, ids::{PrincipalId, Revision}};
+(B[m[32m+use fc_domain::{
+(B[m[32m+    autostart::*,
+(B[m[32m+    ids::{PrincipalId, Revision},
+(B[m[32m+};
+(B[m use fc_presentation::workbench::*;
+ 
+ pub(super) const ENABLE: ActionId = ActionId(650);
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:18:
+     Stay,
+     Close,
+     Load,
+[31m-    Change { expected: Revision, desired: bool, previous_observed: AutostartObservation },
+(B[m[32m+    Change {
+(B[m[32m+        expected: Revision,
+(B[m[32m+        desired: bool,
+(B[m[32m+        previous_observed: AutostartObservation,
+(B[m[32m+    },
+(B[m }
+[31m-struct Review { expected: Revision, desired: bool, previous_observed: AutostartObservation }
+(B[m[31m-pub(super) struct Editor { owner: PrincipalId, loaded: Loaded, review: Option<Review> }
+(B[m[32m+struct Review {
+(B[m[32m+    expected: Revision,
+(B[m[32m+    desired: bool,
+(B[m[32m+    previous_observed: AutostartObservation,
+(B[m[32m+}
+(B[m[32m+pub(super) struct Editor {
+(B[m[32m+    owner: PrincipalId,
+(B[m[32m+    loaded: Loaded,
+(B[m[32m+    review: Option<Review>,
+(B[m[32m+}
+(B[m fn display(command: &str) -> String {
+[31m-    command.chars().take(1024).map(|c| if c.is_control() { '\u{fffd}' } else { c }).collect()
+(B[m[32m+    command
+(B[m[32m+        .chars()
+(B[m[32m+        .take(1024)
+(B[m[32m+        .map(|c| if c.is_control() { '\u{fffd}' } else { c })
+(B[m[32m+        .collect()
+(B[m }
+ fn observation(observed: &AutostartObservation, target: &str) -> String {
+     match observed {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:30:
+         AutostartObservation::Absent => "关闭：未发现本项目启动项".into(),
+         AutostartObservation::Command(command) if command == target => "开启：指向当前程序".into(),
+[31m-        AutostartObservation::Command(command) => format!("发现其他路径或命令：{}", display(command)),
+(B[m[31m-        AutostartObservation::Opaque { .. } => "无法安全读取：启动项格式或长度异常，请先核对".into(),
+(B[m[32m+        AutostartObservation::Command(command) => {
+(B[m[32m+            format!("发现其他路径或命令：{}", display(command))
+(B[m[32m+        }
+(B[m[32m+        AutostartObservation::Opaque { .. } => {
+(B[m[32m+            "无法安全读取：启动项格式或长度异常，请先核对".into()
+(B[m[32m+        }
+(B[m         AutostartObservation::Unavailable(_) => "读取失败：实际状态尚未确认".into(),
+     }
+ }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:44:
+     }
+ }
+ impl Editor {
+[31m-    pub fn new(owner: PrincipalId, loaded: Loaded) -> Self { Self { owner, loaded, review: None } }
+(B[m[31m-    pub fn owner(&self) -> PrincipalId { self.owner }
+(B[m[31m-    pub fn loaded(&self) -> &Loaded { &self.loaded }
+(B[m[31m-    pub fn has_unsaved_changes(&self) -> bool { self.review.is_some() }
+(B[m[32m+    pub fn new(owner: PrincipalId, loaded: Loaded) -> Self {
+(B[m[32m+        Self {
+(B[m[32m+            owner,
+(B[m[32m+            loaded,
+(B[m[32m+            review: None,
+(B[m[32m+        }
+(B[m[32m+    }
+(B[m[32m+    pub fn owner(&self) -> PrincipalId {
+(B[m[32m+        self.owner
+(B[m[32m+    }
+(B[m[32m+    pub fn loaded(&self) -> &Loaded {
+(B[m[32m+        &self.loaded
+(B[m[32m+    }
+(B[m[32m+    pub fn has_unsaved_changes(&self) -> bool {
+(B[m[32m+        self.review.is_some()
+(B[m[32m+    }
+(B[m     pub fn view(&self, status: &str, busy: bool) -> View {
+         let enabled = !busy;
+         let mut description = format!("期望状态：{}\n实际状态：{}\n最近结果：{}\n当前 Windows 用户登录时启动。移动 ZIP 程序目录后，请在新位置重新核对并明确修复。",
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:54:
+             if self.loaded.state.as_ref().is_some_and(|s| s.desired) { "开启" } else { "关闭" },
+             observation(&self.loaded.observed, &self.loaded.target_command),
+             self.loaded.state.as_ref().and_then(AutostartState::current).map_or("尚无操作记录", |o| phase(o.phase)));
+[31m-        if self.loaded.state.as_ref().is_some_and(AutostartState::drifted) {
+(B[m[31m-            description.push_str("\n期望与实际状态不一致，请核对后明确选择；程序不会自动反复修复。");
+(B[m[32m+        if self
+(B[m[32m+            .loaded
+(B[m[32m+            .state
+(B[m[32m+            .as_ref()
+(B[m[32m+            .is_some_and(AutostartState::drifted)
+(B[m[32m+        {
+(B[m[32m+            description
+(B[m[32m+                .push_str("\n期望与实际状态不一致，请核对后明确选择；程序不会自动反复修复。");
+(B[m         }
+[31m-        let mut fields = vec![Field { id: TARGET, label: "当前程序的启动命令".into(), kind: FieldKind::ReadOnly, value: display(&self.loaded.target_command), max_utf16: 1024 },
+(B[m[31m-            Field { id: ACTUAL, label: "本次读取的实际状态".into(), kind: FieldKind::ReadOnly, value: observation(&self.loaded.observed, &self.loaded.target_command), max_utf16: 2048 }];
+(B[m[31m-        let action = |id, label: &str, enabled| Action { id, label: label.into(), enabled };
+(B[m[32m+        let mut fields = vec![
+(B[m[32m+            Field {
+(B[m[32m+                id: TARGET,
+(B[m[32m+                label: "当前程序的启动命令".into(),
+(B[m[32m+                kind: FieldKind::ReadOnly,
+(B[m[32m+                value: display(&self.loaded.target_command),
+(B[m[32m+                max_utf16: 1024,
+(B[m[32m+            },
+(B[m[32m+            Field {
+(B[m[32m+                id: ACTUAL,
+(B[m[32m+                label: "本次读取的实际状态".into(),
+(B[m[32m+                kind: FieldKind::ReadOnly,
+(B[m[32m+                value: observation(&self.loaded.observed, &self.loaded.target_command),
+(B[m[32m+                max_utf16: 2048,
+(B[m[32m+            },
+(B[m[32m+        ];
+(B[m[32m+        let action = |id, label: &str, enabled| Action {
+(B[m[32m+            id,
+(B[m[32m+            label: label.into(),
+(B[m[32m+            enabled,
+(B[m[32m+        };
+(B[m         let actions = if let Some(review) = &self.review {
+[31m-            description.push_str(if review.desired { "\n确认后将本项目启动项设为上方当前程序命令。" } else { "\n确认后将删除本项目启动项。" });
+(B[m[31m-            fields.push(Field { id: ACK, label: "核对当前路径与实际状态".into(), kind: FieldKind::Choice(vec![Choice { value: "0".into(), label: "尚未确认".into() }, Choice { value: "1".into(), label: "已理解并确认本次变更".into() }]), value: "0".into(), max_utf16: 1 });
+(B[m[31m-            vec![action(CONFIRM, "确认变更", enabled), action(CANCEL, "取消本次确认", enabled)]
+(B[m[32m+            description.push_str(if review.desired {
+(B[m[32m+                "\n确认后将本项目启动项设为上方当前程序命令。"
+(B[m[32m+            } else {
+(B[m[32m+                "\n确认后将删除本项目启动项。"
+(B[m[32m+            });
+(B[m[32m+            fields.push(Field {
+(B[m[32m+                id: ACK,
+(B[m[32m+                label: "核对当前路径与实际状态".into(),
+(B[m[32m+                kind: FieldKind::Choice(vec![
+(B[m[32m+                    Choice {
+(B[m[32m+                        value: "0".into(),
+(B[m[32m+                        label: "尚未确认".into(),
+(B[m[32m+                    },
+(B[m[32m+                    Choice {
+(B[m[32m+                        value: "1".into(),
+(B[m[32m+                        label: "已理解并确认本次变更".into(),
+(B[m[32m+                    },
+(B[m[32m+                ]),
+(B[m[32m+                value: "0".into(),
+(B[m[32m+                max_utf16: 1,
+(B[m[32m+            });
+(B[m[32m+            vec![
+(B[m[32m+                action(CONFIRM, "确认变更", enabled),
+(B[m[32m+                action(CANCEL, "取消本次确认", enabled),
+(B[m[32m+            ]
+(B[m         } else {
+[31m-            let can_change = enabled && self.loaded.state.is_some() && self.loaded.observed.mutation_eligible();
+(B[m[31m-            vec![action(ENABLE, "开启或修复到当前路径", can_change), action(DISABLE, "关闭登录自启动", can_change), action(REFRESH, "重新读取实际状态", enabled), action(CLOSE, "返回工作台", enabled)]
+(B[m[32m+            let can_change =
+(B[m[32m+                enabled && self.loaded.state.is_some() && self.loaded.observed.mutation_eligible();
+(B[m[32m+            vec![
+(B[m[32m+                action(ENABLE, "开启或修复到当前路径", can_change),
+(B[m[32m+                action(DISABLE, "关闭登录自启动", can_change),
+(B[m[32m+                action(REFRESH, "重新读取实际状态", enabled),
+(B[m[32m+                action(CLOSE, "返回工作台", enabled),
+(B[m[32m+            ]
+(B[m         };
+[31m-        View { title: "登录自启动".into(), description, status: status.into(), fields, actions, busy, grid: None }
+(B[m[32m+        View {
+(B[m[32m+            title: "登录自启动".into(),
+(B[m[32m+            description,
+(B[m[32m+            status: status.into(),
+(B[m[32m+            fields,
+(B[m[32m+            actions,
+(B[m[32m+            busy,
+(B[m[32m+            grid: None,
+(B[m[32m+        }
+(B[m     }
+     pub fn event(&mut self, action: ActionId, data: FormData) -> Result<Command, String> {
+         match action {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:75:
+             ENABLE | DISABLE if self.review.is_none() => {
+[31m-                if !self.loaded.observed.mutation_eligible() { return Err("实际启动项尚未安全读取，请先核对。".into()); }
+(B[m[32m+                if !self.loaded.observed.mutation_eligible() {
+(B[m[32m+                    return Err("实际启动项尚未安全读取，请先核对。".into());
+(B[m[32m+                }
+(B[m                 let state = self.loaded.state.as_ref().ok_or("部署尚未初始化。")?;
+[31m-                self.review = Some(Review { expected: state.revision, desired: action == ENABLE, previous_observed: self.loaded.observed.clone() });
+(B[m[32m+                self.review = Some(Review {
+(B[m[32m+                    expected: state.revision,
+(B[m[32m+                    desired: action == ENABLE,
+(B[m[32m+                    previous_observed: self.loaded.observed.clone(),
+(B[m[32m+                });
+(B[m                 Ok(Command::Stay)
+             }
+             CONFIRM => {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/autostart_editor.rs:82:
+[31m-                if data.get(ACK) != Some("1") { return Err("请先核对路径与实际状态，再明确确认本次变更。".into()); }
+(B[m[32m+                if data.get(ACK) != Some("1") {
+(B[m[32m+                    return Err("请先核对路径与实际状态，再明确确认本次变更。".into());
+(B[m[32m+                }
+(B[m                 let review = self.review.take().ok_or("当前没有待确认的变更。")?;
+[31m-                Ok(Command::Change { expected: review.expected, desired: review.desired, previous_observed: review.previous_observed })
+(B[m[32m+                Ok(Command::Change {
+(B[m[32m+                    expected: review.expected,
+(B[m[32m+                    desired: review.desired,
+(B[m[32m+                    previous_observed: review.previous_observed,
+(B[m[32m+                })
+(B[m             }
+[31m-            CANCEL => { self.review = None; Ok(Command::Stay) }
+(B[m[31m-            REFRESH => { self.review = None; Ok(Command::Load) }
+(B[m[31m-            CLOSE => { self.review = None; Ok(Command::Close) }
+(B[m[32m+            CANCEL => {
+(B[m[32m+                self.review = None;
+(B[m[32m+                Ok(Command::Stay)
+(B[m[32m+            }
+(B[m[32m+            REFRESH => {
+(B[m[32m+                self.review = None;
+(B[m[32m+                Ok(Command::Load)
+(B[m[32m+            }
+(B[m[32m+            CLOSE => {
+(B[m[32m+                self.review = None;
+(B[m[32m+                Ok(Command::Close)
+(B[m[32m+            }
+(B[m             _ => Ok(Command::Stay),
+         }
+     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:3:
+ mod autostart_controller;
+ mod autostart_editor;
+ mod autostart_probe;
+[31m-pub fn autostart_probe() -> std::result::Result<(), String> { autostart_probe::run() }
+(B[m[32m+pub fn autostart_probe() -> std::result::Result<(), String> {
+(B[m[32m+    autostart_probe::run()
+(B[m[32m+}
+(B[m mod calendar_probe;
+ pub fn calendar_probe() -> std::result::Result<(), String> {
+     calendar_probe::run()
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:170:
+ }
+ impl From<fc_bootstrap::autostart::Error> for Failure {
+     fn from(error: fc_bootstrap::autostart::Error) -> Self {
+[31m-        match error { fc_bootstrap::autostart::Error::Backend(error) => Self::Backend(error), other => Self::Autostart(other) }
+(B[m[32m+        match error {
+(B[m[32m+            fc_bootstrap::autostart::Error::Backend(error) => Self::Backend(error),
+(B[m[32m+            other => Self::Autostart(other),
+(B[m[32m+        }
+(B[m     }
+ }
+ type Result<T> = std::result::Result<T, Failure>;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:431:
+     ),
+     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
+     Calendar(Box<calendar_flow::Job>),
+[31m-    Autostart(Box<fc_bootstrap::autostart::Job>, Option<fc_windows::system::RunScope>),
+(B[m[32m+    Autostart(
+(B[m[32m+        Box<fc_bootstrap::autostart::Job>,
+(B[m[32m+        Option<fc_windows::system::RunScope>,
+(B[m[32m+    ),
+(B[m     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
+     ChangeLesson(
+         Arc<Mutex<Backend>>,
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:567:
+                         // a Run item during startup. Invalid current paths leave
+                         // the normal application available for relocation.
+                         if let Ok(scope) = fc_windows::system::RunScope::current_executable() {
+[31m-                            let mut system = scope.open().map_err(|_| invalid("启动项状态读取不可用。"))?;
+(B[m[31m-                            fc_bootstrap::autostart::Job { backend: backend.clone(), lease: None, operation: fc_bootstrap::autostart::Operation::ObserveStartup }.run(context, &mut system)?;
+(B[m[32m+                            let mut system = scope
+(B[m[32m+                                .open()
+(B[m[32m+                                .map_err(|_| invalid("启动项状态读取不可用。"))?;
+(B[m[32m+                            fc_bootstrap::autostart::Job {
+(B[m[32m+                                backend: backend.clone(),
+(B[m[32m+                                lease: None,
+(B[m[32m+                                operation: fc_bootstrap::autostart::Operation::ObserveStartup,
+(B[m[32m+                            }
+(B[m[32m+                            .run(context, &mut system)?;
+(B[m                         }
+                         material_flow::reconcile(
+                             &fc_windows::materials::files::ControlledFiles::new(&root)
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:715:
+             Self::Autostart(job, scope) => {
+                 let owner = job.lease.map(|lease| lease.principal_id());
+                 let scope = match scope { Some(scope) => scope, None => fc_windows::system::RunScope::current_executable().map_err(|_| invalid("当前程序路径无法用于登录自启动，请将程序移至较短的本地目录后重新核对。"))? };
+[31m-                let mut system = scope.open().map_err(|_| invalid("启动项适配器不可用，请重新读取。"))?;
+(B[m[31m-                job.run(context, &mut system).map(|loaded| Outcome::Autostart(owner, Box::new(loaded))).map_err(Failure::from)
+(B[m[31m-            },
+(B[m[32m+                let mut system = scope
+(B[m[32m+                    .open()
+(B[m[32m+                    .map_err(|_| invalid("启动项适配器不可用，请重新读取。"))?;
+(B[m[32m+                job.run(context, &mut system)
+(B[m[32m+                    .map(|loaded| Outcome::Autostart(owner, Box::new(loaded)))
+(B[m[32m+                    .map_err(Failure::from)
+(B[m[32m+            }
+(B[m             Self::LoadSchedule(backend, lease) => {
+                 let document = backend
+                     .lock()
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1230:
+         if self.screen == Screen::Autostart {
+             if let Some(editor) = &self.autostart {
+                 let mut view = editor.view(&status, self.autostart_job.is_some() || self.stopping);
+[31m-                view.actions.push(Action { id: LOCK, label: "锁定".into(), enabled: true });
+(B[m[32m+                view.actions.push(Action {
+(B[m[32m+                    id: LOCK,
+(B[m[32m+                    label: "锁定".into(),
+(B[m[32m+                    enabled: true,
+(B[m[32m+                });
+(B[m                 return view;
+             }
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1502:
+             Screen::Schedule => {
+                 view.title = "正在加载课表".into();
+             }
+[31m-            Screen::Autostart => { view.title = "正在读取登录自启动".into(); }
+(B[m[32m+            Screen::Autostart => {
+(B[m[32m+                view.title = "正在读取登录自启动".into();
+(B[m[32m+            }
+(B[m             Screen::Calendar => {
+                 view.title = "正在加载公共校历候选".into();
+             }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1591:
+         // candidates and revisions again. The physical download ticket remains.
+         self.calendar = None;
+         self.autostart = None;
+[31m-        if let Some(p) = &self.autostart_job { p.ticket.cancel(); }
+(B[m[32m+        if let Some(p) = &self.autostart_job {
+(B[m[32m+            p.ticket.cancel();
+(B[m[32m+        }
+(B[m         if let Some(p) = &self.calendar_job {
+             p.ticket.cancel();
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1870:
+                 if self.screen == Screen::Lesson {
+                     return self.lesson_event(action, data);
+                 }
+[31m-                if self.screen == Screen::Autostart { return self.autostart_event(action, data); }
+(B[m[32m+                if self.screen == Screen::Autostart {
+(B[m[32m+                    return self.autostart_event(action, data);
+(B[m[32m+                }
+(B[m                 if self.screen == Screen::Calendar {
+                     return self.calendar_event(action, data);
+                 }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1892:
+                     action = EXIT;
+                 }
+                 match action {
+[31m-                    TO_AUTOSTART => self.submit_autostart(fc_bootstrap::autostart::Operation::Load)?,
+(B[m[32m+                    TO_AUTOSTART => {
+(B[m[32m+                        self.submit_autostart(fc_bootstrap::autostart::Operation::Load)?
+(B[m[32m+                    }
+(B[m                     TO_ACCOUNTS => self.open_accounts()?,
+                     TO_WEB => self.open_web_editor()?,
+                     TO_LESSON => {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1905:
+                                 Some(e.owner()) == owner && e.has_unsaved_changes()
+                             }) {
+                                 Screen::Schedule
+[31m-                            } else if self.autostart.as_ref().is_some_and(|e| Some(e.owner()) == owner && e.has_unsaved_changes()) { Screen::Autostart
+(B[m[32m+                            } else if self.autostart.as_ref().is_some_and(|e| {
+(B[m[32m+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+(B[m[32m+                            }) {
+(B[m[32m+                                Screen::Autostart
+(B[m                             } else if self.calendar.as_ref().is_some_and(|e| {
+                                 Some(e.owner()) == owner && e.has_unsaved_changes()
+                             }) {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:3007:
+         let Some(owner) = self.current_global_owner() else {
+             return false;
+         };
+[31m-        self.autostart.as_ref().is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+(B[m[31m-            || self.schedule
+(B[m[32m+        self.autostart
+(B[m             .as_ref()
+             .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+[32m+            || self
+(B[m[32m+                .schedule
+(B[m[32m+                .as_ref()
+(B[m[32m+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+(B[m             || self
+                 .calendar
+                 .as_ref()
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs:34:
+     let args: Vec<String> = std::env::args().skip(1).collect();
+     match args.as_slice() {
+         [flag] if flag == "--autostart-probe" => {
+[31m-            #[cfg(windows)] { application::autostart_probe() }
+(B[m[31m-            #[cfg(not(windows))] { Err("native autostart workflow probe requires Windows".into()) }
+(B[m[32m+            #[cfg(windows)]
+(B[m[32m+            {
+(B[m[32m+                application::autostart_probe()
+(B[m[32m+            }
+(B[m[32m+            #[cfg(not(windows))]
+(B[m[32m+            {
+(B[m[32m+                Err("native autostart workflow probe requires Windows".into())
+(B[m[32m+            }
+(B[m         }
+         [flag] if flag == "--calendar-probe" => {
+             #[cfg(windows)]
