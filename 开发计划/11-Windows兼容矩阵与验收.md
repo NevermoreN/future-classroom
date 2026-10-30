@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.23 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.24 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十轮433项debug测试、release主EXE配对端口/隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十一轮449项debug测试、release主EXE配对端口/隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -109,3 +109,12 @@ Win11首轮整体FAIL并清理PASS：主release EXE的配对隔离探针通过�
 Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑定或防火墙规则；生产HTTPS和教师浏览器仍未交付。P0/P6-11首连接头期限缺口继续保留，完整HTTP验收不能因配对/注销端口通过而完成。后续三系统分别检查实际TLS信任、Cookie/CSRF、关闭/撤权/重启、并发预算和首连接头期限；可见PPT/触控/DPI、设备音频、正式安装及72小时仍按原矩阵独立取证。
 
 测试继续沿用已授权Windows机器，保留SSH服务/公钥及仓库外长期私钥；仅清理本轮自建进程、目录、计划任务及测试构建，不中断用户已有前台工作。最终结果与清理报告统一归档至[第十轮实施记录](10-实施进度与验证记录.md)。
+
+
+## 9. 第十一轮增量：设备管理与浏览器资源
+
+新增原生设备/申请管理页、一致的ManagementSnapshot与React配对/会话页面；正常就绪状态保持Unavailable，启用/短码请求在UI及worker两层拒绝，cfg(test)私有模拟只验证原生控件与业务服务。静态资源仅按受限清单核验后从共享内存响应，不开启正常产品监听。浏览器synthetic拦截验证、Host规则、Win11原生和真实TLS分别记账，不能将HTTPS测试URL的route.fulfill视为真实握手。
+
+本轮缓存304修复在自有HTTP loopback诊断核对实际wire headers/body，未修改系统全局超时、证书、防火墙或SSH服务。Win7GNU继续只作补充导入/Win11运行证据；实际Win7 SP1 x86、Windows10 32/64位与正式MSVC门槛仍各自保留。最终源码/测试/清理绑定见[第十一轮实施记录](10-实施进度与验证记录.md)。
+
+本轮最终Win11为449项/16个debug测试EXE（未优化）与release主EXE配对/隐藏工作台/资料/全零音频链PASS，[报告](验证记录/2026-10-30-windows11-teacher-web-round11.json)；新原生页7项已包含，不另加。浏览器30项属于Linux headless synthetic拦截，未走真实Windows TLS；HTTP loopback两轮304实际wire和完成排空通过但首连接期限仍NOT_VALIDATED。现代PE0/5、Win7GNU0/0，后者在Win11组合probe通过且未运行额外test EXE。三系统整体验收仍未完成。

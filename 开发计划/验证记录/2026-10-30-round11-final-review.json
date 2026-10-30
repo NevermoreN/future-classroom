@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "scope": "Independent read-only final source/package review plus root member hash verification",
+  "packageSha256": "75caa58f06a599cc22518fa84117229592e789a88f0ad66d555a36abb497448b",
+  "members": 11,
+  "sourceInputCount": 186,
+  "sourceManifestSha256": "dd3deccd46a08121baf1098b79c84b6f2ac56c43bc6842586533ea006ddb97b9",
+  "webManifestSha256": "80ec634591c865643d09fc4bd3e69d03ff1fc3c8e549110acb0b833555a07467",
+  "findings": [],
+  "checks": [
+    "Each ZIP member size/hash and manifest matches package report",
+    "Four static assets match frozen dist and HTML references",
+    "Web full notices are 25543 bytes and retained production JS banner; native notices match",
+    "186 frozen inputs match current files and compact JSON array digest",
+    "All platform/TLS/listener/partial/release gates remain accurate",
+    "Git and ZIP typical private key/GitHub/OpenAI/AWS credential patterns: zero matches",
+    "Three screenshots contain synthetic data only"
+  ]
+}

@@ -109,7 +109,8 @@ function Read-Reply($Client,[bool]$AllowReset=$false){
     $all=$m.ToArray();$text=[Text.Encoding]::ASCII.GetString($all);$split=$text.IndexOf("`r`n`r`n");$code=0;$body=[byte[]]::new(0)
     if($split-ge 0){$first=$text.Substring(0,$text.IndexOf("`r`n"));$code=[int]($first.Split(' ')[1]);$length=$all.Length-($split+4);$body=[byte[]]::new($length);[Array]::Copy($all,$split+4,$body,0,$length)}
     Phase ($readPhase+'/read-complete') @{receivedBytes=$all.Length;elapsedMilliseconds=$watch.ElapsedMilliseconds;timedOut=$timedOut;reset=$reset;eof=$eof;statusCode=$code}
-    return [pscustomobject]@{code=$code;body=$body;bytes=$all.Length;timedOut=$timedOut;reset=$reset;eof=$eof;observedMilliseconds=$watch.ElapsedMilliseconds}
+    $headers=if($split-ge 0){$text.Substring(0,$split)}else{''}
+    return [pscustomobject]@{code=$code;body=$body;headers=$headers;bytes=$all.Length;timedOut=$timedOut;reset=$reset;eof=$eof;observedMilliseconds=$watch.ElapsedMilliseconds}
   }finally{$watch.Stop();$m.Dispose();$Client.Dispose()}
 }
 function Get-Route([string]$Route){Phase ("cycle-$script:cycle/get-$Route");$c=Tcp;Write-Ascii ($c.GetStream()) ("GET /$Marker/$Route HTTP/1.1`r`nHost: 127.0.0.1:$script:port`r`nConnection: close`r`n`r`n");return Read-Reply $c}
@@ -134,6 +135,9 @@ function Chunked-Echo {
 function Download {
   Phase ("cycle-$script:cycle/stream-download")
   $r=Get-Route 'download';Assert ($r.code-eq 200) 'stream download failed';Assert ($r.body.Length-eq 196608) 'response did not contain exactly three chunks';Assert (@($r.body|Where-Object{$_-ne 90}).Count-eq 0) 'stream response bytes changed';Step (@{case='streamed-three-response-chunks';bytes=$r.body.Length;status='PASS'})
+}
+function Cached {
+  $r=Get-Route 'cached';Assert ($r.code-eq 304) 'conditional response status mismatch';Assert ($r.body.Length-eq 0) '304 unexpectedly contained a body';Assert ($r.headers-notmatch '(?im)^Content-Length:') '304 emitted wire body length as representation length';Assert ($r.headers-match '(?im)^ETag: "synthetic"') '304 validator missing';Step (@{case='304-omits-content-length-and-body';status='PASS';headers=$r.headers})
 }
 function Hold-Body {
   Phase ("cycle-$script:cycle/hold-partial-body")
@@ -167,6 +171,7 @@ try{
     Fixed-Echo 65537
     Chunked-Echo
     Download
+    Cached
     if($cycle-eq 1){
       Phase 'eight-concurrent-requests'
       $clients=[Collections.Generic.List[object]]::new();for($i=0;$i-lt 8;$i++){$c=Tcp;Write-Ascii ($c.GetStream()) ("GET /$Marker/health HTTP/1.1`r`nHost: 127.0.0.1:$script:port`r`nConnection: close`r`n`r`n");$clients.Add($c)};$replyIndex=0;foreach($c in $clients){Phase ('concurrent-response-'+$replyIndex);$r=Read-Reply $c;$replyIndex++;Assert ($r.code-eq 200) 'bounded concurrent health failed'};Step (@{case='eight-concurrent-requests';count=8;status='PASS'})

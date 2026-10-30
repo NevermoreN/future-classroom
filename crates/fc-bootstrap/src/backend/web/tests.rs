@@ -16,7 +16,7 @@ struct InputHook {
     owner: std::thread::ThreadId,
     remaining_reads: usize,
     control: SessionControl,
-    lease: SessionLease,
+    lease: Option<SessionLease>,
     tick: u64,
 }
 impl TestClock {
@@ -39,8 +39,20 @@ impl TestClock {
             owner: std::thread::current().id(),
             remaining_reads: 2,
             control,
-            lease,
+            lease: Some(lease),
             tick: self.tick.load(Ordering::Acquire).checked_add(1).unwrap(),
+        });
+    }
+    fn local_lock_on_read(&self, control: SessionControl, remaining_reads: usize) {
+        let mut hook = self.input_hook.lock().unwrap();
+        assert!(hook.is_none() && remaining_reads > 0);
+        self.input_hook_fired.store(false, Ordering::Release);
+        *hook = Some(InputHook {
+            owner: std::thread::current().id(),
+            remaining_reads,
+            control,
+            lease: None,
+            tick: 0,
         });
     }
 }
@@ -66,9 +78,13 @@ impl MonotonicClock for TestClock {
             }
         };
         if let Some(input) = fire {
-            let before = self.tick.swap(input.tick, Ordering::AcqRel);
-            assert!(input.tick > before);
-            assert!(input.control.note_input(input.lease, input.tick));
+            if let Some(lease) = input.lease {
+                let before = self.tick.swap(input.tick, Ordering::AcqRel);
+                assert!(input.tick > before);
+                assert!(input.control.note_input(lease, input.tick));
+            } else {
+                input.control.lock_local();
+            }
             self.input_hook_fired.store(true, Ordering::Release);
         }
         self.tick
@@ -695,6 +711,194 @@ fn cookie_has_one_fixed_host_name_canonical_secret_and_strict_security_attribute
 }
 
 #[test]
+fn management_snapshot_tracks_consumed_code_original_revision_and_exact_devices() {
+    let mut f = Fixture::new();
+    let service = f.service();
+    let disabled = service.management_snapshot(f.admin).unwrap();
+    assert!(!disabled.enabled);
+    assert!(
+        disabled.window.is_none() && disabled.pending.is_empty() && disabled.devices.is_empty()
+    );
+    service.set_enabled(f.admin, true).unwrap();
+    let window = service.begin_pairing(f.admin).unwrap();
+    let shown_code = window.code.expose_text();
+    let available = service.management_snapshot(f.admin).unwrap();
+    assert_eq!(
+        available.window,
+        Some(WindowStatus {
+            id: window.id,
+            remaining_millis: PAIR_WINDOW_MILLIS,
+            code_available: true,
+        })
+    );
+    f.clock.advance(17);
+    assert_eq!(
+        service
+            .management_snapshot(f.admin)
+            .unwrap()
+            .window
+            .unwrap()
+            .remaining_millis,
+        PAIR_WINDOW_MILLIS - 17
+    );
+    let receipt = service
+        .request_pairing(window.code, "admin", "first managed device")
+        .unwrap();
+    let captured = service.management_snapshot(f.admin).unwrap();
+    assert!(!captured.window.as_ref().unwrap().code_available);
+    assert_eq!(captured.pending.len(), 1);
+    let original = &captured.pending[0];
+    assert_eq!(original.request_id, receipt.request_id);
+    assert_eq!(original.principal_id, f.admin.principal_id());
+    assert_eq!(original.role, Role::GlobalAdmin);
+    assert_eq!(
+        original.identity_revision,
+        f.backend.state().unwrap().revision
+    );
+    assert!(!original.approved && captured.devices.is_empty());
+    let diagnostic = format!("{:?}", captured.clone());
+    assert!(!diagnostic.contains(shown_code.as_str()));
+    assert!(!diagnostic.contains(receipt.poll_secret.expose_hex().as_str()));
+
+    f.create_class(1);
+    assert_eq!(
+        service.approve(f.admin, receipt.request_id, original.identity_revision),
+        Err(WebServiceError::Busy)
+    );
+    let fresh = service.management_snapshot(f.admin).unwrap();
+    assert_eq!(fresh.pending[0].request_id, original.request_id);
+    assert_ne!(
+        fresh.pending[0].identity_revision,
+        original.identity_revision
+    );
+    service
+        .approve(
+            f.admin,
+            receipt.request_id,
+            fresh.pending[0].identity_revision,
+        )
+        .unwrap();
+    assert!(service.management_snapshot(f.admin).unwrap().pending[0].approved);
+    let first = granted(
+        service
+            .poll(receipt.request_id, &receipt.poll_secret)
+            .unwrap(),
+    );
+    let first_view = service.management_snapshot(f.admin).unwrap();
+    assert!(first_view.pending.is_empty());
+    assert_eq!(first_view.devices, vec![first.device.clone()]);
+    assert!(!first_view.window.unwrap().code_available);
+
+    let second = f.grant("admin", "second managed device");
+    let both = service.management_snapshot(f.admin).unwrap();
+    assert_eq!(both.devices.len(), 2);
+    service
+        .revoke_device(f.admin, first.device.device_id)
+        .unwrap();
+    assert_eq!(
+        service.management_snapshot(f.admin).unwrap().devices,
+        vec![second.device]
+    );
+    assert_eq!(both.devices.len(), 2);
+    assert!(matches!(
+        service.authenticate(&first.cookie),
+        Err(WebServiceError::Denied)
+    ));
+    assert!(service.authenticate(&second.cookie).is_ok());
+}
+
+#[test]
+fn management_snapshot_expires_at_deadline_and_never_renews_the_admin_or_web_admission() {
+    let f = Fixture::new();
+    let service = f.service();
+    service.set_enabled(f.admin, true).unwrap();
+    let existing = f.grant("admin", "independent existing device");
+    let lease = service.authenticate(&existing.cookie).unwrap().lease();
+    let receipt = f.request("admin", "request at expiry");
+    f.clock.advance(PAIR_WINDOW_MILLIS - 1);
+    for _ in 0..3 {
+        let view = service.management_snapshot(f.admin).unwrap();
+        assert_eq!(view.window.unwrap().remaining_millis, 1);
+        assert_eq!(view.pending[0].request_id, receipt.request_id);
+        assert_eq!(view.devices, vec![existing.device.clone()]);
+    }
+    f.clock.advance(1);
+    let expired = service.management_snapshot(f.admin).unwrap();
+    assert!(expired.window.is_none() && expired.pending.is_empty());
+    assert_eq!(expired.devices, vec![existing.device]);
+    assert!(service.authenticate(&existing.cookie).is_ok());
+    service.set_enabled(f.admin, false).unwrap();
+    let disabled = service.management_snapshot(f.admin).unwrap();
+    assert!(!disabled.enabled);
+    assert!(
+        disabled.window.is_none() && disabled.pending.is_empty() && disabled.devices.is_empty()
+    );
+    assert!(f
+        .backend
+        .check_session(lease, SessionPurpose::Manage)
+        .is_err());
+    service.set_enabled(f.admin, true).unwrap();
+    assert!(service
+        .management_snapshot(f.admin)
+        .unwrap()
+        .devices
+        .is_empty());
+    f.clock
+        .advance(fc_application::identity::LOCAL_IDLE_MILLIS - PAIR_WINDOW_MILLIS);
+    assert!(matches!(
+        service.management_snapshot(f.admin),
+        Err(WebServiceError::Denied)
+    ));
+}
+
+#[test]
+fn management_snapshot_denies_web_stale_locked_and_logged_out_local_leases() {
+    let mut f = Fixture::new();
+    let service = f.service();
+    service.set_enabled(f.admin, true).unwrap();
+    let existing = f.grant("admin", "device survives local lock");
+    let web = service.authenticate(&existing.cookie).unwrap().lease();
+    assert!(matches!(
+        service.management_snapshot(web),
+        Err(WebServiceError::Denied)
+    ));
+    let old_admin = f.admin;
+    f.login_admin();
+    assert!(matches!(
+        service.management_snapshot(old_admin),
+        Err(WebServiceError::Denied)
+    ));
+    let valid = service.management_snapshot(f.admin).unwrap();
+    assert_eq!(valid.devices, vec![existing.device.clone()]);
+    assert!(valid.window.is_none());
+    // With no pairing window, samples 1..3 cover sweep and the initial admin
+    // validation. Sample 4 occurs only after the view has been built, during
+    // its final admin validation. Revoke there to prove no stale view escapes.
+    f.clock.local_lock_on_read(f.backend.session_control(), 4);
+    assert!(matches!(
+        service.management_snapshot(f.admin),
+        Err(WebServiceError::Denied)
+    ));
+    assert!(f.clock.input_hook_fired.load(Ordering::Acquire));
+    assert_eq!(service.authenticate(&existing.cookie).unwrap().lease(), web);
+    assert!(f.backend.voice_service().check_web_session(web).is_ok());
+    f.login_admin();
+    assert_eq!(
+        service.management_snapshot(f.admin).unwrap().devices,
+        vec![existing.device]
+    );
+    f.backend.logout_account(f.admin).unwrap();
+    assert!(matches!(
+        service.management_snapshot(f.admin),
+        Err(WebServiceError::Denied)
+    ));
+    assert!(matches!(
+        service.authenticate(&existing.cookie),
+        Err(WebServiceError::Denied)
+    ));
+}
+
+#[test]
 fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_change() {
     let mut f = Fixture::new();
     let class = f.create_class(1);
@@ -802,4 +1006,16 @@ fn teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_ch
         service.set_enabled(auth.lease(), false),
         Err(WebServiceError::Denied)
     );
+    let local_teacher = f
+        .backend
+        .login("teacher", password("Web-teacher-changed-password-2026"))
+        .unwrap();
+    assert!(f
+        .backend
+        .check_session(local_teacher, SessionPurpose::Manage)
+        .is_ok());
+    assert!(matches!(
+        service.management_snapshot(local_teacher),
+        Err(WebServiceError::Denied)
+    ));
 }

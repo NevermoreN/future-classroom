@@ -57,6 +57,22 @@ pub struct WebDevice {
     pub principal_id: PrincipalId,
     pub device_name: String,
 }
+/// Non-secret pairing-window metadata. The short code is disclosed only by
+/// begin_pairing, never by management reads or Debug output.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct WindowStatus {
+    pub id: u64,
+    pub remaining_millis: u64,
+    pub code_available: bool,
+}
+/// One coherent, non-secret view for the exact local global administrator.
+#[derive(Clone, Debug)]
+pub struct ManagementSnapshot {
+    pub enabled: bool,
+    pub window: Option<WindowStatus>,
+    pub pending: Vec<PairingReview>,
+    pub devices: Vec<WebDevice>,
+}
 pub struct IssuedWebSession {
     pub cookie: WebSecret,
     pub csrf: SecretText,
@@ -554,6 +570,77 @@ impl WebService {
                 })
             })
             .collect()
+    }
+    /// Reads one authority revision and one state/ledger critical section.
+    /// This neither reveals credentials nor renews any local or Web lease.
+    pub fn management_snapshot(&self, admin: SessionLease) -> WebResult<ManagementSnapshot> {
+        // Authority publication may wait briefly; keep that wait outside both
+        // business locks and reject a superseded snapshot after acquiring them.
+        let snapshot = self.snapshot()?;
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        self.current(&snapshot)?;
+        let tick = self.inner.monotonic.monotonic_millis();
+        self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
+        let generation = self.admin(&mut ledger, &snapshot.data, admin)?;
+        let view = if state.enabled {
+            let pending = state
+                .requests
+                .iter()
+                .map(|r| {
+                    let target = Self::target(&snapshot.data, r.target)?;
+                    Ok(PairingReview {
+                        request_id: r.id,
+                        identity_revision: snapshot.data.revision,
+                        principal_id: r.target,
+                        login_name: target.account.login_name,
+                        display_name: target.account.display_name,
+                        device_name: r.device_name.clone(),
+                        role: target.account.principal.role,
+                        assignments: target.authority.assignments,
+                        current_class: target.current_class,
+                        approved: r.approved.is_some(),
+                    })
+                })
+                .collect::<WebResult<Vec<_>>>()?;
+            ManagementSnapshot {
+                enabled: true,
+                window: state.window.as_ref().map(|w| WindowStatus {
+                    id: w.id,
+                    remaining_millis: w.deadline.saturating_sub(tick),
+                    code_available: w.code.is_some(),
+                }),
+                pending,
+                devices: state
+                    .devices
+                    .iter()
+                    .map(|d| WebDevice {
+                        device_id: d.lease.id(),
+                        principal_id: d.lease.principal_id(),
+                        device_name: d.name.clone(),
+                    })
+                    .collect(),
+            }
+        } else {
+            ManagementSnapshot {
+                enabled: false,
+                window: None,
+                pending: Vec::new(),
+                devices: Vec::new(),
+            }
+        };
+        // Building a view grants no permission: the original exact local lease,
+        // generation and authority snapshot must still pass at publication.
+        self.admin_current(&snapshot, &mut ledger, admin, generation)?;
+        Ok(view)
     }
     pub fn approve(
         &self,

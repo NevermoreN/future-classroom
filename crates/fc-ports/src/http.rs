@@ -210,7 +210,10 @@ pub struct ResponseHead {
 }
 impl ResponseHead {
     pub fn validate(&self) -> Result<(), HttpError> {
-        if !(200..=599).contains(&self.status) || self.content_length > MAX_TRANSFER_BYTES {
+        if !(200..=599).contains(&self.status)
+            || self.content_length > MAX_TRANSFER_BYTES
+            || (self.status == 304 && self.content_length != 0)
+        {
             return Err(HttpError::InvalidResponse);
         }
         validate_headers(&self.headers)?;
@@ -379,6 +382,20 @@ mod tests {
     }
     #[test]
     fn bounded_headers_and_response_framing() {
+        assert!(ResponseHead {
+            status: 304,
+            headers: vec![],
+            content_length: 0
+        }
+        .validate()
+        .is_ok());
+        assert!(ResponseHead {
+            status: 304,
+            headers: vec![],
+            content_length: 3
+        }
+        .validate()
+        .is_err());
         let h = Header {
             name: "x-token".into(),
             value: b"a\r\nb".to_vec(),

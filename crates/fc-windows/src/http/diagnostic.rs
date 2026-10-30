@@ -109,7 +109,7 @@ fn serve_owned(
                         || head.tls
                         || !matches!(
                             (head.method.as_str(), route),
-                            ("GET", "health" | "download" | "stop") | ("POST", "echo")
+                            ("GET", "health" | "download" | "cached" | "stop") | ("POST", "echo")
                         )
                     {
                         request_result(host.respond(
@@ -124,7 +124,21 @@ fn serve_owned(
                         ))?;
                         continue;
                     }
-                    if route == "echo" && head.has_body {
+                    if route == "cached" {
+                        request_result(host.respond(
+                            head.token,
+                            ResponseHead {
+                                status: 304,
+                                headers: vec![Header {
+                                    name: "ETag".into(),
+                                    value: b"\"synthetic\"".to_vec(),
+                                }],
+                                content_length: 0,
+                            },
+                            &[],
+                            false,
+                        ))?;
+                    } else if route == "echo" && head.has_body {
                         contexts.push(Context {
                             token: head.token,
                             received: 0,

@@ -1,0 +1,412 @@
+{
+  "scope": "SYNTHETIC browser interception; not real TLS/listener/Windows acceptance",
+  "steps": [
+    {
+      "name": "HTTP_preview_HTTPS_only_no_credentials",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTPS_synthetic_compatible_anonymous_form",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop1440_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile390_pairing_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "keyboard_code_to_login",
+      "status": "PASS"
+    },
+    {
+      "name": "keyboard_login_to_device",
+      "status": "PASS"
+    },
+    {
+      "name": "one_create_only_original_secret_POST_poll",
+      "status": "PASS"
+    },
+    {
+      "name": "poll_min500ms_10ms_measurement_tolerance",
+      "status": "PASS"
+    },
+    {
+      "name": "poll_secret_not_rendered",
+      "status": "PASS"
+    },
+    {
+      "name": "AUTHORIZED_followed_by_GETsession_actual_identity",
+      "status": "PASS"
+    },
+    {
+      "name": "actual_current_class",
+      "status": "PASS"
+    },
+    {
+      "name": "four_partial_business_entries",
+      "status": "PASS"
+    },
+    {
+      "name": "business_submissions_disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "synthetic_Secure_HttpOnly_Strict_cookie",
+      "status": "PASS"
+    },
+    {
+      "name": "bearer_not_JS_readable",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile390_session_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "503_RESULT_UNKNOWN_no_POST_retry",
+      "status": "PASS"
+    },
+    {
+      "name": "unknown_logout_clears_local_mirror",
+      "status": "PASS"
+    },
+    {
+      "name": "manual_GET_only_recheck",
+      "status": "PASS"
+    },
+    {
+      "name": "401_session_UI_cleared",
+      "status": "PASS"
+    },
+    {
+      "name": "403_stops_polling_no_create_retry",
+      "status": "PASS"
+    },
+    {
+      "name": "no_browser_storage",
+      "status": "PASS"
+    },
+    {
+      "name": "no_secret_URL_automatic_POST_Origin",
+      "status": "PASS"
+    },
+    {
+      "name": "CSRF_private_POST_only",
+      "status": "PASS"
+    },
+    {
+      "name": "no_uncaught_runtime_errors",
+      "status": "PASS"
+    },
+    {
+      "name": "production_CSP_nosniff_no_security_console_errors",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "2026-10-30-teacher-web-synthetic-round11-pairing-desktop.png",
+      "sha256": "44600f4181516984fc203c22c14f4d910cbc4e99973438f0124b4a6ac726d1ce",
+      "scope": "Synthetic data and intercepted API; no real TLS/Windows acceptance"
+    },
+    {
+      "path": "2026-10-30-teacher-web-synthetic-round11-pairing-mobile.png",
+      "sha256": "03e36749b08b08e6d6db008f2fb99f91f90f9c9c035241bf3da7990b2d7848ad",
+      "scope": "Synthetic data and intercepted API; no real TLS/Windows acceptance"
+    },
+    {
+      "path": "2026-10-30-teacher-web-synthetic-round11-session-desktop.png",
+      "sha256": "294f7fdc469ee4543ca627106715aec5d0d7c8cf102a56cd739ca377ad9951b1",
+      "scope": "Synthetic data and intercepted API; no real TLS/Windows acceptance"
+    }
+  ],
+  "requests": [
+    {
+      "path": "status",
+      "method": "GET",
+      "tick": 1793367299467,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "tick": 1793367299525,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests",
+      "method": "POST",
+      "tick": 1793367300877,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests/18446744073709551615/poll",
+      "method": "POST",
+      "tick": 1793367301435,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests/18446744073709551615/poll",
+      "method": "POST",
+      "tick": 1793367301946,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests/18446744073709551615/poll",
+      "method": "POST",
+      "tick": 1793367302458,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "tick": 1793367302479,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "session/logout",
+      "method": "POST",
+      "tick": 1793367303344,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": true
+    },
+    {
+      "path": "status",
+      "method": "GET",
+      "tick": 1793367304540,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "tick": 1793367304553,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "status",
+      "method": "GET",
+      "tick": 1793367304619,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "tick": 1793367304638,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests",
+      "method": "POST",
+      "tick": 1793367304823,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    },
+    {
+      "path": "pairing/requests/18446744073709551615/poll",
+      "method": "POST",
+      "tick": 1793367305336,
+      "queryEmpty": true,
+      "originOK": true,
+      "hasCsrf": false
+    }
+  ],
+  "cspErrors": [],
+  "status": "PASS",
+  "counts": {
+    "creates": 2,
+    "polls": 4,
+    "logouts": 1,
+    "sessions": 4
+  },
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-30T13:35:27.378Z",
+  "boundaries": {
+    "scope": "SYNTHETIC boundary fixtures only",
+    "steps": [
+      {
+        "name": "64_unbroken_display_name_desktop1440_no_overflow",
+        "status": "PASS"
+      },
+      {
+        "name": "64_unbroken_display_name_mobile320_no_overflow",
+        "status": "PASS"
+      },
+      {
+        "name": "incompatible_API_blocks_session_and_pairing",
+        "status": "PASS"
+      },
+      {
+        "name": "cancel_wait_before_first_poll_clears_timer",
+        "status": "PASS"
+      }
+    ],
+    "longName": {
+      "desktop": {
+        "viewport": 1440,
+        "scroll": 1440
+      },
+      "mobile": {
+        "viewport": 320,
+        "scroll": 320
+      }
+    },
+    "cancel": {
+      "creates": 1,
+      "polls": 0
+    },
+    "status": "PASS"
+  },
+  "artifacts": {
+    "manifestSha256": "80ec634591c865643d09fc4bd3e69d03ff1fc3c8e549110acb0b833555a07467",
+    "manifest": {
+      "schemaVersion": 1,
+      "apiVersion": 1,
+      "uiCompatibilityVersion": 1,
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "sizeBytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-C15lIbbt.js",
+          "sizeBytes": 310336,
+          "sha256": "59fefa28f870dc75e65df7116425dd9a53bbaeb53beb108fda595dba67a3a93e"
+        },
+        {
+          "path": "assets/index-KmgNSuU2.css",
+          "sizeBytes": 25742,
+          "sha256": "cc9176e2e594773ff5f0e77f080169d98e4870e9a24d84de250d2edcff7eacde"
+        },
+        {
+          "path": "index.html",
+          "sizeBytes": 684,
+          "sha256": "43903deeca05fc462585b4db0fc08b5d398a31a76ac734b97e122ce0483407d3"
+        }
+      ]
+    },
+    "budget": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "assetCount": 4,
+      "totalBytes": 337044,
+      "totalLimitBytes": 5242880,
+      "gzipJsCssBytes": 101576,
+      "gzipJsCssLimitBytes": 524288,
+      "scope": "static build only; listener, wire TLS, real browser pairing not established by this report"
+    },
+    "screenshots": [
+      {
+        "path": "/tmp/fc-round11-pairing-desktop.png",
+        "sha256": "44600f4181516984fc203c22c14f4d910cbc4e99973438f0124b4a6ac726d1ce"
+      },
+      {
+        "path": "/tmp/fc-round11-pairing-mobile.png",
+        "sha256": "03e36749b08b08e6d6db008f2fb99f91f90f9c9c035241bf3da7990b2d7848ad"
+      },
+      {
+        "path": "/tmp/fc-round11-session-desktop.png",
+        "sha256": "294f7fdc469ee4543ca627106715aec5d0d7c8cf102a56cd739ca377ad9951b1"
+      }
+    ]
+  },
+  "unitTests": {
+    "count": 16,
+    "status": "PASS",
+    "command": "npm test"
+  },
+  "typecheck": "PASS",
+  "productionBuild": "PASS",
+  "productionDependencyAudit": {
+    "registry": "https://registry.npmjs.org",
+    "vulnerabilityCount": 0,
+    "status": "PASS",
+    "defaultMirrorAudit": "UNAVAILABLE: npmmirror audit endpoint 404; per-command official registry used without global config changes"
+  },
+  "officialVersionIntegrityVerification": {
+    "status": "PASS",
+    "directPackagesChecked": 16,
+    "registry": "https://registry.npmjs.org",
+    "comparison": "exact pinned version and dist.integrity equals package-lock"
+  },
+  "fixedFindings": [
+    {
+      "issue": "native Window fetch receiver",
+      "before": "TypeError: Failed to execute 'fetch' on 'Window': Illegal invocation; no API requests issued",
+      "fix": "bind default fetch to globalThis; added receiver regression unit test",
+      "verification": "full synthetic browser flow 25 steps PASS"
+    },
+    {
+      "issue": "default favicon 404",
+      "fix": "own source SVG emitted as declared hashed asset",
+      "verification": "four declared static files; no missing favicon"
+    },
+    {
+      "issue": "64-character unbroken legal display name overflow",
+      "before": {
+        "desktopViewport": 1440,
+        "documentScrollWidth": 2428
+      },
+      "fix": "flex min-width:0 plus overflow-wrap:anywhere",
+      "after": {
+        "desktopViewport": 1440,
+        "documentScrollWidth": 1440,
+        "mobileViewport": 320,
+        "mobileScrollWidth": 320
+      }
+    }
+  ],
+  "previewCleanup": {
+    "status": "PASS",
+    "ownedServerStopped": true,
+    "port4173Listening": false,
+    "ownedSyntheticRoutesRemoved": true,
+    "ownedSyntheticCookieRemoved": true,
+    "ownedBrowserPageClosed": true,
+    "distAndNodeModulesRetainedForParent": true
+  },
+  "visualInspection": {
+    "status": "PASS",
+    "screenshotsViewed": [
+      "desktop pairing",
+      "mobile pairing",
+      "desktop authenticated"
+    ],
+    "limit": "not a complete screen-reader or WCAG audit"
+  },
+  "totalBrowserChecks": 30,
+  "round11SourceInputs": "2026-10-30-round11-source-inputs.json",
+  "primaryBrowserRunner": {
+    "kind": "Playwright browser_run_code_unsafe function, owned preview and synthetic routes only",
+    "sha256": "83d78edcb2c9562e8e2e33587a99748bc5d56384200dbda2cd7b1708d6ac97e2",
+    "source": "async (page) => {\n const report = {scope:\"SYNTHETIC browser interception; not real TLS/listener/Windows acceptance\",steps:[],screenshots:[],requests:[]};\n const check=(ok,name)=>{if(!ok)throw new Error(name);report.steps.push({name,status:\"PASS\"});};\n let phase=\"setup\", authorized=false,allowGrant=false,pollDenied=false,force401=false,creates=0,polls=0,logouts=0,sessions=0;\n const proof=\"a\".repeat(64),csrf=\"b\".repeat(64),bearer=\"c\".repeat(64),calls=[],errors=[],cspErrors=[];\n const onError=e=>errors.push(e.message);page.on(\"pageerror\",onError);const onConsole=msg=>{if(msg.type()===\"error\"&&/Content Security Policy|Refused to|violates.*directive|unsafe-inline/i.test(msg.text()))cspErrors.push(msg.text());};page.on(\"console\",onConsole);\n try {\n await page.unroute(\"https://board.synthetic/**\");\n await page.context().clearCookies({name:\"__Host-FutureClassroom\",domain:\"board.synthetic\"});\n await page.setViewportSize({width:1440,height:1000});\n await page.goto(\"http://172.30.0.2:4173/fc/\");\n await page.getByText(\"请使用管理员提供的可信 HTTPS 地址。HTTP 预览不会发送配对码或会话凭据。\").waitFor();\n check(await page.locator(\"input\").count()===0,\"HTTP_preview_HTTPS_only_no_credentials\");\n const csp=\"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n await page.route(\"https://board.synthetic/**\",async route=>{\n  const request=route.request(),url=new URL(request.url());\n  if(!url.pathname.startsWith(\"/fc/api/v1/\")){\n   const response=await route.fetch({url:\"http://172.30.0.2:4173\"+url.pathname});\n   await route.fulfill({response,headers:{...response.headers(),\"content-security-policy\":csp,\"x-content-type-options\":\"nosniff\",\"referrer-policy\":\"no-referrer\",\"permissions-policy\":\"camera=(), geolocation=(), microphone=(self)\"}});return;\n  }\n  const path=url.pathname.slice(11),headers=request.headers(),body=request.postDataJSON();\n  calls.push({path,method:request.method(),tick:Date.now(),queryEmpty:!url.search,originOK:request.method()!==\"POST\"||headers.origin===\"https://board.synthetic\",hasCsrf:!!headers[\"x-fc-csrf\"]});\n  const answer=(status,value,extra={})=>route.fulfill({status,headers:{\"content-type\":\"application/json\",\"cache-control\":\"no-store\",...extra},body:JSON.stringify(value)});\n  if(path===\"status\"){await answer(200,{schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});return;}\n  if(path===\"session\"){\n   sessions++;\n   if(force401||!authorized||!headers.cookie?.includes(\"__Host-FutureClassroom=\"+bearer)){await answer(401,{schemaVersion:1,code:\"UNAUTHORIZED\"});return;}\n   await answer(200,{schemaVersion:1,status:\"AUTHENTICATED\",principal:{id:\"18446744073709551615\",displayName:\"合成测试教师\",role:\"TEACHER_ADMIN\"},currentClassId:\"42\",assignments:[{classId:\"42\",subjectId:\"7\"}],csrf});return;\n  }\n  if(path===\"pairing/requests\"){\n   creates++;if(body?.code!==\"01234567\"||Object.keys(body).sort().join(\",\")!==\"code,deviceName,loginName,schemaVersion\")throw new Error(\"invalid_create_shape\");\n   await answer(202,{schemaVersion:1,status:\"PENDING\",requestId:\"18446744073709551615\",pollSecret:proof,retryAfterMs:500});return;\n  }\n  if(path===\"pairing/requests/18446744073709551615/poll\"){\n   polls++;if(body?.pollSecret!==proof||Object.keys(body).sort().join(\",\")!==\"pollSecret,schemaVersion\")throw new Error(\"invalid_poll_proof\");\n   if(pollDenied){await answer(403,{schemaVersion:1,code:\"FORBIDDEN\"});return;}\n   if(!allowGrant){await answer(202,{schemaVersion:1,status:\"PENDING\",retryAfterMs:500});return;}\n   authorized=true;await answer(200,{schemaVersion:1,status:\"AUTHORIZED\"},{\"set-cookie\":\"__Host-FutureClassroom=\"+bearer+\"; Path=/; Secure; HttpOnly; SameSite=Strict\"});return;\n  }\n  if(path===\"session/logout\"){logouts++;if(headers[\"x-fc-csrf\"]!==csrf||JSON.stringify(body)!=='{\"schemaVersion\":1}')throw new Error(\"invalid_private_csrf\");await answer(503,{schemaVersion:1,code:\"RESULT_UNKNOWN\"});return;}\n  await answer(404,{schemaVersion:1,code:\"NOT_FOUND\"});\n });\n phase=\"compatible_form\";await page.goto(\"https://board.synthetic/fc/\");await page.locator(\"#pair-code\").waitFor({timeout:10000});\n check(await page.locator(\"form\").count()===1,\"HTTPS_synthetic_compatible_anonymous_form\");\n check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),\"desktop1440_no_horizontal_overflow\");\n await page.screenshot({path:\"/tmp/fc-round11-pairing-desktop.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round11-pairing-desktop.png\");\n await page.setViewportSize({width:390,height:844});\n check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),\"mobile390_pairing_no_horizontal_overflow\");\n await page.screenshot({path:\"/tmp/fc-round11-pairing-mobile.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round11-pairing-mobile.png\");\n phase=\"keyboard_submit\";await page.locator(\"#pair-code\").focus();await page.keyboard.type(\"01234567\");await page.keyboard.press(\"Tab\");\n check(await page.locator(\"#login-name\").evaluate(e=>document.activeElement===e),\"keyboard_code_to_login\");\n await page.keyboard.type(\"synthetic-teacher\");await page.keyboard.press(\"Tab\");\n check(await page.locator(\"#device-name\").evaluate(e=>document.activeElement===e),\"keyboard_login_to_device\");\n await page.keyboard.type(\"Synthetic QA tablet\");await page.keyboard.press(\"Tab\");await page.keyboard.press(\"Enter\");\n phase=\"pending\";await page.getByRole(\"heading\",{name:\"等待白板管理员批准\"}).waitFor({timeout:10000});await page.waitForTimeout(1150);\n check(creates===1&&polls>=2,\"one_create_only_original_secret_POST_poll\");\n const pp=calls.filter(c=>c.path.endsWith(\"/poll\"));\n check(pp.every((c,i)=>i===0||c.tick-pp[i-1].tick>=490),\"poll_min500ms_10ms_measurement_tolerance\");\n check(!(await page.locator(\"body\").innerText()).includes(proof),\"poll_secret_not_rendered\");\n phase=\"grant_session\";allowGrant=true;await page.getByRole(\"heading\",{name:/你好，合成测试教师/}).waitFor({timeout:10000});\n check(sessions>=2,\"AUTHORIZED_followed_by_GETsession_actual_identity\");\n check(await page.getByText(\"班级 ID 42\",{exact:true}).first().isVisible(),\"actual_current_class\");\n check(await page.getByRole(\"button\",{name:\"尚未接入服务\"}).count()===4,\"four_partial_business_entries\");\n check(await page.getByRole(\"button\",{name:\"尚未接入服务\"}).evaluateAll(es=>es.every(e=>e.disabled)),\"business_submissions_disabled\");\n const cookies=(await page.context().cookies(\"https://board.synthetic\")).filter(c=>c.name===\"__Host-FutureClassroom\");\n check(cookies.length===1&&cookies[0].secure&&cookies[0].httpOnly&&cookies[0].sameSite===\"Strict\",\"synthetic_Secure_HttpOnly_Strict_cookie\");\n check(!(await page.evaluate(()=>document.cookie)).includes(\"__Host-FutureClassroom\"),\"bearer_not_JS_readable\");\n check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),\"mobile390_session_no_horizontal_overflow\");\n await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:\"/tmp/fc-round11-session-desktop.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round11-session-desktop.png\");\n phase=\"unknown_logout\";await page.getByRole(\"button\",{name:\"注销账号\",exact:true}).click();await page.getByRole(\"heading\",{name:\"注销结果尚未确认\"}).waitFor({timeout:10000});await page.waitForTimeout(1100);\n check(logouts===1,\"503_RESULT_UNKNOWN_no_POST_retry\");check(!(await page.locator(\"body\").innerText()).includes(\"合成测试教师\"),\"unknown_logout_clears_local_mirror\");\n const old=sessions;await page.getByRole(\"button\",{name:\"核对白板会话\"}).click();await page.getByRole(\"heading\",{name:/你好，合成测试教师/}).waitFor({timeout:10000});\n check(sessions===old+1&&logouts===1,\"manual_GET_only_recheck\");\n phase=\"401\";force401=true;await page.getByRole(\"button\",{name:\"核对会话\",exact:true}).click();await page.locator(\"#pair-code\").waitFor({timeout:10000});\n check(!(await page.locator(\"body\").innerText()).includes(\"合成测试教师\"),\"401_session_UI_cleared\");\n phase=\"403\";pollDenied=true;allowGrant=false;await page.locator(\"#pair-code\").fill(\"01234567\");await page.locator(\"#login-name\").fill(\"synthetic-teacher\");await page.locator(\"#device-name\").fill(\"Synthetic retry\");await page.getByRole(\"button\",{name:\"申请连接\"}).click();\n await page.getByText(\"申请已失效或授权被拒绝。请让白板管理员重新开启配对窗口后再申请。\").waitFor({timeout:10000});\n const stopped=polls;await page.waitForTimeout(1100);check(polls===stopped&&creates===2,\"403_stops_polling_no_create_retry\");\n check(await page.evaluate(()=>localStorage.length===0&&sessionStorage.length===0),\"no_browser_storage\");\n check(calls.every(c=>c.queryEmpty&&c.originOK),\"no_secret_URL_automatic_POST_Origin\");\n check(calls.filter(c=>c.path===\"session/logout\").every(c=>c.hasCsrf)&&calls.filter(c=>c.path.startsWith(\"pairing/\")).every(c=>!c.hasCsrf),\"CSRF_private_POST_only\");\n check(errors.length===0,\"no_uncaught_runtime_errors\");check(cspErrors.length===0,\"production_CSP_nosniff_no_security_console_errors\");report.cspErrors=cspErrors;report.status=\"PASS\";\n }catch(error){report.status=\"FAIL\";report.failurePhase=phase;report.error=String(error);report.currentText=await page.locator(\"body\").innerText();}\n report.requests=calls;report.counts={creates,polls,logouts,sessions};report.browser=await page.evaluate(()=>navigator.userAgent);page.off(\"pageerror\",onError);page.off(\"console\",onConsole);return report;\n}"
+  }
+}

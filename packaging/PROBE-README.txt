@@ -62,7 +62,9 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 --http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120> 仅供隔离传输诊断，
 在127.0.0.1显式测试前缀运行两轮真实IOCP；需要相应系统权限/URL预留，程序不自行提权或修改配置。
 它拒绝凭证与业务请求，不能作为HTTPS、校园可达或浏览器配对通过证据；正常启动默认没有Web监听。
-完整profile/布局编辑、产品语音工作流和教师管理 Web 均未交付。
+教师网页现有配对/会话界面与经过清单校验的静态资源基础；作业/资料/语音/提醒四个业务入口尚未接入。
+正常启动仍没有正式TLS/Web监听；静态文件入包不代表网页已由应用托管或通过真实浏览器验收。
+完整profile/布局编辑及产品语音工作流仍未交付。
 应用图形DIB合计上限16MiB；4K自身离屏场景实测4806080字节，完整低Alpha区域背景保持。
 这不代表操作系统背景/DWM总内存或4K真实显示设备验收通过。
 原生网格尚未完成真实触控/白板笔、多DPI和全部视觉验收，当前仍为CUI开发目标。
@@ -78,6 +80,11 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
   依赖的系统更新或运行库不在此包中；须在实际测试机器验证。
   未通过正式 MSVC 与真机门槛，不得作为正式发布或创建发布标签。
 
-包内仅含 fc-bootstrap.exe、LICENSE、THIRD-PARTY-NOTICES.txt、此说明与 manifest.json。
+未显式提供打包参数 --web-dist 时，包内仍仅含 fc-bootstrap.exe、LICENSE、THIRD-PARTY-NOTICES.txt、此说明与 manifest.json，
+manifest.json 的 frontend.included=false 表示未附浏览器产物。
+提供 --web-dist <已构建目录> 时，额外加入 web/fc-assets.json 逐项声明的静态文件及 web/THIRD-PARTY-NOTICES.txt。
+打包只读取清单，不扫描其他文件；严格检查版本、大小、SHA-256、普通文件及路径，拒绝符号链接和Windows大小写别名。
+清单不超过64KiB，声明资源最多64个、合计5MiB；清单和许可文本另有独立读取上限。
+frontend 字段记录本包实际是否附带静态产物及其范围；有无网页文件均保持 NOT_VALIDATED。
 manifest.json 记录目标、工具链声明、文件 SHA256、探针范围和 PE 风险。
 LICENSE 为项目许可；第三方组件、Rust/MinGW/GCC 运行时许可与版权见 THIRD-PARTY-NOTICES.txt。

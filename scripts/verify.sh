@@ -8,5 +8,8 @@ export CARGO_TARGET_DIR="$TASK_BUILD_ROOT"
 cargo fmt --all -- --check
 python3 scripts/check-architecture.py
 cargo clippy --workspace --all-targets --locked -- -D warnings
-cargo test --workspace --locked
+# The login gate is process-wide with two KDF slots. Large developer hosts must
+# not turn unrelated fixture setup into an intentional overload test. Dedicated
+# saturation and race tests still exercise those limits explicitly.
+cargo test --workspace --locked -- --test-threads=2
 cargo run -p fc-bootstrap --locked -- --self-check

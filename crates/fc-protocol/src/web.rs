@@ -6,6 +6,7 @@ use fc_domain::{ids::*, voice::*};
 use fc_ports::{http::*, voice::*};
 use serde::Deserialize;
 
+pub mod assets;
 pub mod pairing;
 pub mod responses;
 
@@ -181,6 +182,11 @@ impl WebBoundary {
     /// secret or touching a session ledger. Success does not authenticate a
     /// session and does not authorize a private request without `check`.
     pub fn preflight(&self, head: &RequestHead) -> Result<Route, WebError> {
+        self.check_host(head)?;
+        let route = self.route(&head.method, &head.target)?;
+        self.finish_preflight(head, route)
+    }
+    fn check_host(&self, head: &RequestHead) -> Result<(), WebError> {
         if !head.tls {
             return Err(WebError::Transport);
         }
@@ -189,7 +195,31 @@ impl WebBoundary {
         {
             return Err(WebError::Host);
         }
-        let route = self.route(&head.method, &head.target)?;
+        Ok(())
+    }
+    /// Canonical public static paths share the transport/origin/framing gate.
+    /// API URLs can never fall through to the HTML entry document.
+    pub fn static_path<'a>(&self, head: &'a RequestHead) -> Result<&'a str, WebError> {
+        self.check_host(head)?;
+        if head.method != "GET" {
+            return Err(WebError::Method);
+        }
+        if head.target.len() > MAX_TARGET_BYTES {
+            return Err(WebError::NotFound);
+        }
+        let base = self
+            .base
+            .strip_suffix("api/v1/")
+            .ok_or(WebError::NotFound)?;
+        let path = head.target.strip_prefix(base).ok_or(WebError::NotFound)?;
+        let path = if path.is_empty() { "index.html" } else { path };
+        if !assets::valid_path(path) {
+            return Err(WebError::NotFound);
+        }
+        self.finish_preflight(head, Route::Status)?;
+        Ok(path)
+    }
+    fn finish_preflight(&self, head: &RequestHead, route: Route) -> Result<Route, WebError> {
         let origin = unique(head, "origin")?;
         if origin.is_some_and(|v| v != self.origin.as_bytes()) || (route.post() && origin.is_none())
         {

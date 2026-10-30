@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "command": "cargo test -p fc-bootstrap --lib --release backend::web::tests --locked -- --test-threads=1",
+  "exitCode": 0,
+  "buildElapsedSeconds": 173,
+  "testElapsedSeconds": 12.33,
+  "passed": 14,
+  "failed": 0,
+  "output": "    Finished `release` profile [optimized] target(s) in 2m 53s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 14 tests\ntest backend::web::tests::approval_captures_current_binding_and_rejects_a_different_class_before_grant ... ok\ntest backend::web::tests::cookie_has_one_fixed_host_name_canonical_secret_and_strict_security_attributes ... ok\ntest backend::web::tests::device_revocation_is_exact_and_local_lock_does_not_revoke_existing_web_leases ... ok\ntest backend::web::tests::disabled_default_and_only_exact_local_global_administrator_manages_pairing ... ok\ntest backend::web::tests::disabling_revokes_all_captured_leases_and_restart_never_restores_web_secrets ... ok\ntest backend::web::tests::eight_digit_code_only_creates_pending_and_poll_secret_approval_are_one_use ... ok\ntest backend::web::tests::input_absorbed_during_poll_uses_fresh_issue_time_without_revoking_other_sessions ... ok\ntest backend::web::tests::locking_and_relogging_cannot_transfer_pending_or_approved_local_authority ... ok\ntest backend::web::tests::management_snapshot_denies_web_stale_locked_and_logged_out_local_leases ... ok\ntest backend::web::tests::management_snapshot_expires_at_deadline_and_never_renews_the_admin_or_web_admission ... ok\ntest backend::web::tests::management_snapshot_tracks_consumed_code_original_revision_and_exact_devices ... ok\ntest backend::web::tests::pairing_deadline_is_exact_and_clock_regression_disables_all_admission ... ok\ntest backend::web::tests::teacher_must_change_initial_password_and_review_cannot_cross_account_epoch_change ... ok\ntest backend::web::tests::ten_code_attempts_are_shared_across_windows_and_reset_only_after_the_period ... ok\n\ntest result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 12.33s\n\n",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "09aea3b00dbd23c7cc7019e7f8f13a657da952fb796ec8d74c263534c602d8b8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+      "sha256": "7c5efa87dadf1aa15bee7846e9b2e9fe120a0391daf7e1c0349ce57080e4afd6"
+    }
+  ],
+  "api": {
+    "ManagementSnapshot": [
+      "enabled: bool",
+      "window: Option<WindowStatus>",
+      "pending: Vec<PairingReview>",
+      "devices: Vec<WebDevice>"
+    ],
+    "WindowStatus": [
+      "id: u64",
+      "remaining_millis: u64",
+      "code_available: bool"
+    ],
+    "method": "WebService::management_snapshot(admin: SessionLease) -> Result<ManagementSnapshot, WebServiceError>"
+  },
+  "scope": "Real SQLite Backend fixtures in ordinary OS TEMP. All existing 11 Web regressions plus 3 atomic management snapshot tests passed; existing teacher fixture additionally proves fully authorized local TeacherAdmin cannot read management metadata. The final-permission fence is exercised by a deterministic same-thread clock hook locking the local session after view construction, without sleep/global UI events.",
+  "invariants": [
+    "One state then ledger lock, one authority snapshot checked before destructive sweep and at final publication",
+    "Exact original local global administrator and generation required; Web/stale/local locked/logged-out leases rejected",
+    "No pairing code, poll secret, cookie, CSRF or verifier in the Clone+Debug view",
+    "Code availability changes on consumption; pending approval uses captured identity revision",
+    "Deadline read does not renew lease; expired windows and pending cleared while valid Web devices survive",
+    "Device revoke exact; disabled admission returns authorized empty view and revokes prior Web leases"
+  ],
+  "cleanup": {
+    "remainingOwnWebFixtures": [],
+    "backendClosedBeforeFixtureDirectoryRemoval": true,
+    "externalWindowsInteraction": "NOT_RUN"
+  },
+  "round11SourceInputs": "2026-10-30-round11-source-inputs.json"
+}

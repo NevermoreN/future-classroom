@@ -5,8 +5,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import re
 import runpy
+import stat
 import subprocess
 import sys
 import zipfile
@@ -20,6 +23,130 @@ TARGET_ROLES = {
     "i686-win7-windows-gnu": "supplemental-GNU-not-formal-MSVC-baseline",
     "i686-win7-windows-msvc": "formal-candidate-unvalidated",
 }
+MAX_WEB_FILES = 64
+MAX_WEB_BYTES = 5 * 1024 * 1024
+MAX_WEB_MANIFEST_BYTES = 64 * 1024
+MAX_WEB_NOTICE_BYTES = 1024 * 1024
+
+
+def real_directory(path: Path) -> None:
+    """Reject directory aliases in the selected build path, including ancestors."""
+    absolute = path.absolute()
+    for directory in (absolute, *absolute.parents):
+        info = directory.lstat()
+        reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        if not stat.S_ISDIR(info.st_mode) or reparse:
+            raise ValueError("Expected a real directory without symbolic links: " + str(directory))
+
+
+def bounded_regular_file(path: Path, limit: int) -> bytes:
+    """Capture an owned build file; never follow a final symbolic link."""
+    info = path.lstat()
+    reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    if not stat.S_ISREG(info.st_mode) or reparse or info.st_size > limit:
+        raise ValueError("Expected a bounded regular file: " + str(path))
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    descriptor = os.open(path, flags)
+    with os.fdopen(descriptor, "rb") as source:
+        opened = os.fstat(source.fileno())
+        if not stat.S_ISREG(opened.st_mode) or opened.st_size > limit:
+            raise ValueError("Build input is not a bounded regular file: " + str(path))
+        data = source.read(limit + 1)
+        if len(data) > limit or len(data) != opened.st_size:
+            raise ValueError("Build input changed size while reading: " + str(path))
+        return data
+
+
+def valid_web_path(path: object) -> bool:
+    """Match the Rust static manifest's flat ASCII allowlist, including Win32 aliases."""
+    if path == "index.html":
+        return True
+    if not isinstance(path, str) or not path.startswith("assets/"):
+        return False
+    name = path[len("assets/"):]
+    if not 1 <= len(name) <= 128 or name.startswith(".") or re.fullmatch(r"[A-Za-z0-9._-]+", name) is None:
+        return False
+    stem = name.split(".", 1)[0].upper()
+    if stem in {"CON", "PRN", "AUX", "NUL"} or re.fullmatch(r"(?:COM|LPT)[1-9]", stem):
+        return False
+    return "." in name and name.rsplit(".", 1)[-1] in {"js", "css", "svg", "png", "jpg", "jpeg", "webp"}
+
+
+def frontend_payloads(web_dist: Path) -> tuple[dict[str, bytes], dict]:
+    """Only a validated manifest chooses payloads. No directory glob or request path."""
+    real_directory(web_dist)
+    raw = bounded_regular_file(web_dist / "fc-assets.json", MAX_WEB_MANIFEST_BYTES)
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate Web manifest field.")
+            result[key] = value
+        return result
+
+    def invalid_constant(_):
+        raise ValueError("Non-finite Web manifest number.")
+
+    try:
+        document = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object, parse_constant=invalid_constant)
+    except (UnicodeError, RecursionError, json.JSONDecodeError) as error:
+        raise ValueError("Invalid UTF-8 Web manifest JSON.") from error
+    if not isinstance(document, dict) or set(document) != {"schemaVersion", "apiVersion", "uiCompatibilityVersion", "assets"}:
+        raise ValueError("Unexpected Web manifest fields.")
+    for version in ("schemaVersion", "apiVersion", "uiCompatibilityVersion"):
+        if type(document[version]) is not int or document[version] != 1:
+            raise ValueError("Unsupported Web manifest version.")
+    assets = document["assets"]
+    if not isinstance(assets, list) or not 1 <= len(assets) <= MAX_WEB_FILES:
+        raise ValueError("Web manifest asset count exceeds its bound.")
+    seen = set()
+    declared = []
+    total = 0
+    for asset in assets:
+        if not isinstance(asset, dict) or set(asset) != {"path", "sizeBytes", "sha256"}:
+            raise ValueError("Unexpected Web asset fields.")
+        path, size, digest = asset["path"], asset["sizeBytes"], asset["sha256"]
+        if not valid_web_path(path) or path.lower() in seen:
+            raise ValueError("Invalid or case-aliased Web asset path.")
+        if type(size) is not int or not 1 <= size <= MAX_WEB_BYTES:
+            raise ValueError("Invalid Web asset size.")
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ValueError("Invalid Web asset SHA-256.")
+        total += size
+        if total > MAX_WEB_BYTES:
+            raise ValueError("Web static payload exceeds 5 MiB.")
+        seen.add(path.lower())
+        declared.append((path, size, digest))
+    if "index.html" not in seen:
+        raise ValueError("Web manifest must declare index.html.")
+    payloads = {"web/fc-assets.json": raw}
+    for path, size, digest in sorted(declared):
+        source = web_dist / path
+        if path.startswith("assets/"):
+            real_directory(web_dist / "assets")
+        data = bounded_regular_file(source, size)
+        if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+            raise ValueError("Web asset size or digest mismatch: " + path)
+        payloads["web/" + path] = data
+    real_directory(ROOT / "web")
+    notices = bounded_regular_file(ROOT / "web" / "THIRD-PARTY-NOTICES.txt", MAX_WEB_NOTICE_BYTES)
+    if not notices:
+        raise ValueError("Web third-party notices are empty.")
+    payloads["web/THIRD-PARTY-NOTICES.txt"] = notices
+    return payloads, {
+        "included": True,
+        "status": "PARTIAL_NOT_VALIDATED",
+        "manifest_path": "web/fc-assets.json",
+        "manifest_sha256": hashlib.sha256(raw).hexdigest(),
+        "schema_version": 1,
+        "api_version": 1,
+        "ui_compatibility_version": 1,
+        "asset_count": len(declared),
+        "asset_bytes": total,
+        "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
+        "scope": "Partial pairing/session UI and verified static foundation only; four business entries unconnected; normal TLS/listener disabled.",
+    }
 
 
 def sha256_file(path: Path) -> str:
@@ -40,7 +167,15 @@ def archive_file(archive: zipfile.ZipFile, name: str, source: Path) -> None:
             output.write(block)
 
 
-def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None) -> dict:
+def archive_bytes(archive: zipfile.ZipFile, name: str, data: bytes) -> None:
+    info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.create_system = 3
+    info.external_attr = 0o100644 << 16
+    archive.writestr(info, data)
+
+
+def build_package(executable: Path, output: Path, target: str, objdump: str, declared_toolchain: str | None, web_dist: Path | None = None) -> dict:
     audit_pe = runpy.run_path(str(ROOT / "scripts" / "audit-pe.py"))["audit_pe"]
     audited_digest = sha256_file(executable)
     audit = audit_pe(executable, objdump)
@@ -57,9 +192,15 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "PROBE-README.txt": ROOT / "packaging" / "PROBE-README.txt",
         "THIRD-PARTY-NOTICES.txt": ROOT / "packaging" / "THIRD-PARTY-NOTICES.txt",
     }
+    web_files, frontend = frontend_payloads(web_dist) if web_dist is not None else ({}, {
+        "included": False,
+        "status": "NOT_INCLUDED",
+        "scope": "No browser payload in this package; pass an explicit --web-dist to include a verified partial pairing/session UI.",
+    })
     entries = [{"path": name, "size": path.stat().st_size, "sha256": sha256_file(path)} for name, path in files.items()]
     if entries[0]["sha256"] != audited_digest:
         raise ValueError("Executable changed while its PE imports were inspected.")
+    entries.extend({"path": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in sorted(web_files.items()))
     manifest = {
         "schema_version": 1,
         "product": "FutureClassroom",
@@ -75,6 +216,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             "provenance": "Toolchain output records the packager environment; binary build provenance is not independently established.",
         },
         "sha256": entries[0]["sha256"],
+        "frontend": frontend,
         "features": {
             "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe", "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>", "--native-probe <1..300>"],
             "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, local global-admin current-lesson override/restore with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",
@@ -91,7 +233,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             "normal_start": "manual workbench; --autostart stays locked and hidden; creates project-only protected ProgramData deployment",
             "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; hidden scene tests do not replace interactive QA",
             "complete_application": "NOT_IMPLEMENTED",
-            "teacher_management_web_application": "NOT_IMPLEMENTED",
+            "teacher_management_web_application": "PARTIAL: pairing/session UI and verified static foundation; four business entries unconnected; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
         },
         "gates": {
             "Win7_SP1_x86": "NOT_VALIDATED",
@@ -104,8 +246,8 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "files": entries,
         "pe_audit": audit,
     }
-    # Never glob the workspace. Only these four payloads and this manifest can
-    # enter the ZIP; source plans, reference images, secrets and caches cannot.
+    # Never glob the workspace. The fixed native payloads, optionally validated
+    # Web manifest entries/notices, and this manifest are the entire allowlist.
     output.parent.mkdir(parents=True, exist_ok=True)
     created = False
     try:
@@ -113,6 +255,8 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             created = True
             for name, source in files.items():
                 archive_file(archive, name, source)
+            for name, data in sorted(web_files.items()):
+                archive_bytes(archive, name, data)
             info = zipfile.ZipInfo("manifest.json", (1980, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.create_system = 3
@@ -120,7 +264,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             archive.writestr(info, json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"))
         # Ensure bytes did not change between hashing and reading the archive.
         with zipfile.ZipFile(output) as archive:
-            if set(archive.namelist()) != {*files, "manifest.json"}:
+            if set(archive.namelist()) != {*files, *web_files, "manifest.json"}:
                 raise ValueError("Unexpected archive member set.")
             for entry in entries:
                 digest = hashlib.sha256()
@@ -143,9 +287,10 @@ def main() -> int:
     parser.add_argument("--target", choices=TARGET_ROLES, default="i686-pc-windows-gnu")
     parser.add_argument("--objdump", default="i686-w64-mingw32-objdump")
     parser.add_argument("--toolchain", help="Optional declared build toolchain; does not certify binary provenance.")
+    parser.add_argument("--web-dist", type=Path, help="Explicit built Web directory; only validated fc-assets.json entries and Web notices are included.")
     args = parser.parse_args()
     try:
-        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain)
+        manifest = build_package(args.exe.resolve(), args.output.resolve(), args.target, args.objdump, args.toolchain, args.web_dist)
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile) as error:
         print(f"Probe package failed: {error}", file=sys.stderr)
         return 1

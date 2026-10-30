@@ -641,10 +641,15 @@ impl HttpHost {
         mut head: ResponseHead,
         body: &[u8],
     ) -> Result<(), HttpError> {
-        head.headers.push(Header {
-            name: "Content-Length".into(),
-            value: head.content_length.to_string().into_bytes(),
-        });
+        // The port length is the wire body length. A 304 has no body, but
+        // Content-Length: 0 would falsely describe the cached representation
+        // (RFC 9110 §8.6). Omit this optional field for conditional responses.
+        if head.status != 304 {
+            head.headers.push(Header {
+                name: "Content-Length".into(),
+                value: head.content_length.to_string().into_bytes(),
+            });
+        }
         head.headers.push(Header {
             name: "Connection".into(),
             value: b"close".to_vec(),

@@ -10,7 +10,9 @@ pub fn materials_probe() -> std::result::Result<(), String> {
 mod lesson_editor;
 mod materials_editor;
 mod schedule_editor;
+mod web_editor;
 use fc_application::identity::SessionLease;
+use fc_bootstrap::backend::web::{WebService, WebServiceError};
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl, VoiceService};
 use fc_bootstrap::voice_runtime::{NativeFactory, RuntimePhase, StopReason, VoiceRuntime};
 use fc_domain::desktop::{DesktopFacts, DisplaySettings};
@@ -74,6 +76,7 @@ const TO_SCHEDULE: ActionId = ActionId(17);
 const TO_DISPLAY: ActionId = ActionId(18);
 const TO_MATERIALS: ActionId = ActionId(21);
 const TO_LESSON: ActionId = ActionId(22);
+const TO_WEB: ActionId = ActionId(23);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -97,12 +100,14 @@ enum Screen {
     Display,
     Materials,
     Lesson,
+    Web,
     ExitDraft,
     Repair,
 }
 #[derive(Debug)]
 enum Failure {
     Backend(BackendError),
+    Web(WebServiceError),
     Input(&'static str),
     Deployment(&'static str),
     Stopped,
@@ -169,6 +174,9 @@ fn error_text(error: &Failure) -> String {
     match error {
         Failure::Input(s) | Failure::Deployment(s) => (*s).into(),
         Failure::Stopped => "未取得完成结果，请重新打开并核对已保存内容。".into(),
+        Failure::Web(WebServiceError::Denied) => "教师设备权限或本地会话已变化，请重新登录并刷新核对。".into(),
+        Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
+        Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
             BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
             BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::LessonContextChanged)) => "本节课程已结束或课表已变化，本次未保存。请重新加载当前课程。".into(),
@@ -311,6 +319,8 @@ enum Outcome {
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
     LaunchCopies(material_flow::LaunchCopyReport),
+    WebOpened(WebService, web_editor::Loaded),
+    WebLoaded(web_editor::Loaded),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -352,6 +362,14 @@ enum Work {
     Desktop(Arc<Mutex<Backend>>, usize, Option<MaterialCursor>),
     Material(Box<material_flow::MaterialJob>),
     CleanupMaterial(PathBuf, PathBuf),
+    OpenWeb(Arc<Mutex<Backend>>, SessionLease),
+    Web(
+        WebService,
+        SessionLease,
+        web_editor::Operation,
+        web_editor::Readiness,
+    ),
+    CloseWeb(WebService, SessionLease),
 }
 impl Task for Work {
     type Output = Result<Outcome>;
@@ -367,6 +385,9 @@ impl Task for Work {
             | Self::LoadLesson(_, _)
             | Self::ChangeLesson(_, _, _, _, _)
             | Self::LoadDisplay(_, _)
+            | Self::OpenWeb(_, _)
+            | Self::Web(..)
+            | Self::CloseWeb(..)
             | Self::Desktop(_, _, _) => Some(1024),
             Self::Material(job) => job.allocation_bytes(),
             Self::CleanupMaterial(root, path) => root
@@ -441,6 +462,25 @@ impl Task for Work {
                 Ok(Outcome::MaterialCleaned)
             }
             Self::Request(r) => execute(r),
+            Self::OpenWeb(backend, lease) => {
+                let service = backend.lock().map_err(|_| Failure::Stopped)?.web_service();
+                let loaded = web_editor::load(&service, lease)?;
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                Ok(Outcome::WebOpened(service, loaded))
+            }
+            Self::Web(service, lease, operation, readiness) => {
+                web_editor::run(&service, lease, operation, readiness, context)
+                    .map(Outcome::WebLoaded)
+            }
+            Self::CloseWeb(service, lease) => {
+                // A locked/expired approver already makes its window unusable.
+                // Closing is independent cleanup on the shared worker, not UI IO.
+                match service.close_pairing(lease) {
+                    Ok(()) | Err(WebServiceError::Denied | WebServiceError::Disabled) => {}
+                    Err(error) => return Err(Failure::Web(error)),
+                }
+                Ok(Outcome::MaterialCleaned)
+            }
             Self::Refresh(backend) => {
                 let state = backend.lock().map_err(|_| Failure::Stopped)?.state()?;
                 let next = if state.installation.is_some() {
@@ -860,6 +900,12 @@ struct App {
     material_editor: Option<materials_editor::Editor>,
     copies_loaded_sequence: u64,
     lesson_editor: Option<lesson_editor::Editor>,
+    web_service: Option<WebService>,
+    web_editor: Option<web_editor::Editor>,
+    web_readiness: web_editor::Readiness,
+    next_web_refresh: Instant,
+    close_web: Option<(WebService, SessionLease)>,
+    web_close_job: Option<JobTicket<Result<Outcome>>>,
     lesson_entry_pending: bool,
     lesson_flow_active: bool,
     offscreen_probe: bool,
@@ -880,6 +926,15 @@ impl App {
         };
         if self.screen == Screen::Lesson {
             if let Some(editor) = &self.lesson_editor {
+                return editor.view(
+                    &self.state,
+                    &status,
+                    self.pending.is_some() || self.stopping,
+                );
+            }
+        }
+        if self.screen == Screen::Web {
+            if let Some(editor) = &self.web_editor {
                 return editor.view(
                     &self.state,
                     &status,
@@ -1015,6 +1070,7 @@ impl App {
                         action(TO_SCHEDULE, "课表、作息与校历"),
                         action(TO_DISPLAY, "桌面显示设置"),
                         action(TO_LESSON, "本节临时换课"),
+                        action(TO_WEB, "教师设备与配对"),
                     ]);
                 }
                 if account.is_some_and(|a| a.principal.role != Role::User) {
@@ -1023,7 +1079,6 @@ impl App {
                 }
                 view.actions.extend([
                     action(TO_PASSWORD, "修改本人口令"),
-                    action(TO_ROTATE, "重新生成恢复码"),
                     action(LOCK, "锁定工作台"),
                 ]);
                 if account.is_some_and(|a| a.principal.role == Role::GlobalAdmin) {
@@ -1097,7 +1152,18 @@ impl App {
                     secret(NEW_PASSWORD, "新口令"),
                     secret(CONFIRM, "再次输入新口令"),
                 ];
-                view.actions = vec![action(SAVE, "修改口令"), action(LOCK, "锁定并返回登录")];
+                view.actions = vec![action(SAVE, "修改口令")];
+                if self
+                    .lease
+                    .and_then(|lease| self.state.account(lease.principal_id()).ok())
+                    .is_some_and(|account| !account.must_change_password)
+                {
+                    view.actions.extend([
+                        action(TO_ROTATE, "重新生成恢复码"),
+                        action(BACK, "返回工作台"),
+                    ]);
+                }
+                view.actions.push(action(LOCK, "锁定并返回登录"));
             }
             Screen::Rotate => {
                 view.title = "重新生成恢复码".into();
@@ -1145,6 +1211,10 @@ impl App {
             Screen::Lesson => {
                 view.title = "正在加载本节课程".into();
             }
+            Screen::Web => {
+                view.title = "正在加载教师设备".into();
+                view.description = web_editor::NOT_READY.into();
+            }
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
@@ -1171,12 +1241,25 @@ impl App {
     fn render(&self) -> std::result::Result<(), String> {
         self.window
             .render(&self.view())
-            .map_err(|_| "工作台渲染失败".into())
+            .map_err(|_| "工作台渲染失败".to_owned())?;
+        if self.screen == Screen::Web {
+            if let Some(code) = self
+                .web_editor
+                .as_ref()
+                .and_then(web_editor::Editor::code_text)
+            {
+                self.window
+                    .present_secret(web_editor::CODE, code.as_str())
+                    .map_err(|_| "一次性配对码显示失败".to_owned())?;
+            }
+        }
+        Ok(())
     }
     fn lock(&mut self) {
         if self.backend.is_none() && self.screen == Screen::Starting {
             return;
         }
+        self.leave_web();
         if let Some(c) = &self.control {
             c.lock_local();
         }
@@ -1317,6 +1400,14 @@ impl App {
                         }
                     }
                 }
+                if self.screen == Screen::Web && self.pending.is_none() {
+                    if let (Some(editor), Ok(data)) =
+                        (&mut self.web_editor, self.window.draft_nonsecret())
+                    {
+                        editor.input(&data);
+                        self.render()?;
+                    }
+                }
             }
             Event::GridCell { row, column } => {
                 self.last_input = Instant::now();
@@ -1366,6 +1457,9 @@ impl App {
                 if self.screen == Screen::Materials {
                     return self.material_event(action, data);
                 }
+                if self.screen == Screen::Web {
+                    return self.web_event(action, data);
+                }
                 if self.screen == Screen::Lesson {
                     return self.lesson_event(action, data);
                 }
@@ -1387,6 +1481,7 @@ impl App {
                     action = EXIT;
                 }
                 match action {
+                    TO_WEB => self.open_web_editor()?,
                     TO_LESSON => {
                         self.open_lesson_editor()?;
                     }
@@ -1503,6 +1598,96 @@ impl App {
                         }
                     }
                 }
+            }
+        }
+        Ok(())
+    }
+    fn open_web_editor(&mut self) -> std::result::Result<(), String> {
+        if self.pending.is_some() || self.stopping {
+            return Ok(());
+        }
+        if self.close_web.is_some() || self.web_close_job.is_some() {
+            self.status = "正在关闭上一配对窗口，请稍后重新打开。".into();
+            return self.render();
+        }
+        let Some(lease) = self.lease else {
+            return Ok(());
+        };
+        if !web_editor::authorized(&self.state, lease)
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+        {
+            self.status = "教师设备管理仅限已解锁的本地主管理员。".into();
+            return self.render();
+        }
+        self.web_editor = None;
+        self.web_service = None;
+        self.screen = Screen::Web;
+        self.status.clear();
+        if let Some(backend) = &self.backend {
+            self.submit(Work::OpenWeb(backend.clone(), lease))?;
+        }
+        Ok(())
+    }
+    fn leave_web(&mut self) {
+        if let Some(editor) = &mut self.web_editor {
+            editor.clear_sensitive();
+        }
+        self.web_editor = None;
+        if let (Some(service), Some(lease)) = (self.web_service.take(), self.lease) {
+            self.close_web = Some((service, lease));
+            self.next_web_refresh = Instant::now();
+        }
+    }
+    fn web_event(&mut self, action: ActionId, data: FormData) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if self
+            .control
+            .as_ref()
+            .is_none_or(SessionControl::is_local_locked)
+        {
+            self.lock();
+            return self.render();
+        }
+        let command = self
+            .web_editor
+            .as_mut()
+            .ok_or("教师设备页面已关闭")?
+            .handle(action, &data, &self.state, lease);
+        match command {
+            Ok(web_editor::Command::Stay) => {
+                self.status.clear();
+                self.render()?;
+            }
+            Ok(web_editor::Command::Back) => {
+                self.leave_web();
+                self.screen = Screen::Home;
+                self.status.clear();
+                self.render()?;
+            }
+            Ok(web_editor::Command::Lock) => {
+                self.lock();
+                self.render()?;
+            }
+            Ok(web_editor::Command::Run(operation)) => {
+                if let Some(service) = &self.web_service {
+                    self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                    self.submit(Work::Web(
+                        service.clone(),
+                        lease,
+                        operation,
+                        self.web_readiness,
+                    ))?;
+                }
+            }
+            Err(message) => {
+                self.status = message;
+                self.render()?;
             }
         }
         Ok(())
@@ -1911,6 +2096,61 @@ impl App {
         self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
+        if self
+            .web_editor
+            .as_mut()
+            .is_some_and(|editor| editor.tick(Instant::now()))
+        {
+            self.render()?;
+        }
+        if let Some(ticket) = &mut self.web_close_job {
+            match ticket.try_result() {
+                Ok(None) => {}
+                Ok(Some(Ok(_))) => {
+                    self.web_close_job = None;
+                    self.close_web = None;
+                }
+                Ok(Some(Err(Failure::Web(WebServiceError::Busy) | Failure::Stopped)))
+                | Err(
+                    fc_runtime::worker::JobError::Deadline
+                    | fc_runtime::worker::JobError::Cancelled,
+                ) => {
+                    self.web_close_job = None;
+                    self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                }
+                _ => {
+                    self.web_close_job = None;
+                    self.close_web = None;
+                }
+            }
+        }
+        if self.web_close_job.is_none() && Instant::now() >= self.next_web_refresh {
+            if let Some((service, lease)) = &self.close_web {
+                if let Ok(ticket) = self.pool.handle().try_submit(
+                    Work::CloseWeb(service.clone(), *lease),
+                    Instant::now() + Duration::from_secs(5),
+                ) {
+                    self.web_close_job = Some(ticket);
+                } else {
+                    self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                }
+            }
+        }
+        if self.screen == Screen::Web
+            && self.pending.is_none()
+            && !self.stopping
+            && Instant::now() >= self.next_web_refresh
+        {
+            if let (Some(service), Some(lease)) = (&self.web_service, self.lease) {
+                self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                self.submit(Work::Web(
+                    service.clone(),
+                    lease,
+                    web_editor::Operation::Refresh,
+                    self.web_readiness,
+                ))?;
+            }
+        }
         if let Some(audio) = &self.audio {
             if audio.reap_nonblocking().is_err() && !self.stopping {
                 self.terminate_required = true;
@@ -2102,6 +2342,33 @@ impl App {
                     self.screen = Screen::HomeworkEdit;
                     self.status.clear();
                 }
+                Ok(Outcome::WebOpened(service, loaded)) => {
+                    if let Some(lease) = self.lease {
+                        self.web_editor = Some(web_editor::Editor::new(
+                            lease.principal_id(),
+                            self.web_readiness,
+                            loaded,
+                        ));
+                        self.web_service = Some(service);
+                        self.screen = Screen::Web;
+                        self.status.clear();
+                        self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                    }
+                }
+                Ok(Outcome::WebLoaded(loaded)) => {
+                    if self.screen == Screen::Web {
+                        let changed = loaded.changed;
+                        if let Some(editor) = &mut self.web_editor {
+                            editor.loaded(loaded);
+                        }
+                        self.status = if changed {
+                            "申请或授权已变化；已重新读取，请核对后重新选择。".into()
+                        } else {
+                            "教师设备状态已更新。".into()
+                        };
+                        self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                    }
+                }
                 Ok(Outcome::ScheduleLoaded(document)) => {
                     if let Some(lease) = self.lease {
                         self.schedule = Some(ScheduleEditor::new(document, lease.principal_id()));
@@ -2165,6 +2432,14 @@ impl App {
                     return Err("后台结果类型不匹配".into())
                 }
                 Err(error) => {
+                    if matches!(error, Failure::Web(WebServiceError::Denied)) {
+                        self.lock();
+                    }
+                    if self.screen == Screen::Web {
+                        if let Some(editor) = &mut self.web_editor {
+                            editor.clear_sensitive();
+                        }
+                    }
                     if fatal(&error) {
                         if let Some(control) = &self.control {
                             control.fault();
@@ -2504,6 +2779,12 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         terminate_required: false,
         schedule: None,
         lesson_editor: None,
+        web_service: None,
+        web_editor: None,
+        web_readiness: web_editor::Readiness::Unavailable,
+        next_web_refresh: Instant::now() + Duration::from_secs(1),
+        close_web: None,
+        web_close_job: None,
         lesson_entry_pending: false,
         lesson_flow_active: false,
         offscreen_probe: probe,
@@ -3416,8 +3697,8 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
 #[cfg(test)]
 mod tests {
     use super::*;
-    static SERIAL: Mutex<()> = Mutex::new(());
-    struct Scratch(PathBuf);
+    pub(super) static SERIAL: Mutex<()> = Mutex::new(());
+    pub(super) struct Scratch(PathBuf);
     impl Drop for Scratch {
         fn drop(&mut self) {
             let result = fs::remove_dir_all(&self.0);
@@ -3426,7 +3707,7 @@ mod tests {
             }
         }
     }
-    fn fixture() -> (Scratch, App) {
+    pub(super) fn fixture() -> (Scratch, App) {
         let root = std::env::temp_dir().join(format!(
             "FutureClassroom-Test-Lifecycle-{}-{}",
             std::process::id(),
@@ -3444,7 +3725,7 @@ mod tests {
             .unwrap();
         (Scratch(root), app)
     }
-    fn wait_for(app: &mut App, condition: impl Fn(&App) -> bool) {
+    pub(super) fn wait_for(app: &mut App, condition: impl Fn(&App) -> bool) {
         let deadline = Instant::now() + Duration::from_secs(30);
         while !condition(app) {
             app.poll().unwrap();
@@ -3452,7 +3733,7 @@ mod tests {
             std::thread::sleep(Duration::from_millis(5));
         }
     }
-    fn drain(mut app: App) {
+    pub(super) fn drain(mut app: App) {
         app.begin_shutdown();
         wait_for(&mut app, |a| a.pool.is_finished());
         app.pool.join().unwrap();
