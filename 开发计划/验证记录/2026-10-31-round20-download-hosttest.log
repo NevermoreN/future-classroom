@@ -1,0 +1,18 @@
+    Blocking waiting for file lock on build directory
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling zeroize v1.8.2
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 01s
+     Running unittests src/lib.rs (/tmp/fc-round20-download-target/debug/deps/fc_windows-d4915409123cf1c4)
+
+running 3 tests
+test calendar_download::tests::response_bounds_and_status_do_not_accept_redirect_or_uncached_304 ... ok
+test calendar_download::tests::validators_are_bounded_ascii_and_never_header_injection ... ok
+test calendar_download::tests::cancellation_panics_fail_closed_and_busy_never_releases_physical_owner ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+

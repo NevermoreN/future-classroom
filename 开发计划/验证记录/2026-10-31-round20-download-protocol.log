@@ -1,0 +1,53 @@
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.228
+   Compiling serde_json v1.0.145
+   Compiling serde v1.0.228
+   Compiling cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling ryu v1.0.23
+   Compiling cpufeatures v0.2.17
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling generic-array v0.14.7
+   Compiling itoa v1.0.18
+   Compiling syn v2.0.119
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling serde_derive v1.0.228
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.49s
+     Running unittests src/lib.rs (/tmp/fc-round20-download-target/debug/deps/fc_protocol-65e19b69ce382dec)
+
+running 4 tests
+test calendar_feed::tests::empty_unknown_year_duplicate_dates_and_spill_only_are_not_calendars ... FAILED
+test calendar_feed::tests::duplicate_unknown_keys_numeric_year_and_date_grammar_fail_closed ... ok
+test calendar_feed::tests::exact_byte_digest_kind_and_optional_official_identifiers ... FAILED
+test calendar_feed::tests::untrusted_notice_names_validators_and_size_are_rejected ... ok
+
+failures:
+
+---- calendar_feed::tests::empty_unknown_year_duplicate_dates_and_spill_only_are_not_calendars stdout ----
+
+thread 'calendar_feed::tests::empty_unknown_year_duplicate_dates_and_spill_only_are_not_calendars' (32285) panicked at crates/fc-protocol/src/calendar_feed.rs:186:9:
+assertion failed: decode(&f).is_ok()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- calendar_feed::tests::exact_byte_digest_kind_and_optional_official_identifiers stdout ----
+
+thread 'calendar_feed::tests::exact_byte_digest_kind_and_optional_official_identifiers' (32286) panicked at crates/fc-protocol/src/calendar_feed.rs:133:10:
+called `Result::unwrap()` on an `Err` value: InvalidCalendar
+
+
+failures:
+    calendar_feed::tests::empty_unknown_year_duplicate_dates_and_spill_only_are_not_calendars
+    calendar_feed::tests::exact_byte_digest_kind_and_optional_official_identifiers
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 29 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p fc-protocol --lib`

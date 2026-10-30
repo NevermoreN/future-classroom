@@ -1,0 +1,726 @@
+{
+  "status": "PASS",
+  "scope": "only this round owned temporary namespaces and generated Python bytecode",
+  "topLevelPaths": 141,
+  "files": 26528,
+  "logicalBytes": 12527692008,
+  "removed": [
+    {
+      "path": "/tmp/fc-round20-architecture-final.log",
+      "files": 1,
+      "logicalBytes": 71
+    },
+    {
+      "path": "/tmp/fc-round20-archive-progress.json",
+      "files": 1,
+      "logicalBytes": 5583
+    },
+    {
+      "path": "/tmp/fc-round20-business-storage-fixture-before.rs",
+      "files": 1,
+      "logicalBytes": 162178
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-review.json",
+      "files": 1,
+      "logicalBytes": 6513
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-clippy-1.log",
+      "files": 1,
+      "logicalBytes": 1825
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-clippy-2.log",
+      "files": 1,
+      "logicalBytes": 226
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-fixture-before.rs",
+      "files": 1,
+      "logicalBytes": 13304
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-fixture-fix.patch",
+      "files": 1,
+      "logicalBytes": 2538
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-metadata-final.jsonl",
+      "files": 1,
+      "logicalBytes": 70406
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-metadata-final.log",
+      "files": 1,
+      "logicalBytes": 73
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-tests-1.log",
+      "files": 1,
+      "logicalBytes": 3705
+    },
+    {
+      "path": "/tmp/fc-round20-calendar-worker-fence-tests-2.log",
+      "files": 1,
+      "logicalBytes": 792
+    },
+    {
+      "path": "/tmp/fc-round20-cleanup.py",
+      "files": 1,
+      "logicalBytes": 2535
+    },
+    {
+      "path": "/tmp/fc-round20-domain-clippy-first.log",
+      "files": 1,
+      "logicalBytes": 256
+    },
+    {
+      "path": "/tmp/fc-round20-domain-first.log",
+      "files": 1,
+      "logicalBytes": 1165
+    },
+    {
+      "path": "/tmp/fc-round20-domain-second.log",
+      "files": 1,
+      "logicalBytes": 13748
+    },
+    {
+      "path": "/tmp/fc-round20-domain-strict-auto.log",
+      "files": 1,
+      "logicalBytes": 2865
+    },
+    {
+      "path": "/tmp/fc-round20-domain-target",
+      "files": 740,
+      "logicalBytes": 325072353
+    },
+    {
+      "path": "/tmp/fc-round20-download-hostclippy.log",
+      "files": 1,
+      "logicalBytes": 1149
+    },
+    {
+      "path": "/tmp/fc-round20-download-hosttest.log",
+      "files": 1,
+      "logicalBytes": 1259
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-check.log",
+      "files": 1,
+      "logicalBytes": 3969
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-check2.log",
+      "files": 1,
+      "logicalBytes": 1233
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy.log",
+      "files": 1,
+      "logicalBytes": 1833
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy2.log",
+      "files": 1,
+      "logicalBytes": 2910
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy3.log",
+      "files": 1,
+      "logicalBytes": 2108
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy4.log",
+      "files": 1,
+      "logicalBytes": 1176
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy5.log",
+      "files": 1,
+      "logicalBytes": 1539
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-clippy6.log",
+      "files": 1,
+      "logicalBytes": 171
+    },
+    {
+      "path": "/tmp/fc-round20-download-probe-target",
+      "files": 1046,
+      "logicalBytes": 928330860
+    },
+    {
+      "path": "/tmp/fc-round20-download-protocol-rerun.log",
+      "files": 1,
+      "logicalBytes": 829
+    },
+    {
+      "path": "/tmp/fc-round20-download-protocol.log",
+      "files": 1,
+      "logicalBytes": 2542
+    },
+    {
+      "path": "/tmp/fc-round20-download-target",
+      "files": 2167,
+      "logicalBytes": 1010330008
+    },
+    {
+      "path": "/tmp/fc-round20-download-tests-final.log",
+      "files": 1,
+      "logicalBytes": 1353
+    },
+    {
+      "path": "/tmp/fc-round20-download-wincheck.log",
+      "files": 1,
+      "logicalBytes": 1735
+    },
+    {
+      "path": "/tmp/fc-round20-download-winclippy-final.log",
+      "files": 1,
+      "logicalBytes": 168
+    },
+    {
+      "path": "/tmp/fc-round20-download-winclippy-frozen.log",
+      "files": 1,
+      "logicalBytes": 264
+    },
+    {
+      "path": "/tmp/fc-round20-download-winclippy.log",
+      "files": 1,
+      "logicalBytes": 1327
+    },
+    {
+      "path": "/tmp/fc-round20-editor-clippy-final.log",
+      "files": 1,
+      "logicalBytes": 151
+    },
+    {
+      "path": "/tmp/fc-round20-editor-clippy-first.log",
+      "files": 1,
+      "logicalBytes": 468
+    },
+    {
+      "path": "/tmp/fc-round20-editor-final.log",
+      "files": 1,
+      "logicalBytes": 1733
+    },
+    {
+      "path": "/tmp/fc-round20-editor-first.log",
+      "files": 1,
+      "logicalBytes": 2648
+    },
+    {
+      "path": "/tmp/fc-round20-editor-harness",
+      "files": 3,
+      "logicalBytes": 1200
+    },
+    {
+      "path": "/tmp/fc-round20-editor-second.log",
+      "files": 1,
+      "logicalBytes": 1733
+    },
+    {
+      "path": "/tmp/fc-round20-editor-source-accessible-fixed.log",
+      "files": 1,
+      "logicalBytes": 1733
+    },
+    {
+      "path": "/tmp/fc-round20-editor-source-accessible.log",
+      "files": 1,
+      "logicalBytes": 900
+    },
+    {
+      "path": "/tmp/fc-round20-editor-target",
+      "files": 681,
+      "logicalBytes": 212879018
+    },
+    {
+      "path": "/tmp/fc-round20-editor-third.log",
+      "files": 1,
+      "logicalBytes": 1733
+    },
+    {
+      "path": "/tmp/fc-round20-final-verification.json",
+      "files": 1,
+      "logicalBytes": 4720
+    },
+    {
+      "path": "/tmp/fc-round20-format-confirmed.log",
+      "files": 1,
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round20-format-final.log",
+      "files": 1,
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round20-frontend-reuse.json",
+      "files": 1,
+      "logicalBytes": 951
+    },
+    {
+      "path": "/tmp/fc-round20-host-clippy-1.log",
+      "files": 1,
+      "logicalBytes": 4250
+    },
+    {
+      "path": "/tmp/fc-round20-host-clippy-confirmed.log",
+      "files": 1,
+      "logicalBytes": 171
+    },
+    {
+      "path": "/tmp/fc-round20-host-clippy-final.log",
+      "files": 1,
+      "logicalBytes": 171
+    },
+    {
+      "path": "/tmp/fc-round20-host-final-executable-bindings.json",
+      "files": 1,
+      "logicalBytes": 7081
+    },
+    {
+      "path": "/tmp/fc-round20-host-final.json",
+      "files": 1,
+      "logicalBytes": 2791
+    },
+    {
+      "path": "/tmp/fc-round20-host-first-fixture-explanation.json",
+      "files": 1,
+      "logicalBytes": 643
+    },
+    {
+      "path": "/tmp/fc-round20-host-self-check.log",
+      "files": 1,
+      "logicalBytes": 150
+    },
+    {
+      "path": "/tmp/fc-round20-host-target",
+      "files": 6241,
+      "logicalBytes": 2434064376
+    },
+    {
+      "path": "/tmp/fc-round20-host-test-artifacts-final.jsonl",
+      "files": 1,
+      "logicalBytes": 84588
+    },
+    {
+      "path": "/tmp/fc-round20-host-test-fresh.log",
+      "files": 1,
+      "logicalBytes": 62
+    },
+    {
+      "path": "/tmp/fc-round20-host-tests-1.log",
+      "files": 1,
+      "logicalBytes": 28981
+    },
+    {
+      "path": "/tmp/fc-round20-host-tests-release-final.log",
+      "files": 1,
+      "logicalBytes": 67690
+    },
+    {
+      "path": "/tmp/fc-round20-integration-check-1.log",
+      "files": 1,
+      "logicalBytes": 3865
+    },
+    {
+      "path": "/tmp/fc-round20-integration-check-2.log",
+      "files": 1,
+      "logicalBytes": 1139
+    },
+    {
+      "path": "/tmp/fc-round20-integration-check-3.log",
+      "files": 1,
+      "logicalBytes": 2049
+    },
+    {
+      "path": "/tmp/fc-round20-integration-target",
+      "files": 10052,
+      "logicalBytes": 5516304107
+    },
+    {
+      "path": "/tmp/fc-round20-licenses-check.log",
+      "files": 1,
+      "logicalBytes": 461
+    },
+    {
+      "path": "/tmp/fc-round20-licenses-final-confirmed.json",
+      "files": 1,
+      "logicalBytes": 461
+    },
+    {
+      "path": "/tmp/fc-round20-licenses-final.json",
+      "files": 1,
+      "logicalBytes": 461
+    },
+    {
+      "path": "/tmp/fc-round20-local-fixture-remnants.json",
+      "files": 1,
+      "logicalBytes": 111
+    },
+    {
+      "path": "/tmp/fc-round20-modern-artifact.json",
+      "files": 1,
+      "logicalBytes": 225
+    },
+    {
+      "path": "/tmp/fc-round20-modern-build-1.log",
+      "files": 1,
+      "logicalBytes": 3413
+    },
+    {
+      "path": "/tmp/fc-round20-modern-build-fresh.log",
+      "files": 1,
+      "logicalBytes": 62
+    },
+    {
+      "path": "/tmp/fc-round20-modern-calendar-windows.json",
+      "files": 1,
+      "logicalBytes": 9021
+    },
+    {
+      "path": "/tmp/fc-round20-modern-calendar-windows.log",
+      "files": 1,
+      "logicalBytes": 122
+    },
+    {
+      "path": "/tmp/fc-round20-modern-frozen",
+      "files": 1,
+      "logicalBytes": 9905677
+    },
+    {
+      "path": "/tmp/fc-round20-modern-imports.json",
+      "files": 1,
+      "logicalBytes": 11535
+    },
+    {
+      "path": "/tmp/fc-round20-package-build.log",
+      "files": 1,
+      "logicalBytes": 288
+    },
+    {
+      "path": "/tmp/fc-round20-package.json",
+      "files": 1,
+      "logicalBytes": 25968
+    },
+    {
+      "path": "/tmp/fc-round20-repack",
+      "files": 1,
+      "logicalBytes": 4846129
+    },
+    {
+      "path": "/tmp/fc-round20-repackage-build.log",
+      "files": 1,
+      "logicalBytes": 301
+    },
+    {
+      "path": "/tmp/fc-round20-reused-web",
+      "files": 8,
+      "logicalBytes": 471338
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-after-package.json",
+      "files": 1,
+      "logicalBytes": 48914
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-before-final.json",
+      "files": 1,
+      "logicalBytes": 50480
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-confirmed.json",
+      "files": 1,
+      "logicalBytes": 50480
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-final.json",
+      "files": 1,
+      "logicalBytes": 48914
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-frozen-final.json",
+      "files": 1,
+      "logicalBytes": 50480
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-frozen.json",
+      "files": 1,
+      "logicalBytes": 50480
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-pre-cleanup.json",
+      "files": 1,
+      "logicalBytes": 48914
+    },
+    {
+      "path": "/tmp/fc-round20-source-inputs-verified.json",
+      "files": 1,
+      "logicalBytes": 48914
+    },
+    {
+      "path": "/tmp/fc-round20-source-snapshot.py",
+      "files": 1,
+      "logicalBytes": 816
+    },
+    {
+      "path": "/tmp/fc-round20-storage-check-2.log",
+      "files": 1,
+      "logicalBytes": 167
+    },
+    {
+      "path": "/tmp/fc-round20-storage-check.log",
+      "files": 1,
+      "logicalBytes": 6944
+    },
+    {
+      "path": "/tmp/fc-round20-storage-clippy-1.log",
+      "files": 1,
+      "logicalBytes": 1520
+    },
+    {
+      "path": "/tmp/fc-round20-storage-clippy-2.log",
+      "files": 1,
+      "logicalBytes": 351
+    },
+    {
+      "path": "/tmp/fc-round20-storage-clippy-3.log",
+      "files": 1,
+      "logicalBytes": 258
+    },
+    {
+      "path": "/tmp/fc-round20-storage-clippy-final.log",
+      "files": 1,
+      "logicalBytes": 167
+    },
+    {
+      "path": "/tmp/fc-round20-storage-fence-check-2.log",
+      "files": 1,
+      "logicalBytes": 167
+    },
+    {
+      "path": "/tmp/fc-round20-storage-fence-check.log",
+      "files": 1,
+      "logicalBytes": 1360
+    },
+    {
+      "path": "/tmp/fc-round20-storage-fence-clippy-1.log",
+      "files": 1,
+      "logicalBytes": 259
+    },
+    {
+      "path": "/tmp/fc-round20-storage-fence-result.json",
+      "files": 1,
+      "logicalBytes": 2858
+    },
+    {
+      "path": "/tmp/fc-round20-storage-fence-tests-1.log",
+      "files": 1,
+      "logicalBytes": 3729
+    },
+    {
+      "path": "/tmp/fc-round20-storage-result.json",
+      "files": 1,
+      "logicalBytes": 3522
+    },
+    {
+      "path": "/tmp/fc-round20-storage-source-inputs.json",
+      "files": 1,
+      "logicalBytes": 1430
+    },
+    {
+      "path": "/tmp/fc-round20-storage-target",
+      "files": 4379,
+      "logicalBytes": 1676823754
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-1.log",
+      "files": 1,
+      "logicalBytes": 1898
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-2.log",
+      "files": 1,
+      "logicalBytes": 2052
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-3.log",
+      "files": 1,
+      "logicalBytes": 10250
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-4.log",
+      "files": 1,
+      "logicalBytes": 10685
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-5.log",
+      "files": 1,
+      "logicalBytes": 10613
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-6.log",
+      "files": 1,
+      "logicalBytes": 3158
+    },
+    {
+      "path": "/tmp/fc-round20-storage-tests-final.log",
+      "files": 1,
+      "logicalBytes": 10731
+    },
+    {
+      "path": "/tmp/fc-round20-whitespace-confirmed.log",
+      "files": 1,
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round20-whitespace-final.log",
+      "files": 1,
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round20-win7-artifact.json",
+      "files": 1,
+      "logicalBytes": 291
+    },
+    {
+      "path": "/tmp/fc-round20-win7-build-1.log",
+      "files": 1,
+      "logicalBytes": 11359
+    },
+    {
+      "path": "/tmp/fc-round20-win7-build-fresh.log",
+      "files": 1,
+      "logicalBytes": 5971
+    },
+    {
+      "path": "/tmp/fc-round20-win7-calendar-on-win11.json",
+      "files": 1,
+      "logicalBytes": 9020
+    },
+    {
+      "path": "/tmp/fc-round20-win7-calendar-on-win11.log",
+      "files": 1,
+      "logicalBytes": 122
+    },
+    {
+      "path": "/tmp/fc-round20-win7-frozen",
+      "files": 1,
+      "logicalBytes": 10005504
+    },
+    {
+      "path": "/tmp/fc-round20-win7-imports.json",
+      "files": 1,
+      "logicalBytes": 10383
+    },
+    {
+      "path": "/tmp/fc-round20-win7-regression-on-win11.json",
+      "files": 1,
+      "logicalBytes": 53167
+    },
+    {
+      "path": "/tmp/fc-round20-win7-regression-on-win11.log",
+      "files": 1,
+      "logicalBytes": 184
+    },
+    {
+      "path": "/tmp/fc-round20-win7-target",
+      "files": 1080,
+      "logicalBytes": 396942141
+    },
+    {
+      "path": "/tmp/fc-round20-windows-clippy-1.log",
+      "files": 1,
+      "logicalBytes": 1287
+    },
+    {
+      "path": "/tmp/fc-round20-windows-clippy-final.log",
+      "files": 1,
+      "logicalBytes": 171
+    },
+    {
+      "path": "/tmp/fc-round20-windows-final-executable-bindings.json",
+      "files": 1,
+      "logicalBytes": 6767
+    },
+    {
+      "path": "/tmp/fc-round20-windows-final-ssh-and-cleanup.json",
+      "files": 1,
+      "logicalBytes": 242
+    },
+    {
+      "path": "/tmp/fc-round20-windows-final-test-counts.json",
+      "files": 1,
+      "logicalBytes": 3432
+    },
+    {
+      "path": "/tmp/fc-round20-windows-full.json",
+      "files": 1,
+      "logicalBytes": 156331
+    },
+    {
+      "path": "/tmp/fc-round20-windows-full.log",
+      "files": 1,
+      "logicalBytes": 899
+    },
+    {
+      "path": "/tmp/fc-round20-windows-live-check.json",
+      "files": 1,
+      "logicalBytes": 222
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-artifacts-1.jsonl",
+      "files": 1,
+      "logicalBytes": 98273
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-artifacts-confirmed.jsonl",
+      "files": 1,
+      "logicalBytes": 99090
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-artifacts-final.jsonl",
+      "files": 1,
+      "logicalBytes": 99102
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-artifacts-frozen.jsonl",
+      "files": 1,
+      "logicalBytes": 99091
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-build-1.log",
+      "files": 1,
+      "logicalBytes": 2937
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-build-final.log",
+      "files": 1,
+      "logicalBytes": 268
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-build-frozen.log",
+      "files": 1,
+      "logicalBytes": 172
+    },
+    {
+      "path": "/tmp/fc-round20-windows-test-fresh.log",
+      "files": 1,
+      "logicalBytes": 73
+    }
+  ],
+  "removedBytecode": [
+    "scripts/__pycache__/windows-probe.cpython-312.pyc"
+  ],
+  "remainingOwnedPaths": [],
+  "persistentSshPrivateKeyRetained": true,
+  "persistentSshPrivateKeyMode": "0600",
+  "preserved": [
+    "existing workspace target/dist/node_modules and global caches",
+    "/mnt/data/FutureClassroom-0.1.0-public-calendar-dev.zip",
+    "Windows SSH service and authorized public key"
+  ],
+  "goalStatus": "active"
+}

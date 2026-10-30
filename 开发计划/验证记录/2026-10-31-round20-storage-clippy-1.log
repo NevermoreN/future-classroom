@@ -1,0 +1,28 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error: manual saturating arithmetic
+   --> crates/fc-storage/src/business/calendar.rs:603:9
+    |
+603 | /         std::mem::size_of::<Self>()
+604 | |             .checked_add(match &self.outcome {
+605 | |                 CalendarFetchOutcome::Downloaded(c) => c.allocation_bytes().unwrap_or(usize::MAX),
+606 | |                 _ => 0,
+607 | |             })
+608 | |             .unwrap_or(usize::MAX)
+    | |__________________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#manual_saturating_arithmetic
+    = note: `-D clippy::manual-saturating-arithmetic` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::manual_saturating_arithmetic)]`
+help: consider using `saturating_add`
+    |
+603 ~         std::mem::size_of::<Self>().saturating_add(match &self.outcome {
+604 +                 CalendarFetchOutcome::Downloaded(c) => c.allocation_bytes().unwrap_or(usize::MAX),
+605 +                 _ => 0,
+606 +             })
+    |
+
+error: could not compile `fc-storage` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-storage` (lib test) due to 1 previous error

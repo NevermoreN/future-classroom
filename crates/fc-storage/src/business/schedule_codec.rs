@@ -241,24 +241,29 @@ fn read_cells(v: &Value) -> Result<Vec<CellDetails>, StorageError> {
 }
 
 pub(super) fn document(d: &ScheduleDocument) -> Value {
-    json!({"format":1,"revision":d.revision.get(),"id_high_water":d.id_high_water,"semesters":d.semesters.iter().map(|p|json!({"semester":semester(&p.semester),"name":p.name,"timing_sync":p.timing_sync,"dual_history":p.dual_history.as_ref().map(|h|json!({"tables":h.tables.iter().map(table).collect::<Vec<_>>(),"row_details":rows(&h.row_details),"cell_details":cells(&h.cell_details)})),"row_details":p.row_details.iter().map(|r|json!({"row":r.row_id.get(),"name":r.name})).collect::<Vec<_>>(),"cell_details":p.cell_details.iter().map(|c|json!({"row":c.row_id.get(),"day":c.day.index(),"room":c.room,"note":c.note})).collect::<Vec<_>>()})).collect::<Vec<_>>(),"calendar_mode":match d.calendar_mode{CalendarMode::School=>"school",CalendarMode::Public=>"public"},"calendar_mode_revision":d.calendar_mode_revision.get(),"school_calendar":calendar(&d.school_calendar),"public_calendar":calendar(&d.public_calendar),"automatic_gaps":d.automatic_gaps,"rules_revision":d.rules_revision.get()})
+    json!({"format":1,"revision":d.revision.get(),"id_high_water":d.id_high_water,"semesters":d.semesters.iter().map(|p|json!({"semester":semester(&p.semester),"name":p.name,"timing_sync":p.timing_sync,"dual_history":p.dual_history.as_ref().map(|h|json!({"tables":h.tables.iter().map(table).collect::<Vec<_>>(),"row_details":rows(&h.row_details),"cell_details":cells(&h.cell_details)})),"row_details":p.row_details.iter().map(|r|json!({"row":r.row_id.get(),"name":r.name})).collect::<Vec<_>>(),"cell_details":p.cell_details.iter().map(|c|json!({"row":c.row_id.get(),"day":c.day.index(),"room":c.room,"note":c.note})).collect::<Vec<_>>()})).collect::<Vec<_>>(),"calendar_mode":match d.calendar_mode{CalendarMode::School=>"school",CalendarMode::Public=>"public"},"calendar_mode_revision":d.calendar_mode_revision.get(),"school_calendar":calendar(&d.school_calendar),"public_calendar":calendar(&d.public_calendar),"public_calendar_data":super::calendar_codec::public_data(&d.public_calendar_data),"automatic_gaps":d.automatic_gaps,"rules_revision":d.rules_revision.get()})
 }
 pub(super) fn read_document(v: &Value) -> Result<ScheduleDocument, StorageError> {
-    object_fields(
-        v,
-        &[
-            "format",
-            "revision",
-            "id_high_water",
-            "semesters",
-            "calendar_mode",
-            "calendar_mode_revision",
-            "school_calendar",
-            "public_calendar",
-            "automatic_gaps",
-            "rules_revision",
-        ],
-    )?;
+    let legacy = !v
+        .as_object()
+        .ok_or(StorageError::Database)?
+        .contains_key("public_calendar_data");
+    let mut fields = vec![
+        "format",
+        "revision",
+        "id_high_water",
+        "semesters",
+        "calendar_mode",
+        "calendar_mode_revision",
+        "school_calendar",
+        "public_calendar",
+        "automatic_gaps",
+        "rules_revision",
+    ];
+    if !legacy {
+        fields.push("public_calendar_data");
+    }
+    object_fields(v, &fields)?;
     if number(v, "format")? != 1 {
         return Err(StorageError::Database);
     }
@@ -314,6 +319,11 @@ pub(super) fn read_document(v: &Value) -> Result<ScheduleDocument, StorageError>
         calendar_mode_revision: Revision::new(number(v, "calendar_mode_revision")?),
         school_calendar: read_calendar(&v["school_calendar"])?,
         public_calendar: read_calendar(&v["public_calendar"])?,
+        public_calendar_data: if legacy {
+            Default::default()
+        } else {
+            super::calendar_codec::read_public_data(&v["public_calendar_data"])?
+        },
         automatic_gaps: boolean(v, "automatic_gaps")?,
         rules_revision: Revision::new(number(v, "rules_revision")?),
     })

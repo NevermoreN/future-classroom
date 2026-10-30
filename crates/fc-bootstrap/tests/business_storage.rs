@@ -1487,7 +1487,6 @@ fn timetable_document(history: bool) -> fc_domain::schedule_document::ScheduleDo
             mapping: DayMapping::Rest,
         },
     ];
-    doc.public_calendar.public_verified_years = vec![2026];
     doc.public_calendar.entries = vec![CalendarEntry {
         actual_semester_id: SemesterId::new(1).unwrap(),
         date: date(1),

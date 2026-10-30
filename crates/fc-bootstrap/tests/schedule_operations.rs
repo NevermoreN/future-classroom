@@ -234,7 +234,7 @@ fn dual_document() -> ScheduleDocument {
             }
         })
         .collect();
-    let mut document = ScheduleDocument {
+    ScheduleDocument {
         semesters: vec![SemesterPlan {
             semester: Semester {
                 id: semester(),
@@ -253,9 +253,7 @@ fn dual_document() -> ScheduleDocument {
             cell_details: cells,
         }],
         ..ScheduleDocument::default()
-    };
-    document.public_calendar.public_verified_years = vec![2026];
-    document
+    }
 }
 fn selected_table(document: &ScheduleDocument, day: u8) -> WeekTable {
     match document.resolve_day(class(), date(day)).unwrap() {
@@ -300,6 +298,102 @@ fn assert_retired(result: Result<ScheduleDocument, BackendError>) {
                 ..
             }
         )))
+    ));
+}
+
+#[test]
+fn public_calendar_real_lease_cache_review_adoption_manual_priority_and_offline_reopen() {
+    use fc_ports::calendar::*;
+    let _credentials = CREDENTIAL_FIXTURE.lock().unwrap_or_else(|p| p.into_inner());
+    let directory = Directory::new();
+    let clock = Arc::new(TestClock::new());
+    let mut service = open(&directory, clock.clone());
+    let lease = initialize(&mut service.0);
+    let mut draft = dual_document();
+    draft.public_calendar.entries.push(CalendarEntry {
+        actual_semester_id: semester(),
+        date: date(14),
+        mapping: DayMapping::SourceDate(date(12)),
+    });
+    let initial = service
+        .0
+        .save_schedule(lease, Revision::default(), draft)
+        .unwrap();
+    let CalendarReservation::Reserved(ticket) =
+        service.0.reserve_calendar_fetch(lease, 2026).unwrap()
+    else {
+        panic!("first fetch must reserve");
+    };
+    let feed = br#"{"year":2026,"papers":["https://www.gov.cn/zhengce/content/202501/content_1000000.htm"],"days":[{"date":"2026-10-14","name":"synthetic rest","isOffDay":true},{"date":"2026-10-15","name":"synthetic makeup","isOffDay":false}]}"#;
+    let candidate = fc_protocol::calendar_feed::parse(2026, feed, clock.now(), None, None).unwrap();
+    let status = service
+        .0
+        .finish_calendar_fetch(ticket, CalendarFetchOutcome::Downloaded(candidate))
+        .unwrap();
+    assert!(!status.policy.enabled);
+    assert_eq!(service.0.read_schedule(lease).unwrap(), initial);
+    let reference = CalendarCandidateRef {
+        year: 2026,
+        revision: status.years[0].candidate_revision,
+    };
+    service.0.session_control().lock_local();
+    assert!(service
+        .0
+        .adopt_calendar(lease, initial.revision, vec![reference])
+        .is_err());
+    assert!(service.0.calendar_status(lease, 2026).is_err());
+    let lease = service.0.login("admin", password()).unwrap();
+    assert_eq!(service.0.calendar_status(lease, 2026).unwrap(), status);
+    assert_eq!(service.0.read_schedule(lease).unwrap(), initial);
+    let adopted = service
+        .0
+        .adopt_calendar(lease, initial.revision, vec![reference])
+        .unwrap();
+    assert_eq!(
+        adopted.public_calendar.entries,
+        initial.public_calendar.entries
+    );
+    assert_eq!(adopted.public_calendar_data.years.len(), 1);
+    assert_eq!(
+        adopted.public_calendar.mapping_revision,
+        initial.public_calendar.mapping_revision
+    );
+    assert_eq!(adopted.school_calendar, initial.school_calendar);
+    assert!(matches!(
+        adopted.resolve_day(class(), date(14)).unwrap(),
+        AcademicDay::Scheduled(_)
+    ));
+    assert!(matches!(
+        adopted.resolve_day(class(), date(15)).unwrap(),
+        AcademicDay::Unconfirmed
+    ));
+    assert!(matches!(
+        service
+            .0
+            .adopt_calendar(lease, initial.revision, vec![reference]),
+        Err(BackendError::Calendar(CalendarRepositoryError::Stale))
+    ));
+    let global = service.0.global_revision().unwrap();
+    let mut forged = adopted.clone();
+    forged.public_calendar_data.years.clear();
+    assert!(service
+        .0
+        .save_schedule(lease, adopted.revision, forged)
+        .is_err());
+    assert_eq!(service.0.global_revision().unwrap(), global);
+    drop(service);
+    let mut service = open(&directory, clock);
+    let lease = service.0.login("admin", password()).unwrap();
+    assert_eq!(service.0.read_schedule(lease).unwrap(), adopted);
+    assert!(service
+        .0
+        .calendar_status(lease, 2026)
+        .unwrap()
+        .candidate
+        .is_some());
+    assert!(matches!(
+        service.0.reserve_calendar_fetch(lease, 2026).unwrap(),
+        CalendarReservation::RateLimited { .. }
     ));
 }
 

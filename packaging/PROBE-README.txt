@@ -107,3 +107,5 @@ Round13 includes teacher material JSON and controlled file worker ports (TXT/Off
 --web-voice-probe 使用自有合成账号/真实SQLite/规范零PCM上传和原生音频域，验证总3遍自然完成、原任务查询和停止/驱动归还；应由交互会话的隐藏测试任务运行。它仍只使用synthetic RequestHead，不开启TLS/网络listener，不请求硬件麦克风或改变音量/前台；普通--web-pairing-probe不启动原生声音。
 
 Round15 adds local global-admin account paging/edit/disable/multiple teaching scopes, review/cancel/CAS and self-change re-login. Existing timetable/default/history reference conflicts reject atomically. Identity and receipt each retain the 64KiB bound; over-limit edits return Capacity without truncation or authority changes. The sole registered lock action remains available while busy and carries no form secrets; all other busy actions remain disabled.
+
+公共校历：在课表校历页打开候选下载/来源差异/明确采用。候选缓存与已采用版本分开，人工映射优先，未映射补班待确认。自动纯放假变化默认关闭，须主管理员明确授权，学校模式与人工安排不被覆盖。--calendar-probe 使用独立合成资料及隐藏原生控件，--calendar-download-probe 仅固定2026来源实际HTTPS下载一次且不写应用数据；同步WinHTTP硬抢占未证明，不能替代教师入站TLS/P0与三系统实机验收。

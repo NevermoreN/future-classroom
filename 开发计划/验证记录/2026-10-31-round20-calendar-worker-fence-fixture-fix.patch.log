@@ -1,0 +1,68 @@
+--- crates/fc-bootstrap/tests/calendar_execution_fence.rs (original failed fixture)
++++ crates/fc-bootstrap/tests/calendar_execution_fence.rs (reauthenticated fixture)
+@@ -324,7 +324,9 @@
+ }
+ #[test]
+ fn real_worker_cancel_at_precommit_blocks_reservation_policy_and_adoption() {
+-    let _serial = CREDENTIAL_FIXTURE.lock().unwrap();
++    let _serial = CREDENTIAL_FIXTURE
++        .lock()
++        .unwrap_or_else(std::sync::PoisonError::into_inner);
+     let f = Fixture::new();
+     assert!(f.run(Operation::Reserve, Trip::Cancel).cancelled);
+     assert!(f.status().years.is_empty());
+@@ -343,9 +345,20 @@
+     );
+     f.healthy();
+ }
+-fn assert_cancelled_finish(f: &Fixture, trip: Trip) {
++fn assert_cancelled_finish(f: &mut Fixture, trip: Trip) {
+     f.cache();
+     *f.clock.0.lock().unwrap() = at(11);
++    // The durable 24-hour interval deliberately outlives the old local lease.
++    // Obtain a real fresh authenticated session; never extend a fixture actor.
++    f.lease = f
++        .backend
++        .lock()
++        .unwrap()
++        .login(
++            "admin",
++            Password::new("Synthetic-calendar-execution-2026".into()).unwrap(),
++        )
++        .unwrap();
+     let ticket = f.reserve();
+     let facts = f.run(Operation::Finish(ticket), trip);
+     assert!(
+@@ -375,19 +388,25 @@
+ }
+ #[test]
+ fn real_worker_cancel_cannot_publish_late_body_and_same_ticket_failure_settles() {
+-    let _serial = CREDENTIAL_FIXTURE.lock().unwrap();
+-    let f = Fixture::new();
+-    assert_cancelled_finish(&f, Trip::Cancel);
++    let _serial = CREDENTIAL_FIXTURE
++        .lock()
++        .unwrap_or_else(std::sync::PoisonError::into_inner);
++    let mut f = Fixture::new();
++    assert_cancelled_finish(&mut f, Trip::Cancel);
+ }
+ #[test]
+ fn real_worker_deadline_at_precommit_cannot_publish_late_body() {
+-    let _serial = CREDENTIAL_FIXTURE.lock().unwrap();
+-    let f = Fixture::new();
+-    assert_cancelled_finish(&f, Trip::Deadline);
++    let _serial = CREDENTIAL_FIXTURE
++        .lock()
++        .unwrap_or_else(std::sync::PoisonError::into_inner);
++    let mut f = Fixture::new();
++    assert_cancelled_finish(&mut f, Trip::Deadline);
+ }
+ #[test]
+ fn real_worker_deadline_at_adoption_precommit_preserves_exact_original_cas() {
+-    let _serial = CREDENTIAL_FIXTURE.lock().unwrap();
++    let _serial = CREDENTIAL_FIXTURE
++        .lock()
++        .unwrap_or_else(std::sync::PoisonError::into_inner);
+     let f = Fixture::new();
+     f.cache();
+     assert!(f.run(Operation::Adopt, Trip::Deadline).cancelled);

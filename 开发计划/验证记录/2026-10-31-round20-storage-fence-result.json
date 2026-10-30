@@ -1,0 +1,74 @@
+{
+  "status": "PASS",
+  "scope": "Authorized COMMIT ownership race fix and independent integration/document review",
+  "sourceInputs": [
+    {
+      "path": "crates/fc-ports/src/calendar.rs",
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "22f37b092ce0cdc55e3d755c1c91cc276f5fb184ed4a35b89bcf66f0a4937bea"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "sha256": "2973c6964a5f62377505e86accb7ba8912e34f0613264a2567f4c5aeda9b485f"
+    },
+    {
+      "path": "crates/fc-storage/src/business/calendar.rs",
+      "sha256": "c98e5d726028cf0e447d641a61196de9c63b6987f429a9db61671ee0f17333c2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/calendar.rs",
+      "sha256": "86350ed3273e2122cfcfe5c13d080389b6af59679e204bbc84169d5a1242fcfa"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+      "sha256": "2974e02720b046a2f4bc168c930d05329a099bb067e03596fbb02fbe2f0690c0"
+    }
+  ],
+  "storageCalendarTests": {
+    "passed": 32,
+    "failed": 0,
+    "log": "/tmp/fc-round20-storage-fence-tests-1.log"
+  },
+  "workerTests": {
+    "distinctPassed": 4,
+    "singleFrozenRunAll4Claimed": false,
+    "initialRun": {
+      "passed": 2,
+      "fixtureFailed": 2,
+      "log": "/tmp/fc-round20-calendar-worker-fence-tests-1.log"
+    },
+    "affectedRecheck": {
+      "passed": 2,
+      "failed": 0,
+      "filtered": 2,
+      "log": "/tmp/fc-round20-calendar-worker-fence-tests-2.log"
+    },
+    "fixtureCorrection": {
+      "originalLog": "/tmp/fc-round20-calendar-worker-fence-tests-1.log",
+      "recheckLog": "/tmp/fc-round20-calendar-worker-fence-tests-2.log",
+      "beforeSource": "/tmp/fc-round20-calendar-worker-fence-fixture-before.rs",
+      "patch": "/tmp/fc-round20-calendar-worker-fence-fixture-fix.patch",
+      "oldSHA256": "a16afb50cc47e1ced31e73c96d4b3c079cf2eb0195133905bc25ea153ebf8f6d",
+      "newSHA256": "2974e02720b046a2f4bc168c930d05329a099bb067e03596fbb02fbe2f0690c0",
+      "productionRelaxed": false,
+      "recheckResult": "2 passed; 0 failed; 2 filtered"
+    }
+  },
+  "clippy": [
+    "/tmp/fc-round20-storage-fence-clippy-1.log",
+    "/tmp/fc-round20-calendar-worker-fence-clippy-2.log"
+  ],
+  "review": "/tmp/fc-round20-calendar-review.json",
+  "architecture": "12 crates / 33 edges unchanged",
+  "fixtureResidue": [],
+  "cleanup": "Only own fixtures removed by RAII; root owns final evidence archival and /tmp/fc-round20-* target cleanup. No SSH, global state changes or root cleanup.",
+  "postRunFreshMetadata": {
+    "fresh": true,
+    "executable": "/tmp/fc-round20-storage-target/debug/deps/calendar_execution_fence-1a18c68eda527630",
+    "sha256": "7445afc246ba1a08ae5a55ab7a6d8d1a4f2255f620cc7a1452a59755554663b1",
+    "buildFinished": true
+  }
+}

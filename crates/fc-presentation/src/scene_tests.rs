@@ -129,7 +129,21 @@ fn fixture() -> DesktopFacts {
     schedule
         .semesters
         .push(SemesterPlan::new(semester, "秋季".into()));
-    schedule.public_calendar.public_verified_years.push(2026);
+    schedule.public_calendar_data = fc_domain::calendar::PublicCalendarData {
+        years: vec![fc_domain::calendar::CalendarCandidate {
+            source_year: 2026,
+            fetched_at: now(1),
+            source_sha256: [7; 32],
+            papers: vec!["https://www.gov.cn/zhengce/content/202501/content_1000000.htm".into()],
+            days: vec![fc_domain::calendar::PublicCalendarDay {
+                date: LocalDate::new(2026, 1, 1).unwrap(),
+                kind: fc_domain::calendar::PublicDayKind::Rest,
+                name: "Synthetic off-season fixture".into(),
+            }],
+            etag: None,
+            last_modified: None,
+        }],
+    };
     let mut a = actor();
     a.auth_epoch = identity.account(id(1)).unwrap().principal.auth_epoch;
     schedule = ScheduleDocument::default()
@@ -330,6 +344,7 @@ fn recess_and_static_scene_expire_at_actual_second_and_date() {
 fn public_unverified_keeps_base_courses_but_clock_rollback_is_neutral() {
     let mut facts = fixture();
     facts.schedule.public_calendar.public_verified_years.clear();
+    facts.schedule.public_calendar_data.years.clear();
     let view = scene(&facts);
     assert!(matches!(
         view.cards

@@ -1,0 +1,118 @@
+{
+  "status": "PASS_DEVELOPMENT_MILESTONE",
+  "objective": "按照计划完成全部开发。",
+  "goalStatus": "active",
+  "completeProduct": "NOT_VALIDATED",
+  "sourceInputs": {
+    "fileCount": 321,
+    "sha256": "5861651abe59f315d0078b3124880b2698da4a7395e403537b95826a531ce2a9",
+    "report": "2026-10-31-round20-source-inputs-final.json",
+    "scopeCorrection": "Initial 331-input inventory also included 10 unchanged UI-design atlas files; final compilation/package inventory excludes that atlas, consistent with prior rounds."
+  },
+  "host": {
+    "passed": 594,
+    "resultGroups": 30,
+    "profile": "release",
+    "sourceFrozenCompleteRun": true,
+    "report": "2026-10-31-round20-host-final.json"
+  },
+  "windows": {
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "passed": 799,
+    "testPrograms": 18,
+    "sourceFrozenCompleteRun": true,
+    "testProfile": "debug opt0",
+    "report": "2026-10-31-round20-windows-full.json",
+    "executableBindings": "2026-10-31-round20-windows-final-executable-bindings.json"
+  },
+  "nativeWorkflows": {
+    "modern": {
+      "calendarSteps": 30,
+      "profileSteps": 39,
+      "contentSteps": 52,
+      "scheduleOperationSteps": 65
+    },
+    "supplementaryWin7BuildOnSameWin11": {
+      "calendarSteps": 30,
+      "profileSteps": 39,
+      "contentSteps": 52,
+      "scheduleOperationSteps": 65
+    },
+    "scope": "hidden own windows and synthetic deployments; no visible Seewo/actual touch or DPI acceptance"
+  },
+  "outboundCalendarHttps": {
+    "modernReport": "2026-10-31-round20-modern-calendar-windows.json",
+    "supplementaryReport": "2026-10-31-round20-win7-calendar-on-win11.json",
+    "scope": "fixed2026 HTTPS feed, 39 days, source checksum and strict parse; no application writes in standalone download probe; native workflow uses synthetic cached feed",
+    "governmentNoticeBodyVerified": false,
+    "synchronousHardPreemption": "NOT_PROVEN",
+    "teacherInboundTls": "NOT_VALIDATED"
+  },
+  "artifacts": {
+    "modern": {
+      "path": "/tmp/fc-round20-modern-frozen/fc-bootstrap.exe",
+      "sha256": "6e00081159b91a62b1236c903a6ecab488e01b822e765a63ed25da74bf20679c",
+      "bytes": 9905677,
+      "sourceInputs": "/tmp/fc-round20-source-inputs-final.json"
+    },
+    "supplementaryWin7": {
+      "path": "/tmp/fc-round20-win7-frozen/fc-bootstrap.exe",
+      "sha256": "9d4a146cc49d32620c118645e5b0575e8438650a621a84050ff4881872e45743",
+      "bytes": 10005504,
+      "sourceInputs": "/tmp/fc-round20-source-inputs-final.json",
+      "scope": "Win7 GNU supplemental build, actual Win7 unvalidated"
+    },
+    "package": {
+      "name": "FutureClassroom-0.1.0-public-calendar-dev.zip",
+      "bytes": 4846129,
+      "sha256": "5a72f1a721ac52eac6f34ad0adf111553ef76b31de23a99527e298bfbc998ff7",
+      "memberCount": 13,
+      "independentRepackIdentical": true,
+      "report": "2026-10-31-round20-package.json"
+    }
+  },
+  "checks": {
+    "hostClippy": "PASS",
+    "windowsAllTargetsClippy": "PASS",
+    "rustfmt": "PASS",
+    "architecture": "12 crates / 33 first-party edges",
+    "thirdPartyLicenses": "86 registry components / 181 original registry license files; optional runtime source MIT text retained",
+    "modernPe": {
+      "structuralErrors": 0,
+      "knownWin7RiskTriggers": 5
+    },
+    "supplementaryWin7Pe": {
+      "structuralErrors": 0,
+      "knownRiskTriggers": 0
+    }
+  },
+  "frontend": {
+    "changed": false,
+    "inputFiles": 61,
+    "assetCount": 6,
+    "assetBytes": 444723,
+    "scope": "checksum/manifest verified reuse; no new browser or frontend run claimed"
+  },
+  "failureHistory": {
+    "hostInitial": "27 passed / 16 fixture failures in business_storage; source-year flags were manufactured by old fixtures. Final43 cases in that binary passed with ordinary defaults and dedicated real adoption coverage.",
+    "workerInitial": "2 passed / 2 failed: fixture advanced24h but reused expired lease; second failure was serial-lock poison. Real login fixes fixture; final frozen four cases pass on Host and Windows.",
+    "other": "Original domain import, strict parser official-URL fixture, editor status budget/type inference, compilation/Clippy and partial-move failures are retained as raw logs."
+  },
+  "remainingGates": [
+    "actual Win7 SP1 x86 and Win10 devices, formal MSVC",
+    "visible Seewo/PPT/touch/DPI",
+    "strict inbound P0 deadline and production teacher TLS/listener",
+    "complete remaining plan modules, installation and72-hour acceptance"
+  ],
+  "cleanupReports": [
+    "2026-10-31-round20-cleanup.json",
+    "2026-10-31-round20-windows-final-ssh-and-cleanup.json"
+  ],
+  "cleanupStatus": "PASS",
+  "finalSourceFilesRehashedAfterCleanup": 321
+}

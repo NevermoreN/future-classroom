@@ -3,6 +3,8 @@
 #[cfg(windows)]
 mod application;
 #[cfg(windows)]
+mod calendar_download_probe;
+#[cfg(windows)]
 mod credential_probe;
 #[cfg(windows)]
 mod material_helper;
@@ -31,6 +33,26 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--calendar-probe" => {
+            #[cfg(windows)]
+            {
+                application::calendar_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("native calendar workflow probe requires Windows".into())
+            }
+        }
+        [flag] if flag == "--calendar-download-probe" => {
+            #[cfg(windows)]
+            {
+                calendar_download_probe::run()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("public calendar WinHTTP probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--web-voice-probe" => {
             #[cfg(windows)]
             {

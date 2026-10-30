@@ -1,0 +1,25 @@
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.02s
+     Running unittests src/lib.rs (/tmp/fc-round20-storage-target/debug/deps/fc_storage-50351b439967861c)
+
+running 16 tests
+test business::calendar::tests::exact_local_lease_is_checked_again_at_real_commit ... ok
+test business::calendar::tests::auto_policy_default_cas_and_revoked_grant_fail_closed ... ok
+test business::calendar::tests::cache_is_not_active_and_only_explicit_adoption_verifies ... ok
+test business::calendar::tests::legacy_schedule_without_public_data_is_read_strictly_as_empty ... ok
+test business::calendar::tests::failure_keeps_previous_candidate_and_adopted_schedule ... ok
+test business::calendar::tests::adoption_candidate_cas_schedule_cas_and_idempotent_result ... ok
+test business::calendar::tests::auto_revoked_epoch_keeps_successful_cache_but_does_not_adopt ... ok
+test business::calendar::tests::auto_pure_rest_update_works_without_live_local_lease ... ok
+test business::calendar::tests::ordinary_schedule_draft_cannot_forge_sourced_data_or_verified_years ... ok
+test business::calendar::tests::invalid_empty_or_wrong_year_download_does_not_verify_or_erase ... ok
+test business::calendar::tests::late_completion_cannot_overwrite_new_attempt_after_restart ... ok
+test business::calendar::tests::reservation_failure_and_clock_rollback_survive_restart ... ok
+test business::calendar::tests::not_modified_requires_existing_exact_validators_and_preserves_source_hash ... ok
+test business::calendar::tests::startup_rejects_candidate_corruption_and_orphan_namespace ... ok
+test business::calendar::tests::switch_to_school_while_fetch_in_flight_only_updates_cache ... ok
+test business::calendar::tests::bounded_cache_rejects_thirty_third_year_without_losing_existing ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 67 filtered out; finished in 1.92s
+

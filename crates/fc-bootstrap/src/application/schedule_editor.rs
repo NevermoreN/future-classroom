@@ -54,6 +54,7 @@ pub(super) const SPLIT_ACTIVITY: ActionId = ActionId(123);
 pub(super) const MERGE_ACTIVITY: ActionId = ActionId(124);
 pub(super) const REVIEW_APPLY: ActionId = ActionId(125);
 pub(super) const REVIEW_CANCEL: ActionId = ActionId(126);
+pub(super) const OPEN_PUBLIC_CALENDAR: ActionId = ActionId(127);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Page {
@@ -74,7 +75,7 @@ pub(super) enum EditorCommand {
     Reload,
     Save {
         expected: Revision,
-        document: ScheduleDocument,
+        document: Box<ScheduleDocument>,
     },
 }
 pub(super) struct Editor {
@@ -1070,6 +1071,7 @@ impl Editor {
                 }
                 v.actions = vec![
                     action(APPLY, "应用模式与覆盖到草稿"),
+                    action(OPEN_PUBLIC_CALENDAR, "公共候选下载与采用"),
                     action(EDIT_BACK, "返回学期列表"),
                 ];
                 if !self.document.semesters.is_empty() {
@@ -1221,7 +1223,7 @@ impl Editor {
                 self.document.validate_draft(identity).map_err(problem)?;
                 return Ok(EditorCommand::Save {
                     expected: self.expected,
-                    document: self.document.clone(),
+                    document: Box::new(self.document.clone()),
                 });
             }
             CANCEL => self.page = Page::Discard,
@@ -1956,7 +1958,7 @@ mod tests {
         match e.handle(SAVE_ALL, FormData::new(), &identity).unwrap() {
             EditorCommand::Save { expected, document } => {
                 assert_eq!(expected, Revision::new(8));
-                assert_eq!(document, original);
+                assert_eq!(*document, original);
             }
             _ => panic!(),
         }

@@ -1,0 +1,49 @@
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error: useless conversion to the same type: `fc_bootstrap::backend::BackendError`
+   --> crates/fc-bootstrap/src/application/calendar_flow.rs:159:89
+    |
+159 |       backend.lock().map_err(|_| Failure::Stopped)?.finish_calendar_fetch(ticket, outcome)
+    |  _________________________________________________________________________________________^
+160 | |         .map_err(BackendError::from)?;
+    | |____________________________________^ help: consider removing
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#useless_conversion
+    = note: `-D clippy::useless-conversion` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::useless_conversion)]`
+
+error: large size difference between variants
+  --> crates/fc-bootstrap/src/application/schedule_editor.rs:72:1
+   |
+72 | /  pub(super) enum EditorCommand {
+73 | |      Stay,
+   | |      ---- the second-largest variant carries no data at all
+74 | |      Close,
+75 | |      Reload,
+76 | |/     Save {
+77 | ||         expected: Revision,
+78 | ||         document: ScheduleDocument,
+79 | ||     },
+   | ||_____- the largest variant contains at least 216 bytes
+80 | |  }
+   | |__^ the entire enum is at least 216 bytes
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#large_enum_variant
+   = note: `-D clippy::large-enum-variant` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::large_enum_variant)]`
+help: consider boxing the large fields or introducing indirection in some other way to reduce the total size of the enum
+   |
+78 -         document: ScheduleDocument,
+78 +         document: Box<ScheduleDocument>,
+   |
+
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 2 previous errors

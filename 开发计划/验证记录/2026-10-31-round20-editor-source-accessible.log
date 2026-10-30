@@ -1,0 +1,19 @@
+   Compiling fc-round20-editor-harness v0.1.0 (/tmp/fc-round20-editor-harness)
+error[E0282]: type annotations needed
+   --> /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/calendar_editor.rs:437:25
+    |
+437 |                     let rows =
+    |                         ^^^^
+...
+464 |                     if let Some(row) = rows.first() {
+    |                                        ---- type must be known at this point
+    |
+help: consider giving `rows` an explicit type
+    |
+437 |                     let rows: Vec<_> =
+    |                             ++++++++
+
+For more information about this error, try `rustc --explain E0282`.
+error: could not compile `fc-round20-editor-harness` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-round20-editor-harness` (lib test) due to 1 previous error

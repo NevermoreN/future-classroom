@@ -1,0 +1,26 @@
+   Compiling fc-round20-editor-harness v0.1.0 (/tmp/fc-round20-editor-harness)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.92s
+     Running unittests src/lib.rs (/tmp/fc-round20-editor-target/debug/deps/fc_round20_editor_harness-c69b62e4533e29a7)
+
+running 12 tests
+test calendar_editor::tests::policy_toggle_is_explicit_and_captures_exact_policy_revision ... ok
+test calendar_editor::tests::list_and_review_views_are_valid_and_busy_disables_all_actions ... ok
+test calendar_editor::tests::interrupted_reservation_can_retry_under_writer_limits_and_invalid_cache_cannot_adopt ... ok
+test calendar_editor::tests::full_diff_includes_removed_changed_conflict_and_shadowed_human_arrangement ... ok
+test calendar_editor::tests::every_difference_and_all_sixteen_sources_remain_accessible_in_bounded_pages ... ok
+test calendar_editor::tests::confirmation_uses_frozen_revisions_and_ignores_foreign_form_year ... ok
+test calendar_editor::tests::replace_discards_old_review_and_preserves_owner_identity ... ok
+test calendar_editor::tests::review_is_read_only_and_confirmation_needs_acknowledgment ... ok
+test calendar_editor::tests::cancelled_review_cannot_be_repurposed_as_policy_confirmation ... ok
+test calendar_editor::tests::school_can_review_sources_and_download_but_cannot_adopt ... ok
+test calendar_editor::tests::selection_only_loads_and_download_never_guesses_typed_year ... ok
+test calendar_editor::tests::cancel_changes_neither_adopted_data_nor_policy ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests fc_round20_editor_harness
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

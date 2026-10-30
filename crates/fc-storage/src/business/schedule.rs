@@ -67,12 +67,12 @@ impl std::io::Write for LimitedBuffer {
         Ok(())
     }
 }
-fn encode(value: &Value) -> Result<Vec<u8>, StorageError> {
+pub(super) fn encode(value: &Value) -> Result<Vec<u8>, StorageError> {
     let mut output = LimitedBuffer(Vec::with_capacity(4096));
     serde_json::to_writer(&mut output, value).map_err(|_| StorageError::DocumentTooLarge)?;
     Ok(output.0)
 }
-fn read_document(bytes: &[u8]) -> Result<ScheduleDocument, StorageError> {
+pub(super) fn read_document(bytes: &[u8]) -> Result<ScheduleDocument, StorageError> {
     let doc = dto::read_document(&codec::value(bytes)?)?;
     doc.validate_structure()
         .map_err(|_| StorageError::Database)?;
@@ -259,10 +259,34 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
             if original.len() != 32 {
                 return Err(StorageError::Database);
             }
-            if original != fingerprint {
-                return Err(StorageError::CommandIdReused);
-            }
             let result = d.get(&result_key)?.ok_or(StorageError::Database)?;
+            if original != fingerprint {
+                // Adding sourced calendar data must not invalidate an identical
+                // pre-upgrade retry. Only an actually legacy stored result and an
+                // empty sourced payload may use the exact old serialized proof.
+                let stored = codec::value(&result.value)?;
+                if !self.request.candidate.public_calendar_data.years.is_empty()
+                    || stored
+                        .as_object()
+                        .ok_or(StorageError::Database)?
+                        .contains_key("public_calendar_data")
+                {
+                    return Err(StorageError::CommandIdReused);
+                }
+                let mut legacy = dto::document(&self.request.candidate);
+                legacy
+                    .as_object_mut()
+                    .ok_or(StorageError::Database)?
+                    .remove("public_calendar_data");
+                let mut hash = Sha256::new();
+                hash.update(b"future-classroom/schedule/v1\0");
+                hash.update(self.request.expected_revision.get().to_be_bytes());
+                hash.update(codec::bytes(&codec::actor(&self.actor))?);
+                hash.update(encode(&legacy)?);
+                if original != hash.finalize().to_vec() {
+                    return Err(StorageError::CommandIdReused);
+                }
+            }
             let result_digest: Vec<u8> = serde_json::from_value(value["result_digest"].clone())
                 .map_err(|_| StorageError::Database)?;
             if result_digest.len() != 32
@@ -289,6 +313,14 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
             });
         }
         let current = load(d, &identity)?;
+        // Only the dedicated candidate adoption capability may replace sourced
+        // evidence. A generic timetable draft cannot manufacture verification.
+        if self.request.candidate.public_calendar_data != current.public_calendar_data
+            || self.request.candidate.public_calendar.public_verified_years
+                != current.public_calendar.public_verified_years
+        {
+            return Err(StorageError::InvalidCommand);
+        }
         let next = current
             .transition(
                 &self.request.candidate,
@@ -299,13 +331,6 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
             )
             .map_err(StorageError::Schedule)?;
         let outcome = encode(&dto::document(&next))?;
-        let changed_at = self.clock.now();
-        let snapshot = (self.factory)(
-            &identity,
-            d.revision()?
-                .next()
-                .map_err(|_| StorageError::InvalidCommand)?,
-        )?;
         let journal_bytes = codec::bytes(
             &json!({"fingerprint":fingerprint,"revision":next.revision.get(),"result_digest":Sha256::digest(&outcome).to_vec()}),
         )?;
@@ -313,12 +338,9 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
         let clock = self.clock.clone();
         let session = self.session.clone();
         let request = self.request;
-        let (_, lesson_change) = super::lesson::observe(d, &identity, &next, changed_at)?;
-        let mut mutations = vec![
-            Mutation::Put {
-                key: DOCUMENT.into(),
-                value: outcome.clone(),
-            },
+        let (mut mutations, snapshot) =
+            publication(d, &identity, &next, self.clock.now(), &self.factory)?;
+        mutations.extend([
             Mutation::Put {
                 key: result_key,
                 value: outcome.clone(),
@@ -327,16 +349,7 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
                 key: journal,
                 value: journal_bytes,
             },
-            Mutation::Put {
-                key: CHANGE.into(),
-                value: codec::bytes(
-                    &json!({"format":1,"at":codec::time(changed_at),"unsettled":true,"observed_at":null}),
-                )?,
-            },
-        ];
-        if let Some(change) = lesson_change {
-            mutations.push(change);
-        }
+        ]);
         Ok(TransactionDecision {
             outcome: outcome.clone(),
             commit: Some((mutations, snapshot)),
@@ -355,4 +368,40 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
             })),
         })
     }
+}
+
+/// Shared document/change/lesson publication, used by ordinary edits and the
+/// strictly limited calendar-data capabilities. Authorization remains at callers
+/// and the real writer COMMIT guard; no alternate database writer is introduced.
+pub(super) fn publication<S>(
+    d: &dyn TransactionDocuments,
+    identity: &IdentityState,
+    next: &ScheduleDocument,
+    changed_at: fc_domain::time::LocalDateTime,
+    factory: &Factory<S>,
+) -> Result<(Vec<Mutation>, S), StorageError> {
+    let outcome = encode(&dto::document(next))?;
+    let snapshot = factory(
+        identity,
+        d.revision()?
+            .next()
+            .map_err(|_| StorageError::InvalidCommand)?,
+    )?;
+    let (_, lesson_change) = super::lesson::observe(d, identity, next, changed_at)?;
+    let mut mutations = vec![
+        Mutation::Put {
+            key: DOCUMENT.into(),
+            value: outcome,
+        },
+        Mutation::Put {
+            key: CHANGE.into(),
+            value: codec::bytes(
+                &json!({"format":1,"at":codec::time(changed_at),"unsettled":true,"observed_at":null}),
+            )?,
+        },
+    ];
+    if let Some(change) = lesson_change {
+        mutations.push(change);
+    }
+    Ok((mutations, snapshot))
 }

@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on build directory
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+error[E0583]: file not found for module `calendar_editor`
+ --> crates/fc-bootstrap/src/application.rs:4:1
+  |
+4 | mod calendar_editor;
+  | ^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: to create the module `calendar_editor`, create file "crates/fc-bootstrap/src/application/calendar_editor.rs" or "crates/fc-bootstrap/src/application/calendar_editor/mod.rs"
+  = note: if there is a `mod calendar_editor` elsewhere in the crate already, import it with `use crate::...` instead
+
+For more information about this error, try `rustc --explain E0583`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 1 previous error

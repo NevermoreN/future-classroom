@@ -44,6 +44,8 @@ def main():
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
     parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
+    parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
+    parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
     parser.add_argument("--web-voice", action="store_true", help="interactive hidden-task authenticated voice upload/jobs and native zero-PCM three-repeat/cancel integration")
     parser.add_argument("--web-pairing", action="store_true", help="noninteractive CNG/DPAPI/SQLite pairing and synthetic trusted-TLS metadata port probe; no HTTPS listener/browser")
@@ -53,6 +55,8 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
+    if args.calendar and args.application:
+        parser.error("run the dedicated calendar and full application workflows separately to preserve their independent observation budgets")
     if args.host.startswith("-") or "@" not in args.host or any(c.isspace() for c in args.host):
         parser.error("host must be user@hostname")
     if not args.exe.is_file() or args.exe.suffix.lower() != ".exe" or not args.identity.is_file():
@@ -98,6 +102,14 @@ def main():
         report["selfCheck"] = json.loads(remote.powershell(script, timeout=180))
         if report["selfCheck"]["exitCode"] != 0:
             raise RuntimeError("Windows self-check failed")
+        if args.calendar_download:
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe --calendar-download-probe 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            report["calendarDownload"] = json.loads(remote.powershell(script, timeout=90))
+            result = report["calendarDownload"]
+            if result.get("exitCode") != 0 or not any(isinstance(line, str) and line.startswith("CALENDAR_DOWNLOAD_PROBE_PASS ") for line in result.get("output", [])):
+                raise RuntimeError("fixed source WinHTTP calendar download failed")
+            report["calendarDownload"]["scope"] = "one fixed2026 outbound HTTPS download+strict parse; government notice body and native hard preemption NOT_PROVEN; no application writes"
+            print("calendar HTTPS download PASS", flush=True)
         if args.web_pairing:
             # This probe uses only our marked child TEMP and runs directly over
             # noninteractive SSH; it does not need the user's foreground session.
@@ -182,6 +194,15 @@ def main():
                 raise RuntimeError("voice report insertion point is ambiguous")
             body = body.replace(anchor, command + "@{webVoiceExitCode=$webVoiceCode;webVoiceOutput=$webVoiceOutput;" + anchor[2:])
 
+        if args.calendar:
+            command = "$calendarOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --calendar-probe 2>&1|ForEach-Object{\"$_\"});$calendarCode=$LASTEXITCODE;"
+            report_anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{applicationExitCode=$appCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in report_anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("calendar report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{calendarExitCode=$calendarCode;calendarOutput=$calendarOutput;" + anchor[2:])
+
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -191,9 +212,9 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials or args.web_voice:
+        if args.application or args.materials or args.web_voice or args.calendar:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials or args.web_voice else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials or args.web_voice or args.calendar else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -228,6 +249,15 @@ def main():
             if schedule_steps != list(range(65)):
                 raise RuntimeError("schedule operations did not complete exactly 65 ordered steps")
             report["scheduleOperationsNativeSteps"] = len(schedule_steps)
+        if args.calendar:
+            output = report["native"].get("calendarOutput", [])
+            if report["native"].get("calendarExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native calendar workflow failed")
+            steps = [int(line.split("index=", 1)[1].split()[0]) for line in output if isinstance(line, str) and line.startswith("CALENDAR_NATIVE_STEP index=")]
+            if steps != list(range(30)) or not any(isinstance(line, str) and "calendar_candidates_review_adopt_policy_lock_stale_native_worker=PASS calendar_native_steps=30" in line for line in output):
+                raise RuntimeError("native calendar result or exact30 ordered steps missing")
+            report["calendarNativeSteps"] = len(steps)
+            report["calendarNativeStatus"] = "PASS"
         if args.materials and report["native"].get("materialsExitCode") != 0:
             raise RuntimeError("isolated materials integration failed")
         if args.audio_silent:

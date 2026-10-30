@@ -1,0 +1,23 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0382]: use of partially moved value: `self`
+   --> crates/fc-storage/src/business/calendar.rs:788:38
+    |
+670 |             CalendarFetchOutcome::Downloaded(candidate) => {
+    |                                              --------- value partially moved here
+...
+788 |             precommit: Some(Box::new(move || {
+    |                                      ^^^^^^^ value used here after partial move
+789 |                 if positive {
+790 |                     execution_check(&self.execution)?;
+    |                                      -------------- use occurs due to use in closure
+    |
+    = note: partial move occurs because value has type `fc_domain::calendar::CalendarCandidate`, which does not implement the `Copy` trait
+help: borrow this binding in the pattern to avoid moving the value
+    |
+670 |             CalendarFetchOutcome::Downloaded(ref candidate) => {
+    |                                              +++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `fc-storage` (lib) due to 1 previous error

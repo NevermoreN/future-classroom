@@ -1,0 +1,102 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.09s
+     Running unittests src/lib.rs (/tmp/fc-round20-storage-target/debug/deps/fc_storage-50351b439967861c)
+
+running 92 tests
+test business::calendar::tests::cache_is_not_active_and_only_explicit_adoption_verifies ... ok
+test business::calendar::tests::auto_policy_default_cas_and_revoked_grant_fail_closed ... ok
+test business::calendar::tests::adoption_commit_revocation_rolls_back_document_receipt_and_change_ledger ... ok
+test business::calendar::tests::adoption_candidate_cas_schedule_cas_and_idempotent_result ... ok
+test business::calendar::tests::auto_pure_rest_update_works_without_live_local_lease ... ok
+test business::calendar::tests::auto_revoked_epoch_keeps_successful_cache_but_does_not_adopt ... ok
+test business::calendar::tests::background_reserves_term_years_and_next_year_without_local_actor ... ok
+test business::calendar::tests::legacy_schedule_without_public_data_is_read_strictly_as_empty ... ok
+test business::calendar::tests::exact_local_lease_is_checked_again_at_real_commit ... ok
+test business::calendar::tests::durable_adoption_receipt_capacity_fails_without_touching_schedule ... ok
+test business::calendar::tests::impossible_ticket_headers_fail_startup ... ok
+test business::calendar::tests::failure_keeps_previous_candidate_and_adopted_schedule ... ok
+test business::calendar::tests::invalid_empty_or_wrong_year_download_does_not_verify_or_erase ... ok
+test business::calendar::tests::ordinary_schedule_draft_cannot_forge_sourced_data_or_verified_years ... ok
+test business::calendar::tests::late_completion_cannot_overwrite_new_attempt_after_restart ... ok
+test business::calendar::tests::oversize_candidate_is_failed_attempt_and_preserves_previous_cache ... ok
+test business::calendar::tests::mode_changed_away_and_back_invalidates_auto_capture ... ok
+test business::calendar::tests::not_modified_requires_existing_exact_validators_and_preserves_source_hash ... ok
+test business::codec::json_tests::bounded_json_rejects_recursive_and_escaped_duplicate_keys_before_value_conversion ... ok
+test business::codec::json_tests::every_identity_object_rejects_unknown_and_missing_fields_including_nullable_fields ... ok
+test business::codec::json_tests::exact_object_helper_rejects_missing_null_unknown_and_nonobjects ... ok
+test business::codec::json_tests::record_objects_are_strict_and_preserve_existing_semantic_corruption_checks ... ok
+test business::calendar::tests::manual_override_and_makeup_changes_require_explicit_adoption ... ok
+test business::codec::json_tests::storage_json_enforces_exact_byte_depth_and_container_budgets ... ok
+test business::calendar::tests::bounded_cache_rejects_thirty_third_year_without_losing_existing ... ok
+test business::calendar::tests::policy_revision_change_after_reserve_blocks_auto_without_discarding_cache ... ok
+test business::calendar::tests::reservation_failure_and_clock_rollback_survive_restart ... ok
+test business::calendar::tests::startup_rejects_candidate_hash_corruption ... ok
+test business::calendar::tests::startup_rejects_unindexed_candidate_namespace ... ok
+test business::content_web_tests::web_cleared_slot_retains_cas_and_receipts_are_historical_sender_only_without_recommit ... ok
+test business::content_web_tests::web_precommit_lease_revocation_rolls_back_receipt_and_slot ... ok
+test business::calendar::tests::switch_to_school_while_fetch_in_flight_only_updates_cache ... ok
+test business::content_web_tests::web_global_target_requires_fresh_assignment_but_native_global_semantics_stay_compatible ... ok
+test business::lesson_codec::tests::format_one_remains_unproved_and_format_two_proof_is_strict ... ok
+test business::content_web_tests::web_read_only_new_day_observation_survives_restart_and_wall_rollback_without_desktop ... ok
+test business::content_web_tests::web_receipt_requires_current_account_epoch_but_new_own_session_can_query_original_commit ... ok
+test business::content_web_tests::web_committed_but_midnight_or_revoked_result_release_is_unknown_not_prewrite_denial ... ok
+test business::content_web_tests::web_midnight_and_persistent_day_floor_never_release_expired_or_cleared_text ... ok
+test business::content_web_tests::web_receipts_recheck_exact_channel_after_read_and_local_lock_does_not_revoke_web ... ok
+test business::content_web_tests::web_reminder_receipts_require_web_origin_and_do_not_grant_other_authors_access ... ok
+test business::content_web_tests::web_receipt_shape_digest_length_duplicates_and_record_corruption_are_rejected ... ok
+test business::materials::outcome_tests::managed_download_missing_version_or_deleted_record_is_not_found_without_mutation ... ok
+test business::logout_tests::logout_sqlite_revalidates_live_session_after_authority_update_before_commit ... ok
+test business::materials::outcome_tests::a_new_exact_session_can_read_its_old_commit_but_old_epoch_cannot ... ok
+test business::materials::outcome_tests::native_legacy_receipt_keeps_schema_and_never_gets_fabricated_web_sender ... ok
+test business::logout_tests::logout_sqlite_rejects_other_accounts_stale_expected_epoch_and_initial_password ... ok
+test business::materials::outcome_tests::query_final_guard_gates_owned_foreign_and_unknown_without_writes ... ok
+test business::materials::outcome_tests::precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryable_history ... ok
+test business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown ... ok
+test business::materials::outcome_tests::web_append_delete_receipts_are_historical_original_sender_only_and_survive_restart ... ok
+test business::materials::outcome_tests::stale_delete_cas_never_creates_outcome_and_committed_delete_fault_is_recoverable ... ok
+test business::materials::outcome_tests::receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed ... ok
+test business::logout_tests::logout_sqlite_epoch_survives_restart_and_old_local_and_web_actors_stay_revoked ... ok
+test business::profiles::tests::profile_content_tests::profile_content_committed_publication_failure_preserves_immutable_version_and_durable_outcome ... ok
+test business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup ... ok
+test business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare ... ok
+test business::profiles::tests::profile_content_tests::profile_content_existing_profile_v1_exact_bytes_and_new_v2_strict_shape ... ok
+test business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version ... ok
+test business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish ... ok
+test business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc ... ok
+test business::profiles::tests::profile_content_tests::profile_content_expiry_restart_settlement_preserves_charge_and_never_releases_live_reservation ... ok
+test business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish ... ok
+test business::profiles::tests::profile_content_tests::profile_content_writer_rehashes_even_trusted_preparation_proof ... ok
+test business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize ... ok
+test business::profiles::tests::profiles_canonical_node_water_survives_delete_restart_and_rejects_retired_ids ... ok
+test business::profiles::tests::profile_content_tests::profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund ... ok
+test business::profiles::tests::profile_content_tests::profile_content_subject_owners_are_exact_and_disabled_history_stays_manageable ... ok
+test business::profiles::tests::profiles_facts_codec_accepts_only_exact_legacy_shape_and_rejects_partial_new_data ... ok
+test business::profiles::tests::profiles_exact_material_folder_owner_and_corrupt_receipt_are_not_silent_defaults ... ok
+test business::profiles::tests::profiles_postcommit_publication_failure_faults_new_operations_without_losing_document ... ok
+test business::voice_codec::tests::damaged_time_and_active_state_in_compact_audit_fail_closed ... ok
+test business::voice_codec::tests::full_audit_with_twenty_digit_ids_four_active_and_max_pending_assets_fits_document ... ok
+test login::tests::oversized_security_blob_is_rejected_without_creating_an_owned_copy ... ok
+test business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts ... ok
+test business::profiles::tests::profiles_independent_cas_joint_display_receipts_and_same_id_payload_binding ... ok
+test tests::canceled_backup_removes_only_its_new_partial_file ... ok
+test tests::batch_sql_failure_rolls_back_data_journal_and_authority ... ok
+test business::profiles::tests::profiles_teacher_web_user_denied_and_local_lock_at_precommit_rolls_back ... ok
+test business::profiles::tests::profiles_public_change_incompatible_current_profile_is_neutral_not_lost_or_global_failure ... ok
+test business::profiles::tests::profiles_facts_current_exact_teacher_override_break_and_real_material_pagination ... ok
+test tests::committed_publication_error_fails_closed ... ok
+test tests::committed_publication_panic_fails_closed ... ok
+test tests::full_queue_returns_busy_and_stop_has_independent_capacity ... ok
+test tests::future_schema_and_invalid_commands_are_rejected ... ok
+test tests::durable_reopen_cas_journal_and_cleanup ... ok
+test tests::unused_vector_capacity_is_charged_to_the_ingress_budget ... ok
+test tests::oversized_database_blob_is_rejected_at_borrow_before_allocating_a_document ... ok
+test tests::coherent_backup_reopens_with_original_journal_and_cas ... ok
+test tests::metadata_scan_short_byte_limited_pages_keep_explicit_continuation ... ok
+test business::profiles::tests::profiles_declared_missing_page_document_and_cross_owner_are_startup_corruption ... ok
+test business::profiles::tests::profiles_paged_catalog_history_disable_and_restart_do_not_block_revocation ... ok
+test tests::byte_budget_saturates_before_slot_count_and_has_no_retry_drift ... ok
+
+test result: ok. 92 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.76s
+

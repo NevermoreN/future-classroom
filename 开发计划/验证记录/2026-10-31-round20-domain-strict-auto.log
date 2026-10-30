@@ -1,0 +1,35 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.55s
+     Running unittests src/lib.rs (/tmp/fc-round20-domain-target/debug/deps/fc_domain-2610ce4c188c5c98)
+
+running 27 tests
+test calendar::tests::allocation_counts_adopted_strings_headers_and_reserved_capacity ... ok
+test calendar::tests::auto_accepts_pure_rest_removal_and_ignores_paper_list_order ... ok
+test calendar::tests::adopted_metadata_alone_changes_public_applied_not_mapping_revision ... ok
+test calendar::tests::auto_is_off_without_grant_and_rejects_mode_switch_or_new_year ... ok
+test calendar::tests::distant_spill_and_spill_only_files_are_rejected ... ok
+test calendar::tests::document_conflict_is_unconfirmed_until_manual_mapping_resolves_it ... ok
+test calendar::tests::document_resolver_ignores_legacy_verified_flags ... ok
+test calendar::tests::empty_days_and_empty_or_duplicate_papers_cannot_verify_year ... ok
+test calendar::tests::notice_url_rejects_credentials_cross_origin_query_fragment_and_path_tricks ... ok
+test calendar::tests::preceding_december_spill_is_retained_without_verifying_its_year ... ok
+test calendar::tests::document_resolver_requires_makeup_mapping_and_human_entry_wins ... ok
+test calendar::tests::proposal_shows_additions_deletions_changes_and_human_shadowing ... ok
+test calendar::tests::real_provider_notice_paths_and_fixed_provider_are_valid ... ok
+test calendar::tests::restricted_adoption_advances_only_schedule_and_public_applied_revisions ... ok
+test calendar::tests::school_mode_ignores_public_days_and_keeps_missing_coverage_unconfirmed ... ok
+test calendar::tests::spill_effect_does_not_claim_prior_year_verified ... ok
+test calendar::tests::cross_year_equal_days_merge_and_conflicting_days_are_order_independent ... ok
+test calendar::tests::auto_preserves_existing_unchanged_makeup_but_never_adds_or_removes_one ... ok
+test calendar::tests::text_header_and_source_limits_apply_before_adoption ... ok
+test calendar::tests::auto_rejects_changed_notice_manual_touched_and_forged_differences ... ok
+test calendar::tests::auto_does_not_adopt_rest_name_or_overlap_provenance_changes ... ok
+test calendar::tests::year_range_and_duplicate_dates_are_rejected ... ok
+test calendar::tests::proposal_preserves_unselected_years_and_reports_conflicts ... ok
+test schedule_document::row_operations_tests::operations_allow_unrelated_incomplete_timing_dates_and_calendar_drafts ... ok
+test schedule_document::tests::school_and_public_calendar_are_independent_and_mode_switch_is_versioned ... ok
+test calendar::tests::candidate_date_and_aggregate_year_limits_are_distinct ... ok
+test calendar::tests::aggregate_day_limit_is_checked_across_valid_annual_files ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 97 filtered out; finished in 0.01s
+

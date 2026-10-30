@@ -1,0 +1,25 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+error[E0603]: struct import `AuthEpoch` is private
+  --> crates/fc-domain/src/calendar_tests.rs:3:26
+   |
+ 3 |     auth::{ActorContext, AuthEpoch, TrustedOrigin},
+   |                          ^^^^^^^^^ private struct import
+   |
+note: the struct import `AuthEpoch` is defined here...
+  --> crates/fc-domain/src/auth.rs:1:13
+   |
+ 1 | use crate::{ids::*, time::LocalDateTime};
+   |             ^^^^^^
+note: ...and refers to the struct `AuthEpoch` which is defined here
+  --> crates/fc-domain/src/ids.rs:43:9
+   |
+43 |         pub struct $name(u64);
+   |         ^^^^^^^^^^^^^^^^^^^^^^ you could import this directly
+...
+53 | versions!(Revision, AuthEpoch, SceneGeneration);
+   | ----------------------------------------------- in this macro invocation
+   = note: this error originates in the macro `versions` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `fc-domain` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

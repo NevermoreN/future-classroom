@@ -55,6 +55,8 @@ pub struct ScheduleDocument {
     pub calendar_mode_revision: Revision,
     pub school_calendar: CalendarConfig,
     pub public_calendar: CalendarConfig,
+    /// Adopted public provenance; non-active candidates live in their own repository.
+    pub public_calendar_data: crate::calendar::PublicCalendarData,
     pub automatic_gaps: bool,
     pub rules_revision: Revision,
 }
@@ -116,6 +118,7 @@ impl Default for ScheduleDocument {
             calendar_mode_revision: Revision::default(),
             school_calendar: calendar(CalendarMode::School),
             public_calendar: calendar(CalendarMode::Public),
+            public_calendar_data: crate::calendar::PublicCalendarData::default(),
             automatic_gaps: true,
             rules_revision: Revision::default(),
         }
@@ -432,6 +435,9 @@ impl ScheduleDocument {
     /// immutable command receipts whose identity references may since have changed.
     pub fn validate_structure(&self) -> Result<(), ScheduleDocumentError> {
         self.capacity()?;
+        self.public_calendar_data
+            .validate()
+            .map_err(|_| ScheduleDocumentError::new(DocumentErrorKind::InvalidCalendar))?;
         if self.revision.get() > 0 && self.id_high_water < self.maximum_id() {
             return Err(ScheduleDocumentError::new(DocumentErrorKind::InvalidDraft));
         }
@@ -755,7 +761,35 @@ impl ScheduleDocument {
     ) -> Result<AcademicDay, ScheduleDocumentError> {
         self.validate_structure()?;
         let semesters: Vec<_> = self.semesters.iter().map(|p| p.semester.clone()).collect();
-        let mut day = crate::schedule::resolve_day(&semesters, class, date, self.active_calendar())
+        let mut calendar = self.active_calendar().clone();
+        if self.calendar_mode == CalendarMode::Public {
+            // Legacy year flags carry no provider provenance and cannot verify a year.
+            calendar.public_verified_years = self.public_calendar_data.verified_years();
+            if let Some(actual) = semesters
+                .iter()
+                .find(|s| s.class_id == class && s.contains(date))
+            {
+                let manual = calendar
+                    .entries
+                    .iter()
+                    .any(|e| e.actual_semester_id == actual.id && e.date == date);
+                if !manual {
+                    if let Some(day) = self.public_calendar_data.merged_day(date) {
+                        calendar.entries.push(CalendarEntry {
+                            actual_semester_id: actual.id,
+                            date,
+                            mapping: match day.kind {
+                                Some(crate::calendar::PublicDayKind::Rest) => DayMapping::Rest,
+                                Some(crate::calendar::PublicDayKind::Makeup) | None => {
+                                    DayMapping::Unconfirmed
+                                }
+                            },
+                        });
+                    }
+                }
+            }
+        }
+        let mut day = crate::schedule::resolve_day(&semesters, class, date, &calendar)
             .map_err(|e| ScheduleDocumentError::new(DocumentErrorKind::Schedule(e)))?;
         if let AcademicDay::Scheduled(day) = &mut day {
             day.rules_revision = self.rules_revision;
@@ -787,6 +821,40 @@ impl ScheduleDocument {
         identity
             .authorize_management(actor, now)
             .map_err(|e| ScheduleDocumentError::new(DocumentErrorKind::Identity(e)))?;
+        self.derive_transition(candidate, identity)
+    }
+    /// Restricted pure adoption transition. The caller must first authorize an exact
+    /// local administrator or a durable automatic-adoption grant on the sole writer.
+    /// This cannot change school data, mode, manual mappings, or timetable contents.
+    pub fn transition_calendar_data(
+        &self,
+        data: crate::calendar::PublicCalendarData,
+        expected_revision: Revision,
+        identity: &IdentityState,
+    ) -> Result<Self, ScheduleDocumentError> {
+        if self.revision == Revision::default() && self != &Self::default() {
+            return Err(ScheduleDocumentError::new(DocumentErrorKind::InvalidDraft));
+        }
+        if self.revision != expected_revision {
+            return Err(ScheduleDocumentError::new(
+                DocumentErrorKind::RevisionConflict {
+                    current: self.revision,
+                },
+            ));
+        }
+        self.validate(identity)?;
+        data.validate()
+            .map_err(|_| ScheduleDocumentError::new(DocumentErrorKind::InvalidCalendar))?;
+        let mut candidate = self.clone();
+        candidate.public_calendar.public_verified_years = data.verified_years();
+        candidate.public_calendar_data = data;
+        self.derive_transition(&candidate, identity)
+    }
+    fn derive_transition(
+        &self,
+        candidate: &Self,
+        identity: &IdentityState,
+    ) -> Result<Self, ScheduleDocumentError> {
         self.reject_retired_ids(candidate)?;
         let mut result = candidate.clone();
         // Like version fields, caller-supplied allocation counters cannot silently
@@ -833,7 +901,9 @@ impl ScheduleDocument {
         ] {
             let content_changed = new.school_coverage != old.school_coverage
                 || new.public_verified_years != old.public_verified_years
-                || new.entries != old.entries;
+                || new.entries != old.entries
+                || (new.mode == CalendarMode::Public
+                    && self.public_calendar_data != result.public_calendar_data);
             new.applied_revision = if old.applied_revision.get() == 0 {
                 Revision::new(1)
             } else if content_changed {
@@ -943,6 +1013,7 @@ impl ScheduleDocument {
                         .checked_mul(std::mem::size_of::<i32>())?,
                 )?;
         }
+        bytes = bytes.checked_add(self.public_calendar_data.allocation_bytes()?)?;
         Some(bytes)
     }
 }

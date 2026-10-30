@@ -1,0 +1,125 @@
+{
+  "status": "PASS_AFTER_REVIEW_FIXES_WITH_PHASED_WORKER_PROOF",
+  "scope": "Read review of application/flow/controller/Backend integration and document 21; authorized follow-up storage fence repair",
+  "findings": [
+    {
+      "id": "CAL-R20-R1",
+      "severity": "P1",
+      "finding": "Downloaded/NotModified and management writes could pass an early JobContext checkpoint, wait for Backend mutex/writer, then COMMIT after cancellation or deadline.",
+      "originalLocation": "application/calendar_flow.rs:153-159; Adopt/Policy entry-only checkpoint",
+      "resolution": "Production *_while passes actual execution_fence into BusinessRepository guard; evaluate+precommit checks. False/panic is distinct CalendarCancelled. Positive finish rollback is followed by separate same-ticket Failed(Cancelled) settlement.",
+      "status": "FIXED_CODE_STORAGE32_PASS_AND_FOUR_DISTINCT_WORKER_CASES_PASS_ACROSS_TWO_RUNS",
+      "workerProof": "Initial debug run: 2 valid PASS, 1 fixture SessionExpired failure, 1 fixture mutex-poison cascade. Corrected fixture recheck: 2 affected PASS, 2 filtered. Final all-four single-frozen-source release run remains parent-owned evidence."
+    },
+    {
+      "id": "CAL-R20-R2",
+      "severity": "P2",
+      "finding": "Background completion ignored results and left visible calendar/schedule snapshots stale without notice. Desktop revision refresh was already correct.",
+      "resolution": "Controller now reloads clean Calendar view and preserves dirty review/schedule with stale-version notice.",
+      "status": "FIXED_CODE_REVIEW"
+    },
+    {
+      "id": "CAL-R20-R3",
+      "severity": "P2",
+      "finding": "Document 21 described all reservations/completions as requiring current public mode and grant, while manual School-mode download and ticket-only cache settlement are intentional.",
+      "resolution": "Document now distinguishes background reservation/positive auto adoption authorization from manual download and cache-only completion.",
+      "status": "FIXED_DOCUMENT_REVIEW"
+    },
+    {
+      "id": "CAL-R20-R4",
+      "severity": "P3",
+      "finding": "Only-public-and-document revision wording needs an initial-document qualification: D0 first persistence initializes other zero revisions to one through shared derive_transition.",
+      "resolution": "Document now limits revision preservation claim to existing persisted schedules and describes initial zero-revision initialization.",
+      "status": "FIXED_DOCUMENT_REVIEW"
+    }
+  ],
+  "confirmed": [
+    "Physical HTTP ticket remains stored until real task terminal; cancel does not take/free slot.",
+    "Lock clears calendar review, cancels lifetime, increments UI generation; owner+generation reject cross-session completions.",
+    "Manual adoption uses stored candidate refs and expected schedule revision; ordinary Save cannot replace sourced data.",
+    "Desktop independently observes real health/global revision and invalidates stale facts.",
+    "Status only includes one candidate plus at most 32 metadata rows; persistent blobs 64KiB, status independently bounded 128KiB before COMMIT.",
+    "Calendar changes add no global machine settings writes; background is default-off; shutdown cancellation retains ticket."
+  ],
+  "checks": {
+    "storageCalendarTests": 32,
+    "storageCalendarLog": "/tmp/fc-round20-storage-fence-tests-1.log",
+    "storagePortsClippy": "/tmp/fc-round20-storage-fence-clippy-1.log",
+    "workerIntegrationClippy": "/tmp/fc-round20-calendar-worker-fence-clippy-1.log"
+  },
+  "inputs": [
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_flow.rs",
+      "sha256": "96073294a77cccb3f1eb4ea9a70a579d05944401d88d716a57b58e3a51db4a6e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_controller.rs",
+      "sha256": "be060324658ee61172dc6c4a5e62c06577e5a81dd4a2a460ba5af3aef41e5a34"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "91c56ca564f62195567bb97f5f37124091a7f24ebd424760aba90ccffe71cb94"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/calendar.rs",
+      "sha256": "69a98e0b842967d9a0228c4bb5664c86337bfe0a1116b74c9ba0849ea98d018e"
+    },
+    {
+      "path": "crates/fc-storage/src/business/calendar.rs",
+      "sha256": "c98e5d726028cf0e447d641a61196de9c63b6987f429a9db61671ee0f17333c2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "sha256": "2973c6964a5f62377505e86accb7ba8912e34f0613264a2567f4c5aeda9b485f"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "22f37b092ce0cdc55e3d755c1c91cc276f5fb184ed4a35b89bcf66f0a4937bea"
+    },
+    {
+      "path": "crates/fc-ports/src/calendar.rs",
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad"
+    },
+    {
+      "path": "开发计划/21-公共校历候选与采用.md",
+      "sha256": "4fed4680d796da7315ea0f289be381287afe02ec1d9d32949dcd6e01297adb7a"
+    }
+  ],
+  "workerFixtureCorrection": {
+    "originalLog": "/tmp/fc-round20-calendar-worker-fence-tests-1.log",
+    "recheckLog": "/tmp/fc-round20-calendar-worker-fence-tests-2.log",
+    "beforeSource": "/tmp/fc-round20-calendar-worker-fence-fixture-before.rs",
+    "patch": "/tmp/fc-round20-calendar-worker-fence-fixture-fix.patch",
+    "oldSHA256": "a16afb50cc47e1ced31e73c96d4b3c079cf2eb0195133905bc25ea153ebf8f6d",
+    "newSHA256": "2974e02720b046a2f4bc168c930d05329a099bb067e03596fbb02fbe2f0690c0",
+    "productionRelaxed": false,
+    "recheckResult": "2 passed; 0 failed; 2 filtered"
+  },
+  "codeInputsAfterFix": [
+    {
+      "path": "crates/fc-ports/src/calendar.rs",
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "22f37b092ce0cdc55e3d755c1c91cc276f5fb184ed4a35b89bcf66f0a4937bea"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "sha256": "2973c6964a5f62377505e86accb7ba8912e34f0613264a2567f4c5aeda9b485f"
+    },
+    {
+      "path": "crates/fc-storage/src/business/calendar.rs",
+      "sha256": "c98e5d726028cf0e447d641a61196de9c63b6987f429a9db61671ee0f17333c2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/calendar.rs",
+      "sha256": "86350ed3273e2122cfcfe5c13d080389b6af59679e204bbc84169d5a1242fcfa"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+      "sha256": "2974e02720b046a2f4bc168c930d05329a099bb067e03596fbb02fbe2f0690c0"
+    }
+  ],
+  "fixtureResidue": []
+}

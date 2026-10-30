@@ -1,5 +1,6 @@
 //! Versioned, bounded wire input. Actor, origin and paths never come from JSON.
 #![forbid(unsafe_code)]
+pub mod calendar_feed;
 pub mod web;
 
 use serde::de::{self, DeserializeOwned, DeserializeSeed, MapAccess, SeqAccess, Visitor};

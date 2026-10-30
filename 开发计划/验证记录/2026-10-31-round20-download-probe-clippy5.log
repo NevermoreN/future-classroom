@@ -1,0 +1,33 @@
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error[E0382]: use of moved value: `app`
+    --> crates/fc-bootstrap/src/application/calendar_probe.rs:512:10
+     |
+ 417 |     let mut app = create_app(clock.clone(), true)?;
+     |         ------- move occurs because `app` has type `application::App`, which does not implement the `Copy` trait
+...
+ 500 |     let closed: Check<()> = (|| {
+     |                              -- value moved into closure here
+ 501 |         while !app.pool.is_finished() {
+ 502 |             app.poll()?;
+     |             --- variable moved due to use in closure
+...
+ 509 |         checked(app.pool.join(), "join shared workers")?;
+     |                 -------- capture is moved because of use here
+...
+ 512 |     drop(app);
+     |          ^^^ value used here after move
+     |
+note: if `application::App` implemented `Clone`, you could clone the value
+    --> crates/fc-bootstrap/src/application.rs:1031:1
+     |
+1031 | struct App {
+     | ^^^^^^^^^^ consider implementing `Clone` for this type
+     |
+    ::: crates/fc-bootstrap/src/application/calendar_probe.rs:509:17
+     |
+ 509 |         checked(app.pool.join(), "join shared workers")?;
+     |                 -------- you could clone this value
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 1 previous error

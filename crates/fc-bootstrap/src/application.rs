@@ -1,7 +1,14 @@
 //! Native product composition. All KDF/SQLite/file work runs on the one shared
 //! two-thread pool; the window pump only handles bounded events and owned results.
+mod calendar_probe;
+pub fn calendar_probe() -> std::result::Result<(), String> {
+    calendar_probe::run()
+}
 mod accounts_editor;
 mod accounts_probe;
+mod calendar_controller;
+mod calendar_editor;
+mod calendar_flow;
 mod desktop_controller;
 mod display_editor;
 mod material_flow;
@@ -107,6 +114,7 @@ enum Screen {
     Homework,
     HomeworkEdit,
     Schedule,
+    Calendar,
     Display,
     Profiles,
     ProfileContent,
@@ -132,6 +140,7 @@ fn fatal(error: &Failure) -> bool {
             BackendError::Identity(fc_ports::IdentityRepositoryError::Faulted)
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
+                | BackendError::Calendar(fc_ports::CalendarRepositoryError::Faulted)
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
@@ -192,6 +201,11 @@ fn error_text(error: &Failure) -> String {
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::Calendar(fc_ports::CalendarRepositoryError::Cancelled) => "本次校历任务已取消或超过处理期限，请重新读取当前状态。".into(),
+            BackendError::Calendar(fc_ports::CalendarRepositoryError::Stale) => "校历候选或课表已更新，请重新加载、核对差异后再确认。".into(),
+            BackendError::Calendar(fc_ports::CalendarRepositoryError::Capacity) => "校历缓存或采用资料超过容量上限，本次未生效，请保留数据并核对。".into(),
+            BackendError::Calendar(fc_ports::CalendarRepositoryError::Denied) => "校历管理需要当前有效的本机主管理员会话；学校模式下须先切换并保存公共模式才能采用。".into(),
+            BackendError::Calendar(_) => "本次校历操作未确认完成，请重新加载并核对缓存及已采用资料。".into(),
             BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
             BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::LessonContextChanged)) => "本节课程已结束或课表已变化，本次未保存。请重新加载当前课程。".into(),
             BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::RevisionConflict { .. })) => "本节临时安排已被修改，本次未保存。请重新加载当前课程。".into(),
@@ -338,6 +352,10 @@ enum Outcome {
     },
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
+    Calendar(Box<calendar_flow::Loaded>),
+    CalendarMaintained {
+        attempted: bool,
+    },
     LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
     LessonSaved(fc_domain::lesson_context::LessonContextSnapshot),
     DisplayLoaded(DisplaySettings),
@@ -395,6 +413,7 @@ enum Work {
         Box<accounts_editor::Command>,
     ),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
+    Calendar(Box<calendar_flow::Job>),
     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
     ChangeLesson(
         Arc<Mutex<Backend>>,
@@ -459,6 +478,7 @@ impl Task for Work {
             | Self::CloseWeb(..)
             | Self::Desktop(_, _, _) => Some(1024),
             Self::ContentPage { .. } => Some(1024),
+            Self::Calendar(job) => job.allocation_bytes(),
             Self::ContentImages(job) => job.allocation_bytes(),
             Self::ProfileContent(job) => job.allocation_bytes(),
             Self::SaveAccount(_, _, operation) => {
@@ -665,6 +685,7 @@ impl Task for Work {
                     _ => Err(invalid("账号操作在当前页面不可用。")),
                 }
             }
+            Self::Calendar(job) => job.run(context),
             Self::LoadSchedule(backend, lease) => {
                 let document = backend
                     .lock()
@@ -1037,6 +1058,9 @@ struct App {
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
     schedule: Option<ScheduleEditor>,
+    calendar: Option<calendar_editor::Editor>,
+    calendar_job: Option<Pending>,
+    next_calendar_maintenance: Instant,
     display: Option<display_editor::Editor>,
     accounts: Option<accounts_editor::Editor>,
     profiles: Option<profiles_editor::Editor>,
@@ -1165,6 +1189,24 @@ impl App {
                         enabled: true,
                     });
                 }
+                return view;
+            }
+        }
+        if self.screen == Screen::Calendar {
+            if let Some(editor) = &self.calendar {
+                let mut view = editor.view(
+                    self.pending.is_some() || self.calendar_job.is_some() || self.stopping,
+                    if status.is_empty() {
+                        None
+                    } else {
+                        Some(status.clone())
+                    },
+                );
+                view.actions.push(Action {
+                    id: LOCK,
+                    label: "锁定".into(),
+                    enabled: true,
+                });
                 return view;
             }
         }
@@ -1417,6 +1459,9 @@ impl App {
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
+            Screen::Calendar => {
+                view.title = "正在加载公共校历候选".into();
+            }
             Screen::Display => {
                 view.title = "正在加载显示设置".into();
             }
@@ -1498,6 +1543,12 @@ impl App {
                 editor.capture(data);
             }
         }
+        // A locked review is discarded; a later session must read current
+        // candidates and revisions again. The physical download ticket remains.
+        self.calendar = None;
+        if let Some(p) = &self.calendar_job {
+            p.ticket.cancel();
+        }
         self.generation = self.generation.saturating_add(1);
         if let Some(p) = &self.pending {
             p.ticket.cancel();
@@ -1522,6 +1573,9 @@ impl App {
         self.stopping = true;
         if let Some(ticket) = &self.content_maintenance {
             ticket.cancel();
+        }
+        if let Some(job) = &self.calendar_job {
+            job.ticket.cancel();
         }
         if let Some(audio) = &self.audio {
             audio.shutdown();
@@ -1770,6 +1824,9 @@ impl App {
                 if self.screen == Screen::Lesson {
                     return self.lesson_event(action, data);
                 }
+                if self.screen == Screen::Calendar {
+                    return self.calendar_event(action, data);
+                }
                 if self.screen == Screen::Schedule {
                     return self.schedule_event(action, data);
                 }
@@ -1800,6 +1857,10 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Schedule
+                            } else if self.calendar.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Calendar
                             } else if self.display.as_ref().is_some_and(|e| {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
@@ -2687,6 +2748,12 @@ impl App {
             self.status = "当前账号没有可继续的课表草稿。".into();
             return self.render();
         }
+        if action == schedule_editor::OPEN_PUBLIC_CALENDAR {
+            if let Some(editor) = &mut self.schedule {
+                editor.capture(data, &self.state);
+            }
+            return self.open_calendar();
+        }
         let command =
             self.schedule
                 .as_mut()
@@ -2709,7 +2776,7 @@ impl App {
                         backend.clone(),
                         lease,
                         expected,
-                        document,
+                        *document,
                     ))?;
                 }
             }
@@ -2894,6 +2961,10 @@ impl App {
         self.schedule
             .as_ref()
             .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
+                .calendar
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
             || self
                 .display
                 .as_ref()
@@ -3158,6 +3229,7 @@ impl App {
                 }
             }
         }
+        self.poll_calendar()?;
         self.cleanup_jobs
             .retain_mut(|job| matches!(job.try_result(), Ok(None)));
         if !self.stopping && self.cleanup_jobs.len() < 2 {
@@ -3370,6 +3442,8 @@ impl App {
                         self.status = "账号与任教范围已保存，该账号原有会话已失效。".into();
                     }
                 }
+                Ok(Outcome::Calendar(loaded)) => self.calendar_loaded(*loaded),
+                Ok(Outcome::CalendarMaintained { .. }) => {}
                 Ok(Outcome::ScheduleLoaded(document)) => {
                     if let Some(lease) = self.lease {
                         self.schedule = Some(ScheduleEditor::new(document, lease.principal_id()));
@@ -3846,6 +3920,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         shutdown_deadline: None,
         terminate_required: false,
         schedule: None,
+        calendar: None,
+        calendar_job: None,
+        next_calendar_maintenance: Instant::now() + Duration::from_secs(30),
         lesson_editor: None,
         web_service: None,
         web_editor: None,
