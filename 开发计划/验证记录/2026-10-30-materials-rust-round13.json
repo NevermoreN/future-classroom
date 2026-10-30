@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-30T15:03:59.399994+00:00",
+  "stage": "round13",
+  "scope": "Teacher material authenticated Rust application/protocol/controlled Windows file adapter",
+  "status": "SOURCE_FROZEN_TARGETED_HOST_PASS_WINDOWS_COMPILE_AND_LINT_PASS_WINDOWS_RUNTIME_PENDING_PARENT",
+  "sourceManifest": {
+    "files": [
+      {
+        "path": "crates/fc-bootstrap/src/backend.rs",
+        "sha256": "29d9144ff9acb85361c49b62e373bada63e5ff0ae6bd26f9da6852b31f0df9ee",
+        "bytes": 97519
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+        "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5",
+        "bytes": 11451
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/web.rs",
+        "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499",
+        "bytes": 36612
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "sha256": "4c0e097f6d8ee06dbcdb4a8939af022d7346a648d9c12adaee493c0d1875f9ad",
+        "bytes": 10702
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "sha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9",
+        "bytes": 39220
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+        "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48",
+        "bytes": 8874
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "sha256": "ac17c8252393c39b4fe1d31450b560b3fef4cafbb954884cc000c60d17e95ad2",
+        "bytes": 25074
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "sha256": "cb08ba3529a9f52d113cb6c8d5be41c865a72d2c2df21d96efbc86c7e736a55b",
+        "bytes": 16407
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "sha256": "6bc72312071ef7739e7c9cea7d73a20d734aa1f5e7344d56f8c6efe7e5876046",
+        "bytes": 27652
+      },
+      {
+        "path": "crates/fc-protocol/src/web/materials.rs",
+        "sha256": "bda24725b6df9392d97561c133d43ba837745948c8519a4aecf1e53fce1498c3",
+        "bytes": 18217
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "sha256": "67d94d37995b027c5f1b03cd23982c6d11aab3fde52d45bb55df8fef73a68d84",
+        "bytes": 9883
+      }
+    ],
+    "sha256": "a44699c971856e385bb4cb4e761f9dd54beab8e4a3b793f54b258a32ad01d3c5"
+  },
+  "environment": {
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)\n"
+  },
+  "checks": [
+    {
+      "name": "host_material_application_tests",
+      "command": "cargo test -p fc-bootstrap --lib --release --locked web_application::tests::material_tests -- --test-threads=2",
+      "exitCode": 0,
+      "passed": 4,
+      "failed": 0,
+      "executionSeconds": 2.88,
+      "log": {
+        "path": "/tmp/fc-round13-materials-host-tests-classes.log",
+        "sha256": "6aca08a9331ae652fd428076090e53c00766b3d78e66658924d02781f6051133",
+        "output": "   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 40.60s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 4 tests\ntest web_application::tests::material_tests::material_cursor_never_rebinds_to_mutated_folder_and_binary_slice_is_not_a_spool ... ok\ntest web_application::tests::material_tests::material_class_pages_preserve_all_classes_under_the_same_identity_revision ... ok\ntest web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts ... ok\ntest web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 45 filtered out; finished in 2.88s\n\n"
+      },
+      "coverage": "Real SQLite/credential/paired Web session; actual TXT fixture bytes validated by fc-materials; metadata/CAS/fixed version/delete historical replay/scopes/device revocation/class pagination; excludes Windows file adapter runtime."
+    },
+    {
+      "name": "protocol_material_tests",
+      "command": "cargo test -p fc-protocol --lib --release --locked web::materials -- --test-threads=2",
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0,
+      "executionSeconds": 0.0,
+      "log": {
+        "path": "/tmp/fc-round13-materials-protocol-tests-classes.log",
+        "sha256": "ea05332080ff79842396c10cb3c5d3ce4e0f379022a4d0cdd8c1b56802dba727",
+        "output": "   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Finished `release` profile [optimized] target(s) in 11.92s\n     Running unittests src/lib.rs (target/release/deps/fc_protocol-88395ea77e50a397)\n\nrunning 2 tests\ntest web::materials::tests::routes_and_strict_inputs ... ok\ntest web::materials::tests::scope_serialization_budget_keeps_an_entire_large_group ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n"
+      },
+      "coverage": "Canonical IDs/routes/strict bounded DTOs/duplicate fields/raw class uniqueness/50MiB document and10MiB image envelopes/cancel and maximum legal Unicode class-page response budget."
+    },
+    {
+      "name": "host_strict_clippy",
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --locked -- -D warnings",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round13-materials-host-clippy-final.log",
+        "sha256": "300a3aeebb616411ea7c05177c8b3e56f61c15751be85738e268a7265baf0ed5",
+        "output": "    Checking subtle v2.6.1\n    Checking memchr v2.8.3\n    Checking inout v0.1.4\n    Checking adler2 v2.0.1\n    Checking simd-adler32 v0.3.10\n    Checking crc32fast v1.5.3\n    Checking zeroize v1.8.2\n    Checking scopeguard v1.2.0\n    Checking zlib-rs v0.6.8\n    Checking cipher v0.4.4\n    Checking simdutf8 v0.1.5\n    Checking digest v0.10.7\n    Checking core_detect v1.0.0\n    Checking miniz_oxide v0.9.1\n    Checking rustc-hash v2.1.3\n    Checking log v0.4.34\n    Checking encoding_rs v0.8.42\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking sha2 v0.10.9\n    Checking aes v0.8.4\n    Checking hmac v0.12.1\n    Checking pbkdf2 v0.12.2\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking serde_json v1.0.145\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking flate2 v1.1.10\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking quick-xml v0.42.0\n    Checking pdf-syntax v0.6.1\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Finished `release` profile [optimized] target(s) in 7.67s\n"
+      },
+      "note": "Before Windows-only final permit/download changes. Root whole-workspace final validation is authoritative for final aggregate source."
+    },
+    {
+      "name": "windows_all_targets_check",
+      "command": "cargo check -p fc-bootstrap --all-targets --target i686-pc-windows-gnu --locked",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-check-replacement.log",
+        "sha256": "d070e1a420f4d97fa31efebdb096d447ec49bad84757e83e6418e6aa932a832f",
+        "output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.99s\n"
+      },
+      "reportedBuildSeconds": 0.99,
+      "note": "Compiles final process-global physical permit, actual writer barrier and old-app/new-app Windows counterfactual tests. Does not execute Windows binaries."
+    },
+    {
+      "name": "windows_strict_clippy",
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-clippy-global-permit.log",
+        "sha256": "3fed805938b3341642c96d13665795e0c523a9fe163070518c56f095821e51bb",
+        "output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 4.72s\n"
+      },
+      "reportedBuildSeconds": 4.72
+    }
+  ],
+  "preservedIntermediateFailures": [
+    {
+      "name": "initial_windows_compile",
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-check.log",
+        "sha256": "64e84c9f5b3ace8e2dc2ea4de94c891ff96e59790ccbef715e4e19276b509d30",
+        "output": "    Checking subtle v2.6.1\n   Compiling rustversion v1.0.23\n   Compiling zerocopy v0.8.63\n   Compiling ahash v0.8.12\n    Checking memchr v2.8.3\n   Compiling shlex v2.0.1\n   Compiling find-msvc-tools v0.1.15\n   Compiling pkg-config v0.3.34\n    Checking digest v0.10.7\n   Compiling cc v1.10.0\n   Compiling vcpkg v0.2.15\n    Checking sha2 v0.10.9\n    Checking once_cell v1.21.4\n   Compiling crc32fast v1.5.3\n    Checking inout v0.1.4\n    Checking smallvec v1.16.4\n    Checking simd-adler32 v0.3.10\n    Checking adler2 v2.0.1\n    Checking serde_json v1.0.145\n    Checking miniz_oxide v0.9.1\n    Checking cipher v0.4.4\n    Checking core_detect v1.0.0\n    Checking scopeguard v1.2.0\n    Checking zlib-rs v0.6.8\n    Checking simdutf8 v0.1.5\n   Compiling multiversion_no_op v1.0.0\n    Checking aes v0.8.4\n    Checking hmac v0.12.1\n    Checking fallible-iterator v0.3.0\n   Compiling encoding_rs v0.8.42\n    Checking log v0.4.34\n    Checking fallible-streaming-iterator v0.1.9\n    Checking rustc-hash v2.1.3\n    Checking bitflags v2.13.2\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking pbkdf2 v0.12.2\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking flate2 v1.1.10\n    Checking pdf-syntax v0.6.1\n   Compiling libsqlite3-sys v0.30.1\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking quick-xml v0.42.0\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking hashbrown v0.14.5\n    Checking hashlink v0.9.1\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\nerror[E0599]: no method named `is_err_or` found for enum `std::result::Result<T, E>` in the current scope\n  --> crates/fc-bootstrap/src/web_application/material_files.rs:31:64\n   |\n31 |  fn remove(&mut self,id:u64){self.slots.retain(|s|s.try_lock().is_err_or(|s|s.id!=id));}\n   |                                                                ^^^^^^^^^\n   |\nhelp: there is a method `is_err` with a similar name, but with different arguments\n  --> /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\\core\\src\\result.rs:646:4\n   = note: the full name for the type has been written to '/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-0bd1d7f3715c360d.long-type-14508698592949711511.txt'\n   = note: consider using `--verbose` to print the full type name to the console\n\nerror[E0599]: no method named `is_err_or` found for enum `std::result::Result<T, E>` in the current scope\n  --> crates/fc-bootstrap/src/web_application/material_files.rs:31:64\n   |\n31 |  fn remove(&mut self,id:u64){self.slots.retain(|s|s.try_lock().is_err_or(|s|s.id!=id));}\n   |                                                                ^^^^^^^^^\n   |\nhelp: there is a method `is_err` with a similar name, but with different arguments\n  --> /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\\core\\src\\result.rs:646:4\n   = note: the full name for the type has been written to '/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-9504b3113a95ad13.long-type-3241714184778666829.txt'\n   = note: consider using `--verbose` to print the full type name to the console\n\nFor more information about this error, try `rustc --explain E0599`.\nerror: could not compile `fc-bootstrap` (lib) due to 1 previous error\nwarning: build failed, waiting for other jobs to finish...\nerror: could not compile `fc-bootstrap` (lib test) due to 1 previous error\n"
+      },
+      "reason": "Used nonexistent Result::is_err_or; replaced with supported explicit registry logic. Final compile passes."
+    },
+    {
+      "name": "initial_host_material_tests",
+      "log": {
+        "path": "/tmp/fc-round13-materials-host-tests.log",
+        "sha256": "f957f8a0fb2cf9acba50b390dc71093b56e5c461a6169558844a1ac46bf6d9ac",
+        "output": "   Compiling subtle v2.6.1\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling rustversion v1.0.23\n   Compiling memchr v2.8.3\n   Compiling crc32fast v1.5.3\n   Compiling inout v0.1.4\n   Compiling adler2 v2.0.1\n   Compiling simd-adler32 v0.3.10\n   Compiling digest v0.10.7\n   Compiling cipher v0.4.4\n   Compiling zeroize v1.8.2\n   Compiling miniz_oxide v0.9.1\n   Compiling simdutf8 v0.1.5\n   Compiling sha2 v0.10.9\n   Compiling zlib-rs v0.6.8\n   Compiling multiversion_no_op v1.0.0\n   Compiling core_detect v1.0.0\n   Compiling scopeguard v1.2.0\n   Compiling hmac v0.12.1\n   Compiling aes v0.8.4\n   Compiling log v0.4.34\n   Compiling serde_json v1.0.145\n   Compiling encoding_rs v0.8.42\n   Compiling rustc-hash v2.1.3\n   Compiling pbkdf2 v0.12.2\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n   Compiling quick-xml v0.42.0\n   Compiling flate2 v1.1.10\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling pdf-syntax v0.6.1\n   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Finished `release` profile [optimized] target(s) in 54.38s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 3 tests\ntest web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts ... FAILED\ntest web_application::tests::material_tests::material_cursor_never_rebinds_to_mutated_folder_and_binary_slice_is_not_a_spool ... ok\ntest web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds ... FAILED\n\nfailures:\n\n---- web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts stdout ----\n\nthread 'web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts' (19682) panicked at crates/fc-bootstrap/src/web_application/materials_tests.rs:83:5:\nassertion `left == right` failed: {\"schemaVersion\":1,\"code\":\"RESULT_UNKNOWN\"}\n  left: 503\n right: 404\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds stdout ----\n\nthread 'web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds' (19688) panicked at crates/fc-bootstrap/src/web_application/tests.rs:120:61:\ncalled `Result::unwrap()` on an `Err` value: Denied\n\n\nfailures:\n    web_application::tests::material_tests::material_http_metadata_delete_cas_fixed_version_and_historical_receipts\n    web_application::tests::material_tests::material_scopes_are_numeric_pages_and_original_device_checkpoint_never_rebinds\n\ntest result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 45 filtered out; finished in 2.15s\n\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n"
+      },
+      "reason": "1PASS/2FAIL. Real stale resource-version lookup classified as Database/Unavailable; storage agent fixed ManagedTask to reject wrong folder/status/version as NotFound before inventory lookup. Separate fixture logoutAccount invalidated local admin as correctly designed; test relogs local admin. Final four targeted tests pass."
+    },
+    {
+      "name": "intermediate_concurrent_source_clippy",
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-clippy.log",
+        "sha256": "2c99f73f6d358a4243b9f3539837a3bc901fb60dac8704c10a70e3884f9fd0c8",
+        "output": "    Blocking waiting for file lock on build directory\n    Checking typenum v1.20.1\n    Checking cfg-if v1.0.5\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking subtle v2.6.1\n   Compiling generic-array v0.14.7\n    Checking windows-link v0.2.1\n    Checking cpufeatures v0.2.17\n   Compiling syn v2.0.119\n   Compiling serde_core v1.0.228\n    Checking memchr v2.8.3\n   Compiling zerocopy v0.8.63\n    Checking windows-result v0.4.1\n    Checking windows-strings v0.5.1\n   Compiling serde_json v1.0.145\n   Compiling serde v1.0.228\n   Compiling ahash v0.8.12\n    Checking itoa v1.0.18\n    Checking ryu v1.0.23\n    Checking once_cell v1.21.4\n   Compiling crc32fast v1.5.3\n    Checking smallvec v1.16.4\n    Checking adler2 v2.0.1\n    Checking simd-adler32 v0.3.10\n   Compiling encoding_rs v0.8.42\n   Compiling libsqlite3-sys v0.30.1\n    Checking miniz_oxide v0.9.1\n    Checking windows-threading v0.2.1\n    Checking scopeguard v1.2.0\n    Checking zeroize v1.8.2\n    Checking core_detect v1.0.0\n    Checking simdutf8 v0.1.5\n    Checking crypto-common v0.1.7\n    Checking block-buffer v0.10.4\n    Checking inout v0.1.4\n    Checking digest v0.10.7\n    Checking zlib-rs v0.6.8\n    Checking cipher v0.4.4\n    Checking sha2 v0.10.9\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking aes v0.8.4\n    Checking hmac v0.12.1\n    Checking log v0.4.34\n    Checking fallible-streaming-iterator v0.1.9\n    Checking fallible-iterator v0.3.0\n    Checking rustc-hash v2.1.3\n    Checking bitflags v2.13.2\n    Checking flate2 v1.1.10\n    Checking pbkdf2 v0.12.2\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking pdf-syntax v0.6.1\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking quick-xml v0.42.0\n   Compiling windows-implement v0.60.2\n   Compiling windows-interface v0.59.3\n   Compiling serde_derive v1.0.228\n    Checking windows-core v0.62.2\n    Checking hashbrown v0.14.5\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking windows-collections v0.3.2\n    Checking windows-future v0.3.2\n    Checking windows-numerics v0.3.1\n    Checking hashlink v0.9.1\n    Checking windows v0.62.2\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\nerror[E0425]: cannot find function `cancelled` in module `wire`\n   --> crates/fc-bootstrap/src/web_application/material_files.rs:315:29\n    |\n315 |         response(200, wire::cancelled(upload_id), None)\n    |                             ^^^^^^^^^ not found in `wire`\n\nerror[E0425]: cannot find function `cancel` in module `wire`\n   --> crates/fc-bootstrap/src/web_application/materials.rs:110:22\n    |\n110 |             if wire::cancel(body).is_err() {\n    |                      ^^^^^^ not found in `wire`\n\nerror[E0599]: no variant named `UploadCancel` found for enum `fc_protocol::web::materials::MaterialRoute`\n   --> crates/fc-bootstrap/src/web_application/materials.rs:109:24\n    |\n109 |         MaterialRoute::UploadCancel { upload_id } => {\n    |                        ^^^^^^^^^^^^ variant not found in `fc_protocol::web::materials::MaterialRoute`\n\nSome errors have detailed explanations: E0425, E0599.\nFor more information about an error, try `rustc --explain E0425`.\nerror: could not compile `fc-bootstrap` (lib) due to 3 previous errors\nwarning: build failed, waiting for other jobs to finish...\nerror: could not compile `fc-bootstrap` (lib test) due to 3 previous errors\n"
+      },
+      "reason": "In-flight Clippy built protocol before cancel route was added while bootstrap dispatch already referenced it. Final frozen-source compile and lint pass; no runtime claim from intermediate output."
+    },
+    {
+      "name": "windows_needless_return_lint",
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-clippy-final.log",
+        "sha256": "b37a84530d0f6c2dd057a7b6c4398424c90192aeef0d4393d8a92c6249aebd21",
+        "output": "    Blocking waiting for file lock on build directory\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\nerror: unneeded `return` statement\n   --> crates/fc-bootstrap/src/web_application/materials.rs:130:17\n    |\n130 |                 return app.material_create(backend, lease, scope, input);\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#needless_return\n    = note: `-D clippy::needless-return` implied by `-D warnings`\n    = help: to override `-D warnings` add `#[allow(clippy::needless_return)]`\nhelp: remove `return`\n    |\n130 -                 return app.material_create(backend, lease, scope, input);\n130 +                 app.material_create(backend, lease, scope, input)\n    |\n\nerror: unneeded `return` statement\n   --> crates/fc-bootstrap/src/web_application/materials.rs:144:17\n    |\n144 |                 return app.material_cancel(lease, upload_id);\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#needless_return\nhelp: remove `return`\n    |\n144 -                 return app.material_cancel(lease, upload_id);\n144 +                 app.material_cancel(lease, upload_id)\n    |\n\nerror: unneeded `return` statement\n   --> crates/fc-bootstrap/src/web_application/materials.rs:159:17\n    |\n159 |                 return app.material_append(backend, lease, scope, input);\n    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#needless_return\nhelp: remove `return`\n    |\n159 -                 return app.material_append(backend, lease, scope, input);\n159 +                 app.material_append(backend, lease, scope, input)\n    |\n\nerror: could not compile `fc-bootstrap` (lib) due to 3 previous errors\nwarning: build failed, waiting for other jobs to finish...\nerror: could not compile `fc-bootstrap` (lib test) due to 3 previous errors\n"
+      },
+      "reason": "Three needless_return diagnostics in Windows cfg dispatch branches. Removed only redundant return expressions; final strict lint passes."
+    },
+    {
+      "name": "root_diagnostic_bin_argument_lint",
+      "log": {
+        "path": "/tmp/fc-round13-materials-windows-clippy-frozen.log",
+        "sha256": "637630682eb899a9cd2425230009e599d03b692a3816d165072d0da63fbc35e5",
+        "output": "    Blocking waiting for file lock on build directory\n    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\nerror: this function has too many arguments (8/7)\n  --> crates/fc-bootstrap/src/web_pairing_probe/materials_probe.rs:29:1\n   |\n29 | / fn upload(\n30 | |     backend: &mut Backend,\n31 | |     app: &WebApplication,\n32 | |     scope: MaterialScope,\n...  |\n37 | |     reader: impl Read,\n38 | | ) -> Result<u64, String> {\n   | |________________________^\n   |\n   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#too_many_arguments\n   = note: `-D clippy::too-many-arguments` implied by `-D warnings`\n   = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`\n\nerror: could not compile `fc-bootstrap` (bin \"fc-bootstrap\" test) due to 1 previous error\n"
+      },
+      "reason": "Library passed, root-owned diagnostic bin helper triggered too_many_arguments. Root corrected its own diagnostic helper; latest strict command includes tests/bin and passes."
+    }
+  ],
+  "architecture": {
+    "command": "python3 scripts/check-architecture.py",
+    "exitCode": 0,
+    "output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold."
+  },
+  "formatAndDiff": {
+    "commands": [
+      "cargo fmt --all -- --check",
+      "git diff --check"
+    ],
+    "exitCodes": [
+      0,
+      0
+    ]
+  },
+  "storageEvidence": {
+    "path": "/tmp/fc-round13-materials-storage.json",
+    "sha256": "480f0bed66ebd2d58ae060d338b16e2f17310076b7c00381f664c1e4107faccd",
+    "note": "Separate agent-owned ports/storage report, including actual nine realSQLite tests and original v1 receipt preservation with same-COMMIT sender sidecar."
+  },
+  "implemented": [
+    "Exact authenticated Web lease and same-origin CSRF for material metadata; no actor/school/path/hash injection DTOs.",
+    "Numeric owner/subject scopes, dynamic <=20 groups under64KiB; explicit first <=20 classes, classTotal/nextClassOffset and independently paged current-identity class endpoint; actual legal Unicode names preserved.",
+    "Folder cursor same ID/revision/offset; append independent durable sequence; delete fixed material/resource version plus CAS; historical command result only original submitting principal with current exact Web session/scope.",
+    "At most two process-global physical upload owners acquired before exclusive file creation; RAII permit owned by Slot and strongly held through proof/pin; expired/revoked/old registry/replacement app cannot reclaim it early.",
+    "Private own-marked sibling web-material-staging namespace; startup verifies bounded canonical owned stage names before controlled link-resistant cleanup; does not alter native flat staging.",
+    "Real finite arrived-byte stream input uses fixed64KiB buffer, expected exact length, image10MiB/document50MiB cap, TTL300s, original exact device and current role/owner/classes checkpoints; cancelled/failed own partial file is cleaned.",
+    "Preparation outside Backend mutex: real fc-materials streaming validation/Office validation, full WIC image decode/8MP, isolated PDF helper; durable flush, read-shared immutable pin, atomic final publication and opaque proof through short SQL commit.",
+    "Safe consumed-upload append replay uses original resource version/upload ID, raw ordered class IDs and scope from durable original-principal outcome; no automatic replay on NOT_FOUND.",
+    "Typed streamed attachment with canonical percent-encoded filename, SHA256/length headers, real full SHA verification before first chunk and <=64KiB outgoing chunks; snapshot captured before metadata and final healthy exact-revision gate after fresh lease authorization.",
+    "Post-COMMIT fault/indeterminate/serialization/post-authorization failures report RESULT_UNKNOWN and retain immutable bytes for existing reconciliation; definite pre-COMMIT domain/CAS/quota/idempotency rejection cleans uncommitted object.",
+    "Explicit upload cancellation acknowledges only own waiting/ready stage; proof/committing stage is not a rollback."
+  ],
+  "windowsCounterfactualTests": {
+    "status": "COMPILED_NOT_EXECUTED_BY_THIS_AGENT",
+    "name": "material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_receipt_replay",
+    "cases": [
+      "Other exact device cannot consume/delete known upload ID; repeated body preserves ready bytes",
+      "Two waiting/ready/prepared owners block third reservation",
+      "Consumed proof commit then durable exact original replay and tampered classes conflict",
+      "Own cancel vs foreign cancel and short finite stream cleanup",
+      "Real writer delete executed during authorization callback must reject old download revision even with same live lease",
+      "Two prepared proofs alive, revoke owner lease, another live same-principal device cannot acquire third owner until proof Drop",
+      "Two prepared proofs alive, Drop WebApplication, configure replacement app on same service/root: create remains CAPACITY until one old proof Drop"
+    ]
+  },
+  "notPerformed": [
+    "No remote Windows commands by this agent. Parent final Win11 executable suite/main diagnostics must establish runtime evidence and bind final source/binary hashes.",
+    "No real HTTP listener/TLS/browser network delivery; ordinary slice dispatcher rejects binary, and append/download require typed worker routes.",
+    "Generic Read adapter is for already-arrived finite controlled local bytes/generators, not a proof of interruption of blocking network Read. Absolute between-read checks cannot force completion of arbitrary IO. Transport/event staging scheduling is still a separate disabled-listener gate.",
+    "No Win7/Win10 physical execution, ARM64 evidence, release or tag."
+  ],
+  "cleanup": {
+    "targetedHostFixturePathsRemaining": [],
+    "temporaryGeneratorRemoved": true,
+    "sharedTargetLeftForParentFinalBuildAndWholeRoundCleanup": true,
+    "reportAndRawLogsIntentionallyRetainedForParentArchive": true,
+    "persistentWindowsSSHUnchanged": true
+  }
+}

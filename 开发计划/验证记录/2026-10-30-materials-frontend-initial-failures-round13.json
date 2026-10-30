@@ -1,0 +1,2379 @@
+{
+  "schemaVersion": 1,
+  "scope": "Preserved original negative/counterfactual reports; final results counted separately",
+  "reports": [
+    {
+      "originalPath": "/tmp/fc-round13-materials-vitest-initial.json",
+      "sha256": "f189e0a09eef225c2096e0920e64b760eb09213f5a268c9487fc4c87fbf70543",
+      "report": {
+        "numTotalTestSuites": 4,
+        "numPassedTestSuites": 2,
+        "numFailedTestSuites": 2,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 32,
+        "numPassedTests": 31,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1793371256048,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations separates READY metadata, raw File body, explicit append and original-command GET",
+                "status": "passed",
+                "title": "separates READY metadata, raw File body, explicit append and original-command GET",
+                "duration": 56.947738000000015,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "status": "passed",
+                "title": "refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "duration": 3.3230950000000234,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 401 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 401 even if response stream cancel rejects",
+                "duration": 2.103206,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 403 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 403 even if response stream cancel rejects",
+                "duration": 1.0876839999999675,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "status": "passed",
+                "title": "requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "duration": 3.479461000000015,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "status": "passed",
+                "title": "caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "duration": 3.412498000000028,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations validates fixed-version download metadata before allocating its body",
+                "status": "passed",
+                "title": "validates fixed-version download metadata before allocating its body",
+                "duration": 3.9963319999999953,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "status": "passed",
+                "title": "rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "duration": 3.4269990000000234,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations aborts binary upload at the absolute 120s budget with no retry",
+                "status": "passed",
+                "title": "aborts binary upload at the absolute 120s budget with no retry",
+                "duration": 6.8570080000000075,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "status": "passed",
+                "title": "download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "duration": 2.9628700000000094,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371256383,
+            "endTime": 1793371256470.963,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-client.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots preserves full u64 identities and accepts grouped classes without Number conversion",
+                "status": "passed",
+                "title": "preserves full u64 identities and accepts grouped classes without Number conversion",
+                "duration": 10.022536000000002,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 0",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 0",
+                "duration": 0.7857319999999959,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 01",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 01",
+                "duration": 0.47301900000002206,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 18446744073709551616",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 18446744073709551616",
+                "duration": 0.39911599999999225,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 9007199254740992",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 9007199254740992",
+                "duration": 0.26853099999999586,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name ../课件.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name ../课件.pdf",
+                "duration": 0.5158010000000104,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name CON.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name CON.txt",
+                "duration": 0.5492120000000114,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name LPT¹.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name LPT¹.pdf",
+                "duration": 0.36126500000000306,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc\u0000.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc\u0000.txt",
+                "duration": 0.7950020000000109,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc.txt",
+                "duration": 0.4332380000000171,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad\n.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name bad\n.txt",
+                "duration": 0.3291730000000257,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt ",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt ",
+                "duration": 0.167966999999976,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt.",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt.",
+                "duration": 0.14439500000003136,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name x.exe",
+                "status": "passed",
+                "title": "rejects unsafe file name x.exe",
+                "duration": 0.13014500000002727,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "duration": 0.21611899999999196,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "status": "passed",
+                "title": "keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "duration": 1.077682999999979,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "status": "passed",
+                "title": "rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "duration": 0.7283199999999965,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots accepts an actual partial continuation offset rather than assuming twenty rows",
+                "status": "passed",
+                "title": "accepts an actual partial continuation offset rather than assuming twenty rows",
+                "duration": 0.4073669999999652,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "status": "passed",
+                "title": "rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "duration": 1.123404999999991,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects member versions and append sequence newer than their folder snapshot",
+                "status": "failed",
+                "title": "rejects member versions and append sequence newer than their folder snapshot",
+                "duration": 6.293285000000026,
+                "failureMessages": [
+                  "AssertionError: expected function to throw an error, but it didn't\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts:43:93\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "status": "passed",
+                "title": "rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "duration": 1.0798030000000267,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots validates upload receipt constants and original command identity",
+                "status": "passed",
+                "title": "validates upload receipt constants and original command identity",
+                "duration": 0.9382579999999621,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371256369,
+            "endTime": 1793371256396.9382,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts"
+          }
+        ]
+      }
+    },
+    {
+      "originalPath": "/tmp/fc-round13-materials-vitest-full.json",
+      "sha256": "f120566dd596d34b257fc73664371256ba8f442302961b9930798ad5eebb7ae3",
+      "report": {
+        "numTotalTestSuites": 6,
+        "numPassedTestSuites": 2,
+        "numFailedTestSuites": 4,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 44,
+        "numPassedTests": 42,
+        "numFailedTests": 2,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1793371302088,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations separates READY metadata, raw File body, explicit append and original-command GET",
+                "status": "passed",
+                "title": "separates READY metadata, raw File body, explicit append and original-command GET",
+                "duration": 54.58167300000002,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "status": "passed",
+                "title": "refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "duration": 2.930858999999998,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 401 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 401 even if response stream cancel rejects",
+                "duration": 2.2799019999999928,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 403 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 403 even if response stream cancel rejects",
+                "duration": 1.1532869999999775,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "status": "passed",
+                "title": "requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "duration": 3.11326600000001,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "status": "passed",
+                "title": "caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "duration": 1.6675879999999665,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations validates fixed-version download metadata before allocating its body",
+                "status": "passed",
+                "title": "validates fixed-version download metadata before allocating its body",
+                "duration": 3.453519999999969,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "status": "passed",
+                "title": "rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "duration": 5.9221410000000105,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations aborts binary upload at the absolute 120s budget with no retry",
+                "status": "passed",
+                "title": "aborts binary upload at the absolute 120s budget with no retry",
+                "duration": 7.823487,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "status": "passed",
+                "title": "download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "duration": 2.7690920000000006,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371302418,
+            "endTime": 1793371302503.769,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-client.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation uploads without append and only explicit addition submits a command",
+                "status": "passed",
+                "title": "uploads without append and only explicit addition submits a command",
+                "duration": 8.589178000000004,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cancels upload and ignores late success from a transport disregarding abort",
+                "status": "passed",
+                "title": "cancels upload and ignores late success from a transport disregarding abort",
+                "duration": 52.31228100000004,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cannot append an unconfirmed upload or repeat any write after unknown",
+                "status": "passed",
+                "title": "cannot append an unconfirmed upload or repeat any write after unknown",
+                "duration": 2.279623000000015,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "status": "passed",
+                "title": "NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "duration": 2.3963979999999765,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation foreign committed scope cannot resolve the original unknown command",
+                "status": "passed",
+                "title": "foreign committed scope cannot resolve the original unknown command",
+                "duration": 1.4175880000000234,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation captures immutable original resource version and revision for one delete",
+                "status": "passed",
+                "title": "captures immutable original resource version and revision for one delete",
+                "duration": 1.3946559999999977,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation never deletes a version differing from the loaded row",
+                "status": "failed",
+                "title": "never deletes a version differing from the loaded row",
+                "duration": 10.579088999999954,
+                "failureMessages": [
+                  "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array [\n      Object {\n        \"classes\": Array [\n          Object {\n            \"classId\": \"1\",\n            \"className\": \"一班\",\n          },\n          Object {\n            \"classId\": \"2\",\n            \"className\": \"二班\",\n          },\n        ],\n        \"ownerDisplayName\": \"合成老师\",\n        \"ownerTeacherId\": \"9\",\n        \"subjectId\": \"2\",\n        \"subjectName\": \"合成数学\",\n      },\n      Object {\n        \"commandId\": \"77\",\n        \"expectedMaterialRevision\": \"1\",\n        \"materialId\": \"5\",\n        \"resourceVersionId\": \"999\",\n      },\n      \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n      AbortSignal {\n        Symbol(kEvents): Map {},\n        Symbol(events.maxEventTargetListeners): 0,\n        Symbol(events.maxEventTargetListenersWarned): false,\n        Symbol(kHandlers): Map {},\n        Symbol(kAborted): false,\n        Symbol(kReason): undefined,\n        Symbol(kComposite): false,\n      },\n    ]\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/index.aTZaPVhf.js:2230:51)\n    at Proxy.<anonymous> (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/index.aTZaPVhf.js:1958:14)\n    at Proxy.methodWrapper (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/chai/index.js:1737:25)\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts:59:161\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 401 clears all draft and command mirrors",
+                "status": "passed",
+                "title": "authentication failure 401 clears all draft and command mirrors",
+                "duration": 1.5288919999999848,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 403 clears all draft and command mirrors",
+                "status": "passed",
+                "title": "authentication failure 403 clears all draft and command mirrors",
+                "duration": 1.6642380000000117,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation identity-changed continuation blocks old upload without transferring it",
+                "status": "passed",
+                "title": "identity-changed continuation blocks old upload without transferring it",
+                "duration": 1.2002979999999752,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation keeps actual partial offsets and blocks a stale folder cursor",
+                "status": "passed",
+                "title": "keeps actual partial offsets and blocks a stale folder cursor",
+                "duration": 0.981490000000008,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "status": "passed",
+                "title": "explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "duration": 1.068554000000006,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371302443,
+            "endTime": 1793371302529.0686,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots preserves full u64 identities and accepts grouped classes without Number conversion",
+                "status": "passed",
+                "title": "preserves full u64 identities and accepts grouped classes without Number conversion",
+                "duration": 5.527175,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 0",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 0",
+                "duration": 0.7517710000000193,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 01",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 01",
+                "duration": 0.33165299999996023,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 18446744073709551616",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 18446744073709551616",
+                "duration": 0.34113400000001093,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 9007199254740992",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 9007199254740992",
+                "duration": 0.29566200000004983,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name ../课件.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name ../课件.pdf",
+                "duration": 0.7282799999999838,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name CON.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name CON.txt",
+                "duration": 1.0189210000000344,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name LPT¹.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name LPT¹.pdf",
+                "duration": 0.4410679999999729,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc\u0000.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc\u0000.txt",
+                "duration": 0.9555390000000443,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc.txt",
+                "duration": 0.8029619999999795,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad\n.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name bad\n.txt",
+                "duration": 0.32334400000002006,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt ",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt ",
+                "duration": 0.19678799999996954,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt.",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt.",
+                "duration": 0.18879800000001978,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name x.exe",
+                "status": "passed",
+                "title": "rejects unsafe file name x.exe",
+                "duration": 0.15166599999997743,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "duration": 0.2116380000000504,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "status": "passed",
+                "title": "keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "duration": 1.105745000000013,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "status": "passed",
+                "title": "rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "duration": 0.7995329999999967,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots accepts an actual partial continuation offset rather than assuming twenty rows",
+                "status": "passed",
+                "title": "accepts an actual partial continuation offset rather than assuming twenty rows",
+                "duration": 0.4154970000000162,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "status": "passed",
+                "title": "rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "duration": 1.614325000000008,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects member versions and append sequence newer than their folder snapshot",
+                "status": "failed",
+                "title": "rejects member versions and append sequence newer than their folder snapshot",
+                "duration": 8.17587199999997,
+                "failureMessages": [
+                  "AssertionError: expected function to throw an error, but it didn't\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts:43:93\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "status": "passed",
+                "title": "rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "duration": 1.294522000000029,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots validates upload receipt constants and original command identity",
+                "status": "passed",
+                "title": "validates upload receipt constants and original command identity",
+                "duration": 0.9069869999999582,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371302375,
+            "endTime": 1793371302401.907,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts"
+          }
+        ]
+      }
+    },
+    {
+      "originalPath": "/tmp/fc-round13-materials-vitest-correlation-before.json",
+      "sha256": "80c72f82c6bcad1122b3d32e06abd4686f6a25731deb9da42e19c229bb5238aa",
+      "report": {
+        "numTotalTestSuites": 2,
+        "numPassedTestSuites": 0,
+        "numFailedTestSuites": 2,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 14,
+        "numPassedTests": 0,
+        "numFailedTests": 2,
+        "numPendingTests": 12,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1793371373637,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation uploads without append and only explicit addition submits a command",
+                "status": "skipped",
+                "title": "uploads without append and only explicit addition submits a command",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cancels upload and ignores late success from a transport disregarding abort",
+                "status": "skipped",
+                "title": "cancels upload and ignores late success from a transport disregarding abort",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cannot append an unconfirmed upload or repeat any write after unknown",
+                "status": "skipped",
+                "title": "cannot append an unconfirmed upload or repeat any write after unknown",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "status": "skipped",
+                "title": "NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation foreign committed scope cannot resolve the original unknown command",
+                "status": "skipped",
+                "title": "foreign committed scope cannot resolve the original unknown command",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation captures immutable original resource version and revision for one delete",
+                "status": "skipped",
+                "title": "captures immutable original resource version and revision for one delete",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation a new append receipt cannot resolve as an already revised material",
+                "status": "failed",
+                "title": "a new append receipt cannot resolve as an already revised material",
+                "duration": 25.41789,
+                "failureMessages": [
+                  "AssertionError: expected 'result' to be 'unknown' // Object.is equality\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts:61:29\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation delete cannot confirm different content bytes under the original fixed resource version",
+                "status": "failed",
+                "title": "delete cannot confirm different content bytes under the original fixed resource version",
+                "duration": 2.2902429999999754,
+                "failureMessages": [
+                  "AssertionError: expected 'result' to be 'unknown' // Object.is equality\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts:66:29\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation never deletes a version differing from the loaded row",
+                "status": "skipped",
+                "title": "never deletes a version differing from the loaded row",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 401 clears all draft and command mirrors",
+                "status": "skipped",
+                "title": "authentication failure 401 clears all draft and command mirrors",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 403 clears all draft and command mirrors",
+                "status": "skipped",
+                "title": "authentication failure 403 clears all draft and command mirrors",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation identity-changed continuation blocks old upload without transferring it",
+                "status": "skipped",
+                "title": "identity-changed continuation blocks old upload without transferring it",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation keeps actual partial offsets and blocks a stale folder cursor",
+                "status": "skipped",
+                "title": "keeps actual partial offsets and blocks a stale folder cursor",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "status": "skipped",
+                "title": "explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371373920,
+            "endTime": 1793371373947.2903,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts"
+          }
+        ]
+      }
+    },
+    {
+      "originalPath": "/tmp/fc-round13-materials-vitest-cancel.json",
+      "sha256": "a9e7be63de649470c77d42ccdac21582b2719fbf1dfa93ab848656d00bb59a36",
+      "report": {
+        "numTotalTestSuites": 6,
+        "numPassedTestSuites": 4,
+        "numFailedTestSuites": 2,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 54,
+        "numPassedTests": 53,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1793371554993,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations separates READY metadata, raw File body, explicit append and original-command GET",
+                "status": "passed",
+                "title": "separates READY metadata, raw File body, explicit append and original-command GET",
+                "duration": 65.06680500000004,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations cancels the exact upload with one CSRF POST and rejects a mismatched acknowledgement",
+                "status": "passed",
+                "title": "cancels the exact upload with one CSRF POST and rejects a mismatched acknowledgement",
+                "duration": 4.416050000000041,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "status": "passed",
+                "title": "refuses HTTP metadata, bytes and download without sending credentials or bytes",
+                "duration": 2.0217219999999543,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 401 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 401 even if response stream cancel rejects",
+                "duration": 5.166419999999903,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations preserves authentication failure 403 even if response stream cancel rejects",
+                "status": "passed",
+                "title": "preserves authentication failure 403 even if response stream cancel rejects",
+                "duration": 1.0256919999999354,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "status": "passed",
+                "title": "requires status 201 READY and never treats JSON upload-ID/name/byte mismatch as accepted",
+                "duration": 4.995224000000007,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "status": "passed",
+                "title": "caps actual JSON stream bytes at 64KiB despite a missing content-length",
+                "duration": 1.598025000000007,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations validates fixed-version download metadata before allocating its body",
+                "status": "passed",
+                "title": "validates fixed-version download metadata before allocating its body",
+                "duration": 3.6986200000000053,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "status": "passed",
+                "title": "rejects truncated and overflowing downloads, cancels overflow, and returns exact bytes only",
+                "duration": 3.0946069999999963,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations aborts binary upload at the absolute 120s budget with no retry",
+                "status": "passed",
+                "title": "aborts binary upload at the absolute 120s budget with no retry",
+                "duration": 8.476355000000012,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material HTTP transport has bounded bodies and fixed-version destinations"
+                ],
+                "fullName": "material HTTP transport has bounded bodies and fixed-version destinations download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "status": "passed",
+                "title": "download progress cannot renew the absolute binary deadline and cancellation frees the reader",
+                "duration": 5.461093000000005,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371555550,
+            "endTime": 1793371555655.4612,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-client.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation uploads without append and only explicit addition submits a command",
+                "status": "passed",
+                "title": "uploads without append and only explicit addition submits a command",
+                "duration": 9.377432999999996,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cancels upload and ignores late success from a transport disregarding abort",
+                "status": "passed",
+                "title": "cancels upload and ignores late success from a transport disregarding abort",
+                "duration": 55.340037999999936,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation explicitly cancels a completed upload once and cannot replace that upload before discard",
+                "status": "failed",
+                "title": "explicitly cancels a completed upload once and cannot replace that upload before discard",
+                "duration": 13.379415999999992,
+                "failureMessages": [
+                  "AssertionError: expected 'other.txt' to be '课件.txt' // Object.is equality\n    at /workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts:33:34\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+                ],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation unconfirmed cancellation does not recreate an upload or retry a write: ApiError: 白板未能完成此次请求。",
+                "status": "passed",
+                "title": "unconfirmed cancellation does not recreate an upload or retry a write: ApiError: 白板未能完成此次请求。",
+                "duration": 1.8076340000000073,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation unconfirmed cancellation does not recreate an upload or retry a write: NetworkFault: 无法确认白板的响应，请检查网络后主动核对。",
+                "status": "passed",
+                "title": "unconfirmed cancellation does not recreate an upload or retry a write: NetworkFault: 无法确认白板的响应，请检查网络后主动核对。",
+                "duration": 1.2740319999999201,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cancellation before READY has no guessed ID and ignores the late server receipt",
+                "status": "passed",
+                "title": "cancellation before READY has no guessed ID and ignores the late server receipt",
+                "duration": 1.7536209999999528,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation committing or unknown append cannot be cancelled as a temporary upload",
+                "status": "passed",
+                "title": "committing or unknown append cannot be cancelled as a temporary upload",
+                "duration": 1.1372969999999896,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation cannot append an unconfirmed upload or repeat any write after unknown",
+                "status": "passed",
+                "title": "cannot append an unconfirmed upload or repeat any write after unknown",
+                "duration": 1.9241579999999203,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "status": "passed",
+                "title": "NOT_FOUND retains the exact command; historical success requires explicit current GET",
+                "duration": 2.6664080000000467,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation foreign committed scope cannot resolve the original unknown command",
+                "status": "passed",
+                "title": "foreign committed scope cannot resolve the original unknown command",
+                "duration": 1.5014409999999998,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation captures immutable original resource version and revision for one delete",
+                "status": "passed",
+                "title": "captures immutable original resource version and revision for one delete",
+                "duration": 5.3103869999999915,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation a new append receipt cannot resolve as an already revised material",
+                "status": "passed",
+                "title": "a new append receipt cannot resolve as an already revised material",
+                "duration": 1.2755919999999605,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation delete cannot confirm different content bytes under the original fixed resource version",
+                "status": "passed",
+                "title": "delete cannot confirm different content bytes under the original fixed resource version",
+                "duration": 0.8713050000000067,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation never deletes a version differing from the loaded row",
+                "status": "passed",
+                "title": "never deletes a version differing from the loaded row",
+                "duration": 0.7712109999999939,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 401 clears all draft and command mirrors",
+                "status": "passed",
+                "title": "authentication failure 401 clears all draft and command mirrors",
+                "duration": 0.9097979999999097,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation authentication failure 403 clears all draft and command mirrors",
+                "status": "passed",
+                "title": "authentication failure 403 clears all draft and command mirrors",
+                "duration": 0.9100779999999986,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation identity-changed continuation blocks old upload without transferring it",
+                "status": "passed",
+                "title": "identity-changed continuation blocks old upload without transferring it",
+                "duration": 0.8939669999999751,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation keeps actual partial offsets and blocks a stale folder cursor",
+                "status": "passed",
+                "title": "keeps actual partial offsets and blocks a stale folder cursor",
+                "duration": 0.8977970000000823,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "material drafts, one-shot commands and exact result correlation"
+                ],
+                "fullName": "material drafts, one-shot commands and exact result correlation explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "status": "passed",
+                "title": "explicit leave aborts in-flight upload and late receipts cannot repopulate state",
+                "duration": 0.9004559999999628,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371555537,
+            "endTime": 1793371555640.9004,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots preserves full u64 identities and accepts grouped classes without Number conversion",
+                "status": "passed",
+                "title": "preserves full u64 identities and accepts grouped classes without Number conversion",
+                "duration": 5.60445900000002,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 0",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 0",
+                "duration": 0.7557410000000004,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 01",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 01",
+                "duration": 0.29709200000002056,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 18446744073709551616",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 18446744073709551616",
+                "duration": 0.3725359999999682,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects invalid or numeric identity 9007199254740992",
+                "status": "passed",
+                "title": "rejects invalid or numeric identity 9007199254740992",
+                "duration": 0.32543400000002976,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name ../课件.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name ../课件.pdf",
+                "duration": 0.6834279999999922,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name CON.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name CON.txt",
+                "duration": 0.7139990000000012,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name LPT¹.pdf",
+                "status": "passed",
+                "title": "rejects unsafe file name LPT¹.pdf",
+                "duration": 0.3436739999999645,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc\u0000.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc\u0000.txt",
+                "duration": 0.8868659999999977,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name abc.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name abc.txt",
+                "duration": 0.421717000000001,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad\n.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name bad\n.txt",
+                "duration": 0.4370980000000486,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt ",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt ",
+                "duration": 0.289291999999989,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name bad.txt.",
+                "status": "passed",
+                "title": "rejects unsafe file name bad.txt.",
+                "duration": 0.1994980000000055,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name x.exe",
+                "status": "passed",
+                "title": "rejects unsafe file name x.exe",
+                "duration": 0.21926899999999705,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "status": "passed",
+                "title": "rejects unsafe file name 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀.txt",
+                "duration": 0.3494450000000029,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "status": "passed",
+                "title": "keeps exact boundary file sizes and rejects zero, fractional and excessive bytes",
+                "duration": 2.181429000000037,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "status": "passed",
+                "title": "rejects duplicate/unsorted grouped scopes and classes, controls and empty classes",
+                "duration": 1.4022870000000012,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots accepts full valid owner/class names while keeping the narrower subject bound",
+                "status": "passed",
+                "title": "accepts full valid owner/class names while keeping the narrower subject bound",
+                "duration": 2.0025720000000433,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots only acknowledges cancellation of the exact allocated upload ID",
+                "status": "passed",
+                "title": "only acknowledges cancellation of the exact allocated upload ID",
+                "duration": 1.286611999999991,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots accepts an actual partial continuation offset rather than assuming twenty rows",
+                "status": "passed",
+                "title": "accepts an actual partial continuation offset rather than assuming twenty rows",
+                "duration": 0.5072809999999777,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "status": "passed",
+                "title": "rejects wrong folder, deleted members, duplicate sequence, cursor revision and cursor offset",
+                "duration": 2.0368330000000014,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects member versions and append sequence newer than their folder snapshot",
+                "status": "passed",
+                "title": "rejects member versions and append sequence newer than their folder snapshot",
+                "duration": 1.0128210000000308,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "status": "passed",
+                "title": "rejects mismatched extension/kind, malformed SHA, duplicate classes and unknown fields",
+                "duration": 1.4754500000000235,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              },
+              {
+                "ancestorTitles": [
+                  "materials wire values and immutable directory snapshots"
+                ],
+                "fullName": "materials wire values and immutable directory snapshots validates upload receipt constants and original command identity",
+                "status": "passed",
+                "title": "validates upload receipt constants and original command identity",
+                "duration": 3.9419510000000173,
+                "failureMessages": [],
+                "meta": {},
+                "tags": [],
+                "benchmarks": []
+              }
+            ],
+            "startTime": 1793371555479,
+            "endTime": 1793371555506.942,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts"
+          }
+        ]
+      }
+    },
+    {
+      "originalPath": "/tmp/fc-round13-materials-browser-before-download-fixture-fix.json",
+      "sha256": "4f0b1e6da14d5ad2820ba6bda192f82f153f3eae0b144d8c2a36284598cf517b",
+      "report": {
+        "schemaVersion": 1,
+        "scope": "Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration",
+        "checks": [
+          {
+            "name": "voice_still_explicitly_unimplemented",
+            "status": "PASS"
+          },
+          {
+            "name": "scope_discloses_full_class_total",
+            "status": "PASS"
+          },
+          {
+            "name": "only_first20_classes_loaded",
+            "status": "PASS"
+          },
+          {
+            "name": "all128_classes_explicitly_reachable",
+            "status": "PASS"
+          },
+          {
+            "name": "continuation_ends_at128",
+            "status": "PASS"
+          },
+          {
+            "name": "valid128_owner_class_and64_subject_render",
+            "status": "PASS"
+          },
+          {
+            "name": "download_single_Blob_current_browser_filename",
+            "status": "PASS"
+          }
+        ],
+        "requests": [
+          {
+            "path": "status",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "session",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/scopes/0",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/folders/9/2",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/20",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/40",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/60",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/80",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/100",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/120",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/download/9/2/5/6",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          }
+        ],
+        "screenshots": [],
+        "consoleErrors": [],
+        "runtimeErrors": [],
+        "status": "FAIL",
+        "failurePhase": "download",
+        "error": "Error: Path is not available when connecting remotely. Use saveAs() to save a local copy.",
+        "visibleText": "白板已确认登录，教师工作台已就绪。\n跳到主要内容\n未来教室\nTEACHER WORKSPACE\n白板连接已核验\n教师工作台\n\n以白板实际日期与授权范围为准\n\n我的课堂资料。\n\n选择老师与科目目录，上传、校验后添加；下载到当前设备。\n\n返回工作台\n核对会话\n按老师与科目独立管理，下载到当前设备\n重新加载范围\n\n下载内容已接收，将由当前浏览器保存。\n\n选择资料目录\n第 1–1 项，共 1 个老师 / 科目目录\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科\n师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n128 个有效任教班级\n上一页范围\n下一页范围\n\n真实文件校验后追加，同名文件可独立存在\n\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科 · 师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n支持 TXT、PDF、PPTX、DOCX、XLSX、PNG、JPEG、BMP。单文件最多50MiB，图片最多10MiB / 8MP；白板校验实际内容。\n选择本机课堂文件\n允许展示的任教班级（至少选一个）\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n合成班级2\n合成班级3\n合成班级4\n合成班级5\n合成班级6\n合成班级7\n合成班级8\n合成班级9\n合成班级10\n合成班级11\n合成班级12\n合成班级13\n合成班级14\n合成班级15\n合成班级16\n合成班级17\n合成班级18\n合成班级19\n合成班级20\n合成班级21\n合成班级22\n合成班级23\n合成班级24\n合成班级25\n合成班级26\n合成班级27\n合成班级28\n合成班级29\n合成班级30\n合成班级31\n合成班级32\n合成班级33\n合成班级34\n合成班级35\n合成班级36\n合成班级37\n合成班级38\n合成班级39\n合成班级40\n合成班级41\n合成班级42\n合成班级43\n合成班级44\n合成班级45\n合成班级46\n合成班级47\n合成班级48\n合成班级49\n合成班级50\n合成班级51\n合成班级52\n合成班级53\n合成班级54\n合成班级55\n合成班级56\n合成班级57\n合成班级58\n合成班级59\n合成班级60\n合成班级61\n合成班级62\n合成班级63\n合成班级64\n合成班级65\n合成班级66\n合成班级67\n合成班级68\n合成班级69\n合成班级70\n合成班级71\n合成班级72\n合成班级73\n合成班级74\n合成班级75\n合成班级76\n合成班级77\n合成班级78\n合成班级79\n合成班级80\n合成班级81\n合成班级82\n合成班级83\n合成班级84\n合成班级85\n合成班级86\n合成班级87\n合成班级88\n合成班级89\n合成班级90\n合成班级91\n合成班级92\n合成班级93\n合成班级94\n合成班级95\n合成班级96\n合成班级97\n合成班级98\n合成班级99\n合成班级100\n合成班级101\n合成班级102\n合成班级103\n合成班级104\n合成班级105\n合成班级106\n合成班级107\n合成班级108\n合成班级109\n合成班级110\n合成班级111\n合成班级112\n合成班级113\n合成班级114\n合成班级115\n合成班级116\n合成班级117\n合成班级118\n合成班级119\n合成班级120\n合成班级121\n合成班级122\n合成班级123\n合成班级124\n合成班级125\n合成班级126\n合成班级127\n合成班级128\n\n已加载 128 / 128 个真实任教班级。\n\n上传文件\n校验并添加到课堂资料\n\n上传完成不会自动添加。确认添加后，白板校验文件并持久保存；保存不代表此刻正在屏幕展示。\n\n课堂文件\n第 1–2 项，共 2 项；按成功添加顺序倒序。\n重新读取目录\nTXT\nlesson.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\nTXT\nother.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\n上一页文件\n下一页文件\n\n注销会使这个账号的全部渠道授权失效。\n\n注销账号\n班级共同提醒\n按白板当天日期生效\n管理今日提醒\n未来教室 · 每一堂课，都有准备\n账号与范围由白板本地管理",
+        "counts": {
+          "appendCount": 0,
+          "deleteCount": 0,
+          "cancelCount": 0,
+          "queries": 0,
+          "downloads": 1,
+          "folderGets": 1,
+          "bodyAborts": 0,
+          "dialogs": 0,
+          "beforeUnload": 0
+        },
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "completed": true,
+        "screenshotData": [],
+        "cleanup": "OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED"
+      },
+      "classification": "Browser QA runner fixture/API-availability error; corrected fixture only; not product failure"
+    },
+    {
+      "originalPath": "/tmp/fc-round13-materials-browser-before-vm-fixture-fix.json",
+      "sha256": "41f18d3eba71911827b081e2a94d87f6452848b8e24861fb4c12a1e9cd2bd525",
+      "report": {
+        "schemaVersion": 1,
+        "scope": "Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration",
+        "checks": [
+          {
+            "name": "voice_still_explicitly_unimplemented",
+            "status": "PASS"
+          },
+          {
+            "name": "scope_discloses_full_class_total",
+            "status": "PASS"
+          },
+          {
+            "name": "only_first20_classes_loaded",
+            "status": "PASS"
+          },
+          {
+            "name": "all128_classes_explicitly_reachable",
+            "status": "PASS"
+          },
+          {
+            "name": "continuation_ends_at128",
+            "status": "PASS"
+          },
+          {
+            "name": "valid128_owner_class_and64_subject_render",
+            "status": "PASS"
+          },
+          {
+            "name": "download_single_Blob_current_browser_filename",
+            "status": "PASS"
+          }
+        ],
+        "requests": [
+          {
+            "path": "status",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "session",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/scopes/0",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/folders/9/2",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/20",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/40",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/60",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/80",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/100",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/classes/9/2/120",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          },
+          {
+            "path": "materials/download/9/2/5/6",
+            "method": "GET",
+            "queryEmpty": true,
+            "originOK": true,
+            "csrfOK": true
+          }
+        ],
+        "screenshots": [],
+        "consoleErrors": [],
+        "runtimeErrors": [],
+        "status": "FAIL",
+        "failurePhase": "download",
+        "error": "TypeError [ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING]: A dynamic import callback was not specified.",
+        "visibleText": "白板已确认登录，教师工作台已就绪。\n跳到主要内容\n未来教室\nTEACHER WORKSPACE\n白板连接已核验\n教师工作台\n\n以白板实际日期与授权范围为准\n\n我的课堂资料。\n\n选择老师与科目目录，上传、校验后添加；下载到当前设备。\n\n返回工作台\n核对会话\n按老师与科目独立管理，下载到当前设备\n重新加载范围\n\n下载内容已接收，将由当前浏览器保存。\n\n选择资料目录\n第 1–1 项，共 1 个老师 / 科目目录\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科\n师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n128 个有效任教班级\n上一页范围\n下一页范围\n\n真实文件校验后追加，同名文件可独立存在\n\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科 · 师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n支持 TXT、PDF、PPTX、DOCX、XLSX、PNG、JPEG、BMP。单文件最多50MiB，图片最多10MiB / 8MP；白板校验实际内容。\n选择本机课堂文件\n允许展示的任教班级（至少选一个）\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n合成班级2\n合成班级3\n合成班级4\n合成班级5\n合成班级6\n合成班级7\n合成班级8\n合成班级9\n合成班级10\n合成班级11\n合成班级12\n合成班级13\n合成班级14\n合成班级15\n合成班级16\n合成班级17\n合成班级18\n合成班级19\n合成班级20\n合成班级21\n合成班级22\n合成班级23\n合成班级24\n合成班级25\n合成班级26\n合成班级27\n合成班级28\n合成班级29\n合成班级30\n合成班级31\n合成班级32\n合成班级33\n合成班级34\n合成班级35\n合成班级36\n合成班级37\n合成班级38\n合成班级39\n合成班级40\n合成班级41\n合成班级42\n合成班级43\n合成班级44\n合成班级45\n合成班级46\n合成班级47\n合成班级48\n合成班级49\n合成班级50\n合成班级51\n合成班级52\n合成班级53\n合成班级54\n合成班级55\n合成班级56\n合成班级57\n合成班级58\n合成班级59\n合成班级60\n合成班级61\n合成班级62\n合成班级63\n合成班级64\n合成班级65\n合成班级66\n合成班级67\n合成班级68\n合成班级69\n合成班级70\n合成班级71\n合成班级72\n合成班级73\n合成班级74\n合成班级75\n合成班级76\n合成班级77\n合成班级78\n合成班级79\n合成班级80\n合成班级81\n合成班级82\n合成班级83\n合成班级84\n合成班级85\n合成班级86\n合成班级87\n合成班级88\n合成班级89\n合成班级90\n合成班级91\n合成班级92\n合成班级93\n合成班级94\n合成班级95\n合成班级96\n合成班级97\n合成班级98\n合成班级99\n合成班级100\n合成班级101\n合成班级102\n合成班级103\n合成班级104\n合成班级105\n合成班级106\n合成班级107\n合成班级108\n合成班级109\n合成班级110\n合成班级111\n合成班级112\n合成班级113\n合成班级114\n合成班级115\n合成班级116\n合成班级117\n合成班级118\n合成班级119\n合成班级120\n合成班级121\n合成班级122\n合成班级123\n合成班级124\n合成班级125\n合成班级126\n合成班级127\n合成班级128\n\n已加载 128 / 128 个真实任教班级。\n\n上传文件\n校验并添加到课堂资料\n\n上传完成不会自动添加。确认添加后，白板校验文件并持久保存；保存不代表此刻正在屏幕展示。\n\n课堂文件\n第 1–2 项，共 2 项；按成功添加顺序倒序。\n重新读取目录\nTXT\nlesson.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\nTXT\nother.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\n上一页文件\n下一页文件\n\n注销会使这个账号的全部渠道授权失效。\n\n注销账号\n班级共同提醒\n按白板当天日期生效\n管理今日提醒\n未来教室 · 每一堂课，都有准备\n账号与范围由白板本地管理",
+        "counts": {
+          "appendCount": 0,
+          "deleteCount": 0,
+          "cancelCount": 0,
+          "queries": 0,
+          "downloads": 1,
+          "folderGets": 1,
+          "bodyAborts": 0,
+          "dialogs": 0,
+          "beforeUnload": 0
+        },
+        "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "completed": true,
+        "screenshotData": [],
+        "cleanup": "OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED"
+      },
+      "classification": "Browser QA runner fixture/API-availability error; corrected fixture only; not product failure"
+    }
+  ]
+}

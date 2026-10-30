@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "assetCount": 4,
+  "totalBytes": 403446,
+  "totalLimitBytes": 5242880,
+  "gzipJsCssBytes": 118023,
+  "gzipJsCssLimitBytes": 524288,
+  "scope": "static build only; listener, wire TLS, real browser pairing not established by this report",
+  "sourceInputs": "83fdf7417f72f5b88504af571ad21317701031a37b15e95f480aa018b7a8b4d5",
+  "manifestSha256": "6793ad2126820b5196758a627a6734a143b3b884738cd221943fd985ac1765f7",
+  "rustIntegration": {
+    "exitCode": 0,
+    "output": "    Blocking waiting for file lock on build directory\n    Finished `release` profile [optimized] target(s) in 26.83s\n     Running `target/release/examples/verify_web_assets web/dist`\nSTATIC_BUILD_INTEGRATION_PASS assets=4 bytes=403446 synthetic_metadata_only=true listener_started=false\n"
+  },
+  "typecheckOutput": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\n",
+  "unitOutput": "\n> future-classroom-teacher@0.1.0 test\n> vitest run\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  10 passed (10)\n      Tests  109 passed (109)\n   Start at  22:51:28\n   Duration  2.06s (tests 60%, import 26%, transform 9%, worker 5%)\n\n",
+  "buildOutput": "\n> future-classroom-teacher@0.1.0 build\n> tsc --noEmit && node scripts/licenses.mjs && vite build && node scripts/budget.mjs\n\nvite v8.3.5 building client environment for production...\ntransforming...\n✓ 2047 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/favicon-CXuYoSfB.svg    0.28 kB │ gzip:   0.21 kB\ndist/index.html                     0.68 kB │ gzip:   0.46 kB\ndist/assets/index-ChLw6Lu7.css     34.29 kB │ gzip:   8.34 kB\ndist/assets/index-E26v4lrV.js     368.18 kB │ gzip: 111.05 kB\n\n✓ built in 1.60s\n{\n  \"schemaVersion\": 1,\n  \"status\": \"PASS\",\n  \"assetCount\": 4,\n  \"totalBytes\": 403446,\n  \"totalLimitBytes\": 5242880,\n  \"gzipJsCssBytes\": 118023,\n  \"gzipJsCssLimitBytes\": 524288,\n  \"scope\": \"static build only; listener, wire TLS, real browser pairing not established by this report\"\n}\n",
+  "unitPassed": 109
+}

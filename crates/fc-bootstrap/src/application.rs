@@ -3,7 +3,7 @@
 mod desktop_controller;
 mod display_editor;
 mod material_flow;
-mod material_probe;
+pub(crate) mod material_probe;
 pub fn materials_probe() -> std::result::Result<(), String> {
     material_probe::run()
 }

@@ -8,6 +8,7 @@ use serde::Deserialize;
 
 pub mod assets;
 pub mod content;
+pub mod materials;
 pub mod pairing;
 pub mod responses;
 
@@ -35,6 +36,7 @@ pub enum Route {
     ContentRead { key: content::Key },
     ContentSave { key: content::Key },
     ContentCommand { command_id: CommandId },
+    Materials { route: materials::MaterialRoute },
     VoiceCapabilities,
     VoiceUpload { class_id: ClassId },
     VoiceSubmit,
@@ -50,6 +52,7 @@ impl Route {
     }
     pub fn body_limit(self) -> u64 {
         match self {
+            Self::Materials { route } => route.body_limit(),
             Self::PairingCreate | Self::PairingPoll { .. } | Self::SessionLogout => {
                 pairing::MAX_PAIRING_JSON_BYTES as u64
             }
@@ -63,6 +66,9 @@ impl Route {
         self.post() && !matches!(self, Self::PairingCreate | Self::PairingPoll { .. })
     }
     fn post(self) -> bool {
+        if let Self::Materials { route } = self {
+            return route.post();
+        }
         matches!(
             self,
             Self::PairingCreate
@@ -131,7 +137,11 @@ impl WebBoundary {
             "voice/capabilities" => Route::VoiceCapabilities,
             "voice/broadcasts" => Route::VoiceSubmit,
             _ => {
-                if let Some(offset) = path.strip_prefix("content/homework/scopes/") {
+                if let Some(path) = path.strip_prefix("materials/") {
+                    Route::Materials {
+                        route: materials::route(path).ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some(offset) = path.strip_prefix("content/homework/scopes/") {
                     Route::ContentScopes {
                         kind: content::Kind::Homework,
                         offset: content::route_offset(offset).ok_or(WebError::NotFound)?,
@@ -301,7 +311,14 @@ impl WebBoundary {
                 return Err(WebError::Body);
             }
             let content_type = unique(head, "content-type")?.ok_or(WebError::Body)?;
-            let allowed = if matches!(route, Route::VoiceUpload { .. }) {
+            let allowed = if matches!(
+                route,
+                Route::Materials {
+                    route: materials::MaterialRoute::UploadBytes { .. }
+                }
+            ) {
+                b"application/octet-stream".as_slice()
+            } else if matches!(route, Route::VoiceUpload { .. }) {
                 b"audio/wav".as_slice()
             } else {
                 b"application/json".as_slice()

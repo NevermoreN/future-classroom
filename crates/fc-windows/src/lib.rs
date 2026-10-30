@@ -5,6 +5,7 @@ pub mod audio;
 pub mod http;
 #[cfg(windows)]
 mod native;
+pub mod tcp_frontdoor;
 #[cfg(windows)]
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};
 #[cfg(windows)]

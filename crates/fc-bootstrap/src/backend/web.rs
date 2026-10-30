@@ -798,6 +798,108 @@ impl WebService {
             device,
         }))
     }
+    /// File-worker checkpoint using the latest published identity and exact
+    /// original device lease. No Backend mutex, SQL or activity renewal.
+    pub fn check_material_lease(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        classes: &[ClassId],
+    ) -> WebResult<()> {
+        let deadline = Instant::now() + Duration::from_millis(100);
+        loop {
+            match self.check_material_lease_once(lease, scope, classes) {
+                Err(WebServiceError::Busy) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(1))
+                }
+                result => return result,
+            }
+        }
+    }
+    fn check_material_lease_once(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        classes: &[ClassId],
+    ) -> WebResult<()> {
+        if lease.origin() != TrustedOrigin::Web {
+            return Err(WebServiceError::Denied);
+        }
+        let snapshot = self.snapshot()?;
+        let mut state = self
+            .inner
+            .state
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        let mut ledger = self
+            .inner
+            .ledger
+            .lock()
+            .map_err(|_| WebServiceError::Unavailable)?;
+        self.current(&snapshot)?;
+        let tick = self.inner.monotonic.monotonic_millis();
+        self.sweep(&mut state, &mut ledger, &snapshot.data, tick)?;
+        if !state.enabled || !state.devices.iter().any(|d| d.lease == lease) {
+            return Err(WebServiceError::Denied);
+        }
+        let actor = ledger
+            .sessions
+            .actor(
+                &snapshot.data,
+                lease,
+                self.inner.clock.now(),
+                tick,
+                SessionPurpose::Manage,
+            )
+            .map_err(|_| WebServiceError::Denied)?;
+        // Authority publication already validated this immutable identity.
+        // Repeating full IdentityState::validate for each 32KiB hash block is
+        // quadratic in a school's roster; check the same authorization rules
+        // against its current trusted fields without revalidating the catalog.
+        let identity = &snapshot.data;
+        let authority = identity
+            .authority(actor.principal_id)
+            .map_err(|_| WebServiceError::Denied)?;
+        authority
+            .validate_actor(&actor, self.inner.clock.now())
+            .map_err(|_| WebServiceError::Denied)?;
+        let account = identity
+            .account(actor.principal_id)
+            .map_err(|_| WebServiceError::Denied)?;
+        if account.must_change_password
+            || identity.account(scope.teacher_id).is_err()
+            || !identity.subjects.iter().any(|s| s.id == scope.subject_id)
+        {
+            return Err(WebServiceError::Denied);
+        }
+        match account.principal.role {
+            Role::GlobalAdmin => {}
+            Role::User => return Err(WebServiceError::Denied),
+            Role::TeacherAdmin => {
+                if actor.principal_id != scope.teacher_id
+                    || !identity.assignments.iter().any(|a| {
+                        a.teacher_id == scope.teacher_id
+                            && a.subject_id == scope.subject_id
+                            && identity.is_teacher(scope.teacher_id, a.class_id, scope.subject_id)
+                    })
+                {
+                    return Err(WebServiceError::Denied);
+                }
+            }
+        }
+        if classes.len() > MAX_CLASSES
+            || classes.iter().enumerate().any(|(i, c)| {
+                classes[..i].contains(c)
+                    || !snapshot
+                        .data
+                        .is_teacher(scope.teacher_id, *c, scope.subject_id)
+            })
+        {
+            return Err(WebServiceError::Denied);
+        }
+        self.current(&snapshot)
+    }
+
     pub fn authenticate(&self, cookie: &WebSecret) -> WebResult<AuthenticatedWeb> {
         let snapshot = self.snapshot()?;
         let mut state = self

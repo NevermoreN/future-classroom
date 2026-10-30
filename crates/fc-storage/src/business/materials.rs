@@ -4,8 +4,9 @@
 use super::{materials_codec as dto, *};
 use fc_domain::{materials::*, schedule_document::ScheduleDocument, time::*};
 use fc_ports::{
-    MaterialAppendRequest, MaterialDeleteRequest, MaterialListRequest, MaterialRepository,
-    MaterialRepositoryError, PreparedMaterialAppend,
+    MaterialAppendRequest, MaterialCommandKind, MaterialCommandOutcome, MaterialDeleteRequest,
+    MaterialListRequest, MaterialOutcomeRepository, MaterialRepository, MaterialRepositoryError,
+    PreparedMaterialAppend,
 };
 const ROOT: &str = "business/material/v1/";
 const CATALOG: &str = "business/material/v1/catalog";
@@ -818,6 +819,18 @@ impl<S: Send> TransactionTask<S> for MutationTask<S> {
                 json!({"fingerprint":digest,"record":dto::record(&result),"result_digest":Sha256::digest(encode(&dto::record(&result))?).to_vec()}),
             )?,
         ]);
+        // Keep v1 receipts and fingerprints unchanged. Attribution is a separate
+        // same-COMMIT Web-only document, taken exclusively from the trusted actor.
+        if self.actor.origin == TrustedOrigin::Web {
+            mutations.push(put(
+                key("web-outcomes", self.operation.id().get()),
+                json!({"format":1,"principal":self.actor.principal_id.get(),
+                    "actor":codec::actor(&self.actor),"scope":dto::scope(scope),
+                    "operation":match &self.operation { Operation::Append(_) => "append", Operation::Delete(_) => "delete" },
+                    "fingerprint":digest,
+                    "result_digest":Sha256::digest(encode(&dto::record(&result))?).to_vec()}),
+            )?);
+        }
         let outcome = encode(&dto::record(&result))?;
         let snapshot = (self.factory)(
             &state,
@@ -1332,11 +1345,16 @@ impl<S> TransactionTask<S> for ManagedTask {
         )?;
         let folder = find_folder(d, self.scope)?.ok_or(material_error(MaterialError::NotFound))?;
         let r = load_record(d, self.id)?;
-        let e = resource_entry(d, self.version)?;
+        // A stale requested version is an absent managed download, not corrupt
+        // inventory. Check the actual record before looking up an untrusted ID.
         if r.folder_id != folder.id
             || r.status != MaterialStatus::Published
             || r.resource.version_id != self.version
-            || e.resource != r.resource
+        {
+            return Err(material_error(MaterialError::NotFound));
+        }
+        let e = resource_entry(d, r.resource.version_id)?;
+        if e.resource != r.resource
             || e.scope != self.scope
             || e.material_id != r.id
             || e.references != 1
@@ -1359,3 +1377,228 @@ impl<S> TransactionTask<S> for ManagedTask {
         })
     }
 }
+
+fn authorize_web_observation(
+    state: &IdentityState,
+    actor: &ActorContext,
+    clock: &dyn Clock,
+    guard: &SessionGuard,
+) -> Result<(), StorageError> {
+    guard(state, actor)?;
+    state
+        .authority(actor.principal_id)
+        .map_err(StorageError::Identity)?
+        .validate_actor(actor, clock.now())
+        .map_err(|e| material_error(MaterialError::Permission(e)))?;
+    if actor.origin != TrustedOrigin::Web {
+        return Err(material_error(MaterialError::Permission(
+            PermissionError::WebOnly,
+        )));
+    }
+    if state
+        .account(actor.principal_id)
+        .map_err(StorageError::Identity)?
+        .must_change_password
+    {
+        return Err(material_error(MaterialError::Identity(
+            IdentityError::PasswordChangeRequired,
+        )));
+    }
+    if !matches!(
+        state
+            .account(actor.principal_id)
+            .map_err(StorageError::Identity)?
+            .principal
+            .role,
+        Role::GlobalAdmin | Role::TeacherAdmin
+    ) {
+        return Err(material_error(MaterialError::Permission(
+            PermissionError::RoleDenied,
+        )));
+    }
+    Ok(())
+}
+struct OutcomeTask {
+    command_id: CommandId,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for OutcomeTask {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let state = load_identity(d)?;
+        let check =
+            || authorize_web_observation(&state, &self.actor, self.clock.as_ref(), &self.session);
+        check()?;
+        let attribution = read(d, &key("web-outcomes", self.command_id.get()))?;
+        let mut value = Value::Null;
+        if let Some(meta) = attribution {
+            codec::object_fields(
+                &meta,
+                &[
+                    "format",
+                    "principal",
+                    "actor",
+                    "scope",
+                    "operation",
+                    "fingerprint",
+                    "result_digest",
+                ],
+            )?;
+            if codec::number(&meta, "format")? != 1 {
+                return Err(StorageError::Database);
+            }
+            let owner = PrincipalId::new(codec::number(&meta, "principal")?)
+                .map_err(|_| StorageError::Database)?;
+            // Even global authority is not a capability to inspect other authors.
+            if owner == self.actor.principal_id {
+                let scope = dto::read_scope(&meta["scope"])?;
+                authorize(
+                    &state,
+                    &self.actor,
+                    scope,
+                    self.clock.as_ref(),
+                    &self.session,
+                )?;
+                let kind = match meta["operation"].as_str() {
+                    Some("append") => MaterialCommandKind::Append,
+                    Some("delete") => MaterialCommandKind::Delete,
+                    _ => return Err(StorageError::Database),
+                };
+                let receipt = read(d, &key("receipts", self.command_id.get()))?
+                    .ok_or(StorageError::Database)?;
+                codec::object_fields(&receipt, &["fingerprint", "record", "result_digest"])?;
+                let fingerprint: [u8; 32] = serde_json::from_value(receipt["fingerprint"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                let bound_fingerprint: [u8; 32] =
+                    serde_json::from_value(meta["fingerprint"].clone())
+                        .map_err(|_| StorageError::Database)?;
+                let digest: [u8; 32] = serde_json::from_value(receipt["result_digest"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                let bound_digest: [u8; 32] = serde_json::from_value(meta["result_digest"].clone())
+                    .map_err(|_| StorageError::Database)?;
+                if fingerprint != bound_fingerprint
+                    || digest != bound_digest
+                    || digest.as_slice() != Sha256::digest(encode(&receipt["record"])?).as_slice()
+                {
+                    return Err(StorageError::Database);
+                }
+                let record = dto::read_record(&receipt["record"])?;
+                // Reconstruct the original payload from the historical result,
+                // including the delete's expected revision. The unchanged v1
+                // fingerprint binds the sidecar's principal/school/epoch/origin
+                // and scope/kind to the actual committed request.
+                let submitted = &meta["actor"];
+                codec::object_fields(submitted, &["principal", "school", "epoch", "origin"])?;
+                if codec::number(submitted, "principal")? != owner.get()
+                    || codec::number(submitted, "school")? != self.actor.school_id.get()
+                    || submitted["origin"].as_str() != Some("web")
+                {
+                    return Err(StorageError::Database);
+                }
+                let _ = codec::number(submitted, "epoch")?;
+                let operation = match kind {
+                    MaterialCommandKind::Append => Operation::Append(MaterialAppendRequest {
+                        command_id: self.command_id,
+                        scope,
+                        append: MaterialAppend {
+                            material_id: record.id,
+                            display_name: record.display_name.clone(),
+                            resource: record.resource.clone(),
+                            allowed_class_ids: record.allowed_class_ids.clone(),
+                        },
+                    }),
+                    MaterialCommandKind::Delete => Operation::Delete(MaterialDeleteRequest {
+                        command_id: self.command_id,
+                        scope,
+                        material_id: record.id,
+                        expected_material_revision: Revision::new(
+                            record
+                                .revision
+                                .get()
+                                .checked_sub(1)
+                                .ok_or(StorageError::Database)?,
+                        ),
+                    }),
+                };
+                let mut expected = Sha256::new();
+                expected.update(b"future-classroom/material/v1\0");
+                expected.update(codec::bytes(submitted)?);
+                expected.update(codec::bytes(&operation.payload())?);
+                if expected.finalize().as_slice() != fingerprint {
+                    return Err(StorageError::Database);
+                }
+                let folder = find_folder(d, scope)?.ok_or(StorageError::Database)?;
+                if record.folder_id != folder.id
+                    || !matches!(
+                        (kind, record.status),
+                        (MaterialCommandKind::Append, MaterialStatus::Published)
+                            | (MaterialCommandKind::Delete, MaterialStatus::Deleted)
+                    )
+                {
+                    return Err(StorageError::Database);
+                }
+                value = json!({"operation":meta["operation"],"scope":dto::scope(scope),"record":dto::record(&record)});
+                authorize(
+                    &state,
+                    &self.actor,
+                    scope,
+                    self.clock.as_ref(),
+                    &self.session,
+                )?;
+            }
+        }
+        // Unknown and foreign also require the captured channel still be live.
+        check()?;
+        Ok(TransactionDecision {
+            outcome: encode(&value)?,
+            commit: None,
+            precommit: None,
+        })
+    }
+}
+impl<S: Send + 'static> MaterialOutcomeRepository for BusinessRepository<S> {
+    fn material_outcome(
+        &self,
+        command_id: CommandId,
+        actor: &ActorContext,
+    ) -> Result<Option<MaterialCommandOutcome>, MaterialRepositoryError> {
+        let bytes = self
+            .handle
+            .try_transaction(OutcomeTask {
+                command_id,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(repository_error)?
+            .wait()
+            .map_err(repository_error)?;
+        let value = codec::value(&bytes).map_err(repository_error)?;
+        if value.is_null() {
+            return Ok(None);
+        }
+        codec::object_fields(&value, &["operation", "scope", "record"])
+            .map_err(repository_error)?;
+        let kind = match value["operation"].as_str() {
+            Some("append") => MaterialCommandKind::Append,
+            Some("delete") => MaterialCommandKind::Delete,
+            _ => return Err(MaterialRepositoryError::Unavailable),
+        };
+        Ok(Some(MaterialCommandOutcome {
+            command_id,
+            kind,
+            scope: dto::read_scope(&value["scope"]).map_err(repository_error)?,
+            record: dto::read_record(&value["record"]).map_err(repository_error)?,
+        }))
+    }
+}
+#[cfg(test)]
+#[path = "materials_outcome_tests.rs"]
+mod outcome_tests;

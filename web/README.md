@@ -1,6 +1,6 @@
 # 未来教室教师工作台（当天作业与提醒阶段）
 
-本目录是教师浏览器运行的静态应用，使用 TypeScript、React、Vite、Tailwind CSS 与本地 shadcn/ui 组件。白板提供同源静态文件和 Rust API；白板不安装 Node，不使用独立云服务。本目录实现配对、等待本地批准、读取真实会话、明确注销，以及真实 API 的当天作业/共同提醒范围分页、读取、保存、清空、修订冲突和原命令查询。课堂资料与语音入口继续标明“尚未接入服务”，没有模拟上传、虚构教师数据或假成功。
+本目录是教师浏览器运行的静态应用，使用 TypeScript、React、Vite、Tailwind CSS 与本地 shadcn/ui 组件。白板提供同源静态文件和 Rust API；白板不安装 Node，不使用独立云服务。本目录实现配对、等待本地批准、读取真实会话、明确注销，以及真实 API 的当天作业/共同提醒范围分页、读取、保存、清空、修订冲突和原命令查询。第十三轮新增资料目录/班级分页、File流式上传、明确校验后添加、固定版本删除、下载到当前设备、原命令结果查询与临时上传取消；语音仍未接入。没有模拟上传、虚构教师数据或假成功。
 
 当前 Rust 的 request-port 配对与[教师内容契约](../开发计划/12-教师内容API契约.md)已经存在；本目录的静态构建通过**不代表正常产品监听、真实 TLS、可信证书部署或办公室到白板浏览器配对已经验收**。生产静态宿主由仓库根目录的实现与验证记录管理。
 
@@ -36,7 +36,7 @@ FC_WEB_BASE=/school/ npm run build
 - Cookie 使用 fetch `credentials: same-origin`，禁止重定向、跨源 API 和非 HTTPS 凭据传输。浏览器设置 Origin；客户端不伪造该请求头。私有 POST `session/logout` 必须附服务端会话的 `X-FC-CSRF`。
 - 所有响应渐进读取并核验真实 UTF-8 总字节 `<=65536`；严格拒绝非 JSON、错误 UTF-8、重复/转义重复字段、未知或缺失字段、类型/版本错误、非规范/溢出的 64 位十进制字符串。ID 不转换成 JavaScript Number。
 - 401/403 清除本页会话信息并停止自动操作。注销的 503 `RESULT_UNKNOWN`、网络失败或无效响应显示“注销结果尚未确认”，清除本页账号镜像，只有用户明确点击才 GET 核对；不假称注销成功，也不自动重发注销。
-- 登录后可进入当天作业与共同提醒；班级、科目和所属老师的名称只取自已验证的 scope 响应，绝不从页面输入构造 authority。作业按实际任教老师/班级/科目；共同提醒显示学校全部可管理班级，不按本人任教范围收窄。每页最多20项，使用服务器 continuation，身份修订/总数/日期变化阻断旧分页；资料和语音尚未接入。
+- 登录后可进入当天作业与共同提醒；班级、科目和所属老师的名称只取自已验证的 scope 响应，绝不从页面输入构造 authority。作业按实际任教老师/班级/科目；共同提醒显示学校全部可管理班级，不按本人任教范围收窄。每页最多20项，使用服务器 continuation，身份修订/总数/日期变化阻断旧分页；资料另按owner/subject目录与显式任教班级分页；语音尚未接入。
 - 正文与日期由白板返回。日期为 Gregorian 0001..9999 的 `YYYY-MM-DD`，本地时间不带时区；客户端不以教师设备日期决定业务日期。正文最多16384 UTF-8字节，支持正常换行/Tab/CR，拒绝不可显示的C0/DEL/C1与孤立代理项。白板所报当天有效时长结束后只将草稿标为过期，不自动发送到新日；同日调时回拨可能使 updatedAt 晚于 serverNow，按原值显示，不伪造时间顺序。
 - POST `content/homework/{classId}/{subjectId}/{ownerTeacherId}/{date}` 或 `content/reminders/{classId}/{date}` 只发 `schemaVersion/commandId/expectedRevision/text`，附精确会话CSRF。commandId来自 `crypto.getRandomValues` 的完整非零64位数，不用Math.random。原始正文保留给同一命令指纹，不先trim；服务按Unicode White_Space去首尾，FEFF保留。成功响应只表示持久化，不能称为当前已上屏。
 - 409修订/幂等冲突保留草稿，只有用户明确载入最新修订、对照并确认合并后才允许新命令；清空同样检查CAS并保留非零修订。结果不确定时保留原key/date/revision/text/id，仅手动GET `content/commands/{id}` 查询。NOT_FOUND不证明从未写入，不能重发；COMMITTED原结果单独标为历史提交结果，需另GET当前内容核对，不自动塞回当前编辑器。跨日查询的DAY_CHANGED不返回旧正文，也不把旧草稿改日期。
@@ -54,3 +54,5 @@ FC_WEB_BASE=/school/ npm run build
 按官方文档手动配置静态 Vite/React 项目：[React](https://react.dev/learn/build-a-react-app-from-scratch)、[Vite](https://vite.dev/guide/)、[Tailwind Vite](https://tailwindcss.com/docs/installation/using-vite)、[shadcn Vite](https://ui.shadcn.com/docs/installation/vite)。本地 Button/Input/Card 来自 shadcn 官方 `new-york` registry，保留 [MIT 许可](SHADCN-LICENSE.md)。不依赖托管 Sites 或 Cloudflare 服务。
 
 `scripts/licenses.mjs` 按 `package-lock.json` 生产依赖闭包从已安装包读取完整 license/notice，生成 `THIRD-PARTY-NOTICES.txt`，并在生产 JS 的 post-minification banner 中保留。涵盖 React、Radix、lucide、CVA、clsx、tailwind-merge 等；开发工具不打包到浏览器。
+
+资料协议见[材料API契约](../开发计划/13-教师课堂资料API契约.md)。普通JSON仍64KiB；单文件50MiB/图片10MiB，上传发送浏览器File本身，不读取arrayBuffer/base64；120秒绝对客户端预算不随进度延长，服务器受控字节适配不能替代真实网络取消完成。下载逐块限长并核对固定版元数据，完整成功才生成有界Blob到本浏览器，离页释放对象URL；服务器不提供远程open/Shell。已上传不等于已追加，结果未知只手动GET原命令，不自动重POST；取消仅针对原临时上传，不能撤回COMMIT。正常TLS/listener和HTTP事件调度仍未接线，synthetic浏览器不替代真实部署。

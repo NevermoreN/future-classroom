@@ -506,3 +506,6 @@ fn public_status_is_non_sensitive_and_frame_origin_cookie_fail_before_mutation()
 
 #[path = "content/tests.rs"]
 mod content_tests;
+
+#[path = "materials_tests.rs"]
+mod material_tests;

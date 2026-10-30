@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "scope": "Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration",
+  "checks": [
+    {
+      "name": "voice_still_explicitly_unimplemented",
+      "status": "PASS"
+    },
+    {
+      "name": "scope_discloses_full_class_total",
+      "status": "PASS"
+    },
+    {
+      "name": "only_first20_classes_loaded",
+      "status": "PASS"
+    },
+    {
+      "name": "all128_classes_explicitly_reachable",
+      "status": "PASS"
+    },
+    {
+      "name": "continuation_ends_at128",
+      "status": "PASS"
+    },
+    {
+      "name": "valid128_owner_class_and64_subject_render",
+      "status": "PASS"
+    },
+    {
+      "name": "download_single_Blob_current_browser_filename",
+      "status": "PASS"
+    }
+  ],
+  "requests": [
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/20",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/40",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/60",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/80",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/100",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/120",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/download/9/2/5/6",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    }
+  ],
+  "screenshots": [],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "status": "FAIL",
+  "failurePhase": "download",
+  "error": "Error: Path is not available when connecting remotely. Use saveAs() to save a local copy.",
+  "visibleText": "白板已确认登录，教师工作台已就绪。\n跳到主要内容\n未来教室\nTEACHER WORKSPACE\n白板连接已核验\n教师工作台\n\n以白板实际日期与授权范围为准\n\n我的课堂资料。\n\n选择老师与科目目录，上传、校验后添加；下载到当前设备。\n\n返回工作台\n核对会话\n按老师与科目独立管理，下载到当前设备\n重新加载范围\n\n下载内容已接收，将由当前浏览器保存。\n\n选择资料目录\n第 1–1 项，共 1 个老师 / 科目目录\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科\n师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n128 个有效任教班级\n上一页范围\n下一页范围\n\n真实文件校验后追加，同名文件可独立存在\n\n科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科科 · 师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师师\n支持 TXT、PDF、PPTX、DOCX、XLSX、PNG、JPEG、BMP。单文件最多50MiB，图片最多10MiB / 8MP；白板校验实际内容。\n选择本机课堂文件\n允许展示的任教班级（至少选一个）\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n合成班级2\n合成班级3\n合成班级4\n合成班级5\n合成班级6\n合成班级7\n合成班级8\n合成班级9\n合成班级10\n合成班级11\n合成班级12\n合成班级13\n合成班级14\n合成班级15\n合成班级16\n合成班级17\n合成班级18\n合成班级19\n合成班级20\n合成班级21\n合成班级22\n合成班级23\n合成班级24\n合成班级25\n合成班级26\n合成班级27\n合成班级28\n合成班级29\n合成班级30\n合成班级31\n合成班级32\n合成班级33\n合成班级34\n合成班级35\n合成班级36\n合成班级37\n合成班级38\n合成班级39\n合成班级40\n合成班级41\n合成班级42\n合成班级43\n合成班级44\n合成班级45\n合成班级46\n合成班级47\n合成班级48\n合成班级49\n合成班级50\n合成班级51\n合成班级52\n合成班级53\n合成班级54\n合成班级55\n合成班级56\n合成班级57\n合成班级58\n合成班级59\n合成班级60\n合成班级61\n合成班级62\n合成班级63\n合成班级64\n合成班级65\n合成班级66\n合成班级67\n合成班级68\n合成班级69\n合成班级70\n合成班级71\n合成班级72\n合成班级73\n合成班级74\n合成班级75\n合成班级76\n合成班级77\n合成班级78\n合成班级79\n合成班级80\n合成班级81\n合成班级82\n合成班级83\n合成班级84\n合成班级85\n合成班级86\n合成班级87\n合成班级88\n合成班级89\n合成班级90\n合成班级91\n合成班级92\n合成班级93\n合成班级94\n合成班级95\n合成班级96\n合成班级97\n合成班级98\n合成班级99\n合成班级100\n合成班级101\n合成班级102\n合成班级103\n合成班级104\n合成班级105\n合成班级106\n合成班级107\n合成班级108\n合成班级109\n合成班级110\n合成班级111\n合成班级112\n合成班级113\n合成班级114\n合成班级115\n合成班级116\n合成班级117\n合成班级118\n合成班级119\n合成班级120\n合成班级121\n合成班级122\n合成班级123\n合成班级124\n合成班级125\n合成班级126\n合成班级127\n合成班级128\n\n已加载 128 / 128 个真实任教班级。\n\n上传文件\n校验并添加到课堂资料\n\n上传完成不会自动添加。确认添加后，白板校验文件并持久保存；保存不代表此刻正在屏幕展示。\n\n课堂文件\n第 1–2 项，共 2 项；按成功添加顺序倒序。\n重新读取目录\nTXT\nlesson.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\nTXT\nother.txt\n\n0 KiB · 2026-10-30 10:00:00\n\n班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班班\n\n下载到当前设备\n删除\n上一页文件\n下一页文件\n\n注销会使这个账号的全部渠道授权失效。\n\n注销账号\n班级共同提醒\n按白板当天日期生效\n管理今日提醒\n未来教室 · 每一堂课，都有准备\n账号与范围由白板本地管理",
+  "counts": {
+    "appendCount": 0,
+    "deleteCount": 0,
+    "cancelCount": 0,
+    "queries": 0,
+    "downloads": 1,
+    "folderGets": 1,
+    "bodyAborts": 0,
+    "dialogs": 0,
+    "beforeUnload": 0
+  },
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "completed": true,
+  "screenshotData": [],
+  "cleanup": "OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED"
+}

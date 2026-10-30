@@ -16,6 +16,11 @@ use fc_protocol::{
 use fc_security::web::{PairingCode, WebSecret};
 
 mod content;
+#[cfg(windows)]
+mod material_files;
+mod materials;
+#[cfg(windows)]
+pub use material_files::{MaterialDownload, PreparedWebMaterial};
 
 /// Contains explicitly disclosed session headers/body. Deliberately no Debug or
 /// Clone: transport ownership must not turn credentials into routine diagnostics.
@@ -26,12 +31,16 @@ pub struct WebResponse {
 pub struct WebApplication {
     boundary: WebBoundary,
     service: WebService,
+    #[cfg(windows)]
+    material_files: std::sync::Arc<std::sync::Mutex<Option<material_files::MaterialFiles>>>,
 }
 impl WebApplication {
     pub fn new(prefix: &ListenPrefix, service: WebService) -> Result<Self, WebError> {
         Ok(Self {
             boundary: WebBoundary::new(prefix)?,
             service,
+            #[cfg(windows)]
+            material_files: std::sync::Arc::new(std::sync::Mutex::new(None)),
         })
     }
     pub fn dispatch(&self, backend: &mut Backend, head: &RequestHead, body: &[u8]) -> WebResponse {
@@ -44,6 +53,16 @@ impl WebApplication {
             Ok(route) => route,
             Err(error) => return boundary_error(error),
         };
+        // Binary bodies are accepted only through the typed stream port; the
+        // ordinary JSON dispatcher must never retain a 50MiB request Vec.
+        if matches!(
+            route,
+            Route::Materials {
+                route: fc_protocol::web::materials::MaterialRoute::UploadBytes { .. }
+            }
+        ) {
+            return failure(400, responses::ErrorCode::InvalidRequest);
+        }
         // The transport's complete body must agree with both its parsed metadata
         // and the application route budget before any pairing/session mutation.
         if body.len() as u64 != head.content_length.unwrap_or(0)
@@ -159,6 +178,12 @@ impl WebApplication {
                     ),
                     Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
                 }
+            }
+            Route::Materials { route } => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                materials::dispatch(self, backend, session.lease(), route, body)
             }
             Route::ContentScopes { .. }
             | Route::ContentRead { .. }

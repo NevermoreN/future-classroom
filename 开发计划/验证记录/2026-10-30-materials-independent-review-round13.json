@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "round": 13,
+  "kind": "INDEPENDENT_READ_ONLY_CODE_REVIEW",
+  "status": "THREE_CONFIRMED_DEFECTS_CORRECTED_IN_REVIEWED_SOURCE; RUNTIME_REGRESSIONS_PENDING_ROOT",
+  "scope": [
+    "Win32 upload stage ownership and2 permits including validation/proof",
+    "wrong-device and duplicate upload/cancel ownership",
+    "preparation versus short Backend commit lock scope",
+    "post-COMMIT uncertainty versus proof Drop file retention",
+    "download SHA and fresh exact lease/health/revision guards",
+    "WebApplication and Backend material routing"
+  ],
+  "reviewMethod": "read authoritative current files only; no Cargo, Windows, browser or network tests executed during this review; implementation owner/root own runtime verification separately",
+  "sourceBefore": [
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "sha256": "87e4a6fb08ca7beef293c6c66b394e81bfad5a73b06225c98a145f47f774b3a8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+      "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "sha256": "4c0e097f6d8ee06dbcdb4a8939af022d7346a648d9c12adaee493c0d1875f9ad"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "sha256": "53e226569533b482aaff808f4063dd6484b8a400237c2ebef5050ca31c7d21e5"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+    },
+    {
+      "path": "开发计划/13-教师课堂资料API契约.md",
+      "sha256": "e788fd49df8fa610ce003903f4c3d90dec22bcdbfb6ada15ad5956648ae5dcc4"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "sha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+      "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "sha256": "4c0e097f6d8ee06dbcdb4a8939af022d7346a648d9c12adaee493c0d1875f9ad"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "sha256": "53e226569533b482aaff808f4063dd6484b8a400237c2ebef5050ca31c7d21e5"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+    },
+    {
+      "path": "开发计划/13-教师课堂资料API契约.md",
+      "sha256": "e788fd49df8fa610ce003903f4c3d90dec22bcdbfb6ada15ad5956648ae5dcc4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+      "sha256": "ac17c8252393c39b4fe1d31450b560b3fef4cafbb954884cc000c60d17e95ad2"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "sha256": "9aa227365406669ee025611828ded3373f40820f3963c468622f2e851cd1cca1"
+    },
+    {
+      "path": "crates/fc-domain/src/materials.rs",
+      "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+    }
+  ],
+  "implementationOwnerFreezeManifest": {
+    "files": [
+      {
+        "path": "crates/fc-bootstrap/src/backend.rs",
+        "sha256": "29d9144ff9acb85361c49b62e373bada63e5ff0ae6bd26f9da6852b31f0df9ee",
+        "bytes": 97519
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+        "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5",
+        "bytes": 11451
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/web.rs",
+        "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499",
+        "bytes": 36612
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "sha256": "4c0e097f6d8ee06dbcdb4a8939af022d7346a648d9c12adaee493c0d1875f9ad",
+        "bytes": 10702
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "sha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9",
+        "bytes": 39220
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+        "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48",
+        "bytes": 8874
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "sha256": "ac17c8252393c39b4fe1d31450b560b3fef4cafbb954884cc000c60d17e95ad2",
+        "bytes": 25074
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "sha256": "cb08ba3529a9f52d113cb6c8d5be41c865a72d2c2df21d96efbc86c7e736a55b",
+        "bytes": 16407
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "sha256": "6bc72312071ef7739e7c9cea7d73a20d734aa1f5e7344d56f8c6efe7e5876046",
+        "bytes": 27652
+      },
+      {
+        "path": "crates/fc-protocol/src/web/materials.rs",
+        "sha256": "bda24725b6df9392d97561c133d43ba837745948c8519a4aecf1e53fce1498c3",
+        "bytes": 18217
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "sha256": "67d94d37995b027c5f1b03cd23982c6d11aab3fde52d45bb55df8fef73a68d84",
+        "bytes": 9883
+      }
+    ],
+    "sha256": "a44699c971856e385bb4cb4e761f9dd54beab8e4a3b793f54b258a32ad01d3c5"
+  },
+  "findings": [
+    {
+      "id": "IR13-01",
+      "status": "FIXED_IN_REVIEWED_SOURCE; RUNTIME_REGRESSION_PENDING_ROOT",
+      "title": "Proof phase permit released by TTL/revocation sweep while proof still physically owns inode",
+      "beforeSourceSha256": "87e4a6fb08ca7beef293c6c66b394e81bfad5a73b06225c98a145f47f774b3a8",
+      "afterSourceSha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9",
+      "counterfactual": [
+        "create and prepare2 uploads and keep both PreparedWebMaterial values alive",
+        "revoke original exact device lease or let slotTTLexpire",
+        "another live exact device on same application creates upload; old sweep removes Consuming/pathNone entries and admits third physical owner"
+      ],
+      "beforeCodeFact": "sweep first applied now<expires and check_material_lease to every unlocked Slot; PreparedWebMaterial stored only Weak registry and separate LockedFile, so its lifetime did not retain registry capacity",
+      "fixFact": "sweep first branch returns true for Consuming and pathNone regardless expiry/revocation; PreparedWebMaterial Drop removes original registry ID; expired proof remains uncommittable but still charged",
+      "regressionSource": "materials_tests.rs keeps2proofalive, revokes stream-owner, new live device gets429, drop1proof then201; static inspection only, not claimed executed"
+    },
+    {
+      "id": "IR13-02",
+      "status": "FIXED_IN_REVIEWED_SOURCE; RUNTIME_REGRESSION_PENDING_ROOT",
+      "title": "Download revision checked before potentially waiting fresh-authority callback",
+      "beforeSourceSha256": "87e4a6fb08ca7beef293c6c66b394e81bfad5a73b06225c98a145f47f774b3a8",
+      "afterSourceSha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9",
+      "counterfactual": [
+        "old valid closure reads matching captured health revision",
+        "delete commits during check_material_lease and publishes newer authority",
+        "lease remains valid; callback adopts newer snapshot and returnsOk",
+        "old closure returns true although resource revision changed, including final post-read release check"
+      ],
+      "fixFact": "download_checkpoint executes authorize callback first, then reads final gate status and requiresHealthy, captured revision and unexpired; read before/after and initialSHAControl use it; begin captures global revision before managed record and final checkpoint",
+      "regressionSource": "materials_tests.rs invokes actual writer delete inside authorization closure and asserts checkpointfalse; source inspected, execution belongs to root"
+    },
+    {
+      "id": "IR13-03",
+      "status": "FIXED_IN_REVIEWED_SOURCE; RUNTIME_REGRESSION_PENDING_ROOT",
+      "title": "Two-permit ledger is perWebApplication registry, not a shared process/service owner",
+      "fact": "WebApplication::new constructs fresh material_files Arc<Mutex<Option<MaterialFiles>>> for every instance; PreparedWebMaterial retains Weak registry. Its proof may outlive dropped WebApplication. Another application sharing sameWebService can configure new registry (stageproof already moved final), yielding separate2permits",
+      "counterfactual": "construct/app1 prepare2proofs, keepproofs alive while droppingapp1; constructapp2 with same service and root and configure; freshregistry can admitmore owners",
+      "scopeLimit": "new globalRAIIcap removes arbitrary same-process WebApplication construction/drop bypass; this remains staticproof and requires root finalWindows execution",
+      "beforeSourceSha256": "17cb8b310c3bebe31c8fb9dc44d47e841175c9dc8d00c992d9015f1a4c94b25e",
+      "afterSourceSha256": "4beb73a086f5e449fe6d37206634438a901a246be726f47d655dfbd42fc987e9",
+      "fixFact": "process-global AtomicUsize PHYSICAL_UPLOADS guarded by private nonClone StagePermit; fetch_update only admitscount<2; material_create takespermit before create_new; Slot ownsStagePermit, PreparedWebMaterial._physical_owner strongly retains originalArcSlot even ifWebApplication/registry dropped; proofDrop closesfinalpin/removesunattemptedfinal before lastArcOwnerfielddrop returnsphysicalpermit",
+      "dropOrderingFact": "Slot::drop assignsConsuming first (droppingNewFile/LockedFile) and removescontrolledpath before automatic _permitfielddrop; createfailure locals dropFile before earlierdeclaredpermit; proofDrop pin.take runs before registryremove and _physical_owner fielddropslast",
+      "regressionSource": "materials_tests.rs prepares2proofs, dropsoldWebApplication/replacesnewapp using sameWebService/root, expects429 whileproofalive, dropsoneproof thenexpects201, cancelsreplacement; inspectedonly, not executedbyreviewer"
+    }
+  ],
+  "verifiedCodeFacts": [
+    {
+      "area": "opaqueproof",
+      "fact": "PreparedWebMaterial and PreparedMaterialAppend have private fields, noClone/Deserialize/public data constructor; append proof binds validated resource to metadata; moving to commit consumesproof exactlyonce"
+    },
+    {
+      "area": "wrongdevice",
+      "fact": "upload checks exact Slot.lease before takingWaiting and settingstarted_transfer; wrongdevice, wronglength, duplicateReady/Consuming and try_lock failures leave started_transferfalse and neverremove original registry entry"
+    },
+    {
+      "area": "doubleupload",
+      "fact": "transfer holds single Slot mutex through copy; concurrent attempttry_lock fails; later attempt findsReady and returnsUploadNotReady without cleanup of first bytes"
+    },
+    {
+      "area": "cancel",
+      "fact": "cancel requires exact lease and fresh authorization before changingphase; Consuming proof returns409; Waiting/Ready drops its original handle then removes only its controlled path; remove failure does not return successful cancellation"
+    },
+    {
+      "area": "physicaldeadline",
+      "fact": "genericRead checks120s before/after synchronous reads and afterEOF; it does not implement physical cancellation of arbitrary blockingRead/write and comments/contract explicitly exclude that claim"
+    },
+    {
+      "area": "lockscope",
+      "fact": "stream has noBackend parameter; prepare accepts &self/head/body and long validation does not holdBackend; dispatch_material_append scopes receipt lookup and final shortcommit mutex separately; read_chunk_without_backend uses captured WebService/SessionControl"
+    },
+    {
+      "area": "postcommitretention",
+      "fact": "PreparedWebMaterial.attempted becomestrue before backendappend; PublicationFailed/Indeterminate mapFaulted, postappend authorize failures mapUnavailable, serialization failure mapsResultUnknown; none resetattempted so Drop retainsfinal"
+    },
+    {
+      "area": "definiterejectioncleanup",
+      "fact": "only Domain/IdempotencyConflict/QuotaExceeded/DocumentTooLarge/Cancelled resetattemptedfalse. Repository transaction emits such errors beforeCOMMIT; aftercommitpublication failure isFaulted. Prepared path is newlynonreplacing published resource, not an existing committed object"
+    },
+    {
+      "area": "downloadrecord",
+      "fact": "writerManagedTask checks requestedversion, publishedrecord, exactfolder, resourceinventoryscope/id/descriptor/references1/stateReferenced; deleted/staleversion rejected before download"
+    },
+    {
+      "area": "downloadstream",
+      "fact": "LockedFile refuses writes/replacement; firstread validates completeSHA and exactlength, seeksstart; atmost64KiBread percall and fresh checkpoint before/afterread; any global revision change conservatively invalidatescapturedstream"
+    },
+    {
+      "area": "fastlease",
+      "fact": "check_material_lease requires Weborigin, exact live devicelease, latest published authority and Manage session, must-change-password rejection, role/owner/subject/classes rules and final sameSnapshot current check; noBackendMutex/SQL/input renewal"
+    },
+    {
+      "area": "routes",
+      "fact": "ordinaryslice dispatch explicitly rejectsbinaryupload; append slice returnsunavailable rather than validating largefile underBackend; independentupload/append/download ports authenticateCookie throughsameWebService and boundaryCSRF/origin checks; commit/download bindbackendservice identity"
+    },
+    {
+      "area": "stagenamespace",
+      "fact": "web-material-staging separate native flatstaging; bounded3entries includesownermarker+max2canonical nonzero server-idparts; unexpectednames rejected beforedeletion, ControlledFiles rejectsreparse/hardlink and deletionpins exactinode"
+    },
+    {
+      "area": "globalpermit",
+      "fact": "process-global AtomicUsize PHYSICAL_UPLOADS guarded by private nonClone StagePermit; fetch_update only admitscount<2; material_create takespermit before create_new; Slot ownsStagePermit, PreparedWebMaterial._physical_owner strongly retains originalArcSlot even ifWebApplication/registry dropped; proofDrop closesfinalpin/removesunattemptedfinal before lastArcOwnerfielddrop returnsphysicalpermit"
+    }
+  ],
+  "limitations": [
+    "static review is not executed fault-injection or runtimeevidence",
+    "Windows newregressions and root nativeprobe need finalsource-bound execution",
+    "no actualHTTPS/IOCP upload cancellation or browserWindowsdelivery tested here",
+    "review does not claim filedeletion succeeds under everyfilesystemfault; nativecleanup/faultmatrix remains separate",
+    "globalpermit is process scope and relies on existing deployment exclusive instance lock across processes; configuration comment requires that lock andACLreadback, reviewed current patch does not add crossprocess locking"
+  ],
+  "mutationsByReviewer": "none to repository; only this /tmp evidence and beforeSHA snapshot",
+  "sourceIntermediateAfterTwoFixes": [
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "sha256": "17cb8b310c3bebe31c8fb9dc44d47e841175c9dc8d00c992d9015f1a4c94b25e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+      "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "sha256": "4c0e097f6d8ee06dbcdb4a8939af022d7346a648d9c12adaee493c0d1875f9ad"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "sha256": "53e226569533b482aaff808f4063dd6484b8a400237c2ebef5050ca31c7d21e5"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+    },
+    {
+      "path": "开发计划/13-教师课堂资料API契约.md",
+      "sha256": "e788fd49df8fa610ce003903f4c3d90dec22bcdbfb6ada15ad5956648ae5dcc4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+      "sha256": "b6f2ec231c4472b63b07722befe7ed5d3be9a913924e1da55c225cdcc7386e97"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "sha256": "9aa227365406669ee025611828ded3373f40820f3963c468622f2e851cd1cca1"
+    },
+    {
+      "path": "crates/fc-domain/src/materials.rs",
+      "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+    }
+  ],
+  "reviewConclusion": "No additional confirmed defect remains in assigned source areas afterthree fixes. This conclusion is limited to independent static inspection; no runtimepass inferred from regression source or implementation owner compilation."
+}

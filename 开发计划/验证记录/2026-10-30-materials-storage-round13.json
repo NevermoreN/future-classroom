@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Host real SQLite sole-writer material Web receipt queries; no remote/Windows/workspace test evidence",
+  "testProfile": "release optimized; --test-threads=1",
+  "testCommand": "cargo test -p fc-storage --lib business::materials::outcome_tests --release --locked -- --test-threads=1",
+  "testPassed": 9,
+  "testFailed": 0,
+  "testIgnored": 0,
+  "testFiltered": 34,
+  "testExecutionSeconds": 2.54,
+  "finalCompileSeconds": 32.54,
+  "clippyCommand": "cargo clippy -p fc-storage --lib --tests --release --locked -- -D warnings",
+  "clippySeconds": 96,
+  "fmt": "PASS",
+  "diffCheck": "PASS",
+  "cleanup": {
+    "status": "PASS",
+    "ownedFixturePrefix": "FutureClassroom-MaterialOutcome-",
+    "remainingOwnedFixtureDirectories": [],
+    "writerShutdown": "Every fixture explicitly shuts down the sole writer before remove_dir_all",
+    "sharedBuildCache": "Retained for parent whole-round integration/cleanup; not removed by this task"
+  },
+  "api": {
+    "trait": "fc_ports::MaterialOutcomeRepository",
+    "signature": "material_outcome(&self, command_id:CommandId, actor:&ActorContext) -> Result<Option<MaterialCommandOutcome>,MaterialRepositoryError>",
+    "outcomeFields": [
+      "command_id",
+      "kind:Append|Delete",
+      "scope",
+      "record:MaterialRecord"
+    ]
+  },
+  "securityProperties": [
+    "Exact captured live Web channel checked on writer before and after reads, including None",
+    "Only actual submitting principal may read; GlobalAdmin does not bypass owner",
+    "Current folder authority remains required; historical result survives later delete and restart",
+    "Legacy/native v1 receipt and fingerprint serialization remain unchanged; no sender invented for old records",
+    "New Web-only sidecar commits atomically and is attributed solely by actual trusted actor",
+    "Sidecar identity/scope/kind recomputed against original v1 fingerprint from historical result; receipt result_digest strictly checked",
+    "Unknown/foreign/native-without-sidecar -> None; corrupt/incomplete/bad-bound sidecar fails closed",
+    "New valid own epoch may read historical own result; old lease/epoch/account disabled/must-change/current subject scope reject",
+    "Stale delete CAS creates neither receipt nor sidecar; precommit revocation rolls back both",
+    "Postcommit publication failure for append and delete returns Faulted (must map RESULT_UNKNOWN), both receipts recoverable after restart with same command ID"
+  ],
+  "permissionsReview": "Existing MaterialRepository already checks actual actor/session for Web teacher ownership/current assignment, global native override, actual allowed class teaching scope and delete CAS. None of those mutation checks were weakened.",
+  "sources": [
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "sha256": "9aa227365406669ee025611828ded3373f40820f3963c468622f2e851cd1cca1"
+    },
+    {
+      "path": "crates/fc-ports/src/material_outcome.rs",
+      "sha256": "582f6428c0e55a9f65caee04d0df95dc9fc16dd200298a72cf048fc174596da5"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "sha256": "53e226569533b482aaff808f4063dd6484b8a400237c2ebef5050ca31c7d21e5"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials_outcome_tests.rs",
+      "sha256": "e424317c29218bfcc644d0040084a2c3be32f73a8b37c0eaa61f264cc87a94a0"
+    }
+  ],
+  "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+  "commands": [
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-test.log",
+      "interpretation": "Initial compile fixture syntax error",
+      "exitCode": 101,
+      "sha256": "0177ea56b82acf8e2f1854385864149196a6c09cfebe9c720d7fc0c8b994e95d",
+      "output": "   Compiling version_check v0.9.5\n   Compiling proc-macro2 v1.0.107\n   Compiling zerocopy v0.8.63\n   Compiling typenum v1.20.1\n   Compiling find-msvc-tools v0.1.15\n   Compiling shlex v2.0.1\n   Compiling unicode-ident v1.0.27\n   Compiling quote v1.0.47\n   Compiling cfg-if v1.0.5\n   Compiling once_cell v1.21.4\n   Compiling cc v1.10.0\n   Compiling vcpkg v0.2.15\n   Compiling serde_core v1.0.228\n   Compiling pkg-config v0.3.34\n   Compiling generic-array v0.14.7\n   Compiling ahash v0.8.12\n   Compiling serde_json v1.0.145\n   Compiling serde v1.0.228\n   Compiling bitflags v2.13.2\n   Compiling smallvec v1.16.4\n   Compiling memchr v2.8.3\n   Compiling syn v2.0.119\n   Compiling fallible-iterator v0.3.0\n   Compiling cpufeatures v0.2.17\n   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n   Compiling crypto-common v0.1.7\n   Compiling block-buffer v0.10.4\n   Compiling digest v0.10.7\n   Compiling ryu v1.0.23\n   Compiling itoa v1.0.18\n   Compiling fallible-streaming-iterator v0.1.9\n   Compiling sha2 v0.10.9\n   Compiling libsqlite3-sys v0.30.1\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling serde_derive v1.0.228\n   Compiling hashbrown v0.14.5\n   Compiling hashlink v0.9.1\n   Compiling rusqlite v0.32.1\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\nerror: no rules expected `1`\n   --> crates/fc-storage/src/business/materials_outcome_tests.rs:433:41\n    |\n433 |             v[\"result_digest\"] = json!([1; 32]);\n    |                                         ^ no rules expected this token in macro call\n    |\n    = note: while trying to match end of macro\n\nerror: could not compile `fc-storage` (lib test) due to 1 previous error\n"
+    },
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-test-final.log",
+      "interpretation": "7 PASS, 1 invalid fixture identity rejected with ScopeRequired; no product query reached",
+      "exitCode": 101,
+      "sha256": "d48504d6167bf5a4fdf8016a972c4817d96ab9f870f70f761e52c50920a23857",
+      "output": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 33.64s\n     Running unittests src/lib.rs (target/release/deps/fc_storage-4851e2ad8397fc42)\n\nrunning 8 tests\ntest business::materials::outcome_tests::a_new_exact_session_can_read_its_old_commit_but_old_epoch_cannot ... ok\ntest business::materials::outcome_tests::native_legacy_receipt_keeps_schema_and_never_gets_fabricated_web_sender ... ok\ntest business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown ... FAILED\ntest business::materials::outcome_tests::precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryable_history ... ok\ntest business::materials::outcome_tests::query_final_guard_gates_owned_foreign_and_unknown_without_writes ... ok\ntest business::materials::outcome_tests::receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed ... ok\ntest business::materials::outcome_tests::stale_delete_cas_never_creates_outcome_and_committed_delete_fault_is_recoverable ... ok\ntest business::materials::outcome_tests::web_append_delete_receipts_are_historical_original_sender_only_and_survive_restart ... ok\n\nfailures:\n\n---- business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown stdout ----\n\nthread 'business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown' (11418) panicked at crates/fc-storage/src/business/materials_outcome_tests.rs:213:22:\ncalled `Result::unwrap()` on an `Err` value: ScopeRequired\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown\n\ntest result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 34 filtered out; finished in 1.83s\n\nerror: test failed, to rerun pass `-p fc-storage --lib`\n"
+    },
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-test-pass.log",
+      "interpretation": "Final exact filter 8 PASS",
+      "exitCode": 0,
+      "sha256": "7927d065b7546b3d4307befa842af524539f0f4aefa8fe742d96388a65aea2d0",
+      "output": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 28.33s\n     Running unittests src/lib.rs (target/release/deps/fc_storage-4851e2ad8397fc42)\n\nrunning 8 tests\ntest business::materials::outcome_tests::a_new_exact_session_can_read_its_old_commit_but_old_epoch_cannot ... ok\ntest business::materials::outcome_tests::native_legacy_receipt_keeps_schema_and_never_gets_fabricated_web_sender ... ok\ntest business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown ... ok\ntest business::materials::outcome_tests::precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryable_history ... ok\ntest business::materials::outcome_tests::query_final_guard_gates_owned_foreign_and_unknown_without_writes ... ok\ntest business::materials::outcome_tests::receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed ... ok\ntest business::materials::outcome_tests::stale_delete_cas_never_creates_outcome_and_committed_delete_fault_is_recoverable ... ok\ntest business::materials::outcome_tests::web_append_delete_receipts_are_historical_original_sender_only_and_survive_restart ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 1.78s\n\n"
+    },
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-clippy.log",
+      "interpretation": "Single package lib/tests strict release Clippy PASS",
+      "exitCode": 0,
+      "sha256": "0f21f0520cb24793162b66ef1ed9456cfb6b053e0aea356fd8bce6f612f2235f",
+      "output": "    Checking typenum v1.20.1\n    Checking cfg-if v1.0.5\n    Checking zerocopy v0.8.63\n    Checking once_cell v1.21.4\n    Checking serde_core v1.0.228\n    Checking libsqlite3-sys v0.30.1\n    Checking fallible-streaming-iterator v0.1.9\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking bitflags v2.13.2\n    Checking smallvec v1.16.4\n    Checking cpufeatures v0.2.17\n    Checking fallible-iterator v0.3.0\n    Checking itoa v1.0.18\n    Checking memchr v2.8.3\n    Checking ryu v1.0.23\n    Checking generic-array v0.14.7\n    Checking crypto-common v0.1.7\n    Checking block-buffer v0.10.4\n    Checking digest v0.10.7\n    Checking sha2 v0.10.9\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking serde_json v1.0.145\n    Checking serde v1.0.228\n    Checking ahash v0.8.12\n    Checking hashbrown v0.14.5\n    Checking hashlink v0.9.1\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 8.79s\n"
+    },
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-test-fixed-download.log",
+      "interpretation": "Final 9 PASS after managed-download version correction",
+      "exitCode": 0,
+      "sha256": "f136a906afb9684b36e766bb086cd6f3a23484772150770c01a061d8ff090eeb",
+      "output": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 32.54s\n     Running unittests src/lib.rs (target/release/deps/fc_storage-4851e2ad8397fc42)\n\nrunning 9 tests\ntest business::materials::outcome_tests::a_new_exact_session_can_read_its_old_commit_but_old_epoch_cannot ... ok\ntest business::materials::outcome_tests::managed_download_missing_version_or_deleted_record_is_not_found_without_mutation ... ok\ntest business::materials::outcome_tests::native_legacy_receipt_keeps_schema_and_never_gets_fabricated_web_sender ... ok\ntest business::materials::outcome_tests::outcome_requires_exact_live_web_and_current_authority_even_for_unknown ... ok\ntest business::materials::outcome_tests::precommit_revocation_rolls_back_both_docs_but_postcommit_fault_keeps_queryable_history ... ok\ntest business::materials::outcome_tests::query_final_guard_gates_owned_foreign_and_unknown_without_writes ... ok\ntest business::materials::outcome_tests::receipt_and_sidecar_digest_shape_and_kind_mismatches_fail_closed ... ok\ntest business::materials::outcome_tests::stale_delete_cas_never_creates_outcome_and_committed_delete_fault_is_recoverable ... ok\ntest business::materials::outcome_tests::web_append_delete_receipts_are_historical_original_sender_only_and_survive_restart ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 2.54s\n\n"
+    },
+    {
+      "logPath": "/tmp/fc-round13-materials-storage-clippy-fixed-download.log",
+      "interpretation": "Final exact source single-package strict release Clippy PASS; 96s includes build-lock wait",
+      "exitCode": 0,
+      "sha256": "0453496bc7a8d14bb420fcd76c3731be3be2b0d295b6feb8cf645dc7c3f6e1e2",
+      "output": "    Blocking waiting for file lock on build directory\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 1m 36s\n"
+    }
+  ],
+  "finalTestArtifact": {
+    "path": "target/release/deps/fc_storage-4851e2ad8397fc42",
+    "sha256": "f940abfe28e0f8630831e6423e001c2ec00701d3ed4314c78c0062153c915e6b"
+  },
+  "limitations": [
+    "Initial failure logs bind only their captured output; final source hashes bind final PASS sources.",
+    "No real exact application lease implementation bypass added: storage test uses isolated exact captured-actor guard; parent must integrate real Backend lease fence.",
+    "No Windows/Win7/Win10/TLS/listener/browser evidence from this task."
+  ],
+  "previousPassingPhase": {
+    "passed": 8,
+    "testExecutionSeconds": 1.78,
+    "compileSeconds": 28.33,
+    "clippySeconds": 8.79,
+    "report": "/tmp/fc-round13-materials-storage-before-download-fix.json"
+  },
+  "clippyTimingIncludesCargoBuildLockWait": true,
+  "managedDownloadCorrection": "Check record folder/Published/exact requested resourceVersion before inventory lookup; absent/stale version and deleted record -> Domain(NotFound), no SQLite mutation; matched actual version still verifies internal resource integrity."
+}

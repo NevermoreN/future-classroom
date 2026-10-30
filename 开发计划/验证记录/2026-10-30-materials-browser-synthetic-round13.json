@@ -1,0 +1,618 @@
+{
+  "schemaVersion": 1,
+  "scope": "Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration",
+  "checks": [
+    {
+      "name": "voice_still_explicitly_unimplemented",
+      "status": "PASS"
+    },
+    {
+      "name": "scope_discloses_full_class_total",
+      "status": "PASS"
+    },
+    {
+      "name": "only_first20_classes_loaded",
+      "status": "PASS"
+    },
+    {
+      "name": "all128_classes_explicitly_reachable",
+      "status": "PASS"
+    },
+    {
+      "name": "continuation_ends_at128",
+      "status": "PASS"
+    },
+    {
+      "name": "valid128_owner_class_and64_subject_render",
+      "status": "PASS"
+    },
+    {
+      "name": "download_single_Blob_current_browser_filename",
+      "status": "PASS"
+    },
+    {
+      "name": "download_event_artifact_exact_bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "download_does_not_call_whiteboard_Shell",
+      "status": "PASS"
+    },
+    {
+      "name": "one_bounded_download_objectURL",
+      "status": "PASS"
+    },
+    {
+      "name": "objectURL_revoked_on_material_page_unmount",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel_navigation_keeps_File_without_append",
+      "status": "PASS"
+    },
+    {
+      "name": "actual_beforeunload_cancel_keeps_file_draft",
+      "status": "PASS"
+    },
+    {
+      "name": "upload_metadata_no_path_or_role",
+      "status": "PASS"
+    },
+    {
+      "name": "raw_File_body_exact_size_not_JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "uploaded_no_auto_append_file_cannot_be_replaced",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel_body_has_no_new_command",
+      "status": "PASS"
+    },
+    {
+      "name": "uploaded_explicit_cancel_frees_original_receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "upload_metadata_no_path_or_role",
+      "status": "PASS"
+    },
+    {
+      "name": "raw_File_body_exact_size_not_JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "delayed_body_fixture_inflight",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel_body_has_no_new_command",
+      "status": "PASS"
+    },
+    {
+      "name": "abort_late_binary_never_enables_append",
+      "status": "PASS"
+    },
+    {
+      "name": "upload_metadata_no_path_or_role",
+      "status": "PASS"
+    },
+    {
+      "name": "raw_File_body_exact_size_not_JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "append_requires_completed_original_upload",
+      "status": "PASS"
+    },
+    {
+      "name": "append_uses_nonzero_u64_string",
+      "status": "PASS"
+    },
+    {
+      "name": "append_unknown_submits_once",
+      "status": "PASS"
+    },
+    {
+      "name": "NOT_FOUND_never_reposts_append",
+      "status": "PASS"
+    },
+    {
+      "name": "historical_append_receipt_not_automatic_directory_GET",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit_current_GET_after_historical_receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "delete_exact_original_version_and_CAS",
+      "status": "PASS"
+    },
+    {
+      "name": "delete_unknown_keeps_original_one_shot_CAS_and_history",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile390_long_labels_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile320_long_labels_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile320_last_download_button_not_obscured_by_bottom_reminder",
+      "status": "PASS"
+    },
+    {
+      "name": "deleted_fixed_row_disappears_only_after_explicit_GET",
+      "status": "PASS"
+    },
+    {
+      "name": "materials_page_keeps_bottom_reminder_action",
+      "status": "PASS"
+    },
+    {
+      "name": "403_clears_session_materials_File_and_command_mirrors",
+      "status": "PASS"
+    },
+    {
+      "name": "401_directory_read_clears_session_and_material_rows",
+      "status": "PASS"
+    },
+    {
+      "name": "no_persistent_file_command_or_secret_storage",
+      "status": "PASS"
+    },
+    {
+      "name": "same_origin_CSRF_no_secret_query_for_all_material_requests",
+      "status": "PASS"
+    },
+    {
+      "name": "no_uncaught_browser_runtime_errors",
+      "status": "PASS"
+    },
+    {
+      "name": "strict_CSP_no_security_errors",
+      "status": "PASS"
+    }
+  ],
+  "requests": [
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/20",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/40",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/60",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/80",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/100",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/classes/9/2/120",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/download/9/2/5/6",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/9/2",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/18446744073709551615/bytes",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/18446744073709551615/cancel",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/9/2",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/18446744073709551614/bytes",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/18446744073709551614/cancel",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/9/2",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/18446744073709551613/bytes",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2/append",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "13660769237540401105"
+    },
+    {
+      "path": "materials/commands/13660769237540401105",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/commands/13660769237540401105",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2/delete",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "6842484297980716377"
+    },
+    {
+      "path": "materials/commands/6842484297980716377",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/commands/6842484297980716377",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/uploads/9/2",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "materials/folders/9/2",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/tmp/fc-round13-materials-desktop.png",
+      "sha256": "40d4b04896e180b031f8a4a0a64b4cc04457a7144a5f0f829f77853b6c88c7cd",
+      "bytes": 373852
+    },
+    {
+      "path": "/tmp/fc-round13-materials-mobile.png",
+      "sha256": "6dcd81bb2f98c5dd5c1e6c9b9a3f5f9f9c0854835e21faec5b37385506129113",
+      "bytes": 321779
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+    "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "runtimeErrors": [],
+  "downloadArtifact": {
+    "bytes": 6,
+    "sha256": "af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf",
+    "syntheticUtf8Content": "sample",
+    "scope": "Actual Playwright Download.createReadStream bytes from synthetic authenticated API response; not Windows TLS"
+  },
+  "status": "PASS",
+  "counts": {
+    "appendCount": 1,
+    "deleteCount": 1,
+    "cancelCount": 2,
+    "queries": 4,
+    "downloads": 1,
+    "folderGets": 4,
+    "bodyAborts": 1,
+    "dialogs": 5,
+    "beforeUnload": 1,
+    "primaryAssertions": 44,
+    "additionalAssertions": 4,
+    "aggregateAssertions": 48
+  },
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "completed": true,
+  "cleanup": "OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED",
+  "runner": {
+    "path": "/tmp/fc-round13-materials-browser-runner.js",
+    "scope": "Own browser context and fixtures, final synthetic build only",
+    "code": "async defaultPage => {\n const context=await defaultPage.context().browser().newContext({viewport:{width:1440,height:1000},acceptDownloads:true,serviceWorkers:'block'}),page=await context.newPage();\n const preview='http://172.30.0.2:4173',origin='https://teacher-materials.synthetic',prefix='/fc/api/v1/',csrf='b'.repeat(64),bearer='c'.repeat(64),target={ownerTeacherId:'9',subjectId:'2'},owner='师'.repeat(128),subject='科'.repeat(64),className='班'.repeat(128);\n const report={schemaVersion:1,scope:'Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration',checks:[],requests:[],screenshots:[],screenshotData:[],consoleErrors:[],runtimeErrors:[]};\n const check=(x,name)=>{if(!x)throw new Error(name);report.checks.push({name,status:'PASS'});};let phase='setup',allow=false,dialogCount=0,beforeUnloadCount=0,forceAuth=0,uploadMode='normal',writeMode='normal',unknownOnce=false,uploadId=18446744073709551615n,folderRevision=2n,appendCount=0,deleteCount=0,cancelCount=0,queries=0,downloads=0,folderGets=0,pendingBody=null,bodyAborts=0;const uploads=new Map(),receipts=new Map();\n const makeRow=(id='5',version='6',sequence='2',name='lesson.txt')=>({materialId:id,folderId:'4',displayName:name,resourceVersionId:version,kind:'TXT',bytes:6,sha256:'af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf',allowedClassIds:['1'],addedAt:'2026-10-30T10:00:00',addedSequence:sequence,status:'PUBLISHED',revision:'1'});\n let records=[makeRow(),makeRow('7','8','1','other.txt')];\n const allClasses=Array.from({length:128},(_,i)=>({classId:String(i+1),className:i===0?className:'合成班级'+(i+1)}));\n const onDialog=async d=>{dialogCount++;if(d.type()==='beforeunload')beforeUnloadCount++;if(allow)await d.accept();else await d.dismiss();};page.on('dialog',onDialog);page.on('console',m=>{if(m.type()==='error')report.consoleErrors.push(m.text())});page.on('pageerror',e=>report.runtimeErrors.push(e.message));page.on('requestfailed',r=>{if(r.url().endsWith('/bytes'))bodyAborts++});\n try {\n await context.addCookies([{name:'__Host-FutureClassroom',value:bearer,domain:'teacher-materials.synthetic',path:'/',secure:true,httpOnly:true,sameSite:'Strict'}]);\n await page.addInitScript(()=>{window.__fcObjectUrls={created:[],revoked:[]};const c=URL.createObjectURL.bind(URL),r=URL.revokeObjectURL.bind(URL);URL.createObjectURL=b=>{const u=c(b);window.__fcObjectUrls.created.push(u);return u};URL.revokeObjectURL=u=>{window.__fcObjectUrls.revoked.push(u);r(u)}});\n const csp=\"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n await page.route(origin+'/**',async route=>{\n  const req=route.request(),url=new URL(req.url()),h=req.headers();\n  if(!url.pathname.startsWith(prefix)){const response=await route.fetch({url:preview+url.pathname});return route.fulfill({response,headers:{...response.headers(),'content-security-policy':csp,'x-content-type-options':'nosniff','referrer-policy':'no-referrer','permissions-policy':'camera=(),geolocation=(),microphone=(self)'}})}\n  const path=url.pathname.slice(prefix.length),method=req.method(),body=method==='POST'&&h['content-type']?.startsWith('application/json')?req.postDataJSON():null;\n  const log={path,method,queryEmpty:!url.search,originOK:method!=='POST'||h.origin===origin,csrfOK:method!=='POST'||h['x-fc-csrf']===csrf};report.requests.push(log);\n  const answer=(status,value)=>route.fulfill({status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'},body:JSON.stringify(value)});\n  if(path==='status')return answer(200,{schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});\n  if(path==='session')return answer(200,{schemaVersion:1,status:'AUTHENTICATED',principal:{id:'9',displayName:owner,role:'TEACHER_ADMIN'},currentClassId:'1',assignments:[{classId:'1',subjectId:'2'}],csrf});\n  if(forceAuth){const status=forceAuth;forceAuth=0;return answer(status,{schemaVersion:1,code:status===401?'UNAUTHORIZED':'FORBIDDEN'})}\n  let match;\n  if((match=/^materials\\/scopes\\/(\\d+)$/.exec(path))){const offset=Number(match[1]);const items=[{...target,ownerDisplayName:owner,subjectName:subject,classes:allClasses.slice(0,20),classTotal:128,nextClassOffset:20}];return answer(200,{schemaVersion:1,status:'MATERIAL_SCOPES',identityRevision:'1',offset,total:1,nextOffset:null,items})}\n  if((match=/^materials\\/classes\\/9\\/2\\/(\\d+)$/.exec(path))){const offset=Number(match[1]),items=allClasses.slice(offset,offset+20);return answer(200,{schemaVersion:1,status:'MATERIAL_CLASSES',identityRevision:'1',scope:target,offset,total:128,nextOffset:offset+items.length<128?offset+items.length:null,items})}\n  if((match=/^materials\\/folders\\/9\\/2(?:\\/4\\/(\\d+)\\/(\\d+))?$/.exec(path))&&method==='GET'){folderGets++;if(match[1]&&match[1]!==String(folderRevision))return answer(409,{schemaVersion:1,code:'STALE_CURSOR'});const offset=match[2]?Number(match[2]):0,items=records.slice(offset,offset+20);return answer(200,{schemaVersion:1,status:'MATERIALS',scope:target,folderId:'4',folderRevision:String(folderRevision),offset,total:records.length,items,nextCursor:offset+items.length<records.length?{folderId:'4',folderRevision:String(folderRevision),offset:offset+items.length}:null})}\n  if(path==='materials/uploads/9/2'&&method==='POST'){const id=String(uploadId--);uploads.set(id,{name:body.displayName,bytes:body.bytes,received:false});check(Object.keys(body).sort().join(',')==='bytes,displayName,schemaVersion','upload_metadata_no_path_or_role');return answer(201,{schemaVersion:1,status:'UPLOAD_READY',uploadId:id,expiresInSeconds:300,maxChunkBytes:65536})}\n  if((match=/^materials\\/uploads\\/(\\d+)\\/bytes$/.exec(path))&&method==='POST'){const id=match[1],u=uploads.get(id);check(h['content-type']==='application/octet-stream'&&req.postDataBuffer()?.length===u.bytes,'raw_File_body_exact_size_not_JSON');if(uploadMode==='delay'){uploadMode='normal';await new Promise(resolve=>{pendingBody={id,resolve}});if(!uploads.has(id)){try{return await answer(409,{schemaVersion:1,code:'UPLOAD_EXPIRED'})}catch{return}}}u.received=true;try{return await answer(200,{schemaVersion:1,status:'UPLOADED',uploadId:id,bytes:u.bytes})}catch{return}}\n  if((match=/^materials\\/uploads\\/(\\d+)\\/cancel$/.exec(path))&&method==='POST'){cancelCount++;check(Object.keys(body).join(',')==='schemaVersion','cancel_body_has_no_new_command');uploads.delete(match[1]);return answer(200,{schemaVersion:1,status:'UPLOAD_CANCELLED',uploadId:match[1]})}\n  if(path==='materials/folders/9/2/append'&&method==='POST'){appendCount++;const u=uploads.get(body.uploadId);check(!!u?.received,'append_requires_completed_original_upload');check(/^[1-9][0-9]{0,19}$/.test(body.commandId)&&BigInt(body.commandId)<=18446744073709551615n,'append_uses_nonzero_u64_string');folderRevision++;const r={...makeRow('99',body.uploadId,String(folderRevision),u.name),allowedClassIds:body.allowedClassIds};records.unshift(r);uploads.delete(body.uploadId);receipts.set(body.commandId,r);log.commandId=body.commandId;const unknown=writeMode==='unknown';writeMode='normal';unknownOnce=unknown;return unknown?answer(503,{schemaVersion:1,code:'RESULT_UNKNOWN'}):answer(200,{schemaVersion:1,status:'COMMITTED',commandId:body.commandId,scope:target,record:r})}\n  if(path==='materials/folders/9/2/delete'&&method==='POST'){deleteCount++;const r=records.find(x=>x.materialId===body.materialId);check(r?.resourceVersionId===body.resourceVersionId&&r?.revision===body.expectedMaterialRevision,'delete_exact_original_version_and_CAS');folderRevision++;const result={...r,status:'DELETED',revision:String(BigInt(r.revision)+1n)};records=records.filter(x=>x!==r);receipts.set(body.commandId,result);log.commandId=body.commandId;const unknown=writeMode==='unknown';writeMode='normal';unknownOnce=unknown;return unknown?answer(503,{schemaVersion:1,code:'RESULT_UNKNOWN'}):answer(200,{schemaVersion:1,status:'COMMITTED',commandId:body.commandId,scope:target,record:result})}\n  if((match=/^materials\\/commands\\/(\\d+)$/.exec(path))){queries++;const id=match[1],r=receipts.get(id);if(unknownOnce){unknownOnce=false;return answer(200,{schemaVersion:1,status:'COMMAND_RESULT',commandId:id,state:'NOT_FOUND',scope:null,record:null})}return answer(200,{schemaVersion:1,status:'COMMAND_RESULT',commandId:id,state:r?'COMMITTED':'NOT_FOUND',scope:r?target:null,record:r||null})}\n  if(path==='materials/download/9/2/5/6'){downloads++;return route.fulfill({status:200,headers:{'content-type':'application/octet-stream','content-length':'6','x-fc-sha256':'af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf','content-disposition':\"attachment; filename*=UTF-8''lesson.txt\",'cache-control':'no-store','x-content-type-options':'nosniff'},body:'sample'})}\n  return answer(404,{schemaVersion:1,code:'NOT_FOUND'});\n });\n await page.goto(origin+'/fc/');await page.getByRole('button',{name:'管理课堂资料',exact:true}).waitFor({timeout:10000});check(await page.getByRole('button',{name:'尚未接入服务',exact:true}).count()===1,'voice_still_explicitly_unimplemented');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().waitFor();\n check((await page.locator('.scope-option').first().innerText()).includes('128 个有效任教班级'),'scope_discloses_full_class_total');await page.locator('.scope-option').first().click();await page.locator('#material-file').waitFor();\n check(await page.locator('.material-classes input[type=checkbox]').count()===20,'only_first20_classes_loaded');for(let offset=20;offset<128;offset+=20){await page.getByRole('button',{name:'加载更多任教班级',exact:true}).click();await page.getByText('已加载 '+Math.min(offset+20,128)+' / 128 个真实任教班级。',{exact:true}).waitFor()}\n check(await page.locator('.material-classes input[type=checkbox]').count()===128,'all128_classes_explicitly_reachable');check(await page.getByRole('button',{name:'加载更多任教班级',exact:true}).count()===0,'continuation_ends_at128');check((await page.locator('.content-editor').innerText()).includes(owner)&& (await page.locator('.material-classes').innerText()).includes(className),'valid128_owner_class_and64_subject_render');\n phase='download';const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).click();const dl=await downloaded;check(dl.suggestedFilename()==='lesson.txt'&&dl.url().startsWith('blob:'),'download_single_Blob_current_browser_filename');const downloadStream=await dl.createReadStream(),downloadChunks=[];for await(const chunk of downloadStream)downloadChunks.push(Buffer.from(chunk));const downloadBytes=Buffer.concat(downloadChunks);check(downloadBytes.equals(Buffer.from('sample')),'download_event_artifact_exact_bytes');report.downloadArtifact={path:'/tmp/fc-round13-download-lesson.txt',base64:downloadBytes.toString('base64'),bytes:downloadBytes.length};await dl.cancel();check(downloads===1&&!report.requests.some(x=>/shell|launch|open-copy/i.test(x.path)),'download_does_not_call_whiteboard_Shell');\n const urlStats=await page.evaluate(()=>window.__fcObjectUrls);check(urlStats.created.length===1,'one_bounded_download_objectURL');await page.getByRole('button',{name:'返回工作台',exact:true}).click();check(await page.evaluate(()=>window.__fcObjectUrls.revoked.length)===1,'objectURL_revoked_on_material_page_unmount');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().click();await page.locator('#material-file').waitFor();\n phase='draft_guard';await page.locator('#material-file').setInputFiles({name:'本机合成课件.txt',mimeType:'text/plain',buffer:Buffer.from('sample')});const oldDialogs=dialogCount;await page.getByRole('button',{name:'返回工作台',exact:true}).click();check(dialogCount===oldDialogs+1&&await page.locator('#material-file').isVisible(),'cancel_navigation_keeps_File_without_append');\n const oldUnload=beforeUnloadCount;try{await page.reload({timeout:3000})}catch{}check(beforeUnloadCount===oldUnload+1&&await page.locator('#material-file').isVisible(),'actual_beforeunload_cancel_keeps_file_draft');\n phase='uploaded_cancel';await page.locator('.material-classes input[type=checkbox]').first().check();await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.getByText('文件传输已完成，尚未添加。选择可见班级后，点击“校验并添加”。',{exact:true}).waitFor();check(appendCount===0&&await page.locator('#material-file').isDisabled(),'uploaded_no_auto_append_file_cannot_be_replaced');await page.getByRole('button',{name:'取消上传',exact:true}).click();await page.getByText('白板已确认取消原临时文件；未发送添加命令。',{exact:true}).waitFor();check(cancelCount===1&&appendCount===0&&await page.locator('#material-file').isEnabled(),'uploaded_explicit_cancel_frees_original_receipt');\n phase='body_cancel';uploadMode='delay';await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.loading-content')!==null);await page.waitForTimeout(150);check(!!pendingBody,'delayed_body_fixture_inflight');await page.getByRole('button',{name:'取消上传',exact:true}).click();await page.getByText('白板已确认取消原临时文件；未发送添加命令。',{exact:true}).waitFor();pendingBody.resolve();pendingBody=null;await page.waitForTimeout(150);check(cancelCount===2&&appendCount===0&&await page.getByRole('button',{name:'校验并添加到课堂资料',exact:true}).isDisabled(),'abort_late_binary_never_enables_append');\n phase='append_unknown';await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.getByText('文件传输已完成，尚未添加。选择可见班级后，点击“校验并添加”。',{exact:true}).waitFor();writeMode='unknown';await page.getByRole('button',{name:'校验并添加到课堂资料',exact:true}).click();await page.getByText('提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。',{exact:true}).waitFor();check(appendCount===1,'append_unknown_submits_once');const oldGets=folderGets;await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.getByText('当前未查到原命令，不证明从未提交；不会因此重发。',{exact:true}).waitFor();check(appendCount===1,'NOT_FOUND_never_reposts_append');await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.locator('.historical-result').waitFor();check(folderGets===oldGets&&appendCount===1,'historical_append_receipt_not_automatic_directory_GET');\n const desktopShot=await page.screenshot({path:'/tmp/fc-round13-materials-desktop.png',fullPage:true});report.screenshots.push({path:'/tmp/fc-round13-materials-desktop.png'});report.screenshotData.push({path:'/tmp/fc-round13-materials-desktop.png',base64:desktopShot.toString('base64')});allow=true;await page.getByRole('button',{name:'读取当前目录核对',exact:true}).click();allow=false;await page.getByRole('heading',{name:'本机合成课件.txt',exact:true}).waitFor();check(folderGets===oldGets+1,'explicit_current_GET_after_historical_receipt');\n phase='delete_unknown';writeMode='unknown';allow=true;await page.getByRole('button',{name:'删除 lesson.txt',exact:true}).click();allow=false;await page.getByText('提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。',{exact:true}).waitFor();await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.getByText('当前未查到原命令，不证明从未提交；不会因此重发。',{exact:true}).waitFor();await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.locator('.historical-result').waitFor();check(deleteCount===1&&(await page.locator('.historical-result').innerText()).includes('已删除'),'delete_unknown_keeps_original_one_shot_CAS_and_history');\n await page.setViewportSize({width:390,height:844});check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'mobile390_long_labels_no_horizontal_overflow');await page.setViewportSize({width:320,height:740});check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'mobile320_long_labels_no_horizontal_overflow');await page.getByRole('button',{name:'下载 other.txt',exact:true}).click({trial:true,timeout:3000});check(true,'mobile320_last_download_button_not_obscured_by_bottom_reminder');await page.setViewportSize({width:390,height:844});const mobileShot=await page.screenshot({path:'/tmp/fc-round13-materials-mobile.png',fullPage:true});report.screenshots.push({path:'/tmp/fc-round13-materials-mobile.png'});report.screenshotData.push({path:'/tmp/fc-round13-materials-mobile.png',base64:mobileShot.toString('base64')});\n allow=true;await page.getByRole('button',{name:'读取当前目录核对',exact:true}).click();allow=false;await page.locator('.historical-result').waitFor({state:'detached'});check(await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).count()===0,'deleted_fixed_row_disappears_only_after_explicit_GET');check(await page.getByRole('button',{name:'管理今日提醒',exact:true}).isVisible(),'materials_page_keeps_bottom_reminder_action');\n phase='403';await page.locator('#material-file').setInputFiles({name:'撤权后不可保留.txt',mimeType:'text/plain',buffer:Buffer.from('sample')});forceAuth=403;await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.locator('#pair-code').waitFor({timeout:10000});check(!(await page.locator('body').innerText()).includes('撤权后不可保留')&&await page.locator('#material-file').count()===0,'403_clears_session_materials_File_and_command_mirrors');\n phase='401';await page.reload();await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().waitFor();forceAuth=401;await page.locator('.scope-option').first().click();await page.locator('#pair-code').waitFor();check(await page.locator('.material-row').count()===0,'401_directory_read_clears_session_and_material_rows');\n check(await page.evaluate(()=>localStorage.length===0&&sessionStorage.length===0),'no_persistent_file_command_or_secret_storage');check(report.requests.every(x=>x.queryEmpty&&x.originOK&&x.csrfOK),'same_origin_CSRF_no_secret_query_for_all_material_requests');check(report.runtimeErrors.length===0,'no_uncaught_browser_runtime_errors');check(!report.consoleErrors.some(s=>/CSP|Content Security Policy|Refused to|violates.*directive/i.test(s)),'strict_CSP_no_security_errors');report.status='PASS';\n }catch(error){report.status='FAIL';report.failurePhase=phase;report.error=String(error);report.visibleText=await page.locator('body').innerText().catch(()=>'<unavailable>')}\n finally{if(pendingBody){pendingBody.resolve();pendingBody=null}report.counts={appendCount,deleteCount,cancelCount,queries,downloads,folderGets,bodyAborts,dialogs:dialogCount,beforeUnload:beforeUnloadCount};report.browser=await page.evaluate(()=>navigator.userAgent).catch(()=>'<closed>');report.completed=true;await context.close();report.cleanup='OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED';}\n return report;\n}\n",
+    "sha256": "99fe8ac4df587c6d9e58e623e6bc4c35177148120d9f59161c8ed16e5cecb3a8"
+  },
+  "beforeFixtureFailures": [
+    "/tmp/fc-round13-materials-browser-before-download-fixture-fix.json",
+    "/tmp/fc-round13-materials-browser-before-vm-fixture-fix.json"
+  ],
+  "assetsManifest": {
+    "path": "web/dist/fc-assets.json",
+    "sha256": "6793ad2126820b5196758a627a6734a143b3b884738cd221943fd985ac1765f7"
+  },
+  "sourceBindingsMatchTargetedUnitReport": [
+    {
+      "path": "web/tests/material-protocol.test.ts",
+      "matches": true
+    },
+    {
+      "path": "web/tests/material-client.test.ts",
+      "matches": true
+    },
+    {
+      "path": "web/tests/material-controller.test.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/material-protocol.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/material-client.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/material-controller.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/MaterialsPane.tsx",
+      "matches": true
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/protocol.ts",
+      "matches": true
+    },
+    {
+      "path": "web/src/api/content-protocol.ts",
+      "matches": true
+    },
+    {
+      "path": "web/package-lock.json",
+      "matches": true
+    },
+    {
+      "path": "开发计划/13-教师课堂资料API契约.md",
+      "matches": true
+    }
+  ],
+  "evidenceLimits": [
+    "Linux headless Chromium with synthetic HTTPS-origin routes; actual HTTPS/TLS/Windows listener not exercised",
+    "Download event plus stream bytes verified; no Shell invocation",
+    "44 final checks counted once; earlier partial fixture failures not added to final count",
+    "Strict CSP and response metadata injected by fixture, not proof of production deployment"
+  ],
+  "additionalChecks": {
+    "report": "/tmp/fc-round13-materials-browser-negative.json",
+    "sha256": "fa804aff8043d401b9bb4551817b14e42c3657a2729e41b696ad7ba971db7ce8",
+    "passed": 4,
+    "unexpectedDownloads": 0,
+    "cleanup": "OWN_CONTEXT_CLOSED"
+  },
+  "visualInspection": {
+    "screenshotsViewed": [
+      "/tmp/fc-round13-materials-desktop.png",
+      "/tmp/fc-round13-materials-mobile.png"
+    ],
+    "observations": [
+      "Long permitted owner/class/subject labels wrap within the cards.",
+      "Mobile320 last download action passed real Playwright hit-testing; no document horizontal overflow at320 or390.",
+      "History is labelled separate from the current directory; bottom reminder action remains accessible."
+    ],
+    "scope": "Synthetic Linux Chromium visual/layout evidence only"
+  },
+  "archivedScreenshots": [
+    {
+      "file": "2026-10-30-materials-synthetic-round13-desktop.png",
+      "sha256": "40d4b04896e180b031f8a4a0a64b4cc04457a7144a5f0f829f77853b6c88c7cd"
+    },
+    {
+      "file": "2026-10-30-materials-synthetic-round13-mobile.png",
+      "sha256": "6dcd81bb2f98c5dd5c1e6c9b9a3f5f9f9c0854835e21faec5b37385506129113"
+    }
+  ],
+  "archivedRunners": {
+    "fc-round13-materials-browser-negative-runner.js": {
+      "code": "async defaultPage => {\n const context=await defaultPage.context().browser().newContext({viewport:{width:390,height:844},acceptDownloads:true}),page=await context.newPage(),report={scope:'Synthetic browser negative downloads only; no real TLS/server',checks:[],unexpectedDownloads:0,requests:[]};let mode='header';\n try {\n await page.addInitScript(()=>{window.__urls=0;const original=URL.createObjectURL.bind(URL);URL.createObjectURL=b=>{window.__urls++;return original(b)}});\n const scope={ownerTeacherId:'9',subjectId:'2'},sha='af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf',row={materialId:'5',folderId:'4',displayName:'lesson.txt',resourceVersionId:'6',kind:'TXT',bytes:6,sha256:sha,allowedClassIds:['1'],addedAt:'2026-10-30T10:00:00',addedSequence:'1',status:'PUBLISHED',revision:'1'};\n page.on('download',async d=>{report.unexpectedDownloads++;await d.cancel()});\n await page.route('https://materials-negative.synthetic/**',async route=>{const url=new URL(route.request().url()),path=url.pathname.slice('/fc/api/v1/'.length),answer=value=>route.fulfill({headers:{'content-type':'application/json','cache-control':'no-store'},body:JSON.stringify(value)});if(!url.pathname.startsWith('/fc/api/v1/')){const response=await route.fetch({url:'http://172.30.0.2:4173'+url.pathname});return route.fulfill({response})}report.requests.push(path);\n if(path==='status')return answer({schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});if(path==='session')return answer({schemaVersion:1,status:'AUTHENTICATED',principal:{id:'9',displayName:'合成老师',role:'TEACHER_ADMIN'},currentClassId:'1',assignments:[{classId:'1',subjectId:'2'}],csrf:'b'.repeat(64)});\n if(path==='materials/scopes/0')return answer({schemaVersion:1,status:'MATERIAL_SCOPES',identityRevision:'1',offset:0,total:1,nextOffset:null,items:[{...scope,ownerDisplayName:'合成老师',subjectName:'数学',classes:[{classId:'1',className:'一班'}],classTotal:1,nextClassOffset:null}]});if(path==='materials/folders/9/2')return answer({schemaVersion:1,status:'MATERIALS',scope,folderId:'4',folderRevision:'1',offset:0,total:1,items:[row],nextCursor:null});if(path==='materials/download/9/2/5/6')return route.fulfill({headers:{'content-type':'application/octet-stream','content-length':'6','x-fc-sha256':mode==='header'?'b'.repeat(64):sha,'content-disposition':'attachment; filename=\"lesson.txt\"'},body:mode==='header'?'sample':'short'});return route.fulfill({status:404,body:''})});\n await page.goto('https://materials-negative.synthetic/fc/');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().click();await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).waitFor();\n for(const candidate of ['header','short']){mode=candidate;await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).click();await page.getByText('下载未完成，没有生成下载文件；请重新核对目录与授权。',{exact:true}).waitFor();await page.waitForTimeout(100);if(report.unexpectedDownloads!==0)throw new Error(candidate+' created download');report.checks.push({name:candidate+'_invalid_download_emits_no_download_event',status:'PASS'});if(await page.evaluate(()=>window.__urls)!==0)throw new Error(candidate+' created BlobURL');report.checks.push({name:candidate+'_invalid_download_creates_no_objectURL',status:'PASS'})}\n report.status='PASS';\n }catch(e){report.status='FAIL';report.error=String(e)}finally{await context.close();report.cleanup='OWN_CONTEXT_CLOSED';}return report;\n}\n",
+      "sha256": "0b3e69c707098a12360dff9031f0f5f22287d282b81352b0e1ff76d464e29e70"
+    },
+    "fc-round13-materials-browser-runner.js": {
+      "code": "async defaultPage => {\n const context=await defaultPage.context().browser().newContext({viewport:{width:1440,height:1000},acceptDownloads:true,serviceWorkers:'block'}),page=await context.newPage();\n const preview='http://172.30.0.2:4173',origin='https://teacher-materials.synthetic',prefix='/fc/api/v1/',csrf='b'.repeat(64),bearer='c'.repeat(64),target={ownerTeacherId:'9',subjectId:'2'},owner='师'.repeat(128),subject='科'.repeat(64),className='班'.repeat(128);\n const report={schemaVersion:1,scope:'Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration',checks:[],requests:[],screenshots:[],screenshotData:[],consoleErrors:[],runtimeErrors:[]};\n const check=(x,name)=>{if(!x)throw new Error(name);report.checks.push({name,status:'PASS'});};let phase='setup',allow=false,dialogCount=0,beforeUnloadCount=0,forceAuth=0,uploadMode='normal',writeMode='normal',unknownOnce=false,uploadId=18446744073709551615n,folderRevision=2n,appendCount=0,deleteCount=0,cancelCount=0,queries=0,downloads=0,folderGets=0,pendingBody=null,bodyAborts=0;const uploads=new Map(),receipts=new Map();\n const makeRow=(id='5',version='6',sequence='2',name='lesson.txt')=>({materialId:id,folderId:'4',displayName:name,resourceVersionId:version,kind:'TXT',bytes:6,sha256:'af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf',allowedClassIds:['1'],addedAt:'2026-10-30T10:00:00',addedSequence:sequence,status:'PUBLISHED',revision:'1'});\n let records=[makeRow(),makeRow('7','8','1','other.txt')];\n const allClasses=Array.from({length:128},(_,i)=>({classId:String(i+1),className:i===0?className:'合成班级'+(i+1)}));\n const onDialog=async d=>{dialogCount++;if(d.type()==='beforeunload')beforeUnloadCount++;if(allow)await d.accept();else await d.dismiss();};page.on('dialog',onDialog);page.on('console',m=>{if(m.type()==='error')report.consoleErrors.push(m.text())});page.on('pageerror',e=>report.runtimeErrors.push(e.message));page.on('requestfailed',r=>{if(r.url().endsWith('/bytes'))bodyAborts++});\n try {\n await context.addCookies([{name:'__Host-FutureClassroom',value:bearer,domain:'teacher-materials.synthetic',path:'/',secure:true,httpOnly:true,sameSite:'Strict'}]);\n await page.addInitScript(()=>{window.__fcObjectUrls={created:[],revoked:[]};const c=URL.createObjectURL.bind(URL),r=URL.revokeObjectURL.bind(URL);URL.createObjectURL=b=>{const u=c(b);window.__fcObjectUrls.created.push(u);return u};URL.revokeObjectURL=u=>{window.__fcObjectUrls.revoked.push(u);r(u)}});\n const csp=\"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n await page.route(origin+'/**',async route=>{\n  const req=route.request(),url=new URL(req.url()),h=req.headers();\n  if(!url.pathname.startsWith(prefix)){const response=await route.fetch({url:preview+url.pathname});return route.fulfill({response,headers:{...response.headers(),'content-security-policy':csp,'x-content-type-options':'nosniff','referrer-policy':'no-referrer','permissions-policy':'camera=(),geolocation=(),microphone=(self)'}})}\n  const path=url.pathname.slice(prefix.length),method=req.method(),body=method==='POST'&&h['content-type']?.startsWith('application/json')?req.postDataJSON():null;\n  const log={path,method,queryEmpty:!url.search,originOK:method!=='POST'||h.origin===origin,csrfOK:method!=='POST'||h['x-fc-csrf']===csrf};report.requests.push(log);\n  const answer=(status,value)=>route.fulfill({status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'},body:JSON.stringify(value)});\n  if(path==='status')return answer(200,{schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});\n  if(path==='session')return answer(200,{schemaVersion:1,status:'AUTHENTICATED',principal:{id:'9',displayName:owner,role:'TEACHER_ADMIN'},currentClassId:'1',assignments:[{classId:'1',subjectId:'2'}],csrf});\n  if(forceAuth){const status=forceAuth;forceAuth=0;return answer(status,{schemaVersion:1,code:status===401?'UNAUTHORIZED':'FORBIDDEN'})}\n  let match;\n  if((match=/^materials\\/scopes\\/(\\d+)$/.exec(path))){const offset=Number(match[1]);const items=[{...target,ownerDisplayName:owner,subjectName:subject,classes:allClasses.slice(0,20),classTotal:128,nextClassOffset:20}];return answer(200,{schemaVersion:1,status:'MATERIAL_SCOPES',identityRevision:'1',offset,total:1,nextOffset:null,items})}\n  if((match=/^materials\\/classes\\/9\\/2\\/(\\d+)$/.exec(path))){const offset=Number(match[1]),items=allClasses.slice(offset,offset+20);return answer(200,{schemaVersion:1,status:'MATERIAL_CLASSES',identityRevision:'1',scope:target,offset,total:128,nextOffset:offset+items.length<128?offset+items.length:null,items})}\n  if((match=/^materials\\/folders\\/9\\/2(?:\\/4\\/(\\d+)\\/(\\d+))?$/.exec(path))&&method==='GET'){folderGets++;if(match[1]&&match[1]!==String(folderRevision))return answer(409,{schemaVersion:1,code:'STALE_CURSOR'});const offset=match[2]?Number(match[2]):0,items=records.slice(offset,offset+20);return answer(200,{schemaVersion:1,status:'MATERIALS',scope:target,folderId:'4',folderRevision:String(folderRevision),offset,total:records.length,items,nextCursor:offset+items.length<records.length?{folderId:'4',folderRevision:String(folderRevision),offset:offset+items.length}:null})}\n  if(path==='materials/uploads/9/2'&&method==='POST'){const id=String(uploadId--);uploads.set(id,{name:body.displayName,bytes:body.bytes,received:false});check(Object.keys(body).sort().join(',')==='bytes,displayName,schemaVersion','upload_metadata_no_path_or_role');return answer(201,{schemaVersion:1,status:'UPLOAD_READY',uploadId:id,expiresInSeconds:300,maxChunkBytes:65536})}\n  if((match=/^materials\\/uploads\\/(\\d+)\\/bytes$/.exec(path))&&method==='POST'){const id=match[1],u=uploads.get(id);check(h['content-type']==='application/octet-stream'&&req.postDataBuffer()?.length===u.bytes,'raw_File_body_exact_size_not_JSON');if(uploadMode==='delay'){uploadMode='normal';await new Promise(resolve=>{pendingBody={id,resolve}});if(!uploads.has(id)){try{return await answer(409,{schemaVersion:1,code:'UPLOAD_EXPIRED'})}catch{return}}}u.received=true;try{return await answer(200,{schemaVersion:1,status:'UPLOADED',uploadId:id,bytes:u.bytes})}catch{return}}\n  if((match=/^materials\\/uploads\\/(\\d+)\\/cancel$/.exec(path))&&method==='POST'){cancelCount++;check(Object.keys(body).join(',')==='schemaVersion','cancel_body_has_no_new_command');uploads.delete(match[1]);return answer(200,{schemaVersion:1,status:'UPLOAD_CANCELLED',uploadId:match[1]})}\n  if(path==='materials/folders/9/2/append'&&method==='POST'){appendCount++;const u=uploads.get(body.uploadId);check(!!u?.received,'append_requires_completed_original_upload');check(/^[1-9][0-9]{0,19}$/.test(body.commandId)&&BigInt(body.commandId)<=18446744073709551615n,'append_uses_nonzero_u64_string');folderRevision++;const r={...makeRow('99',body.uploadId,String(folderRevision),u.name),allowedClassIds:body.allowedClassIds};records.unshift(r);uploads.delete(body.uploadId);receipts.set(body.commandId,r);log.commandId=body.commandId;const unknown=writeMode==='unknown';writeMode='normal';unknownOnce=unknown;return unknown?answer(503,{schemaVersion:1,code:'RESULT_UNKNOWN'}):answer(200,{schemaVersion:1,status:'COMMITTED',commandId:body.commandId,scope:target,record:r})}\n  if(path==='materials/folders/9/2/delete'&&method==='POST'){deleteCount++;const r=records.find(x=>x.materialId===body.materialId);check(r?.resourceVersionId===body.resourceVersionId&&r?.revision===body.expectedMaterialRevision,'delete_exact_original_version_and_CAS');folderRevision++;const result={...r,status:'DELETED',revision:String(BigInt(r.revision)+1n)};records=records.filter(x=>x!==r);receipts.set(body.commandId,result);log.commandId=body.commandId;const unknown=writeMode==='unknown';writeMode='normal';unknownOnce=unknown;return unknown?answer(503,{schemaVersion:1,code:'RESULT_UNKNOWN'}):answer(200,{schemaVersion:1,status:'COMMITTED',commandId:body.commandId,scope:target,record:result})}\n  if((match=/^materials\\/commands\\/(\\d+)$/.exec(path))){queries++;const id=match[1],r=receipts.get(id);if(unknownOnce){unknownOnce=false;return answer(200,{schemaVersion:1,status:'COMMAND_RESULT',commandId:id,state:'NOT_FOUND',scope:null,record:null})}return answer(200,{schemaVersion:1,status:'COMMAND_RESULT',commandId:id,state:r?'COMMITTED':'NOT_FOUND',scope:r?target:null,record:r||null})}\n  if(path==='materials/download/9/2/5/6'){downloads++;return route.fulfill({status:200,headers:{'content-type':'application/octet-stream','content-length':'6','x-fc-sha256':'af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf','content-disposition':\"attachment; filename*=UTF-8''lesson.txt\",'cache-control':'no-store','x-content-type-options':'nosniff'},body:'sample'})}\n  return answer(404,{schemaVersion:1,code:'NOT_FOUND'});\n });\n await page.goto(origin+'/fc/');await page.getByRole('button',{name:'管理课堂资料',exact:true}).waitFor({timeout:10000});check(await page.getByRole('button',{name:'尚未接入服务',exact:true}).count()===1,'voice_still_explicitly_unimplemented');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().waitFor();\n check((await page.locator('.scope-option').first().innerText()).includes('128 个有效任教班级'),'scope_discloses_full_class_total');await page.locator('.scope-option').first().click();await page.locator('#material-file').waitFor();\n check(await page.locator('.material-classes input[type=checkbox]').count()===20,'only_first20_classes_loaded');for(let offset=20;offset<128;offset+=20){await page.getByRole('button',{name:'加载更多任教班级',exact:true}).click();await page.getByText('已加载 '+Math.min(offset+20,128)+' / 128 个真实任教班级。',{exact:true}).waitFor()}\n check(await page.locator('.material-classes input[type=checkbox]').count()===128,'all128_classes_explicitly_reachable');check(await page.getByRole('button',{name:'加载更多任教班级',exact:true}).count()===0,'continuation_ends_at128');check((await page.locator('.content-editor').innerText()).includes(owner)&& (await page.locator('.material-classes').innerText()).includes(className),'valid128_owner_class_and64_subject_render');\n phase='download';const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).click();const dl=await downloaded;check(dl.suggestedFilename()==='lesson.txt'&&dl.url().startsWith('blob:'),'download_single_Blob_current_browser_filename');const downloadStream=await dl.createReadStream(),downloadChunks=[];for await(const chunk of downloadStream)downloadChunks.push(Buffer.from(chunk));const downloadBytes=Buffer.concat(downloadChunks);check(downloadBytes.equals(Buffer.from('sample')),'download_event_artifact_exact_bytes');report.downloadArtifact={path:'/tmp/fc-round13-download-lesson.txt',base64:downloadBytes.toString('base64'),bytes:downloadBytes.length};await dl.cancel();check(downloads===1&&!report.requests.some(x=>/shell|launch|open-copy/i.test(x.path)),'download_does_not_call_whiteboard_Shell');\n const urlStats=await page.evaluate(()=>window.__fcObjectUrls);check(urlStats.created.length===1,'one_bounded_download_objectURL');await page.getByRole('button',{name:'返回工作台',exact:true}).click();check(await page.evaluate(()=>window.__fcObjectUrls.revoked.length)===1,'objectURL_revoked_on_material_page_unmount');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().click();await page.locator('#material-file').waitFor();\n phase='draft_guard';await page.locator('#material-file').setInputFiles({name:'本机合成课件.txt',mimeType:'text/plain',buffer:Buffer.from('sample')});const oldDialogs=dialogCount;await page.getByRole('button',{name:'返回工作台',exact:true}).click();check(dialogCount===oldDialogs+1&&await page.locator('#material-file').isVisible(),'cancel_navigation_keeps_File_without_append');\n const oldUnload=beforeUnloadCount;try{await page.reload({timeout:3000})}catch{}check(beforeUnloadCount===oldUnload+1&&await page.locator('#material-file').isVisible(),'actual_beforeunload_cancel_keeps_file_draft');\n phase='uploaded_cancel';await page.locator('.material-classes input[type=checkbox]').first().check();await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.getByText('文件传输已完成，尚未添加。选择可见班级后，点击“校验并添加”。',{exact:true}).waitFor();check(appendCount===0&&await page.locator('#material-file').isDisabled(),'uploaded_no_auto_append_file_cannot_be_replaced');await page.getByRole('button',{name:'取消上传',exact:true}).click();await page.getByText('白板已确认取消原临时文件；未发送添加命令。',{exact:true}).waitFor();check(cancelCount===1&&appendCount===0&&await page.locator('#material-file').isEnabled(),'uploaded_explicit_cancel_frees_original_receipt');\n phase='body_cancel';uploadMode='delay';await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.loading-content')!==null);await page.waitForTimeout(150);check(!!pendingBody,'delayed_body_fixture_inflight');await page.getByRole('button',{name:'取消上传',exact:true}).click();await page.getByText('白板已确认取消原临时文件；未发送添加命令。',{exact:true}).waitFor();pendingBody.resolve();pendingBody=null;await page.waitForTimeout(150);check(cancelCount===2&&appendCount===0&&await page.getByRole('button',{name:'校验并添加到课堂资料',exact:true}).isDisabled(),'abort_late_binary_never_enables_append');\n phase='append_unknown';await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.getByText('文件传输已完成，尚未添加。选择可见班级后，点击“校验并添加”。',{exact:true}).waitFor();writeMode='unknown';await page.getByRole('button',{name:'校验并添加到课堂资料',exact:true}).click();await page.getByText('提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。',{exact:true}).waitFor();check(appendCount===1,'append_unknown_submits_once');const oldGets=folderGets;await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.getByText('当前未查到原命令，不证明从未提交；不会因此重发。',{exact:true}).waitFor();check(appendCount===1,'NOT_FOUND_never_reposts_append');await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.locator('.historical-result').waitFor();check(folderGets===oldGets&&appendCount===1,'historical_append_receipt_not_automatic_directory_GET');\n const desktopShot=await page.screenshot({path:'/tmp/fc-round13-materials-desktop.png',fullPage:true});report.screenshots.push({path:'/tmp/fc-round13-materials-desktop.png'});report.screenshotData.push({path:'/tmp/fc-round13-materials-desktop.png',base64:desktopShot.toString('base64')});allow=true;await page.getByRole('button',{name:'读取当前目录核对',exact:true}).click();allow=false;await page.getByRole('heading',{name:'本机合成课件.txt',exact:true}).waitFor();check(folderGets===oldGets+1,'explicit_current_GET_after_historical_receipt');\n phase='delete_unknown';writeMode='unknown';allow=true;await page.getByRole('button',{name:'删除 lesson.txt',exact:true}).click();allow=false;await page.getByText('提交结果未知。原命令保留在本页，只能手动查询；不会自动重发或生成新命令。',{exact:true}).waitFor();await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.getByText('当前未查到原命令，不证明从未提交；不会因此重发。',{exact:true}).waitFor();await page.getByRole('button',{name:'手动查询原命令',exact:true}).click();await page.locator('.historical-result').waitFor();check(deleteCount===1&&(await page.locator('.historical-result').innerText()).includes('已删除'),'delete_unknown_keeps_original_one_shot_CAS_and_history');\n await page.setViewportSize({width:390,height:844});check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'mobile390_long_labels_no_horizontal_overflow');await page.setViewportSize({width:320,height:740});check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'mobile320_long_labels_no_horizontal_overflow');await page.getByRole('button',{name:'下载 other.txt',exact:true}).click({trial:true,timeout:3000});check(true,'mobile320_last_download_button_not_obscured_by_bottom_reminder');await page.setViewportSize({width:390,height:844});const mobileShot=await page.screenshot({path:'/tmp/fc-round13-materials-mobile.png',fullPage:true});report.screenshots.push({path:'/tmp/fc-round13-materials-mobile.png'});report.screenshotData.push({path:'/tmp/fc-round13-materials-mobile.png',base64:mobileShot.toString('base64')});\n allow=true;await page.getByRole('button',{name:'读取当前目录核对',exact:true}).click();allow=false;await page.locator('.historical-result').waitFor({state:'detached'});check(await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).count()===0,'deleted_fixed_row_disappears_only_after_explicit_GET');check(await page.getByRole('button',{name:'管理今日提醒',exact:true}).isVisible(),'materials_page_keeps_bottom_reminder_action');\n phase='403';await page.locator('#material-file').setInputFiles({name:'撤权后不可保留.txt',mimeType:'text/plain',buffer:Buffer.from('sample')});forceAuth=403;await page.getByRole('button',{name:'上传文件',exact:true}).click();await page.locator('#pair-code').waitFor({timeout:10000});check(!(await page.locator('body').innerText()).includes('撤权后不可保留')&&await page.locator('#material-file').count()===0,'403_clears_session_materials_File_and_command_mirrors');\n phase='401';await page.reload();await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().waitFor();forceAuth=401;await page.locator('.scope-option').first().click();await page.locator('#pair-code').waitFor();check(await page.locator('.material-row').count()===0,'401_directory_read_clears_session_and_material_rows');\n check(await page.evaluate(()=>localStorage.length===0&&sessionStorage.length===0),'no_persistent_file_command_or_secret_storage');check(report.requests.every(x=>x.queryEmpty&&x.originOK&&x.csrfOK),'same_origin_CSRF_no_secret_query_for_all_material_requests');check(report.runtimeErrors.length===0,'no_uncaught_browser_runtime_errors');check(!report.consoleErrors.some(s=>/CSP|Content Security Policy|Refused to|violates.*directive/i.test(s)),'strict_CSP_no_security_errors');report.status='PASS';\n }catch(error){report.status='FAIL';report.failurePhase=phase;report.error=String(error);report.visibleText=await page.locator('body').innerText().catch(()=>'<unavailable>')}\n finally{if(pendingBody){pendingBody.resolve();pendingBody=null}report.counts={appendCount,deleteCount,cancelCount,queries,downloads,folderGets,bodyAborts,dialogs:dialogCount,beforeUnload:beforeUnloadCount};report.browser=await page.evaluate(()=>navigator.userAgent).catch(()=>'<closed>');report.completed=true;await context.close();report.cleanup='OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED';}\n return report;\n}\n",
+      "sha256": "99fe8ac4df587c6d9e58e623e6bc4c35177148120d9f59161c8ed16e5cecb3a8"
+    }
+  },
+  "additionalNegativeBrowserEvidence": {
+    "scope": "Synthetic browser negative downloads only; no real TLS/server",
+    "checks": [
+      {
+        "name": "header_invalid_download_emits_no_download_event",
+        "status": "PASS"
+      },
+      {
+        "name": "header_invalid_download_creates_no_objectURL",
+        "status": "PASS"
+      },
+      {
+        "name": "short_invalid_download_emits_no_download_event",
+        "status": "PASS"
+      },
+      {
+        "name": "short_invalid_download_creates_no_objectURL",
+        "status": "PASS"
+      }
+    ],
+    "unexpectedDownloads": 0,
+    "requests": [
+      "status",
+      "session",
+      "materials/scopes/0",
+      "materials/folders/9/2",
+      "materials/download/9/2/5/6",
+      "materials/download/9/2/5/6"
+    ],
+    "status": "PASS",
+    "cleanup": "OWN_CONTEXT_CLOSED",
+    "runner": {
+      "path": "/tmp/fc-round13-materials-browser-negative-runner.js",
+      "code": "async defaultPage => {\n const context=await defaultPage.context().browser().newContext({viewport:{width:390,height:844},acceptDownloads:true}),page=await context.newPage(),report={scope:'Synthetic browser negative downloads only; no real TLS/server',checks:[],unexpectedDownloads:0,requests:[]};let mode='header';\n try {\n await page.addInitScript(()=>{window.__urls=0;const original=URL.createObjectURL.bind(URL);URL.createObjectURL=b=>{window.__urls++;return original(b)}});\n const scope={ownerTeacherId:'9',subjectId:'2'},sha='af2bdbe1aa9b6ec1e2ade1d694f41fc71a831d0268e9891562113d8a62add1bf',row={materialId:'5',folderId:'4',displayName:'lesson.txt',resourceVersionId:'6',kind:'TXT',bytes:6,sha256:sha,allowedClassIds:['1'],addedAt:'2026-10-30T10:00:00',addedSequence:'1',status:'PUBLISHED',revision:'1'};\n page.on('download',async d=>{report.unexpectedDownloads++;await d.cancel()});\n await page.route('https://materials-negative.synthetic/**',async route=>{const url=new URL(route.request().url()),path=url.pathname.slice('/fc/api/v1/'.length),answer=value=>route.fulfill({headers:{'content-type':'application/json','cache-control':'no-store'},body:JSON.stringify(value)});if(!url.pathname.startsWith('/fc/api/v1/')){const response=await route.fetch({url:'http://172.30.0.2:4173'+url.pathname});return route.fulfill({response})}report.requests.push(path);\n if(path==='status')return answer({schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});if(path==='session')return answer({schemaVersion:1,status:'AUTHENTICATED',principal:{id:'9',displayName:'合成老师',role:'TEACHER_ADMIN'},currentClassId:'1',assignments:[{classId:'1',subjectId:'2'}],csrf:'b'.repeat(64)});\n if(path==='materials/scopes/0')return answer({schemaVersion:1,status:'MATERIAL_SCOPES',identityRevision:'1',offset:0,total:1,nextOffset:null,items:[{...scope,ownerDisplayName:'合成老师',subjectName:'数学',classes:[{classId:'1',className:'一班'}],classTotal:1,nextClassOffset:null}]});if(path==='materials/folders/9/2')return answer({schemaVersion:1,status:'MATERIALS',scope,folderId:'4',folderRevision:'1',offset:0,total:1,items:[row],nextCursor:null});if(path==='materials/download/9/2/5/6')return route.fulfill({headers:{'content-type':'application/octet-stream','content-length':'6','x-fc-sha256':mode==='header'?'b'.repeat(64):sha,'content-disposition':'attachment; filename=\"lesson.txt\"'},body:mode==='header'?'sample':'short'});return route.fulfill({status:404,body:''})});\n await page.goto('https://materials-negative.synthetic/fc/');await page.getByRole('button',{name:'管理课堂资料',exact:true}).click();await page.locator('.scope-option').first().click();await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).waitFor();\n for(const candidate of ['header','short']){mode=candidate;await page.getByRole('button',{name:'下载 lesson.txt',exact:true}).click();await page.getByText('下载未完成，没有生成下载文件；请重新核对目录与授权。',{exact:true}).waitFor();await page.waitForTimeout(100);if(report.unexpectedDownloads!==0)throw new Error(candidate+' created download');report.checks.push({name:candidate+'_invalid_download_emits_no_download_event',status:'PASS'});if(await page.evaluate(()=>window.__urls)!==0)throw new Error(candidate+' created BlobURL');report.checks.push({name:candidate+'_invalid_download_creates_no_objectURL',status:'PASS'})}\n report.status='PASS';\n }catch(e){report.status='FAIL';report.error=String(e)}finally{await context.close();report.cleanup='OWN_CONTEXT_CLOSED';}return report;\n}",
+      "sha256": "0b3e69c707098a12360dff9031f0f5f22287d282b81352b0e1ff76d464e29e70"
+    }
+  },
+  "round13FinalSourceInputs": "83fdf7417f72f5b88504af571ad21317701031a37b15e95f480aa018b7a8b4d5"
+}

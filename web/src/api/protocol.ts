@@ -17,9 +17,10 @@ export function decimal(value: unknown): string {
     || value.length === 20 && value > '18446744073709551615') return fail()
   return value
 }
+export function unicodeText(value: string): string { if (new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(new TextEncoder().encode(value)) !== value) return fail(); return value }
 function text(value: unknown, max = 64): string {
-  if (typeof value !== 'string' || !value.trim() || [...value].length > max || /[\u0000-\u001f\u007f-\u009f]/u.test(value)) return fail()
-  return value
+  if (typeof value !== 'string' || !value.replace(/\p{White_Space}/gu, '') || [...value].length > max || /[\u0000-\u001f\u007f-\u009f]/u.test(value)) return fail()
+  return unicodeText(value)
 }
 export function secret(value: unknown): string {
   if (typeof value !== 'string' || !/^[0-9a-f]{64}$/.test(value) || /^0+$/.test(value)) return fail()
@@ -72,7 +73,7 @@ export function session(value: unknown): Session {
     return { classId, subjectId }
   })
   return {
-    principal: { id: decimal(p.id), displayName: text(p.displayName), role: p.role },
+    principal: { id: decimal(p.id), displayName: text(p.displayName, 128), role: p.role },
     currentClassId: v.currentClassId === null ? null : decimal(v.currentClassId),
     assignments, csrf: secret(v.csrf),
   }
@@ -82,7 +83,7 @@ function fixedStatus(value: unknown, expected: string): void {
   if (v.status !== expected) fail()
 }
 export function loggedOut(value: unknown): void { fixedStatus(value, 'LOGGED_OUT') }
-export const errorCodes = ['INVALID_REQUEST', 'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'RESULT_UNKNOWN', 'REVISION_CONFLICT', 'DAY_CHANGED', 'IDEMPOTENCY_CONFLICT'] as const
+export const errorCodes = ['INVALID_REQUEST', 'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'RESULT_UNKNOWN', 'REVISION_CONFLICT', 'DAY_CHANGED', 'IDEMPOTENCY_CONFLICT', 'STALE_CURSOR', 'UPLOAD_EXPIRED', 'UPLOAD_NOT_READY', 'INVALID_RESOURCE', 'CAPACITY'] as const
 export type ErrorCode = typeof errorCodes[number]
 export function errorCode(value: unknown): ErrorCode {
   const v = object(value, ['schemaVersion', 'code']); version(v.schemaVersion)

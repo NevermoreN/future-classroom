@@ -32,7 +32,7 @@ export async function readJson(response: Response, signal: AbortSignal): Promise
     if (length !== null && BigInt(total) !== BigInt(length)) throw new ProtocolFault()
     const bytes = new Uint8Array(total); let offset = 0
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength }
-    try { return strictJson(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) } catch { throw new ProtocolFault() }
+    try { return strictJson(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)) } catch { throw new ProtocolFault() }
   } finally { signal.removeEventListener('abort', cancel); reader.releaseLock() }
 }
 /** Static deployment owns this base; user inputs, URL queries and responses cannot
@@ -57,8 +57,8 @@ export interface ContentApi {
   commandResult(commandId: string, signal: AbortSignal): Promise<CommandResult>
 }
 export class HttpApi implements ServerApi, ContentApi {
-  constructor(private readonly base: URL, private readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
-  private async request(path: string, signal: AbortSignal, input?: unknown, csrf?: string): Promise<{ status: number; value: unknown }> {
+  constructor(protected readonly base: URL, protected readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
+  protected async request(path: string, signal: AbortSignal, input?: unknown, csrf?: string): Promise<{ status: number; value: unknown }> {
     if (signal.aborted) throw abortError()
     if (this.base.protocol !== 'https:') throw new ProtocolFault('请使用管理员提供的可信 HTTPS 地址。HTTP 预览不会发送配对码或会话凭据。')
     const controller = new AbortController()
@@ -75,7 +75,7 @@ export class HttpApi implements ServerApi, ContentApi {
         ...(input === undefined ? {} : { body: JSON.stringify(input) }),
       })
       // A malformed error body cannot keep an unauthorized local session alive.
-      if (response.status === 401 || response.status === 403) { await response.body?.cancel(); throw new ApiError(response.status, response.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN') }
+      if (response.status === 401 || response.status === 403) { await response.body?.cancel().catch(() => undefined); throw new ApiError(response.status, response.status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN') }
       const value = await readJson(response, controller.signal)
       if (!response.ok) throw new ApiError(response.status, errorCode(value))
       return { status: response.status, value }

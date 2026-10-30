@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "phase": "Targeted tests and synthetic browser QA complete",
+  "scope": "Real TypeScript parsers/HTTP client/controllers with isolated fetch and timer fixtures; no Rust server, TLS, Windows or browser evidence here",
+  "tests": {
+    "command": "npx vitest run tests/material-protocol.test.ts tests/material-client.test.ts tests/material-controller.test.ts --reporter=json --outputFile=/tmp/fc-round13-materials-vitest-final.json",
+    "passed": 62,
+    "failed": 0,
+    "files": [
+      {
+        "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-client.test.ts",
+        "passed": 12,
+        "seconds": 0.0763623046875
+      },
+      {
+        "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-controller.test.ts",
+        "passed": 25,
+        "seconds": 0.10510107421875
+      },
+      {
+        "name": "/workspace/共享/Eliora/未来教室计划/web/tests/material-protocol.test.ts",
+        "passed": 25,
+        "seconds": 0.02922021484375
+      }
+    ],
+    "rawReport": "/tmp/fc-round13-materials-vitest-final.json",
+    "rawReportSha256": "619c9749aed0f3b1c9d478bae2504dcc65462b0eb89bca73090ac922cbb7dccc"
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "exitCode": 0,
+    "log": "/tmp/fc-round13-materials-web-typecheck-classes.log"
+  },
+  "discoveredAndFixedByRoot": [
+    "binary 401/403 must remain authoritative if response body cancellation rejects",
+    "Folder page member revision/append sequence cannot exceed folderRevision",
+    "Delete request cannot target a different resourceVersion from loaded original",
+    "Append receipt revision must be1 and resourceVersionId must equal original uploadId",
+    "Delete receipt immutable fields must equal original fixed version",
+    "Completed upload cannot be silently replaced by another file",
+    "Valid owner/class names128 preserved with subject name64",
+    "Class lists page20 with explicit total/continuation to retain 128 valid classes within JSON64KiB"
+  ],
+  "beforeReports": [
+    {
+      "path": "/tmp/fc-round13-materials-vitest-initial.json",
+      "sha256": "f189e0a09eef225c2096e0920e64b760eb09213f5a268c9487fc4c87fbf70543"
+    },
+    {
+      "path": "/tmp/fc-round13-materials-vitest-full.json",
+      "sha256": "f120566dd596d34b257fc73664371256ba8f442302961b9930798ad5eebb7ae3"
+    },
+    {
+      "path": "/tmp/fc-round13-materials-vitest-correlation-before.json",
+      "sha256": "80c72f82c6bcad1122b3d32e06abd4686f6a25731deb9da42e19c229bb5238aa"
+    },
+    {
+      "path": "/tmp/fc-round13-materials-vitest-cancel.json",
+      "sha256": "a9e7be63de649470c77d42ccdac21582b2719fbf1dfa93ab848656d00bb59a36"
+    }
+  ],
+  "beforeLimit": "Intermediate reports bind changing API revisions. Initial controller file write used wrong relative directory and was corrected before full tests. One fixture used unsupported ErrorCode BUSY, corrected to actual CAPACITY before final typecheck. Final schema fixtures updated for explicit class pagination and uploadId/resourceVersion identity, without weakening failing assertions.",
+  "coverage": [
+    "u64/string identity and unsafe/control/file byte/name bounds",
+    "Strict malformed wire responses, SHA/extension/classes/folder/version/cursor checks",
+    "Same-origin HTTPS credential and CSRF transport, binary File and explicit separate append",
+    "JSON64KiB actual stream and binary120s absolute deadline, download truncation/overflow/metadata",
+    "Cancel exact upload success/429/unknown/READY pending/late ignored and no committed command cancel",
+    "Unknown→NOT_FOUND→historical receipt retains command and never retries mutation; explicit GET current",
+    "Exact fixed-version delete and post-response correlation",
+    "401/403 clear file/scope/pending/session mirrors",
+    "Identity/scope/total/offset/numeric class ordering and explicit all128 class reachability"
+  ],
+  "sources": [
+    {
+      "path": "web/tests/material-protocol.test.ts",
+      "sha256": "1bdb6d418b1aeb75cdc5f19dc3a1a4e684d7c082bd97830f3859815bf061b481"
+    },
+    {
+      "path": "web/tests/material-client.test.ts",
+      "sha256": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9"
+    },
+    {
+      "path": "web/tests/material-controller.test.ts",
+      "sha256": "c55dd735babf4495268cbdbfe81cd9cf11cf6ce7f843a08dad6b18dfa400a73c"
+    },
+    {
+      "path": "web/src/api/material-protocol.ts",
+      "sha256": "3c10c3ae05828f29dd61bf427d0f06e8c44791127af98e807b92bcf3dacb0763"
+    },
+    {
+      "path": "web/src/api/material-client.ts",
+      "sha256": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6"
+    },
+    {
+      "path": "web/src/api/material-controller.ts",
+      "sha256": "f18aa159726f334f228e7b29c8f23e9f71a4070be3df2aed13c07a1e322c859b"
+    },
+    {
+      "path": "web/src/MaterialsPane.tsx",
+      "sha256": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c"
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "sha256": "9cb982e2fa048d4dec48fd0e77ab3b15a31f93af27721e02c7197bdda5c0ebfa"
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b"
+    },
+    {
+      "path": "web/src/api/protocol.ts",
+      "sha256": "427b1527d5ffeb6cc24f2b2df83e2b3fcaa85f98dedbd9272681263754fe4a6b"
+    },
+    {
+      "path": "web/src/api/content-protocol.ts",
+      "sha256": "77e1feb6a7a0571cd08918c68f6e9b17e7dcaab63ae2627f947d0d84e7ab0f43"
+    },
+    {
+      "path": "web/package-lock.json",
+      "sha256": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0"
+    },
+    {
+      "path": "开发计划/13-教师课堂资料API契约.md",
+      "sha256": "e788fd49df8fa610ce003903f4c3d90dec22bcdbfb6ada15ad5956648ae5dcc4"
+    }
+  ],
+  "commandLogs": [
+    {
+      "path": "/tmp/fc-round13-materials-web-typecheck-classes.log",
+      "sha256": "99b856e0dae663563ee3f5f454c2ba5e32fddfca161704b8b35c2ab7a8295cae",
+      "output": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\n"
+    },
+    {
+      "path": "/tmp/fc-round13-materials-vitest-final.log",
+      "sha256": "c75e45e7379f9aaef0bef57a157e2ad26478fcde08fee6c48710f95bc03ceb30",
+      "output": "JSON report written to /tmp/fc-round13-materials-vitest-final.json\n"
+    }
+  ],
+  "cleanup": "Vitest fake timers restored; all test controllers disposed; fixture fetches do not touch network or persistent browser storage. Parent owns final node_modules/build-cache cleanup.",
+  "browser": {
+    "status": "PASS",
+    "passedChecks": 48,
+    "report": "/tmp/fc-round13-materials-browser.json",
+    "reportSha256": "3fbac09977c2654c0e934aa611061f03fef488a9b7fb3e4e21d22ece1de52337",
+    "scope": "Synthetic HTTPS-origin routed browser and React build only; no actual TLS/Rust listener/Windows/browser-to-whiteboard integration",
+    "cleanup": "OWN_CONTEXT_CLOSED_DOWNLOADS_AND_MEMORY_RELEASED",
+    "primaryChecks": 44,
+    "negativeChecks": 4,
+    "negativeReport": "/tmp/fc-round13-materials-browser-negative.json"
+  }
+}

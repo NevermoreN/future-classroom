@@ -1,7 +1,11 @@
 #![forbid(unsafe_code)]
 pub mod audio;
 pub mod content_web;
+pub mod material_outcome;
 pub use content_web::ContentOutcomeRepository;
+pub use material_outcome::{
+    MaterialCommandKind, MaterialCommandOutcome, MaterialOutcomeRepository,
+};
 pub mod http;
 use fc_domain::ids::Revision;
 use fc_domain::{

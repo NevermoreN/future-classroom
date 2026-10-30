@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "sourceInputs": "83fdf7417f72f5b88504af571ad21317701031a37b15e95f480aa018b7a8b4d5",
+  "checks": {
+    "frozenInputFileHashes": 220,
+    "independentReviewFinalFiles": 12,
+    "implementationOwnerFreezeFiles": 11,
+    "hostRawPassed": 397,
+    "windowsRawPassed": 487,
+    "testedWindowsArtifactHashesMatchFinalCargoMetadata": 16,
+    "windowsNewPermitAndCheckpointUnit": "actual ... ok; deterministic three race counterfactuals included",
+    "browserSyntheticChecks": 48,
+    "browserUnitTests": 109,
+    "staticManifestRustIntegration": "PASS",
+    "developmentPackageMembersAndHashes": "PASS / 11 members / byte-identical independent repack previously archived",
+    "packageStatus": "NOT_VALIDATED",
+    "Win7GnuOnWin11": "PASS supplemental; not actual Win7",
+    "preview4173Closed": true,
+    "persistentPrivateIdentityMode": "0600 retained"
+  },
+  "limitations": [
+    "Strict five-second TCP observation FAIL: 5/8 over budget, maximum +577000ns; P0 remains unresolved",
+    "Normal HTTPS listener disabled; real TLS/campus browser and network Read deadline NOT_VALIDATED",
+    "Actual Win7/Win10, formal MSVC, visible Siwo/PPT/touch/DPI/installer/72h pending"
+  ],
+  "sourceEditAfterFreeze": false,
+  "archivePostProcessingCorrection": "First two archive scripts assumed summary output was string/list-of-strings; actual list-of-objects inspected and corrected. No product run repeated."
+}

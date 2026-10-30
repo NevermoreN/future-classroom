@@ -2,6 +2,7 @@
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
 mod content_web;
+mod materials_web;
 mod voice;
 pub mod web;
 pub use content_web::{WebContentDocument, WebContentKind, WebContentScope, WebContentScopes};
@@ -41,6 +42,9 @@ use fc_storage::{
     business::{startup_state, BusinessRepository},
     login::*,
     StorageError, StorageHandle, StorageWriter,
+};
+pub use materials_web::{
+    WebMaterialClass, WebMaterialClasses, WebMaterialScope, WebMaterialScopes,
 };
 use std::{
     path::Path,

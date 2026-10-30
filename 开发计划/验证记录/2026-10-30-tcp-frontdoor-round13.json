@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "round": 13,
+  "status": "CANDIDATE_LIFECYCLE_PASS_STRICT_WIRE_DEADLINE_FAIL_P0_UNRESOLVED",
+  "implementation": {
+    "mode": "loopback-only finite single-batch experimental admission owner; no production listener route",
+    "slots": 4,
+    "acceptReceiveLength": 0,
+    "allocation": "one owner with four pinned AcceptMemory boxes, 4x16KiB header arrays, report Vec capacities4; no per-event thread, no slot reuse within batch",
+    "deadline": "fixed Instant captured before each AcceptEx post plus 5 seconds; no renewal; this is not an inferred TCP establishment timestamp",
+    "fullCapacity": "close the private listener when all four accepted sockets are owned; no silent paused accept with active listener",
+    "stop": "cancel precise pending operations, close private sockets/listener, poll exact IOCP completions up to5s; only actual dequeued matching completion clears pending",
+    "fault": "retain ManuallyDrop slot owner/IOCP/Winsock without replacement allocation, permanent process fault gate prevents replacement",
+    "normalStartupConnected": false,
+    "TLS": "NOT_IMPLEMENTED",
+    "requestHeadApplicationDispatch": "NOT_IMPLEMENTED; plaintext diagnostic data never reaches business APIs"
+  },
+  "newNativeEvidence": {
+    "scope": "Win11 x86 GNU test executable; own loopback-only plaintext finite admission candidate, not TLS server",
+    "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "exeSha256": "a94a21038da5c0fbc06ca3c0223663294f72beade205fa7d6904529b0d094e00",
+    "directory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-TcpFrontdoor-Round13-fe59fed1901a4feba780ca8b94026af0",
+    "testArguments": [
+      "tcp_frontdoor",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "architecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "commandPowerShell": "$exe=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-TcpFrontdoor-Round13-fe59fed1901a4feba780ca8b94026af0' 'fc_windows-a8df1002bc9e60b7.exe';$ErrorActionPreference='Continue';$output=@(& $exe tcp_frontdoor --nocapture --test-threads=1 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;exeSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress",
+    "native": {
+      "output": [
+        "",
+        "running 3 tests",
+        "test tcp_frontdoor::native::tests::native_finite_admission_deadline_and_drain ... TCP_FRONTDOOR_CANDIDATE_PASS FrontdoorProbeReport { cycles: 3, accept_submissions: 12, accept_completions: 12, canceled_accepts: 4, accepted: 8, headers: 1, deadline_closes: 6, header_limit_closes: 1, capacity_listener_closes: 2, connect_age_seconds: [1, 1, 1, 1, 1, 1, 1, 1], wire_close_nanos: [5000577000, 5000505900, 5000457500, 5000411200, 1200854500, 5000019800, 1222017900, 4999886800], delayed_poll_millis: 1200, fixed_owner_bytes: 66176, diagnostic_vector_payload_capacity_bytes: 80, cleanup_complete: true } TLS_NOT_RUN hard_kernel_bound_UNPROVEN full_TCP_to_header_5s_UNPROVEN",
+        "ok",
+        "test tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline ... ok",
+        "test tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked ... ok",
+        "",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 49 filtered out; finished in 10.01s",
+        ""
+      ],
+      "exitCode": 0,
+      "exeSha256": "a94a21038da5c0fbc06ca3c0223663294f72beade205fa7d6904529b0d094e00"
+    },
+    "cleanup": {
+      "ownProcessCount": 0,
+      "sshd": "Running",
+      "scheduledTasksCreated": 0,
+      "systemSettingsChanged": 0,
+      "rootExists": false
+    }
+  },
+  "strictWireFiveSecondObservation": {
+    "status": "FAIL",
+    "thresholdNanoseconds": 5000000000,
+    "observedNanoseconds": [
+      5000577000,
+      5000505900,
+      5000457500,
+      5000411200,
+      1200854500,
+      5000019800,
+      1222017900,
+      4999886800
+    ],
+    "exceededCount": 5,
+    "maxOvershootNanoseconds": 577000,
+    "measurementOrigin": "each client connect_timeout return; poll read EOF or connection reset/aborted/broken-pipe; same process monotonic clock",
+    "measurementLimits": [
+      "client connect return is an observation, not server kernel TCP establishment instant",
+      "ordinary scheduler/poll latency remains in observed duration; threshold not widened",
+      "7s loop is a failure observation window, not a passing deadline",
+      "two complete/rejected headers close earlier; remaining6 close on deadline",
+      "does not cover TLS, SYN/backlog before admission, persistent rearming, sleep or saturated scheduling"
+    ]
+  },
+  "earlierCoarseMeasurement": {
+    "scope": "Win11 x86 GNU test executable; own loopback-only plaintext finite admission candidate, not TLS server",
+    "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "exeSha256": "f2ca64c053cd48c287cc2cab8a207d501e17daa20024b562bd30c93a81b18eac",
+    "directory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-TcpFrontdoor-Round13-771ae3f4cb9a4606963a98477fdd713d",
+    "testArguments": [
+      "tcp_frontdoor",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "architecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "commandPowerShell": "$exe=Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-TcpFrontdoor-Round13-771ae3f4cb9a4606963a98477fdd713d' 'fc_windows-a8df1002bc9e60b7.exe';$ErrorActionPreference='Continue';$output=@(& $exe tcp_frontdoor --nocapture --test-threads=1 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;exeSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress",
+    "native": {
+      "output": [
+        "",
+        "running 3 tests",
+        "test tcp_frontdoor::native::tests::native_finite_admission_deadline_and_drain ... TCP_FRONTDOOR_CANDIDATE_PASS FrontdoorProbeReport { cycles: 3, accept_submissions: 12, accept_completions: 12, canceled_accepts: 4, accepted: 8, headers: 1, deadline_closes: 6, header_limit_closes: 1, capacity_listener_closes: 2, connect_age_seconds: [1, 1, 1, 1, 1, 1, 1, 1], wire_close_millis: [5000, 5000, 5000, 5000, 1200, 5000, 1223, 5000], delayed_poll_millis: 1200, fixed_owner_bytes: 66176, diagnostic_vector_payload_capacity_bytes: 80, cleanup_complete: true } TLS_NOT_RUN hard_kernel_bound_UNPROVEN full_TCP_to_header_5s_UNPROVEN",
+        "ok",
+        "test tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline ... ok",
+        "test tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked ... ok",
+        "",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 49 filtered out; finished in 10.01s",
+        ""
+      ],
+      "exitCode": 0,
+      "exeSha256": "f2ca64c053cd48c287cc2cab8a207d501e17daa20024b562bd30c93a81b18eac"
+    },
+    "cleanup": {
+      "ownProcessCount": 0,
+      "sshd": "Running",
+      "scheduledTasksCreated": 0,
+      "systemSettingsChanged": 0,
+      "rootExists": false
+    }
+  },
+  "precisionCorrection": "first run had truncated millisecond observations=5000, insufficient for strict5s; source changed to preserve nanoseconds, rerun produced explicit FAIL rather than rounding it to PASS",
+  "factsAndInferences": {
+    "facts": [
+      "actual Win11 build26300 test process completed3 filtered tests in10.01s",
+      "actual12 submissions and12 matching IOCP completions across3 owners",
+      "4 idle accepts canceled/drained;8 accepted;2 capacity listener closes;1 complete header and1 oversized header closed;6 deadline closes",
+      "deliberate1.2s completion dequeue delay consumed original deadline; SO_CONNECT_TIME observed1sec on each accepted socket",
+      "remote process and marked directory cleaned, no tasks or system settings changes; sshd remainsRunning"
+    ],
+    "inferences": [
+      "SO_CONNECT_TIME cannot prove an exact conservative deadline without an official quantization/error bound; do not assume returned seconds+1 solves it",
+      "fixed owner payload sizes are not proof of full allocator/kernel/socket/SSPI memory hard bounds",
+      "fixed deadline checked at expiration is observed late under ordinary scheduling even on idle loopback; needs reserved close-scheduling budget and further stress/suspend model",
+      "TLS must have bounded fixed native owner and no concurrent SSPI context access; this candidate does not run SSPI and cannot claim its cancellation or memory behavior"
+    ]
+  },
+  "primarySources": [
+    {
+      "title": "AcceptEx",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-acceptex",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "receiveLength=0 returns after connection without waiting for data; obtain extension through WSAIoctl; update accept context before getsockopt"
+    },
+    {
+      "title": "getsockopt",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "SO_CONNECT_TIME returns connected seconds; no documented rounding or error bound for reconstructing an exact TCP establishment timestamp"
+    },
+    {
+      "title": "SOL_SOCKET options",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "SO_CONNECT_TIME and SO_UPDATE_ACCEPT_CONTEXT scope; options do not claim exact aggregate kernel memory bounds"
+    },
+    {
+      "title": "CancelIoEx",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelioex",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "requesting cancellation is not completion; keep OVERLAPPED live until actual completion"
+    },
+    {
+      "title": "closesocket",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "close initiates cancellation and does not itself prove all asynchronous operations completed"
+    },
+    {
+      "title": "GetQueuedCompletionStatus",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-getqueuedcompletionstatus",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "nonnull OVERLAPPED distinguishes dequeued failed operation from no-packet timeout; low-power waiting differs Win7 versus Win8+"
+    },
+    {
+      "title": "listen",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "provider pending queue and backlog are transport-managed; requested backlog is not an application memory hard bound"
+    },
+    {
+      "title": "AcceptSecurityContext (Schannel)",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel",
+      "verifiedVia": "web.run direct open/search this task",
+      "notes": "same context cannot be used concurrently; partial contexts require DeleteSecurityContext; API provides no timeout parameter or documented arbitrary cancel guarantee"
+    }
+  ],
+  "commands": [
+    {
+      "command": "cargo test -p fc-windows tcp_frontdoor --locked -- --nocapture",
+      "rawToolLog": "/tmp/fc-round13-tcp-host.log",
+      "rawText": "    Blocking waiting for file lock on build directory\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.14s\n     Running unittests src/lib.rs (target/debug/deps/fc_windows-d4915409123cf1c4)\n\nrunning 2 tests\ntest tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline ... ok\ntest tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s\n\n",
+      "sha256": "0c112f76501bd65d805a959ed6e147c054ea4883fc4acd9cafb3ee111fabef43"
+    },
+    {
+      "command": "cargo check -p fc-windows --target i686-pc-windows-gnu --locked",
+      "rawToolLog": "/tmp/fc-round13-tcp-check.log",
+      "rawText": "   Compiling proc-macro2 v1.0.107\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.27\n   Compiling version_check v0.9.5\n    Checking windows-link v0.2.1\n    Checking typenum v1.20.1\n   Compiling serde_core v1.0.228\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking windows-result v0.4.1\n    Checking windows-strings v0.5.1\n   Compiling serde v1.0.228\n   Compiling serde_json v1.0.145\n    Checking windows-threading v0.2.1\n    Checking cpufeatures v0.2.17\n    Checking itoa v1.0.18\n    Checking ryu v1.0.23\n   Compiling generic-array v0.14.7\n    Checking cfg-if v1.0.5\n    Checking memchr v2.8.3\n    Checking zeroize v1.8.2\n   Compiling syn v2.0.119\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking block-buffer v0.10.4\n    Checking crypto-common v0.1.7\n    Checking digest v0.10.7\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking sha2 v0.10.9\n   Compiling windows-implement v0.60.2\n   Compiling windows-interface v0.59.3\n   Compiling serde_derive v1.0.228\n    Checking windows-core v0.62.2\n    Checking windows-numerics v0.3.1\n    Checking windows-future v0.3.2\n    Checking windows-collections v0.3.2\n    Checking windows v0.62.2\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 49.52s\n",
+      "sha256": "f3d95f15c777e2da76ea25fc4548668d4e056c861ec5971445f57e0cf5e6f318"
+    },
+    {
+      "command": "cargo test -p fc-windows --no-run --target i686-pc-windows-gnu --locked --message-format=json",
+      "rawToolLog": "/tmp/fc-round13-tcp-build.log",
+      "rawText": "   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.41s\n",
+      "sha256": "13703b7b8350e6d16173fd72b87b0860b4d95e1b683201145b67b7b05d9e973c"
+    },
+    {
+      "command": "cargo clippy -p fc-windows --all-targets --locked -- -D warnings",
+      "rawToolLog": "/tmp/fc-round13-tcp-host-clippy.log",
+      "rawText": "    Blocking waiting for file lock on build directory\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking digest v0.10.7\n    Checking memchr v2.8.3\n    Checking sha2 v0.10.9\n    Checking serde_json v1.0.145\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 47.15s\n",
+      "sha256": "981d6a6b3882582b3f224ccdb81df2a65e4f4779183a5b4b6b603539421db4c3"
+    },
+    {
+      "command": "cargo clippy -p fc-windows --all-targets --target i686-pc-windows-gnu --locked -- -D warnings",
+      "rawToolLog": "/tmp/fc-round13-tcp-windows-clippy.log",
+      "rawText": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.05s\n",
+      "sha256": "a8ab8457a1828032628f42a0a3556787cb0a5946dffd32b74bb9f984d823b552"
+    }
+  ],
+  "nativeRunnerSource": "import sys, runpy, json, hashlib, uuid\nfrom pathlib import Path\nsys.dont_write_bytecode=True\nhelpers=runpy.run_path('scripts/windows-probe.py')\nRemote, ps=helpers['Remote'], helpers['ps_literal']\nr=Remote('elior@192.168.10.212',Path('/config/.local/share/future-classroom-test-access/win11-192.168.10.212'))\nrecords=[json.loads(line) for line in Path('/tmp/fc-round13-tcp-tests.jsonl').read_text().splitlines()]\npaths=[Path(x['executable']) for x in records if x.get('reason')=='compiler-artifact' and x.get('profile',{}).get('test') and x.get('executable')]\nassert len(paths)==1,paths\nexe=paths[0]\ntoken='FutureClassroom-TcpFrontdoor-Round13-'+uuid.uuid4().hex\ndirectory=r.powershell(\"$p=Join-Path $env:TEMP \"+ps(token)+\";New-Item -ItemType Directory -Path $p|Out-Null;Set-Content -LiteralPath (Join-Path $p '.future-classroom-probe-root') -Value \"+ps(token)+\";$p\")\nreport={'scope':'Win11 x86 GNU test executable; own loopback-only plaintext finite admission candidate, not TLS server', 'executable':str(exe),'exeSha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'directory':directory,'testArguments':['tcp_frontdoor','--nocapture','--test-threads=1']}\ntry:\n    report['platform']=json.loads(r.powershell('$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;architecture=$os.OSArchitecture}|ConvertTo-Json -Compress'))\n    r.upload(exe,directory)\n    script=\"$exe=Join-Path \"+ps(directory)+\" \"+ps(exe.name)+\";$ErrorActionPreference='Continue';$output=@(& $exe tcp_frontdoor --nocapture --test-threads=1 2>&1|ForEach-Object{\\\"$_\\\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output;exeSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant()}|ConvertTo-Json -Compress\"\n    report['commandPowerShell']=script\n    report['native']=json.loads(r.powershell(script,timeout=60))\nfinally:\n    script=\"$root=\"+ps(directory)+\";$ours=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\\\\',[StringComparison]::OrdinalIgnoreCase)});foreach($p in $ours){Stop-Process -Id $p.ProcessId -Force};if(Test-Path -LiteralPath (Join-Path $root '.future-classroom-probe-root')){Remove-Item -LiteralPath $root -Recurse -Force};@{rootExists=(Test-Path -LiteralPath $root);ownProcessCount=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\\\\',[StringComparison]::OrdinalIgnoreCase)}).Count;sshd=(Get-Service sshd).Status.ToString();scheduledTasksCreated=0;systemSettingsChanged=0}|ConvertTo-Json -Compress\"\n    report['cleanup']=json.loads(r.powershell(script))\n    Path('/tmp/fc-round13-tcp-native.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps(report,ensure_ascii=False))\nassert report['native']['exitCode']==0\nassert report['native']['exeSha256']==report['exeSha256']\nassert any('TCP_FRONTDOOR_CANDIDATE_PASS' in x for x in report['native']['output'])\nassert not report['cleanup']['rootExists'] and report['cleanup']['ownProcessCount']==0\n",
+  "sourceInputs": [
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "sha256": "2d542807d629ab73c679efd8fc7e60d90e2c64c2a2781efe9f5406a978272455"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/mod.rs",
+      "sha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/native.rs",
+      "sha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3"
+    }
+  ],
+  "notPerformed": [
+    "Schannel handshake/encryption/trust/certificate provisioning",
+    "persistent admission slot recycling or production request parser/dispatch",
+    "kernel/SYN/backlog/SSPI absolute memory limit proof",
+    "Win7/Win10 or MSVC execution",
+    "foreground or visible UI interaction",
+    "global HTTP/SSH/firewall/certificate/settings changes"
+  ],
+  "nextActions": [
+    "preserve strict5s failed sample separately from lifecycle PASS",
+    "add conservative close-scheduling reserve inside existing5s maximum and test saturation/suspend without declaring hard real-time guarantee",
+    "design persistent finite slot rearming without creating unowned backlog time or releasing pending native memory",
+    "then bounded Schannel owner plus actual trusted TLS; original5s and all resource ledgers remain gates"
+  ],
+  "cleanupScope": "own remote marked directory removed; no remote own process/task remains; shared target caches deliberately left to root integration cleanup",
+  "round13FinalSourceInputs": "83fdf7417f72f5b88504af571ad21317701031a37b15e95f480aa018b7a8b4d5"
+}

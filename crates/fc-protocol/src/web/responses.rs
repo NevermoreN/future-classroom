@@ -19,6 +19,11 @@ pub enum ErrorCode {
     RevisionConflict,
     DayChanged,
     IdempotencyConflict,
+    StaleCursor,
+    UploadExpired,
+    UploadNotReady,
+    InvalidResource,
+    Capacity,
 }
 #[derive(Default)]
 struct BoundedJson {
@@ -48,7 +53,7 @@ impl Write for BoundedJson {
         Ok(())
     }
 }
-fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>, ProtocolError> {
+pub(super) fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>, ProtocolError> {
     let mut output = BoundedJson::default();
     if serde_json::to_writer(&mut output, value).is_err() {
         return Err(if output.limit_exceeded {

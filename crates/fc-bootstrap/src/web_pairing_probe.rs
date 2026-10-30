@@ -26,6 +26,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 mod content_probe;
+mod materials_probe;
 
 fn check<T, E: std::fmt::Debug>(r: Result<T, E>) -> Result<T, String> {
     r.map_err(|e| format!("web-pairing: {e:?}"))
@@ -237,7 +238,7 @@ fn run_owned() -> Result<(), String> {
             ))?),
         "CSRF was the bearer cookie",
     )?;
-    let application = check(WebApplication::new(
+    let mut application = check(WebApplication::new(
         &check(ListenPrefix::https("https://board.synthetic:443/fc/"))?,
         service.clone(),
     ))?;
@@ -306,6 +307,14 @@ fn run_owned() -> Result<(), String> {
         "wrong CSRF logged out account",
     )?;
     check(backend.check_session(lease, SessionPurpose::Manage))?;
+    materials_probe::run(
+        &mut backend,
+        &mut application,
+        &root.0,
+        cookie,
+        authentication.csrf.as_str(),
+        lease,
+    )?;
     content_probe::run(
         &mut backend,
         &application,

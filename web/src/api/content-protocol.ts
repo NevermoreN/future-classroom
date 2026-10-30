@@ -1,4 +1,4 @@
-import { decimal, ProtocolFault } from './protocol'
+import { decimal, ProtocolFault, unicodeText } from './protocol'
 const fail = (): never => { throw new ProtocolFault() }
 export type ContentKind = 'HOMEWORK' | 'REMINDER'
 export type ContentKey = { kind: 'HOMEWORK'; classId: string; subjectId: string; ownerTeacherId: string; date: string } | { kind: 'REMINDER'; classId: string; date: string }
@@ -41,9 +41,9 @@ export function bodyText(value: unknown): string {
   return value
 }
 export function normalizedBodyText(raw: string): string { return bodyText(raw).replace(/^\p{White_Space}+|\p{White_Space}+$/gu, '') }
-function name(value: unknown): string {
-  if (typeof value !== 'string' || !value.trim() || [...value].length > 64 || /[\u0000-\u001f\u007f-\u009f]/u.test(value)) return fail()
-  return value
+function name(value: unknown, max = 64): string {
+  if (typeof value !== 'string' || !value.replace(/\p{White_Space}/gu, '') || [...value].length > max || /[\u0000-\u001f\u007f-\u009f]/u.test(value)) return fail()
+  return unicodeText(value)
 }
 export function key(value: unknown): ContentKey {
   if (typeof value !== 'object' || value === null || !('kind' in value)) return fail()
@@ -78,7 +78,7 @@ export function scopes(value: unknown, expectedKind: ContentKind, expectedOffset
   const seen = new Set<string>(); let previous: string[] | undefined
   const items: ScopeItem[] = v.items.map(item => {
     const r = object(item, expectedKind === 'HOMEWORK' ? ['classId', 'className', 'subjectId', 'subjectName', 'ownerTeacherId', 'ownerDisplayName'] : ['classId', 'className'])
-    const normalized: ScopeItem = expectedKind === 'HOMEWORK' ? { kind: expectedKind, classId: decimal(r.classId), className: name(r.className), subjectId: decimal(r.subjectId), subjectName: name(r.subjectName), ownerTeacherId: decimal(r.ownerTeacherId), ownerDisplayName: name(r.ownerDisplayName) } : { kind: expectedKind, classId: decimal(r.classId), className: name(r.className) }
+    const normalized: ScopeItem = expectedKind === 'HOMEWORK' ? { kind: expectedKind, classId: decimal(r.classId), className: name(r.className, 128), subjectId: decimal(r.subjectId), subjectName: name(r.subjectName), ownerTeacherId: decimal(r.ownerTeacherId), ownerDisplayName: name(r.ownerDisplayName, 128) } : { kind: expectedKind, classId: decimal(r.classId), className: name(r.className, 128) }
     const ids = scopeKey(normalized).split('/'), id = ids.join('/')
     if (seen.has(id)) return fail()
     if (previous) { let comparison = 0; for (let i = 0; i < ids.length; i++) { comparison = BigInt(ids[i]!) < BigInt(previous[i]!) ? -1 : BigInt(ids[i]!) > BigInt(previous[i]!) ? 1 : 0; if (comparison) break } if (comparison <= 0) return fail() }

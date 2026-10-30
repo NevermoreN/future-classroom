@@ -63,7 +63,7 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 在127.0.0.1显式测试前缀运行两轮真实IOCP；需要相应系统权限/URL预留，程序不自行提权或修改配置。
 它拒绝凭证与业务请求，不能作为HTTPS、校园可达或浏览器配对通过证据；正常启动默认没有Web监听。
 --web-pairing-probe还验证同一隔离部署的作业/提醒POST、清空后再写、命令幂等/查询与真实桌面事实；仅请求端口metadata，未开启网络监听。
-教师网页已接配对/会话、当天作业与共同提醒的真实应用端口，包含范围分页、读取/保存/清空、修订冲突和原命令查询；资料与语音网页入口仍未接入。
+教师网页已接配对/会话、当天作业与共同提醒的真实应用端口，包含范围分页、读取/保存/清空、修订冲突和原命令查询；第十三轮补齐资料网页与受控文件工作端口，语音网页入口仍未接入。
 内容日期观察与写入走唯一SQLite writer，清空保留CAS；跨午夜草稿不能自动改日期发送。COMMITTED只表示已持久化，不表示当前可见；未知写入只能手动查询，不自动重发。
 正常启动仍没有正式TLS/Web监听；静态文件入包不代表网页已由应用托管或通过真实浏览器验收。
 完整profile/布局编辑及产品语音工作流仍未交付。
@@ -90,3 +90,5 @@ manifest.json 的 frontend.included=false 表示未附浏览器产物。
 frontend 字段记录本包实际是否附带静态产物及其范围；有无网页文件均保持 NOT_VALIDATED。
 manifest.json 记录目标、工具链声明、文件 SHA256、探针范围和 PE 风险。
 LICENSE 为项目许可；第三方组件、Rust/MinGW/GCC 运行时许可与版权见 THIRD-PARTY-NOTICES.txt。
+
+Round13 includes teacher material JSON and controlled file worker ports (TXT/Office/WIC/PDF helper, <=50MiB) plus browser management UI. WEB_MATERIALS_PASS is an owned DPAPI/SQLite/files diagnostic with synthetic request metadata, NOT actual TLS or network upload cancellation. Normal listener remains disabled. An isolated finite Winsock accept candidate has lifecycle evidence and a strict five-second observation FAIL; it is not a production TLS replacement.

@@ -831,7 +831,7 @@ pub(super) fn run() -> Check<()> {
     Ok(())
 }
 
-fn pdf(active: bool) -> Vec<u8> {
+pub(crate) fn pdf(active: bool) -> Vec<u8> {
     let extra = if active {
         "/AA << /O << /S /JavaScript /JS (probe) >> >>"
     } else {
@@ -856,7 +856,7 @@ fn pdf(active: bool) -> Vec<u8> {
     data.extend(format!("trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n").bytes());
     data
 }
-fn bmp() -> Vec<u8> {
+pub(crate) fn bmp() -> Vec<u8> {
     let mut data = vec![0u8; 58];
     data[..2].copy_from_slice(b"BM");
     for (offset, value) in [(2, 58u32), (10, 54), (14, 40), (18, 1), (22, 1), (34, 4)] {
@@ -877,7 +877,7 @@ fn crc32(data: &[u8]) -> u32 {
     }
     !crc
 }
-fn docx() -> Vec<u8> {
+pub(crate) fn docx() -> Vec<u8> {
     let parts = [
         (
             "[Content_Types].xml",
