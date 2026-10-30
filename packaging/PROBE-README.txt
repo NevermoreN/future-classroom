@@ -4,11 +4,11 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
 直接运行 fc-bootstrap.exe 打开工作台；--autostart 保持锁定并隐藏窗口。
 首次运行在本机 ProgramData 的 FutureClassroom 专属目录准备保护ACL、部署标记、
 数据库和当前Windows用户的DPAPI密钥。请自行设置应用主管理员口令；无默认密码。
-支持学校/班级、基础科目、账号创建、首次改密、恢复码、今日作业，
+支持学校/班级、基础科目、账号创建/编辑/停用、多班级科目任教范围、首次改密、恢复码、今日作业，
 以及原生课表网格、固定数字时间输入、单双表深复制/保留历史、校历草稿。
 课表页面先编辑草稿，“保存全部”才写数据库；取消需确认，锁定后同账号可继续草稿。
 桌面显示设置支持三种时钟、秒数、日期倒计时、科目底色及逐组件显示/透明度/尺寸约束；
-同样先编辑草稿，保存后生效。存在本账号未保存课表/显示草稿时，正常退出会提示处理。
+同样先编辑草稿，保存后生效。存在本账号未保存课表/显示/账号草稿时，正常退出会提示处理。
 常驻桌面已接入一致事实快照及原生卡片，在系统桌面前台显示课表、作业、时钟等；
 外部应用、管理窗口和无效会话时隐藏，分页仅小按钮接收点击，其余区域穿透。
 本阶段整份课表（含历史）上限64KiB，超限拒绝，不截断。学校/公共校历分别保存；
@@ -94,3 +94,5 @@ LICENSE 为项目许可；第三方组件、Rust/MinGW/GCC 运行时许可与版
 Round13 includes teacher material JSON and controlled file worker ports (TXT/Office/WIC/PDF helper, <=50MiB) plus browser management UI. WEB_MATERIALS_PASS is an owned DPAPI/SQLite/files diagnostic with synthetic request metadata, NOT actual TLS or network upload cancellation. Normal listener remains disabled. An isolated finite Winsock accept candidate has lifecycle evidence and a strict five-second observation FAIL; it is not a production TLS replacement.
 
 --web-voice-probe 使用自有合成账号/真实SQLite/规范零PCM上传和原生音频域，验证总3遍自然完成、原任务查询和停止/驱动归还；应由交互会话的隐藏测试任务运行。它仍只使用synthetic RequestHead，不开启TLS/网络listener，不请求硬件麦克风或改变音量/前台；普通--web-pairing-probe不启动原生声音。
+
+Round15 adds local global-admin account paging/edit/disable/multiple teaching scopes, review/cancel/CAS and self-change re-login. Existing timetable/default/history reference conflicts reject atomically. Identity and receipt each retain the 64KiB bound; over-limit edits return Capacity without truncation or authority changes. The sole registered lock action remains available while busy and carries no form secrets; all other busy actions remain disabled.

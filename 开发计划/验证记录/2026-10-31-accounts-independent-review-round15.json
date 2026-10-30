@@ -1,0 +1,612 @@
+{
+  "schemaVersion": 1,
+  "round": 15,
+  "kind": "INDEPENDENT_READ_ONLY_ACCOUNTS_REVIEW",
+  "recordedUtc": "2026-10-30T16:17:26.254675+00:00",
+  "status": "INDEPENDENT_ACCOUNTS_SOURCE_REVIEW_COMPLETE; NO_ADDITIONAL_CONFIRMED_ACCOUNTS_DEFECT; OWN_WINDOW_LOCK_IMPLEMENTATION_SEPARATE_COMPILE_ONLY",
+  "scope": "P2-08 local GlobalAdmin account list/create/update display role enabled and multiple exact class-subject assignments; review only, no source edit or remote tests",
+  "baselineSourceInputs": [
+    {
+      "path": "开发计划/模块/02-设置认证权限与自启动.md",
+      "bytes": 11829,
+      "sha256": "7b79dee7489e9e2c95fcbfad2bd760d1bd2a835d556858e79a73ae71d680d78f"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 129785,
+      "sha256": "13ba5096b6c537457b6fd156f553efeb9b29bf43053aaf7722e7ef3474dd520a"
+    },
+    {
+      "path": "crates/fc-domain/src/identity.rs",
+      "bytes": 32091,
+      "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 97519,
+      "sha256": "29d9144ff9acb85361c49b62e373bada63e5ff0ae6bd26f9da6852b31f0df9ee"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 156502,
+      "sha256": "93792d3cad0b6fa44fba3b40f557df7f5e18cbe45dd492d9aff354375d5371b1"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 36567,
+      "sha256": "33a1e5516dbefff3b8b92b484b5bb2210442df459848025435f3712bb651a67a"
+    },
+    {
+      "path": "crates/fc-storage/src/business/codec.rs",
+      "bytes": 15173,
+      "sha256": "df5cff1b4408618fc7ae949f119daee4a336ac21a9f1be43ec2bf698f329f8e8"
+    },
+    {
+      "path": "crates/fc-storage/src/business/schedule.rs",
+      "bytes": 13388,
+      "sha256": "d40ad4fe120cc3cabdf0f8ad7e2c1ea7720d9f645a8855371ea4a37d1d84040c"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61498,
+      "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+    },
+    {
+      "path": "crates/fc-presentation/src/workbench.rs",
+      "bytes": 11155,
+      "sha256": "5fae85ff6a0372d95ae0405d6f057b417a610fdd840e948b0326d34be98f4264"
+    }
+  ],
+  "execution": "Independent accounts portion: read-only source/test-body inspection, SHA256 checks, serialization byte calculation; no account Cargo/native/browser execution by this reviewer. Separate authorized fc-windows lock implementation has producer-only Windows-target compile/Clippy, no runtime execution.",
+  "reportedRisks": [
+    {
+      "id": "IR15-01",
+      "status": "SOURCE_CONFIRMED_FIXED_BY_ROOT; ROOT_NATIVE_EXECUTION_PENDING",
+      "fact": "UpdateAccount revokes target auth_epoch even if only display name changes; Backend.apply immediately locks active local control when target is current local principal. Existing self_revokes only includes password/recovery/exit.",
+      "counterfactual": "Self rename commits, local control closes, heartbeat handles lock before worker completion and cancels result; UI can lose its own success.",
+      "rootPlannedFix": "Dedicated fixed-target Work::UpdateAccount marks self_revokes only when target==captured exact lease principal; UI generation still makes WTS/explicit lock win, final self result goes Login."
+    },
+    {
+      "id": "IR15-02",
+      "status": "SOURCE_CONFIRMED_ADDRESSED; OWNER_TEST_RESULTS_EXTERNAL",
+      "fact": "validate_scopes require_active equals requested enabled. Disabled account may retain scopes into disabled class/subject; reenabled account must repair them. Global role independent from teaching and accepts empty scopes, Teacher requires nonempty and User forbids all scopes.",
+      "requirement": "Render retained disabled exact IDs with labels; do not silently filter them out. Explicit scope clearing confirmation when role changes to User. Exact captured revision must not auto-refresh on stale-save."
+    },
+    {
+      "id": "IR15-03",
+      "status": "KNOWN_LIMIT_RETAINED_WITH_PRECISE_CAPACITY_ERROR_AND_REAL_ATOMIC_REJECTION_TEST",
+      "fact": "Identity state and full next-state receipt are monolithic bounded64KiB documents. Domain512 accounts/4096 assignments are not physically persistable maxima.",
+      "deterministicByteCalculation": {
+        "method": "Python compact JSON matching assignment codec keys;128classes times32subjects with teacher2 and enabledtrue, all4096unique valid pairs",
+        "assignmentArrayBytes": 216577,
+        "storedValueLimitBytes": 65536,
+        "executionClassification": "Serialization byte calculation, not Rust persistence execution"
+      },
+      "requirement": "Do not equate editor/domain maximum pagination with full persistence capacity. Return specific DocumentTooLarge, retain draft without truncation; storage owner may implement separate bounded documents if scoped."
+    },
+    {
+      "id": "IR15-04",
+      "status": "SOURCE_CONFIRMED_ADDRESSED; OWNER_TEST_RESULTS_EXTERNAL",
+      "fact": "Legal identity names allow128Unicode scalars/512UTF8 bytes. Choice label allows512bytes, Grid cell allows1024; adding ID/status/name combinations without bounded display can reject otherwise valid View.",
+      "requirement": "Keep full original values in editor; bounded display labels with stable IDs disambiguate names. Exercise long4byte scalar names with512accounts/4096scope pagination."
+    },
+    {
+      "id": "IR15-05",
+      "status": "SOURCE_CONFIRMED_ADDRESSED; OWNER_TEST_RESULTS_EXTERNAL",
+      "fact": "Identity writer validates actual persisted live and retained timetable document against next identity. Default teacher before/after resolution changes also reject InvalidScope.",
+      "requirement": "Account disable/demotion/scope removal may correctly reject due to explicit or default timetable references. Show useful conflict feedback, preserve original draft and revision, never report saved or silently mutate schedule."
+    }
+  ],
+  "baselineAuthorityFacts": [
+    "IdentityState.authorize_management requires fresh local GlobalAdmin authority and rejects must_change_password; role/teaching independent.",
+    "Last enabled GlobalAdmin cannot be disabled/demoted; domain validates same invariant on reconstructed state.",
+    "Identity transaction captures expected identity revision, rechecks exact session at evaluation/precommit and uses schedule check before COMMIT.",
+    "Account changes revoke affected account all channels and dependent audio tasks through auth_epoch; current editor owner must be reauthenticated after self change.",
+    "View/FormData contain no retained password values: Password field initial value must be empty, FormData is zeroizing/noClone/noSerialize, final secret take must immediately wrap Password; no wholeFormData stash in editor."
+  ],
+  "finalReview": {
+    "recordedUtc": "2026-10-30T16:37:53.073178+00:00",
+    "classification": "INDEPENDENT_STATIC_REVIEW_OF_OTHER_OWNERS_CODE; NOT_RUNTIME_EXECUTION",
+    "sources": [
+      {
+        "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+        "bytes": 57942,
+        "sha256": "9531485e934483b4a08a1343662d2715524dcb683d97dcbc0f8e3d2e298d1855"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "bytes": 38475,
+        "sha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend.rs",
+        "bytes": 98203,
+        "sha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df"
+      },
+      {
+        "path": "crates/fc-storage/src/business/mod.rs",
+        "bytes": 37151,
+        "sha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "bytes": 171692,
+        "sha256": "17c6e8c861f8c31d2b8f2a1a248465eb6cff34ba4a63539d05bf021cb501c71b"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/accounts_probe.rs",
+        "bytes": 8162,
+        "sha256": "34f5987c6d4ef63574cb24738d96a9bca278bb6422752e4b5eeb550e4f3fd1e6"
+      },
+      {
+        "path": "crates/fc-domain/src/identity.rs",
+        "bytes": 32091,
+        "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+      },
+      {
+        "path": "crates/fc-storage/src/business/codec.rs",
+        "bytes": 15173,
+        "sha256": "df5cff1b4408618fc7ae949f119daee4a336ac21a9f1be43ec2bf698f329f8e8"
+      },
+      {
+        "path": "crates/fc-storage/src/business/schedule.rs",
+        "bytes": 13388,
+        "sha256": "d40ad4fe120cc3cabdf0f8ad7e2c1ea7720d9f645a8855371ea4a37d1d84040c"
+      },
+      {
+        "path": "crates/fc-storage/src/lib.rs",
+        "bytes": 61498,
+        "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+      },
+      {
+        "path": "crates/fc-presentation/src/workbench.rs",
+        "bytes": 11155,
+        "sha256": "5fae85ff6a0372d95ae0405d6f057b417a610fdd840e948b0326d34be98f4264"
+      }
+    ],
+    "frozenOwnerSourceChecks": [
+      {
+        "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+        "expectedSha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+        "actualSha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+        "match": true,
+        "status": "HISTORICAL_FREEZE_MATCH_AT_REVIEW_TIME; ROOT_SUBSEQUENTLY_FORMATTED; SEE_CURRENT_FINAL_SOURCE"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "expectedSha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d",
+        "actualSha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d",
+        "match": true
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend.rs",
+        "expectedSha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df",
+        "actualSha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df",
+        "match": true
+      },
+      {
+        "path": "crates/fc-storage/src/business/mod.rs",
+        "expectedSha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084",
+        "actualSha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084",
+        "match": true
+      }
+    ],
+    "noAdditionalConfirmedDefect": true,
+    "facts": [
+      {
+        "area": "authorization",
+        "fact": "management_identity obtains actual durable identity and exact SessionPurpose::Manage actor, requires authorize_management (local GlobalAdmin, enabled, current epoch, not mustChangePassword), rechecks actor and health before returning. UI read/new/save entry additionally requires current localGlobal owner and unlocked control, but real Backend/sole writer remains authority."
+      },
+      {
+        "area": "captured submit",
+        "fact": "Editor expectedRevision is captured once in new, never silently refreshed by input/confirm. Stable account ID and exact class-subject pairs are selected from bounded paged model. Backend identity_at and create_account_at use captured expectedRevision; writer rechecks captured exact session and domain transition before COMMIT, plus timetable references."
+      },
+      {
+        "area": "last admin and teaching independence",
+        "fact": "Last enabled GlobalAdmin cannot be demoted/disabled. Global may have0teaching scopes; TeacherAdmin must have>=1; User must have0. Editing role toUser with existing scopes opens explicit ClearScopes page; KEEP restores original role without silent loss. No login rename, other-account password reset/delete entry introduced."
+      },
+      {
+        "area": "disabled catalogue",
+        "fact": "Retained scope rows are not filtered by class/subject enabled flags; captions identify stable ID and disabled state. Adding only uses active catalogues, removing old scope is explicit. Empty active catalogue selections are now allowed as None so removal/return remains usable; actual positive reenable still domain-validates active scopes."
+      },
+      {
+        "area": "draft owner and secrets",
+        "fact": "Editor holds only principal owner/nonsecret Account/Draft structs and scalar selections, no FormData/Password cache. suspend white-lists LOGIN/NAME/ROLE/ENABLED/CLASS/SUBJECT; lock closes local control before drafting. Restore and exit-draft return choose sameowner only, different-owner open discards prior editor. Final password page consumes take directly into Password, confirmation FormData zeroizes on navigation/drop. Recovery code is presented once through native secret control, never ordinaryView. Uncertain/locked completion cannot resurrect oldlease or reveal late recoverycode."
+      },
+      {
+        "area": "self revoke",
+        "fact": "UpdateAccount even display-only change revokes target. New WorkSaveAccount marks self_revokes iff fixed UpdateAccount target equals captured exact lease principal. Explicit/WTS lock increments UIgeneration and cancels ticket; stale completion reports locked/recheck. Own committed success consumes actual returned state, clears locallease and routesLogin with saved status, issuing no substitute authority."
+      },
+      {
+        "area": "feedback",
+        "fact": "App Accounts view now merges editor status rather than overwriting dirty/stale/size details. InvalidScope explicitly reports active/default/retained timetable conflict and preserves draft. Capacity explicitly reports quantity or actual64KiB document limit. CapturedCAS conflict does not auto-refresh/retry; submitted guard blocks duplicate confirmation until explicit return/review."
+      },
+      {
+        "area": "UI capacity",
+        "fact": "Account and scope rows each page20, stable sorted numeric account IDs. Caption truncates display at UTF8 boundary440B then addsID/status; original name values remain full. Choice caption<512B and split class/subject Grid cells<1024B even128four-byte scalar legal names. Owner model test asserts512-account lastpage12 rows and ID512,4096scope page205 has16rows with exact pair(128,32), allViews validate."
+      },
+      {
+        "area": "storage capacity",
+        "fact": "Current aggregate identity and receipt remain64KiB; DocumentTooLarge now maps identity Domain(Capacity) instead of ambiguous unavailable. Real test constructs3968count-valid scopes, domain transition passes but actual storage rejects Capacity atomically, then verifies original state/globalrevision/health/oldWeblease and a subsequentsmall valid retry plus protected reopen. This does not promise all4096scopes or512accounts persist."
+      },
+      {
+        "area": "native probe assertions",
+        "fact": "New8creation stages traverse real controls and worker, verify one recoverycode page, mustChangePassword and actualscope. New35management stages addsecond classscope, reject timetable-referenced disable, selfrename demands Login/nolease/savedstatus then reauthenticate, verify lastadmin refusal and Userclear KEEP cancellation. Probe uses own hidden controls inside existing isolated application fixture; no global input. Source assertions are not actual native execution in this review."
+      }
+    ],
+    "ownerSourceTestBodiesReviewed": {
+      "editor": [
+        "empty_active_catalog_does_not_block_removing_retained_scope_or_returning",
+        "disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed",
+        "confirmation_holds_cas_backend_failure_allows_explicit_reentry",
+        "suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page",
+        "multiple_scopes_explicit_user_clear_and_dirty_discard_keep",
+        "real_roles_owner_gate_and_stable_id_selection",
+        "last_admin_teacher_scope_and_readonly_login_use_domain_preflight",
+        "password_only_final_submit_never_retained_by_navigation_or_suspend",
+        "full_capacity_pagination_and_long_unicode_labels_are_valid_views"
+      ],
+      "backend": [
+        "accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records",
+        "accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation",
+        "accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access",
+        "accounts_active_default_and_retained_history_references_reject_atomically_without_revoking",
+        "accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically"
+      ]
+    },
+    "externalOwnerEvidence": [
+      {
+        "path": "/tmp/fc-round15-accounts-editor.json",
+        "bytes": 2088,
+        "sha256": "42d15d3c39110d28cd26c86fbe58f21503365ab51fa952c0d4e413492d65fc5d"
+      },
+      {
+        "path": "/tmp/fc-round15-accounts-storage.json",
+        "bytes": 13198,
+        "sha256": "ffc5dbc01fb574132e98f244f555d3b059a5fb957ef4d89845af54e2e25f4be3"
+      }
+    ],
+    "externalRuntimeClassification": "Editor owner reports9 Host pure-harness tests and Windows --tests compile PASS. Backend owner reports5 actual Host SQLite tests PASS45.08s plus finalimplicit-default targetedPASS2.60s and strictClippy/architecture12crates33edges. These are external owner executions, not reviewer runs; fixtures clearly distinguish synthetic credential record/trusted issued testlease from one actual PBKDF2 creation, Host fake protector from Windows DPAPI.",
+    "limits": [
+      "Root owns final full-source frozen freshness, full suites, Windows actual execution and cleanup.",
+      "Win7SP1x86/Win10 actual machines, actual Seewo foreground/workbench visual QA and other D11P2-08legacy role migration are not established by this source review.",
+      "Single64KiBidentity/receipt capacity remains; UI/domain maxima are ceilings, not full persistence promise.",
+      "Own native-lock adapter change below is producer work; reviewed separately by root, not independently approved by its author."
+    ],
+    "rootAdditionalIntegrationTestSource": {
+      "name": "account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work",
+      "reviewStatus": "SOURCE_ONLY; ACTUAL_NATIVE_RUN_PENDING_ROOT",
+      "facts": [
+        "Synthetic issued UI ownership leases are clearly marked not Backend authentication evidence.",
+        "Dirty account draft triggersExitDraft whose text now includes账号; Return selects sameowner draft, otherowner returnsHome.",
+        "WorkValidateOffice nonexistent fixture creates a pending UI ticket; actual hidden busyLock button emits nativeWM_COMMAND and emptyform. Processing event increments UIgeneration, clearslease/routesLogin while retaining owner nonsecret draft.",
+        "Pending ticket is consumed later and cannot restorelease/page; drain helper cleans ownruntime."
+      ],
+      "limit": "The pending ticket may physically finish before event pumping; test proves busy UI and late result ownership, not forced interruption of an actually blocked KDF/SQL operation."
+    },
+    "currentFinalSourceCheck": {
+      "classification": "Fresh bytes/SHA read only; root reports final editor change is cargo fmt formatting. Reviewer re-inspected current implementation and all9test bodies; no new runtime claimed.",
+      "editorPreviousOwnerFreezeSha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+      "editorCurrent": {
+        "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+        "bytes": 57942,
+        "sha256": "9531485e934483b4a08a1343662d2715524dcb683d97dcbc0f8e3d2e298d1855"
+      },
+      "otherBusinessOwnerFrozenSourcesStillMatch": [
+        {
+          "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+          "match": true
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend.rs",
+          "match": true
+        },
+        {
+          "path": "crates/fc-storage/src/business/mod.rs",
+          "match": true
+        }
+      ],
+      "all9EditorTestNamesPresent": true
+    },
+    "finalFixtureAlignment": {
+      "source": {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "bytes": 171692,
+        "sha256": "17c6e8c861f8c31d2b8f2a1a248465eb6cff34ba4a63539d05bf021cb501c71b"
+      },
+      "helper": "prepare_probe_form",
+      "facts": [
+        "Only LOCK branch changes: non-LOCK returns original FormData.",
+        "LOCK iterates fields from current actual App.view, calls hidden bounded probe_edit only for FieldKind::Text with supplied synthetic value, then drops original zeroizing FormData and returns empty FormData.",
+        "Exactly4 old helper callsites invoke prepare_probe_form before probe_submit: copies/general application/display/schedule helper paths.",
+        "No Password/ReadOnly/Choice/Multiline/TimeRange field is written by this adapter. It does not call editor.capture/save or bypass native submit/model validation.",
+        "Schedule partialSTART and display partialTARGET/LABEL values are now written to native text control before emptyLOCK, reproducing real edit-before-click order. Existing locked-draft restoration assertions remain unchanged.",
+        "New accounts_probe has no LOCK stage and needs no fullForm-lock adapter. RootApp pending-lock test already supplies emptyFormData directly."
+      ],
+      "runtimeStatus": "Source-only adapter alignment. Two prior actual FAIL runs remain preserved; final Windows native rerun still pending."
+    }
+  },
+  "limitations": [
+    "Independent review is static/source derived; owner executed results are separately attributed.",
+    "No remote tests started by this agent.",
+    "This agent additionally changed only authorizedworkbench.rs; tests compiled for Windows target and strictClippy passed, actual native runtime awaits root.",
+    "Final integration/source freshness and plan acceptance remain root responsibility."
+  ],
+  "additionalFindings": [
+    {
+      "id": "IR15-06",
+      "origin": "independent root integration review",
+      "before": "App.view assigned editor.status=appstatus, losing dirty and stale revision messages",
+      "status": "SOURCE_CONFIRMED_FIXED: merge nonempty status"
+    },
+    {
+      "id": "IR15-07",
+      "origin": "independent native boundary review; subsequently root authorized this reviewer to implement fix",
+      "before": "All native buttons/probe_submit refusedbusy even if root globalLOCK event handled beforependingguard",
+      "status": "PRODUCER_IMPLEMENTED_AND_COMPILED_SEPARATELY; ROOT_STATIC_REVIEW_ACCEPTED; NATIVE_RUN_PENDING",
+      "producerReport": {
+        "path": "/tmp/fc-round15-workbench-lock.json",
+        "bytes": 5542,
+        "sha256": "2dd4e439c6e802885f373837492419a04765b42b14100f03c258e9ad6a795b5a"
+      }
+    },
+    {
+      "id": "IR15-08",
+      "origin": "editor owner deterministic allcatalogdisabled counterexample",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "fact": "Empty active Choice value now sets selectedclass/subjectNone rather than error, so remove old disabledscope and return remain possible; this reviewer inspected fix and owner regression source."
+    },
+    {
+      "id": "IR15-09",
+      "origin": "actual root Windows native fixture recheck, not reviewer execution",
+      "status": "FIXTURE_ADAPTER_EDIT_IMPLEMENTED_COMPILE_ONLY; FINAL_NATIVE_PENDING",
+      "fact": "Old schedule/display helpers must set nonsecret nativeText using newprobe_edit then call emptyLock; no broadening of lockpayload accepted."
+    }
+  ],
+  "producerImplementationSeparate": {
+    "report": {
+      "path": "/tmp/fc-round15-workbench-lock.json",
+      "bytes": 12006,
+      "sha256": "4a997b33bbf3f4dec2eb13f930faa5a7b31543b8df94ae02ca2b8779b6b8f2d1"
+    },
+    "classification": "This agent owns implementation, compile/Clippy. Root reports independent static review acceptance; author does not claim independent self-review PASS. Native execution NOT_RUN by this agent.",
+    "source": {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 88976,
+      "sha256": "200d90b3cc173b1e54476768412a6340061094baba3091cd49d5be5595eca53b"
+    },
+    "diagnosticEditRevision": {
+      "interface": "Window::probe_edit(&self, FieldId, &str)->Result<()>",
+      "contract": "Hidden current View !busy, exact existing enabled NativeKind::Text and FieldKind::Text; rejects all non-Text types (including Password/ReadOnly/Choice/Multiline/TimeRange), NUL and UTF16 length beyond model limit. Releases View RefCell borrow before own SetWindowTextW synchronous EN_CHANGE. No form submission, foreground or globalinput.",
+      "reason": "Old native test fixture previously placed half-draft text via fullForm LOCK probe. Strict empty lock correctly refuses old payload; replacing it with empty without first native editing leaves fixture defaults, not user half-draft. New narrow setter emulates actual nonsecret typing before emptyLock. Product model/lock behavior unchanged.",
+      "newNativeTest": "Text field actual halfdate2026-1 is set via probe_edit, invalid types/unknown/NUL/oversize refused; password/recovery synthetic fields set separately, populated lockform refused, emptylock clearssecrets and leaves draft_nonsecret2026-1, busy/removed currentfield edits refused.",
+      "runtime": "NOT_EXECUTED_BY_THIS_AGENT; compile and strictClippy only; root will execute new3 native tests and fix four own fixture helpers."
+    }
+  },
+  "historicalActualNativeFixtureFailures": [
+    {
+      "path": "/tmp/fc-round15-windows-initial-application.json",
+      "bytes": 10971,
+      "sha256": "ad8c18758abf195fedee7395a36f2c57c2431bf199bd051a7c0f0a0478908cd2",
+      "actualStatus": "FAIL",
+      "executedMainSha256": "9958e487a36d35d07f548f9636f718caa39462fbdb0d9fbce34eb4b6bff2d5ae",
+      "actualApplicationExitCode": 1,
+      "actualFailureTail": [
+        "PROBE_EVENT tick=44997 action=17 page=隔离验证学校 · 工作台 pending=false generation=2",
+        "PROBE_EVENT tick=45015 action=107 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46001 action=108 page=取消课表修改 pending=false generation=2",
+        "PROBE_SUBMIT tick=46001 kind=schedule-load page=取消课表修改",
+        "PROBE_COMPLETE tick=46002 kind=schedule page=取消课表修改",
+        "PROBE_EVENT tick=46007 action=100 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46022 action=102 page=验证学期 · 单周表 pending=false generation=2",
+        "FutureClassroom: 原生课表命令拒绝：stage=58"
+      ],
+      "classification": "Strict empty lock probe refused old fullForm helper at schedule stage58; actual native application FAIL."
+    },
+    {
+      "path": "/tmp/fc-round15-windows-account-flow-recheck.json",
+      "bytes": 11475,
+      "sha256": "7a7281cf965200f4035d2b2f5a36255da03c8de9c24c0cf2c3ec781d3d12c3e0",
+      "actualStatus": "FAIL",
+      "executedMainSha256": "e4828870089691b7fa1712b725ae1905568dfe5a885d6935799510a679afdc4d",
+      "actualApplicationExitCode": 1,
+      "actualFailureTail": [
+        "PROBE_EVENT tick=45998 action=100 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46012 action=102 page=验证学期 · 单周表 pending=false generation=2",
+        "PROBE_EVENT tick=46029 action=6 page=学期设置 · 验证学期 pending=false generation=2",
+        "PROBE_EVENT tick=47993 action=3 page=隔离验证学校 · 登录工作台 pending=false generation=3",
+        "PROBE_SUBMIT tick=47993 kind=request page=隔离验证学校 · 登录工作台",
+        "PROBE_COMPLETE tick=48999 kind=updated page=隔离验证学校 · 登录工作台",
+        "PROBE_EVENT tick=50004 action=17 page=隔离验证学校 · 工作台 pending=false generation=3",
+        "FutureClassroom: 锁定后未保留未完成日期草稿"
+      ],
+      "classification": "Helper changed to emptyLock without first writing partialdate to native control; followup lockrestore assertion failed. This is fixture setup failure, not evidence real productlostdraft; actual native application remains FAIL for that run."
+    }
+  ],
+  "nativeFixtureRetestStatus": "Second fullWindowsrun511PASS1FAIL; rootlegacyWebhelperalignmentfixedcfg(test)only, finalall16rerunpending",
+  "updatedUtc": "2026-10-30T16:51:35.447281+00:00",
+  "historicalSourceSnapshots": [
+    {
+      "label": "Before final formatting and root prepare_probe_form fixture adapter",
+      "sourceInputs": [
+        {
+          "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+          "bytes": 58287,
+          "sha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+          "bytes": 38475,
+          "sha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend.rs",
+          "bytes": 98203,
+          "sha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df"
+        },
+        {
+          "path": "crates/fc-storage/src/business/mod.rs",
+          "bytes": 37151,
+          "sha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "bytes": 170777,
+          "sha256": "6fb57bf9b5ce803cf3c6a468b4150a9536ee75374a388972a86d2b4e6f07c5e7"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/accounts_probe.rs",
+          "bytes": 8162,
+          "sha256": "34f5987c6d4ef63574cb24738d96a9bca278bb6422752e4b5eeb550e4f3fd1e6"
+        },
+        {
+          "path": "crates/fc-domain/src/identity.rs",
+          "bytes": 32091,
+          "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+        },
+        {
+          "path": "crates/fc-storage/src/business/codec.rs",
+          "bytes": 15173,
+          "sha256": "df5cff1b4408618fc7ae949f119daee4a336ac21a9f1be43ec2bf698f329f8e8"
+        },
+        {
+          "path": "crates/fc-storage/src/business/schedule.rs",
+          "bytes": 13388,
+          "sha256": "d40ad4fe120cc3cabdf0f8ad7e2c1ea7720d9f645a8855371ea4a37d1d84040c"
+        },
+        {
+          "path": "crates/fc-storage/src/lib.rs",
+          "bytes": 61498,
+          "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+        },
+        {
+          "path": "crates/fc-presentation/src/workbench.rs",
+          "bytes": 11155,
+          "sha256": "5fae85ff6a0372d95ae0405d6f057b417a610fdd840e948b0326d34be98f4264"
+        }
+      ],
+      "frozenOwnerSourceChecks": [
+        {
+          "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+          "expectedSha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+          "actualSha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+          "match": true,
+          "status": "HISTORICAL_FREEZE_MATCH_AT_REVIEW_TIME; ROOT_SUBSEQUENTLY_FORMATTED; SEE_CURRENT_FINAL_SOURCE"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+          "expectedSha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d",
+          "actualSha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d",
+          "match": true
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend.rs",
+          "expectedSha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df",
+          "actualSha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df",
+          "match": true
+        },
+        {
+          "path": "crates/fc-storage/src/business/mod.rs",
+          "expectedSha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084",
+          "actualSha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084",
+          "match": true
+        }
+      ]
+    }
+  ],
+  "rootTestAssertionCorrection": {
+    "classification": "REAL_NATIVE_PRODUCER_TEST_ASSERTION_DEFECT; FIX_BY_ROOT; NOT_PRODUCT_READ_BOUND_FAILURE",
+    "sourceAfterRootFix": {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 89353,
+      "sha256": "04f12d7936c14898efa753c74302632b6261cf6776cae0c9eb18d04d2fb13884"
+    },
+    "historicalActualRun": {
+      "path": "/tmp/fc-round15-windows-final-before-lock-secret-fixture-fix.json",
+      "bytes": 10704,
+      "sha256": "6c8e5f80ea1bc9774deb265a8c0f0e6740efa5303ec9cc03955c3556f0dd9ba0"
+    },
+    "actualStatus": "FAIL",
+    "actualCleanup": "PASS",
+    "actualMainSha256": "4a4c149f610585522df727387838de831fa2d782645f64531f12dd17605aa275",
+    "testExe": "fc_windows-95fad28d15fea78d.exe",
+    "testExeSha256": "3eb381b60dbe61fbf1f0fc408900147aab66d7c1a3e981ca84735ac36d539b65",
+    "actualSummary": "54passed1failed of55nativefc_windows tests; firstEXE stopsrunner; no aggregate512PASS claim",
+    "rawFailureTail": [
+      "test workbench::tests::isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes ... ok",
+      "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok",
+      "test workbench::tests::native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts ... ok",
+      "test workbench::tests::native_timetable_grid_and_combo_use_bounded_stable_selections ... ok",
+      "System.Management.Automation.RemoteException",
+      "thread 'workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields' (2496) panicked at crates/fc-windows/src/workbench.rs:1707:49:",
+      "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+      "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... FAILED",
+      "test workbench::tests::repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources ... ok",
+      "test workbench::tests::repeated_hidden_render_and_submit_do_not_accumulate_native_resources ... ok",
+      "",
+      "failures:",
+      "",
+      "failures:",
+      "    workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+      "",
+      "test result: FAILED. 54 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.21s",
+      ""
+    ],
+    "producerAcknowledgement": "Original author test deliberately wrote33characters into max32Text to prove Lock doesnotread/truncate. It incorrectly unwrapped bounded read_edit, which correctly returnedE_INVALIDARG. This was an author test mistake.",
+    "rootFix": "Require read_edit.is_err, then GetWindowTextLengthW(exacthiddennonsecretHWND)==33. EmptyLock event and secretclear assertions remain unchanged.",
+    "independentScopeCheck": {
+      "method": "Replace exactly the new6line comment/assert block with original singleassert and recomputeSHA256 of whole file",
+      "replacements": 1,
+      "reconstructedBeforeSha256": "200d90b3cc173b1e54476768412a6340061094baba3091cd49d5be5595eca53b",
+      "matchesPreviouslyFrozenSource": true,
+      "conclusion": "Rootchange is precisely this cfg(test) assertion block; no production method or lock/readbound was changed."
+    },
+    "runtimeAfterFix": "PENDING_ROOT_FINAL_FREEZE_REBUILD_AND_FULL_NATIVE_RERUN; notrunbythisagent"
+  },
+  "legacyWebLockFixtureAlignment": {
+    "classification": "SECOND_FULL_RUN_REAL_FAILURE_OF_LEGACY_LOCK_FIXTURE; ROOT_ONE_LINE_TEST_HELPER_ALIGNMENT",
+    "actualRaw": {
+      "path": "/tmp/fc-round15-windows-final-before-second-full-fixture-fix.json",
+      "bytes": 73353,
+      "sha256": "bea667445f6387cd8b33b30c876519ab499a05b9e2cefbfb4ce7f02f0c52ebaa"
+    },
+    "actualStatus": "FAIL",
+    "cleanup": "PASS",
+    "testExeCount": 16,
+    "rawCounts": {
+      "passed": 511,
+      "failed": 1
+    },
+    "failedTestExe": "fc_bootstrap-2c9facf31078f737.exe",
+    "failedTestExeSha256": "9bd77d452fa4c8805f4c07a29e74174f5f76fa5a09c2edce8629991c57e7a896",
+    "rawFailureTail": [
+      "PROBE_COMPLETE tick=7466 kind=other page=正在加载教师设备",
+      "PROBE_EVENT tick=7473 action=502 page=教师设备与配对管理 pending=false generation=0",
+      "PROBE_SUBMIT tick=7473 kind=other page=教师设备与配对管理",
+      "PROBE_COMPLETE tick=7473 kind=other page=教师设备与配对管理",
+      "",
+      "thread 'application::web_editor::tests::native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocations' (30332) panicked at crates/fc-bootstrap/src/application/web_editor/tests.rs:303:43:",
+      "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    application::web_editor::tests::native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocations",
+      "",
+      "test result: FAILED. 52 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.36s",
+      ""
+    ],
+    "beforeFileSha256": "07dee97c3bbc44682106d34ad5c2a427bc94b3239200cddeeb24ffc805bfd27c",
+    "afterFile": {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 16299,
+      "sha256": "f4460eaadf51119fe09b4f42b30e72db174e4226a3f3d11952b82ffc798a30d6"
+    },
+    "exactChangeProof": "Remove the one prepare_probe_form call from current file and SHA256 reproduces previous frozen wholefile 07dee97c3bbc44682106d34ad5c2a427bc94b3239200cddeeb24ffc805bfd27c",
+    "rootFix": "native_action forwards current synthetic form through prepare_probe_form; onlyLOCK edits nonsecretText then emits emptyFormData; all other actions, nativeevents/wait_for and assertions unchanged.",
+    "HostBoundary": "This adds4th Windows-cfg changedpath sinceHost407build. Actual92Hostdepinfo search finds0mentions of web_editor/tests.rs; finalHostreport must describe4paths, other246 unchanged.",
+    "runtimeAfterFix": "PENDING_NEW_FREEZE_REBUILD_AND_ALL16_RERUN; prior15EXE successes not accumulated."
+  },
+  "rootFinalSourceInputAggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "rootFinalBindingReview": "2026-10-31-round15-final-review.json"
+}

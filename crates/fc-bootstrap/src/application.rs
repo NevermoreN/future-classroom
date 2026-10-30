@@ -1,5 +1,7 @@
 //! Native product composition. All KDF/SQLite/file work runs on the one shared
 //! two-thread pool; the window pump only handles bounded events and owned results.
+mod accounts_editor;
+mod accounts_probe;
 mod desktop_controller;
 mod display_editor;
 mod material_flow;
@@ -53,7 +55,6 @@ const CLASS: FieldId = FieldId(8);
 const SUBJECT: FieldId = FieldId(9);
 const OLD_NAME: FieldId = FieldId(10);
 const COLOR: FieldId = FieldId(11);
-const ROLE: FieldId = FieldId(12);
 const OWNER: FieldId = FieldId(13);
 const CONTENT: FieldId = FieldId(14);
 const SAVE: ActionId = ActionId(1);
@@ -202,6 +203,9 @@ fn error_text(error: &Failure) -> String {
             | BackendError::Storage(
                 fc_storage::StorageError::Database | fc_storage::StorageError::CredentialCorrupt,
             ) => "数据或凭据需要修复；请使用有效恢复码或受控备份，不会重新开放首次注册。".into(),
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(IdentityError::LastAdministrator)) => "必须保留至少一名启用的主管理员；请先创建或启用另一名主管理员。".into(),
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(IdentityError::InvalidScope)) => "任教范围无效或仍被课表、单双周保留历史或默认教师引用。请先修正引用后再保存；本次未修改账号，草稿仍保留。".into(),
+            BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(IdentityError::Capacity)) => "账号或任教关系已超过数量上限或实际64KiB身份文档容量。本次未保存，草稿仍保留；请减少条目或文字。".into(),
             BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(
                 IdentityError::DuplicateName,
             )) => "该登录名或名称已存在。".into(),
@@ -308,6 +312,11 @@ enum Outcome {
         key: ContentKey,
         record: Option<ContentRecord>,
     },
+    AccountsLoaded(IdentityState),
+    AccountSaved {
+        state: IdentityState,
+        self_changed: bool,
+    },
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
     LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
@@ -342,6 +351,12 @@ enum Work {
     MaintainVoice(PathBuf, VoiceService),
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
+    LoadAccounts(Arc<Mutex<Backend>>, SessionLease),
+    SaveAccount(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        Box<accounts_editor::Command>,
+    ),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
     ChangeLesson(
@@ -381,6 +396,7 @@ impl Task for Work {
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
             Self::Refresh(_)
             | Self::Shutdown(_)
+            | Self::LoadAccounts(_, _)
             | Self::LoadSchedule(_, _)
             | Self::LoadLesson(_, _)
             | Self::ChangeLesson(_, _, _, _, _)
@@ -389,6 +405,30 @@ impl Task for Work {
             | Self::Web(..)
             | Self::CloseWeb(..)
             | Self::Desktop(_, _, _) => Some(1024),
+            Self::SaveAccount(_, _, operation) => {
+                let (strings, scopes) = match operation.as_ref() {
+                    accounts_editor::Command::Create { account, .. } => (
+                        account
+                            .login_name
+                            .capacity()
+                            .checked_add(account.display_name.capacity())?,
+                        account.scopes.capacity(),
+                    ),
+                    accounts_editor::Command::Update {
+                        command:
+                            IdentityCommand::UpdateAccount {
+                                display_name,
+                                scopes,
+                                ..
+                            },
+                        ..
+                    } => (display_name.capacity(), scopes.capacity()),
+                    _ => return None,
+                };
+                strings
+                    .checked_add(scopes.checked_mul(std::mem::size_of::<AssignmentScope>())?)?
+                    .checked_add(2048)
+            }
             Self::Material(job) => job.allocation_bytes(),
             Self::CleanupMaterial(root, path) => root
                 .as_os_str()
@@ -498,6 +538,60 @@ impl Task for Work {
             Self::Shutdown(backend) => {
                 backend.lock().map_err(|_| Failure::Stopped)?.close()?;
                 Ok(Outcome::Closed)
+            }
+            Self::LoadAccounts(backend, lease) => {
+                let state = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .management_identity(lease)?;
+                Ok(Outcome::AccountsLoaded(state))
+            }
+            Self::SaveAccount(backend, lease, operation) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                match *operation {
+                    accounts_editor::Command::Create {
+                        expected,
+                        account,
+                        password,
+                    } => {
+                        let code = backend.create_account_at(lease, expected, account, password)?;
+                        Ok(Outcome::Updated {
+                            state: backend.state()?,
+                            lease: Some(lease),
+                            code: Some(code),
+                            next: Screen::Code,
+                        })
+                    }
+                    accounts_editor::Command::Update {
+                        expected,
+                        command:
+                            IdentityCommand::UpdateAccount {
+                                id,
+                                display_name,
+                                role,
+                                enabled,
+                                scopes,
+                            },
+                    } => {
+                        let self_changed = id == lease.principal_id();
+                        let state = backend.identity_at(
+                            lease,
+                            expected,
+                            IdentityCommand::UpdateAccount {
+                                id,
+                                display_name,
+                                role,
+                                enabled,
+                                scopes,
+                            },
+                        )?;
+                        Ok(Outcome::AccountSaved {
+                            state,
+                            self_changed,
+                        })
+                    }
+                    _ => Err(invalid("账号操作在当前页面不可用。")),
+                }
             }
             Self::LoadSchedule(backend, lease) => {
                 let document = backend
@@ -734,54 +828,6 @@ fn execute(mut r: Request) -> Result<Outcome> {
                 },
             )?;
         }
-        (Screen::Accounts, SAVE) => {
-            confirm(&r.data, PASSWORD)?;
-            let role = match r.data.get(ROLE).unwrap_or("").trim() {
-                "教师管理员" => Role::TeacherAdmin,
-                "普通用户" => Role::User,
-                "主管理员" => Role::GlobalAdmin,
-                _ => return Err(invalid("角色请选择教师管理员、普通用户或主管理员。")),
-            };
-            let scopes = if role == Role::User {
-                Vec::new()
-            } else {
-                let c = r.data.get(CLASS).unwrap_or("").trim();
-                let s = r.data.get(SUBJECT).unwrap_or("").trim();
-                if role == Role::GlobalAdmin && c.is_empty() && s.is_empty() {
-                    Vec::new()
-                } else {
-                    vec![AssignmentScope {
-                        class_id: find_class(&r.state, c)?,
-                        subject_id: find_subject(&r.state, s)?,
-                    }]
-                }
-            };
-            let id = PrincipalId::new(
-                r.state
-                    .accounts
-                    .iter()
-                    .map(|a| a.principal.id.get())
-                    .max()
-                    .unwrap_or(0)
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("账号数量已达上限。"))?,
-            )
-            .map_err(|_| invalid("账号编号不可用。"))?;
-            let account = NewAccount {
-                id,
-                login_name: text(&r.data, LOGIN)?,
-                display_name: text(&r.data, NAME)?,
-                role,
-                scopes,
-            };
-            code = Some(backend.create_account_at(
-                require_lease()?,
-                r.state.revision,
-                account,
-                password(&mut r.data, PASSWORD)?,
-            )?);
-            next = Screen::Code;
-        }
         (Screen::Homework, LOAD) => {
             let proof = require_lease()?;
             let class = find_class(&r.state, &text(&r.data, CLASS)?)?;
@@ -895,6 +941,7 @@ struct App {
     terminate_required: bool,
     schedule: Option<ScheduleEditor>,
     display: Option<display_editor::Editor>,
+    accounts: Option<accounts_editor::Editor>,
     desktop: desktop_controller::Controller,
     root: PathBuf,
     material_editor: Option<materials_editor::Editor>,
@@ -924,6 +971,24 @@ impl App {
             (_, true) => self.status.clone(),
             _ => format!("{}\n{}", self.status, self.desktop_notice),
         };
+        if self.screen == Screen::Accounts {
+            if let Some(editor) = &self.accounts {
+                let mut view = editor.view(&self.state);
+                if !status.is_empty() {
+                    if !view.status.is_empty() {
+                        view.status.push('\n');
+                    }
+                    view.status.push_str(&status);
+                }
+                view.actions.push(Action {
+                    id: LOCK,
+                    label: "锁定".into(),
+                    enabled: true,
+                });
+                view.busy = self.pending.is_some() || self.stopping;
+                return view;
+            }
+        }
         if self.screen == Screen::Lesson {
             if let Some(editor) = &self.lesson_editor {
                 return editor.view(
@@ -1066,7 +1131,7 @@ impl App {
                     view.actions.extend([
                         action(TO_SCHOOL, "学校与班级"),
                         action(TO_SUBJECTS, "基础科目"),
-                        action(TO_ACCOUNTS, "创建账号"),
+                        action(TO_ACCOUNTS, "账号与任教管理"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
                         action(TO_DISPLAY, "桌面显示设置"),
                         action(TO_LESSON, "本节临时换课"),
@@ -1127,22 +1192,9 @@ impl App {
                 view.actions = vec![action(SAVE, "保存科目"), action(BACK, "返回")];
             }
             Screen::Accounts => {
-                view.title = "创建账号".into();
-                view.description="教师管理员须填写已建班级和科目，首次登录必须改密。普通用户无管理权限；主管理员可按需兼任教学。".into();
-                view.fields = vec![
-                    plain(LOGIN, "唯一登录名", String::new()),
-                    plain(NAME, "姓名", String::new()),
-                    plain(
-                        ROLE,
-                        "角色（教师管理员/普通用户/主管理员）",
-                        "教师管理员".into(),
-                    ),
-                    plain(CLASS, "任教班级（教师必填）", String::new()),
-                    plain(SUBJECT, "任教科目（教师必填）", String::new()),
-                    secret(PASSWORD, "初始口令"),
-                    secret(CONFIRM, "再次输入口令"),
-                ];
-                view.actions = vec![action(SAVE, "创建账号"), action(BACK, "返回")];
+                view.title = "账号与任教管理".into();
+                view.description = "正在读取当前账号目录与权限，请稍候。".into();
+                view.actions = vec![action(LOCK, "锁定")];
             }
             Screen::Password => {
                 view.title = "修改本人口令".into();
@@ -1224,7 +1276,7 @@ impl App {
             Screen::ExitDraft => {
                 view.title = "退出前处理未保存草稿".into();
                 view.description =
-                    "课表或显示设置有未保存修改。退出后，本次运行中的草稿将丢失。".into();
+                    "课表、显示设置或账号有未保存修改。退出后，本次运行中的草稿将丢失。".into();
                 view.actions = vec![
                     action(RETURN_DRAFT, "返回草稿"),
                     action(DISCARD_EXIT, "丢弃草稿并退出"),
@@ -1262,6 +1314,11 @@ impl App {
         self.leave_web();
         if let Some(c) = &self.control {
             c.lock_local();
+        }
+        if self.screen == Screen::Accounts {
+            if let (Some(editor), Ok(data)) = (&mut self.accounts, self.window.draft_nonsecret()) {
+                editor.suspend(data);
+            }
         }
         if self.screen == Screen::Schedule {
             if let (Some(editor), Ok(data)) = (&mut self.schedule, self.window.draft_nonsecret()) {
@@ -1357,7 +1414,8 @@ impl App {
         // current local lease before their completion reaches the window pump.
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
         // particular completion to be consumed rather than cancel its own success.
-        let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate));
+        let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
+            || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
         match self
             .pool
             .handle()
@@ -1414,6 +1472,17 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
+                if self.screen == Screen::Accounts && self.pending.is_none() && !self.stopping {
+                    if let Some(editor) = &mut self.accounts {
+                        if let Ok(data) = self.window.draft_nonsecret() {
+                            editor.suspend(data);
+                        }
+                        if let Err(message) = editor.select(row, column, &self.state) {
+                            self.status = message;
+                        }
+                        self.render()?;
+                    }
+                }
                 if self.screen == Screen::Materials && self.pending.is_none() && !self.stopping {
                     if let Some(editor) = &mut self.material_editor {
                         if let Err(message) = editor.select(row, column) {
@@ -1451,8 +1520,15 @@ impl App {
                 if let (Some(c), Some(l)) = (&self.control, self.lease) {
                     let _ = c.note_input(l, self.clock.monotonic_millis());
                 }
+                if action == LOCK && !self.stopping {
+                    self.lock();
+                    return self.render();
+                }
                 if self.pending.is_some() || self.stopping {
                     return Ok(());
+                }
+                if self.screen == Screen::Accounts {
+                    return self.accounts_event(action, data);
                 }
                 if self.screen == Screen::Materials {
                     return self.material_event(action, data);
@@ -1481,6 +1557,7 @@ impl App {
                     action = EXIT;
                 }
                 match action {
+                    TO_ACCOUNTS => self.open_accounts()?,
                     TO_WEB => self.open_web_editor()?,
                     TO_LESSON => {
                         self.open_lesson_editor()?;
@@ -1496,6 +1573,10 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Display
+                            } else if self.accounts.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Accounts
                             } else {
                                 Screen::Home
                             };
@@ -1563,13 +1644,12 @@ impl App {
                         self.status.clear();
                         self.render()?;
                     }
-                    TO_RECOVERY | TO_SCHOOL | TO_SUBJECTS | TO_ACCOUNTS | TO_HOMEWORK
-                    | TO_PASSWORD | TO_ROTATE => {
+                    TO_RECOVERY | TO_SCHOOL | TO_SUBJECTS | TO_HOMEWORK | TO_PASSWORD
+                    | TO_ROTATE => {
                         self.screen = match action {
                             TO_RECOVERY => Screen::Recovery,
                             TO_SCHOOL => Screen::School,
                             TO_SUBJECTS => Screen::Subjects,
-                            TO_ACCOUNTS => Screen::Accounts,
                             TO_HOMEWORK => Screen::Homework,
                             TO_PASSWORD => Screen::Password,
                             _ => Screen::Rotate,
@@ -1601,6 +1681,91 @@ impl App {
             }
         }
         Ok(())
+    }
+    fn open_accounts(&mut self) -> std::result::Result<(), String> {
+        if self.pending.is_some() || self.stopping {
+            return Ok(());
+        }
+        let Some(lease) = self.lease else {
+            return Ok(());
+        };
+        if self.current_global_owner() != Some(lease.principal_id())
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+        {
+            self.status = "账号与任教管理仅限已解锁的本地主管理员。".into();
+            return self.render();
+        }
+        if self
+            .accounts
+            .as_ref()
+            .is_some_and(|e| e.owner() != lease.principal_id())
+        {
+            self.accounts = None;
+        }
+        self.screen = Screen::Accounts;
+        self.status.clear();
+        if let Some(backend) = &self.backend {
+            self.submit(Work::LoadAccounts(backend.clone(), lease))?;
+        }
+        Ok(())
+    }
+    fn accounts_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if self.current_global_owner() != Some(lease.principal_id())
+            || self
+                .control
+                .as_ref()
+                .is_none_or(SessionControl::is_local_locked)
+            || action == LOCK
+        {
+            self.lock();
+            return self.render();
+        }
+        let Some(editor) = &mut self.accounts else {
+            return self.render();
+        };
+        if editor.owner() != lease.principal_id() {
+            self.accounts = None;
+            self.screen = Screen::Home;
+            return self.render();
+        }
+        match editor.handle(action, data, &self.state) {
+            Ok(accounts_editor::Command::Stay) => self.status.clear(),
+            Ok(accounts_editor::Command::Close) => {
+                self.screen = Screen::Home;
+                self.status.clear();
+            }
+            Ok(accounts_editor::Command::Reload) => {
+                self.accounts = None;
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadAccounts(backend.clone(), lease))?;
+                }
+            }
+            Ok(
+                operation @ (accounts_editor::Command::Create { .. }
+                | accounts_editor::Command::Update { .. }),
+            ) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::SaveAccount(
+                        backend.clone(),
+                        lease,
+                        Box::new(operation),
+                    ))?;
+                }
+            }
+            Err(message) => self.status = message,
+        }
+        self.render()
     }
     fn open_web_editor(&mut self) -> std::result::Result<(), String> {
         if self.pending.is_some() || self.stopping {
@@ -2022,6 +2187,10 @@ impl App {
                 .display
                 .as_ref()
                 .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
+                .accounts
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
     }
     fn current_global_owner(&self) -> Option<PrincipalId> {
         let id = self.lease?.principal_id();
@@ -2316,6 +2485,9 @@ impl App {
                     next,
                 }) => {
                     self.state = Arc::new(state);
+                    if next == Screen::Code {
+                        self.accounts = None;
+                    }
                     let previous_lease = self.lease;
                     self.lease = lease;
                     self.screen = next;
@@ -2367,6 +2539,39 @@ impl App {
                             "教师设备状态已更新。".into()
                         };
                         self.next_web_refresh = Instant::now() + Duration::from_secs(1);
+                    }
+                }
+                Ok(Outcome::AccountsLoaded(state)) => {
+                    self.state = Arc::new(state);
+                    if let Some(owner) = self.current_global_owner() {
+                        if self
+                            .accounts
+                            .as_ref()
+                            .is_none_or(|e| e.owner() != owner || !e.has_unsaved_changes())
+                        {
+                            self.accounts = Some(accounts_editor::Editor::new(&self.state, owner)?);
+                        }
+                        self.screen = Screen::Accounts;
+                        self.status.clear();
+                    }
+                }
+                Ok(Outcome::AccountSaved {
+                    state,
+                    self_changed,
+                }) => {
+                    self.state = Arc::new(state);
+                    self.accounts = None;
+                    if self_changed {
+                        // The committed change revoked this exact local lease. A
+                        // successful completion does not issue replacement authority.
+                        self.lease = None;
+                        self.screen = Screen::Login;
+                        self.status =
+                            "账号变更已保存，本地会话已失效；请使用当前权限重新登录。".into();
+                    } else if let Some(owner) = self.current_global_owner() {
+                        self.accounts = Some(accounts_editor::Editor::new(&self.state, owner)?);
+                        self.screen = Screen::Accounts;
+                        self.status = "账号与任教范围已保存，该账号原有会话已失效。".into();
                     }
                 }
                 Ok(Outcome::ScheduleLoaded(document)) => {
@@ -2529,6 +2734,8 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let mut stage = 0u8;
     let mut lesson_stage = 0u8;
     let mut copies_probe = CopiesProbe::default();
+    let mut accounts_creation = 0u8;
+    let mut accounts_management = 0u8;
     let mut probe_error = None;
     let mut office_verified = !probe;
     let mut office = if probe {
@@ -2676,13 +2883,25 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             }
         }
         if probe && !app.stopping && app.pending.is_none() {
-            if stage == 83 && lesson_stage < 8 {
+            if stage == 10 {
+                if let Err(error) = accounts_probe::create(&mut app, &mut accounts_creation) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                } else if accounts_creation == accounts_probe::CREATION_STEPS {
+                    stage = 11;
+                }
+            } else if stage == 83 && lesson_stage < 8 {
                 if let Err(error) = lesson_probe_step(&mut app, &mut lesson_stage) {
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
             } else if stage == 83 && copies_probe.stage < 6 {
                 if let Err(error) = copies_probe_step(&mut app, &mut copies_probe) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
+            } else if stage == 83 && accounts_management < accounts_probe::MANAGEMENT_STEPS {
+                if let Err(error) = accounts_probe::manage(&mut app, &mut accounts_management) {
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
@@ -2746,14 +2965,25 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if let Some(error) = probe_error {
         return Err(error);
     }
-    if probe && (stage != 90 || lesson_stage != 8 || copies_probe.stage != 6 || !office_verified) {
+    if probe
+        && (stage != 90
+            || lesson_stage != 8
+            || copies_probe.stage != 6
+            || accounts_creation != accounts_probe::CREATION_STEPS
+            || accounts_management != accounts_probe::MANAGEMENT_STEPS
+            || !office_verified)
+    {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
     Ok(())
 }
 fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App, String> {
+    let window = Window::new().map_err(|_| "无法创建工作台".to_owned())?;
+    window
+        .set_lock_action(LOCK)
+        .map_err(|_| "无法注册独立锁定操作".to_owned())?;
     Ok(App {
-        window: Window::new().map_err(|_| "无法创建工作台".to_owned())?,
+        window,
         pool: WorkerPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
         clock,
         backend: None,
@@ -2789,6 +3019,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         lesson_flow_active: false,
         offscreen_probe: probe,
         display: None,
+        accounts: None,
         desktop: desktop_controller::Controller::new(probe)?,
         root: PathBuf::new(),
         material_editor: None,
@@ -2819,7 +3050,7 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
     Ok(())
 }
 #[derive(Default)]
@@ -2921,6 +3152,27 @@ fn copies_probe_step(app: &mut App, probe: &mut CopiesProbe) -> std::result::Res
     probe.stage += 1;
     Ok(())
 }
+// A real user edits native fields before clicking Lock. The diagnostic must
+// reproduce that order instead of smuggling an edit through the empty lock event.
+fn prepare_probe_form(
+    app: &App,
+    action: ActionId,
+    data: FormData,
+) -> std::result::Result<FormData, String> {
+    if action != LOCK {
+        return Ok(data);
+    }
+    for field in app.view().fields {
+        if field.kind == FieldKind::Text {
+            if let Some(value) = data.get(field.id) {
+                app.window
+                    .probe_edit(field.id, value)
+                    .map_err(|_| "隔离锁定前非秘密文本未写入".to_owned())?;
+            }
+        }
+    }
+    Ok(FormData::new())
+}
 fn submit_copies_probe(app: &App, action: ActionId) -> std::result::Result<(), String> {
     let mut data = FormData::new();
     for field in app.view().fields {
@@ -2929,6 +3181,7 @@ fn submit_copies_probe(app: &App, action: ActionId) -> std::result::Result<(), S
                 .map_err(|_| "副本探针表单无效")?;
         }
     }
+    let data = prepare_probe_form(app, action, data)?;
     app.window
         .probe_submit(action, data)
         .map_err(|_| "副本原生命令拒绝".into())
@@ -3231,17 +3484,7 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             action = TO_ACCOUNTS;
             Screen::Home
         }
-        10 => {
-            action = SAVE;
-            put(LOGIN, "probe-teacher")?;
-            put(NAME, "验证教师")?;
-            put(ROLE, "教师管理员")?;
-            put(CLASS, "验证班")?;
-            put(SUBJECT, "数学")?;
-            put(PASSWORD, TEACHER)?;
-            put(CONFIRM, TEACHER)?;
-            Screen::Accounts
-        }
+        10 => return Err("账号创建必须通过新原生编辑器流程".into()),
         11 => {
             action = ACK;
             Screen::Code
@@ -3448,6 +3691,7 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
                 .map_err(|_| "原生诊断表单重复字段")?;
         }
     }
+    let data = prepare_probe_form(app, action, data)?;
     app.window
         .probe_submit(action, data)
         .map_err(|_| format!("原生工作台命令未接纳：stage={stage}"))?;
@@ -3532,6 +3776,7 @@ fn display_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), 
             data.insert(f.id, f.value).map_err(|_| "显示诊断字段重复")?;
         }
     }
+    let data = prepare_probe_form(app, action, data)?;
     app.window
         .probe_submit(action, data)
         .map_err(|_| format!("原生显示设置命令拒绝：stage={stage}"))?;
@@ -3687,6 +3932,7 @@ fn schedule_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(),
             data.insert(f.id, f.value).map_err(|_| "诊断表单无效")?;
         }
     }
+    let data = prepare_probe_form(app, action, data)?;
     app.window
         .probe_submit(action, data)
         .map_err(|_| format!("原生课表命令拒绝：stage={stage}"))?;
@@ -3974,6 +4220,117 @@ mod tests {
             .unwrap();
         assert!(app.screen == Screen::Home);
         assert!(app.display.as_ref().unwrap().has_unsaved_changes());
+        drain(app);
+    }
+    #[test]
+    fn account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work() {
+        let _serial = SERIAL.lock().unwrap();
+        // UI ownership fixture only. These issued test leases are not backend
+        // authentication evidence; the application probe covers real login/SQL.
+        let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
+        let now = fc_domain::time::LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
+            36000,
+        )
+        .unwrap();
+        let mut state = IdentityState::default()
+            .transition(
+                &IdentityCommand::FirstAdministrator {
+                    school_id: SchoolId::new(1).unwrap(),
+                    school_name: "UI ownership fixture".into(),
+                    id: PrincipalId::new(1).unwrap(),
+                    login_name: "owner".into(),
+                    display_name: "Owner".into(),
+                },
+                None,
+                now,
+            )
+            .unwrap()
+            .next;
+        let mut second = state.accounts[0].clone();
+        second.principal.id = PrincipalId::new(2).unwrap();
+        second.login_name = "other".into();
+        state.accounts.push(second);
+        state.validate().unwrap();
+        let expires = fc_domain::time::LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2030, 1, 1).unwrap(),
+            0,
+        )
+        .unwrap();
+        let mut sessions = fc_application::identity::IdentitySessions::default();
+        let owner = sessions
+            .issue_verified(
+                &state.accounts[0],
+                TrustedOrigin::Local,
+                0,
+                3600000,
+                expires,
+            )
+            .unwrap();
+        let other = sessions
+            .issue_verified(
+                &state.accounts[1],
+                TrustedOrigin::Local,
+                0,
+                3600000,
+                expires,
+            )
+            .unwrap();
+        let mut editor = accounts_editor::Editor::new(&state, owner.principal_id()).unwrap();
+        editor.select(0, 0, &state).unwrap();
+        editor
+            .handle(accounts_editor::EDIT, FormData::new(), &state)
+            .unwrap();
+        let mut form = FormData::new();
+        form.insert(accounts_editor::NAME, "未保存的账号姓名".into())
+            .unwrap();
+        editor
+            .handle(accounts_editor::REVIEW, form, &state)
+            .unwrap();
+        app.accounts = Some(editor);
+        app.state = Arc::new(state);
+        app.lease = Some(owner);
+        app.screen = Screen::Home;
+        app.event(Event::Submit(EXIT, FormData::new())).unwrap();
+        assert!(app.screen == Screen::ExitDraft);
+        assert!(app.view().description.contains("账号"));
+        app.event(Event::Submit(RETURN_DRAFT, FormData::new()))
+            .unwrap();
+        assert!(app.screen == Screen::Accounts);
+        assert!(app.view().description.contains("未保存的账号姓名"));
+        app.lease = Some(other);
+        app.screen = Screen::ExitDraft;
+        assert!(!app.has_unsaved_changes());
+        app.event(Event::Submit(RETURN_DRAFT, FormData::new()))
+            .unwrap();
+        assert!(app.screen == Screen::Home);
+        assert!(app.accounts.as_ref().unwrap().has_unsaved_changes());
+        app.lease = Some(owner);
+        app.screen = Screen::Accounts;
+        app.submit(Work::ValidateOffice(PathBuf::from(
+            "nonexistent-owned-lock-fixture.docx",
+        )))
+        .unwrap();
+        assert!(app.pending.is_some());
+        let old_generation = app.generation;
+        // This invokes our own actual hidden native button. All other busy
+        // actions remain unavailable; LOCK carries no copied form or password.
+        app.window.probe_submit(LOCK, FormData::new()).unwrap();
+        for event in app.window.take_events().unwrap() {
+            app.event(event).unwrap();
+        }
+        assert_eq!(app.generation, old_generation + 1);
+        assert!(app.lease.is_none());
+        assert!(app.screen == Screen::Login);
+        assert!(app.accounts.as_ref().unwrap().has_unsaved_changes());
+        assert!(app
+            .view()
+            .fields
+            .iter()
+            .all(|f| f.id != accounts_editor::NAME));
+        wait_for(&mut app, |a| a.pending.is_none());
+        assert!(app.lease.is_none());
+        assert!(app.screen == Screen::Login);
         drain(app);
     }
 }

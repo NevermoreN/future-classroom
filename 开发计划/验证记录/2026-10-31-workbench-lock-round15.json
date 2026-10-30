@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "round": 15,
+  "kind": "PRODUCER_IMPLEMENTATION_AND_COMPILE_EVIDENCE_NOT_INDEPENDENT_REVIEW",
+  "status": "HISTORICAL_PRODUCER_COMPILE_PASS_WITH_ONE_ACTUAL_NATIVE_TEST_ASSERTION_FAIL; ROOT_CFG_TEST_FIX_STATIC_CONFIRMED; FINAL_NATIVE_RERUN_PENDING",
+  "source": {
+    "path": "crates/fc-windows/src/workbench.rs",
+    "bytes": 88976,
+    "sha256": "200d90b3cc173b1e54476768412a6340061094baba3091cd49d5be5595eca53b"
+  },
+  "beforeSource": {
+    "path": "/tmp/fc-round15-workbench-before-lock.rs",
+    "bytes": 75200,
+    "sha256": "4e320055d4b33ce2fb548f730c905cb16c4903409f900908f6dfb26854abf873"
+  },
+  "interface": "Window::set_lock_action(&self, ActionId) -> windows::core::Result<()>",
+  "contract": [
+    "Default registration None preserves existing busy refusal. Zero rejected; only same-ID idempotent registration may repeat.",
+    "Only exact registered action currently present and enabled in immutable current View may bypass busy. render, probe_submit, State.submit and nativeWM_COMMAND apply this condition.",
+    "Registered lock never reads native field values. It drops any queued forms (zeroizing secret storage), queues one empty FormData Submit, and clears password/one-time displayed native controls with existing undo clearing.",
+    "Busy fields and all other actions remain disabled/refused. Missing/disabled/unknown/old native binding and supplied nonempty lock probe form are refused.",
+    "Registration and notification never request foreground/global input. Production App owns actual meaning/authorization of registered LOCK; adapter has no hard-coded role or action number."
+  ],
+  "newNativeTests": [
+    "registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+    "lock_requires_registration_enabled_current_view_and_exact_native_binding",
+    "hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields"
+  ],
+  "testSourceFacts": [
+    "First test queues8 genuine old secret-bearing native forms, then marksbusy, sets intentionally invalid overlong native nonsecret input plus password/recovery display. Empty lockprobe must succeed, clear both secrets and replace oldqueue with one empty lockSubmit without reading invalidfield. Foreground observed unchanged.",
+    "Second uses actual direct current native WM_COMMAND; refuses unregistered, disabled, removed-current-view, unknown IDs and closes hiddenwindow with passwordclearing. Registration afterrender enables only unique exact lock action."
+  ],
+  "checks": [
+    {
+      "command": "cargo test -p fc-windows --target i686-pc-windows-gnu --lib --no-run --locked --message-format=json",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round15-workbench-lock-build.jsonl",
+        "bytes": 39944,
+        "sha256": "ae11ed88dfa0a3d6762ff0251b2e1603c1b3a2da59ba2c40d4c2eedf9ca5c08a"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round15-workbench-lock-build.log",
+        "bytes": 1413,
+        "sha256": "e6487653a80b0fba68c05e9a806450916842f7c553d936f047d32678099b6316"
+      },
+      "result": "Finished test profile unoptimized+debuginfo in1m16s; compile only"
+    },
+    {
+      "command": "cargo clippy -p fc-windows --target i686-pc-windows-gnu --tests --locked -- -D warnings",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round15-workbench-lock-clippy.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round15-workbench-lock-clippy-build.log",
+        "bytes": 378,
+        "sha256": "c3fe80ea7a818c772147398c8fce3c7da377a8f87363f2c5fe79a10603a7716b"
+      },
+      "result": "Finished dev profile unoptimized+debuginfo in9.20s"
+    },
+    {
+      "command": "rustfmt --edition 2021 crates/fc-windows/src/workbench.rs",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check -- crates/fc-windows/src/workbench.rs",
+      "exitCode": 0
+    },
+    {
+      "command": "cargo test -p fc-windows --target i686-pc-windows-gnu --lib --no-run --locked --message-format=json",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round15-workbench-probe-edit-build.jsonl",
+        "bytes": 39915,
+        "sha256": "777fa08bd264a98f9cbca397319c4bfa804d8a89efa13c4636c089b2e1cceadd"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round15-workbench-probe-edit-build.log",
+        "bytes": 168,
+        "sha256": "cf750cd2c4d207154f04016476b701be6596fbbecdd681a7a00a2d9cac1fef0c"
+      },
+      "result": "compile5.13s only"
+    },
+    {
+      "command": "cargo clippy -p fc-windows --target i686-pc-windows-gnu --tests --locked -- -D warnings",
+      "exitCode": 0,
+      "stdout": {
+        "path": "/tmp/fc-round15-workbench-probe-edit-clippy.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round15-workbench-probe-edit-clippy-build.log",
+        "bytes": 167,
+        "sha256": "7ec6421423202ed97f3dfdb2bcb92cf1199759ee3e910dd715e4d3321b7cda7f"
+      },
+      "result": "strictClippy7.57s"
+    },
+    {
+      "command": "rustfmt --edition 2021 crates/fc-windows/src/workbench.rs; git diff --check (each executed separately)",
+      "exitCode": 0
+    }
+  ],
+  "testBinary": {
+    "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "bytes": 53834444,
+    "sha256": "8aa4763b6e1e45590b1d802f56124dc2b560fda22184d2a3a722e6589f1d740a",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    }
+  },
+  "externalRootReadOnlyReview": "Root reports it inspected exact State.submit/action_allowed/queue_submit, registration/render/probe_submit/WM_COMMAND and both test bodies. It accepts contract and registers unique application LOCK6 in create_app. This producer does not label self-implementation as independent review PASS.",
+  "nativeRuntime": "NOT_RUN_BY_THIS_AGENT. Root owns actual Windows native execution and final integration freshness; no remote task started.",
+  "limitations": [
+    "Physical cancellation of already-running KDF/database task is unchanged; lock immediately closes authority and cancels ticket, while existing bounded worker retains ownership until actual completion.",
+    "Clearing owned native Edit/undo and zeroizing queued forms does not prove every Windows-internal secret copy erased.",
+    "No foreground changes, global input, real credentials, persistence modifications or remote tests from this implementation work."
+  ],
+  "initialLockSource": {
+    "path": "crates/fc-windows/src/workbench.rs",
+    "bytes": 84586,
+    "sha256": "b05427fd4966aa15222f07d51eb8b72477a5c3d515b5bae696fe65583a4c41c0"
+  },
+  "initialLockTestBinary": {
+    "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "bytes": 53792064,
+    "sha256": "4ca680ace78133b5d5dfdaac5b13b70fc7c3a952e3ccec2ebad5f8659d5b9821",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    }
+  },
+  "diagnosticEditRevision": {
+    "interface": "Window::probe_edit(&self, FieldId, &str)->Result<()>",
+    "contract": "Hidden current View !busy, exact existing enabled NativeKind::Text and FieldKind::Text; rejects all non-Text types (including Password/ReadOnly/Choice/Multiline/TimeRange), NUL and UTF16 length beyond model limit. Releases View RefCell borrow before own SetWindowTextW synchronous EN_CHANGE. No form submission, foreground or globalinput.",
+    "reason": "Old native test fixture previously placed half-draft text via fullForm LOCK probe. Strict empty lock correctly refuses old payload; replacing it with empty without first native editing leaves fixture defaults, not user half-draft. New narrow setter emulates actual nonsecret typing before emptyLock. Product model/lock behavior unchanged.",
+    "newNativeTest": "Text field actual halfdate2026-1 is set via probe_edit, invalid types/unknown/NUL/oversize refused; password/recovery synthetic fields set separately, populated lockform refused, emptylock clearssecrets and leaves draft_nonsecret2026-1, busy/removed currentfield edits refused.",
+    "runtime": "NOT_EXECUTED_BY_THIS_AGENT; compile and strictClippy only; root will execute new3 native tests and fix four own fixture helpers."
+  },
+  "historicalActualNativeFixtureFailures": [
+    {
+      "path": "/tmp/fc-round15-windows-initial-application.json",
+      "bytes": 10971,
+      "sha256": "ad8c18758abf195fedee7395a36f2c57c2431bf199bd051a7c0f0a0478908cd2",
+      "actualStatus": "FAIL",
+      "executedMainSha256": "9958e487a36d35d07f548f9636f718caa39462fbdb0d9fbce34eb4b6bff2d5ae",
+      "actualApplicationExitCode": 1,
+      "actualFailureTail": [
+        "PROBE_EVENT tick=44997 action=17 page=隔离验证学校 · 工作台 pending=false generation=2",
+        "PROBE_EVENT tick=45015 action=107 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46001 action=108 page=取消课表修改 pending=false generation=2",
+        "PROBE_SUBMIT tick=46001 kind=schedule-load page=取消课表修改",
+        "PROBE_COMPLETE tick=46002 kind=schedule page=取消课表修改",
+        "PROBE_EVENT tick=46007 action=100 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46022 action=102 page=验证学期 · 单周表 pending=false generation=2",
+        "FutureClassroom: 原生课表命令拒绝：stage=58"
+      ],
+      "classification": "Strict empty lock probe refused old fullForm helper at schedule stage58; actual native application FAIL."
+    },
+    {
+      "path": "/tmp/fc-round15-windows-account-flow-recheck.json",
+      "bytes": 11475,
+      "sha256": "7a7281cf965200f4035d2b2f5a36255da03c8de9c24c0cf2c3ec781d3d12c3e0",
+      "actualStatus": "FAIL",
+      "executedMainSha256": "e4828870089691b7fa1712b725ae1905568dfe5a885d6935799510a679afdc4d",
+      "actualApplicationExitCode": 1,
+      "actualFailureTail": [
+        "PROBE_EVENT tick=45998 action=100 page=课表、作息与校历 pending=false generation=2",
+        "PROBE_EVENT tick=46012 action=102 page=验证学期 · 单周表 pending=false generation=2",
+        "PROBE_EVENT tick=46029 action=6 page=学期设置 · 验证学期 pending=false generation=2",
+        "PROBE_EVENT tick=47993 action=3 page=隔离验证学校 · 登录工作台 pending=false generation=3",
+        "PROBE_SUBMIT tick=47993 kind=request page=隔离验证学校 · 登录工作台",
+        "PROBE_COMPLETE tick=48999 kind=updated page=隔离验证学校 · 登录工作台",
+        "PROBE_EVENT tick=50004 action=17 page=隔离验证学校 · 工作台 pending=false generation=3",
+        "FutureClassroom: 锁定后未保留未完成日期草稿"
+      ],
+      "classification": "Helper changed to emptyLock without first writing partialdate to native control; followup lockrestore assertion failed. This is fixture setup failure, not evidence real productlostdraft; actual native application remains FAIL for that run."
+    }
+  ],
+  "updatedUtc": "2026-10-30T16:51:35.446274+00:00",
+  "rootTestAssertionCorrection": {
+    "classification": "REAL_NATIVE_PRODUCER_TEST_ASSERTION_DEFECT; FIX_BY_ROOT; NOT_PRODUCT_READ_BOUND_FAILURE",
+    "sourceAfterRootFix": {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 89353,
+      "sha256": "04f12d7936c14898efa753c74302632b6261cf6776cae0c9eb18d04d2fb13884"
+    },
+    "historicalActualRun": {
+      "path": "/tmp/fc-round15-windows-final-before-lock-secret-fixture-fix.json",
+      "bytes": 10704,
+      "sha256": "6c8e5f80ea1bc9774deb265a8c0f0e6740efa5303ec9cc03955c3556f0dd9ba0"
+    },
+    "actualStatus": "FAIL",
+    "actualCleanup": "PASS",
+    "actualMainSha256": "4a4c149f610585522df727387838de831fa2d782645f64531f12dd17605aa275",
+    "testExe": "fc_windows-95fad28d15fea78d.exe",
+    "testExeSha256": "3eb381b60dbe61fbf1f0fc408900147aab66d7c1a3e981ca84735ac36d539b65",
+    "actualSummary": "54passed1failed of55nativefc_windows tests; firstEXE stopsrunner; no aggregate512PASS claim",
+    "rawFailureTail": [
+      "test workbench::tests::isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes ... ok",
+      "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok",
+      "test workbench::tests::native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts ... ok",
+      "test workbench::tests::native_timetable_grid_and_combo_use_bounded_stable_selections ... ok",
+      "System.Management.Automation.RemoteException",
+      "thread 'workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields' (2496) panicked at crates/fc-windows/src/workbench.rs:1707:49:",
+      "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+      "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... FAILED",
+      "test workbench::tests::repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources ... ok",
+      "test workbench::tests::repeated_hidden_render_and_submit_do_not_accumulate_native_resources ... ok",
+      "",
+      "failures:",
+      "",
+      "failures:",
+      "    workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+      "",
+      "test result: FAILED. 54 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.21s",
+      ""
+    ],
+    "producerAcknowledgement": "Original author test deliberately wrote33characters into max32Text to prove Lock doesnotread/truncate. It incorrectly unwrapped bounded read_edit, which correctly returnedE_INVALIDARG. This was an author test mistake.",
+    "rootFix": "Require read_edit.is_err, then GetWindowTextLengthW(exacthiddennonsecretHWND)==33. EmptyLock event and secretclear assertions remain unchanged.",
+    "independentScopeCheck": {
+      "method": "Replace exactly the new6line comment/assert block with original singleassert and recomputeSHA256 of whole file",
+      "replacements": 1,
+      "reconstructedBeforeSha256": "200d90b3cc173b1e54476768412a6340061094baba3091cd49d5be5595eca53b",
+      "matchesPreviouslyFrozenSource": true,
+      "conclusion": "Rootchange is precisely this cfg(test) assertion block; no production method or lock/readbound was changed."
+    },
+    "runtimeAfterFix": "PENDING_ROOT_FINAL_FREEZE_REBUILD_AND_FULL_NATIVE_RERUN; notrunbythisagent"
+  },
+  "externalRootProbeEditReview": "Root has independently confirmed hidden/Text/busy/current native field boundaries; producer does not independently approve selfimplementation.",
+  "rootFinalSourceInputAggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "rootFinalBindingReview": "2026-10-31-round15-final-review.json"
+}

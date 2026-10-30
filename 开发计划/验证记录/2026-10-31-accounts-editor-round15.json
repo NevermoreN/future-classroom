@@ -1,0 +1,25 @@
+{
+  "scope": "accounts_editor",
+  "host_tests": "passed",
+  "windows_compile": "passed: cargo check -p fc-bootstrap --target i686-pc-windows-gnu --tests --locked",
+  "native_run": "not run by this agent",
+  "host_exit": 0,
+  "output": "\nrunning 9 tests\ntest accounts_editor::tests::empty_active_catalog_does_not_block_removing_retained_scope_or_returning ... ok\ntest accounts_editor::tests::disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed ... ok\ntest accounts_editor::tests::confirmation_holds_cas_backend_failure_allows_explicit_reentry ... ok\ntest accounts_editor::tests::suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page ... ok\ntest accounts_editor::tests::multiple_scopes_explicit_user_clear_and_dirty_discard_keep ... ok\ntest accounts_editor::tests::real_roles_owner_gate_and_stable_id_selection ... ok\ntest accounts_editor::tests::last_admin_teacher_scope_and_readonly_login_use_domain_preflight ... ok\ntest accounts_editor::tests::password_only_final_submit_never_retained_by_navigation_or_suspend ... ok\ntest accounts_editor::tests::full_capacity_pagination_and_long_unicode_labels_are_valid_views ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.88s\n\n",
+  "notes": [
+    "No credential material is stored in Editor or View.",
+    "The editor previews rules only; actual localGlobal lease/DB CAS remain mandatory.",
+    "4096-scope host model is UI/domain capacity evidence, not a claim about persistent aggregate codec capacity."
+  ],
+  "host_test_count": 9,
+  "strict_clippy": "editor clean; full invocation blocked by unused import in backend/account_management_tests.rs and old ROLE constant in application.rs; owners notified",
+  "source": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+  "source_sha256": "bba1468168171d0624c502b63e5391885c91bf9a2492405d49b83d6c23f71100",
+  "architecture": "passed: 12 crates / 33 edges",
+  "diff_check": "passed",
+  "temporary_harness_and_builds": "cleaned",
+  "completed_utc": "2026-10-30T16:23:04.316683+00:00",
+  "round15FinalSourceInputs": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "originalProducerReportSha256": "42d15d3c39110d28cd26c86fbe58f21503365ab51fa952c0d4e413492d65fc5d",
+  "finalFormattedSourceSha256": "9531485e934483b4a08a1343662d2715524dcb683d97dcbc0f8e3d2e298d1855",
+  "sourceAlignmentNote": "Root cargo fmt aligned Rust formatting after the producer host harness; final frozen Windows suite must execute all nine tests against the formatted current source. Producer historical SHA remains separately recorded."
+}

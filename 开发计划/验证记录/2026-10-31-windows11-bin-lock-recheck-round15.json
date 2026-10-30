@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 600,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [
+    {
+      "output": [
+        "",
+        "running 53 tests",
+        "test application::accounts_editor::tests::disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed ... ok",
+        "test application::accounts_editor::tests::confirmation_holds_cas_backend_failure_allows_explicit_reentry ... ok",
+        "test application::accounts_editor::tests::empty_active_catalog_does_not_block_removing_retained_scope_or_returning ... ok",
+        "test application::accounts_editor::tests::last_admin_teacher_scope_and_readonly_login_use_domain_preflight ... ok",
+        "test application::accounts_editor::tests::multiple_scopes_explicit_user_clear_and_dirty_discard_keep ... ok",
+        "test application::accounts_editor::tests::password_only_final_submit_never_retained_by_navigation_or_suspend ... ok",
+        "test application::accounts_editor::tests::real_roles_owner_gate_and_stable_id_selection ... ok",
+        "test application::accounts_editor::tests::suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page ... ok",
+        "test application::desktop_controller::tests::bounded_page_history_reverses_actual_variable_batch_starts_without_skip ... ok",
+        "test application::desktop_controller::tests::material_events_require_exact_published_generation_source_and_fixed_resource ... ok",
+        "test application::desktop_controller::tests::material_navigation_preserves_variable_homework_page_history ... ok",
+        "test application::desktop_controller::tests::normal_seconds_reuse_scene_but_boundary_date_and_rollback_require_recomposition ... ok",
+        "test application::desktop_controller::tests::recoverable_render_notice_is_reported_once_and_cleared_once_after_actual_success ... ok",
+        "test application::display_editor::schema_tests::every_display_page_is_a_bounded_native_schema ... ok",
+        "test application::display_editor::schema_tests::failed_transport_values_cannot_poison_native_view_schema ... ok",
+        "test application::display_editor::tests::back_from_components_applies_valid_fields_and_refuses_to_lose_invalid_text ... ok",
+        "test application::display_editor::tests::discard_requires_confirmation_and_keep_restores_component_partial_text ... ok",
+        "test application::display_editor::tests::incomplete_dates_malformed_toggles_and_overflow_sizes_never_partially_apply ... ok",
+        "test application::display_editor::tests::invalid_partial_main_survives_error_close_and_lock_capture ... ok",
+        "test application::display_editor::tests::save_captures_original_expected_cas_until_successful_saved_callback ... ok",
+        "test application::display_editor::tests::switching_components_applies_old_fields_atomically_and_keeps_ids_stable ... ok",
+        "test application::lesson_editor::tests::non_course_has_no_save_actions_and_cannot_submit_the_next_lesson ... ok",
+        "test application::lesson_editor::tests::submission_carries_original_lesson_and_revision_and_requires_explicit_unassigned_confirmation ... ok",
+        "test application::materials_editor::tests::copy_cleanup_requires_global_role_and_inspection_even_without_material_scopes ... ok",
+        "test application::materials_editor::tests::delete_confirmation_and_open_capture_fixed_selected_record_and_version ... ok",
+        "test application::materials_editor::tests::next_page_uses_exact_backend_cursor_and_refresh_resets_to_first_page ... ok",
+        "test application::materials_editor::tests::switching_folder_clears_selection_and_rejects_late_old_folder_results ... ok",
+        "test application::materials_editor::tests::teacher_scope_and_visible_classes_are_stable_choices_and_user_has_no_entry ... ok",
+        "test application::schedule_editor::tests::clearing_course_with_existing_room_and_note_removes_metadata_atomically ... ok",
+        "test application::schedule_editor::tests::date_parsing_rejects_untrusted_shapes_and_handles_previous_year_boundary ... ok",
+        "test application::schedule_editor::tests::every_editor_page_has_a_bounded_valid_native_schema ... ok",
+        "test application::schedule_editor::tests::failed_mapping_does_not_apply_mode_coverage_or_dirty_state ... ok",
+        "test application::schedule_editor::tests::incomplete_time_and_date_survive_capture_without_mutating_the_document ... ok",
+        "test application::schedule_editor::tests::invalid_metadata_does_not_poison_a_draft_and_can_be_corrected ... ok",
+        "test application::schedule_editor::tests::locking_unchanged_fields_or_list_pages_does_not_create_false_unsaved_drafts ... ok",
+        "test application::schedule_editor::tests::save_preserves_captured_revision_and_cancel_requires_explicit_confirmation ... ok",
+        "test application::schedule_editor::tests::subject_selection_filters_teachers_and_auto_selects_the_only_candidate ... ok",
+        "test application::schedule_editor::tests::unavailable_choices_remain_visible_for_repair_without_replacing_the_teacher ... ok",
+        "test application::schedule_editor::tests::unfinished_date_is_unsaved_and_saved_document_becomes_the_new_baseline ... ok",
+        "test application::tests::account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work ... ok",
+        "test application::tests::exit_guard_returns_only_the_current_owners_unapplied_display_draft ... ok",
+        "test application::accounts_editor::tests::full_capacity_pagination_and_long_unicode_labels_are_valid_views ... ok",
+        "test application::tests::publication_failure_is_fatal_but_conflict_and_wrong_password_are_recoverable ... ok",
+        "test application::tests::lost_initialization_result_refreshes_committed_state_instead_of_reopening_registration ... ok",
+        "test application::tests::shutdown_during_open_hands_backend_to_shutdown_worker_before_pool_stops ... ok",
+        "test application::web_editor::tests::all_teaching_scopes_are_paged_without_changing_the_captured_approval ... ok",
+        "test application::web_editor::tests::approval_captures_original_revision_and_refresh_never_rebinds_the_selection ... ok",
+        "test application::web_editor::tests::device_confirmation_keeps_exact_id_and_cannot_be_redirected_by_new_form_values ... ok",
+        "test application::tests::shutdown_keeps_writer_alive_until_audio_acknowledges_native_release ... ok",
+        "test application::web_editor::tests::only_the_original_local_global_manage_owner_can_use_the_editor ... ok",
+        "test application::web_editor::tests::pairing_code_is_not_in_view_and_consumption_expiry_and_leave_clear_sensitive_state ... ok",
+        "test application::web_editor::tests::unavailable_transport_has_no_false_enable_and_rejects_forged_positive_actions ... ok",
+        "test application::web_editor::tests::native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocations ... ok",
+        "",
+        "test result: ok. 53 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.72s",
+        ""
+      ],
+      "exitCode": 0,
+      "name": "fc_bootstrap-2c9facf31078f737.exe",
+      "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+      "timeoutSeconds": 600
+    }
+  ],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=2000 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "exitCode": 0,
+    "sessionId": 1
+  },
+  "status": "PASS",
+  "round15FinalSourceInputs": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "scopeNote": "Targeted single bin recheck after cfg(test) empty-LOCK helper alignment. 53 cases included in later final full suite; not additional final cases.",
+  "originalReportSha256": "7225fdb8d993bac96eaae5e7ebf5e6800294774f88fa47bb389e061b5ba73089",
+  "runnerStdout": "fc_bootstrap-2c9facf31078f737.exe PASS\nnative probe PASS; foreground/interaction evidence remains limited to counters\ncleanup: PASS\n",
+  "binding": {
+    "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "sha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "sourceAggregateSha256": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd"
+  },
+  "testMetadata": "{\"reason\": \"compiler-artifact\", \"package_id\": \"path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0\", \"manifest_path\": \"/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/Cargo.toml\", \"target\": {\"kind\": [\"bin\"], \"crate_types\": [\"bin\"], \"name\": \"fc-bootstrap\", \"src_path\": \"/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs\", \"edition\": \"2021\", \"doc\": true, \"doctest\": false, \"test\": true}, \"profile\": {\"opt_level\": \"0\", \"debuginfo\": 2, \"debug_assertions\": true, \"overflow_checks\": true, \"test\": true}, \"features\": [], \"filenames\": [\"/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe\"], \"executable\": \"/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe\", \"fresh\": false}\n"
+}

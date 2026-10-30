@@ -1,0 +1,302 @@
+{
+  "status": "PASS",
+  "method": "Reused unchanged frontend build from actual verified round14 development ZIP; no frontend source/dependencies changed and no frontend test rerun in round15",
+  "priorPackage": "/mnt/data/FutureClassroom-0.1.0-teacher-voice-dev.zip",
+  "priorPackageSha256": "b04befa946a4d4c323c42eebc22960afc25e472e079ba9fa543a40a033c3de91",
+  "verifiedUnchangedWebSourceFiles": [
+    {
+      "path": "web/.gitignore",
+      "sha256": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636"
+    },
+    {
+      "path": "web/README.md",
+      "sha256": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3"
+    },
+    {
+      "path": "web/SHADCN-LICENSE.md",
+      "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+    },
+    {
+      "path": "web/THIRD-PARTY-NOTICES.txt",
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7"
+    },
+    {
+      "path": "web/components.json",
+      "sha256": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d"
+    },
+    {
+      "path": "web/index.html",
+      "sha256": "2dca4d7418dad0e52c618b48d9024bd4313da9908a0c2f79bcbec7554d17903b"
+    },
+    {
+      "path": "web/package-lock.json",
+      "sha256": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0"
+    },
+    {
+      "path": "web/package.json",
+      "sha256": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f"
+    },
+    {
+      "path": "web/scripts/budget.mjs",
+      "sha256": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88"
+    },
+    {
+      "path": "web/scripts/licenses.mjs",
+      "sha256": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea"
+    },
+    {
+      "path": "web/src/App.tsx",
+      "sha256": "a433dcf70690c909cf280c469949ccccfcb4888eb77dbe472b6d2f4ea75870ad"
+    },
+    {
+      "path": "web/src/MaterialsPane.tsx",
+      "sha256": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c"
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "sha256": "1c7f5d81950d785c64356ba7c6eec3a9ef2a3af72e0be24d6ca80c7a16680981"
+    },
+    {
+      "path": "web/src/VoicePane.tsx",
+      "sha256": "cc6319381eac84aa2d5f6b04a117172dd36189d86cd8e712ea60b44d647c2aaa"
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b"
+    },
+    {
+      "path": "web/src/api/content-controller.ts",
+      "sha256": "30cf89809a4351ca01926fc741a6d200e4027b4682b4f90fbbb749fa851edce3"
+    },
+    {
+      "path": "web/src/api/content-protocol.ts",
+      "sha256": "77e1feb6a7a0571cd08918c68f6e9b17e7dcaab63ae2627f947d0d84e7ab0f43"
+    },
+    {
+      "path": "web/src/api/controller.ts",
+      "sha256": "1bbe3f304c0ce4fb59e850822b93224b446cb25472bdd228b0085d69bedccc07"
+    },
+    {
+      "path": "web/src/api/material-client.ts",
+      "sha256": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6"
+    },
+    {
+      "path": "web/src/api/material-controller.ts",
+      "sha256": "f18aa159726f334f228e7b29c8f23e9f71a4070be3df2aed13c07a1e322c859b"
+    },
+    {
+      "path": "web/src/api/material-protocol.ts",
+      "sha256": "3c10c3ae05828f29dd61bf427d0f06e8c44791127af98e807b92bcf3dacb0763"
+    },
+    {
+      "path": "web/src/api/protocol.ts",
+      "sha256": "1ade99d3f638312dceeaa70ae9afdd95412c2df76d384cd91bc6c48c16a27c52"
+    },
+    {
+      "path": "web/src/api/voice-client.ts",
+      "sha256": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda"
+    },
+    {
+      "path": "web/src/api/voice-controller.ts",
+      "sha256": "d2768bb06da8430d0da04ff9b8ee6dae16c2d94c79fcb659fee74edc091907a6"
+    },
+    {
+      "path": "web/src/api/voice-protocol.ts",
+      "sha256": "ed5d80450a7d979d26182e3cf24248b9ff8d0f04bff4bd4c67d2a25931023d07"
+    },
+    {
+      "path": "web/src/components/ui/button.tsx",
+      "sha256": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84"
+    },
+    {
+      "path": "web/src/components/ui/card.tsx",
+      "sha256": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8"
+    },
+    {
+      "path": "web/src/components/ui/input.tsx",
+      "sha256": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441"
+    },
+    {
+      "path": "web/src/favicon.svg",
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+    },
+    {
+      "path": "web/src/lib/utils.ts",
+      "sha256": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6"
+    },
+    {
+      "path": "web/src/main.tsx",
+      "sha256": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02"
+    },
+    {
+      "path": "web/src/styles.css",
+      "sha256": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6"
+    },
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+    },
+    {
+      "path": "web/tests/client.test.ts",
+      "sha256": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c"
+    },
+    {
+      "path": "web/tests/content-client.test.ts",
+      "sha256": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01"
+    },
+    {
+      "path": "web/tests/content-controller.test.ts",
+      "sha256": "3c794b0a63a6fe57ee0f2c6b2dcfdfc31b7a3146abf9b5a48530b206de17220b"
+    },
+    {
+      "path": "web/tests/content-fixtures.ts",
+      "sha256": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471"
+    },
+    {
+      "path": "web/tests/content-protocol.test.ts",
+      "sha256": "3949f7e77450c030476ecadda3d0e0530a01ad261b6ce8bf665d3032df9d1762"
+    },
+    {
+      "path": "web/tests/controller.test.ts",
+      "sha256": "2d2b98d8592466946f969ac7a539bf089e20298fe5235d2ac5c58bb537e52fd7"
+    },
+    {
+      "path": "web/tests/material-client.test.ts",
+      "sha256": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9"
+    },
+    {
+      "path": "web/tests/material-controller.test.ts",
+      "sha256": "c55dd735babf4495268cbdbfe81cd9cf11cf6ce7f843a08dad6b18dfa400a73c"
+    },
+    {
+      "path": "web/tests/material-protocol.test.ts",
+      "sha256": "1bdb6d418b1aeb75cdc5f19dc3a1a4e684d7c082bd97830f3859815bf061b481"
+    },
+    {
+      "path": "web/tests/material-unicode.test.ts",
+      "sha256": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0"
+    },
+    {
+      "path": "web/tests/protocol.test.ts",
+      "sha256": "3e63ed627b9d392157ebd99cfd08ea0a29b6e91bbda727107a380dfa9e375c70"
+    },
+    {
+      "path": "web/tests/voice-client.test.ts",
+      "sha256": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52"
+    },
+    {
+      "path": "web/tests/voice-controller.test.ts",
+      "sha256": "000b37672ac1d3818e9e7f2147addb3be45006841c7bd0801176fb56ab59343c"
+    },
+    {
+      "path": "web/tests/voice-fixtures.ts",
+      "sha256": "a5dedd9a242a8b7af219a69dd3977e4345dca50044f977643c1a78a93962d683"
+    },
+    {
+      "path": "web/tests/voice-protocol.test.ts",
+      "sha256": "5366eff7220eb6648d43ebea003d903f881dd08257bac51996e97e1e6c37c792"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+    },
+    {
+      "path": "web/tsconfig.json",
+      "sha256": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508"
+    },
+    {
+      "path": "web/vite.config.ts",
+      "sha256": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff"
+    }
+  ],
+  "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+  "manifest": {
+    "schemaVersion": 1,
+    "apiVersion": 1,
+    "uiCompatibilityVersion": 1,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-Cr8Ck6mT.js",
+        "sizeBytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sizeBytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/pcm-worklet-DQjgdlBf.js",
+        "sizeBytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+      }
+    ]
+  },
+  "assetCount": 6,
+  "assetBytes": 444723,
+  "priorTests": {
+    "unit": 208,
+    "unitFiles": 18,
+    "UIBrowserSynthetic": 31,
+    "actualHardwareMicrophone": "NOT_RUN",
+    "productionTLS": "NOT_RUN"
+  },
+  "output": "/tmp/fc-round15-reused-web",
+  "round15FinalSourceInputs": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "originalProducerReportSha256": "9862c3aede4432176f23b74edf9969a8fdf8f9ebea32ff60cef9c3543c494c6b"
+}

@@ -1,6 +1,8 @@
 //! Synchronous product business service. Invoke only on the shared bounded worker
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
+#[cfg(test)]
+mod account_management_tests;
 mod content_web;
 mod materials_web;
 mod voice;
@@ -909,6 +911,18 @@ impl Backend {
             }
         }
         Ok(lease)
+    }
+    /// Authenticated account-management read. The global/local role is checked
+    /// against fresh durable identity, never inferred from the UI's cached list.
+    pub fn management_identity(&self, lease: SessionLease) -> Result<IdentityState> {
+        let state = self.state()?;
+        let (actor, _) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        state
+            .authorize_management(&actor, self.clock.now())
+            .map_err(|error| BackendError::Identity(IdentityRepositoryError::Domain(error)))?;
+        self.actor(&state, lease, SessionPurpose::Manage)?;
+        self.check_open()?;
+        Ok(state)
     }
     pub fn identity(
         &mut self,

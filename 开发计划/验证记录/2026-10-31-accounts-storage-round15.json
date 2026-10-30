@@ -1,0 +1,222 @@
+{
+  "round": 15,
+  "scope": "Account management durable backend/store and exact-session invalidation integration",
+  "recordedAt": "2026-10-30T16:28:29.291174+00:00",
+  "repository": "/workspace/共享/Eliora/未来教室计划",
+  "baseHead": "af580801b6d91ff693b3706d2c851705f406d597",
+  "status": "PASS for scoped host verification; Windows execution and whole-round validation delegated to root",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 98203,
+      "sha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+      "bytes": 38475,
+      "sha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 37151,
+      "sha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084"
+    }
+  ],
+  "rawLogs": [
+    {
+      "path": "/tmp/fc-round15-accounts-tests.log",
+      "sha256": "04d8506b4a40b6744177779dad077bbd6649968af7d3043a0fb3c69788d10922",
+      "text": "    Blocking waiting for file lock on build directory\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 43.38s\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 5 tests\ntest backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... ok\ntest backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... ok\ntest backend::account_management_tests::accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation ... ok\ntest backend::account_management_tests::accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records ... ok\ntest backend::account_management_tests::accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 45.08s\n\n"
+    },
+    {
+      "path": "/tmp/fc-round15-accounts-references.log",
+      "sha256": "73a8fb7bfd6eb29160998a0b6db32fb85821c73960ae6f8cc02c6eca4d5a2224",
+      "text": "   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 1 test\ntest backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 57 filtered out; finished in 2.60s\n\n"
+    },
+    {
+      "path": "/tmp/fc-round15-accounts-checks.log",
+      "sha256": "cc7cbd59fe06eb151c3822e73d7264adf3112f135848817927fb9f93f163166e",
+      "text": "{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-bootstrap\", \"--lib\", \"--tests\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.81s\n{\"exitCode\": 0}\n{\"command\": [\"cargo\", \"clippy\", \"-p\", \"fc-storage\", \"--lib\", \"--locked\", \"--\", \"-D\", \"warnings\"]}\n    Checking digest v0.10.7\n    Checking memchr v2.8.3\n    Checking sha2 v0.10.9\n    Checking serde_json v1.0.145\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.30s\n{\"exitCode\": 0}\n{\"command\": [\"python3\", \"scripts/check-architecture.py\"]}\nArchitecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n{\"exitCode\": 0}\n{\"command\": [\"git\", \"diff\", \"--check\", \"--\", \"crates/fc-bootstrap/src/backend.rs\", \"crates/fc-bootstrap/src/backend/account_management_tests.rs\", \"crates/fc-storage/src/business/mod.rs\"]}\n{\"exitCode\": 0}\n"
+    }
+  ],
+  "verification": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-bootstrap",
+        "--lib",
+        "account_management_tests",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "profile": "test unoptimized + debuginfo, target/debug",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0,
+      "runSeconds": 45.08,
+      "log": "/tmp/fc-round15-accounts-tests.log",
+      "sourceBinding": "Main run preceded the final implicit-default subcase addition; all five test functions passed. Final subcase compiled and executed separately below; final source also strict-Clippy checked."
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-bootstrap",
+        "--lib",
+        "accounts_active_default_and_retained_history_references_reject_atomically_without_revoking",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "profile": "test unoptimized + debuginfo, target/debug",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "runSeconds": 2.6,
+      "log": "/tmp/fc-round15-accounts-references.log",
+      "sourceBinding": "Final account_management_tests.rs including explicit/default/implicit-default/retained-history cases."
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-bootstrap",
+        "--lib",
+        "--tests",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "profile": "dev unoptimized + debuginfo",
+      "exitCode": 0,
+      "log": "/tmp/fc-round15-accounts-checks.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-storage",
+        "--lib",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "profile": "dev unoptimized + debuginfo",
+      "exitCode": 0,
+      "log": "/tmp/fc-round15-accounts-checks.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "result": "12 crates, 33 first-party edges; D11 boundaries hold",
+      "log": "/tmp/fc-round15-accounts-checks.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-bootstrap/src/backend.rs",
+        "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "crates/fc-storage/src/business/mod.rs"
+      ],
+      "exitCode": 0,
+      "log": "/tmp/fc-round15-accounts-checks.log"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/backend.rs",
+        "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "crates/fc-storage/src/business/mod.rs"
+      ],
+      "exitCode": 0,
+      "evidence": "Tool output captured in this agent session; no separate raw file, successful check produced no output."
+    }
+  ],
+  "coverage": [
+    "Actual Backend and sole SQLite writer create/update multi-AssignmentScope, captured identity CAS for create and update, immutable login name, persistent reopen and protected credential version decoding.",
+    "management_identity performs fresh durable local Global role authorization; Teacher local, Global Web, Teacher Web and disabled exact leases denied. User management read denied.",
+    "Last administrator cannot be demoted; failed mutation retains identity/global revision and live authorization. Successful self rename and self demotion revoke previous local and Web leases.",
+    "Scope/role/disabled changes invalidate Web cookie/exact lease, material lease checkpoint, real voice execution guard and material open guard. Other-account admin lease stays valid.",
+    "Explicit teacher, explicit default teacher, implicit unique teacher becoming ambiguous, and retained dual-history references reject identity updates atomically with InvalidScope; state, global revision, schedule and prior Web sessions persist unchanged across reopen.",
+    "3968 unique assignment scopes satisfy domain transition but exceed real identity/receipt 64KiB persistence budget. Store returns Domain(Capacity), preserving state/global revision/epoch/healthy authority/live sessions; small valid retry succeeds and revokes target sessions."
+  ],
+  "productionChanges": [
+    "Backend::management_identity authenticated durable account-management read.",
+    "IdentityTask checks independently encoded identity and receipt against existing MAX_VALUE_BYTES before mutation/authority publication. DocumentTooLarge maps to IdentityError::Capacity."
+  ],
+  "audit": {
+    "permissionBypassFound": false,
+    "reviewed": [
+      "IdentityCommand::UpdateAccount epoch and assignments",
+      "schedule::check_identity_change active/default/inactive/history references",
+      "Backend::apply ledger/control revocation",
+      "WebService sweep and exact lease authentication",
+      "voice and material execution authorization guards"
+    ],
+    "confirmedDefectFixed": "Domain-valid oversized identity was previously surfaced as Unavailable via generic InvalidCommand; explicit precommit value bounds now produce Capacity."
+  },
+  "historicalFailure": {
+    "status": "Retained as summary; original failed command console remains in agent conversation but no complete separate raw log was saved. Not claimed as raw evidence.",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-bootstrap",
+      "--lib",
+      "account_management_tests",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "profile": "test unoptimized + debuginfo",
+    "passed": 4,
+    "failed": 1,
+    "runSeconds": 36.17,
+    "failedTest": "accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically",
+    "observed": "Identity(Unavailable)",
+    "expected": "Identity(Domain(Capacity))",
+    "resolution": "Added explicit precommit individual identity/receipt value checks and precise error mapping; scoped 5-test rerun passed."
+  },
+  "fixtureClassification": {
+    "database": "real SQLite, same BusinessRepository and unique writer as product",
+    "credentialCodec": "real HMAC protected record encoder/decoder with principal and credential/recovery version binding",
+    "passwordKdf": "One successful production PBKDF2 create_account_at. Remaining setup uses explicitly synthetic password records and trusted test-issued leases; no claim of password login authentication.",
+    "hostKeyProtection": "FakeKeyProtector fixture transport only, not encryption or DPAPI.",
+    "windowsKeyProtection": "cfg(windows) code uses real CurrentUserDpapi to protect and reopen test codec key. This host report has not run that branch."
+  },
+  "limitations": [
+    "Identity and identity receipt remain independent single BLOB values capped at64KiB; domain ceilings 512 accounts/4096 assignments do not imply those maxima can all be persisted. No schema sharding or truncation introduced.",
+    "Windows DPAPI execution, Win7/10/11 runtime, native accounts UI, and full-workspace finals remain root verification tasks.",
+    "Conservative scheduled explicit/default/history reference rejection remains unchanged."
+  ],
+  "cleanup": {
+    "temporaryFixturePrefix": "FutureClassroom-Accounts-R15-",
+    "remaining": [],
+    "method": "RAII Backend.close plus remove_dir_all for private per-test directory; successful enumeration found none.",
+    "buildCache": "Retained shared target per root instruction; no new target directory.",
+    "windowsAuthorization": "SSH service and keys untouched."
+  },
+  "synchronization": "No commit or push performed by child; root owns final whole-round synchronization.",
+  "round15FinalSourceInputs": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+  "originalProducerReportSha256": "ffc5dbc01fb574132e98f244f555d3b059a5fb957ef4d89845af54e2e25f4be3"
+}

@@ -300,6 +300,7 @@ fn native_form(app: &App) -> FormData {
     data
 }
 fn native_action(app: &mut App, action: ActionId, data: FormData) {
+    let data = super::super::prepare_probe_form(app, action, data).unwrap();
     app.window.probe_submit(action, data).unwrap();
     native_events(app);
     super::super::tests::wait_for(app, |app| app.pending.is_none());

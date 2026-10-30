@@ -219,6 +219,7 @@ struct State {
     scroll: Cell<i32>,
     presented_secrets: RefCell<Vec<FieldId>>,
     grid_cell: Cell<Option<(usize, usize)>>,
+    lock_action: Cell<Option<ActionId>>,
 }
 impl State {
     fn new() -> Self {
@@ -235,6 +236,7 @@ impl State {
             scroll: Cell::new(0),
             presented_secrets: RefCell::new(Vec::new()),
             grid_cell: Cell::new(None),
+            lock_action: Cell::new(None),
         }
     }
     fn fail(&self, error: Error) {
@@ -285,6 +287,9 @@ impl State {
         }
     }
     fn submit(&self, action: ActionBinding) -> Result<()> {
+        if !self.action_allowed(action.id)? {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
         if self.capturing.replace(true) {
             return Err(Error::from_hresult(E_UNEXPECTED));
         }
@@ -302,6 +307,12 @@ impl State {
             }
         }
         let _clear = Clear(self);
+        if self.lock_action.get() == Some(action.id) {
+            // Lock supersedes queued forms, including their zeroizing secrets.
+            // Never read the native fields or carry their values into this event.
+            self.discard_forms();
+            return self.queue_submit(action.id, FormData::new());
+        }
         let fields = self
             .controls
             .try_borrow()
@@ -316,6 +327,19 @@ impl State {
                     .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
             }
         }
+        self.queue_submit(action.id, form)
+    }
+    fn action_allowed(&self, id: ActionId) -> Result<bool> {
+        let view = self
+            .view
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        Ok(view.as_ref().is_some_and(|view| {
+            (!view.busy || self.lock_action.get() == Some(id))
+                && view.actions.iter().any(|a| a.id == id && a.enabled)
+        }))
+    }
+    fn queue_submit(&self, id: ActionId, form: FormData) -> Result<()> {
         let bytes = form
             .allocation_bytes()
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
@@ -331,7 +355,7 @@ impl State {
         if events.len() >= MAX_SUBMITS || next > MAX_EVENT_BYTES {
             return Err(Error::from_hresult(E_OUTOFMEMORY));
         }
-        events.push_back(Event::Submit(action.id, form));
+        events.push_back(Event::Submit(id, form));
         self.event_bytes.set(next);
         Ok(())
     }
@@ -452,6 +476,40 @@ pub struct Window {
     _thread: PhantomData<Rc<()>>,
 }
 impl Window {
+    /// Register this composition's sole lock action. Registration is optional
+    /// and immutable; only an enabled action present in the current View may
+    /// bypass busy. Lock emits empty FormData and clears secret native controls.
+    pub fn set_lock_action(&self, id: ActionId) -> Result<()> {
+        if id.0 == 0 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        if self.state.lock_action.get().is_some_and(|old| old != id) {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let view = self
+            .state
+            .view
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        let controls = self
+            .state
+            .controls
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        self.state.lock_action.set(Some(id));
+        if let Some(view) = view.as_ref() {
+            for action in &controls.actions {
+                let enabled = view.actions.iter().any(|a| a.id == action.id && a.enabled)
+                    && (!view.busy || action.id == id);
+                // SAFETY: current controls are owned by this window/UI thread;
+                // EnableWindow changes no focus and does not read form contents.
+                unsafe {
+                    let _ = EnableWindow(action.hwnd, enabled);
+                }
+            }
+        }
+        Ok(())
+    }
     /// Initially hidden. Construction and hidden tests never change foreground.
     pub fn new() -> Result<Self> {
         let class = ClassLease::acquire()?;
@@ -564,7 +622,11 @@ impl Window {
             }
             for (binding, action) in actions.iter().zip(&view.actions) {
                 SetWindowTextW(binding.hwnd, &HSTRING::from(action.label.as_str()))?;
-                let _ = EnableWindow(binding.hwnd, action.enabled && !view.busy);
+                let _ = EnableWindow(
+                    binding.hwnd,
+                    action.enabled
+                        && (!view.busy || self.state.lock_action.get() == Some(action.id)),
+                );
             }
         }
         if let Some(grid) = &view.grid {
@@ -872,7 +934,8 @@ impl Window {
             .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
             .clone()
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-        if view.busy
+        let lock = self.state.lock_action.get() == Some(id);
+        if (view.busy && !lock)
             || !view
                 .actions
                 .iter()
@@ -896,6 +959,42 @@ impl Window {
                     .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
             )
         };
+        if lock {
+            if !form.is_empty() {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            // SAFETY: this binding comes from this window's current owned controls.
+            if !unsafe { IsWindowEnabled(action.hwnd) }.as_bool() {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            // SAFETY: exact current owned button notification, with no global
+            // input/focus change. Normal WndProc performs the same lock checks.
+            unsafe {
+                let _ = SendMessageW(
+                    self.hwnd,
+                    WM_COMMAND,
+                    Some(WPARAM(
+                        usize::from(action.native_id) | ((BN_CLICKED as usize) << 16),
+                    )),
+                    Some(LPARAM(action.hwnd.0 as isize)),
+                );
+            }
+            let events = self
+                .state
+                .events
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+            if self.state.error.get() != 0
+                || events.len() != 1
+                || !events.front().is_some_and(|event| {
+                    matches!(event,
+                    Event::Submit(action_id, data) if *action_id == id && data.is_empty())
+                })
+            {
+                return Err(Error::from_hresult(E_UNEXPECTED));
+            }
+            return Ok(());
+        }
         // Validate the entire supplied form before modifying even one native
         // control. Every editable field is required; readonly/unknown IDs remain
         // in FormData and are rejected, including fields with empty values.
@@ -1060,6 +1159,55 @@ impl Window {
                     (x as u16 as usize | ((y as u16 as usize) << 16)) as isize,
                 )),
             );
+        }
+        Ok(())
+    }
+    /// Hidden diagnostic edit of an existing non-secret Text field. Incomplete
+    /// drafts are allowed, as for actual typing; model validation is unchanged.
+    /// Does not submit a form, reveal a password or synthesize global input.
+    pub fn probe_edit(&self, id: FieldId, value: &str) -> Result<()> {
+        if self.is_visible() || self.state.suppress.get() || self.state.capturing.get() {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let current = self
+            .state
+            .view
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+        let view = current
+            .as_ref()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if view.busy {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let model = view
+            .fields
+            .iter()
+            .find(|f| f.id == id && f.kind == FieldKind::Text)
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        if value.contains('\0') || value.encode_utf16().count() > model.max_utf16 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let field = self
+            .state
+            .controls
+            .try_borrow()
+            .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+            .fields
+            .iter()
+            .find(|f| f.id == id && f.kind == NativeKind::Text)
+            .copied()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        // Release the immutable View borrow before the synchronous native edit
+        // can dispatch EN_CHANGE back through our normal window procedure.
+        drop(current);
+        // SAFETY: exact current owned Text Edit HWND on this UI thread; bounded
+        // non-secret text only, with no focus/global keyboard or mouse change.
+        unsafe {
+            if !IsWindowEnabled(field.hwnd).as_bool() {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            SetWindowTextW(field.hwnd, &HSTRING::from(value))?;
         }
         Ok(())
     }
@@ -1373,7 +1521,9 @@ unsafe extern "system" fn window_proc(
                             state.input.set(true);
                         }
                         if let Some(action) = action {
-                            if notification == BN_CLICKED && IsWindowEnabled(action.hwnd).as_bool()
+                            if notification == BN_CLICKED
+                                && IsWindowEnabled(action.hwnd).as_bool()
+                                && state.action_allowed(action.id).unwrap_or(false)
                             {
                                 state.input.set(true);
                                 if let Err(error) = state.submit(action) {
@@ -1485,6 +1635,176 @@ mod tests {
                 Some(LPARAM(button.hwnd.0 as isize)),
             );
         }
+    }
+    fn notify(window: &Window, button: ActionBinding) {
+        // SAFETY: direct notification to this test's hidden owned window only.
+        unsafe {
+            let _ = SendMessageW(
+                window.hwnd,
+                WM_COMMAND,
+                Some(WPARAM(
+                    usize::from(button.native_id) | ((BN_CLICKED as usize) << 16),
+                )),
+                Some(LPARAM(button.hwnd.0 as isize)),
+            );
+        }
+    }
+    fn lock_view() -> View {
+        let mut view = view();
+        view.actions.push(Action {
+            id: ActionId(2),
+            label: "锁定".into(),
+            enabled: true,
+        });
+        view
+    }
+    #[test]
+    fn registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields(
+    ) {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        // SAFETY: observes foreground only; all windows below remain hidden.
+        let foreground = unsafe { GetForegroundWindow() };
+        let window = Window::new().unwrap();
+        assert!(window.set_lock_action(ActionId(0)).is_err());
+        window.set_lock_action(ActionId(2)).unwrap();
+        window.set_lock_action(ActionId(2)).unwrap();
+        assert!(window.set_lock_action(ActionId(3)).is_err());
+        let mut view = lock_view();
+        window.render(&view).unwrap();
+        // Lock must supersede even a full queue of old secret-bearing forms.
+        for _ in 0..MAX_SUBMITS {
+            set(field(&window, 2), "SyntheticQueuedPassword");
+            click(&window);
+        }
+        view.busy = true;
+        window.render(&view).unwrap();
+        set(field(&window, 1), &"x".repeat(33)); // invalid if any form read occurs
+        set(field(&window, 2), "SyntheticBusyPassword");
+        window
+            .present_secret(FieldId(4), "SyntheticRecovery")
+            .unwrap();
+        assert!(window.probe_submit(ActionId(1), FormData::new()).is_err());
+        let mut supplied = FormData::new();
+        supplied
+            .insert(FieldId(2), "MustNotEnterLockEvent".into())
+            .unwrap();
+        assert!(window.probe_submit(ActionId(2), supplied).is_err());
+        window.probe_submit(ActionId(2), FormData::new()).unwrap();
+        let mut submits = window
+            .take_events()
+            .unwrap()
+            .into_iter()
+            .filter_map(|e| match e {
+                Event::Submit(id, data) => Some((id, data)),
+                _ => None,
+            });
+        let (id, data) = submits.next().unwrap();
+        assert_eq!(id, ActionId(2));
+        assert!(data.is_empty());
+        assert!(submits.next().is_none());
+        assert_eq!(read_edit(field(&window, 2)).unwrap(), "");
+        assert_eq!(read_edit(field(&window, 4)).unwrap(), "");
+        // This field deliberately exceeds its configured bound. The ordinary
+        // bounded reader must still reject it after Lock; observe only its
+        // native length to prove Lock did not read or truncate the text.
+        assert!(read_edit(field(&window, 1)).is_err());
+        // SAFETY: read only the length of this hidden fixture's nonsecret Edit.
+        assert_eq!(unsafe { GetWindowTextLengthW(field(&window, 1).hwnd) }, 33);
+        assert!(!window.is_visible());
+        // SAFETY: no mutation of the observed process foreground.
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
+    }
+    #[test]
+    fn lock_requires_registration_enabled_current_view_and_exact_native_binding() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let window = Window::new().unwrap();
+        let mut view = lock_view();
+        view.busy = true;
+        window.render(&view).unwrap();
+        let lock = window.state.controls.borrow().actions[1];
+        assert!(window.probe_submit(ActionId(2), FormData::new()).is_err());
+        notify(&window, lock);
+        assert!(window.take_events().unwrap().is_empty());
+        // Registration after a render enables only this exact current button.
+        window.set_lock_action(ActionId(2)).unwrap();
+        set(field(&window, 2), "SyntheticNativeLock");
+        notify(&window, lock);
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::Submit(ActionId(2), data) if data.is_empty())));
+        assert_eq!(read_edit(field(&window, 2)).unwrap(), "");
+        assert!(window.probe_submit(ActionId(99), FormData::new()).is_err());
+        view.actions[1].enabled = false;
+        window.render(&view).unwrap();
+        assert!(window.probe_submit(ActionId(2), FormData::new()).is_err());
+        notify(&window, lock);
+        assert!(window.take_events().unwrap().is_empty());
+        view.actions.pop();
+        window.render(&view).unwrap();
+        assert!(window.probe_submit(ActionId(2), FormData::new()).is_err());
+        notify(&window, lock); // old destroyed button is not in the current binding table
+        assert!(window.take_events().unwrap().is_empty());
+        set(field(&window, 2), "SyntheticBusyClose");
+        // SAFETY: close only this hidden owned window, without quitting the UI thread.
+        unsafe {
+            let _ = SendMessageW(window.hwnd, WM_CLOSE, None, None);
+        }
+        assert_eq!(read_edit(field(&window, 2)).unwrap(), "");
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::Close)));
+    }
+    #[test]
+    fn hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields()
+    {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let window = Window::new().unwrap();
+        window.set_lock_action(ActionId(2)).unwrap();
+        let mut view = lock_view();
+        window.render(&view).unwrap();
+        window.probe_edit(FieldId(1), "2026-1").unwrap();
+        assert!(window.probe_edit(FieldId(2), "ForbiddenPassword").is_err());
+        assert!(window.probe_edit(FieldId(3), "ForbiddenMultiline").is_err());
+        assert!(window.probe_edit(FieldId(4), "ForbiddenReadonly").is_err());
+        assert!(window.probe_edit(FieldId(99), "Unknown").is_err());
+        assert!(window.probe_edit(FieldId(1), "bad\0text").is_err());
+        assert!(window.probe_edit(FieldId(1), &"x".repeat(33)).is_err());
+        set(field(&window, 2), "SyntheticPasswordNotCopiedByLock");
+        window
+            .present_secret(FieldId(4), "SyntheticOneTimeRecovery")
+            .unwrap();
+        let mut old_style = FormData::new();
+        old_style
+            .insert(FieldId(1), "MustNotBeLockPayload".into())
+            .unwrap();
+        assert!(window.probe_submit(ActionId(2), old_style).is_err());
+        window.probe_submit(ActionId(2), FormData::new()).unwrap();
+        let draft = window.draft_nonsecret().unwrap();
+        assert_eq!(draft.get(FieldId(1)), Some("2026-1"));
+        assert!(draft.get(FieldId(2)).is_none());
+        assert_eq!(read_edit(field(&window, 2)).unwrap(), "");
+        assert_eq!(read_edit(field(&window, 4)).unwrap(), "");
+        assert!(window
+            .take_events()
+            .unwrap()
+            .iter()
+            .any(|e| matches!(e, Event::Submit(ActionId(2), data) if data.is_empty())));
+        view.busy = true;
+        window.render(&view).unwrap();
+        assert!(window.probe_edit(FieldId(1), "busy").is_err());
+        assert_eq!(
+            window.draft_nonsecret().unwrap().get(FieldId(1)),
+            Some("2026-1")
+        );
+        view.busy = false;
+        view.fields.remove(0);
+        window.render(&view).unwrap();
+        assert!(window.probe_edit(FieldId(1), "RemovedViewField").is_err());
+        assert!(!window.is_visible());
     }
     #[test]
     fn hidden_native_form_preserves_drafts_masks_and_consumes_password_without_activation() {

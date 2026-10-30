@@ -1,0 +1,4038 @@
+{
+  "schemaVersion": 1,
+  "round": 15,
+  "createdUtc": "2026-10-30T17:01:11.993942+00:00",
+  "kind": "FINAL_SOURCE_ARTIFACT_EVIDENCE_BINDING_PLUS_OTHER_OWNER_FIXTURE_STATIC_REVIEW",
+  "status": "PASS",
+  "method": "Read current source SHA256, external raw result logs/JSON, Cargo compiler metadata and actual compiled bytes, ZIP CRC/SHA. No build/test/remote operation or cleanup. This read-only binding work does not make this producer an independent security auditor of its own Windows lock/setter implementation.",
+  "checks": [
+    {
+      "check": "250 frozen current source hashes exact",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "source aggregate finalf82ea02d",
+      "pass": true,
+      "raw": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd"
+    },
+    {
+      "check": "Host started vs final only4 Windows cfg paths changed",
+      "pass": true,
+      "raw": [
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/application/accounts_probe.rs",
+        "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+        "crates/fc-windows/src/workbench.rs"
+      ]
+    },
+    {
+      "check": "all4 Windows cfg sources absent from92 actual Host depinfos",
+      "pass": true,
+      "raw": {
+        "crates/fc-bootstrap/src/application.rs": [],
+        "crates/fc-bootstrap/src/application/accounts_probe.rs": [],
+        "crates/fc-windows/src/workbench.rs": [],
+        "crates/fc-bootstrap/src/application/web_editor/tests.rs": []
+      }
+    },
+    {
+      "check": "Host actual407/28 no failures/skips/filter",
+      "pass": true,
+      "raw": [
+        [
+          "25",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "22",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "58",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "43",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "3",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "6",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "62",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "35",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "6",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "24",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "29",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "26",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "17",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "43",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "check": "Host raw matches archivedstdout and final-source explanation",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "16 final compiled test artifacts and metadata",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_windows-95fad28d15fea78d.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_storage-9549596680176a3f.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_bootstrap-153172ad9c1ad7f3.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_materials-2221de66f2e97130.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_security-9c7f88663f75f873.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata runtime_storage-d7df388ce9405226.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata business_storage-17bf377bec8f2f7e.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata voice_storage-bf022395eae863de.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_protocol-186900fcb7bfa5db.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_presentation-bf0074726aa5b441.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_audio-35e3156477d0188a.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_application-8ad1e6c8c699ab50.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_runtime-fad3e5e278e2d80c.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_ports-361bddc8b2876cc0.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_domain-915566e140287178.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "compiled test bytes/profile/metadata fc_bootstrap-2c9facf31078f737.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "modern release8123502/SHA0159",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "Win7GNU8241664/SHA0b178",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "historical4thtargeted actualnativePASS bound previous4a4c; not current0159",
+      "pass": true,
+      "raw": [
+        "PROBE_EVENT tick=102036 action=12 page=隔离验证学校 · 工作台 pending=false generation=4",
+        "PROBE_EVENT tick=103022 action=20 page=退出前处理未保存草稿 pending=false generation=4",
+        "PROBE_SUBMIT tick=103022 kind=request page=退出前处理未保存草稿",
+        "PROBE_COMPLETE tick=103023 kind=other page=退出前处理未保存草稿",
+        "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+      ]
+    },
+    {
+      "check": "reference fixture source uses production SaveSchedule and requires actual explicit result",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "prior verified round14 ZIP hash exact",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "all61 Web source paths unchanged from reuse record",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "61 Web hashes also match round14 frozen actual source",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "new ZIP13 unique members12 payload entries+manifest CRCgood",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA fc-bootstrap.exe",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA LICENSE",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA PROBE-README.txt",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA THIRD-PARTY-NOTICES.txt",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/THIRD-PARTY-NOTICES.txt",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/assets/favicon-CXuYoSfB.svg",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/assets/index-Cr8Ck6mT.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/assets/index-DFFVdc8-.css",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/assets/pcm-worklet-DQjgdlBf.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/assets/wav-worker-LSywWbpJ.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/fc-assets.json",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA web/index.html",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP member CRC/SHA manifest.json",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "ZIP main matches final modern actual bytes",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "6 reusedstaticassets444723 and manifest hash",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest assets/favicon-CXuYoSfB.svg",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest assets/index-Cr8Ck6mT.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest assets/index-DFFVdc8-.css",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest assets/pcm-worklet-DQjgdlBf.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest assets/wav-worker-LSywWbpJ.js",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "reused member exact prior ZIP/current ZIP/original manifest index.html",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "development ZIP package log SHA exact",
+      "pass": true,
+      "raw": {
+        "path": "/mnt/data/FutureClassroom-0.1.0-accounts-dev.zip",
+        "bytes": 4033635,
+        "sha256": "eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1"
+      }
+    },
+    {
+      "check": "352d to f82e only1 cfgtest Web helper alignment source changed",
+      "pass": true,
+      "raw": [
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+          "sha256": "f4460eaadf51119fe09b4f42b30e72db174e4226a3f3d11952b82ffc798a30d6"
+        }
+      ]
+    },
+    {
+      "check": "same modern and Win7 release/package bytes across cfgtestonly Web helper alignment",
+      "pass": true,
+      "raw": {
+        "modern": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08",
+        "win7": "0b178c13ed5ae3f0ba0d46056aad4906daca487b480573e5b1f258c25acf4c1f",
+        "zip": "eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1"
+      }
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_windows-95fad28d15fea78d.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_storage-9549596680176a3f.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_bootstrap-153172ad9c1ad7f3.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_materials-2221de66f2e97130.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_security-9c7f88663f75f873.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result runtime_storage-d7df388ce9405226.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result business_storage-17bf377bec8f2f7e.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result voice_storage-bf022395eae863de.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_protocol-186900fcb7bfa5db.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_presentation-bf0074726aa5b441.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_audio-35e3156477d0188a.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_application-8ad1e6c8c699ab50.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_runtime-fad3e5e278e2d80c.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_ports-361bddc8b2876cc0.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_domain-915566e140287178.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual Windows test hash/profile/result fc_bootstrap-2c9facf31078f737.exe",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final one-run512/16 exact and cleanupPASS",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "final actual modern main bound final0159 artifact",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok empty_active_catalog_does_not_block_removing_retained_scope_or_returning",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::empty_active_catalog_does_not_block_removing_retained_scope_or_returning ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok confirmation_holds_cas_backend_failure_allows_explicit_reentry",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::confirmation_holds_cas_backend_failure_allows_explicit_reentry ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok multiple_scopes_explicit_user_clear_and_dirty_discard_keep",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::multiple_scopes_explicit_user_clear_and_dirty_discard_keep ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok real_roles_owner_gate_and_stable_id_selection",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::real_roles_owner_gate_and_stable_id_selection ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok last_admin_teacher_scope_and_readonly_login_use_domain_preflight",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::last_admin_teacher_scope_and_readonly_login_use_domain_preflight ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok password_only_final_submit_never_retained_by_navigation_or_suspend",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::password_only_final_submit_never_retained_by_navigation_or_suspend ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok full_capacity_pagination_and_long_unicode_labels_are_valid_views",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::accounts_editor::tests::full_capacity_pagination_and_long_unicode_labels_are_valid_views ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+          "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+          "actualLine": "test backend::account_management_tests::accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+          "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+          "actualLine": "test backend::account_management_tests::accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+          "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+          "actualLine": "test backend::account_management_tests::accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok accounts_active_default_and_retained_history_references_reject_atomically_without_revoking",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+          "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+          "actualLine": "test backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+          "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+          "actualLine": "test backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields",
+      "raw": [
+        {
+          "testExe": "fc_windows-95fad28d15fea78d.exe",
+          "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+          "actualLine": "test workbench::tests::hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok lock_requires_registration_enabled_current_view_and_exact_native_binding",
+      "raw": [
+        {
+          "testExe": "fc_windows-95fad28d15fea78d.exe",
+          "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+          "actualLine": "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+      "raw": [
+        {
+          "testExe": "fc_windows-95fad28d15fea78d.exe",
+          "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+          "actualLine": "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "new finalactual test ok account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work",
+      "raw": [
+        {
+          "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+          "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+          "actualLine": "test application::tests::account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work ... ok"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "check": "final modern native webVoice four markers actualexit0",
+      "raw": [
+        "WEB_MATERIALS_PASS real_DPAPI_SQLite_controlled_files_TXT_Office_WIC_PDFhelper_50MiB_upload_download_64KiB_chunks_CSRF_CAS_delete_receipt_delete_invalidates_stream=PASS synthetic_request_metadata=true listener_TLS_browser=NOT_RUN network_Read_deadline=NOT_VALIDATED",
+        "WEB_VOICE_PASS real_DPAPI_SQLite_exact_Web_target_CSRF_canonical_WAV_upload_native_zero_PCM_three_repeats_query_cancel_driver_return=PASS synthetic_request_metadata=true actual_microphone=NOT_RUN listener_TLS_browser=NOT_RUN",
+        "WEB_CONTENT_PASS real_DPAPI_SQLite_exact_Web_lease_scopes_CSRF_save_read_clear_CAS_idempotency_query_reminder_desktop_facts=PASS synthetic_request_metadata=true wire_TLS_browser_listener=NOT_RUN",
+        "WEB_PAIRING_PASS CNG_DPAPI_SQLite_exact_local_approval_original_poll_secret_Secure_HttpOnly_CSRF_local_lock_independent_durable_logout_restart_cleanup=PASS wire_TLS_browser_listener=NOT_RUN"
+      ],
+      "pass": true
+    },
+    {
+      "check": "final modern account36stage native marker and drainage exit0",
+      "raw": [
+        "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+      ],
+      "pass": true
+    },
+    {
+      "check": "modern summary matches independent recomputation",
+      "raw": null,
+      "pass": true
+    },
+    {
+      "check": "Win7GNU final supplemental actualPASS cleanupPASS zeroEXEs exactfinal0b178",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "Win7 target executes same actualWin11build26300; actualWin7notvalidated",
+      "pass": true,
+      "raw": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "check": "Win7GNU final supplemental actualfourWebmarkers exit0",
+      "pass": true,
+      "raw": [
+        "WEB_MATERIALS_PASS real_DPAPI_SQLite_controlled_files_TXT_Office_WIC_PDFhelper_50MiB_upload_download_64KiB_chunks_CSRF_CAS_delete_receipt_delete_invalidates_stream=PASS synthetic_request_metadata=true listener_TLS_browser=NOT_RUN network_Read_deadline=NOT_VALIDATED",
+        "WEB_VOICE_PASS real_DPAPI_SQLite_exact_Web_target_CSRF_canonical_WAV_upload_native_zero_PCM_three_repeats_query_cancel_driver_return=PASS synthetic_request_metadata=true actual_microphone=NOT_RUN listener_TLS_browser=NOT_RUN",
+        "WEB_CONTENT_PASS real_DPAPI_SQLite_exact_Web_lease_scopes_CSRF_save_read_clear_CAS_idempotency_query_reminder_desktop_facts=PASS synthetic_request_metadata=true wire_TLS_browser_listener=NOT_RUN",
+        "WEB_PAIRING_PASS CNG_DPAPI_SQLite_exact_local_approval_original_poll_secret_Secure_HttpOnly_CSRF_local_lock_independent_durable_logout_restart_cleanup=PASS wire_TLS_browser_listener=NOT_RUN"
+      ]
+    },
+    {
+      "check": "Win7GNU actualcurrent nativeaccount marker exit0",
+      "pass": true,
+      "raw": [
+        "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+      ]
+    },
+    {
+      "check": "modern all actual nativecodes/selfcheck/system/webpairing0",
+      "pass": true,
+      "raw": {
+        "exitCode": 0,
+        "audioExitCode": 0,
+        "webVoiceExitCode": 0,
+        "applicationExitCode": 0,
+        "hostExitCode": 0,
+        "materialsExitCode": 0
+      }
+    },
+    {
+      "check": "modern actual voice stopack and shutdown before writer",
+      "pass": true,
+      "raw": [
+        "VOICE_RUNTIME_PASS on_demand_local_lock_independent_two_repeats_emergency_all_pending_fresh_explicit_job_shutdown_before_writer threads=5 stop_generation=3 ack_generation=3"
+      ]
+    },
+    {
+      "check": "Win7GNU_on_Win11 all actual nativecodes/selfcheck/system/webpairing0",
+      "pass": true,
+      "raw": {
+        "exitCode": 0,
+        "audioExitCode": 0,
+        "webVoiceExitCode": 0,
+        "applicationExitCode": 0,
+        "hostExitCode": 0,
+        "materialsExitCode": 0
+      }
+    },
+    {
+      "check": "Win7GNU_on_Win11 actual voice stopack and shutdown before writer",
+      "pass": true,
+      "raw": [
+        "VOICE_RUNTIME_PASS on_demand_local_lock_independent_two_repeats_emergency_all_pending_fresh_explicit_job_shutdown_before_writer threads=5 stop_generation=3 ack_generation=3"
+      ]
+    },
+    {
+      "check": "freshfinal250still frozenF82 after bothactualruns",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "freshfinalmain/test/package bytes unchanged afterbothactualruns",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "final read-only remote audit zeroownedtasks/processes/directories and persistentSSH retained",
+      "pass": true,
+      "raw": {
+        "ownedProbeTasks": 0,
+        "ownedProbeProcesses": 0,
+        "ownedMarkerDirectories": 0,
+        "sshd": "Running",
+        "identity": "eliora\\elior",
+        "outsideRepositoryPrivateKeyExists": true,
+        "outsideRepositoryPrivateKeyMode": "0600",
+        "readOnly": true,
+        "recordedUtc": "2026-10-30T17:13:23.161011+00:00",
+        "status": "PASS"
+      }
+    },
+    {
+      "check": "lastread250source exactF82 afterterminalWindows+Win7+audit",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "modern finalsummary sourceFileSHA/aggregate/count/main/runtime exact",
+      "pass": true,
+      "raw": {
+        "summary": {
+          "path": "/tmp/fc-round15-windows-summary.json",
+          "bytes": 38529,
+          "sha256": "80b6c03083f3c7ab0ce049fa3f2ecaa08d14b6160340acf7a07c2d253e23afe9"
+        },
+        "sourceAggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+        "passed": 512,
+        "testExeCount": 16
+      }
+    },
+    {
+      "check": "Win7GNU finalsummary sourceFileSHA/aggregate/count/main/runtime exact",
+      "pass": true,
+      "raw": {
+        "summary": {
+          "path": "/tmp/fc-round15-win7-summary.json",
+          "bytes": 28897,
+          "sha256": "205fcb8967f81a58720f023bfd905c88fd13409f6aed3ff547ebb71df7aa5dd9"
+        },
+        "sourceAggregate": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+        "passed": 0,
+        "testExeCount": 0
+      }
+    },
+    {
+      "check": "lastreadmain and16test files plusactualrunner hashes stillmatch",
+      "pass": true,
+      "raw": null
+    },
+    {
+      "check": "lastreadcanonical ZIP all13CRC/SHA stillmatch finaleee565",
+      "pass": true,
+      "raw": null
+    }
+  ],
+  "source": {
+    "manifest": {
+      "path": "开发计划/验证记录/2026-10-31-round15-source-inputs.json",
+      "bytes": 41236,
+      "sha256": "63eba4010bbe4b4d253bbcd48eabe0cc75fb98333a4799d9457ba4515b244783"
+    },
+    "aggregateSha256": "f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd",
+    "actualFiles": [
+      {
+        "path": ".cargo/config.toml",
+        "sha256": "c9f891471ee47afd946b8ee0142233c51fa5d85b79c9474301285aa044f4a83d"
+      },
+      {
+        "path": ".gitignore",
+        "sha256": "82affc9aabcf1e824253341a29a6b3be06842e26d15adf57460b54dda1eb3123"
+      },
+      {
+        "path": "Cargo.lock",
+        "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f"
+      },
+      {
+        "path": "Cargo.toml",
+        "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40"
+      },
+      {
+        "path": "crates/fc-application/Cargo.toml",
+        "sha256": "be7be2a202b5e417e4c4273fbf0470517aaf6a73018352947d4d4f894e3acbaf"
+      },
+      {
+        "path": "crates/fc-application/src/identity.rs",
+        "sha256": "3788eebafdeff4d1207801977a0380c92122ab1610607c12dbada36baf2e0ac6"
+      },
+      {
+        "path": "crates/fc-application/src/identity/tests.rs",
+        "sha256": "6525b50764bde780f7cd98586199f828b6ff94f0273467609e260d909b479bed"
+      },
+      {
+        "path": "crates/fc-application/src/lib.rs",
+        "sha256": "692eaee6032cab5b35e9ff721df5112b6a9afe0bcba4c4038885c0464a7f3cc1"
+      },
+      {
+        "path": "crates/fc-application/src/tests.rs",
+        "sha256": "3623de53c9dc82e80025e303cb61d6de79aa967f81cb095795a260db4df3e272"
+      },
+      {
+        "path": "crates/fc-audio/Cargo.toml",
+        "sha256": "0c3584e356d1476cdbb4ef704a0f0895daff485faf2fd389b5f3d33e2cfb3125"
+      },
+      {
+        "path": "crates/fc-audio/src/execution.rs",
+        "sha256": "dd3bd726f73c1f1d534d66254b8500825381023fd38cb43d18ed4abf96d52261"
+      },
+      {
+        "path": "crates/fc-audio/src/execution/tests.rs",
+        "sha256": "2124fc2fe014d9f108be91d70ed029bac44f5e839240ea5717a7f8cdc26b4f6c"
+      },
+      {
+        "path": "crates/fc-audio/src/lib.rs",
+        "sha256": "4022243e3747fb6b9c6c4a1013036cb55f39bee644d9cf2acc094656f9bde004"
+      },
+      {
+        "path": "crates/fc-bootstrap/Cargo.toml",
+        "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66"
+      },
+      {
+        "path": "crates/fc-bootstrap/build.rs",
+        "sha256": "cd8bf3a9b0cfc76468a2e459ceee2e0e22dbb335ed42b81756375718f53a489e"
+      },
+      {
+        "path": "crates/fc-bootstrap/examples/verify_web_assets.rs",
+        "sha256": "4dbcb46566319f67f4f8969cba543c1b0306956e27e6b1f244741aec6f33450e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "sha256": "17c6e8c861f8c31d2b8f2a1a248465eb6cff34ba4a63539d05bf021cb501c71b"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+        "sha256": "9531485e934483b4a08a1343662d2715524dcb683d97dcbc0f8e3d2e298d1855"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/accounts_probe.rs",
+        "sha256": "f669f1c91f6d31fe82347eb016bd4151fbeba1a15834fca4b85d2c9cd9fd371c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+        "sha256": "b48e9939980a03ddf9c1b5356e2ed1076889d25488a01da4b8c191ed8db1c94f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+        "sha256": "6108a61a127769e984a10853d2615c6ce0ca3e65956d515a59b48738aac5c72e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/lesson_editor.rs",
+        "sha256": "6703f8a25d44972e3214c96bc0780bf179575523fb61b5e2c4515b19d76409c1"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/material_flow.rs",
+        "sha256": "c1cf53d137cd257e05592b157c5ef972750dcb39df1c971bba0a66d503a0ed7e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/material_probe.rs",
+        "sha256": "8912e92e025eac8c48633ba128aad7be3b7b024d1f58783c3d259eb0781cc9c9"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/materials_editor.rs",
+        "sha256": "fd617d92c62571ab0fdb9825eca38ebc5cec2c1436684a52081ca47046249ef0"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/schedule_editor.rs",
+        "sha256": "a4bc811d3574ec49c8e32f4874c74024d27c2ea4299d7a3dc877fe18c63e73e9"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+        "sha256": "4103d908c78eb4037d54c739e95a33fb9630141dcd95ec1dd57f606b0300621f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+        "sha256": "f4460eaadf51119fe09b4f42b30e72db174e4226a3f3d11952b82ffc798a30d6"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend.rs",
+        "sha256": "1527721743c044e6a5d9e3ff33f7419d4f8d11a9bd303159299e44d28fbaa4df"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "sha256": "ba2b17e73c85779f7fec9ec310d77d3104493df27847526f3cdfb1f93c03a55d"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/content_web.rs",
+        "sha256": "6eb505650a248f2e3d60cd92569499e920f08d4079f7bfe54029b7cee1f8134b"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+        "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/voice.rs",
+        "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/web.rs",
+        "sha256": "95d77fe81bc76d509178a011d630ab84557f91c5eeb78dd11872a7ca345f7499"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+        "sha256": "7c5efa87dadf1aa15bee7846e9b2e9fe120a0391daf7e1c0349ce57080e4afd6"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/credential_probe.rs",
+        "sha256": "5ef49bc2ec2994d7e214f467dd33261969d531c2000b89c16927c5990b53089d"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/lib.rs",
+        "sha256": "77454606d23a8057258df3481fc6fa33bfbe108cad5a24bd8a838fa4744ebf0e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/main.rs",
+        "sha256": "114abf5cd61027c00bf7c591dd542d549418e208525cd20e5eefe6b1a405eb60"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/material_helper.rs",
+        "sha256": "4d674c8a0b6b20397ee9a6f486f0101c7b15e29b072aa9e07c68ff95db428418"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_files.rs",
+        "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+        "sha256": "7f97898a071e9c89765a2ed2f8bbd1bfaaae55d204bfdc838f742024c090bfb4"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_runtime.rs",
+        "sha256": "9b7087051a2b55aba69361d2d6b676ef3ff6481d29fd4b4659502057869e59cb"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_runtime/native.rs",
+        "sha256": "edc3890c0ce646af791c187374b24b518d39edb72ca945fe88f812afc27211ac"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_runtime/tests.rs",
+        "sha256": "980b202a504f5660e8148cab37dded83e1bafabc8257a5f0334d863181d5ce2b"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "sha256": "5fafc8de4b0de4be24ab6bad9d112d9839fdfd5d41033dbcfce4c041e9c079c5"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/content.rs",
+        "sha256": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/content/tests.rs",
+        "sha256": "9d2149897ccd4965253ac370b507aa27f6038969a9d4aed00bf68ccd1a002bc6"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "sha256": "96f87ceb9435513be0629eec57d71e36aa56ded043b4ae128e0bc1786c47751a"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+        "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+        "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "sha256": "48fc97b2ecd03aaf7255e629e8e83bc4ad9e00a6c9cf9b10c1df5ef3e18d1b8f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+        "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+        "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+        "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_assets.rs",
+        "sha256": "1abaf1f89f7dc09c83f220dd664d5fcc1ac3e4e2ba7d693d0d3a91e44a58ce3d"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_assets/tests.rs",
+        "sha256": "a77a36c5331d0dd4ccfc1990d5f5b9de1fda556f52af81aed7ce1ccee72d3fc2"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_pairing_probe.rs",
+        "sha256": "00a86796d0eb5701673e29faa8e1c297c0103135378a6b1b913ac6a80d7f97b2"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_pairing_probe/content_probe.rs",
+        "sha256": "79ddb806fc0ef8ea2eca4d9ca6672d27cfdbc0a35e1917ed555fd03fe4d448d9"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_pairing_probe/materials_probe.rs",
+        "sha256": "c81b127e7d62a922a871dccd4011a6b4f9183fb9efbe9af5dcdcf68effb1b272"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_pairing_probe/voice_probe.rs",
+        "sha256": "a66e7bfa0c2b93af24ef2c5fd2bc660e42c7d9bb22784bde5bc766a9ee4c5c89"
+      },
+      {
+        "path": "crates/fc-bootstrap/tests/business_storage.rs",
+        "sha256": "736cacdfe12069e1cd6592a60c1318fecbe6b7755918752c99f4869985a88f11"
+      },
+      {
+        "path": "crates/fc-bootstrap/tests/runtime_storage.rs",
+        "sha256": "a74680a9e4b7ec4bf1a36c661636f8ba3394ee2442292e46552873c1b76f43e2"
+      },
+      {
+        "path": "crates/fc-bootstrap/tests/voice_storage.rs",
+        "sha256": "efc0f2e7ec05fefcc280664b55b1a3b5da77e3bfdc789aa8cc358d728e3396d8"
+      },
+      {
+        "path": "crates/fc-domain/Cargo.toml",
+        "sha256": "79be768cf77d3e968eab4fee89e0e57a5cbe7545216a28d24503dfea39886792"
+      },
+      {
+        "path": "crates/fc-domain/src/auth.rs",
+        "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d"
+      },
+      {
+        "path": "crates/fc-domain/src/content.rs",
+        "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f"
+      },
+      {
+        "path": "crates/fc-domain/src/desktop.rs",
+        "sha256": "0e9d78e33e79dfb813ff6c18e64b4f5c22e87c939755eee8be1bdf50718cfaf8"
+      },
+      {
+        "path": "crates/fc-domain/src/identity.rs",
+        "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa"
+      },
+      {
+        "path": "crates/fc-domain/src/identity/tests.rs",
+        "sha256": "f502a37887102dbbacb64aed9119aad6e329d5fd397b7b925c6c9d15c307ecbc"
+      },
+      {
+        "path": "crates/fc-domain/src/ids.rs",
+        "sha256": "e1a2fd740cb413dbed71df42b42cd054e22dbca4d4d55f2618667e8a343a69df"
+      },
+      {
+        "path": "crates/fc-domain/src/lesson_context.rs",
+        "sha256": "1cfd35b716381155578e0d37f5db507fb12a6916411c636f73f9fdf09f869834"
+      },
+      {
+        "path": "crates/fc-domain/src/lesson_context/tests.rs",
+        "sha256": "724eaab4629c21abc60c907f9bb2375f03cdb3f0a323fd820c2dc30bf9c792a5"
+      },
+      {
+        "path": "crates/fc-domain/src/lib.rs",
+        "sha256": "fca7d1cc1ea97bc60d923b633286891926f4a6ad0467f1fa5fb50384cb551aaa"
+      },
+      {
+        "path": "crates/fc-domain/src/materials.rs",
+        "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d"
+      },
+      {
+        "path": "crates/fc-domain/src/materials/tests.rs",
+        "sha256": "516ca209bb9d89efc88ad87cb249749a0688a670c7cfa5b8b1c5609837f30de2"
+      },
+      {
+        "path": "crates/fc-domain/src/schedule.rs",
+        "sha256": "330d4c72670fa1eeb82508c97ec2a6fe94c9b34605d8b6a3f06338fe19f7438b"
+      },
+      {
+        "path": "crates/fc-domain/src/schedule/tests.rs",
+        "sha256": "b257722c966df36b12277090070448dd096a549adc2c9ad6ce700ebcdaa38e5c"
+      },
+      {
+        "path": "crates/fc-domain/src/schedule_document.rs",
+        "sha256": "1c7f0df34107224be19b8e303aa94ee3620a646512013846ef206987e96b608e"
+      },
+      {
+        "path": "crates/fc-domain/src/schedule_document/tests.rs",
+        "sha256": "3429a284637dd283dcb9143fc2b60cdabb9fa36a500f54b84bff2a9a9ccfec12"
+      },
+      {
+        "path": "crates/fc-domain/src/time.rs",
+        "sha256": "b8763ff445240f5e91e38b77654d6d92784e21feee07e8fc051187ae9ed88f3a"
+      },
+      {
+        "path": "crates/fc-domain/src/voice.rs",
+        "sha256": "186d3f71d00a0860bfacac13262a646e80b29be7e92cb32a46f1cf657cb80574"
+      },
+      {
+        "path": "crates/fc-materials/Cargo.toml",
+        "sha256": "cc6978efb0b994dd58a973ba0c8a0dfd25d956b645dda3ed0e1d3a9a63d43e90"
+      },
+      {
+        "path": "crates/fc-materials/src/lib.rs",
+        "sha256": "50df8abf64d9bd8111226841b80f5be31548dc8a2bd24458530611b427b37535"
+      },
+      {
+        "path": "crates/fc-materials/src/office.rs",
+        "sha256": "b4accc4d3bea1c6c5a2dbd0a8a2b00c179b5a58a45e303006af50a88d6323cd9"
+      },
+      {
+        "path": "crates/fc-materials/src/office/tests.rs",
+        "sha256": "ee5ab79e9776fe3cb82c1bd6111e278c1d43e60d4e0f98fec4a12814c735e872"
+      },
+      {
+        "path": "crates/fc-materials/src/office/xml.rs",
+        "sha256": "4cb71a65edc6e6d04a1dff94db0651e0431e1199a18e6e6aeaf2c5400f458bc4"
+      },
+      {
+        "path": "crates/fc-materials/src/pdf_validation.rs",
+        "sha256": "48e5f9ebe364d45efe7b015f02b34752c98062964c31a7e8649c9e7a978af93c"
+      },
+      {
+        "path": "crates/fc-materials/src/validation.rs",
+        "sha256": "b31fe20ad8f85c98c08572d4077f3bb7a7a7af86109bfa3740c1b8759f4aca87"
+      },
+      {
+        "path": "crates/fc-ports/Cargo.toml",
+        "sha256": "eb4da687dda49f120d097c61d25b4fd41498045990b722108a489823661677f7"
+      },
+      {
+        "path": "crates/fc-ports/src/audio.rs",
+        "sha256": "15b76c1a2af5d2d26bdd9f5b475b3fdc6ef79c19b8385cb8cbd3da80ed94c656"
+      },
+      {
+        "path": "crates/fc-ports/src/content_web.rs",
+        "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6"
+      },
+      {
+        "path": "crates/fc-ports/src/http.rs",
+        "sha256": "e0b6f0bfa38a04316182159150db14d468ce0b665eba78d4fbb1d710ce70e966"
+      },
+      {
+        "path": "crates/fc-ports/src/lib.rs",
+        "sha256": "9aa227365406669ee025611828ded3373f40820f3963c468622f2e851cd1cca1"
+      },
+      {
+        "path": "crates/fc-ports/src/material_outcome.rs",
+        "sha256": "582f6428c0e55a9f65caee04d0df95dc9fc16dd200298a72cf048fc174596da5"
+      },
+      {
+        "path": "crates/fc-ports/src/voice.rs",
+        "sha256": "4d8656e865bf85d39911b704477eba47f3b3dd7d45fc78469aa64f2bd67e1ded"
+      },
+      {
+        "path": "crates/fc-presentation/Cargo.toml",
+        "sha256": "1cfa8132a30fae2d570c18bb3cd6b9a672f02025b9980147e20992870ee3d3fe"
+      },
+      {
+        "path": "crates/fc-presentation/src/lib.rs",
+        "sha256": "fd17bf57c05bdce374f8a2be09be4d956f28daf17c763b3ba6de3564c5e60764"
+      },
+      {
+        "path": "crates/fc-presentation/src/scene.rs",
+        "sha256": "189ce0b3cf6687fafce40257f606584e6d98bcdd22ad3ed375579c12dffe6f23"
+      },
+      {
+        "path": "crates/fc-presentation/src/scene_tests.rs",
+        "sha256": "af74bc794c37a42bc5c351d928370b607fee62ae2401631a664a59bee20a8709"
+      },
+      {
+        "path": "crates/fc-presentation/src/workbench.rs",
+        "sha256": "5fae85ff6a0372d95ae0405d6f057b417a610fdd840e948b0326d34be98f4264"
+      },
+      {
+        "path": "crates/fc-protocol/Cargo.toml",
+        "sha256": "45582e343dfe52a120d485872447dfb45c824d461bd8661c579e040362ac0ce8"
+      },
+      {
+        "path": "crates/fc-protocol/src/lib.rs",
+        "sha256": "f391215c86898d703a613e6f7aabaf4fabbbc8277b9a75516183ca07952837ad"
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "sha256": "e36688326be6a21a451c5f40ffe8d39c7f421593ad23ef7f0362f0f5da8d8bb9"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/assets.rs",
+        "sha256": "582ed1717b22068fae6ba084e1c775b6b8e9380ae711fbe16838efae93d8e8f8"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/content.rs",
+        "sha256": "a6c8a23b6529d7502118811bb8ac19d3fefe8279e19a53a749d45bb7a016f7d7"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/content/tests.rs",
+        "sha256": "56669b3b27234bd2263c6cb1874c19518807e5257fc0b7ecf343418e8d966442"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/materials.rs",
+        "sha256": "bda24725b6df9392d97561c133d43ba837745948c8519a4aecf1e53fce1498c3"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/pairing.rs",
+        "sha256": "2e745037c65a936b91312c6ceeb43a87bf04b6e1c0ab84ed40b3d80d49cfe0b2"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/voice.rs",
+        "sha256": "b9c66758227733c3eb441bb19ecfb10b93a5bf82b1d5555370a9ce0f6508d117"
+      },
+      {
+        "path": "crates/fc-runtime/Cargo.toml",
+        "sha256": "8d0fd38ef235c6876fe54fd3bac0efd793f6924c42b227a115f3a6bcdfe6a770"
+      },
+      {
+        "path": "crates/fc-runtime/src/authority.rs",
+        "sha256": "0b5cbf90ebf1915e025243b0a6842f468e6ac309de0d94c36155f48122e1ddf2"
+      },
+      {
+        "path": "crates/fc-runtime/src/cancel.rs",
+        "sha256": "786ad31bb2257318268252259ea959d78aef08e6fa06e990c6c2e6e317eff390"
+      },
+      {
+        "path": "crates/fc-runtime/src/control.rs",
+        "sha256": "b7eea2a41d144d6476ad2e5b347ac7df8e7afb00d2a5b77923cd914bade8b979"
+      },
+      {
+        "path": "crates/fc-runtime/src/health.rs",
+        "sha256": "f8c92ee5d160b651180c31d0a57d3f0cfa4329e04330cdd9c420b0f8d67284ea"
+      },
+      {
+        "path": "crates/fc-runtime/src/lib.rs",
+        "sha256": "45b76c8e6bc3d5de804fe0e12bdb9a590c02a9c8cccae42d3c4a060e0a2795e8"
+      },
+      {
+        "path": "crates/fc-runtime/src/mailbox.rs",
+        "sha256": "83e2c24da87f0b3609971d5e533e87ac6ed6f72ca689821c20d508dee08b58dd"
+      },
+      {
+        "path": "crates/fc-runtime/src/observer.rs",
+        "sha256": "d05ae71babbfc29a96e7678852b58d6f5bafc03550826f571bcd8f2f0ae1abd7"
+      },
+      {
+        "path": "crates/fc-runtime/src/shutdown.rs",
+        "sha256": "67dca134c0f7230426bff25595eb0732b4044b4a08f3e9b7b33e57e2abc338c8"
+      },
+      {
+        "path": "crates/fc-runtime/src/worker.rs",
+        "sha256": "84f4381b268706ef68248af43471a36b991b0f90740d29e896108bb8da1426e6"
+      },
+      {
+        "path": "crates/fc-runtime/src/worker/tests.rs",
+        "sha256": "2d94f7ef4b104e18ee6480e24937e02a06e85bc82887c3880bdba153466515e1"
+      },
+      {
+        "path": "crates/fc-security/Cargo.toml",
+        "sha256": "4879a172c15f9cfa7503d565a191016915c829a2e4118edc3e0c2cbb2502a7ad"
+      },
+      {
+        "path": "crates/fc-security/src/codec.rs",
+        "sha256": "af2372d6de1b714b04a607b446f815724bdcb06b091b18ab2b2757edecb9c3c2"
+      },
+      {
+        "path": "crates/fc-security/src/lib.rs",
+        "sha256": "89576b808aadf2311601c6e907e043e943dc782f88978af17eff02dddbce7286"
+      },
+      {
+        "path": "crates/fc-security/src/recovery.rs",
+        "sha256": "d63a66afe1ba11f42a3e64ea4ae595a7412d8899cada4df09a0682465f73e39d"
+      },
+      {
+        "path": "crates/fc-security/src/web.rs",
+        "sha256": "447fff04d2821183d06fa6575dafe5e92e620d8193c182b9a5fcaed993a90daf"
+      },
+      {
+        "path": "crates/fc-storage/Cargo.toml",
+        "sha256": "ab71ff3e4e900bc1d753802a5f95a36558cd5b053819c2f222206de9f3b04f09"
+      },
+      {
+        "path": "crates/fc-storage/src/business/codec.rs",
+        "sha256": "df5cff1b4408618fc7ae949f119daee4a336ac21a9f1be43ec2bf698f329f8e8"
+      },
+      {
+        "path": "crates/fc-storage/src/business/content_web.rs",
+        "sha256": "bc303da7b969447b287d843d9499ac66743049a4c064b2dc0ac323b52a8f5eb1"
+      },
+      {
+        "path": "crates/fc-storage/src/business/desktop.rs",
+        "sha256": "87b65ddf822fbc02f8370f74fef240114c9dd6b27d9147052051b8260373577f"
+      },
+      {
+        "path": "crates/fc-storage/src/business/display.rs",
+        "sha256": "bc6d49e0121c3506ece534242b7753419da231206be1b1318a34af707d5db28f"
+      },
+      {
+        "path": "crates/fc-storage/src/business/display_codec.rs",
+        "sha256": "a3c115bfafc01b17975dec07de398a3c7ee1acd8cb5c78915c0c0252b9887951"
+      },
+      {
+        "path": "crates/fc-storage/src/business/lesson.rs",
+        "sha256": "84744b5000d1941ff5db4851e2ce23ba6ecd808991116853fc46f4a4b987c1d0"
+      },
+      {
+        "path": "crates/fc-storage/src/business/lesson_codec.rs",
+        "sha256": "082c8b498c10a7ed7080a61d3bdbc9942156717dda0f3ab1bf766d3e723477df"
+      },
+      {
+        "path": "crates/fc-storage/src/business/materials.rs",
+        "sha256": "53e226569533b482aaff808f4063dd6484b8a400237c2ebef5050ca31c7d21e5"
+      },
+      {
+        "path": "crates/fc-storage/src/business/materials_codec.rs",
+        "sha256": "6d8c49c21d49b4f49e46ef30594bf25b7e2077b6cb435cf3b03f348541cf6986"
+      },
+      {
+        "path": "crates/fc-storage/src/business/materials_outcome_tests.rs",
+        "sha256": "e424317c29218bfcc644d0040084a2c3be32f73a8b37c0eaa61f264cc87a94a0"
+      },
+      {
+        "path": "crates/fc-storage/src/business/mod.rs",
+        "sha256": "d27f8de9a5054bdf49d2795615aa58de22ca6ff250530ab99b23eee6a19ea084"
+      },
+      {
+        "path": "crates/fc-storage/src/business/schedule.rs",
+        "sha256": "d40ad4fe120cc3cabdf0f8ad7e2c1ea7720d9f645a8855371ea4a37d1d84040c"
+      },
+      {
+        "path": "crates/fc-storage/src/business/schedule_codec.rs",
+        "sha256": "f324231c1ef0c9e6b08e1bd31802d05a6291e8395cf0fcb0c0ace7ae1bbe6dd7"
+      },
+      {
+        "path": "crates/fc-storage/src/business/tests/content_web.rs",
+        "sha256": "8a8e7ef264edc5320fa3fcff88ef2dfe0e8d01b544dfa11de0eede003b41e9a2"
+      },
+      {
+        "path": "crates/fc-storage/src/business/tests/json.rs",
+        "sha256": "af9b384c221b7f67b7c300b15e2720aa8a38b0cc1f86f2fb4dc30aaeeefcc931"
+      },
+      {
+        "path": "crates/fc-storage/src/business/tests/logout.rs",
+        "sha256": "65ba0653a1ede61c77cc728e0816c69ccba1f984d499cb553d7060bde7b7a1d4"
+      },
+      {
+        "path": "crates/fc-storage/src/business/voice.rs",
+        "sha256": "c5a5be994e1f0bba8827745998502c2bc4a6610648babf2d6e1a260f2b9c46b4"
+      },
+      {
+        "path": "crates/fc-storage/src/business/voice_codec.rs",
+        "sha256": "5d16ee982ee5ee4b99426743690c8f08cbff6f94929827dd73d4f3793207bbd6"
+      },
+      {
+        "path": "crates/fc-storage/src/lib.rs",
+        "sha256": "60f835c39cc8f0b68f2162bb8b703c74d25c9ef9245b00bc5d32c77534077b5f"
+      },
+      {
+        "path": "crates/fc-storage/src/login.rs",
+        "sha256": "8b4ccd7ab9fe12b783a27975ba1ddab4faec4b0af0c61f93c7cb266a9a06a25b"
+      },
+      {
+        "path": "crates/fc-windows/Cargo.toml",
+        "sha256": "69fc6fcf470a2124524db2f2d45f31f0212d81adea2e1b74c8a76823071a9eca"
+      },
+      {
+        "path": "crates/fc-windows/src/audio/device.rs",
+        "sha256": "91bb2a0583e3828a8a9c79fb943a9f588bfd5f1d15092969cefc49682bef9f04"
+      },
+      {
+        "path": "crates/fc-windows/src/audio/diagnostic.rs",
+        "sha256": "36925671241565e419a67d6dd6024b82354b2ef96148e0b9f7f03982c9663f9a"
+      },
+      {
+        "path": "crates/fc-windows/src/audio/mod.rs",
+        "sha256": "bde2965bacc59f91b1deb72e55bf119dfef2b29f78ce4716b84e61f2a07a5b13"
+      },
+      {
+        "path": "crates/fc-windows/src/audio/tests.rs",
+        "sha256": "f53505d3b96c3b9a38a93fe4dd78a318ca91a5d6909214e0adb1fa7482db07e2"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "sha256": "ade863fcb317197aa1dc6e79622637ca4eb133331e89b04a51fc38ad05e22554"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/backdrop.rs",
+        "sha256": "50ac0401217df6fc1db31d89caba5c5888fef60c434532a72d52030e81d8250f"
+      },
+      {
+        "path": "crates/fc-windows/src/host.rs",
+        "sha256": "a9c7a5ee3612f5e81428a9790d9c22e7466954bfd6fc849b718dedd361f4403b"
+      },
+      {
+        "path": "crates/fc-windows/src/http/diagnostic.rs",
+        "sha256": "a389e056896ac61578b6ff4465da401c30d329d6b268cdeb1f0b7d9670799c90"
+      },
+      {
+        "path": "crates/fc-windows/src/http/lifecycle.rs",
+        "sha256": "4276583752383129f79a6e91c420fc73058595648a5d7c50cc25b86fbe11dc28"
+      },
+      {
+        "path": "crates/fc-windows/src/http/mod.rs",
+        "sha256": "c91355053e2d939e199a75c1207c62eddf1188154567e81b65137f35ec7c7c1a"
+      },
+      {
+        "path": "crates/fc-windows/src/http/native.rs",
+        "sha256": "e1461aa0eddd1b8f3fbbf6cedd90e4f5f747b1b6a94d6a035a098f94f86c93f4"
+      },
+      {
+        "path": "crates/fc-windows/src/lib.rs",
+        "sha256": "2d542807d629ab73c679efd8fc7e60d90e2c64c2a2781efe9f5406a978272455"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/chooser.rs",
+        "sha256": "f7f87bfe84886bc88ef8f6308d69ff7332ca044b89568e2e93eed5b39af536cd"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/files.rs",
+        "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/helper.rs",
+        "sha256": "245d36c5910e11e4a643888168f8ede7006baafc236936551721f2b3e7a82cca"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/image.rs",
+        "sha256": "52b9549bbfd78b1efaa21f2bfdc1760a72ff694dcde537a1e51b0174196343fd"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/mod.rs",
+        "sha256": "9802fa4db46d0b49badd3c35ec8bb9784d32a16e965d43eb913576ed28daf892"
+      },
+      {
+        "path": "crates/fc-windows/src/materials/shell.rs",
+        "sha256": "4178bff80df06b2707b2dbd5f37a4779a0be0d29a2a441266cb09ed7081e8261"
+      },
+      {
+        "path": "crates/fc-windows/src/native.rs",
+        "sha256": "07ff202793058fa276952a2fcac757683ddf97ee09f69db539c559cc4f348d50"
+      },
+      {
+        "path": "crates/fc-windows/src/system/autorun.rs",
+        "sha256": "ea1b6f1ebc8b73a5911b6c43b44a14efadf038d2b9b23afb5ec635b920d7f631"
+      },
+      {
+        "path": "crates/fc-windows/src/system/clock.rs",
+        "sha256": "5c8210c364c2b5a588168be4c88e377ee90b7f568d66127b4fd80be46814b9ca"
+      },
+      {
+        "path": "crates/fc-windows/src/system/crypto.rs",
+        "sha256": "90506fa8133b7d6701f34618e5286a61a33bbbce8bb6b1edc99c7766ba771038"
+      },
+      {
+        "path": "crates/fc-windows/src/system/mod.rs",
+        "sha256": "2d3c767faa542988c677419bc56b371ca80cdc735405710b07ebc753f2eae27e"
+      },
+      {
+        "path": "crates/fc-windows/src/system/paths.rs",
+        "sha256": "aad234b4896c4b23d9f7c61c4056d3ddbfaeb4d605cecd8e2daa59c07d135c1a"
+      },
+      {
+        "path": "crates/fc-windows/src/tcp_frontdoor/mod.rs",
+        "sha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f"
+      },
+      {
+        "path": "crates/fc-windows/src/tcp_frontdoor/native.rs",
+        "sha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3"
+      },
+      {
+        "path": "crates/fc-windows/src/workbench.rs",
+        "sha256": "04f12d7936c14898efa753c74302632b6261cf6776cae0c9eb18d04d2fb13884"
+      },
+      {
+        "path": "crates/fc-windows/src/workbench/widgets.rs",
+        "sha256": "8f227ff809ff4142c0c10b6d802b430eb1c03851a6c0b4355fbc490febadbda9"
+      },
+      {
+        "path": "packaging/PROBE-README.txt",
+        "sha256": "b831d226e4d9e921e16373b4662999dc36bd102847834e17b9879688e3c9385f"
+      },
+      {
+        "path": "packaging/THIRD-PARTY-NOTICES.txt",
+        "sha256": "372382560a2d656d222d68be2d13b3d03daab01cb70e72039d4ae9e3b0ebe957"
+      },
+      {
+        "path": "rust-toolchain.toml",
+        "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62"
+      },
+      {
+        "path": "scripts/audit-pe.py",
+        "sha256": "a64eec6cbc04da1ab03ec6c2de42bddf2fab891f63ded7076cf00d486e8ef1d5"
+      },
+      {
+        "path": "scripts/check-architecture.py",
+        "sha256": "d779551f4850ff2ea1520cdd237bd76d3da110e83d53c3c479ada99509b62d82"
+      },
+      {
+        "path": "scripts/link-win7-gnu.sh",
+        "sha256": "a0f0da43212de83f69d28f1241e03cfdefcf06b9ec7c9f17ef1341778326d3d2"
+      },
+      {
+        "path": "scripts/package-probe.py",
+        "sha256": "979f7387f0bc5019703e21a404d01600f9a12e4204b6750e22d5d4328a0cfe53"
+      },
+      {
+        "path": "scripts/update-third-party-notices.py",
+        "sha256": "9f121f22d34c2785d2f1c1adda5e64a822f359d70794db24f2cd541b2f196adc"
+      },
+      {
+        "path": "scripts/verify.sh",
+        "sha256": "735ff1000dee4ed3815ed2c0af10fa08945604817249c1dea931068df9b24a9d"
+      },
+      {
+        "path": "scripts/windows-http-probe.py",
+        "sha256": "cb4e02785c3b842da4199c53eb324343946c0377429a71f1b3405dbf180031b9"
+      },
+      {
+        "path": "scripts/windows-probe.py",
+        "sha256": "a2e97d9bfd74f99471218694c1a4a7c7fa03e0f02d9b32ce6b24b9203d907efa"
+      },
+      {
+        "path": "web/.gitignore",
+        "sha256": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636"
+      },
+      {
+        "path": "web/README.md",
+        "sha256": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3"
+      },
+      {
+        "path": "web/SHADCN-LICENSE.md",
+        "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7"
+      },
+      {
+        "path": "web/components.json",
+        "sha256": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d"
+      },
+      {
+        "path": "web/index.html",
+        "sha256": "2dca4d7418dad0e52c618b48d9024bd4313da9908a0c2f79bcbec7554d17903b"
+      },
+      {
+        "path": "web/package-lock.json",
+        "sha256": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0"
+      },
+      {
+        "path": "web/package.json",
+        "sha256": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f"
+      },
+      {
+        "path": "web/scripts/budget.mjs",
+        "sha256": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88"
+      },
+      {
+        "path": "web/scripts/licenses.mjs",
+        "sha256": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea"
+      },
+      {
+        "path": "web/src/App.tsx",
+        "sha256": "a433dcf70690c909cf280c469949ccccfcb4888eb77dbe472b6d2f4ea75870ad"
+      },
+      {
+        "path": "web/src/MaterialsPane.tsx",
+        "sha256": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c"
+      },
+      {
+        "path": "web/src/TeacherWorkspace.tsx",
+        "sha256": "1c7f5d81950d785c64356ba7c6eec3a9ef2a3af72e0be24d6ca80c7a16680981"
+      },
+      {
+        "path": "web/src/VoicePane.tsx",
+        "sha256": "cc6319381eac84aa2d5f6b04a117172dd36189d86cd8e712ea60b44d647c2aaa"
+      },
+      {
+        "path": "web/src/api/client.ts",
+        "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b"
+      },
+      {
+        "path": "web/src/api/content-controller.ts",
+        "sha256": "30cf89809a4351ca01926fc741a6d200e4027b4682b4f90fbbb749fa851edce3"
+      },
+      {
+        "path": "web/src/api/content-protocol.ts",
+        "sha256": "77e1feb6a7a0571cd08918c68f6e9b17e7dcaab63ae2627f947d0d84e7ab0f43"
+      },
+      {
+        "path": "web/src/api/controller.ts",
+        "sha256": "1bbe3f304c0ce4fb59e850822b93224b446cb25472bdd228b0085d69bedccc07"
+      },
+      {
+        "path": "web/src/api/material-client.ts",
+        "sha256": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6"
+      },
+      {
+        "path": "web/src/api/material-controller.ts",
+        "sha256": "f18aa159726f334f228e7b29c8f23e9f71a4070be3df2aed13c07a1e322c859b"
+      },
+      {
+        "path": "web/src/api/material-protocol.ts",
+        "sha256": "3c10c3ae05828f29dd61bf427d0f06e8c44791127af98e807b92bcf3dacb0763"
+      },
+      {
+        "path": "web/src/api/protocol.ts",
+        "sha256": "1ade99d3f638312dceeaa70ae9afdd95412c2df76d384cd91bc6c48c16a27c52"
+      },
+      {
+        "path": "web/src/api/voice-client.ts",
+        "sha256": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda"
+      },
+      {
+        "path": "web/src/api/voice-controller.ts",
+        "sha256": "d2768bb06da8430d0da04ff9b8ee6dae16c2d94c79fcb659fee74edc091907a6"
+      },
+      {
+        "path": "web/src/api/voice-protocol.ts",
+        "sha256": "ed5d80450a7d979d26182e3cf24248b9ff8d0f04bff4bd4c67d2a25931023d07"
+      },
+      {
+        "path": "web/src/components/ui/button.tsx",
+        "sha256": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84"
+      },
+      {
+        "path": "web/src/components/ui/card.tsx",
+        "sha256": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8"
+      },
+      {
+        "path": "web/src/components/ui/input.tsx",
+        "sha256": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441"
+      },
+      {
+        "path": "web/src/favicon.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "web/src/lib/utils.ts",
+        "sha256": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6"
+      },
+      {
+        "path": "web/src/main.tsx",
+        "sha256": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02"
+      },
+      {
+        "path": "web/src/styles.css",
+        "sha256": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6"
+      },
+      {
+        "path": "web/src/voice/browser-capture.ts",
+        "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+      },
+      {
+        "path": "web/src/voice/normalize.ts",
+        "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+      },
+      {
+        "path": "web/src/voice/pcm-worklet.ts",
+        "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+      },
+      {
+        "path": "web/src/voice/pcm.ts",
+        "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+      },
+      {
+        "path": "web/src/voice/ports.ts",
+        "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+      },
+      {
+        "path": "web/src/voice/recorder.ts",
+        "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+      },
+      {
+        "path": "web/src/voice/wav-worker.ts",
+        "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+      },
+      {
+        "path": "web/tests/client.test.ts",
+        "sha256": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c"
+      },
+      {
+        "path": "web/tests/content-client.test.ts",
+        "sha256": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01"
+      },
+      {
+        "path": "web/tests/content-controller.test.ts",
+        "sha256": "3c794b0a63a6fe57ee0f2c6b2dcfdfc31b7a3146abf9b5a48530b206de17220b"
+      },
+      {
+        "path": "web/tests/content-fixtures.ts",
+        "sha256": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471"
+      },
+      {
+        "path": "web/tests/content-protocol.test.ts",
+        "sha256": "3949f7e77450c030476ecadda3d0e0530a01ad261b6ce8bf665d3032df9d1762"
+      },
+      {
+        "path": "web/tests/controller.test.ts",
+        "sha256": "2d2b98d8592466946f969ac7a539bf089e20298fe5235d2ac5c58bb537e52fd7"
+      },
+      {
+        "path": "web/tests/material-client.test.ts",
+        "sha256": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9"
+      },
+      {
+        "path": "web/tests/material-controller.test.ts",
+        "sha256": "c55dd735babf4495268cbdbfe81cd9cf11cf6ce7f843a08dad6b18dfa400a73c"
+      },
+      {
+        "path": "web/tests/material-protocol.test.ts",
+        "sha256": "1bdb6d418b1aeb75cdc5f19dc3a1a4e684d7c082bd97830f3859815bf061b481"
+      },
+      {
+        "path": "web/tests/material-unicode.test.ts",
+        "sha256": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0"
+      },
+      {
+        "path": "web/tests/protocol.test.ts",
+        "sha256": "3e63ed627b9d392157ebd99cfd08ea0a29b6e91bbda727107a380dfa9e375c70"
+      },
+      {
+        "path": "web/tests/voice-client.test.ts",
+        "sha256": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52"
+      },
+      {
+        "path": "web/tests/voice-controller.test.ts",
+        "sha256": "000b37672ac1d3818e9e7f2147addb3be45006841c7bd0801176fb56ab59343c"
+      },
+      {
+        "path": "web/tests/voice-fixtures.ts",
+        "sha256": "a5dedd9a242a8b7af219a69dd3977e4345dca50044f977643c1a78a93962d683"
+      },
+      {
+        "path": "web/tests/voice-protocol.test.ts",
+        "sha256": "5366eff7220eb6648d43ebea003d903f881dd08257bac51996e97e1e6c37c792"
+      },
+      {
+        "path": "web/tests/voice-recorder-capture.test.ts",
+        "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+      },
+      {
+        "path": "web/tests/voice-recorder-normalize.test.ts",
+        "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+      },
+      {
+        "path": "web/tests/voice-recorder-pcm.test.ts",
+        "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+      },
+      {
+        "path": "web/tests/voice-recorder-worklet.test.ts",
+        "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+      },
+      {
+        "path": "web/tests/voice-recorder.test.ts",
+        "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+      },
+      {
+        "path": "web/tsconfig.json",
+        "sha256": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508"
+      },
+      {
+        "path": "web/vite.config.ts",
+        "sha256": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff"
+      }
+    ]
+  },
+  "Host": {
+    "passed": 407,
+    "resultGroups": 28,
+    "rawLog": {
+      "path": "/tmp/fc-round15-host-final.log",
+      "bytes": 42380,
+      "sha256": "a4dc220bcfc4dd75391fc4453a58d87993483afeaca1009aad031684543bd425"
+    },
+    "report": {
+      "path": "开发计划/验证记录/2026-10-31-host-accounts-round15.json",
+      "bytes": 48691,
+      "sha256": "347837d769d8b708ba9ea87fbef0f1176a8cc55accd998acd7f537111095cadc"
+    },
+    "cfgOnlyPathsChangedAfterBuildStarted": [
+      "crates/fc-bootstrap/src/application.rs",
+      "crates/fc-bootstrap/src/application/accounts_probe.rs",
+      "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "crates/fc-windows/src/workbench.rs"
+    ],
+    "hostDepInfoFiles": [
+      {
+        "path": "target/release/deps/adler2-efc696f3a28ce3f8.d",
+        "bytes": 975,
+        "sha256": "b744a1eb09ddc4dfd3d2b7f8fd55cc311ff01f600e99e4761287056539e5cdf1"
+      },
+      {
+        "path": "target/release/deps/aes-780289d9a0456056.d",
+        "bytes": 3409,
+        "sha256": "fa3d3c8cc8e884cc4151a7d32e1b2064f5bc18bf9329ef7db2151998c25e5a69"
+      },
+      {
+        "path": "target/release/deps/ahash-fbf5ffdee571732c.d",
+        "bytes": 2480,
+        "sha256": "0a1fe901eb4aa18c5e9e4ef72b57a5401a416a878fef844328c84194d8c94e67"
+      },
+      {
+        "path": "target/release/deps/bitflags-4b63ee4b502f45b0.d",
+        "bytes": 2846,
+        "sha256": "209e1c1747ee6b613782c4a07eece281a6d6d33bcbcaef0d6b2861282599d8c5"
+      },
+      {
+        "path": "target/release/deps/block_buffer-3a0169b56286b56c.d",
+        "bytes": 1057,
+        "sha256": "41be7eb2494c47291a51bd262aa3cbc39d8c7dbb0c88de315017d80087528059"
+      },
+      {
+        "path": "target/release/deps/business_storage-c09de9fe3d791272.d",
+        "bytes": 341,
+        "sha256": "b25f2212db1657897486948f27613315f5ebf0c0f6143392ef813fed996196a7"
+      },
+      {
+        "path": "target/release/deps/cc-b8e8d8ad9ceda545.d",
+        "bytes": 5656,
+        "sha256": "265601a4d1caacf24f08bf42e20197ef13fa22d8926ebab8c801960b8a587048"
+      },
+      {
+        "path": "target/release/deps/cfg_if-f185e5d8136f3f3c.d",
+        "bytes": 630,
+        "sha256": "515111bca0147c6f7f4c16621a7f52070a5ed64129aa5485cc7a3f994bad7e80"
+      },
+      {
+        "path": "target/release/deps/cipher-9218c9ce814dbad5.d",
+        "bytes": 2443,
+        "sha256": "b0ea3b01fd6c0cfd0ba310fa8c97b5820785aeb7eef3cd5c31faa2cfd7ec66e0"
+      },
+      {
+        "path": "target/release/deps/core_detect-f2f3b0e872fd2113.d",
+        "bytes": 2161,
+        "sha256": "00cf44049d482119a4497050411bceb88de798ef724856603b925fc1d3ce5251"
+      },
+      {
+        "path": "target/release/deps/cpufeatures-52605b35ec2e0258.d",
+        "bytes": 1034,
+        "sha256": "9812fafe42b392c257d502ee4e71fac128d51c6ac33335823cf8d1d034cc19d3"
+      },
+      {
+        "path": "target/release/deps/crc32fast-78c28e648e9211b3.d",
+        "bytes": 2580,
+        "sha256": "ff08fa5822c1819305287ad47565e595f4c322914a20073c7fe291cdbda2d6f4"
+      },
+      {
+        "path": "target/release/deps/crypto_common-d9ab639cee7e19b6.d",
+        "bytes": 679,
+        "sha256": "514578dfa795a5d77d3edf07ade237e031dc3fdaf70549634f76863cf66e3764"
+      },
+      {
+        "path": "target/release/deps/digest-d94f0c6fa58c0049.d",
+        "bytes": 3333,
+        "sha256": "90afadb0a03671fee0e060a00cae7a82ef09f0ec8ec8ed711891315ab06446b1"
+      },
+      {
+        "path": "target/release/deps/encoding_rs-349c843bd9e4d075.d",
+        "bytes": 7559,
+        "sha256": "ba7ed8ce492e6d1ad473c5a17b66e00a04b8c113dac006495370fe811f3d5fab"
+      },
+      {
+        "path": "target/release/deps/fallible_iterator-d4b83733f07db2ad.d",
+        "bytes": 707,
+        "sha256": "ad18897fbe26264daa762c5f209373ba59e83c04d4808553910d0d67b2caba96"
+      },
+      {
+        "path": "target/release/deps/fallible_streaming_iterator-b0f68d88fef8efed.d",
+        "bytes": 777,
+        "sha256": "a8e9e853f832f85e99af8ace71e541af1475834458b9244247bd27915969993d"
+      },
+      {
+        "path": "target/release/deps/fc_application-496471dd70afe184.d",
+        "bytes": 652,
+        "sha256": "5f9b3c84c329ecf1d64f3c3cb8a25be7f86491628245dc702a67dd11611b820b"
+      },
+      {
+        "path": "target/release/deps/fc_application-c194ceb3cd111103.d",
+        "bytes": 599,
+        "sha256": "976f2c85734fbac6638588b6f5b4dc6ae8702b2342c56450f033a42e005972f7"
+      },
+      {
+        "path": "target/release/deps/fc_audio-8fd269f7e0a78166.d",
+        "bytes": 486,
+        "sha256": "cfd60a0555177614a383933043e41383c17e7dccffc5dd5e1f9938319855b5f5"
+      },
+      {
+        "path": "target/release/deps/fc_audio-e84cca14b03879cf.d",
+        "bytes": 537,
+        "sha256": "a37eb3f20c5223c412608c71f2247677bcfacb32f0b54e20963d2da7d66a7cc5"
+      },
+      {
+        "path": "target/release/deps/fc_bootstrap-6290f6353d64e181.d",
+        "bytes": 2387,
+        "sha256": "b58fa0cc6ca01bbb51cf8d7d06e653bef8a5c52bff341d24ac9faa9b016b6a71"
+      },
+      {
+        "path": "target/release/deps/fc_bootstrap-b9bea83e9f9001f8.d",
+        "bytes": 326,
+        "sha256": "5f0c8a1eda8f383633ebf94b6b6cc6cae3547c9b46950a4e00be4168d4f983e4"
+      },
+      {
+        "path": "target/release/deps/fc_bootstrap-edc6a2db3ec6c04d.d",
+        "bytes": 326,
+        "sha256": "3a2d8d68bc59c58ba8b5f12b966a99657ed8cb6fb32ad7194d310eee32498f28"
+      },
+      {
+        "path": "target/release/deps/fc_bootstrap-fede0e4f4c3723bc.d",
+        "bytes": 3013,
+        "sha256": "c28adfbee4f95e3c63790ff4f9be96cc0810e512fb7870bf7e4c5bfa441d8cd8"
+      },
+      {
+        "path": "target/release/deps/fc_domain-74d504fc50556e61.d",
+        "bytes": 2005,
+        "sha256": "65b79570c7cfcdca53f1ac02ebf406a0cfd5c9f1a22eb12705cf5189e15146d4"
+      },
+      {
+        "path": "target/release/deps/fc_domain-e8af1c758f10890a.d",
+        "bytes": 1866,
+        "sha256": "daaa5f7d5d53805c0d773af95554a9811e3e33eec598744852e0ed70c1fff168"
+      },
+      {
+        "path": "target/release/deps/fc_materials-5cf24807e9bd4ac2.d",
+        "bytes": 1044,
+        "sha256": "882b43247079d0bc8442134d5e4e59d3d3a07ab67c2ae2f5d43c71761f180334"
+      },
+      {
+        "path": "target/release/deps/fc_materials-c70694769ac6ff79.d",
+        "bytes": 869,
+        "sha256": "a8a4a9fc155cfee36d41d214a7bd64ef8cadab463594df97b51b098889b302fd"
+      },
+      {
+        "path": "target/release/deps/fc_ports-02b160eb844c47f4.d",
+        "bytes": 756,
+        "sha256": "b280eee04aa5329640ff2ca81f363e05a64810282360061bca8f1e039bbc1d06"
+      },
+      {
+        "path": "target/release/deps/fc_ports-6995560993aaa444.d",
+        "bytes": 1053,
+        "sha256": "69d35f57d0e601bbaa196543e42ccc42d67010c00196129149e49c6bb7b2447f"
+      },
+      {
+        "path": "target/release/deps/fc_presentation-7bc51d81dee9c28b.d",
+        "bytes": 759,
+        "sha256": "4f817b98cecd4a579b6e03608680b9617ed91a9c387072587624208dbe3f30d3"
+      },
+      {
+        "path": "target/release/deps/fc_presentation-90026aa7e95eec3e.d",
+        "bytes": 660,
+        "sha256": "a49216b7165e4731d8035caf60ec97f6debb2470b88d1c6b69cd99446d5d2ec3"
+      },
+      {
+        "path": "target/release/deps/fc_protocol-7f5abd9df1decbc6.d",
+        "bytes": 1468,
+        "sha256": "0960e2f4ea0003547e8e906f31198edefae13c8848f190876e25d563c878d075"
+      },
+      {
+        "path": "target/release/deps/fc_protocol-94fabff2daa536dd.d",
+        "bytes": 1200,
+        "sha256": "016f4182ec4a7032c1ca66c2f3fdf30246201f88acd5a72d006ff46573227b86"
+      },
+      {
+        "path": "target/release/deps/fc_runtime-72b01ce2ade9bbcc.d",
+        "bytes": 1486,
+        "sha256": "a8c1ae34c99a6b4d1e233f129eb9483ba26daadc0d23916d1bd9df42c554eb53"
+      },
+      {
+        "path": "target/release/deps/fc_runtime-bad4922eb9fb158e.d",
+        "bytes": 1196,
+        "sha256": "4c9bb07aca6430ace7844ee564710c852fa8c575588a12ae271dc62367b91b8d"
+      },
+      {
+        "path": "target/release/deps/fc_security-7fcbe33c6c73bf84.d",
+        "bytes": 816,
+        "sha256": "ca12a4666a035c40a9ecd742a9969605b89c57768db04a05e0174b3bd2bf9cd2"
+      },
+      {
+        "path": "target/release/deps/fc_security-90a92c5620c0eb4c.d",
+        "bytes": 577,
+        "sha256": "8f4dc5409d084825d4ca4c088d5b5fe2d5d2cb4ebe0a9519645960a5e149df8b"
+      },
+      {
+        "path": "target/release/deps/fc_storage-52e58b4f31e7c795.d",
+        "bytes": 3021,
+        "sha256": "4000c05a94a3c02ab719326162ed45e92d45ff307dc042f3a457f9e6efc0a69f"
+      },
+      {
+        "path": "target/release/deps/fc_storage-892441de5853c1f4.d",
+        "bytes": 2844,
+        "sha256": "f752f3d84ac9ed3540467a9b9475e2ab8bc6268fd8ec9986e2d2022471b6ae0c"
+      },
+      {
+        "path": "target/release/deps/fc_windows-01a8414be8da61f7.d",
+        "bytes": 632,
+        "sha256": "ce62b96038d28a533e11392438dc6611743e28cb617be1bc3590ef6800c60e1c"
+      },
+      {
+        "path": "target/release/deps/fc_windows-aaaecef118271c90.d",
+        "bytes": 728,
+        "sha256": "df3dfcede2f57e5422e058bf052ba3586001c10d3af52efaa1f2bc393ff6a58b"
+      },
+      {
+        "path": "target/release/deps/find_msvc_tools-0e2aefdf6b86fd34.d",
+        "bytes": 1491,
+        "sha256": "91997a0e765ca9ef42bf70df6758cdb513493ebc4051464c56ce8bf0459fc1d3"
+      },
+      {
+        "path": "target/release/deps/flate2-38da5922ac689511.d",
+        "bytes": 7625,
+        "sha256": "b0128e6ab9e29229990a0f0074d863dd83c908f543f29dab41112a8422e6bf63"
+      },
+      {
+        "path": "target/release/deps/generic_array-8700b48b710b2d5a.d",
+        "bytes": 2981,
+        "sha256": "cc4b4c73b2ecf6590b562cb9165ed870dc23a7e33883463badb3535b9f1bca13"
+      },
+      {
+        "path": "target/release/deps/hashbrown-b05ab1a0f25639c1.d",
+        "bytes": 4449,
+        "sha256": "9db4941ea5f2dffa5e152920be0015c815e4e8d57ae2d825c14a07f18d1af5cd"
+      },
+      {
+        "path": "target/release/deps/hashlink-ceb202270819edac.d",
+        "bytes": 1811,
+        "sha256": "2021139bccea326994db14c633de3eb2784ce02de0e2f02619dd29e597f413fd"
+      },
+      {
+        "path": "target/release/deps/hmac-67f24d8d6aee61ae.d",
+        "bytes": 1314,
+        "sha256": "4f4872433aefb87ac49c386c26adbe5a31d6ab75709c220c87ed11063b0d7e40"
+      },
+      {
+        "path": "target/release/deps/inout-00bcd3c99615af8c.d",
+        "bytes": 2035,
+        "sha256": "c2223b11ebe3aace50c37f12d1c0e220df2537aeea8a8a5daa350dbcf4643666"
+      },
+      {
+        "path": "target/release/deps/itoa-9ce36a963f9d84f7.d",
+        "bytes": 977,
+        "sha256": "eb198ec84f2324fd4288d2630ad12e06747b66cbd9a12a06d1ed68bf31cb636d"
+      },
+      {
+        "path": "target/release/deps/libsqlite3_sys-7918b88e1a96cdfc.d",
+        "bytes": 1644,
+        "sha256": "782e7e9f23ce0c34b3a7529326d8a5f42f6eee6bb8458f4b958702236e43f190"
+      },
+      {
+        "path": "target/release/deps/log-5b61e306d704dac2.d",
+        "bytes": 1672,
+        "sha256": "8db984cc7dd6de5dc703c7aaa2b45a85f1d1971cf162276c531a9da308445855"
+      },
+      {
+        "path": "target/release/deps/memchr-b0a9d0a086cecb52.d",
+        "bytes": 10860,
+        "sha256": "540041ed8f7abf5eed1ef3542f331680dcbf3e89f76c32f3b0b1e0eb9d09b3a3"
+      },
+      {
+        "path": "target/release/deps/miniz_oxide-fa9b785018975303.d",
+        "bytes": 5068,
+        "sha256": "70b7801a0294bda95e467d29cdd9c7d914538c55a701f9d054bc235da9ddbbbb"
+      },
+      {
+        "path": "target/release/deps/multiversion_no_op-29feb4a67ad06d5f.d",
+        "bytes": 504,
+        "sha256": "c5bd479c700df58b4b842e2a91e2b4a5a1e6f771f051708a8546164fdc60d790"
+      },
+      {
+        "path": "target/release/deps/once_cell-729befbacc07b06d.d",
+        "bytes": 1016,
+        "sha256": "e9b3a543241b55ea8a0f80871803d278084e9d435f3a900f1a58179c830970c9"
+      },
+      {
+        "path": "target/release/deps/pbkdf2-5dcf736455d91950.d",
+        "bytes": 634,
+        "sha256": "eb7184add439afa527a73cc5517be73a4327688abfd4e143a784c538c61c03f9"
+      },
+      {
+        "path": "target/release/deps/pdf_syntax-33d0be5497b71d26.d",
+        "bytes": 16892,
+        "sha256": "fa1d4569c4d64edd00b1d583fd09426986f58fc32742f868f31743ace0ab51eb"
+      },
+      {
+        "path": "target/release/deps/pkg_config-63c9957c239e5aaa.d",
+        "bytes": 662,
+        "sha256": "b46d9c869b744a5fd5fb0bf0277a62476258ee2096a180550a5cf4f3ba9a0bb7"
+      },
+      {
+        "path": "target/release/deps/proc_macro2-8d436a02e245e5d8.d",
+        "bytes": 4667,
+        "sha256": "6cf92136fb0c7d84157f2f9440679396bfda9d1f949e7b319f8ae17eccad40c9"
+      },
+      {
+        "path": "target/release/deps/quick_xml-bd2be2aafcf6a6ca.d",
+        "bytes": 7657,
+        "sha256": "ac8fd27c483baebd377d867b0e659a30ba64d00afcd5ea59eb3b5155292e646c"
+      },
+      {
+        "path": "target/release/deps/quote-fcaf8c888e86417b.d",
+        "bytes": 2785,
+        "sha256": "401433c9cc30db311e49bb8d2afbebca47721a45d89e129a18e108c6681002eb"
+      },
+      {
+        "path": "target/release/deps/runtime_storage-551276b46a38165c.d",
+        "bytes": 336,
+        "sha256": "b1f18908a00acb9bef076bc00e3f86a1be9d447272dacb7f2ea0b1349d2e0bdb"
+      },
+      {
+        "path": "target/release/deps/rusqlite-3fe1c2cd34843aa6.d",
+        "bytes": 9772,
+        "sha256": "2d03c4ab6a9e6b1d16dcec444a8f8bc4ba8f77b5a2efbb1de14c3a3ef84f7d82"
+      },
+      {
+        "path": "target/release/deps/rustc_hash-76b61586d73cbcec.d",
+        "bytes": 1051,
+        "sha256": "bc1283d448207824b895dff91f7b8466505ac05ebc01fde595aa58199c3d6972"
+      },
+      {
+        "path": "target/release/deps/rustversion-bd9cfb81bbacbbca.d",
+        "bytes": 4289,
+        "sha256": "ed5ea1fc058932b9a9f77555cb41f396370647ac3b42adc71b2c29ea36d92100"
+      },
+      {
+        "path": "target/release/deps/ryu-9f3cf706bd13c96a.d",
+        "bytes": 4604,
+        "sha256": "b6a02144e7083f1e585ea5d93ac1a22401222fa1ec5e0e67317039c8d2f0f1dc"
+      },
+      {
+        "path": "target/release/deps/scopeguard-60657e68eef05b6e.d",
+        "bytes": 658,
+        "sha256": "f8787208d8de11a05d5ed8a656c674f5b358090e263f7140c3c6cf9ff5380b97"
+      },
+      {
+        "path": "target/release/deps/serde-3bae774ed0fd4b62.d",
+        "bytes": 2655,
+        "sha256": "13be97545c8fb375627051a1c40dde59111aa4f2950cc52afbc587a728026386"
+      },
+      {
+        "path": "target/release/deps/serde_core-273adafb3532575a.d",
+        "bytes": 7916,
+        "sha256": "c56f9379bfcd4b723dae49817a2c4907efb6118e5ee4a8a3f48b08cb22d1be53"
+      },
+      {
+        "path": "target/release/deps/serde_derive-4135bda54eaa29c3.d",
+        "bytes": 8757,
+        "sha256": "186d197b3487398e28d053689b6adeba1bbe9d24ab38dbbf65000b9e538f8a6b"
+      },
+      {
+        "path": "target/release/deps/serde_derive-c9f2691f33a74241.d",
+        "bytes": 8757,
+        "sha256": "441c22ecab3aec3a069fde5b78e3701628d003d7acd9d88377d506da66bd3dab"
+      },
+      {
+        "path": "target/release/deps/serde_json-83272b7c47f840e7.d",
+        "bytes": 6369,
+        "sha256": "106a09c3eb66459c3090c0744cbe8474260b3d876bbef807c35f332eb0e1e4ec"
+      },
+      {
+        "path": "target/release/deps/sha2-a96255f7cde114a6.d",
+        "bytes": 3492,
+        "sha256": "6c8617328ba8683534c78c21240a7e8d7a89c4a05fe2d9727248e43e0d032ad4"
+      },
+      {
+        "path": "target/release/deps/shlex-01b389c0ef08dc6c.d",
+        "bytes": 968,
+        "sha256": "fc91b05e5d42cf1592ed0d06ae15d9aeb002988e6c1dcd0299bf2971393d358d"
+      },
+      {
+        "path": "target/release/deps/simd_adler32-bc4419a9495a78e3.d",
+        "bytes": 4177,
+        "sha256": "1e34b28e527b4b4cd6fe6ffc8e20452c47efd141f6011c02debcd0b82eff7694"
+      },
+      {
+        "path": "target/release/deps/simdutf8-296d780722471106.d",
+        "bytes": 3916,
+        "sha256": "3d39ec987e50ee39930791172d066e47f4ce56f3d5722c85afd9415add3a258e"
+      },
+      {
+        "path": "target/release/deps/smallvec-6444c7b8a39447fa.d",
+        "bytes": 648,
+        "sha256": "d8eb2ad2d4ba15652a260b25de3c528dc95267a391b0241abdc51d0a991e6a7a"
+      },
+      {
+        "path": "target/release/deps/subtle-75670e4e21b43cd6.d",
+        "bytes": 630,
+        "sha256": "183560b934aab25b2fc0400ffd2c2acee865b59453331cb5c46b153d6927765f"
+      },
+      {
+        "path": "target/release/deps/syn-384d781d310b1366.d",
+        "bytes": 16779,
+        "sha256": "e2270d00f5373d54e057273055495a6bdd12a9fde8c6973ddc53b5366e89d367"
+      },
+      {
+        "path": "target/release/deps/syn-8e7308c985dd6fe7.d",
+        "bytes": 15415,
+        "sha256": "d373003fe650c114dd6a29e4a5dead0b503210f2f2853ef1aacd01f73f31b103"
+      },
+      {
+        "path": "target/release/deps/typenum-4bece21b56d35fd9.d",
+        "bytes": 5041,
+        "sha256": "e49eeb8150b1d6e771120a5ada843439bc39d4872634fc93c9a178e5e051d6a9"
+      },
+      {
+        "path": "target/release/deps/unicode_ident-c7bd1f99bdd49be2.d",
+        "bytes": 1068,
+        "sha256": "6295b7887c4c22acbf065d815a0c8bde12a30e43c0d85018fde5d07900d5e5e6"
+      },
+      {
+        "path": "target/release/deps/vcpkg-594104ce323bdc52.d",
+        "bytes": 627,
+        "sha256": "fe310eeeb6a4750736cb528e3ac15e54a5c826cc305036b0643e8cb363bf049d"
+      },
+      {
+        "path": "target/release/deps/version_check-8c32ccdc2e3674ac.d",
+        "bytes": 1822,
+        "sha256": "30161a3813d8ef0a18c069f00dbbac51341d810760f72f814df82b5739a5b282"
+      },
+      {
+        "path": "target/release/deps/voice_storage-5160e16195dfb891.d",
+        "bytes": 326,
+        "sha256": "c5749684e7e1d1cf67b3e6a6096b148223681e8bd696a7dc3a6c6d2480fc81b4"
+      },
+      {
+        "path": "target/release/deps/windows_implement-cf1762f504877dff.d",
+        "bytes": 794,
+        "sha256": "90beddeb7f0d6c5a6781a66f14e78b769e671533109d2861f5a9868e9ddc4276"
+      },
+      {
+        "path": "target/release/deps/windows_interface-039c45f21d489587.d",
+        "bytes": 502,
+        "sha256": "8758d887c93fdef45e7d9e5b7bd654a5fb16e52a2a5bb438c75a8fb726a6c001"
+      },
+      {
+        "path": "target/release/deps/zerocopy-70c372ef30480739.d",
+        "bytes": 7514,
+        "sha256": "67f083a40f5f23929da63c83be7020042375b40d1b6d1b974d8f4a37949e167d"
+      },
+      {
+        "path": "target/release/deps/zeroize-fb461536803743c6.d",
+        "bytes": 982,
+        "sha256": "9f9db2321e4abb0d3e1e4635ef259f2858ff2c6ceffe0260b3560fe7741614ba"
+      },
+      {
+        "path": "target/release/deps/zlib_rs-67705f156ba86c30.d",
+        "bytes": 15166,
+        "sha256": "aacc0825127e2b3a4ca1736f4fccd24669aa3eb4cdda0a1609e7689e278a0b3f"
+      }
+    ],
+    "actualAbsenceSearch": {
+      "crates/fc-bootstrap/src/application.rs": [],
+      "crates/fc-bootstrap/src/application/accounts_probe.rs": [],
+      "crates/fc-windows/src/workbench.rs": [],
+      "crates/fc-bootstrap/src/application/web_editor/tests.rs": []
+    },
+    "remaining246SourceHashes": "Byte-identical between build-start snapshot and final; four Windows-cfg paths absent from all92Hostdepinfo. This supports Host-effective source stability; it does not claim Windows source ran on Host."
+  },
+  "compiledWindows": {
+    "modernMain": {
+      "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 8123502,
+      "sha256": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08"
+    },
+    "win7GnuMain": {
+      "path": "/tmp/fc-round15-win7-target/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 8241664,
+      "sha256": "0b178c13ed5ae3f0ba0d46056aad4906daca487b480573e5b1f258c25acf4c1f"
+    },
+    "testArtifacts": [
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-95fad28d15fea78d.exe",
+        "bytes": 53834004,
+        "sha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_windows",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_storage-9549596680176a3f.exe",
+        "bytes": 39308531,
+        "sha256": "561cbefcaa50d1a4d540cb923468894847d72d4a49c52d33b2a75d49371eea6f",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-storage/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+        "bytes": 113506170,
+        "sha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_bootstrap",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_materials-2221de66f2e97130.exe",
+        "bytes": 33302283,
+        "sha256": "ace85a62b324a3364e9aeac18b59a1f2278cbc5e502afc34d14cb12799759417",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_materials",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-materials/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_security-9c7f88663f75f873.exe",
+        "bytes": 16404992,
+        "sha256": "5fc7415663272d3fb7e9f158c01a5b2e322c67ae3ed313b28583b7ef6b4595e5",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_security",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-security/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/runtime_storage-d7df388ce9405226.exe",
+        "bytes": 36954313,
+        "sha256": "8ae286d8d02649bdb81a9859d883601bb11718db8a73633f4647dbbe93b0fda0",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "runtime_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/runtime_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/business_storage-17bf377bec8f2f7e.exe",
+        "bytes": 44497570,
+        "sha256": "02d91f484570364228d31cd95cbfccca329cf380d9b20ff8387f34e095818116",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "business_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/business_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/voice_storage-bf022395eae863de.exe",
+        "bytes": 38568888,
+        "sha256": "933e7d2871c08ae5e1541e4fee21bcd22eea3058f8603a67d9b4e0fad7ad17f4",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "voice_storage",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/voice_storage.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_protocol-186900fcb7bfa5db.exe",
+        "bytes": 21473943,
+        "sha256": "884c2de42dab24556bbafb810e9c933e13552d6131f1b49f337d3dd157599d49",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_protocol",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-protocol/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_presentation-bf0074726aa5b441.exe",
+        "bytes": 17809571,
+        "sha256": "14639010d8f4a04f3e91efc473d018da24a075ea4a356ed734b7a94392eb9cfc",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_presentation",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-presentation/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_audio-35e3156477d0188a.exe",
+        "bytes": 16294993,
+        "sha256": "26887f2213bd4f4119c41ed8a80a83b135f6dcb2fa152aeb4afb816ed00ff0c3",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_audio",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-audio/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_application-8ad1e6c8c699ab50.exe",
+        "bytes": 15582000,
+        "sha256": "2d736e0e8a5b8e51df3772aea2ad89ce744e7334e1658d5cae2fabf8aa5e5267",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_application",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-application/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_runtime-fad3e5e278e2d80c.exe",
+        "bytes": 18756332,
+        "sha256": "04ee773d50a4f3110cf3a4c8c397f82112499eef44ea79a5c6505e02d78ae622",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_runtime",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-runtime/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_ports-361bddc8b2876cc0.exe",
+        "bytes": 15072310,
+        "sha256": "3d92f009891b13ab95b79d5cfa498e6b725317c78081133022ea23b78f4a49ff",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_ports",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-ports/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_domain-915566e140287178.exe",
+        "bytes": 16288802,
+        "sha256": "409957b9f2aff37fef74057e2ab6f3ba87e7686ab1e83b9a3e896f18a808bab2",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fc_domain",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-domain/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+        "bytes": 122034077,
+        "sha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fc-bootstrap",
+          "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        }
+      }
+    ],
+    "profile": "16 testEXEs debug/unoptimized opt0; release main probes separately",
+    "cargoMetadata": {
+      "path": "/tmp/fc-round15-windows-tests-final.jsonl",
+      "bytes": 100830,
+      "sha256": "2f12efb52328b89b719961c16623f52753ace4ff83da6c01e5b8bfde30ea018a"
+    },
+    "actualFullRun": "FINAL_MODERN_ONE_RUN512_16_PASS; WIN7GNU_SUPPLEMENTAL_ZERO_TEST_EXES_PASS; CLEANUP_AND_READONLY_REMOTE_AUDIT_PASS"
+  },
+  "referenceFixtureReview": {
+    "source": {
+      "path": "crates/fc-bootstrap/src/application/accounts_probe.rs",
+      "bytes": 10217,
+      "sha256": "f669f1c91f6d31fe82347eb016bd4151fbeba1a15834fca4b85d2c9cd9fd371c"
+    },
+    "facts": [
+      "Prior lesson fixture intentionally left teacher bindings Unassigned; without actual reference the domain correctly allowed account disable. Third FAIL was an invalid negative-fixture premise, not product permission bypass.",
+      "New36stage management starts by editing only self-owned fixture ScheduleDocument to Explicit teacher for exact probe teacher. Submits production Work::SaveSchedule with real locallease and captured schedule revision.",
+      "Next stage checks committed ScheduleSaved document returned through normal worker and editor saved path contains exactExplicit teacher. Original disable-rejection assertion remains accountenabled and specific reference-error status.",
+      "No test success callback, direct raw storage edit, forged authority or weakened refusal assertion was added."
+    ],
+    "fourthTargetedRecheck": {
+      "path": "/tmp/fc-round15-windows-reference-recheck.json",
+      "bytes": 22490,
+      "sha256": "05332d09930da274a70326d7ffaa4a8944a9339625d6d4ffc0b4a324e928171e",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualApplicationExitCode": 0,
+      "mainSha256": "4a4c149f610585522df727387838de831fa2d782645f64531f12dd17605aa275",
+      "marker": [
+        "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+      ],
+      "classification": "Historical targetedPASS on previous4a4c/main and a1ea source; not final0159/f82execution."
+    },
+    "historicalFailures": [
+      {
+        "path": "/tmp/fc-round15-windows-initial-application.json",
+        "bytes": 10971,
+        "sha256": "ad8c18758abf195fedee7395a36f2c57c2431bf199bd051a7c0f0a0478908cd2",
+        "actualStatus": "FAIL",
+        "exeSha256": "9958e487a36d35d07f548f9636f718caa39462fbdb0d9fbce34eb4b6bff2d5ae",
+        "actualApplicationExitCode": 1,
+        "actualFailureTail": [
+          "PROBE_COMPLETE tick=46002 kind=schedule page=取消课表修改",
+          "PROBE_EVENT tick=46007 action=100 page=课表、作息与校历 pending=false generation=2",
+          "PROBE_EVENT tick=46022 action=102 page=验证学期 · 单周表 pending=false generation=2",
+          "FutureClassroom: 原生课表命令拒绝：stage=58"
+        ]
+      },
+      {
+        "path": "/tmp/fc-round15-windows-account-flow-recheck.json",
+        "bytes": 11475,
+        "sha256": "7a7281cf965200f4035d2b2f5a36255da03c8de9c24c0cf2c3ec781d3d12c3e0",
+        "actualStatus": "FAIL",
+        "exeSha256": "e4828870089691b7fa1712b725ae1905568dfe5a885d6935799510a679afdc4d",
+        "actualApplicationExitCode": 1,
+        "actualFailureTail": [
+          "PROBE_SUBMIT tick=47993 kind=request page=隔离验证学校 · 登录工作台",
+          "PROBE_COMPLETE tick=48999 kind=updated page=隔离验证学校 · 登录工作台",
+          "PROBE_EVENT tick=50004 action=17 page=隔离验证学校 · 工作台 pending=false generation=3",
+          "FutureClassroom: 锁定后未保留未完成日期草稿"
+        ]
+      },
+      {
+        "path": "/tmp/fc-round15-windows-native-text-recheck.json",
+        "bytes": 19040,
+        "sha256": "ef903827ea6c7d09ecda6fbbc29a77fede7ce2a9f625a82846f464102652edbc",
+        "actualStatus": "FAIL",
+        "exeSha256": "919002e49f7548fc8e53a3804bc98742e474345ed4a9a033349c59e15d3110b3",
+        "actualApplicationExitCode": 1,
+        "actualFailureTail": [
+          "PROBE_EVENT tick=80990 action=611 page=账号与任教范围 pending=false generation=4",
+          "PROBE_SUBMIT tick=80990 kind=other page=账号与任教范围",
+          "PROBE_COMPLETE tick=81993 kind=other page=账号与任教范围",
+          "FutureClassroom: 被课表引用的账号停用未原子拒绝或未显示原因：账号与任教范围已保存，该账号原有会话已失效。"
+        ]
+      }
+    ]
+  },
+  "package": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-accounts-dev.zip",
+    "bytes": 4033635,
+    "sha256": "eee5658f3dddbfbed284fd57aa5162d926e647d91b22d98ed19338d303637cf1",
+    "memberCount": 13,
+    "members": [
+      {
+        "path": "fc-bootstrap.exe",
+        "bytes": 8123502,
+        "sha256": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08",
+        "CRC32": "4c70c9a1",
+        "computedCRC32": "4c70c9a1",
+        "manifestBound": true
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1067,
+        "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+        "CRC32": "7a6b93f4",
+        "computedCRC32": "7a6b93f4",
+        "manifestBound": true
+      },
+      {
+        "path": "PROBE-README.txt",
+        "bytes": 10423,
+        "sha256": "b831d226e4d9e921e16373b4662999dc36bd102847834e17b9879688e3c9385f",
+        "CRC32": "f678b4a0",
+        "computedCRC32": "f678b4a0",
+        "manifestBound": true
+      },
+      {
+        "path": "THIRD-PARTY-NOTICES.txt",
+        "bytes": 2400197,
+        "sha256": "372382560a2d656d222d68be2d13b3d03daab01cb70e72039d4ae9e3b0ebe957",
+        "CRC32": "5ac17f00",
+        "computedCRC32": "5ac17f00",
+        "manifestBound": true
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "bytes": 25543,
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+        "CRC32": "e5388c3e",
+        "computedCRC32": "e5388c3e",
+        "manifestBound": true
+      },
+      {
+        "path": "web/assets/favicon-CXuYoSfB.svg",
+        "bytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "CRC32": "42ea869c",
+        "computedCRC32": "42ea869c",
+        "manifestBound": true
+      },
+      {
+        "path": "web/assets/index-Cr8Ck6mT.js",
+        "bytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78",
+        "CRC32": "c94b462a",
+        "computedCRC32": "c94b462a",
+        "manifestBound": true
+      },
+      {
+        "path": "web/assets/index-DFFVdc8-.css",
+        "bytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+        "CRC32": "58efa4b4",
+        "computedCRC32": "58efa4b4",
+        "manifestBound": true
+      },
+      {
+        "path": "web/assets/pcm-worklet-DQjgdlBf.js",
+        "bytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d",
+        "CRC32": "df2c6257",
+        "computedCRC32": "df2c6257",
+        "manifestBound": true
+      },
+      {
+        "path": "web/assets/wav-worker-LSywWbpJ.js",
+        "bytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "CRC32": "dd4aea29",
+        "computedCRC32": "dd4aea29",
+        "manifestBound": true
+      },
+      {
+        "path": "web/fc-assets.json",
+        "bytes": 1072,
+        "sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+        "CRC32": "b8a1ad53",
+        "computedCRC32": "b8a1ad53",
+        "manifestBound": true
+      },
+      {
+        "path": "web/index.html",
+        "bytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf",
+        "CRC32": "8d732a1c",
+        "computedCRC32": "8d732a1c",
+        "manifestBound": true
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 21036,
+        "sha256": "83949b79c5c18a2cc8b7f000aa7d4c47278a7ec51d1aeb0b185214d07146106f",
+        "CRC32": "3b9f5359",
+        "computedCRC32": "3b9f5359",
+        "manifestBound": false
+      }
+    ],
+    "artifactType": "development-probe",
+    "frontend": {
+      "api_version": 1,
+      "asset_bytes": 444723,
+      "asset_count": 6,
+      "included": true,
+      "manifest_path": "web/fc-assets.json",
+      "manifest_sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+      "schema_version": 1,
+      "scope": "Pairing/session plus authenticated homework/shared-reminder UI and content application ports; material metadata and controlled file preparation/upload/download ports; voice canonical WAV upload/job/cancel ports and browser AudioWorklet recording; normal TLS/listener and event-to-stage scheduling disabled.",
+      "status": "PARTIAL_NOT_VALIDATED",
+      "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
+      "ui_compatibility_version": 1
+    }
+  },
+  "frontendReuse": {
+    "report": {
+      "path": "/tmp/fc-round15-frontend-reused.json",
+      "bytes": 10493,
+      "sha256": "9862c3aede4432176f23b74edf9969a8fdf8f9ebea32ff60cef9c3543c494c6b"
+    },
+    "unchangedWebSourceFiles": [
+      {
+        "path": "web/.gitignore",
+        "sha256": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636"
+      },
+      {
+        "path": "web/README.md",
+        "sha256": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3"
+      },
+      {
+        "path": "web/SHADCN-LICENSE.md",
+        "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7"
+      },
+      {
+        "path": "web/components.json",
+        "sha256": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d"
+      },
+      {
+        "path": "web/index.html",
+        "sha256": "2dca4d7418dad0e52c618b48d9024bd4313da9908a0c2f79bcbec7554d17903b"
+      },
+      {
+        "path": "web/package-lock.json",
+        "sha256": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0"
+      },
+      {
+        "path": "web/package.json",
+        "sha256": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f"
+      },
+      {
+        "path": "web/scripts/budget.mjs",
+        "sha256": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88"
+      },
+      {
+        "path": "web/scripts/licenses.mjs",
+        "sha256": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea"
+      },
+      {
+        "path": "web/src/App.tsx",
+        "sha256": "a433dcf70690c909cf280c469949ccccfcb4888eb77dbe472b6d2f4ea75870ad"
+      },
+      {
+        "path": "web/src/MaterialsPane.tsx",
+        "sha256": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c"
+      },
+      {
+        "path": "web/src/TeacherWorkspace.tsx",
+        "sha256": "1c7f5d81950d785c64356ba7c6eec3a9ef2a3af72e0be24d6ca80c7a16680981"
+      },
+      {
+        "path": "web/src/VoicePane.tsx",
+        "sha256": "cc6319381eac84aa2d5f6b04a117172dd36189d86cd8e712ea60b44d647c2aaa"
+      },
+      {
+        "path": "web/src/api/client.ts",
+        "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b"
+      },
+      {
+        "path": "web/src/api/content-controller.ts",
+        "sha256": "30cf89809a4351ca01926fc741a6d200e4027b4682b4f90fbbb749fa851edce3"
+      },
+      {
+        "path": "web/src/api/content-protocol.ts",
+        "sha256": "77e1feb6a7a0571cd08918c68f6e9b17e7dcaab63ae2627f947d0d84e7ab0f43"
+      },
+      {
+        "path": "web/src/api/controller.ts",
+        "sha256": "1bbe3f304c0ce4fb59e850822b93224b446cb25472bdd228b0085d69bedccc07"
+      },
+      {
+        "path": "web/src/api/material-client.ts",
+        "sha256": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6"
+      },
+      {
+        "path": "web/src/api/material-controller.ts",
+        "sha256": "f18aa159726f334f228e7b29c8f23e9f71a4070be3df2aed13c07a1e322c859b"
+      },
+      {
+        "path": "web/src/api/material-protocol.ts",
+        "sha256": "3c10c3ae05828f29dd61bf427d0f06e8c44791127af98e807b92bcf3dacb0763"
+      },
+      {
+        "path": "web/src/api/protocol.ts",
+        "sha256": "1ade99d3f638312dceeaa70ae9afdd95412c2df76d384cd91bc6c48c16a27c52"
+      },
+      {
+        "path": "web/src/api/voice-client.ts",
+        "sha256": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda"
+      },
+      {
+        "path": "web/src/api/voice-controller.ts",
+        "sha256": "d2768bb06da8430d0da04ff9b8ee6dae16c2d94c79fcb659fee74edc091907a6"
+      },
+      {
+        "path": "web/src/api/voice-protocol.ts",
+        "sha256": "ed5d80450a7d979d26182e3cf24248b9ff8d0f04bff4bd4c67d2a25931023d07"
+      },
+      {
+        "path": "web/src/components/ui/button.tsx",
+        "sha256": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84"
+      },
+      {
+        "path": "web/src/components/ui/card.tsx",
+        "sha256": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8"
+      },
+      {
+        "path": "web/src/components/ui/input.tsx",
+        "sha256": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441"
+      },
+      {
+        "path": "web/src/favicon.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "web/src/lib/utils.ts",
+        "sha256": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6"
+      },
+      {
+        "path": "web/src/main.tsx",
+        "sha256": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02"
+      },
+      {
+        "path": "web/src/styles.css",
+        "sha256": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6"
+      },
+      {
+        "path": "web/src/voice/browser-capture.ts",
+        "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+      },
+      {
+        "path": "web/src/voice/normalize.ts",
+        "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+      },
+      {
+        "path": "web/src/voice/pcm-worklet.ts",
+        "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+      },
+      {
+        "path": "web/src/voice/pcm.ts",
+        "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+      },
+      {
+        "path": "web/src/voice/ports.ts",
+        "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+      },
+      {
+        "path": "web/src/voice/recorder.ts",
+        "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+      },
+      {
+        "path": "web/src/voice/wav-worker.ts",
+        "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+      },
+      {
+        "path": "web/tests/client.test.ts",
+        "sha256": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c"
+      },
+      {
+        "path": "web/tests/content-client.test.ts",
+        "sha256": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01"
+      },
+      {
+        "path": "web/tests/content-controller.test.ts",
+        "sha256": "3c794b0a63a6fe57ee0f2c6b2dcfdfc31b7a3146abf9b5a48530b206de17220b"
+      },
+      {
+        "path": "web/tests/content-fixtures.ts",
+        "sha256": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471"
+      },
+      {
+        "path": "web/tests/content-protocol.test.ts",
+        "sha256": "3949f7e77450c030476ecadda3d0e0530a01ad261b6ce8bf665d3032df9d1762"
+      },
+      {
+        "path": "web/tests/controller.test.ts",
+        "sha256": "2d2b98d8592466946f969ac7a539bf089e20298fe5235d2ac5c58bb537e52fd7"
+      },
+      {
+        "path": "web/tests/material-client.test.ts",
+        "sha256": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9"
+      },
+      {
+        "path": "web/tests/material-controller.test.ts",
+        "sha256": "c55dd735babf4495268cbdbfe81cd9cf11cf6ce7f843a08dad6b18dfa400a73c"
+      },
+      {
+        "path": "web/tests/material-protocol.test.ts",
+        "sha256": "1bdb6d418b1aeb75cdc5f19dc3a1a4e684d7c082bd97830f3859815bf061b481"
+      },
+      {
+        "path": "web/tests/material-unicode.test.ts",
+        "sha256": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0"
+      },
+      {
+        "path": "web/tests/protocol.test.ts",
+        "sha256": "3e63ed627b9d392157ebd99cfd08ea0a29b6e91bbda727107a380dfa9e375c70"
+      },
+      {
+        "path": "web/tests/voice-client.test.ts",
+        "sha256": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52"
+      },
+      {
+        "path": "web/tests/voice-controller.test.ts",
+        "sha256": "000b37672ac1d3818e9e7f2147addb3be45006841c7bd0801176fb56ab59343c"
+      },
+      {
+        "path": "web/tests/voice-fixtures.ts",
+        "sha256": "a5dedd9a242a8b7af219a69dd3977e4345dca50044f977643c1a78a93962d683"
+      },
+      {
+        "path": "web/tests/voice-protocol.test.ts",
+        "sha256": "5366eff7220eb6648d43ebea003d903f881dd08257bac51996e97e1e6c37c792"
+      },
+      {
+        "path": "web/tests/voice-recorder-capture.test.ts",
+        "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+      },
+      {
+        "path": "web/tests/voice-recorder-normalize.test.ts",
+        "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+      },
+      {
+        "path": "web/tests/voice-recorder-pcm.test.ts",
+        "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+      },
+      {
+        "path": "web/tests/voice-recorder-worklet.test.ts",
+        "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+      },
+      {
+        "path": "web/tests/voice-recorder.test.ts",
+        "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+      },
+      {
+        "path": "web/tsconfig.json",
+        "sha256": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508"
+      },
+      {
+        "path": "web/vite.config.ts",
+        "sha256": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff"
+      }
+    ],
+    "assetCount": 6,
+    "assetBytes": 444723,
+    "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+    "priorRound14Evidence": {
+      "unit": 208,
+      "unitFiles": 18,
+      "UIBrowserSynthetic": 31,
+      "actualHardwareMicrophone": "NOT_RUN",
+      "productionTLS": "NOT_RUN"
+    },
+    "classification": "Reused unchanged actual round14 Web build from verified prior ZIP after61source SHA checks; no new208unit/UI31browser run inround15. Six package assets are exact prior bytes."
+  },
+  "producerBoundary": {
+    "workbenchSource": {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 89353,
+      "sha256": "04f12d7936c14898efa753c74302632b6261cf6776cae0c9eb18d04d2fb13884"
+    },
+    "producerEvidence": {
+      "path": "/tmp/fc-round15-workbench-lock.json",
+      "bytes": 15654,
+      "sha256": "8ecda4d5479bd6b812e1ca26c90aa4b01b8ea52b67ec2db5d6331f872c0908ae"
+    },
+    "accountsStaticReview": {
+      "path": "/tmp/fc-round15-accounts-independent-review.json",
+      "bytes": 38270,
+      "sha256": "250ec761f831cb6677ec278782fccd2318d00ad52db407ddf7f12651a24a5302"
+    },
+    "externalRootReview": "Root independently reviewed and accepted initial lock and subsequent hidden Text-only probe_edit boundaries. This author records own implementation separately; final source/evidence binding is not independent self-security approval."
+  },
+  "limits": [
+    "Independent operation here was read-only binding of current sources, binaries, Cargo metadata, ZIP CRC/SHA and external raw execution/audit records. No test/build/remotecommand orcleanup was rerun by this finalreview; hashconsistency is not reproduciblebuild proof.",
+    "This agent authored Windowlock/probe_edit earlier and made one native testassertion mistake, corrected by root. Root independently reviewed both production adapter boundaries. Producerimplementation, ownercompile and externally executed final55Windows tests remain distinct from independent accounts-source review.",
+    "Finalmodern512tests across16debug opt0EXEs and Host407/28 groups are separate executions. Win7GNU finalrelease had0extra testEXEs and only ran supplementalprobes on the sameactualWin11build26300. ActualWin7SP1x86,Win10 andSeewohardware remainNOT_VALIDATED.",
+    "Frontend208unit/UI31syntheticbrowser and6staticassets444723B are reusedround14 evidence after61unchangedWebsourcechecks and byte-exact assetcopy from priorverifiedZIP; they were not rerun inround15.",
+    "NativeWebmarkers use synthetictrustedrequestmetadata; normal productionlistener/TLS/networkdeadlines, physicalmicrophone and audibleoutput remainNOT_RUN. No P0strict5s acceptance claim; previousstrict5s failure remains open.",
+    "Account512/scope4096 are domain/UIceilings. Current aggregateidentity/receipt64KiB limit remains; real capacitytest proves atomicrejection and safe retry, not fullmaximum persistence. Legacyrolemigration and fullD11P2-08acceptance are not established by this report.",
+    "Lock closes authority/UIticket andsecretcontrols immediately but doesnot physically interrupt alreadyrunningKDF/SQL; boundedworker keepsphysicalownership untilactualreturn. NativeEditclearing is not proof of allWindowsinternalmemorycopies erased.",
+    "Three targetednativefixtureFAIL and two fullnativefixture/testFAIL are retained as history. Historical4thtargetedPASS and singlebin53PASS are not accumulated into final512/16; final countscome fromone complete finalrun.",
+    "Actualper-run cleanup and finalremoteaudit arePASS; noownprobe tasks/processes/markerdirectories remain and authorizedsshd/keyretained. Root performslocaltarget/tmp/cachecleanup after archiving thisreport."
+  ],
+  "reviewScript": {
+    "path": "/tmp/fc-round15-final-review-source-check.py",
+    "bytes": 12638,
+    "sha256": "194040ca6131ce600e95af4bf919e0b9e2371f0ff5cfc6144bc48c9c3d7ffffb"
+  },
+  "rootTestAssertionCorrection": {
+    "classification": "REAL_NATIVE_PRODUCER_TEST_ASSERTION_DEFECT; FIX_BY_ROOT; NOT_PRODUCT_READ_BOUND_FAILURE",
+    "sourceAfterRootFix": {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 89353,
+      "sha256": "04f12d7936c14898efa753c74302632b6261cf6776cae0c9eb18d04d2fb13884"
+    },
+    "historicalActualRun": {
+      "path": "/tmp/fc-round15-windows-final-before-lock-secret-fixture-fix.json",
+      "bytes": 10704,
+      "sha256": "6c8e5f80ea1bc9774deb265a8c0f0e6740efa5303ec9cc03955c3556f0dd9ba0"
+    },
+    "actualStatus": "FAIL",
+    "actualCleanup": "PASS",
+    "actualMainSha256": "4a4c149f610585522df727387838de831fa2d782645f64531f12dd17605aa275",
+    "testExe": "fc_windows-95fad28d15fea78d.exe",
+    "testExeSha256": "3eb381b60dbe61fbf1f0fc408900147aab66d7c1a3e981ca84735ac36d539b65",
+    "actualSummary": "54passed1failed of55nativefc_windows tests; firstEXE stopsrunner; no aggregate512PASS claim",
+    "rawFailureTail": [
+      "test workbench::tests::isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes ... ok",
+      "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok",
+      "test workbench::tests::native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts ... ok",
+      "test workbench::tests::native_timetable_grid_and_combo_use_bounded_stable_selections ... ok",
+      "System.Management.Automation.RemoteException",
+      "thread 'workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields' (2496) panicked at crates/fc-windows/src/workbench.rs:1707:49:",
+      "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+      "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... FAILED",
+      "test workbench::tests::repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources ... ok",
+      "test workbench::tests::repeated_hidden_render_and_submit_do_not_accumulate_native_resources ... ok",
+      "",
+      "failures:",
+      "",
+      "failures:",
+      "    workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+      "",
+      "test result: FAILED. 54 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.21s",
+      ""
+    ],
+    "producerAcknowledgement": "Original author test deliberately wrote33characters into max32Text to prove Lock doesnotread/truncate. It incorrectly unwrapped bounded read_edit, which correctly returnedE_INVALIDARG. This was an author test mistake.",
+    "rootFix": "Require read_edit.is_err, then GetWindowTextLengthW(exacthiddennonsecretHWND)==33. EmptyLock event and secretclear assertions remain unchanged.",
+    "independentScopeCheck": {
+      "method": "Replace exactly the new6line comment/assert block with original singleassert and recomputeSHA256 of whole file",
+      "replacements": 1,
+      "reconstructedBeforeSha256": "200d90b3cc173b1e54476768412a6340061094baba3091cd49d5be5595eca53b",
+      "matchesPreviouslyFrozenSource": true,
+      "conclusion": "Rootchange is precisely this cfg(test) assertion block; no production method or lock/readbound was changed."
+    },
+    "runtimeAfterFix": "PENDING_ROOT_FINAL_FREEZE_REBUILD_AND_FULL_NATIVE_RERUN; notrunbythisagent",
+    "currentResolution": "Corrected producer native test actual ...ok in final512/16 run, sourceF82/modern0159, recorded in modernActualFullRun.new18ActualTests. Producer did not independently execute remote tests."
+  },
+  "legacyWebLockFixtureAlignment": {
+    "classification": "SECOND_FULL_RUN_REAL_FAILURE_OF_LEGACY_LOCK_FIXTURE; ROOT_ONE_LINE_TEST_HELPER_ALIGNMENT",
+    "actualRaw": {
+      "path": "/tmp/fc-round15-windows-final-before-second-full-fixture-fix.json",
+      "bytes": 73353,
+      "sha256": "bea667445f6387cd8b33b30c876519ab499a05b9e2cefbfb4ce7f02f0c52ebaa"
+    },
+    "actualStatus": "FAIL",
+    "cleanup": "PASS",
+    "testExeCount": 16,
+    "rawCounts": {
+      "passed": 511,
+      "failed": 1
+    },
+    "failedTestExe": "fc_bootstrap-2c9facf31078f737.exe",
+    "failedTestExeSha256": "9bd77d452fa4c8805f4c07a29e74174f5f76fa5a09c2edce8629991c57e7a896",
+    "rawFailureTail": [
+      "PROBE_COMPLETE tick=7466 kind=other page=正在加载教师设备",
+      "PROBE_EVENT tick=7473 action=502 page=教师设备与配对管理 pending=false generation=0",
+      "PROBE_SUBMIT tick=7473 kind=other page=教师设备与配对管理",
+      "PROBE_COMPLETE tick=7473 kind=other page=教师设备与配对管理",
+      "",
+      "thread 'application::web_editor::tests::native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocations' (30332) panicked at crates/fc-bootstrap/src/application/web_editor/tests.rs:303:43:",
+      "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    application::web_editor::tests::native_teacher_device_page_uses_the_shared_worker_and_exact_confirmed_revocations",
+      "",
+      "test result: FAILED. 52 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.36s",
+      ""
+    ],
+    "beforeFileSha256": "07dee97c3bbc44682106d34ad5c2a427bc94b3239200cddeeb24ffc805bfd27c",
+    "afterFile": {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 16299,
+      "sha256": "f4460eaadf51119fe09b4f42b30e72db174e4226a3f3d11952b82ffc798a30d6"
+    },
+    "exactChangeProof": "Remove the one prepare_probe_form call from current file and SHA256 reproduces previous frozen wholefile 07dee97c3bbc44682106d34ad5c2a427bc94b3239200cddeeb24ffc805bfd27c",
+    "rootFix": "native_action forwards current synthetic form through prepare_probe_form; onlyLOCK edits nonsecretText then emits emptyFormData; all other actions, nativeevents/wait_for and assertions unchanged.",
+    "HostBoundary": "This adds4th Windows-cfg changedpath sinceHost407build. Actual92Hostdepinfo search finds0mentions of web_editor/tests.rs; finalHostreport must describe4paths, other246 unchanged.",
+    "runtimeAfterFix": "PENDING_NEW_FREEZE_REBUILD_AND_ALL16_RERUN; prior15EXE successes not accumulated.",
+    "currentResolution": "Aligned legacyWebnative test actual ...ok within finalbin53PASS0, overall512/16; finalSourceF82 and currentbinarySHA matched metadata."
+  },
+  "historicalBeforeAssertionFixBindingReport": {
+    "path": "/tmp/fc-round15-final-review-before-lock-reader-test-fix.json",
+    "bytes": 107870,
+    "sha256": "b506dc050939ec47d4673987022525573accd4ee2b0cad100d7064492a082240"
+  },
+  "historicalPreviousPackage": {
+    "path": "/tmp/fc-round15-before-lock-reader-test-fix-dev.zip",
+    "bytes": 4033678,
+    "sha256": "f96e34bdd4349f173783b2b26e576cafcd67480eb8dace52842f5adfeca56065"
+  },
+  "historicalBeforeWebLockFixBindingReport": {
+    "path": "/tmp/fc-round15-final-review-before-web-lock-test-fix.json",
+    "sha256": "605f83037185beb5946ec6bac526c18047cedaf55d32600d3a1c90995dfbd53b"
+  },
+  "updatedUtc": "2026-10-30T17:13:38.618647+00:00",
+  "supplementalFinalBinRecheck": {
+    "path": "/tmp/fc-round15-windows-bin-recheck.json",
+    "bytes": 8442,
+    "sha256": "7225fdb8d993bac96eaae5e7ebf5e6800294774f88fa47bb389e061b5ba73089",
+    "classification": "Actual targeted1EXE53PASS0FAIL/cleanupPASS; supplemental only, not full512/16",
+    "actualMainSha256": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08",
+    "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+    "testExeSha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+    "matchesCurrentArtifactsMetadata": true,
+    "actualRawSummary": [
+      "test result: ok. 53 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.72s"
+    ]
+  },
+  "modernActualFullRun": {
+    "raw": {
+      "path": "/tmp/fc-round15-windows-final.json",
+      "bytes": 92090,
+      "sha256": "b5131b24c110dae78cd52ad8c66ef12d2915c364994fcd5f624046574ac708da"
+    },
+    "log": {
+      "path": "/tmp/fc-round15-windows-run.log",
+      "bytes": 802,
+      "sha256": "7ddbb6d1fc5cc5292db968cb30c8e06f15bdc65d279a680c7ea0bff523275575"
+    },
+    "summary": {
+      "path": "/tmp/fc-round15-windows-summary.json",
+      "bytes": 38529,
+      "sha256": "80b6c03083f3c7ab0ce049fa3f2ecaa08d14b6160340acf7a07c2d253e23afe9"
+    },
+    "actualStatus": "PASS",
+    "cleanup": "PASS",
+    "actualMainSha256": "0159f7e1667b6ff82354916cf64f1d4d356699ff173a8c4f3a5d42669f04df08",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "actualPassed": 512,
+    "actualTestExeCount": 16,
+    "testRows": [
+      {
+        "name": "fc_windows-95fad28d15fea78d.exe",
+        "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+        "actualResults": [
+          [
+            "55",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_storage-9549596680176a3f.exe",
+        "binarySha256": "561cbefcaa50d1a4d540cb923468894847d72d4a49c52d33b2a75d49371eea6f",
+        "actualResults": [
+          [
+            "43",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualResults": [
+          [
+            "63",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_materials-2221de66f2e97130.exe",
+        "binarySha256": "ace85a62b324a3364e9aeac18b59a1f2278cbc5e502afc34d14cb12799759417",
+        "actualResults": [
+          [
+            "35",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_security-9c7f88663f75f873.exe",
+        "binarySha256": "5fc7415663272d3fb7e9f158c01a5b2e322c67ae3ed313b28583b7ef6b4595e5",
+        "actualResults": [
+          [
+            "17",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "runtime_storage-d7df388ce9405226.exe",
+        "binarySha256": "8ae286d8d02649bdb81a9859d883601bb11718db8a73633f4647dbbe93b0fda0",
+        "actualResults": [
+          [
+            "3",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "business_storage-17bf377bec8f2f7e.exe",
+        "binarySha256": "02d91f484570364228d31cd95cbfccca329cf380d9b20ff8387f34e095818116",
+        "actualResults": [
+          [
+            "43",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "voice_storage-bf022395eae863de.exe",
+        "binarySha256": "933e7d2871c08ae5e1541e4fee21bcd22eea3058f8603a67d9b4e0fad7ad17f4",
+        "actualResults": [
+          [
+            "6",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_protocol-186900fcb7bfa5db.exe",
+        "binarySha256": "884c2de42dab24556bbafb810e9c933e13552d6131f1b49f337d3dd157599d49",
+        "actualResults": [
+          [
+            "29",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "binarySha256": "14639010d8f4a04f3e91efc473d018da24a075ea4a356ed734b7a94392eb9cfc",
+        "actualResults": [
+          [
+            "24",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_audio-35e3156477d0188a.exe",
+        "binarySha256": "26887f2213bd4f4119c41ed8a80a83b135f6dcb2fa152aeb4afb816ed00ff0c3",
+        "actualResults": [
+          [
+            "22",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_application-8ad1e6c8c699ab50.exe",
+        "binarySha256": "2d736e0e8a5b8e51df3772aea2ad89ce744e7334e1658d5cae2fabf8aa5e5267",
+        "actualResults": [
+          [
+            "25",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_runtime-fad3e5e278e2d80c.exe",
+        "binarySha256": "04ee773d50a4f3110cf3a4c8c397f82112499eef44ea79a5c6505e02d78ae622",
+        "actualResults": [
+          [
+            "26",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_ports-361bddc8b2876cc0.exe",
+        "binarySha256": "3d92f009891b13ab95b79d5cfa498e6b725317c78081133022ea23b78f4a49ff",
+        "actualResults": [
+          [
+            "6",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_domain-915566e140287178.exe",
+        "binarySha256": "409957b9f2aff37fef74057e2ab6f3ba87e7686ab1e83b9a3e896f18a808bab2",
+        "actualResults": [
+          [
+            "62",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      },
+      {
+        "name": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualResults": [
+          [
+            "53",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "exitCode": 0
+      }
+    ],
+    "new18ActualTests": [
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::empty_active_catalog_does_not_block_removing_retained_scope_or_returning ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::disabled_catalog_relationships_stay_visible_and_can_be_explicitly_removed ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::confirmation_holds_cas_backend_failure_allows_explicit_reentry ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::suspension_preserves_same_owner_nonsecret_half_draft_without_changing_page ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::multiple_scopes_explicit_user_clear_and_dirty_discard_keep ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::real_roles_owner_gate_and_stable_id_selection ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::last_admin_teacher_scope_and_readonly_login_use_domain_preflight ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::password_only_final_submit_never_retained_by_navigation_or_suspend ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::accounts_editor::tests::full_capacity_pagination_and_long_unicode_labels_are_valid_views ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualLine": "test backend::account_management_tests::accounts_real_create_update_multiple_scopes_captured_cas_and_reopen_protected_records ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualLine": "test backend::account_management_tests::accounts_management_reads_and_writes_reject_teacher_web_and_last_admin_without_revocation ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualLine": "test backend::account_management_tests::accounts_scope_role_and_disable_changes_revoke_exact_web_voice_and_material_access ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualLine": "test backend::account_management_tests::accounts_active_default_and_retained_history_references_reject_atomically_without_revoking ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "binarySha256": "96587e7fa995cf989ee74d6ac65ff654a795a65c0631ea1573e9ecbed2b67129",
+        "actualLine": "test backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... ok"
+      },
+      {
+        "testExe": "fc_windows-95fad28d15fea78d.exe",
+        "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+        "actualLine": "test workbench::tests::hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields ... ok"
+      },
+      {
+        "testExe": "fc_windows-95fad28d15fea78d.exe",
+        "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+        "actualLine": "test workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding ... ok"
+      },
+      {
+        "testExe": "fc_windows-95fad28d15fea78d.exe",
+        "binarySha256": "eebefe162059ef53e10634434e4347217e157c14baf1282ffe4c1917577b1819",
+        "actualLine": "test workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields ... ok"
+      },
+      {
+        "testExe": "fc_bootstrap-2c9facf31078f737.exe",
+        "binarySha256": "122b42572737b37974276e8eb5f654cca7eddadd62dd0b3e3432db9d1dc5103c",
+        "actualLine": "test application::tests::account_draft_exit_guard_is_owner_bound_and_native_lock_supersedes_pending_work ... ok"
+      }
+    ],
+    "webVoiceMarkers": [
+      "WEB_MATERIALS_PASS real_DPAPI_SQLite_controlled_files_TXT_Office_WIC_PDFhelper_50MiB_upload_download_64KiB_chunks_CSRF_CAS_delete_receipt_delete_invalidates_stream=PASS synthetic_request_metadata=true listener_TLS_browser=NOT_RUN network_Read_deadline=NOT_VALIDATED",
+      "WEB_VOICE_PASS real_DPAPI_SQLite_exact_Web_target_CSRF_canonical_WAV_upload_native_zero_PCM_three_repeats_query_cancel_driver_return=PASS synthetic_request_metadata=true actual_microphone=NOT_RUN listener_TLS_browser=NOT_RUN",
+      "WEB_CONTENT_PASS real_DPAPI_SQLite_exact_Web_lease_scopes_CSRF_save_read_clear_CAS_idempotency_query_reminder_desktop_facts=PASS synthetic_request_metadata=true wire_TLS_browser_listener=NOT_RUN",
+      "WEB_PAIRING_PASS CNG_DPAPI_SQLite_exact_local_approval_original_poll_secret_Secure_HttpOnly_CSRF_local_lock_independent_durable_logout_restart_cleanup=PASS wire_TLS_browser_listener=NOT_RUN"
+    ],
+    "nativeApplicationMarker": [
+      "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+    ],
+    "nativeExitCodes": {
+      "exitCode": 0,
+      "audioExitCode": 0,
+      "webVoiceExitCode": 0,
+      "applicationExitCode": 0,
+      "hostExitCode": 0,
+      "materialsExitCode": 0
+    },
+    "interpretation": "Actual root/paired Windows execution, independently bound by this reviewer to current artifact/metadata bytes. Includes18new realWindows tests; this reviewer did not itself start remote tests. Producer Window tests passed in this finalrun; this is external runtime evidence, not author-independent security approval."
+  },
+  "win7GnuActualSupplemental": {
+    "raw": {
+      "path": "/tmp/fc-round15-win7-on-win11.json",
+      "bytes": 27790,
+      "sha256": "dc1ade5b712a57d5c92944f6d7f372bf516a1b7065894c3151ff16ab990ed1b6"
+    },
+    "log": {
+      "path": "/tmp/fc-round15-win7-run.log",
+      "bytes": 184,
+      "sha256": "043d7b36b2893bda2e926d792b6aa3ffa786f61f366c7199830386087d69d728"
+    },
+    "actualStatus": "PASS",
+    "cleanup": "PASS",
+    "actualMainSha256": "0b178c13ed5ae3f0ba0d46056aad4906daca487b480573e5b1f258c25acf4c1f",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "testExeCount": 0,
+    "actualWebMarkers": [
+      "WEB_MATERIALS_PASS real_DPAPI_SQLite_controlled_files_TXT_Office_WIC_PDFhelper_50MiB_upload_download_64KiB_chunks_CSRF_CAS_delete_receipt_delete_invalidates_stream=PASS synthetic_request_metadata=true listener_TLS_browser=NOT_RUN network_Read_deadline=NOT_VALIDATED",
+      "WEB_VOICE_PASS real_DPAPI_SQLite_exact_Web_target_CSRF_canonical_WAV_upload_native_zero_PCM_three_repeats_query_cancel_driver_return=PASS synthetic_request_metadata=true actual_microphone=NOT_RUN listener_TLS_browser=NOT_RUN",
+      "WEB_CONTENT_PASS real_DPAPI_SQLite_exact_Web_lease_scopes_CSRF_save_read_clear_CAS_idempotency_query_reminder_desktop_facts=PASS synthetic_request_metadata=true wire_TLS_browser_listener=NOT_RUN",
+      "WEB_PAIRING_PASS CNG_DPAPI_SQLite_exact_local_approval_original_poll_secret_Secure_HttpOnly_CSRF_local_lock_independent_durable_logout_restart_cleanup=PASS wire_TLS_browser_listener=NOT_RUN"
+    ],
+    "actualAccountMarker": [
+      "native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS"
+    ],
+    "nativeExitCodes": {
+      "exitCode": 0,
+      "audioExitCode": 0,
+      "webVoiceExitCode": 0,
+      "applicationExitCode": 0,
+      "hostExitCode": 0,
+      "materialsExitCode": 0
+    },
+    "scope": "Win7GNU-target release binary supplementary execution on sameactualWin11 only; no actualWin7SP1x86/Win10 evidence and no extra512tests.",
+    "summary": {
+      "path": "/tmp/fc-round15-win7-summary.json",
+      "bytes": 28897,
+      "sha256": "205fcb8967f81a58720f023bfd905c88fd13409f6aed3ff547ebb71df7aa5dd9"
+    }
+  },
+  "alreadyArchivedRuntimeAuditReports": [
+    {
+      "path": "开发计划/验证记录/2026-10-31-windows11-accounts-round15.json",
+      "bytes": 133188,
+      "sha256": "970781590345154344c9b005163caa15da9b77969a8fbded568d023d2c2d63fe"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-31-win7-gnu-accounts-on-windows11-round15.json",
+      "bytes": 57974,
+      "sha256": "d133dd28907551a46f89dac6781dbcf575da7bd06c32b55814e88a88660782f0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-31-round15-remote-cleanup.json",
+      "bytes": 321,
+      "sha256": "95db6acc13aabe884b3b9e85d36aaf1ace376354b8c70b5d95ad1fc995c1c574"
+    }
+  ],
+  "finalRemoteCleanupAudit": {
+    "raw": {
+      "path": "/tmp/fc-round15-windows-cleanup-audit.json",
+      "bytes": 321,
+      "sha256": "95db6acc13aabe884b3b9e85d36aaf1ace376354b8c70b5d95ad1fc995c1c574"
+    },
+    "facts": {
+      "ownedProbeTasks": 0,
+      "ownedProbeProcesses": 0,
+      "ownedMarkerDirectories": 0,
+      "sshd": "Running",
+      "identity": "eliora\\elior",
+      "outsideRepositoryPrivateKeyExists": true,
+      "outsideRepositoryPrivateKeyMode": "0600",
+      "readOnly": true,
+      "recordedUtc": "2026-10-30T17:13:23.161011+00:00",
+      "status": "PASS"
+    },
+    "classification": "External root/paired read-only audit after actual runners; no newremotecommand by this reviewer. Root still owns subsequent local buildcache/temp cleanup after archival."
+  },
+  "finalRuntimeTerminalConfirmation": {
+    "source": "Root relayed paired process terminal checks",
+    "modernSession": 96288,
+    "modernExitCode": 0,
+    "win7Session": 43345,
+    "win7ExitCode": 0,
+    "furtherRemoteTestsPlanned": false
+  },
+  "completedUtc": "2026-10-30T17:14:51.030644+00:00",
+  "allSourceArtifactReadsComplete": true,
+  "finalCheckCount": 110
+}

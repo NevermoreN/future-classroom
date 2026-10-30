@@ -485,6 +485,7 @@ pub(crate) fn credential_key(id: PrincipalId, kind: &str, version: u64) -> Strin
 fn identity_error(e: StorageError) -> IdentityRepositoryError {
     match e {
         StorageError::Identity(e) => IdentityRepositoryError::Domain(e),
+        StorageError::DocumentTooLarge => IdentityRepositoryError::Domain(IdentityError::Capacity),
         StorageError::CommandIdReused => IdentityRepositoryError::IdempotencyConflict,
         StorageError::PublicationFailed { .. }
         | StorageError::Indeterminate
@@ -839,13 +840,21 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
             .map_err(StorageError::Identity)?;
         let outcome =
             json!({"state":codec::identity(&transition.next),"events":events(&transition.events)});
+        let identity_value = codec::bytes(&codec::identity(&transition.next))?;
+        let receipt_value = codec::bytes(&json!({"fingerprint":fingerprint,"outcome":outcome}))?;
+        // Domain count ceilings do not imply this release's complete identity
+        // and receipt fit their independent 64KiB persisted value budgets.
+        // Reject before authority update/COMMIT, without truncating assignments.
+        if identity_value.len() > MAX_VALUE_BYTES || receipt_value.len() > MAX_VALUE_BYTES {
+            return Err(StorageError::DocumentTooLarge);
+        }
         mutations.push(Mutation::Put {
             key: IDENTITY.into(),
-            value: codec::bytes(&codec::identity(&transition.next))?,
+            value: identity_value,
         });
         mutations.push(Mutation::Put {
             key: journal,
-            value: codec::bytes(&json!({"fingerprint":fingerprint,"outcome":outcome}))?,
+            value: receipt_value,
         });
         let session = self.session.clone();
         let actor = self.actor.clone();

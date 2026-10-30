@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.27 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.28 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十四轮494项/16个debug测试EXE、release主EXE配对/内容/资料/语音端口及隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十五轮512项/16个debug测试EXE、release主EXE配对/内容/资料/语音端口及隐藏账号编辑/多任教/撤权/独立busy锁定、工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -148,3 +148,13 @@ Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑�
 [浏览器31检查](验证记录/2026-10-30-voice-ui-browser-synthetic-round14.json)及[真实Worklet→Offline→Worker通路](验证记录/2026-10-30-recorder-browser-synthetic-round14.json)采用合成零PCM MediaStream。自签HTTPS仅用于加载真实Worklet资源，不是校园证书信任或正常HTTP/TLS监听验收；无实际硬件麦克风、PPT共存或扬声器可听证据。现代PE仍5项已知Win7风险；Win7GNU扫描0风险仅静态补充。实际Win7/Win10/正式MSVC、可见希沃/触控/DPI、安装和72小时状态不变。
 
 [最终Windows只读清理](验证记录/2026-10-30-windows11-owned-cleanup-round14.json)确认自有测试目录、任务和进程均0，sshd Running，仓库外私钥0600保留。全部开发目标继续active，正常监听与严格5秒P0门槛仍待完成。
+
+
+## 第十五轮增量：账号编辑、多任教范围与独立busy锁定
+
+[Win11现代x86最终512项/16程序](验证记录/2026-10-31-windows11-accounts-round15.json)PASS、cleanup PASS；新增3个原生锁定、9个账号Editor、1个应用草稿/锁定及5个Backend用例包含在512中。隐藏工作台通过账号创建、多班级/科目、课表引用拒绝、最后管理员保护、本人变更撤权后重登录和取消流程。独立LOCK在busy时只发送空表单并清秘密；探针仅写自己的隐藏非秘密Text控件，未使用全局输入或抢前台。
+
+[Win7GNU补充程序在同一Win11运行](验证记录/2026-10-31-win7-gnu-accounts-on-windows11-round15.json)也通过上述组合、四个Web标记及清理，0额外单测EXE。两产物均绑定250输入SHA `f82ea02da0deee4145c74bdd55cc85a5d1ddd762fbd1d649e96950edb48d47dd`；现代0159f7e1…与Win7GNU 0b178c13…分别记录，PE仍为0结构错误/5个已知风险与0/0。实际Win7 SP1、Win10 32/64位、正式MSVC、真实希沃/PPT/触控/DPI、可信TLS、安装和72小时状态不变。正式兼容目标不以同一台Win11上的两种程序代替。
+
+
+[本轮远端只读清理审计](验证记录/2026-10-31-round15-remote-cleanup.json)确认自有测试目录/任务/进程均0、sshd Running及仓库外私钥0600保留；[110项最终绑定复核](验证记录/2026-10-31-round15-final-review.json)与[本地清理](验证记录/2026-10-31-round15-cleanup.json)分别归档。测试通过与三系统完整产品验收继续分开记录。
