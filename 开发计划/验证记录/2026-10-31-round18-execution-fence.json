@@ -1,0 +1,125 @@
+{
+  "round": 18,
+  "scope": "Narrow worker execution fence and exact-session composed cancellable profile-content commit",
+  "not_independent_audit": true,
+  "frozen_at_utc": "2026-10-30T20:52:32.737404+00:00",
+  "sources": [
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "bytes": 18420,
+      "sha256": "4ea6b583bf7e22ee9d3ed2f0cdd51ef2f4ec42d9400fcf04908343d5a8b6f4bd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 99284,
+      "sha256": "862f2b618323ab75e952deaf62b9b8e52f373195342488452646b6b6be0eccfb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "bytes": 60598,
+      "sha256": "093cc3ff296d4694398720698b9921503db8b7b311ff667dfec8f19be42cf66b"
+    }
+  ],
+  "prior_evidence": "/tmp/fc-round18-backend.json remains unchanged, records the earlier 8-test source freeze; do not bind its hashes to these newer sources",
+  "api": {
+    "worker": "JobContext::execution_fence(&self)->impl Fn()->bool+Send+Sync+static. Captures same private Control Arc, cancellation token and monotonic deadline; checkpoint and fence share one private check_execution function. No actor authority is minted.",
+    "backend": "Backend::commit_profile_content_while(lease,prepared,Arc<dyn Fn()->bool+Send+Sync>)->Result<PublishedContentSnapshot>. Composes extracted original exact session_guard with fence before/after session checks; existing writer authorize calls at evaluation and actual precommit repeat both. Original commit remains compatible.",
+    "cancellation": "False or panicking fence maps ordinary ProfileContent Domain(Expired); no AuthorityUnavailable/global publication fault for normal cancellation/deadline. Already COMMIT cannot be undone by a later cancellation; query outcome/readback.",
+    "parent_wiring": "Root owns ContentJob and confirmed wiring context.execution_fence into commit_profile_content_while; its source is not owned/edited here."
+  },
+  "final_checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-bootstrap --lib --locked profile_content -- --test-threads=1",
+      "passed": 9,
+      "failed": 0,
+      "filtered": 60,
+      "seconds": 36.96,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-backend-final.log",
+        "bytes": 1338,
+        "sha256": "b19d745daa9ee85568eadb50d51d713010452352c45e5dd7458460b25877144a"
+      },
+      "new_test_cases": 1
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-runtime --lib --locked worker::",
+      "passed": 9,
+      "failed": 0,
+      "filtered": 17,
+      "seconds": 0.02,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-runtime-final.log",
+        "bytes": 1261,
+        "sha256": "a37e53114bf1b27762a401a2986e415002221d97d6ebc91d6a59c1d9c5f81bef"
+      },
+      "new_test_cases": 0
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo clippy -p fc-bootstrap -p fc-runtime --lib --tests --locked -- -D warnings",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-host-clippy.log",
+        "bytes": 466,
+        "sha256": "1fdbaff3d74218afe2390aa176a593cebda8cb34f4485d29b1ee9bd431880630"
+      }
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check [owned runtime/backend + flow-tests files]",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-final-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "new_test": {
+    "name": "backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back",
+    "description": "Actual PBKDF2/SQLite fixture and real fixed WorkerPool issue opaque context fences. A coordinator borrows Backend while the real context owner remains live; this is not a claim of the full Windows application job composition. A bounded fixture-only callback holds actual SQLite precommit when Health is AuthorityUpdating (mutations before COMMIT). Ticket cancel, real Instant deadline, pool request_stop, and a second physical worker panic each make the fence false. Each rejected finish leaves prior current unchanged and durable Begin.latest_publish_sequence intact. Known authority returns Healthy. Later cancellation after a successful commit does not undo current or durable Committed outcome.",
+    "no_fabricated_clock_for_job_deadline": true,
+    "fixture_barrier_is_test_only": true
+  },
+  "history": [
+    {
+      "stage": "Initial exact test FAIL",
+      "passed": 0,
+      "failed": 1,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-initial-test.log",
+        "bytes": 1475,
+        "sha256": "dbf6a7f6df3549b2a313c35332c5c94d96941fccb6208d8e1d6070e1e004cf2b"
+      },
+      "reason": "Fresh WorkerPool first try_submit saw Busy (mailbox receiver startup lock contention), before SQL cancellation test admission. Original log retained."
+    },
+    {
+      "stage": "Fixture corrected exact retry PASS",
+      "passed": 1,
+      "failed": 0,
+      "seconds": 10.85,
+      "log": {
+        "path": "/tmp/fc-round18-execution-fence-retry-test.log",
+        "bytes": 523,
+        "sha256": "ad5ad054bd67e5401c926375d1bcafb754f7557b95b6fe11c342198d08d2b0a7"
+      },
+      "correction": "Only unadmitted Busy is retried with returned task ownership and original bounded deadline. No CAS/SQL retry, no weakened assertion or production policy change. Included in final 9-test run; do not add counts."
+    }
+  ],
+  "execution_limits": {
+    "host_only": true,
+    "windows_runs": 0,
+    "ssh_runs": 0,
+    "full_application_windows_fence_run": "Parent controlled execution pending",
+    "real_media_wic": false,
+    "unchanged_precommit_contract": "This is a fresh precommit check, not a promise of rollback for a cancellation racing after final check/COMMIT."
+  },
+  "cleanup": {
+    "fixture_residuals": [],
+    "target": "/tmp/fc-round18-backend-target retained for parent unified cleanup; no foreign cache deleted"
+  },
+  "aggregate_algorithm": "SHA256 of ordered path + NUL + sha256 + LF rows in sources order",
+  "aggregate": "28f5ffe00b578186fa4e4ab17eb4daf935977e161f5b26ab5d5f0e02648b97f9"
+}

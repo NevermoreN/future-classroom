@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "scope": "Round18 development evidence across explicitly bound source phases; no single frozen EXE set ran all691 cases at once",
+  "developmentVerification": "PASS",
+  "completeProduct": "NOT_VALIDATED",
+  "architecture": {
+    "crates": 12,
+    "edges": 33
+  },
+  "host": {
+    "distinctCases": 504,
+    "method": "Full503/28groups plus one new guest-page fence case; prior pure producer/harness runs not added"
+  },
+  "windows": {
+    "distinctCases": 691,
+    "nonzeroTestPrograms": 16,
+    "blocks": [
+      {
+        "target": "fc_audio",
+        "kind": "lib",
+        "distinctCases": 22,
+        "report": "fc-round18-full-fc_audio-35e3156477d0188a-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_security",
+        "kind": "lib",
+        "distinctCases": 18,
+        "report": "fc-round18-full-fc_security-9c7f88663f75f873-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_runtime",
+        "kind": "lib",
+        "distinctCases": 26,
+        "report": "fc-round18-full-fc_runtime-fad3e5e278e2d80c-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_application",
+        "kind": "lib",
+        "distinctCases": 25,
+        "report": "fc-round18-full-fc_application-8ad1e6c8c699ab50-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_ports",
+        "kind": "lib",
+        "distinctCases": 8,
+        "report": "fc-round18-full-fc_ports-361bddc8b2876cc0-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_protocol",
+        "kind": "lib",
+        "distinctCases": 29,
+        "report": "fc-round18-full-fc_protocol-186900fcb7bfa5db-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_presentation",
+        "kind": "lib",
+        "distinctCases": 58,
+        "report": "fc-round18-full-fc_presentation-bf0074726aa5b441-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_materials",
+        "kind": "lib",
+        "distinctCases": 39,
+        "report": "fc-round18-full-fc_materials-2221de66f2e97130-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_domain",
+        "kind": "lib",
+        "distinctCases": 82,
+        "report": "fc-round18-full-fc_domain-915566e140287178-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_storage",
+        "kind": "lib",
+        "distinctCases": 67,
+        "report": "fc-round18-full-fc_storage-9549596680176a3f-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "runtime_storage",
+        "kind": "integration",
+        "distinctCases": 3,
+        "report": "fc-round18-final-runtime_storage-d7df388ce9405226-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "business_storage",
+        "kind": "integration",
+        "distinctCases": 43,
+        "report": "fc-round18-final-business_storage-17bf377bec8f2f7e-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "voice_storage",
+        "kind": "integration",
+        "distinctCases": 6,
+        "report": "fc-round18-final-voice_storage-bf022395eae863de-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_windows",
+        "kind": "lib",
+        "distinctCases": 85,
+        "report": "fc-round18-windows-library-verified-windows.json",
+        "exactFinalExe": true
+      },
+      {
+        "target": "fc_bootstrap",
+        "kind": "lib",
+        "distinctCases": 84,
+        "reports": [
+          "fc-round18-bootstrap-library-full-windows.json",
+          "fc-round18-bootstrap-affected-verified-windows.json"
+        ],
+        "exactFinalExe": false,
+        "reason": "Full 83-case baseline then changed Backend/file/startup scopes 14 cases on final EXE, including one new guest execution-fence case; unchanged code and repeated cases are not added twice."
+      },
+      {
+        "target": "fc-bootstrap",
+        "kind": "bin",
+        "distinctCases": 96,
+        "reports": [
+          "fc-round18-application-bin-complete-windows.json",
+          "fc-round18-controller-final-windows.json"
+        ],
+        "exactFinalExe": false,
+        "reason": "95 pass and one fixture admission failure; only the failing fixture source changed, then all four affected Controller cases passed on final EXE. No production-source change between these phases; count deduplicated to 96."
+      }
+    ],
+    "zeroExample": "verify_web_assets test harness has zero tests and is not counted; initial colon filter/300s observation failures retained separately"
+  },
+  "release": {
+    "modernSha256": "0a91fc8c7c98c6cb4596e16ccc98e6f40747f5bf21476797bf726196a1d07c38",
+    "win7GnuSha256": "be11ff441eb5947a2aca2a66b1cd4323aaa88971ad3707c20cff8ff215940af2",
+    "scope": "Both actually ran on Win11 build26300 x64/WOW64. Win7/Win10 actual OS and formal MSVC NOT_VALIDATED. Each combined probe passed existing39 layout steps +new52 independent-content UI steps, own hidden native/host/materials/zeroPCM and synthetic Web ports."
+  },
+  "package": {
+    "scope": "Development package exact payload and manifest verification; no formal release or machine certification",
+    "path": "/tmp/fc-round18-package/FutureClassroom-0.1.0-independent-content-dev.zip",
+    "bytes": 4589535,
+    "sha256": "f5ea406c81b48decf467b2bd096eac6cbbfd9d94d72bcb7369f936d4f30f41b3",
+    "exeSha256": "0a91fc8c7c98c6cb4596e16ccc98e6f40747f5bf21476797bf726196a1d07c38",
+    "entries": [
+      "fc-bootstrap.exe",
+      "LICENSE",
+      "PROBE-README.txt",
+      "THIRD-PARTY-NOTICES.txt",
+      "web/THIRD-PARTY-NOTICES.txt",
+      "web/assets/favicon-CXuYoSfB.svg",
+      "web/assets/index-Cr8Ck6mT.js",
+      "web/assets/index-DFFVdc8-.css",
+      "web/assets/pcm-worklet-DQjgdlBf.js",
+      "web/assets/wav-worker-LSywWbpJ.js",
+      "web/fc-assets.json",
+      "web/index.html",
+      "manifest.json"
+    ],
+    "target": "i686-pc-windows-gnu",
+    "status": "NOT_VALIDATED",
+    "payloadVerification": "PASS",
+    "frontend": {
+      "api_version": 1,
+      "asset_bytes": 444723,
+      "asset_count": 6,
+      "included": true,
+      "manifest_path": "web/fc-assets.json",
+      "manifest_sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+      "schema_version": 1,
+      "scope": "Pairing/session plus authenticated homework/shared-reminder UI and content application ports; material metadata and controlled file preparation/upload/download ports; voice canonical WAV upload/job/cancel ports and browser AudioWorklet recording; normal TLS/listener and event-to-stage scheduling disabled.",
+      "status": "PARTIAL_NOT_VALIDATED",
+      "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
+      "ui_compatibility_version": 1
+    },
+    "publishedDevelopmentArtifact": "/mnt/data/FutureClassroom-0.1.0-independent-content-dev.zip"
+  },
+  "frontend": {
+    "sourceFilesUnchanged": 61,
+    "assetFilesReused": 6,
+    "assetBytes": 444723,
+    "newFrontendTestsClaimed": false
+  },
+  "remainingGates": [
+    "Strict5s P0 and full networking resource proof",
+    "Real TLS/production listener/browser flow",
+    "Win7 SP1 x86/Win10/formal MSVC actual evidence",
+    "Visible Seewo/DPI/touch/PPT and full GUI",
+    "Install/upgrade/uninstall/72h and remaining plan tasks"
+  ],
+  "originalGoalStatus": "active",
+  "cleanup": "PASS",
+  "finalCodeInputs": {
+    "files": 301,
+    "aggregateSha256": "cd1860d30aa048cebce961c6688fad65b61d784b23b5d00abc0c0b085d43eb3a"
+  },
+  "cleanupReport": "开发计划/验证记录/2026-10-31-round18-cleanup.json",
+  "sshVerificationReport": "开发计划/验证记录/2026-10-31-round18-windows-final-ssh-and-cleanup.json"
+}

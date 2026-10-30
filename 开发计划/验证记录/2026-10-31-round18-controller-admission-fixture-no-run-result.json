@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--no-run",
+    "--message-format=json",
+    "--locked",
+    "--target-dir",
+    "/tmp/fc-round18-native-target"
+  ],
+  "exitCode": 0,
+  "sourceSha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b"
+}

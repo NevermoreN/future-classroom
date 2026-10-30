@@ -59,6 +59,15 @@ fn assigned(mut scene: SceneSnapshot, note: bool) -> SceneSnapshot {
         &default_public_layout(),
         None,
         &[WidgetMeasure {
+            key: fc_presentation::scene::SceneNodeKey {
+                scope: fc_domain::layout::LayoutScope::Public,
+                id: default_public_layout()
+                    .nodes
+                    .iter()
+                    .find(|n| n.kind == fc_domain::layout::NodeKind::Widget(kind))
+                    .unwrap()
+                    .id,
+            },
             kind,
             body,
             font_dip: card.font_dip,

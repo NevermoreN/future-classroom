@@ -1,0 +1,63 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "3063db1936591bd897041ce41aaafa3e95264b2bbdd9e5dffb6b6ee471d3089b",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/fc_protocol-186900fcb7bfa5db.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "::",
+      "exitCode": 0,
+      "binarySha256": "3063db1936591bd897041ce41aaafa3e95264b2bbdd9e5dffb6b6ee471d3089b",
+      "output": [
+        "",
+        "running 29 tests",
+        "test tests::bounded_before_conversion_and_no_trailing_values ... ok",
+        "test tests::canonical_nested_keys_remain_sorted_but_array_order_and_unicode_stay_exact ... ok",
+        "test tests::canonical_order_but_distinct_payloads_and_full_integer_precision ... ok",
+        "test tests::strict_dto_and_unicode_duplicate_keys ... ok",
+        "test web::assets::tests::manifest_caps_files_total_bytes_and_rejects_nonstatic_paths ... ok",
+        "test web::assets::tests::manifest_integrity_versions_duplicates_and_windows_aliases ... ok",
+        "test web::content::tests::canonical_routes_preserve_all_id_bits_and_reject_aliases_dates_and_offsets ... ok",
+        "test web::content::tests::content_mutation_requires_json_same_origin_framing_and_exact_csrf ... ok",
+        "test web::content::tests::exact_content_committed_and_command_result_disclosures_keep_revisions_after_clear ... ok",
+        "test web::content::tests::response_date_record_text_and_page_bounds_fail_closed_without_truncation ... ok",
+        "test web::content::tests::strict_save_rejects_duplicate_authority_injection_noncanonical_ids_and_invalid_text ... ok",
+        "test web::materials::tests::routes_and_strict_inputs ... ok",
+        "test web::materials::tests::scope_serialization_budget_keeps_an_entire_large_group ... ok",
+        "test web::pairing::tests::codes_secrets_and_names_have_independent_strict_bounds ... ok",
+        "test web::pairing::tests::exact_schema_duplicate_and_unknown_fields_are_rejected ... ok",
+        "test web::pairing::tests::pairing_inputs_preserve_spelling_without_claiming_authority ... ok",
+        "test web::responses::tests::full_assignment_session_is_rejected_without_truncating_scope ... ok",
+        "test web::responses::tests::outbound_json_exact_byte_limit_and_rejection_before_growth ... ok",
+        "test web::responses::tests::outbound_limit_counts_json_escaping_and_utf8_bytes ... ok",
+        "test web::responses::tests::public_response_is_an_exact_non_sensitive_field_set ... ok",
+        "test web::responses::tests::request_ids_keep_all_64_bits_and_only_creation_discloses_poll_secret ... ok",
+        "test web::tests::ambiguous_framing_and_cross_site_reads_are_rejected ... ok",
+        "test web::tests::origin_host_csrf_and_transport_are_independent ... ok",
+        "test web::tests::pairing_alone_bootstraps_without_existing_session_csrf ... ok",
+        "test web::tests::preflight_is_only_transport_admission_and_never_private_csrf_authorization ... ok",
+        "test web::tests::private_session_get_forbids_body_and_pairing_urls_forbid_secrets ... ok",
+        "test web::tests::routing_has_no_remote_launch_admin_or_static_fallback ... ok",
+        "test web::tests::voice_dto_exact_ids_and_injection_rejection ... ok",
+        "test web::voice::tests::civil_roundtrip_boundaries_and_no_device_claim ... ok",
+        "",
+        "test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        ""
+      ],
+      "passed": 29
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

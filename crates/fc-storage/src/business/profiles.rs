@@ -229,7 +229,7 @@ pub(super) fn load_public(
     }
     Ok(p)
 }
-fn load_subject(
+pub(super) fn load_subject(
     d: &dyn TransactionDocuments,
     state: &IdentityState,
     key: SubjectProfileKey,
@@ -670,6 +670,11 @@ impl<S: Send> TransactionTask<S> for SavePublic<S> {
         let outcome = display::encode(&public_state(&layout, &settings), MAX_VALUE_BYTES)?;
         let mut mutations = receipt(self.request.command_id, "public", hash, &outcome)?;
         if layout != current {
+            mutations.extend(profile_content::remove_nodes(
+                d,
+                &current.tree,
+                &layout.tree,
+            )?);
             mutations.push(put(PUBLIC.into(), dto::public(&layout))?);
             let mut catalog = Catalog::load(d)?;
             catalog.public = true;
@@ -796,6 +801,9 @@ impl<S: Send> TransactionTask<S> for SaveSubject<S> {
         }
         historical_refs(d, &state, &next)?;
         let mut mutations = index_mutations(d, &mut catalog, &next, current.is_none())?;
+        if let Some(old) = &current {
+            mutations.extend(profile_content::remove_nodes(d, &old.tree, &next.tree)?);
+        }
         let outcome = display::encode(&dto::subject(&next), MAX_VALUE_BYTES)?;
         mutations.push(Mutation::Put {
             key: document_key(next.id),

@@ -3,7 +3,7 @@
 #![forbid(unsafe_code)]
 use fc_ports::RandomPort;
 use pbkdf2::pbkdf2_hmac;
-use sha2::Sha256;
+use sha2::{Digest, Sha256};
 use std::fmt;
 use subtle::ConstantTimeEq;
 use zeroize::Zeroizing;
@@ -15,6 +15,12 @@ pub use codec::{CredentialRecordCodec, EncodedCredential, CREDENTIAL_RECORD_BYTE
 pub use recovery::{
     create_recovery_record, verify_recovery, RecoveryCode, RecoveryRecord, RECOVERY_FORMAT,
 };
+
+/// Hash actual owned bytes for immutable content/resource verification. This
+/// function does not interpret a client-supplied digest as authentication.
+pub fn sha256(bytes: &[u8]) -> [u8; 32] {
+    Sha256::digest(bytes).into()
+}
 
 pub const PASSWORD_FORMAT: u32 = 1;
 pub const PBKDF2_ITERATIONS: u32 = 600_000;
@@ -222,6 +228,17 @@ mod tests {
         }
     }
 
+    #[test]
+    fn content_sha256_matches_the_standard_abc_vector() {
+        assert_eq!(
+            sha256(b"abc"),
+            [
+                0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea, 0x41, 0x41, 0x40, 0xde, 0x5d, 0xae,
+                0x22, 0x23, 0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c, 0xb4, 0x10, 0xff, 0x61,
+                0xf2, 0x00, 0x15, 0xad,
+            ]
+        );
+    }
     #[test]
     fn unicode_bounds_and_redaction() {
         assert!(Password::new("密".repeat(11)).is_err());

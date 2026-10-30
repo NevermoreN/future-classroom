@@ -1,0 +1,20 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.93s
+     Running unittests src/lib.rs (/tmp/fc-round18-storage-target/debug/deps/fc_storage-50351b439967861c)
+
+running 12 tests
+test business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare ... ok
+test business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish ... ok
+test business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version ... ok
+test business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup ... ok
+test business::profiles::tests::profile_content_tests::profile_content_existing_profile_v1_exact_bytes_and_new_v2_strict_shape ... ok
+test business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc ... ok
+test business::profiles::tests::profile_content_tests::profile_content_expiry_restart_settlement_preserves_charge_and_never_releases_live_reservation ... ok
+test business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize ... ok
+test business::profiles::tests::profile_content_tests::profile_content_writer_rehashes_even_trusted_preparation_proof ... ok
+test business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish ... ok
+test business::profiles::tests::profile_content_tests::profile_content_reserved_media_and_materials_share_two_gib_without_ttl_refund ... ok
+test business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 2.81s
+

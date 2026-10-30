@@ -15,6 +15,8 @@ fn kind(value: ComponentKind) -> &'static str {
         ComponentKind::Reminder => "reminder",
         ComponentKind::DateCountdown => "date_countdown",
         ComponentKind::Recess => "recess",
+        ComponentKind::SubjectText => "subject_text",
+        ComponentKind::SubjectImage => "subject_image",
     }
 }
 fn read_kind(value: &Value) -> Result<ComponentKind, StorageError> {
@@ -27,6 +29,8 @@ fn read_kind(value: &Value) -> Result<ComponentKind, StorageError> {
         Some("reminder") => Ok(ComponentKind::Reminder),
         Some("date_countdown") => Ok(ComponentKind::DateCountdown),
         Some("recess") => Ok(ComponentKind::Recess),
+        Some("subject_text") => Ok(ComponentKind::SubjectText),
+        Some("subject_image") => Ok(ComponentKind::SubjectImage),
         _ => Err(StorageError::Database),
     }
 }
@@ -144,11 +148,20 @@ pub(super) fn read_settings(v: &Value) -> Result<DisplaySettings, StorageError> 
     Ok(result)
 }
 pub(super) fn facts(d: &DesktopFacts) -> Value {
-    json!({"format":2,"global_revision":d.global_revision.get(),"captured_at":time(d.captured_at),
+    let mut value = json!({"format":2,"global_revision":d.global_revision.get(),"captured_at":time(d.captured_at),
         "date_watermark":date(d.date_watermark),"clock_rollback":d.clock_rollback,
         "profiles":super::profiles_codec::selection(&d.profiles),"lesson_context":super::lesson_codec::snapshot(&d.lesson_context),"identity":identity(&d.identity),"schedule":schedule_codec::document(&d.schedule),"display":settings(&d.display),
         "homework_offset":d.homework_offset,"homework_eligible_total":d.homework_eligible_total,
-        "homework":d.homework.iter().map(record).collect::<Vec<_>>(),"reminder":d.reminder.as_ref().map(record),"materials_source":d.materials_source.as_ref().map(super::materials_codec::source),"materials_page":d.materials_page.as_ref().map(super::materials_codec::page)})
+        "homework":d.homework.iter().map(record).collect::<Vec<_>>(),"reminder":d.reminder.as_ref().map(record),"materials_source":d.materials_source.as_ref().map(super::materials_codec::source),"materials_page":d.materials_page.as_ref().map(super::materials_codec::page)});
+    if !d.profile_contents.is_empty() {
+        value["format"] = json!(3);
+        value["profile_contents"] = json!(d
+            .profile_contents
+            .iter()
+            .map(super::profile_content_codec::snapshot)
+            .collect::<Vec<_>>());
+    }
+    value
 }
 pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
     let format = number(v, "format")?;
@@ -169,8 +182,13 @@ pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
         "materials_source",
         "materials_page",
     ];
-    if format == 2 {
-        fields.push("profiles")
+    if format >= 2 {
+        fields.push("profiles");
+        if format == 3 {
+            fields.push("profile_contents");
+        } else if format != 2 {
+            return Err(StorageError::Database);
+        }
     } else if format != 1 {
         return Err(StorageError::Database);
     }
@@ -181,7 +199,7 @@ pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
     }
     let identity = read_identity(&v["identity"])?;
     let lesson_context = super::lesson_codec::read_snapshot(&v["lesson_context"])?;
-    let profiles = if format == 2 {
+    let profiles = if format >= 2 {
         super::profiles_codec::read_selection(&v["profiles"])?
     } else {
         use fc_domain::profile::{ProfileSelectionReason as R, ProfileSelectionSnapshot};
@@ -211,6 +229,17 @@ pub(super) fn read_facts(v: &Value) -> Result<DesktopFacts, StorageError> {
         identity,
         schedule: schedule_codec::read_document(&v["schedule"])?,
         lesson_context,
+        profile_contents: if format == 3 {
+            let a = array(v, "profile_contents")?;
+            if a.len() > 64 {
+                return Err(StorageError::Database);
+            }
+            a.iter()
+                .map(super::profile_content_codec::read_snapshot)
+                .collect::<Result<_, _>>()?
+        } else {
+            Vec::new()
+        },
         profiles,
         display: read_settings(&v["display"])?,
         homework_offset: number(v, "homework_offset")?,

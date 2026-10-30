@@ -1,0 +1,250 @@
+{
+  "round": 18,
+  "scope": "Author-owned Windows shared-pool profile-content composition tests only",
+  "not_independent_audit": true,
+  "source": {
+    "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+    "bytes": 46217,
+    "sha256": "8823c04d64b93833dff1e0f554e4263ff9a788372d4a2fbf0dcacba51f8c5269"
+  },
+  "source_frozen_at_utc": "2026-10-30T21:04:04.564242+00:00",
+  "test_cases": [
+    "real_worker_txt_unicode_two_nodes_clear_explicit_undo_and_dpapi_sqlite_reopen",
+    "real_worker_wic_fifty_pages_existing_reorder_partial_failure_and_physical_settlement"
+  ],
+  "product_execution": {
+    "host_runs": 0,
+    "windows_runs": 0,
+    "ssh_runs": 0,
+    "native_tests_compiled_final": 2,
+    "native_tests_passed": null,
+    "note": "No-run and cross strictClippy do not claim DPAPI/WIC/runtime/cleanup PASS. Parent physical Windows execution pending for these two application flow cases."
+  },
+  "evidence_history": [
+    {
+      "stage": "Initial cross link on still-changing integration source",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo test -p fc-bootstrap --bin fc-bootstrap --target i686-pc-windows-gnu --locked --no-run",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-initial-no-run.log",
+        "bytes": 3949,
+        "sha256": "0577e8af9618575e56607b7c5f016adbc8e29e0fc1dad2f45f955c2780fc78ea"
+      },
+      "warning": "Root profiles_preview.rs image_requests_with_content unused; producer-owned test file had no diagnostics",
+      "binds_final_source": false
+    },
+    {
+      "stage": "Final retry interrupted by central integration API mismatch",
+      "exit_code": 101,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-final-no-run.log",
+        "bytes": 999,
+        "sha256": "f4d2bbacbc57400c1f5ba76e56cb8202249afb4a17fd7fc56cde71b84feda18e"
+      },
+      "reason": "Root application.rs696 supplies new root PathBuf to profile_flow::run, which still accepts five parameters. No producer test errors. Parent notified; no unowned source edited."
+    },
+    {
+      "stage": "Retry after run signature alignment, newer Preview payload not yet integrated by parent",
+      "exit_code": 101,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-aligned-no-run.log",
+        "bytes": 1425,
+        "sha256": "62acc07de42c2f43616f75a001c562743b2476a6e6b66113a2bab30589b98761"
+      },
+      "reason": "Parent application.rs2297~2302 Preview destructuring omits new now/contents/text/images. No producer-owned test diagnostics; unowned source not edited."
+    },
+    {
+      "stage": "Complete Preview integration retry",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-integrated-no-run.log",
+        "bytes": 501,
+        "sha256": "2fdd5dfe567bfbb3a9dbc4ef03b0a88c5ac282dbb680d8d72f1f54287322cbb2"
+      },
+      "note": "Cross link PASS, superseded by newest maintenance fixture source"
+    },
+    {
+      "stage": "Complete Preview integration strictClippy",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-integrated-clippy.log",
+        "bytes": 2936,
+        "sha256": "de494fb6e435bdbfe0375681af1da510e9a84728be794d7f085fb948cc75335f"
+      },
+      "note": "Earlier source, superseded by newest final checks"
+    },
+    {
+      "stage": "Authorized unadmitted-Busy fixture correction cross link",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-admission-final-no-run.log",
+        "bytes": 310,
+        "sha256": "dd3d92a957219c262104b996d2fe1c49d056e8ae48536416bb331a1191577644"
+      },
+      "source_sha256": "d01489631fd539836eac1a0e86e7adc17f765969125d8257efbaaf18b6e158e2",
+      "note": "Intermediate source, superseded by maintenance fixture; earlier bytes not retained"
+    },
+    {
+      "stage": "Strict retry during parent maintenance integration",
+      "exit_code": 101,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-admission-final-clippy.log",
+        "bytes": 855,
+        "sha256": "20fdf21d3ef34854657fcf10873c9e1ca2ace9d914ff09f27688238cd77aeb2c"
+      },
+      "reason": "Root flow began returning ContentMaintained while parent Outcome variant had not yet landed. No producer test diagnostics; raw failure retained."
+    },
+    {
+      "stage": "Small-registry maintenance source crosschecks, superseded by >128 persistent-cursor fixture",
+      "checks": [
+        {
+          "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo test -p fc-bootstrap --bin fc-bootstrap --target i686-pc-windows-gnu --locked --no-run",
+          "exit_code": 0,
+          "seconds": 7.62,
+          "log": {
+            "path": "/tmp/fc-round18-content-flow-maintenance-final-no-run.log",
+            "bytes": 310,
+            "sha256": "68a8519d120b14c08bd841fbb104aa437aab09802b8d86721c69d5ed74a2cc14"
+          },
+          "compiled_new_cases": 2,
+          "executed_new_cases": 0
+        },
+        {
+          "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo clippy -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked -- -D warnings",
+          "exit_code": 0,
+          "seconds": 5.05,
+          "log": {
+            "path": "/tmp/fc-round18-content-flow-maintenance-final-clippy.log",
+            "bytes": 171,
+            "sha256": "2a3cd9527c93f55644f8ebbda6fa0c15ed79a85495c5b3461aeb30f6657d39ef"
+          }
+        },
+        {
+          "command": "rustfmt --edition 2021 --config skip_children=true --check crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+          "exit_code": 0,
+          "log": {
+            "path": "/tmp/fc-round18-content-flow-maintenance-final-fmt.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "command": "git diff --check",
+          "exit_code": 0
+        }
+      ]
+    }
+  ],
+  "final_checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo test -p fc-bootstrap --bin fc-bootstrap --target i686-pc-windows-gnu --locked --no-run",
+      "exit_code": 0,
+      "seconds": 12.3,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-cursor-final-no-run.log",
+        "bytes": 311,
+        "sha256": "6020116d829c246dd9904c33ff2bf99cccb4367274fbd05880a9e7716dea98ca"
+      },
+      "compiled_new_cases": 2,
+      "executed_new_cases": 0
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo clippy -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exit_code": 0,
+      "seconds": 8.45,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-cursor-final-clippy.log",
+        "bytes": 171,
+        "sha256": "e290dbffb9afa17d6f58252d63c6eb4cf26d388958f92f61f6a28401ef642a13"
+      }
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-cursor-final-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "coverage": [
+    "One fixed WorkerPool<Job> wrapping actual Work, no second pool. Real Work::Open protected deployment key/SQLite and KDF/login run on same worker pool.",
+    "Two distinct text nodes concurrently publish independent literal text / BOM TXT 10000 emoji; invalid UTF16 + 10001 scalar rejected; Clear + explicit target revision Undo; Work::Shutdown/Open reloads protected key and bodies; actual Work::Desktop hydration.",
+    "Two distinct image nodes concurrently publish 50 pages and 1 page; selected BMP headers/full WIC and SHA are real. 51-page descriptor rejected by actual shared queue.",
+    "Existing MediaReference + Selected page append/delete/reorder without replacing stable resources. Both current and previous resources remain Referenced; retired older versions reclaimed. Actual Clear/explicit Undo preserves restored image references.",
+    "Partial valid-image + malformed-image bundle fails after first original preparation and preserves prior body; settled unreferenced media removed. Actual Work::ContentImages decodes current images for two node identities.",
+    "A same-pool owned preparation pauses inside its real state callback, after actual Begin/reservation/source pin/guard admission; Reserved bytes remain through GC and lock, then physical exit is signaled separately before permitted settle. Old lease cannot publish another node. Fresh Work::Open/login preserves last accepted bodies.",
+    "Actual Work::MaintainProfileContent runs on the same shared pool while a live Reserved preparation occupies the other worker; it cannot settle/refund that owner. After explicit physical exit/settle, periodic work collects its now-unreferenced reservation.",
+    "Actual published BMP is pinned by LockedFile (no delete sharing), preserved as previous after next publication, then ages out after a further publication. Automatic GC and explicit periodic Work report pending, retain real file + Retiring charge. Releasing native pin lets periodic Work delete the original, remove it from strict physical inventory and finalize refund; current/previous and other node stay referenced.",
+    "Persistent per-harness Arc<Mutex<GcCursor>> is passed to every real Work::MaintainProfileContent; calls do not reset it. Second case adds 150 actual SQLite import reservations from real locked BMP source handles, then drops physical sources and explicitly settles/fails them; these are cancelled-before-copy registry records, not fabricated image payloads or 150 claimed original files. A separate reservation deliberately remains Reserved until later explicit settlement.",
+    "A subsequently WIC-prepared actual original has stable version ID>128. Fixture cancellation keyed to completed cursor.after interrupts prefix scanning; progress survives discarded result and later physical worker starts from that saved ID, reaches the locked tail and wraps. No sleeping/scheduling assumption or callback-count mirror determines the cancellation boundary.",
+    "After releasing the tail native pin, a fixture-only file-existence predicate stops collection exactly after real physical deletion and before registry finalize. Charge remains Retiring and cursor does not advance that unfinished entry. Next actual maintenance Work finalizes/refunds. The Reserved entry is unchanged across full scan/wrap and is collected only after its original receipt is explicitly settled. Current/previous published resources and the other content node remain referenced."
+  ],
+  "fixture_boundaries": [
+    "Only FutureClassroom-Test-Content-Flow roots with protected DACL readback and exact InstanceGuard. No user paths, windows, input, sounds, or Shell launch.",
+    "Two glass groups hold four content widgets; explicitly remove display Recess slot to respect 8 top-level cards. No business deletion.",
+    "The coordinator owns synthetic fixture setup/assertions, native busy-reader pins, and direct deterministic cleanup callbacks; these are not UI operations. Actual KDF, product ContentJob and periodic Maintain Work run on the same fixed two-thread pool. Queue accounting includes real Work and selected path/text capacities.",
+    "Paused fixture signals ACK only after real guard creation and first preparation-state callback, not just reservation timing. Pause is test controlled, not a claimed real AuthorityUpdating transaction.",
+    "Owner exists before protected-directory creation; panic unwinding joins workers, closes SQLite, releases instance then removes only that exclusive test root. Runtime cleanup unverified until Windows execution."
+  ],
+  "build_cache": "/tmp/fc-round18-content-flow-target retained for parent unified cleanup; no remote temporary state created",
+  "source_history": [
+    {
+      "stage": "Original source freeze before authorized admission/maintenance corrections",
+      "source": {
+        "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+        "bytes": 33131,
+        "sha256": "7737b0e6be73b34253d653170e48af644639096af21c9247d13fb7a04500ed99"
+      },
+      "preserved_report": "/tmp/fc-round18-content-flow-before-admission-correction.json",
+      "preserved_source": {
+        "path": "/tmp/fc-round18-content-flow-tests-before-admission-correction.rs",
+        "bytes": 33131,
+        "sha256": "7737b0e6be73b34253d653170e48af644639096af21c9247d13fb7a04500ed99"
+      }
+    },
+    {
+      "stage": "Small-registry maintenance freeze before root authorized persistent cursor correction",
+      "source": {
+        "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+        "bytes": 36663,
+        "sha256": "684e7d0606ddeb1f251f6bd22c0b342e52042bacb1a580f82ec5ecf8fb3b65e5"
+      },
+      "test_executable": {
+        "path": "/tmp/fc-round18-content-flow-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+        "bytes": 145435562,
+        "sha256": "7d834376f3227d832f04f6030baed29c77058680740264ea3c36a8cd435ce4a8"
+      },
+      "preserved_report": "/tmp/fc-round18-content-flow-before-cursor-correction.json",
+      "note": "Old manifest and raw logs remain evidence of that source. Original artifact path was subsequently rebuilt; do not use its current bytes as the old binary."
+    }
+  ],
+  "test_executable": {
+    "path": "/tmp/fc-round18-content-flow-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "bytes": 145857035,
+    "sha256": "d8cb476198547b49085071618de4473fbc7da5da54ce4264b5cf04ae36a69ea4"
+  },
+  "artifact_scope": "Debug i686 test binary from producer no-run invocation, not the final whole-workspace/release/source freeze binding; parent unified source manifest/build/execution remains authoritative.",
+  "fixture_corrections": [
+    {
+      "reason": "The new Host execution-fence fixture actually observed fresh mailbox startup Busy. Parent authorized same narrow correction in this already-frozen Windows fixture before physical execution.",
+      "change": "Retry only Rejection::Busy before admission, retaining returned task ownership, max5s admission window and original90s jobdeadline. Never retries SQL/CAS or changes production UI Busy policy.",
+      "note": "No physical Windows Busy failure claimed for these two not-yet-executed cases."
+    }
+  ],
+  "related_evidence": [
+    "/tmp/fc-round18-backend.json (prior Backend/cache source freeze, unchanged)",
+    "/tmp/fc-round18-execution-fence.json (new frozen Backend/runtime sources and Host9+worker9 checks)"
+  ],
+  "gc_cursor_validation_limits": {
+    "windows_runtime_cases_executed_here": 0,
+    "registry_prefix_fixture": "Real admitted source handles and SQLite reserved-byte rows; no WIC/commit is claimed for the 150 prefix imports cancelled before copy. Tail original is actually prepared through product ContentJob/WIC.",
+    "controlled_cancel_callbacks": "Pure cursor-memory predicate for prefix interruption; fixture-only real file existence predicate for the after-delete-before-finalize boundary. Production callbacks remain JobContext checkpoints.",
+    "not_a_completed_goal": "No P4/full-layout/Win7/10/11 acceptance or P0 latency claim from cross compilation."
+  }
+}

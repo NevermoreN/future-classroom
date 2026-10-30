@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "scope": "LOCAL_BIN_TEST_NO_RUN_ONLY",
+  "artifact": {
+    "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "bytes": 144781495,
+    "sha256": "ca6da4d27759b0ea2130690ec6967c7f696cbc8faefe5c07210254e23d37c425",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": []
+  },
+  "metadata": {
+    "path": "/tmp/fc-round18-controller-final-test-metadata.jsonl",
+    "bytes": 83665,
+    "sha256": "18ae658b5603b619a8271db697f5e1f5e7f8901bc2a052b9ad9e109211b376c3"
+  },
+  "sourceManifest": {
+    "sources": [
+      {
+        "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+        "sha256": "9c1def116dfef2ae17c85d49f2a23399e949117aecba634b439b70ab70e3385e",
+        "bytes": 58283
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+        "sha256": "bd184ee4a3491150b5f8441ad069264e06b1d7435e8be85e1bdedd18a5f89c43",
+        "bytes": 10599
+      }
+    ],
+    "aggregateSha256": "a538186157382e52e0eec366d8787994714a550debc4b07f4c80043afc704470"
+  },
+  "newRuntimeTestsExecutedByThisAgent": 0
+}

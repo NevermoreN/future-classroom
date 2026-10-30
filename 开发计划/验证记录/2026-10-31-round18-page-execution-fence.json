@@ -1,0 +1,123 @@
+{
+  "round": 18,
+  "scope": "Narrow guest page execution deadline/cancel fence, only backend/profile_content.rs reopened",
+  "not_independent_audit": true,
+  "frozen_at_utc": "2026-10-30T21:12:06.550028+00:00",
+  "source": {
+    "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+    "bytes": 71800,
+    "sha256": "3cb470019d1ad62edd13f90ca1a6ac507a4716385bce66ea0214c51b423afabb"
+  },
+  "unchanged_sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 99284,
+      "sha256": "862f2b618323ab75e952deaf62b9b8e52f373195342488452646b6b6be0eccfb"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "bytes": 18420,
+      "sha256": "4ea6b583bf7e22ee9d3ed2f0cdd51ef2f4ec42d9400fcf04908343d5a8b6f4bd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "bytes": 46217,
+      "sha256": "8823c04d64b93833dff1e0f554e4263ff9a788372d4a2fbf0dcacba51f8c5269"
+    }
+  ],
+  "prior_evidence_unchanged": [
+    "/tmp/fc-round18-backend.json",
+    "/tmp/fc-round18-execution-fence.json",
+    "/tmp/fc-round18-content-flow.json"
+  ],
+  "prior_evidence_boundary": "Prior reports bind their earlier source snapshots, not this changed module. Parent old Windows83 run/report bindings were not edited. Parent owns central Work::ContentPage wiring and subsequent Windows rebuild/run.",
+  "api": {
+    "new": "Backend::page_profile_content_while(generation:SceneGeneration,expected_global:Revision,request:PageContentRequest,fence:Arc<dyn Fn()->bool+Send+Sync>)->Result<PublishedContentSnapshot>",
+    "compatibility": "Existing page_profile_content delegates with a true fence. Its precise published-scene permission checks remain intact.",
+    "authority": "No ActorContext or administrator is synthesized. Per-request callback composes job execution with exact published slot/content/view/global/generation, time/current selection and existing AuthorityUpdating precommit allowance. Checks fence before and after scene checks at both evaluation and precommit.",
+    "error": "False or panicking execution fence becomes ordinary ProfileContent Domain(Expired), not AuthorityUnavailable/PublicationFailed/Faulted. Shared private helper preserves existing commit_profile_content_while semantics.",
+    "after_commit": "A cancellation racing after final precommit checks/COMMIT cannot promise rollback. Current/page/view readback remains authoritative."
+  },
+  "final_checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-bootstrap --lib --locked profile_content -- --test-threads=1",
+      "passed": 10,
+      "failed": 0,
+      "filtered": 60,
+      "seconds": 49.62,
+      "new_cases": 1,
+      "log": {
+        "path": "/tmp/fc-round18-page-execution-fence-backend-final.log",
+        "bytes": 1458,
+        "sha256": "489b23e8976b2d9556fe220d8055dbc13f463a2f4c3a9768cb162bccbea74220"
+      }
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo clippy -p fc-bootstrap --lib --tests --locked -- -D warnings",
+      "exit_code": 0,
+      "seconds": 2.46,
+      "log": {
+        "path": "/tmp/fc-round18-page-execution-fence-clippy.log",
+        "bytes": 171,
+        "sha256": "c7c879dcd6c45435e29ae4f8fddc07baeec43da3f197490dc8fcca7b4db17351"
+      }
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check crates/fc-bootstrap/src/backend/profile_content.rs",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-page-execution-fence-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "history": [
+    {
+      "stage": "First exact new test PASS, included in final10 rather than extra final count",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-bootstrap --lib --locked backend::profile_content::tests::guest_page_job_cancel_and_deadline_at_real_precommit_do_not_advance_view -- --exact",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 69,
+      "seconds": 11.68,
+      "log": {
+        "path": "/tmp/fc-round18-page-execution-fence-initial-test.log",
+        "bytes": 512,
+        "sha256": "f9d01207b4ae5dbb55580ccaca00c5ec89643ec80648e07ef86b56e15345f929"
+      }
+    }
+  ],
+  "new_test": {
+    "name": "backend::profile_content::tests::guest_page_job_cancel_and_deadline_at_real_precommit_do_not_advance_view",
+    "real_components": [
+      "PBKDF2 credential initialization",
+      "SQLite unique writer and actual precommit/rollback",
+      "HealthGate AuthorityUpdating/restore-known-authority",
+      "actual fixed WorkerPool-issued JobContext execution fence",
+      "actual ticket cancellation and real monotonic Instant deadline"
+    ],
+    "assertions": [
+      "Published scene capability admitted before request; no UI watchdog/pump clears it during cancellation case.",
+      "Bounded fixture barrier is entered only at actual writer precommit, after SQL mutations and before COMMIT. Cancel and deadline both reject via Domain(Expired).",
+      "content revision, view revision, current page, current payload and latestPublishSequence all unchanged after rollback; Health remains Healthy.",
+      "Panicking memory fence rejects ordinarily and does not fault authority.",
+      "A successful page COMMIT followed by context-owner cancellation is still visible via current page1/view increase, with content revision/latestPublishSequence unchanged.",
+      "Fresh task with true fence cannot page once published scene capability is cleared."
+    ],
+    "fixture_limits": "Media references/preparation are trusted metadata-only fixtures using real SHA; no actual image files/WIC/DPAPI/native scene publication claim. Synthetic verified local lease is used for setup/readback, never forged as a guest page actor. A real worker issues the context fence, while the test coordinator drives the synchronous Backend/writer call. This does not claim the whole Windows ContentPage composition was executed."
+  },
+  "execution_limits": {
+    "host_checks_only_here": true,
+    "windows_runs": 0,
+    "ssh_runs": 0,
+    "full_application_test": "Parent controlled Windows run pending for this new source; do not reinterpret prior old-source83 results."
+  },
+  "cleanup": {
+    "fixture_residuals": [],
+    "target": "/tmp/fc-round18-backend-target retained for parent unified cleanup; no foreign cache touched"
+  }
+}

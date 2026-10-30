@@ -10,7 +10,7 @@ pub const MAX_TOP_LEVEL_GLASS: usize = 8;
 pub const MAX_VISIBLE_LEAVES: usize = 64;
 pub const MAX_LAYOUT_DIP: u16 = 16_384;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum LayoutScope {
     Public,
     Subject(SubjectProfileKey),
@@ -117,7 +117,8 @@ impl WidgetKind {
             Self::DateCountdown => ComponentKind::DateCountdown,
             Self::Recess => ComponentKind::Recess,
             Self::Materials => ComponentKind::Materials,
-            Self::SubjectText | Self::SubjectImage => return None,
+            Self::SubjectText => ComponentKind::SubjectText,
+            Self::SubjectImage => ComponentKind::SubjectImage,
         })
     }
     pub fn is_content(self) -> bool {
@@ -271,9 +272,6 @@ impl Walker<'_> {
             NodeKind::Widget(widget) => {
                 if !node.children.is_empty() {
                     return Err(LayoutError::InvalidConstraint);
-                }
-                if matches!(widget, WidgetKind::SubjectText | WidgetKind::SubjectImage) {
-                    return Err(LayoutError::UnsupportedWidget);
                 }
                 match self.tree.scope {
                     LayoutScope::Public => {

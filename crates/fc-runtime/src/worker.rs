@@ -120,16 +120,32 @@ pub struct JobContext {
 }
 impl JobContext {
     pub fn checkpoint(&self) -> Result<(), JobError> {
-        if let Some(error) = self.control.error() {
+        Self::check_execution(&self.control, &self.cancellation, self.deadline)
+    }
+    fn check_execution(
+        control: &Control,
+        cancellation: &CancellationToken,
+        deadline: Instant,
+    ) -> Result<(), JobError> {
+        if let Some(error) = control.error() {
             return Err(error);
         }
-        if self.cancellation.is_cancelled() {
+        if cancellation.is_cancelled() {
             return Err(JobError::Cancelled);
         }
-        if Instant::now() >= self.deadline {
+        if Instant::now() >= deadline {
             return Err(JobError::Deadline);
         }
         Ok(())
+    }
+    /// Memory-only lifetime check for the final execution owner (for example a
+    /// SQLite precommit callback). Carries the same pool stop/fault, cancellation
+    /// token and monotonic deadline; it grants no actor or publication authority.
+    pub fn execution_fence(&self) -> impl Fn() -> bool + Send + Sync + 'static {
+        let control = self.control.clone();
+        let cancellation = self.cancellation.clone();
+        let deadline = self.deadline;
+        move || Self::check_execution(&control, &cancellation, deadline).is_ok()
     }
     pub fn deadline(&self) -> Instant {
         self.deadline

@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "round": 18,
+  "status": "PASS_HOST_PURE_PRESENTATION_ONLY",
+  "createdUtc": "2026-10-30T20:04:27.675626+00:00",
+  "authorBoundary": "Producer implementation/tests, not independent review of own new sources; native/bootstrap/Windows evidence belongs to root integration.",
+  "sourceFrozen": true,
+  "sources": [
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "bytes": 19436,
+      "sha256": "53c45b293552b32aa10e8c2990320654c5de72b2a042067848cd5f11a3971eaf"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 23719,
+      "sha256": "141061c85c69d66ff7712df24055338a940656c87510c69d5d997229acd49421"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 31921,
+      "sha256": "0cd07f148ccce95aced264f5be08d76ed0848aed50f9347db3431d8648cf1b84"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 18214,
+      "sha256": "345db5de6631e637a5b10b8b6f7bfb949d4862175a49b41e01772939cb6b37f0"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 37680,
+      "sha256": "be020f5f671d684fe782fda1e25ab1d5c9f7b448e819a48db7453c57ce60ae48"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_content_tests.rs",
+      "bytes": 14873,
+      "sha256": "cff93c4dcff6fbf046b9fcf95fb5fd6edba8ef1791291021709201ef44f1264f"
+    }
+  ],
+  "aggregateAlgorithm": "SHA256 UTF8(path+NUL+sha256+newline) in recorded source order",
+  "aggregateSha256": "ebc20dda060fb5ad950ad7fc23ca650decc26aefc9b1ab84486f872e370d0c26",
+  "dependencyContracts": [
+    {
+      "path": "crates/fc-domain/src/profile_content.rs",
+      "sha256": "7f8b62e2471fccf48c991eebe316971f7f02df2f51d87c3677c84a6b67ca3590"
+    },
+    {
+      "path": "crates/fc-domain/src/desktop.rs",
+      "sha256": "c8fb60a73f3f30e07fd5684a35c45fa6f0eba9a515f36597c0bcef2fbedaaf89"
+    },
+    {
+      "path": "crates/fc-domain/src/profile.rs",
+      "sha256": "c3749ff5e73cd82a9da76e5014901f384658a3ae51254d4ac43ec20ca5f50ee4"
+    },
+    {
+      "path": "crates/fc-domain/src/layout.rs",
+      "sha256": "a9ab98415f1ff2c573a553ef6ef56acb226f61e772e4cf812d3e614afef2b518"
+    }
+  ],
+  "api": {
+    "ContentTextSource": "text(slot:ContentSlotKey, revision:Revision, sha256:[u8;32])->Option<Arc<str>>",
+    "build_scene_with_content": "(facts,generation,work,measure,&dyn ContentTextSource)->Result<SceneSnapshot,SceneError>",
+    "compatibilityBuildScene": "Explicitly builtin-only; nonempty independentText/Image metadata returnsContentPending. Empty independent slots may disappear without fake text.",
+    "SceneContentIdentity": "Copy{slot,revision,view_revision}; SceneCard.content_identity:Option<_>",
+    "CardContent": "StandaloneText(Arc<str>) or Image(SceneImageContent{current:MediaReference,current_page:u8,total_pages:u8}); metadata only, no handles/paths/pixels",
+    "WidgetMeasure": "key:SceneNodeKey required; solver matching is exact scope+nodeID+kind, never kind-only alias",
+    "geometry": "CardBodySpec::image_geometry(outer_width,outer_height)->ImageBodyGeometry{viewport,image,pager:Option<ImagePagerGeometry{rect,previous,next}>}; all card-relative DIP"
+  },
+  "implementation": [
+    "Public/subject exact nodes resolved before measurement. Selected subject replaces public outlet fallback; unavailable prior scope never hydrated. Multiple same-kind nodes use their ownstyle/content/identity.",
+    "Text lookup passes actualsnapshot owner/revision/hash, then checks exactcharacters/UTF8bytes and10000scalar/40000byte/control bounds. Cachemiss isContentPending, malformedreturnedbody InvalidContent, so no placeholder Scene is published.",
+    "Trusted worker cache is responsible for recomputing realSHA256 before insertion and exactkey lookup. This crate has no crypto dependency/newcrate edge, does not present cacheArc or fixturehash as cryptographic proof.",
+    "Image current metadata/page/viewrevision remains exact. Shared intrinsic height and Contain geometry reserve32top/12bottom, horizontal16each, and44DIPpager+8gap only for multipage. Final too-small assigned card failsOutOfSpace before native publication.",
+    "Standalone text uses shared complete CardBodySpec block rules, never truncated sample. Image is explicit dynamic geometry, not fake text or fullpixelbody.",
+    "Emptycontent removes actual widget/spacing; opacity0 still measures full actual body/keepsgeometry and effectivealpha0. Layout pending/error does not fabricate successful output.",
+    "Existing64leaf fairallocation,128nodes/16depth/2glass/8top checks remain; one current image costsone data leaf. No page loop, wallclock timer or image decoding added."
+  ],
+  "validation": {
+    "targetDir": "/tmp/fc-round18-presentation-target",
+    "hostTests": {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-presentation-target cargo test -p fc-presentation --lib --locked",
+      "baseline": 50,
+      "new": 7,
+      "passed": 57,
+      "failed": 0,
+      "finalBodySeconds": 0.22
+    },
+    "strictClippy": {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-presentation-target cargo clippy -p fc-presentation --all-targets --locked -- -D warnings",
+      "exitCode": 0
+    },
+    "format": {
+      "command": "rustfmt --check --edition2021 --config skip_children=true [six owned files]",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check -- crates/fc-presentation",
+      "exitCode": 0
+    },
+    "windowsTests": 0,
+    "remoteExecutions": 0,
+    "workspaceWideBuilds": 0
+  },
+  "meaningfulTests": [
+    "Two public same-kind text slots preserve distinct fullbody/size/font/contentrev/viewrev and Arc identity; old entry refuses content.",
+    "Wrongcache revision/hash/scopednode returnsPending, mismatched returnedlength fails, invalidFactsnode rejected.",
+    "Empty slot absent; zeroalpha retains measured realbody and exactidentity; provider not called for empty.",
+    "Two same-kind images retain distinctwidth/height/aspect/currentpage/50pagetotal; wholeContain withinviewport and actual44controls, singlepage noemptycontrols.",
+    "Selected exactsubject doesnotquery publicfallback cache; staleSelected atbreak invalid; correctpublic break neverborrows subjectcontent.",
+    "10000emoji/40000UTF8 succeeds,10001 fails;8MP exactly succeeds,1pixelover and10MiB+1 fail; page50outside50/51count reject; insufficientpagercard fails.",
+    "DuplicateWidgetMeasure exactkey rejected; wrongscope cannotalias publicwidget; repeatedMaterial/Recess existingfixtures now explicitly targetcorrect IDs."
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-presentation-first.log",
+      "sha256": "3cc88e7927acd35aab3aa52fffc4419fe9e8a8ed190c5b238ac4dbdf9eec67fc",
+      "recordedExitCode": 101,
+      "meaning": "Initial intermediate implementation compiled;48PASS/2FAIL because existing tests cloned/retyped WidgetMeasure while retaining the same newly-required exact key. Recess fixture now uses actual recess key; repeated-material fixture now supplies each distinct node key; original assertions retained."
+    },
+    {
+      "path": "/tmp/fc-round18-presentation-second.log",
+      "sha256": "c7c3a1d64e64bbbccbd80b4388337aace354bce0d8282ab46f58e8be87c2b715",
+      "recordedExitCode": 0,
+      "meaning": "Original50 tests pass after exact fixture retarget; intermediate dead_code warning later removed."
+    },
+    {
+      "path": "/tmp/fc-round18-presentation-third.log",
+      "sha256": "368629ab97ce392b03ef07adc9b4644d1526c010cbb859898583d3db215a6b97",
+      "recordedExitCode": 0,
+      "meaning": "55PASS including initial5 new standalone-content regressions."
+    },
+    {
+      "path": "/tmp/fc-round18-presentation-fourth.log",
+      "sha256": "3599b0ac5d27923c869d07fca4ca90d111be071f9d80f080ad00424fa7aef100",
+      "recordedExitCode": 0,
+      "meaning": "57PASS including resource and exact-key bounds."
+    },
+    {
+      "label": "finalTests",
+      "path": "/tmp/fc-round18-presentation-final-tests.log",
+      "sha256": "9afa49474a2007034f23ddc8861ecb317b1ee0355f7f6523b7912ea3aaaf858b",
+      "recordedExitCode": 0
+    },
+    {
+      "label": "finalClippy",
+      "path": "/tmp/fc-round18-presentation-final-clippy.log",
+      "sha256": "632158bbe2ae9131e9f2b2be0b4c02f16ff63aa2c2b947e5206da531e44f0e72",
+      "recordedExitCode": 0
+    },
+    {
+      "label": "finalFormat",
+      "path": "/tmp/fc-round18-presentation-final-format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "recordedExitCode": 0
+    }
+  ],
+  "limits": [
+    "No native image decoding, bitmapcache, textcache insertion, path/resource IO, backend/SQL/editor/Page actioneffect implemented in this scope. Root implements those realchain parts.",
+    "Pure testCache hashes are intentionally fixtures and not realSHA proofs; worker cache must verify before adoption.",
+    "No new memory budget claims:32MiBimagecache/4MiBsharedtextcache/16MiBcompositor/64-96-160MiBprocess remain root integration responsibilities, including sharedbody copies/COM/provider overhead.",
+    "No new dependencies, crateedges, Windows/bootstrap/native edits or remote execution. ActualOS/DPI/visible/P0/TLS/longrun acceptance unproved."
+  ],
+  "cleanup": "No DB/remote task/process produced. Own target/log/helper/tmp retained for root unified archive and cleanup; no commit/push."
+}

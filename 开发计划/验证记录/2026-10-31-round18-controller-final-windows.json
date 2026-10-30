@@ -1,0 +1,38 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "e40d15d46ab33482a7b58c8e6c123fd353c2e1f9fc4712e64aceb9df329269d3",
+  "exe": "/tmp/fc-round18-frozen-workspace-final-state/fc_bootstrap-2c9facf31078f737.exe",
+  "timeoutSeconds": 900,
+  "tests": [
+    {
+      "filter": "application::desktop_controller::desktop_content_tests::",
+      "exitCode": 0,
+      "binarySha256": "e40d15d46ab33482a7b58c8e6c123fd353c2e1f9fc4712e64aceb9df329269d3",
+      "output": [
+        "",
+        "running 4 tests",
+        "test application::desktop_controller::desktop_content_tests::hidden_controller_cancels_both_tickets_without_freeing_live_workers_or_resetting_generation ... ok",
+        "test application::desktop_controller::desktop_content_tests::image_completion_gate_rejects_wrong_scene_source_time_and_fault_without_relayout ... ok",
+        "test application::desktop_controller::desktop_content_tests::image_page_requires_exact_scoped_revision_generation_adjacent_page_and_actual_clip ... ok",
+        "test application::desktop_controller::desktop_content_tests::preview_release_drops_actual_native_card_scene_and_text_provider_owners_before_new_hydration ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 92 filtered out; finished in 0.13s",
+        ""
+      ],
+      "passed": 4
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

@@ -206,6 +206,18 @@ def main():
             if not isinstance(application, list) or not any(isinstance(line, str) and marker in line for line in application):
                 raise RuntimeError("native public-layout/subject-profile/canvas result marker missing")
             report["profileNativeStatus"] = "PASS"
+            content_marker = "profile_content_text_images_clear_undo_real_preview=PASS"
+            if not any(content_marker in line for line in application if isinstance(line, str)):
+                raise RuntimeError("native independent-content workflow result marker missing")
+            content_steps = [
+                int(line.split("index=", 1)[1].split()[0])
+                for line in application
+                if isinstance(line, str) and line.startswith("PROFILE_CONTENT_UI_STEP index=")
+            ]
+            if content_steps != list(range(52)):
+                raise RuntimeError("native independent-content workflow steps incomplete or repeated")
+            report["profileContentNativeStatus"] = "PASS"
+            report["profileContentNativeSteps"] = len(content_steps)
         if args.materials and report["native"].get("materialsExitCode") != 0:
             raise RuntimeError("isolated materials integration failed")
         if args.audio_silent:

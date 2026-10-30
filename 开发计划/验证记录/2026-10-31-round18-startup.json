@@ -1,0 +1,170 @@
+{
+  "round": 18,
+  "scope": "Startup physical profile-media reconciliation; author-owned3 new files only; frozen storage untouched",
+  "frozen_at_utc": "2026-10-30T20:40:58.108035+00:00",
+  "source_files": [
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files/inventory.rs",
+      "bytes": 5350,
+      "sha256": "5e422a4ca1bc023c65623dc4a34377b4c78e19da667f5c882e88e5911b12df4f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup.rs",
+      "bytes": 6993,
+      "sha256": "54a352c67bba1678a75d68359d3f275cb407e1d09d804d336a85a666d4a209c6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup_tests.rs",
+      "bytes": 15145,
+      "sha256": "5fb6ed2652392d3f3e592fbeb2bfc3fd293defcb0e225370ad96fabfb6970c1f"
+    }
+  ],
+  "target": "/tmp/fc-round18-startup-target",
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo check -p fc-bootstrap --lib --target i686-pc-windows-gnu --locked",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-startup-lib-check.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo clippy -p fc-bootstrap --lib --target i686-pc-windows-gnu --locked -- -D warnings",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-startup-clippy.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo test -p fc-bootstrap --lib --no-run --target i686-pc-windows-gnu --locked",
+      "status": "PASS",
+      "profile": "test [unoptimized + debuginfo]",
+      "tests_compiled_not_executed": 4,
+      "log": "/tmp/fc-round18-startup-no-run.log",
+      "artifact": {
+        "path": "/tmp/fc-round18-startup-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+        "bytes": 128224524,
+        "sha256": "363db4f833b52aa1e320ff99e19f1bca8f012d2d76d6df20806d4885916eb39d"
+      }
+    },
+    {
+      "command": "rustfmt --edition2021 --config skip_children=true --check <3 owned files>",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-startup-fmt.log"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "status": "PASS12crates33edges",
+      "log": "/tmp/fc-round18-startup-architecture.log"
+    }
+  ],
+  "concurrent_integration_failures_preserved": [
+    {
+      "log": "/tmp/fc-round18-startup-check.log",
+      "details": "Initial --lib --tests included root-owned bin integration still missing Work/Outcome/frame variants and display enum arms. No errors in owned startup source."
+    },
+    {
+      "log": "/tmp/fc-round18-startup-clippy-final.log",
+      "details": "Transient central backend reexport of PreparationState before its implementation; identity agent confirmed completed afterward."
+    },
+    {
+      "log": "/tmp/fc-round18-startup-clippy-final-2.log",
+      "details": "Latest --lib --tests blocked only root application.rs2881 match missing Outcome::ProfileContent arm; root notified. This is not a final whole-application strict PASS."
+    }
+  ],
+  "new_product_tests_executed": 0,
+  "windows_remote_sessions": 0,
+  "temporary_windows_dirs_created_by_reviewer": 0,
+  "implemented": [
+    "Combined max32768 physical fixed canonical names, regular/no hardlinks/reparse;0byte quarantine allowed via safe Windows inspect adapter.",
+    "Whole physical inventory + registry pages<=128,total8192 + every Referenced exact unique format/bytes/actual same-pin SHA validated BEFORE any physical deletion.",
+    "Unknown owned originals from older DB restores removed only in trusted startup; no external-name adoption. Uninitialized with any owned media is Repair, not registration/cleanup.",
+    "Reserved startup owner handoff then registry refetch before exact CAS retire; physical exclusive remove precedes quota finalize; Removed leftovers removed; final bidirectional physical/reference check.",
+    "No management actor/lease required; local lock cannot prevent lifecycle cleanup. Backend fresh health checked before deletion effects.",
+    "4 compiled tests: full actual protected FS/SQLite/DPAPI+real init/login and synthetic already-validated BMP metadata; bad name/SHA/multiple formats prevent earlier orphan deletion;0byte partial;Reserved/orphan/Removedcleanup/reopen+local lock; uninitialized owned fail; canonical/hardlink/directory fail; faultedwriter fail. Tests do not claim WIC import validation."
+  ],
+  "contract": "Caller must already own deployment InstanceGuard and admit no preparation workers throughout reconciliation. Root owns Open registration and later Windows execution.",
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-startup-architecture.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-check.log",
+      "bytes": 7981,
+      "sha256": "09714d2e82d9b404346f079642c6ff3a36bd8a298e316abd2b66e1adfba65302",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-clippy-final-2.log",
+      "bytes": 1276,
+      "sha256": "3da8d3393fbbb1ba8bbf806b8d54ffd053f1c40f1627e683c90e3b3271d6cf3b",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-clippy-final.log",
+      "bytes": 977,
+      "sha256": "bbf9b4f37d2a42e15078d45b27ee36fada8db50ce49ebb85717f45b4ecb055d2",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-clippy.log",
+      "bytes": 1233,
+      "sha256": "1a9dd50ece1e582711e043fc38993c93fd070c81ecc582d4a3d7cb3534e0e1ad",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-lib-check.log",
+      "bytes": 72,
+      "sha256": "2bc683fb4e4f4f21ee9ee39e2b8ecce2efe20d3b1be57bda5316aa519ab3d30a",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-startup-no-run.log",
+      "bytes": 3069,
+      "sha256": "4f4492c91c4ef53649ba6ec10164f8136137bf85b682445a5e3c87aad9d946ab",
+      "raw": true
+    }
+  ],
+  "prior_source_files_before_windows_fixture_fix": [
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files/inventory.rs",
+      "bytes": 5350,
+      "sha256": "5e422a4ca1bc023c65623dc4a34377b4c78e19da667f5c882e88e5911b12df4f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup.rs",
+      "bytes": 6993,
+      "sha256": "54a352c67bba1678a75d68359d3f275cb407e1d09d804d336a85a666d4a209c6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup_tests.rs",
+      "bytes": 15145,
+      "sha256": "5fb6ed2652392d3f3e592fbeb2bfc3fd293defcb0e225370ad96fabfb6970c1f"
+    }
+  ],
+  "fixture_correction": {
+    "at_utc": "2026-10-30T20:40:58.107905+00:00",
+    "path": "crates/fc-bootstrap/src/profile_content_startup_tests.rs",
+    "changes": [
+      "Test root starts with required FutureClassroom-Test- prefix; DataPaths safety check unchanged.",
+      "Fixture cleanup owner is constructed before prepare_for_current_user so prepare/read_back errors still run RAII Drop."
+    ],
+    "source_rebuild_and_windows_execution": "Pending parent; no old EXE reuse and no Windows execution by this subagent after correction."
+  },
+  "parent_executed_initial_windows_startup": {
+    "report": "/tmp/fc-round18-content-library-windows.json",
+    "report_sha256": "f9f0e034e6ad641a157d747d10b501e28256ab592334a2e4f9d47241dcd19ddc",
+    "binary_sha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+    "filter": "profile_content_startup::tests::",
+    "exit_code": 101,
+    "passed": 0,
+    "failed": 4,
+    "failure_stage": "All4 fail at fixture DataPaths::isolated_test argument validation BEFORE startup recovery logic; wrong test-directory prefix. Raw failure retained unchanged.",
+    "other_filters": "files5/backend3/cache5 PASS are separate parent evidence, not startup PASS."
+  }
+}

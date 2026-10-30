@@ -13,6 +13,9 @@ const CATALOG: &str = "business/material/v1/catalog";
 const MAX_FOLDERS: u64 = 4096;
 const MAX_RECORDS: u64 = 16384;
 const MAX_RESOURCES: u64 = 8192;
+pub(super) fn primary_bytes(d: &dyn TransactionDocuments) -> Result<u64, StorageError> {
+    Ok(Catalog::read(d)?.bytes)
+}
 pub const ORIGINAL_BYTE_LIMIT: u64 = 2 * 1024 * 1024 * 1024;
 const RESPONSE_LIMIT: usize = 256 * 1024;
 fn key(kind: &str, id: u64) -> String {
@@ -746,10 +749,14 @@ impl<S: Send> TransactionTask<S> for MutationTask<S> {
                 {
                     return Err(material_error(MaterialError::AlreadyExists));
                 }
+                let content_bytes = super::profile_content::primary_bytes(d)?;
                 catalog.bytes = catalog
                     .bytes
                     .checked_add(r.append.resource.bytes)
-                    .filter(|n| *n <= ORIGINAL_BYTE_LIMIT)
+                    .filter(|n| {
+                        n.checked_add(content_bytes)
+                            .is_some_and(|total| total <= ORIGINAL_BYTE_LIMIT)
+                    })
                     .ok_or(StorageError::ResourceQuota)?;
                 catalog.records += 1;
                 catalog.resources += 1;

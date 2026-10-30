@@ -261,6 +261,7 @@ struct TextValidator {
     byte: Option<u8>,
     high: Option<u16>,
     count: u32,
+    content: Option<String>,
 }
 impl TextValidator {
     fn new() -> Self {
@@ -274,13 +275,22 @@ impl TextValidator {
             byte: None,
             high: None,
             count: 0,
+            content: None,
         }
     }
     fn character(&mut self, c: char) -> Result<(), ValidationError> {
-        if !valid_character(c) {
+        if !valid_character(c) && !(c == '\u{feff}' && self.content.is_some()) {
             return Err(ValidationError::InvalidText);
         }
         self.count = self.count.checked_add(1).ok_or(ValidationError::TooLarge)?;
+        if let Some(text) = &mut self.content {
+            if self.count as usize > fc_domain::profile_content::MAX_CONTENT_CHARACTERS
+                || text.len() + c.len_utf8() > fc_domain::profile_content::MAX_CONTENT_TEXT_BYTES
+            {
+                return Err(ValidationError::TooLarge);
+            }
+            text.push(c);
+        }
         Ok(())
     }
     fn data_byte(&mut self, byte: u8) -> Result<(), ValidationError> {
@@ -365,7 +375,7 @@ impl TextValidator {
         }
         Ok(())
     }
-    fn finish(mut self) -> Result<u32, ValidationError> {
+    fn finalize(&mut self) -> Result<(), ValidationError> {
         if matches!(self.encoding, TextEncoding::Unknown) {
             self.encoding = TextEncoding::Utf8;
             for n in 0..self.prefix_len {
@@ -375,8 +385,53 @@ impl TextValidator {
         if self.utf8_len != 0 || self.byte.is_some() || self.high.is_some() {
             return Err(ValidationError::InvalidText);
         }
+        Ok(())
+    }
+    fn finish(mut self) -> Result<u32, ValidationError> {
+        self.finalize()?;
         Ok(self.count)
     }
+}
+/// Independent text-node import, with the same strict incremental UTF-8/BOM or
+/// BOM-marked UTF-16 decoder used for material validation. Preserve formatting;
+/// never guess a legacy code page or replace malformed Unicode. Only this
+/// content path collects text and applies its 10,000-scalar/40,000-byte policy;
+/// ordinary material TXT files retain their existing larger-original policy.
+pub fn decode_content_text<R: Read + Seek>(
+    reader: &mut R,
+    control: &dyn ValidationControl,
+) -> Result<String, ValidationError> {
+    let budget = Budget::new(control)?;
+    let bytes = reader.seek(SeekFrom::End(0))?;
+    if bytes > 64 * 1024 {
+        return Err(ValidationError::TooLarge);
+    }
+    reader.seek(SeekFrom::Start(0))?;
+    let mut text = TextValidator::new();
+    text.content = Some(String::new());
+    let mut block = [0u8; BLOCK];
+    let mut total = 0u64;
+    loop {
+        budget.check()?;
+        let n = reader.read(&mut block)?;
+        budget.check()?;
+        if n == 0 {
+            break;
+        }
+        total = total
+            .checked_add(n as u64)
+            .ok_or(ValidationError::TooLarge)?;
+        if total > bytes || total > 64 * 1024 {
+            return Err(ValidationError::TooLarge);
+        }
+        text.feed(&block[..n])?;
+    }
+    if total != bytes {
+        return Err(ValidationError::Io);
+    }
+    text.finalize()?;
+    budget.check()?;
+    text.content.ok_or(ValidationError::InvalidText)
 }
 /// Read in bounded blocks; PDF always fails with PdfRequiresHelper. Calling code
 /// must run validate_pdf on a read-only mapping in the OS-limited helper instead.
@@ -741,6 +796,115 @@ mod tests {
             ),
             Err(ValidationError::ClockUnavailable)
         );
+    }
+    #[test]
+    fn content_txt_preserves_unicode_and_formatting_across_every_decoder_boundary() {
+        let expected = "\t中文😀\r\n第二行\n\u{feff}正文";
+        let mut forms = vec![
+            expected.as_bytes().to_vec(),
+            utf16(expected, true),
+            utf16(expected, false),
+        ];
+        let mut bom = vec![0xef, 0xbb, 0xbf];
+        bom.extend_from_slice(expected.as_bytes());
+        forms.push(bom);
+        for form in forms {
+            for max in 1..=7 {
+                let mut input = Chunked {
+                    inner: Cursor::new(form.clone()),
+                    max,
+                };
+                assert_eq!(decode_content_text(&mut input, &Control).unwrap(), expected);
+            }
+        }
+    }
+    #[test]
+    fn content_txt_counts_scalars_and_bytes_without_restricting_material_originals() {
+        let maximum = "😀".repeat(10_000);
+        for bytes in [
+            maximum.as_bytes().to_vec(),
+            utf16(&maximum, true),
+            utf16(&maximum, false),
+        ] {
+            assert_eq!(
+                decode_content_text(&mut Cursor::new(bytes), &Control).unwrap(),
+                maximum
+            );
+        }
+        for invalid in ["😀".repeat(10_001), "a".repeat(10_001)] {
+            assert_eq!(
+                decode_content_text(&mut Cursor::new(invalid.as_bytes()), &Control),
+                Err(ValidationError::TooLarge)
+            );
+        }
+        let large_original = vec![b'a'; 50_001];
+        assert!(validate_file(&mut Cursor::new(&large_original), "课堂资料.txt", &Control).is_ok());
+        assert_eq!(
+            decode_content_text(&mut Cursor::new(large_original), &Control),
+            Err(ValidationError::TooLarge)
+        );
+        assert_eq!(
+            decode_content_text(&mut Cursor::new(vec![b'a'; 65_537]), &Control),
+            Err(ValidationError::TooLarge)
+        );
+    }
+    #[test]
+    fn content_txt_rejects_invalid_unicode_and_binary_instead_of_lossy_decoding() {
+        for invalid in [
+            vec![0xc0, 0x80],
+            vec![0xff],
+            vec![0xef, 0xbb],
+            vec![0xff, 0xfe, 0],
+            vec![0xfe, 0xff, 0xd8, 0],
+            vec![0xff, 0xfe, 0, 0xdc],
+            vec![0xff, 0xfe, 0, 0xd8, 0x61, 0],
+            vec![0xf4, 0x90, 0x80, 0x80],
+            b"text\0binary".to_vec(),
+            vec![b'a', 0x1b, b'b'],
+        ] {
+            for max in 1..=3 {
+                let mut input = Chunked {
+                    inner: Cursor::new(invalid.clone()),
+                    max,
+                };
+                assert_eq!(
+                    decode_content_text(&mut input, &Control),
+                    Err(ValidationError::InvalidText)
+                );
+            }
+        }
+    }
+    #[test]
+    fn content_txt_rechecks_cancellation_while_streaming_and_rejects_cpu_exhaustion() {
+        struct Stop(Cell<u32>, bool);
+        impl ValidationControl for Stop {
+            fn canceled(&self) -> bool {
+                let n = self.0.get();
+                self.0.set(n + 1);
+                !self.1 && n >= 8
+            }
+            fn thread_cpu_time(&self) -> Result<Duration, ContainerError> {
+                Ok(if self.1 && self.0.get() > 1 {
+                    Duration::from_secs(10)
+                } else {
+                    Duration::ZERO
+                })
+            }
+        }
+        for (cpu, expected) in [
+            (false, ValidationError::Canceled),
+            (true, ValidationError::CpuBudget),
+        ] {
+            let mut input = Chunked {
+                inner: Cursor::new(vec![b'a'; 500]),
+                max: 1,
+            };
+            assert_eq!(
+                decode_content_text(&mut input, &Stop(Cell::new(0), cpu)),
+                Err(expected)
+            );
+            assert!(input.inner.position() < 500);
+        }
     }
     #[test]
     fn hash_file_is_streaming_and_does_not_trigger_text_or_pdf_parsing() {

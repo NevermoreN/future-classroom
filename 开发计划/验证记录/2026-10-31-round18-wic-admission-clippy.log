@@ -1,0 +1,29 @@
+    Checking memchr v2.8.3
+    Checking digest v0.10.7
+    Checking sha2 v0.10.9
+    Checking serde_json v1.0.145
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+error: called `.err().expect()` on a `Result` value
+   --> crates/fc-windows/src/materials/image_admission_tests.rs:158:10
+    |
+158 |           .err()
+    |  __________^
+159 | |         .expect("expired budget must not wait or acquire");
+    | |_______________^ help: try: `expect_err`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#err_expect
+    = note: `-D clippy::err-expect` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::err_expect)]`
+
+error: called `.err().expect()` on a `Result` value
+   --> crates/fc-windows/src/materials/image_admission_tests.rs:170:10
+    |
+170 |           .err()
+    |  __________^
+171 | |         .expect("revocation at acquisition must release without WIC");
+    | |_______________^ help: try: `expect_err`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#err_expect
+
+error: could not compile `fc-windows` (lib test) due to 2 previous errors

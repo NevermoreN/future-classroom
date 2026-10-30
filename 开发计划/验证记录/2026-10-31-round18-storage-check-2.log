@@ -1,0 +1,11 @@
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+warning: unused variable: `content_bytes`
+    --> crates/fc-storage/src/business/materials.rs:1298:21
+     |
+1298 |                 let content_bytes=super::profile_content::primary_bytes(d)?;
+     |                     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_content_bytes`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fc-storage` (lib) generated 1 warning (run `cargo fix --lib -p fc-storage` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.19s

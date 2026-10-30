@@ -1,0 +1,23 @@
+{
+  "scope": "Release build inputs; documentation and separate cfg(test) flow test module excluded; build only, not formal MSVC/platform certification",
+  "target": "i686-win7-windows-gnu",
+  "command": [
+    "cargo",
+    "+nightly-2026-10-29",
+    "build",
+    "-p",
+    "fc-bootstrap",
+    "--release",
+    "--target",
+    "i686-win7-windows-gnu",
+    "--locked",
+    "--message-format=json",
+    "-Z",
+    "build-std=std,panic_unwind",
+    "-Z",
+    "unstable-options"
+  ],
+  "inputsUnchangedDuringBuild": true,
+  "exitCode": 101,
+  "changedInputs": []
+}

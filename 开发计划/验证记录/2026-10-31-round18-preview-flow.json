@@ -1,0 +1,122 @@
+{
+  "status": "PASS",
+  "scope": "PRODUCER_MANAGEMENT_PREVIEW_LOCAL_CROSS_BUILD_ONLY",
+  "role": "Own implementation, not an independent safety review",
+  "createdUtc": "2026-10-30T20:45:30.417656+00:00",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "bytes": 4676,
+      "sha256": "7a0683176bc3f57913498f517600efb411f21501eec98b129cef5217a0492cff"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview_flow.rs",
+      "bytes": 15034,
+      "sha256": "1289bc982a3227f73a25cad0f5850e9aec6e5e7a5e23674661a76764a3debdbc"
+    }
+  ],
+  "aggregateSha256": "956a234b9574efbd0e451be3f824fa7e945fb5f515ad71cde317c7e53bb9c2ee",
+  "interfaces": {
+    "run": "profile_flow::run(backend,lease,operation,sequence,root:PathBuf,context:&JobContext)",
+    "Preview": [
+      "identity:IdentityState",
+      "public:PublicLayoutState",
+      "subject:Option<SubjectProfileDocument>",
+      "sequence:u64",
+      "now:LocalDateTime",
+      "source_revision:Revision",
+      "contents:Vec<PublishedContentSnapshot>",
+      "text:TextFrame",
+      "images:Vec<Arc<RasterFrame>>"
+    ]
+  },
+  "implemented": [
+    "Preview worker handles arbitrary exact managed saved profile scopes without the production current-lesson guest fence. It still requires a fresh stateful Local GlobalAdmin preparation guard.",
+    "Captured source global revision, management identity, saved public layout and optional exact saved subject document form a baseline. All draft structures/styles/composition validate before traversal.",
+    "Saved independent nodes are read through Backend.read_profile_content with error propagation. Only a fresh ID above the baseline high water (or a genuinely unsaved subject profile) receives Empty. Retired IDs/type changes/saved profile ID mismatches are explicit errors.",
+    "Text uses actual current payload plus snapshot scalars/UTF8 bytes and TextFrame.insert_verified SHA256. No placeholder body or fake media reference is published.",
+    "Only selected subject content or public outlet fallback is hydrated, never both.",
+    "One fixed now supplies both shared DWrite/layout measurement and UI rendering. Image requests come from the same image_requests_with_content geometry; no parallel layout/Contain authority is introduced.",
+    "Backend mutex is released before UTF8 hashing, DWrite, original file reads, hash verification, and WIC. All file work stays on the existing shared worker pool.",
+    "ControlledContentFiles.decode_current verifies the actual immutable original pin and produces an accounted RasterFrame in the same process-shared32MiB cache. Returned frame Arcs remain owned until UI finishes rendering.",
+    "Whole batch has cooperative30s wall/10s CPU plus JobContext checkpoints. AuthorityUpdating pauses5ms at a time with deadline/cancel checks; it is not permanent lease revocation. Healthy source change or actual revocation discards the snapshot.",
+    "Final management authorization, global revision, public/subject baselines and every saved slot content revision/view revision/current descriptor are read again before return. source_revision enables root UI before/after-render freshness checks."
+  ],
+  "newPureTests": [
+    "only_fresh_ids_become_empty_never_denied_or_retired_saved_slots",
+    "active_preview_slots_replace_public_fallback_without_loading_its_content"
+  ],
+  "verification": {
+    "runtimeTestsExecutedByThisAgent": 0,
+    "sshOperations": 0,
+    "strictClippy": {
+      "exit": 0,
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo clippy -p fc-bootstrap --target i686-pc-windows-gnu --bins --tests --locked -- -D warnings",
+      "raw": {
+        "path": "/tmp/fc-round18-controller-preview-final-clippy.log",
+        "bytes": 361,
+        "sha256": "0c9e4346ec5a291550b1ae9ca150afd2e098b34bccee52778ff6e8fdd3b9fe12"
+      },
+      "elapsedSeconds": 6.95
+    },
+    "noRun": {
+      "exit": 0,
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo test -p fc-bootstrap --target i686-pc-windows-gnu --bin fc-bootstrap --no-run --locked --message-format=json",
+      "raw": {
+        "path": "/tmp/fc-round18-controller-preview-final-no-run.log",
+        "bytes": 363,
+        "sha256": "351dc9e31062d95d5e863a4e4fa339d631e5419d8fb03c69a35e224897e0c062"
+      },
+      "metadata": {
+        "path": "/tmp/fc-round18-controller-preview-final-test-metadata.jsonl",
+        "bytes": 82079,
+        "sha256": "2befb092f68495e2437b30c1b17df6292e013e0ed3a992b018299fbe148641d9"
+      },
+      "elapsedSeconds": 13.31,
+      "artifact": {
+        "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+        "sha256": "71c3abd6c2c478ee3b6fbb2164da0a61a4f4e5432f63c2fa66c12d0a66454c0b",
+        "bytes": 145349147,
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": []
+      }
+    },
+    "intermediateFirstCheck": {
+      "raw": {
+        "path": "/tmp/fc-round18-preview-flow-first-check.log",
+        "bytes": 1844,
+        "sha256": "13bb0aa706bcbe70b60122addf7f1b3aa3cc6473cf3f8402b28698a6a6ecbbbc"
+      },
+      "exit": 101,
+      "reason": "Central UI was still destructuring the old Preview fields; fixed by root, no owned type errors."
+    },
+    "frozenCombinedSourceManifest": {
+      "path": "/tmp/fc-round18-controller-preview-final-source-manifest.json",
+      "bytes": 1190,
+      "sha256": "46ade3d74ea207775888778b62c0fd267a611d68e77b3af82a7545e545de972f"
+    },
+    "artifactBinding": {
+      "path": "/tmp/fc-round18-controller-preview-artifact.json",
+      "bytes": 1956,
+      "sha256": "0f3db96bda484ae660e07791f92dc4e4ab9716ee4b80e4d4772badc2b685fe37"
+    }
+  },
+  "limits": [
+    "No new management preview or controller runtime execution by this agent. The two new slot-contract tests are pure checks, not proof of DPAPI/SQLite/WIC end-to-end preview behavior.",
+    "Existing native9Win11 PASS belongs to earlier frozen raster/native source. It does not execute these new controller4 or preview worker tests.",
+    "Cooperative budgets/cancellation do not prove physical interruption of a synchronous SQLite/DWrite/WIC call; live workers and reservations remain owned until calls actually return.",
+    "Root central UI integration is owned/reviewed by root; its existing role/source before/after checks and keeping images alive through render are integration requirements, not this producer independent-review evidence."
+  ],
+  "cleanup": {
+    "remoteActions": 0,
+    "remoteResidueCreated": 0,
+    "localCache": "/tmp/fc-round18-native-target retained for root unified final verification and cleanup",
+    "allOwnReadsComplete": true
+  }
+}

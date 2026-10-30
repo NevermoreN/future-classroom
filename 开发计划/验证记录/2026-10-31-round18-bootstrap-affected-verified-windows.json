@@ -1,0 +1,81 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "e9ba43a0843c7e93e0a67960581cfcebfb9a4de8a12c8cdec74d44ff72ad685c",
+  "exe": "/tmp/fc-round18-frozen-workspace-verified-final/fc_bootstrap-153172ad9c1ad7f3.exe",
+  "timeoutSeconds": 900,
+  "tests": [
+    {
+      "filter": "backend::profile_content::tests::",
+      "exitCode": 0,
+      "binarySha256": "e9ba43a0843c7e93e0a67960581cfcebfb9a4de8a12c8cdec74d44ff72ad685c",
+      "output": [
+        "",
+        "running 5 tests",
+        "System.Management.Automation.RemoteException",
+        "thread 'fc-worker-2' (28100) panicked at crates/fc-bootstrap/src/backend/profile_content.rs:947:32:",
+        "synthetic physical worker fault",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back ... ok",
+        "test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok",
+        "test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok",
+        "System.Management.Automation.RemoteException",
+        "thread 'backend::profile_content::tests::guest_page_job_cancel_and_deadline_at_real_precommit_do_not_advance_view' (33648) panicked at crates/fc-bootstrap/src/backend/profile_content.rs:1160:29:",
+        "synthetic guest fence panic",
+        "test backend::profile_content::tests::guest_page_job_cancel_and_deadline_at_real_precommit_do_not_advance_view ... ok",
+        "test backend::profile_content::tests::preparation_guard_rechecks_actual_account_epoch_and_fails_closed_on_health_fault ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 24.57s",
+        ""
+      ],
+      "passed": 5
+    },
+    {
+      "filter": "profile_content_files::tests::",
+      "exitCode": 0,
+      "binarySha256": "e9ba43a0843c7e93e0a67960581cfcebfb9a4de8a12c8cdec74d44ff72ad685c",
+      "output": [
+        "",
+        "running 5 tests",
+        "test profile_content_files::tests::authority_update_pauses_actual_source_read_then_resumes_or_revokes_without_consuming_bytes ... ok",
+        "test profile_content_files::tests::failed_later_image_keeps_owned_paths_retirable_and_does_not_publish_partial_proof ... ok",
+        "test profile_content_files::tests::mismatched_admission_and_reservation_fail_before_creating_any_owned_image ... ok",
+        "test profile_content_files::tests::native_txt_preparation_preserves_utf16_and_hashes_actual_text_not_intent ... ok",
+        "test profile_content_files::tests::real_ordered_image_bundle_seals_hashes_decodes_and_pins_until_commit_owner_exits ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 0.17s",
+        ""
+      ],
+      "passed": 5
+    },
+    {
+      "filter": "profile_content_startup::tests::",
+      "exitCode": 0,
+      "binarySha256": "e9ba43a0843c7e93e0a67960581cfcebfb9a4de8a12c8cdec74d44ff72ad685c",
+      "output": [
+        "",
+        "running 4 tests",
+        "test profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting ... ok",
+        "test profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery ... ok",
+        "test profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup ... ok",
+        "test profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 80 filtered out; finished in 7.59s",
+        ""
+      ],
+      "passed": 4
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

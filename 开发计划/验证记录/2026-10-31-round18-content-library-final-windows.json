@@ -1,0 +1,104 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "5d3736de55bdef6fa96dc4b99c246912310560f6207c30d46f03a08da252b461",
+  "exe": "/tmp/fc-round18-frozen-library-final/fc_bootstrap-153172ad9c1ad7f3.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "profile_content_startup::tests::",
+      "exitCode": 101,
+      "binarySha256": "5d3736de55bdef6fa96dc4b99c246912310560f6207c30d46f03a08da252b461",
+      "output": [
+        "",
+        "running 4 tests",
+        "test profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting ... ok",
+        "System.Management.Automation.RemoteException",
+        "thread 'profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery' (40888) panicked at crates/fc-bootstrap/src/profile_content_startup_tests.rs:441:5:",
+        "assertion failed: matches!(reconcile_after_restart(f.b(), &files),",
+        "    Err(BackendError::Storage(fc_storage::StorageError::AuthorityUnavailable)))",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery ... FAILED",
+        "test profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup ... ok",
+        "test profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart ... ok",
+        "",
+        "failures:",
+        "",
+        "failures:",
+        "    profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery",
+        "",
+        "test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 79 filtered out; finished in 7.52s",
+        ""
+      ]
+    },
+    {
+      "filter": "backend::profile_content::tests::",
+      "exitCode": 0,
+      "binarySha256": "5d3736de55bdef6fa96dc4b99c246912310560f6207c30d46f03a08da252b461",
+      "output": [
+        "",
+        "running 4 tests",
+        "System.Management.Automation.RemoteException",
+        "thread 'fc-worker-2' (10344) panicked at crates/fc-bootstrap/src/backend/profile_content.rs:932:32:",
+        "synthetic physical worker fault",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back ... ok",
+        "test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok",
+        "test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok",
+        "test backend::profile_content::tests::preparation_guard_rechecks_actual_account_epoch_and_fails_closed_on_health_fault ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 17.81s",
+        ""
+      ],
+      "passed": 4
+    },
+    {
+      "filter": "profile_content_cache::tests::",
+      "exitCode": 0,
+      "binarySha256": "5d3736de55bdef6fa96dc4b99c246912310560f6207c30d46f03a08da252b461",
+      "output": [
+        "",
+        "running 5 tests",
+        "test profile_content_cache::tests::a_new_shared_handle_cannot_reset_billing_for_an_old_external_body ... ok",
+        "test profile_content_cache::tests::clearing_index_and_dropping_frame_do_not_release_live_external_arc_charge ... ok",
+        "test profile_content_cache::tests::exact_owner_revision_hash_and_missing_nodes_never_fall_back ... ok",
+        "test profile_content_cache::tests::full_four_mib_budget_counts_retained_bodies_across_many_frames ... ok",
+        "test profile_content_cache::tests::retired_metadata_has_a_hard_cap_even_when_bodies_are_tiny ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 78 filtered out; finished in 0.21s",
+        ""
+      ],
+      "passed": 5
+    },
+    {
+      "filter": "profile_content_files::tests::",
+      "exitCode": 0,
+      "binarySha256": "5d3736de55bdef6fa96dc4b99c246912310560f6207c30d46f03a08da252b461",
+      "output": [
+        "",
+        "running 5 tests",
+        "test profile_content_files::tests::authority_update_pauses_actual_source_read_then_resumes_or_revokes_without_consuming_bytes ... ok",
+        "test profile_content_files::tests::failed_later_image_keeps_owned_paths_retirable_and_does_not_publish_partial_proof ... ok",
+        "test profile_content_files::tests::mismatched_admission_and_reservation_fail_before_creating_any_owned_image ... ok",
+        "test profile_content_files::tests::native_txt_preparation_preserves_utf16_and_hashes_actual_text_not_intent ... ok",
+        "test profile_content_files::tests::real_ordered_image_bundle_seals_hashes_decodes_and_pins_until_commit_owner_exits ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 78 filtered out; finished in 0.16s",
+        ""
+      ],
+      "passed": 5
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "FAIL"
+}

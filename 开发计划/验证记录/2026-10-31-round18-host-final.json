@@ -1,0 +1,157 @@
+{
+  "scope": "Host workspace run; actual exit 0; after-run Cargo no-run confirms cache identities; not a before-run whole-repository source freeze or Windows UI execution",
+  "command": "CARGO_TARGET_DIR=/tmp/fc-round18-host-target cargo test --workspace --locked -- --test-threads=2",
+  "exitCode": 0,
+  "passed": 503,
+  "groups": 28,
+  "rawLogSha256": "b9f6c7f22c7565463027c7da9575ea86f89b418464cd9c470f0ce20819efe81c",
+  "artifacts": [
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_security-48b3fc75e737e616",
+      "target": "fc_security",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "b4bde36295ff9fc0ffe9c084007fbda7d977620d8340bba99391bf89883e217b"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_storage-307e61de7acdd8d1",
+      "target": "fc_storage",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "e3d9d08cfb6ee322a52fa9782663875899c204372db613cd731cd031df9985cd"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_materials-91241ec9afea0a08",
+      "target": "fc_materials",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "299623978578555d37423b3d2828f5dcd4f4c03fb8c892236cc5cb18b313f4ca"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0",
+      "target": "fc_bootstrap",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "beff698ace95174b824d1868fb6b5710750d05b2ab12328cea1792d3916e29db"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_windows-f36007e04f82d86d",
+      "target": "fc_windows",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "302911f6ef27fc7d4cec2e715deb5a4f25577ccfda2bea01265aae56ea5449ec"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_protocol-672b82c869c9fb9e",
+      "target": "fc_protocol",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "8cf59550082ebb09fa7d213290802ef4ef316d3ea3153c9c9d613e798d022568"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_presentation-b9cda297d671ae0a",
+      "target": "fc_presentation",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "42a669ef2548c0d94b28496f152b7cdf3cfe88e5ed31a0ddbabacf73409abeb8"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/business_storage-5d8a817026372542",
+      "target": "business_storage",
+      "kind": [
+        "test"
+      ],
+      "fresh": true,
+      "sha256": "2a695a32f5a1d4ec6f6f4b6e6aedcc3a6d82592472f438776c497814f8e23861"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/voice_storage-acd3c79f0e71eeaf",
+      "target": "voice_storage",
+      "kind": [
+        "test"
+      ],
+      "fresh": true,
+      "sha256": "b069f3a33c63954d8f5167bc5d2a1cc0529c783d324a4f624c5e9428a2460b2b"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/runtime_storage-8d8e7a25c6b64e49",
+      "target": "runtime_storage",
+      "kind": [
+        "test"
+      ],
+      "fresh": true,
+      "sha256": "8f1840d363515a942476bf2f0688f18631003dcd86c1ed343aa189b60f51ca2a"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_bootstrap-a6d541c33cc08efc",
+      "target": "fc-bootstrap",
+      "kind": [
+        "bin"
+      ],
+      "fresh": true,
+      "sha256": "bb4c3ca5ea2b67c3f238a154e463b7997419590c3f10876961cb8673393600b8"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_application-07ac2c263ee5035b",
+      "target": "fc_application",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "8a9c844e470789a45ef69ab8e4b993037566a097657d970522b1deb51fae065c"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_runtime-541c4b0a42f17d87",
+      "target": "fc_runtime",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "24d958032b1d43a017a88e4d01025f432dccd0da9a0189e512ce0075fe45ad0e"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_audio-fba3f86df4fe4ef8",
+      "target": "fc_audio",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "8e72019b648671cffb1377cb3b672c6581ef480d60103a80323f58051c325ec5"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_ports-1a5cca1b50154c98",
+      "target": "fc_ports",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "e8a6819e339dc0e96c0f388de75511fcf3fe16999bcf50679d18b1e3aaa8ed4f"
+    },
+    {
+      "path": "/tmp/fc-round18-host-target/debug/deps/fc_domain-2610ce4c188c5c98",
+      "target": "fc_domain",
+      "kind": [
+        "lib"
+      ],
+      "fresh": true,
+      "sha256": "5e795b5d4ebb70216150b34e6df608b4f71828cfde2ac26038d0455fb6475687"
+    }
+  ],
+  "allArtifactsFreshOnNoRun": true,
+  "clippyExitCode": 0,
+  "clippyLogSha256": "30e603683caf0d0279410df900428e73b5a1293a4de27d968090668d045561ce"
+}

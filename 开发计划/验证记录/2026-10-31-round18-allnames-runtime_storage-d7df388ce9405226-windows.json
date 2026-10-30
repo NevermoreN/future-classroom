@@ -1,0 +1,41 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "28e4591d3a39274f2b0a8d23c379b5a402619de7df8d8b9801b4a80fb1825828",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/runtime_storage-d7df388ce9405226.exe",
+  "timeoutSeconds": 900,
+  "tests": [
+    {
+      "filter": "",
+      "exitCode": 0,
+      "binarySha256": "28e4591d3a39274f2b0a8d23c379b5a402619de7df8d8b9801b4a80fb1825828",
+      "output": [
+        "",
+        "running 3 tests",
+        "test commit_cas_journal_and_recovery_keep_database_and_authority_consistent ... ok",
+        "test sqlite_commit_then_publication_error_blocks_old_permissions_and_recovers_facts ... ok",
+        "System.Management.Automation.RemoteException",
+        "thread 'fc-sqlite-writer' (20548) panicked at crates/fc-bootstrap/tests/runtime_storage.rs:264:31:",
+        "injected post-COMMIT authority publication panic",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test sqlite_commit_then_publication_panic_blocks_old_permissions_and_recovers_facts ... ok",
+        "",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s",
+        ""
+      ],
+      "passed": 3
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

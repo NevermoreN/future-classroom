@@ -6,7 +6,8 @@ pub use crate::layout::{
     PaintGlass, SceneNodeKey, ScenePaintNode, ScenePaintTree, SceneProfileStamp,
 };
 use crate::{ClockStyle, LayoutError, Rect};
-use fc_domain::layout::WidgetKind;
+use fc_domain::layout::{LayoutScope, LayoutTree, NodeKind, WidgetKind};
+use fc_domain::profile_content::{ContentSlotKey, MediaReference, PublishedContentDescriptor};
 use fc_domain::{
     content::ContentKey,
     desktop::*,
@@ -17,6 +18,7 @@ use fc_domain::{
     time::LocalDateTime,
 };
 use fc_ports::TextMeasure;
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct PageInfo {
@@ -76,10 +78,36 @@ pub struct MaterialListContent {
     pub visible_rows: u8,
     pub row_gap_dip: u16,
 }
+/// Trusted cache boundary. The producer verifies SHA-256 against actual UTF-8
+/// before insertion. Lookup must use the exact owner, revision and digest; no
+/// fallback to another revision or another node with the same kind is permitted.
+pub trait ContentTextSource {
+    fn text(&self, slot: ContentSlotKey, revision: Revision, sha256: [u8; 32]) -> Option<Arc<str>>;
+}
+struct EmptyContentTextSource;
+impl ContentTextSource for EmptyContentTextSource {
+    fn text(&self, _: ContentSlotKey, _: Revision, _: [u8; 32]) -> Option<Arc<str>> {
+        None
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SceneContentIdentity {
+    pub slot: ContentSlotKey,
+    pub revision: Revision,
+    pub view_revision: Revision,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SceneImageContent {
+    pub current: MediaReference,
+    pub current_page: u8,
+    pub total_pages: u8,
+}
 #[derive(Clone, Debug, PartialEq)]
 pub enum CardContent {
     Clock(ClockContent),
     Text(String),
+    StandaloneText(Arc<str>),
+    Image(SceneImageContent),
     Courses(Vec<CourseCapsule>),
     Homework(Vec<HomeworkEntry>),
     Recess {
@@ -101,6 +129,7 @@ pub struct LessonControlContent {
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct SceneCard {
+    pub content_identity: Option<SceneContentIdentity>,
     pub kind: ComponentKind,
     pub rect: Rect,
     pub font_dip: f32,
@@ -157,6 +186,8 @@ pub enum SceneError {
     TreeLayout(TreeLayoutError),
     Schedule,
     Capacity,
+    ContentPending(ContentSlotKey),
+    InvalidContent(ContentSlotKey),
 }
 /// A neutral fallback is explicit; it never suggests a different teacher's profile.
 pub fn profile_configuration_warning(
@@ -236,17 +267,34 @@ pub fn soft_subject_color(raw: Rgb) -> Rgb {
         blue: ((b + m) * 255.).round() as u8,
     }
 }
-fn widget_kind(kind: ComponentKind) -> WidgetKind {
-    match kind {
-        ComponentKind::Clock => WidgetKind::Clock,
-        ComponentKind::Date => WidgetKind::Date,
-        ComponentKind::Schedule => WidgetKind::Schedule,
-        ComponentKind::Homework => WidgetKind::Homework,
-        ComponentKind::Materials => WidgetKind::Materials,
-        ComponentKind::Reminder => WidgetKind::Reminder,
-        ComponentKind::DateCountdown => WidgetKind::DateCountdown,
-        ComponentKind::Recess => WidgetKind::Recess,
+
+fn selected_widgets(tree: &LayoutTree, replace_outlet: bool) -> Vec<(SceneNodeKey, WidgetKind)> {
+    fn walk(
+        tree: &LayoutTree,
+        id: LayoutNodeId,
+        replace: bool,
+        out: &mut Vec<(SceneNodeKey, WidgetKind)>,
+    ) {
+        let n = tree.node(id).expect("validated tree");
+        if let NodeKind::Widget(kind) = n.kind {
+            out.push((
+                SceneNodeKey {
+                    scope: tree.scope,
+                    id,
+                },
+                kind,
+            ));
+        }
+        if replace && matches!(n.kind, NodeKind::Outlet { .. }) {
+            return;
+        }
+        for child in &n.children {
+            walk(tree, *child, replace, out);
+        }
     }
+    let mut out = Vec::new();
+    walk(tree, tree.root, replace_outlet, &mut out);
+    out
 }
 
 fn card(
@@ -260,6 +308,7 @@ fn card(
     let c = component;
     let alpha = f32::from(c.opacity_percent) / 100.;
     Ok(SceneCard {
+        content_identity: None,
         kind: k,
         rect,
         font_dip: f32::from(c.font_dip),
@@ -277,6 +326,27 @@ pub fn build_scene(
     generation: SceneGeneration,
     work: Rect,
     measure: &dyn TextMeasure,
+) -> Result<SceneSnapshot, SceneError> {
+    // Compatibility entry point has no content-cache authority. Independent
+    // content requires the explicit hydrated composition path, even for images
+    // whose pixels will subsequently be admitted by the native cache adapter.
+    facts.validate().map_err(SceneError::InvalidFacts)?;
+    if let Some(snapshot) = facts
+        .profile_contents
+        .iter()
+        .find(|s| !matches!(s.content, PublishedContentDescriptor::Empty))
+    {
+        return Err(SceneError::ContentPending(snapshot.slot));
+    }
+    build_scene_with_content(facts, generation, work, measure, &EmptyContentTextSource)
+}
+
+pub fn build_scene_with_content(
+    facts: &DesktopFacts,
+    generation: SceneGeneration,
+    work: Rect,
+    measure: &dyn TextMeasure,
+    source: &dyn ContentTextSource,
 ) -> Result<SceneSnapshot, SceneError> {
     facts.validate().map_err(SceneError::InvalidFacts)?;
     let settings = &facts.display;
@@ -613,16 +683,98 @@ pub fn build_scene(
     if let Some(deadline) = recess {
         entries.push((ComponentKind::Recess, CardContent::Recess { deadline }));
     }
-    let specs: Vec<_> = entries.iter().map(|(k, content)| {
-        let c = component(*k).ok_or(SceneError::Schedule)?;
+    // Resolve every active widget by its immutable scoped identity. Public
+    // outlet fallback is never hydrated while an exact subject tree replaces it.
+    let mut bound = Vec::new();
+    let mut nodes = selected_widgets(&facts.profiles.public_layout.tree, profile.is_some());
+    if let Some(profile) = profile {
+        nodes.extend(selected_widgets(&profile.tree, false));
+    }
+    for (key, widget) in nodes {
+        let kind = widget.component_kind().ok_or(SceneError::Capacity)?;
+        let independent = matches!(widget, WidgetKind::SubjectText | WidgetKind::SubjectImage);
+        let (style, content, identity) = if independent {
+            let styles = match key.scope {
+                LayoutScope::Public => &facts.profiles.public_layout.content_styles,
+                LayoutScope::Subject(_) => &profile.ok_or(SceneError::Schedule)?.content_styles,
+            };
+            let style = styles
+                .iter()
+                .find(|s| s.node_id == key.id)
+                .ok_or(SceneError::Schedule)?;
+            if !style.component.visible {
+                continue;
+            }
+            let slot = ContentSlotKey {
+                scope: key.scope,
+                node_id: key.id,
+            };
+            let snapshot = facts
+                .profile_contents
+                .iter()
+                .find(|s| s.slot == slot)
+                .ok_or(SceneError::InvalidContent(slot))?;
+            let content = match &snapshot.content {
+                PublishedContentDescriptor::Empty => continue,
+                PublishedContentDescriptor::Text {
+                    characters,
+                    utf8_bytes,
+                    sha256,
+                } => {
+                    let text = source
+                        .text(slot, snapshot.revision, *sha256)
+                        .ok_or(SceneError::ContentPending(slot))?;
+                    if text.len() != *utf8_bytes as usize
+                        || text.chars().count() != *characters as usize
+                        || text.len() > 40_000
+                        || text.chars().count() > 10_000
+                        || text
+                            .chars()
+                            .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+                    {
+                        return Err(SceneError::InvalidContent(slot));
+                    }
+                    CardContent::StandaloneText(text)
+                }
+                PublishedContentDescriptor::Image {
+                    current,
+                    total_pages,
+                } => CardContent::Image(SceneImageContent {
+                    current: current.clone(),
+                    current_page: snapshot.current_page,
+                    total_pages: *total_pages,
+                }),
+            };
+            (
+                style.component.clone(),
+                content,
+                Some(SceneContentIdentity {
+                    slot,
+                    revision: snapshot.revision,
+                    view_revision: snapshot.view_revision,
+                }),
+            )
+        } else {
+            let Some((_, content)) = entries.iter().find(|(k, _)| *k == kind) else {
+                continue;
+            };
+            (
+                component(kind).ok_or(SceneError::Schedule)?.clone(),
+                content.clone(),
+                None,
+            )
+        };
+        bound.push((key, widget, style, content, identity));
+    }
+    let specs: Vec<_> = bound.iter().map(|(key, widget, c, content, _)| {
         Ok(WidgetMeasure {
-            kind: widget_kind(*k),
-            body: card_body_spec(*k, content, public_unverified, if *k == ComponentKind::Materials { profile_configuration_warning(facts.profiles.reason) } else { None }).map_err(|_| SceneError::Capacity)?,
+            key: *key, kind: *widget,
+            body: card_body_spec(c.kind, content, public_unverified, if c.kind == ComponentKind::Materials { profile_configuration_warning(facts.profiles.reason) } else { None }).map_err(|_| SceneError::Capacity)?,
             font_dip: c.font_dip as f32, opacity: c.opacity_percent as f32 / 100.,
             min_width: c.min_width as f32, max_width: c.max_width as f32,
             min_height: (c.min_height as f32).max(if matches!(content, CardContent::Clock(clock) if clock.mode == ClockMode::Analog) {160.} else {84.}),
             max_height: c.max_height as f32,
-            preferred_width: if *k == ComponentKind::Homework {480.} else {280.},
+            preferred_width: if c.kind == ComponentKind::Homework {480.} else {280.},
             glass: PaintGlass { surface_alpha: settings.glass_surface_percent as f32 / 100., edge_alpha: settings.edge_reflection_percent as f32 / 100. },
         })
     }).collect::<Result<_, SceneError>>()?;
@@ -648,13 +800,18 @@ pub fn build_scene(
             continue;
         };
         let k = widget.component_kind().ok_or(SceneError::Capacity)?;
-        let content = entries
+        let (_, _, style, content, identity) = bound
             .iter()
-            .find(|(kind, _)| *kind == k)
-            .ok_or(SceneError::Schedule)?
-            .1
-            .clone();
-        let page = if k == ComponentKind::Homework {
+            .find(|(key, _, _, _, _)| *key == node.key)
+            .ok_or(SceneError::Schedule)?;
+        let content = content.clone();
+        let page = if let CardContent::Image(image) = &content {
+            PageInfo {
+                offset: u64::from(image.current_page),
+                shown: 1,
+                total: u64::from(image.total_pages),
+            }
+        } else if k == ComponentKind::Homework {
             PageInfo {
                 offset: facts.homework_offset,
                 shown: facts.homework.len() as u64,
@@ -677,14 +834,8 @@ pub fn build_scene(
             }
         };
         node.card_index = Some(cards.len());
-        cards.push(card(
-            settings,
-            k,
-            node.rect,
-            content,
-            page,
-            component(k).ok_or(SceneError::Schedule)?,
-        )?);
+        cards.push(card(settings, k, node.rect, content, page, style)?);
+        cards.last_mut().expect("just pushed").content_identity = *identity;
     }
     if cards.len() > 64 {
         return Err(SceneError::Capacity);

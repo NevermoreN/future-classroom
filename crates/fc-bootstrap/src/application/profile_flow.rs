@@ -1,7 +1,12 @@
 //! Owned, bounded profile work. Database waits stay on the existing shared pool.
 use super::*;
+use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::profile::{SubjectProfileDocument, SubjectProfileKey};
+use fc_domain::{profile_content::PublishedContentSnapshot, time::LocalDateTime};
 use fc_ports::{ProfilePage, PublicLayoutState};
+use fc_windows::materials::raster::RasterFrame;
+#[path = "profiles_preview_flow.rs"]
+mod preview_flow;
 
 pub(super) enum Loaded {
     Directory {
@@ -24,6 +29,12 @@ pub(super) struct Preview {
     pub public: PublicLayoutState,
     pub subject: Option<SubjectProfileDocument>,
     pub sequence: u64,
+    pub now: LocalDateTime,
+    pub source_revision: Revision,
+    pub contents: Vec<PublishedContentSnapshot>,
+    pub text: TextFrame,
+    /// Physical raster reservations stay owned until the UI render returns.
+    pub images: Vec<Arc<RasterFrame>>,
 }
 pub(super) fn allocation(operation: &profiles_editor::Command) -> Option<usize> {
     use profiles_editor::Command as C;
@@ -47,7 +58,7 @@ pub(super) fn allocation(operation: &profiles_editor::Command) -> Option<usize> 
             )?
         }
         C::ReloadList { .. } | C::LoadPublic | C::LoadSubject { .. } => 0,
-        C::Stay | C::Close => return None,
+        C::Stay | C::Close | C::ManageContent { .. } => return None,
     };
     bytes.checked_add(2048)
 }
@@ -56,9 +67,17 @@ pub(super) fn run(
     lease: SessionLease,
     operation: profiles_editor::Command,
     sequence: u64,
+    root: PathBuf,
     context: &JobContext,
 ) -> Result<Loaded> {
     context.checkpoint().map_err(|_| Failure::Stopped)?;
+    let operation = match operation {
+        profiles_editor::Command::Preview { public, subject } => {
+            return preview_flow::prepare(backend, lease, public, subject, sequence, root, context)
+                .map(|preview| Loaded::Preview(Box::new(preview)))
+        }
+        operation => operation,
+    };
     let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
     let identity = backend.management_identity(lease)?;
     use profiles_editor::Command as C;
@@ -105,35 +124,9 @@ pub(super) fn run(
             )?),
             saved: true,
         },
-        C::Preview { public, subject } => {
-            let public = match public {
-                Some(p) => p,
-                None => backend.read_public_layout(lease)?,
-            };
-            public
-                .display
-                .validate()
-                .map_err(|_| invalid("预览显示设置无效。"))?;
-            public
-                .layout
-                .tree
-                .validate_composition(subject.as_ref().map(|s| &s.tree))
-                .map_err(|_| {
-                    invalid("草稿布局无法与当前公共内容区组合，请先调整节点、层级和尺寸约束。")
-                })?;
-            if let Some(subject) = &subject {
-                subject
-                    .validate_structure()
-                    .map_err(|_| invalid("科目预览布局无效。"))?;
-            }
-            Loaded::Preview(Box::new(Preview {
-                identity,
-                public,
-                subject,
-                sequence,
-            }))
+        C::Preview { .. } | C::Stay | C::Close | C::ManageContent { .. } => {
+            return Err(invalid("当前页面没有后台布局操作。"))
         }
-        C::Stay | C::Close => return Err(invalid("当前页面没有后台布局操作。")),
     };
     // Explicit lock/WTS can advance independently of this mutex. Do not return
     // directory or preview data under a revoked local lease.

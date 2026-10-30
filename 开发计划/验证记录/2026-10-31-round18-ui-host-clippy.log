@@ -1,0 +1,16 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking zeroize v1.8.2
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-round18-ui-host-harness v0.0.0 (/tmp/fc-round18-ui-host-harness)
+error: unnecessary `>= y + 1` or `x - 1 >=`
+   --> /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/profile_content_editor_tests.rs:189:13
+    |
+189 |     assert!(e.view(false).actions.len() + 1 <= 12);
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: change it to: `e.view(false).actions.len() < 12`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#int_plus_one
+    = note: `-D clippy::int-plus-one` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::int_plus_one)]`
+
+error: could not compile `fc-round18-ui-host-harness` (lib test) due to 1 previous error

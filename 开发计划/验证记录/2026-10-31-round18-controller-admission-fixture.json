@@ -1,0 +1,104 @@
+{
+  "status": "PASS",
+  "scope": "PRODUCER_FIXTURE_ADMISSION_RETRY_AND_LOCAL_CROSS_BUILD_ONLY",
+  "createdUtc": "2026-10-30T21:23:18.993661+00:00",
+  "source": {
+    "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+    "sha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b",
+    "bytes": 14367,
+    "previousFrozenSha256": "8ebd1b459210aaadc667c7f3326309ef825e2974816825a1ec157c282ad8316f"
+  },
+  "change": "One test fixture now uses submit_held for both worker tasks. Only Rejection::Busy preserves and retries the rejected original task. Each helper has a fixed at-most-5-second pre-admission budget; both use one original 10-second job deadline, unchanged across retries. Before every attempt the admission bound is checked. Other rejection kinds fail with first/second worker labels. Accepted ticket returns immediately and is never resubmitted.",
+  "unchangedAssertions": [
+    "both physical workers actually started",
+    "cancel image/page tickets on expiration/hide",
+    "both remain physically running before release",
+    "tickets remain unfinished until physical release",
+    "generation500 remains and next501",
+    "actual terminal Cancelled result after release",
+    "pool join completes"
+  ],
+  "historicalRuntimeFailure": {
+    "report": "/tmp/fc-round18-application-bin-complete-windows.json",
+    "case": "application::desktop_controller::desktop_content_tests::hidden_controller_cancels_both_tickets_without_freeing_live_workers_or_resetting_generation",
+    "description": "Parent reports whole bin96 with95PASS1FAIL; first unretied try_submit(...).ok().unwrap() got None. Prior runs passed. The old code discarded the rejection kind; transient startup mailbox Busy diagnosis is consistent with source semantics, not preserved old error-kind evidence.",
+    "originalReportPreserved": true
+  },
+  "checks": {
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--tests",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round18-native-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "sourceSha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b"
+    },
+    "no-run": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--no-run",
+        "--message-format=json",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round18-native-target"
+      ],
+      "exitCode": 0,
+      "sourceSha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b"
+    }
+  },
+  "rustfmtCheckExitCode": 0,
+  "metadata": {
+    "path": "/tmp/fc-round18-controller-admission-fixture-test-metadata.jsonl",
+    "sha256": "1b40b0170c1b092c6967721f04a38958a0ac55dec8bb78f5d8e79787abd97716",
+    "buildFinished": [
+      {
+        "reason": "build-finished",
+        "success": true
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+      "sha256": "e40d15d46ab33482a7b58c8e6c123fd353c2e1f9fc4712e64aceb9df329269d3",
+      "bytes": 146058850,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": "fc-bootstrap"
+    }
+  ],
+  "runtimeTestsExecutedByThisAgent": 0,
+  "sshCalls": 0,
+  "sourceChangesOutsideOwnedTest": 0,
+  "windowsRecheck": "PENDING_PARENT_FOUR_CONTROLLER_TESTS",
+  "limits": [
+    "No runtime PASS claimed for corrected fixture. Parent will record prior95 plus affected4 rerun with duplicate test identities counted once, not99 distinct.",
+    "This producer fixture correction is not independent security review.",
+    "Shared target retained for parent cleanup."
+  ]
+}

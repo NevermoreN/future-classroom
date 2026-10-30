@@ -1,0 +1,110 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+  "exe": "/tmp/fc-round18-frozen-content-library/fc_bootstrap-153172ad9c1ad7f3.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "profile_content_files::tests::",
+      "exitCode": 0,
+      "binarySha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+      "output": [
+        "",
+        "running 5 tests",
+        "test profile_content_files::tests::authority_update_pauses_actual_source_read_then_resumes_or_revokes_without_consuming_bytes ... ok",
+        "test profile_content_files::tests::failed_later_image_keeps_owned_paths_retirable_and_does_not_publish_partial_proof ... ok",
+        "test profile_content_files::tests::mismatched_admission_and_reservation_fail_before_creating_any_owned_image ... ok",
+        "test profile_content_files::tests::native_txt_preparation_preserves_utf16_and_hashes_actual_text_not_intent ... ok",
+        "test profile_content_files::tests::real_ordered_image_bundle_seals_hashes_decodes_and_pins_until_commit_owner_exits ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 77 filtered out; finished in 0.17s",
+        ""
+      ],
+      "passed": 5
+    },
+    {
+      "filter": "profile_content_startup::tests::",
+      "exitCode": 101,
+      "binarySha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+      "output": [
+        "",
+        "running 4 tests",
+        "System.Management.Automation.RemoteException",
+        "thread 'profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting' (11752) panicked at crates/fc-bootstrap/src/profile_content_startup_tests.rs:56:14:",
+        "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting ... FAILED",
+        "System.Management.Automation.RemoteException",
+        "thread 'profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery' (10188) panicked at crates/fc-bootstrap/src/profile_content_startup_tests.rs:56:14:",
+        "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+        "test profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery ... FAILED",
+        "System.Management.Automation.RemoteException",
+        "thread 'profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup' (27700) panicked at crates/fc-bootstrap/src/profile_content_startup_tests.rs:56:14:",
+        "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+        "test profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup ... FAILED",
+        "System.Management.Automation.RemoteException",
+        "thread 'profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart' (38828) panicked at crates/fc-bootstrap/src/profile_content_startup_tests.rs:56:14:",
+        "called `Result::unwrap()` on an `Err` value: Error { code: HRESULT(0x80070057), message: \"参数错误。\" }",
+        "test profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart ... FAILED",
+        "",
+        "failures:",
+        "",
+        "failures:",
+        "    profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting",
+        "    profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery",
+        "    profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup",
+        "    profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart",
+        "",
+        "test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 78 filtered out; finished in 0.01s",
+        ""
+      ]
+    },
+    {
+      "filter": "backend::profile_content::tests::",
+      "exitCode": 0,
+      "binarySha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+      "output": [
+        "",
+        "running 3 tests",
+        "test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok",
+        "test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok",
+        "test backend::profile_content::tests::preparation_guard_rechecks_actual_account_epoch_and_fails_closed_on_health_fault ... ok",
+        "",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 11.04s",
+        ""
+      ],
+      "passed": 3
+    },
+    {
+      "filter": "profile_content_cache::tests::",
+      "exitCode": 0,
+      "binarySha256": "4ad31f104e5028a18d90fee60f5fad73c6c46f9067eedeffabfc12c7a0525d0a",
+      "output": [
+        "",
+        "running 5 tests",
+        "test profile_content_cache::tests::a_new_shared_handle_cannot_reset_billing_for_an_old_external_body ... ok",
+        "test profile_content_cache::tests::clearing_index_and_dropping_frame_do_not_release_live_external_arc_charge ... ok",
+        "test profile_content_cache::tests::exact_owner_revision_hash_and_missing_nodes_never_fall_back ... ok",
+        "test profile_content_cache::tests::full_four_mib_budget_counts_retained_bodies_across_many_frames ... ok",
+        "test profile_content_cache::tests::retired_metadata_has_a_hard_cap_even_when_bodies_are_tiny ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 77 filtered out; finished in 0.21s",
+        ""
+      ],
+      "passed": 5
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "FAIL"
+}

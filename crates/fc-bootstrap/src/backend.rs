@@ -5,6 +5,7 @@
 mod account_management_tests;
 mod content_web;
 mod materials_web;
+mod profile_content;
 mod profiles;
 mod voice;
 pub mod web;
@@ -31,7 +32,7 @@ use fc_ports::{
     ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
-    authority::{AuthorityStore, PreparedAuthority},
+    authority::{AuthorityReader, AuthorityStore, PreparedAuthority},
     health::HealthGate,
 };
 use fc_security::{
@@ -48,6 +49,10 @@ use fc_storage::{
 };
 pub use materials_web::{
     WebMaterialClass, WebMaterialClasses, WebMaterialScope, WebMaterialScopes,
+};
+pub use profile_content::{
+    MediaEntry, MediaInventory, MediaReservation, MediaRetirement, MediaState,
+    ProfileContentPreparationGuard, ProfileContentPreparationState,
 };
 use std::{
     path::Path,
@@ -76,6 +81,7 @@ pub enum BackendError {
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
     Profile(fc_ports::ProfileRepositoryError),
+    ProfileContent(fc_ports::ProfileContentRepositoryError),
     Material(MaterialRepositoryError),
     Voice(fc_ports::voice::VoiceRepositoryError),
     Storage(StorageError),
@@ -125,6 +131,11 @@ impl From<fc_ports::ProfileRepositoryError> for BackendError {
         Self::Profile(error)
     }
 }
+impl From<fc_ports::ProfileContentRepositoryError> for BackendError {
+    fn from(error: fc_ports::ProfileContentRepositoryError) -> Self {
+        Self::ProfileContent(error)
+    }
+}
 impl From<MaterialRepositoryError> for BackendError {
     fn from(error: MaterialRepositoryError) -> Self {
         Self::Material(error)
@@ -154,6 +165,7 @@ struct Control {
     input_first: AtomicU64,
     input_last: AtomicU64,
     material_scene: Mutex<Option<PublishedMaterialScene>>,
+    profile_content_scene: Mutex<profile_content::PublishedProfileContentScene>,
 }
 #[derive(Clone)]
 struct PublishedMaterialScene {
@@ -261,6 +273,7 @@ impl SessionControl {
     }
     pub fn lock_local(&self) {
         self.clear_material_scene();
+        self.clear_profile_content_scene();
         // A saturated generation remains permanently closed rather than wrap old leases.
         if self
             .0
@@ -421,6 +434,7 @@ pub struct Backend {
     writer: Option<StorageWriter<Snapshot>>,
     handle: StorageHandle<Snapshot>,
     repository: Repository,
+    authority: AuthorityReader<IdentityState>,
     codec: CredentialRecordCodec,
     crypto: CredentialCryptoAdapter<PlatformRandom>,
     clock: Arc<dyn Clock + Send + Sync>,
@@ -468,6 +482,7 @@ impl Backend {
             input_first: AtomicU64::new(0),
             input_last: AtomicU64::new(0),
             material_scene: Mutex::new(None),
+            profile_content_scene: Mutex::new(Default::default()),
         }));
         let scene_control = control.clone();
         let repository =
@@ -495,7 +510,7 @@ impl Backend {
         let web = web::WebService::new(
             ledger.clone(),
             control.clone(),
-            authority,
+            authority.clone(),
             clock.clone(),
             monotonic.clone(),
         );
@@ -505,6 +520,7 @@ impl Backend {
             writer: Some(writer),
             handle,
             repository,
+            authority,
             codec,
             crypto: CredentialCryptoAdapter::new(PlatformRandom),
             clock,
@@ -704,39 +720,47 @@ impl Backend {
         Ok((actor, generation))
     }
     fn guarded(&self, lease: SessionLease, generation: u64, purpose: SessionPurpose) -> Repository {
+        self.repository
+            .clone()
+            .with_session_guard(self.session_guard(lease, generation, purpose))
+    }
+    fn session_guard(
+        &self,
+        lease: SessionLease,
+        generation: u64,
+        purpose: SessionPurpose,
+    ) -> fc_storage::business::SessionGuard {
         let ledger = self.ledger.clone();
         let control = self.control.clone();
         let wall = self.clock.clone();
         let monotonic = self.monotonic.clone();
-        self.repository
-            .clone()
-            .with_session_guard(Arc::new(move |state, expected| {
-                control
-                    .check(lease, generation)
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                let mut ledger = ledger
-                    .lock()
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                ledger.synchronize(&control, state, wall.now(), monotonic.monotonic_millis());
-                let actual = ledger
-                    .sessions
-                    .actor(
-                        state,
-                        lease,
-                        wall.now(),
-                        monotonic.monotonic_millis(),
-                        purpose,
-                    )
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                control
-                    .check(lease, generation)
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                if actual == *expected {
-                    Ok(())
-                } else {
-                    Err(StorageError::AuthorityUnavailable)
-                }
-            }))
+        Arc::new(move |state, expected| {
+            control
+                .check(lease, generation)
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            let mut ledger = ledger
+                .lock()
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            ledger.synchronize(&control, state, wall.now(), monotonic.monotonic_millis());
+            let actual = ledger
+                .sessions
+                .actor(
+                    state,
+                    lease,
+                    wall.now(),
+                    monotonic.monotonic_millis(),
+                    purpose,
+                )
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            control
+                .check(lease, generation)
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            if actual == *expected {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        })
     }
     pub fn check_session(
         &self,

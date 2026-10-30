@@ -1,0 +1,140 @@
+{
+  "round": 18,
+  "scope": "Author-owned native content editor and stable scoped node style UI",
+  "frozen_at_utc": "2026-10-30T20:41:27.713973+00:00",
+  "source_files": [
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 109403,
+      "sha256": "b65e630599e6db7d21d3c9aca85e5d78f3df10be84584be5eb781c3ba473b0da"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_editor.rs",
+      "bytes": 24189,
+      "sha256": "1fffe689af231fa994260073da0c38877077763336bab9268bc9b601e18b3893"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_editor_tests.rs",
+      "bytes": 9993,
+      "sha256": "916f73648cd962df1271bc695a903775f08ac5b9be2f9fe175478c6107005df6"
+    }
+  ],
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-ui-target cargo test --manifest-path /tmp/fc-round18-ui-host-harness/Cargo.toml --locked",
+      "profile": "test [unoptimized + debuginfo]",
+      "status": "PASS",
+      "passed": 35,
+      "failed": 0,
+      "log": "/tmp/fc-round18-ui-host-final-2.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-ui-target cargo clippy --manifest-path /tmp/fc-round18-ui-host-harness/Cargo.toml --all-targets --locked -- -D warnings",
+      "profile": "dev [unoptimized + debuginfo]",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-ui-host-clippy-final-2.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo check -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked",
+      "status": "PASS at earlier integrated source, unrelated preview deadcode warnings",
+      "log": "/tmp/fc-round18-content-ui-check-initial.log"
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo clippy -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked -- -D warnings",
+      "status": "BLOCKED in concurrent root application.rs2297 Preview destructure missing now/contents/text/images; no errors in owned files. Parent notified.",
+      "log": "/tmp/fc-round18-content-ui-clippy-windows.log"
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check <3 owned UI files and corrected startup test>",
+      "status": "PASS",
+      "raw_capture": "functions tool output; no standalone raw log"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "status": "PASS12crates33edges",
+      "raw_capture": "functions tool output; no standalone raw log"
+    }
+  ],
+  "harness": {
+    "path": "/tmp/fc-round18-ui-host-harness",
+    "actual_sources": "Directly includes production display_editor.rs/profiles_editor.rs/profile_content_editor.rs and their actual tests; real fc-domain/fc-ports/fc-presentation dependencies.",
+    "stub_limits": "SelectedFile is uncloneable metadata-only privatePathBuf stub; CurrentClock fixed; LocalContentInput enum shape matches root. No Windows handles, native Edit, picker, file IO, SQLite, KDF, publication or deployment claim.",
+    "sources": [
+      {
+        "path": "/tmp/fc-round18-ui-host-harness/Cargo.toml",
+        "bytes": 352,
+        "sha256": "b4710f6b35517efc469a6caf98356b4debea8ebf1a5a1b4ca8388ac559aee82c"
+      },
+      {
+        "path": "/tmp/fc-round18-ui-host-harness/src/lib.rs",
+        "bytes": 1681,
+        "sha256": "0ee7a6fa4209ff0a65f5fa7b45705a15aca3f472f907ef498ab490946a491e21"
+      }
+    ]
+  },
+  "implemented": [
+    "Public-outlet and exactSubject Text/Image nodes plus per-node independent ContentNodeStyle; delete removes only matching stable scoped styles.",
+    "ManageContent requires clean saved layout/style and emits exact ContentSlotKey+kind; no automatic unsaved layout replacement.",
+    "10000scalar/40000UTF8 and20000UTF16 text; TXT uses opaque selected file; review/cancel/confirm captures loaded CAS.",
+    "ImagePages Existing/Selected uncloneable picker, append/replace/reorder/remove<=50pages; root worker validates actual media.",
+    "Clear/Undo explicitly confirmed, previous revision exact; already Empty cannot clear again and erase sole undo.",
+    "LOCK capture+cancel preserves manual draft; unknown submit needs readback before resubmit, manualText/allExistingimageorder recover, consumedSelected files require reselect.",
+    "Max image actions10+rootLOCK1; slots/current-kind validated before loaded state, dirty drafts resist unrelated background reload."
+  ],
+  "initial_failures_preserved": [
+    "Harness-only alias/currentclock omissions in initial log; corrected harness.",
+    "One owned test clippy int_plus_one assertion corrected without weakening action count requirement.",
+    "Windows strict concurrent integration blocker preserved verbatim; not claimed full binary strict PASS."
+  ],
+  "windows_remote_sessions": 0,
+  "native_ui_tests_executed_by_subagent": 0,
+  "storage_or_startup_logic_modified_by_ui_task": false,
+  "cleanup": "No real test files created by pure harness. Harness/targets/logs retained for parent final evidence and unified cleanup.",
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-ui-host-initial.log",
+      "bytes": 1618,
+      "sha256": "da814f05adbf50ace9a6ba3b0d0eb3c1719824d0068f4b0a3bb68aa53d52ff66"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-2.log",
+      "bytes": 4607,
+      "sha256": "58626c2a7f8fbe94669dafdac431d9180c5da3585faecfbff4b64589a3b80a03"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-clippy.log",
+      "bytes": 1095,
+      "sha256": "0d92ddb7b752c5440f3a521508e7793f50e5ad6b0964032ace80db36af2105c8"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-final.log",
+      "bytes": 4607,
+      "sha256": "34962c1012a0e7bec68b24b4c25536d2e90c26372677e5033d9dc4dad29818ca"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-clippy-final.log",
+      "bytes": 153,
+      "sha256": "dc83a0ff00139c0783b443a03cf5fc2f783fa851be03503ec2de5597558f89c6"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-final-2.log",
+      "bytes": 4728,
+      "sha256": "f36a88bf4543e8b7eae13abaefdf073cbb53577478f11c6a9e90e7db48e0dd70"
+    },
+    {
+      "path": "/tmp/fc-round18-ui-host-clippy-final-2.log",
+      "bytes": 153,
+      "sha256": "3f069ad25e7505b6885af75eab02951b8e72752e9dc60372c5b1ae1b06cbcd1c"
+    },
+    {
+      "path": "/tmp/fc-round18-content-ui-check-initial.log",
+      "bytes": 1347,
+      "sha256": "a36e3d1557fb7c4dc2fe14b8dcd95f1d780eedce1c9d0678e04700a3253be4f5"
+    },
+    {
+      "path": "/tmp/fc-round18-content-ui-clippy-windows.log",
+      "bytes": 1769,
+      "sha256": "ff624e2cd46ca0a559b15d0ea50d0cf75eadb34a113bdf8c4b7a0c68795059a3"
+    }
+  ]
+}

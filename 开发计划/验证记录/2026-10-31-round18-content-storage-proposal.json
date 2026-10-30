@@ -1,0 +1,136 @@
+{
+  "round": 18,
+  "scope": "Read-only storage/media pipeline implementation proposal; interfaces are proposals subject to root/domain freeze",
+  "recordedAtUtc": "2026-10-30T19:54:39.860285+00:00",
+  "head": "b75af32",
+  "sourceEdits": 0,
+  "testsExecuted": 0,
+  "sshOrWindowsSessions": 0,
+  "sourcesRead": [
+    {
+      "path": "crates/fc-storage/src/business/profiles.rs",
+      "sha256": "1d3f6db8ac6153bb569170b177569b09ea1f41418cd3c374b68988cb85464331"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles_codec.rs",
+      "sha256": "7cf16865c5d89b5c627a976ab6063505dc18aa8f6521332dd6ebbfe8538dafeb"
+    },
+    {
+      "path": "crates/fc-storage/src/business/content_web.rs",
+      "sha256": "bc303da7b969447b287d843d9499ac66743049a4c064b2dc0ac323b52a8f5eb1"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "sha256": "fbc30e45eb9ef63a7b00ad2607be277247d1430a0f5512e3f5d075519aa54333"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop.rs",
+      "sha256": "92b6f64d7597ab2498c666444985b32e34aa13ea15abb7e76cca528c28de0442"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/material_flow.rs",
+      "sha256": "c1cf53d137cd257e05592b157c5ef972750dcb39df1c971bba0a66d503a0ed7e"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image.rs",
+      "sha256": "52b9549bbfd78b1efaa21f2bfdc1760a72ff694dcde537a1e51b0174196343fd"
+    },
+    {
+      "path": "crates/fc-materials/src/validation.rs",
+      "sha256": "b31fe20ad8f85c98c08572d4077f3bb7a7a7af86109bfa3740c1b8759f4aca87"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "sha256": "0ad649f76bba84b1346d17053e84e0c8f25a451555225cab2c87db11e186b6b0"
+    },
+    {
+      "path": "crates/fc-domain/src/layout.rs",
+      "sha256": "f9e200424681ff64f7b295bb73b5a8b5abb5d0c4b071a22b6dff41dbab8ef221"
+    },
+    {
+      "path": "crates/fc-domain/src/profile.rs",
+      "sha256": "ed7521314d25b90746148243856255a5b0d05fc5a8501b7129e07138cb1855df"
+    }
+  ],
+  "rootPolicyReceived": "LocalGlobal only publish; slot=LayoutScope+LayoutNodeId, Public content only inside outlet and Subject exact triple; independent media primary originals1GiB (separate from classroom material originals2GiB); per-node document; current+one previous version; persistent latest acceptance sequence and separate page/view revision. This supersedes initial suggestions about teacher writes or a shared primary quota.",
+  "reusable": [
+    "Existing sole StorageWriter TransactionTask/TransactionDocuments, owned Clock, exact SessionGuard and authority publisher: evaluate/precommit permissions and same-COMMIT content/receipt/catalog/ref accounting.",
+    "profiles catalog pages64/list20, stable scoped node IDs and independent document revisions. Profiles select only the exact currently authorized class/subject/effective teacher; keep that resolver rather than borrowing another material owner or retained-break source.",
+    "strict codec64KiB BLOB, recursive duplicate/unknown/depth/count guards, bounded scan_prefix128 entries/512KiB. Store independent node bodies and bounded catalogs, not full content in one profile.",
+    "ControlledFiles/SelectedFile/LockedFile/NewFile APIs: source pin,32KiB bounded copy/hash, durable seal, no-reparse/hardlink checks and immutable controlled rename; keep the prepared pin through DB commit and preserve files when commit result is unknown.",
+    "Material flow separates file preparation from writer and has original-retire/exclusive-delete/finalize pattern. Reuse the pattern, not its material-specific ownership schema or Shell open semantics.",
+    "WIC image.validate_image uses one decoder slot, trusted Microsoft container check, one frame,10MiB and8MP checks before scanline allocation, PBGRA full validation,64KiB explicit tile buffer, cancellation/CPU/wall limits. It currently returns metadata only and retains no display pixels.",
+    "Existing text validation handles strict UTF8 and BOM UTF16 including surrogate/block boundaries. It validates the stream but does not expose a normalized String; a bounded extraction API is still required for TXT node import.",
+    "Round17 CardBodySpec/NativeTextMeasure shared geometry can serve SubjectText. Images require distinct typed media content and stable node-specific geometry; material filename rows/thumbnails are not image components."
+  ],
+  "mustNotReuseAsIs": [
+    "materials.ResourceInventory has material_id/scope and enforces references<=1. Attaching a profile image to it without generalizing every startup/GC invariant would permit wrong deletion or fail validation. Narrow change: separate profile-media namespace/registry and no physical cross-kind dedup this round.",
+    "material TXT import allows material-size inputs; subject text must independently enforce10000 Unicode scalar values and40KiB UTF8, normalize line endings explicitly, reject malformed encoding/control characters and never truncate or decode lossy.",
+    "WIC validate_image is not a display decoder or cache. Add bounded target-size pixel preparation over the same pinned validated source; do not expose IWIC objects cross-thread or put source paths in Scene.",
+    "Current layout Solver.spec and WidgetMeasure uniqueness use WidgetKind; Scene grouping uses component_kind and SubjectText/Image returnNone. Multiple independent content nodes require exact SceneNodeKey lookup, node-specific content/style, and node/revision-specific page events.",
+    "200MiB rebuildable media cache is not the only copy of an original. Active/current/previous media source files remain primary durable data; cache eviction must never destroy those sources."
+  ],
+  "suggestedPureModelAlignment": {
+    "slot": "ContentSlotKey{scope:LayoutScope,node_id:LayoutNodeId}; writer proves current public outlet membership or selected exact Subject triple and node kind.",
+    "document": "ProfileContentDocument{slot,revision,latest_publish_sequence,current:Option<ContentVersion>,previous:Option<ContentVersion>,view_revision,current_page,pending:Option<ContentAdmission>}",
+    "version": "ContentVersion{revision,payload:Empty|Text(String)|Images(Vec<MediaReference>),last_actor_id,updated_at}; ordered images1..50; each ref has opaque media version ID/hash/bytes/dimensions/format, no path/pixels.",
+    "style": "LayoutDocument and SubjectProfileDocument hold bounded per-node ContentNodeStyle metadata, not full bodies. Match node_id/kind exactly; ALL stays eight builtins, new SubjectText/Image kinds are independent scoped content.",
+    "limits": "Text10000scalars/40KiBUTF8; image10MiB/8MP; image document1..50 ordered pages; one previous content version and explicit global catalog/resource cardinality caps in addition to byte quotas. Do not silently drop retained versions or pages to fit."
+  },
+  "proposedBackendFacade": [
+    "read_profile_content(lease, slot) -> ProfileContentDocument: fresh exact LocalGlobal Manage; no unauthenticated state() read used as a management facade.",
+    "begin_profile_content(lease, BeginContentRequest{command_id,slot,expected_revision,operation,payload_fingerprint,expires_at}) -> opaque ContentAdmissionTicket; sequence/current-CAS authorization stored before async work, current visible content remains unchanged.",
+    "prepare_profile_content(ticket, selected input, cancellation) -> opaque PreparedProfileContent: trusted worker preparation port, private fields bind ticket/slot/sequence/expected revision/actor and immutable verified refs or text; no constructor from UI path/JSON.",
+    "finish_profile_content(lease, PreparedProfileContent) -> ProfileContentDocument: same writer checks exact pending command/fingerprint/sequence/CAS, fresh lease/node membership and role, media registry/quota/ref transitions, receipt and authority publication.",
+    "fail_profile_content(lease or trusted canceled ticket, admission) -> outcome: only settles that original pending work; latest sequence never rolls backward and current content remains unchanged.",
+    "clear_profile_content and undo_profile_content: either use begin+finish operation variants or immediate same-writer commands; captured current revision/target previous revision required, emit a new content revision and reference updates atomically.",
+    "page_profile_content(management lease OR trusted current-scene capability, PageContentRequest{slot,expected_content_revision,expected_view_revision,page}) -> view state: page0..len-1, independent view CAS, no content mutation or manager-session renewal.",
+    "profile_content_outcome(command_id, actor/current lease) -> sender-authorized receipt: exact original result, not current visible state; no automatic resubmission after unknown COMMIT.",
+    "media_inventory(after,limit<=128) / retire_media(id,expected_registry_rev) / finalize_media_removal(ticket): trusted maintenance, bounded namespace, no external file I/O in writer."
+  ],
+  "publicationAlgorithm": [
+    "Validate/capture the actual scoped node and expected content revision, then persist admission sequenceA using the unique writer; keep current/previous untouched.",
+    "Take a physical preparation owner on the shared finite worker pool. Open selected sources with controlled pinned handles, count pages and expected bytes before copying; reserve real pending bytes against the1GiB primary ledger.",
+    "For TXT, stream strict bounded decoding into the10000-scalar/40KiB string and canonical line endings. For image/pages, bounded copy/hash/fullWIC validation then durable controlled rename per fresh opaque version; ordered whole-batch manifest is only committed when every page succeeds.",
+    "Before finish, recheck exact original lease/control generation and request checkpoint; writer rereads node/profile/current pendingA/expected revision/latestSequence. AdmissionB supersedesA even ifB later fails;A can never become current again.",
+    "One transaction moves current→previous, drops only the displaced old previous references, installs new current with its own revision and resets page consistently, writes command result/digest, updates primary accounting and publishes authority.",
+    "Known precommit rejection cleans only this uncommitted preparation after actual handle/worker release. Any COMMIT/postpublication/response ambiguity retains sources and ownership/accounting until bounded startup/reconciliation proves state; never delete a potentially committed image.",
+    "On clear/undo/layout node deletion, keep stable scoped IDs and explicit resource-reference retention semantics. Layout removal must not let a stale preparation recreate content or reuse a retired node ID. Define how removed-node retained content appears in global cleanup/history rather than leaking indefinitely."
+  ],
+  "resourceAndCacheAccounting": {
+    "primary": "Independent profile-media originals1GiB; classroom-material original2GiB and launchcopies200MiB remain separate. Include current, previous, failed/unreferenced, retiring and in-progress bytes until real cleanup confirms release.",
+    "criticalLifetime": "Pending/admission TTL only revokes publication. It must not return physical preparation or byte quota while an old worker/file is still alive; otherwise two50-page500MiB batches can exceed1GiB after TTL/replacement. Physical tokens and byte owners survive until actual worker/handle cleanup.",
+    "memoryImageCache": "32MiB explicit owned image-pixel cache, one decoder, bounded current-page/at-most-small-prefetch policy. Reserve before allocating, include actual pixel copies and WIC/D2D ownership; an8MP PBGRA image is32000000bytes so two full images cannot both fit.",
+    "decodeWorkingSet": "WIC may internally retain full original buffers; scanline/scaler APIs do not prove zero full-image allocation. Decoder working-set peaks plus target pixels, old/new caches and renderer surfaces must remain visible in global160MiB transient evidence.",
+    "diskCache": "200MiB rebuildable derived cache with versioned key{media_id/hash,target_pixels,DPI,fit/orientation,format/algorithm}. LRU only unpinned derived entries; active content originals cannot be evicted to meet the cache quota.",
+    "nativeBudget": "16MiB application RGBA/DIB admission remains unchanged. Resample to the actual target rectangle, account any D2D bitmap copy/scratch as well as outputDIB, and do not allocate an entire original-page set or full-screen preview intermediate.",
+    "paths": "Private controlled profile-media/{opaque version} sources and separate cache namespace, canonical path derived by trusted adapter only; no Scene/DTO user path, URL, UNC or shell open."
+  },
+  "factsAndSceneBoundary": {
+    "selection": "Inside the same writer transaction select only activePublic content inside its outlet fallback plus the at-most-one exact Subject tree chosen by profiles::select; query only referenced active node slots, not all profile bodies.",
+    "snapshot": "PublishedContentSnapshot exposes current version/content revision/view revision/page only; never pending/history/private raw input. Current display access uses trusted local scene-source proof and HealthGate, not a fabricated administrator actor.",
+    "budgetConcern": "Existing Facts has2MiB response and64KiB individual BLOB limits.64 separate10000-scalar texts can exceed2MiB. Freeze one explicit strategy: an immutable bounded manifest plus version-bound paged worker payload fetch under expected source revision, or defined aggregate admission with explicit Capacity. Never silently truncate full text or allocate all128 blobs before a cap check.",
+    "renderBundle": "Scene carries typed content/media IDs, dimensions, page and styles. Prepared target-size pixels travel as a separate bounded owned raster bundle/cache lease keyed by those IDs; no native handles or filesystem paths enter domain/Scene.",
+    "wholeScene": "Late reads/decodes carry original selected slot/content revision/page/source stamp. Publication discards the complete stale bundle on any lesson/profile/content/global authority change and performs the existing final generation/source-revision/health checks before each native upload/input."
+  },
+  "strictRecovery": [
+    "Old exactly recognized profile schema with onlyMaterials and no content_styles can map to an explicit empty content-style list. New schema missing refs/styles or unknown fields remains corruption; do not default malformed new documents to empty content/initial registration.",
+    "Catalog pages and slot/content/media references are checked bidirectionally at startup in bounded batches. Missing declared current/previous media, bad hash/size/type/dimensions or cross-scope ownership enters repair/failclosed; orphan files are not interpreted as registered content.",
+    "Current/previous immutable media references and refcounts/state/quota survive reopen. Unreferenced files are retired in writer, then exclusively deleted by worker, then finalized in writer; no filename-only scan deletes a valid reference.",
+    "Derived cache loss is rebuildable; original-source loss is a data-integrity failure. Both crash cases must remain distinct."
+  ],
+  "meaningfulLaterTestsNoExecutionYet": [
+    "RealSQLite text save/clear/undo/reopen with emptyrevision retained, exactcaptured CAS, crossSubject/Public scope and stale/locked lease rejection.",
+    "AdmissionA→B→Bfailure→Afinish remains superseded; layout deletion/kind replacement/retirednode cannot receive old prepared bytes; allresource/receipt/CAS rollback atomically.",
+    "Current+previous media refs, thirdpublish displacedprevious GC, unknownCOMMIT preserveblob, process restart midprepare/reconcile and missing-active-ref repair.",
+    "TXT UTF8/BOM UTF16 boundaries, malformed surrogate/control/truncated input,10000exact/+1,40KiB cap and newline normalization without truncation.",
+    "Real WIC complete PNG/JPEG/BMP validation/rendering,10MiB/8MP exact/+1, malformed/truncated/multiframe, ordered1/50/+1 image pages, current-page only decoding and stable scoped page events.",
+    "32MiB pixel/200MiB cache/1GiB primary/16MiBDIB accounting with old/new/prepared/canceled owners; no quota release whilephysicalowner lives; cache eviction never removes activecurrent/previous source.",
+    "Actual scoped multiText/multiImage rendering,4K/DPI/contain/alpha/crop/source switch and preview stalebundle; formal Win7/10/11/Seewo and72h evidence remain separate."
+  ],
+  "narrowOwnershipRecommendation": "Domain/ports define stable slot/admission/version/style/ref rules; storage owns new profile_content/media modules plus narrow profiles/Facts/strictstartup integration; bootstrap owns trusted ControlledProfileMedia preparation/cache/reconcile and Backendfacade; native owns targetWICpixels/rasterrendering; presentation owns per-node measure/content and complete scene binding. No new persistent writer/worker/runtime/dependency edge is needed."
+}

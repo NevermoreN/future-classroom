@@ -134,6 +134,8 @@ fn label(kind: ComponentKind) -> &'static str {
         ComponentKind::Reminder => "今日提醒",
         ComponentKind::DateCountdown => "日期倒计时",
         ComponentKind::Recess => "课间大字倒计时",
+        ComponentKind::SubjectText => "独立文字",
+        ComponentKind::SubjectImage => "独立图片",
     }
 }
 fn format_date(d: LocalDate) -> String {

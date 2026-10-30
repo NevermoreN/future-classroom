@@ -32,6 +32,7 @@ pub enum StorageError {
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
     Profile(fc_domain::profile::ProfileError),
+    ProfileContent(fc_domain::profile_content::ProfileContentError),
     Material(fc_domain::materials::MaterialError),
     Lesson(fc_domain::lesson_context::LessonContextError),
     Voice(fc_domain::voice::VoiceError),

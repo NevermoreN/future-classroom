@@ -2,17 +2,66 @@
 use super::files::LockedFile;
 use fc_domain::materials::MaterialKind;
 use std::{
-    sync::Mutex,
+    sync::{Mutex, MutexGuard, TryLockError},
     time::{Duration, Instant},
 };
 use windows::{
     core::{Error, Result},
     Win32::{Foundation::*, Graphics::Imaging::*, System::Com::*},
 };
-static DECODER: Mutex<()> = Mutex::new(());
-struct ComScope(bool);
+pub(super) static DECODER: Mutex<()> = Mutex::new(());
+
+/// One physical decoder for import validation and demand rasterization. Waiting
+/// uses only the caller's existing worker and its ORIGINAL per-file budget.
+/// A deadline cannot return a live decoder slot before its synchronous owner exits.
+pub(super) struct DecoderBudget {
+    started: Instant,
+    cpu_started: Duration,
+}
+impl DecoderBudget {
+    pub(super) fn new() -> Result<Self> {
+        let started = Instant::now();
+        let cpu_started = crate::system::current_thread_cpu_time()?;
+        Ok(Self {
+            started,
+            cpu_started,
+        })
+    }
+    pub(super) fn check(&self, can_continue: &impl Fn() -> bool) -> Result<()> {
+        if !can_continue() || self.started.elapsed() >= Duration::from_secs(30) {
+            return Err(Error::from_hresult(ERROR_CANCELLED.to_hresult()));
+        }
+        if crate::system::current_thread_cpu_time()?.saturating_sub(self.cpu_started)
+            >= Duration::from_secs(10)
+        {
+            return Err(Error::from_hresult(ERROR_TIMEOUT.to_hresult()));
+        }
+        Ok(())
+    }
+    pub(super) fn admit(
+        &self,
+        can_continue: &impl Fn() -> bool,
+    ) -> Result<MutexGuard<'static, ()>> {
+        loop {
+            self.check(can_continue)?;
+            match DECODER.try_lock() {
+                Ok(slot) => {
+                    // Cancellation can arrive while acquiring the slot. Do not
+                    // create any COM/WIC object after a revoked/deadline waiter.
+                    self.check(can_continue)?;
+                    return Ok(slot);
+                }
+                Err(TryLockError::WouldBlock) => {
+                    std::thread::sleep(Duration::from_millis(2));
+                }
+                Err(TryLockError::Poisoned(_)) => return Err(Error::from_hresult(E_UNEXPECTED)),
+            }
+        }
+    }
+}
+pub(super) struct ComScope(bool);
 impl ComScope {
-    fn new() -> Result<Self> {
+    pub(super) fn new() -> Result<Self> {
         let h = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
         if h == RPC_E_CHANGED_MODE {
             Ok(Self(false))
@@ -40,21 +89,20 @@ pub fn validate_image(
     kind: MaterialKind,
     canceled: impl Fn() -> bool,
 ) -> Result<ImageValidation> {
-    let _slot = DECODER
-        .try_lock()
-        .map_err(|_| Error::from_hresult(ERROR_BUSY.to_hresult()))?;
-    let _com = ComScope::new()?;
-    let started = Instant::now();
-    let cpu_start = crate::system::current_thread_cpu_time()?;
+    let budget = DecoderBudget::new()?;
+    let can_continue = || !canceled();
     let guid = match kind {
         MaterialKind::Png => GUID_ContainerFormatPng,
         MaterialKind::Jpeg => GUID_ContainerFormatJpeg,
         MaterialKind::Bmp => GUID_ContainerFormatBmp,
         _ => return Err(Error::from_hresult(E_INVALIDARG)),
     };
-    if source.len()? > 10 * 1024 * 1024 || canceled() {
+    if source.len()? > 10 * 1024 * 1024 {
         return Err(Error::from_hresult(E_INVALIDARG));
     }
+    let _slot = budget.admit(&can_continue)?;
+    let _com = ComScope::new()?;
+    budget.check(&can_continue)?;
     unsafe {
         let factory: IWICImagingFactory =
             CoCreateInstance(&CLSID_WICImagingFactory, None, CLSCTX_INPROC_SERVER)?;
@@ -92,20 +140,11 @@ pub fn validate_image(
         let mut buffer = vec![0u8; (rows * stride) as usize];
         let mut y = 0;
         while y < height {
-            if canceled() || started.elapsed() > Duration::from_secs(30) {
-                return Err(Error::from_hresult(ERROR_CANCELLED.to_hresult()));
-            }
-            if crate::system::current_thread_cpu_time()?.saturating_sub(cpu_start)
-                >= Duration::from_secs(10)
-            {
-                return Err(Error::from_hresult(ERROR_TIMEOUT.to_hresult()));
-            }
+            budget.check(&can_continue)?;
             let n = rows.min(height - y);
             let mut x = 0;
             while x < width {
-                if canceled() {
-                    return Err(Error::from_hresult(ERROR_CANCELLED.to_hresult()));
-                }
+                budget.check(&can_continue)?;
                 let columns = tile_width.min(width - x);
                 let rect = WICRect {
                     X: x as i32,
@@ -118,6 +157,7 @@ pub fn validate_image(
             }
             y += n;
         }
+        budget.check(&can_continue)?;
         Ok(ImageValidation {
             width,
             height,
@@ -125,3 +165,7 @@ pub fn validate_image(
         })
     }
 }
+
+#[cfg(test)]
+#[path = "image_admission_tests.rs"]
+mod admission_tests;

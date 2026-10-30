@@ -1,0 +1,21 @@
+{
+  "command": [
+    "cargo",
+    "clippy",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--tests",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--locked",
+    "--target-dir",
+    "/tmp/fc-round18-native-target",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exitCode": 0,
+  "sourceSha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd"
+}

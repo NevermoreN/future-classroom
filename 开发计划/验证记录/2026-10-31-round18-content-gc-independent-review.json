@@ -1,0 +1,131 @@
+{
+  "status": "PASS",
+  "scope": "READ_ONLY_ROOT_CONTENT_COMMIT_AND_PERIODIC_GC_INTEGRATION",
+  "createdUtc": "2026-10-30T20:59:30.710374+00:00",
+  "reviewerRole": "Independent reader of root-owned flow/application integration, Backend/storage and worker fence. Prior self-produced Controller/Preview implementation is excluded from an independent security PASS.",
+  "activity": {
+    "newProductTests": 0,
+    "cargoRuns": 0,
+    "windowsRuns": 0,
+    "sshCalls": 0,
+    "productSourceChanges": 0,
+    "planChanges": 0,
+    "onlyOutput": "/tmp/fc-round18-content-gc-independent-review.json"
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow.rs",
+      "bytes": 19511,
+      "sha256": "e68bdef30af96521b8b80894302a91c067c0ae582bd5555bad6c90cdd2ea7f6f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 215824,
+      "sha256": "8ae8e3ea42608c5ac033612d781f4d2e0f97bbfe9e7ece8edd9bd8808e01b15a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "bytes": 60598,
+      "sha256": "093cc3ff296d4694398720698b9921503db8b7b311ff667dfec8f19be42cf66b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files.rs",
+      "bytes": 25177,
+      "sha256": "f906572103d2abddcfc6a01b5a341d9e4da59f2f8774fcf3c2f54a07a91c2696"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "bytes": 40393,
+      "sha256": "59683dd90d923351b13943f128b56aaf26fba963e25ba79430b28b66e94a8a2d"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "bytes": 18420,
+      "sha256": "4ea6b583bf7e22ee9d3ed2f0cdd51ef2f4ec42d9400fcf04908343d5a8b6f4bd"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61614,
+      "sha256": "2c1315c586d1ad0a059766f15a5373366f6906c09ef4a7aeea8bde7537a6da56"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content.rs",
+      "bytes": 43192,
+      "sha256": "7a135212258bced7606ae349e0a15fead8a66e7cc52595b5e21c4b945f51223b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_media.rs",
+      "bytes": 25181,
+      "sha256": "24ca6ca17d52fae1fedc5c513057641c021f92ca8a4e788ed00c8db9e1a70816"
+    }
+  ],
+  "observedFacts": [
+    {
+      "id": "COMMIT_FENCE",
+      "source": "backend/profile_content.rs::commit_profile_content_while; worker.rs::JobContext::execution_fence; storage/business/profile_content.rs::evaluate/precommit",
+      "fact": "The memory-only cancellation/deadline/stop/fault fence is checked alongside the exact existing Manage session guard at writer evaluation and precommit. False or panic is mapped to ProfileContent Expired; the fence grants no actor/administration authority."
+    },
+    {
+      "id": "PHYSICAL_EXIT",
+      "source": "application/profile_content_flow.rs::ContentJob::run; storage/lib.rs::Ticket::wait",
+      "fact": "The preparation/source owner closure exits before reservation settlement. This storage path uses blocking receiver recv rather than an early deadline-only caller wait. Reserved bytes cannot be safely settled merely because cancellation was requested."
+    },
+    {
+      "id": "COMMITTED_UNKNOWN",
+      "source": "storage/business/profile_content.rs::Op::Commit/Op::Fail; profile_content_media.rs::Settle",
+      "fact": "COMMIT receipt carries the committed snapshot/digest. Fail changes only Accepted receipts. Settle changes only Reserved rows; Referenced originals remain referenced. A late cancellation or unknown delivery cannot roll back a completed COMMIT. User must reopen/read the original command outcome; this review does not claim all post-COMMIT returns are known success."
+    },
+    {
+      "id": "GC_OWNERSHIP",
+      "source": "profile_content_flow.rs::collect_garbage_while; profile_content_media.rs::Retire/Finalize; profile_content_files.rs::remove_retired",
+      "fact": "Runtime GC selects only Unreferenced/Retiring entries, CAS-retires, physically removes the controlled original, and only then finalizes quota release. Busy/error removal retains the charge and is retried. Runtime maintenance never age-settles Reserved; restart settlement is a separate exclusive handoff API."
+    },
+    {
+      "id": "NODE_DELETE",
+      "source": "storage/business/profile_content.rs::remove_nodes; profile_content_media.rs::update_refs",
+      "fact": "Deleting a content node atomically removes its current/previous/pending head references and immutable versions, retires the head, and updates media references. Current plus Undo references protect originals. App schedules maintenance independently of a subsequent publication."
+    },
+    {
+      "id": "GC_CURSOR",
+      "source": "profile_content_flow.rs::GcCursor/collect_garbage_while; application.rs::content_gc/content_maintenance poll",
+      "fact": "App owns a single Arc<Mutex<GcCursor>> reused across worker submissions. A physical job reads at most one 128-entry page. Completed entry attempts advance the typed cursor without holding its lock across SQL/FS. next_after requests a 1-second continuation; the end including an empty tail wraps to None. Cancelled/completion-discarded jobs retain already published cursor progress. App retains the ticket while try_result is None and cannot start a second maintenance job."
+    }
+  ],
+  "findings": [
+    {
+      "id": "GC_PREFIX_STARVATION",
+      "classification": "source-level liveness counterexample, not a runtime failure",
+      "before": "Each maintenance call restarted after=None. A repeated deadline or contention after a fixed prefix could forever leave later registry entries unseen even while retries continued. Returning a cursor only via Outcome would also lose progress when deadline handling discards the result.",
+      "notifiedParent": true,
+      "resolution": "Root added App-owned durable-in-process shared cursor and one-page scanning; source implementation inspected above. Positive progress survives discarded outcomes. A busy failed entry can advance and is revisited after wraparound.",
+      "oldSourceHash": "No pre-fix file snapshot was independently captured; retain this as the observed pre-fix code/counterexample, not a claimed SHA-bound runtime reproduction.",
+      "remainingLimit": "No hard real-time or unconditional liveness proof: synchronous SQL/FS can run beyond the cooperative deadline; if every attempt expires before it can safely publish cursor progress, progress is not guaranteed. The implementation preserves ownership/quota and retries, rather than claiming physical interruption."
+    }
+  ],
+  "previewWorkflow": {
+    "probeOwner": "business_storage; proposed 52-step hidden native workflow, execution not performed or verified by this reviewer",
+    "assertionContractReportedByOwner": [
+      "Scoped Public Text/Image saves",
+      "native 20000 UTF-16 / 10000 emoji publish/readback/Clear/Undo",
+      "two BMP files through actual prepare/WIC/SQLite and Existing reorder",
+      "management Preview actual exact-slot/revision/SHA TextFrame Arc plus actual green 2x1 image BGRA Arc and successful native canvas sequence",
+      "CAS restoration and readback of original public layout/display"
+    ],
+    "limitsMustRemainExplicit": [
+      "No assertion of non-current Subject management Preview in that workflow",
+      "No same-kind double-node workflow assertion",
+      "No complete native UI event -> Controller -> Backend page workflow assertion",
+      "No periodic maintenance/pinned-removal workflow assertion from the 52-step UI probe; distinct worker/storage/native fixtures are separate evidence",
+      "My prior Controller/Preview implementation and producer no-run reports are not independent runtime/security evidence"
+    ],
+    "fixtureReadOnlyFacts": "Existing shared-pool flow fixture explicitly holds a physical preparation owner, verifies maintenance leaves Reserved charged before and after lock, and waits actual owner exit before settlement. This reviewer read the assertions but did not run them or claim current final-source runtime PASS."
+  },
+  "limits": [
+    "Source hashes bind the inspected bytes only; later author changes require delta review.",
+    "No native timing, hard synchronous cancellation, Win7/10/11 compatibility or final whole-round runtime claim is established here.",
+    "Test/producer results supplied by other agents are not counted as this reviewer executing tests.",
+    "No shared target/temp cleanup performed; parent owns final evidence archiving and cleanup."
+  ],
+  "allReadsComplete": true,
+  "aggregateSourceSha256": "56b2be2d1d542d778db92e041b65bd21c11d83a453a311ddbd54c1f3e08e07bd"
+}

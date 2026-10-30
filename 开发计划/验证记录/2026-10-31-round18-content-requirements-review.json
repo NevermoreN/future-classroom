@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "round": 18,
+  "status": "READ_ONLY_REQUIREMENTS_REVIEW_COMPLETE",
+  "createdUtc": "2026-10-30T19:52:15.184496+00:00",
+  "baseHeadAtTaskStart": "b75af3269b6687ec711686cabbc421ae1e87f89d",
+  "scope": "M16/F04/Q04/R01/R22 independent text/image/TXT/ordered paged-image requirements and current implementation boundaries; no P0 research, source edits, tests or SSH.",
+  "execution": {
+    "sourceOrPlanEdits": 0,
+    "tests": 0,
+    "cargo": 0,
+    "windows": 0,
+    "ssh": 0,
+    "onlyNewOutput": "this /tmp report"
+  },
+  "sourceBindings": [
+    {
+      "path": "开发计划/00-开发导航与需求追踪.md",
+      "sha256": "24e1e801dc05c6c9a91f8296225bec92151f2174ecf463254e85a379ef743b25"
+    },
+    {
+      "path": "开发计划/01-模块划分与接口契约.md",
+      "sha256": "898a37a1d1d013a553c620a11600097abfc1ce27a5154aecbaeb275e69740165"
+    },
+    {
+      "path": "开发计划/02-功能链与状态机.md",
+      "sha256": "6cdd60f0ec8d6a43863098741a006227eb7f99cfebaa27a3136ebcb1ec4520ce"
+    },
+    {
+      "path": "开发计划/03-调用链与线程模型.md",
+      "sha256": "4d6356792a06e2ed215e26b0f979434f2a4f7f9c9c2f1e89767fe7bdccc85ca0"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "sha256": "e9a633d25d083a3bd0c0ff6487d2be516297a9ac57c53da6d27ace205a3370d5"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "sha256": "59ecf49ca0034f36378d98f69cec7b52171614c4139c04c61f0ad45ccc8430b2"
+    },
+    {
+      "path": "开发计划/06-整体Review与风险登记.md",
+      "sha256": "bf113592dc56a413217c127787797018a1f3148c66e5c607e96c7645e6ac8983"
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "sha256": "d9614fbc247c747d3f318fef161f8a1cc2e73bfb0fba969782b83bfb3f17d365"
+    },
+    {
+      "path": "开发计划/模块/03-内容资源持久化与恢复.md",
+      "sha256": "8d42b008093f91006531220a5bf25a06d911d1022329c732ed3e60160fecd196"
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "sha256": "8e8de2751b437ca2f338fe8d6b2df2d9c829aca2c2bdf7ad5c04131a7f8b1321"
+    },
+    {
+      "path": "开发计划/模块/07-多科目联动与临时课堂.md",
+      "sha256": "1715b32b1625f5289b05bee6f16c19b8e057aada09c5c2e2c6426786845252fe"
+    },
+    {
+      "path": "开发计划/17-公共布局与科目场景配置.md",
+      "sha256": "36d2005b16ec6409e71cc0fd14c678d25741032db982d6bc3a2e121b5fc5d07a"
+    },
+    {
+      "path": "开发计划/18-统一内容测量与原生排版.md",
+      "sha256": "a5b84ad25dc128d221881dc98f56b087c6765a3b4a268f21f0d02107a5d7ada3"
+    },
+    {
+      "path": "开发计划/12-教师内容API契约.md",
+      "sha256": "4712303f4bd287b9626939cfc434292ca3ecbab4ed993c83141858fff7170abf"
+    },
+    {
+      "path": "crates/fc-domain/src/content.rs",
+      "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f"
+    },
+    {
+      "path": "crates/fc-domain/src/profile.rs",
+      "sha256": "ed7521314d25b90746148243856255a5b0d05fc5a8501b7129e07138cb1855df"
+    },
+    {
+      "path": "crates/fc-domain/src/layout.rs",
+      "sha256": "f9e200424681ff64f7b295bb73b5a8b5abb5d0c4b071a22b6dff41dbab8ef221"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "sha256": "afc0feb0a3fddcb1d9c0e34730c8f393e490f64ebfe552642f269c06cddc9515"
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "sha256": "646bbcc72c0aa23421490156a2408a6a28b675a421f3b5e50cc30ade340b2af1"
+    },
+    {
+      "path": "crates/fc-materials/src/validation.rs",
+      "sha256": "b31fe20ad8f85c98c08572d4077f3bb7a7a7af86109bfa3740c1b8759f4aca87"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image.rs",
+      "sha256": "52b9549bbfd78b1efaa21f2bfdc1760a72ff694dcde537a1e51b0174196343fd"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R01-F04",
+      "basis": [
+        "00 R01",
+        "02 F04",
+        "04 P3-01/P3-02",
+        "module03 sections3–6"
+      ],
+      "required": "Real standalone text and image tiles, TXT-to-text import, ordered images document with current page; trusted admission -> bounded preparation -> final resource durability -> transactional references/version -> coherent native Scene -> visible/hidden result; clear/undo/page/replace/restart included. A node enum, image header validator, static sample canvas or downloadable original alone does not complete this chain."
+    },
+    {
+      "id": "M16-R22",
+      "basis": [
+        "module07 section5",
+        "17 场景授权恢复",
+        "08 section6"
+      ],
+      "required": "Current COURSE selects exact class/subject/actualTeacher after timetable/calendar/override resolution. Whole profile/content/resources/layout/clip/hits publish in one generation. Missing/disabled/invalid scope uses explicit neutral fallback without borrowing same-subject other-teacher or stale previous profile. Break uses public visuals and only independently authorized prior Materials directory, not prior subject text/images; next course and override/rebind/revoke invalidate old prepared media."
+    },
+    {
+      "id": "Q04-concurrency",
+      "basis": [
+        "01 section4",
+        "module03 P3-01",
+        "05 Q04"
+      ],
+      "required": "Persistent replacement-intent acceptedSequence and expectedRevision plus commandId/fingerprint. A slow then B fast: A superseded; B accepted then fails: retain last committed, never resurrect A. Local/Web permitted commands share the relevant authority/serialization. Clear and targetRevision undo create new bounded commands/revisions; undo cannot overwrite another owner/newer update. Ordered page navigation correlates current content and generation."
+    },
+    {
+      "id": "result-split",
+      "basis": [
+        "01 unified results",
+        "02 F04"
+      ],
+      "required": "ACCEPTED/PREPARING/COMMITTED distinct from visible/hidden/renderfailed/replaced/inactive. PPT hide does not roll back commit or falsely show visible. Old committed command remains committed with REPLACED display state after later publication. Unknown postCOMMIT is query-original-only, not cleanup/delete/retry with new ID."
+    }
+  ],
+  "authorityBoundary": {
+    "facts": [
+      "Latest module07/17 restricts all layout/component/profile appearance writing and management reads to fresh exact LOCAL global-admin lease; teacher/user/Web cannot save profile or shared protection layout.",
+      "Teacher Web currently has exactly homework, own classroom materials, school shared today-reminder, and authorized voice modules. Current12/13/15 explicit commands replace old generic API sketch; legacy broad text/image publish cannot be revived as an unbounded Web write route.",
+      "Teacher role can write only own valid assigned homework/material content; USER has current published read/local-open access, no write merely from stale teaching assignments. Shared reminder stays Web-only even for global admin.",
+      "All sensitive reads, preview/history/resource reads, admission, final commit and actual display/effect recheck latest authority/HealthGate; requested IDs or remembered profile identity are not capability."
+    ],
+    "recommendedConcreteScope": "Implement standalone content management locally under existing global-admin management lease for public fallback outlet or exact subject profile; protected public widgets remain protected. This is authorized by global manage-all/profile rules. Do not infer a new teacher Web text/image/profile capability from historical F04 local/Web wording.",
+    "needsExplicitContractIfExpanded": "If teacher may publish independent media through existing My Materials, freeze a separate narrow capability/target/owner/content command within that business module first; do not expose a generic endpoint or merge visual-layout writes into upload. Current four-module contract does not itself specify such standalone writes.",
+    "localReadonlyNavigation": "Page/view action can remain available for currently displayed published content under a narrow same-generation display capability, not an admin layout/publish capability. Editing content/layout remains privileged."
+  },
+  "budgetsToRetain": {
+    "contentTextDefaultCharacters": 10000,
+    "textCountDecision": "Define scalar/grapheme/UTF16 counting once; existing default says10000characters. Do not silently substitute homework16384UTF8bytes or rendering262144UTF16units. Recommended Unicode scalar count with strict decoded-byte/serialized-document caps, no silent truncation.",
+    "image": {
+      "perFileBytes": 10485760,
+      "maxPixels": 8000000,
+      "formatsCurrentlyValidated": [
+        "PNG",
+        "JPEG",
+        "BMP"
+      ],
+      "maxPagedDocumentPages": 50,
+      "pageManifest": "Explicit ordered resource/version references and bounded current page; each page uses image limits. No all50decoded buffers or automatic slideshow.",
+      "memoryImageCacheBytes": 33554432,
+      "rebuildableDiskCacheBytes": 209715200,
+      "originalsDiskBytes": 2147483648,
+      "singleOrdinaryMaterialInputBytes": 52428800,
+      "note": "200MiB is rebuildable cache, not originals. Do not promise50x10MiB collections always fit: total active/history/staged/orphan reservations need an explicit aggregate disk policy. No whole-document heap allocation follows from per-page limits."
+    },
+    "workers": {
+      "preparationMax": 2,
+      "wicDecodeMax": 1,
+      "workerQueueItems": 8,
+      "workerQueueDescriptionBytes": 4194304,
+      "constraint": "Reuse total existing worker/resource reservations; no new static media2 lane on top of material/voice/KDF2. Physical permit remains held until actual file/decoder worker returns, even after logical cancellation or old App Drop."
+    },
+    "graphics": {
+      "rgbaAdmissionBytes": 16777216,
+      "logicalNodes": 128,
+      "graphDepth": 16,
+      "actualGlassLevels": 2,
+      "topBusinessCards": 8,
+      "actualVisibleLeaves": 64,
+      "previewMax": "960x540/2MiB with classroom surfaces released before separate preview; each actual image/DIB/CPU scratch/display cache target charged once at real simultaneous capacity"
+    },
+    "processPrivateBytesMiB": {
+      "ordinary": 64,
+      "settingsOrImage": 96,
+      "shortPeak": 160
+    },
+    "nativeMeasurement": "Aspect-preserving display at assigned final width/DPI; no unbounded font shrinking, full original pixel caches, per-page HWND/thread or1Hz image/tree redecode. Image cache + WIC provider/native peak + renderer buffers all contribute to process total.",
+    "existingTextPaginationMax": 16384,
+    "textVersusImagePageLimit": "50page limit applies paginated image document; existing long text pagination16384 remains a distinct rendering cap.",
+    "storageAndProtocol": "Each bounded persisted document/index block <=64KiB; do not stuff4096profiles,10kUnicode body+full tree or50pixel payloads in one unbounded document/DTO. File/pixel bytes stay outside domain/protocol and command queue.",
+    "preparationTiming": "Existing chunk copy/validation32KiB, validation CPU10s/wall30s and cancellation checks retain finite quotas. Checks between synchronous Read/CopyPixels do not prove physical cancellation of an executing native call; keep its owner/permit charged."
+  },
+  "currentGaps": [
+    {
+      "path": "fc-domain/content.rs",
+      "fact": "ContentKey only Homework and SharedReminder, text-only ContentCommand, max16KiB; no independent typed slot/resource-pages/history/prepare lifecycle. Cannot repurpose reminders to bypass local-only standalone requirements or lose date/origin rules."
+    },
+    {
+      "path": "fc-domain/profile.rs + layout.rs",
+      "fact": "Profile currently holds tree/folder/materials settings only. SubjectText/SubjectImage explicitly UnsupportedWidget and component_kindNone. New node-specific text/media identity/settings/resource refs must be real, independently scoped, bounded and persisted. Removing Unsupported alone is not implementation."
+    },
+    {
+      "path": "fc-materials/validation.rs",
+      "fact": "TXT validates UTF8 (optional BOM) and BOM UTF16LE/BE incrementally plus control/surrogate validity; returns character count/metadata, not prepared bounded display text. Longer original TXT files are permitted. Need decoded-text importer with explicit encoding/count/errors, not read_to_end/lossy conversion or claim validator success is displayed content."
+    },
+    {
+      "path": "fc-windows/materials/image.rs",
+      "fact": "Existing full WIC validation serializes decoder and returns dimensions/decoded byte count, scans bounded tiles and discards pixels. There is no standalone display-size image producer/cache/Scene image handoff here. Explicit64KiB scan buffer does not bound WIC internal codec peak."
+    },
+    {
+      "path": "fc-presentation/scene.rs + card_body.rs",
+      "fact": "Current CardContent contains clock/text/course/homework/recess/materials/control, no independent image/page image descriptor and actual image drawing/action path. Text body machinery is reusable for measured native text, not independent content authority/persistence."
+    },
+    {
+      "area": "whole chain",
+      "fact": "Need content editor/import picker/review/cancel/CAS/results; trusted prepared ownership and resource store; single-writer admission/commands/history/ref transactions; coherent exact-profile Facts; real native text+image/page rendering/hits; crash recovery/GC and tests. Existing My Materials append semantics must stay independent of replacement-slot sequence."
+    }
+  ],
+  "proposedAcceptanceMatrix": [
+    {
+      "case": "Local creation and real rendering",
+      "pass": "Fresh local global admin creates standalone text, imports legal TXT, selects image, builds ordered2/50page images in existing public outlet/exact profile editor; review/cancel/save work. Actual real DirectWrite/WIC/native pixels and visible-page actions correspond to committed same-generation resource/version; restart recovers saved content/page policy. No schema/sample-only success."
+    },
+    {
+      "case": "Privilege isolation",
+      "pass": "Teacher/user/Web/stale/revoked lease cannot change profile/layout/media attachment; old generic text/image HTTP paths remain rejected. Same-subject other teacher/class and raw path/URL/UNC rejected. Allowed preview/read/history uses fresh exact scope. Narrow current-page view action grants no publish capability."
+    },
+    {
+      "case": "Prepare ordering",
+      "pass": "Deterministic A slow/B fast and B failed/A late preserve correct last committed version and terminal SUPERSEDED. Target/teacher/revision changes mid-copy/decode or owner lock/revoke/scene switch prevent final attach/display; late output only cleans its own unpublished data."
+    },
+    {
+      "case": "Images and TXT adversarial boundaries",
+      "pass": "Real full PNG/JPEG/BMP decode, file type mismatch, truncated image,10MiB/8MP exact and1over; strict UTF8/UTF16 BOM/surrogate/control/multi-block and10000-character boundaries; illegal/oversized input rejects without changing old committed content. Defined image scaling/alpha/aspect/DPI and measured/cached bytes verified."
+    },
+    {
+      "case": "Ordered image document",
+      "pass": "0/1/50/51pages, chosen order and explicit reorder before review, current-page bounds, first/last wrap policy, replacement while page event queued, repeated identical bytes without changing authored order, fixed resource versions and scoped nodeID action routing. No implicit filename sorting or timer/animation loop."
+    },
+    {
+      "case": "Clear undo replace and references",
+      "pass": "Clear/undo/replace are explicit idempotent commands and revisionchecked. Undo targets current revision and a retained accessible predecessor; conflicts preserve current. Retained history/resources are bounded, unavailable history returns explicit cannotundo. Live old snapshot/decode/proof/history refs survive GC; new final files synced before SQL refs; uncertain committed files never removed by unattempted cleanup."
+    },
+    {
+      "case": "Crash restore quotas",
+      "pass": "Inject crash at copy/validate/final-file/SQL/COMMIT/publication/query and retry originalID; only own orphan after grace/reference checks cleaned. Missing/corrupt referenced files fail closed or explicitly neutral not silently another image. Disk full/cache full/stalled decode retain previous content and physical accounting. Backup restores consistent media refs without resurrecting auth, ended lesson profile or expired reminder."
+    },
+    {
+      "case": "M16 whole-scene",
+      "pass": "Same subject two teachers, actual overrides/restores, exact profile missing/disabled, class switch, lesson end/BREAK/nextCOURSE, calendar revision and wake all produce coherent content/tree/clip/hits. BREAK shows public visual with last valid Materials directory only; no old subject image/text leak or future teacher prefetch."
+    },
+    {
+      "case": "Resource and lifecycle evidence",
+      "pass": "Two prepare/one decode physically enforced across app replacement/cancel, current+bounded prefetch32MiBcache, original/staged/history/orphan200MiBcache/2GiBoriginals ledgers distinct, compositor16MiB allsimultaneous buffers, worker queue8/4MiB and process64/96/160MiB measured. UI/Writer never do fullcopy/decode/join; provider calls can delay logical timeout but no owner/free/replacement fiction."
+    },
+    {
+      "case": "Compatibility and user acceptance",
+      "pass": "Host rules + real SQLite + actual Win11 native synthetic endtoend and visible user QA are separate. Win7 SP1x86/Win10 actual devices/formalMSVC, PPT/foreground/click-through, touch/DPI,72h and total memory remain individual gates. Local full chain can advance without pretending unresolved productionTLS/P0 is solved."
+    }
+  ],
+  "decisionsToFreezeBeforeImplementation": [
+    "Exact independent slot key: public fallback or SubjectProfileKey+stableNodeId/contentId. Content and visual revisions separate; moving/hiding a node must not silently delete content/resources.",
+    "Text10000 character/count/encoding/control/whitespace/empty semantics and serialized64KiB cap; TXT import is a copied immutable snapshot versus live external file (recommended snapshot).",
+    "Page as bounded command carrying contentRevision+SceneGeneration; whether page state persists and independent viewRevision. It must not use admin layout capability or supersede replacement intent merely to navigate.",
+    "Ordered import/reorder and repeated-resource policy; default manual static navigation, no timer. Define1page as image versus document with1page and contain/crop rule rather than accidental clipping.",
+    "Bounded history count/bytes/retention, command-result query/retry window and resource orphan grace. D11 requires finite values but does not provide standalone-content numeric defaults, so document actual chosen caps rather than invent them as prior requirements.",
+    "Aggregate disk reservations for multi-page preparation and resource dedup/ref ownership; image display cache admission/preload count (current + at most a small explicitly budgeted neighbor).",
+    "Whether teachers may ever update independent body in current My Materials module: not inferred from historical generic Web draft, and must not add visual/profile write authority. Localglobal complete chain is directly consistent with current permissions."
+  ],
+  "limits": [
+    "This is document/code reading and implementation-contract advice, not implementation or runtime evidence. No official API or P0 research undertaken.",
+    "Some broad F04 local/Web language predates four-module whitelist; latest explicit role/channel capability wins. Recommendations are labeled and must not be described as already implemented.",
+    "Standalone content does not justify newcrate/dependency direction, browser runtime, thumbnail generation of all Materials or loss of existing budgets.",
+    "Only this local report produced; no tests/remote resources created and no source/plan altered."
+  ]
+}

@@ -1,16 +1,19 @@
 //! UI-thread resident desktop orchestration. SQLite runs only through the shared
 //! Work pool; the UI never takes Backend's mutex or refreshes a manager lease.
-use super::{fatal, Outcome, Work};
+use super::{fatal, profile_content_flow, Outcome, Work};
 use fc_bootstrap::backend::{Backend, SessionControl};
+use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
     ids::{Revision, SceneGeneration},
     materials::MaterialCursor,
+    profile_content::{PageContentRequest, PublishedContentDescriptor, PublishedContentSnapshot},
     schedule::AcademicDay,
     time::{LocalDate, LocalDateTime},
 };
 use fc_presentation::{
-    scene::{build_scene, CardContent, SceneSnapshot},
+    card_body::card_body_spec,
+    scene::{build_scene_with_content, CardContent, SceneSnapshot},
     Rect,
 };
 use fc_runtime::{
@@ -23,15 +26,18 @@ use fc_windows::{
         PublicationGuard, DESKTOP_SCOPE,
     },
     host::HostHints,
+    materials::raster::{RasterCache, RasterFrame},
     system::CurrentClock,
 };
 use std::{
+    path::PathBuf,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
 
 const RETRY: Duration = Duration::from_secs(1);
 const FACTS_DEADLINE: Duration = Duration::from_secs(5);
+const IMAGES_DEADLINE: Duration = Duration::from_secs(30);
 const DISPLAY_LEASE: Duration = Duration::from_secs(2);
 // At most 4096 eligible assignment slots, so even one-record batches fit this
 // complete, bounded history. Backward navigation never guesses a 64-item step.
@@ -129,6 +135,148 @@ struct Pending {
     material_cursor: Option<MaterialCursor>,
     cancelled: bool,
 }
+struct PendingImages {
+    deadline: Instant,
+    ticket: JobTicket<super::Result<Outcome>>,
+    source: Revision,
+    generation: SceneGeneration,
+    cancelled: bool,
+}
+struct PendingPage {
+    deadline: Instant,
+    ticket: JobTicket<super::Result<Outcome>>,
+    source: Revision,
+    generation: SceneGeneration,
+    request: PageContentRequest,
+    cancelled: bool,
+}
+/// This linearization check is shared by image completion and pre-publication.
+/// It never treats a cancellation signal as physical worker completion.
+fn content_scene_current(
+    scene: &SceneSnapshot,
+    generation: SceneGeneration,
+    source: Revision,
+    now: LocalDateTime,
+    gate: &HealthGate,
+) -> bool {
+    let status = gate.status();
+    status.health == Health::Healthy
+        && status.revision == source
+        && scene.generation == generation
+        && scene.source_revision == source
+        && scene.valid_at(now)
+}
+fn intersects(a: Rect, b: Rect) -> bool {
+    a.x.max(b.x) < (a.x + a.width).min(b.x + b.width)
+        && a.y.max(b.y) < (a.y + a.height).min(b.y + b.height)
+}
+fn image_page_matches(scene: &SceneSnapshot, event: &DesktopEvent) -> bool {
+    let DesktopEvent::ImagePage {
+        generation,
+        slot,
+        content_revision,
+        view_revision,
+        page,
+    } = event
+    else {
+        return false;
+    };
+    *generation == scene.generation
+        && scene.cards.iter().enumerate().any(|(index, card)| {
+            let (Some(identity), CardContent::Image(image)) =
+                (card.content_identity, &card.content)
+            else {
+                return false;
+            };
+            if identity.slot != *slot
+                || identity.revision != *content_revision
+                || identity.view_revision != *view_revision
+                || *page >= image.total_pages
+                || *page == image.current_page
+                || image.current_page.abs_diff(*page) != 1
+            {
+                return false;
+            }
+            let Some(node) = scene.paint_tree.as_ref().and_then(|tree| {
+                tree.nodes.iter().find(|node| {
+                    node.card_index == Some(index)
+                        && node.key.scope == slot.scope
+                        && node.key.id == slot.node_id
+                        && node.effective_opacity > 0.
+                })
+            }) else {
+                return false;
+            };
+            let Some(pager) = card_body_spec(card.kind, &card.content, false, None)
+                .ok()
+                .and_then(|spec| spec.image_geometry(card.rect.width, card.rect.height).ok())
+                .and_then(|geometry| geometry.pager)
+            else {
+                return false;
+            };
+            let target = if *page < image.current_page {
+                pager.previous
+            } else {
+                pager.next
+            };
+            intersects(
+                Rect {
+                    x: card.rect.x + target.x,
+                    y: card.rect.y + target.y,
+                    ..target
+                },
+                node.clip,
+            )
+        })
+}
+fn image_entries(
+    scene: &SceneSnapshot,
+    published: &[PublishedContentSnapshot],
+) -> Vec<PublishedContentSnapshot> {
+    let mut entries = Vec::new();
+    for entry in published {
+        let PublishedContentDescriptor::Image {
+            current,
+            total_pages,
+        } = &entry.content
+        else {
+            continue;
+        };
+        if *total_pages < 2 {
+            continue;
+        }
+        let exact=scene.cards.iter().any(|card|{
+            let Some(identity)=card.content_identity else{return false;};
+            identity.slot==entry.slot&&identity.revision==entry.revision&&identity.view_revision==entry.view_revision
+                &&matches!(&card.content,CardContent::Image(image) if image.current==*current&&image.current_page==entry.current_page&&image.total_pages==*total_pages)
+        });
+        if !exact {
+            continue;
+        }
+        let candidates = [
+            entry.current_page.checked_sub(1),
+            entry
+                .current_page
+                .checked_add(1)
+                .filter(|page| *page < *total_pages),
+        ];
+        if candidates.into_iter().flatten().any(|page| {
+            image_page_matches(
+                scene,
+                &DesktopEvent::ImagePage {
+                    generation: scene.generation,
+                    slot: entry.slot,
+                    content_revision: entry.revision,
+                    view_revision: entry.view_revision,
+                    page,
+                },
+            )
+        }) {
+            entries.push(entry.clone());
+        }
+    }
+    entries
+}
 #[derive(Default)]
 struct RenderNotice {
     message: Option<String>,
@@ -140,7 +288,12 @@ impl RenderNotice {
         self.failed = true;
     }
     fn rendered(&mut self, outcome: PresentOutcome) {
-        if self.failed && outcome != PresentOutcome::Hidden {
+        if self.failed
+            && matches!(
+                outcome,
+                PresentOutcome::Published | PresentOutcome::Unchanged | PresentOutcome::Offscreen
+            )
+        {
             self.message = Some(String::new());
             self.failed = false;
         }
@@ -150,6 +303,17 @@ impl RenderNotice {
     }
 }
 pub(super) struct Controller {
+    root: Option<PathBuf>,
+    raster: Arc<RasterCache>,
+    text: TextFrame,
+    images: Option<PendingImages>,
+    page: Option<PendingPage>,
+    ready_images: Vec<Arc<RasterFrame>>,
+    needs_scene: bool,
+    next_images: Instant,
+    published_content: Option<SceneGeneration>,
+    images_verified: Option<(SceneGeneration, Revision)>,
+
     renderer: DesktopRenderer,
     measure: NativeTextMeasure,
     facts: Option<Box<DesktopFacts>>,
@@ -273,14 +437,26 @@ fn material_event_matches(scene: &SceneSnapshot, event: &DesktopEvent) -> bool {
 }
 impl Controller {
     pub(super) fn new(probe: bool) -> Result<Self, String> {
-        let renderer = if probe {
+        let mut renderer = if probe {
             DesktopRenderer::new_hidden()
         } else {
             DesktopRenderer::new()
         }
         .map_err(|_| "桌面窗口初始化失败".to_owned())?;
+        let raster = profile_content_flow::raster_cache();
+        renderer.set_raster_cache(raster.clone());
         let measure = NativeTextMeasure::new().map_err(|_| "桌面文字测量初始化失败".to_owned())?;
         Ok(Self {
+            root: None,
+            raster,
+            text: TextFrame::default(),
+            images: None,
+            page: None,
+            ready_images: Vec::new(),
+            needs_scene: true,
+            next_images: Instant::now(),
+            published_content: None,
+            images_verified: None,
             renderer,
             measure,
             facts: None,
@@ -303,7 +479,50 @@ impl Controller {
             probe_presented: false,
         })
     }
+    pub(super) fn set_root(&mut self, root: PathBuf) {
+        if self.root.as_ref() != Some(&root) {
+            self.invalidate();
+            self.cancel_pending();
+        }
+        self.root = Some(root);
+    }
+    fn clear_content_capability(&mut self) {
+        if self.published_content.take().is_some() {
+            self.needs_scene = true;
+        }
+        if let Some(control) = &self.control {
+            control.clear_profile_content_scene();
+        }
+    }
+    fn cancel_content_jobs(&mut self) {
+        if let Some(images) = &mut self.images {
+            images.ticket.cancel();
+            images.cancelled = true;
+        }
+        if let Some(page) = &mut self.page {
+            page.ticket.cancel();
+            page.cancelled = true;
+        }
+        self.ready_images.clear();
+        self.images_verified = None;
+    }
+    fn expire_content_jobs(&mut self) {
+        let expired =
+            self.images
+                .as_ref()
+                .is_some_and(|pending| !pending.cancelled && Instant::now() >= pending.deadline)
+                || self.page.as_ref().is_some_and(|pending| {
+                    !pending.cancelled && Instant::now() >= pending.deadline
+                });
+        if expired {
+            self.hide();
+            self.cancel_pending();
+        }
+    }
     pub(super) fn hide(&mut self) {
+        self.clear_content_capability();
+        self.cancel_content_jobs();
+        self.needs_scene = true;
         if let Some(control) = &self.control {
             control.clear_material_scene();
         }
@@ -315,8 +534,9 @@ impl Controller {
     /// The layout editor renders a separate synthetic scene. Release the hidden
     /// classroom surfaces first so its preview cannot coexist with that cache.
     pub(super) fn release_for_preview(&mut self) {
-        self.hide();
-        self.renderer.release_surfaces();
+        self.invalidate();
+        self.cancel_pending();
+        self.next_fetch = Instant::now();
     }
     pub(super) fn stop(&mut self) {
         self.stopped = true;
@@ -325,9 +545,11 @@ impl Controller {
             pending.ticket.cancel();
         }
         self.facts = None;
+        self.text = TextFrame::default();
         self.scene = None;
         self.requested = None;
         self.history.clear();
+        self.renderer.release_surfaces();
     }
     pub(super) fn probe_ready(&self) -> bool {
         self.probe && self.probe_presented && !self.stopped
@@ -348,8 +570,8 @@ impl Controller {
         self.notice.take()
     }
     fn render_unavailable(&mut self, message: &str) {
-        self.hide();
-        self.scene = None;
+        self.invalidate();
+        self.cancel_pending();
         self.notice.failed(message);
         self.next_render = Instant::now() + RETRY;
     }
@@ -381,16 +603,51 @@ impl Controller {
                 self.material_events.clear();
             }
         }
+        if visible {
+            if let (Some(control), Some(scene), Some(facts)) =
+                (&self.control, &self.scene, &self.facts)
+            {
+                let entries = image_entries(scene, &facts.profile_contents);
+                if !entries.is_empty() {
+                    if !control.publish_profile_content_scene(
+                        &entries,
+                        scene.generation,
+                        scene.source_revision,
+                        scene.captured_at,
+                        scene.valid_until,
+                    ) {
+                        self.hide();
+                        return;
+                    }
+                    self.published_content = Some(scene.generation);
+                } else {
+                    self.clear_content_capability();
+                }
+            }
+            // Native Cards now physically own their exact cache frames.
+            self.ready_images.clear();
+        } else if outcome == PresentOutcome::ContentPending {
+            self.clear_content_capability();
+            self.images_verified = None;
+            self.ready_images.clear();
+            self.next_images = Instant::now();
+        } else {
+            self.hide();
+        }
         self.probe_presented = outcome == PresentOutcome::Offscreen;
         self.notice.rendered(outcome);
     }
     fn invalidate(&mut self) {
         self.hide();
         self.facts = None;
+        self.text = TextFrame::default();
         self.scene = None;
         self.history.clear();
         self.requested = None;
         self.refresh_at = None;
+        // Native Cards clone text/frame ownership. Clear them as well as the
+        // scene/provider before admitting a fresh 4MiB/32MiB content set.
+        self.renderer.release_surfaces();
     }
     fn cancel_pending(&mut self) {
         if let Some(pending) = &mut self.pending {
@@ -427,8 +684,8 @@ impl Controller {
             self.invalidate();
             return Ok(false);
         };
-        let facts = match completion {
-            Ok(Outcome::Desktop(facts)) => facts,
+        let (facts, text) = match completion {
+            Ok(Outcome::Desktop(facts, text)) => (facts, text),
             Err(error) => {
                 self.invalidate();
                 if fatal(&error) {
@@ -453,6 +710,7 @@ impl Controller {
             || next_context_boundary(&facts).is_some_and(|end| now >= end)
             || !material_page_matches(&facts, pending.material_cursor.as_ref())
             || facts.validate().is_err()
+            || !text.complete_for(&facts.profile_contents)
             || !navigation_current
             || facts.homework_offset != pending.offset
         {
@@ -468,8 +726,226 @@ impl Controller {
         }
         self.refresh_at = next_context_boundary(&facts);
         self.facts = Some(facts);
+        self.text = text;
         self.requested = None;
         Ok(true)
+    }
+    fn poll_content_jobs(
+        &mut self,
+        gate: &HealthGate,
+        now: LocalDateTime,
+        control: &SessionControl,
+    ) -> Result<(), String> {
+        let completion = self
+            .images
+            .as_mut()
+            .map(|pending| pending.ticket.try_result());
+        if !matches!(completion, None | Some(Ok(None))) {
+            let pending = self.images.take().expect("image result requires ticket");
+            self.next_images = Instant::now() + RETRY;
+            match completion.expect("checked image completion") {
+                Ok(Some(Ok(Outcome::ContentImages(result))))
+                    if !pending.cancelled
+                        && !self.stopped
+                        && self.scene.as_ref().is_some_and(|scene| {
+                            content_scene_current(
+                                scene,
+                                pending.generation,
+                                pending.source,
+                                now,
+                                gate,
+                            )
+                        })
+                        && result.generation == pending.generation
+                        && result.source_revision == pending.source =>
+                {
+                    let scene = self.scene.as_ref().expect("matching scene");
+                    let requests =
+                        DesktopRenderer::image_requests(scene).map_err(|_| "桌面图片描述无效。")?;
+                    let exact = requests.len() == result.frames.len()
+                        && requests.iter().zip(&result.frames).all(|(request, frame)| {
+                            let key = frame.key();
+                            frame.source() == &request.reference
+                                && fc_windows::materials::raster::contained_pixels(
+                                    request.reference.width,
+                                    request.reference.height,
+                                    request.max_pixel_width,
+                                    request.max_pixel_height,
+                                )
+                                .is_ok_and(|(width, height)| {
+                                    key.width == width && key.height == height
+                                })
+                        });
+                    if exact {
+                        self.images_verified = Some((pending.generation, pending.source));
+                        self.ready_images = result.frames;
+                    } else {
+                        self.render_unavailable("桌面图片结果与原场景不匹配，已隐藏并重新准备。");
+                    }
+                }
+                Ok(Some(Err(error))) if !pending.cancelled => {
+                    if fatal(&error) {
+                        control.fault();
+                        return Err("桌面图片权威不可用".into());
+                    }
+                    self.render_unavailable("桌面图片尚未准备完成，已隐藏并稍后重试。");
+                }
+                _ => (),
+            }
+        }
+        let completion = self
+            .page
+            .as_mut()
+            .map(|pending| pending.ticket.try_result());
+        if !matches!(completion, None | Some(Ok(None))) {
+            let pending = self.page.take().expect("page result requires ticket");
+            let completion = completion.expect("checked page completion");
+            let valid = match &completion {
+                Ok(Some(Ok(Outcome::ContentPage {
+                    generation,
+                    snapshot,
+                }))) => {
+                    *generation == pending.generation
+                        && snapshot.slot == pending.request.slot
+                        && snapshot.revision == pending.request.expected_content_revision
+                        && snapshot.view_revision > pending.request.expected_view_revision
+                        && snapshot.view_revision > pending.source
+                        && snapshot.current_page == pending.request.page
+                        && snapshot.validate().is_ok()
+                }
+                _ => false,
+            };
+            // A page may have committed even if cancellation/deadline/Unknown
+            // discarded its return value. Never apply a guessed local page;
+            // always read a new coherent Facts+TextFrame from the authority.
+            self.invalidate();
+            self.cancel_pending();
+            self.next_fetch = Instant::now();
+            if !valid && !pending.cancelled {
+                if let Ok(Some(Err(error))) = completion {
+                    if fatal(&error) {
+                        control.fault();
+                        return Err("桌面翻页权威不可用".into());
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+    fn prepare_images(
+        &mut self,
+        backend: &Arc<Mutex<Backend>>,
+        gate: &HealthGate,
+        pool: &WorkerPool<Work>,
+        now: LocalDateTime,
+    ) -> Result<bool, String> {
+        let Some(scene) = &self.scene else {
+            return Ok(false);
+        };
+        if !content_scene_current(scene, self.generation, scene.source_revision, now, gate) {
+            return Ok(false);
+        }
+        let requests = DesktopRenderer::image_requests(scene).map_err(|_| "桌面图片描述无效。")?;
+        if requests.is_empty() {
+            return Ok(true);
+        }
+        if self.images_verified == Some((scene.generation, scene.source_revision)) {
+            return Ok(true);
+        }
+        if self.images.is_some() || Instant::now() < self.next_images {
+            return Ok(false);
+        }
+        let root = self.root.clone().ok_or("桌面图片数据目录未配置。")?;
+        let generation = scene.generation;
+        let source_revision = scene.source_revision;
+        let job = profile_content_flow::ImageJob {
+            root,
+            backend: backend.clone(),
+            generation,
+            source_revision,
+            captured_at: scene.captured_at,
+            valid_until: scene.valid_until,
+            requests,
+            cache: self.raster.clone(),
+        };
+        let deadline = Instant::now() + IMAGES_DEADLINE;
+        if let Ok(ticket) = pool
+            .handle()
+            .try_submit(Work::ContentImages(Box::new(job)), deadline)
+        {
+            self.images = Some(PendingImages {
+                deadline,
+                ticket,
+                source: source_revision,
+                generation,
+                cancelled: false,
+            });
+        }
+        self.next_images = Instant::now() + RETRY;
+        Ok(false)
+    }
+    fn submit_page(
+        &mut self,
+        backend: &Arc<Mutex<Backend>>,
+        gate: &HealthGate,
+        pool: &WorkerPool<Work>,
+        event: &DesktopEvent,
+        now: LocalDateTime,
+    ) -> Result<(), String> {
+        let Some(scene) = &self.scene else {
+            return Ok(());
+        };
+        let DesktopEvent::ImagePage {
+            generation,
+            slot,
+            content_revision,
+            view_revision,
+            page,
+        } = event
+        else {
+            return Ok(());
+        };
+        if self.page.is_some()
+            || !image_page_matches(scene, event)
+            || self.published_content != Some(scene.generation)
+            || !content_scene_current(scene, *generation, scene.source_revision, now, gate)
+        {
+            return Ok(());
+        }
+        let request = PageContentRequest {
+            command_id: match super::command_id() {
+                Ok(id) => id,
+                Err(_) => {
+                    self.notice.failed("无法生成翻页操作标识，请稍后重试。");
+                    return Ok(());
+                }
+            },
+            slot: *slot,
+            expected_content_revision: *content_revision,
+            expected_view_revision: *view_revision,
+            page: *page,
+        };
+        let source = scene.source_revision;
+        let deadline = Instant::now() + FACTS_DEADLINE;
+        if let Ok(ticket) = pool.handle().try_submit(
+            Work::ContentPage {
+                backend: backend.clone(),
+                generation: *generation,
+                source_revision: source,
+                request: request.clone(),
+            },
+            deadline,
+        ) {
+            self.page = Some(PendingPage {
+                deadline,
+                ticket,
+                source,
+                generation: *generation,
+                request,
+                cancelled: false,
+            });
+        }
+        Ok(())
     }
     fn submit(
         &mut self,
@@ -536,6 +1012,7 @@ impl Controller {
         if let Some(control) = control {
             self.control = Some(control.clone());
         }
+        self.expire_content_jobs();
         if hints.contains(HostHints::SHUTDOWN) {
             self.stop();
             return Ok(());
@@ -556,10 +1033,22 @@ impl Controller {
         let gate = control.health_gate();
         let status = gate.status();
         if status.health != Health::Healthy {
+            if status.health == Health::AuthorityUpdating
+                && self.page.as_ref().is_some_and(|page| !page.cancelled)
+            {
+                // Keep the exact page writer's capability during its own guarded
+                // transaction; hide native input without cancelling that writer.
+                self.renderer.hide();
+                self.material_events.clear();
+                self.lesson_event = false;
+                self.probe_presented = false;
+                return Ok(());
+            }
             self.hide();
             if matches!(status.health, Health::Faulted | Health::Stopping) {
                 self.cancel_pending();
                 self.facts = None;
+                self.text = TextFrame::default();
                 self.scene = None;
             }
             return Ok(());
@@ -572,6 +1061,7 @@ impl Controller {
                 return Ok(());
             }
         };
+        self.poll_content_jobs(&gate, now, control)?;
         if management_busy {
             self.cancel_pending();
         }
@@ -619,7 +1109,8 @@ impl Controller {
                 return Ok(());
             }
         };
-        let recompose = received
+        let recompose = self.needs_scene
+            || received
             || self.work != Some(work)
             || time_requires_scene(self.scene.as_ref(), self.last_sample, now)
             || hints.contains(HostHints::TIME_CHANGED)
@@ -638,7 +1129,13 @@ impl Controller {
             // Clock-only/work-area changes reuse this coherent snapshot. All lesson
             // boundaries and wall-clock changes fetched fresh material facts above.
             facts.captured_at = now;
-            let scene = match build_scene(facts, generation, work, &self.measure) {
+            let scene = match build_scene_with_content(
+                facts,
+                generation,
+                work,
+                &self.measure,
+                &self.text,
+            ) {
                 Ok(scene) => scene,
                 Err(_) => {
                     self.render_unavailable(
@@ -650,8 +1147,22 @@ impl Controller {
             self.generation = generation;
             self.scene = Some(scene);
             self.work = Some(work);
+            self.needs_scene = false;
         }
         self.last_sample = Some(now);
+        match self.prepare_images(backend, &gate, pool, now) {
+            Ok(true) => (),
+            Ok(false) => {
+                self.renderer.hide();
+                self.clear_content_capability();
+                self.probe_presented = false;
+                return Ok(());
+            }
+            Err(message) => {
+                self.render_unavailable(&message);
+                return Ok(());
+            }
+        }
         let scene = self.scene.as_ref().expect("composed scene");
         let Ok(lease) =
             gate.lease_for_authorized_scope(DESKTOP_SCOPE, Instant::now() + DISPLAY_LEASE)
@@ -673,6 +1184,9 @@ impl Controller {
             }
         };
         self.rendered(outcome);
+        if outcome == PresentOutcome::ContentPending {
+            return Ok(());
+        }
         let events = match self.renderer.take_events() {
             Ok(events) => events,
             Err(_) => {
@@ -683,6 +1197,17 @@ impl Controller {
         let scene = self.scene.as_ref().expect("composed scene");
         for event in events {
             match &event {
+                DesktopEvent::ImagePage { .. } => {
+                    if !management_busy
+                        && self.pending.is_none()
+                        && self.requested.is_none()
+                        && self.page.is_none()
+                        && image_page_matches(scene, &event)
+                    {
+                        self.submit_page(backend, &gate, pool, &event, now)?;
+                        break;
+                    }
+                }
                 DesktopEvent::LessonManage { generation } => {
                     if *generation == scene.generation
                         && scene.valid_at(now)
@@ -817,6 +1342,7 @@ mod tests {
         assert_eq!(history.previous.last(), Some(&57));
         let mut scene = scene();
         scene.cards.push(fc_presentation::scene::SceneCard {
+            content_identity: None,
             kind: ComponentKind::Homework,
             rect: Rect {
                 x: 0.,
@@ -962,6 +1488,7 @@ mod tests {
             offset: 5,
         };
         scene.cards.push(fc_presentation::scene::SceneCard {
+            content_identity: None,
             kind: ComponentKind::Materials,
             rect: Rect {
                 x: 0.,
@@ -1091,6 +1618,8 @@ mod tests {
         assert!(notice.take().is_none());
         notice.rendered(PresentOutcome::Hidden);
         assert!(notice.take().is_none());
+        notice.rendered(PresentOutcome::ContentPending);
+        assert!(notice.take().is_none());
         notice.rendered(PresentOutcome::Offscreen);
         assert_eq!(notice.take(), Some(String::new()));
         assert!(notice.take().is_none());
@@ -1098,3 +1627,7 @@ mod tests {
         assert!(notice.take().is_none());
     }
 }
+
+#[cfg(test)]
+#[path = "desktop_content_tests.rs"]
+mod desktop_content_tests;

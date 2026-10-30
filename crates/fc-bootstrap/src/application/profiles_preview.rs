@@ -4,9 +4,10 @@ use fc_domain::{
     desktop::{ClockMode, ComponentKind, ComponentSettings},
     identity::{IdentityState, Rgb},
     ids::*,
-    layout::{LayoutScope, WidgetKind},
+    layout::{LayoutScope, LayoutTree, NodeKind, WidgetKind},
     materials::{MaterialSource, MaterialSourceEvidence, MaterialSourceKind},
     profile::{ProfileSelectionReason, SubjectProfileDocument},
+    profile_content::{ContentSlotKey, PublishedContentDescriptor, PublishedContentSnapshot},
     schedule::{CalendarMode, LessonInstanceKey, ResolvedScheduleVersion},
     time::{LocalDateTime, Minute, MinuteRange},
 };
@@ -15,19 +16,24 @@ use fc_presentation::{
     card_body::card_body_spec,
     layout::{compose_layout, PaintGlass, SceneProfileStamp, WidgetMeasure},
     scene::{
-        CardContent, ClockContent, CourseCapsule, HomeworkEntry, MaterialListContent, PageInfo,
-        SceneCard, SceneMaterialRow, SceneSnapshot,
+        CardContent, ClockContent, ContentTextSource, CourseCapsule, HomeworkEntry,
+        MaterialListContent, PageInfo, SceneCard, SceneContentIdentity, SceneImageContent,
+        SceneMaterialRow, SceneNodeKey, SceneSnapshot,
     },
     Rect,
 };
 use fc_runtime::authority::AuthorityStore;
+use fc_windows::materials::raster::RasterCache;
 use fc_windows::{
     desktop::{
         DesktopRenderer, NativeTextMeasure, PresentOutcome, PublicationGuard, DESKTOP_SCOPE,
     },
     workbench::{LayoutPreview, PreviewNode},
 };
-use std::time::{Duration, Instant};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 const WORK: Rect = Rect {
     x: 0.,
@@ -44,9 +50,145 @@ pub(super) fn render(
     sequence: u64,
     now: LocalDateTime,
 ) -> Result<LayoutPreview, String> {
+    render_impl(
+        identity,
+        public,
+        subject,
+        sequence,
+        now,
+        None,
+        None,
+        Arc::new(RasterCache::new()),
+    )
+}
+/// The ordinary preview supplies no content authority. Published independent
+/// content requires this exact-slot cache path; no body or pixels are fabricated.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn render_with_content(
+    identity: &IdentityState,
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    sequence: u64,
+    now: LocalDateTime,
+    contents: &[PublishedContentSnapshot],
+    text: &dyn ContentTextSource,
+    raster: Arc<RasterCache>,
+) -> Result<LayoutPreview, String> {
+    render_impl(
+        identity,
+        public,
+        subject,
+        sequence,
+        now,
+        Some(contents),
+        Some(text),
+        raster,
+    )
+}
+#[allow(clippy::too_many_arguments)]
+fn render_impl(
+    identity: &IdentityState,
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    sequence: u64,
+    now: LocalDateTime,
+    contents: Option<&[PublishedContentSnapshot]>,
+    text: Option<&dyn ContentTextSource>,
+    raster: Arc<RasterCache>,
+) -> Result<LayoutPreview, String> {
+    let scene = prepare_scene(identity, public, subject, sequence, now, contents, text)?;
+    let editable = subject.map_or(LayoutScope::Public, |p| LayoutScope::Subject(p.key));
+    // This private, ephemeral gate is only for synthetic hidden DIB rendering.
+    // It cannot authorize product effects, real classroom facts or file opening.
+    let (mut publisher, reader) = AuthorityStore::new((), scene.source_revision, AuthEpoch::new(1));
+    publisher.initialize().map_err(|_| "无法初始化隔离预览。")?;
+    let gate = reader.gate();
+    let lease = gate
+        .lease_for_authorized_scope(DESKTOP_SCOPE, Instant::now() + Duration::from_secs(30))
+        .map_err(|_| "无法建立隔离预览租约。")?;
+    let guard = PublicationGuard {
+        gate: &gate,
+        lease,
+        current_generation: scene.generation,
+        settings_open: false,
+    };
+    let mut renderer = DesktopRenderer::new_hidden().map_err(|_| "无法创建隐藏预览渲染器。")?;
+    renderer.set_raster_cache(raster);
+    match renderer
+        .present(&scene, now, &guard)
+        .map_err(|_| "原生示例预览绘制失败。")?
+    {
+        PresentOutcome::Offscreen => (),
+        PresentOutcome::ContentPending => return Err("图片尚未准备；请先完成预览图片准备。".into()),
+        _ => return Err("隔离预览被拒绝。".into()),
+    }
+    let image = renderer
+        .export_preview_bgra(WORK, 960, 540)
+        .map_err(|_| "预览位图超出预算或无法导出。")?;
+    if image.bgra.len() > MAX_PREVIEW_BYTES || image.bgra.capacity() > MAX_PREVIEW_BYTES {
+        return Err("预览位图超过 2 MiB。".into());
+    }
+    let tree = scene.paint_tree.as_ref().ok_or("预览树缺失。")?;
+    let nodes = tree
+        .nodes
+        .iter()
+        .filter(|n| n.key.scope == editable)
+        .map(|node| PreviewNode {
+            key: node.key,
+            parent: node.parent.filter(|p| p.scope == editable),
+            rect: normalize(node.rect, image.source_work, image.scale_x, image.scale_y),
+            clip: normalize(node.clip, image.source_work, image.scale_x, image.scale_y),
+        })
+        .collect();
+    Ok(LayoutPreview {
+        generation: sequence,
+        width: image.width,
+        height: image.height,
+        bgra: image.bgra,
+        nodes,
+    })
+}
+
+/// Computes the same final geometry as render_with_content, without allocating
+/// surfaces or pixels. The caller prepares these references on its shared worker.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn image_requests_with_content(
+    identity: &IdentityState,
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    sequence: u64,
+    now: LocalDateTime,
+    contents: &[PublishedContentSnapshot],
+    text: &dyn ContentTextSource,
+) -> Result<Vec<fc_windows::desktop::ImageRenderRequest>, String> {
+    let scene = prepare_scene(
+        identity,
+        public,
+        subject,
+        sequence,
+        now,
+        Some(contents),
+        Some(text),
+    )?;
+    DesktopRenderer::image_requests(&scene).map_err(|_| "图片预览元数据无效。".into())
+}
+#[allow(clippy::too_many_arguments)]
+fn prepare_scene(
+    identity: &IdentityState,
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    sequence: u64,
+    now: LocalDateTime,
+    contents: Option<&[PublishedContentSnapshot]>,
+    text: Option<&dyn ContentTextSource>,
+) -> Result<SceneSnapshot, String> {
     if sequence == 0 {
         return Err("预览代次无效。".into());
     }
+    public
+        .layout
+        .validate_structure()
+        .map_err(|_| "公共预览结构无效。")?;
     public
         .display
         .validate()
@@ -57,10 +199,12 @@ pub(super) fn render(
             .map_err(|_| "科目预览结构无效。")?;
     }
     let measure = NativeTextMeasure::new().map_err(|_| "无法初始化原生文字测量。")?;
-    let samples = samples(identity, public, subject, now)?;
+    let base = samples(identity, public, subject, now)?;
+    let samples = bound_samples(public, subject, &base, contents, text)?;
     let specs: Vec<_> = samples.iter().map(|sample| {
         let c = &sample.component;
         Ok(WidgetMeasure {
+            key: sample.key,
             kind: sample.widget,
             body: card_body_spec(c.kind, &sample.content, false, None)
                 .map_err(|_| "预览内容无法完成有界测量。".to_owned())?,
@@ -103,10 +247,11 @@ pub(super) fn render(
         };
         let sample = samples
             .iter()
-            .find(|s| s.widget == kind)
+            .find(|s| s.key == node.key && s.widget == kind)
             .ok_or("预览组件样例缺失。")?;
         node.card_index = Some(cards.len());
         cards.push(SceneCard {
+            content_identity: sample.content_identity,
             kind: sample.component.kind,
             rect: node.rect,
             font_dip: f32::from(sample.component.font_dip),
@@ -141,7 +286,6 @@ pub(super) fn render(
             break;
         }
     }
-    let editable = subject.map_or(LayoutScope::Public, |p| LayoutScope::Subject(p.key));
     let scene = SceneSnapshot {
         generation: SceneGeneration::new(sequence),
         source_revision: Revision::new(1),
@@ -154,53 +298,7 @@ pub(super) fn render(
         public_calendar_unverified: false,
         lesson_control: None,
     };
-    // This private, ephemeral gate is only for synthetic hidden DIB rendering.
-    // It cannot authorize product effects, real classroom facts or file opening.
-    let (mut publisher, reader) = AuthorityStore::new((), scene.source_revision, AuthEpoch::new(1));
-    publisher.initialize().map_err(|_| "无法初始化隔离预览。")?;
-    let gate = reader.gate();
-    let lease = gate
-        .lease_for_authorized_scope(DESKTOP_SCOPE, Instant::now() + Duration::from_secs(30))
-        .map_err(|_| "无法建立隔离预览租约。")?;
-    let guard = PublicationGuard {
-        gate: &gate,
-        lease,
-        current_generation: scene.generation,
-        settings_open: false,
-    };
-    let mut renderer = DesktopRenderer::new_hidden().map_err(|_| "无法创建隐藏预览渲染器。")?;
-    if renderer
-        .present(&scene, now, &guard)
-        .map_err(|_| "原生示例预览绘制失败。")?
-        != PresentOutcome::Offscreen
-    {
-        return Err("隔离预览被拒绝。".into());
-    }
-    let image = renderer
-        .export_preview_bgra(WORK, 960, 540)
-        .map_err(|_| "预览位图超出预算或无法导出。")?;
-    if image.bgra.len() > MAX_PREVIEW_BYTES || image.bgra.capacity() > MAX_PREVIEW_BYTES {
-        return Err("预览位图超过 2 MiB。".into());
-    }
-    let tree = scene.paint_tree.as_ref().ok_or("预览树缺失。")?;
-    let nodes = tree
-        .nodes
-        .iter()
-        .filter(|n| n.key.scope == editable)
-        .map(|node| PreviewNode {
-            key: node.key,
-            parent: node.parent.filter(|p| p.scope == editable),
-            rect: normalize(node.rect, image.source_work, image.scale_x, image.scale_y),
-            clip: normalize(node.clip, image.source_work, image.scale_x, image.scale_y),
-        })
-        .collect();
-    Ok(LayoutPreview {
-        generation: sequence,
-        width: image.width,
-        height: image.height,
-        bgra: image.bgra,
-        nodes,
-    })
+    Ok(scene)
 }
 
 fn normalize(rect: Rect, work: Rect, sx: f32, sy: f32) -> Rect {
@@ -211,6 +309,151 @@ fn normalize(rect: Rect, work: Rect, sx: f32, sy: f32) -> Rect {
         height: rect.height * sy,
     }
 }
+struct BoundSample<'a> {
+    key: SceneNodeKey,
+    sample: std::borrow::Cow<'a, Sample>,
+    content_identity: Option<SceneContentIdentity>,
+}
+impl std::ops::Deref for BoundSample<'_> {
+    type Target = Sample;
+    fn deref(&self) -> &Sample {
+        &self.sample
+    }
+}
+fn selected_nodes(tree: &LayoutTree, replace: bool) -> Vec<(SceneNodeKey, WidgetKind)> {
+    fn visit(
+        tree: &LayoutTree,
+        id: LayoutNodeId,
+        replace: bool,
+        out: &mut Vec<(SceneNodeKey, WidgetKind)>,
+    ) {
+        let Some(node) = tree.nodes.iter().find(|n| n.id == id) else {
+            return;
+        };
+        if replace && matches!(node.kind, NodeKind::Outlet { .. }) {
+            return;
+        }
+        if let NodeKind::Widget(widget) = node.kind {
+            out.push((
+                SceneNodeKey {
+                    scope: tree.scope,
+                    id,
+                },
+                widget,
+            ));
+        }
+        for child in &node.children {
+            visit(tree, *child, replace, out);
+        }
+    }
+    let mut out = Vec::new();
+    visit(tree, tree.root, replace, &mut out);
+    out
+}
+fn bound_samples<'a>(
+    public: &PublicLayoutState,
+    subject: Option<&SubjectProfileDocument>,
+    base: &'a [Sample],
+    contents: Option<&[PublishedContentSnapshot]>,
+    provider: Option<&dyn ContentTextSource>,
+) -> Result<Vec<BoundSample<'a>>, String> {
+    let mut nodes = selected_nodes(&public.layout.tree, subject.is_some());
+    if let Some(subject) = subject {
+        nodes.extend(selected_nodes(&subject.tree, false));
+    }
+    let mut result = Vec::new();
+    for (key, widget) in nodes {
+        if !matches!(widget, WidgetKind::SubjectText | WidgetKind::SubjectImage) {
+            if let Some(sample) = base.iter().find(|s| s.widget == widget) {
+                result.push(BoundSample {
+                    key,
+                    sample: std::borrow::Cow::Borrowed(sample),
+                    content_identity: None,
+                });
+            }
+            continue;
+        }
+        let styles = match key.scope {
+            LayoutScope::Public => &public.layout.content_styles,
+            LayoutScope::Subject(_) => &subject.ok_or("科目预览缺失。")?.content_styles,
+        };
+        let style = styles
+            .iter()
+            .find(|s| s.node_id == key.id)
+            .ok_or("独立内容样式缺失。")?;
+        if !style.component.visible {
+            continue;
+        }
+        let slot = ContentSlotKey {
+            scope: key.scope,
+            node_id: key.id,
+        };
+        let snapshot = contents
+            .and_then(|snapshots| snapshots.iter().find(|s| s.slot == slot))
+            .ok_or("独立内容尚未准备；请使用已发布内容预览。")?;
+        snapshot.validate().map_err(|_| "独立内容描述无效。")?;
+        let content = match &snapshot.content {
+            PublishedContentDescriptor::Empty => continue,
+            PublishedContentDescriptor::Text {
+                characters,
+                utf8_bytes,
+                sha256,
+            } => {
+                if widget != WidgetKind::SubjectText {
+                    return Err("独立内容类型不匹配。".into());
+                }
+                let text = provider
+                    .and_then(|p| p.text(slot, snapshot.revision, *sha256))
+                    .ok_or("文字尚未准备。")?;
+                if text.len() != *utf8_bytes as usize
+                    || text.chars().count() != *characters as usize
+                    || text.len() > 40_000
+                    || text.chars().count() > 10_000
+                    || text
+                        .chars()
+                        .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+                {
+                    return Err("文字缓存与发布内容不匹配。".into());
+                }
+                CardContent::StandaloneText(text)
+            }
+            PublishedContentDescriptor::Image {
+                current,
+                total_pages,
+            } => {
+                if widget != WidgetKind::SubjectImage || current.owner != slot {
+                    return Err("图片槽位不匹配。".into());
+                }
+                CardContent::Image(SceneImageContent {
+                    current: current.clone(),
+                    current_page: snapshot.current_page,
+                    total_pages: *total_pages,
+                })
+            }
+        };
+        result.push(BoundSample {
+            key,
+            content_identity: Some(SceneContentIdentity {
+                slot,
+                revision: snapshot.revision,
+                view_revision: snapshot.view_revision,
+            }),
+            sample: std::borrow::Cow::Owned(Sample {
+                widget,
+                component: style.component.clone(),
+                content,
+                page: PageInfo {
+                    offset: 0,
+                    shown: 1,
+                    total: 1,
+                },
+                leaf_limit: 1,
+            }),
+        });
+    }
+    Ok(result)
+}
+#[derive(Clone)]
 struct Sample {
     widget: WidgetKind,
     component: ComponentSettings,
@@ -419,6 +662,195 @@ fn samples(
 #[cfg(test)]
 mod tests {
     use super::*;
+    struct Provider(Vec<(ContentSlotKey, Revision, [u8; 32], Arc<str>)>);
+    impl ContentTextSource for Provider {
+        fn text(
+            &self,
+            slot: ContentSlotKey,
+            revision: Revision,
+            hash: [u8; 32],
+        ) -> Option<Arc<str>> {
+            self.0
+                .iter()
+                .find(|entry| entry.0 == slot && entry.1 == revision && entry.2 == hash)
+                .map(|entry| entry.3.clone())
+        }
+    }
+    fn independent_public() -> (PublicLayoutState, Vec<PublishedContentSnapshot>, Provider) {
+        use fc_domain::{
+            layout::{AxisSize, ContainerSettings, Flow, GlassMaterial, LayoutNode},
+            profile_content::{ContentNodeStyle, ContentPayloadKind},
+        };
+        let mut public = PublicLayoutState {
+            layout: Default::default(),
+            display: Default::default(),
+        };
+        public.layout.revision = Revision::new(1);
+        public.layout.node_id_high_water = 101;
+        for component in &mut public.display.components {
+            component.visible = false;
+        }
+        let fallback: Vec<_> = public
+            .layout
+            .tree
+            .nodes
+            .iter()
+            .filter(|n| matches!(n.kind, NodeKind::Widget(WidgetKind::Materials)))
+            .map(|n| n.id)
+            .collect();
+        public
+            .layout
+            .tree
+            .nodes
+            .retain(|n| !fallback.contains(&n.id));
+        let outlet = public
+            .layout
+            .tree
+            .nodes
+            .iter_mut()
+            .find(|n| matches!(n.kind, NodeKind::Outlet { .. }))
+            .unwrap();
+        // Both independent cards share one top-level glass group. The seven
+        // protected builtin cards remain in the structural budget even while
+        // their display styles are invisible in this focused fixture.
+        let group_id = LayoutNodeId::new(99).unwrap();
+        outlet.children = vec![group_id];
+        public.layout.tree.nodes.push(LayoutNode {
+            id: group_id,
+            kind: NodeKind::Container(ContainerSettings {
+                flow: Flow::Column,
+                padding: 0,
+                gap: 8,
+                width: AxisSize::Content {
+                    min: 160,
+                    preferred: 300,
+                    max: 800,
+                },
+                height: AxisSize::Content {
+                    min: 0,
+                    preferred: 0,
+                    max: 2160,
+                },
+                group_opacity_percent: 100,
+                material: Some(GlassMaterial::default()),
+            }),
+            children: vec![
+                LayoutNodeId::new(100).unwrap(),
+                LayoutNodeId::new(101).unwrap(),
+            ],
+        });
+        let mut snapshots = Vec::new();
+        let mut entries = Vec::new();
+        for (id, text) in [
+            (100, "第一份真实正文\n保留换行"),
+            (101, "第二份真实正文，与第一份不同。"),
+        ] {
+            let id = LayoutNodeId::new(id).unwrap();
+            public.layout.tree.nodes.push(LayoutNode {
+                id,
+                kind: NodeKind::Widget(WidgetKind::SubjectText),
+                children: vec![],
+            });
+            let mut style = ContentNodeStyle::new(id, ContentPayloadKind::Text);
+            style.component.font_dip = 18;
+            public.layout.content_styles.push(style);
+            let slot = ContentSlotKey {
+                scope: LayoutScope::Public,
+                node_id: id,
+            };
+            let hash = [id.get() as u8; 32];
+            snapshots.push(PublishedContentSnapshot {
+                slot,
+                revision: Revision::new(2),
+                view_revision: Revision::new(3),
+                current_page: 0,
+                content: PublishedContentDescriptor::Text {
+                    characters: text.chars().count() as u32,
+                    utf8_bytes: text.len() as u32,
+                    sha256: hash,
+                },
+            });
+            entries.push((slot, Revision::new(2), hash, Arc::from(text)));
+        }
+        public.layout.validate().unwrap();
+        let metrics = public.layout.tree.metrics().unwrap();
+        assert_eq!(metrics.top_level_glass, 8);
+        assert_eq!(metrics.glass_depth, 2);
+        (public, snapshots, Provider(entries))
+    }
+    #[test]
+    fn real_content_preview_uses_exact_slots_and_refuses_missing_or_wrong_cache() {
+        let (public, snapshots, mut provider) = independent_public();
+        let now = LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
+            9 * 3600,
+        )
+        .unwrap();
+        let scene = prepare_scene(
+            &IdentityState::default(),
+            &public,
+            None,
+            200,
+            now,
+            Some(&snapshots),
+            Some(&provider),
+        )
+        .unwrap();
+        assert_eq!(scene.cards.len(), 2);
+        assert_ne!(
+            scene.cards[0].content_identity,
+            scene.cards[1].content_identity
+        );
+        assert!(
+            matches!(&scene.cards[0].content,CardContent::StandaloneText(text) if text.contains("第一份")&&text.contains('\n'))
+        );
+        assert!(
+            matches!(&scene.cards[1].content,CardContent::StandaloneText(text) if text.contains("第二份"))
+        );
+        assert!(render(&IdentityState::default(), &public, None, 201, now)
+            .unwrap_err()
+            .contains("尚未准备"));
+        provider.0[0].2 = [0; 32];
+        assert!(prepare_scene(
+            &IdentityState::default(),
+            &public,
+            None,
+            202,
+            now,
+            Some(&snapshots),
+            Some(&provider)
+        )
+        .unwrap_err()
+        .contains("尚未准备"));
+    }
+    #[test]
+    fn actual_hidden_preview_renders_exact_published_text_without_placeholder() {
+        let (public, snapshots, provider) = independent_public();
+        let now = LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
+            9 * 3600,
+        )
+        .unwrap();
+        let image = render_with_content(
+            &IdentityState::default(),
+            &public,
+            None,
+            203,
+            now,
+            &snapshots,
+            &provider,
+            Arc::new(RasterCache::new()),
+        )
+        .unwrap();
+        assert!(image.bgra.chunks_exact(4).any(|pixel| pixel[3] > 0));
+        for id in [100, 101] {
+            assert!(image
+                .nodes
+                .iter()
+                .any(|node| node.key.id.get() == id && node.rect.height > 0.));
+        }
+        assert!(image.bgra.capacity() <= MAX_PREVIEW_BYTES);
+    }
     #[test]
     fn image_coordinates_use_actual_export_transform() {
         assert_eq!(

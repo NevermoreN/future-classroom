@@ -1,0 +1,193 @@
+{
+  "round": 18,
+  "scope": "Author-owned Backend profile-content service, exact read-only scene paging/image fences, shared text body ownership accounting, memory-only preparation guard",
+  "not_independent_audit": true,
+  "frozen_at_utc": "2026-10-30T20:26:55.379800+00:00",
+  "base_head": "b75af32",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 99157,
+      "sha256": "b14b69467310e83b2f087ca56527c036dffe1858174032a6b5fcb257d92749a8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "bytes": 48592,
+      "sha256": "68a022efa5ce0e6bdf3dd8d3549e2b54e9f808acdabaca6c764b2b2eaac163ac"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_cache.rs",
+      "bytes": 14436,
+      "sha256": "6b10d2b0f55ef3cbf4f5649b994ade6d12e9d9e2dbd7cb7a0055814900e271fe"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "bytes": 363,
+      "sha256": "92a27f3341affb784921c751172f33344347846d9e58e34781d152bc794d4ed6"
+    },
+    {
+      "path": "crates/fc-security/src/lib.rs",
+      "bytes": 10050,
+      "sha256": "3060e348a27623affad226bbb8af83158ea6144e544eab5555317c40b1940deb"
+    }
+  ],
+  "aggregate": "7e6dd1f4a709f82d351ec80ce05e746a91c647a14bc451ba6071535483061534",
+  "aggregate_algorithm": "SHA256 of ordered UTF8 path + NUL + sha256 + LF rows in sources order",
+  "api": {
+    "security": "fc_security::sha256(&[u8]) -> [u8;32]",
+    "text": "ProfileContentTextCache::shared(); TextFrame implements ContentTextSource, precise slot/revision/SHA, Arc<str> bodies accounted through external strong owners; allocation_bytes is metadata only",
+    "backend": [
+      "read_profile_content",
+      "read_profile_content_version",
+      "begin_profile_content",
+      "commit_profile_content",
+      "fail_profile_content",
+      "profile_content_outcome",
+      "hydrate_profile_content",
+      "page_profile_content",
+      "verify_profile_content_images",
+      "reserve_profile_media",
+      "settle_profile_media",
+      "inventory_profile_media",
+      "retire_profile_media",
+      "finalize_profile_media_removal",
+      "settle_profile_media_after_restart",
+      "profile_content_preparation_guard"
+    ],
+    "session": "publish_profile_content_scene / clear_profile_content_scene; clears index but not live body budget",
+    "preparation": "ProfileContentPreparationGuard.state() -> Ready | AuthorityUpdating | Revoked. is_context_valid is liveness only, is_ready required for another IO/decode step. Updating must pause with job cancellation/deadline checks. No 2s dispatch lease; final writer validates seq/CAS/exact lease. Uses current memory AuthorityReader, not fixed global revision.",
+    "page": "Default denied; exact already-published scene generation/global/slot/content/view; Healthy at service admission; exact callback permits AuthorityUpdating only during same writer precommit; actual selected node/lesson re-resolved on writer. Ordinary stale callback does not globally fault.",
+    "images": "One fresh writer facts batch, <=64 unique slots, exact global/content/view/mediaRef, date/capture/deadline and health checked before/after; no already-published generation needed before decode."
+  },
+  "final_checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-bootstrap --lib --locked profile_content -- --test-threads=1",
+      "passed": 8,
+      "failed": 0,
+      "filtered": 60,
+      "seconds": 25.21,
+      "log": {
+        "path": "/tmp/fc-round18-backend-preparation-guard-tests.log",
+        "bytes": 1308,
+        "sha256": "228f655f241a88cb82f93cd5ca6f5329e822e601975b0e0a2be77f4406abec7c"
+      }
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo test -p fc-security --lib --locked tests::content_sha256_matches_the_standard_abc_vector -- --exact",
+      "passed": 1,
+      "failed": 0,
+      "log": {
+        "path": "/tmp/fc-round18-backend-sha256-test.log",
+        "bytes": 456,
+        "sha256": "c6d4a092f8cfc440022a80d4d3e38f0d3c16c9d8013d077c717078b9aac791d3"
+      },
+      "note": "SHA helper unchanged since this exact test; newest strictClippy compiles tests against final source"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-backend-target cargo clippy -p fc-bootstrap -p fc-security --lib --tests --locked -- -D warnings",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-backend-preparation-guard-clippy.log",
+        "bytes": 171,
+        "sha256": "81af8171434702a3437392acc439ddbdc17cb73fab2e04d2de4b42ad95d7deac"
+      }
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check [the five owned source files]",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-backend-preparation-guard-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "coverage": [
+    "Real SQLite writer + actual password PBKDF2 initialization; explicitly synthetic verified sessions isolate service authorization and do not claim login-flow validation.",
+    "Text publish/read/SHA verification/hydration, invalid descriptor digest, Web-global management rejection, Clear, target revision Undo, committed outcome, stale global and locked exact lease.",
+    "Two independent real persisted image slots: pre-publication image fence, stale view refusal without Faulted, actual published generation page capability, content revision fixed/view revision advances, transient AuthorityUpdating precommit, current lesson switches resolved from actual schedule.",
+    "Real held SQLite precommit authority publication: preparation stays live but forbids next IO while Updating, recovers Ready after unrelated commit. Different-node Begin/commit do not revoke. Actual account security epoch change, new lease non-revival, lock and Faulted revoke.",
+    "Five cache tests: actual 4MiB saturation with 40000-byte emoji texts, external Arc ownership after clear/frame drop, exact immutable keys/digest, bounded retired metadata, process shared handle cannot reset physical billing."
+  ],
+  "history": [
+    {
+      "stage": "Initial cargo check",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-backend-initial-check.log",
+        "bytes": 3028,
+        "sha256": "6bc4ddb54757830328f22f8f4789de8a6267c8bcd055ded247407ef8a3142d84"
+      }
+    },
+    {
+      "stage": "Earlier narrower test runs, not additional final counts",
+      "logs": [
+        {
+          "path": "/tmp/fc-round18-backend-initial-tests.log",
+          "bytes": 3417,
+          "sha256": "7fef5d99a62ef4ad6481a9fa5e10ae0783b8dacba8af4ccf7dec46e34782b573"
+        },
+        {
+          "path": "/tmp/fc-round18-backend-final-tests.log",
+          "bytes": 1182,
+          "sha256": "c7c909ddd62a62828c529fda5ab403e495e9ab5d841a63ec2a1283c7d29d03ba"
+        },
+        {
+          "path": "/tmp/fc-round18-backend-images-fence-tests.log",
+          "bytes": 1182,
+          "sha256": "433fc99043751ae2d5afd1383f82337ec6a59576fcf44bc5a514b9512eb0f4e4"
+        }
+      ]
+    },
+    {
+      "stage": "Initial strictClippy failure, original evidence retained",
+      "exit_code": 101,
+      "reason": "Test-only cloned_ref_to_slice_refs on [snapshot.clone()]; replaced with std::slice::from_ref(&snapshot), no lint suppression",
+      "log": {
+        "path": "/tmp/fc-round18-backend-initial-clippy.log",
+        "bytes": 1955,
+        "sha256": "f3f555fad50eaaa262d60328512568fe89fa2cebdd77c162ae7d7835baeb9d37"
+      }
+    },
+    {
+      "stage": "Previous pre-guard strictClippy/fmt PASS, superseded by newest final checks",
+      "logs": [
+        {
+          "path": "/tmp/fc-round18-backend-final-clippy.log",
+          "bytes": 171,
+          "sha256": "8f0f3be1786edee9bfc1a83dcc8830a854d1c911568c02b62c92c5db6a9cbf60"
+        },
+        {
+          "path": "/tmp/fc-round18-backend-final-fmt.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "execution_limits": {
+    "host_only": true,
+    "windows_runs": 0,
+    "ssh_runs": 0,
+    "real_wic": false,
+    "real_image_files": false,
+    "image_fixture": "metadata-only trusted preparation adapter, actual digest and SQLite references/reservations; no image decode or filesystem verification claim",
+    "work_queue": "TextFrame contains bounded metadata and Arc handles; body allocations are separately accounted by process shared 4MiB ledger, not smuggled as unmetered queue payload",
+    "cache_records_max": 512,
+    "cache_body_bytes_max": 4194304
+  },
+  "cleanup": {
+    "fixture_directory_residuals": [],
+    "fixture_cleanup": "Fixture Drop joins/closes its Backend writer then removes only its own exclusive temp directory",
+    "build_cache": "/tmp/fc-round18-backend-target retained for root unified integration/cleanup; no foreign cache deletion"
+  },
+  "remaining": [
+    "Parent application worker UI/editor/import/WIC/filesystem/startup combination and physical Windows tests",
+    "No complete goal/P4/platform acceptance claim; Windows 7/10/11 evidence remains separate",
+    "Parent unified workspace architecture/tests/Clippy/package/source binding and cleanup/sync pending"
+  ]
+}

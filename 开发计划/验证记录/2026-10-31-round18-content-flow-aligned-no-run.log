@@ -1,0 +1,34 @@
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error[E0027]: pattern does not mention fields `now`, `contents`, `text`, `images`
+    --> crates/fc-bootstrap/src/application.rs:2297:21
+     |
+2297 |                   let profile_flow::Preview {
+     |  _____________________^
+2298 | |                     identity,
+2299 | |                     public,
+2300 | |                     subject,
+2301 | |                     sequence,
+2302 | |                 } = *preview;
+     | |_________________^ missing fields `now`, `contents`, `text`, `images`
+     |
+help: include the missing fields in the pattern
+     |
+2301 -                     sequence,
+2302 -                 } = *preview;
+2301 +                     sequence, now, contents, text, images } = *preview;
+     |
+help: if you don't care about these missing fields, you can explicitly ignore them
+     |
+2301 -                     sequence,
+2302 -                 } = *preview;
+2301 +                     sequence, now: _, contents: _, text: _, images: _ } = *preview;
+     |
+help: or always ignore missing fields here
+     |
+2301 -                     sequence,
+2302 -                 } = *preview;
+2301 +                     sequence, .. } = *preview;
+     |
+
+For more information about this error, try `rustc --explain E0027`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 1 previous error

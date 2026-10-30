@@ -1,0 +1,254 @@
+{
+  "round": 18,
+  "scope": "Author-owned storage content persistence, narrow profile/facts/shared-quota integration",
+  "frozen_at_utc": "2026-10-30T20:11:39.359611+00:00",
+  "base_head": "b75af32",
+  "not_independent_audit": true,
+  "source_files": [
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61614,
+      "sha256": "2c1315c586d1ad0a059766f15a5373366f6906c09ef4a7aeea8bde7537a6da56"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 37630,
+      "sha256": "5a20df1e2e8e21b2842bd00ddd0dffe9edd7a0977f20de9886ceb2b4593f6a81"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop.rs",
+      "bytes": 12179,
+      "sha256": "b84e695a12f750de681186a369cac4ba955edcde2c03f84cbd9df9bf2974878f"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display_codec.rs",
+      "bytes": 10933,
+      "sha256": "eba31fd12d8887c60065a04212195c987f824b8330d675e204fa0692370ed3ad"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles.rs",
+      "bytes": 33983,
+      "sha256": "699831ac32521671d64fb6af462e0b05922556c9138c121c08923b7be4b0aa0e"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles_codec.rs",
+      "bytes": 17221,
+      "sha256": "dc01cf7c6611015ed311117805632170575bf009d71114605f538a54daa73661"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "bytes": 59184,
+      "sha256": "90bc8baaf42c132cb57f15609890b901372e9de2a291de9ebdb9c2e65c07b470"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles/tests.rs",
+      "bytes": 34609,
+      "sha256": "52448a786fd4b591070087705db28d424adbff53bd87232d0732d4cf67a86c5a"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content.rs",
+      "bytes": 43192,
+      "sha256": "7a135212258bced7606ae349e0a15fead8a66e7cc52595b5e21c4b945f51223b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_codec.rs",
+      "bytes": 9782,
+      "sha256": "29942eb8fad7243e7256c6e111076ff78ffdaf533a707e951867992a1e9deea1"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_media.rs",
+      "bytes": 25181,
+      "sha256": "24ca6ca17d52fae1fedc5c513057641c021f92ca8a4e788ed00c8db9e1a70816"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/profile_content.rs",
+      "bytes": 28136,
+      "sha256": "101c6156ed2431319251c2c673cc0e372a3dccc3d646bd1cc5b1921c1c276a63"
+    }
+  ],
+  "target_directory": "/tmp/fc-round18-storage-target",
+  "product_execution": {
+    "host_only": true,
+    "windows": 0,
+    "remote": 0,
+    "dpapi": false,
+    "wic": false,
+    "real_media_files": false,
+    "fixture_description": "Actual SQLite writer, SHA256, owned clocks and exact SessionGuard. Credential byte records and prepared image/material metadata synthetic. No filesystem import/decode/DPAPI claim."
+  },
+  "final_checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-storage-target cargo test -p fc-storage --all-targets --locked",
+      "profile": "test [unoptimized + debuginfo]",
+      "log": "/tmp/fc-round18-storage-all-final.log",
+      "passed": 67,
+      "failed": 0,
+      "new_content_tests": 14
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-storage-target cargo clippy -p fc-storage --all-targets --locked -- -D warnings",
+      "profile": "dev [unoptimized + debuginfo]",
+      "log": "/tmp/fc-round18-storage-clippy-final.log",
+      "status": "PASS"
+    },
+    {
+      "command": "rustfmt --edition 2021 --config skip_children=true --check <12 owned source files>",
+      "log": "/tmp/fc-round18-storage-fmt.log",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "log": "/tmp/fc-round18-storage-architecture-final.log",
+      "status": "PASS",
+      "crates": 12,
+      "first_party_edges": 33
+    }
+  ],
+  "initial_failures_preserved": [
+    {
+      "log": "/tmp/fc-round18-storage-check.log",
+      "kind": "Initial compilation Catalog::read naming, String match conversions, new ComponentKind arms corrected."
+    },
+    {
+      "log": "/tmp/fc-round18-storage-tests-initial.log",
+      "passed": 0,
+      "failed": 8,
+      "kind": "Fixture appended ninth top-level glass card; corrected fixture to actual valid glass container grouping content children. Product caps unchanged."
+    },
+    {
+      "log": "/tmp/fc-round18-storage-lib.log",
+      "passed": 64,
+      "failed": 1,
+      "kind": "Legacy facts fixture expected format2. Serializer now retains exact format2 when no content descriptors and uses format3 only when needed. Old assertion unchanged."
+    },
+    {
+      "log": "/tmp/fc-round18-storage-clippy.log",
+      "kind": "type_complexity and identical-if corrected."
+    }
+  ],
+  "implemented": [
+    "Head refs and immutable per-version <=64KiB documents, current and one previous each support full40KiB UTF8/10000 scalars. Clear and exact undo persist after reopen.",
+    "Durable Begin sequence and receipt before preparation; newer failed intent never lets older preparation overwrite. Actor/epoch/request/digest-bound replay does not write again. Writer independently rehashes actual canonical payload and raw UTF8.",
+    "Fresh local GlobalAdmin and exact SessionGuard evaluate/precommit; teachers/Web/lock denied. Hydration requires actual current selected slot/current version/exact DBglobal, no manager actor or already-published scene.",
+    "Page default-deny dedicated scene guard evaluate/precommit, actual selected tree/content/view CAS, pure precommit lesson/date proof.",
+    "Old profile v1 bytes and receipt fingerprints preserved for empty styles; v2 style exact schema. Old Facts v2 unchanged when no content descriptors; exact v3 otherwise.",
+    "Independent media owner registry shares global2GiB with Materials. Reserved and retiring bytes stay charged until actual physical deletion/finalize; no timeout refund.",
+    "Node removal atomically tombstones head, cancels pending, drops current/previous immutable version and resource refs; physical GC independent.",
+    "Startup bounded512KiB scans verify head/index/version/media/receipt refs and actual SHA, reject missing/unknown/damaged state."
+  ],
+  "limits": [
+    "Per BLOB64KiB; full management current+previous response192KiB; desktop Facts2MiB.",
+    "16384 lifetime head slots;8192 lifetime media IDs;65536 lifetime content+page receipts. Explicit capacity refusal, no silent truncation; receipt eviction/window not implemented.",
+    "Startup settlement requires exclusive instance lock and zero active preparation workers, trusted internal only.",
+    "Storage does not perform external file IO, decode/WIC, KDF, pixels,4MiBtextcache/32MiBimagecache/200MiBrebuildcache or native execution; those remain root/other-agent integration."
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-storage-all-final.log",
+      "bytes": 8053,
+      "sha256": "bcab49b8c792888cc5ac55c45fa0119249a1867fdccd6962a8e33433577ce702",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-architecture-final.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-architecture.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-check-2.log",
+      "bytes": 677,
+      "sha256": "e6ab3820fd3ab88358d90135c8c72f1ebdf47b99beca1af407b221dc28d9d1ce",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-check.log",
+      "bytes": 13553,
+      "sha256": "b68682eef720157cf7aacaf4f409a550fb8184acfb5fa64dcdfbec692762b216",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-clippy-2.log",
+      "bytes": 167,
+      "sha256": "57ebbb2b3de3ad3c28010b6bd1bb16e365fcca21330d55cfb652a0f3143b56ab",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-clippy-final.log",
+      "bytes": 167,
+      "sha256": "20a92c4da85bb10f962c772dc7881d59d4f15737442c9b262529f86ade4ecc5f",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-clippy.log",
+      "bytes": 2085,
+      "sha256": "0d7c952d8ff5fbe39fa4e963bf288a38af8092e7435775b5d5112c99111bfe7f",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-lib-2.log",
+      "bytes": 7757,
+      "sha256": "cdee34f93485ea90b606fb17c3c5857892d7eb9982fb5a2690b4853e26d502f9",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-lib.log",
+      "bytes": 8331,
+      "sha256": "93901165498734f1dbb4fc5ff52ab0c6e6020c338ccfbdf8ddb86c74acb00b0e",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-2.log",
+      "bytes": 1485,
+      "sha256": "6cf1422f10439045c774bf83bd1a97c0cbc182105f23f2cbb3d4a25362aaac23",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-3.log",
+      "bytes": 1485,
+      "sha256": "76dbe596a804bd26e5969a22ec29d5c7d2e477385cd13c4ae358c16e7fbf2ce0",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-4.log",
+      "bytes": 2043,
+      "sha256": "7975551791106fe8480817f14e79cf1d87128d85b286b7f3c481ce4c1c00647a",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-final-2.log",
+      "bytes": 2340,
+      "sha256": "556e53bac61c23f92c005a57788d96b607212ad58f38da146ce37ec0a8f13865",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-final.log",
+      "bytes": 2199,
+      "sha256": "06a9dcaa71a27f61965d99d6294aff411a6b6054cb2a2a193650bf9162e112c8",
+      "raw": true
+    },
+    {
+      "path": "/tmp/fc-round18-storage-tests-initial.log",
+      "bytes": 7276,
+      "sha256": "a1f3f070194116ff9b3b58fcde7c84785fa75b1749e920f6cec17df567103faf",
+      "raw": true
+    }
+  ],
+  "cleanup": {
+    "private_profile_fixture_directories_remaining": [],
+    "directory_lifecycle": "RAII closes/joins writer and removes private SQLite fixture directories. Targets/raw logs retained for root final evidence/cleanup.",
+    "remote_authorization_untouched": true
+  }
+}

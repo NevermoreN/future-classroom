@@ -1,0 +1,99 @@
+{
+  "round": 18,
+  "scope": "Temporary-authorized shared physical WIC admission only, two production files+one new test file",
+  "frozen_at_utc": "2026-10-30T21:12:13.943191+00:00",
+  "source_files": [
+    {
+      "path": "crates/fc-windows/src/materials/image.rs",
+      "bytes": 6014,
+      "sha256": "fc2e438cc67e1e02e2f92285a996d3c9e4508219c8dbccf9df3357049bcb23a2"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster.rs",
+      "bytes": 11406,
+      "sha256": "c6eaf20174c430e869c3036284a9256a3a64a9a504798cdaae71bc3d08b63037"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image_admission_tests.rs",
+      "bytes": 9835,
+      "sha256": "de890369e02798faa6d8fc4d0aa2947f85140af897f24b1426faf6907d2c05d2"
+    }
+  ],
+  "initial_failure": {
+    "report": {
+      "path": "/tmp/fc-round18-application-bin-full-windows.json",
+      "bytes": 23860,
+      "sha256": "ef15bd74a0b77f09805470218bd8a07301d7862d778614d3d7c0d14fa4cdf58b"
+    },
+    "binarySha256": "48edbcbcbccc20406feea79b3a6c5d3a26b971066120fddd9ecb64bd89403f26",
+    "case": "application::profile_content_flow::tests::real_worker_wic_fifty_pages_existing_reorder_partial_failure_and_physical_settlement",
+    "panic": "profile_content_flow_tests.rs785 first.wait().unwrap().unwrap(); Backend(ProfileContent(Unavailable))",
+    "finding": "validate_image and raster decode shared DECODER.try_lock immediate ERROR_BUSY on any concurrent legal WIC owner. files unavailable maps every WIC HRESULT to ProfileContentUnavailable. This is a deterministic product contention defect, but original raw output has no phase/HRESULT; not uniquely proven root cause of that run.",
+    "initial_report_status": "93passed/3failed includes2separatepreview failures; preserved unchanged; not replaced by later rerun."
+  },
+  "production_api": "validate_image existing signature unchanged; RasterCache::decode_verified unchanged; no files/backend/central source edits. image::DecoderBudget pub(super) internal shared helper.",
+  "semantics": [
+    "Exactlyone processwideWICmutex for validation and raster; no new productionthreads, permits, workers or capacity.",
+    "Wall Instant and currentthreadCPU captured at APIentry before admission; waiting uses original existing worker,2msboundedpoll, same30wall/10CPU.",
+    "Cancellation/deadline checked before eachtrylock and immediately afteracquire, before COM/WIC, during tiledcopy and afterlastsyncnativecall; poisonedgate failclosed.",
+    "Physical MutexGuard lives until synchronousWIC objects/nativecopy reallyreturn; canceled waiter cannot return another owner slot or pixelbudget.",
+    "Raster pixels not reserved until physicalWIC admission succeeds; cache fastpath still verifies current context/time. Existing32MiBcache/10MiB/8MP limits unchanged."
+  ],
+  "new_windows_test_cases": [
+    "materials::image::admission_tests::waiting_validation_cancels_without_decoder_or_early_owner_release",
+    "materials::image::admission_tests::admission_original_deadline_and_post_acquire_cancel_precede_wic",
+    "materials::image::admission_tests::legal_validation_waits_for_physical_owner_then_full_wic_completes",
+    "materials::image::admission_tests::raster_same_gate_cancel_charges_no_pixels_and_retry_decodes_after_release"
+  ],
+  "test_proofs": [
+    "Real heldMutex plus waiter canceled→ERROR_CANCELLED while owner remainsheld; old immediateBUSY fails test.",
+    "Alreadyexpired originalInstant returns beforeadmission; deterministic cancellation on secondcallback proves postacquirecheck/guarddrop beforeWIC.",
+    "Actual pinned synthetic4x2BMP fullWICreport afterowner release.",
+    "ActualsamegateRaster cancellation0pixelscharged, release→real32B PBGRA/sourcekey/cacheexact; originalsharing samepinnedfile/fixtureRAII."
+  ],
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo clippy -p fc-windows --all-targets --target i686-pc-windows-gnu --locked -- -D warnings",
+      "profile": "dev [unoptimized + debuginfo]",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-wic-admission-clippy-final.log"
+    },
+    {
+      "command": "rustfmt --edition2021 --config skip_children=true --check <3 ownedfiles>",
+      "status": "PASS",
+      "raw": "functions output; no separate rawlog"
+    },
+    {
+      "command": "git diff --check -- crates/fc-windows/src/materials/image.rs",
+      "status": "PASS; other2files new/untracked and separatelyfmtchecked"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "status": "PASS12crates33edges",
+      "raw": "functions output; no separate rawlog"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-wic-admission-clippy.log",
+      "bytes": 1345,
+      "sha256": "4a565f76d78ec2504615739467d252ebd3d788f3096fb9ae26eb447a08eea134"
+    },
+    {
+      "path": "/tmp/fc-round18-wic-admission-clippy-final.log",
+      "bytes": 167,
+      "sha256": "a10951e0b5adb9820c634ac125310f10c348d72b6991c047ac09a75f655f295e"
+    }
+  ],
+  "initial_check_failure": "Initialstrict rejected2testerr().expect patterns; changed to expect_err, no assertion weakened; rawlog retained.",
+  "actual_new_windows_execution": "PENDING root unified; 4cases compiled,0executed by author. Original50pagecase needs freshlylinked source rerun.",
+  "windows_sessions_by_author": 0,
+  "new_product_tests_executed_by_author": 0,
+  "limitations": [
+    "No claim of hard preemption inside synchronous WIC/COM call; slot/bytes remainowneduntilreturn and deadline is checked afterward.",
+    "No unique original-run diagnosis without HRESULT/phase evidence.",
+    "Other Unavailable sources including filesystem/SQL/context/cache-trylock still exist and are not silently swallowed or retried here.",
+    "No Windows7/Windows10 execution claim; using existingWIC1/Win7-compatiblemutex+threadsleep+threadCPU APIs, no newOSAPI."
+  ],
+  "cleanup": "No fixtures executed by author; Windowsfixture test root has RAII beforeprepare; parent owns buildtargets/unifiedtest cleanup."
+}

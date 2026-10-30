@@ -1,0 +1,40 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> crates/fc-storage/src/business/profile_content.rs:523:28
+    |
+523 |           let mut page_rule: Option<
+    |  ____________________________^
+524 | |             Box<dyn FnOnce(LocalDateTime) -> Result<(), StorageError> + Send>,
+525 | |         > = None;
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#type_complexity
+    = note: `-D clippy::type-complexity` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+error: this `if` has identical blocks
+    --> crates/fc-storage/src/business/profile_content.rs:1015:29
+     |
+1015 |               if k == COUNTER {
+     |  _____________________________^
+1016 | |                 continue;
+1017 | |             } else if k.starts_with(&format!("{ROOT}heads/")) {
+     | |_____________^
+     |
+note: same as this
+    --> crates/fc-storage/src/business/profile_content.rs:1017:63
+     |
+1017 |               } else if k.starts_with(&format!("{ROOT}heads/")) {
+     |  _______________________________________________________________^
+1018 | |                 continue;
+1019 | |             } else if k.starts_with(&format!("{ROOT}slots/")) {
+     | |_____________^
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#if_same_then_else
+     = note: `-D clippy::if-same-then-else` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::if_same_then_else)]`
+
+error: could not compile `fc-storage` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-storage` (lib test) due to 2 previous errors

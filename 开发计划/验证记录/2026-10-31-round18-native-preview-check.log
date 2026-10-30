@@ -1,0 +1,131 @@
+    Checking subtle v2.6.1
+   Compiling zerocopy v0.8.63
+   Compiling rustversion v1.0.23
+   Compiling ahash v0.8.12
+   Compiling find-msvc-tools v0.1.15
+   Compiling shlex v2.0.1
+    Checking memchr v2.8.3
+   Compiling pkg-config v0.3.34
+    Checking digest v0.10.7
+   Compiling vcpkg v0.2.15
+   Compiling cc v1.10.0
+    Checking once_cell v1.21.4
+   Compiling crc32fast v1.5.3
+    Checking sha2 v0.10.9
+    Checking inout v0.1.4
+    Checking adler2 v2.0.1
+    Checking simd-adler32 v0.3.10
+    Checking smallvec v1.16.4
+    Checking miniz_oxide v0.9.1
+    Checking serde_json v1.0.145
+    Checking cipher v0.4.4
+    Checking scopeguard v1.2.0
+    Checking zlib-rs v0.6.8
+   Compiling multiversion_no_op v1.0.0
+   Compiling encoding_rs v0.8.42
+    Checking simdutf8 v0.1.5
+    Checking core_detect v1.0.0
+    Checking aes v0.8.4
+    Checking hmac v0.12.1
+    Checking fallible-iterator v0.3.0
+    Checking bitflags v2.13.2
+    Checking log v0.4.34
+    Checking rustc-hash v2.1.3
+    Checking fallible-streaming-iterator v0.1.9
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking pbkdf2 v0.12.2
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking flate2 v1.1.10
+    Checking quick-xml v0.42.0
+    Checking pdf-syntax v0.6.1
+   Compiling libsqlite3-sys v0.30.1
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking hashbrown v0.14.5
+    Checking hashlink v0.9.1
+    Checking rusqlite v0.32.1
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0063]: missing field `content_identity` in initializer of `SceneCard`
+   --> crates/fc-bootstrap/src/application/desktop_controller.rs:819:26
+    |
+819 |         scene.cards.push(fc_presentation::scene::SceneCard {
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `content_identity`
+
+error[E0063]: missing field `content_identity` in initializer of `SceneCard`
+   --> crates/fc-bootstrap/src/application/desktop_controller.rs:964:26
+    |
+964 |         scene.cards.push(fc_presentation::scene::SceneCard {
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `content_identity`
+
+error[E0004]: non-exhaustive patterns: `&DesktopEvent::ImagePage { .. }` not covered
+   --> crates/fc-bootstrap/src/application/desktop_controller.rs:685:19
+    |
+685 |             match &event {
+    |                   ^^^^^^ pattern `&DesktopEvent::ImagePage { .. }` not covered
+    |
+note: `DesktopEvent` defined here
+   --> crates/fc-windows/src/desktop.rs:102:1
+    |
+102 | pub enum DesktopEvent {
+    | ^^^^^^^^^^^^^^^^^^^^^
+103 |     ImagePage {
+    |     --------- not covered
+    = note: the matched value is of type `&DesktopEvent`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+    |
+738 ~                 },
+739 +                 &DesktopEvent::ImagePage { .. } => todo!()
+    |
+
+error[E0004]: non-exhaustive patterns: `fc_domain::desktop::ComponentKind::SubjectText` and `fc_domain::desktop::ComponentKind::SubjectImage` not covered
+   --> crates/fc-bootstrap/src/application/display_editor.rs:128:11
+    |
+128 |     match kind {
+    |           ^^^^ patterns `fc_domain::desktop::ComponentKind::SubjectText` and `fc_domain::desktop::ComponentKind::SubjectImage` not covered
+    |
+note: `fc_domain::desktop::ComponentKind` defined here
+   --> crates/fc-domain/src/desktop.rs:23:1
+    |
+ 23 | pub enum ComponentKind {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+...
+ 32 |     SubjectText,
+    |     ----------- not covered
+ 33 |     SubjectImage,
+    |     ------------ not covered
+    = note: the matched value is of type `fc_domain::desktop::ComponentKind`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+    |
+136 ~         ComponentKind::Recess => "课间大字倒计时",
+137 ~         fc_domain::desktop::ComponentKind::SubjectText | fc_domain::desktop::ComponentKind::SubjectImage => todo!(),
+    |
+
+error[E0004]: non-exhaustive patterns: `&fc_windows::desktop::DesktopEvent::ImagePage { .. }` not covered
+   --> crates/fc-bootstrap/src/application/desktop_controller.rs:685:19
+    |
+685 |             match &event {
+    |                   ^^^^^^ pattern `&fc_windows::desktop::DesktopEvent::ImagePage { .. }` not covered
+    |
+note: `fc_windows::desktop::DesktopEvent` defined here
+   --> crates/fc-windows/src/desktop.rs:102:1
+    |
+102 | pub enum DesktopEvent {
+    | ^^^^^^^^^^^^^^^^^^^^^
+103 |     ImagePage {
+    |     --------- not covered
+    = note: the matched value is of type `&fc_windows::desktop::DesktopEvent`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+    |
+738 ~                 },
+739 +                 &fc_windows::desktop::DesktopEvent::ImagePage { .. } => todo!()
+    |
+
+For more information about this error, try `rustc --explain E0004`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+Some errors have detailed explanations: E0004, E0063.
+For more information about an error, try `rustc --explain E0004`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 4 previous errors

@@ -1009,3 +1009,6 @@ fn profiles_facts_codec_accepts_only_exact_legacy_shape_and_rejects_partial_new_
     assert!(f.save(too_many).is_err());
     assert_eq!(f.revision(), before);
 }
+
+#[path = "../tests/profile_content.rs"]
+mod profile_content_tests;

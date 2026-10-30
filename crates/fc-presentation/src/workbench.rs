@@ -104,7 +104,12 @@ impl View {
             if f.id.0 == 0
                 || f.label.len() > 512
                 || f.max_utf16 == 0
-                || f.max_utf16 > 16384
+                || f.max_utf16
+                    > if f.kind == FieldKind::Multiline {
+                        20_000
+                    } else {
+                        16_384
+                    }
                 || f.value.len() > 65536
                 || f.value.encode_utf16().count() > f.max_utf16
                 || f.value.contains('\0')
@@ -244,6 +249,37 @@ mod tests {
         assert!(!format!("{form:?}").contains("password"));
         assert_eq!(form.take(FieldId(1)).unwrap(), "long-private-password");
         assert_eq!(form.get(FieldId(1)), None);
+    }
+    #[test]
+    fn multiline_content_accepts_10000_astral_scalars_with_exact_utf16_bound() {
+        let text = "😀".repeat(10_000);
+        let mut view = View {
+            title: "独立文字".into(),
+            description: String::new(),
+            status: String::new(),
+            fields: vec![Field {
+                id: FieldId(800),
+                label: "正文".into(),
+                kind: FieldKind::Multiline,
+                value: text.clone(),
+                max_utf16: 20_000,
+            }],
+            actions: Vec::new(),
+            busy: false,
+            grid: None,
+        };
+        view.validate().unwrap();
+        let mut form = FormData::new();
+        form.insert(FieldId(800), text.clone()).unwrap();
+        assert_eq!(form.take(FieldId(800)).unwrap(), text);
+        view.fields[0].value.push('😀');
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
+        view.fields[0].value = String::new();
+        view.fields[0].max_utf16 = 20_001;
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
+        view.fields[0].max_utf16 = 20_000;
+        view.fields[0].kind = FieldKind::Password;
+        assert_eq!(view.validate(), Err(FormError::InvalidView));
     }
     #[test]
     fn view_refuses_secret_initial_values_and_duplicate_native_bindings() {

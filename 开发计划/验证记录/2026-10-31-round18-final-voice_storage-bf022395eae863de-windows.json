@@ -1,0 +1,40 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "5b1166116cb812ea99a4ebfcc3dd0ec44f9f7df94806387e94adaa612bacf82a",
+  "exe": "/tmp/fc-round18-frozen-workspace-final-state/voice_storage-bf022395eae863de.exe",
+  "timeoutSeconds": 900,
+  "tests": [
+    {
+      "filter": "",
+      "exitCode": 0,
+      "binarySha256": "5b1166116cb812ea99a4ebfcc3dd0ec44f9f7df94806387e94adaa612bacf82a",
+      "output": [
+        "",
+        "running 6 tests",
+        "test sqlite_voice_audit_and_receipts_are_capped_and_age_out_together ... ok",
+        "test sqlite_voice_canonical_three_repeats_deadline_and_backup_strip_active_bytes ... ok",
+        "test sqlite_voice_commit_idempotency_cancel_release_and_restart_never_replay ... ok",
+        "test sqlite_voice_exact_lease_binding_revocation_and_fifo_limits ... ok",
+        "test sqlite_voice_expire_before_write_ignores_revoked_lease_but_requires_exact_release ... ok",
+        "test sqlite_voice_first_boot_idle_recovery_is_read_only_and_expired_reads_are_redacted ... ok",
+        "",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s",
+        ""
+      ],
+      "passed": 6
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

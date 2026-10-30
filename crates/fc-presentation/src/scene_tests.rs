@@ -165,6 +165,7 @@ fn fixture() -> DesktopFacts {
         schedule,
         lesson_context,
         display: DisplaySettings::default(),
+        profile_contents: Vec::new(),
         profiles: fc_domain::profile::ProfileSelectionSnapshot {
             reason: fc_domain::profile::ProfileSelectionReason::Missing,
             ..Default::default()
@@ -1196,3 +1197,6 @@ fn actual_profile_material_gap_and_warning_drive_intrinsic_scene_height() {
             .ceil()
     );
 }
+
+#[path = "scene_content_tests.rs"]
+mod independent_content;

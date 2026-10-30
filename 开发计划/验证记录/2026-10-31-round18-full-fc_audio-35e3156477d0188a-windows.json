@@ -1,0 +1,56 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "43da1ec6168f0e74e25d29b726ec1a29c20aa8b578407cc4ae5b872b9b07f7d7",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/fc_audio-35e3156477d0188a.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "::",
+      "exitCode": 0,
+      "binarySha256": "43da1ec6168f0e74e25d29b726ec1a29c20aa8b578407cc4ae5b872b9b07f7d7",
+      "output": [
+        "",
+        "running 22 tests",
+        "test execution::tests::cancel_before_done_drains_exact_old_generation_without_counting ... ok",
+        "test execution::tests::cancel_between_native_first_write_and_commit_and_between_done_and_commit_wins ... ok",
+        "test execution::tests::crossing_a_civil_second_does_not_shortcut_the_full_monotonic_repeat_gap ... ok",
+        "test execution::tests::durable_three_repeats_have_first_write_before_natural_and_release_before_next ... ok",
+        "test execution::tests::fifo_next_job_cannot_start_until_the_canceled_device_is_confirmed_released ... ok",
+        "test execution::tests::first_five_minute_expiry_opens_no_file_or_device ... ok",
+        "test execution::tests::lost_release_response_is_settled_only_from_inventory_and_known_device_release ... ok",
+        "test execution::tests::new_executor_cannot_adopt_persisted_live_or_gap_ownership ... ok",
+        "test execution::tests::no_device_and_midstream_driver_error_fail_and_drain_then_preserve_error_without_replay ... ok",
+        "test execution::tests::persistent_clock_rollback_still_settles_durable_terminal_without_replay ... ok",
+        "test execution::tests::preparation_and_open_deadlines_are_fresh_and_playback_budget_starts_at_first_write ... ok",
+        "test execution::tests::read_fault_source_fault_revocation_timeout_and_rollback_fail_closed ... ok",
+        "test execution::tests::ten_max_duration_repeats_are_not_expired_at_the_initial_five_minute_deadline ... ok",
+        "test execution::tests::unknown_storage_after_first_write_stops_and_cannot_replay_on_recovery ... ok",
+        "test execution::tests::updating_defers_queued_first_write_and_natural_without_reopening_or_counting ... ok",
+        "test execution::tests::wait_return_time_starts_gap_and_expired_wait_cannot_count_completion ... ok",
+        "test tests::cancellation_done_is_never_counted_and_next_job_waits_for_release ... ok",
+        "test tests::late_cleanup_cannot_finish_a_reused_id_with_a_new_generation ... ok",
+        "test tests::later_jobs_do_not_start_during_repeat_gap_and_emergency_cancels_all ... ok",
+        "test tests::quota_expiry_revocation_and_emergency_are_independent_of_desktop ... ok",
+        "test tests::submission_failure_waits_for_release_and_never_counts_as_a_repeat ... ok",
+        "test tests::total_three_means_three_and_one_second_gaps ... ok",
+        "",
+        "test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        ""
+      ],
+      "passed": 22
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

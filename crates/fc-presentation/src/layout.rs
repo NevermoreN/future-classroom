@@ -46,6 +46,8 @@ pub struct SceneProfileStamp {
 }
 #[derive(Clone, Debug)]
 pub struct WidgetMeasure {
+    /// Exact scoped node; matching a component kind alone may alias independent slots.
+    pub key: SceneNodeKey,
     pub kind: WidgetKind,
     pub body: CardBodySpec,
     pub font_dip: f32,
@@ -114,8 +116,10 @@ struct Solver<'a> {
     measure: &'a dyn TextMeasure,
 }
 impl<'a> Solver<'a> {
-    fn spec(&self, kind: WidgetKind) -> Option<&WidgetMeasure> {
-        self.specs.iter().find(|s| s.kind == kind)
+    fn spec(&self, n: Ref<'_>) -> Option<&WidgetMeasure> {
+        self.specs
+            .iter()
+            .find(|s| s.key == n.key() && n.node().kind == NodeKind::Widget(s.kind))
     }
     fn children(&self, n: Ref<'a>) -> Vec<Ref<'a>> {
         if matches!(n.node().kind, NodeKind::Outlet { .. }) {
@@ -138,7 +142,7 @@ impl<'a> Solver<'a> {
     }
     fn active(&self, n: Ref<'a>) -> bool {
         match n.node().kind {
-            NodeKind::Widget(w) => self.spec(w).is_some(),
+            NodeKind::Widget(_) => self.spec(n).is_some(),
             _ => self.children(n).into_iter().any(|c| self.active(c)),
         }
     }
@@ -189,8 +193,8 @@ impl<'a> Solver<'a> {
         })
     }
     fn widths(&self, n: Ref<'a>, available: f32) -> Result<(f32, f32, f32), TreeLayoutError> {
-        if let NodeKind::Widget(k) = n.node().kind {
-            let s = self.spec(k).ok_or(TreeLayoutError::InvalidGeometry)?;
+        if let NodeKind::Widget(_) = n.node().kind {
+            let s = self.spec(n).ok_or(TreeLayoutError::InvalidGeometry)?;
             return Ok((
                 s.min_width,
                 s.preferred_width.clamp(s.min_width, s.max_width),
@@ -253,8 +257,8 @@ impl<'a> Solver<'a> {
         Ok((a.max(min), b.max(min), c))
     }
     fn min_height(&self, n: Ref<'a>) -> f32 {
-        if let NodeKind::Widget(k) = n.node().kind {
-            return self.spec(k).map_or(0., |s| s.min_height);
+        if let NodeKind::Widget(_) = n.node().kind {
+            return self.spec(n).map_or(0., |s| s.min_height);
         }
         let (flow, pad, gap) = self.flow(n);
         let cs: Vec<_> = self
@@ -284,8 +288,8 @@ impl<'a> Solver<'a> {
         if width <= 0. || height_budget < 0. {
             return Err(TreeLayoutError::OutOfSpace);
         }
-        if let NodeKind::Widget(k) = n.node().kind {
-            let s = self.spec(k).ok_or(TreeLayoutError::InvalidGeometry)?;
+        if let NodeKind::Widget(_) = n.node().kind {
+            let s = self.spec(n).ok_or(TreeLayoutError::InvalidGeometry)?;
             if width + 0.01 < s.min_width || height_budget + 0.01 < s.min_height {
                 return Err(TreeLayoutError::OutOfSpace);
             }
@@ -302,6 +306,14 @@ impl<'a> Solver<'a> {
                 .max(s.min_height)
                 .min(s.max_height)
                 .min(height_budget);
+            if matches!(
+                s.body.dynamic,
+                crate::card_body::CardBodyDynamic::Image { .. }
+            ) {
+                s.body
+                    .image_geometry(width, height)
+                    .map_err(|_| TreeLayoutError::OutOfSpace)?;
+            }
             return Ok(BoxNode {
                 node: n,
                 rect: Rect {
@@ -478,7 +490,7 @@ impl<'a> Solver<'a> {
                 None,
             ),
             NodeKind::Widget(k) => {
-                let s = self.spec(*k).expect("active widget");
+                let s = self.spec(b.node).expect("active widget");
                 (s.opacity, Some(s.glass), Some(*k))
             }
             _ => (1., None, None),
@@ -522,7 +534,7 @@ pub fn compose_layout(
     }
     let mut kinds = std::collections::HashSet::new();
     for s in specs {
-        if !kinds.insert(s.kind) || s.body.validate().is_err() {
+        if !kinds.insert((s.key.scope, s.key.id)) || s.body.validate().is_err() {
             return Err(TreeLayoutError::Capacity);
         }
         if [
@@ -588,7 +600,10 @@ pub fn compose_layout(
         .iter()
         .find(|n| matches!(n.kind, NodeKind::Widget(WidgetKind::Recess)))
     {
-        if let Some(s) = solver.spec(WidgetKind::Recess) {
+        if let Some(s) = solver.spec(Ref {
+            tree: public,
+            id: n.id,
+        }) {
             let candidates = [
                 Rect {
                     x: work.x,

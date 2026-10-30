@@ -1,0 +1,16 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (/tmp/fc-round18-backend-target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)
+
+running 9 tests
+test backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back ... ok
+test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok
+test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok
+test backend::profile_content::tests::preparation_guard_rechecks_actual_account_epoch_and_fails_closed_on_health_fault ... ok
+test profile_content_cache::tests::a_new_shared_handle_cannot_reset_billing_for_an_old_external_body ... ok
+test profile_content_cache::tests::clearing_index_and_dropping_frame_do_not_release_live_external_arc_charge ... ok
+test profile_content_cache::tests::exact_owner_revision_hash_and_missing_nodes_never_fall_back ... ok
+test profile_content_cache::tests::full_four_mib_budget_counts_retained_bodies_across_many_frames ... ok
+test profile_content_cache::tests::retired_metadata_has_a_hard_cap_even_when_bodies_are_tiny ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 60 filtered out; finished in 36.96s
+

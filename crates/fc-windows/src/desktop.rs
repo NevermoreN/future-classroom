@@ -1,17 +1,19 @@
 //! The resident desktop's UI-thread renderer. No private pump or worker thread.
 //! Native publication always rechecks a real system sample and an exact lease.
+use crate::materials::raster::{RasterCache, RasterFrame};
 use crate::native::{Apartment, Dib};
 use fc_domain::{
     desktop::{ClockMode, ComponentKind, TextTone},
     identity::Rgb,
     ids::{FolderId, MaterialId, ResourceVersionId, Revision, SceneGeneration},
     materials::{MaterialCursor, MaterialSource},
+    profile_content::{ContentSlotKey, MediaReference},
     time::LocalDateTime,
 };
 use fc_ports::{MeasureError, TextMeasure};
 use fc_presentation::{
     card_body::{card_body_spec, CardBodyRole, CARD_BODY_TEXT_INSET, CARD_BODY_TEXT_PADDING},
-    scene::{CardContent, SceneCard, SceneSnapshot},
+    scene::{CardContent, SceneCard, SceneContentIdentity, SceneSnapshot},
     Rect,
 };
 use fc_runtime::health::{EffectIntent, EffectLease, HealthGate};
@@ -21,6 +23,7 @@ use std::{
     marker::PhantomData,
     path::Path,
     rc::Rc,
+    sync::Arc,
 };
 use windows::{
     core::{w, Error, Result},
@@ -38,9 +41,12 @@ use windows::{
 
 #[path = "desktop/backdrop.rs"]
 mod backdrop;
+#[path = "desktop/content.rs"]
+mod content;
 #[path = "desktop/tree.rs"]
 mod tree;
 use backdrop::Backdrop;
+pub use content::ImageRenderRequest;
 pub use tree::DesktopPreview;
 
 pub const DESKTOP_SCOPE: u64 = 0xfc00_0001;
@@ -89,10 +95,18 @@ pub enum PresentOutcome {
     Unchanged,
     Hidden,
     Offscreen,
+    ContentPending,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[allow(clippy::large_enum_variant)] // At most eight owned metadata events, no full scene or file bytes.
 pub enum DesktopEvent {
+    ImagePage {
+        generation: SceneGeneration,
+        slot: ContentSlotKey,
+        content_revision: Revision,
+        view_revision: Revision,
+        page: u8,
+    },
     LessonManage {
         generation: SceneGeneration,
     },
@@ -127,6 +141,10 @@ struct InputContext {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[allow(clippy::large_enum_variant)] // At most two queued actions per input component.
 enum InputAction {
+    ImagePage {
+        identity: SceneContentIdentity,
+        page: u8,
+    },
     LessonManage,
     Page(bool),
     TreePage {
@@ -444,6 +462,7 @@ struct Surface {
     dirty: bool,
 }
 struct Card {
+    image: Option<Arc<RasterFrame>>,
     source: SceneCard,
     tone: TextTone,
     calendar_unverified: bool,
@@ -474,6 +493,7 @@ impl Card {
 }
 
 pub struct DesktopRenderer {
+    raster: Arc<RasterCache>,
     cards: Vec<Card>,
     tree: Option<tree::TreeRenderer>,
     graphics: Graphics,
@@ -625,6 +645,7 @@ impl DesktopRenderer {
         let g = Graphics::new()?;
         let class = Class::new()?;
         Ok(Self {
+            raster: Arc::new(RasterCache::new()),
             cards: Vec::new(),
             tree: None,
             graphics: g,
@@ -637,6 +658,15 @@ impl DesktopRenderer {
             metrics: DesktopMetrics::default(),
             _thread: PhantomData,
         })
+    }
+    /// Changes the physical cache owner only after releasing all old surfaces.
+    pub fn set_raster_cache(&mut self, raster: Arc<RasterCache>) {
+        self.release_surfaces();
+        self.raster = raster;
+    }
+    /// Metadata only; shared workers perform all file verification and WIC work.
+    pub fn image_requests(scene: &SceneSnapshot) -> Result<Vec<ImageRenderRequest>> {
+        content::requests(scene)
     }
     pub fn work_area(&self) -> Result<Rect> {
         work_area()
@@ -720,6 +750,22 @@ impl DesktopRenderer {
             self.hide();
             return Ok(PresentOutcome::Hidden);
         }
+        // Retain these exact reservations through construction. Worker eviction
+        // cannot return bytes while either this guard or a Card owns its Arc.
+        let mut ready = Vec::new();
+        for request in Self::image_requests(scene)? {
+            match self.raster.get(
+                &request.reference,
+                request.max_pixel_width,
+                request.max_pixel_height,
+            )? {
+                Some(frame) => ready.push(frame),
+                None => {
+                    self.release_surfaces();
+                    return Ok(PresentOutcome::ContentPending);
+                }
+            }
+        }
         if scene.paint_tree.is_some() {
             return tree::present(self, scene, now, guard);
         }
@@ -730,6 +776,7 @@ impl DesktopRenderer {
             self.last_scene = None;
         }
         let control_card = scene.lesson_control.as_ref().map(|control| SceneCard {
+            content_identity: None,
             kind: ComponentKind::Schedule,
             rect: control.rect,
             font_dip: 16.,
@@ -811,7 +858,8 @@ impl DesktopRenderer {
                         width: 144.,
                         height: 40.,
                     })
-                } else if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
+                } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
+                    || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
                 {
                     Some(card.rect)
                 } else if matches!(card.content, CardContent::Materials(_)) {
@@ -872,6 +920,7 @@ impl DesktopRenderer {
                     .find(|(kind, offset, _)| *kind == card.kind && *offset == card.page.offset)
                     .map_or(0, |(_, _, page)| (*page).min(body.pages.len() - 1));
                 let mut c = Card {
+                    image: content::frame(&self.raster, card)?,
                     source: card.clone(),
                     tone: scene.text_tone,
                     calendar_unverified: scene.public_calendar_unverified,
@@ -1238,6 +1287,13 @@ fn route_nonpage(generation: SceneGeneration, action: InputAction, output: &mut 
         return;
     }
     match action {
+        InputAction::ImagePage { identity, page } => output.push(DesktopEvent::ImagePage {
+            generation,
+            slot: identity.slot,
+            content_revision: identity.revision,
+            view_revision: identity.view_revision,
+            page,
+        }),
         InputAction::LessonManage => output.push(DesktopEvent::LessonManage { generation }),
         InputAction::MaterialOpen {
             source,
@@ -1267,6 +1323,16 @@ fn route_action(
     action: InputAction,
     output: &mut Vec<DesktopEvent>,
 ) -> Result<()> {
+    if let InputAction::ImagePage { identity, page } = action {
+        if content::valid_page(&card.source, identity, page) {
+            route_nonpage(
+                generation,
+                InputAction::ImagePage { identity, page },
+                output,
+            );
+        }
+        return Ok(());
+    }
     let InputAction::Page(forward) = action else {
         route_nonpage(generation, action, output);
         return Ok(());
@@ -1356,6 +1422,7 @@ fn validate_card(c: &SceneCard) -> Result<()> {
     {
         return Err(Error::from_hresult(E_INVALIDARG));
     }
+    content::validate_identity(c)?;
     Ok(())
 }
 fn scene_allowed(scene: &SceneSnapshot, now: LocalDateTime, g: &PublicationGuard<'_>) -> bool {
@@ -1697,6 +1764,8 @@ fn title(kind: ComponentKind) -> &'static str {
         ComponentKind::Reminder => "今日提醒",
         ComponentKind::DateCountdown => "日期倒计时",
         ComponentKind::Recess => "课间倒计时",
+        ComponentKind::SubjectText => "独立文字",
+        ComponentKind::SubjectImage => "独立图片",
     }
 }
 fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
@@ -1827,6 +1896,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
         target.EndDraw(None, None)?;
     }
     drop(target);
+    content::blend_image(c)?;
     c.surface.dirty = true;
     c.render_pending = false;
     render_inputs(g, c)?;
@@ -2115,12 +2185,16 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
     let material = matches!(c.source.content, CardContent::Materials(_));
     let mut targets = Vec::new();
     let control = matches!(c.source.content, CardContent::LessonControl { .. });
-    let pagination = !control && (!material || c.body.pages.len() > 1);
+    let image = matches!(c.source.content, CardContent::Image(_));
+    let pagination = !control && !image && (!material || c.body.pages.len() > 1);
     let origin = if material {
         (c.source.rect.width - 86., 8.)
     } else {
         (0., 0.)
     };
+    if image {
+        targets.extend(content::image_targets(&c.source)?);
+    }
     if control {
         targets.push(HitTarget {
             rect: Rect {
@@ -2201,7 +2275,7 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
             },
             None,
         )?;
-        if material {
+        if material || image {
             for item in &targets {
                 if !matches!(item.action, InputAction::Page(_)) {
                     let r = item.rect;
@@ -2236,6 +2310,9 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
                 &brush,
                 D2D1_DRAW_TEXT_OPTIONS_NONE,
             );
+        }
+        if image {
+            content::draw_pager(g, &target, &c.source, c.tone)?;
         }
         if pagination {
             let brush =
@@ -2321,8 +2398,10 @@ mod tests {
                 ComponentKind::Date=>CardContent::Text("本地日期 · 合成离屏场景".into()),
                 ComponentKind::Reminder=>CardContent::Text("请按时整理课堂用品。".into()),
                 ComponentKind::DateCountdown=>CardContent::Text("学校活动 · 还有12天".into()),
+                ComponentKind::SubjectText | ComponentKind::SubjectImage => unreachable!("builtin fixture"),
             };
             cards.push(SceneCard {
+                content_identity: None,
                 kind,
                 rect: Rect {
                     x: 20. + (index % 4) as f32 * 250.,

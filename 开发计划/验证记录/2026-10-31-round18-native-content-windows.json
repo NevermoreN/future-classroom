@@ -1,0 +1,55 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "23c2d2f117c91a8b9494d002a988e1f839cc87201acf6989fb93712c5e39328f",
+  "exe": "/tmp/fc-round18-frozen-native/fc_windows-a8df1002bc9e60b7.exe",
+  "tests": [
+    {
+      "filter": "materials::raster::tests::",
+      "exitCode": 0,
+      "binarySha256": "23c2d2f117c91a8b9494d002a988e1f839cc87201acf6989fb93712c5e39328f",
+      "output": [
+        "",
+        "running 5 tests",
+        "test materials::raster::tests::concurrent_reservations_cannot_oversubscribe_or_return_each_others_bytes ... ok",
+        "test materials::raster::tests::containment_handles_extreme_aspects_without_overflow_crop_or_enlargement ... ok",
+        "test materials::raster::tests::physical_frame_keeps_budget_after_cache_clear_until_final_arc_drops ... ok",
+        "test materials::raster::tests::real_wic_decodes_same_pinned_bmp_after_hash_eof_and_keeps_node_identity ... ok",
+        "test materials::raster::tests::verification_metadata_and_cancellation_fail_without_leaking_decode_reservations ... ok",
+        "",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 0.05s",
+        ""
+      ],
+      "passed": 5
+    },
+    {
+      "filter": "desktop::content::tests::",
+      "exitCode": 0,
+      "binarySha256": "23c2d2f117c91a8b9494d002a988e1f839cc87201acf6989fb93712c5e39328f",
+      "output": [
+        "",
+        "running 4 tests",
+        "test desktop::content::tests::actual_hidden_image_waits_for_verified_frame_pages_by_metadata_and_retains_physical_owner ... ok",
+        "test desktop::content::tests::actual_hidden_two_text_nodes_page_only_the_exact_scoped_node ... ok",
+        "test desktop::content::tests::premultiplied_blend_scales_without_touching_padding_or_double_alpha ... ok",
+        "test desktop::content::tests::scoped_requests_reject_owner_revision_and_tree_aliases ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 76 filtered out; finished in 0.22s",
+        ""
+      ],
+      "passed": 4
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

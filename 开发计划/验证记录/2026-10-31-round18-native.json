@@ -1,0 +1,182 @@
+{
+  "status": "PASS",
+  "scope": "PRODUCER_NATIVE_CROSS_BUILD_AND_PREVIEW_SOURCE_ONLY",
+  "createdUtc": "2026-10-30T20:16:05.834484+00:00",
+  "role": "Implementation producer; not an independent security review of own code.",
+  "ownedSources": {
+    "scope": "ROUND18_NATIVE_PREVIEW_OWNED_SOURCE_FREEZE",
+    "createdUtc": "2026-10-30T20:14:23.125743+00:00",
+    "sources": [
+      {
+        "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+        "bytes": 35616,
+        "sha256": "b342e34070573979743c3434ad1fcbf2b3600a62c87c2602674a3570102603c3"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "bytes": 120821,
+        "sha256": "2eeda0d99c15cb44c44f4582acb0b3c7208811c06c2962cac4efbdd268e235d0"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+        "bytes": 18631,
+        "sha256": "a1e660ec54873c1c5b313bf7d08dda8ae5b75d6117a70d98432c253071f3dd46"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/content.rs",
+        "bytes": 9399,
+        "sha256": "f328ea45e91a1282f2b2798ad39eeec10e2db6bb4d56eccc84edd36f600222dc"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/content_tests.rs",
+        "bytes": 13108,
+        "sha256": "061e629d992db8fa57c907e6c0f20ff28a0efbcb3b38d715b2354ac857440992"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/tree.rs",
+        "bytes": 69161,
+        "sha256": "61c976b963f0629032c581ad37e09f1b70b636ca5c3cade8df4c8eaf49e24e51"
+      }
+    ],
+    "aggregateSha256": "87b2900a107fff71b6c3c6984b6f9daee5252f281a965314e2185c4d0b48d7a0",
+    "runtimeTestsExecutedByThisAgent": 0
+  },
+  "artifact": {
+    "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "bytes": 61484787,
+    "sha256": "23c2d2f117c91a8b9494d002a988e1f839cc87201acf6989fb93712c5e39328f",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false
+  },
+  "commands": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo check -p fc-windows --target i686-pc-windows-gnu --lib --tests --locked",
+      "exit": 0,
+      "raw": {
+        "path": "/tmp/fc-round18-native-second-check.log",
+        "bytes": 167,
+        "sha256": "c4ce322da63da227a00aa4a2748cddd770e66226657fca2213f9f895fa4cc49a"
+      }
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo test -p fc-windows --target i686-pc-windows-gnu --lib --no-run --locked --message-format=json",
+      "exit": 0,
+      "raw": {
+        "path": "/tmp/fc-round18-native-final2-no-run.log",
+        "bytes": 168,
+        "sha256": "f181ef407df31d8d6dd51465d2e8248808334205a65f4a8f07f8442e31d30367"
+      },
+      "metadata": {
+        "path": "/tmp/fc-round18-native-final2-test-metadata.jsonl",
+        "bytes": 38130,
+        "sha256": "c1eb9e5eaabf00491036104352b34a13efbca2afbabda7201f7b118aef44451c"
+      },
+      "buildFinishedSuccess": true
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo clippy -p fc-windows --target i686-pc-windows-gnu --lib --tests --locked -- -D warnings",
+      "exit": 0,
+      "raw": {
+        "path": "/tmp/fc-round18-native-final2-clippy.log",
+        "bytes": 167,
+        "sha256": "4c635a0a382df2a4b0e620138862919d22483c07824cbbf89f986bc284533cd9"
+      }
+    },
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-native-target cargo check -p fc-bootstrap --target i686-pc-windows-gnu --bins --tests --locked",
+      "exit": 101,
+      "raw": {
+        "path": "/tmp/fc-round18-native-preview-check.log",
+        "bytes": 5900,
+        "sha256": "500c49292d9897b54b5d7cb8f91b21fe5d8ea3f9fed20307eb1e0fe9ea251715"
+      },
+      "classification": "Root integration still pending: DesktopEvent ImagePage match; controller fixture content_identity fields; display_editor new ComponentKind arms. No profiles_preview.rs diagnostic in this attempt. Package check is NOT a pass."
+    }
+  ],
+  "api": {
+    "renderer": [
+      "set_raster_cache(Arc<RasterCache>) releases old surfaces before replacing cache",
+      "image_requests(&SceneSnapshot)->Result<Vec<ImageRenderRequest>>",
+      "PresentOutcome::ContentPending hides and releases previous surfaces and inputs on any missing frame",
+      "probe_image_page(ContentSlotKey,u8) is hidden-owned-HWND only"
+    ],
+    "requestFields": [
+      "identity:SceneContentIdentity",
+      "reference:MediaReference",
+      "max_pixel_width:u32",
+      "max_pixel_height:u32"
+    ],
+    "event": "DesktopEvent::ImagePage { generation, slot, content_revision, view_revision, page }",
+    "preview": [
+      "render_with_content(identity,public,subject,sequence,now,contents,text,raster)",
+      "image_requests_with_content(identity,public,subject,sequence,now,contents,text)",
+      "Both use prepare_scene for identical DWrite/layout/image geometry. Empty content nodes are omitted. Legacy synthetic builtin-only preview rejects independent nodes without explicit cache inputs."
+    ]
+  },
+  "implementedBoundaries": [
+    "Content identity validates exact scoped node, owner, nonzero content revision, monotonic view revision; tree node lookup is never by kind for independent content.",
+    "Text body cache is exact slot/revision/hash provider; preview checks actual scalar/UTF8 lengths and allowed control characters. Hash computation remains trusted worker responsibility.",
+    "Image viewport/Contain/pager derive solely from shared CardBodySpec::image_geometry; pager targets are actual 44DIP bounds.",
+    "Premultiplied source-over CPU blend runs after D2D EndDraw and target drop directly in the existing charged card DIB. No image pixel Vec or ID2DBitmap is allocated by UI.",
+    "Card holds Arc<RasterFrame>; root cache reservation continues charging after cache clear until final renderer owner drops.",
+    "All existing surface/input/root/scratch charges remain in 16MiB DIB path; frames are separately charged by shared RasterCache32MiB.",
+    "Click sends original scoped slot/content/view/generation/page; native does not commit or change persisted image page. Old view queues are dropped by scene replacement; zero-opacity groups expose no targets.",
+    "Extreme valid aspect ratio receives conservative minimum physical-pixel coverage while preserving the shared logical Contain geometry.",
+    "Preview validates public/subject structure before recursive node enumeration and exports only own bounded hidden surfaces."
+  ],
+  "newTests": {
+    "nativeCompiledNotExecutedByThisAgent": [
+      "desktop::content::tests::premultiplied_blend_scales_without_touching_padding_or_double_alpha",
+      "desktop::content::tests::scoped_requests_reject_owner_revision_and_tree_aliases",
+      "desktop::content::tests::actual_hidden_two_text_nodes_page_only_the_exact_scoped_node",
+      "desktop::content::tests::actual_hidden_image_waits_for_verified_frame_pages_by_metadata_and_retains_physical_owner"
+    ],
+    "previewSourceIntegratedNotExecutedByThisAgent": [
+      "application::profiles_preview::tests::real_content_preview_uses_exact_slots_and_refuses_missing_or_wrong_cache",
+      "application::profiles_preview::tests::actual_hidden_preview_renders_exact_published_text_without_placeholder"
+    ]
+  },
+  "history": [
+    {
+      "kind": "strictClippyFailure",
+      "raw": {
+        "path": "/tmp/fc-round18-native-clippy.log",
+        "bytes": 2608,
+        "sha256": "67e9a04c2086147e13682572eb600d2b65fae10f62aa1e29fa5aecba91dd961b"
+      },
+      "cause": "Two adjacent full-input branches returned identical blocks. Combined image/material conditions; no assertion relaxed."
+    },
+    {
+      "kind": "preFinalImagePixelBoundary",
+      "artifact": {
+        "path": "/tmp/fc-round18-native-artifact-before-thin-pixel-fix.json",
+        "bytes": 2119,
+        "sha256": "fbb666e445578dd49405c4b4349cf8c8497f12c1c5d51991511375f6cd596afd"
+      },
+      "sourceManifest": {
+        "path": "/tmp/fc-round18-native-owned-source-before-thin-pixel-fix.json",
+        "bytes": 1334,
+        "sha256": "d1beb93cad6cc454a2fdd34d5dca9f574d6f9b235a08a09777345e9e439797fa"
+      },
+      "reason": "Read-only final pass found valid extremely thin Contain rect could round to zero pixels. Corrected pixel coverage and added assertion before final2 build."
+    }
+  ],
+  "limits": [
+    "0 runtime product tests executed by this agent; no SSH, Windows process, scheduled task, foreground or input operation. Native and preview actual execution belongs to root unified runner.",
+    "This report does not claim successful whole-bootstrap build, full round integration, process-memory/runtime measurements, or actual Windows7/10/11 compatibility.",
+    "Preview empty/draft nodes have no fabricated media reference or publication revision; caller must clearly label unpublished content.",
+    "No source modifications outside listed owned files; no dependency version/edge changes."
+  ],
+  "cleanup": {
+    "remoteActions": 0,
+    "remoteResidue": 0,
+    "localTarget": "/tmp/fc-round18-native-target retained for root unified cleanup",
+    "allReadsComplete": false
+  }
+}

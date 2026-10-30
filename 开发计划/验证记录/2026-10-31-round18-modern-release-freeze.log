@@ -1,0 +1,22 @@
+{
+  "scope": "Release build inputs; documentation and separate cfg(test) flow test module excluded; build only, not formal MSVC/platform certification",
+  "target": "i686-pc-windows-gnu",
+  "command": [
+    "cargo",
+    "build",
+    "-p",
+    "fc-bootstrap",
+    "--release",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--locked",
+    "--message-format=json"
+  ],
+  "inputsUnchangedDuringBuild": true,
+  "exitCode": 0,
+  "artifact": {
+    "path": "/tmp/fc-round18-frozen-modern-release/fc-bootstrap.exe",
+    "sha256": "ae85e35644922d543897debe9dad1c6f794a58ccca5d027a16fcd8e9f332da7d",
+    "bytes": 9336767
+  }
+}

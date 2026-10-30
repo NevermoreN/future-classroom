@@ -1,0 +1,17 @@
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.85s
+     Running unittests src/lib.rs (/tmp/fc-round18-backend-target/debug/deps/fc_runtime-541c4b0a42f17d87)
+
+running 9 tests
+test worker::tests::completed_but_unobserved_output_cannot_cross_cancel_or_stop ... ok
+test worker::tests::cancellation_and_stop_do_not_free_running_slots_or_start_replacements ... ok
+test worker::tests::pool_drop_signals_stop_and_detaches_instead_of_joining_event_loop ... ok
+test worker::tests::completion_notification_and_ticket_polling_are_nonblocking_and_one_shot ... ok
+test worker::tests::task_panic_faults_entire_pool_and_suppresses_other_live_results ... ok
+test worker::tests::descriptor_budget_uses_capacity_and_rejections_return_owned_secrets ... ok
+test worker::tests::descriptor_and_notification_panics_fault_closed_without_unwinding_caller ... ok
+test worker::tests::two_physical_workers_are_shared_by_mixed_jobs_and_eight_more_may_queue ... ok
+test worker::tests::queued_cancel_and_expired_deadline_skip_user_code_and_post_run_cancel_discards_output ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.02s
+

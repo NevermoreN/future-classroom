@@ -1,0 +1,73 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "679e0b1b24d466919d4e3b8d44879f86588b26d11537c1c3514c0f67c2a44e49",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/fc_materials-2221de66f2e97130.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "::",
+      "exitCode": 0,
+      "binarySha256": "679e0b1b24d466919d4e3b8d44879f86588b26d11537c1c3514c0f67c2a44e49",
+      "output": [
+        "",
+        "running 39 tests",
+        "test office::tests::actual_xml_attribute_text_depth_and_global_event_limits_are_enforced ... ok",
+        "test office::tests::cancellation_actual_cpu_and_exclusive_slot_release_on_every_error ... ok",
+        "test office::tests::dtd_external_entities_unknown_entities_and_namespace_forgery_fail ... ok",
+        "test office::tests::forged_expanded_size_cannot_hide_real_deflate_output ... ok",
+        "test office::tests::malformed_xml_names_characters_and_declarations_are_not_accepted_as_xml ... ok",
+        "test office::tests::real_stored_deflated_and_descriptor_packages_all_office_kinds ... ok",
+        "test office::tests::relationships_resolve_inside_existing_parts_and_block_external_embeds ... ok",
+        "test office::tests::traversal_case_aliases_windows_devices_and_executables_are_rejected ... ok",
+        "test office::tests::uppercase_xml_extensions_cannot_bypass_the_xml_scanner ... ok",
+        "test office::tests::utf16_main_and_namespace_aliases_are_decoded_before_limits ... ok",
+        "test office::tests::zip_header_corruption_crc_symlink_encryption_overlap_and_truncation_fail ... ok",
+        "test pdf_validation::tests::active_content_is_checked_in_structure_not_compressed_payload_bytes ... ok",
+        "test pdf_validation::tests::broken_xref_page_count_duplicate_pages_and_recovery_are_not_success ... ok",
+        "test pdf_validation::tests::canceled_control_stops_before_parser_loading ... ok",
+        "test pdf_validation::tests::explicit_object_page_and_stream_budgets_fail_without_truncation ... ok",
+        "test pdf_validation::tests::genuine_classic_pdf_and_literal_encrypt_text_are_accepted ... ok",
+        "test pdf_validation::tests::hybrid_xref_dag_is_supported_and_supplement_encryption_cannot_hide ... ok",
+        "test pdf_validation::tests::trailer_encryption_keys_including_hex_and_previous_revision_are_rejected ... ok",
+        "test pdf_validation::tests::unknown_filters_and_stream_length_recovery_are_rejected ... ok",
+        "test pdf_validation::tests::xref_stream_and_compressed_page_object_are_actually_parsed ... ok",
+        "test tests::actual_output_not_compressed_size_counts_toward_budget ... ok",
+        "test tests::archive_failure_cannot_be_cleared_by_starting_another_entry ... ok",
+        "test tests::cancellation_between_partial_writes_stops_the_copy ... ok",
+        "test tests::copy_limits_and_cancellation_preserve_destination_budget ... ok",
+        "test tests::deadline_is_checked_again_after_a_slow_read_before_writing ... ok",
+        "test tests::exact_voice_limits_and_truncated_or_extended_body ... ok",
+        "test tests::legacy_office_is_not_enabled_by_filename_alone ... ok",
+        "test tests::names_never_become_shell_paths ... ok",
+        "test validation::tests::binary_controls_bad_sequences_and_truncated_utf16_fail_while_long_originals_are_allowed ... ok",
+        "test validation::tests::bmp_and_jpeg_metadata_reject_forged_geometry_and_lengths ... ok",
+        "test validation::tests::cancellation_cpu_limit_and_cpu_rollback_fail_before_unbounded_work ... ok",
+        "test validation::tests::content_txt_counts_scalars_and_bytes_without_restricting_material_originals ... ok",
+        "test validation::tests::content_txt_preserves_unicode_and_formatting_across_every_decoder_boundary ... ok",
+        "test validation::tests::content_txt_rechecks_cancellation_while_streaming_and_rejects_cpu_exhaustion ... ok",
+        "test validation::tests::content_txt_rejects_invalid_unicode_and_binary_instead_of_lossy_decoding ... ok",
+        "test validation::tests::hash_file_is_streaming_and_does_not_trigger_text_or_pdf_parsing ... ok",
+        "test validation::tests::image_header_reports_dimensions_and_requires_native_full_decode ... ok",
+        "test validation::tests::pdf_is_never_accepted_by_magic_and_unsafe_names_are_rejected ... ok",
+        "test validation::tests::utf8_utf16_boms_and_surrogates_are_validated_across_every_byte_and_block_boundary ... ok",
+        "",
+        "test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.64s",
+        ""
+      ],
+      "passed": 39
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

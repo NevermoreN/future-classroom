@@ -1,0 +1,28 @@
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+warning: function `render_with_content` is never used
+  --> crates/fc-bootstrap/src/application/profiles_preview.rs:67:15
+   |
+67 | pub(super) fn render_with_content(
+   |               ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `image_requests_with_content` is never used
+   --> crates/fc-bootstrap/src/application/profiles_preview.rs:155:15
+    |
+155 | pub(super) fn image_requests_with_content(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `fc-bootstrap` (bin "fc-bootstrap") generated 2 warnings
+warning: function `image_requests_with_content` is never used
+   --> crates/fc-bootstrap/src/application/profiles_preview.rs:155:15
+    |
+155 | pub(super) fn image_requests_with_content(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fc-bootstrap` (bin "fc-bootstrap" test) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.26s

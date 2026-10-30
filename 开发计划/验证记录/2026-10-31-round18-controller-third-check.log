@@ -1,0 +1,23 @@
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error[E0004]: non-exhaustive patterns: `Ok(application::Outcome::ProfileContent(_))` not covered
+    --> crates/fc-bootstrap/src/application.rs:2881:19
+     |
+2881 |             match outcome {
+     |                   ^^^^^^^ pattern `Ok(application::Outcome::ProfileContent(_))` not covered
+     |
+note: `std::result::Result<application::Outcome, application::Failure>` defined here
+    --> /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\core\src\result.rs:557:0
+    ::: /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\core\src\result.rs:561:4
+     |
+     = note: not covered
+     = note: the matched value is of type `std::result::Result<application::Outcome, application::Failure>`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+     |
+3098 ~                 },
+3099 +                 Ok(application::Outcome::ProfileContent(_)) => todo!()
+     |
+
+For more information about this error, try `rustc --explain E0004`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 1 previous error

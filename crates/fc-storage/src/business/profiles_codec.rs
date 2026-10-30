@@ -249,17 +249,28 @@ fn read_tree(v: &Value) -> Result<LayoutTree, StorageError> {
     Ok(t)
 }
 pub(super) fn public(v: &LayoutDocument) -> Value {
-    json!({"format":1,"revision":v.revision.get(),"node_high_water":v.node_id_high_water,"tree":tree(&v.tree)})
+    let mut o = json!({"format":1,"revision":v.revision.get(),"node_high_water":v.node_id_high_water,"tree":tree(&v.tree)});
+    add_styles(&mut o, &v.content_styles);
+    o
 }
 pub(super) fn read_public(v: &Value) -> Result<LayoutDocument, StorageError> {
-    object_fields(v, &["format", "revision", "node_high_water", "tree"])?;
-    if number(v, "format")? != 1 {
+    let mut fields = vec!["format", "revision", "node_high_water", "tree"];
+    if number(v, "format")? == 2 {
+        fields.push("content_styles");
+    }
+    object_fields(v, &fields)?;
+    if !matches!(number(v, "format")?, 1 | 2) {
         return Err(StorageError::Database);
     }
     let d = LayoutDocument {
         revision: Revision::new(number(v, "revision")?),
         node_id_high_water: number(v, "node_high_water")?,
         tree: read_tree(&v["tree"])?,
+        content_styles: if number(v, "format")? == 2 {
+            read_styles(&v["content_styles"])?
+        } else {
+            Vec::new()
+        },
     };
     d.validate_structure().map_err(|_| StorageError::Database)?;
     if d.node_id_high_water < d.tree.maximum_id()
@@ -297,25 +308,28 @@ fn read_component(v: &Value) -> Result<fc_domain::desktop::ComponentSettings, St
     })
 }
 pub(super) fn subject(v: &SubjectProfileDocument) -> Value {
-    json!({"format":1,"id":v.id.get(),"key":key(v.key),"enabled":v.enabled,"revision":v.revision.get(),"layout_revision":v.layout_revision.get(),"node_high_water":v.node_id_high_water,"tree":tree(&v.tree),"folder":v.folder_id.map(|f|f.get()),"materials":{"component":component(&v.materials.component),"visible_rows":v.materials.visible_rows,"row_gap":v.materials.row_gap_dip}})
+    let mut o = json!({"format":1,"id":v.id.get(),"key":key(v.key),"enabled":v.enabled,"revision":v.revision.get(),"layout_revision":v.layout_revision.get(),"node_high_water":v.node_id_high_water,"tree":tree(&v.tree),"folder":v.folder_id.map(|f|f.get()),"materials":{"component":component(&v.materials.component),"visible_rows":v.materials.visible_rows,"row_gap":v.materials.row_gap_dip}});
+    add_styles(&mut o, &v.content_styles);
+    o
 }
 pub(super) fn read_subject(v: &Value) -> Result<SubjectProfileDocument, StorageError> {
-    object_fields(
-        v,
-        &[
-            "format",
-            "id",
-            "key",
-            "enabled",
-            "revision",
-            "layout_revision",
-            "node_high_water",
-            "tree",
-            "folder",
-            "materials",
-        ],
-    )?;
-    if number(v, "format")? != 1 {
+    let mut fields = vec![
+        "format",
+        "id",
+        "key",
+        "enabled",
+        "revision",
+        "layout_revision",
+        "node_high_water",
+        "tree",
+        "folder",
+        "materials",
+    ];
+    if number(v, "format")? == 2 {
+        fields.push("content_styles");
+    }
+    object_fields(v, &fields)?;
+    if !matches!(number(v, "format")?, 1 | 2) {
         return Err(StorageError::Database);
     }
     let m = &v["materials"];
@@ -328,6 +342,11 @@ pub(super) fn read_subject(v: &Value) -> Result<SubjectProfileDocument, StorageE
         layout_revision: Revision::new(number(v, "layout_revision")?),
         node_id_high_water: number(v, "node_high_water")?,
         tree: read_tree(&v["tree"])?,
+        content_styles: if number(v, "format")? == 2 {
+            read_styles(&v["content_styles"])?
+        } else {
+            Vec::new()
+        },
         folder_id: if v["folder"].is_null() {
             None
         } else {
@@ -375,4 +394,38 @@ pub(super) fn read_selection(v: &Value) -> Result<ProfileSelectionSnapshot, Stor
         },
         reason,
     })
+}
+
+fn add_styles(v: &mut Value, styles: &[fc_domain::profile_content::ContentNodeStyle]) {
+    if !styles.is_empty() {
+        v["format"] = json!(2);
+        v["content_styles"]=json!(styles.iter().map(|s|json!({"node":s.node_id.get(),"kind":match s.component.kind{fc_domain::desktop::ComponentKind::SubjectText=>"text",_=>"image"},"component":component(&s.component),"fit":"contain"})).collect::<Vec<_>>());
+    }
+}
+fn read_styles(
+    v: &Value,
+) -> Result<Vec<fc_domain::profile_content::ContentNodeStyle>, StorageError> {
+    let a = v.as_array().ok_or(StorageError::Database)?;
+    if a.is_empty() || a.len() > MAX_LAYOUT_NODES {
+        return Err(StorageError::Database);
+    }
+    a.iter()
+        .map(|v| {
+            object_fields(v, &["node", "kind", "component", "fit"])?;
+            let mut c = read_component(&v["component"])?;
+            c.kind = match text(v, "kind")?.as_str() {
+                "text" => fc_domain::desktop::ComponentKind::SubjectText,
+                "image" => fc_domain::desktop::ComponentKind::SubjectImage,
+                _ => return Err(StorageError::Database),
+            };
+            if text(v, "fit")? != "contain" {
+                return Err(StorageError::Database);
+            }
+            Ok(fc_domain::profile_content::ContentNodeStyle {
+                node_id: id(v, "node", LayoutNodeId::new)?,
+                component: c,
+                image_fit: fc_domain::profile_content::ImageFit::Contain,
+            })
+        })
+        .collect()
 }

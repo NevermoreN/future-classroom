@@ -29,6 +29,7 @@ ids!(
     CommandId,
     MaterialId,
     ResourceVersionId,
+    MediaVersionId,
     ProfileId,
     LayoutNodeId
 );

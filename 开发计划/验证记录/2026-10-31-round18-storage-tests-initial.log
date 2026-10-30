@@ -1,0 +1,98 @@
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling zerocopy v0.8.63
+   Compiling once_cell v1.21.4
+   Compiling serde_core v1.0.228
+   Compiling libsqlite3-sys v0.30.1
+   Compiling fallible-iterator v0.3.0
+   Compiling bitflags v2.13.2
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling ryu v1.0.23
+   Compiling smallvec v1.16.4
+   Compiling cpufeatures v0.2.17
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.145
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling ahash v0.8.12
+   Compiling hashbrown v0.14.5
+   Compiling hashlink v0.9.1
+   Compiling rusqlite v0.32.1
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.54s
+     Running unittests src/lib.rs (/tmp/fc-round18-storage-target/debug/deps/fc_storage-50351b439967861c)
+
+running 8 tests
+test business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts ... FAILED
+test business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize ... FAILED
+
+failures:
+
+---- business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish' (22793) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare' (22790) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc' (22792) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup' (22789) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish' (22795) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version' (22791) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts' (22796) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+---- business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize stdout ----
+
+thread 'business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize' (22794) panicked at crates/fc-storage/src/business/profiles/../tests/profile_content.rs:46:10:
+called `Result::unwrap()` on an `Err` value: Domain(Layout(TooManyTopLevel))
+
+
+failures:
+    business::profiles::tests::profile_content_tests::profile_content_corrupt_version_hash_and_declared_missing_head_fail_startup
+    business::profiles::tests::profile_content_tests::profile_content_durable_latest_intent_survives_failed_newer_prepare
+    business::profiles::tests::profile_content_tests::profile_content_hydration_rejects_foreign_scope_stale_global_and_previous_version
+    business::profiles::tests::profile_content_tests::profile_content_media_page_default_deny_exact_guard_and_ref_safe_gc
+    business::profiles::tests::profile_content_tests::profile_content_receipts_bind_actor_intent_actual_bytes_and_never_double_publish
+    business::profiles::tests::profile_content_tests::profile_content_remove_node_atomically_cancels_and_drops_refs_before_physical_finalize
+    business::profiles::tests::profile_content_tests::profile_content_teacher_web_and_exact_precommit_lock_cannot_publish
+    business::profiles::tests::profile_content_tests::profile_content_versions_full_limit_clear_undo_restart_and_light_facts
+
+test result: FAILED. 0 passed; 8 failed; 0 ignored; 0 measured; 53 filtered out; finished in 0.54s
+
+error: test failed, to rerun pass `-p fc-storage --lib`

@@ -109,6 +109,7 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
             clock_rollback: captured_at.date < date_watermark,
             schedule: schedule_document,
             lesson_context,
+            profile_contents: super::profile_content::snapshots(d, &profiles)?,
             profiles,
             display: display::load(d, &identity)?,
             identity,

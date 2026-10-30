@@ -1,0 +1,144 @@
+{
+  "round": 18,
+  "scope": "Author-owned Windows content-flow fixture correction; no production source changes",
+  "created_at_utc": "2026-10-30T21:20:32.638847+00:00",
+  "source_frozen": true,
+  "source": {
+    "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+    "bytes": 50786,
+    "sha256": "ea9007e00f498ecd3d4d14c785b301884ec77b6a68eb9945063cfe0d062eb598"
+  },
+  "previous_source": {
+    "path": "/tmp/fc-round18-content-flow-tests-before-removed-accounting-correction.rs",
+    "bytes": 46217,
+    "sha256": "8823c04d64b93833dff1e0f554e4263ff9a788372d4a2fbf0dcacba51f8c5269"
+  },
+  "patch": {
+    "path": "/tmp/fc-round18-content-flow-removed-accounting-fixture.patch",
+    "bytes": 7990,
+    "sha256": "3897c956392842bb545c98d49d36db56545c18100355cc095a2e01188bd5be53"
+  },
+  "independent_audit": false,
+  "triggering_evidence": {
+    "report": {
+      "path": "/tmp/fc-round18-application-bin-verified-windows.json",
+      "bytes": 22901,
+      "sha256": "f873bba1897f28eca7f5bf97fb6c8068cf125cfd2d4c587e08b01d3efafcae70"
+    },
+    "physical_result": {
+      "platform": "Authorized Win11 WOW64 test host",
+      "bin_total": 96,
+      "passed": 95,
+      "failed": 1,
+      "failing_test": "application::profile_content_flow::tests::real_worker_wic_fifty_pages_existing_reorder_partial_failure_and_physical_settlement",
+      "original_assertion_line": 910,
+      "exe_sha256": "3058d34f3266e2ed6b22e8f11eb12c6d2acf58c92377a0d12689e971e5b8548b"
+    },
+    "preservation": "Original 95/1 report and original producer /tmp/fc-round18-content-flow.json unchanged. New checks do not relabel old failure as PASS."
+  },
+  "diagnosis": {
+    "confirmed_fixture_conflict": [
+      "MediaEntry.charged_bytes is the retained original reservation size, not a zeroed balance. Strict entry decoder rejects zero for every state, including Removed.",
+      "MediaOp::Finalize atomically marks Removed and subtracts the retained size from catalog.bytes; it deliberately does not mutate per-entry charged_bytes.",
+      "Therefore the previous Removed && charged_bytes == 0 conjunction was impossible even when physical deletion and refund succeeded. Four later zero-size assertions had the same conflict."
+    ],
+    "source_references": [
+      {
+        "path": "crates/fc-storage/src/business/profile_content_media.rs",
+        "sections": [
+          "entry strict decoder",
+          "MediaOp::Settle",
+          "MediaOp::Retire",
+          "MediaOp::Finalize",
+          "startup_check"
+        ]
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/profile_content_flow.rs",
+        "sections": [
+          "ContentJob::run physical preparation scope then settle",
+          "collect_garbage_while opportunistic one-page scan",
+          "Work::MaintainProfileContent"
+        ]
+      },
+      {
+        "path": "开发计划/19-独立文字与分页图片内容.md",
+        "section": "回收与重启"
+      }
+    ],
+    "unknown_original_runtime_states": "The original failed EXE printed no registry/file state. This report cannot prove whether both records were already Removed in that run, nor exclude additional runtime cleanup problems.",
+    "contract": "Publish cleanup is opportunistic/nonblocking. After the actual preparation owner exits, settlement must leave no Reserved owner. Unreferenced/Retiring resources remain fully charged until physical deletion followed by Finalize. No immediate refund is guaranteed at failed Publish completion.",
+    "no_external_cause_claim": "No evidence attributes the original failure to antivirus, external readers, scheduling, a production leak, or a successful immediate refund."
+  },
+  "fixture_changes": [
+    "Command206 now logs real registry metadata and matching physical inventory after the real worker reply and after each maintenance pass; no user paths/content/credentials are printed.",
+    "Verify exact two reservations, owning slot, refs=0 and exact original byte sizes. Reserved and Referenced are rejected after failed preparation, rather than being tolerated as cleanup pending.",
+    "When Unreferenced/Retiring remains, explicitly retain its full charge and drive at most four real Work::MaintainProfileContent jobs using the same deployment-owned persistent GcCursor. Every final record must be Removed; no permanent pending or missing physical cleanup is accepted.",
+    "assert_removed checks Removed, refs=0, retained reservation size and no original/quarantine file for that ID. Replaces all five incorrect zero-field assertions.",
+    "Failed publish and cleanup must preserve both current and previous payloads/content revision; the persisted Begin sequence advances and maintenance cannot regress it.",
+    "Add final real Work::Shutdown/Work::Open/DPAPI SQLite reopen. Existing storage startup_check verifies catalog.bytes equals the sum of original reservation sizes for all non-Removed entries, while original/current/previous resources and content are revalidated. Then recheck all Removed IDs are physically absent and both image nodes retain their exact current content."
+  ],
+  "checks": [
+    {
+      "name": "cross_bin_no_run",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo test -p fc-bootstrap --bin fc-bootstrap --target i686-pc-windows-gnu --locked --no-run",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-removed-accounting-no-run.log",
+        "bytes": 406,
+        "sha256": "eb3dc571e63af587790601f5b99b94428187b558fb2b832c8fe826513ac34ccc"
+      }
+    },
+    {
+      "name": "strict_clippy",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo clippy -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-removed-accounting-clippy.log",
+        "bytes": 267,
+        "sha256": "0adfbc8ef7a0d4059045c14d361c610d566725ae326662b141b05db525e4efd3"
+      }
+    },
+    {
+      "name": "owned_format",
+      "command": "rustfmt --edition 2021 --config skip_children=true --check crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-removed-accounting-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-removed-accounting-diff-check.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "new_cross_linked_executable": {
+    "path": "/tmp/fc-round18-content-flow-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+    "bytes": 146058139,
+    "sha256": "14eb4bbaf58a017243bf4d66f9c838521d9732d4dc62990c96f452f53a6ab9e8"
+  },
+  "test_counts": {
+    "existing_flow_cases_compiled": 2,
+    "new_cases": 0,
+    "host_product_runs": 0,
+    "windows_runs_by_this_agent": 0,
+    "ssh_runs": 0,
+    "new_physical_passes": null
+  },
+  "pending": "Parent will execute the corrected image flow on the authorized Windows host and retain exact state output and independent EXE binding. Cross link/Clippy are not runtime/WIC/refund/cleanup evidence.",
+  "limits": [
+    "No Win7 or Win10 runtime evidence added",
+    "No claim of full P4/project acceptance",
+    "No production GC/storage/backend/API change",
+    "No workspace-wide test or remote execution by this producer",
+    "Owned build target retained for parent artifact collection and final unified cleanup"
+  ]
+}

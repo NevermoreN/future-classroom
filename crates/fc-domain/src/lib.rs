@@ -9,6 +9,7 @@ pub mod layout;
 pub mod lesson_context;
 pub mod materials;
 pub mod profile;
+pub mod profile_content;
 pub mod schedule;
 pub mod schedule_document;
 pub mod time;

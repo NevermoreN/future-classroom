@@ -1,0 +1,289 @@
+{
+  "round": 18,
+  "scope": "Author-owned52-step actual hidden native independent-content UI probe; newfile only",
+  "frozen_at_utc": "2026-10-30T20:54:49.238203+00:00",
+  "source": {
+    "path": "crates/fc-bootstrap/src/application/profile_content_probe.rs",
+    "bytes": 22128,
+    "sha256": "0613df63600cae84ad68cdbb97a803b37b420bbbae0fe910f0a6dbc04517d73f"
+  },
+  "api": [
+    "STEPS:usize=52",
+    "State:Default; cleanup synthetic source files on Drop",
+    "run(&mut App,&mut State,&mut usize)->Result<bool,String>; one step per pendingNone, true only at completion",
+    "observe_preview(&profile_flow::Preview); parent calls only offscreen probe after fresh exactGlobal/source check and before actual renderer"
+  ],
+  "preconditions": [
+    "Existing profiles39-step probe endedHome with localGlobal, clean drafts, previewclosed.",
+    "Existing protected unique FutureClassroom-Test-* deployment, currentDPAPI/backend/sharedworker; no extra KDF.",
+    "Parent keeps existing180sec total cap and serializes stage advancement after ordinary pendingNone."
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "name": "open-display"
+    },
+    {
+      "index": 1,
+      "name": "open-profiles"
+    },
+    {
+      "index": 2,
+      "name": "read-public"
+    },
+    {
+      "index": 3,
+      "name": "capture-original-select-outlet"
+    },
+    {
+      "index": 4,
+      "name": "add-content-group"
+    },
+    {
+      "index": 5,
+      "name": "configure-content-group"
+    },
+    {
+      "index": 6,
+      "name": "select-existing-materials"
+    },
+    {
+      "index": 7,
+      "name": "open-materials-operations"
+    },
+    {
+      "index": 8,
+      "name": "reparent-materials"
+    },
+    {
+      "index": 9,
+      "name": "return-tree"
+    },
+    {
+      "index": 10,
+      "name": "select-content-group"
+    },
+    {
+      "index": 11,
+      "name": "open-group-appearance"
+    },
+    {
+      "index": 12,
+      "name": "enable-group-glass"
+    },
+    {
+      "index": 13,
+      "name": "add-text-node"
+    },
+    {
+      "index": 14,
+      "name": "open-text-style"
+    },
+    {
+      "index": 15,
+      "name": "bound-text-viewport"
+    },
+    {
+      "index": 16,
+      "name": "add-image-node"
+    },
+    {
+      "index": 17,
+      "name": "open-image-style"
+    },
+    {
+      "index": 18,
+      "name": "bound-image-viewport"
+    },
+    {
+      "index": 19,
+      "name": "review-layout"
+    },
+    {
+      "index": 20,
+      "name": "save-clean-layout"
+    },
+    {
+      "index": 21,
+      "name": "verify-layout-save"
+    },
+    {
+      "index": 22,
+      "name": "reread-public"
+    },
+    {
+      "index": 23,
+      "name": "verify-node-styles-select-text"
+    },
+    {
+      "index": 24,
+      "name": "manage-saved-text"
+    },
+    {
+      "index": 25,
+      "name": "native-10000-emoji-review"
+    },
+    {
+      "index": 26,
+      "name": "publish-text"
+    },
+    {
+      "index": 27,
+      "name": "verify-text-and-reread"
+    },
+    {
+      "index": 28,
+      "name": "verify-reread-clear-review"
+    },
+    {
+      "index": 29,
+      "name": "clear-text"
+    },
+    {
+      "index": 30,
+      "name": "verify-empty-undo-review"
+    },
+    {
+      "index": 31,
+      "name": "undo-text"
+    },
+    {
+      "index": 32,
+      "name": "verify-undo-return-tree"
+    },
+    {
+      "index": 33,
+      "name": "select-image"
+    },
+    {
+      "index": 34,
+      "name": "manage-saved-images"
+    },
+    {
+      "index": 35,
+      "name": "select-two-owned-bmps"
+    },
+    {
+      "index": 36,
+      "name": "review-two-images"
+    },
+    {
+      "index": 37,
+      "name": "publish-images"
+    },
+    {
+      "index": 38,
+      "name": "verify-images-select-second"
+    },
+    {
+      "index": 39,
+      "name": "move-second-page-first"
+    },
+    {
+      "index": 40,
+      "name": "review-reordered-images"
+    },
+    {
+      "index": 41,
+      "name": "publish-reordered-images"
+    },
+    {
+      "index": 42,
+      "name": "verify-reorder-and-reread"
+    },
+    {
+      "index": 43,
+      "name": "verify-image-reread-return-tree"
+    },
+    {
+      "index": 44,
+      "name": "request-actual-content-preview"
+    },
+    {
+      "index": 45,
+      "name": "verify-real-arcs-native-preview-and-restore"
+    },
+    {
+      "index": 46,
+      "name": "verify-restoration-save"
+    },
+    {
+      "index": 47,
+      "name": "reread-restored-public"
+    },
+    {
+      "index": 48,
+      "name": "verify-restored-public"
+    },
+    {
+      "index": 49,
+      "name": "return-list"
+    },
+    {
+      "index": 50,
+      "name": "return-home"
+    },
+    {
+      "index": 51,
+      "name": "verify-home-cleanup"
+    }
+  ],
+  "assertions": [
+    "Nativeprobe_submit20000UTF16Edit→10000emoji/40000UTF8→ordinaryContentJob actualSQLite; readback,Clear,Undo3revisions.",
+    "Existing publicMaterials stableID reparented under newglass group, Text/Image added with stable scoped styles and112DIPmaxheight, stays8topglass budget; savedclean then reread.",
+    "Two exclusivelycreated red4x2/green2x1 syntheticBMPs inject only isolated trustedpicker selection; nativeReview/Confirm still runs actualreserve/copy/hash/WIC/SHA/SQLite; imageExisting reorder and reread CAS.",
+    "Actual workerPreview exact textslot/revision/SHA returnsArc with10000emoji; imageArc matches exactreorderedfirstMediaRef2x1 and8actualallgreenopaqueBGRA bytes. Witness retainsbool/seq only; nonwaitingtry_lock.",
+    "Samepreviewsequence plus nativepreview_active required after actualhiddenrender/export/set_layout_preview success.",
+    "Ordinaryworker jointCAS restore exactoriginal publictree/contentstyles/displaysemantic; reread durableversion and monotoniccapturedIDhighwater, Homeclean andpreviewclosed.",
+    "SourceBMP cleanup ownership only after successful exclusivecreate; writefailure protected byStateDrop; normalcompletion deletes2fixture sources. Parentowns fulltestroot/media/worker cleanup."
+  ],
+  "markers": [
+    "PROFILE_CONTENT_UI_STEP index=<0..51> name=<name>",
+    "PROFILE_CONTENT_UI_PASS steps=52 text=10000emoji clear=undo images=2 reorder=verified preview=actual-arcs restoration=readback"
+  ],
+  "checks": [
+    {
+      "command": "CARGO_TARGET_DIR=/tmp/fc-round18-startup-target cargo clippy -p fc-bootstrap --bin fc-bootstrap --tests --target i686-pc-windows-gnu --locked -- -D warnings",
+      "profile": "dev [unoptimized + debuginfo]",
+      "status": "PASS",
+      "log": "/tmp/fc-round18-content-probe-clippy-final.log"
+    },
+    {
+      "command": "rustfmt --edition2021 --config skip_children=true --check crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "status": "PASS;rawfunctions output, no standalone file"
+    },
+    {
+      "command": "git diff --check -- crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "status": "PASS;newuntrackedfile rustfmt checked separately"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/fc-round18-content-probe-clippy.log",
+      "bytes": 362,
+      "sha256": "c1aa89829f2d4108c6bbddf4e350b5c1ce96568d96a8acca1f210e089cb8502a"
+    },
+    {
+      "path": "/tmp/fc-round18-content-probe-clippy-final.log",
+      "bytes": 171,
+      "sha256": "48cf171bacfd8b20342d31ef5d0ecb24b5e1196402c17e44935fcc16b24dd5c3"
+    },
+    {
+      "path": "/tmp/fc-round18-content-ui-integration-clippy.log",
+      "bytes": 171,
+      "sha256": "d785a0c3a6b1605db1a118fa06efab6611faf08af80520b76b8f0502c3e4cef8"
+    }
+  ],
+  "actual_native_ui_probe_execution": "PENDING parent finalrelease52step execution; not claimed PASS from crosscompile",
+  "new_product_tests_executed_by_author": 0,
+  "windows_remote_sessions_by_author": 0,
+  "limits": [
+    "ModalFileDialog intentionally replaced by isolatedsyntheticselection; no externalassets/pickerinteraction/foreground/globalinput.",
+    "Does not additionally claim Subjectnoncurrentprovider, samekinddualnode, scenePage event, pinnedGC/quota maintenance runtime proof. Existing unit/worker/native evidence remains separate.",
+    "Observer validates actualworkerArcinputs plus successful actualrenderer, not a screen capture or humanvisibleWindows proof.",
+    "Restoration is authorizeddirectSavePublic ordinaryworker cleanup; product content publication andmanagemententry use actualnativeFormevents."
+  ],
+  "parent_owns_registration": [
+    "application.rs mod/State/loop/final52assert/marker and offscreenobserver hook registered byroot; this subagent did not edit centralfile."
+  ]
+}

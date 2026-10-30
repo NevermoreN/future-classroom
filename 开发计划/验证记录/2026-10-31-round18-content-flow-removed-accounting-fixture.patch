@@ -1,0 +1,201 @@
+--- /tmp/fc-round18-content-flow-tests-before-removed-accounting-correction.rs
++++ /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/profile_content_flow_tests.rs
+@@ -615,6 +615,25 @@
+         _ => panic!("actual periodic maintenance reply"),
+     }
+ }
++fn assert_removed(
++    files: &ControlledContentFiles,
++    entry: &fc_bootstrap::backend::MediaEntry,
++    reserved_bytes: u64,
++) {
++    assert_eq!(entry.state, MediaState::Removed, "{entry:?}");
++    assert_eq!(entry.refs, 0, "{entry:?}");
++    // Inventory retains the original reservation size even after Finalize
++    // subtracts it from the catalog. Zero would be a corrupt registry record.
++    assert_eq!(entry.charged_bytes, reserved_bytes, "{entry:?}");
++    assert!(
++        !files
++            .owned_inventory()
++            .unwrap()
++            .iter()
++            .any(|physical| physical.id == entry.id),
++        "Removed media must have neither an original nor quarantine file: {entry:?}"
++    );
++}
+ fn bmp() -> Vec<u8> {
+     let mut bytes = vec![0; 58];
+     bytes[..2].copy_from_slice(b"BM");
+@@ -901,15 +920,100 @@
+         )
+     )
+     .is_err());
+-    assert_eq!(h.load(h.slots[2]).current, restored.document.current);
+-    let failed: Vec<_> = inventory(&h.backend())
++    let after_failure = h.load(h.slots[2]);
++    assert_eq!(after_failure.current, restored.document.current);
++    assert_eq!(after_failure.previous, restored.document.previous);
++    assert_eq!(after_failure.revision, restored.document.revision);
++    assert!(after_failure.latest_publish_sequence > restored.document.latest_publish_sequence);
++    let files = ControlledContentFiles::new(&h.root).unwrap();
++    let failed_entries = || {
++        inventory(&h.backend())
++            .into_iter()
++            .filter(|entry| entry.command_id == CommandId::new(206).unwrap())
++            .collect::<Vec<_>>()
++    };
++    let physical_failed = || {
++        let failed = failed_entries();
++        files
++            .owned_inventory()
++            .unwrap()
++            .into_iter()
++            .filter(|physical| failed.iter().any(|entry| entry.id == physical.id))
++            .collect::<Vec<_>>()
++    };
++    let mut failed = failed_entries();
++    eprintln!(
++        "partial-bundle command=206 after physical owner exit: registry={failed:?}, physical={:?}",
++        physical_failed()
++    );
++    assert_eq!(failed.len(), 2, "{failed:?}");
++    for (entry, size) in failed
++        .iter()
++        .zip([bmp().len() as u64, b"BMnot-an-image".len() as u64])
++    {
++        assert_eq!(entry.owner, h.slots[2], "{entry:?}");
++        assert_eq!(
++            entry.refs, 0,
++            "failed preparation cannot publish references"
++        );
++        assert_eq!(entry.charged_bytes, size, "{entry:?}");
++        assert!(
++            matches!(
++                entry.state,
++                MediaState::Unreferenced | MediaState::Retiring | MediaState::Removed
++            ),
++            "the exited owner must settle Reserved; failed preparation cannot be Referenced: {entry:?}"
++        );
++    }
++    // A failed Publish performs opportunistic, nonblocking GC. Busy IO/locks
++    // may leave Unreferenced/Retiring entries fully charged; no contract grants
++    // an immediate refund. Drive the actual periodic Work and shared cursor,
++    // rather than settling another owner or pretending those bytes are zero.
++    let pending_bytes: u64 = failed
+         .into_iter()
+-        .filter(|entry| entry.command_id == CommandId::new(206).unwrap())
+-        .collect();
+-    assert_eq!(failed.len(), 2);
+-    assert!(failed
++        .filter(|entry| entry.state != MediaState::Removed)
++        .map(|entry| entry.charged_bytes)
++        .sum();
++    if pending_bytes > 0 {
++        eprintln!("partial-bundle command=206 still charged before maintenance: {pending_bytes}");
++    }
++    failed = failed_entries();
++    for pass in 0..4 {
++        if failed
++            .iter()
++            .all(|entry| entry.state == MediaState::Removed)
++        {
++            break;
++        }
++        let pending = maintained(&h);
++        failed = failed_entries();
++        eprintln!(
++            "partial-bundle command=206 maintenance pass={pass} pending={pending}: registry={failed:?}, physical={:?}",
++            physical_failed()
++        );
++        assert!(
++            pending
++                || failed
++                    .iter()
++                    .all(|entry| entry.state == MediaState::Removed),
++            "maintenance must not report completion while failed resources remain: {failed:?}"
++        );
++    }
++    assert_eq!(failed.len(), 2, "{failed:?}");
++    for (entry, size) in failed
+         .iter()
+-        .all(|entry| entry.state == MediaState::Removed && entry.charged_bytes == 0));
++        .zip([bmp().len() as u64, b"BMnot-an-image".len() as u64])
++    {
++        assert_removed(&files, entry, size);
++    }
++    let after_cleanup = h.load(h.slots[2]);
++    assert_eq!(after_cleanup.current, after_failure.current);
++    assert_eq!(after_cleanup.previous, after_failure.previous);
++    assert_eq!(after_cleanup.revision, after_failure.revision);
++    assert_eq!(
++        after_cleanup.latest_publish_sequence,
++        after_failure.latest_publish_sequence
++    );
+     let facts = h.backend().lock().unwrap().desktop_facts(0).unwrap();
+     let requests = facts
+         .profile_contents
+@@ -974,7 +1078,6 @@
+         })),
+     );
+     let ids = receiver.recv_timeout(Duration::from_secs(20)).unwrap();
+-    let files = ControlledContentFiles::new(&h.root).unwrap();
+     assert!(!collect_garbage(&files, &h.backend()).unwrap());
+     assert!(
+         !maintained(&h),
+@@ -1027,8 +1130,7 @@
+             .into_iter()
+             .find(|entry| entry.id == *id)
+             .unwrap();
+-        assert_eq!(entry.state, MediaState::Removed);
+-        assert_eq!(entry.charged_bytes, 0);
++        assert_removed(&files, &entry, bmp().len() as u64);
+     }
+     assert!(product(
+         &handle,
+@@ -1107,8 +1209,7 @@
+         .iter()
+         .find(|entry| entry.id == old.version_id)
+         .unwrap();
+-    assert_eq!(removed.state, MediaState::Removed);
+-    assert_eq!(removed.charged_bytes, 0);
++    assert_removed(&files, removed, old.bytes);
+     for reference in pages(&second.document)
+         .iter()
+         .chain(pages(&third.document).iter())
+@@ -1256,8 +1357,7 @@
+         .iter()
+         .find(|entry| entry.id == tail_reference.version_id)
+         .unwrap();
+-    assert_eq!(removed.state, MediaState::Removed);
+-    assert_eq!(removed.charged_bytes, 0);
++    assert_removed(&files, removed, tail_reference.bytes);
+     let reserved = registry
+         .iter()
+         .find(|entry| entry.id == retained_id)
+@@ -1295,8 +1395,23 @@
+         .into_iter()
+         .find(|entry| entry.id == retained_id)
+         .unwrap();
+-    assert_eq!(settled.state, MediaState::Removed);
+-    assert_eq!(settled.charged_bytes, 0);
++    assert_removed(&files, &settled, bmp().len() as u64);
+     assert_eq!(h.load(h.slots[3]).current, tail_last.document.current);
+     assert_eq!(h.load(h.slots[2]).current, restored.document.current);
+-}
++    // Work::Open performs real startup validation, including catalog bytes ==
++    // the sum of original reservation sizes for every non-Removed registry
++    // entry. Thus retained per-entry sizes are not mistaken for current debt,
++    // and physical deletion plus Finalize must persist a consistent refund.
++    drop(files);
++    h.reopen();
++    let reopened_files = ControlledContentFiles::new(&h.root).unwrap();
++    let registry = inventory(&h.backend());
++    for entry in registry
++        .iter()
++        .filter(|entry| entry.state == MediaState::Removed)
++    {
++        assert_removed(&reopened_files, entry, entry.charged_bytes);
++    }
++    assert_eq!(h.load(h.slots[3]).current, tail_last.document.current);
++    assert_eq!(h.load(h.slots[2]).current, restored.document.current);
++}

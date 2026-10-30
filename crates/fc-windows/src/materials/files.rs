@@ -309,6 +309,24 @@ impl ControlledFiles {
         }
         Ok(())
     }
+    /// Inspect an owned regular inode with the same link/reparse and ancestor
+    /// checks as LockedFile. Crash staging may legitimately be empty; originals
+    /// are not. No write/delete sharing is granted during this inspection.
+    pub fn inspect_regular(&self, path: &Path, max: u64, allow_empty: bool) -> Result<u64> {
+        self.check(path)?;
+        let _parents = pins(path)?;
+        let file = OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ.0)
+            .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT.0 | FILE_FLAG_SEQUENTIAL_SCAN.0)
+            .open(path)?;
+        regular(&file)?;
+        let bytes = file.metadata()?.len();
+        if bytes > max || bytes == 0 && !allow_empty {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        Ok(bytes)
+    }
     /// Bounded one-directory enumeration; refuses excess entries and every link.
     /// Returned paths are names only: callers open/pin again before byte access.
     pub fn entries(&self, path: &Path, limit: usize) -> Result<Vec<PathBuf>> {

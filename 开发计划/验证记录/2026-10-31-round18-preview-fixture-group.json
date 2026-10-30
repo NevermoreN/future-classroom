@@ -1,0 +1,123 @@
+{
+  "status": "PASS",
+  "scope": "PRODUCER_TEST_FIXTURE_CORRECTION_AND_LOCAL_CROSS_BUILD_ONLY",
+  "createdUtc": "2026-10-30T21:10:03.297749+00:00",
+  "source": {
+    "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+    "bytes": 36862,
+    "sha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd",
+    "oldSha256": "b342e34070573979743c3434ad1fcbf2b3600a62c87c2602674a3570102603c3"
+  },
+  "change": "Only cfg(test)::independent_public changed. Preserve all seven protected builtin nodes and both independently scoped actual text cards; replace Outlet direct children with one glass Column id99 containing original id100/id101. Explicit document validation plus top_level_glass==8 / glass_depth==2 fixture assertions. No production validation relaxation or content/cache assertion removal.",
+  "failureHistory": [
+    {
+      "report": "/tmp/fc-round18-application-bin-full-windows.json",
+      "caseNames": [
+        "application::profiles_preview::tests::real_content_preview_uses_exact_slots_and_refuses_missing_or_wrong_cache",
+        "application::profiles_preview::tests::actual_hidden_preview_renders_exact_published_text_without_placeholder"
+      ],
+      "description": "Parent observed both fail public preview structure validation; old fixture removed one Materials from eight builtin templates but added two standalone top-level Text cards, yielding nine. Invisible display styles do not erase static tree budget. Original runtime report remains untouched.",
+      "observedByThisAgent": false
+    },
+    {
+      "result": "/tmp/fc-round18-preview-fixture-group-no-run-result.json",
+      "log": "/tmp/fc-round18-preview-fixture-group-no-run.log",
+      "exitCode": 101,
+      "description": "Initial local no-run used nonexistent bin future-classroom; corrected to declared bin fc-bootstrap. This invocation did not compile/test product code."
+    },
+    {
+      "result": "/tmp/fc-round18-preview-fixture-group-aligned-no-run-result.json",
+      "description": "Aligned bin no-run succeeded before adding explicit metrics assertions; historical result not substituted for final source."
+    }
+  ],
+  "checks": {
+    "no-run": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--no-run",
+        "--message-format=json",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round18-native-target"
+      ],
+      "exitCode": 0,
+      "sourceSha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd"
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--tests",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round18-native-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "sourceSha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd"
+    }
+  },
+  "rustfmtCheckExitCode": 0,
+  "metadata": {
+    "path": "/tmp/fc-round18-preview-fixture-group-final-test-metadata.jsonl",
+    "sha256": "6403f676d1794c37daae6f42a6f5c8af4cd090160614be25142639aa48acd724",
+    "buildFinished": [
+      {
+        "reason": "build-finished",
+        "success": true
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+      "bytes": 145874113,
+      "sha256": "acd879315d7720e327833a884e2328312deb909897c99e726ef9cbeb3d559438",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    }
+  ],
+  "runtimeTestsExecutedByThisAgent": 0,
+  "sshCalls": 0,
+  "actualWindowsRecheck": "PENDING_PARENT_UNIFIED_RUN",
+  "limits": [
+    "No runtime PASS claimed for the two corrected tests; final parent source/artifact freeze may differ from this producer cache.",
+    "Existing round-wide failures and reports preserved.",
+    "This is self-produced fixture work, not independent security review.",
+    "Shared target cleanup remains parent-owned."
+  ]
+}

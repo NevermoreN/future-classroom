@@ -221,7 +221,8 @@ fn make_card(
             width: 144.,
             height: 40.,
         })
-    } else if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty()||list.next_cursor.is_some()||body.pages.len()>1)
+    } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
+        || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty()||list.next_cursor.is_some()||body.pages.len()>1)
     {
         Some(card.rect)
     } else if matches!(card.content, CardContent::Materials(_)) {
@@ -300,6 +301,7 @@ fn make_card(
         source.component_alpha = 1.;
     }
     Ok(Card {
+        image: content::frame(&renderer.raster, card)?,
         source,
         tone: scene.text_tone,
         calendar_unverified: scene.public_calendar_unverified,
@@ -406,6 +408,11 @@ fn validate(tree: &ScenePaintTree, cards: &[SceneCard]) -> Result<Vec<usize>> {
                 || n.widget_kind.and_then(|k| k.component_kind()) != Some(cards[card].kind)
             {
                 return Err(invalid());
+            }
+            if let Some(identity) = cards[card].content_identity {
+                if identity.slot.scope != n.key.scope || identity.slot.node_id != n.key.id {
+                    return Err(invalid());
+                }
             }
             card_seen[card] = true;
         } else if n.widget_kind.is_some() {
@@ -801,6 +808,7 @@ pub(super) fn present(
         if let Some(control) = &scene.lesson_control {
             special.push(renderer.cards.len());
             let card = SceneCard {
+                content_identity: None,
                 kind: ComponentKind::Schedule,
                 rect: control.rect,
                 font_dip: 16.,
@@ -1121,6 +1129,18 @@ pub(super) fn take_events(renderer: &mut DesktopRenderer) -> Result<Vec<DesktopE
                 InputAction::Page(forward),
                 &mut output,
             )?;
+        } else if let InputAction::ImagePage { identity, page } = action {
+            if renderer
+                .cards
+                .iter()
+                .any(|c| content::valid_page(&c.source, identity, page))
+            {
+                route_nonpage(
+                    generation,
+                    InputAction::ImagePage { identity, page },
+                    &mut output,
+                );
+            }
         } else {
             // Non-page metadata carries its original source/version IDs. It is
             // already bound to a fresh real group context and original generation.
@@ -1311,6 +1331,20 @@ pub(super) fn composite_groups(
     Ok(())
 }
 impl DesktopRenderer {
+    /// Hidden diagnostic input targets only this renderer's exact current slot.
+    pub fn probe_image_page(&self, slot: ContentSlotKey, page: u8) -> Result<()> {
+        if !self.hidden_probe {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        let tree = self.tree.as_ref().ok_or_else(invalid)?;
+        for group in &tree.groups {
+            let rect=group.input.state.targets.borrow().iter().find(|t|matches!(t.action,InputAction::ImagePage{identity,page:p} if identity.slot==slot&&p==page)).map(|t|t.rect);
+            if let Some(rect) = rect {
+                return send_probe(&group.input, rect);
+            }
+        }
+        Err(invalid())
+    }
     pub fn probe_next_page_node(&self, key: SceneNodeKey, forward: bool) -> Result<()> {
         if !self.hidden_probe {
             return Err(Error::from_hresult(E_ACCESSDENIED));
@@ -1484,6 +1518,7 @@ mod tests {
             captured_at: now(),
             valid_until: None,
             cards: vec![SceneCard {
+                content_identity: None,
                 kind: ComponentKind::Materials,
                 rect: inner,
                 font_dip: 18.,

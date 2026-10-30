@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "scope": "LOCAL_NO_RUN_BUILD_ONLY",
+  "metadataPath": "/tmp/fc-round18-native-final-test-metadata.jsonl",
+  "metadataSha256": "4d949e83a87b42712709213f9566d0b9d432f8eb11c4f8ddf024f5a47e2c9c42",
+  "buildFinishedSuccess": true,
+  "artifact": {
+    "path": "/tmp/fc-round18-native-target/i686-pc-windows-gnu/debug/deps/fc_windows-a8df1002bc9e60b7.exe",
+    "bytes": 61477058,
+    "sha256": "8c650fede33f2241400e5119391194e5546ffaa426db3a56e8ca39fa2ff0cfe4",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false
+  },
+  "ownedSourceManifest": {
+    "scope": "ROUND18_NATIVE_PREVIEW_OWNED_SOURCE_FREEZE",
+    "createdUtc": "2026-10-30T20:13:00.071991+00:00",
+    "sources": [
+      {
+        "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+        "bytes": 35505,
+        "sha256": "19de6503e283daf778d6ab67fd19fb3653f6920424e403bbce2ce9ca0fd46757"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "bytes": 120821,
+        "sha256": "2eeda0d99c15cb44c44f4582acb0b3c7208811c06c2962cac4efbdd268e235d0"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+        "bytes": 18631,
+        "sha256": "a1e660ec54873c1c5b313bf7d08dda8ae5b75d6117a70d98432c253071f3dd46"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/content.rs",
+        "bytes": 8671,
+        "sha256": "5a764e7c6083f432f677980f5c6d17441a5c41d14a4663f6945170fd0f016f55"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/content_tests.rs",
+        "bytes": 12717,
+        "sha256": "7200835d5c1e77561264167be41de189f136569af954add7118cc4348b9d5781"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/tree.rs",
+        "bytes": 69161,
+        "sha256": "61c976b963f0629032c581ad37e09f1b70b636ca5c3cade8df4c8eaf49e24e51"
+      }
+    ],
+    "aggregateSha256": "ef20afbd7a4a4942486920f6dbb364d57f2e57ec200ac51c74964b8cf4c899e4",
+    "runtimeTestsExecutedByThisAgent": 0
+  },
+  "runtimeTestsExecuted": 0
+}

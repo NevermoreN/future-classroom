@@ -1,0 +1,89 @@
+{
+  "status": "AWAITING_ROOT_CENTRAL_INTEGRATION",
+  "scope": "PRODUCER_CONTROLLER_IMPLEMENTATION_PENDING_FINAL_PACKAGE_CHECK",
+  "role": "Own implementation; not independent review",
+  "createdUtc": "2026-10-30T20:30:04.567406+00:00",
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 58283,
+      "sha256": "9c1def116dfef2ae17c85d49f2a23399e949117aecba634b439b70ab70e3385e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+      "bytes": 10599,
+      "sha256": "bd184ee4a3491150b5f8441ad069264e06b1d7435e8be85e1bdedd18a5f89c43"
+    }
+  ],
+  "aggregateSha256": "a538186157382e52e0eec366d8787994714a550debc4b07f4c80043afc704470",
+  "interfaces": [
+    "Controller::set_root(PathBuf)",
+    "Work::Desktop -> Outcome::Desktop(Box<DesktopFacts>,TextFrame)",
+    "Work::ContentImages(Box<ImageJob>) -> Outcome::ContentImages(ImageCompletion)",
+    "Work::ContentPage{backend,generation,source_revision,request} -> Outcome::ContentPage{generation,snapshot}"
+  ],
+  "implemented": [
+    "Verified TextFrame is accepted only with coherent validated Facts and complete exact descriptor set; compose uses build_scene_with_content.",
+    "One pending image job and one pending page job; canceled tickets remain owned until try_result observes actual terminal, so cancellation never creates replacement-worker admission.",
+    "Every image-bearing new scene goes through worker source/generation verification even on cache hits; cache entries written by still-running/stale work cannot bypass completion gate.",
+    "Completion needs Healthy/current global source/current scene generation/time; each frame source and bounded decoded geometry must match original requests.",
+    "Returned frame Arcs remain owned until actual native publication, then native Cards hold physical reservation owners.",
+    "Hide/lock/preview/stop/deadline clear scene capabilities/cancel tickets; needs_scene forces a higher generation before reauthorization and does not reset current generation high water.",
+    "Fixed worker deadlines are cooperative. UI deadline watchdog revokes the guarded capability and cancels output but does not claim physical SQL/WIC interruption.",
+    "Publication grants guest page capability only after real renderer acceptance, exact snapshot identity/reference/current page, effective alpha positive, and actual adjacent pager button intersecting clip.",
+    "Own in-flight page temporarily keeps exact capability through AuthorityUpdating while native input is hidden; external hide/lock/deadline still revokes normally.",
+    "Page requests require current source/time/actual published generation, original slot/content/view revisions, adjacent bounded page and a fresh command ID. UI never changes persisted current page or publish sequence.",
+    "Page completion, cancellation or Unknown triggers fresh coherent Facts hydration; no guessed page result is applied.",
+    "Clock ticks within one scene do not recompose/reverify/redecode the entire tree."
+  ],
+  "newTests": [
+    "image_page_requires_exact_scoped_revision_generation_adjacent_page_and_actual_clip",
+    "image_completion_gate_rejects_wrong_scene_source_time_and_fault_without_relayout",
+    "hidden_controller_cancels_both_tickets_without_freeing_live_workers_or_resetting_generation"
+  ],
+  "existingTestStrengthened": "recoverable_render_notice remains failed through ContentPending, clears only on actual accepted render",
+  "verification": {
+    "newRuntimeTestsExecutedByThisAgent": 0,
+    "sshOperations": 0,
+    "checks": [
+      {
+        "raw": {
+          "path": "/tmp/fc-round18-controller-initial-check.log",
+          "sha256": "c2a7c16e712d47dc71d684e0b7d21d41991cb03a4c8e3ec1d05fe2e2796f6564",
+          "bytes": 2774
+        },
+        "exit": 101,
+        "reason": "Transient test module registration preceded file creation; Root worker guard and central result arm still incomplete. Preserved without claiming pass."
+      },
+      {
+        "raw": {
+          "path": "/tmp/fc-round18-controller-second-check.log",
+          "sha256": "4db9016ba9687bfda43299e3c0c96b4fb7f16cc0a89682f30b4dc1bdcd5d0df1",
+          "bytes": 1057
+        },
+        "exit": 101,
+        "reason": "Root preparation guard exports were being written; unresolved imports in Backend. Preserved."
+      },
+      {
+        "raw": {
+          "path": "/tmp/fc-round18-controller-third-check.log",
+          "sha256": "b6e1f7e93480db0b154267a02d2874b4a13d5b1c7ef498a9453821b953349a53",
+          "bytes": 1420
+        },
+        "exit": 101,
+        "reason": "Only root application.rs Outcome::ProfileContent arm incomplete. No owned controller/test diagnostics. Still NOT a whole-package pass."
+      }
+    ],
+    "finalStrictClippy": "PENDING_ROOT_CENTRAL_ARM",
+    "finalNoRun": "PENDING_ROOT_CENTRAL_ARM"
+  },
+  "limits": [
+    "No actual controller Windows runtime tests yet. Native/raster prior 9 PASS belongs to separate frozen source and root runner report /tmp/fc-round18-native-content-windows.json, not these controller tests.",
+    "The hold-worker test is deterministic synthetic fixed-pool ownership evidence; it does not prove native WIC or SQLite calls have a physical cancellation deadline.",
+    "No central application.rs, Backend, other flows, or frozen Windows files modified by this controller task."
+  ],
+  "cleanup": {
+    "localCache": "/tmp/fc-round18-native-target retained for root final checks and unified cleanup",
+    "remoteResidueCreated": 0
+  }
+}

@@ -1,0 +1,15 @@
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.61s
+     Running unittests src/lib.rs (/tmp/fc-round18-backend-target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)
+
+running 7 tests
+test backend::profile_content::tests::backend_guest_page_requires_published_generation_global_view_and_live_time_window ... ok
+test backend::profile_content::tests::backend_text_hydration_clear_undo_outcome_and_locked_original_lease_use_real_sqlite ... ok
+test profile_content_cache::tests::a_new_shared_handle_cannot_reset_billing_for_an_old_external_body ... ok
+test profile_content_cache::tests::clearing_index_and_dropping_frame_do_not_release_live_external_arc_charge ... ok
+test profile_content_cache::tests::exact_owner_revision_hash_and_missing_nodes_never_fall_back ... ok
+test profile_content_cache::tests::full_four_mib_budget_counts_retained_bodies_across_many_frames ... ok
+test profile_content_cache::tests::retired_metadata_has_a_hard_cap_even_when_bodies_are_tiny ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 60 filtered out; finished in 24.31s
+

@@ -1,0 +1,25 @@
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.78s
+     Running unittests src/lib.rs (/tmp/fc-round18-backend-target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)
+
+running 1 test
+test backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back ... FAILED
+
+failures:
+
+---- backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back stdout ----
+
+thread 'backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back' (15947) panicked at crates/fc-bootstrap/src/backend/profile_content.rs:993:41:
+fence owner admission: Busy
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    backend::profile_content::tests::actual_job_fence_cancellation_deadline_stop_and_fault_at_sqlite_precommit_roll_back
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 68 filtered out; finished in 11.16s
+
+error: test failed, to rerun pass `-p fc-bootstrap --lib`

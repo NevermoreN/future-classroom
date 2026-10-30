@@ -1,0 +1,47 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+error: this `if` has identical blocks
+   --> crates/fc-windows/src/desktop/tree.rs:224:88
+    |
+224 |       } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1) {
+    |  ________________________________________________________________________________________^
+225 | |         Some(card.rect)
+226 | |     } else if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty()||list.next_cursor.is_some()||body.page...
+    | |_____^
+    |
+note: same as this
+   --> crates/fc-windows/src/desktop/tree.rs:227:5
+    |
+227 | /     {
+228 | |         Some(card.rect)
+229 | |     } else if matches!(card.content, CardContent::Materials(_)) {
+    | |_____^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#if_same_then_else
+    = note: `-D clippy::if-same-then-else` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::if_same_then_else)]`
+
+error: this `if` has identical blocks
+   --> crates/fc-windows/src/desktop.rs:861:100
+    |
+861 |   ...   } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1) {
+    |  __________________________________________________________________________________________^
+862 | | ...       Some(card.rect)
+863 | | ...   } else if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || bod...
+    | |_______^
+    |
+note: same as this
+   --> crates/fc-windows/src/desktop.rs:864:17
+    |
+864 | /                 {
+865 | |                     Some(card.rect)
+866 | |                 } else if matches!(card.content, CardContent::Materials(_)) {
+    | |_________________^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#if_same_then_else
+
+error: could not compile `fc-windows` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-windows` (lib test) due to 2 previous errors

@@ -1,0 +1,111 @@
+{
+  "round": 18,
+  "reviewed_at_utc": "2026-10-30T20:16:04.281335+00:00",
+  "kind": "Read-only source review; no product/test execution",
+  "new_tests_executed": 0,
+  "windows_or_remote_sessions": 0,
+  "source_mutations": 0,
+  "reviewer_authorship": "Reviewer authored fc-storage content persistence; this review of bootstrap physical-file/WIC/raster/decoder modules is cross-module read-only review, not an independent audit of reviewer-owned storage.",
+  "source_inputs_at_report_time": [
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files.rs",
+      "sha256": "4cb12fea81ee0c93b7c6f5cdeb633d53f3403a908d9635df0121226b13592c25"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "sha256": "7be05e9496309b79570bf8d241dbbf35b8238e84fc94f11156321266bc61f604"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster.rs",
+      "sha256": "9e258561022e86e2e1914a06f0a3e9f27b693439eb3d39976c6f3fc893d75d60"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster_tests.rs",
+      "sha256": "47b6e860805632918e7195a59d02c5a1c5b283d89bf55abebd4e17cf766a9d0b"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "97008b17be2d7270da07079fa919a91468d870990da007d15226270313eba1eb"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image.rs",
+      "sha256": "1d4a4064723532c8dd7be0a1f4bba9549b22136917fcd55998d58a8c29f0b2e2"
+    },
+    {
+      "path": "crates/fc-materials/src/validation.rs",
+      "sha256": "f97243102870985a510b99eee2242058a84f2851ad032b2e2fdb0a5943ea8ff6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "sha256": "ab456e8d5cbfdb2aa9d9980c9f61a78eab9bb0032bf368a65be08655d2b00ce5"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "sha256": "2eeda0d99c15cb44c44f4582acb0b3c7208811c06c2962cac4efbdd268e235d0"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R18-FILES-01",
+      "severity": "P1 integration/startup gate",
+      "path": "crates/fc-bootstrap/src/profile_content_files.rs",
+      "line": 196,
+      "status": "Root acknowledged; pending complete physical inventory/Open integration, not a storage test failure",
+      "problem": "Constructor validates only namespace top-level marker/originals/quarantine, not physical children, and currently exposes no physical inventory/reconcile. SQL media inventory cannot find physical originals absent from an older/restored registry.",
+      "reproduction_from_source": "Prepare images and retain filesystem; restore a database snapshot from before their media reservations. startup_state sees no corresponding media entries, ControlledContentFiles::new still succeeds because only top-level entries are checked. Those originals no longer count against2GiB, and reallocated media IDs hit non-overwriting rename collisions. Additional IDs can accumulate primary bytes beyond ledger until physical reconciliation. This is a source-derived path, not an executed reproduction.",
+      "fix": "Before new worker admissions under exclusive instance lock/no active preparation workers, bounded-enumerate canonical fixed filenames in originals and quarantine and compare against complete registry IDs. Unknown owned files must be exclusively removed or cause Repair, not silently ignored. Referenced resources must map to exactly correct format/length/hash; Reserved gets explicit startup physical-owner handoff before retire/delete/finalize. Keep charge until actual deletion and SQL finalize."
+    },
+    {
+      "id": "R18-FILES-02",
+      "severity": "P1 deterministic Windows test/setup contradiction",
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "line": 194,
+      "status": "Root corrected adapter test; fix confirmed by read-only source, no adapter execution by reviewer",
+      "problem": "real_ordered_image_bundle... calls decode_current while ContentPreparation still owns original pins from NewFile::seal. That seal duplicates the original create_new share_mode(0) file object and explicitly keeps share-0 through publish. decode_current reopens the original using a fresh READ handle, incompatible with existing share-0 pin; expected ERROR_SHARING_VIOLATION, before its unwrap.",
+      "source_evidence": [
+        "files.rs create_new share_mode(0), seal DuplicateHandle preserves same object/share exclusion; own comment lines424-428 confirms.",
+        "profile_content_files.rs preparation retains original in self.pins after publish; decode_current uses LockedFile::open on original pathname.",
+        "profile_content_files_tests.rs decode_current occurs lines194-197; drop(preparation) only at208."
+      ],
+      "fix": "First assert prep pin prevents modification and exclusive GC; simulate commit completion, drop ContentPreparation (or transfer same exact pinned handle to decode, avoiding pathname reopen), then perform independent current-resource decode/cache assertions. Actual worker flow likewise commit returns -> release physical prep owner -> separate hydration from original. Do not weaken source-sharing/rename/deletion protection to make test pass."
+    }
+  ],
+  "verified_by_source": [
+    "ContentSources is private/uncloneable; random intent token binds slot and operation to the immutable pinned selection, while payload proof hashes actual canonical bytes separately. No user path enters domain/Facts.",
+    "Images require reservation admission and per-image byte list match before create_new/copy; each staged file is flushed/sealed, hashed and full WIC decoded on same immutable handle, dimensions compared, nonoverwriting handle rename, original pin retained through commit.",
+    "On failure before seal, NewFile Drop owns deletion. On failure after seal/rename, fixed ID paths remain in quarantine/originals and are still reserved/charged; ContentPreparation retains earlier pins until caller releases it. Actual worker composition must settle only after that release.",
+    "remove_retired performs exclusive pinned deletion of fixed version paths and stage; partial deletion failure leaves registry charge for retry, and caller may finalize only after all paths absent.",
+    "decode_current rehashes the same locally opened pinned handle, compares actual length/SHA, then WIC decoder uses this exact raw handle; RasterCache rewinds after hash EOF.",
+    "RasterCache owns Vec with capacity checked and an actual byte reservation retained by every Arc owner. clear evicts map ownership without premature refund; global WIC mutex serializes decode. Cache key includes owner/version/SHA/output size and full source metadata equality.",
+    "TXT decoder streams at32KiB, rejects malformed UTF8/UTF16 instead of replacement, strips only initial BOM, preserves interior BOM/newlines/tabs and bounds actual scalar/UTF8 counts. File input max64KiB admits all legal10000-scalar content encodings.",
+    "New raster calls use existing WIC1 factory/format-converter/scaler and existing clock/file wrappers; no WIC2 or FileRenameInfoEx was introduced in reviewed paths. This is source compatibility observation, not Win7/10/11 runtime evidence."
+  ],
+  "composition_conditions_not_new_findings": [
+    "Raster byte cap is per RasterCache instance: desktop/preview/hydration must inject one shared Arc for a process-wide32MiB cache; renderer exposes set_raster_cache/release_surfaces.",
+    "The32MiB reserve covers application-owned pixel buffers, not internal WIC/COM allocations; imports use bounded scanline buffer. Native-call cancellation/CPU10s/wall30s are cooperative checks and cannot release an executing WIC call early.",
+    "Scene/management authority remains composition-owned: callbacks must be generation/exact-lease/health bound and final visible effects recheck after worker returns. File preparation does not grant publication authority.",
+    "Full physical filesystem+SQLite+UI integration and formal Win7/10/11 runtime evidence remain root verification, not adapter-only test coverage."
+  ],
+  "references": [
+    "开发计划/08-Rust所有权与FFI生命周期.md:80 CPU10s/wall30s streaming checks",
+    "开发计划/08-Rust所有权与FFI生命周期.md:82 separate WIC pixel/cache budgets"
+  ],
+  "updates": [
+    {
+      "at_utc": "2026-10-30T20:16:34.475548+00:00",
+      "source_recheck": "profile_content_files_tests.rs now drops preparation at196 before decode_current at198-200; verified by read-only source inspection.",
+      "root_reported_execution": "Root reports actual Win11 5 raster +4 desktop tests PASS (artifact prefix23c2d2f1), cleanup0 roots/processes and sshdRunning. Reviewer did not execute or inspect remote evidence. These9 tests are not a claim that bootstrap content-files adapter tests have run.",
+      "remaining": "Physical inventory/restore consistency is root-acknowledged, still pending complete Open/worker integration. It is not a failure of the frozen storage implementation or its67 tests. No additional definite source problem found in the assigned decoder/raster/files paths."
+    }
+  ],
+  "source_recheck_inputs": [
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "sha256": "7be05e9496309b79570bf8d241dbbf35b8238e84fc94f11156321266bc61f604"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files.rs",
+      "sha256": "4cb12fea81ee0c93b7c6f5cdeb633d53f3403a908d9635df0121226b13592c25"
+    }
+  ]
+}

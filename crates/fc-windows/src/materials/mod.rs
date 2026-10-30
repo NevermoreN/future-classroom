@@ -3,4 +3,5 @@ pub mod chooser;
 pub mod files;
 pub mod helper;
 pub mod image;
+pub mod raster;
 pub mod shell;

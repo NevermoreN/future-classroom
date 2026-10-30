@@ -33,6 +33,15 @@ fn specs() -> Vec<WidgetMeasure> {
     ]
     .into_iter()
     .map(|kind| WidgetMeasure {
+        key: SceneNodeKey {
+            scope: LayoutScope::Public,
+            id: default_public_layout()
+                .nodes
+                .iter()
+                .find(|n| n.kind == NodeKind::Widget(kind))
+                .unwrap()
+                .id,
+        },
         kind,
         body: crate::card_body::card_body_spec(
             fc_domain::desktop::ComponentKind::Date,
@@ -53,6 +62,31 @@ fn specs() -> Vec<WidgetMeasure> {
             edge_alpha: 0.5,
         },
     })
+    .chain(std::iter::once(WidgetMeasure {
+        key: SceneNodeKey {
+            scope: LayoutScope::Subject(key()),
+            id: id(2),
+        },
+        kind: WidgetKind::Materials,
+        body: crate::card_body::card_body_spec(
+            fc_domain::desktop::ComponentKind::Date,
+            &crate::scene::CardContent::Text("full owned content".into()),
+            false,
+            None,
+        )
+        .unwrap(),
+        font_dip: 22.,
+        opacity: 1.,
+        min_width: 160.,
+        max_width: 800.,
+        min_height: 84.,
+        max_height: 1200.,
+        preferred_width: 280.,
+        glass: PaintGlass {
+            surface_alpha: 0.03,
+            edge_alpha: 0.5,
+        },
+    }))
     .collect()
 }
 fn key() -> SubjectProfileKey {
@@ -318,6 +352,12 @@ fn recess_uses_continuous_remaining_desktop_without_intersecting_public_tree() {
     let mut ss = specs();
     let mut recess = ss[0].clone();
     recess.kind = WidgetKind::Recess;
+    recess.key.id = default_public_layout()
+        .nodes
+        .iter()
+        .find(|n| n.kind == NodeKind::Widget(WidgetKind::Recess))
+        .unwrap()
+        .id;
     ss.push(recess);
     let tree = compose_layout(&default_public_layout(), None, &ss, work(), &measure()).unwrap();
     let r = tree
@@ -373,9 +413,15 @@ fn wrap_breaks_between_nodes_and_reflows_without_shrinking_fonts() {
     let mut ss = specs();
     let material = ss
         .iter_mut()
-        .find(|s| s.kind == WidgetKind::Materials)
+        .find(|s| s.key.scope == subject.scope && s.kind == WidgetKind::Materials)
         .unwrap();
     material.min_width = 200.;
+    let material = material.clone();
+    for n in [3, 4] {
+        let mut independent = material.clone();
+        independent.key.id = id(n);
+        ss.push(independent);
+    }
     let large = compose_layout(&public, Some(&subject), &ss, work(), &measure()).unwrap();
     let rows: Vec<_> = large
         .nodes
@@ -515,4 +561,27 @@ fn full_typed_body_is_measured_at_final_width_even_when_leaf_opacity_is_zero() {
     assert_eq!((leaf.rect.width, leaf.rect.height), (400., 160.));
     assert_eq!(leaf.effective_opacity, 0.);
     assert!(tree.nodes.iter().any(|n| n.key.id == id(10)));
+}
+
+#[test]
+fn exact_widget_keys_never_alias_other_kind_scope_or_reuse_duplicate_identity() {
+    let public = default_public_layout();
+    let ss = specs();
+    let mut duplicate = ss.clone();
+    duplicate.push(ss[0].clone());
+    assert_eq!(
+        compose_layout(&public, None, &duplicate, work(), &measure()),
+        Err(TreeLayoutError::Capacity)
+    );
+    let mut wrong = ss.clone();
+    wrong[0].key.scope = LayoutScope::Subject(key());
+    let result = compose_layout(&public, None, &wrong, work(), &measure()).unwrap();
+    assert!(!result
+        .nodes
+        .iter()
+        .any(|n| n.widget_kind == Some(WidgetKind::Clock)));
+    assert!(result
+        .nodes
+        .iter()
+        .any(|n| n.widget_kind == Some(WidgetKind::Materials)));
 }

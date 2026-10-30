@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "scope": "Only this round /tmp/fc-round18-* scratch trees, files, build products and copied test EXEs removed; intentional repository evidence and /mnt/data development artifacts retained",
+  "removedTopLevelEntries": 422,
+  "removedFiles": 36752,
+  "removedBytes": 21723859677,
+  "remainingOwnedEntries": [],
+  "protectedBefore": {
+    "/workspace/共享/Eliora/未来教室计划/target": {
+      "exists": true,
+      "inode": 45511040,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/dist": {
+      "exists": true,
+      "inode": 44743611,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/node_modules": {
+      "exists": true,
+      "inode": 45321626,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/web/node_modules": {
+      "exists": false,
+      "inode": null,
+      "mode": null
+    },
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212": {
+      "exists": true,
+      "inode": 350322122,
+      "mode": "0o600"
+    }
+  },
+  "protectedAfter": {
+    "/workspace/共享/Eliora/未来教室计划/target": {
+      "exists": true,
+      "inode": 45511040,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/dist": {
+      "exists": true,
+      "inode": 44743611,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/node_modules": {
+      "exists": true,
+      "inode": 45321626,
+      "mode": "0o755"
+    },
+    "/workspace/共享/Eliora/未来教室计划/web/node_modules": {
+      "exists": false,
+      "inode": null,
+      "mode": null
+    },
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212": {
+      "exists": true,
+      "inode": 350322122,
+      "mode": "0o600"
+    }
+  },
+  "persistentSshKeyPreserved": true,
+  "windows": "See separate final SSH/service/marked directories/tasks read-only check; zero remaining probes, persistent public key authorized and sshd Running",
+  "activeOwnedBuildProcessesBeforeRemoval": []
+}

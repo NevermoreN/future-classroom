@@ -1,6 +1,7 @@
 //! Non-secret public/subject layout drafts. Node selections use stable IDs;
 //! only the Backend's exact local lease and writer CAS authorize persistence.
 use super::display_editor;
+use fc_domain::profile_content::{ContentNodeStyle, ContentPayloadKind, ContentSlotKey};
 use fc_domain::{auth::Role, desktop::*, identity::IdentityState, ids::*, layout::*, profile::*};
 use fc_ports::{ProfilePage, PublicLayoutState};
 use fc_presentation::workbench::*;
@@ -70,11 +71,16 @@ pub(super) const PUBLIC_STYLE: ActionId = ActionId(727);
 pub(super) const PREVIEW: ActionId = ActionId(728);
 pub(super) const CLEAR_FOLDER: ActionId = ActionId(729);
 pub(super) const NODE_OPERATIONS: ActionId = ActionId(730);
+pub(super) const MANAGE_CONTENT: ActionId = ActionId(731);
 
 #[derive(Debug)]
 pub(super) enum Command {
     Stay,
     Close,
+    ManageContent {
+        slot: ContentSlotKey,
+        kind: ComponentKind,
+    },
     ReloadList {
         after: Option<ProfileId>,
     },
@@ -105,6 +111,7 @@ enum Page {
     Operations,
     Geometry,
     Appearance,
+    ContentStyle,
     Materials,
     PublicStyle,
     Review,
@@ -242,8 +249,8 @@ fn widget_label(kind: WidgetKind) -> &'static str {
         WidgetKind::DateCountdown => "日期倒计时",
         WidgetKind::Recess => "课间剩余区",
         WidgetKind::Materials => "课堂资料",
-        WidgetKind::SubjectText => "独立文字（尚未开放）",
-        WidgetKind::SubjectImage => "独立图片（尚未开放）",
+        WidgetKind::SubjectText => "独立文字",
+        WidgetKind::SubjectImage => "独立图片",
     }
 }
 fn widget_parse(value: &str) -> Result<WidgetKind, String> {
@@ -256,6 +263,8 @@ fn widget_parse(value: &str) -> Result<WidgetKind, String> {
         WidgetKind::DateCountdown,
         WidgetKind::Recess,
         WidgetKind::Materials,
+        WidgetKind::SubjectText,
+        WidgetKind::SubjectImage,
     ]
     .into_iter()
     .find(|k| widget_value(*k) == value)
@@ -454,6 +463,24 @@ impl Editor {
             Draft::Subject(s) => Some(&mut s.tree),
         }
     }
+    fn content_styles(&self) -> Option<&[ContentNodeStyle]> {
+        match self.draft.as_ref()? {
+            Draft::Public(s) => Some(&s.layout.content_styles),
+            Draft::Subject(s) => Some(&s.content_styles),
+        }
+    }
+    fn content_styles_mut(&mut self) -> Option<&mut Vec<ContentNodeStyle>> {
+        match self.draft.as_mut()? {
+            Draft::Public(s) => Some(&mut s.layout.content_styles),
+            Draft::Subject(s) => Some(&mut s.content_styles),
+        }
+    }
+    fn selected_content_style(&self) -> Option<&ContentNodeStyle> {
+        let id = self.selected?;
+        self.content_styles()?
+            .iter()
+            .find(|style| style.node_id == id)
+    }
     fn allocate(&mut self) -> Result<LayoutNodeId, String> {
         match self.draft.as_mut().ok_or("没有布局草稿。")? {
             Draft::Public(s) => s.layout.allocate_id().map_err(issue),
@@ -504,7 +531,9 @@ impl Editor {
     fn semantic_dirty(&self) -> bool {
         match (&self.draft, &self.original) {
             (Some(Draft::Public(a)), Some(Draft::Public(b))) => {
-                a.layout.tree != b.layout.tree || a.display != b.display
+                a.layout.tree != b.layout.tree
+                    || a.layout.content_styles != b.layout.content_styles
+                    || a.display != b.display
             }
             (Some(Draft::Subject(a)), Some(Draft::Subject(b))) => {
                 self.creating
@@ -512,6 +541,7 @@ impl Editor {
                     || a.tree != b.tree
                     || a.folder_id != b.folder_id
                     || a.materials != b.materials
+                    || a.content_styles != b.content_styles
             }
             (None, None) => false,
             _ => true,
@@ -548,7 +578,7 @@ impl Editor {
                 {
                     if matches!(
                         self.page,
-                        Page::Geometry | Page::Appearance | Page::Materials
+                        Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials
                     ) {
                         self.raw_original
                             .entry(field.id)
@@ -742,7 +772,11 @@ impl Editor {
                 let mut out = vec![];
                 let subject = matches!(self.draft, Some(Draft::Subject(_)));
                 let kinds = if subject {
-                    vec![WidgetKind::Materials]
+                    vec![
+                        WidgetKind::Materials,
+                        WidgetKind::SubjectText,
+                        WidgetKind::SubjectImage,
+                    ]
                 } else {
                     vec![
                         WidgetKind::Clock,
@@ -753,6 +787,8 @@ impl Editor {
                         WidgetKind::DateCountdown,
                         WidgetKind::Recess,
                         WidgetKind::Materials,
+                        WidgetKind::SubjectText,
+                        WidgetKind::SubjectImage,
                     ]
                 };
                 out.push(choices(
@@ -863,6 +899,21 @@ impl Editor {
                     text(EDGE, "容器边缘反射 0..100", material.edge_percent),
                 ]
             }
+            Page::ContentStyle => {
+                let Some(style) = self.selected_content_style() else {
+                    return vec![];
+                };
+                let c = &style.component;
+                vec![
+                    toggle(VISIBLE, "显示此节点", c.visible),
+                    text(ALPHA, "节点整体Alpha 0..100", c.opacity_percent),
+                    text(FONT, "字号DIP（10..72）", c.font_dip),
+                    text(MIN_WIDTH, "节点最小宽DIP", c.min_width),
+                    text(MAX_WIDTH, "节点最大宽DIP", c.max_width),
+                    text(MIN_HEIGHT, "节点最小高DIP", c.min_height),
+                    text(MAX_HEIGHT, "节点最大高DIP", c.max_height),
+                ]
+            }
             Page::Materials => {
                 let Some(Draft::Subject(s)) = &self.draft else {
                     return vec![];
@@ -959,6 +1010,26 @@ impl Editor {
                 };
                 c.group_opacity_percent = opacity;
                 c.material = material;
+            }
+            Page::ContentStyle => {
+                let id = self.selected.ok_or("请选择独立内容节点。")?;
+                let mut next = self
+                    .selected_content_style()
+                    .ok_or("此节点没有独立样式。")?
+                    .clone();
+                let c = &mut next.component;
+                c.visible = self.boolean(VISIBLE)?;
+                c.opacity_percent = self.percent(ALPHA)?;
+                c.font_dip = self.integer(FONT)?;
+                c.min_width = self.integer(MIN_WIDTH)?;
+                c.max_width = self.integer(MAX_WIDTH)?;
+                c.min_height = self.integer(MIN_HEIGHT)?;
+                c.max_height = self.integer(MAX_HEIGHT)?;
+                next.validate().map_err(issue)?;
+                *self
+                    .content_styles_mut()
+                    .and_then(|styles| styles.iter_mut().find(|s| s.node_id == id))
+                    .ok_or("独立样式目标已改变。")? = next;
             }
             Page::Materials => {
                 let Some(Draft::Subject(old)) = &self.draft else {
@@ -1073,7 +1144,30 @@ impl Editor {
             return Err("布局最多128个配置节点。".into());
         }
         let parent = self.parent_for_add()?;
+        if matches!(
+            kind,
+            NodeKind::Widget(WidgetKind::SubjectText | WidgetKind::SubjectImage)
+        ) && self.tree().is_some_and(|t| t.scope == LayoutScope::Public)
+        {
+            let outlet = self
+                .tree()
+                .and_then(|t| {
+                    t.nodes
+                        .iter()
+                        .find(|n| matches!(n.kind, NodeKind::Outlet { .. }))
+                })
+                .ok_or("公共布局缺少内容出口。")?
+                .id;
+            if !self.descendants(outlet).contains(&parent) {
+                return Err("公共独立内容请添加到科目内容出口或其内部容器。".into());
+            }
+        }
         let id = self.allocate()?;
+        let content_kind = match kind {
+            NodeKind::Widget(WidgetKind::SubjectText) => Some(ContentPayloadKind::Text),
+            NodeKind::Widget(WidgetKind::SubjectImage) => Some(ContentPayloadKind::Images),
+            _ => None,
+        };
         let tree = self.tree_mut().ok_or("没有草稿。")?;
         tree.nodes
             .iter_mut()
@@ -1086,6 +1180,11 @@ impl Editor {
             kind,
             children: vec![],
         });
+        if let Some(kind) = content_kind {
+            self.content_styles_mut()
+                .ok_or("没有样式草稿。")?
+                .push(ContentNodeStyle::new(id, kind));
+        }
         self.selected = Some(id);
         self.raw.clear();
         self.raw_original.clear();
@@ -1171,6 +1270,9 @@ impl Editor {
             }
         }
         tree.nodes.retain(|n| !remove.contains(&n.id));
+        if let Some(styles) = self.content_styles_mut() {
+            styles.retain(|s| !remove.contains(&s.node_id));
+        }
         self.selected = Some(parent);
         self.page = Page::Tree;
         self.raw.clear();
@@ -1223,6 +1325,31 @@ impl Editor {
                 return self.depart(Destination::ListAfter(None));
             }
             (Page::Tree, NODE_OPERATIONS) => self.page = Page::Operations,
+            (Page::Tree, MANAGE_CONTENT) => {
+                if self.has_unsaved_changes()
+                    || self.creating
+                    || match &self.draft {
+                        Some(Draft::Public(s)) => s.layout.revision.get() == 0,
+                        Some(Draft::Subject(s)) => s.revision.get() == 0,
+                        None => true,
+                    }
+                {
+                    return Err("请先保存布局与节点样式，再管理已保存节点的正文。".into());
+                }
+                let n = self.selected_node().ok_or("请选择独立内容节点。")?;
+                let kind = match n.kind {
+                    NodeKind::Widget(WidgetKind::SubjectText) => ComponentKind::SubjectText,
+                    NodeKind::Widget(WidgetKind::SubjectImage) => ComponentKind::SubjectImage,
+                    _ => return Err("请选择独立文字或图片节点。".into()),
+                };
+                return Ok(Command::ManageContent {
+                    slot: ContentSlotKey {
+                        scope: self.tree().ok_or("没有布局。")?.scope,
+                        node_id: n.id,
+                    },
+                    kind,
+                });
+            }
             (Page::Operations, BACK) => {
                 self.page = Page::Tree;
                 self.raw.clear();
@@ -1230,6 +1357,15 @@ impl Editor {
             }
             (Page::Tree, EDIT_NODE) => {
                 let node = self.selected_node().ok_or("请选择节点。")?;
+                if matches!(
+                    node.kind,
+                    NodeKind::Widget(WidgetKind::SubjectText | WidgetKind::SubjectImage)
+                ) {
+                    self.page = Page::ContentStyle;
+                    self.raw.clear();
+                    self.raw_original.clear();
+                    return Ok(Command::Stay);
+                }
                 if matches!(node.kind, NodeKind::Widget(_)) {
                     return Err(
                         "公共组件样式由公共显示设置管理；科目资料样式请打开资料设置。".into(),
@@ -1251,18 +1387,20 @@ impl Editor {
             (Page::Tree | Page::Operations, DOWN) => self.move_node(false)?,
             (Page::Tree | Page::Operations, REPARENT) => self.reparent()?,
             (Page::Tree, NODE_APPEARANCE) => {
-                if !matches!(
-                    self.selected_node().map(|n| &n.kind),
-                    Some(NodeKind::Container(_))
-                ) {
-                    return Err("只有容器有父组透明度与材质。".into());
-                }
-                self.page = Page::Appearance;
+                self.page = match self.selected_node().map(|n| &n.kind) {
+                    Some(NodeKind::Widget(WidgetKind::SubjectText | WidgetKind::SubjectImage)) => {
+                        Page::ContentStyle
+                    }
+                    Some(NodeKind::Container(_)) => Page::Appearance,
+                    _ => return Err("请选择独立内容节点或容器。".into()),
+                };
                 self.raw.clear();
                 self.raw_original.clear();
             }
-            (Page::Geometry | Page::Appearance | Page::Materials, APPLY) => self.apply_fields()?,
-            (Page::Geometry | Page::Appearance | Page::Materials, BACK) => {
+            (Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials, APPLY) => {
+                self.apply_fields()?
+            }
+            (Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials, BACK) => {
                 self.apply_fields()?;
                 self.page = Page::Tree;
             }
@@ -1516,7 +1654,7 @@ impl Editor {
             }
             Page::Tree => {
                 let order = self.order();
-                view.description="选择节点后编辑尺寸、顺序或父节点。公共内容出口限定科目树边界；玻璃最多两级（作业/课表内卡也计一级），超屏内容分页。重排不会修改作业、课表或资料原件。".into();
+                view.description="选择节点后编辑尺寸、顺序或父节点。公共内容出口限定科目树边界；玻璃最多两级（作业/课表内卡也计一级），超屏内容分页。重排不会修改作业、课表或课堂资料原件；删除独立内容节点会撤下该节点正文与撤销版本，其独立原件在无引用后回收。".into();
                 let rows = order
                     .iter()
                     .filter_map(|(id, depth)| {
@@ -1543,7 +1681,7 @@ impl Editor {
                 });
                 view.actions = vec![
                     action(EDIT_NODE, "尺寸 / 排列", true),
-                    action(NODE_APPEARANCE, "容器材质 / 组Alpha", true),
+                    action(NODE_APPEARANCE, "节点样式 / 容器Alpha", true),
                     action(ADD_CONTAINER, "添加透明容器", true),
                     action(ADD_WIDGET, "添加组件", true),
                     action(
@@ -1562,11 +1700,16 @@ impl Editor {
                     action(NODE_OPERATIONS, "顺序 / 重挂 / 删除 / 重置…", true),
                     action(PREVIEW, "只读预览草稿", true),
                     action(REVIEW, "保存摘要", true),
+                    action(
+                        MANAGE_CONTENT,
+                        "管理已保存节点正文…",
+                        self.selected_content_style().is_some(),
+                    ),
                     action(CANCEL, "返回配置列表", true),
                 ];
             }
             Page::Operations => {
-                view.description="通过所选稳定节点编号调整同级顺序或重挂到父节点。删除父节点时须明确保留重挂子节点，或移除整个展示子树；恢复默认使用全新节点编号。".into();
+                view.description="通过所选稳定节点编号调整同级顺序或重挂到父节点。删除父节点时须明确保留重挂子节点，或移除整个展示子树。移除独立内容节点会撤下正文与撤销版本，独立原件待无引用后回收；不会删除作业或课堂资料。恢复默认使用全新节点编号。".into();
                 view.actions = vec![
                     action(UP, "同级上移", true),
                     action(DOWN, "同级下移", true),
@@ -1577,8 +1720,8 @@ impl Editor {
                     action(CANCEL, "取消整份草稿…", true),
                 ];
             }
-            Page::Geometry | Page::Appearance | Page::Materials => {
-                view.description=match self.page{Page::Geometry=>"尺寸先确定宽度，再测量内容高度。Content父高度不能依赖子百分比高度；比例以万分位填写。透明根的锚点以系统工作区或科目内容区为边界。",Page::Appearance=>"容器玻璃填充不乘到子文字。父组整体Alpha应用到整个子组一次；0%保留布局占位但无展示命中。",_=>"科目配置只控制自己的资料内容区，不能修改公共时钟、学校科目色或全科作业。目录仍按当前有效老师与科目授权；完整名字与只读分页保留。"}.into();
+            Page::Geometry | Page::Appearance | Page::ContentStyle | Page::Materials => {
+                view.description=match self.page{Page::Geometry=>"尺寸先确定宽度，再测量内容高度。Content父高度不能依赖子百分比高度；比例以万分位填写。透明根的锚点以系统工作区或科目内容区为边界。",Page::ContentStyle=>"此样式仅属于当前作用域内的稳定节点编号。文字/图片正文另行确认发布；图片始终完整等比显示，不裁切。",Page::Appearance=>"容器玻璃填充不乘到子文字。父组整体Alpha应用到整个子组一次；0%保留布局占位但无展示命中。",_=>"科目配置只控制自己的资料内容区，不能修改公共时钟、学校科目色或全科作业。目录仍按当前有效老师与科目授权；完整名字与只读分页保留。"}.into();
                 view.actions = vec![
                     action(APPLY, "应用到草稿", true),
                     action(BACK, "应用并返回树", true),
@@ -1645,7 +1788,7 @@ impl Editor {
             }
             Page::Delete => {
                 view.description = format!(
-                    "移除展示节点#{}：请选择将子节点重挂到原父节点，或明确删除整个展示子树。两者都不会删除作业正文、课表或资料原件。",
+                    "移除展示节点#{}：请选择将子节点重挂到原父节点，或明确删除整个展示子树。独立内容节点移除后正文与撤销版本不再保留，独立原件待无引用后回收；作业、课表与课堂资料保持原状。",
                     self.selected.map_or(0, |id| id.get())
                 );
                 view.actions = vec![
@@ -1655,7 +1798,7 @@ impl Editor {
                 ];
             }
             Page::Reset => {
-                view.description="恢复默认排列会替换整棵展示树，为所有节点分配高水位之后的新编号。显示设置、科目资料和业务内容保留；只有确认保存后才生效。".into();
+                view.description="恢复默认排列会替换整棵展示树，为所有节点分配高水位之后的新编号。显示设置、作业、课表与课堂资料保留；独立内容节点的正文和撤销版本会撤下，独立原件在无引用后回收。只有确认保存后才生效。".into();
                 view.actions = vec![
                     action(CONFIRM_RESET, "确认恢复默认树", true),
                     action(KEEP, "保留当前树", true),
@@ -2489,5 +2632,122 @@ mod tests {
         assert_eq!(e.page, Page::Review);
         assert!(e.has_unsaved_changes());
         assert!(!e.submitted);
+    }
+    #[test]
+    fn independent_content_styles_are_stable_node_scoped_dirty_and_removed_with_the_node() {
+        let mut e = editor();
+        e.loaded_subject(key(), Some(subject())).unwrap();
+        let root = tree(&e).root;
+        e.selected = Some(root);
+        act(&mut e, ADD_WIDGET, &[(ADD_KIND, "text")]);
+        let one = e.selected.unwrap();
+        act(&mut e, ADD_WIDGET, &[(ADD_KIND, "text")]);
+        let two = e.selected.unwrap();
+        assert_ne!(one, two);
+        assert_eq!(e.content_styles().unwrap().len(), 2);
+        e.selected = Some(one);
+        act(&mut e, NODE_APPEARANCE, &[]);
+        assert_eq!(e.page, Page::ContentStyle);
+        act(&mut e, APPLY, &[(ALPHA, "17"), (FONT, "30")]);
+        let styles = e.content_styles().unwrap();
+        assert_eq!(
+            styles
+                .iter()
+                .find(|s| s.node_id == one)
+                .unwrap()
+                .component
+                .opacity_percent,
+            17
+        );
+        assert_eq!(
+            styles
+                .iter()
+                .find(|s| s.node_id == two)
+                .unwrap()
+                .component
+                .opacity_percent,
+            100
+        );
+        assert!(e.has_unsaved_changes());
+        act(&mut e, BACK, &[]);
+        assert!(e
+            .handle(MANAGE_CONTENT, FormData::new(), &identity())
+            .is_err());
+        act(&mut e, NODE_OPERATIONS, &[]);
+        act(&mut e, DELETE, &[]);
+        act(&mut e, REMOVE_SUBTREE, &[]);
+        assert!(!e.content_styles().unwrap().iter().any(|s| s.node_id == one));
+        assert!(e.content_styles().unwrap().iter().any(|s| s.node_id == two));
+        valid(&e);
+    }
+    #[test]
+    fn managing_content_requires_saved_clean_scope_and_never_changes_draft_cas() {
+        let mut e = editor();
+        let mut d = subject();
+        let id = d.allocate_id().unwrap();
+        let old = d
+            .tree
+            .nodes
+            .iter_mut()
+            .find(|n| n.id == d.tree.root)
+            .unwrap()
+            .children
+            .remove(0);
+        d.tree.nodes.retain(|n| n.id != old);
+        d.tree
+            .nodes
+            .iter_mut()
+            .find(|n| n.id == d.tree.root)
+            .unwrap()
+            .children
+            .push(id);
+        d.tree.nodes.push(LayoutNode {
+            id,
+            kind: NodeKind::Widget(WidgetKind::SubjectImage),
+            children: vec![],
+        });
+        d.content_styles
+            .push(ContentNodeStyle::new(id, ContentPayloadKind::Images));
+        e.loaded_subject(key(), Some(d.clone())).unwrap();
+        e.selected = Some(id);
+        let Command::ManageContent { slot, kind } = act(&mut e, MANAGE_CONTENT, &[]) else {
+            panic!("saved target")
+        };
+        assert_eq!(
+            slot,
+            ContentSlotKey {
+                scope: LayoutScope::Subject(key()),
+                node_id: id
+            }
+        );
+        assert_eq!(kind, ComponentKind::SubjectImage);
+        assert!(!e.has_unsaved_changes());
+        act(&mut e, NODE_APPEARANCE, &[]);
+        act(&mut e, APPLY, &[(ALPHA, "13")]);
+        act(&mut e, BACK, &[]);
+        assert!(e
+            .handle(MANAGE_CONTENT, FormData::new(), &identity())
+            .is_err());
+        assert!(matches!(&e.draft,Some(Draft::Subject(p))if p.revision==d.revision));
+    }
+    #[test]
+    fn independent_content_add_choices_and_invalid_style_apply_preserve_previous_values() {
+        let mut e = editor();
+        e.loaded_subject(key(), Some(subject())).unwrap();
+        let kinds = e.fields().into_iter().find(|f| f.id == ADD_KIND).unwrap();
+        let FieldKind::Choice(items) = kinds.kind else {
+            panic!()
+        };
+        assert!(items.iter().any(|i| i.value == "text"));
+        assert!(items.iter().any(|i| i.value == "image"));
+        act(&mut e, ADD_WIDGET, &[(ADD_KIND, "image")]);
+        let id = e.selected.unwrap();
+        act(&mut e, EDIT_NODE, &[]);
+        let before = e.selected_content_style().unwrap().clone();
+        let bad = form(&e, &[(FONT, "99")]);
+        assert!(e.handle(APPLY, bad, &identity()).is_err());
+        assert_eq!(e.selected_content_style().unwrap(), &before);
+        assert_eq!(e.selected, Some(id));
+        valid(&e);
     }
 }

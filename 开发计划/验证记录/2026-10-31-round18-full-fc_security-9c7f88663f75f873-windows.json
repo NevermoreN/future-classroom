@@ -1,0 +1,52 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "600ecf4f23111bccd77e4add237bb0e934cdc553ad2b4c6a0e61dd0960ed00d3",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/fc_security-9c7f88663f75f873.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "::",
+      "exitCode": 0,
+      "binarySha256": "600ecf4f23111bccd77e4add237bb0e934cdc553ad2b4c6a0e61dd0960ed00d3",
+      "output": [
+        "",
+        "running 18 tests",
+        "test codec::tests::authenticated_unsupported_formats_and_weak_work_factors_are_rejected_before_kdf ... ok",
+        "test codec::tests::each_modified_byte_truncation_extension_wrong_key_kind_and_binding_are_rejected ... ok",
+        "test codec::tests::fixed_record_round_trip_and_independent_hmac_vector ... ok",
+        "test codec::tests::recovery_record_codec_keeps_only_verifier_and_rejects_cross_account_copy ... ok",
+        "test recovery::tests::credential_port_rejects_wrong_recovery_before_preparing_password_or_new_recovery ... ok",
+        "test recovery::tests::malformed_recovery_codes_and_rng_failure_fail_closed ... ok",
+        "test recovery::tests::random_recovery_has_independent_salt_and_reference_verifier ... ok",
+        "test tests::content_sha256_matches_the_standard_abc_vector ... ok",
+        "test tests::independent_salts_and_constant_time_verification ... ok",
+        "test tests::standard_pbkdf2_sha256_vector ... ok",
+        "test tests::unicode_bounds_and_redaction ... ok",
+        "test web::tests::canonical_secret_validation_and_redaction ... ok",
+        "test web::tests::fixed_length_comparisons_reject_first_middle_and_last_mismatches ... ok",
+        "test web::tests::independent_sha256_vector_and_verifier_round_trip ... ok",
+        "test web::tests::owned_text_constructor_redacts_diagnostics ... ok",
+        "test web::tests::pairing_canonical_validation_and_redaction ... ok",
+        "test web::tests::pairing_sampling_rejects_zero_and_out_of_range_without_modulo_bias ... ok",
+        "test web::tests::secret_generation_has_bounded_zero_rejection_and_propagates_failure ... ok",
+        "",
+        "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.40s",
+        ""
+      ],
+      "passed": 18
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

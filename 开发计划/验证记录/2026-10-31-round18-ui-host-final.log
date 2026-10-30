@@ -1,0 +1,48 @@
+   Compiling fc-round18-ui-host-harness v0.0.0 (/tmp/fc-round18-ui-host-harness)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.24s
+     Running unittests src/lib.rs (/tmp/fc-round18-ui-target/debug/deps/fc_round18_ui_host_harness-d7e65e3374a9cd62)
+
+running 34 tests
+test application::display_editor::schema_tests::every_display_page_is_a_bounded_native_schema ... ok
+test application::display_editor::schema_tests::failed_transport_values_cannot_poison_native_view_schema ... ok
+test application::display_editor::tests::back_from_components_applies_valid_fields_and_refuses_to_lose_invalid_text ... ok
+test application::display_editor::tests::discard_requires_confirmation_and_keep_restores_component_partial_text ... ok
+test application::display_editor::tests::incomplete_dates_malformed_toggles_and_overflow_sizes_never_partially_apply ... ok
+test application::display_editor::tests::save_captures_original_expected_cas_until_successful_saved_callback ... ok
+test application::profile_content_editor::tests::clear_and_undo_require_separate_confirmation_and_cancel_does_not_publish ... ok
+test application::profile_content_editor::tests::node_scoped_load_and_kind_guards_never_replace_another_nodes_body ... ok
+test application::profile_content_editor::tests::image_append_replace_cancel_and_fifty_page_cap_preserve_previous_draft ... ok
+test application::profile_content_editor::tests::close_and_reload_discard_are_explicit_and_lock_cancel_keeps_text ... ok
+test application::display_editor::tests::material_controls_are_atomic_bounded_drafts_and_preserve_captured_revision ... ok
+test application::profile_content_editor::tests::ordered_existing_images_move_remove_and_recover_consumed_submission_without_new_file_clone ... ok
+test application::display_editor::tests::switching_components_applies_old_fields_atomically_and_keeps_ids_stable ... ok
+test application::display_editor::tests::invalid_partial_main_survives_error_close_and_lock_capture ... ok
+test application::profiles_editor::tests::canvas_drop_is_atomic_scope_bound_and_keeps_stable_order ... ok
+test application::profiles_editor::tests::exact_owner_and_scope_keys_are_required_without_caching_secrets ... ok
+test application::profile_content_editor::tests::text_over_scalar_limit_is_repairable_and_async_load_cannot_replace_unsaved_draft ... ok
+test application::profiles_editor::tests::every_page_reserves_the_native_lock_action_budget ... ok
+test application::profiles_editor::tests::historical_revoked_profile_can_be_disabled_but_cannot_be_reenabled ... ok
+test application::profiles_editor::tests::independent_content_add_choices_and_invalid_style_apply_preserve_previous_values ... ok
+test application::profiles_editor::tests::first_page_refresh_reads_created_profile_and_later_disabled_state ... ok
+test application::profiles_editor::tests::independent_content_styles_are_stable_node_scoped_dirty_and_removed_with_the_node ... ok
+test application::profiles_editor::tests::managing_content_requires_saved_clean_scope_and_never_changes_draft_cas ... ok
+test application::profiles_editor::tests::container_geometry_and_group_material_are_separate_nonsecret_settings ... ok
+test application::profiles_editor::tests::public_style_local_cancel_restores_entry_style_without_losing_tree_changes ... ok
+test application::profiles_editor::tests::material_settings_are_scoped_bounded_and_backend_failure_preserves_draft ... ok
+test application::profile_content_editor::tests::text_full_unicode_limit_requires_review_preserves_captured_cas_and_keeps_draft ... ok
+test application::profiles_editor::tests::public_style_is_one_joint_draft_and_keeps_both_captured_revisions ... ok
+test application::profiles_editor::tests::deleting_parent_requires_an_explicit_strategy_and_keeps_child_ids ... ok
+test application::profiles_editor::tests::review_preview_owns_candidate_without_committing_or_advancing_cas ... ok
+test application::profiles_editor::tests::unfinished_numbers_survive_lock_cancel_keep_and_never_mutate_geometry ... ok
+test application::profiles_editor::tests::directory_pages_keep_stable_profile_ids_and_valid_long_labels ... ok
+test application::profiles_editor::tests::reset_ids_are_fresh_and_late_loads_cannot_overwrite_dirty_drafts ... ok
+test application::profiles_editor::tests::configured_node_capacity_refuses_addition_without_changing_ids_or_tree ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests fc_round18_ui_host_harness
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,26 @@
+    Updating crates.io index
+     Locking 4 packages to latest compatible versions
+      Adding zeroize v1.8.2 (available: v1.9.1)
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling zeroize v1.8.2
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-round18-ui-host-harness v0.0.0 (/tmp/fc-round18-ui-host-harness)
+error[E0433]: cannot find module or crate `materials` in this scope
+ --> src/lib.rs:6:35
+  |
+6 | pub mod profile_content_files{use materials::chooser::SelectedFile;use fc_domain::profile_content::MediaReference;pub enum ImagePageI...
+  |                                   ^^^^^^^^^ use of unresolved module or unlinked crate `materials`
+  |
+  = help: if you wanted to use a crate named `materials`, use `cargo add materials` to add it to your `Cargo.toml`
+
+error[E0433]: cannot find type `CurrentClock` in this scope
+   --> /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/display_editor.rs:382:27
+    |
+382 |                 let now = CurrentClock::new().try_now().ok();
+    |                           ^^^^^^^^^^^^ use of undeclared type `CurrentClock`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `fc-round18-ui-host-harness` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-round18-ui-host-harness` (lib test) due to 2 previous errors

@@ -15,6 +15,8 @@ mod lesson_codec;
 mod logout_tests;
 pub mod materials;
 mod materials_codec;
+pub mod profile_content;
+mod profile_content_codec;
 mod profiles;
 mod profiles_codec;
 mod schedule;
@@ -52,6 +54,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     desktop::read_watermark(&TransactionView(&transaction), &identity)?;
     materials::startup_check(&TransactionView(&transaction), &identity)?;
     voice::startup_check(&TransactionView(&transaction), &identity)?;
+    profile_content::startup_check(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
 }
@@ -75,6 +78,7 @@ pub struct BusinessRepository<S> {
     factory: Factory<S>,
     session: SessionGuard,
     material_scene: MaterialSceneGuard,
+    profile_content_scene: profile_content::ProfileContentSceneGuard,
     lesson_observations: lesson::Observations,
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
 }
@@ -86,6 +90,7 @@ impl<S> Clone for BusinessRepository<S> {
             factory: self.factory.clone(),
             session: self.session.clone(),
             material_scene: self.material_scene.clone(),
+            profile_content_scene: self.profile_content_scene.clone(),
             lesson_observations: self.lesson_observations.clone(),
             voice_timeout: self.voice_timeout.clone(),
         }
@@ -103,6 +108,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
             factory,
             session: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
             material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
+            profile_content_scene: Arc::new(|_, _, _, _| Err(StorageError::AuthorityUnavailable)),
             lesson_observations: Arc::new(std::sync::Mutex::new(None)),
             voice_timeout: None,
         }

@@ -1,0 +1,38 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "d3c56f222e1cc84f81014a46a2d2ac211856549e5fc2281fb9350cf5d99122d3",
+  "exe": "/tmp/fc-round18-frozen-library-startup-fixed/fc_bootstrap-153172ad9c1ad7f3.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "profile_content_startup::tests::",
+      "exitCode": 0,
+      "binarySha256": "d3c56f222e1cc84f81014a46a2d2ac211856549e5fc2281fb9350cf5d99122d3",
+      "output": [
+        "",
+        "running 4 tests",
+        "test profile_content_startup::tests::owned_inventory_rejects_noncanonical_names_links_and_nonregular_before_deleting ... ok",
+        "test profile_content_startup::tests::startup_faulted_writer_cannot_enter_physical_recovery ... ok",
+        "test profile_content_startup::tests::startup_uninitialized_owned_files_are_repair_not_new_registration_or_silent_cleanup ... ok",
+        "test profile_content_startup::tests::startup_validates_everything_before_deletion_then_reconciles_reserved_orphans_removed_and_restart ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 7.62s",
+        ""
+      ],
+      "passed": 4
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

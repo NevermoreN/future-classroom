@@ -29,8 +29,12 @@ pub enum ComponentKind {
     Reminder,
     DateCountdown,
     Recess,
+    SubjectText,
+    SubjectImage,
 }
 impl ComponentKind {
+    /// The eight built-in global policies. Independent per-node content styles
+    /// are deliberately not global DisplaySettings entries.
     pub const ALL: [Self; 8] = [
         Self::Clock,
         Self::Date,
@@ -213,6 +217,7 @@ pub struct DesktopFacts {
     pub lesson_context: crate::lesson_context::LessonContextSnapshot,
     pub display: DisplaySettings,
     pub profiles: crate::profile::ProfileSelectionSnapshot,
+    pub profile_contents: Vec<crate::profile_content::PublishedContentSnapshot>,
     pub homework_offset: u64,
     pub homework_eligible_total: u64,
     pub homework: Vec<ContentRecord>,
@@ -339,6 +344,63 @@ impl DesktopFacts {
                 self.materials_page.as_ref().map(|page| &page.folder),
             )
             .map_err(|_| DisplayError::InvalidFacts)?;
+        let active_tree = self
+            .profiles
+            .subject_profile
+            .as_ref()
+            .map_or(&self.profiles.public_layout.tree, |profile| &profile.tree);
+        let expected_content_nodes = active_tree
+            .nodes
+            .iter()
+            .filter(|node| {
+                matches!(
+                    node.kind,
+                    crate::layout::NodeKind::Widget(
+                        crate::layout::WidgetKind::SubjectText
+                            | crate::layout::WidgetKind::SubjectImage
+                    )
+                )
+            })
+            .count();
+        if self.profile_contents.len() > crate::layout::MAX_VISIBLE_LEAVES {
+            return Err(DisplayError::Capacity);
+        }
+        if self.profile_contents.len() != expected_content_nodes {
+            return Err(DisplayError::InvalidFacts);
+        }
+        let target = crate::profile_content::ContentTarget {
+            public: &self.profiles.public_layout,
+            subject: self.profiles.subject_profile.as_ref(),
+        };
+        for (i, snapshot) in self.profile_contents.iter().enumerate() {
+            snapshot
+                .validate()
+                .map_err(|_| DisplayError::InvalidFacts)?;
+            if snapshot.slot.scope != active_tree.scope
+                || snapshot.revision > self.global_revision
+                || snapshot.view_revision > self.global_revision
+                || self.profile_contents[..i]
+                    .iter()
+                    .any(|old| old.slot == snapshot.slot)
+            {
+                return Err(DisplayError::InvalidFacts);
+            }
+            let kind = target
+                .kind(snapshot.slot, &self.identity)
+                .map_err(|_| DisplayError::InvalidFacts)?;
+            let actual = match snapshot.content {
+                crate::profile_content::PublishedContentDescriptor::Empty => None,
+                crate::profile_content::PublishedContentDescriptor::Text { .. } => {
+                    Some(crate::profile_content::ContentPayloadKind::Text)
+                }
+                crate::profile_content::PublishedContentDescriptor::Image { .. } => {
+                    Some(crate::profile_content::ContentPayloadKind::Images)
+                }
+            };
+            if actual.is_some_and(|actual| actual != kind) {
+                return Err(DisplayError::InvalidFacts);
+            }
+        }
         for (i, record) in self.homework.iter().enumerate() {
             self.validate_record(record)?;
             let ContentKey::Homework(k) = &record.key else {
@@ -487,6 +549,7 @@ mod tests {
             lesson_context: Default::default(),
             display: DisplaySettings::default(),
             profiles: Default::default(),
+            profile_contents: vec![],
             homework_offset: 0,
             homework_eligible_total: 0,
             homework: vec![],

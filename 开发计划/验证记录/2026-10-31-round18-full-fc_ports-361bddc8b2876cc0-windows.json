@@ -1,0 +1,42 @@
+{
+  "scope": "Win11 x86/WOW64 isolated native adapter tests; Win7/Win10 not executed",
+  "sha256": "ef76f169352a89e0d0cb5ca2f013ba757fa6bfe79dc66f9393b981f1dd01be74",
+  "exe": "/tmp/fc-round18-frozen-workspace-final/fc_ports-361bddc8b2876cc0.exe",
+  "timeoutSeconds": 300,
+  "tests": [
+    {
+      "filter": "::",
+      "exitCode": 0,
+      "binarySha256": "ef76f169352a89e0d0cb5ca2f013ba757fa6bfe79dc66f9393b981f1dd01be74",
+      "output": [
+        "",
+        "running 8 tests",
+        "test http::tests::bounded_headers_and_response_framing ... ok",
+        "test http::tests::debug_redacts_target_header_values_and_body ... ok",
+        "test http::tests::prefixes_never_infer_plaintext_or_wildcard ... ok",
+        "test http::tests::tokens_cannot_be_reconstructed_for_an_existing_generation_or_wrap ... ok",
+        "test material_preparation_tests::invalid_metadata_is_rejected_before_resource_adapter_io ... ok",
+        "test material_preparation_tests::prepared_append_binds_fixed_version_hash_size_and_type ... ok",
+        "test profile_content::tests::prepared_proof_hashes_actual_payload_and_text_instead_of_the_intent_fingerprint ... ok",
+        "test profile_content::tests::wrong_resource_owner_is_rejected_before_any_digest_proof_is_returned ... ok",
+        "",
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        ""
+      ],
+      "passed": 8
+    }
+  ],
+  "cleanup": {
+    "remainingProcesses": 0,
+    "sshd": "Running",
+    "remainingRoot": false
+  },
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "architecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300",
+    "session": 0
+  },
+  "status": "PASS"
+}

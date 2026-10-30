@@ -7,6 +7,7 @@ use crate::{
     ids::*,
     layout::*,
     materials::TeacherMaterialFolder,
+    profile_content::{validate_content_styles, ContentNodeStyle},
     time::LocalDateTime,
 };
 
@@ -60,6 +61,7 @@ pub struct LayoutDocument {
     pub revision: Revision,
     pub node_id_high_water: u64,
     pub tree: LayoutTree,
+    pub content_styles: Vec<ContentNodeStyle>,
 }
 impl Default for LayoutDocument {
     fn default() -> Self {
@@ -68,6 +70,7 @@ impl Default for LayoutDocument {
             revision: Revision::default(),
             node_id_high_water: tree.maximum_id(),
             tree,
+            content_styles: Vec::new(),
         }
     }
 }
@@ -82,6 +85,7 @@ pub struct SubjectProfileDocument {
     pub tree: LayoutTree,
     pub folder_id: Option<FolderId>,
     pub materials: MaterialsDisplaySettings,
+    pub content_styles: Vec<ContentNodeStyle>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ProfileError {
@@ -123,6 +127,18 @@ fn canonical_water(
             if n.id.get() <= floor && old.node(n.id).is_none() {
                 return Err(LayoutError::RetiredNodeId.into());
             }
+            if let Some(previous) = old.node(n.id) {
+                let content_kind = |kind: &NodeKind| match kind {
+                    NodeKind::Widget(WidgetKind::SubjectText) => Some(0),
+                    NodeKind::Widget(WidgetKind::SubjectImage) => Some(1),
+                    _ => None,
+                };
+                if content_kind(&previous.kind) != content_kind(&n.kind) {
+                    // Content slot identity cannot be repurposed into another
+                    // type. Allocate a fresh node; retain old business/history.
+                    return Err(LayoutError::RetiredNodeId.into());
+                }
+            }
         }
     }
     Ok(floor.max(candidate.maximum_id()))
@@ -142,6 +158,8 @@ impl LayoutDocument {
             return Err(ProfileError::InvalidScope);
         }
         self.tree.validate_structure()?;
+        validate_content_styles(&self.tree, &self.content_styles)
+            .map_err(|_| ProfileError::InvalidSettings)?;
         if self.node_id_high_water < self.tree.maximum_id() {
             return Err(ProfileError::Layout(LayoutError::RetiredNodeId));
         }
@@ -168,7 +186,10 @@ impl LayoutDocument {
         candidate.node_id_high_water =
             canonical_water(Some(&self.tree), self.node_id_high_water, &candidate.tree)?;
         candidate.validate_structure()?;
-        candidate.revision = if candidate.tree == self.tree && self.revision.get() != 0 {
+        candidate.revision = if candidate.tree == self.tree
+            && candidate.content_styles == self.content_styles
+            && self.revision.get() != 0
+        {
             self.revision
         } else {
             self.revision
@@ -188,10 +209,15 @@ impl LayoutDocument {
             .remap_fresh_ids(self.node_id_high_water.max(self.tree.maximum_id()))?;
         self.node_id_high_water = tree.maximum_id();
         self.tree = tree;
+        self.content_styles.clear();
         Ok(())
     }
     pub fn allocation_bytes(&self) -> Option<usize> {
-        self.tree.allocation_bytes()
+        self.tree.allocation_bytes()?.checked_add(
+            self.content_styles
+                .capacity()
+                .checked_mul(std::mem::size_of::<ContentNodeStyle>())?,
+        )
     }
 }
 impl SubjectProfileDocument {
@@ -207,6 +233,7 @@ impl SubjectProfileDocument {
             tree,
             folder_id: None,
             materials: MaterialsDisplaySettings::default(),
+            content_styles: Vec::new(),
         }
     }
     pub fn validate_structure(&self) -> Result<(), ProfileError> {
@@ -214,6 +241,8 @@ impl SubjectProfileDocument {
             return Err(ProfileError::InvalidScope);
         }
         self.tree.validate_structure()?;
+        validate_content_styles(&self.tree, &self.content_styles)
+            .map_err(|_| ProfileError::InvalidSettings)?;
         if self.node_id_high_water < self.tree.maximum_id() {
             return Err(ProfileError::Layout(LayoutError::RetiredNodeId));
         }
@@ -296,12 +325,15 @@ impl SubjectProfileDocument {
         } else {
             candidate.validate_references(identity, folder)?;
         }
-        let tree_changed = current.is_none_or(|old| old.tree != candidate.tree);
+        let tree_changed = current.is_none_or(|old| {
+            old.tree != candidate.tree || old.content_styles != candidate.content_styles
+        });
         let changed = current.is_none_or(|old| {
             old.tree != candidate.tree
                 || old.enabled != candidate.enabled
                 || old.folder_id != candidate.folder_id
                 || old.materials != candidate.materials
+                || old.content_styles != candidate.content_styles
         });
         candidate.layout_revision = if tree_changed {
             current
@@ -329,10 +361,15 @@ impl SubjectProfileDocument {
             .remap_fresh_ids(self.node_id_high_water.max(self.tree.maximum_id()))?;
         self.node_id_high_water = tree.maximum_id();
         self.tree = tree;
+        self.content_styles.clear();
         Ok(())
     }
     pub fn allocation_bytes(&self) -> Option<usize> {
-        self.tree.allocation_bytes()
+        self.tree.allocation_bytes()?.checked_add(
+            self.content_styles
+                .capacity()
+                .checked_mul(std::mem::size_of::<ContentNodeStyle>())?,
+        )
     }
 }
 
@@ -681,12 +718,12 @@ mod tests {
         assert_eq!(t.validate(), Err(LayoutError::Capacity));
     }
     #[test]
-    fn protected_scopes_unsupported_extensions_and_nested_actual_glass_are_rejected() {
+    fn protected_scopes_and_nested_actual_glass_are_rejected_but_content_is_supported() {
         let mut t = default_subject_layout(key(2));
         t.nodes[1].kind = NodeKind::Widget(WidgetKind::Homework);
         assert_eq!(t.validate(), Err(LayoutError::ProtectedWidget));
         t.nodes[1].kind = NodeKind::Widget(WidgetKind::SubjectImage);
-        assert_eq!(t.validate(), Err(LayoutError::UnsupportedWidget));
+        t.validate().unwrap();
         let mut t = default_public_layout();
         let parent = t.nodes.iter_mut().find(|n| n.id == nid(2)).unwrap();
         if let NodeKind::Container(c) = &mut parent.kind {

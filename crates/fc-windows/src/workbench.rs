@@ -1103,6 +1103,12 @@ impl Window {
     pub fn select_material(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
         crate::materials::chooser::select(Some(self.hwnd))
     }
+    pub fn select_content_txt(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
+        crate::materials::chooser::select_content_txt(Some(self.hwnd))
+    }
+    pub fn select_content_images(&self) -> Result<Vec<crate::materials::chooser::SelectedFile>> {
+        crate::materials::chooser::select_content_images(Some(self.hwnd))
+    }
     pub fn hide(&self) {
         self.state.clear_passwords();
         self.state.discard_forms();
@@ -1883,6 +1889,31 @@ mod tests {
             enabled: true,
         });
         view
+    }
+    #[test]
+    fn hidden_multiline_edit_preserves_10000_astral_scalars_without_truncation() {
+        let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
+        let foreground = unsafe { GetForegroundWindow() };
+        let window = Window::new().unwrap();
+        let mut model = view();
+        model.fields[2].max_utf16 = 20_000;
+        window.render(&model).unwrap();
+        let text = "😀".repeat(10_000);
+        set(field(&window, 3), &text);
+        assert_eq!(read_edit(field(&window, 3)).unwrap(), text);
+        click(&window);
+        let mut submitted = window
+            .take_events()
+            .unwrap()
+            .into_iter()
+            .find_map(|event| match event {
+                Event::Submit(ActionId(1), data) => Some(data),
+                _ => None,
+            })
+            .expect("own hidden control submit");
+        assert_eq!(submitted.take(FieldId(3)).unwrap(), text);
+        assert!(!window.is_visible());
+        assert_eq!(unsafe { GetForegroundWindow() }, foreground);
     }
     #[test]
     fn registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields(

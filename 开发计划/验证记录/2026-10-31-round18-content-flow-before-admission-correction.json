@@ -1,0 +1,74 @@
+{
+  "round": 18,
+  "scope": "Author-owned Windows shared-pool profile-content composition tests only",
+  "not_independent_audit": true,
+  "source": {
+    "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+    "bytes": 33131,
+    "sha256": "7737b0e6be73b34253d653170e48af644639096af21c9247d13fb7a04500ed99"
+  },
+  "source_frozen_at_utc": "2026-10-30T20:36:29.868777+00:00",
+  "test_cases": [
+    "real_worker_txt_unicode_two_nodes_clear_explicit_undo_and_dpapi_sqlite_reopen",
+    "real_worker_wic_fifty_pages_existing_reorder_partial_failure_and_physical_settlement"
+  ],
+  "product_execution": {
+    "host_runs": 0,
+    "windows_runs": 0,
+    "ssh_runs": 0,
+    "native_tests_compiled_initial": 2,
+    "native_tests_passed": null,
+    "note": "Cross-compilation does not claim DPAPI/WIC/runtime/cleanup PASS. Root unified physical Windows execution pending."
+  },
+  "evidence_history": [
+    {
+      "stage": "Initial cross link on still-changing integration source",
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round18-content-flow-target cargo test -p fc-bootstrap --bin fc-bootstrap --target i686-pc-windows-gnu --locked --no-run",
+      "exit_code": 0,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-initial-no-run.log",
+        "bytes": 3949,
+        "sha256": "0577e8af9618575e56607b7c5f016adbc8e29e0fc1dad2f45f955c2780fc78ea"
+      },
+      "warning": "Root profiles_preview.rs image_requests_with_content unused; producer-owned test file had no diagnostics",
+      "binds_final_source": false
+    },
+    {
+      "stage": "Final retry interrupted by central integration API mismatch",
+      "exit_code": 101,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-final-no-run.log",
+        "bytes": 999,
+        "sha256": "f4d2bbacbc57400c1f5ba76e56cb8202249afb4a17fd7fc56cde71b84feda18e"
+      },
+      "reason": "Root application.rs696 supplies new root PathBuf to profile_flow::run, which still accepts five parameters. No producer test errors. Parent notified; no unowned source edited."
+    },
+    {
+      "stage": "Retry after run signature alignment, newer Preview payload not yet integrated by parent",
+      "exit_code": 101,
+      "log": {
+        "path": "/tmp/fc-round18-content-flow-aligned-no-run.log",
+        "bytes": 1425,
+        "sha256": "62acc07de42c2f43616f75a001c562743b2476a6e6b66113a2bab30589b98761"
+      },
+      "reason": "Parent application.rs2297~2302 Preview destructuring omits new now/contents/text/images. No producer-owned test diagnostics; unowned source not edited."
+    }
+  ],
+  "final_checks": "PENDING parent complete Preview payload integration, then final no-run / strictClippy / fmt",
+  "coverage": [
+    "One fixed WorkerPool<Job> wrapping actual Work, no second pool. Real Work::Open protected deployment key/SQLite and KDF/login run on same worker pool.",
+    "Two distinct text nodes concurrently publish independent literal text / BOM TXT 10000 emoji; invalid UTF16 + 10001 scalar rejected; Clear + explicit target revision Undo; Work::Shutdown/Open reloads protected key and bodies; actual Work::Desktop hydration.",
+    "Two distinct image nodes concurrently publish 50 pages and 1 page; selected BMP headers/full WIC and SHA are real. 51-page descriptor rejected by actual shared queue.",
+    "Existing MediaReference + Selected page append/delete/reorder without replacing stable resources. Both current and previous resources remain Referenced; retired older versions reclaimed. Actual Clear/explicit Undo preserves restored image references.",
+    "Partial valid-image + malformed-image bundle fails after first original preparation and preserves prior body; settled unreferenced media removed. Actual Work::ContentImages decodes current images for two node identities.",
+    "A same-pool owned preparation pauses inside its real state callback, after actual Begin/reservation/source pin/guard admission; Reserved bytes remain through GC and lock, then physical exit is signaled separately before permitted settle. Old lease cannot publish another node. Fresh Work::Open/login preserves last accepted bodies."
+  ],
+  "fixture_boundaries": [
+    "Only FutureClassroom-Test-Content-Flow roots with protected DACL readback and exact InstanceGuard. No user paths, windows, input, sounds, or Shell launch.",
+    "Two glass groups hold four content widgets; explicitly remove display Recess slot to respect 8 top-level cards. No business deletion.",
+    "Test coordinator waits only; actual KDF and product ContentJob run on fixed two worker threads. Queue accounting includes Work and selected path/text actual allocation.",
+    "Paused fixture signals ACK only after real guard creation and first preparation-state callback, not just reservation timing. Pause is test controlled, not a claimed real AuthorityUpdating transaction.",
+    "Owner exists before protected-directory creation; panic unwinding joins workers, closes SQLite, releases instance then removes only that exclusive test root. Runtime cleanup unverified until Windows execution."
+  ],
+  "build_cache": "/tmp/fc-round18-content-flow-target retained for parent unified cleanup; no remote temporary state created"
+}

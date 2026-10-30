@@ -6,6 +6,9 @@ mod desktop_controller;
 mod display_editor;
 mod material_flow;
 pub(crate) mod material_probe;
+mod profile_content_editor;
+mod profile_content_flow;
+mod profile_content_probe;
 mod profile_flow;
 mod profiles_editor;
 mod profiles_preview;
@@ -105,6 +108,7 @@ enum Screen {
     Schedule,
     Display,
     Profiles,
+    ProfileContent,
     Materials,
     Lesson,
     Web,
@@ -130,6 +134,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
+                | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
                 | BackendError::Storage(
                     S::AuthorityUnavailable
@@ -197,6 +202,7 @@ fn error_text(error: &Failure) -> String {
             BackendError::Profile(fc_ports::ProfileRepositoryError::Domain(fc_domain::profile::ProfileError::InvalidScope)) => "请选择有效的班级、科目与任教老师；停用后的历史配置不会用于当前场景。".into(),
             BackendError::Profile(fc_ports::ProfileRepositoryError::DocumentTooLarge) => "布局或科目配置超过64KiB文档上限，本次未保存，草稿仍保留。".into(),
             BackendError::Profile(fc_ports::ProfileRepositoryError::Display(e)) => display_editor::problem(e),
+            BackendError::ProfileContent(e) => profile_content_flow::problem(e).into(),
             BackendError::Schedule(fc_ports::ScheduleRepositoryError::DocumentTooLarge) => "课表和保留历史超过本阶段64KiB文档上限。请减少学期、行或备注；草稿仍保留，未截断或覆盖。".into(),
             BackendError::Storage(fc_storage::StorageError::LoginRateLimited {
                 retry_after_millis,
@@ -336,7 +342,19 @@ enum Outcome {
     DisplayLoaded(DisplaySettings),
     DisplaySaved(DisplaySettings),
     Profile(Box<profile_flow::Loaded>),
-    Desktop(Box<DesktopFacts>),
+    Desktop(
+        Box<DesktopFacts>,
+        fc_bootstrap::profile_content_cache::TextFrame,
+    ),
+    ContentImages(profile_content_flow::ImageCompletion),
+    ContentPage {
+        generation: SceneGeneration,
+        snapshot: fc_domain::profile_content::PublishedContentSnapshot,
+    },
+    ProfileContent(Box<profile_content_flow::Loaded>),
+    ContentMaintained {
+        pending: bool,
+    },
     Materials(Box<MaterialPage>),
     MaterialLaunch(Box<material_flow::PreparedLaunch>),
     MaterialCleaned,
@@ -362,6 +380,11 @@ enum Work {
     Request(Request),
     Refresh(Arc<Mutex<Backend>>),
     MaintainVoice(PathBuf, VoiceService),
+    MaintainProfileContent(
+        PathBuf,
+        Arc<Mutex<Backend>>,
+        Arc<Mutex<profile_content_flow::GcCursor>>,
+    ),
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
     LoadAccounts(Arc<Mutex<Backend>>, SessionLease),
@@ -392,8 +415,17 @@ enum Work {
         SessionLease,
         Box<profiles_editor::Command>,
         u64,
+        PathBuf,
     ),
     Desktop(Arc<Mutex<Backend>>, usize, Option<MaterialCursor>),
+    ContentImages(Box<profile_content_flow::ImageJob>),
+    ContentPage {
+        backend: Arc<Mutex<Backend>>,
+        generation: SceneGeneration,
+        source_revision: Revision,
+        request: fc_domain::profile_content::PageContentRequest,
+    },
+    ProfileContent(Box<profile_content_flow::ContentJob>),
     Material(Box<material_flow::MaterialJob>),
     CleanupMaterial(PathBuf, PathBuf),
     OpenWeb(Arc<Mutex<Backend>>, SessionLease),
@@ -409,9 +441,10 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
-            Self::Open(p, _) | Self::ValidateOffice(p) | Self::MaintainVoice(p, _) => {
-                Some(p.as_os_str().len().saturating_mul(2))
-            }
+            Self::Open(p, _)
+            | Self::ValidateOffice(p)
+            | Self::MaintainVoice(p, _)
+            | Self::MaintainProfileContent(p, _, _) => Some(p.as_os_str().len().saturating_mul(2)),
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
             Self::Refresh(_)
             | Self::Shutdown(_)
@@ -424,6 +457,9 @@ impl Task for Work {
             | Self::Web(..)
             | Self::CloseWeb(..)
             | Self::Desktop(_, _, _) => Some(1024),
+            Self::ContentPage { .. } => Some(1024),
+            Self::ContentImages(job) => job.allocation_bytes(),
+            Self::ProfileContent(job) => job.allocation_bytes(),
             Self::SaveAccount(_, _, operation) => {
                 let (strings, scopes) = match operation.as_ref() {
                     accounts_editor::Command::Create { account, .. } => (
@@ -448,7 +484,8 @@ impl Task for Work {
                     .checked_add(scopes.checked_mul(std::mem::size_of::<AssignmentScope>())?)?
                     .checked_add(2048)
             }
-            Self::Profile(_, _, operation, _) => profile_flow::allocation(operation),
+            Self::Profile(_, _, operation, _, root) => profile_flow::allocation(operation)?
+                .checked_add(root.as_os_str().len().checked_mul(2)?),
             Self::Material(job) => job.allocation_bytes(),
             Self::CleanupMaterial(root, path) => root
                 .as_os_str()
@@ -471,6 +508,17 @@ impl Task for Work {
                 let backend = Arc::new(Mutex::new(backend));
                 let opened = (|| {
                     let state = backend.lock().map_err(|_| Failure::Stopped)?.state()?;
+                    // Startup holds the deployment's exclusive instance guard;
+                    // this backend has not been released to any preparation yet.
+                    // Reconcile even a new deployment, refusing orphan media in
+                    // an uninstalled/older database instead of adopting it.
+                    let content_files =
+                        fc_bootstrap::profile_content_files::ControlledContentFiles::new(&root)
+                            .map_err(BackendError::ProfileContent)?;
+                    fc_bootstrap::profile_content_startup::reconcile_after_restart(
+                        &*backend.lock().map_err(|_| Failure::Stopped)?,
+                        &content_files,
+                    )?;
                     // Inventory maintenance requires an installed identity. A
                     // new, valid deployment has no published resources yet;
                     // keep the first-administrator flow available.
@@ -520,6 +568,9 @@ impl Task for Work {
                     .map_err(|_| invalid("声音数据维护未完成。"))?;
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 Ok(Outcome::MaterialCleaned)
+            }
+            Self::MaintainProfileContent(root, backend, cursor) => {
+                profile_content_flow::maintain(root, backend, cursor, context)
             }
             Self::Request(r) => execute(r),
             Self::OpenWeb(backend, lease) => {
@@ -655,8 +706,8 @@ impl Task for Work {
                     .save_display(lease, expected, settings)?;
                 Ok(Outcome::DisplaySaved(settings))
             }
-            Self::Profile(backend, lease, operation, sequence) => {
-                profile_flow::run(backend, lease, *operation, sequence, context)
+            Self::Profile(backend, lease, operation, sequence, root) => {
+                profile_flow::run(backend, lease, *operation, sequence, root, context)
                     .map(|loaded| Outcome::Profile(Box::new(loaded)))
             }
             Self::Material(job) => job.run(context),
@@ -677,16 +728,37 @@ impl Task for Work {
             Self::Desktop(backend, offset, cursor) => {
                 // A display refresh must never occupy the second shared worker
                 // waiting behind a management KDF/transaction holding Backend.
-                let facts = backend
-                    .try_lock()
-                    .map_err(|_| {
-                        Failure::Backend(BackendError::Display(
-                            fc_ports::DisplayRepositoryError::Unavailable,
-                        ))
-                    })?
-                    .desktop_facts_with_material_cursor(offset, cursor)?;
+                let backend = backend.try_lock().map_err(|_| {
+                    Failure::Backend(BackendError::Display(
+                        fc_ports::DisplayRepositoryError::Unavailable,
+                    ))
+                })?;
+                let facts = backend.desktop_facts_with_material_cursor(offset, cursor)?;
+                let content = backend.hydrate_profile_content(&facts)?;
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
-                Ok(Outcome::Desktop(Box::new(facts)))
+                Ok(Outcome::Desktop(Box::new(facts), content))
+            }
+            Self::ContentImages(job) => job.run(context),
+            Self::ProfileContent(job) => job.run(context),
+            Self::ContentPage {
+                backend,
+                generation,
+                source_revision,
+                request,
+            } => {
+                let snapshot = backend
+                    .try_lock()
+                    .map_err(|_| invalid("内容状态正在更新，请稍后刷新。"))?
+                    .page_profile_content_while(
+                        generation,
+                        source_revision,
+                        request,
+                        Arc::new(context.execution_fence()),
+                    )?;
+                Ok(Outcome::ContentPage {
+                    generation,
+                    snapshot,
+                })
             }
             Self::ValidateOffice(path) => {
                 struct Control<'a>(&'a JobContext);
@@ -967,6 +1039,8 @@ struct App {
     display: Option<display_editor::Editor>,
     accounts: Option<accounts_editor::Editor>,
     profiles: Option<profiles_editor::Editor>,
+    profile_content: Option<profile_content_editor::Editor>,
+    profile_content_owner: Option<PrincipalId>,
     preview_sequence: u64,
     preview_active: bool,
     desktop: desktop_controller::Controller,
@@ -990,6 +1064,9 @@ struct App {
     cleanup_jobs: Vec<JobTicket<Result<Outcome>>>,
     voice_maintenance: Option<JobTicket<Result<Outcome>>>,
     next_voice_maintenance: Instant,
+    content_maintenance: Option<JobTicket<Result<Outcome>>>,
+    next_content_maintenance: Instant,
+    content_gc: Arc<Mutex<profile_content_flow::GcCursor>>,
 }
 impl App {
     fn view(&self) -> View {
@@ -1008,6 +1085,23 @@ impl App {
                         enabled: true,
                     });
                 }
+                return view;
+            }
+        }
+        if self.screen == Screen::ProfileContent {
+            if let Some(editor) = &self.profile_content {
+                let mut view = editor.view(self.pending.is_some() || self.stopping);
+                if !status.is_empty() {
+                    if !view.status.is_empty() {
+                        view.status.push('\n');
+                    }
+                    view.status.push_str(&status);
+                }
+                view.actions.push(Action {
+                    id: LOCK,
+                    label: "锁定并保留草稿".into(),
+                    enabled: true,
+                });
                 return view;
             }
         }
@@ -1328,10 +1422,13 @@ impl App {
             Screen::Profiles => {
                 view.title = "正在加载布局与科目配置".into();
             }
+            Screen::ProfileContent => {
+                view.title = "正在读取独立节点内容".into();
+            }
             Screen::ExitDraft => {
                 view.title = "退出前处理未保存草稿".into();
                 view.description =
-                    "课表、显示设置、账号或布局有未保存修改。退出后，本次运行中的草稿将丢失。"
+                    "课表、显示设置、账号、布局或独立内容有未保存修改。退出后，本次运行中的草稿将丢失。"
                         .into();
                 view.actions = vec![
                     action(RETURN_DRAFT, "返回草稿"),
@@ -1382,6 +1479,14 @@ impl App {
                 editor.suspend(data);
             }
         }
+        if self.screen == Screen::ProfileContent {
+            if let Some(editor) = &mut self.profile_content {
+                if let Ok(data) = self.window.draft_nonsecret() {
+                    let _ = editor.capture(&data);
+                }
+                editor.cancel_review();
+            }
+        }
         if self.screen == Screen::Schedule {
             if let (Some(editor), Ok(data)) = (&mut self.schedule, self.window.draft_nonsecret()) {
                 editor.capture(data, &self.state);
@@ -1414,6 +1519,9 @@ impl App {
             return;
         }
         self.stopping = true;
+        if let Some(ticket) = &self.content_maintenance {
+            ticket.cancel();
+        }
         if let Some(audio) = &self.audio {
             audio.shutdown();
         }
@@ -1528,6 +1636,15 @@ impl App {
                         self.render()?;
                     }
                 }
+                if self.screen == Screen::ProfileContent && self.pending.is_none() {
+                    if let (Some(editor), Ok(data)) =
+                        (&mut self.profile_content, self.window.draft_nonsecret())
+                    {
+                        if let Err(message) = editor.capture(&data) {
+                            self.status = message;
+                        }
+                    }
+                }
             }
             Event::LayoutSelect {
                 generation,
@@ -1571,6 +1688,15 @@ impl App {
                         }
                         self.render()?;
                         self.sync_layout_selection()?;
+                    }
+                }
+                if self.screen == Screen::ProfileContent && self.pending.is_none() && !self.stopping
+                {
+                    if let Some(editor) = &mut self.profile_content {
+                        if let Err(message) = editor.select(row, column) {
+                            self.status = message;
+                        }
+                        self.render()?;
                     }
                 }
                 if self.screen == Screen::Materials && self.pending.is_none() && !self.stopping {
@@ -1628,6 +1754,9 @@ impl App {
                 if self.screen == Screen::Profiles {
                     return self.profiles_event(action, data);
                 }
+                if self.screen == Screen::ProfileContent {
+                    return self.profile_content_event(action, data);
+                }
                 if self.screen == Screen::Accounts {
                     return self.accounts_event(action, data);
                 }
@@ -1682,6 +1811,13 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Profiles
+                            } else if self.profile_content_owner == owner
+                                && self
+                                    .profile_content
+                                    .as_ref()
+                                    .is_some_and(|editor| editor.is_dirty())
+                            {
+                                Screen::ProfileContent
                             } else {
                                 Screen::Home
                             };
@@ -1822,6 +1958,16 @@ impl App {
             return self.render();
         }
         self.clear_profile_preview();
+        if self.profile_content_owner == Some(lease.principal_id())
+            && self
+                .profile_content
+                .as_ref()
+                .is_some_and(|editor| editor.is_dirty())
+        {
+            self.screen = Screen::ProfileContent;
+            self.status.clear();
+            return self.render();
+        }
         self.screen = Screen::Profiles;
         self.status.clear();
         if self
@@ -1870,6 +2016,30 @@ impl App {
     ) -> std::result::Result<(), String> {
         use profiles_editor::Command as C;
         match command {
+            C::ManageContent { slot, kind } => {
+                let Some(owner) = self.current_global_owner() else {
+                    return self.render();
+                };
+                if !self.profiles_memory_gate() {
+                    self.lock();
+                    return self.render();
+                }
+                self.clear_profile_preview();
+                let keep = self.profile_content_owner == Some(owner)
+                    && self
+                        .profile_content
+                        .as_ref()
+                        .is_some_and(|editor| editor.slot() == slot && editor.is_dirty());
+                if !keep {
+                    self.profile_content = Some(profile_content_editor::Editor::new(slot, kind)?);
+                }
+                self.profile_content_owner = Some(owner);
+                self.screen = Screen::ProfileContent;
+                self.status.clear();
+                if !keep {
+                    self.submit_profile_content(profile_content_flow::Operation::Load { slot })?;
+                }
+            }
             C::Stay => {
                 self.clear_profile_preview();
                 self.status.clear();
@@ -1885,6 +2055,9 @@ impl App {
                     return Ok(());
                 };
                 self.clear_profile_preview();
+                if matches!(&operation, C::Preview { .. }) {
+                    self.desktop.release_for_preview();
+                }
                 self.preview_sequence = self
                     .preview_sequence
                     .checked_add(1)
@@ -1895,11 +2068,142 @@ impl App {
                         lease,
                         Box::new(operation),
                         self.preview_sequence,
+                        self.root.clone(),
                     ))?;
                 }
             }
         }
         Ok(())
+    }
+    fn submit_profile_content(
+        &mut self,
+        operation: profile_content_flow::Operation,
+    ) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        if !self.profiles_memory_gate() || self.current_global_owner() != self.profile_content_owner
+        {
+            self.lock();
+            return self.render();
+        }
+        let Some(backend) = self.backend.clone() else {
+            return Ok(());
+        };
+        self.submit(Work::ProfileContent(Box::new(
+            profile_content_flow::ContentJob {
+                root: self.root.clone(),
+                backend,
+                lease,
+                operation,
+            },
+        )))?;
+        if self.pending.is_none() {
+            if let Some(editor) = &mut self.profile_content {
+                editor.cancel_review();
+            }
+            self.status = "后台繁忙，本次未排入任务；请重新读取核对后再选择文件。".into();
+        }
+        Ok(())
+    }
+    fn profile_content_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        if !self.profiles_memory_gate() || self.current_global_owner() != self.profile_content_owner
+        {
+            self.lock();
+            return self.render();
+        }
+        let Some(editor) = &mut self.profile_content else {
+            return self.render();
+        };
+        use profile_content_editor::Command as C;
+        match editor.command(action, &data) {
+            Ok(C::Stay) => self.status.clear(),
+            Ok(C::Close) => {
+                self.profile_content = None;
+                self.profile_content_owner = None;
+                self.screen = Screen::Profiles;
+                self.status.clear();
+            }
+            Ok(C::Reload) => {
+                let slot = editor.slot();
+                self.submit_profile_content(profile_content_flow::Operation::Load { slot })?;
+            }
+            Ok(C::PickTxt) => {
+                let selected = self.window.select_content_txt();
+                if !self.profiles_memory_gate()
+                    || self.current_global_owner() != self.profile_content_owner
+                {
+                    self.lock();
+                    return self.render();
+                }
+                self.last_input = Instant::now();
+                match selected {
+                    Ok(Some(file)) => {
+                        if let Some(editor) = &mut self.profile_content {
+                            if let Err(message) = editor.accept_txt(file) {
+                                self.status = message;
+                            } else {
+                                self.status.clear();
+                            }
+                        }
+                    }
+                    Ok(None) => self.status = "已取消选择TXT。".into(),
+                    Err(_) => self.status = "无法选择本机TXT文件。".into(),
+                }
+            }
+            Ok(C::PickImages) => {
+                let selected = self.window.select_content_images();
+                if !self.profiles_memory_gate()
+                    || self.current_global_owner() != self.profile_content_owner
+                {
+                    self.lock();
+                    return self.render();
+                }
+                self.last_input = Instant::now();
+                match selected {
+                    Ok(files) if files.is_empty() => self.status = "已取消选择图片。".into(),
+                    Ok(files) => {
+                        if let Some(editor) = &mut self.profile_content {
+                            if let Err(message) = editor.accept_images(files) {
+                                self.status = message;
+                            } else {
+                                self.status.clear();
+                            }
+                        }
+                    }
+                    Err(_) => self.status = "无法选择图片；每次最多50张。".into(),
+                }
+            }
+            Ok(C::Submit {
+                slot,
+                expected_revision,
+                operation,
+                input,
+            }) => match command_id() {
+                Ok(command_id) => {
+                    self.submit_profile_content(profile_content_flow::Operation::Publish {
+                        slot,
+                        expected_revision,
+                        command_id,
+                        operation,
+                        input,
+                    })?
+                }
+                Err(error) => {
+                    if let Some(editor) = &mut self.profile_content {
+                        editor.cancel_review();
+                    }
+                    self.status = error_text(&error);
+                }
+            },
+            Err(message) => self.status = message,
+        }
+        self.render()
     }
     fn layout_canvas_event(
         &mut self,
@@ -2018,34 +2322,66 @@ impl App {
                 };
             }
             L::Preview(preview) => {
+                if preview.sequence != self.preview_sequence {
+                    return Ok(());
+                }
+                let source_revision = preview.source_revision;
+                let preview_current = |control: &SessionControl| {
+                    let status = control.health_gate().status();
+                    status.health == fc_runtime::health::Health::Healthy
+                        && status.revision == source_revision
+                };
+                if !self.profiles_memory_gate()
+                    || self
+                        .control
+                        .as_ref()
+                        .is_none_or(|control| !preview_current(control))
+                {
+                    self.status = "预览内容已变化，请重新预览。".into();
+                    return self.render();
+                }
+                if self.offscreen_probe {
+                    profile_content_probe::observe_preview(&preview);
+                }
                 let profile_flow::Preview {
                     identity,
                     public,
                     subject,
                     sequence,
+                    now,
+                    source_revision: _,
+                    contents,
+                    text,
+                    images,
                 } = *preview;
-                if sequence != self.preview_sequence {
-                    return Ok(());
-                }
-                self.desktop.release_for_preview();
-                let image = match profiles_preview::render(
+                let rendered = profiles_preview::render_with_content(
                     &identity,
                     &public,
                     subject.as_ref(),
                     sequence,
-                    self.clock.try_now().map_err(|_| "无法读取预览时间")?,
-                ) {
+                    now,
+                    &contents,
+                    &text,
+                    profile_content_flow::raster_cache(),
+                );
+                drop(images);
+                let image = match rendered {
                     Ok(image) => image,
                     Err(message) => {
                         self.status = message;
                         return self.render();
                     }
                 };
-                if !self.profiles_memory_gate() {
-                    self.lock();
+                if !self.profiles_memory_gate()
+                    || self
+                        .control
+                        .as_ref()
+                        .is_none_or(|control| !preview_current(control))
+                {
+                    self.status = "预览内容已变化，请重新预览。".into();
                     return self.render();
                 }
-                self.status = "草稿预览使用示例内容，不保存或改变课堂显示。树页可选择节点并拖动调整顺序或父节点。".into();
+                self.status = "布局预览中，内置组件使用示例，独立节点显示已发布内容，尚未发布的节点为空。树页可选择并拖动节点；预览不会保存修改。".into();
                 self.render()?;
                 self.window
                     .set_layout_preview(Some(image))
@@ -2561,6 +2897,11 @@ impl App {
                 .display
                 .as_ref()
                 .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self.profile_content_owner == Some(owner)
+                && self
+                    .profile_content
+                    .as_ref()
+                    .is_some_and(|editor| editor.is_dirty())
             || self
                 .accounts
                 .as_ref()
@@ -2771,6 +3112,51 @@ impl App {
                 }
             }
         }
+        // Node removal can drop the last current/Undo reference without another
+        // publication. Retry physical removal on the shared pool; retain this
+        // ticket until its worker really exits, including after cancellation.
+        if let Some(ticket) = self.content_maintenance.as_mut() {
+            match ticket.try_result() {
+                Ok(None) => {}
+                Ok(Some(Ok(Outcome::ContentMaintained { pending }))) => {
+                    self.content_maintenance = None;
+                    self.next_content_maintenance =
+                        Instant::now() + Duration::from_secs(if pending { 1 } else { 30 });
+                }
+                Ok(Some(Err(error))) if fatal(&error) => {
+                    if let Some(control) = &self.control {
+                        control.fault();
+                    }
+                    self.begin_shutdown();
+                }
+                _ => {
+                    self.content_maintenance = None;
+                    self.next_content_maintenance = Instant::now() + Duration::from_secs(1);
+                }
+            }
+        }
+        if !self.stopping
+            && self.pending.is_none()
+            && self.content_maintenance.is_none()
+            && Instant::now() >= self.next_content_maintenance
+            && self.state.installation.is_some()
+        {
+            if let Some(backend) = &self.backend {
+                match self.pool.handle().try_submit(
+                    Work::MaintainProfileContent(
+                        self.root.clone(),
+                        backend.clone(),
+                        self.content_gc.clone(),
+                    ),
+                    Instant::now() + Duration::from_secs(5),
+                ) {
+                    Ok(ticket) => self.content_maintenance = Some(ticket),
+                    Err(_) => {
+                        self.next_content_maintenance = Instant::now() + Duration::from_secs(1);
+                    }
+                }
+            }
+        }
         self.cleanup_jobs
             .retain_mut(|job| matches!(job.try_result(), Ok(None)));
         if !self.stopping && self.cleanup_jobs.len() < 2 {
@@ -2935,6 +3321,21 @@ impl App {
                     }
                 }
                 Ok(Outcome::Profile(loaded)) => self.profile_loaded(*loaded)?,
+                Ok(Outcome::ProfileContent(loaded)) => {
+                    if self.screen == Screen::ProfileContent
+                        && self.current_global_owner() == self.profile_content_owner
+                        && self.profiles_memory_gate()
+                    {
+                        if let Some(editor) = &mut self.profile_content {
+                            editor.loaded(loaded.document, loaded.cleanup_pending)?;
+                        }
+                        self.status = if loaded.outcome.is_some() {
+                            "节点内容已保存；桌面将读取这一内容版本。".into()
+                        } else {
+                            "节点内容已读取。".into()
+                        };
+                    }
+                }
                 Ok(Outcome::AccountsLoaded(state)) => {
                     self.state = Arc::new(state);
                     if let Some(owner) = self.current_global_owner() {
@@ -3027,10 +3428,20 @@ impl App {
                 }
                 Ok(Outcome::ExitAuthorized) => self.begin_shutdown(),
                 Ok(Outcome::Closed) => return Err("关闭结果进入了普通请求通道".into()),
-                Ok(Outcome::Office(_) | Outcome::Desktop(_) | Outcome::MaterialCleaned) => {
-                    return Err("后台结果类型不匹配".into())
-                }
+                Ok(
+                    Outcome::Office(_)
+                    | Outcome::Desktop(..)
+                    | Outcome::ContentImages(_)
+                    | Outcome::ContentPage { .. }
+                    | Outcome::ContentMaintained { .. }
+                    | Outcome::MaterialCleaned,
+                ) => return Err("后台结果类型不匹配".into()),
                 Err(error) => {
+                    if self.screen == Screen::ProfileContent {
+                        if let Some(editor) = &mut self.profile_content {
+                            editor.cancel_review();
+                        }
+                    }
                     if matches!(error, Failure::Web(WebServiceError::Denied)) {
                         self.lock();
                     }
@@ -3085,6 +3496,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
     app.root = paths.root().to_owned();
+    app.desktop.set_root(paths.root().to_owned());
     let control_slot = app.control_slot.clone();
     let audio_slot = app.audio_slot.clone();
     let audio_suspended = app.audio_suspended.clone();
@@ -3131,6 +3543,8 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let mut accounts_creation = 0u8;
     let mut accounts_management = 0u8;
     let mut profiles_stage = 0u8;
+    let mut profile_content_stage = 0usize;
+    let mut profile_content_probe = profile_content_probe::State::default();
     let mut probe_error = None;
     let mut office_verified = !probe;
     let mut office = if probe {
@@ -3305,6 +3719,15 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
+            } else if stage == 83 && profile_content_stage < profile_content_probe::STEPS {
+                if let Err(error) = profile_content_probe::run(
+                    &mut app,
+                    &mut profile_content_probe,
+                    &mut profile_content_stage,
+                ) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
             } else if let Err(e) = probe_step(&mut app, &mut stage) {
                 probe_error = Some(e);
                 app.begin_shutdown();
@@ -3372,6 +3795,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             || accounts_creation != accounts_probe::CREATION_STEPS
             || accounts_management != accounts_probe::MANAGEMENT_STEPS
             || profiles_stage != profiles_probe::STEPS
+            || profile_content_stage != profile_content_probe::STEPS
             || !office_verified)
     {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
@@ -3422,6 +3846,8 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         display: None,
         accounts: None,
         profiles: None,
+        profile_content: None,
+        profile_content_owner: None,
         preview_sequence: 0,
         preview_active: false,
         desktop: desktop_controller::Controller::new(probe)?,
@@ -3435,6 +3861,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         cleanup_jobs: Vec::new(),
         voice_maintenance: None,
         next_voice_maintenance: Instant::now() + Duration::from_secs(15),
+        content_maintenance: None,
+        next_content_maintenance: Instant::now() + Duration::from_secs(30),
+        content_gc: Arc::new(Mutex::new(profile_content_flow::GcCursor::default())),
     })
 }
 
@@ -3455,6 +3884,10 @@ pub fn probe() -> std::result::Result<(), String> {
     result?;
     cleanup?;
     println!("native_workbench_application=PASS account_editor_stable_ID_multi_scope_reference_reject_last_admin_self_revoke_native_worker=PASS profiles_public_joint_cas_subject_exact_native_canvas=PASS profile_native_steps=39 setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS launch_copy_management_native_worker=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!(
+        "profile_content_text_images_clear_undo_real_preview=PASS profile_content_native_steps={}",
+        profile_content_probe::STEPS
+    );
     Ok(())
 }
 #[derive(Default)]
@@ -4053,14 +4486,21 @@ fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> 
             let metrics = app.desktop.probe_metrics();
             let display = app.display.as_ref().ok_or("显示草稿缺失")?;
             let tree = scene.paint_tree.as_ref().ok_or("常驻桌面没有发布布局树")?;
-            // The preceding native profile flow jointly committed glass 7 and
-            // public layout revision 1 after the older display-only revision 2.
+            // The profile flow first committed display 3 / layout 1; the
+            // content flow then jointly saved its nodes and restored the same
+            // public semantics in two more layout commits. An unchanged display
+            // keeps its revision 3; the restored layout advances to revision 3.
             if display.settings.revision!=Revision::new(3)
                 || display.settings.glass_surface_percent != 7
-                || tree.public_layout_revision != Revision::new(1)
+                || tree.public_layout_revision != Revision::new(3)
                 || !scene.cards.iter().any(|c| matches!(&c.content,fc_presentation::scene::CardContent::Homework(rows) if rows.iter().any(|r|r.text=="验证作业：完成今天的数学练习。")))
                 || metrics.drawn_frames==0 || metrics.visible_windows!=0 || metrics.input_regions!=0 {
-                return Err("真实事实至隐藏原生场景/持久显示修订核对失败".into());
+                return Err(format!(
+                    "真实事实至隐藏原生场景/持久显示修订核对失败：display={} layout={} glass={} frames={} visible={} input={}",
+                    display.settings.revision.get(), tree.public_layout_revision.get(),
+                    display.settings.glass_surface_percent, metrics.drawn_frames,
+                    metrics.visible_windows, metrics.input_regions,
+                ));
             }
             action = TO_DISPLAY;
             Screen::Home
@@ -4375,6 +4815,7 @@ mod tests {
         paths.prepare_for_current_user().unwrap();
         let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
         app.root = root.clone();
+        app.desktop.set_root(root.clone());
         app.render().unwrap();
         app.submit(Work::Open(root.clone(), app.clock.clone()))
             .unwrap();

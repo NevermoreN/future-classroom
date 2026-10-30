@@ -31,6 +31,7 @@ pub struct CardBodyBlock {
 #[derive(Clone, Debug, PartialEq)]
 pub enum CardBodyDynamic {
     Static,
+    Image { width: u32, height: u32, pages: u8 },
     DigitalClock(ClockContent),
     AnalogClock,
     Recess,
@@ -54,6 +55,19 @@ pub struct CardBodyGeometry {
     pub blocks: Vec<CardBodyPosition>,
     /// Includes the final block's complete bottom padding, with no trailing gap.
     pub total_body_height: f32,
+}
+/// Pure card-relative image and page controls, shared by native painting/input.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ImageBodyGeometry {
+    pub viewport: crate::Rect,
+    pub image: crate::Rect,
+    pub pager: Option<ImagePagerGeometry>,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ImagePagerGeometry {
+    pub rect: crate::Rect,
+    pub previous: crate::Rect,
+    pub next: crate::Rect,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardBodyError {
@@ -111,6 +125,20 @@ impl CardBodySpec {
         }
         if !matches!(self.dynamic, CardBodyDynamic::Static) && !self.blocks.is_empty() {
             return Err(CardBodyError::InvalidContent);
+        }
+        if let CardBodyDynamic::Image {
+            width,
+            height,
+            pages,
+        } = self.dynamic
+        {
+            if width == 0
+                || height == 0
+                || u64::from(width) * u64::from(height) > 8_000_000
+                || !(1..=50).contains(&pages)
+            {
+                return Err(CardBodyError::InvalidContent);
+            }
         }
         for block in &self.blocks {
             let minimum = if block.fill.is_some() || block.role != CardBodyRole::Plain {
@@ -170,6 +198,70 @@ impl CardBodySpec {
             total_body_height: top,
         })
     }
+    /// Contain the complete original aspect ratio in the allocated card. No
+    /// pixel buffers, handles, paths or display-resource side effects occur here.
+    pub fn image_geometry(
+        &self,
+        outer_width: f32,
+        outer_height: f32,
+    ) -> Result<ImageBodyGeometry, CardBodyError> {
+        self.validate()?;
+        let CardBodyDynamic::Image {
+            width,
+            height,
+            pages,
+        } = self.dynamic
+        else {
+            return Err(CardBodyError::InvalidContent);
+        };
+        let available_width = self.text_width(outer_width)?;
+        let nav = if pages > 1 { 52. } else { 0. };
+        let available_height = outer_height - self.top_inset - self.bottom_inset - nav;
+        if !outer_height.is_finite()
+            || outer_height > 16_384.
+            || available_height <= 0.
+            || available_width < 96.
+        {
+            return Err(CardBodyError::InvalidGeometry);
+        }
+        let viewport = crate::Rect {
+            x: 16.,
+            y: self.top_inset,
+            width: available_width,
+            height: available_height,
+        };
+        let scale = (available_width / width as f32).min(available_height / height as f32);
+        let image_width = width as f32 * scale;
+        let image_height = height as f32 * scale;
+        let image = crate::Rect {
+            x: viewport.x + (viewport.width - image_width) / 2.,
+            y: viewport.y + (viewport.height - image_height) / 2.,
+            width: image_width,
+            height: image_height,
+        };
+        let pager = (pages > 1).then(|| {
+            let rect = crate::Rect {
+                x: 16.,
+                y: outer_height - self.bottom_inset - 44.,
+                width: available_width,
+                height: 44.,
+            };
+            ImagePagerGeometry {
+                rect,
+                previous: crate::Rect { width: 44., ..rect },
+                next: crate::Rect {
+                    x: rect.x + rect.width - 44.,
+                    width: 44.,
+                    ..rect
+                },
+            }
+        });
+        Ok(ImageBodyGeometry {
+            viewport,
+            image,
+            pager,
+        })
+    }
     /// Finite intrinsic whole-card height at the already selected outer width.
     /// Dynamic rules remain independent of wall-clock ticks and body block pages.
     pub fn intrinsic_height(
@@ -211,6 +303,16 @@ impl CardBodySpec {
                 measured(label, font)? + 54.
             }
             CardBodyDynamic::AnalogClock => 160.,
+            CardBodyDynamic::Image {
+                width: image_width,
+                height: image_height,
+                pages,
+            } => {
+                self.top_inset
+                    + width * (*image_height as f32 / *image_width as f32)
+                    + self.bottom_inset
+                    + if *pages > 1 { 52. } else { 0. }
+            }
             // Recess is assigned the remaining protected region by compose;
             // only its fixed 100-DIP dynamic patch refreshes once a second.
             CardBodyDynamic::Recess => 100.,
@@ -248,6 +350,27 @@ pub fn card_body_spec(
     }
     match content {
         CardContent::Text(text) => add_units(&mut units, text)?,
+        CardContent::StandaloneText(text) => {
+            if kind != ComponentKind::SubjectText
+                || text.len() > 40_000
+                || text.chars().count() > 10_000
+                || text
+                    .chars()
+                    .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+            {
+                return Err(CardBodyError::ContentLimit);
+            }
+            add_units(&mut units, text)?;
+        }
+        CardContent::Image(image) => {
+            if kind != ComponentKind::SubjectImage
+                || image.current.validate().is_err()
+                || !(1..=50).contains(&image.total_pages)
+                || image.current_page >= image.total_pages
+            {
+                return Err(CardBodyError::InvalidContent);
+            }
+        }
         CardContent::Courses(rows) => {
             if kind != ComponentKind::Schedule || rows.len() > 128 {
                 return Err(CardBodyError::ContentLimit);
@@ -323,6 +446,16 @@ pub fn card_body_spec(
             }
         }
         CardContent::Text(text) => push(text.clone(), false, None, None, CardBodyRole::Plain),
+        CardContent::StandaloneText(text) => {
+            push(text.to_string(), false, None, None, CardBodyRole::Plain)
+        }
+        CardContent::Image(image) => {
+            spec.dynamic = CardBodyDynamic::Image {
+                width: image.current.width,
+                height: image.current.height,
+                pages: image.total_pages,
+            };
+        }
         CardContent::Courses(rows) => {
             for (i, row) in rows.iter().enumerate() {
                 push(
