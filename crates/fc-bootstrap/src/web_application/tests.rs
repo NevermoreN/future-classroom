@@ -333,16 +333,20 @@ fn pairing_session_csrf_and_account_logout_cross_the_real_backend_and_persist_ep
         assert!(!body.contains(denied));
     }
     let csrf = field(&session.body, "csrf");
-    assert_eq!(
-        fixture
-            .dispatch(
-                &head("GET", "voice/capabilities", 0, Some(&first), None),
-                b""
-            )
-            .head
-            .status,
-        404
+    let voice = fixture.dispatch(
+        &head("GET", "voice/capabilities", 0, Some(&first), None),
+        b"",
     );
+    assert_eq!(voice.head.status, 200);
+    let voice_body = text(&voice.body);
+    for expected in [
+        "\"status\":\"VOICE_CAPABILITIES\"",
+        "\"currentClass\":null",
+        "\"targetAuthorized\":false",
+        "\"deviceAvailability\":\"UNVERIFIED\"",
+    ] {
+        assert!(voice_body.contains(expected));
+    }
     let logout = br#"{"schemaVersion":1}"#;
     let denied = fixture.dispatch(
         &head("POST", "session/logout", logout.len(), Some(&first), None),
@@ -509,3 +513,6 @@ mod content_tests;
 
 #[path = "materials_tests.rs"]
 mod material_tests;
+
+#[path = "voice_tests.rs"]
+mod voice_tests;

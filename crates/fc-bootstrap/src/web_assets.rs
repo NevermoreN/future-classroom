@@ -8,7 +8,7 @@ use fc_protocol::web::{
 };
 use std::{collections::BTreeMap, sync::Arc};
 
-pub const CONTENT_SECURITY_POLICY: &str = "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
+pub const CONTENT_SECURITY_POLICY: &str = "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
 // RFC 9110 §13.1.2 uses weak comparison and permits lists; commas inside
 // quoted opaque tags are data. Header bytes are already bounded by preflight.
 fn cache_matches(mut value: &[u8], etag: &[u8]) -> Result<bool, StaticError> {

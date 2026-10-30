@@ -31,6 +31,16 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--web-voice-probe" => {
+            #[cfg(windows)]
+            {
+                web_pairing_probe::run_with_voice()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("Web voice native zero-PCM probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--web-pairing-probe" => {
             #[cfg(windows)]
             {

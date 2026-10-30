@@ -54,6 +54,8 @@ struct Inner {
     runtime_state: AtomicU64,
     enabled: AtomicBool,
     waker: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
+    #[cfg(test)]
+    after_commit: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
 }
 #[derive(Clone)]
 pub struct VoiceService {
@@ -96,6 +98,19 @@ fn denied() -> BackendError {
         PermissionError::StaleAuthorization,
     )))
 }
+/// Browser capability metadata, containing no device/native claim.
+pub struct WebVoiceCapabilities {
+    pub identity_revision: Revision,
+    pub runtime_generation: u64,
+    pub now: LocalDateTime,
+    pub current_class: Option<(ClassId, String)>,
+    pub enabled: bool,
+    pub admitting: bool,
+    pub target_authorized: bool,
+}
+fn result_unknown() -> BackendError {
+    BackendError::Voice(VoiceRepositoryError::Unavailable)
+}
 impl VoiceService {
     pub(super) fn new(
         repository: Repository,
@@ -117,7 +132,22 @@ impl VoiceService {
                 runtime_state: AtomicU64::new(3),
                 enabled: AtomicBool::new(true),
                 waker: Mutex::new(None),
+                #[cfg(test)]
+                after_commit: Mutex::new(None),
             }),
+        }
+    }
+    #[cfg(test)]
+    pub(crate) fn after_next_commit(&self, hook: Arc<dyn Fn() + Send + Sync>) {
+        let mut slot = self.inner.after_commit.lock().unwrap();
+        assert!(slot.is_none());
+        *slot = Some(hook);
+    }
+    #[cfg(test)]
+    fn after_committed(&self) {
+        let hook = self.inner.after_commit.lock().unwrap().take();
+        if let Some(hook) = hook {
+            hook()
         }
     }
     fn check_open(&self) -> Result<()> {
@@ -149,7 +179,9 @@ impl VoiceService {
         if self.current(generation) {
             Ok(generation)
         } else {
-            Err(denied())
+            Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::StaleGeneration,
+            )))
         }
     }
     /// IMM/WTS/control callback safe: atomic invalidation only. Never acquires a
@@ -257,6 +289,41 @@ impl VoiceService {
     /// Memory-only preparation checkpoint for the original Web session. A
     /// transient publication may wait briefly; it never renews the lease or lets
     /// an in-flight upload cross a stop into a replacement runtime generation.
+    /// Read/cancel result freshness does not require positive runtime admission.
+    pub fn check_web_actor(&self, lease: SessionLease) -> Result<()> {
+        let actor = self.actor(lease, true)?;
+        let snapshot = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Closed)?;
+        let account = snapshot
+            .data
+            .account(actor.principal_id)
+            .map_err(|_| denied())?;
+        if !matches!(
+            account.principal.role,
+            Role::GlobalAdmin | Role::TeacherAdmin
+        ) {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::Permission(PermissionError::RoleDenied),
+            )));
+        }
+        if account.must_change_password {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::Permission(PermissionError::PasswordChangeRequired),
+            )));
+        }
+        self.actor_from_state(lease, &snapshot.data)?;
+        let status = self.inner.control.health_gate().status();
+        if status.health != Health::Healthy
+            || status.revision != snapshot.revision
+            || status.auth_epoch != snapshot.auth_epoch
+        {
+            return Err(BackendError::Storage(StorageError::Busy));
+        }
+        Ok(())
+    }
     pub fn check_web_session(&self, lease: SessionLease) -> Result<()> {
         let epoch = self.epoch()?;
         self.actor(lease, true)?;
@@ -321,6 +388,161 @@ impl VoiceService {
         }
         repository
     }
+    /// Bound to the original runtime generation. This does not renew a lease,
+    /// take Backend's mutex, query SQLite or permit stop/resume retargeting.
+    pub fn check_web_target(
+        &self,
+        lease: SessionLease,
+        class: ClassId,
+        generation: u64,
+    ) -> Result<()> {
+        if !self.inner.enabled.load(Ordering::Acquire) {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::Disabled,
+            )));
+        }
+        if !self.current(generation) {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::StaleGeneration,
+            )));
+        }
+        let snapshot = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Closed)?;
+        let actor = self.actor_from_state(lease, &snapshot.data)?;
+        authorize_submit(&snapshot.data, &actor, class, self.inner.clock.now())
+            .map_err(|e| BackendError::Voice(VoiceRepositoryError::Domain(e)))?;
+        let status = self.inner.control.health_gate().status();
+        if !self.current(generation)
+            || !self.inner.enabled.load(Ordering::Acquire)
+            || status.health != Health::Healthy
+            || status.revision != snapshot.revision
+            || status.auth_epoch != snapshot.auth_epoch
+        {
+            return Err(denied());
+        }
+        Ok(())
+    }
+    pub fn check_web_upload(
+        &self,
+        lease: SessionLease,
+        asset: &VoiceAsset,
+        generation: u64,
+    ) -> Result<()> {
+        if asset.owner != lease.principal_id()
+            || self
+                .inner
+                .sessions
+                .lock()
+                .map_err(|_| BackendError::Closed)?
+                .uploads
+                .get(&asset.id)
+                != Some(&lease)
+        {
+            return Err(denied());
+        }
+        self.check_web_target(lease, asset.class_id, generation)?;
+        let now = civil_seconds(self.inner.clock.now());
+        if now < asset.created_at || now >= asset.expires_at {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::Expired,
+            )));
+        }
+        Ok(())
+    }
+    pub fn web_capabilities(&self, lease: SessionLease) -> Result<WebVoiceCapabilities> {
+        self.check_web_actor(lease)?;
+        let snapshot = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Closed)?;
+        let actor = self.actor_from_state(lease, &snapshot.data)?;
+        let inventory = self.inventory()?;
+        let now = self.inner.clock.now();
+        let class = snapshot
+            .data
+            .installation
+            .as_ref()
+            .and_then(|i| i.current_class)
+            .and_then(|id| {
+                snapshot
+                    .data
+                    .classes
+                    .iter()
+                    .find(|c| c.id == id && c.enabled)
+            })
+            .map(|c| (c.id, c.name.clone()));
+        let authorized = class
+            .as_ref()
+            .is_some_and(|(id, _)| authorize_submit(&snapshot.data, &actor, *id, now).is_ok());
+        self.actor_from_state(lease, &snapshot.data)?;
+        let status = self.inner.control.health_gate().status();
+        if status.health != Health::Healthy
+            || status.revision != snapshot.revision
+            || status.auth_epoch != snapshot.auth_epoch
+        {
+            return Err(BackendError::Storage(StorageError::Busy));
+        }
+        let runtime = self.inner.runtime_state.load(Ordering::Acquire);
+        Ok(WebVoiceCapabilities {
+            identity_revision: snapshot.data.revision,
+            runtime_generation: runtime >> 1,
+            now,
+            current_class: class,
+            enabled: inventory.enabled,
+            admitting: runtime & 1 == 1,
+            target_authorized: authorized,
+        })
+    }
+    pub fn web_jobs(&self, lease: SessionLease) -> Result<Vec<VoiceJob>> {
+        self.check_web_actor(lease)?;
+        let snapshot = self
+            .inner
+            .authority
+            .snapshot()
+            .map_err(|_| BackendError::Closed)?;
+        let actor = self.actor_from_state(lease, &snapshot.data)?;
+        let inventory = self.inventory()?;
+        let now = self.inner.clock.now();
+        let cutoff = civil_seconds(now).max(inventory.observed_at.unwrap_or(i64::MIN));
+        let mut jobs: Vec<_> = inventory
+            .jobs
+            .into_iter()
+            .filter(|j| {
+                authorize_job(&snapshot.data, &actor, j, now).is_ok()
+                    && (!j.state.terminal()
+                        || j.ended_at
+                            .is_some_and(|ended| cutoff.saturating_sub(ended) < AUDIT_TTL_SECONDS))
+            })
+            .collect();
+        jobs.sort_by_key(|j| std::cmp::Reverse(j.sequence));
+        let mut terminal = 0;
+        let mut active = 0;
+        jobs.retain(|j| {
+            if j.state.terminal() {
+                terminal += 1;
+                terminal <= 20
+            } else {
+                active += 1;
+                active <= 4
+            }
+        });
+        for job in &mut jobs {
+            job.authorization = None;
+        }
+        self.actor_from_state(lease, &snapshot.data)?;
+        let status = self.inner.control.health_gate().status();
+        if status.health != Health::Healthy
+            || status.revision != snapshot.revision
+            || status.auth_epoch != snapshot.auth_epoch
+        {
+            return Err(BackendError::Storage(StorageError::Busy));
+        }
+        Ok(jobs)
+    }
     pub fn reserve(&self, lease: SessionLease, class: ClassId) -> Result<VoiceAsset> {
         let epoch = self.epoch()?;
         let actor = self.actor(lease, true)?;
@@ -351,16 +573,14 @@ impl VoiceService {
             self.repository(epoch, Some(lease))
                 .reserve_voice_upload(id, class, &actor),
         )?;
+        #[cfg(test)]
+        self.after_committed();
         if !self.current(epoch) {
-            return Err(denied());
+            return Err(result_unknown());
         }
         {
-            let mut sessions = self
-                .inner
-                .sessions
-                .lock()
-                .map_err(|_| BackendError::Closed)?;
-            sessions.changed()?;
+            let mut sessions = self.inner.sessions.lock().map_err(|_| result_unknown())?;
+            sessions.changed().map_err(|_| result_unknown())?;
             sessions.uploads.insert(asset.id, lease);
         }
         Ok(asset)
@@ -386,10 +606,15 @@ impl VoiceService {
         if !self.current(epoch) {
             return Err(denied());
         }
-        self.conclude(
+        let asset = self.conclude(
             self.repository(epoch, Some(lease))
                 .publish_voice_upload(prepared, &actor),
-        )
+        )?;
+        #[cfg(test)]
+        self.after_committed();
+        self.check_web_upload(lease, &asset, epoch)
+            .map_err(|_| result_unknown())?;
+        Ok(asset)
     }
     pub fn submit(&self, lease: SessionLease, request: VoiceSubmitRequest) -> Result<VoiceJob> {
         let epoch = self.epoch()?;
@@ -425,16 +650,14 @@ impl VoiceService {
             self.repository(epoch, Some(lease))
                 .submit_voice(request, &actor),
         )?;
+        #[cfg(test)]
+        self.after_committed();
         if !self.current(epoch) {
-            return Err(denied());
+            return Err(result_unknown());
         }
         {
-            let mut sessions = self
-                .inner
-                .sessions
-                .lock()
-                .map_err(|_| BackendError::Closed)?;
-            sessions.changed()?;
+            let mut sessions = self.inner.sessions.lock().map_err(|_| result_unknown())?;
+            sessions.changed().map_err(|_| result_unknown())?;
             sessions.uploads.remove(&asset);
             if existing.is_none() && !job.state.terminal() {
                 sessions.jobs.entry(job.id).or_insert_with(|| VoiceSession {
@@ -486,7 +709,9 @@ impl VoiceService {
             self.repository(self.generation(), Some(lease))
                 .cancel_voice(request, &actor),
         )?;
-        self.update(&job)?;
+        #[cfg(test)]
+        self.after_committed();
+        self.update(&job).map_err(|_| result_unknown())?;
         self.wake();
         Ok(job)
     }

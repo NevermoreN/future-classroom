@@ -1,0 +1,191 @@
+{
+  "final": {
+    "content": [
+      {
+        "type": "text",
+        "text": "### Result\n{\"status\":\"PASS\",\"evidence\":\"self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence\",\"result\":{\"secureContext\":true,\"actualSampleRate\":48000,\"inputFrames\":36608,\"outputFrames\":12203,\"wavBytes\":24450,\"riffBytes\":24442,\"dataBytes\":24406,\"format\":1,\"channels\":1,\"sampleRate\":16000,\"byteRate\":32000,\"blockAlign\":2,\"bits\":16,\"middlePcm16\":16384,\"tracksEnded\":true,\"contextClosed\":true,\"workerTerminated\":true},\"errors\":[],\"requests\":[],\"cleanup\":\"context closed in finally\"}\n### Ran Playwright code\n```js\nawait (async (defaultPage) => {\n  const context = await defaultPage.context().browser().newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 800 } });\n  const page = await context.newPage(), errors = [], requests = [], consoleMessages = [], failures = [];\n  page.on('pageerror', error => errors.push(error.message));\n  page.on('console', message => consoleMessages.push(message.type() + ': ' + message.text()));\n  page.on('requestfailed', request => failures.push({url: request.url(), failure: request.failure()}));\n  const csp = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n  try {\n    await page.goto('https://172.30.0.2:18443/fc/fixture');\n    const result = await page.evaluate(async () => {\n      const audio = new AudioContext({ sampleRate: 48000 }), streamTracks = [];\n      let node, source, worker;\n      const chunks = []; let stopped;\n      try {\n        await audio.resume();\n        await audio.audioWorklet.addModule('/fc/assets/pcm-worklet-DQjgdlBf.js');\n        node = new AudioWorkletNode(audio, 'fc-bounded-mono-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCountMode: 'max', channelInterpretation: 'discrete' });\n        const finish = new Promise(resolve => stopped = resolve);\n        node.port.onmessage = event => { if (event.data.type === 'pcm') chunks.push(event.data.chunk); if (event.data.type === 'stopped') stopped(); };\n        const buffer = audio.createBuffer(2, 48000, audio.sampleRate); buffer.getChannelData(0).fill(0.75); buffer.getChannelData(1).fill(0.25);\n        source = audio.createBufferSource(); source.buffer = buffer;\n        const destination = audio.createMediaStreamDestination(); source.connect(destination); streamTracks.push(...destination.stream.getTracks());\n        const microphoneSource = audio.createMediaStreamSource(destination.stream); microphoneSource.connect(node); node.connect(audio.destination);\n        node.port.postMessage({ type: 'start' }); source.start();\n        await new Promise(resolve => setTimeout(resolve, 750));\n        streamTracks.forEach(track => track.stop()); node.port.postMessage({ type: 'finish' });\n        await finish; microphoneSource.disconnect(); source.disconnect(); node.disconnect(); node.port.close(); await audio.close();\n        const inputFrames = chunks.reduce((n, c) => n + c.length, 0), outputFrames = Math.round(inputFrames * 16000 / audio.sampleRate);\n        const offline = new OfflineAudioContext(1, outputFrames, 16000), input = offline.createBuffer(1, inputFrames, audio.sampleRate);\n        let offset = 0; for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length; }\n        chunks.length = 0; const reader = offline.createBufferSource(); reader.buffer = input; reader.connect(offline.destination); reader.start();\n        const rendered = await offline.startRendering(); reader.disconnect();\n        worker = new Worker('/fc/assets/wav-worker-LSywWbpJ.js', { type: 'module' });\n        const encoded = new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data.wav); worker.onerror = reject; });\n        const pcm = rendered.getChannelData(0).slice(); worker.postMessage(pcm, [pcm.buffer]); const wav = await encoded; worker.terminate();\n        const view = new DataView(wav), value = view.getInt16(44 + Math.floor(outputFrames / 2) * 2, true);\n        return { secureContext: isSecureContext, actualSampleRate: audio.sampleRate, inputFrames, outputFrames, wavBytes: wav.byteLength, riffBytes: view.getUint32(4, true), dataBytes: view.getUint32(40, true), format: view.getUint16(20, true), channels: view.getUint16(22, true), sampleRate: view.getUint32(24, true), byteRate: view.getUint32(28, true), blockAlign: view.getUint16(32, true), bits: view.getUint16(34, true), middlePcm16: value, tracksEnded: streamTracks.every(t => t.readyState === 'ended'), contextClosed: audio.state === 'closed', workerTerminated: true };\n      } finally { streamTracks.forEach(track => track.stop()); source?.disconnect(); node?.disconnect(); node?.port.close(); worker?.terminate(); if (audio.state !== 'closed') await audio.close(); }\n    });\n    if (!result.secureContext || result.wavBytes !== 44 + result.outputFrames * 2 || result.outputFrames < 8000 || result.outputFrames > 960000 || result.sampleRate !== 16000 || result.channels !== 1 || result.bits !== 16 || result.format !== 1 || result.blockAlign !== 2 || result.byteRate !== 32000 || result.riffBytes !== result.wavBytes - 8 || result.dataBytes !== result.outputFrames * 2 || Math.abs(result.middlePcm16 - 16384) > 2 || !result.tracksEnded || !result.contextClosed || errors.length) throw Error(JSON.stringify({ result, errors }));\n    return { status: 'PASS', evidence: 'self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence', result, errors, requests, cleanup: 'context closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), requests, errors, consoleMessages, failures }; }\n  finally { await context.close(); }\n}\n)(page);\n```"
+      }
+    ]
+  },
+  "initialFileAccessFailure": {
+    "content": [
+      {
+        "type": "text",
+        "text": "### Error\nError: File access denied: /tmp/fc-round14-recorder-browser-runner.js is outside allowed roots. Allowed roots: /config/data/User/globalStorage/playwright-headless/output, /workspace/共享/Eliora/未来教室计划"
+      }
+    ],
+    "isError": true
+  },
+  "initialRouteFailure": {
+    "content": [
+      {
+        "type": "text",
+        "text": "### Error\nError: page.evaluate: AbortError: Failed to load worklet module script: https://voice.synthetic/fc/assets/pcm-worklet-DQjgdlBf.js (Network error)"
+      }
+    ],
+    "isError": true
+  },
+  "recorderSourceInputs": [
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "bytes": 6463,
+      "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4160,
+      "sha256": "49a401eba90ac51ebf30e22dc6a02b09475f550c9b28c4b0d3affe4b0e3c0fea"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "bytes": 1836,
+      "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "bytes": 2718,
+      "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "bytes": 1854,
+      "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "bytes": 7728,
+      "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "bytes": 464,
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "bytes": 9440,
+      "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 8048,
+      "sha256": "176cef764132c5b3729859263e3ef13b67eec226ecc986390d8e455cd28d496b"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 2955,
+      "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 2221,
+      "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "bytes": 13606,
+      "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+    }
+  ],
+  "recorderSourceSha256": "13344b6ac6cf9210ce444e67e8544b32f7ad0a9afdf5161edb370972d89990dd",
+  "distBinding": {
+    "manifestSha256": "6f58921287213a3f9b1facd95e1f9509ef5036643ad7282aa5f569612bed83c1",
+    "manifestBytes": 1072,
+    "manifestSource": "{\n  \"schemaVersion\": 1,\n  \"apiVersion\": 1,\n  \"uiCompatibilityVersion\": 1,\n  \"assets\": [\n    {\n      \"path\": \"assets/favicon-CXuYoSfB.svg\",\n      \"sizeBytes\": 282,\n      \"sha256\": \"46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a\"\n    },\n    {\n      \"path\": \"assets/index-DFFVdc8-.css\",\n      \"sizeBytes\": 38836,\n      \"sha256\": \"4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8\"\n    },\n    {\n      \"path\": \"assets/index-YBGSDbut.js\",\n      \"sizeBytes\": 402649,\n      \"sha256\": \"0defebbdce076a33a19ff6ed14a0c0b9b50851d2278489de3df34c87df79b148\"\n    },\n    {\n      \"path\": \"assets/pcm-worklet-DQjgdlBf.js\",\n      \"sizeBytes\": 1440,\n      \"sha256\": \"c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d\"\n    },\n    {\n      \"path\": \"assets/wav-worker-LSywWbpJ.js\",\n      \"sizeBytes\": 884,\n      \"sha256\": \"a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886\"\n    },\n    {\n      \"path\": \"index.html\",\n      \"sizeBytes\": 684,\n      \"sha256\": \"c280a2cb9e737b194cda1299408a7dd32675f24c1b3d02918853f5180177e44c\"\n    }\n  ]\n}\n",
+    "manifest": {
+      "schemaVersion": 1,
+      "apiVersion": 1,
+      "uiCompatibilityVersion": 1,
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "sizeBytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-DFFVdc8-.css",
+          "sizeBytes": 38836,
+          "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+        },
+        {
+          "path": "assets/index-YBGSDbut.js",
+          "sizeBytes": 402649,
+          "sha256": "0defebbdce076a33a19ff6ed14a0c0b9b50851d2278489de3df34c87df79b148"
+        },
+        {
+          "path": "assets/pcm-worklet-DQjgdlBf.js",
+          "sizeBytes": 1440,
+          "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+        },
+        {
+          "path": "assets/wav-worker-LSywWbpJ.js",
+          "sizeBytes": 884,
+          "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+        },
+        {
+          "path": "index.html",
+          "sizeBytes": 684,
+          "sha256": "c280a2cb9e737b194cda1299408a7dd32675f24c1b3d02918853f5180177e44c"
+        }
+      ]
+    },
+    "scope": "UI 31-check/17-context run used these exact six dist members. Direct PCM browser run exercised the same Worklet/WAV worker bytes; its earlier main UI bundle was not loaded and is not represented as this final main bundle."
+  },
+  "screenshotsArchived": [
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-desktop-before-shared-render-fix.png",
+      "sizeBytes": 523352,
+      "sha256": "2735f0bce7fa0e7c09924794d17dd0ee764dee520f91144208ca2762556bdc5e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile390-before-shared-render-fix.png",
+      "sizeBytes": 177610,
+      "sha256": "0a667f266d574a974bc75150805a74a5b056acd183472c116c67eb58094fafd4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile320-before-shared-render-fix.png",
+      "sizeBytes": 174335,
+      "sha256": "57a0c6294ca5f2004d0393a3b9288e367346ff35cdda6c3ebb694a3aed617aa6"
+    }
+  ],
+  "scopeLimits": [
+    "Synthetic API fixtures and synthetic audio only; no physical microphone requested.",
+    "Self-signed temporary HTTPS with certificate verification bypassed is not trusted campus TLS or a production listener acceptance test.",
+    "No real phone browser or audible speaker/WinMM verification is claimed by these browser reports.",
+    "The injected 60-second callback browser case ran after approximately 750ms; the worklet unit test independently checks the exact 60-second sample cap."
+  ],
+  "runner": {
+    "originalTemporaryPath": "/tmp/fc-round14-recorder-browser-runner.js",
+    "encoding": "utf-8",
+    "sizeBytes": 5319,
+    "sha256": "742bec45d8203a67ca356c7e25a448510b6a66f84d3bf40c814f7cd53e286177",
+    "code": "async (defaultPage) => {\n  const context = await defaultPage.context().browser().newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 800 } });\n  const page = await context.newPage(), errors = [], requests = [], consoleMessages = [], failures = [];\n  page.on('pageerror', error => errors.push(error.message));\n  page.on('console', message => consoleMessages.push(message.type() + ': ' + message.text()));\n  page.on('requestfailed', request => failures.push({url: request.url(), failure: request.failure()}));\n  const csp = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n  try {\n    await page.goto('https://172.30.0.2:18443/fc/fixture');\n    const result = await page.evaluate(async () => {\n      const audio = new AudioContext({ sampleRate: 48000 }), streamTracks = [];\n      let node, source, worker;\n      const chunks = []; let stopped;\n      try {\n        await audio.resume();\n        await audio.audioWorklet.addModule('/fc/assets/pcm-worklet-DQjgdlBf.js');\n        node = new AudioWorkletNode(audio, 'fc-bounded-mono-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCountMode: 'max', channelInterpretation: 'discrete' });\n        const finish = new Promise(resolve => stopped = resolve);\n        node.port.onmessage = event => { if (event.data.type === 'pcm') chunks.push(event.data.chunk); if (event.data.type === 'stopped') stopped(); };\n        const buffer = audio.createBuffer(2, 48000, audio.sampleRate); buffer.getChannelData(0).fill(0.75); buffer.getChannelData(1).fill(0.25);\n        source = audio.createBufferSource(); source.buffer = buffer;\n        const destination = audio.createMediaStreamDestination(); source.connect(destination); streamTracks.push(...destination.stream.getTracks());\n        const microphoneSource = audio.createMediaStreamSource(destination.stream); microphoneSource.connect(node); node.connect(audio.destination);\n        node.port.postMessage({ type: 'start' }); source.start();\n        await new Promise(resolve => setTimeout(resolve, 750));\n        streamTracks.forEach(track => track.stop()); node.port.postMessage({ type: 'finish' });\n        await finish; microphoneSource.disconnect(); source.disconnect(); node.disconnect(); node.port.close(); await audio.close();\n        const inputFrames = chunks.reduce((n, c) => n + c.length, 0), outputFrames = Math.round(inputFrames * 16000 / audio.sampleRate);\n        const offline = new OfflineAudioContext(1, outputFrames, 16000), input = offline.createBuffer(1, inputFrames, audio.sampleRate);\n        let offset = 0; for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length; }\n        chunks.length = 0; const reader = offline.createBufferSource(); reader.buffer = input; reader.connect(offline.destination); reader.start();\n        const rendered = await offline.startRendering(); reader.disconnect();\n        worker = new Worker('/fc/assets/wav-worker-LSywWbpJ.js', { type: 'module' });\n        const encoded = new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data.wav); worker.onerror = reject; });\n        const pcm = rendered.getChannelData(0).slice(); worker.postMessage(pcm, [pcm.buffer]); const wav = await encoded; worker.terminate();\n        const view = new DataView(wav), value = view.getInt16(44 + Math.floor(outputFrames / 2) * 2, true);\n        return { secureContext: isSecureContext, actualSampleRate: audio.sampleRate, inputFrames, outputFrames, wavBytes: wav.byteLength, riffBytes: view.getUint32(4, true), dataBytes: view.getUint32(40, true), format: view.getUint16(20, true), channels: view.getUint16(22, true), sampleRate: view.getUint32(24, true), byteRate: view.getUint32(28, true), blockAlign: view.getUint16(32, true), bits: view.getUint16(34, true), middlePcm16: value, tracksEnded: streamTracks.every(t => t.readyState === 'ended'), contextClosed: audio.state === 'closed', workerTerminated: true };\n      } finally { streamTracks.forEach(track => track.stop()); source?.disconnect(); node?.disconnect(); node?.port.close(); worker?.terminate(); if (audio.state !== 'closed') await audio.close(); }\n    });\n    if (!result.secureContext || result.wavBytes !== 44 + result.outputFrames * 2 || result.outputFrames < 8000 || result.outputFrames > 960000 || result.sampleRate !== 16000 || result.channels !== 1 || result.bits !== 16 || result.format !== 1 || result.blockAlign !== 2 || result.byteRate !== 32000 || result.riffBytes !== result.wavBytes - 8 || result.dataBytes !== result.outputFrames * 2 || Math.abs(result.middlePcm16 - 16384) > 2 || !result.tracksEnded || !result.contextClosed || errors.length) throw Error(JSON.stringify({ result, errors }));\n    return { status: 'PASS', evidence: 'self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence', result, errors, requests, cleanup: 'context closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), requests, errors, consoleMessages, failures }; }\n  finally { await context.close(); }\n}\n"
+  },
+  "initialBrowserFixtureFailures": {
+    "rawFileAccessFailure": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### Error\nError: File access denied: /tmp/fc-round14-recorder-browser-runner.js is outside allowed roots. Allowed roots: /config/data/User/globalStorage/playwright-headless/output, /workspace/共享/Eliora/未来教室计划"
+        }
+      ],
+      "isError": true
+    },
+    "rawWorkletRouteFailure": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### Error\nError: page.evaluate: AbortError: Failed to load worklet module script: https://voice.synthetic/fc/assets/pcm-worklet-DQjgdlBf.js (Network error)"
+        }
+      ],
+      "isError": true
+    },
+    "routeFixture": {
+      "code": "async (defaultPage) => {\n  const context = await defaultPage.context().browser().newContext({ viewport: { width: 1100, height: 800 } });\n  const page = await context.newPage(), errors = [], requests = [], consoleMessages = [], failures = [];\n  page.on('pageerror', error => errors.push(error.message));\n  page.on('console', message => consoleMessages.push(message.type() + ': ' + message.text()));\n  page.on('requestfailed', request => failures.push({url: request.url(), failure: request.failure()}));\n  const csp = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n  try {\n    await context.route('https://voice.synthetic/**', async route => {\n      const url = new URL(route.request().url()); requests.push(url.pathname);\n      if (url.pathname === '/fc/fixture') return route.fulfill({ status: 200, headers: { 'content-type': 'text/html', 'content-security-policy': csp, 'x-content-type-options': 'nosniff' }, body: '<!doctype html><meta charset=\"utf-8\"><title>Synthetic PCM fixture</title><button>Run isolated PCM</button>' });\n      const response = await route.fetch({ url: 'http://172.30.0.2:4173' + url.pathname });\n      return route.fulfill({ response, headers: { ...response.headers(), 'content-security-policy': csp, 'x-content-type-options': 'nosniff' } });\n    });\n    await page.goto('https://voice.synthetic/fc/fixture');\n    const result = await page.evaluate(async () => {\n      const audio = new AudioContext({ sampleRate: 48000 }), streamTracks = [];\n      let node, source, worker;\n      const chunks = []; let stopped;\n      try {\n        await audio.resume();\n        await audio.audioWorklet.addModule('/fc/assets/pcm-worklet-DQjgdlBf.js');\n        node = new AudioWorkletNode(audio, 'fc-bounded-mono-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCountMode: 'max', channelInterpretation: 'discrete' });\n        const finish = new Promise(resolve => stopped = resolve);\n        node.port.onmessage = event => { if (event.data.type === 'pcm') chunks.push(event.data.chunk); if (event.data.type === 'stopped') stopped(); };\n        const buffer = audio.createBuffer(2, 48000, audio.sampleRate); buffer.getChannelData(0).fill(0.75); buffer.getChannelData(1).fill(0.25);\n        source = audio.createBufferSource(); source.buffer = buffer;\n        const destination = audio.createMediaStreamDestination(); source.connect(destination); streamTracks.push(...destination.stream.getTracks());\n        const microphoneSource = audio.createMediaStreamSource(destination.stream); microphoneSource.connect(node); node.connect(audio.destination);\n        node.port.postMessage({ type: 'start' }); source.start();\n        await new Promise(resolve => setTimeout(resolve, 750));\n        streamTracks.forEach(track => track.stop()); node.port.postMessage({ type: 'finish' });\n        await finish; microphoneSource.disconnect(); source.disconnect(); node.disconnect(); node.port.close(); await audio.close();\n        const inputFrames = chunks.reduce((n, c) => n + c.length, 0), outputFrames = Math.round(inputFrames * 16000 / audio.sampleRate);\n        const offline = new OfflineAudioContext(1, outputFrames, 16000), input = offline.createBuffer(1, inputFrames, audio.sampleRate);\n        let offset = 0; for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length; }\n        chunks.length = 0; const reader = offline.createBufferSource(); reader.buffer = input; reader.connect(offline.destination); reader.start();\n        const rendered = await offline.startRendering(); reader.disconnect();\n        worker = new Worker('/fc/assets/wav-worker-LSywWbpJ.js', { type: 'module' });\n        const encoded = new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data.wav); worker.onerror = reject; });\n        const pcm = rendered.getChannelData(0).slice(); worker.postMessage(pcm, [pcm.buffer]); const wav = await encoded; worker.terminate();\n        const view = new DataView(wav), value = view.getInt16(44 + Math.floor(outputFrames / 2) * 2, true);\n        return { secureContext: isSecureContext, actualSampleRate: audio.sampleRate, inputFrames, outputFrames, wavBytes: wav.byteLength, riffBytes: view.getUint32(4, true), dataBytes: view.getUint32(40, true), format: view.getUint16(20, true), channels: view.getUint16(22, true), sampleRate: view.getUint32(24, true), byteRate: view.getUint32(28, true), blockAlign: view.getUint16(32, true), bits: view.getUint16(34, true), middlePcm16: value, tracksEnded: streamTracks.every(t => t.readyState === 'ended'), contextClosed: audio.state === 'closed', workerTerminated: true };\n      } finally { streamTracks.forEach(track => track.stop()); source?.disconnect(); node?.disconnect(); node?.port.close(); worker?.terminate(); if (audio.state !== 'closed') await audio.close(); }\n    });\n    if (!result.secureContext || result.wavBytes !== 44 + result.outputFrames * 2 || result.outputFrames < 8000 || result.outputFrames > 960000 || result.sampleRate !== 16000 || result.channels !== 1 || result.bits !== 16 || result.format !== 1 || result.blockAlign !== 2 || result.byteRate !== 32000 || result.riffBytes !== result.wavBytes - 8 || result.dataBytes !== result.outputFrames * 2 || Math.abs(result.middlePcm16 - 16384) > 2 || !result.tracksEnded || !result.contextClosed || errors.length) throw Error(JSON.stringify({ result, errors }));\n    return { status: 'PASS', evidence: 'self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence', result, errors, requests, cleanup: 'context closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), requests, errors, consoleMessages, failures }; }\n  finally { await context.close(); }\n}\n",
+      "sha256": "c7f9bca1e58bbb0d223c9a28989bdd3ae8593f91cab1c0050b79c1d72ad7560c",
+      "provenance": "Reconstructed diagnostic variant of the original failed route fixture from the recorded invocation; original failure text is retained verbatim separately. This SHA binds the included reconstruction, not an unretained pre-run file."
+    },
+    "classification": "Harness limitation, not product failure: the synthetic worklet URL did not pass through Playwright context.route. Own short-lived self-signed HTTPS served actual static assets for the subsequent pass; certificate verification was explicitly bypassed."
+  },
+  "historicalEvidenceStatus": "Superseded positive run before cross-instance Offline render ownership regression was fixed; not final Round14 validation."
+}

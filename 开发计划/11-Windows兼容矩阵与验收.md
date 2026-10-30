@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.26 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.27 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十三轮487项debug测试、release主EXE配对/内容/资料端口及隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十四轮494项/16个debug测试EXE、release主EXE配对/内容/资料/语音端口及隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -137,3 +137,14 @@ Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑�
 [Win7GNU最终产物PE](验证记录/2026-10-30-win7-gnu-round13-imports.json)为0结构错误/0已知触发；[在同一Win11上的补充运行](验证记录/2026-10-30-win7-gnu-teacher-materials-on-windows11-round13.json)PASS、0额外测试EXE、cleanup PASS。[现代PE](验证记录/2026-10-30-modern-round13-imports.json)仍有5个已知Win7风险。两产物绑定相同220个冻结输入，现代SHA516b20a7…、Win7GNU SHA591d70df…；实际Win7/Win10及正式MSVC仍未取证，不能由补充运行推定三系统正式兼容。
 
 [独立TCP接纳候选](验证记录/2026-10-30-tcp-frontdoor-round13.json)仅loopback自有四槽实验。生命周期排空通过，但严格5秒观测FAIL（5/8超限，最大超577微秒）；不改系统全局HTTP、证书、防火墙或持续SSH配置，P0保持UNRESOLVED，正常HTTPS监听关闭。网页109单测/48项synthetic浏览器及开发包NOT_VALIDATED范围见[本轮实施记录](10-实施进度与验证记录.md)。
+
+
+## 第十四轮增量：网页语音应用端口与受控录音
+
+[Win11最终494项/16程序](验证记录/2026-10-30-windows11-teacher-voice-round14.json)和[Win7GNU构建在同一Win11的补充探针](验证记录/2026-10-30-win7-gnu-teacher-voice-on-windows11-round14.json)均PASS、cleanup PASS，绑定最终247输入SHA `b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba`。Win7GNU补充没有额外运行单测，不能把它重复计入494。两份组合报告均断言四个Web标记，规范全零WAV经真实DPAPI/SQLite、默认总3遍WinMM自然完成、查询、停止及驱动归还；web-voice-probe只在自有隐藏交互任务中运行，旧非交互配对探针仍保持三个标记且不触发音频。
+
+两个新Windows语音proof反例与既有资料容量用例均实际通过：跨资料/语音共享两个物理上传owner，SQL过期或旧App销毁不提前释放proof；测试fixture间共享锁只隔离相互干扰，生产全局容量与runner并发2不变。COMMIT后授权变化一律不确定结果；角色/精确班级/CSRF门禁保持。
+
+[浏览器31检查](验证记录/2026-10-30-voice-ui-browser-synthetic-round14.json)及[真实Worklet→Offline→Worker通路](验证记录/2026-10-30-recorder-browser-synthetic-round14.json)采用合成零PCM MediaStream。自签HTTPS仅用于加载真实Worklet资源，不是校园证书信任或正常HTTP/TLS监听验收；无实际硬件麦克风、PPT共存或扬声器可听证据。现代PE仍5项已知Win7风险；Win7GNU扫描0风险仅静态补充。实际Win7/Win10/正式MSVC、可见希沃/触控/DPI、安装和72小时状态不变。
+
+[最终Windows只读清理](验证记录/2026-10-30-windows11-owned-cleanup-round14.json)确认自有测试目录、任务和进程均0，sshd Running，仓库外私钥0600保留。全部开发目标继续active，正常监听与严格5秒P0门槛仍待完成。

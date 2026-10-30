@@ -45,6 +45,7 @@ def main():
     parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
+    parser.add_argument("--web-voice", action="store_true", help="interactive hidden-task authenticated voice upload/jobs and native zero-PCM three-repeat/cancel integration")
     parser.add_argument("--web-pairing", action="store_true", help="noninteractive CNG/DPAPI/SQLite pairing and synthetic trusted-TLS metadata port probe; no HTTPS listener/browser")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
@@ -166,6 +167,13 @@ def main():
                 raise RuntimeError("audio report insertion point is ambiguous")
             body = body.replace(anchor, command + "@{audioExitCode=$audioCode;audioOutput=$audioOutput;" + anchor[2:])
 
+        if args.web_voice:
+            command = "$webVoiceOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --web-voice-probe 2>&1|ForEach-Object{\"$_\"});$webVoiceCode=$LASTEXITCODE;"
+            anchor = "@{audioExitCode=$audioCode;" if args.audio_silent else ("@{materialsExitCode=$materialsCode;" if args.materials else ("@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;")))
+            if body.count(anchor) != 1:
+                raise RuntimeError("voice report insertion point is ambiguous")
+            body = body.replace(anchor, command + "@{webVoiceExitCode=$webVoiceCode;webVoiceOutput=$webVoiceOutput;" + anchor[2:])
+
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -175,9 +183,9 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials:
+        if args.application or args.materials or args.web_voice:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials or args.web_voice else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -193,6 +201,14 @@ def main():
             report["audioStatus"] = "NOT_RUN" if any("AUDIO_SILENT_NOT_RUN" in line or "VOICE_PIPELINE_NOT_RUN" in line for line in audio) else "PASS"
             if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio) and any("VOICE_RUNTIME_PASS" in line for line in audio)):
                 raise RuntimeError("silent audio result missing")
+        if args.web_voice:
+            voice_output = report["native"].get("webVoiceOutput", [])
+            if report["native"].get("webVoiceExitCode") != 0:
+                raise RuntimeError("isolated authenticated native zero-PCM Web voice integration failed")
+            for marker in ["WEB_VOICE_PASS", "WEB_MATERIALS_PASS", "WEB_CONTENT_PASS", "WEB_PAIRING_PASS"]:
+                if not any(isinstance(line, str) and line.startswith(marker + " ") for line in voice_output):
+                    raise RuntimeError("Web voice diagnostic result marker missing: " + marker)
+            report["webVoiceStatus"] = "PASS"
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"
     except Exception as error:

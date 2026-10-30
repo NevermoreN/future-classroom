@@ -27,6 +27,7 @@ use std::{
 };
 mod content_probe;
 mod materials_probe;
+mod voice_probe;
 
 fn check<T, E: std::fmt::Debug>(r: Result<T, E>) -> Result<T, String> {
     r.map_err(|e| format!("web-pairing: {e:?}"))
@@ -102,14 +103,20 @@ fn head(
     })
 }
 pub fn run() -> Result<(), String> {
+    run_with_audio(false)
+}
+pub fn run_with_voice() -> Result<(), String> {
+    run_with_audio(true)
+}
+fn run_with_audio(include_voice: bool) -> Result<(), String> {
     std::thread::Builder::new()
         .name("fc-web-pairing-probe".into())
-        .spawn(run_owned)
+        .spawn(move || run_owned(include_voice))
         .map_err(|_| "web pairing probe thread unavailable")?
         .join()
         .map_err(|_| "web pairing probe panicked")?
 }
-fn run_owned() -> Result<(), String> {
+fn run_owned(include_voice: bool) -> Result<(), String> {
     let stamp = check(SystemTime::now().duration_since(UNIX_EPOCH))?.as_nanos();
     let root = Cleanup(std::env::temp_dir().join(format!(
         "FutureClassroom-Test-WebPairing-{}-{stamp}",
@@ -315,6 +322,17 @@ fn run_owned() -> Result<(), String> {
         authentication.csrf.as_str(),
         lease,
     )?;
+    if include_voice {
+        voice_probe::run(
+            &mut backend,
+            &mut application,
+            &root.0,
+            cookie,
+            authentication.csrf.as_str(),
+            lease,
+            clock.clone(),
+        )?;
+    }
     content_probe::run(
         &mut backend,
         &application,

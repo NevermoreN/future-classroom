@@ -115,3 +115,10 @@ WinMM使用WAVE_MAPPER/规范PCM16单声道16kHz及CALLBACK_EVENT，固定3×16K
 实现参考：[waveOutOpen](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutopen)、[waveOutWrite](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutwrite)、[waveOutReset](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutreset)、[waveOutUnprepareHeader](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutunprepareheader)、[waveOutClose](https://learn.microsoft.com/en-us/windows/win32/api/mmeapi/nf-mmeapi-waveoutclose)、[DuplicateHandle](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-duplicatehandle)。源码核对固定windows 0.62.2绑定；正式支持仍取三系统实测及PE证据，不能据这些API文档直接宣称产品兼容。
 
 当前只有显式全零PCM隔离诊断串起真实持久/文件/输出链；教师网页录音、HTTP超时及实际上传worker预约、正常运行播报域/托盘停止和WTS/电源联动尚未接入。正常应用启动恢复并回收旧正文，每15秒共享worker维护元数据/正文；不将原型探针列为M18全部交付。最终测试状态见实施记录。
+
+
+### 第十四轮实施边界（2026-10-30）
+
+[总计划1.27/D11语音API契约](../15-教师语音API契约.md)补齐应用路由、严格响应、规范WAV受控流上传、当前绑定班级/原设备/运行代次门禁、任务列表及停止/未知命令查询；浏览器按住/上滑/键盘/迟到授权/隐藏取消、AudioWorklet mono、Offline重采样和Worker编码已落代码。正常按需音频域、托盘/WTS/电源停止沿用第九轮，不再把它们说成尚未接线。
+
+独立分层运行结果以[本轮实施进度](../10-实施进度与验证记录.md)为准；真实教师手机/硬件麦克风、可信校园TLS、网络事件到计费stage/120秒硬期限、Win7/Win10及可听PPT共存仍未验收。能力页当前设备状态诚实为UNVERIFIED，首次实际播放才由现有WAVE_FORMAT_QUERY验证，不把会话可用伪装成扬声器保证。采集缓存32MiB与额外规范化源/输出/Worker副本分列预算，非整个浏览器heap实测上限。

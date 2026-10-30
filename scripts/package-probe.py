@@ -145,7 +145,7 @@ def frontend_payloads(web_dist: Path) -> tuple[dict[str, bytes], dict]:
         "asset_count": len(declared),
         "asset_bytes": total,
         "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
-        "scope": "Pairing/session plus authenticated homework/shared-reminder UI and content application ports; material metadata and controlled file preparation/upload/download ports; voice browser entry unconnected; normal TLS/listener disabled.",
+        "scope": "Pairing/session plus authenticated homework/shared-reminder UI and content application ports; material metadata and controlled file preparation/upload/download ports; voice canonical WAV upload/job/cancel ports and browser AudioWorklet recording; normal TLS/listener and event-to-stage scheduling disabled.",
     }
 
 
@@ -218,7 +218,8 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "sha256": entries[0]["sha256"],
         "frontend": frontend,
         "features": {
-            "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe", "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>", "--native-probe <1..300>"],
+            "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe",
+                "--web-voice-probe", "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>", "--native-probe <1..300>"],
             "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, local global-admin current-lesson override/restore with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",
             "timetable_limits": "64 KiB complete document including bounded dual history; public calendar source verification incomplete",
             "resident_desktop": "coherent SQLite facts, native Direct2D cards, 12/24/analog clocks, schedule/homework/material paging, full recess region backgrounds and small dynamic surfaces; separate bounded current-lesson control strip; full profile/layout and actual visibility QA incomplete",
@@ -226,16 +227,17 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             "desktop_limits": "16 MiB aggregate application DIB cap; 4K hidden native region background test uses 4806080 DIB bytes; OS backing, visible display and actual device acceptance remain incomplete",
             "materials": "local owner/global management20 and current-scene5 filename rows; validated pinned immutable originals and independent editable launch copies; constrained PDF helper and full WIC decode; dedicated STA association open; no Web launch",
             "material_limits": "original <=50MiB/image<=10MiB/8MP, originals2GiB, launchcopies200MiB/128files/24h grace; local global-admin inspection and expired exclusive cleanup; full adversarial/device matrices incomplete",
-            "voice_execution": "exact original Web session independent of Backend/KDF lock; bounded writer wait and on-demand single physical WinMM thread, tray/WTS/power/shutdown stop fence and endpoint monitor; canonical staged WAV/3x16KiB buffers; actual teacher Web submission and browser recording incomplete",
+            "voice_execution": "exact original Web session independent of Backend/KDF lock; bounded writer wait and on-demand single physical WinMM thread, tray/WTS/power/shutdown stop fence and endpoint monitor; canonical staged WAV/3x16KiB buffers; canonical teacher Web upload/submit/status/cancel ports and browser recording implemented; real TLS/campus/microphone integration incomplete",
             "http_transport": "HTTP.sys v2 aligned fixed slots/OVERLAPPED/IOCP with bounded body/response pieces, cancel/drain and cycle tokens; explicit two-cycle synthetic loopback diagnostic only; production listener, TLS deployment and browser application incomplete",
             "web_pairing_port": "direct service pairing with process-local eight-digit one-use request and exact local-global-admin approval, 256-bit poll/cookie/CSRF secrets and independent device leases; CNG/DPAPI/SQLite plus synthetic trusted-TLS request metadata through session/CSRF/logout ports only, not end-to-end POST pairing dispatch; real HTTPS/TLS/browser/listening delivery incomplete",
+            "teacher_voice_port": "Current-bound-class/exact Web authorization; canonical PCM16 mono16k WAV typed upload, durable jobs/status/cancel and original-command query; AudioWorklet/Offline/Worker browser capture; STOPPING awaits actual driver return; device capability UNVERIFIED; normal TLS/network deadline not validated",
             "teacher_material_port": "Authenticated material scopes/classes paging, controlled fixed-slot file staging, full validation before append, fixed-version delete/download and sender-only durable command query; native synthetic metadata probe includes full50MiB, not actual TLS/network staging deadline",
             "teacher_content_port": "Authenticated Web application-port scopes, current-day homework/shared-reminder read/save/clear, exact CAS, durable original-command outcome, midnight expiry and persistent observed-day rollback protection; CNG/DPAPI/SQLite probe uses synthetic trusted transport metadata; no actual TLS/browser/network delivery evidence",
             "http_transport_initial_header_deadline": "NOT_VALIDATED: HTTP.sys uses driver defaults before the first complete header is attributed to a URL group; group HeaderWait=5 does not prove a first-request 5s bound. Kernel connection limits/QoS and P0 platform decision remain open.",
             "normal_start": "manual workbench; --autostart stays locked and hidden; creates project-only protected ProgramData deployment",
             "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; hidden scene tests do not replace interactive QA",
             "complete_application": "NOT_IMPLEMENTED",
-            "teacher_management_web_application": "PARTIAL: pairing/session, homework/shared reminders with CAS and durable original-command query; material metadata and controlled file preparation/upload/download ports; voice browser entry unconnected; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
+            "teacher_management_web_application": "PARTIAL: pairing/session, homework/shared reminders with CAS and durable original-command query; material metadata and controlled file preparation/upload/download ports; voice canonical WAV upload/job/cancel ports and browser AudioWorklet recording; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
         },
         "gates": {
             "Win7_SP1_x86": "NOT_VALIDATED",

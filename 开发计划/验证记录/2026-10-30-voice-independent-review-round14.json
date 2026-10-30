@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 2,
+  "round": 14,
+  "kind": "INDEPENDENT_READ_ONLY_FINAL_VOICE_REVIEW",
+  "createdUtc": "2026-10-30T15:48:22.312021+00:00",
+  "status": "FINAL_FROZEN_RUST_SOURCES_MATCH; IDENTIFIED_RUST_AND_CROSS_INSTANCE_RENDER_FINDINGS_SOURCE_CONFIRMED_FIXED; NO_ADDITIONAL_CONFIRMED_RUST_DEFECT",
+  "reviewerExecution": "Static code/contract/test-source inspection and independent SHA256 only for this Rust final review. No Cargo, Windows, microphone, audio, browser, TLS listener, system mutation, P0 rerun, source edit, or Git submission.",
+  "baselineReview": {
+    "schemaVersion": 1,
+    "round": 14,
+    "kind": "INDEPENDENT_READ_ONLY_BASELINE_ARCHITECTURE_REVIEW",
+    "status": "BASELINE_REVIEW_COMPLETE; ONE_CONFIRMED_POSTCOMMIT_RESULT_CLASSIFICATION_GAP_REPORTED; NEW_WEB_SOURCE_REVIEW_PENDING",
+    "objective": "Review actual VoiceService, controlled voice files, domain/storage and module11 before wiring authenticated teacher browser voice; facts separated from recommendations",
+    "sourceInputs": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/voice.rs",
+        "sha256": "1ed84685b114d3b30c2b7be398d1c16b2f6690384f071832c61763aba3f294c3"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_files.rs",
+        "sha256": "105a07866d775ead4042f73c6b8c75d8ed553456c6029c55c8cd302b80c92260"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_runtime.rs",
+        "sha256": "9b7087051a2b55aba69361d2d6b676ef3ff6481d29fd4b4659502057869e59cb"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_runtime/native.rs",
+        "sha256": "edc3890c0ce646af791c187374b24b518d39edb72ca945fe88f812afc27211ac"
+      },
+      {
+        "path": "crates/fc-storage/src/business/voice.rs",
+        "sha256": "c5a5be994e1f0bba8827745998502c2bc4a6610648babf2d6e1a260f2b9c46b4"
+      },
+      {
+        "path": "crates/fc-domain/src/voice.rs",
+        "sha256": "186d3f71d00a0860bfacac13262a646e80b29be7e92cb32a46f1cf657cb80574"
+      },
+      {
+        "path": "crates/fc-ports/src/voice.rs",
+        "sha256": "4d8656e865bf85d39911b704477eba47f3b3dd7d45fc78469aa64f2bd67e1ded"
+      },
+      {
+        "path": "crates/fc-audio/src/execution.rs",
+        "sha256": "dd3bd726f73c1f1d534d66254b8500825381023fd38cb43d18ed4abf96d52261"
+      },
+      {
+        "path": "开发计划/模块/11-Web按住录音与本地语音播报.md",
+        "sha256": "c6f17a21edf83b9e9d69453760968dbaa22586c46abfe67036e1e172c29baa2e"
+      }
+    ],
+    "executionEvidence": "NONE: reviewer only read files; no Cargo, Windows, audio, microphone, browser, P0 rerun, code mutation or Git submission",
+    "confirmedFindings": [
+      {
+        "id": "IR14-01",
+        "title": "Post-COMMIT stop race returned as definite stale-authorization domain error",
+        "status": "REPORTED_TO_ROOT_AND_RUST_OWNER; FIX_PENDING",
+        "files": [
+          "crates/fc-bootstrap/src/backend/voice.rs"
+        ],
+        "fact": "reserve and submit first obtain successful committed asset/job from repository, then check current(epoch); failure returnsdenied() which is Domain(Permission(StaleAuthorization))",
+        "counterfactual": [
+          "reserve/submit writer COMMIT succeeds",
+          "stop invalidates runtime before post-success current(epoch) check",
+          "method returns domain stale authorization although authoritative row/task already exists"
+        ],
+        "requiredSemantics": "postcommit release/publication failure must mapUnavailable/Faulted/ResultUnknown, preservepublishedbytes and originalcommandId, never imply definitely rejected or enableautomatic newID resend",
+        "runtimeStatus": "NOT_EXECUTED; source-derived counterfactual only"
+      }
+    ],
+    "baselineFacts": [
+      {
+        "area": "actualTarget",
+        "fact": "domain authorize_submit requires Weborigin, current enabled school class, exact installation.current_class, must-change-password false, current actor auth_epoch; Teacher must have effective assignment; authority construction already filters disabled subjects/classes; Global also requires actualboundclass"
+      },
+      {
+        "area": "queryCancel",
+        "fact": "authorize_job permits currentGlobal or sameprincipalTeacher and deliberately does not require jobclass equal currentbinding; preserve ability to inspect/cancel oldtarget job after board target changes"
+      },
+      {
+        "area": "exactDevice",
+        "fact": "VoiceService.uploads map bindsserver-generatedassetId to exactSessionLease; publish and firstsubmit consult it; active jobVoiceSession retainsoriginalexactlease,sequence,actor,alive andstamp, not merely persistedActorContext"
+      },
+      {
+        "area": "capabilityPrivacy",
+        "fact": "inventory returns all jobs/internal authorization, while status redacts authorization=None; rawVoiceSnapshot/internaldriver DTO must not be JSONserialized toteacher"
+      },
+      {
+        "area": "queryMeaning",
+        "fact": "jobId equals originalsubmitcommandId; repository replay returns current durablejob state rather than storedQUEUED snapshot; terminal audits expire24h/max100 and laterGET canMissing"
+      },
+      {
+        "area": "cancelRelease",
+        "fact": "cancel closesoldjob capability alive beforewaitingSQL; domain stop incrementsgeneration; ifrelease_generation exists state remainsStopping withpendingterminal untilDriverReleased; terminalCancel withoutrelease_generation onlymeans no nativeowner existed or release alreadyconfirmed"
+      },
+      {
+        "area": "repeats",
+        "fact": "repeat_total1..10 default3; current_repeat/completed_repeats differentiated; naturalcompletion only incrementscount while reset/cancel drains separately; queueFIFO4global/2perteacher"
+      },
+      {
+        "area": "reserveQuota",
+        "fact": "reservation charges MAX_WAV_BYTES1,920,044 beforebody; totalcharged16MiB,32physicalassetmetadata includingDeletePending,SQLReserved<=2/perteacherReservedorReady<=2; reservationExpires600s andfirststart300s"
+      },
+      {
+        "area": "physicalReturn",
+        "fact": "ControlledVoiceFiles.reconcile exclusively deletes staging/activebefore service.finalize releasesquota; native-held filedeletionfails sochargedassetsretained; source hashing andnative open overlapreadonlypins"
+      },
+      {
+        "area": "preparation",
+        "fact": "prepare_body directly writes solechargedstagingobject in32KiBchunks, maxcanonicalWAVbytes; seals/validatescanonical44byteWAVheader andfullhash thennonreplacingpublishactive; PendingVoiceUpload keepsLockedFile acrossDBpublish"
+      },
+      {
+        "area": "readDeadline",
+        "fact": "ControlledVoiceFiles.Control checks30s andauthorize between synchronousoperations; genericRead alone cannot physicallyinterrupt arbitraryblockingread; existingcommentsrequireboundedscheduledHTTPreader andphysicalworker"
+      },
+      {
+        "area": "runtimeStop",
+        "fact": "runtime_state atomic combinesepoch+admission; invalidation closesadmission andoldguard; resume_after_stop requires callerconfirmednonativeownership pluswriterfence/terminaljobs before reopeningexactgeneration"
+      },
+      {
+        "area": "stopScope",
+        "fact": "emergency_stop_voice is trustedlocaltray/control API; it must not be exposed through ordinaryteacher remote cancel; remote cancel targetsoneauthorizedjob"
+      },
+      {
+        "area": "hardwareAvailability",
+        "fact": "RuntimeControl.available andVoiceService.admitting reflectsession/stop/health; application set_available usesinteractive_session_available andaudio_suspended, notspeakerquery. WinMMWAVE_FORMAT_QUERY occurs onlyinsideaudioexecutionopen"
+      },
+      {
+        "area": "existingCheckpointScope",
+        "fact": "check_web_session verifiescurrentManageWeblease+epochcapturedpercall; it neitherbindsoriginaluploadgenerationacrosscalls norchecksactualtarget/teaching/voiceenabled. A wrapper mustcaptureoriginalgenerationandtarget once rather thanreacquiringpositivepermission afterstop/resume"
+      }
+    ],
+    "contractRecommendations": [
+      {
+        "area": "capabilities",
+        "recommendation": "returnactualclassId/name,identityRevision,currentserverciviltime,voiceenabled,admission/sessiongeneration,outputavailabilityasindependentlyverifiedAVAILABLE/UNAVAILABLE/UNKNOWN,formatlimits andexplicitreason; noarbitraryclasspicker"
+      },
+      {
+        "area": "hardware",
+        "recommendation": "neverinferoutputAvailablefromadmitting/sessionAvailable; a read-onlytrusteddevice/formatprobe mustsupplyresult ordefaultUNKNOWN. Capabilities cannotopenplayback orproduceaudio"
+      },
+      {
+        "area": "authClasses",
+        "recommendation": "reserve/publish/submit bindcapturedclass andexactdevice; longworkercheckpoint rechecksoriginaltarget andruntimegeneration; preserveindependentquery/cancel whenrecordingcapabilityfalse"
+      },
+      {
+        "area": "uploadPhysicalPermit",
+        "recommendation": "processRAII2 admission beforephysicalbody/staging, retainthroughproof/pinpublication untilactualDrop andacrossWebApplicationreplacement. SQLReservedcountalonefreesentryonReady whileworker/proofmaystillalive, sonotaphysicalworkerbound"
+      },
+      {
+        "area": "unknown",
+        "recommendation": "generatefreezecommandId beforePOST, unknownsubmit retainsoriginalIDandonlymanualGETjob; noautomaticnewIDresend, uploadsuccessnotenqueue, COMMITTEDnotaudibleproof; queryMissingisnotautomaticpermissiontoresend"
+      },
+      {
+        "area": "stopUI",
+        "recommendation": "cancelreceiptStopping displays正在停止; onlyreleasedterminalresult permits已停止, Failed/Interrupted/Completed truthfulseparatestates. CASconflict requiresfreshstateandexplicituseraction"
+      },
+      {
+        "area": "recording",
+        "recommendation": "lategetUserMediaafterpointerendmuststoptrackswithoutrecording; cancelpointercancel/hidden/leave/targetchange; max60s/min0.5s; default3totalnot1+3; freeze repeats,target,command perfinalize exactlyonce"
+      },
+      {
+        "area": "polling",
+        "recommendation": "foregroundactivejob<=1Hz, inactive15s/manual, backgroundstoppoll; session401/403purgescookie-mirror/editor/recordingandunsubmittedaudio; networkdisconnectdoesnotrevokealreadycommittedserverjob"
+      },
+      {
+        "area": "noAudioReadback",
+        "recommendation": "do notaddremoteShell/open, rawpath, arbitraryURL, systemvolumeorvoiceassetdownload capabilities; notneededforbrowserrecordandsubmit"
+      },
+      {
+        "area": "testing",
+        "recommendation": "actualnativeevidenceuseonlyselfownedzeroPCM; planmodule11requiresrealTLS/mobilemic separately, so host/syntheticAPIpassesmustnotclaimthatcoverage"
+      }
+    ],
+    "notConclusions": [
+      "no runtime defect reproduction performed in this review",
+      "physical2 globalHTTPworkers/cancellation stilldependsfinalcomposition",
+      "P0strict5s remainsknownfailed; intentionallynotrerununchangedcase",
+      "newRustWebsource notyetavailableatreview; followupreviewrequired"
+    ]
+  },
+  "intermediateSnapshot": {
+    "path": "/tmp/fc-round14-voice-review-intermediate.json",
+    "bytes": 1285,
+    "sha256": "c6cb6bfc24ad15d9638f0bfd4f8530754e3881c06f260bb6c787f57ee0f0e024"
+  },
+  "finalSourceManifest": {
+    "schemaVersion": 1,
+    "sourceFiles": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/voice.rs",
+        "bytes": 88624,
+        "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_files.rs",
+        "bytes": 20853,
+        "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "bytes": 11497,
+        "sha256": "5fafc8de4b0de4be24ab6bad9d112d9839fdfd5d41033dbcfce4c041e9c079c5"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "bytes": 38490,
+        "sha256": "96f87ceb9435513be0629eec57d71e36aa56ded043b4ae128e0bc1786c47751a"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "bytes": 25137,
+        "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+        "bytes": 1253,
+        "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "bytes": 16452,
+        "sha256": "9fae297f5e5c3a8d73f3064fb9b166184fcf47ae28f45a830a1622812787bf63"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+        "bytes": 5972,
+        "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+        "bytes": 8062,
+        "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+        "bytes": 24233,
+        "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "bytes": 28289,
+        "sha256": "11c6bdfe74c89800cf3635cf0cbd328d7f537e9d80e9f097fa4ba5d35654a3ae"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "bytes": 9981,
+        "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/voice.rs",
+        "bytes": 9063,
+        "sha256": "b9c66758227733c3eb441bb19ecfb10b93a5bf82b1d5555370a9ce0f6508d117"
+      }
+    ],
+    "aggregateAlgorithm": "SHA256 of UTF8 JSON sourceFiles sorted by path, keys sorted, compact separators, ensure_ascii=False",
+    "aggregateSha256": "141c53b4b0029a651fa30ac4ce35154770a0f7dea440068f803b40ce2da9565d"
+  },
+  "independentSourceHashCheck": {
+    "all13FilesBytesAndSha256Match": true,
+    "aggregateMatches": true,
+    "aggregateSha256": "141c53b4b0029a651fa30ac4ce35154770a0f7dea440068f803b40ce2da9565d"
+  },
+  "additionalReviewedSources": [
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe/voice_probe.rs",
+      "bytes": 10264,
+      "sha256": "a66e7bfa0c2b93af24ef2c5fd2bc660e42c7d9bb22784bde5bc766a9ee4c5c89"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe.rs",
+      "bytes": 13399,
+      "sha256": "00a86796d0eb5701673e29faa8e1c297c0103135378a6b1b913ac6a80d7f97b2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 13337,
+      "sha256": "114abf5cd61027c00bf7c591dd542d549418e208525cd20e5eefe6b1a405eb60"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "bytes": 20459,
+      "sha256": "a2e97d9bfd74f99471218694c1a4a7c7fa03e0f02d9b32ce6b24b9203d907efa"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4500,
+      "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 10847,
+      "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+    }
+  ],
+  "fixedFindings": [
+    {
+      "id": "IR14-01",
+      "origin": "independent baseline review",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "beforeSourceSha256": "1ed84685b114d3b30c2b7be398d1c16b2f6690384f071832c61763aba3f294c3",
+      "afterSourceSha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0",
+      "fact": "Successful repository reserve/submit followed by current-generation or sessions publication failure now returns result_unknown (VoiceRepositoryError::Unavailable); post-publish check and cancel postcommit update likewise return unknown. Web mutation response final authorization/encoding failures return RESULT_UNKNOWN. Prepared upload attempted is set before durable publication and its Drop retains possibly committed file.",
+      "testSource": "voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable_without_replay invokes cfg(test) after_next_commit hook to invalidate runtime after actual SQL success, then expects 503 RESULT_UNKNOWN and original command GET QUEUED; this reviewer did not run it."
+    },
+    {
+      "id": "IR14-02",
+      "origin": "independent followup review",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "fact": "Rust expectedAssetRevision and cancel expectedRevision decoders now use nonzero decimal validation; zero rejection tests exist, aligning TS strict CAS contract."
+    },
+    {
+      "id": "IR14-03",
+      "origin": "independent followup review",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "counterfactual": "A legitimate paired Role::User could previously get capability/list because ManageWeb actor validation alone did not restrict role. Module11 requires current GlobalAdmin or TeacherAdmin.",
+      "fact": "check_web_actor now checks latest authority role and mustChangePassword, revalidates exact lease against that snapshot, and finally checks Healthy plus snapshot revision/auth_epoch. web_capabilities/web_jobs call it before disclosure. Source includes actual paired User caps/list403 fixture."
+    },
+    {
+      "id": "IR14-04",
+      "origin": "root identified cross-business cap conflict; independently reviewed fix",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "counterfactual": "Separate material static2 and voice static2 allowed four concurrent physical Web owners. Per-application caps also permit replacement bypass.",
+      "fact": "Both businesses now acquire the same process-global PhysicalUploadPermit static count<=2, before physical create/read and SQL reserve for voice. Material Slot owns permit; PreparedWebMaterial last-field strong Arc<Mutex<Slot>> survives Weak registry and old App drop. Slot Drop closes phase/pins and removes its controlled path before permit field drops. Voice proof owns strong binding, pending pin, and last-field permit. Its Drop closes pending pin, deletes only unattempted own unpublished asset, then returns permit. Locals in commit close publication pin before Prepared proof returns its permit. No Clone/Deserialize/public constructor permits duplicate proof."
+    },
+    {
+      "id": "IR14-05",
+      "origin": "independent native probe review",
+      "status": "SOURCE_CONFIRMED_FIXED",
+      "fact": "Probe nonexistent class8 now expects403 unmanaged instead of409 managed-but-not-current. RuntimeOwner.close returns Result and requires Closed, !faulted, no physical_thread_running and ack_generation>=stop_generation before PASS; Drop is fallback only."
+    },
+    {
+      "id": "IR14-06",
+      "origin": "independent recorder/runtime boundary review; fixed by paired_leases",
+      "status": "SOURCE_CONFIRMED_FIXED; OWNER_REPORTED_TEST_RESULTS_SEPARATE",
+      "counterfactual": "Old per-normalizer pendingRender guard let disposed old Recorder with unsettled OfflineAudioContext coexist with newly constructed Normalizer render, accumulating physical contexts across remounts.",
+      "fact": "normalize.ts now reserves a realm-level Symbol before OfflineAudioContext/source AudioBuffer allocation and releases only when original startRendering promise actually resolves/rejects, or synchronous setup failed before any rendering promise existed. Public abort/15s timeout/dispose only drops output and disconnects source; cannot return token. Two independent-instance/remount regression test sources verify one context while old render remains unsettled and later recovery.",
+      "ownerReportedExecution": "paired_leases reports both old-source regressions failed with two contexts, new source passes and all 5 recorder test files 68 PASS + typecheck. This reviewer only inspected source; no independent rerun."
+    }
+  ],
+  "finalOwnershipAndAuthorityFacts": [
+    "check_web_target binds captured original runtime generation, actual enabled current bound class, current role/teaching assignment and fresh Healthy revision/auth_epoch. check_web_upload additionally binds server asset owner and exact SessionLease via uploads map plus created<=now<expires. Stop/resume does not silently retarget a previous upload.",
+    "Voice target authorization precedes shared permit; shared permit precedes SQL reserve and physical body creation/read. Long actual prepare_body/hash/flush and publication do not hold Backend mutex; canonical WAV adapter uses fixed32KiB bounded work buffers.",
+    "Finite trusted Content-Length, max WAV bytes and Framed reader expected+1 prevent larger publication, early EOF/overlength and invalid canonical WAV rejected. No caller filename/path/owner is accepted by typed proof.",
+    "Wrong application commit fails Arc pointer binding. Drop cleans only that prepared reservation and never another device upload. Published or unknown-result files remain conservatively charged; unattempted Drop physical cleanup does not claim immediate SQL quota release.",
+    "GET list filters fresh authorized ownTeacher or Global jobs, redacts internal authorization, caps active/recent terminal output, and checks snapshot freshness before release. Query/cancel preserve authorized access to old target when positive admission or enabled recording closes.",
+    "Cancel receipt STOPPING is not physical release. Terminal cancellation only follows no native owner or confirmed DriverReleased; probe explicitly checks runtime drainage before PASS. No remote emergency-stop, arbitrary shell/path, system volume or audio readback was added.",
+    "Capabilities deviceAvailability remains UNVERIFIED; runtime admission does not prove real output availability. Request metadata in native Web probe is synthetic and marker explicitly reports actual_microphone and listener_TLS_browser NOT_RUN.",
+    "SQL Reserved charge after known unattempted upload cleanup intentionally persists until existing bounded expiry/reconcile. DeletePending storage charges persist until actual controlled deletion; proof Drop is physical owner release, not SQL finalization."
+  ],
+  "sourceInspectedRegressionAssertions": [
+    {
+      "name": "voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "fact": "Two actual canonical WAV prepared proofs stay alive, SQL reservations are deliberately expired to avoid masking physical count, old application replaced, third NeverRead rejected429 before byte reads. Dropping one proof admits replacement and subsequent prepared proof publishes201."
+    },
+    {
+      "name": "voice_windows_material_and_voice_share_two_physical_owners_across_application_replacement",
+      "fact": "One material TXT proof and one canonical WAV proof occupy both shared permits; inventory len1 excludes SQL Reserved2 as rejection cause. Third voice NeverRead429; after SQL expiry and App replacement both material metadata and voice NeverRead still429; dropping material proof admits new voice."
+    },
+    {
+      "name": "shared test_guard",
+      "fact": "cfg(test) Mutex only serializes independent process-saturation fixtures; it does not serialize the two real owners inside a scenario and is absent from production."
+    },
+    {
+      "name": "native Web probe separation",
+      "fact": "--web-pairing-probe retains no-native-voice semantics. --web-voice-probe and runner --web-voice use authorized interactive hidden task for self-owned zero PCM. Natural3 repeats, idempotent duplicate current result, stop before total10, query/list and explicit physical drain are asserted. No microphone or audible-content evidence claimed."
+    }
+  ],
+  "externalExecutedEvidence": {
+    "rustOwnerReport": {
+      "path": "/tmp/fc-round14-voice-rust.json",
+      "bytes": 28030,
+      "sha256": "77a50763991c3b021218478af459db63595fc2d668fcf735b8cfaba1e64fa36c"
+    },
+    "classification": "External owner report, not reviewer runtime. Owner reports Host/Windows target release strict Clippy PASS. Root owns final actual native Windows suite and cleanup.",
+    "ownWebTestsSeparateReport": {
+      "path": "/tmp/fc-round14-voice-web-tests.json",
+      "bytes": 47821,
+      "sha256": "83f2b6c7060ee8404a668eae6f563108410cfecc034a606ae4b7a4b4ff205438"
+    },
+    "ownWebTestsMeaning": "Separate earlier execution:3 API/protocol/controller files31 PASS plus typecheck; original five actual failures retained. WAV transport fixture bytes are not real canonical WAV integration. Subsequent root final suite binds any source changes."
+  },
+  "limits": [
+    "Review findings and source assertions are not Windows runtime execution. Root must bind actual executed binaries/tests and cleanup to final source aggregate.",
+    "Shared permits bound admitted typed Web upload physical owners and in-flight proofs; no claim that disabled production HTTP listener has end-to-end socket cancellation or whole-system resource bounds.",
+    "30s deadline/checkpoints on synchronous generic Read do not physically cancel a blocking read. No whole-request5s or kernel/Schannel bounds proven; P0 strict5s known failed and intentionally not rerun unchanged.",
+    "No Win7SP1x86 or Win10 real-device proof, real mobile microphone, browser TLS listener, campus network, audible sound or actual Seewo hardware evidence from this review.",
+    "Realm render token bounds OfflineAudioContext rendering; no claim to synchronously cancel native browser render after abort/timeout. It intentionally remains reserved until true settlement.",
+    "Final source evidence is point-in-time; later integration edits require root source freshness check."
+  ],
+  "testExpectationAlignment": {
+    "reviewedUtc": "2026-10-30T15:55:03.936966+00:00",
+    "status": "SOURCE_ONLY_ALIGNMENT_CONFIRMED; ROOT_TARGETED_AND_FINAL_SUITE_RESULTS_PENDING",
+    "historic13SourceAggregateRetained": "141c53b4b0029a651fa30ac4ce35154770a0f7dea440068f803b40ce2da9565d",
+    "current13SourceAggregateSha256": "dd23e548b539c0a1289febdf9518e04bfbbb140cd9d650c527368b92ba2dbc5c",
+    "current13SourceFiles": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/voice.rs",
+        "bytes": 88624,
+        "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_files.rs",
+        "bytes": 20853,
+        "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "bytes": 11497,
+        "sha256": "5fafc8de4b0de4be24ab6bad9d112d9839fdfd5d41033dbcfce4c041e9c079c5"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "bytes": 38490,
+        "sha256": "96f87ceb9435513be0629eec57d71e36aa56ded043b4ae128e0bc1786c47751a"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "bytes": 25137,
+        "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+        "bytes": 1253,
+        "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "bytes": 16680,
+        "sha256": "48fc97b2ecd03aaf7255e629e8e83bc4ad9e00a6c9cf9b10c1df5ef3e18d1b8f"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+        "bytes": 5972,
+        "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+        "bytes": 8062,
+        "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+        "bytes": 24233,
+        "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "bytes": 28288,
+        "sha256": "e36688326be6a21a451c5f40ffe8d39c7f421593ad23ef7f0362f0f5da8d8bb9"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "bytes": 9981,
+        "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/voice.rs",
+        "bytes": 9063,
+        "sha256": "b9c66758227733c3eb441bb19ecfb10b93a5bf82b1d5555370a9ce0f6508d117"
+      }
+    ],
+    "changedPathsSinceReviewedFreeze": [
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "priorSha256": "9fae297f5e5c3a8d73f3064fb9b166184fcf47ae28f45a830a1622812787bf63",
+        "currentSha256": "48fc97b2ecd03aaf7255e629e8e83bc4ad9e00a6c9cf9b10c1df5ef3e18d1b8f"
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "priorSha256": "11c6bdfe74c89800cf3635cf0cbd328d7f537e9d80e9f097fa4ba5d35654a3ae",
+        "currentSha256": "e36688326be6a21a451c5f40ffe8d39c7f421593ad23ef7f0362f0f5da8d8bb9"
+      }
+    ],
+    "facts": [
+      {
+        "file": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "test": "pairing_session_csrf_and_account_logout_cross_the_real_backend_and_persist_epoch",
+        "before": "GET voice/capabilities from actual authenticated privately initialized GlobalAdmin fixture expected404 while new route returns200.",
+        "after": "Requires200 and VOICE_CAPABILITIES,currentClass:null,targetAuthorized:false,deviceAvailability:UNVERIFIED. Fixture has actual paired exact lease, GlobalAdmin role, no current bound class/teaching assignments;200 represents private read capability, not positive target authorization or playback permission.",
+        "unchangedSecurityAssertions": "Session excludes credential/recovery/password/loginName/authEpoch/pollSecret; logout withoutCSRF/badCSRF403, exact session revocation/persisted epoch assertions remain. RoleUser403 and current-target/old-job stop tests are distinct existing round14 tests and remain present."
+      },
+      {
+        "file": "crates/fc-protocol/src/web.rs",
+        "test": "routing_has_no_remote_launch_admin_or_static_fallback",
+        "before": "GET canonical voice/broadcasts expected Method despite newly added explicit VoiceList route.",
+        "after": "Requires Ok(Route::VoiceList), matching actual new GET list contract. This is lexical route selection only; authenticated/role/snapshot authorization remains application/backend responsibility.",
+        "unchangedSecurityAssertions": "Traversal, encodedaliases, noncanonicaljobIDs, trailing slash/query, materials/1/open, settings, commands, role injection uploadquery and tokenquery remain NotFound. GET exact maxu64 status remains typedVoiceStatus. No remote launch/open/admin fallback was enabled."
+      }
+    ],
+    "conclusion": "These two cfg(test) expectation updates align stale fixtures with previously implemented authenticated capability/list behavior and strengthen capability response meaning. No security denial assertion was removed or weakened by the two alignment edits. The broader round14 production diff predates these two edits and remains reviewed separately.",
+    "preservedActualFailures": [
+      {
+        "path": "/tmp/fc-round14-before-test-expectation-fix-host-final.log",
+        "bytes": 11416,
+        "sha256": "8acfa4a05b7c633f607d1f5b476672ac852aa482569faa9c5e74015d8283df28",
+        "fact": "Host actual test reported left200/right404 at tests.rs336;52 passed1failed. Read source/log only, not reviewer-run."
+      },
+      {
+        "path": "/tmp/fc-round14-windows-before-protocol-expectation-fix.json",
+        "bytes": 14718,
+        "sha256": "2521d1f630d51bafee384198324f0ff37e9e9448fbcc64b538d4264af434ad3d",
+        "fact": "Actual Windows fc_protocol test reported Ok(VoiceList) vsErr(Method),28passed1failed, exit101. Read external runner JSON only, not reviewer-run.",
+        "failedBinarySha256": "9e432728e088064587394c9cea8c4ff711352d46818bbeb4c65fd295e3a69519"
+      }
+    ],
+    "executionLimit": "Reviewer did not run Cargo, Windows or modify source. Root owns targeted rerun, final247-source manifest refresh, full build/suite and cleanup. Historic13-owner aggregate and previous review results remain point-in-time history; current source hash is explicitly separate."
+  },
+  "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba",
+  "originalReportSha256": "dabd3d31a061cc03f043f79176757e3db25cc0dde7df2dde8760689518dfeda2"
+}

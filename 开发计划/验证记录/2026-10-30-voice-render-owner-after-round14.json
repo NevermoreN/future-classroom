@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "exitCode": 0,
+  "tests": {
+    "passed": 2,
+    "skipped": 12
+  },
+  "sourceInputs": [
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "bytes": 6463,
+      "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4500,
+      "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "bytes": 1836,
+      "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "bytes": 2718,
+      "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "bytes": 1854,
+      "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "bytes": 7728,
+      "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "bytes": 464,
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "bytes": 9440,
+      "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 10847,
+      "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 2955,
+      "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 2221,
+      "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "bytes": 13606,
+      "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+    }
+  ],
+  "sourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+  "normalizerSource": "import { outputFrames, OUTPUT_RATE } from './pcm'\nimport { RecorderError, type NormalizedWav, type WavNormalizer } from './ports'\n\n// Physical ownership belongs to this JS realm, not a mounted component/normalizer.\n// OfflineAudioContext has no close/abort API. Public cancellation never returns this\n// token; only the original render promise's actual resolution/rejection can do so.\nlet renderOwner: symbol | undefined\n\nasync function render(chunks: Float32Array[], sourceFrames: number, frames: number, rate: number, signal: AbortSignal): Promise<AudioBuffer> {\n  if (renderOwner) throw new RecorderError('RECORDING_FAILED')\n  const owner = Symbol()\n  renderOwner = owner\n  const release = () => { if (renderOwner === owner) renderOwner = undefined }\n  let rendering: Promise<AudioBuffer> | undefined\n  let source: AudioBufferSourceNode | undefined\n  const disconnect = () => { source?.disconnect(); if (source) source.buffer = null }\n  try {\n    // Reserve before allocation: a remounted workspace cannot allocate a second\n    // source AudioBuffer while an abandoned old render still owns its first one.\n    const context = new OfflineAudioContext(1, frames, OUTPUT_RATE)\n    const input = context.createBuffer(1, sourceFrames, rate)\n    let offset = 0\n    for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length }\n    chunks.length = 0\n    source = context.createBufferSource(); source.buffer = input; source.connect(context.destination); source.start()\n    signal.addEventListener('abort', disconnect, { once: true })\n    rendering = context.startRendering()\n    void rendering.then(release, release)\n    return await new Promise<AudioBuffer>((resolve, reject) => {\n      const finish = (result?: AudioBuffer, error?: unknown) => {\n        clearTimeout(timer); signal.removeEventListener('abort', abort)\n        if (error) reject(error); else resolve(result!)\n      }\n      const abort = () => finish(undefined, new RecorderError('MIC_INTERRUPTED'))\n      const timer = globalThis.setTimeout(() => finish(undefined, new RecorderError('RECORDING_FAILED')), 15000)\n      signal.addEventListener('abort', abort, { once: true })\n      void rendering!.then(buffer => finish(buffer), error => finish(undefined, error))\n      if (signal.aborted) abort()\n    })\n  } finally {\n    // Setup failure before startRendering returned cannot have a physical render.\n    if (!rendering) release()\n    signal.removeEventListener('abort', disconnect); disconnect()\n  }\n}\n\nexport class BrowserWavNormalizer implements WavNormalizer {\n  async normalize(chunks: Float32Array[], rate: number, signal: AbortSignal): Promise<NormalizedWav> {\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    const sourceFrames = chunks.reduce((sum, chunk) => sum + chunk.length, 0)\n    const frames = outputFrames(sourceFrames, rate)\n    const rendered = await render(chunks, sourceFrames, frames, rate, signal)\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    const pcm = rendered.getChannelData(0).slice()\n    // Always a separate, same-origin packaged worker; no blob/data URL or main-thread encoder fallback.\n    const worker = new Worker(new URL('./wav-worker.ts', import.meta.url), { type: 'module' })\n    const wav = await new Promise<ArrayBuffer>((resolve, reject) => {\n      let active = true\n      const cleanup = () => { active = false; clearTimeout(timer); signal.removeEventListener('abort', abort); worker.terminate() }\n      const fail = (code: 'MIC_INTERRUPTED' | 'RECORDING_FAILED') => { if (active) { cleanup(); reject(new RecorderError(code)) } }\n      const abort = () => fail('MIC_INTERRUPTED')\n      const timer = globalThis.setTimeout(() => fail('RECORDING_FAILED'), 15000)\n      signal.addEventListener('abort', abort, { once: true })\n      worker.onerror = () => fail('RECORDING_FAILED')\n      worker.onmessageerror = () => fail('RECORDING_FAILED')\n      worker.onmessage = event => {\n        if (!active) return\n        const result = event.data?.wav\n        if (!(result instanceof ArrayBuffer) || result.byteLength !== 44 + frames * 2) { fail('RECORDING_FAILED'); return }\n        cleanup(); resolve(result)\n      }\n      if (signal.aborted) { abort(); return }\n      try { worker.postMessage(pcm, [pcm.buffer]) } catch { fail('RECORDING_FAILED') }\n    })\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    return { wav: new Blob([wav], { type: 'audio/wav' }), frames, sampleRate: OUTPUT_RATE }\n  }\n}\n",
+  "regressionTestSourceSha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306",
+  "command": "npm --prefix web test -- tests/voice-recorder-normalize.test.ts -t \"different normalizer instances|constructing a new recorder\"",
+  "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-normalize.test.ts -t different normalizer instances|constructing a new recorder\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  1 passed (1)\n      Tests  2 passed | 12 skipped (14)\n   Start at  23:45:23\n   Duration  1.21s (transform 46%, import 29%, tests 16%, worker 8%)\n\n",
+  "fix": "Module/JS-realm shared Symbol token acquired before OfflineAudioContext allocation and released only by actual original render promise settlement. Abort, public deadline and Recorder.dispose cannot return the token. A fresh normalizer cannot create a second context while the old one is unsettled."
+}

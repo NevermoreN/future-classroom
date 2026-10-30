@@ -326,6 +326,7 @@ fn material_cursor_never_rebinds_to_mutated_folder_and_binary_slice_is_not_a_spo
 #[cfg(windows)]
 #[test]
 fn material_windows_upload_device_capacity_prepared_permit_cancel_and_consumed_receipt_replay() {
+    let _scenario = super::super::shared_upload::test_guard();
     use std::{
         io::Cursor,
         sync::{Arc, Mutex},

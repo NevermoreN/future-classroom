@@ -1,0 +1,816 @@
+{
+  "schemaVersion": 1,
+  "round": 14,
+  "recordedAt": "2026-10-30T15:50:06.717434+00:00",
+  "status": "PASS",
+  "scope": "browser recorder and PCM normalization; synthetic sources only",
+  "sourceInputs": [
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "bytes": 6463,
+      "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4500,
+      "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "bytes": 1836,
+      "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "bytes": 2718,
+      "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "bytes": 1854,
+      "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "bytes": 7728,
+      "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "bytes": 464,
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "bytes": 9440,
+      "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 10847,
+      "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 2955,
+      "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 2221,
+      "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "bytes": 13606,
+      "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+    }
+  ],
+  "sourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+  "commands": [
+    {
+      "log": "/tmp/fc-round14-recorder-typecheck-first.log",
+      "output": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\nsrc/voice/normalize.ts(13,55): error TS2345: Argument of type 'Float32Array<ArrayBufferLike>' is not assignable to parameter of type 'Float32Array<ArrayBuffer>'.\n  Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.\n    Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.\n      Types of property '[Symbol.toStringTag]' are incompatible.\n        Type '\"SharedArrayBuffer\"' is not assignable to type '\"ArrayBuffer\"'.\n",
+      "exitCode": 1
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-tests-first.log",
+      "output": "\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划\n\n\n Test Files  2 passed (2)\n      Tests  41 passed (41)\n   Start at  23:25:34\n   Duration  459ms (transform 54%, tests 31%, import 12%, worker 3%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-tests-second.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder.test.ts tests/voice-recorder-pcm.test.ts tests/voice-recorder-capture.test.ts tests/voice-recorder-worklet.test.ts\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  4 passed (4)\n      Tests  52 passed (52)\n   Start at  23:26:53\n   Duration  524ms (transform 49%, tests 27%, import 20%, worker 5%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-adapter-hardening.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-capture.test.ts\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  1 passed (1)\n      Tests  10 passed (10)\n   Start at  23:28:09\n   Duration  279ms (transform 43%, tests 31%, import 18%, worker 7%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-tests-final.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder.test.ts tests/voice-recorder-pcm.test.ts tests/voice-recorder-capture.test.ts tests/voice-recorder-worklet.test.ts tests/voice-recorder-normalize.test.ts\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  5 passed (5)\n      Tests  66 passed (66)\n   Start at  23:32:28\n   Duration  524ms (transform 44%, tests 36%, import 16%, worker 4%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-typecheck-final.log",
+      "output": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-render-owner-before.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-normalize.test.ts -t different normalizer instances|constructing a new recorder\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n ❯ tests/voice-recorder-normalize.test.ts (14 tests | 2 failed | 12 skipped) 39ms\n   ❯ bounded offline resampling and disposable encoding worker (14)\n     × cancelled physical render retains the shared owner across different normalizer instances until actual settlement 27ms\n     × disposing an old recorder and constructing a new recorder cannot mint a second unsettled physical render 8ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/voice-recorder-normalize.test.ts > bounded offline resampling and disposable encoding worker > cancelled physical render retains the shared owner across different normalizer instances until actual settlement\nAssertionError: expected [ Context{ channels: 1, …(9) }, …(1) ] to have a length of 1 but got 2\n\n- Expected\n+ Received\n\n- 1\n+ 2\n\n ❯ tests/voice-recorder-normalize.test.ts:87:26\n     85|     void next.catch(() => {})\n     86|     try {\n     87|       expect(f.contexts).toHaveLength(1)\n       |                          ^\n     88|       await expect(next).rejects.toMatchObject({ code: 'RECORDING_FAIL…\n     89|       expect(f.workers).toHaveLength(0)\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  tests/voice-recorder-normalize.test.ts > bounded offline resampling and disposable encoding worker > disposing an old recorder and constructing a new recorder cannot mint a second unsettled physical render\nAssertionError: expected [ Context{ channels: 1, …(9) }, …(1) ] to have a length of 1 but got 2\n\n- Expected\n+ Received\n\n- 1\n+ 2\n\n ❯ tests/voice-recorder-normalize.test.ts:115:51\n    113|       old.controller.dispose(); await oldFinish\n    114|       await replacement.controller.start('replacement-owner'); replace…\n    115|       await Promise.resolve(); expect(f.contexts).toHaveLength(1)\n       |                                                   ^\n    116|       await nextFinish\n    117|       expect(replacement.onError).toHaveBeenCalledWith(expect.objectCo…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 12 skipped (14)\n   Start at  23:44:42\n   Duration  337ms (transform 54%, tests 23%, import 19%, worker 3%)\n\n",
+      "exitCode": 1
+    },
+    {
+      "log": "/tmp/fc-round14-render-owner-after.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-normalize.test.ts -t different normalizer instances|constructing a new recorder\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  1 passed (1)\n      Tests  2 passed | 12 skipped (14)\n   Start at  23:45:23\n   Duration  1.21s (transform 46%, import 29%, tests 16%, worker 8%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-tests-shared-owner-final.log",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder.test.ts tests/voice-recorder-pcm.test.ts tests/voice-recorder-capture.test.ts tests/voice-recorder-worklet.test.ts tests/voice-recorder-normalize.test.ts\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  5 passed (5)\n      Tests  68 passed (68)\n   Start at  23:45:38\n   Duration  1.98s (tests 60%, import 27%, worker 9%, transform 4%)\n\n",
+      "exitCode": 0
+    },
+    {
+      "log": "/tmp/fc-round14-recorder-typecheck-shared-owner-final.log",
+      "output": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\n",
+      "exitCode": 0
+    }
+  ],
+  "finalTests": {
+    "files": 5,
+    "passed": 68,
+    "failed": 0
+  },
+  "browserEvidenceFile": "/tmp/fc-round14-recorder-browser-final.json",
+  "browserRunner": "/tmp/fc-round14-recorder-browser-runner.js",
+  "memoryBounds": {
+    "rawCaptureCacheBytes": 33554432,
+    "supportedRateHz": [
+      8000,
+      96000
+    ],
+    "maxRawSourceFloat32Bytes": 23040000,
+    "extraSourceAudioBufferBytes": 23040000,
+    "outputAudioBufferBytes": 3840000,
+    "workerTransferFloat32Bytes": 3840000,
+    "wavBytes": 1920044,
+    "conservativeApplicationBuffersBytes": 55680044,
+    "note": "This is a bound on application-owned float/WAV arrays, not a measured total browser heap or audio-engine internal memory. Capture cache cap is not a total 32MiB working-set claim. One abandoned OfflineAudioContext retains exclusive render ownership until its actual promise settles, despite public cancellation/deadline.",
+    "sharedOwnerScope": "One physical Offline render across BrowserWavNormalizer/RecorderController/Workspace instances within the same JS realm; a pending old render is included in the conservative 55,680,044-byte application-array bound together with replacement capture. No total browser heap bound or cross-tab global cap is claimed."
+  },
+  "apiFacts": [
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia",
+      "fact": "Requires secure context and permission. Permission promise may never settle; cannot treat user silence as approval."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack/stop",
+      "fact": "stop synchronously sets ended but does not dispatch ended; stop all late/owned tracks explicitly."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope/sampleRate",
+      "fact": "Worklet sampleRate is the associated BaseAudioContext rate, not the requested device channelCount or an assumed 48k."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor/process",
+      "fact": "Input channel arrays provide actual quantum lengths; do not hardcode 128 frames."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext/OfflineAudioContext",
+      "fact": "Explicit output channel count/frames/sampleRate; documented required supported rate range 8k..96k."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext/startRendering",
+      "fact": "Returns a rendered AudioBuffer promise. This module does not invent close/abort APIs; cancelled results are discarded."
+    },
+    {
+      "url": "https://vite.dev/guide/features#web-workers",
+      "fact": "Direct new Worker(new URL(...,import.meta.url),options) and ?worker&url bundle static worker entries."
+    }
+  ],
+  "inferences": [
+    "Production trusted campus TLS/phone permission/device interruption remain independent acceptance gates.",
+    "Playwright synthetic-domain route did not intercept worklet fetch in this Chromium runner; isolated self-signed HTTPS fixture served actual assets instead, with certificate verification explicitly bypassed."
+  ],
+  "notValidated": [
+    "physical microphone",
+    "trusted campus certificate chain",
+    "production HTTPS listener",
+    "actual phone browser",
+    "audible playback",
+    "measured browser peak heap"
+  ],
+  "cleanup": {
+    "schemaVersion": 1,
+    "recordedAt": "2026-10-30T15:50:06.717434+00:00",
+    "status": "PASS",
+    "temporaryHttpsOwnedPidsStopped": [
+      15585
+    ],
+    "temporaryHttpsPortClosed": true,
+    "temporaryHttpsDirectoryExists": false,
+    "certificatePathExists": false,
+    "privateKeyPathExists": false,
+    "allBrowserContextsTracksWorkersClosed": true,
+    "rootPreviewUntouched": true,
+    "nodeModulesAndTargetUntouched": true,
+    "sourceFrozenSha256Unchanged": true,
+    "historicalPriorCleanupArchive": "开发计划/验证记录/2026-10-30-voice-browser-owned-cleanup-round14-before-shared-render-fix.json",
+    "recorderSourceInputs": [
+      {
+        "path": "web/src/voice/browser-capture.ts",
+        "bytes": 6463,
+        "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+      },
+      {
+        "path": "web/src/voice/normalize.ts",
+        "bytes": 4500,
+        "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+      },
+      {
+        "path": "web/src/voice/pcm-worklet.ts",
+        "bytes": 1836,
+        "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+      },
+      {
+        "path": "web/src/voice/pcm.ts",
+        "bytes": 2718,
+        "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+      },
+      {
+        "path": "web/src/voice/ports.ts",
+        "bytes": 1854,
+        "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+      },
+      {
+        "path": "web/src/voice/recorder.ts",
+        "bytes": 7728,
+        "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+      },
+      {
+        "path": "web/src/voice/wav-worker.ts",
+        "bytes": 464,
+        "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+      },
+      {
+        "path": "web/tests/voice-recorder-capture.test.ts",
+        "bytes": 9440,
+        "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+      },
+      {
+        "path": "web/tests/voice-recorder-normalize.test.ts",
+        "bytes": 10847,
+        "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+      },
+      {
+        "path": "web/tests/voice-recorder-pcm.test.ts",
+        "bytes": 2955,
+        "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+      },
+      {
+        "path": "web/tests/voice-recorder-worklet.test.ts",
+        "bytes": 2221,
+        "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+      },
+      {
+        "path": "web/tests/voice-recorder.test.ts",
+        "bytes": 13606,
+        "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+      }
+    ],
+    "recorderSourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+    "distBinding": {
+      "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+      "manifestBytes": 1072,
+      "manifestSource": "{\n  \"schemaVersion\": 1,\n  \"apiVersion\": 1,\n  \"uiCompatibilityVersion\": 1,\n  \"assets\": [\n    {\n      \"path\": \"assets/favicon-CXuYoSfB.svg\",\n      \"sizeBytes\": 282,\n      \"sha256\": \"46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a\"\n    },\n    {\n      \"path\": \"assets/index-Cr8Ck6mT.js\",\n      \"sizeBytes\": 402597,\n      \"sha256\": \"30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78\"\n    },\n    {\n      \"path\": \"assets/index-DFFVdc8-.css\",\n      \"sizeBytes\": 38836,\n      \"sha256\": \"4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8\"\n    },\n    {\n      \"path\": \"assets/pcm-worklet-DQjgdlBf.js\",\n      \"sizeBytes\": 1440,\n      \"sha256\": \"c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d\"\n    },\n    {\n      \"path\": \"assets/wav-worker-LSywWbpJ.js\",\n      \"sizeBytes\": 884,\n      \"sha256\": \"a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886\"\n    },\n    {\n      \"path\": \"index.html\",\n      \"sizeBytes\": 684,\n      \"sha256\": \"a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf\"\n    }\n  ]\n}\n",
+      "manifest": {
+        "schemaVersion": 1,
+        "apiVersion": 1,
+        "uiCompatibilityVersion": 1,
+        "assets": [
+          {
+            "path": "assets/favicon-CXuYoSfB.svg",
+            "sizeBytes": 282,
+            "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+          },
+          {
+            "path": "assets/index-Cr8Ck6mT.js",
+            "sizeBytes": 402597,
+            "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+          },
+          {
+            "path": "assets/index-DFFVdc8-.css",
+            "sizeBytes": 38836,
+            "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+          },
+          {
+            "path": "assets/pcm-worklet-DQjgdlBf.js",
+            "sizeBytes": 1440,
+            "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+          },
+          {
+            "path": "assets/wav-worker-LSywWbpJ.js",
+            "sizeBytes": 884,
+            "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+          },
+          {
+            "path": "index.html",
+            "sizeBytes": 684,
+            "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+          }
+        ]
+      },
+      "scope": "Final shared-render-owner implementation: both direct real Worklet/Offline/Worker pipeline and complete 31-check/17-context Voice UI ran against these exact six static members."
+    },
+    "runnerBindings": {
+      "pcmBrowser": "5718d6bdb94d7cf993b20750fc327ed30b2cd132b5837e69a336d5d8dcd470cf",
+      "voiceUiBrowser": "87429b96a5cf4d005dd6414e1f6f37e63b9185381612072a03f2659bb98e8522"
+    },
+    "screenshotsArchived": [
+      {
+        "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-desktop.png",
+        "sizeBytes": 523334,
+        "sha256": "a1c2a81e073f15e7dbaab89eee886c2ecda94c9e466fddf1e82534fe672bc428"
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile390.png",
+        "sizeBytes": 177610,
+        "sha256": "0a667f266d574a974bc75150805a74a5b056acd183472c116c67eb58094fafd4"
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile320.png",
+        "sizeBytes": 174335,
+        "sha256": "57a0c6294ca5f2004d0393a3b9288e367346ff35cdda6c3ebb694a3aed617aa6"
+      }
+    ]
+  },
+  "browserUiEvidenceFile": "/tmp/fc-round14-voice-ui-browser-final.json",
+  "browserUiChecks": 31,
+  "historicalBeforeSharedRenderFix": {
+    "sourceInputs": [
+      {
+        "path": "web/src/voice/browser-capture.ts",
+        "bytes": 6463,
+        "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+      },
+      {
+        "path": "web/src/voice/normalize.ts",
+        "bytes": 4160,
+        "sha256": "49a401eba90ac51ebf30e22dc6a02b09475f550c9b28c4b0d3affe4b0e3c0fea"
+      },
+      {
+        "path": "web/src/voice/pcm-worklet.ts",
+        "bytes": 1836,
+        "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+      },
+      {
+        "path": "web/src/voice/pcm.ts",
+        "bytes": 2718,
+        "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+      },
+      {
+        "path": "web/src/voice/ports.ts",
+        "bytes": 1854,
+        "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+      },
+      {
+        "path": "web/src/voice/recorder.ts",
+        "bytes": 7728,
+        "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+      },
+      {
+        "path": "web/src/voice/wav-worker.ts",
+        "bytes": 464,
+        "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+      },
+      {
+        "path": "web/tests/voice-recorder-capture.test.ts",
+        "bytes": 9440,
+        "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+      },
+      {
+        "path": "web/tests/voice-recorder-normalize.test.ts",
+        "bytes": 8048,
+        "sha256": "176cef764132c5b3729859263e3ef13b67eec226ecc986390d8e455cd28d496b"
+      },
+      {
+        "path": "web/tests/voice-recorder-pcm.test.ts",
+        "bytes": 2955,
+        "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+      },
+      {
+        "path": "web/tests/voice-recorder-worklet.test.ts",
+        "bytes": 2221,
+        "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+      },
+      {
+        "path": "web/tests/voice-recorder.test.ts",
+        "bytes": 13606,
+        "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+      }
+    ],
+    "sourceSha256": "13344b6ac6cf9210ce444e67e8544b32f7ad0a9afdf5161edb370972d89990dd",
+    "tests": {
+      "files": 5,
+      "passed": 66,
+      "failed": 0
+    },
+    "distManifestSha256": "6f58921287213a3f9b1facd95e1f9509ef5036643ad7282aa5f569612bed83c1",
+    "distAssets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sizeBytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/index-YBGSDbut.js",
+        "sizeBytes": 402649,
+        "sha256": "0defebbdce076a33a19ff6ed14a0c0b9b50851d2278489de3df34c87df79b148"
+      },
+      {
+        "path": "assets/pcm-worklet-DQjgdlBf.js",
+        "sizeBytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 684,
+        "sha256": "c280a2cb9e737b194cda1299408a7dd32675f24c1b3d02918853f5180177e44c"
+      }
+    ],
+    "recorderBrowserArchive": "开发计划/验证记录/2026-10-30-recorder-browser-synthetic-round14-before-shared-render-fix.json",
+    "uiBrowserArchive": "开发计划/验证记录/2026-10-30-voice-ui-browser-synthetic-round14-before-shared-render-fix.json",
+    "note": "Positive 66-unit/31-browser-check evidence preceded cross-instance owner fix. Preserved for history, not substituted for revalidation of the new final source/dist."
+  },
+  "sharedRenderOwnerRegression": {
+    "before": {
+      "schemaVersion": 1,
+      "status": "FAIL",
+      "exitCode": 1,
+      "tests": {
+        "failed": 2,
+        "skipped": 12
+      },
+      "sourceInputs": [
+        {
+          "path": "web/src/voice/browser-capture.ts",
+          "bytes": 6463,
+          "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+        },
+        {
+          "path": "web/src/voice/normalize.ts",
+          "bytes": 4160,
+          "sha256": "49a401eba90ac51ebf30e22dc6a02b09475f550c9b28c4b0d3affe4b0e3c0fea"
+        },
+        {
+          "path": "web/src/voice/pcm-worklet.ts",
+          "bytes": 1836,
+          "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+        },
+        {
+          "path": "web/src/voice/pcm.ts",
+          "bytes": 2718,
+          "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+        },
+        {
+          "path": "web/src/voice/ports.ts",
+          "bytes": 1854,
+          "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+        },
+        {
+          "path": "web/src/voice/recorder.ts",
+          "bytes": 7728,
+          "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+        },
+        {
+          "path": "web/src/voice/wav-worker.ts",
+          "bytes": 464,
+          "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+        },
+        {
+          "path": "web/tests/voice-recorder-capture.test.ts",
+          "bytes": 9440,
+          "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+        },
+        {
+          "path": "web/tests/voice-recorder-normalize.test.ts",
+          "bytes": 10847,
+          "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+        },
+        {
+          "path": "web/tests/voice-recorder-pcm.test.ts",
+          "bytes": 2955,
+          "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+        },
+        {
+          "path": "web/tests/voice-recorder-worklet.test.ts",
+          "bytes": 2221,
+          "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+        },
+        {
+          "path": "web/tests/voice-recorder.test.ts",
+          "bytes": 13606,
+          "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+        }
+      ],
+      "normalizerSource": "import { outputFrames, OUTPUT_RATE } from './pcm'\nimport { RecorderError, type NormalizedWav, type WavNormalizer } from './ports'\n\nexport class BrowserWavNormalizer implements WavNormalizer {\n  // OfflineAudioContext has no close/abort API. An abandoned render remains the sole render\n  // until its bounded source actually settles; repeated cancel cannot accumulate contexts.\n  private pendingRender: Promise<AudioBuffer> | undefined\n  async normalize(chunks: Float32Array[], rate: number, signal: AbortSignal): Promise<NormalizedWav> {\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    if (this.pendingRender) throw new RecorderError('RECORDING_FAILED')\n    const sourceFrames = chunks.reduce((sum, chunk) => sum + chunk.length, 0)\n    const frames = outputFrames(sourceFrames, rate)\n    const context = new OfflineAudioContext(1, frames, OUTPUT_RATE)\n    const input = context.createBuffer(1, sourceFrames, rate)\n    let offset = 0\n    // The source list is consumed, never persisted, and released before offline rendering.\n    for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length }\n    chunks.length = 0\n    const source = context.createBufferSource(); source.buffer = input; source.connect(context.destination); source.start()\n    const disconnect = () => { source.disconnect(); source.buffer = null }\n    signal.addEventListener('abort', disconnect, { once: true })\n    let rendering: Promise<AudioBuffer>\n    try { rendering = context.startRendering() }\n    catch (error) { signal.removeEventListener('abort', disconnect); disconnect(); throw error }\n    this.pendingRender = rendering\n    const settled = () => { if (this.pendingRender === rendering) this.pendingRender = undefined }\n    void rendering.then(settled, settled)\n    let rendered: AudioBuffer\n    try {\n      rendered = await new Promise<AudioBuffer>((resolve, reject) => {\n        const finish = (result?: AudioBuffer, error?: unknown) => {\n          clearTimeout(timer); signal.removeEventListener('abort', abort)\n          if (error) reject(error); else resolve(result!)\n        }\n        const abort = () => finish(undefined, new RecorderError('MIC_INTERRUPTED'))\n        const timer = globalThis.setTimeout(() => finish(undefined, new RecorderError('RECORDING_FAILED')), 15000)\n        signal.addEventListener('abort', abort, { once: true })\n        void rendering.then(buffer => finish(buffer), error => finish(undefined, error))\n        if (signal.aborted) abort()\n      })\n    }\n    finally { signal.removeEventListener('abort', disconnect); disconnect() }\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    const pcm = rendered.getChannelData(0).slice()\n    // Always a separate, same-origin packaged worker; no blob/data URL or main-thread encoder fallback.\n    const worker = new Worker(new URL('./wav-worker.ts', import.meta.url), { type: 'module' })\n    const wav = await new Promise<ArrayBuffer>((resolve, reject) => {\n      let active = true\n      const cleanup = () => { active = false; clearTimeout(timer); signal.removeEventListener('abort', abort); worker.terminate() }\n      const fail = (code: 'MIC_INTERRUPTED' | 'RECORDING_FAILED') => { if (active) { cleanup(); reject(new RecorderError(code)) } }\n      const abort = () => fail('MIC_INTERRUPTED')\n      const timer = globalThis.setTimeout(() => fail('RECORDING_FAILED'), 15000)\n      signal.addEventListener('abort', abort, { once: true })\n      worker.onerror = () => fail('RECORDING_FAILED')\n      worker.onmessageerror = () => fail('RECORDING_FAILED')\n      worker.onmessage = event => {\n        if (!active) return\n        const result = event.data?.wav\n        if (!(result instanceof ArrayBuffer) || result.byteLength !== 44 + frames * 2) { fail('RECORDING_FAILED'); return }\n        cleanup(); resolve(result)\n      }\n      if (signal.aborted) { abort(); return }\n      try { worker.postMessage(pcm, [pcm.buffer]) } catch { fail('RECORDING_FAILED') }\n    })\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    return { wav: new Blob([wav], { type: 'audio/wav' }), frames, sampleRate: OUTPUT_RATE }\n  }\n}\n",
+      "regressionTestSource": "import { afterEach, describe, expect, it, vi } from 'vitest'\nimport { BrowserWavNormalizer } from '../src/voice/normalize'\nimport { encodeWav } from '../src/voice/pcm'\nimport { RecorderController, type CaptureSink } from '../src/voice/recorder'\n\nfunction deferred<T>() {\n  let resolve!: (value: T) => void, reject!: (reason: unknown) => void\n  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no })\n  return { promise, resolve, reject }\n}\nfunction environment(mode = 'success') {\n  const contexts: Context[] = [], workers: Encoder[] = []\n  const rendering = deferred<AudioBuffer>()\n  class Context {\n    destination = {}\n    input = new Float32Array(0)\n    source = { buffer: null as unknown, connect: vi.fn(), start: vi.fn(), disconnect: vi.fn() }\n    rendered = { getChannelData: () => new Float32Array(this.frames).fill(0.5) } as unknown as AudioBuffer\n    constructor(readonly channels: number, readonly frames: number, readonly rate: number) { contexts.push(this) }\n    createBuffer = vi.fn((_channels: number, frames: number, _rate: number) => {\n      this.input = new Float32Array(frames)\n      return { getChannelData: () => this.input }\n    })\n    createBufferSource = vi.fn(() => this.source)\n    startRendering = vi.fn(() => {\n      if (mode === 'render-throws') throw new Error('render setup unavailable')\n      return mode.startsWith('render-') ? rendering.promise : Promise.resolve(this.rendered)\n    })\n  }\n  class Encoder {\n    onmessage: ((event: { data: unknown }) => void) | null = null\n    onerror: (() => void) | null = null\n    onmessageerror: (() => void) | null = null\n    terminate = vi.fn()\n    postMessage = vi.fn((pcm: Float32Array, transfer: Transferable[]) => {\n      expect(transfer).toEqual([pcm.buffer])\n      if (mode === 'post-throws') throw new Error('private worker failure')\n      if (mode === 'worker-pending') return\n      queueMicrotask(() => {\n        if (mode === 'worker-error') this.onerror?.()\n        else if (mode === 'worker-malformed') this.onmessage?.({ data: { wav: new ArrayBuffer(1) } })\n        else this.onmessage?.({ data: { wav: encodeWav(pcm) } })\n      })\n    })\n    constructor(readonly url: URL, readonly options: unknown) { workers.push(this) }\n  }\n  vi.stubGlobal('OfflineAudioContext', Context); vi.stubGlobal('Worker', Encoder)\n  return { contexts, workers, rendering, normalizer: new BrowserWavNormalizer(), abort: new AbortController() }\n}\nafterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers() })\ndescribe('bounded offline resampling and disposable encoding worker', () => {\n  it('uses actual source rate, one offline channel and exact 16k output frames before worker encoding', async () => {\n    const f = environment(), chunks = [new Float32Array(11025).fill(1), new Float32Array(11025).fill(-1)]\n    const result = await f.normalizer.normalize(chunks, 44100, f.abort.signal), context = f.contexts[0]!\n    expect(context.channels).toBe(1); expect(context.frames).toBe(8000); expect(context.rate).toBe(16000)\n    expect(context.createBuffer).toHaveBeenCalledWith(1, 22050, 44100)\n    expect(context.input[0]).toBe(1); expect(context.input[11025]).toBe(-1); expect(chunks).toHaveLength(0)\n    expect(result.frames).toBe(8000); expect(result.wav.size).toBe(16044); expect(result.wav.type).toBe('audio/wav')\n    const view = new DataView(await result.wav.arrayBuffer()); expect(view.getInt16(44, true)).toBe(16384)\n    expect(f.workers[0]!.options).toEqual({ type: 'module' }); expect(f.workers[0]!.url.pathname).toContain('wav-worker')\n    expect(f.workers[0]!.terminate).toHaveBeenCalledOnce(); expect(context.source.disconnect).toHaveBeenCalled()\n  })\n  it('aborted normalization never allocates context or worker', async () => {\n    const f = environment(); f.abort.abort()\n    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })\n    expect(f.contexts).toHaveLength(0); expect(f.workers).toHaveLength(0)\n  })\n  it('rejects invalid source duration before allocating browser buffers', async () => {\n    const f = environment(); await expect(f.normalizer.normalize([new Float32Array(7999)], 16000, f.abort.signal)).rejects.toThrow('DURATION_OUT_OF_RANGE')\n    expect(f.contexts).toHaveLength(0)\n  })\n  it('cancelled offline rendering returns promptly, cannot spawn a worker later, and cannot accumulate abandoned contexts', async () => {\n    const f = environment('render-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    f.abort.abort(); await expect(operation).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })\n    expect(f.contexts[0]!.source.disconnect).toHaveBeenCalled()\n    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, new AbortController().signal)).rejects.toMatchObject({ code: 'RECORDING_FAILED' })\n    expect(f.contexts).toHaveLength(1); f.rendering.resolve(f.contexts[0]!.rendered); await Promise.resolve(); await Promise.resolve()\n    expect(f.workers).toHaveLength(0)\n  })\n  it('cancelled physical render retains the shared owner across different normalizer instances until actual settlement', async () => {\n    const f = environment('render-pending'), nextAbort = new AbortController()\n    const first = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    f.abort.abort(); await expect(first).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })\n    const next = new BrowserWavNormalizer().normalize([new Float32Array(8000)], 16000, nextAbort.signal)\n    void next.catch(() => {})\n    try {\n      expect(f.contexts).toHaveLength(1)\n      await expect(next).rejects.toMatchObject({ code: 'RECORDING_FAILED' })\n      expect(f.workers).toHaveLength(0)\n    } finally {\n      nextAbort.abort(); f.rendering.resolve(f.contexts[0]!.rendered); await next.catch(() => {}); await Promise.resolve()\n    }\n    const recovered = environment()\n    await expect(recovered.normalizer.normalize([new Float32Array(8000)], 16000, recovered.abort.signal)).resolves.toMatchObject({ frames: 8000 })\n  })\n  it('disposing an old recorder and constructing a new recorder cannot mint a second unsettled physical render', async () => {\n    const f = environment('render-pending')\n    const recorder = () => {\n      let sink!: CaptureSink\n      const onWav = vi.fn(), onError = vi.fn()\n      const controller = new RecorderController({ onWav, onError, normalizer: new BrowserWavNormalizer(),\n        capturePort: { open: async next => {\n          sink = next\n          return { sampleRate: 16000, start: async () => {}, stop: async () => {}, abort: () => {} }\n        } } })\n      return { controller, onWav, onError, pcm: () => sink.pcm(new Float32Array(8000), 16000) }\n    }\n    const old = recorder(), replacement = recorder()\n    let oldFinish: Promise<void> | undefined, nextFinish: Promise<void> | undefined\n    try {\n      await old.controller.start('old-realm-owner'); old.pcm(); oldFinish = old.controller.finish('old-realm-owner')\n      await Promise.resolve(); expect(f.contexts).toHaveLength(1)\n      old.controller.dispose(); await oldFinish\n      await replacement.controller.start('replacement-owner'); replacement.pcm(); nextFinish = replacement.controller.finish('replacement-owner')\n      await Promise.resolve(); expect(f.contexts).toHaveLength(1)\n      await nextFinish\n      expect(replacement.onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'RECORDING_FAILED' }))\n      expect(replacement.onWav).not.toHaveBeenCalled(); expect(old.onWav).not.toHaveBeenCalled()\n    } finally {\n      old.controller.dispose(); replacement.controller.dispose(); f.rendering.resolve(f.contexts[0]!.rendered)\n      await oldFinish; await nextFinish; await Promise.resolve()\n    }\n  })\n  it('offline rendering has a finite deadline without inventing a nonexistent close API', async () => {\n    vi.useFakeTimers(); const f = environment('render-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    const rejected = expect(operation).rejects.toMatchObject({ code: 'RECORDING_FAILED' }); await vi.advanceTimersByTimeAsync(15000); await rejected\n    expect(f.contexts[0]!.source.disconnect).toHaveBeenCalled(); expect(f.workers).toHaveLength(0); f.rendering.resolve(f.contexts[0]!.rendered)\n  })\n  it('render rejection does not start a worker and releases source references', async () => {\n    const f = environment('render-reject'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    f.rendering.reject(new Error('offline unavailable')); await expect(operation).rejects.toThrow('offline unavailable')\n    expect(f.contexts[0]!.source.disconnect).toHaveBeenCalled(); expect(f.contexts[0]!.source.buffer).toBeNull(); expect(f.workers).toHaveLength(0)\n  })\n  it('synchronous render setup failure still removes the source and does not retain physical render ownership', async () => {\n    const f = environment('render-throws')\n    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toThrow('render setup unavailable')\n    expect(f.contexts[0]!.source.disconnect).toHaveBeenCalledOnce(); expect(f.contexts[0]!.source.buffer).toBeNull()\n    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toThrow('render setup unavailable')\n    expect(f.contexts).toHaveLength(2); expect(f.workers).toHaveLength(0)\n  })\n  it.each(['worker-error', 'worker-malformed', 'post-throws'])('%s terminates the encoding worker and never yields a WAV', async mode => {\n    const f = environment(mode)\n    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code: 'RECORDING_FAILED' })\n    expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()\n  })\n  it('aborting an encoding worker terminates it once and ignores a late WAV message', async () => {\n    const f = environment('worker-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); expect(f.workers).toHaveLength(1)\n    f.abort.abort(); await expect(operation).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })\n    f.workers[0]!.onmessage?.({ data: { wav: new ArrayBuffer(16044) } }); expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()\n  })\n  it('worker deadline terminates an otherwise permanently pending encoder', async () => {\n    vi.useFakeTimers(); const f = environment('worker-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)\n    const rejected = expect(operation).rejects.toMatchObject({ code: 'RECORDING_FAILED' }); await vi.advanceTimersByTimeAsync(15000); await rejected\n    expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()\n  })\n})\n",
+      "command": "npm --prefix web test -- tests/voice-recorder-normalize.test.ts -t \"different normalizer instances|constructing a new recorder\"",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-normalize.test.ts -t different normalizer instances|constructing a new recorder\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n ❯ tests/voice-recorder-normalize.test.ts (14 tests | 2 failed | 12 skipped) 39ms\n   ❯ bounded offline resampling and disposable encoding worker (14)\n     × cancelled physical render retains the shared owner across different normalizer instances until actual settlement 27ms\n     × disposing an old recorder and constructing a new recorder cannot mint a second unsettled physical render 8ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/voice-recorder-normalize.test.ts > bounded offline resampling and disposable encoding worker > cancelled physical render retains the shared owner across different normalizer instances until actual settlement\nAssertionError: expected [ Context{ channels: 1, …(9) }, …(1) ] to have a length of 1 but got 2\n\n- Expected\n+ Received\n\n- 1\n+ 2\n\n ❯ tests/voice-recorder-normalize.test.ts:87:26\n     85|     void next.catch(() => {})\n     86|     try {\n     87|       expect(f.contexts).toHaveLength(1)\n       |                          ^\n     88|       await expect(next).rejects.toMatchObject({ code: 'RECORDING_FAIL…\n     89|       expect(f.workers).toHaveLength(0)\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  tests/voice-recorder-normalize.test.ts > bounded offline resampling and disposable encoding worker > disposing an old recorder and constructing a new recorder cannot mint a second unsettled physical render\nAssertionError: expected [ Context{ channels: 1, …(9) }, …(1) ] to have a length of 1 but got 2\n\n- Expected\n+ Received\n\n- 1\n+ 2\n\n ❯ tests/voice-recorder-normalize.test.ts:115:51\n    113|       old.controller.dispose(); await oldFinish\n    114|       await replacement.controller.start('replacement-owner'); replace…\n    115|       await Promise.resolve(); expect(f.contexts).toHaveLength(1)\n       |                                                   ^\n    116|       await nextFinish\n    117|       expect(replacement.onError).toHaveBeenCalledWith(expect.objectCo…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 12 skipped (14)\n   Start at  23:44:42\n   Duration  337ms (transform 54%, tests 23%, import 19%, worker 3%)\n\n"
+    },
+    "after": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "exitCode": 0,
+      "tests": {
+        "passed": 2,
+        "skipped": 12
+      },
+      "sourceInputs": [
+        {
+          "path": "web/src/voice/browser-capture.ts",
+          "bytes": 6463,
+          "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+        },
+        {
+          "path": "web/src/voice/normalize.ts",
+          "bytes": 4500,
+          "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+        },
+        {
+          "path": "web/src/voice/pcm-worklet.ts",
+          "bytes": 1836,
+          "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+        },
+        {
+          "path": "web/src/voice/pcm.ts",
+          "bytes": 2718,
+          "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+        },
+        {
+          "path": "web/src/voice/ports.ts",
+          "bytes": 1854,
+          "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+        },
+        {
+          "path": "web/src/voice/recorder.ts",
+          "bytes": 7728,
+          "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+        },
+        {
+          "path": "web/src/voice/wav-worker.ts",
+          "bytes": 464,
+          "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+        },
+        {
+          "path": "web/tests/voice-recorder-capture.test.ts",
+          "bytes": 9440,
+          "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+        },
+        {
+          "path": "web/tests/voice-recorder-normalize.test.ts",
+          "bytes": 10847,
+          "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+        },
+        {
+          "path": "web/tests/voice-recorder-pcm.test.ts",
+          "bytes": 2955,
+          "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+        },
+        {
+          "path": "web/tests/voice-recorder-worklet.test.ts",
+          "bytes": 2221,
+          "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+        },
+        {
+          "path": "web/tests/voice-recorder.test.ts",
+          "bytes": 13606,
+          "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+        }
+      ],
+      "sourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+      "normalizerSource": "import { outputFrames, OUTPUT_RATE } from './pcm'\nimport { RecorderError, type NormalizedWav, type WavNormalizer } from './ports'\n\n// Physical ownership belongs to this JS realm, not a mounted component/normalizer.\n// OfflineAudioContext has no close/abort API. Public cancellation never returns this\n// token; only the original render promise's actual resolution/rejection can do so.\nlet renderOwner: symbol | undefined\n\nasync function render(chunks: Float32Array[], sourceFrames: number, frames: number, rate: number, signal: AbortSignal): Promise<AudioBuffer> {\n  if (renderOwner) throw new RecorderError('RECORDING_FAILED')\n  const owner = Symbol()\n  renderOwner = owner\n  const release = () => { if (renderOwner === owner) renderOwner = undefined }\n  let rendering: Promise<AudioBuffer> | undefined\n  let source: AudioBufferSourceNode | undefined\n  const disconnect = () => { source?.disconnect(); if (source) source.buffer = null }\n  try {\n    // Reserve before allocation: a remounted workspace cannot allocate a second\n    // source AudioBuffer while an abandoned old render still owns its first one.\n    const context = new OfflineAudioContext(1, frames, OUTPUT_RATE)\n    const input = context.createBuffer(1, sourceFrames, rate)\n    let offset = 0\n    for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length }\n    chunks.length = 0\n    source = context.createBufferSource(); source.buffer = input; source.connect(context.destination); source.start()\n    signal.addEventListener('abort', disconnect, { once: true })\n    rendering = context.startRendering()\n    void rendering.then(release, release)\n    return await new Promise<AudioBuffer>((resolve, reject) => {\n      const finish = (result?: AudioBuffer, error?: unknown) => {\n        clearTimeout(timer); signal.removeEventListener('abort', abort)\n        if (error) reject(error); else resolve(result!)\n      }\n      const abort = () => finish(undefined, new RecorderError('MIC_INTERRUPTED'))\n      const timer = globalThis.setTimeout(() => finish(undefined, new RecorderError('RECORDING_FAILED')), 15000)\n      signal.addEventListener('abort', abort, { once: true })\n      void rendering!.then(buffer => finish(buffer), error => finish(undefined, error))\n      if (signal.aborted) abort()\n    })\n  } finally {\n    // Setup failure before startRendering returned cannot have a physical render.\n    if (!rendering) release()\n    signal.removeEventListener('abort', disconnect); disconnect()\n  }\n}\n\nexport class BrowserWavNormalizer implements WavNormalizer {\n  async normalize(chunks: Float32Array[], rate: number, signal: AbortSignal): Promise<NormalizedWav> {\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    const sourceFrames = chunks.reduce((sum, chunk) => sum + chunk.length, 0)\n    const frames = outputFrames(sourceFrames, rate)\n    const rendered = await render(chunks, sourceFrames, frames, rate, signal)\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    const pcm = rendered.getChannelData(0).slice()\n    // Always a separate, same-origin packaged worker; no blob/data URL or main-thread encoder fallback.\n    const worker = new Worker(new URL('./wav-worker.ts', import.meta.url), { type: 'module' })\n    const wav = await new Promise<ArrayBuffer>((resolve, reject) => {\n      let active = true\n      const cleanup = () => { active = false; clearTimeout(timer); signal.removeEventListener('abort', abort); worker.terminate() }\n      const fail = (code: 'MIC_INTERRUPTED' | 'RECORDING_FAILED') => { if (active) { cleanup(); reject(new RecorderError(code)) } }\n      const abort = () => fail('MIC_INTERRUPTED')\n      const timer = globalThis.setTimeout(() => fail('RECORDING_FAILED'), 15000)\n      signal.addEventListener('abort', abort, { once: true })\n      worker.onerror = () => fail('RECORDING_FAILED')\n      worker.onmessageerror = () => fail('RECORDING_FAILED')\n      worker.onmessage = event => {\n        if (!active) return\n        const result = event.data?.wav\n        if (!(result instanceof ArrayBuffer) || result.byteLength !== 44 + frames * 2) { fail('RECORDING_FAILED'); return }\n        cleanup(); resolve(result)\n      }\n      if (signal.aborted) { abort(); return }\n      try { worker.postMessage(pcm, [pcm.buffer]) } catch { fail('RECORDING_FAILED') }\n    })\n    if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')\n    return { wav: new Blob([wav], { type: 'audio/wav' }), frames, sampleRate: OUTPUT_RATE }\n  }\n}\n",
+      "regressionTestSourceSha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306",
+      "command": "npm --prefix web test -- tests/voice-recorder-normalize.test.ts -t \"different normalizer instances|constructing a new recorder\"",
+      "output": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-recorder-normalize.test.ts -t different normalizer instances|constructing a new recorder\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  1 passed (1)\n      Tests  2 passed | 12 skipped (14)\n   Start at  23:45:23\n   Duration  1.21s (transform 46%, import 29%, tests 16%, worker 8%)\n\n",
+      "fix": "Module/JS-realm shared Symbol token acquired before OfflineAudioContext allocation and released only by actual original render promise settlement. Abort, public deadline and Recorder.dispose cannot return the token. A fresh normalizer cannot create a second context while the old one is unsettled."
+    }
+  },
+  "browserRevalidation": {
+    "status": "PASS",
+    "sourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+    "distManifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+    "realPcmPipeline": "PASS",
+    "uiChecks": 31,
+    "uiContexts": 17
+  },
+  "recorderSourceInputs": [
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "bytes": 6463,
+      "sha256": "8ffba0e2f22dd4ccb3c750d8669bc4d4d2e642e13185e18c079c2019471857f4"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4500,
+      "sha256": "c7842a753f4f5dfa1a7e24aeeabfcd40293fc5b51935cbe569acf30351bd9243"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "bytes": 1836,
+      "sha256": "7d26f0748dad529c778b316fd60683368c54f9ec9c8541078024f9490fd5fc77"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "bytes": 2718,
+      "sha256": "a125891862e7dc173d7f8e6b97a7eb5d2c380e9f683c477e3ce60e6136d7c8b6"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "bytes": 1854,
+      "sha256": "6804deac5a0be2ebd9da50c0064e6e3feaaaa84560f5cb3621c4c5019b4b5413"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "bytes": 7728,
+      "sha256": "41a5f5080c5207dda1477f1974e95c8e9ff50f0e4341fa82dc4394cb0e3b2cb6"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "bytes": 464,
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "bytes": 9440,
+      "sha256": "cf6a4543fa5c32f30859602eba8cf69314427acd0ec61ede9cdb31f06eaab33d"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 10847,
+      "sha256": "434f8e20f65dacc9c44d3e6a397af1e067e22700d6fef9d49f92d615545c7306"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 2955,
+      "sha256": "60abf88f70c8ecafd3c51df13a161deb67a1856d4a3157c308d61f9541decc85"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 2221,
+      "sha256": "efb3e23b244e0d3c70883a74ce8e2f61638ee2c4d6114e6118c20b94b0dee7f8"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "bytes": 13606,
+      "sha256": "b03819cd581ae8ed94362a32abf2b054f638f67b1e60da3b1d4faf10fd659fc9"
+    }
+  ],
+  "recorderSourceSha256": "a53084d0de88f11ff7cc2d1fac940f2e259a7be9813e46eddfb667b300d1c86c",
+  "distBinding": {
+    "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+    "manifestBytes": 1072,
+    "manifestSource": "{\n  \"schemaVersion\": 1,\n  \"apiVersion\": 1,\n  \"uiCompatibilityVersion\": 1,\n  \"assets\": [\n    {\n      \"path\": \"assets/favicon-CXuYoSfB.svg\",\n      \"sizeBytes\": 282,\n      \"sha256\": \"46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a\"\n    },\n    {\n      \"path\": \"assets/index-Cr8Ck6mT.js\",\n      \"sizeBytes\": 402597,\n      \"sha256\": \"30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78\"\n    },\n    {\n      \"path\": \"assets/index-DFFVdc8-.css\",\n      \"sizeBytes\": 38836,\n      \"sha256\": \"4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8\"\n    },\n    {\n      \"path\": \"assets/pcm-worklet-DQjgdlBf.js\",\n      \"sizeBytes\": 1440,\n      \"sha256\": \"c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d\"\n    },\n    {\n      \"path\": \"assets/wav-worker-LSywWbpJ.js\",\n      \"sizeBytes\": 884,\n      \"sha256\": \"a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886\"\n    },\n    {\n      \"path\": \"index.html\",\n      \"sizeBytes\": 684,\n      \"sha256\": \"a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf\"\n    }\n  ]\n}\n",
+    "manifest": {
+      "schemaVersion": 1,
+      "apiVersion": 1,
+      "uiCompatibilityVersion": 1,
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "sizeBytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-Cr8Ck6mT.js",
+          "sizeBytes": 402597,
+          "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+        },
+        {
+          "path": "assets/index-DFFVdc8-.css",
+          "sizeBytes": 38836,
+          "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+        },
+        {
+          "path": "assets/pcm-worklet-DQjgdlBf.js",
+          "sizeBytes": 1440,
+          "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+        },
+        {
+          "path": "assets/wav-worker-LSywWbpJ.js",
+          "sizeBytes": 884,
+          "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+        },
+        {
+          "path": "index.html",
+          "sizeBytes": 684,
+          "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+        }
+      ]
+    },
+    "scope": "Final shared-render-owner implementation: both direct real Worklet/Offline/Worker pipeline and complete 31-check/17-context Voice UI ran against these exact six static members."
+  },
+  "screenshotsArchived": [
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-desktop.png",
+      "sizeBytes": 523334,
+      "sha256": "a1c2a81e073f15e7dbaab89eee886c2ecda94c9e466fddf1e82534fe672bc428"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile390.png",
+      "sizeBytes": 177610,
+      "sha256": "0a667f266d574a974bc75150805a74a5b056acd183472c116c67eb58094fafd4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-voice-ui-synthetic-round14-mobile320.png",
+      "sizeBytes": 174335,
+      "sha256": "57a0c6294ca5f2004d0393a3b9288e367346ff35cdda6c3ebb694a3aed617aa6"
+    }
+  ],
+  "fixtureServer": {
+    "originalTemporaryPath": "/tmp/fc-round14-voice-https/server.py",
+    "encoding": "utf-8",
+    "sizeBytes": 1828,
+    "sha256": "9a35ea6cf0043c4ac2bf44425e2bf041aca40b14ab8f77e5de7f1541dae5993f",
+    "code": "import http.server\nimport ssl\nfrom pathlib import Path\n\nROOT = Path('/workspace/共享/Eliora/未来教室计划/web/dist')\nCSP = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\"\n\nclass Handler(http.server.BaseHTTPRequestHandler):\n    def do_GET(self):\n        if self.path == '/fc/fixture':\n            body = b'<!doctype html><meta charset=\"utf-8\"><title>Synthetic PCM fixture</title><button>Run isolated PCM</button>'\n            mime = 'text/html'\n        else:\n            name = self.path.split('?', 1)[0]\n            if name == '/fc/': name = '/fc/index.html'\n            if not name.startswith('/fc/') or '..' in name:\n                self.send_error(404); return\n            path = ROOT / name[4:]\n            if not path.is_file():\n                self.send_error(404); return\n            body = path.read_bytes()\n            mime = {'.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.svg': 'image/svg+xml'}.get(path.suffix, 'application/octet-stream')\n        self.send_response(200)\n        self.send_header('Content-Type', mime)\n        self.send_header('Content-Length', str(len(body)))\n        self.send_header('Content-Security-Policy', CSP)\n        self.send_header('X-Content-Type-Options', 'nosniff')\n        self.send_header('Cache-Control', 'no-store')\n        self.end_headers()\n        self.wfile.write(body)\n\nserver = http.server.ThreadingHTTPServer(('0.0.0.0', 18443), Handler)\ntls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)\ntls.load_cert_chain('/tmp/fc-round14-voice-https/cert.pem', '/tmp/fc-round14-voice-https/key.pem')\nserver.socket = tls.wrap_socket(server.socket, server_side=True)\nserver.serve_forever()\n"
+  },
+  "scopeLimits": [
+    "All final browser recording sources are zero-only synthetic MediaStreams. No native getUserMedia microphone call was made.",
+    "Temporary self-signed HTTPS with certificate verification bypassed is not trusted campus TLS or a production listener acceptance test.",
+    "No real phone/browser permission dialog, physical microphone, audible playback or measured browser peak heap is claimed.",
+    "The injected 60-second callback ran after approximately 750ms; the worklet unit test separately verifies the exact 60-second frame cap."
+  ],
+  "runner": {
+    "pcmBrowser": {
+      "originalTemporaryPath": "/tmp/fc-round14-recorder-browser-runner.js",
+      "encoding": "utf-8",
+      "sizeBytes": 5309,
+      "sha256": "5718d6bdb94d7cf993b20750fc327ed30b2cd132b5837e69a336d5d8dcd470cf",
+      "code": "async (defaultPage) => {\n  const context = await defaultPage.context().browser().newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 800 } });\n  const page = await context.newPage(), errors = [], requests = [], consoleMessages = [], failures = [];\n  page.on('pageerror', error => errors.push(error.message));\n  page.on('console', message => consoleMessages.push(message.type() + ': ' + message.text()));\n  page.on('requestfailed', request => failures.push({url: request.url(), failure: request.failure()}));\n  const csp = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n  try {\n    await page.goto('https://172.30.0.2:18443/fc/fixture');\n    const result = await page.evaluate(async () => {\n      const audio = new AudioContext({ sampleRate: 48000 }), streamTracks = [];\n      let node, source, worker;\n      const chunks = []; let stopped;\n      try {\n        await audio.resume();\n        await audio.audioWorklet.addModule('/fc/assets/pcm-worklet-DQjgdlBf.js');\n        node = new AudioWorkletNode(audio, 'fc-bounded-mono-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCountMode: 'max', channelInterpretation: 'discrete' });\n        const finish = new Promise(resolve => stopped = resolve);\n        node.port.onmessage = event => { if (event.data.type === 'pcm') chunks.push(event.data.chunk); if (event.data.type === 'stopped') stopped(); };\n        const buffer = audio.createBuffer(2, 48000, audio.sampleRate); buffer.getChannelData(0).fill(0); buffer.getChannelData(1).fill(0);\n        source = audio.createBufferSource(); source.buffer = buffer;\n        const destination = audio.createMediaStreamDestination(); source.connect(destination); streamTracks.push(...destination.stream.getTracks());\n        const microphoneSource = audio.createMediaStreamSource(destination.stream); microphoneSource.connect(node); node.connect(audio.destination);\n        node.port.postMessage({ type: 'start' }); source.start();\n        await new Promise(resolve => setTimeout(resolve, 750));\n        streamTracks.forEach(track => track.stop()); node.port.postMessage({ type: 'finish' });\n        await finish; microphoneSource.disconnect(); source.disconnect(); node.disconnect(); node.port.close(); await audio.close();\n        const inputFrames = chunks.reduce((n, c) => n + c.length, 0), outputFrames = Math.round(inputFrames * 16000 / audio.sampleRate);\n        const offline = new OfflineAudioContext(1, outputFrames, 16000), input = offline.createBuffer(1, inputFrames, audio.sampleRate);\n        let offset = 0; for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length; }\n        chunks.length = 0; const reader = offline.createBufferSource(); reader.buffer = input; reader.connect(offline.destination); reader.start();\n        const rendered = await offline.startRendering(); reader.disconnect();\n        worker = new Worker('/fc/assets/wav-worker-LSywWbpJ.js', { type: 'module' });\n        const encoded = new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data.wav); worker.onerror = reject; });\n        const pcm = rendered.getChannelData(0).slice(); worker.postMessage(pcm, [pcm.buffer]); const wav = await encoded; worker.terminate();\n        const view = new DataView(wav), value = view.getInt16(44 + Math.floor(outputFrames / 2) * 2, true);\n        return { secureContext: isSecureContext, actualSampleRate: audio.sampleRate, inputFrames, outputFrames, wavBytes: wav.byteLength, riffBytes: view.getUint32(4, true), dataBytes: view.getUint32(40, true), format: view.getUint16(20, true), channels: view.getUint16(22, true), sampleRate: view.getUint32(24, true), byteRate: view.getUint32(28, true), blockAlign: view.getUint16(32, true), bits: view.getUint16(34, true), middlePcm16: value, tracksEnded: streamTracks.every(t => t.readyState === 'ended'), contextClosed: audio.state === 'closed', workerTerminated: true };\n      } finally { streamTracks.forEach(track => track.stop()); source?.disconnect(); node?.disconnect(); node?.port.close(); worker?.terminate(); if (audio.state !== 'closed') await audio.close(); }\n    });\n    if (!result.secureContext || result.wavBytes !== 44 + result.outputFrames * 2 || result.outputFrames < 8000 || result.outputFrames > 960000 || result.sampleRate !== 16000 || result.channels !== 1 || result.bits !== 16 || result.format !== 1 || result.blockAlign !== 2 || result.byteRate !== 32000 || result.riffBytes !== result.wavBytes - 8 || result.dataBytes !== result.outputFrames * 2 || Math.abs(result.middlePcm16 - 0) > 2 || !result.tracksEnded || !result.contextClosed || errors.length) throw Error(JSON.stringify({ result, errors }));\n    return { status: 'PASS', evidence: 'self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence', result, errors, requests, cleanup: 'context closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), requests, errors, consoleMessages, failures }; }\n  finally { await context.close(); }\n}\n"
+    },
+    "voiceUiBrowser": {
+      "originalTemporaryPath": "/tmp/fc-round14-voice-ui-runner.js",
+      "encoding": "utf-8",
+      "sizeBytes": 18059,
+      "sha256": "87429b96a5cf4d005dd6414e1f6f37e63b9185381612072a03f2659bb98e8522",
+      "code": "async (defaultPage) => {\n  const results = [], fixtures = [], errors = [], screenshots = [];\n  const origin = 'https://172.30.0.2:18443';\n  const check = (name, passed, details) => { results.push({ name, status: passed ? 'PASS' : 'FAIL', ...(details === undefined ? {} : { details }) }); if (!passed) throw Error(name + ': ' + JSON.stringify(details)); };\n  async function fixture(options = {}) {\n    const context = await defaultPage.context().browser().newContext({ ignoreHTTPSErrors: true, viewport: { width: options.width || 1440, height: 900 } });\n    const page = await context.newPage();\n    const state = { context, page, options, requests: [], uploads: [], submits: [], stops: [], jobs: options.job ? [options.job] : [], capsCalls: 0, queryCalls: 0, closed: false };\n    fixtures.push(state); page.on('pageerror', error => errors.push(error.message));\n    page.on('dialog', dialog => { if (state.dismissDialog) return dialog.dismiss(); return dialog.accept(); });\n    await context.addInitScript(({ mode }) => {\n      const NativeAudio = window.AudioContext, captureContexts = [], generators = [], tracks = [];\n      const fixture = { calls: 0, contexts: captureContexts, generators, tracks, releasePermission: null, deadlines: [], nativeMicCalls: 0 };\n      window.__voiceFixture = fixture;\n      window.AudioContext = class extends NativeAudio { constructor(...args) { super(...args); captureContexts.push(this); } };\n      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', { configurable: true, value: () => {\n        fixture.calls++;\n        if (mode === 'denied') return Promise.reject(new DOMException('synthetic denied', 'NotAllowedError'));\n        const generator = new NativeAudio(), constant = generator.createConstantSource(), destination = generator.createMediaStreamDestination();\n        constant.offset.value = 0; constant.connect(destination); constant.start(); void generator.resume();\n        generators.push(generator); tracks.push(...destination.stream.getTracks());\n        if (mode === 'late') return new Promise(resolve => fixture.releasePermission = () => resolve(destination.stream));\n        return Promise.resolve(destination.stream);\n      } });\n      const timer = window.setTimeout.bind(window);\n      window.setTimeout = (callback, delay, ...args) => { if (delay === 60000) { fixture.deadlines.push(() => callback(...args)); return timer(() => {}, 60000); } return timer(callback, delay, ...args); };\n    }, { mode: options.mic || 'normal' });\n    const json = async (route, value, status = 200) => {\n      const body = JSON.stringify(value);\n      if (Buffer.byteLength(body) > 65536) throw Error('fixture exceeds protocol budget');\n      return route.fulfill({ status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-length': String(Buffer.byteLength(body)) }, body });\n    };\n    const caps = () => ({ schemaVersion: 1, status: 'VOICE_CAPABILITIES', identityRevision: options.changed && state.capsCalls > 1 ? '2' : '1', runtimeGeneration: '1', serverNow: '2026-10-30T12:00:00', currentClass: { classId: options.changed && state.capsCalls > 1 ? '2' : '1', className: options.long ? '🚀'.repeat(128) : '合成零音频班' }, enabled: true, admission: 'OPEN', targetAuthorized: true, deviceAvailability: 'UNVERIFIED', defaultRepeatTotal: 3, minRepeatTotal: 1, maxRepeatTotal: 10, minDurationMillis: 500, maxDurationMillis: 60000, sampleRate: 16000, channels: 1, bitsPerSample: 16, maxWavBytes: 1920044, uploadTtlSeconds: 600 });\n    await context.route(origin + '/fc/api/v1/**', async route => {\n      const request = route.request(), url = new URL(request.url()), path = url.pathname.slice('/fc/api/v1/'.length), method = request.method();\n      state.requests.push({ path, method });\n      if (path === 'status') return json(route, { schemaVersion: 1, apiVersion: 1, uiCompatibilityVersion: 1, online: true });\n      if (path === 'session') return json(route, { schemaVersion: 1, status: 'AUTHENTICATED', principal: { id: '9', displayName: options.long ? '师'.repeat(128) : '合成教师', role: 'TEACHER_ADMIN' }, currentClassId: '1', assignments: [{ classId: '1', subjectId: '2' }], csrf: 'b'.repeat(64) });\n      if (path === 'voice/capabilities') { state.capsCalls++; if (options.forbidden) return json(route, { schemaVersion: 1, code: 'FORBIDDEN' }, 403); return json(route, caps()); }\n      if (path === 'voice/uploads') {\n        const data = request.postDataBuffer(), view = new DataView(data.buffer, data.byteOffset, data.byteLength);\n        state.uploads.push({ bytes: data.length, classId: url.searchParams.get('classId'), mime: request.headers()['content-type'], csrf: request.headers()['x-fc-csrf'] === 'b'.repeat(64), riff: data.toString('ascii', 0, 4), frames: (data.length - 44) / 2, sampleRate: view.getUint32(24, true), allZeroPcm: data.subarray(44).every(byte => byte === 0) });\n        if (options.uploadUnauthorized) return json(route, { schemaVersion: 1, code: 'UNAUTHORIZED' }, 401);\n        if (options.uploadPending) { state.pendingUpload = route; return; }\n        return json(route, { schemaVersion: 1, status: 'VOICE_UPLOADED', assetId: '6', assetRevision: '1', classId: '1', bytes: data.length, durationMillis: Math.floor((data.length - 44) / 32), expiresAt: '2026-10-30T12:10:00' }, 201);\n      }\n      if (path === 'voice/broadcasts' && method === 'POST') {\n        const input = request.postDataJSON(); state.submits.push(input);\n        const job = { jobId: input.commandId, commandId: input.commandId, classId: input.classId, repeatTotal: input.repeatTotal, completedRepeats: 0, currentRepeat: 0, state: 'QUEUED', revision: '1', failure: null }; state.jobs = [job];\n        if (options.submitUnknown) return json(route, { schemaVersion: 1, code: 'RESULT_UNKNOWN' }, 503);\n        return json(route, { schemaVersion: 1, status: 'COMMITTED', commandId: input.commandId, job });\n      }\n      if (path === 'voice/broadcasts') return json(route, { schemaVersion: 1, status: 'VOICE_JOBS', jobs: state.jobs });\n      const cancel = /^voice\\/broadcasts\\/([1-9][0-9]*)\\/cancel$/.exec(path);\n      if (cancel) {\n        state.stops.push({ jobId: cancel[1], input: request.postDataJSON() });\n        state.jobs = state.jobs.map(job => ({ ...job, state: 'STOPPING', revision: '3' }));\n        if (options.stopUnknown) return json(route, { schemaVersion: 1, code: 'RESULT_UNKNOWN' }, 503);\n        return json(route, { schemaVersion: 1, status: 'CANCEL_REQUESTED', commandId: state.stops.at(-1).input.commandId, job: state.jobs[0] });\n      }\n      if (/^voice\\/broadcasts\\/\\d+$/.test(path)) {\n        state.queryCalls++; if (options.submitUnknown && state.queryCalls === 1) return json(route, { schemaVersion: 1, code: 'NOT_FOUND' }, 404);\n        if (options.stopUnknown && state.queryCalls >= 2) state.jobs = state.jobs.map(job => ({ ...job, state: 'CANCELED', revision: '4' }));\n        return json(route, { schemaVersion: 1, status: 'VOICE_JOB', job: state.jobs[0] });\n      }\n      return json(route, { schemaVersion: 1, code: 'NOT_FOUND' }, 404);\n    });\n    await page.goto(origin + '/fc/'); await page.getByRole('button', { name: '打开语音播报' }).click();\n    if (!options.forbidden) await page.getByRole('button', { name: '按住说话，松开发送', exact: true }).waitFor({ state: 'visible' });\n    return state;\n  }\n  async function press(f, milliseconds = 750) {\n    const button = f.page.getByRole('button', { name: '按住说话，松开发送', exact: true });\n    await button.scrollIntoViewIfNeeded(); const box = await button.boundingBox();\n    await f.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await f.page.mouse.down();\n    if (milliseconds) await f.page.waitForTimeout(milliseconds);\n    return box;\n  }\n  async function trackAudit(f) { return f.page.evaluate(() => ({ calls: window.__voiceFixture.calls, tracksEnded: window.__voiceFixture.tracks.every(t => t.readyState === 'ended'), captureClosed: window.__voiceFixture.contexts.every(c => c.state === 'closed'), nativeMicCalls: window.__voiceFixture.nativeMicCalls })); }\n  async function close(f) {\n    if (f.closed) return;\n    await f.page.evaluate(async () => { const f = window.__voiceFixture; f.tracks.forEach(track => track.stop()); await Promise.all([...f.contexts, ...f.generators].map(c => c.state === 'closed' ? undefined : c.close())); }).catch(() => {});\n    await f.context.close(); f.closed = true;\n  }\n  try {\n    {\n      const f = await fixture(); check('default total is three including first', await f.page.locator('#voice-repeat').inputValue() === '3');\n      await press(f); check('hold never uploads or submits before release', f.uploads.length === 0 && f.submits.length === 0);\n      check('repeat is locked while recording', await f.page.locator('#voice-repeat').isDisabled());\n      const beforeUnload = await f.page.evaluate(() => { const event = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; }); check('active recording installs beforeunload guard', beforeUnload);\n      await f.page.mouse.up(); await f.page.getByText('白板已确认任务持久化。', { exact: false }).waitFor();\n      check('one canonical zero WAV then one explicit finalized command', f.uploads.length === 1 && f.submits.length === 1 && f.uploads[0].riff === 'RIFF' && f.uploads[0].sampleRate === 16000 && f.uploads[0].allZeroPcm && f.uploads[0].csrf && f.uploads[0].mime === 'audio/wav', f.uploads);\n      check('frozen class and total-three reach exact submission', f.submits[0].classId === '1' && f.submits[0].repeatTotal === 3 && f.submits[0].assetId === '6');\n      check('microphone released before server outcome', (await trackAudit(f)).tracksEnded && (await trackAudit(f)).captureClosed, await trackAudit(f));\n      await f.page.screenshot({ path: '/tmp/fc-round14-voice-desktop.png', fullPage: true }); screenshots.push('/tmp/fc-round14-voice-desktop.png'); await close(f);\n    }\n    for (const mode of ['slide', 'pointercancel', 'hidden', 'ended', 'short']) {\n      const f = await fixture(), box = await press(f, mode === 'short' ? 120 : 700);\n      if (mode === 'slide') { await f.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 - 70); check('upward slide enters cancel gesture', await f.page.getByText('松开取消', { exact: true }).isVisible()); }\n      if (mode === 'pointercancel') await f.page.getByRole('button', { name: '按住说话，松开发送', exact: true }).dispatchEvent('pointercancel', { pointerId: 1 });\n      if (mode === 'hidden') await f.page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });\n      if (mode === 'ended') await f.page.evaluate(() => { const track = window.__voiceFixture.tracks[0]; track.stop(); track.dispatchEvent(new Event('ended')); });\n      await f.page.mouse.up(); await f.page.waitForTimeout(120);\n      check(mode + ' cancels without upload/submit and releases tracks', f.uploads.length === 0 && f.submits.length === 0 && (await trackAudit(f)).tracksEnded, await trackAudit(f)); await close(f);\n    }\n    {\n      const f = await fixture({ mic: 'late' }); await press(f, 0); await f.page.mouse.up(); await f.page.evaluate(() => window.__voiceFixture.releasePermission()); await f.page.waitForTimeout(100);\n      check('late permission after release stops all tracks with no upload', f.uploads.length === 0 && f.submits.length === 0 && (await trackAudit(f)).tracksEnded && (await trackAudit(f)).captureClosed, await trackAudit(f)); await close(f);\n    }\n    {\n      const f = await fixture({ mic: 'denied' }); await press(f, 0); await f.page.mouse.up(); await f.page.getByText('未获得麦克风权限', { exact: false }).waitFor();\n      check('denied permission is visible and never uploads', f.uploads.length === 0 && f.submits.length === 0); await close(f);\n    }\n    {\n      const f = await fixture(), button = f.page.getByRole('button', { name: '按住说话，松开发送', exact: true }); await button.focus(); await f.page.keyboard.down('Space'); await f.page.waitForTimeout(750); await f.page.keyboard.up('Space'); await f.page.getByText('白板已确认任务持久化。', { exact: false }).waitFor();\n      check('keyboard hold/release finalizes exactly once', f.uploads.length === 1 && f.submits.length === 1); await close(f);\n    }\n    {\n      const f = await fixture(); await press(f, 750); await f.page.evaluate(() => window.__voiceFixture.deadlines[0]()); await f.page.getByText('白板已确认任务持久化。', { exact: false }).waitFor(); await f.page.mouse.up(); await f.page.waitForTimeout(80);\n      check('declared 60s timer path finalizes once; later pointerup cannot duplicate', f.uploads.length === 1 && f.submits.length === 1, { note: 'Timer callback injected after synthetic 750ms; exact 60s frame cap separately tested in real worklet unit.' }); await close(f);\n    }\n    {\n      const f = await fixture({ changed: true }); await press(f); await f.page.mouse.up(); await f.page.getByText('白板班级、授权或播放状态已变化', { exact: false }).waitFor();\n      check('target/identity change before upload discards recording', f.uploads.length === 0 && f.submits.length === 0 && (await trackAudit(f)).tracksEnded); await close(f);\n    }\n    {\n      const f = await fixture({ submitUnknown: true }); await press(f); await f.page.mouse.up(); await f.page.getByText('提交结果未知。', { exact: false }).waitFor();\n      check('unknown submit keeps original command and never retries POST', f.submits.length === 1);\n      await f.page.getByRole('button', { name: '手动查询原任务' }).click(); await f.page.getByText('当前未查到原任务，不证明从未提交', { exact: false }).waitFor();\n      check('NOT_FOUND does not permit resubmission', f.submits.length === 1 && await f.page.getByRole('button', { name: '按住说话，松开发送', exact: true }).isDisabled());\n      await f.page.getByRole('button', { name: '手动查询原任务' }).click(); await f.page.getByText('已查到原任务当前持久状态', { exact: false }).waitFor(); check('manual exact original lookup resolves without new POST', f.submits.length === 1 && f.queryCalls === 2); await close(f);\n    }\n    {\n      const job = { jobId: '88', commandId: '88', classId: '1', repeatTotal: 3, completedRepeats: 0, currentRepeat: 1, state: 'PLAYING', revision: '2', failure: null };\n      const f = await fixture({ job, stopUnknown: true }); await f.page.getByRole('button', { name: '停止此任务', exact: true }).click(); await f.page.getByText('停止结果未知。', { exact: false }).waitFor();\n      check('stop unknown preserves original expected revision', f.stops.length === 1 && f.stops[0].input.expectedRevision === '2');\n      await f.page.getByRole('button', { name: '手动查询原任务' }).click(); await f.page.getByText('当前任务尚未终止', { exact: false }).waitFor(); check('STOPPING never claims stopped or retries cancel', f.stops.length === 1 && await f.page.getByText('正在等待驱动归还', { exact: true }).isVisible());\n      await f.page.getByRole('button', { name: '手动查询原任务' }).click(); await f.page.getByText('已查到原任务当前持久状态', { exact: false }).waitFor(); check('terminal exact lookup resolves stop without repeat POST', f.stops.length === 1 && await f.page.getByText('已取消', { exact: true }).isVisible()); await close(f);\n    }\n    for (const options of [{ uploadUnauthorized: true }, { forbidden: true }]) {\n      const f = await fixture(options);\n      if (!options.forbidden) { await press(f); await f.page.mouse.up(); }\n      await f.page.getByRole('heading', { name: '连接白板', exact: true }).waitFor(); check((options.forbidden ? '403 capabilities' : '401 upload') + ' clears local teacher/session mirror', await f.page.getByRole('button', { name: '打开语音播报' }).count() === 0 && f.submits.length === 0); await close(f);\n    }\n    for (const width of [390, 320]) {\n      const f = await fixture({ width, long: true });\n      const geometry = await f.page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth, fixed: (() => { const r = document.querySelector('.bottom-reminder-action').getBoundingClientRect(); return { left: r.left, right: r.right, bottom: r.bottom }; })() }));\n      check(width + 'px long-128-character class stays within viewport', geometry.scrollWidth <= geometry.width + 1 && geometry.fixed.left >= 0 && geometry.fixed.right <= width + 1, geometry);\n      const footer = f.page.locator('.logout-row'); await footer.scrollIntoViewIfNeeded(); const rect = await footer.boundingBox(), reminder = await f.page.locator('.bottom-reminder-action').boundingBox();\n      check(width + 'px fixed reminders leave final page controls reachable', rect.y + rect.height <= reminder.y + 1, { footer: rect, reminder });\n      await f.page.screenshot({ path: '/tmp/fc-round14-voice-' + width + '.png', fullPage: true }); screenshots.push('/tmp/fc-round14-voice-' + width + '.png'); await close(f);\n    }\n    check('no page runtime errors across isolated scenarios', errors.length === 0, errors);\n    return { status: 'PASS', checks: results, checkCount: results.length, errors, screenshots, evidence: 'Synthetic API mocks and zero-only MediaStreams; real production JS, AudioWorklet, OfflineAudioContext and Worker. Self-signed local fixture with TLS verification bypassed; not a trusted campus TLS/listener/physical microphone/speaker test.', fixtureCount: fixtures.length, cleanup: 'all isolated contexts/generator contexts/tracks closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), checks: results, errors, fixtureCount: fixtures.length, states: fixtures.map(f => ({ requests: f.requests, uploads: f.uploads, submits: f.submits, stops: f.stops })), screenshots }; }\n  finally { await Promise.all(fixtures.map(close)); }\n}\n"
+    }
+  },
+  "finalDistManifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+  "finalDistAssets": [
+    {
+      "path": "assets/favicon-CXuYoSfB.svg",
+      "sizeBytes": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+    },
+    {
+      "path": "assets/index-Cr8Ck6mT.js",
+      "sizeBytes": 402597,
+      "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+    },
+    {
+      "path": "assets/index-DFFVdc8-.css",
+      "sizeBytes": 38836,
+      "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+    },
+    {
+      "path": "assets/pcm-worklet-DQjgdlBf.js",
+      "sizeBytes": 1440,
+      "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+    },
+    {
+      "path": "assets/wav-worker-LSywWbpJ.js",
+      "sizeBytes": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+    },
+    {
+      "path": "index.html",
+      "sizeBytes": 684,
+      "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+    }
+  ],
+  "initialBrowserFixtureFailures": {
+    "rawFileAccessFailure": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### Error\nError: File access denied: /tmp/fc-round14-recorder-browser-runner.js is outside allowed roots. Allowed roots: /config/data/User/globalStorage/playwright-headless/output, /workspace/共享/Eliora/未来教室计划"
+        }
+      ],
+      "isError": true
+    },
+    "rawWorkletRouteFailure": {
+      "content": [
+        {
+          "type": "text",
+          "text": "### Error\nError: page.evaluate: AbortError: Failed to load worklet module script: https://voice.synthetic/fc/assets/pcm-worklet-DQjgdlBf.js (Network error)"
+        }
+      ],
+      "isError": true
+    },
+    "routeFixture": {
+      "code": "async (defaultPage) => {\n  const context = await defaultPage.context().browser().newContext({ viewport: { width: 1100, height: 800 } });\n  const page = await context.newPage(), errors = [], requests = [], consoleMessages = [], failures = [];\n  page.on('pageerror', error => errors.push(error.message));\n  page.on('console', message => consoleMessages.push(message.type() + ': ' + message.text()));\n  page.on('requestfailed', request => failures.push({url: request.url(), failure: request.failure()}));\n  const csp = \"default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n  try {\n    await context.route('https://voice.synthetic/**', async route => {\n      const url = new URL(route.request().url()); requests.push(url.pathname);\n      if (url.pathname === '/fc/fixture') return route.fulfill({ status: 200, headers: { 'content-type': 'text/html', 'content-security-policy': csp, 'x-content-type-options': 'nosniff' }, body: '<!doctype html><meta charset=\"utf-8\"><title>Synthetic PCM fixture</title><button>Run isolated PCM</button>' });\n      const response = await route.fetch({ url: 'http://172.30.0.2:4173' + url.pathname });\n      return route.fulfill({ response, headers: { ...response.headers(), 'content-security-policy': csp, 'x-content-type-options': 'nosniff' } });\n    });\n    await page.goto('https://voice.synthetic/fc/fixture');\n    const result = await page.evaluate(async () => {\n      const audio = new AudioContext({ sampleRate: 48000 }), streamTracks = [];\n      let node, source, worker;\n      const chunks = []; let stopped;\n      try {\n        await audio.resume();\n        await audio.audioWorklet.addModule('/fc/assets/pcm-worklet-DQjgdlBf.js');\n        node = new AudioWorkletNode(audio, 'fc-bounded-mono-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCountMode: 'max', channelInterpretation: 'discrete' });\n        const finish = new Promise(resolve => stopped = resolve);\n        node.port.onmessage = event => { if (event.data.type === 'pcm') chunks.push(event.data.chunk); if (event.data.type === 'stopped') stopped(); };\n        const buffer = audio.createBuffer(2, 48000, audio.sampleRate); buffer.getChannelData(0).fill(0.75); buffer.getChannelData(1).fill(0.25);\n        source = audio.createBufferSource(); source.buffer = buffer;\n        const destination = audio.createMediaStreamDestination(); source.connect(destination); streamTracks.push(...destination.stream.getTracks());\n        const microphoneSource = audio.createMediaStreamSource(destination.stream); microphoneSource.connect(node); node.connect(audio.destination);\n        node.port.postMessage({ type: 'start' }); source.start();\n        await new Promise(resolve => setTimeout(resolve, 750));\n        streamTracks.forEach(track => track.stop()); node.port.postMessage({ type: 'finish' });\n        await finish; microphoneSource.disconnect(); source.disconnect(); node.disconnect(); node.port.close(); await audio.close();\n        const inputFrames = chunks.reduce((n, c) => n + c.length, 0), outputFrames = Math.round(inputFrames * 16000 / audio.sampleRate);\n        const offline = new OfflineAudioContext(1, outputFrames, 16000), input = offline.createBuffer(1, inputFrames, audio.sampleRate);\n        let offset = 0; for (const chunk of chunks) { input.getChannelData(0).set(chunk, offset); offset += chunk.length; }\n        chunks.length = 0; const reader = offline.createBufferSource(); reader.buffer = input; reader.connect(offline.destination); reader.start();\n        const rendered = await offline.startRendering(); reader.disconnect();\n        worker = new Worker('/fc/assets/wav-worker-LSywWbpJ.js', { type: 'module' });\n        const encoded = new Promise((resolve, reject) => { worker.onmessage = event => resolve(event.data.wav); worker.onerror = reject; });\n        const pcm = rendered.getChannelData(0).slice(); worker.postMessage(pcm, [pcm.buffer]); const wav = await encoded; worker.terminate();\n        const view = new DataView(wav), value = view.getInt16(44 + Math.floor(outputFrames / 2) * 2, true);\n        return { secureContext: isSecureContext, actualSampleRate: audio.sampleRate, inputFrames, outputFrames, wavBytes: wav.byteLength, riffBytes: view.getUint32(4, true), dataBytes: view.getUint32(40, true), format: view.getUint16(20, true), channels: view.getUint16(22, true), sampleRate: view.getUint32(24, true), byteRate: view.getUint32(28, true), blockAlign: view.getUint16(32, true), bits: view.getUint16(34, true), middlePcm16: value, tracksEnded: streamTracks.every(t => t.readyState === 'ended'), contextClosed: audio.state === 'closed', workerTerminated: true };\n      } finally { streamTracks.forEach(track => track.stop()); source?.disconnect(); node?.disconnect(); node?.port.close(); worker?.terminate(); if (audio.state !== 'closed') await audio.close(); }\n    });\n    if (!result.secureContext || result.wavBytes !== 44 + result.outputFrames * 2 || result.outputFrames < 8000 || result.outputFrames > 960000 || result.sampleRate !== 16000 || result.channels !== 1 || result.bits !== 16 || result.format !== 1 || result.blockAlign !== 2 || result.byteRate !== 32000 || result.riffBytes !== result.wavBytes - 8 || result.dataBytes !== result.outputFrames * 2 || Math.abs(result.middlePcm16 - 16384) > 2 || !result.tracksEnded || !result.contextClosed || errors.length) throw Error(JSON.stringify({ result, errors }));\n    return { status: 'PASS', evidence: 'self-signed isolated HTTPS with certificate errors ignored, synthetic PCM only; no trusted campus TLS, production listener, physical microphone or audible playback evidence', result, errors, requests, cleanup: 'context closed in finally' };\n  } catch (error) { return { status: 'FAIL', error: String(error), requests, errors, consoleMessages, failures }; }\n  finally { await context.close(); }\n}\n",
+      "sha256": "c7f9bca1e58bbb0d223c9a28989bdd3ae8593f91cab1c0050b79c1d72ad7560c",
+      "provenance": "Reconstructed diagnostic variant of the original failed route fixture from the recorded invocation; original failure text is retained verbatim separately. This SHA binds the included reconstruction, not an unretained pre-run file."
+    },
+    "classification": "Harness limitation, not product failure: the synthetic worklet URL did not pass through Playwright context.route. Own short-lived self-signed HTTPS served actual static assets for the subsequent pass; certificate verification was explicitly bypassed."
+  },
+  "browserEvidenceArchive": "开发计划/验证记录/2026-10-30-recorder-browser-synthetic-round14.json",
+  "browserUiEvidenceArchive": "开发计划/验证记录/2026-10-30-voice-ui-browser-synthetic-round14.json",
+  "cleanupEvidenceArchive": "开发计划/验证记录/2026-10-30-voice-browser-owned-cleanup-round14.json",
+  "firstRecordedAt": "2026-10-30T15:32:30.498307+00:00",
+  "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba"
+}

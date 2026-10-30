@@ -24,6 +24,12 @@ pub enum ErrorCode {
     UploadNotReady,
     InvalidResource,
     Capacity,
+    VoiceDisabled,
+    TargetChanged,
+    InvalidWav,
+    QueueFull,
+    OwnerLimit,
+    Expired,
 }
 #[derive(Default)]
 struct BoundedJson {

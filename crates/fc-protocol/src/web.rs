@@ -11,6 +11,7 @@ pub mod content;
 pub mod materials;
 pub mod pairing;
 pub mod responses;
+pub mod voice;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WebError {
@@ -38,6 +39,7 @@ pub enum Route {
     ContentCommand { command_id: CommandId },
     Materials { route: materials::MaterialRoute },
     VoiceCapabilities,
+    VoiceList,
     VoiceUpload { class_id: ClassId },
     VoiceSubmit,
     VoiceStatus { job_id: VoiceJobId },
@@ -56,7 +58,7 @@ impl Route {
             Self::PairingCreate | Self::PairingPoll { .. } | Self::SessionLogout => {
                 pairing::MAX_PAIRING_JSON_BYTES as u64
             }
-            Self::VoiceUpload { .. } => 2 * 1024 * 1024,
+            Self::VoiceUpload { .. } => fc_domain::voice::MAX_WAV_BYTES,
             Self::VoiceSubmit | Self::VoiceCancel { .. } => crate::MAX_JSON_BYTES as u64,
             Self::ContentSave { .. } => crate::MAX_JSON_BYTES as u64,
             _ => 0,
@@ -135,7 +137,13 @@ impl WebBoundary {
             "session" => Route::Session,
             "session/logout" => Route::SessionLogout,
             "voice/capabilities" => Route::VoiceCapabilities,
-            "voice/broadcasts" => Route::VoiceSubmit,
+            "voice/broadcasts" => {
+                if method == "GET" {
+                    Route::VoiceList
+                } else {
+                    Route::VoiceSubmit
+                }
+            }
             _ => {
                 if let Some(path) = path.strip_prefix("materials/") {
                     Route::Materials {
@@ -387,7 +395,7 @@ pub fn voice_submit(bytes: &[u8]) -> Result<VoiceSubmitRequest, ProtocolError> {
         asset_id: VoiceAssetId::new(decimal(&d.asset_id, false).ok_or_else(bad)?)
             .map_err(|_| bad())?,
         expected_asset_revision: Revision::new(
-            decimal(&d.expected_asset_revision, true).ok_or_else(bad)?,
+            decimal(&d.expected_asset_revision, false).ok_or_else(bad)?,
         ),
         class_id: ClassId::new(decimal(&d.class_id, false).ok_or_else(bad)?).map_err(|_| bad())?,
         repeat_total: d.repeat_total,
@@ -412,7 +420,7 @@ pub fn voice_cancel(job_id: VoiceJobId, bytes: &[u8]) -> Result<VoiceCancelReque
         )
         .map_err(|_| ProtocolError::InvalidCommand)?,
         expected_revision: Revision::new(
-            decimal(&d.expected_revision, true).ok_or(ProtocolError::InvalidCommand)?,
+            decimal(&d.expected_revision, false).ok_or(ProtocolError::InvalidCommand)?,
         ),
     })
 }
@@ -549,7 +557,7 @@ mod tests {
         );
         assert_eq!(
             b.route("GET", "/fc/api/v1/voice/broadcasts"),
-            Err(WebError::Method)
+            Ok(Route::VoiceList)
         );
         assert_eq!(
             b.route("GET", "/fc/api/v1/voice/broadcasts/18446744073709551615"),
@@ -595,11 +603,25 @@ mod tests {
     }
     #[test]
     fn voice_dto_exact_ids_and_injection_rejection() {
-        let input = r#"{"schemaVersion":1,"commandId":"18446744073709551615","assetId":"2","expectedAssetRevision":"0","classId":"1","repeatTotal":3}"#;
+        let input = r#"{"schemaVersion":1,"commandId":"18446744073709551615","assetId":"2","expectedAssetRevision":"1","classId":"1","repeatTotal":3}"#;
         assert_eq!(
             voice_submit(input.as_bytes()).unwrap().command_id.get(),
             u64::MAX
         );
+        assert!(voice_submit(
+            input
+                .replace(
+                    "\"expectedAssetRevision\":\"1\"",
+                    "\"expectedAssetRevision\":\"0\""
+                )
+                .as_bytes()
+        )
+        .is_err());
+        assert!(voice_cancel(
+            VoiceJobId::new(1).unwrap(),
+            br#"{"schemaVersion":1,"commandId":"2","expectedRevision":"0"}"#
+        )
+        .is_err());
         for field in [
             r#""role":"GLOBAL_ADMIN""#,
             r#""owner":1"#,

@@ -52,7 +52,7 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 受控WAV→精确Web会话→SQLite持久任务→WinMM→释放后正文清理。无兼容设备记NOT_RUN。
 声音持久核心有4任务/每教师2、16MiB（含预留）、100条/24h审计和重启中断不重播；
 按需声音执行域已绑定托盘紧急停止、当前Windows会话/休眠/退出和默认输出设备变化；
-管理登录的后台锁不再阻挡音频停止。尚无对外教师网页提交入口，不能据此称录音产品已交付。
+管理登录的后台锁不再阻挡音频停止。第十四轮已接语音Web应用端口和录音页面；正常TLS/网络调度尚未接入，不能据此称录音产品已交付。
 --audio-silent-probe 额外验证正常按需执行域、独立Web会话、停止全部待播和退出顺序。
 --web-pairing-probe 在隔离临时部署中使用真实Windows CNG随机源、DPAPI及SQLite，
 直接调用配对service验证8位一次请求、本地主管理员明确批准、256位轮询秘密及独立设备租约，
@@ -63,10 +63,10 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 在127.0.0.1显式测试前缀运行两轮真实IOCP；需要相应系统权限/URL预留，程序不自行提权或修改配置。
 它拒绝凭证与业务请求，不能作为HTTPS、校园可达或浏览器配对通过证据；正常启动默认没有Web监听。
 --web-pairing-probe还验证同一隔离部署的作业/提醒POST、清空后再写、命令幂等/查询与真实桌面事实；仅请求端口metadata，未开启网络监听。
-教师网页已接配对/会话、当天作业与共同提醒的真实应用端口，包含范围分页、读取/保存/清空、修订冲突和原命令查询；第十三轮补齐资料网页与受控文件工作端口，语音网页入口仍未接入。
+教师网页已接配对/会话、当天作业与共同提醒的真实应用端口，包含范围分页、读取/保存/清空、修订冲突和原命令查询；第十三轮补齐资料网页与受控文件工作端口，第十四轮补齐语音录音、规范WAV上传、持久任务/停止端口与未知结果查询。
 内容日期观察与写入走唯一SQLite writer，清空保留CAS；跨午夜草稿不能自动改日期发送。COMMITTED只表示已持久化，不表示当前可见；未知写入只能手动查询，不自动重发。
 正常启动仍没有正式TLS/Web监听；静态文件入包不代表网页已由应用托管或通过真实浏览器验收。
-完整profile/布局编辑及产品语音工作流仍未交付。
+完整profile/布局编辑、真实TLS到白板语音工作流及三系统产品验收仍未交付。
 应用图形DIB合计上限16MiB；4K自身离屏场景实测4806080字节，完整低Alpha区域背景保持。
 这不代表操作系统背景/DWM总内存或4K真实显示设备验收通过。
 原生网格尚未完成真实触控/白板笔、多DPI和全部视觉验收，当前仍为CUI开发目标。
@@ -92,3 +92,5 @@ manifest.json 记录目标、工具链声明、文件 SHA256、探针范围和 P
 LICENSE 为项目许可；第三方组件、Rust/MinGW/GCC 运行时许可与版权见 THIRD-PARTY-NOTICES.txt。
 
 Round13 includes teacher material JSON and controlled file worker ports (TXT/Office/WIC/PDF helper, <=50MiB) plus browser management UI. WEB_MATERIALS_PASS is an owned DPAPI/SQLite/files diagnostic with synthetic request metadata, NOT actual TLS or network upload cancellation. Normal listener remains disabled. An isolated finite Winsock accept candidate has lifecycle evidence and a strict five-second observation FAIL; it is not a production TLS replacement.
+
+--web-voice-probe 使用自有合成账号/真实SQLite/规范零PCM上传和原生音频域，验证总3遍自然完成、原任务查询和停止/驱动归还；应由交互会话的隐藏测试任务运行。它仍只使用synthetic RequestHead，不开启TLS/网络listener，不请求硬件麦克风或改变音量/前台；普通--web-pairing-probe不启动原生声音。

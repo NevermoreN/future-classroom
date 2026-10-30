@@ -1,0 +1,956 @@
+{
+  "schemaVersion": 1,
+  "kind": "INDEPENDENT_WEB_VOICE_TESTS",
+  "scope": "31 unit/transport/controller checks with fake timers and explicit mocked API/fetch; no real browser microphone/TLS/Windows audio",
+  "firstFailure": {
+    "command": "npm --prefix web test -- tests/voice-protocol.test.ts tests/voice-client.test.ts tests/voice-controller.test.ts --reporter=json --outputFile=/tmp/fc-round14-voice-web-tests-first.json",
+    "result": {
+      "numTotalTestSuites": 6,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 6,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 27,
+      "numPassedTests": 22,
+      "numFailedTests": 5,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1793374164513,
+      "success": false,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport uses exact shared broadcasts path, captured upload class, credentials and no extra owner/path fields",
+              "status": "passed",
+              "title": "uses exact shared broadcasts path, captured upload class, credentials and no extra owner/path fields",
+              "duration": 114.98790200000008,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport rejects duplicate JSON including escaped keys, oversized body, malformed UTF8 and foreign receipt",
+              "status": "passed",
+              "title": "rejects duplicate JSON including escaped keys, oversized body, malformed UTF8 and foreign receipt",
+              "duration": 12.173387000000048,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport purges unauthorized interpretation even for invalid error bodies and never retries unknown submit",
+              "status": "passed",
+              "title": "purges unauthorized interpretation even for invalid error bodies and never retries unknown submit",
+              "duration": 7.202179000000115,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport does not send invalid target/WAV/revision or HTTP credentials",
+              "status": "failed",
+              "title": "does not send invalid target/WAV/revision or HTTP credentials",
+              "duration": 13.994171999999935,
+              "failureMessages": [
+                "Error: expected error to be instance of ProtocolFault\n    at _Assertion.__VITEST_REJECTS__ (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/index.aTZaPVhf.js:2480:33)\n    at _Assertion.propertyGetter (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/chai/index.js:1696:22)\n    at /workspace/共享/Eliora/未来教室计划/web/tests/voice-client.test.ts:38:92\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+              ],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport bounds upload fetch wait and propagates caller abort without automatic replacement",
+              "status": "passed",
+              "title": "bounds upload fetch wait and propagates caller abort without automatic replacement",
+              "duration": 22.57160900000008,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374166187,
+          "endTime": 1793374166358.5715,
+          "status": "failed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-client.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle locks original target and repeat count, never submits at upload acknowledgement alone, finalizes once",
+              "status": "passed",
+              "title": "locks original target and repeat count, never submits at upload acknowledgement alone, finalizes once",
+              "duration": 28.162042000000156,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects stale finalizer and cancels changed target before uploading any bytes",
+              "status": "passed",
+              "title": "rejects stale finalizer and cancels changed target before uploading any bytes",
+              "duration": 5.439035999999987,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle does not adopt changed identityRevision for an old recording",
+              "status": "passed",
+              "title": "does not adopt changed identityRevision for an old recording",
+              "duration": 3.0678179999999884,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle does not adopt changed runtimeGeneration for an old recording",
+              "status": "passed",
+              "title": "does not adopt changed runtimeGeneration for an old recording",
+              "duration": 2.8903999999999996,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle hiding or leaving cancels unsubmitted upload and ignores late receipt/finalizer output",
+              "status": "passed",
+              "title": "hiding or leaving cancels unsubmitted upload and ignores late receipt/finalizer output",
+              "duration": 7.027151999999887,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle keeps exact unknown submit command and only manually queries original job, including404",
+              "status": "passed",
+              "title": "keeps exact unknown submit command and only manually queries original job, including404",
+              "duration": 13.567344000000048,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects foreign unknown result and preserves original payload without resending",
+              "status": "passed",
+              "title": "rejects foreign unknown result and preserves original payload without resending",
+              "duration": 8.409980000000132,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle allows stopping an old task with recording admission closed and requires actual terminal confirmation",
+              "status": "passed",
+              "title": "allows stopping an old task with recording admission closed and requires actual terminal confirmation",
+              "duration": 12.789022000000159,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle unknown cancel never repeatsPOST, and a still-playing query cannot confirm stopped",
+              "status": "passed",
+              "title": "unknown cancel never repeatsPOST, and a still-playing query cannot confirm stopped",
+              "duration": 10.957315999999992,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle HTTP401 clears task/draft/commands and invalidates paired session exactlyonce",
+              "status": "passed",
+              "title": "HTTP401 clears task/draft/commands and invalidates paired session exactlyonce",
+              "duration": 3.3734709999998813,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle HTTP403 clears task/draft/commands and invalidates paired session exactlyonce",
+              "status": "passed",
+              "title": "HTTP403 clears task/draft/commands and invalidates paired session exactlyonce",
+              "duration": 2.830296999999973,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle polls foreground active tasks at mostonce persecond and idle every15sec; background doesnotpoll",
+              "status": "passed",
+              "title": "polls foreground active tasks at mostonce persecond and idle every15sec; background doesnotpoll",
+              "duration": 4.925044999999955,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle automatic recording checkpoints observe actualtarget changes and stop old microphone context",
+              "status": "failed",
+              "title": "automatic recording checkpoints observe actualtarget changes and stop old microphone context",
+              "duration": 28.782976999999846,
+              "failureMessages": [
+                "AssertionError: expected { recordingId: 'recording-one', …(3) } to be null\n    at /workspace/共享/Eliora/未来教室计划/web/tests/voice-controller.test.ts:71:72\n    at async file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:20"
+              ],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects backwards or terminal-resurrected task progress instead of adopting it",
+              "status": "passed",
+              "title": "rejects backwards or terminal-resurrected task progress instead of adopting it",
+              "duration": 2.0441450000000714,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374165920,
+          "endTime": 1793374166056.0442,
+          "status": "failed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-controller.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning retains u64 identifiers without numeric coercion and requires exact capabilities",
+              "status": "passed",
+              "title": "retains u64 identifiers without numeric coercion and requires exact capabilities",
+              "duration": 24.72462799999994,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects malformed UTF16, control characters and ambiguous civil dates in labels/capabilities",
+              "status": "passed",
+              "title": "rejects malformed UTF16, control characters and ambiguous civil dates in labels/capabilities",
+              "duration": 35.427324,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning correlates upload receipt with exact captured target and actual WAV frame count",
+              "status": "passed",
+              "title": "correlates upload receipt with exact captured target and actual WAV frame count",
+              "duration": 6.555323000000044,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning distinguishes STOPPING from released terminal states and rejects impossible playback counters",
+              "status": "failed",
+              "title": "distinguishes STOPPING from released terminal states and rejects impossible playback counters",
+              "duration": 17.79009000000019,
+              "failureMessages": [
+                "AssertionError: expected function to throw an error, but it didn't\n    at /workspace/共享/Eliora/未来教室计划/web/tests/voice-protocol.test.ts:28:367\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64"
+              ],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects duplicate task rows, too many active jobs and internal authorization fields",
+              "status": "passed",
+              "title": "rejects duplicate task rows, too many active jobs and internal authorization fields",
+              "duration": 1.9479109999999764,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning requires nonzero CAS revisions and bounded repeat input before any fetch",
+              "status": "failed",
+              "title": "requires nonzero CAS revisions and bounded repeat input before any fetch",
+              "duration": 4.36224100000004,
+              "failureMessages": [
+                "AssertionError: expected function to throw an error, but it didn't\n    at /workspace/共享/Eliora/未来教室计划/web/tests/voice-protocol.test.ts:38:79\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64"
+              ],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects foreign committed task and refuses active playback as cancellation acknowledgement",
+              "status": "failed",
+              "title": "rejects foreign committed task and refuses active playback as cancellation acknowledgement",
+              "duration": 3.7010340000001634,
+              "failureMessages": [
+                "AssertionError: expected function to throw an error, but it didn't\n    at /workspace/共享/Eliora/未来教室计划/web/tests/voice-protocol.test.ts:47:309\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/web/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64"
+              ],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning tracks identity and runtime generation as well as actual class during recording",
+              "status": "passed",
+              "title": "tracks identity and runtime generation as well as actual class during recording",
+              "duration": 0.979280000000017,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374165859,
+          "endTime": 1793374165954.9792,
+          "status": "failed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-protocol.test.ts"
+        }
+      ]
+    },
+    "rawLog": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-protocol.test.ts tests/voice-client.test.ts tests/voice-controller.test.ts --reporter=json --outputFile=/tmp/fc-round14-voice-web-tests-first.json\n\nJSON report written to /tmp/fc-round14-voice-web-tests-first.json\n"
+  },
+  "finalPass": {
+    "command": "npm --prefix web test -- tests/voice-protocol.test.ts tests/voice-client.test.ts tests/voice-controller.test.ts --reporter=json --outputFile=/tmp/fc-round14-voice-web-tests-final.json",
+    "result": {
+      "numTotalTestSuites": 6,
+      "numPassedTestSuites": 6,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 31,
+      "numPassedTests": 31,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1793374255180,
+      "success": true,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport uses exact shared broadcasts path, captured upload class, credentials and no extra owner/path fields",
+              "status": "passed",
+              "title": "uses exact shared broadcasts path, captured upload class, credentials and no extra owner/path fields",
+              "duration": 46.962553000000014,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport rejects duplicate JSON including escaped keys, oversized body, malformed UTF8 and foreign receipt",
+              "status": "passed",
+              "title": "rejects duplicate JSON including escaped keys, oversized body, malformed UTF8 and foreign receipt",
+              "duration": 6.409017000000006,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport purges unauthorized interpretation even for invalid error bodies and never retries unknown submit",
+              "status": "passed",
+              "title": "purges unauthorized interpretation even for invalid error bodies and never retries unknown submit",
+              "duration": 4.551639000000023,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport does not send invalid target/WAV/revision or HTTP credentials",
+              "status": "passed",
+              "title": "does not send invalid target/WAV/revision or HTTP credentials",
+              "duration": 2.9488719999999944,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "authenticated voice transport"
+              ],
+              "fullName": "authenticated voice transport bounds upload fetch wait and propagates caller abort without automatic replacement",
+              "status": "passed",
+              "title": "bounds upload fetch wait and propagates caller abort without automatic replacement",
+              "duration": 7.061214000000007,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374255479,
+          "endTime": 1793374255547.0613,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-client.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle locks original target and repeat count, never submits at upload acknowledgement alone, finalizes once",
+              "status": "passed",
+              "title": "locks original target and repeat count, never submits at upload acknowledgement alone, finalizes once",
+              "duration": 14.687691000000001,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects stale finalizer and cancels changed target before uploading any bytes",
+              "status": "passed",
+              "title": "rejects stale finalizer and cancels changed target before uploading any bytes",
+              "duration": 3.2474849999999833,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle does not adopt changed identityRevision for an old recording",
+              "status": "passed",
+              "title": "does not adopt changed identityRevision for an old recording",
+              "duration": 2.44050100000004,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle does not adopt changed runtimeGeneration for an old recording",
+              "status": "passed",
+              "title": "does not adopt changed runtimeGeneration for an old recording",
+              "duration": 1.485621999999978,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle hiding or leaving cancels unsubmitted upload and ignores late receipt/finalizer output",
+              "status": "passed",
+              "title": "hiding or leaving cancels unsubmitted upload and ignores late receipt/finalizer output",
+              "duration": 2.507804999999962,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle keeps exact unknown submit command and only manually queries original job, including404",
+              "status": "passed",
+              "title": "keeps exact unknown submit command and only manually queries original job, including404",
+              "duration": 3.1783430000000408,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects foreign unknown result and preserves original payload without resending",
+              "status": "passed",
+              "title": "rejects foreign unknown result and preserves original payload without resending",
+              "duration": 1.4909220000000118,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle allows stopping an old task with recording admission closed and requires actual terminal confirmation",
+              "status": "passed",
+              "title": "allows stopping an old task with recording admission closed and requires actual terminal confirmation",
+              "duration": 1.584696000000008,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle unknown cancel never repeatsPOST, and a still-playing query cannot confirm stopped",
+              "status": "passed",
+              "title": "unknown cancel never repeatsPOST, and a still-playing query cannot confirm stopped",
+              "duration": 3.379220000000032,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle HTTP401 clears task/draft/commands and invalidates paired session exactlyonce",
+              "status": "passed",
+              "title": "HTTP401 clears task/draft/commands and invalidates paired session exactlyonce",
+              "duration": 1.5635750000000144,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle HTTP403 clears task/draft/commands and invalidates paired session exactlyonce",
+              "status": "passed",
+              "title": "HTTP403 clears task/draft/commands and invalidates paired session exactlyonce",
+              "duration": 1.1266370000000165,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle polls foreground active tasks at mostonce persecond and idle every15sec; background doesnotpoll",
+              "status": "passed",
+              "title": "polls foreground active tasks at mostonce persecond and idle every15sec; background doesnotpoll",
+              "duration": 4.3774119999999925,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle automatic recording checkpoints observe actualtarget changes and stop old microphone context",
+              "status": "passed",
+              "title": "automatic recording checkpoints observe actualtarget changes and stop old microphone context",
+              "duration": 1.9589710000000196,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle recording an otherwiseidle board changes polling to onecapability checkpoint persecond",
+              "status": "passed",
+              "title": "recording an otherwiseidle board changes polling to onecapability checkpoint persecond",
+              "duration": 1.8398160000000416,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle a malformed committed response remains unknown for the sameoriginal command",
+              "status": "passed",
+              "title": "a malformed committed response remains unknown for the sameoriginal command",
+              "duration": 2.1038770000000113,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle CASconflict never claims stopped or retries and explicitrefresh supplies newrevision",
+              "status": "passed",
+              "title": "CASconflict never claims stopped or retries and explicitrefresh supplies newrevision",
+              "duration": 1.707441000000017,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle latepoll cannot restore jobs or capabilities after confirmedleave",
+              "status": "passed",
+              "title": "latepoll cannot restore jobs or capabilities after confirmedleave",
+              "duration": 1.1627079999999523,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice recording and durable task lifecycle"
+              ],
+              "fullName": "voice recording and durable task lifecycle rejects backwards or terminal-resurrected task progress instead of adopting it",
+              "status": "passed",
+              "title": "rejects backwards or terminal-resurrected task progress instead of adopting it",
+              "duration": 0.8401850000000195,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374255475,
+          "endTime": 1793374255526.84,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-controller.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning retains u64 identifiers without numeric coercion and requires exact capabilities",
+              "status": "passed",
+              "title": "retains u64 identifiers without numeric coercion and requires exact capabilities",
+              "duration": 8.258693000000022,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects malformed UTF16, control characters and ambiguous civil dates in labels/capabilities",
+              "status": "passed",
+              "title": "rejects malformed UTF16, control characters and ambiguous civil dates in labels/capabilities",
+              "duration": 1.8908689999999524,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning correlates upload receipt with exact captured target and actual WAV frame count",
+              "status": "passed",
+              "title": "correlates upload receipt with exact captured target and actual WAV frame count",
+              "duration": 1.2961540000000014,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning distinguishes STOPPING from released terminal states and rejects impossible playback counters",
+              "status": "passed",
+              "title": "distinguishes STOPPING from released terminal states and rejects impossible playback counters",
+              "duration": 1.4838419999999815,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects duplicate task rows, too many active jobs and internal authorization fields",
+              "status": "passed",
+              "title": "rejects duplicate task rows, too many active jobs and internal authorization fields",
+              "duration": 1.353496000000007,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning requires nonzero CAS revisions and bounded repeat input before any fetch",
+              "status": "passed",
+              "title": "requires nonzero CAS revisions and bounded repeat input before any fetch",
+              "duration": 1.9726219999999444,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning rejects foreign committed task and refuses active playback as cancellation acknowledgement",
+              "status": "passed",
+              "title": "rejects foreign committed task and refuses active playback as cancellation acknowledgement",
+              "duration": 1.6268569999999727,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            },
+            {
+              "ancestorTitles": [
+                "voice wire boundary and state meaning"
+              ],
+              "fullName": "voice wire boundary and state meaning tracks identity and runtime generation as well as actual class during recording",
+              "status": "passed",
+              "title": "tracks identity and runtime generation as well as actual class during recording",
+              "duration": 0.7443810000000326,
+              "failureMessages": [],
+              "meta": {},
+              "tags": [],
+              "benchmarks": []
+            }
+          ],
+          "startTime": 1793374255474,
+          "endTime": 1793374255492.7444,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/共享/Eliora/未来教室计划/web/tests/voice-protocol.test.ts"
+        }
+      ]
+    },
+    "rawLog": "\n> future-classroom-teacher@0.1.0 test\n> vitest run tests/voice-protocol.test.ts tests/voice-client.test.ts tests/voice-controller.test.ts --reporter=json --outputFile=/tmp/fc-round14-voice-web-tests-final.json\n\nJSON report written to /tmp/fc-round14-voice-web-tests-final.json\n"
+  },
+  "sourceInputs": [
+    {
+      "path": "web/tests/voice-fixtures.ts",
+      "sha256": "a5dedd9a242a8b7af219a69dd3977e4345dca50044f977643c1a78a93962d683"
+    },
+    {
+      "path": "web/tests/voice-protocol.test.ts",
+      "sha256": "5366eff7220eb6648d43ebea003d903f881dd08257bac51996e97e1e6c37c792"
+    },
+    {
+      "path": "web/tests/voice-client.test.ts",
+      "sha256": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52"
+    },
+    {
+      "path": "web/tests/voice-controller.test.ts",
+      "sha256": "000b37672ac1d3818e9e7f2147addb3be45006841c7bd0801176fb56ab59343c"
+    },
+    {
+      "path": "web/src/api/voice-protocol.ts",
+      "sha256": "ed5d80450a7d979d26182e3cf24248b9ff8d0f04bff4bd4c67d2a25931023d07"
+    },
+    {
+      "path": "web/src/api/voice-client.ts",
+      "sha256": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda"
+    },
+    {
+      "path": "web/src/api/voice-controller.ts",
+      "sha256": "d2768bb06da8430d0da04ff9b8ee6dae16c2d94c79fcb659fee74edc091907a6"
+    },
+    {
+      "path": "web/src/VoicePane.tsx",
+      "sha256": "cc6319381eac84aa2d5f6b04a117172dd36189d86cd8e712ea60b44d647c2aaa"
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "sha256": "1c7f5d81950d785c64356ba7c6eec3a9ef2a3af72e0be24d6ca80c7a16680981"
+    }
+  ],
+  "defectsCaughtAndFixedByRoot": [
+    "nonzero CAS revisions rejected before network",
+    "CANCEL_REQUESTED rejects QUEUED/STARTING/PLAYING/GAP as stop acknowledgement",
+    "playback counters consistent with queue/start/play/gap states",
+    "recording polls capabilities so changed target/identity/runtime cancels old microphonecontext; idle15s and active1s totalrequestbudget remainbounded"
+  ],
+  "meaningfulCounterexamples": [
+    "slowupload does not submitbeforeack and duplicatefinalizer postsonejob",
+    "lateupload result ignoredafterhide/leave",
+    "unknowncommitqueries onlyoriginalcommandId==jobId manually;404doesnotprove no commit",
+    "oldtaskstopworkswithadmissionclosed;Stoppingnotterminal",
+    "unknownstopwhileplaying remainsunknown andneverrePOSTs",
+    "401403purgetaskcontext/pending/sessionmirror",
+    "terminalresurrection/foreignresultreject",
+    "duplicateescapedJSON/invalidUTF8/oversizedresponsefail",
+    "HTTP credentials andinvalidWAVsize/type/target/CASneverfetch"
+  ],
+  "limitations": [
+    "API/fetchresponses synthetic; Blob bytes are framingfixtures, notcanonicalaudiointegration proof",
+    "no productionnetworkphysicalcancellation orrealTLS validated",
+    "rootmaychangeUI/controllerafterthissnapshot; authoritative finalfullsuite mustbindlatestsource"
+  ],
+  "mutations": "only four owned web/tests/voice-* files; rootfixedimplementation itself",
+  "originalReportSha256": "83f2b6c7060ee8404a668eae6f563108410cfecc034a606ae4b7a4b4ff205438",
+  "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba"
+}

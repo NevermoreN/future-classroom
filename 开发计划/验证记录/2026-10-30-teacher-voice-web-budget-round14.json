@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba",
+  "budget": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "assetCount": 6,
+    "totalBytes": 444723,
+    "totalLimitBytes": 5242880,
+    "gzipJsCssBytes": 130957,
+    "gzipJsCssLimitBytes": 524288,
+    "scope": "static build only; listener, wire TLS, real browser pairing not established by this report"
+  },
+  "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+  "manifest": {
+    "schemaVersion": 1,
+    "apiVersion": 1,
+    "uiCompatibilityVersion": 1,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-Cr8Ck6mT.js",
+        "sizeBytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sizeBytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/pcm-worklet-DQjgdlBf.js",
+        "sizeBytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf"
+      }
+    ]
+  },
+  "unitTests": 208,
+  "unitFiles": 18,
+  "unitStdout": "\n> future-classroom-teacher@0.1.0 test\n> vitest run\n\n\n RUN  v5.0.5 /workspace/共享/Eliora/未来教室计划/web\n\n\n Test Files  18 passed (18)\n      Tests  208 passed (208)\n   Start at  23:47:24\n   Duration  4.45s (tests 61%, import 26%, worker 7%, transform 6%)\n\n    Isolate  18 workers spawned · ~843ms startup each (spawn + environment, per file)\n             at least ~1.32s faster with isolate: false — reuses workers across files instead of one per file\n\n",
+  "typecheckStdout": "\n> future-classroom-teacher@0.1.0 typecheck\n> tsc --noEmit\n\n",
+  "buildStdout": "\n> future-classroom-teacher@0.1.0 build\n> tsc --noEmit && node scripts/licenses.mjs && vite build && node scripts/budget.mjs\n\nvite v8.3.5 building client environment for production...\ntransforming...\n✓ 2057 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/favicon-CXuYoSfB.svg       0.28 kB │ gzip:   0.21 kB\ndist/index.html                        0.68 kB │ gzip:   0.46 kB\ndist/assets/wav-worker-LSywWbpJ.js     0.88 kB\ndist/assets/pcm-worklet-DQjgdlBf.js    1.44 kB\ndist/assets/index-DFFVdc8-.css        38.83 kB │ gzip:   9.17 kB\ndist/assets/index-Cr8Ck6mT.js        402.59 kB │ gzip: 122.06 kB\n\n✓ built in 1.64s\n{\n  \"schemaVersion\": 1,\n  \"status\": \"PASS\",\n  \"assetCount\": 6,\n  \"totalBytes\": 444723,\n  \"totalLimitBytes\": 5242880,\n  \"gzipJsCssBytes\": 130957,\n  \"gzipJsCssLimitBytes\": 524288,\n  \"scope\": \"static build only; listener, wire TLS, real browser pairing not established by this report\"\n}\n",
+  "rustIntegrationStdout": "    Finished `release` profile [optimized] target(s) in 0.16s\n     Running `target/release/examples/verify_web_assets web/dist`\nSTATIC_BUILD_INTEGRATION_PASS assets=6 bytes=444723 synthetic_metadata_only=true listener_started=false\n",
+  "browserScope": "Synthetic fixture, no hardware microphone/campus trusted TLS evidence"
+}

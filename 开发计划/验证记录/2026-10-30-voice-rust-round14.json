@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "round": "round14",
+  "agent": "materials_rust",
+  "createdUtc": "2026-10-30T15:44:32.339672+00:00",
+  "status": "SOURCE_FROZEN_HOST_PASS_WINDOWS_CROSS_COMPILED_RUNTIME_PENDING_ROOT",
+  "sourceManifest": "/tmp/fc-round14-voice-rust-source-manifest.json",
+  "sourceAggregateSha256": "141c53b4b0029a651fa30ac4ce35154770a0f7dea440068f803b40ce2da9565d",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "bytes": 88624,
+      "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_files.rs",
+      "bytes": 20853,
+      "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "bytes": 11497,
+      "sha256": "5fafc8de4b0de4be24ab6bad9d112d9839fdfd5d41033dbcfce4c041e9c079c5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "bytes": 38490,
+      "sha256": "96f87ceb9435513be0629eec57d71e36aa56ded043b4ae128e0bc1786c47751a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+      "bytes": 25137,
+      "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "bytes": 1253,
+      "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+      "bytes": 16452,
+      "sha256": "9fae297f5e5c3a8d73f3064fb9b166184fcf47ae28f45a830a1622812787bf63"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+      "bytes": 5972,
+      "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "bytes": 8062,
+      "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "bytes": 24233,
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-protocol/src/web.rs",
+      "bytes": 28289,
+      "sha256": "11c6bdfe74c89800cf3635cf0cbd328d7f537e9d80e9f097fa4ba5d35654a3ae"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/responses.rs",
+      "bytes": 9981,
+      "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/voice.rs",
+      "bytes": 9063,
+      "sha256": "b9c66758227733c3eb441bb19ecfb10b93a5bf82b1d5555370a9ce0f6508d117"
+    }
+  ],
+  "checks": [
+    {
+      "command": "cargo check -p fc-bootstrap --all-targets --locked",
+      "exitCode": 0,
+      "result": "PASS; early implementation host compilation",
+      "log": "/tmp/fc-round14-voice-host-check.log",
+      "logBytes": 126,
+      "logSha256": "886c07185ca93154a4a55f59adf2977c4350d50a01345562f085c51b13795858",
+      "output": "    Blocking waiting for file lock on build directory\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.89s\n"
+    },
+    {
+      "command": "cargo check -p fc-bootstrap --all-targets --target i686-pc-windows-gnu --locked",
+      "exitCode": 0,
+      "result": "PASS; early Windows cross compilation, superseded by final strict Clippy",
+      "log": "/tmp/fc-round14-voice-windows-check.log",
+      "logBytes": 3423,
+      "logSha256": "4081cc702efc1d178b3901f97b6960e373e74a5a6fd76375b01484ad3b216bfe",
+      "output": "   Compiling version_check v0.9.5\n    Checking cfg-if v1.0.5\n   Compiling proc-macro2 v1.0.107\n    Checking typenum v1.20.1\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.27\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking windows-link v0.2.1\n    Checking subtle v2.6.1\n    Checking cpufeatures v0.2.17\n   Compiling zerocopy v0.8.63\n   Compiling serde_core v1.0.228\n   Compiling rustversion v1.0.23\n    Checking windows-strings v0.5.1\n    Checking windows-result v0.4.1\n    Checking memchr v2.8.3\n   Compiling generic-array v0.14.7\n   Compiling ahash v0.8.12\n   Compiling find-msvc-tools v0.1.15\n   Compiling shlex v2.0.1\n   Compiling cc v1.10.0\n   Compiling serde_json v1.0.145\n   Compiling syn v2.0.119\n    Checking crypto-common v0.1.7\n    Checking block-buffer v0.10.4\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling vcpkg v0.2.15\n    Checking digest v0.10.7\n    Checking once_cell v1.21.4\n    Checking sha2 v0.10.9\n   Compiling crc32fast v1.5.3\n   Compiling serde v1.0.228\n   Compiling pkg-config v0.3.34\n   Compiling encoding_rs v0.8.42\n    Checking inout v0.1.4\n    Checking simd-adler32 v0.3.10\n    Checking ryu v1.0.23\n    Checking itoa v1.0.18\n    Checking smallvec v1.16.4\n    Checking adler2 v2.0.1\n    Checking miniz_oxide v0.9.1\n    Checking cipher v0.4.4\n    Checking windows-threading v0.2.1\n   Compiling multiversion_no_op v1.0.0\n    Checking zlib-rs v0.6.8\n    Checking zeroize v1.8.2\n    Checking simdutf8 v0.1.5\n    Checking scopeguard v1.2.0\n    Checking core_detect v1.0.0\n    Checking aes v0.8.4\n    Checking hmac v0.12.1\n    Checking rustc-hash v2.1.3\n    Checking fallible-iterator v0.3.0\n    Checking fallible-streaming-iterator v0.1.9\n    Checking bitflags v2.13.2\n    Checking log v0.4.34\n    Checking pbkdf2 v0.12.2\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking flate2 v1.1.10\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n   Compiling libsqlite3-sys v0.30.1\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking pdf-syntax v0.6.1\n    Checking quick-xml v0.42.0\n   Compiling windows-interface v0.59.3\n   Compiling windows-implement v0.60.2\n   Compiling serde_derive v1.0.228\n    Checking hashbrown v0.14.5\n    Checking hashlink v0.9.1\n    Checking windows-core v0.62.2\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking windows-collections v0.3.2\n    Checking windows-numerics v0.3.1\n    Checking windows-future v0.3.2\n    Checking windows v0.62.2\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 54.04s\n"
+    },
+    {
+      "command": "cargo test -p fc-bootstrap --lib --release --locked web_application::tests::voice_tests -- --test-threads=1",
+      "exitCode": 0,
+      "result": "PASS 2/2 initial tests",
+      "log": "/tmp/fc-round14-voice-host-tests.log",
+      "logBytes": 3495,
+      "logSha256": "39fe8b3deb15031b06b16fe24f105a300af11e7e73875e420e81e56f9e096300",
+      "output": "   Compiling version_check v0.9.5\n   Compiling typenum v1.20.1\n   Compiling cfg-if v1.0.5\n   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n   Compiling proc-macro2 v1.0.107\n   Compiling subtle v2.6.1\n   Compiling quote v1.0.47\n   Compiling cpufeatures v0.2.17\n   Compiling unicode-ident v1.0.27\n   Compiling zerocopy v0.8.63\n   Compiling serde_core v1.0.228\n   Compiling rustversion v1.0.23\n   Compiling shlex v2.0.1\n   Compiling find-msvc-tools v0.1.15\n   Compiling memchr v2.8.3\n   Compiling generic-array v0.14.7\n   Compiling ahash v0.8.12\n   Compiling cc v1.10.0\n   Compiling pkg-config v0.3.34\n   Compiling syn v2.0.119\n   Compiling serde_json v1.0.145\n   Compiling crypto-common v0.1.7\n   Compiling block-buffer v0.10.4\n   Compiling digest v0.10.7\n   Compiling once_cell v1.21.4\n   Compiling sha2 v0.10.9\n   Compiling vcpkg v0.2.15\n   Compiling crc32fast v1.5.3\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling serde v1.0.228\n   Compiling inout v0.1.4\n   Compiling encoding_rs v0.8.42\n   Compiling libsqlite3-sys v0.30.1\n   Compiling itoa v1.0.18\n   Compiling smallvec v1.16.4\n   Compiling ryu v1.0.23\n   Compiling simd-adler32 v0.3.10\n   Compiling adler2 v2.0.1\n   Compiling miniz_oxide v0.9.1\n   Compiling cipher v0.4.4\n   Compiling multiversion_no_op v1.0.0\n   Compiling scopeguard v1.2.0\n   Compiling core_detect v1.0.0\n   Compiling zeroize v1.8.2\n   Compiling simdutf8 v0.1.5\n   Compiling zlib-rs v0.6.8\n   Compiling aes v0.8.4\n   Compiling serde_derive v1.0.228\n   Compiling hmac v0.12.1\n   Compiling fallible-iterator v0.3.0\n   Compiling fallible-streaming-iterator v0.1.9\n   Compiling hashbrown v0.14.5\n   Compiling bitflags v2.13.2\n   Compiling log v0.4.34\n   Compiling rustc-hash v2.1.3\n   Compiling quick-xml v0.42.0\n   Compiling pbkdf2 v0.12.2\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling hashlink v0.9.1\n   Compiling flate2 v1.1.10\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n   Compiling pdf-syntax v0.6.1\n   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n   Compiling rusqlite v0.32.1\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 2m 11s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 2 tests\ntest web_application::tests::voice_tests::voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_sound ... ok\ntest web_application::tests::voice_tests::voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_and_closed_admission ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 49 filtered out; finished in 0.87s\n\n"
+    },
+    {
+      "command": "cargo test -p fc-bootstrap --lib --release --locked web_application::tests::voice_tests -- --test-threads=1",
+      "exitCode": 0,
+      "result": "PASS 4/4 in 1.49s; real credentials, SQLite, HTTP DTOs, actual validated zero PCM; no native audio",
+      "log": "/tmp/fc-round14-voice-host-tests-final.log",
+      "logBytes": 1159,
+      "logSha256": "dc018b737f75de3bf7ab6cbd0bc4acef8c75c42b527d1db42907f3f2355528ea",
+      "output": "    Blocking waiting for file lock on build directory\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 1m 26s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 4 tests\ntest web_application::tests::voice_tests::voice_http_post_commit_stop_reports_unknown_and_original_command_is_queryable_without_replay ... ok\ntest web_application::tests::voice_tests::voice_http_readonly_user_pairing_never_discloses_remote_voice_capabilities_or_jobs ... ok\ntest web_application::tests::voice_tests::voice_http_submit_is_durable_idempotent_queryable_and_never_claims_device_or_sound ... ok\ntest web_application::tests::voice_tests::voice_http_teacher_current_target_and_old_job_stop_survive_binding_disable_and_closed_admission ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 49 filtered out; finished in 1.49s\n\n"
+    },
+    {
+      "command": "cargo test -p fc-bootstrap --lib --release --locked backend::voice::tests -- --test-threads=1",
+      "exitCode": 0,
+      "result": "PASS 6/6 in 0.96s; pre-existing service regression",
+      "log": "/tmp/fc-round14-voice-backend-tests.log",
+      "logBytes": 1091,
+      "logSha256": "09619069f7723e71c444f1bfdf44c6917e3dd5feeb9c19d75564a3bed20896b8",
+      "output": "    Blocking waiting for file lock on build directory\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 44.61s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 6 tests\ntest backend::voice::tests::actor_wait_then_publish_rechecks_actual_new_binding_without_replaying_sql ... ok\ntest backend::voice::tests::actor_waits_for_real_publication_and_busy_preserves_exact_voice_runtime ... ok\ntest backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok\ntest backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok\ntest backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... ok\ntest backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.96s\n\n"
+    },
+    {
+      "command": "cargo test -p fc-protocol --lib --release --locked web::voice -- --test-threads=1",
+      "exitCode": 0,
+      "result": "PASS 1/1 initial civil/schema test",
+      "log": "/tmp/fc-round14-voice-protocol-tests.log",
+      "logBytes": 604,
+      "logSha256": "ba64082877886b9e20ab551bcaa4286e195b24f759a4d342ffb1e0ad55b9ab4b",
+      "output": "    Blocking waiting for file lock on build directory\n   Compiling memchr v2.8.3\n   Compiling digest v0.10.7\n   Compiling sha2 v0.10.9\n   Compiling serde_json v1.0.145\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Finished `release` profile [optimized] target(s) in 1m 49s\n     Running unittests src/lib.rs (target/release/deps/fc_protocol-88395ea77e50a397)\n\nrunning 1 test\ntest web::voice::tests::civil_roundtrip_boundaries_and_no_device_claim ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s\n\n"
+    },
+    {
+      "command": "cargo test -p fc-protocol --lib --release --locked voice -- --test-threads=1",
+      "exitCode": 0,
+      "result": "PASS 2/2; includes nonzero voice CAS revisions",
+      "log": "/tmp/fc-round14-voice-protocol-final.log",
+      "logBytes": 511,
+      "logSha256": "d4234bde5080bedeb3aafaf70d4affc373d3e9f32fa7a9ace9370900e7be0952",
+      "output": "    Blocking waiting for file lock on package cache\n    Blocking waiting for file lock on package cache\n    Finished `release` profile [optimized] target(s) in 0.10s\n     Running unittests src/lib.rs (target/release/deps/fc_protocol-88395ea77e50a397)\n\nrunning 2 tests\ntest web::tests::voice_dto_exact_ids_and_injection_rejection ... ok\ntest web::voice::tests::civil_roundtrip_boundaries_and_no_device_claim ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 27 filtered out; finished in 0.01s\n\n"
+    },
+    {
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --locked -- -D warnings",
+      "exitCode": 0,
+      "result": "PASS cold 15.90s",
+      "log": "/tmp/fc-round14-voice-host-clippy.log",
+      "logBytes": 2713,
+      "logSha256": "31638009e3529edadda3d4186f86fac62fe0f79f690e3bcabb00535bb45ab632",
+      "output": "    Blocking waiting for file lock on package cache\n    Blocking waiting for file lock on package cache\n    Checking typenum v1.20.1\n    Checking cfg-if v1.0.5\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking subtle v2.6.1\n    Checking cpufeatures v0.2.17\n    Checking memchr v2.8.3\n    Checking serde_core v1.0.228\n    Checking zerocopy v0.8.63\n    Checking itoa v1.0.18\n    Checking once_cell v1.21.4\n    Checking ryu v1.0.23\n    Checking smallvec v1.16.4\n    Checking adler2 v2.0.1\n    Checking simd-adler32 v0.3.10\n    Checking crc32fast v1.5.3\n    Checking core_detect v1.0.0\n    Checking miniz_oxide v0.9.1\n    Checking zlib-rs v0.6.8\n    Checking zeroize v1.8.2\n    Checking scopeguard v1.2.0\n    Checking simdutf8 v0.1.5\n    Checking libsqlite3-sys v0.30.1\n    Checking encoding_rs v0.8.42\n    Checking generic-array v0.14.7\n    Checking fallible-iterator v0.3.0\n    Checking rustc-hash v2.1.3\n    Checking log v0.4.34\n    Checking fallible-streaming-iterator v0.1.9\n    Checking bitflags v2.13.2\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking crypto-common v0.1.7\n    Checking block-buffer v0.10.4\n    Checking inout v0.1.4\n    Checking digest v0.10.7\n    Checking cipher v0.4.4\n    Checking sha2 v0.10.9\n    Checking hmac v0.12.1\n    Checking aes v0.8.4\n    Checking pbkdf2 v0.12.2\n    Checking flate2 v1.1.10\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking quick-xml v0.42.0\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking pdf-syntax v0.6.1\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking serde_json v1.0.145\n    Checking serde v1.0.228\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking ahash v0.8.12\n    Checking hashbrown v0.14.5\n    Checking hashlink v0.9.1\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 15.90s\n"
+    },
+    {
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exitCode": 0,
+      "result": "PASS cold 2m09s; compiled Windows-only file/proof regressions",
+      "log": "/tmp/fc-round14-voice-windows-clippy.log",
+      "logBytes": 3119,
+      "logSha256": "58c4db0b6daccb34e58878189cd1b05978c2557bf128f35f4fa08e28f9b37c0a",
+      "output": "    Blocking waiting for file lock on build directory\n    Checking cfg-if v1.0.5\n    Checking typenum v1.20.1\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking subtle v2.6.1\n   Compiling generic-array v0.14.7\n    Checking cpufeatures v0.2.17\n    Checking windows-link v0.2.1\n   Compiling syn v2.0.119\n   Compiling serde_core v1.0.228\n    Checking memchr v2.8.3\n   Compiling zerocopy v0.8.63\n    Checking windows-result v0.4.1\n    Checking windows-strings v0.5.1\n   Compiling serde_json v1.0.145\n   Compiling serde v1.0.228\n   Compiling ahash v0.8.12\n    Checking ryu v1.0.23\n    Checking itoa v1.0.18\n    Checking once_cell v1.21.4\n   Compiling crc32fast v1.5.3\n    Checking simd-adler32 v0.3.10\n    Checking adler2 v2.0.1\n    Checking smallvec v1.16.4\n    Checking miniz_oxide v0.9.1\n   Compiling encoding_rs v0.8.42\n   Compiling libsqlite3-sys v0.30.1\n    Checking windows-threading v0.2.1\n    Checking core_detect v1.0.0\n    Checking scopeguard v1.2.0\n    Checking zlib-rs v0.6.8\n    Checking simdutf8 v0.1.5\n    Checking crypto-common v0.1.7\n    Checking block-buffer v0.10.4\n    Checking inout v0.1.4\n    Checking digest v0.10.7\n    Checking cipher v0.4.4\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking zeroize v1.8.2\n    Checking sha2 v0.10.9\n    Checking flate2 v1.1.10\n    Checking hmac v0.12.1\n    Checking aes v0.8.4\n    Checking bitflags v2.13.2\n    Checking fallible-iterator v0.3.0\n    Checking fallible-streaming-iterator v0.1.9\n    Checking rustc-hash v2.1.3\n    Checking log v0.4.34\n    Checking pbkdf2 v0.12.2\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking pdf-syntax v0.6.1\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking quick-xml v0.42.0\n   Compiling windows-implement v0.60.2\n   Compiling windows-interface v0.59.3\n   Compiling serde_derive v1.0.228\n    Checking windows-core v0.62.2\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking windows-numerics v0.3.1\n    Checking windows-collections v0.3.2\n    Checking windows-future v0.3.2\n    Checking hashbrown v0.14.5\n    Checking windows v0.62.2\n    Checking hashlink v0.9.1\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `release` profile [optimized] target(s) in 2m 09s\n"
+    },
+    {
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --locked -- -D warnings",
+      "exitCode": 0,
+      "result": "PASS final source incremental 2.11s",
+      "log": "/tmp/fc-round14-voice-host-clippy-final.log",
+      "logBytes": 161,
+      "logSha256": "45093d08fda0003265037f043189c94d4d6b76b4b05a345e38178ff2dccd5e01",
+      "output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 2.11s\n"
+    },
+    {
+      "command": "cargo clippy -p fc-bootstrap -p fc-protocol --lib --tests --release --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exitCode": 0,
+      "result": "PASS final source incremental 2.07s including lock wait",
+      "log": "/tmp/fc-round14-voice-windows-clippy-final.log",
+      "logBytes": 116,
+      "logSha256": "6a07c564994449e499779c41a61f6b80a57368203700e5ac5258bac3c79b450b",
+      "output": "    Blocking waiting for file lock on build directory\n    Finished `release` profile [optimized] target(s) in 2.07s\n"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0,
+      "result": "PASS final",
+      "log": "/tmp/fc-round14-voice-fmtcheck.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "exitCode": 0,
+      "result": "PASS 12 crates, 33 first-party edges",
+      "log": "/tmp/fc-round14-voice-architecture.log",
+      "logBytes": 71,
+      "logSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS final shared working tree",
+      "log": "/tmp/fc-round14-voice-diffcheck.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": ""
+    }
+  ],
+  "failuresRetained": [
+    {
+      "stage": "development formatter before initial Windows check",
+      "command": "cargo fmt --all",
+      "result": "parse error from missing closing brace in newly inserted ControlledVoiceFiles::discard_unpublished, fixed immediately before subsequent checks; raw initial tool output was not saved separately; no fabricated test failure",
+      "resolved": true
+    }
+  ],
+  "actualTestFailureCount": 0,
+  "windowsNewTests": {
+    "executionByThisAgent": "NOT_RUN; root performs authorized real Windows validation",
+    "compiledWith": "final Windows release --lib --tests strict Clippy",
+    "tests": [
+      "voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "voice_windows_material_and_voice_share_two_physical_owners_across_application_replacement"
+    ],
+    "testIsolation": "shared_upload::test_guard cfg(test)-only mutex shared with pre-existing material Windows capacity test; fixture/proof Drop occurs before guard release; production admission remains process-global two"
+  },
+  "implemented": [
+    "strict capabilities/current bound class/effective teacher scope and explicit User denial",
+    "canonical finite actual WAV typed prepare/commit without Backend long lock or WAV body Vec",
+    "one process-global physical permit budget shared across materials and voice until actual file/pin owner Drop, including App replacement",
+    "full MAX_WAV_BYTES SQL reservation before file work, canonical WAV validation and actual byte hashing through existing ControlledVoiceFiles",
+    "original exact Web lease/CSRF/runtime generation/civil expiry and fresh current target guards",
+    "submit/cancel durable commands and recoverable own/global jobs list/status; STOPPING truthful; post-COMMIT stop maps RESULT_UNKNOWN",
+    "nonzero asset/job CAS revisions and bounded response schema; hardware availability UNVERIFIED"
+  ],
+  "limitations": [
+    "Normal HTTPS listener remains disabled; no browser/TLS/audio device readiness claim",
+    "Finite local Read adapter cannot establish hard physical cancellation/deadline for a blocking network socket; real event/staging scheduling is separate gate",
+    "No microphone capture, volume changes, foreground changes or native playback by this agent",
+    "No Windows unit test execution, Win7/10/11 runtime or Seewo hardware verification by this agent; root records these separately",
+    "Host4 + backend6 execution preceded final Windows-only proof/test-isolation additions; final Host and Windows strict Clippy check current frozen source"
+  ],
+  "cleanup": {
+    "ownedPrefix": "FutureClassroom-Web-Voice-",
+    "rootsChecked": [
+      "/dev/shm",
+      "/tmp"
+    ],
+    "remaining": [],
+    "method": "RAII fixture Backend close then directory recursive removal; no shared target removal; no SSH services/keys modified"
+  },
+  "git": {
+    "commitOrPushByThisAgent": false,
+    "dependencyOrLockChangesByThisAgent": false
+  },
+  "originalReportSha256": "77a50763991c3b021218478af459db63595fc2d668fcf735b8cfaba1e64fa36c",
+  "ownerSourceManifest": {
+    "schemaVersion": 1,
+    "sourceFiles": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/voice.rs",
+        "bytes": 88624,
+        "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/voice_files.rs",
+        "bytes": 20853,
+        "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application.rs",
+        "bytes": 11497,
+        "sha256": "5fafc8de4b0de4be24ab6bad9d112d9839fdfd5d41033dbcfce4c041e9c079c5"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+        "bytes": 38490,
+        "sha256": "96f87ceb9435513be0629eec57d71e36aa56ded043b4ae128e0bc1786c47751a"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+        "bytes": 25137,
+        "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+        "bytes": 1253,
+        "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+        "bytes": 16452,
+        "sha256": "9fae297f5e5c3a8d73f3064fb9b166184fcf47ae28f45a830a1622812787bf63"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+        "bytes": 5972,
+        "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+        "bytes": 8062,
+        "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+        "bytes": 24233,
+        "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+      },
+      {
+        "path": "crates/fc-protocol/src/web.rs",
+        "bytes": 28289,
+        "sha256": "11c6bdfe74c89800cf3635cf0cbd328d7f537e9d80e9f097fa4ba5d35654a3ae"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/responses.rs",
+        "bytes": 9981,
+        "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+      },
+      {
+        "path": "crates/fc-protocol/src/web/voice.rs",
+        "bytes": 9063,
+        "sha256": "b9c66758227733c3eb441bb19ecfb10b93a5bf82b1d5555370a9ce0f6508d117"
+      }
+    ],
+    "aggregateAlgorithm": "SHA256 of UTF8 JSON sourceFiles sorted by path, keys sorted, compact separators, ensure_ascii=False",
+    "aggregateSha256": "141c53b4b0029a651fa30ac4ce35154770a0f7dea440068f803b40ce2da9565d"
+  },
+  "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba",
+  "testExpectationAlignment": "Owner 13-source targeted snapshot is historical for two cfg(test) files. Root final suite and independent review record the two expectation-only updates; production behavior unchanged."
+}

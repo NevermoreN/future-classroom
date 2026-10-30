@@ -73,35 +73,14 @@ fn path(
         ext(resource.kind)
     )))
 }
-// As with the process-wide KDF gate, a replacement WebApplication cannot
-// bypass physical ownership by dropping an old registry with work still alive.
-static PHYSICAL_UPLOADS: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
-struct StagePermit;
-impl StagePermit {
-    fn take() -> Option<Self> {
-        PHYSICAL_UPLOADS
-            .fetch_update(
-                std::sync::atomic::Ordering::AcqRel,
-                std::sync::atomic::Ordering::Acquire,
-                |count| (count < 2).then_some(count + 1),
-            )
-            .ok()
-            .map(|_| Self)
-    }
-}
-impl Drop for StagePermit {
-    fn drop(&mut self) {
-        let previous = PHYSICAL_UPLOADS.fetch_sub(1, std::sync::atomic::Ordering::AcqRel);
-        debug_assert!(previous > 0);
-    }
-}
+use super::shared_upload::PhysicalUploadPermit;
 enum Phase {
     Waiting(NewFile),
     Ready(LockedFile),
     Consuming,
 }
 struct Slot {
-    _permit: StagePermit,
+    _permit: PhysicalUploadPermit,
     lease: SessionLease,
     scope: MaterialScope,
     material_id: MaterialId,
@@ -319,7 +298,7 @@ impl WebApplication {
             Ok(p) => p.join(format!("web-material-{id}.part")),
             Err(_) => return unavailable(),
         };
-        let Some(permit) = StagePermit::take() else {
+        let Some(permit) = PhysicalUploadPermit::take() else {
             return failure(429, responses::ErrorCode::Capacity);
         };
         let file = match files.files.create_new(&stage) {

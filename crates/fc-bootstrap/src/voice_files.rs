@@ -93,6 +93,9 @@ pub struct PendingVoiceUpload {
     pin: LockedFile,
 }
 impl PendingVoiceUpload {
+    pub fn pcm(&self) -> &VoicePcmMetadata {
+        self.proof.pcm()
+    }
     /// Hold this exact validated inode across the publish DB commit. If the DB
     /// result is unknown, retain its bytes for startup reconciliation.
     pub fn into_parts(self) -> (PreparedVoiceUpload, LockedFile) {
@@ -127,6 +130,20 @@ impl ControlledVoiceFiles {
             staging,
             active,
         })
+    }
+    /// Trusted failed/abandoned preparation only, before publication is attempted.
+    /// The caller must first drop its exact pending inode pin. Never call after
+    /// an unknown publish result: the active object may already be durable.
+    pub fn discard_unpublished(&self, reservation: &VoiceAsset) -> io::Result<()> {
+        if reservation.state != VoiceAssetState::Reserved || reservation.pcm.is_some() {
+            return Err(invalid());
+        }
+        for active in [false, true] {
+            self.files
+                .remove(&self.path(active, reservation.id))
+                .map_err(file_error)?;
+        }
+        Ok(())
     }
     fn path(&self, active: bool, id: VoiceAssetId) -> PathBuf {
         (if active { &self.active } else { &self.staging }).join(format!("{}.wav", id.get()))

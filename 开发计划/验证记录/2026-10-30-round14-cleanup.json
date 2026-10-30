@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "createdUtc": "2026-10-30T16:12:22.107222+00:00",
+  "scope": "Round14 owned builds, temporary files, browser fixtures and remote probe cleanup; retained review evidence and development ZIP",
+  "paths": [
+    {
+      "path": "target",
+      "logicalBytes": 5146040242
+    },
+    {
+      "path": "web/node_modules",
+      "logicalBytes": 185210376
+    },
+    {
+      "path": "web/dist",
+      "logicalBytes": 445795
+    },
+    {
+      "path": "web/build-budget.json",
+      "logicalBytes": 284
+    },
+    {
+      "path": "web/.vitest",
+      "logicalBytes": 11818
+    },
+    {
+      "path": "/tmp/fc-round14-architecture-final-build.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-architecture-final.log",
+      "logicalBytes": 71
+    },
+    {
+      "path": "/tmp/fc-round14-archive-recorder.py",
+      "logicalBytes": 5763
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-dev.zip",
+      "logicalBytes": 3995864
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-final-checks.json",
+      "logicalBytes": 1613
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-host-final-build.log",
+      "logicalBytes": 1591
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-host-final.log",
+      "logicalBytes": 11416
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-modern-artifacts.json",
+      "logicalBytes": 12973
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-modern-build-final.log",
+      "logicalBytes": 2926
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-win7-build-final.log",
+      "logicalBytes": 11359
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-windows-tests-final-build.log",
+      "logicalBytes": 2937
+    },
+    {
+      "path": "/tmp/fc-round14-before-test-expectation-fix-windows-tests-final.jsonl",
+      "logicalBytes": 100914
+    },
+    {
+      "path": "/tmp/fc-round14-final-checks.json",
+      "logicalBytes": 2990
+    },
+    {
+      "path": "/tmp/fc-round14-final-independent-bindings-check.py",
+      "logicalBytes": 13341
+    },
+    {
+      "path": "/tmp/fc-round14-final-independent-bindings.json",
+      "logicalBytes": 91143
+    },
+    {
+      "path": "/tmp/fc-round14-final-verify.py",
+      "logicalBytes": 1500
+    },
+    {
+      "path": "/tmp/fc-round14-finalize-recorder-evidence.py",
+      "logicalBytes": 6475
+    },
+    {
+      "path": "/tmp/fc-round14-fmt-final-build.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-fmt-final.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-host-clippy-final-build.log",
+      "logicalBytes": 1232
+    },
+    {
+      "path": "/tmp/fc-round14-host-clippy-final.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-host-final-build.log",
+      "logicalBytes": 2088
+    },
+    {
+      "path": "/tmp/fc-round14-host-final.log",
+      "logicalBytes": 41710
+    },
+    {
+      "path": "/tmp/fc-round14-modern-artifacts-before-protocol-expectation-fix.json",
+      "logicalBytes": 12973
+    },
+    {
+      "path": "/tmp/fc-round14-modern-artifacts.json",
+      "logicalBytes": 13202
+    },
+    {
+      "path": "/tmp/fc-round14-modern-build-final.log",
+      "logicalBytes": 354
+    },
+    {
+      "path": "/tmp/fc-round14-modern-pe.json",
+      "logicalBytes": 11076
+    },
+    {
+      "path": "/tmp/fc-round14-normalize-before-shared-render-fix.ts",
+      "logicalBytes": 4160
+    },
+    {
+      "path": "/tmp/fc-round14-package-before-test-alignment.json",
+      "logicalBytes": 479
+    },
+    {
+      "path": "/tmp/fc-round14-package.log",
+      "logicalBytes": 286
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-adapter-hardening.log",
+      "logicalBytes": 300
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-browser-before-shared-render-fix.json",
+      "logicalBytes": 6829
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-browser-final.json",
+      "logicalBytes": 6905
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-browser-runner.js",
+      "logicalBytes": 5309
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-browser.json",
+      "logicalBytes": 6829
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-tests-final.log",
+      "logicalBytes": 438
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-tests-first.log",
+      "logicalBytes": 206
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-tests-second.log",
+      "logicalBytes": 399
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-tests-shared-owner-final.log",
+      "logicalBytes": 437
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-typecheck-final.log",
+      "logicalBytes": 60
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-typecheck-first.log",
+      "logicalBytes": 501
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-typecheck-second.log",
+      "logicalBytes": 60
+    },
+    {
+      "path": "/tmp/fc-round14-recorder-typecheck-shared-owner-final.log",
+      "logicalBytes": 60
+    },
+    {
+      "path": "/tmp/fc-round14-render-owner-after.log",
+      "logicalBytes": 376
+    },
+    {
+      "path": "/tmp/fc-round14-render-owner-before.json",
+      "logicalBytes": 20106
+    },
+    {
+      "path": "/tmp/fc-round14-render-owner-before.log",
+      "logicalBytes": 2468
+    },
+    {
+      "path": "/tmp/fc-round14-route-expectation-recheck.log",
+      "logicalBytes": 436
+    },
+    {
+      "path": "/tmp/fc-round14-session-expectation-recheck.log",
+      "logicalBytes": 670
+    },
+    {
+      "path": "/tmp/fc-round14-summarize-windows.py",
+      "logicalBytes": 3613
+    },
+    {
+      "path": "/tmp/fc-round14-voice-320-before-shared-render-fix.png",
+      "logicalBytes": 174335
+    },
+    {
+      "path": "/tmp/fc-round14-voice-320.png",
+      "logicalBytes": 174335
+    },
+    {
+      "path": "/tmp/fc-round14-voice-390-before-shared-render-fix.png",
+      "logicalBytes": 177610
+    },
+    {
+      "path": "/tmp/fc-round14-voice-390.png",
+      "logicalBytes": 177610
+    },
+    {
+      "path": "/tmp/fc-round14-voice-architecture.log",
+      "logicalBytes": 71
+    },
+    {
+      "path": "/tmp/fc-round14-voice-backend-tests.log",
+      "logicalBytes": 1091
+    },
+    {
+      "path": "/tmp/fc-round14-voice-cleanup-final.json",
+      "logicalBytes": 6368
+    },
+    {
+      "path": "/tmp/fc-round14-voice-cleanup.json",
+      "logicalBytes": 601
+    },
+    {
+      "path": "/tmp/fc-round14-voice-desktop-before-shared-render-fix.png",
+      "logicalBytes": 523352
+    },
+    {
+      "path": "/tmp/fc-round14-voice-desktop.png",
+      "logicalBytes": 523334
+    },
+    {
+      "path": "/tmp/fc-round14-voice-diffcheck.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-voice-fmtcheck.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-voice-host-check.log",
+      "logicalBytes": 126
+    },
+    {
+      "path": "/tmp/fc-round14-voice-host-clippy-final.log",
+      "logicalBytes": 161
+    },
+    {
+      "path": "/tmp/fc-round14-voice-host-clippy.log",
+      "logicalBytes": 2713
+    },
+    {
+      "path": "/tmp/fc-round14-voice-host-tests-final.log",
+      "logicalBytes": 1159
+    },
+    {
+      "path": "/tmp/fc-round14-voice-host-tests.log",
+      "logicalBytes": 3495
+    },
+    {
+      "path": "/tmp/fc-round14-voice-independent-review.json",
+      "logicalBytes": 32474
+    },
+    {
+      "path": "/tmp/fc-round14-voice-protocol-final.log",
+      "logicalBytes": 511
+    },
+    {
+      "path": "/tmp/fc-round14-voice-protocol-tests.log",
+      "logicalBytes": 604
+    },
+    {
+      "path": "/tmp/fc-round14-voice-recorder-before-shared-render-fix.json",
+      "logicalBytes": 9779
+    },
+    {
+      "path": "/tmp/fc-round14-voice-recorder.json",
+      "logicalBytes": 93111
+    },
+    {
+      "path": "/tmp/fc-round14-voice-render-owner-after-round14.json",
+      "logicalBytes": 7781
+    },
+    {
+      "path": "/tmp/fc-round14-voice-render-owner-before-round14.json",
+      "logicalBytes": 20106
+    },
+    {
+      "path": "/tmp/fc-round14-voice-review-before.json",
+      "logicalBytes": 1408
+    },
+    {
+      "path": "/tmp/fc-round14-voice-review-intermediate.json",
+      "logicalBytes": 1285
+    },
+    {
+      "path": "/tmp/fc-round14-voice-root-web-check.json",
+      "logicalBytes": 252
+    },
+    {
+      "path": "/tmp/fc-round14-voice-root-web-check.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-voice-rust-source-manifest.json",
+      "logicalBytes": 2625
+    },
+    {
+      "path": "/tmp/fc-round14-voice-rust.json",
+      "logicalBytes": 28030
+    },
+    {
+      "path": "/tmp/fc-round14-voice-ui-browser-before-shared-render-fix.json",
+      "logicalBytes": 29249
+    },
+    {
+      "path": "/tmp/fc-round14-voice-ui-browser-final.json",
+      "logicalBytes": 29195
+    },
+    {
+      "path": "/tmp/fc-round14-voice-ui-browser.json",
+      "logicalBytes": 29249
+    },
+    {
+      "path": "/tmp/fc-round14-voice-ui-runner.js",
+      "logicalBytes": 18059
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-tests-final.json",
+      "logicalBytes": 13389
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-tests-final.log",
+      "logicalBytes": 278
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-tests-first.json",
+      "logicalBytes": 17425
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-tests-first.log",
+      "logicalBytes": 278
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-tests.json",
+      "logicalBytes": 47821
+    },
+    {
+      "path": "/tmp/fc-round14-voice-web-typecheck.log",
+      "logicalBytes": 60
+    },
+    {
+      "path": "/tmp/fc-round14-voice-windows-check.log",
+      "logicalBytes": 3423
+    },
+    {
+      "path": "/tmp/fc-round14-voice-windows-clippy-final.log",
+      "logicalBytes": 116
+    },
+    {
+      "path": "/tmp/fc-round14-voice-windows-clippy.log",
+      "logicalBytes": 3119
+    },
+    {
+      "path": "/tmp/fc-round14-web-assets-integration.log",
+      "logicalBytes": 232
+    },
+    {
+      "path": "/tmp/fc-round14-web-build-final.log",
+      "logicalBytes": 939
+    },
+    {
+      "path": "/tmp/fc-round14-web-build-initial.log",
+      "logicalBytes": 939
+    },
+    {
+      "path": "/tmp/fc-round14-web-typecheck-final.log",
+      "logicalBytes": 60
+    },
+    {
+      "path": "/tmp/fc-round14-web-unit-final.log",
+      "logicalBytes": 466
+    },
+    {
+      "path": "/tmp/fc-round14-win7-build-final.log",
+      "logicalBytes": 6263
+    },
+    {
+      "path": "/tmp/fc-round14-win7-on-win11.json",
+      "logicalBytes": 22879
+    },
+    {
+      "path": "/tmp/fc-round14-win7-pe.json",
+      "logicalBytes": 9924
+    },
+    {
+      "path": "/tmp/fc-round14-win7-run.log",
+      "logicalBytes": 184
+    },
+    {
+      "path": "/tmp/fc-round14-win7-summary-output.log",
+      "logicalBytes": 2491
+    },
+    {
+      "path": "/tmp/fc-round14-win7-summary.json",
+      "logicalBytes": 23259
+    },
+    {
+      "path": "/tmp/fc-round14-win7-target",
+      "logicalBytes": 383449127
+    },
+    {
+      "path": "/tmp/fc-round14-windows-before-protocol-expectation-fix-summary.json",
+      "logicalBytes": 1643
+    },
+    {
+      "path": "/tmp/fc-round14-windows-before-protocol-expectation-fix.json",
+      "logicalBytes": 14718
+    },
+    {
+      "path": "/tmp/fc-round14-windows-before-protocol-expectation-fix.log",
+      "logicalBytes": 662
+    },
+    {
+      "path": "/tmp/fc-round14-windows-cleanup-audit.json",
+      "logicalBytes": 268
+    },
+    {
+      "path": "/tmp/fc-round14-windows-clippy-final-build.log",
+      "logicalBytes": 363
+    },
+    {
+      "path": "/tmp/fc-round14-windows-clippy-final.log",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round14-windows-final.json",
+      "logicalBytes": 84820
+    },
+    {
+      "path": "/tmp/fc-round14-windows-run.log",
+      "logicalBytes": 802
+    },
+    {
+      "path": "/tmp/fc-round14-windows-summary-output.log",
+      "logicalBytes": 10281
+    },
+    {
+      "path": "/tmp/fc-round14-windows-summary.json",
+      "logicalBytes": 31045
+    },
+    {
+      "path": "/tmp/fc-round14-windows-tests-before-protocol-expectation-fix.jsonl",
+      "logicalBytes": 100914
+    },
+    {
+      "path": "/tmp/fc-round14-windows-tests-final-build.log",
+      "logicalBytes": 365
+    },
+    {
+      "path": "/tmp/fc-round14-windows-tests-final.jsonl",
+      "logicalBytes": 100841
+    }
+  ],
+  "topLevelPathCount": 122,
+  "logicalBytesRemoved": 5722134426,
+  "preview": {
+    "pid": 23962,
+    "action": "SIGTERM to verified owned Vite preview",
+    "sessionExitCode": 143,
+    "purpose": "intentional cleanup"
+  },
+  "portsClosed": {
+    "4173": true,
+    "18443": true
+  },
+  "remoteReadOnlyAudit": {
+    "ownedProbeTasks": 0,
+    "ownedProbeProcesses": 0,
+    "ownedMarkerDirectories": 0,
+    "sshd": "Running",
+    "identity": "eliora\\elior",
+    "outsideRepositoryPrivateKeyExists": true,
+    "outsideRepositoryPrivateKeyMode": "0600",
+    "readOnly": true,
+    "status": "PASS",
+    "scope": "Final read-only audit after modern and Win7 GNU round14 probes on actual Win11",
+    "round14SourceInputs": "b64b0d64606dbb6d480645b1a6b5b09317e650e836ec69dfc530f61612a051ba"
+  },
+  "privateKeyRetained": true,
+  "privateKeyMode": "0600",
+  "retained": [
+    "intended archived verification reports and synthetic screenshots",
+    "/mnt/data/FutureClassroom-0.1.0-teacher-voice-dev.zip",
+    "earlier intended development ZIPs",
+    "persistent Windows SSH service/public authorization and outside-repository private key",
+    "preexisting root node_modules/dist and global tool/package caches"
+  ],
+  "remainingRound14TmpPaths": []
+}

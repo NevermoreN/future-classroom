@@ -20,7 +20,14 @@ mod content;
 mod material_files;
 mod materials;
 #[cfg(windows)]
+mod shared_upload;
+mod voice;
+#[cfg(windows)]
+mod voice_files;
+#[cfg(windows)]
 pub use material_files::{MaterialDownload, PreparedWebMaterial};
+#[cfg(windows)]
+pub use voice_files::PreparedWebVoiceUpload;
 
 /// Contains explicitly disclosed session headers/body. Deliberately no Debug or
 /// Clone: transport ownership must not turn credentials into routine diagnostics.
@@ -33,6 +40,8 @@ pub struct WebApplication {
     service: WebService,
     #[cfg(windows)]
     material_files: std::sync::Arc<std::sync::Mutex<Option<material_files::MaterialFiles>>>,
+    #[cfg(windows)]
+    voice_files: std::sync::Mutex<Option<std::sync::Arc<voice_files::VoiceFiles>>>,
 }
 impl WebApplication {
     pub fn new(prefix: &ListenPrefix, service: WebService) -> Result<Self, WebError> {
@@ -41,6 +50,8 @@ impl WebApplication {
             service,
             #[cfg(windows)]
             material_files: std::sync::Arc::new(std::sync::Mutex::new(None)),
+            #[cfg(windows)]
+            voice_files: std::sync::Mutex::new(None),
         })
     }
     pub fn dispatch(&self, backend: &mut Backend, head: &RequestHead, body: &[u8]) -> WebResponse {
@@ -59,7 +70,7 @@ impl WebApplication {
             route,
             Route::Materials {
                 route: fc_protocol::web::materials::MaterialRoute::UploadBytes { .. }
-            }
+            } | Route::VoiceUpload { .. }
         ) {
             return failure(400, responses::ErrorCode::InvalidRequest);
         }
@@ -178,6 +189,16 @@ impl WebApplication {
                     ),
                     Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
                 }
+            }
+            Route::VoiceCapabilities
+            | Route::VoiceList
+            | Route::VoiceSubmit
+            | Route::VoiceStatus { .. }
+            | Route::VoiceCancel { .. } => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                voice::dispatch(&backend.voice_service(), session.lease(), route, body)
             }
             Route::Materials { route } => {
                 let Some(session) = authenticated else {
