@@ -8,6 +8,7 @@ use fc_domain::{
     desktop::{DesktopFacts, DisplaySettings},
     identity::*,
     ids::*,
+    lesson_context::{LessonAction, LessonContextSnapshot},
     materials::*,
     schedule_document::ScheduleDocument,
     time::*,
@@ -16,9 +17,10 @@ use fc_ports::{
     prepare_initial_credentials, prepare_password_change, prepare_recovery,
     prepare_recovery_rotation, Clock, CredentialCrypto, CredentialIdentityRepository,
     DisplayRepository, DisplayRepositoryError, DisplayRequest, IdentityRepositoryError,
-    IdentityRequest, MaterialDeleteRequest, MaterialListRequest, MaterialRepository,
-    MaterialRepositoryError, MonotonicClock, PreparedCredentialChange, PreparedMaterialAppend,
-    RandomSource, RepositoryError, ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
+    IdentityRequest, LessonRepository, LessonRepositoryError, LessonRequest, MaterialDeleteRequest,
+    MaterialListRequest, MaterialRepository, MaterialRepositoryError, MonotonicClock,
+    PreparedCredentialChange, PreparedMaterialAppend, RandomSource, RepositoryError,
+    ScheduleRepository, ScheduleRepositoryError, ScheduleRequest,
 };
 use fc_runtime::{
     authority::{AuthorityStore, PreparedAuthority},
@@ -59,6 +61,7 @@ pub enum BackendError {
     Identity(IdentityRepositoryError),
     Content(RepositoryError),
     Schedule(ScheduleRepositoryError),
+    Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
     Material(MaterialRepositoryError),
     Storage(StorageError),
@@ -86,6 +89,11 @@ impl From<SessionError> for BackendError {
 impl From<ScheduleRepositoryError> for BackendError {
     fn from(error: ScheduleRepositoryError) -> Self {
         Self::Schedule(error)
+    }
+}
+impl From<LessonRepositoryError> for BackendError {
+    fn from(error: LessonRepositoryError) -> Self {
+        Self::Lesson(error)
     }
 }
 impl From<DisplayRepositoryError> for BackendError {
@@ -1262,38 +1270,50 @@ impl Backend {
         let clock = self.clock.clone();
         let source = source.clone();
         let authorized_at = clock.now();
-        if resolve_material_source(
-            &facts.identity,
-            &facts.schedule,
-            source.lesson.class_id,
-            authorized_at,
-        )
-        .ok()
-        .flatten()
-            != Some(source.clone())
+        // Facts already contain the writer's durable actual-teacher resolution.
+        // Never resolve a temporary lesson back through today's base timetable.
+        // Its time window starts at the captured trusted clock, so crossing a
+        // boundary between the read and this dispatch cannot extend the grant.
+        if authorized_at < facts.captured_at
+            || facts
+                .lesson_context
+                .material_source(
+                    &facts.identity,
+                    &facts.schedule,
+                    source.lesson.class_id,
+                    authorized_at,
+                )
+                .ok()
+                .flatten()
+                != Some(source.clone())
         {
             return Err(BackendError::Material(MaterialRepositoryError::Domain(
                 MaterialError::InvalidContext,
             )));
         }
-        let mut context_until = LocalDateTime::new(next_day(authorized_at)?.date, 0)
+        let mut context_until = LocalDateTime::new(next_day(facts.captured_at)?.date, 0)
             .map_err(|_| BackendError::Overflow)?;
         if let Ok(fc_domain::schedule::AcademicDay::Scheduled(day)) = facts
             .schedule
-            .resolve_day(source.lesson.class_id, authorized_at.date)
+            .resolve_day(source.lesson.class_id, facts.captured_at.date)
         {
             for row in &day.table.rows {
                 if row.enabled_days[day.source_date.weekday().index()] {
                     for minute in [row.range.begin, row.range.end] {
                         let second = u32::from(minute.get()) * 60;
-                        if second > authorized_at.second_of_day() {
-                            let boundary = LocalDateTime::new(authorized_at.date, second)
+                        if second > facts.captured_at.second_of_day() {
+                            let boundary = LocalDateTime::new(facts.captured_at.date, second)
                                 .map_err(|_| BackendError::InvalidInput)?;
                             context_until = context_until.min(boundary);
                         }
                     }
                 }
             }
+        }
+        if authorized_at >= context_until {
+            return Err(BackendError::Material(MaterialRepositoryError::Domain(
+                MaterialError::InvalidContext,
+            )));
         }
         let expires_at = Instant::now() + Duration::from_secs(2);
         let check = Arc::new(move || {
@@ -1318,6 +1338,34 @@ impl Backend {
         Ok(self
             .guarded(lease, generation, SessionPurpose::Manage)
             .schedule(&actor)?)
+    }
+    /// Load a trusted captured lesson context on the worker. This operation never
+    /// fabricates an actor for an unsigned-in desktop entry.
+    pub fn read_lesson(&self, lease: SessionLease) -> Result<LessonContextSnapshot> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .lesson_context(&actor, self.clock.as_ref())?)
+    }
+    pub fn change_lesson(
+        &mut self,
+        lease: SessionLease,
+        expected_revision: Revision,
+        lesson: fc_domain::schedule::LessonInstanceKey,
+        action: LessonAction,
+    ) -> Result<LessonContextSnapshot> {
+        let state = self.state()?;
+        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
+        let request = LessonRequest {
+            command_id: self.command_id()?,
+            expected_revision,
+            lesson,
+            action,
+        };
+        Ok(self
+            .guarded(lease, generation, SessionPurpose::Manage)
+            .execute_lesson(request, &actor, self.clock.as_ref())?)
     }
     /// The revision comes from the UI's original complete draft, never a new
     /// identity/global revision sampled during save. Failed CAS preserves it.
@@ -2045,6 +2093,126 @@ mod tests {
         let admin = policy_lease(&restored.0, 1, TrustedOrigin::Local);
         assert_eq!(restored.0.read_schedule(admin).unwrap(), saved);
         restored.0.close().unwrap();
+    }
+    #[test]
+    fn lesson_backend_requires_exact_local_admin_and_persists_override_restore_cas() {
+        use fc_domain::{schedule::*, schedule_document::*};
+        let directory = Directory::new();
+        let clock = Arc::new(TestClock::new());
+        let mut service = open(&directory, clock.clone());
+        policy_accounts(&mut service.0);
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        service
+            .0
+            .identity(
+                admin,
+                IdentityCommand::BindCurrentClass {
+                    id: ClassId::new(1).unwrap(),
+                },
+            )
+            .unwrap();
+        let row = TimetableRow {
+            id: RowId::new(1).unwrap(),
+            logical_key: LogicalRowKey::new(1).unwrap(),
+            group: DayGroup::Morning,
+            kind: RowKind::Course,
+            range: MinuteRange::new(Minute::new(0).unwrap(), Minute::new(120).unwrap()).unwrap(),
+            enabled_days: [true; 7],
+            courses: std::array::from_fn(|_| {
+                Some(CourseCell {
+                    subject_id: SubjectId::new(1).unwrap(),
+                    teacher: TeacherBinding::Explicit(PrincipalId::new(2).unwrap()),
+                })
+            }),
+        };
+        let doc = ScheduleDocument {
+            semesters: vec![SemesterPlan::new(
+                Semester {
+                    id: SemesterId::new(1).unwrap(),
+                    class_id: ClassId::new(1).unwrap(),
+                    revision: Revision::default(),
+                    enabled: true,
+                    start: LocalDate::new(2026, 10, 1).unwrap(),
+                    end: LocalDate::new(2026, 10, 31).unwrap(),
+                    first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
+                    tables: vec![WeekTable {
+                        id: TableId::new(1).unwrap(),
+                        role: TableRole::Single,
+                        rows: vec![row],
+                    }],
+                },
+                "Lesson backend".into(),
+            )],
+            ..ScheduleDocument::default()
+        };
+        service
+            .0
+            .save_schedule(admin, Revision::default(), doc)
+            .unwrap();
+        let before = service.0.read_lesson(admin).unwrap();
+        let current = before.current.as_ref().unwrap();
+        let key = current.key.clone();
+        let target = current.base.clone();
+        let replaced = service
+            .0
+            .change_lesson(
+                admin,
+                before.revision,
+                key.clone(),
+                LessonAction::Replace(target.clone()),
+            )
+            .unwrap();
+        assert!(replaced.active_override.is_some());
+        assert_eq!(replaced.current.as_ref().unwrap().effective, target);
+        assert!(matches!(
+            service
+                .0
+                .change_lesson(admin, before.revision, key.clone(), LessonAction::Restore),
+            Err(BackendError::Lesson(LessonRepositoryError::Domain(
+                fc_domain::lesson_context::LessonContextError::RevisionConflict { .. }
+            )))
+        ));
+        service.0.close().unwrap();
+        drop(service);
+        let mut service = open(&directory, clock);
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        let loaded = service.0.read_lesson(admin).unwrap();
+        assert_eq!(loaded.active_override, replaced.active_override);
+        let restored = service
+            .0
+            .change_lesson(admin, loaded.revision, key.clone(), LessonAction::Restore)
+            .unwrap();
+        assert!(restored.active_override.is_none());
+        let teacher = policy_lease(&service.0, 2, TrustedOrigin::Local);
+        assert!(service.0.read_lesson(teacher).is_err());
+        assert!(service
+            .0
+            .change_lesson(
+                teacher,
+                restored.revision,
+                key.clone(),
+                LessonAction::Replace(target.clone())
+            )
+            .is_err());
+        let web = policy_lease(&service.0, 1, TrustedOrigin::Web);
+        assert!(service.0.read_lesson(web).is_err());
+        assert!(service
+            .0
+            .change_lesson(
+                web,
+                restored.revision,
+                key.clone(),
+                LessonAction::Replace(target.clone())
+            )
+            .is_err());
+        let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
+        service.0.session_control().lock_local();
+        assert!(matches!(
+            service
+                .0
+                .change_lesson(admin, restored.revision, key, LessonAction::Replace(target)),
+            Err(BackendError::Session(SessionError::Revoked))
+        ));
     }
     #[test]
     fn display_backend_uses_captured_cas_and_public_facts_do_not_renew_management() {

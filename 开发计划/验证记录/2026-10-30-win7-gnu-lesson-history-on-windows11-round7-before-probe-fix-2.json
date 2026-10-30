@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "3fd702323e71a13b2575e25fa2d5cdb1c6c89d0222fc430ac82a477a445d4a1d",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "system": {
+    "exitCode": 0,
+    "output": [
+      "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None }"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "materialsOutput": [
+      "MATERIALS_PASS real-dpapi-sqlite-kdf-exact-lease",
+      "MATERIALS_PASS same-name-independent-append-management20-cursor",
+      "MATERIALS_PASS pdf-helper-job-wic-bmp-streamed-docx",
+      "MATERIALS_PASS fixed-version-copy-delete-retirement-original-tamper",
+      "MATERIALS_PASS two-shared-workers-cancel-lock-stale-shell-private-receiver",
+      "MATERIALS_PASS restart-durable-records-orphan-reconcile",
+      "MATERIALS_PASS all-owned-processes-registry-files-cleaned"
+    ],
+    "hostOutput": [
+      "hidden_host=PASS tray_lifecycle=PASS ticks=3 elapsed_ms=2996 session_notifications=true"
+    ],
+    "materialsExitCode": 0,
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=5000 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "sessionId": 1,
+    "applicationOutput": [
+      "FutureClassroom: 恢复原课命令拒绝"
+    ],
+    "exitCode": 0,
+    "applicationExitCode": 1,
+    "hostExitCode": 0
+  },
+  "status": "FAIL",
+  "error": "isolated native workbench application failed",
+  "sourceBinding": {
+    "sha256": "b81cc7e69e4b542cf37a19ccf8d242b51c0f68ae9c6f3db7b10b2ccef97bc7d0",
+    "manifest": "2026-10-30-lesson-history-round7-build-inputs-before-probe-fix-2.json"
+  }
+}

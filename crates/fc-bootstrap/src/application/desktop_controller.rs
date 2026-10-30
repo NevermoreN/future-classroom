@@ -160,6 +160,7 @@ pub(super) struct Controller {
     requested: Option<Request>,
     control: Option<SessionControl>,
     material_events: Vec<DesktopEvent>,
+    lesson_event: bool,
     refresh_at: Option<LocalDateTime>,
     history: BatchHistory,
     next_fetch: Instant,
@@ -290,6 +291,7 @@ impl Controller {
             requested: None,
             control: None,
             material_events: Vec::new(),
+            lesson_event: false,
             refresh_at: None,
             history: BatchHistory::default(),
             next_fetch: Instant::now(),
@@ -306,6 +308,7 @@ impl Controller {
             control.clear_material_scene();
         }
         self.material_events.clear();
+        self.lesson_event = false;
         self.renderer.hide();
         self.probe_presented = false;
     }
@@ -328,6 +331,9 @@ impl Controller {
     }
     pub(super) fn probe_metrics(&self) -> DesktopMetrics {
         self.renderer.diagnostics()
+    }
+    pub(super) fn take_lesson_event(&mut self) -> bool {
+        std::mem::take(&mut self.lesson_event)
     }
     pub(super) fn take_material_events(&mut self) -> Vec<DesktopEvent> {
         std::mem::take(&mut self.material_events)
@@ -671,6 +677,14 @@ impl Controller {
         let scene = self.scene.as_ref().expect("composed scene");
         for event in events {
             match &event {
+                DesktopEvent::LessonManage { generation } => {
+                    if *generation == scene.generation
+                        && scene.valid_at(now)
+                        && scene.lesson_control.as_ref().is_some_and(|c| c.can_change)
+                    {
+                        self.lesson_event = true;
+                    }
+                }
                 DesktopEvent::MaterialOpen { .. } => {
                     if material_event_matches(scene, &event)
                         && self.control.as_ref().is_some_and(|control| match &event {
@@ -750,6 +764,7 @@ mod tests {
             text_tone: fc_domain::desktop::TextTone::Light,
             clock_rollback: false,
             public_calendar_unverified: false,
+            lesson_control: None,
         }
     }
     #[test]

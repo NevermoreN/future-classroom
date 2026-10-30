@@ -566,3 +566,32 @@ mod material_preparation_tests {
         ));
     }
 }
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LessonRequest {
+    pub command_id: fc_domain::ids::CommandId,
+    pub expected_revision: Revision,
+    pub lesson: fc_domain::schedule::LessonInstanceKey,
+    pub action: fc_domain::lesson_context::LessonAction,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum LessonRepositoryError {
+    Domain(fc_domain::lesson_context::LessonContextError),
+    Unavailable,
+    Faulted,
+    IdempotencyConflict,
+    DocumentTooLarge,
+}
+pub trait LessonRepository {
+    fn lesson_context(
+        &self,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::lesson_context::LessonContextSnapshot, LessonRepositoryError>;
+    fn execute_lesson(
+        &mut self,
+        request: LessonRequest,
+        actor: &ActorContext,
+        clock: &dyn Clock,
+    ) -> Result<fc_domain::lesson_context::LessonContextSnapshot, LessonRepositoryError>;
+}

@@ -7,6 +7,7 @@ mod material_probe;
 pub fn materials_probe() -> std::result::Result<(), String> {
     material_probe::run()
 }
+mod lesson_editor;
 mod materials_editor;
 mod schedule_editor;
 use fc_application::identity::SessionLease;
@@ -68,6 +69,7 @@ const TO_ROTATE: ActionId = ActionId(16);
 const TO_SCHEDULE: ActionId = ActionId(17);
 const TO_DISPLAY: ActionId = ActionId(18);
 const TO_MATERIALS: ActionId = ActionId(21);
+const TO_LESSON: ActionId = ActionId(22);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -90,6 +92,7 @@ enum Screen {
     Schedule,
     Display,
     Materials,
+    Lesson,
     ExitDraft,
     Repair,
 }
@@ -108,6 +111,7 @@ fn fatal(error: &Failure) -> bool {
             BackendError::Identity(fc_ports::IdentityRepositoryError::Faulted)
                 | BackendError::Content(fc_ports::RepositoryError::Faulted)
                 | BackendError::Schedule(fc_ports::ScheduleRepositoryError::Faulted)
+                | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
                 | BackendError::Storage(
@@ -163,6 +167,9 @@ fn error_text(error: &Failure) -> String {
         Failure::Stopped => "未取得完成结果，请重新打开并核对已保存内容。".into(),
         Failure::Backend(e) => match e {
             BackendError::InvalidCredentials => "登录名或口令不正确。".into(),
+            BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::LessonContextChanged)) => "本节课程已结束或课表已变化，本次未保存。请重新加载当前课程。".into(),
+            BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::RevisionConflict { .. })) => "本节临时安排已被修改，本次未保存。请重新加载当前课程。".into(),
+            BackendError::Lesson(fc_ports::LessonRepositoryError::Domain(fc_domain::lesson_context::LessonContextError::InvalidTarget)) => "请选择本班有效科目及任教教师。".into(),
             BackendError::Schedule(fc_ports::ScheduleRepositoryError::Domain(e)) => schedule_editor::problem(e.clone()),
             BackendError::Display(fc_ports::DisplayRepositoryError::Domain(e)) => display_editor::problem(e),
             BackendError::Schedule(fc_ports::ScheduleRepositoryError::DocumentTooLarge) => "课表和保留历史超过本阶段64KiB文档上限。请减少学期、行或备注；草稿仍保留，未截断或覆盖。".into(),
@@ -285,6 +292,8 @@ enum Outcome {
     },
     ScheduleLoaded(ScheduleDocument),
     ScheduleSaved(ScheduleDocument),
+    LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
+    LessonSaved(fc_domain::lesson_context::LessonContextSnapshot),
     DisplayLoaded(DisplaySettings),
     DisplaySaved(DisplaySettings),
     Desktop(Box<DesktopFacts>),
@@ -312,6 +321,14 @@ enum Work {
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
+    LoadLesson(Arc<Mutex<Backend>>, SessionLease),
+    ChangeLesson(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        Revision,
+        fc_domain::schedule::LessonInstanceKey,
+        fc_domain::lesson_context::LessonAction,
+    ),
     SaveSchedule(
         Arc<Mutex<Backend>>,
         SessionLease,
@@ -335,6 +352,8 @@ impl Task for Work {
             Self::Refresh(_)
             | Self::Shutdown(_)
             | Self::LoadSchedule(_, _)
+            | Self::LoadLesson(_, _)
+            | Self::ChangeLesson(_, _, _, _, _)
             | Self::LoadDisplay(_, _)
             | Self::Desktop(_, _, _) => Some(1024),
             Self::Material(job) => job.allocation_bytes(),
@@ -416,6 +435,20 @@ impl Task for Work {
                     .map_err(|_| Failure::Stopped)?
                     .read_schedule(lease)?;
                 Ok(Outcome::ScheduleLoaded(document))
+            }
+            Self::LoadLesson(backend, lease) => {
+                let snapshot = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .read_lesson(lease)?;
+                Ok(Outcome::LessonLoaded(snapshot))
+            }
+            Self::ChangeLesson(backend, lease, expected, lesson, action) => {
+                let snapshot = backend
+                    .lock()
+                    .map_err(|_| Failure::Stopped)?
+                    .change_lesson(lease, expected, lesson, action)?;
+                Ok(Outcome::LessonSaved(snapshot))
             }
             Self::SaveSchedule(backend, lease, expected, document) => {
                 let document = backend
@@ -790,6 +823,10 @@ struct App {
     desktop: desktop_controller::Controller,
     root: PathBuf,
     material_editor: Option<materials_editor::Editor>,
+    lesson_editor: Option<lesson_editor::Editor>,
+    lesson_entry_pending: bool,
+    lesson_flow_active: bool,
+    offscreen_probe: bool,
     shell: fc_windows::materials::shell::ShellLauncher,
     control_slot: Arc<OnceLock<SessionControl>>,
     launch_paths: HashMap<u64, PathBuf>,
@@ -803,6 +840,15 @@ impl App {
             (_, true) => self.status.clone(),
             _ => format!("{}\n{}", self.status, self.desktop_notice),
         };
+        if self.screen == Screen::Lesson {
+            if let Some(editor) = &self.lesson_editor {
+                return editor.view(
+                    &self.state,
+                    &status,
+                    self.pending.is_some() || self.stopping,
+                );
+            }
+        }
         if self.screen == Screen::Materials {
             if let Some(editor) = &self.material_editor {
                 return editor.view(
@@ -930,6 +976,7 @@ impl App {
                         action(TO_ACCOUNTS, "创建账号"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
                         action(TO_DISPLAY, "桌面显示设置"),
+                        action(TO_LESSON, "本节临时换课"),
                     ]);
                 }
                 if account.is_some_and(|a| a.principal.role != Role::User) {
@@ -1057,6 +1104,9 @@ impl App {
             Screen::Materials => {
                 view.title = "课堂资料".into();
             }
+            Screen::Lesson => {
+                view.title = "正在加载本节课程".into();
+            }
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
@@ -1109,6 +1159,9 @@ impl App {
         self.lease = None;
         self.key = None;
         self.record = None;
+        self.lesson_editor = None;
+        self.lesson_entry_pending = false;
+        self.lesson_flow_active = false;
         self.screen = if self.state.installation.is_none() {
             Screen::Setup
         } else {
@@ -1186,6 +1239,15 @@ impl App {
                         }
                     }
                 }
+                if self.screen == Screen::Lesson && self.pending.is_none() {
+                    if let (Some(editor), Ok(data)) =
+                        (&mut self.lesson_editor, self.window.draft_nonsecret())
+                    {
+                        if editor.input(data, &self.state) {
+                            self.render()?;
+                        }
+                    }
+                }
             }
             Event::GridCell { row, column } => {
                 self.last_input = Instant::now();
@@ -1225,6 +1287,9 @@ impl App {
                 if self.screen == Screen::Materials {
                     return self.material_event(action, data);
                 }
+                if self.screen == Screen::Lesson {
+                    return self.lesson_event(action, data);
+                }
                 if self.screen == Screen::Schedule {
                     return self.schedule_event(action, data);
                 }
@@ -1243,6 +1308,9 @@ impl App {
                     action = EXIT;
                 }
                 match action {
+                    TO_LESSON => {
+                        self.open_lesson_editor()?;
+                    }
                     RETURN_DRAFT if self.screen == Screen::ExitDraft => {
                         let owner = self.current_global_owner();
                         self.screen =
@@ -1355,6 +1423,91 @@ impl App {
                             self.submit(Work::Request(request))?;
                         }
                     }
+                }
+            }
+        }
+        Ok(())
+    }
+    fn open_lesson_editor(&mut self) -> std::result::Result<(), String> {
+        if self.pending.is_some() || self.stopping {
+            return Ok(());
+        }
+        self.lesson_flow_active = true;
+        if !self.offscreen_probe {
+            self.window.show(true);
+        }
+        let Some(lease) = self.lease else {
+            self.lesson_entry_pending = true;
+            self.screen = Screen::Login;
+            self.status = "请以本地主管理员身份登录后操作本节临时换课。".into();
+            return self.render();
+        };
+        if !self.state.account(lease.principal_id()).is_ok_and(|a| {
+            a.principal.enabled && a.principal.role == Role::GlobalAdmin && !a.must_change_password
+        }) {
+            self.lesson_entry_pending = false;
+            self.lesson_flow_active = false;
+            self.status = "本节临时换课仅限本地主管理员。".into();
+            return self.render();
+        }
+        self.lesson_entry_pending = false;
+        if let Some(backend) = &self.backend {
+            self.submit(Work::LoadLesson(backend.clone(), lease))?;
+        }
+        Ok(())
+    }
+    fn lesson_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        let Some(lease) = self.lease else {
+            self.lock();
+            return self.render();
+        };
+        let command = self
+            .lesson_editor
+            .as_mut()
+            .ok_or("本节课程页面已关闭")?
+            .handle(action, data, &self.state);
+        match command {
+            Ok(lesson_editor::Command::Stay) => {
+                self.status.clear();
+                self.render()?;
+            }
+            Err(message) => {
+                self.status = message;
+                self.render()?;
+            }
+            Ok(lesson_editor::Command::Close) => {
+                self.lesson_editor = None;
+                self.lesson_flow_active = false;
+                self.screen = Screen::Home;
+                self.status.clear();
+                self.render()?;
+            }
+            Ok(lesson_editor::Command::Lock) => {
+                self.lock();
+                self.render()?;
+            }
+            Ok(lesson_editor::Command::Reload) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadLesson(backend.clone(), lease))?;
+                }
+            }
+            Ok(lesson_editor::Command::Apply {
+                expected,
+                lesson,
+                action,
+            }) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::ChangeLesson(
+                        backend.clone(),
+                        lease,
+                        expected,
+                        lesson,
+                        action,
+                    ))?;
                 }
             }
         }
@@ -1759,6 +1912,10 @@ impl App {
                         self.last_input = Instant::now();
                     }
                     self.status = "已保存。".into();
+                    if next == Screen::Home && self.lesson_entry_pending {
+                        self.open_lesson_editor()?;
+                        return Ok(());
+                    }
                     self.render()?;
                     if let Some(code) = code {
                         let shown = code.reveal();
@@ -1780,6 +1937,15 @@ impl App {
                         self.screen = Screen::Schedule;
                         self.status.clear();
                     }
+                }
+                Ok(Outcome::LessonLoaded(snapshot)) => {
+                    self.lesson_editor = Some(lesson_editor::Editor::new(snapshot));
+                    self.screen = Screen::Lesson;
+                    self.status.clear();
+                }
+                Ok(Outcome::LessonSaved(snapshot)) => {
+                    self.lesson_editor = Some(lesson_editor::Editor::new(snapshot));
+                    self.status = "本节课程已保存；桌面将按同一份最新事实刷新。".into();
                 }
                 Ok(Outcome::ScheduleSaved(document)) => {
                     if let Some(editor) = &mut self.schedule {
@@ -1890,6 +2056,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     app.submit(Work::Open(paths.root().to_owned(), clock))?;
     let started = Instant::now();
     let mut stage = 0u8;
+    let mut lesson_stage = 0u8;
     let mut probe_error = None;
     let mut office_verified = !probe;
     let mut office = if probe {
@@ -1921,6 +2088,15 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         }
         if hints.contains(HostHints::SESSION_LOCKED) || hints.contains(HostHints::SESSION_CHANGED) {
             app.desktop.hide();
+            app.lock();
+            app.window.hide();
+            let _ = app.render();
+        }
+        if !probe
+            && app.lesson_flow_active
+            && hints.contains(HostHints::FOREGROUND_CHANGED)
+            && !app.window.lesson_foreground_allowed()
+        {
             app.lock();
             app.window.hide();
             let _ = app.render();
@@ -1975,6 +2151,12 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             if let Some(notice) = app.desktop.take_notice() {
                 app.desktop_notice = notice;
             }
+            if app.desktop.take_lesson_event() {
+                if let Err(error) = app.open_lesson_editor() {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
+            }
         }
         if !app.stopping {
             for event in app.desktop.take_material_events() {
@@ -2022,12 +2204,17 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             }
         }
         if probe && !app.stopping && app.pending.is_none() {
-            if let Err(e) = probe_step(&mut app, &mut stage) {
+            if stage == 83 && lesson_stage < 8 {
+                if let Err(error) = lesson_probe_step(&mut app, &mut lesson_stage) {
+                    probe_error = Some(error);
+                    app.begin_shutdown();
+                }
+            } else if let Err(e) = probe_step(&mut app, &mut stage) {
                 probe_error = Some(e);
                 app.begin_shutdown();
             }
         }
-        if probe && started.elapsed() > Duration::from_secs(120) && !app.stopping {
+        if probe && started.elapsed() > Duration::from_secs(180) && !app.stopping {
             probe_error = Some("原生工作台闭环超时".into());
             app.begin_shutdown();
         }
@@ -2070,7 +2257,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if let Some(error) = probe_error {
         return Err(error);
     }
-    if probe && (stage != 90 || !office_verified) {
+    if probe && (stage != 90 || lesson_stage != 8 || !office_verified) {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
     Ok(())
@@ -2097,6 +2284,10 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         shutdown_deadline: None,
         terminate_required: false,
         schedule: None,
+        lesson_editor: None,
+        lesson_entry_pending: false,
+        lesson_flow_active: false,
+        offscreen_probe: probe,
         display: None,
         desktop: desktop_controller::Controller::new(probe)?,
         root: PathBuf::new(),
@@ -2125,7 +2316,240 @@ pub fn probe() -> std::result::Result<(), String> {
     let cleanup = fs::remove_dir_all(&root).map_err(|_| "隔离工作台数据未清理".to_owned());
     result?;
     cleanup?;
-    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    println!("native_workbench_application=PASS setup_login_catalog_teacher_password_homework_exit=PASS timetable_grid_dual_calendar_draft_cas=PASS display_settings_cas_draft=PASS lesson_override_restore_native_worker_cas=PASS resident_scene_offscreen=PASS unsaved_exit_guard=PASS shared_kdf_office_workers=PASS isolated_cleanup=PASS");
+    Ok(())
+}
+fn lesson_probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {
+    use fc_domain::{schedule::*, time::*};
+    fn form(app: &App) -> std::result::Result<FormData, String> {
+        let mut data = FormData::new();
+        for field in app.view().fields {
+            if field.kind != FieldKind::ReadOnly {
+                if field.kind == FieldKind::Password {
+                    return Err("换课探针不接收秘密字段".into());
+                }
+                data.insert(field.id, field.value)
+                    .map_err(|_| "换课表单无效")?;
+            }
+        }
+        Ok(data)
+    }
+    match *stage {
+        0 => {
+            // Test-fixture setup still commits through the production worker and
+            // exact administrator lease, never through a fake save callback.
+            let now = fc_ports::Clock::now(app.clock.as_ref());
+            if now.second_of_day() >= 86_280 {
+                return Err("课程原生探针需要距离午夜至少两分钟的隔离窗口。".into());
+            }
+            let lease = app.lease.ok_or("换课探针无会话")?;
+            let mut document = app
+                .schedule
+                .as_ref()
+                .ok_or("换课探针课表缺失")?
+                .document
+                .clone();
+            let plan = document.semesters.first_mut().ok_or("换课探针学期缺失")?;
+            plan.semester.start = now.date;
+            plan.semester.end = now.date;
+            let mut monday = now.date;
+            while monday.weekday() != Weekday::Monday {
+                monday = (1..=31)
+                    .rev()
+                    .find_map(|day| {
+                        LocalDate::new(monday.year(), monday.month(), day)
+                            .ok()
+                            .filter(|d| *d < monday)
+                    })
+                    .or_else(|| {
+                        let (year, month) = if monday.month() == 1 {
+                            (monday.year() - 1, 12)
+                        } else {
+                            (monday.year(), monday.month() - 1)
+                        };
+                        (28..=31)
+                            .rev()
+                            .find_map(|day| LocalDate::new(year, month, day).ok())
+                    })
+                    .ok_or("换课探针日期越界")?;
+            }
+            plan.semester.first_week_monday = monday;
+            let mut table = plan.semester.tables[0].clone();
+            table.role = TableRole::Single;
+            table.rows.truncate(1);
+            let cell = CourseCell {
+                subject_id: app.state.subjects[0].id,
+                teacher: TeacherBinding::Unassigned,
+            };
+            table.rows[0].range =
+                MinuteRange::new(Minute::new(0).unwrap(), Minute::new(1439).unwrap()).unwrap();
+            table.rows[0].enabled_days = [true; 7];
+            table.rows[0].courses = std::array::from_fn(|_| Some(cell.clone()));
+            plan.semester.tables = vec![table];
+            plan.dual_history = None;
+            // The earlier grid probe created names for both week tables. This
+            // fixture keeps one table, so discard metadata for the retired rows.
+            plan.row_details.clear();
+            plan.cell_details.clear();
+            document.school_calendar.entries.clear();
+            document.school_calendar.school_coverage = Some((now.date, now.date));
+            document.validate_draft(&app.state).map_err(|error| {
+                format!("换课探针课表准备无效：{}", schedule_editor::problem(error))
+            })?;
+            let backend = app.backend.as_ref().ok_or("换课探针后台缺失")?.clone();
+            app.submit(Work::SaveSchedule(
+                backend,
+                lease,
+                document.revision,
+                document,
+            ))?;
+        }
+        1 => {
+            let now = fc_ports::Clock::now(app.clock.as_ref());
+            let document = &app
+                .schedule
+                .as_ref()
+                .ok_or("换课探针保存结果缺失")?
+                .document;
+            let resolved = document
+                .resolve_day(
+                    app.state
+                        .installation
+                        .as_ref()
+                        .and_then(|i| i.current_class)
+                        .ok_or("换课探针班级缺失")?,
+                    now.date,
+                )
+                .map_err(|error| {
+                    format!("换课探针课表读回无效：{}", schedule_editor::problem(error))
+                })?;
+            if !matches!(
+                resolve_lesson(&resolved, now, document.automatic_gaps),
+                LessonState::Course {
+                    cell: CourseCell {
+                        teacher: TeacherBinding::Unassigned,
+                        ..
+                    },
+                    ..
+                }
+            ) {
+                return Err(format!("换课探针课表未成功持久保存：{}", app.status));
+            }
+            app.open_lesson_editor()?;
+        }
+        2 => {
+            let editor = app.lesson_editor.as_ref().ok_or("换课原生页面未加载")?;
+            if editor
+                .snapshot
+                .current
+                .as_ref()
+                .is_none_or(|c| c.teacher_id.is_some())
+                || editor.snapshot.active_override.is_some()
+            {
+                return Err(format!(
+                    "当前课程捕获失败：status={}；snapshot={:?}",
+                    app.status, editor.snapshot
+                ));
+            }
+            let mut data = form(app)?;
+            data.take(lesson_editor::TEACHER);
+            data.insert(
+                lesson_editor::TEACHER,
+                app.state
+                    .account_by_login("probe-teacher")
+                    .map_err(|_| "探针教师缺失")?
+                    .principal
+                    .id
+                    .get()
+                    .to_string(),
+            )
+            .map_err(|_| "换课教师字段无效")?;
+            app.window
+                .probe_submit(lesson_editor::REPLACE, data)
+                .map_err(|_| "换课原生命令拒绝")?;
+        }
+        3 => {
+            let snapshot = &app
+                .lesson_editor
+                .as_ref()
+                .ok_or("换课结果页面缺失")?
+                .snapshot;
+            if snapshot.active_override.is_none()
+                || snapshot
+                    .current
+                    .as_ref()
+                    .is_none_or(|c| c.teacher_id.is_none() || c.effective == c.base)
+            {
+                return Err(format!("真实换课未提交：{}", app.status));
+            }
+            let current = snapshot.current.as_ref().ok_or("换课当前实例缺失")?;
+            let stale = snapshot
+                .revision
+                .get()
+                .checked_sub(1)
+                .ok_or("换课修订无效")?;
+            app.submit(Work::ChangeLesson(
+                app.backend.as_ref().unwrap().clone(),
+                app.lease.unwrap(),
+                Revision::new(stale),
+                current.key.clone(),
+                fc_domain::lesson_context::LessonAction::Restore,
+            ))?;
+        }
+        4 => {
+            if !app.status.contains("临时安排已被修改")
+                || app
+                    .lesson_editor
+                    .as_ref()
+                    .unwrap()
+                    .snapshot
+                    .active_override
+                    .is_none()
+            {
+                return Err("过期换课修订未保留原页面或未拒绝".into());
+            }
+            app.window
+                .probe_submit(lesson_editor::RESTORE, form(app)?)
+                .map_err(|_| "恢复原课命令拒绝")?;
+        }
+        5 => {
+            let snapshot = &app
+                .lesson_editor
+                .as_ref()
+                .ok_or("恢复原课结果缺失")?
+                .snapshot;
+            if snapshot.active_override.is_some()
+                || snapshot
+                    .current
+                    .as_ref()
+                    .is_none_or(|c| c.base != c.effective || c.teacher_id.is_some())
+            {
+                return Err(format!("恢复原课未生效：{}", app.status));
+            }
+            app.window
+                .probe_submit(lesson_editor::RELOAD, form(app)?)
+                .map_err(|_| "本节重读拒绝")?;
+        }
+        6 => {
+            if app
+                .lesson_editor
+                .as_ref()
+                .is_none_or(|e| e.snapshot.active_override.is_some())
+            {
+                return Err("恢复原课持久化重读失败".into());
+            }
+            app.window
+                .probe_submit(BACK, form(app)?)
+                .map_err(|_| "换课返回拒绝")?;
+        }
+        7 => {
+            if app.screen != Screen::Home {
+                return Err("换课未返回主管理工作台".into());
+            }
+        }
+        _ => return Err("换课探针阶段无效".into()),
+    }
+    *stage += 1;
     Ok(())
 }
 fn probe_step(app: &mut App, stage: &mut u8) -> std::result::Result<(), String> {

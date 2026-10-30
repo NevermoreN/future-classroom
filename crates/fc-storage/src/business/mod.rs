@@ -4,6 +4,8 @@ pub(crate) mod codec;
 mod desktop;
 mod display;
 mod display_codec;
+mod lesson;
+mod lesson_codec;
 pub mod materials;
 mod materials_codec;
 mod schedule;
@@ -33,6 +35,7 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
     let identity = load_identity(&TransactionView(&transaction))?;
     schedule::load(&TransactionView(&transaction), &identity)?;
     schedule::change_proof(&TransactionView(&transaction))?;
+    lesson::load(&TransactionView(&transaction))?;
     display::load(&TransactionView(&transaction), &identity)?;
     desktop::read_watermark(&TransactionView(&transaction), &identity)?;
     materials::startup_check(&TransactionView(&transaction), &identity)?;
@@ -59,6 +62,7 @@ pub struct BusinessRepository<S> {
     factory: Factory<S>,
     session: SessionGuard,
     material_scene: MaterialSceneGuard,
+    lesson_observations: lesson::Observations,
 }
 impl<S> Clone for BusinessRepository<S> {
     fn clone(&self) -> Self {
@@ -68,6 +72,7 @@ impl<S> Clone for BusinessRepository<S> {
             factory: self.factory.clone(),
             session: self.session.clone(),
             material_scene: self.material_scene.clone(),
+            lesson_observations: self.lesson_observations.clone(),
         }
     }
 }
@@ -83,6 +88,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
             factory,
             session: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
             material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
+            lesson_observations: Arc::new(std::sync::Mutex::new(None)),
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
@@ -729,6 +735,13 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
             .map_err(StorageError::Identity)?;
         schedule::check_identity_change(d, &state, &transition.next)?;
         let mut mutations = Vec::new();
+        if transition.next.installation.is_some() {
+            let document = schedule::load(d, &state)?;
+            let (_, change) = lesson::observe(d, &transition.next, &document, self.clock.now())?;
+            if let Some(change) = change {
+                mutations.push(change);
+            }
+        }
         if let Some((id, password, recovery)) = required {
             let c = self
                 .credentials

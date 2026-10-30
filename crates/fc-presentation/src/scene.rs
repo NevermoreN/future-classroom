@@ -37,6 +37,7 @@ pub struct CourseCapsule {
     pub name: String,
     pub color: Rgb,
     pub current: bool,
+    pub temporary: bool,
     pub fill_alpha: f32,
     pub stroke_width: f32,
 }
@@ -73,9 +74,22 @@ pub enum CardContent {
     Text(String),
     Courses(Vec<CourseCapsule>),
     Homework(Vec<HomeworkEntry>),
-    Recess { deadline: LocalDateTime },
+    Recess {
+        deadline: LocalDateTime,
+    },
     MaterialsUnavailable,
     Materials(Box<MaterialListContent>),
+    /// A separate, small desktop surface. Only its explicit button is interactive.
+    LessonControl {
+        caption: String,
+        can_change: bool,
+    },
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct LessonControlContent {
+    pub rect: Rect,
+    pub caption: String,
+    pub can_change: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct SceneCard {
@@ -98,6 +112,7 @@ pub struct SceneSnapshot {
     pub text_tone: TextTone,
     pub clock_rollback: bool,
     pub public_calendar_unverified: bool,
+    pub lesson_control: Option<LessonControlContent>,
 }
 impl SceneSnapshot {
     /// A date change, same-day rollback or reached lesson boundary invalidates the
@@ -250,6 +265,7 @@ fn measure_text(content: &CardContent) -> String {
             }
         ),
         CardContent::Recess { .. } => "00:00".into(),
+        CardContent::LessonControl { caption, .. } => caption.clone(),
     };
     // Only the layout sample is bounded. Full owned texts remain in the DTO for
     // native DirectWrite paging; no text is silently truncated at publication.
@@ -334,13 +350,35 @@ pub fn build_scene(
             let Some(cell) = &row.courses[weekday.index()] else {
                 continue;
             };
+            let key = day.lesson_key(row);
+            let current = matches!(&lesson,LessonState::Course{key:active,..}if *active==key);
+            let effective = facts
+                .lesson_context
+                .current
+                .as_ref()
+                .filter(|c| current && c.key == key);
+            let subject_id = effective.map_or(cell.subject_id, |c| c.effective.subject_id);
             let subject = identity
                 .subjects
                 .iter()
-                .find(|s| s.id == cell.subject_id && s.enabled)
+                .find(|s| s.id == subject_id && s.enabled)
                 .ok_or(SceneError::Schedule)?;
-            let key = day.lesson_key(row);
-            let current = matches!(&lesson,LessonState::Course{key:active,..}if *active==key);
+            let temporary = current
+                && facts
+                    .lesson_context
+                    .active_override
+                    .as_ref()
+                    .is_some_and(|o| o.key == key);
+            let name = if temporary {
+                let original = identity
+                    .subjects
+                    .iter()
+                    .find(|s| s.id == cell.subject_id)
+                    .ok_or(SceneError::Schedule)?;
+                format!("临时：{} · 原{}", subject.name, original.name)
+            } else {
+                subject.name.clone()
+            };
             let alpha = f32::from(
                 settings
                     .component(ComponentKind::Schedule)
@@ -350,9 +388,10 @@ pub fn build_scene(
             course_rows.push(CourseCapsule {
                 key,
                 subject_id: subject.id,
-                name: subject.name.clone(),
+                name,
                 color: soft_subject_color(subject.color),
                 current,
+                temporary,
                 fill_alpha: if settings.subject_fill {
                     f32::from(settings.course_fill_percent) / 100. * alpha
                 } else {
@@ -520,12 +559,87 @@ pub fn build_scene(
             .component(ComponentKind::Recess)
             .is_some_and(|c| c.visible)
     {
-        match lesson {
-            LessonState::Recess { deadline, .. } if deadline > now => Some(deadline),
+        match &lesson {
+            LessonState::Recess { deadline, .. } if *deadline > now => Some(*deadline),
             _ => None,
         }
     } else {
         None
+    };
+    let lesson_control = if class.is_some() {
+        let current = facts
+            .lesson_context
+            .current
+            .as_ref()
+            .filter(|_| !facts.clock_rollback);
+        let caption = if let Some(context) = current {
+            let subject = identity
+                .subjects
+                .iter()
+                .find(|s| s.id == context.effective.subject_id && s.enabled)
+                .ok_or(SceneError::Schedule)?;
+            let teacher = context
+                .teacher_id
+                .and_then(|id| identity.accounts.iter().find(|a| a.principal.id == id))
+                .map_or("未分配老师", |a| a.display_name.as_str());
+            if facts.lesson_context.active_override.is_some() {
+                let base = identity
+                    .subjects
+                    .iter()
+                    .find(|s| s.id == context.base.subject_id)
+                    .ok_or(SceneError::Schedule)?;
+                format!(
+                    "临时：{} · {} · 原{} · 仅本节有效",
+                    subject.name, teacher, base.name
+                )
+            } else {
+                format!("当前：{} · {}", subject.name, teacher)
+            }
+        } else {
+            match lesson {
+                LessonState::Recess { .. } => "当前课间，不能临时换课",
+                LessonState::Course { .. } => "课堂上下文待确认，不能临时换课",
+                _ => "当前没有正在进行的课程，不能临时换课",
+            }
+            .into()
+        };
+        let can_change = current.is_some() && !facts.clock_rollback;
+        let width = work.width.min(1000.);
+        let text_width = width - if can_change { 180. } else { 32. };
+        if text_width < 80. {
+            return Err(SceneError::Layout(LayoutError::OutOfSpace));
+        }
+        let measured = measure
+            .height(&caption, text_width, 16.)
+            .map_err(|_| SceneError::Capacity)?;
+        if !measured.is_finite() || !(0. ..=384.).contains(&measured) {
+            return Err(SceneError::Capacity);
+        }
+        Some(LessonControlContent {
+            rect: Rect {
+                x: work.x,
+                y: work.y,
+                width,
+                height: (measured.ceil() + 24.).max(56.),
+            },
+            caption,
+            can_change,
+        })
+    } else {
+        None
+    };
+    let work = if let Some(control) = &lesson_control {
+        let height = work.height - control.rect.height - 12.;
+        if height < 84. {
+            return Err(SceneError::Layout(LayoutError::OutOfSpace));
+        }
+        Rect {
+            y: work.y + control.rect.height + 12.,
+            height,
+            ..work
+        }
+    } else {
+        work
     };
     let minimum = |widget| {
         settings.component(kind(widget)).map_or((0., 84.), |c| {
@@ -608,6 +722,7 @@ pub fn build_scene(
         text_tone: settings.text_tone,
         clock_rollback: facts.clock_rollback,
         public_calendar_unverified: public_unverified,
+        lesson_control,
     })
 }
 

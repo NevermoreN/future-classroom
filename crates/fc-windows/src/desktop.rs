@@ -85,6 +85,9 @@ pub enum PresentOutcome {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[allow(clippy::large_enum_variant)] // At most eight owned metadata events, no full scene or file bytes.
 pub enum DesktopEvent {
+    LessonManage {
+        generation: SceneGeneration,
+    },
     HomeworkBatch {
         generation: SceneGeneration,
         offset: u64,
@@ -116,6 +119,7 @@ struct InputContext {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[allow(clippy::large_enum_variant)] // At most two queued actions per input component.
 enum InputAction {
+    LessonManage,
     Page(bool),
     MaterialOpen {
         source: MaterialSource,
@@ -485,6 +489,12 @@ impl DesktopRenderer {
                     continue;
                 }
                 let forward = match action {
+                    InputAction::LessonManage => {
+                        if output.len() < 8 {
+                            output.push(DesktopEvent::LessonManage { generation });
+                        }
+                        continue;
+                    }
                     InputAction::Page(forward) => forward,
                     InputAction::MaterialOpen {
                         source,
@@ -542,6 +552,9 @@ impl DesktopRenderer {
         }
         Ok(output)
     }
+    pub fn probe_lesson_control(&self) -> Result<()> {
+        self.probe_input(ComponentKind::Schedule, |a| *a == InputAction::LessonManage)
+    }
     pub fn probe_next_page(&self, kind: ComponentKind, forward: bool) -> Result<()> {
         self.probe_input(kind, |action| *action == InputAction::Page(forward))
     }
@@ -567,7 +580,12 @@ impl DesktopRenderer {
         let input = self
             .cards
             .iter()
-            .find(|c| c.source.kind == kind)
+            .find(|c| {
+                c.source.kind == kind
+                    && c.input
+                        .as_ref()
+                        .is_some_and(|i| i.state.targets.borrow().iter().any(|t| select(&t.action)))
+            })
             .and_then(|c| c.input.as_ref())
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
         let rect = input
@@ -685,10 +703,24 @@ impl DesktopRenderer {
             self.hide();
             return Ok(PresentOutcome::Hidden);
         }
+        let control_card = scene.lesson_control.as_ref().map(|control| SceneCard {
+            kind: ComponentKind::Schedule,
+            rect: control.rect,
+            font_dip: 16.,
+            component_alpha: 1.,
+            surface_alpha: 0.03,
+            edge_alpha: 0.5,
+            content: CardContent::LessonControl {
+                caption: control.caption.clone(),
+                can_change: control.can_change,
+            },
+            page: Default::default(),
+        });
+        let scene_cards: Vec<_> = scene.cards.iter().chain(control_card.iter()).collect();
         let changed = self.last_scene != Some(scene.generation)
-            || self.cards.len() != scene.cards.len()
-            || self.cards.iter().zip(&scene.cards).any(|(a, b)| {
-                a.source != *b
+            || self.cards.len() != scene_cards.len()
+            || self.cards.iter().zip(&scene_cards).any(|(a, b)| {
+                a.source != **b
                     || a.tone != scene.text_tone
                     || a.calendar_unverified != scene.public_calendar_unverified
             });
@@ -711,11 +743,14 @@ impl DesktopRenderer {
             }
             let mut total = 0u64;
             let mut kinds = Vec::with_capacity(8);
-            for card in &scene.cards {
-                if kinds.contains(&card.kind) {
+            for card in scene_cards {
+                let control = matches!(card.content, CardContent::LessonControl { .. });
+                if kinds.contains(&card.kind) && !control {
                     return Err(Error::from_hresult(E_INVALIDARG));
                 }
-                kinds.push(card.kind);
+                if !control {
+                    kinds.push(card.kind);
+                }
                 validate_card(card)?;
                 let body = prepare_content(&self.graphics, card, scene.public_calendar_unverified)?;
                 let dynamic_rect = match card.content {
@@ -736,7 +771,20 @@ impl DesktopRenderer {
                     }),
                     _ => None,
                 };
-                let input_rect = if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
+                let input_rect = if matches!(
+                    card.content,
+                    CardContent::LessonControl {
+                        can_change: true,
+                        ..
+                    }
+                ) {
+                    Some(Rect {
+                        x: card.rect.x + 8.,
+                        y: card.rect.y + 8.,
+                        width: 144.,
+                        height: 40.,
+                    })
+                } else if matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
                 {
                     Some(card.rect)
                 } else if matches!(card.content, CardContent::Materials(_)) {
@@ -1320,6 +1368,13 @@ fn xy(x: f32, y: f32) -> D2D1_ELLIPSE {
     e
 }
 fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<ContentLayout> {
+    if matches!(c.content, CardContent::LessonControl { .. }) {
+        return Ok(ContentLayout {
+            blocks: Vec::new(),
+            pages: vec![0.],
+            units: 0,
+        });
+    }
     let width = c.rect.width - 32.;
     let viewport = c.rect.height - body_top(c, unverified) - 12.;
     if viewport < 20. {
@@ -1374,6 +1429,7 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
         Ok(())
     };
     match &c.content {
+        CardContent::LessonControl { .. } => unreachable!("control handled above"),
         CardContent::Text(text) => add(text.clone(), false, None)?,
         CardContent::Courses(rows) => {
             if rows.len() > 128 {
@@ -1389,7 +1445,15 @@ fn prepare_content(g: &Graphics, c: &SceneCard, unverified: bool) -> Result<Cont
                 }
                 add(
                     if r.current {
-                        format!("{}\n正在上课", r.name)
+                        format!(
+                            "{}\n{}",
+                            r.name,
+                            if r.temporary {
+                                "临时 · 仅本节有效"
+                            } else {
+                                "正在上课"
+                            }
+                        )
                     } else {
                         r.name.clone()
                     },
@@ -1547,6 +1611,13 @@ fn title(kind: ComponentKind) -> &'static str {
     }
 }
 fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
+    if let CardContent::LessonControl {
+        caption,
+        can_change,
+    } = &c.source.content
+    {
+        return render_lesson_control(g, c, caption.clone(), *can_change);
+    }
     // SAFETY below: all COM targets/brushes/layouts and selected DIBs belong to this
     // UI thread; local targets drop before DIB release, no UI calls borrow State.
     let target = g.target(&c.surface.dib)?;
@@ -1664,6 +1735,60 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
     c.render_pending = false;
     render_inputs(g, c)?;
     Ok(())
+}
+fn render_lesson_control(
+    g: &Graphics,
+    c: &mut Card,
+    caption: String,
+    can_change: bool,
+) -> Result<()> {
+    let target = g.target(&c.surface.dib)?;
+    let left = if can_change { 164. } else { 16. };
+    let layout = g.layout(
+        &caption,
+        c.source.rect.width - left - 16.,
+        c.source.font_dip,
+        false,
+    )?;
+    unsafe {
+        let mut metrics = DWRITE_TEXT_METRICS::default();
+        layout.GetMetrics(&mut metrics)?;
+        if metrics.height > c.source.rect.height - 24. + 0.5 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        let text = target.CreateSolidColorBrush(&ink(c.tone, 1.), None)?;
+        let glass = target.CreateSolidColorBrush(
+            &D2D1_COLOR_F {
+                r: 0.3,
+                g: 0.3,
+                b: 0.3,
+                a: 0.16,
+            },
+            None,
+        )?;
+        target.BeginDraw();
+        target.Clear(Some(&D2D1_COLOR_F::default()));
+        target.FillRoundedRectangle(
+            &bounds(
+                1.,
+                1.,
+                c.surface.rect.width - 1.,
+                c.surface.rect.height - 1.,
+                12.,
+            ),
+            &glass,
+        );
+        target.DrawTextLayout(
+            xy(left, 12.).point,
+            &layout,
+            &text,
+            D2D1_DRAW_TEXT_OPTIONS_NONE,
+        );
+        target.EndDraw(None, None)?;
+    }
+    c.surface.dirty = true;
+    c.render_pending = false;
+    render_inputs(g, c)
 }
 fn draw_dial(target: &ID2D1DCRenderTarget, c: &Card) -> Result<()> {
     // SAFETY: drawing synchronously uses owned COM brushes and value-only points.
@@ -1889,12 +2014,24 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
     };
     let material = matches!(c.source.content, CardContent::Materials(_));
     let mut targets = Vec::new();
-    let pagination = !material || c.body.pages.len() > 1;
+    let control = matches!(c.source.content, CardContent::LessonControl { .. });
+    let pagination = !control && (!material || c.body.pages.len() > 1);
     let origin = if material {
         (c.source.rect.width - 86., 8.)
     } else {
         (0., 0.)
     };
+    if control {
+        targets.push(HitTarget {
+            rect: Rect {
+                x: 0.,
+                y: 0.,
+                width: 144.,
+                height: 40.,
+            },
+            action: InputAction::LessonManage,
+        });
+    }
     if pagination {
         for (index, forward) in [false, true].into_iter().enumerate() {
             targets.push(HitTarget {
@@ -1978,6 +2115,26 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
                 }
             }
         }
+        if control {
+            let brush = target.CreateSolidColorBrush(&ink(c.tone, 1.), None)?;
+            let background = target.CreateSolidColorBrush(
+                &D2D1_COLOR_F {
+                    r: 0.3,
+                    g: 0.3,
+                    b: 0.3,
+                    a: 0.35,
+                },
+                None,
+            )?;
+            target.FillRoundedRectangle(&bounds(0., 0., 144., 40., 10.), &background);
+            let label = g.layout("临时换课 ▾", 144., 16., true)?;
+            target.DrawTextLayout(
+                xy(0., 9.).point,
+                &label,
+                &brush,
+                D2D1_DRAW_TEXT_OPTIONS_NONE,
+            );
+        }
         if pagination {
             let brush =
                 target.CreateSolidColorBrush(&ink(c.tone, c.source.component_alpha), None)?;
@@ -2057,7 +2214,7 @@ mod tests {
                 ComponentKind::Schedule=>{
                     use fc_domain::{ids::{ClassId,SemesterId,TableId,RowId},schedule::{LessonInstanceKey,ResolvedScheduleVersion,CalendarMode},time::{Minute,MinuteRange}};
                     let key=LessonInstanceKey{actual_date:now.date,class_id:ClassId::new(1).unwrap(),range:MinuteRange::new(Minute::new(480).unwrap(),Minute::new(525).unwrap()).unwrap(),version:ResolvedScheduleVersion{actual_semester_id:SemesterId::new(1).unwrap(),actual_revision:Revision::new(1),source_semester_id:SemesterId::new(1).unwrap(),source_revision:Revision::new(1),calendar_mode:CalendarMode::School,calendar_mode_revision:Revision::new(1),applied_calendar_revision:Revision::new(1),makeup_mapping_revision:Revision::new(1),source_table_id:TableId::new(1).unwrap(),source_row_id:RowId::new(1).unwrap(),rules_revision:Revision::new(1)}};
-                    CardContent::Courses(["合成语文","合成数学","合成英语"].into_iter().enumerate().map(|(i,name)|fc_presentation::scene::CourseCapsule{key:key.clone(),subject_id:SubjectId::new(i as u64+1).unwrap(),name:name.into(),color:Rgb{red:201,green:164,blue:164},current:i==0,fill_alpha:0.2,stroke_width:0.}).collect())
+                    CardContent::Courses(["合成语文","合成数学","合成英语"].into_iter().enumerate().map(|(i,name)|fc_presentation::scene::CourseCapsule{key:key.clone(),subject_id:SubjectId::new(i as u64+1).unwrap(),name:name.into(),color:Rgb{red:201,green:164,blue:164},current:i==0,temporary:false,fill_alpha:0.2,stroke_width:0.}).collect())
                 },
                 ComponentKind::Date=>CardContent::Text("本地日期 · 合成离屏场景".into()),
                 ComponentKind::Reminder=>CardContent::Text("请按时整理课堂用品。".into()),
@@ -2092,6 +2249,7 @@ mod tests {
             text_tone: TextTone::Light,
             clock_rollback: false,
             public_calendar_unverified: true,
+            lesson_control: None,
         }
     }
     #[test]
@@ -2770,5 +2928,68 @@ mod tests {
         assert!(r.take_events().unwrap().is_empty());
         r.hide();
         assert_eq!(r.last_metrics().input_regions, 0);
+    }
+    #[test]
+    fn lesson_control_uses_only_its_button_and_cancels_old_scene_input() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_publisher, gate) = authority();
+        let now = crate::native::local_now().unwrap();
+        let mut scene = scene(now);
+        scene.cards.clear();
+        scene.lesson_control = Some(fc_presentation::scene::LessonControlContent {
+            rect: Rect {
+                x: 20.,
+                y: 20.,
+                width: 900.,
+                height: 80.,
+            },
+            caption: "临时：合成语文 · 合成教师 · 原合成数学 · 仅本节有效".into(),
+            can_change: true,
+        });
+        let mut renderer = DesktopRenderer::new_hidden().unwrap();
+        renderer
+            .present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        let input = renderer.cards[0].input.as_ref().unwrap();
+        assert_eq!(input.surface.rect.width, 144.);
+        assert_eq!(input.surface.rect.height, 40.);
+        assert_eq!(input.state.targets.borrow().len(), 1);
+        assert_eq!(
+            unsafe {
+                SendMessageW(
+                    input.surface.window.0,
+                    WM_MOUSEACTIVATE,
+                    Some(WPARAM(0)),
+                    Some(LPARAM(0)),
+                )
+            }
+            .0,
+            MA_NOACTIVATE as isize
+        );
+        renderer.probe_lesson_control().unwrap();
+        assert_eq!(
+            renderer.take_events().unwrap(),
+            vec![DesktopEvent::LessonManage {
+                generation: scene.generation
+            }]
+        );
+        renderer.probe_lesson_control().unwrap();
+        scene.generation = SceneGeneration::new(2);
+        renderer
+            .present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(renderer.take_events().unwrap().is_empty());
+        renderer.probe_lesson_control().unwrap();
+        renderer.hide();
+        assert!(renderer.take_events().unwrap().is_empty());
+        scene.lesson_control.as_mut().unwrap().can_change = false;
+        renderer
+            .present(&scene, now, &guard(&gate, scene.generation))
+            .unwrap();
+        assert!(renderer.cards[0].input.is_none());
+        assert!(renderer.probe_lesson_control().is_err());
+        assert_eq!(renderer.last_metrics().visible_windows, 0);
     }
 }

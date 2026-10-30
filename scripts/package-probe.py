@@ -77,9 +77,10 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
         "sha256": entries[0]["sha256"],
         "features": {
             "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--materials-probe", "--native-probe <1..300>"],
-            "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, unsaved-exit guard; full application incomplete",
+            "native_management_workbench": "initial setup/login, school/classes/subjects, account creation, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, local global-admin current-lesson override/restore with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",
             "timetable_limits": "64 KiB complete document including bounded dual history; public calendar source verification incomplete",
-            "resident_desktop": "coherent SQLite facts, native Direct2D cards, 12/24/analog clocks, schedule/homework/material paging, full recess region backgrounds and small dynamic surfaces; complete layout/override flows and actual visibility QA incomplete",
+            "resident_desktop": "coherent SQLite facts, native Direct2D cards, 12/24/analog clocks, schedule/homework/material paging, full recess region backgrounds and small dynamic surfaces; separate bounded current-lesson control strip; full profile/layout and actual visibility QA incomplete",
+            "lesson_history": "durable bounded 64 actual intervals, override revision and complete timetable key; in-lesson/recess restart and rollback invalidation; unobserved baseline without sufficient evidence stays neutral",
             "desktop_limits": "16 MiB aggregate application DIB cap; 4K hidden native region background test uses 4806080 DIB bytes; OS backing, visible display and actual device acceptance remain incomplete",
             "materials": "local owner/global management20 and current-scene5 filename rows; validated pinned immutable originals and independent editable launch copies; constrained PDF helper and full WIC decode; dedicated STA association open; no Web launch",
             "material_limits": "original <=50MiB/image<=10MiB/8MP, originals2GiB, launchcopies200MiB/24h grace; active cleanup UI and full adversarial/device matrices incomplete",

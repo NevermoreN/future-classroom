@@ -115,17 +115,26 @@ impl<S: Send + 'static> DisplayRepository for BusinessRepository<S> {
         cursor: Option<fc_domain::materials::MaterialCursor>,
         _clock: &dyn Clock,
     ) -> Result<DesktopFacts, DisplayRepositoryError> {
-        let outcome = self
+        let result = self
             .handle
             .try_transaction(super::desktop::ReadDesktop {
                 offset,
                 material_cursor: cursor,
+                lesson_observations: self.lesson_observations.clone(),
                 clock: self.clock.clone(),
                 factory: self.factory.clone(),
             })
-            .map_err(error)?
-            .wait()
-            .map_err(error)?;
+            .and_then(|ticket| ticket.wait());
+        if matches!(
+            &result,
+            Err(StorageError::Busy
+                | StorageError::Lesson(_)
+                | StorageError::Material(fc_domain::materials::MaterialError::InvalidContext))
+        ) {
+            self.observe_lesson()
+                .map_err(|_| DisplayRepositoryError::Unavailable)?;
+        }
+        let outcome = result.map_err(error)?;
         dto::read_facts(&codec::value_with_limit(&outcome, MAX_FACTS_BYTES).map_err(error)?)
             .map_err(error)
     }

@@ -838,6 +838,25 @@ impl Window {
         // SAFETY: unique owned live window handle.
         unsafe { IsWindowVisible(self.hwnd).as_bool() }
     }
+    /// Read-only policy for the explicitly opened temporary-lesson editor.
+    /// Unknown or external foregrounds never retain its pending write intent.
+    pub fn lesson_foreground_allowed(&self) -> bool {
+        if !crate::native::input_desktop_available() {
+            return false;
+        }
+        if crate::native::desktop_foreground() == fc_presentation::Foreground::Desktop {
+            return true;
+        }
+        unsafe {
+            let foreground = GetForegroundWindow();
+            if foreground.is_invalid() {
+                return false;
+            }
+            let mut pid = 0;
+            GetWindowThreadProcessId(foreground, Some(&mut pid));
+            pid != 0 && pid == windows::Win32::System::Threading::GetCurrentProcessId()
+        }
+    }
     /// Explicit isolated diagnostic only. This method refuses a visible window,
     /// fills only its own existing native Edit controls and invokes the same
     /// button notification path as the UI. It bypasses no model/worker validation

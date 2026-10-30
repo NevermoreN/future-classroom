@@ -212,6 +212,7 @@ pub struct DesktopFacts {
     pub clock_rollback: bool,
     pub identity: IdentityState,
     pub schedule: ScheduleDocument,
+    pub lesson_context: crate::lesson_context::LessonContextSnapshot,
     pub display: DisplaySettings,
     pub homework_offset: u64,
     pub homework_eligible_total: u64,
@@ -270,29 +271,44 @@ impl DesktopFacts {
         {
             return Err(DisplayError::InvalidFacts);
         }
+        self.lesson_context
+            .validate()
+            .map_err(|_| DisplayError::InvalidFacts)?;
+        if self.lesson_context.revision > self.global_revision {
+            return Err(DisplayError::InvalidFacts);
+        }
+        if (class.is_some() || self.lesson_context.observed_at.is_some())
+            && (self.lesson_context.class_id != class
+                || self.lesson_context.identity_revision != self.identity.revision
+                || self.lesson_context.observed_at.is_none())
+        {
+            return Err(DisplayError::InvalidFacts);
+        }
+        if !self.clock_rollback && self.lesson_context.blocked_until.is_none() {
+            let observed = self
+                .lesson_context
+                .observe(&self.identity, &self.schedule, self.captured_at)
+                .map_err(|_| DisplayError::InvalidFacts)?;
+            // Facts cannot mix a new timetable with a stale course or override.
+            // The storage adapter must observe the complete context in its transaction.
+            if observed.current != self.lesson_context.current
+                || observed.active_override != self.lesson_context.active_override
+                || observed.history != self.lesson_context.history
+                || observed.blocked_until != self.lesson_context.blocked_until
+            {
+                return Err(DisplayError::InvalidFacts);
+            }
+        }
         let expected_source = if self.clock_rollback {
             None
         } else if let Some(class) = class {
-            crate::materials::resolve_material_source(
-                &self.identity,
-                &self.schedule,
-                class,
-                self.captured_at,
-            )
-            .map_err(|_| DisplayError::InvalidFacts)?
+            self.lesson_context
+                .material_source(&self.identity, &self.schedule, class, self.captured_at)
+                .map_err(|_| DisplayError::InvalidFacts)?
         } else {
             None
         };
-        // Storage may deliberately withhold a retained source when committed
-        // change timestamps cannot prove the base table preceded lesson end.
-        // A neutral empty result never broadens access; a current course or any
-        // nonempty source must still match the exact schedule/class/teacher.
-        let safely_withheld_recess = self.materials_source.is_none()
-            && self.materials_page.is_none()
-            && expected_source.as_ref().is_some_and(|source| {
-                source.kind == crate::materials::MaterialSourceKind::RetainedBreak
-            });
-        if self.materials_source != expected_source && !safely_withheld_recess {
+        if self.materials_source != expected_source {
             return Err(DisplayError::InvalidFacts);
         }
         if let Some(page) = &self.materials_page {
@@ -444,6 +460,7 @@ mod tests {
             clock_rollback: false,
             identity,
             schedule: ScheduleDocument::default(),
+            lesson_context: Default::default(),
             display: DisplaySettings::default(),
             homework_offset: 0,
             homework_eligible_total: 0,

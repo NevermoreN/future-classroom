@@ -32,6 +32,7 @@ pub enum StorageError {
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
     Material(fc_domain::materials::MaterialError),
+    Lesson(fc_domain::lesson_context::LessonContextError),
     ResourceQuota,
     LoginRateLimited {
         retry_after_millis: u64,

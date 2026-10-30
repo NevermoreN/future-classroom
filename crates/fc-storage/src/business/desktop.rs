@@ -42,6 +42,7 @@ pub(super) struct ReadDesktop<S> {
     pub(super) offset: u64,
     pub(super) material_cursor: Option<fc_domain::materials::MaterialCursor>,
     pub(super) clock: Arc<dyn Clock + Send + Sync>,
+    pub(super) lesson_observations: super::lesson::Observations,
     pub(super) factory: Factory<S>,
 }
 fn record(
@@ -77,7 +78,21 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         let date_watermark = previous.map_or(captured_at.date, |date| date.max(captured_at.date));
         let advances_day = previous != Some(date_watermark);
         let change_confirmation = schedule::confirm_change(d, captured_at)?;
-        let advances = advances_day || change_confirmation.is_some();
+        let schedule_document = schedule::load(d, &identity)?;
+        let (lesson_context, lesson_mutation) = super::lesson::observe_with_floor(
+            d,
+            &identity,
+            &schedule_document,
+            captured_at,
+            super::lesson::witnessed(&self.lesson_observations, captured_at)?
+                .into_iter()
+                .chain(
+                    (captured_at.date < date_watermark)
+                        .then(|| LocalDateTime::new(date_watermark, 0).unwrap()),
+                )
+                .max(),
+        )?;
+        let advances = advances_day || change_confirmation.is_some() || lesson_mutation.is_some();
         let current_revision = d.revision()?;
         let global_revision = if advances {
             current_revision
@@ -91,7 +106,8 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
             captured_at,
             date_watermark,
             clock_rollback: captured_at.date < date_watermark,
-            schedule: schedule::load(d, &identity)?,
+            schedule: schedule_document,
+            lesson_context,
             display: display::load(d, &identity)?,
             identity,
             homework_offset: 0,
@@ -104,6 +120,7 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         if !facts.clock_rollback {
             let (source, page) = materials::desktop_page(
                 d,
+                &facts.lesson_context,
                 &facts.identity,
                 &facts.schedule,
                 captured_at,
@@ -222,12 +239,19 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
         }
         let snapshot = (self.factory)(&facts.identity, global_revision)?;
         let clock = self.clock;
+        let context = facts.lesson_context.clone();
+        let observations = self.lesson_observations;
+        let identity = facts.identity.clone();
+        let schedule = facts.schedule.clone();
         let mut mutations = Vec::new();
         if advances_day {
             mutations.push(Mutation::Put {
                 key: WATERMARK.into(),
                 value: codec::bytes(&json!({"format":1,"date":codec::date(date_watermark)}))?,
             });
+        }
+        if let Some(mutation) = lesson_mutation {
+            mutations.push(mutation);
         }
         if let Some(confirmation) = change_confirmation {
             mutations.push(confirmation);
@@ -236,7 +260,17 @@ impl<S: Send> TransactionTask<S> for ReadDesktop<S> {
             outcome,
             commit: Some((mutations, snapshot)),
             precommit: Some(Box::new(move || {
-                if clock.now().date == captured_at.date {
+                let fresh_now = clock.now();
+                let floor = super::lesson::witnessed(&observations, fresh_now)?;
+                let fresh = context
+                    .observe_with_floor(&identity, &schedule, fresh_now, floor)
+                    .map_err(StorageError::Lesson)?;
+                if fresh_now.date == captured_at.date
+                    && fresh.current == context.current
+                    && fresh.active_override == context.active_override
+                    && fresh.history == context.history
+                    && fresh.blocked_until == context.blocked_until
+                {
                     Ok(())
                 } else {
                     Err(StorageError::Busy)

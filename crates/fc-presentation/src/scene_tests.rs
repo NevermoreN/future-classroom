@@ -150,9 +150,12 @@ fn fixture() -> DesktopFacts {
             updated_at: now(30000),
         })
         .collect();
-    let materials_source =
-        fc_domain::materials::resolve_material_source(&identity, &schedule, class, now(30300))
-            .unwrap();
+    let lesson_context = fc_domain::lesson_context::LessonContextSnapshot::default()
+        .observe(&identity, &schedule, now(30300))
+        .unwrap();
+    let materials_source = lesson_context
+        .material_source(&identity, &schedule, class, now(30300))
+        .unwrap();
     DesktopFacts {
         global_revision: Revision::new(100),
         captured_at: now(30300),
@@ -160,6 +163,7 @@ fn fixture() -> DesktopFacts {
         clock_rollback: false,
         identity,
         schedule,
+        lesson_context,
         display: DisplaySettings::default(),
         homework_offset: 0,
         homework_eligible_total: 2,
@@ -171,6 +175,10 @@ fn fixture() -> DesktopFacts {
 }
 fn scene(facts: &DesktopFacts) -> SceneSnapshot {
     let mut fresh = facts.clone();
+    fresh.lesson_context = fresh
+        .lesson_context
+        .observe(&fresh.identity, &fresh.schedule, fresh.captured_at)
+        .unwrap();
     fresh.materials_source = if fresh.clock_rollback {
         None
     } else {
@@ -180,14 +188,11 @@ fn scene(facts: &DesktopFacts) -> SceneSnapshot {
             .as_ref()
             .and_then(|i| i.current_class)
             .and_then(|class| {
-                fc_domain::materials::resolve_material_source(
-                    &fresh.identity,
-                    &fresh.schedule,
-                    class,
-                    fresh.captured_at,
-                )
-                .ok()
-                .flatten()
+                fresh
+                    .lesson_context
+                    .material_source(&fresh.identity, &fresh.schedule, class, fresh.captured_at)
+                    .ok()
+                    .flatten()
             })
     };
     build_scene(
@@ -619,6 +624,11 @@ fn withheld_recess_history_is_neutral_while_missing_current_source_is_invalid() 
     facts.materials_source = None;
     assert_eq!(facts.validate(), Err(DisplayError::InvalidFacts));
     facts.captured_at = now(8 * 3600 + 45 * 60);
+    facts.lesson_context = Default::default();
+    facts.lesson_context = facts
+        .lesson_context
+        .observe(&facts.identity, &facts.schedule, facts.captured_at)
+        .unwrap();
     facts.validate().unwrap();
     let view = build_scene(
         &facts,
@@ -641,4 +651,192 @@ fn withheld_recess_history_is_neutral_while_missing_current_source_is_invalid() 
         CardContent::MaterialsUnavailable
     ));
     assert!(view.cards.iter().any(|c| c.kind == ComponentKind::Recess));
+}
+
+#[test]
+fn actual_override_switches_capsule_color_teacher_and_recess_source_as_one_scene() {
+    use fc_domain::lesson_context::LessonAction;
+    let mut facts = fixture();
+    let class = ClassId::new(1).unwrap();
+    let english = SubjectId::new(2).unwrap();
+    for command in [
+        IdentityCommand::PutSubject {
+            id: english,
+            name: "英语".into(),
+            enabled: true,
+            color: Rgb {
+                red: 30,
+                green: 80,
+                blue: 220,
+            },
+            expected_revision: None,
+        },
+        IdentityCommand::UpdateAccount {
+            id: id(1),
+            display_name: "管理教师".into(),
+            role: Role::GlobalAdmin,
+            enabled: true,
+            scopes: vec![
+                AssignmentScope {
+                    class_id: class,
+                    subject_id: SubjectId::new(1).unwrap(),
+                },
+                AssignmentScope {
+                    class_id: class,
+                    subject_id: english,
+                },
+            ],
+        },
+    ] {
+        let mut admin = actor();
+        admin.auth_epoch = facts.identity.account(id(1)).unwrap().principal.auth_epoch;
+        facts.identity = facts
+            .identity
+            .transition(&command, Some(&admin), now(30305))
+            .unwrap()
+            .next;
+    }
+    facts.lesson_context = facts
+        .lesson_context
+        .observe(&facts.identity, &facts.schedule, now(30310))
+        .unwrap();
+    let mut admin = actor();
+    admin.auth_epoch = facts.identity.account(id(1)).unwrap().principal.auth_epoch;
+    let key = facts.lesson_context.current.as_ref().unwrap().key.clone();
+    facts.lesson_context = facts
+        .lesson_context
+        .apply(
+            facts.lesson_context.revision,
+            &key,
+            LessonAction::Replace(CourseCell {
+                subject_id: english,
+                teacher: TeacherBinding::Explicit(id(1)),
+            }),
+            OverrideId::new(1).unwrap(),
+            &facts.identity,
+            &admin,
+            now(30315),
+        )
+        .unwrap();
+    facts.captured_at = now(30315);
+    facts.materials_source = facts
+        .lesson_context
+        .material_source(&facts.identity, &facts.schedule, class, facts.captured_at)
+        .unwrap();
+    let view = scene(&facts);
+    let CardContent::Courses(rows) = &view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Schedule)
+        .unwrap()
+        .content
+    else {
+        panic!()
+    };
+    let current = rows.iter().find(|r| r.current).unwrap();
+    assert_eq!(current.subject_id, english);
+    assert_eq!(
+        current.color,
+        soft_subject_color(Rgb {
+            red: 30,
+            green: 80,
+            blue: 220
+        })
+    );
+    assert!(current.temporary && current.name.contains("原数学"));
+    assert!(rows
+        .iter()
+        .filter(|r| !r.current)
+        .all(|r| !r.temporary && r.subject_id.get() == 1));
+    let control = view.lesson_control.as_ref().unwrap();
+    assert!(
+        control.can_change
+            && control.caption.contains("管理教师")
+            && control.caption.contains("仅本节有效")
+    );
+    assert!(view
+        .cards
+        .iter()
+        .all(|c| c.rect.y >= control.rect.y + control.rect.height));
+    assert_eq!(facts.materials_source.as_ref().unwrap().teacher_id, id(1));
+    assert_eq!(facts.materials_source.as_ref().unwrap().subject_id, english);
+
+    let mut restored = facts.clone();
+    restored.lesson_context = restored
+        .lesson_context
+        .apply(
+            restored.lesson_context.revision,
+            &key,
+            LessonAction::Restore,
+            OverrideId::new(2).unwrap(),
+            &restored.identity,
+            &admin,
+            now(30320),
+        )
+        .unwrap();
+    restored.captured_at = now(30320);
+    restored.materials_source = restored
+        .lesson_context
+        .material_source(
+            &restored.identity,
+            &restored.schedule,
+            class,
+            restored.captured_at,
+        )
+        .unwrap();
+    let restored_view = scene(&restored);
+    assert!(!restored_view
+        .lesson_control
+        .as_ref()
+        .unwrap()
+        .caption
+        .contains("临时："));
+    assert_eq!(
+        restored.materials_source.as_ref().unwrap().teacher_id,
+        id(2)
+    );
+
+    facts.captured_at = now(8 * 3600 + 45 * 60);
+    facts.lesson_context = facts
+        .lesson_context
+        .observe(&facts.identity, &facts.schedule, facts.captured_at)
+        .unwrap();
+    facts.materials_source = facts
+        .lesson_context
+        .material_source(&facts.identity, &facts.schedule, class, facts.captured_at)
+        .unwrap();
+    let recess = scene(&facts);
+    assert!(!recess.lesson_control.as_ref().unwrap().can_change);
+    assert!(recess
+        .cards
+        .iter()
+        .any(|c| matches!(c.content, CardContent::Recess { .. })));
+    assert_eq!(
+        facts.materials_source.as_ref().unwrap().kind,
+        fc_domain::materials::MaterialSourceKind::RetainedBreak
+    );
+    assert_eq!(facts.materials_source.as_ref().unwrap().teacher_id, id(1));
+    let CardContent::Courses(rows) = &recess
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Schedule)
+        .unwrap()
+        .content
+    else {
+        panic!()
+    };
+    assert!(rows.iter().all(|r| !r.temporary && r.subject_id.get() == 1));
+
+    facts.captured_at = now(8 * 3600 + 55 * 60);
+    facts.lesson_context = facts
+        .lesson_context
+        .observe(&facts.identity, &facts.schedule, facts.captured_at)
+        .unwrap();
+    facts.materials_source = facts
+        .lesson_context
+        .material_source(&facts.identity, &facts.schedule, class, facts.captured_at)
+        .unwrap();
+    let next = scene(&facts);
+    assert!(next.lesson_control.as_ref().unwrap().can_change);
+    assert_eq!(facts.materials_source.as_ref().unwrap().teacher_id, id(2));
 }

@@ -313,31 +313,33 @@ impl<S: Send> TransactionTask<S> for SaveSchedule<S> {
         let clock = self.clock.clone();
         let session = self.session.clone();
         let request = self.request;
+        let (_, lesson_change) = super::lesson::observe(d, &identity, &next, changed_at)?;
+        let mut mutations = vec![
+            Mutation::Put {
+                key: DOCUMENT.into(),
+                value: outcome.clone(),
+            },
+            Mutation::Put {
+                key: result_key,
+                value: outcome.clone(),
+            },
+            Mutation::Put {
+                key: journal,
+                value: journal_bytes,
+            },
+            Mutation::Put {
+                key: CHANGE.into(),
+                value: codec::bytes(
+                    &json!({"format":1,"at":codec::time(changed_at),"unsettled":true,"observed_at":null}),
+                )?,
+            },
+        ];
+        if let Some(change) = lesson_change {
+            mutations.push(change);
+        }
         Ok(TransactionDecision {
             outcome: outcome.clone(),
-            commit: Some((
-                vec![
-                    Mutation::Put {
-                        key: DOCUMENT.into(),
-                        value: outcome.clone(),
-                    },
-                    Mutation::Put {
-                        key: result_key,
-                        value: outcome,
-                    },
-                    Mutation::Put {
-                        key: journal,
-                        value: journal_bytes,
-                    },
-                    Mutation::Put {
-                        key: CHANGE.into(),
-                        value: codec::bytes(
-                            &json!({"format":1,"at":codec::time(changed_at),"unsettled":true,"observed_at":null}),
-                        )?,
-                    },
-                ],
-                snapshot,
-            )),
+            commit: Some((mutations, snapshot)),
             precommit: Some(Box::new(move || {
                 authorize(&identity, &actor, clock.as_ref(), &session)?;
                 current

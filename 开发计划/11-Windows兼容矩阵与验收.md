@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.19 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.20 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -69,3 +69,11 @@ P5-01/02/03/06/07对Windows 7、Windows 10和Windows 11逐个闭环后才能声�
 原件2GiB与launchcopies200MiB分账、管理20/桌面5项、固定版本/实际哈希、stage到提交同inode与删除回收已接代码和定向测试；副本最后写入后24小时宽限，锁定不强删，主动清理UI尚缺。本轮最终开发package及隔离资料链证据已归档，不提前宣称Win7/10/11正式兼容或创建产品Release；Windows SSH长期测试授权继续保留。
 
 第六轮最终[Win11 x86 296项与资料/90步工作台](验证记录/2026-10-30-windows11-materials-round6.json)、[107构建输入绑定](验证记录/2026-10-30-materials-round6-build-inputs.json)、[Win7GNU PE审计](验证记录/2026-10-30-win7-gnu-round6-imports.json)、[Win7GNU在Win11的相同资料/工作台复测](验证记录/2026-10-30-win7-gnu-materials-on-windows11-final2.json)通过对应局部门槛。错误信息路径引入的RoOriginateErrorW已移除，静态Win7已知风险触发数归零；这依然不是实际Win7/Win10、正式MSVC或完整产品验收。
+
+## 6. 第七轮增量：临时换课与持久实际老师
+
+[Win11现代x86最终回归](验证记录/2026-10-30-windows11-lesson-history-round7.json)305项/15测试exe、98步隐藏工作台及合成资料链通过，原生28项包含在305中。新增独立顶部按钮、有效科目/颜色/资料来源整包与64个持久区间；保持16MiB全部应用DIB预算。Windows7GNU补充构建按同一112输入重新审计/运行，不能视为真实Win7或正式MSVC。
+
+实际Win10/Win7设备仍未连接，PPT/触控/DPI/完整profile布局、教师Web/WinMM、安装与72小时保留原状态。无充分课程历史时中性隐藏，可信基础课程无观测恢复尚未完成。各目标独立取证；SSH服务和长期授权保留。
+
+[第七轮Win7GNU PE审计](验证记录/2026-10-30-win7-gnu-round7-imports.json)零结构错误/零已知风险触发；[该补充EXE在Win11的98步/资料链](验证记录/2026-10-30-win7-gnu-lesson-history-on-windows11-round7.json)通过。它与[现代目标最终305项](验证记录/2026-10-30-windows11-lesson-history-round7.json)共用112输入哈希；补充nightly编译诊断保留，正式MSVC/Win7/Win10仍未验收。

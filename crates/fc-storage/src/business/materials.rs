@@ -378,6 +378,7 @@ fn page(
 }
 pub(super) fn desktop_page(
     d: &dyn TransactionDocuments,
+    context: &fc_domain::lesson_context::LessonContextSnapshot,
     identity: &IdentityState,
     schedule: &ScheduleDocument,
     now: LocalDateTime,
@@ -389,7 +390,9 @@ pub(super) fn desktop_page(
         }
         return Ok((None, None));
     };
-    let source = resolve_source(d, identity, schedule, class, now)?;
+    let source = context
+        .material_source(identity, schedule, class, now)
+        .map_err(StorageError::Material)?;
     let Some(s) = &source else {
         if cursor.is_some() {
             return Err(material_error(MaterialError::StaleCursor));
@@ -422,27 +425,10 @@ pub(super) fn resolve_source(
     schedule: &ScheduleDocument,
     class: ClassId,
     now: LocalDateTime,
+    floor: Option<LocalDateTime>,
 ) -> Result<Option<MaterialSource>, StorageError> {
-    let source = resolve_material_source(identity, schedule, class, now).map_err(material_error)?;
-    if let Some(s) = &source {
-        if s.kind == MaterialSourceKind::RetainedBreak {
-            let Some(proof) = super::schedule::change_proof(d)? else {
-                return Ok(None);
-            };
-            let Some(observed_at) = proof.observed_at else {
-                return Ok(None);
-            };
-            let end = LocalDateTime::new(
-                s.lesson.actual_date,
-                u32::from(s.lesson.range.end.get()) * 60,
-            )
-            .map_err(|_| StorageError::Database)?;
-            if now < observed_at || observed_at >= end {
-                return Ok(None);
-            }
-        }
-    }
-    Ok(source)
+    let (context, _) = super::lesson::observe_with_floor(d, identity, schedule, now, floor)?;
+    super::lesson::source(&context, identity, schedule, class, now)
 }
 impl<S: Send + 'static> MaterialRepository for BusinessRepository<S> {
     fn materials(
@@ -493,7 +479,9 @@ impl<S: Send + 'static> MaterialRepository for BusinessRepository<S> {
         resource_version: ResourceVersionId,
         _clock: &dyn Clock,
     ) -> Result<MaterialRecord, MaterialRepositoryError> {
-        let bytes = self
+        self.observe_lesson()
+            .map_err(|_| MaterialRepositoryError::Unavailable)?;
+        let result = self
             .handle
             .try_transaction(PublishedTask {
                 source: source.clone(),
@@ -502,10 +490,19 @@ impl<S: Send + 'static> MaterialRepository for BusinessRepository<S> {
                 resource_version,
                 clock: self.clock.clone(),
                 scene: self.material_scene.clone(),
+                observations: self.lesson_observations.clone(),
             })
-            .map_err(repository_error)?
-            .wait()
-            .map_err(repository_error)?;
+            .and_then(|ticket| ticket.wait());
+        if matches!(
+            &result,
+            Err(StorageError::Busy
+                | StorageError::Lesson(_)
+                | StorageError::Material(fc_domain::materials::MaterialError::InvalidContext))
+        ) {
+            self.observe_lesson()
+                .map_err(|_| MaterialRepositoryError::Unavailable)?;
+        }
+        let bytes = result.map_err(repository_error)?;
         dto::read_record(&codec::value(&bytes).map_err(repository_error)?).map_err(repository_error)
     }
 }
@@ -864,6 +861,7 @@ struct PublishedTask {
     resource_version: ResourceVersionId,
     clock: Arc<dyn Clock + Send + Sync>,
     scene: MaterialSceneGuard,
+    observations: super::lesson::Observations,
 }
 impl<S> TransactionTask<S> for PublishedTask {
     fn allocation_bytes(&self) -> usize {
@@ -886,7 +884,15 @@ impl<S> TransactionTask<S> for PublishedTask {
                 .as_ref()
                 .and_then(|i| i.current_class)
                 .ok_or(material_error(MaterialError::InvalidContext))?;
-            if resolve_source(d, &identity, &schedule, class, now)? != Some(self.source.clone()) {
+            if resolve_source(
+                d,
+                &identity,
+                &schedule,
+                class,
+                now,
+                super::lesson::witnessed(&self.observations, now)?,
+            )? != Some(self.source.clone())
+            {
                 return Err(material_error(MaterialError::InvalidContext));
             }
             Ok(())

@@ -397,6 +397,7 @@ pub enum MaterialSourceKind {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum MaterialSourceEvidence {
     BaseTimetableOnly,
+    PersistedLesson { revision: Revision },
 }
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct MaterialSource {
@@ -418,6 +419,40 @@ pub fn resolve_material_source(
     schedule
         .validate(identity)
         .map_err(|_| MaterialError::InvalidContext)?;
+    let selected = resolve_material_lesson(schedule, class, now)?;
+    let Some((kind, lesson, cell)) = selected else {
+        return Ok(None);
+    };
+    let teacher = match cell.teacher {
+        TeacherBinding::Explicit(id) => Some(id),
+        TeacherBinding::Default => None,
+        TeacherBinding::Unassigned => return Ok(None),
+    };
+    let teacher_id = identity
+        .resolve_teacher(class, cell.subject_id, teacher)
+        .map_err(|_| MaterialError::InvalidScope)?;
+    Ok(Some(MaterialSource {
+        kind,
+        lesson,
+        subject_id: cell.subject_id,
+        teacher_id,
+        evidence: MaterialSourceEvidence::BaseTimetableOnly,
+    }))
+}
+/// Select the physical lesson independently of a default/explicit teacher. A
+/// persisted override may be assigned even when its original cell was unassigned.
+pub fn resolve_material_lesson(
+    schedule: &ScheduleDocument,
+    class: ClassId,
+    now: LocalDateTime,
+) -> Result<
+    Option<(
+        MaterialSourceKind,
+        LessonInstanceKey,
+        crate::schedule::CourseCell,
+    )>,
+    MaterialError,
+> {
     let day = schedule
         .resolve_day(class, now.date)
         .map_err(|_| MaterialError::InvalidContext)?;
@@ -470,24 +505,7 @@ pub fn resolve_material_source(
         }
         _ => None,
     };
-    let Some((kind, lesson, cell)) = selected else {
-        return Ok(None);
-    };
-    let teacher = match cell.teacher {
-        TeacherBinding::Explicit(id) => Some(id),
-        TeacherBinding::Default => None,
-        TeacherBinding::Unassigned => return Ok(None),
-    };
-    let teacher_id = identity
-        .resolve_teacher(class, cell.subject_id, teacher)
-        .map_err(|_| MaterialError::InvalidScope)?;
-    Ok(Some(MaterialSource {
-        kind,
-        lesson,
-        subject_id: cell.subject_id,
-        teacher_id,
-        evidence: MaterialSourceEvidence::BaseTimetableOnly,
-    }))
+    Ok(selected)
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MaterialCursor {

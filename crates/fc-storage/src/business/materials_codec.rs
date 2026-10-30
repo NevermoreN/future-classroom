@@ -98,11 +98,11 @@ pub(super) fn read_record(v: &Value) -> Result<MaterialRecord, StorageError> {
     r.validate().map_err(|_| StorageError::Database)?;
     Ok(r)
 }
-fn lesson(k: &LessonInstanceKey) -> Value {
+pub(super) fn lesson(k: &LessonInstanceKey) -> Value {
     let v = &k.version;
     json!({"date":date(k.actual_date),"class":k.class_id.get(),"begin":k.range.begin.get(),"end":k.range.end.get(),"version":{"actual_semester":v.actual_semester_id.get(),"actual_revision":v.actual_revision.get(),"source_semester":v.source_semester_id.get(),"source_revision":v.source_revision.get(),"mode":match v.calendar_mode{CalendarMode::School=>"school",CalendarMode::Public=>"public"},"mode_revision":v.calendar_mode_revision.get(),"applied_revision":v.applied_calendar_revision.get(),"mapping_revision":v.makeup_mapping_revision.get(),"table":v.source_table_id.get(),"row":v.source_row_id.get(),"rules_revision":v.rules_revision.get()}})
 }
-fn read_lesson(v: &Value) -> Result<LessonInstanceKey, StorageError> {
+pub(super) fn read_lesson(v: &Value) -> Result<LessonInstanceKey, StorageError> {
     object_fields(v, &["date", "class", "begin", "end", "version"])?;
     let s = &v["version"];
     object_fields(
@@ -150,13 +150,18 @@ fn read_lesson(v: &Value) -> Result<LessonInstanceKey, StorageError> {
     })
 }
 pub(super) fn source(s: &MaterialSource) -> Value {
-    json!({"kind":match s.kind{MaterialSourceKind::CurrentLesson=>"current",MaterialSourceKind::RetainedBreak=>"break"},"lesson":lesson(&s.lesson),"subject":s.subject_id.get(),"teacher":s.teacher_id.get(),"evidence":"base_timetable_only"})
+    json!({"kind":match s.kind{MaterialSourceKind::CurrentLesson=>"current",MaterialSourceKind::RetainedBreak=>"break"},"lesson":lesson(&s.lesson),"subject":s.subject_id.get(),"teacher":s.teacher_id.get(),"evidence":match s.evidence{MaterialSourceEvidence::BaseTimetableOnly=>json!("base_timetable_only"),MaterialSourceEvidence::PersistedLesson{revision}=>json!({"lesson_revision":revision.get()})}})
 }
 pub(super) fn read_source(v: &Value) -> Result<MaterialSource, StorageError> {
     object_fields(v, &["kind", "lesson", "subject", "teacher", "evidence"])?;
-    if v["evidence"].as_str() != Some("base_timetable_only") {
-        return Err(StorageError::Database);
-    }
+    let evidence = if v["evidence"].as_str() == Some("base_timetable_only") {
+        MaterialSourceEvidence::BaseTimetableOnly
+    } else {
+        object_fields(&v["evidence"], &["lesson_revision"])?;
+        MaterialSourceEvidence::PersistedLesson {
+            revision: Revision::new(number(&v["evidence"], "lesson_revision")?),
+        }
+    };
     Ok(MaterialSource {
         kind: match v["kind"].as_str() {
             Some("current") => MaterialSourceKind::CurrentLesson,
@@ -166,7 +171,7 @@ pub(super) fn read_source(v: &Value) -> Result<MaterialSource, StorageError> {
         lesson: read_lesson(&v["lesson"])?,
         subject_id: id(v, "subject", SubjectId::new)?,
         teacher_id: id(v, "teacher", PrincipalId::new)?,
-        evidence: MaterialSourceEvidence::BaseTimetableOnly,
+        evidence,
     })
 }
 pub(super) fn cursor(c: &MaterialCursor) -> Value {
