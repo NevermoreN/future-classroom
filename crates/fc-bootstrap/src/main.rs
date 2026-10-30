@@ -29,6 +29,30 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, port, marker, seconds] if flag == "--http-iocp-probe" => {
+            #[cfg(windows)]
+            {
+                let port = port
+                    .parse::<u16>()
+                    .map_err(|_| "invalid isolated HTTP port")?;
+                let seconds = seconds
+                    .parse::<u32>()
+                    .map_err(|_| "invalid HTTP probe deadline")?;
+                let prefix = fc_ports::http::ListenPrefix::isolated_loopback(port, marker)
+                    .map_err(|_| "invalid isolated HTTP prefix")?;
+                let reports = fc_windows::http::serve_isolated_twice(prefix, seconds)
+                    .map_err(|e| format!("HTTP_IOCP_FAIL {e:?}"))?;
+                for report in reports {
+                    println!("HTTP_IOCP_PASS {}", report.to_json());
+                }
+                Ok(())
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (port, marker, seconds);
+                Err("HTTP.sys probe requires Windows".into())
+            }
+        }
         [flag, path] if flag == "--material-open-probe-receiver" => {
             #[cfg(windows)]
             {

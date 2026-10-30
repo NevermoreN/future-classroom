@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Round9 owned build/test residue only; source/evidence/dev ZIP/toolchains and persistent SSH authorization retained",
+  "removedBuildBytes": 5157428657,
+  "targetDirectoryAbsent": true,
+  "pythonCacheAbsent": true,
+  "temporaryItemsRemoved": [
+    "fc-round9-architecture.log",
+    "fc-round9-final-notice-audit.json",
+    "fc-round9-final-remote-audit.json",
+    "fc-round9-format.log",
+    "fc-round9-host-final-clippy.log",
+    "fc-round9-hostStrictClippy.log",
+    "fc-round9-hostTests.log",
+    "fc-round9-http-exitcode-fixture.json",
+    "fc-round9-http-probe.log",
+    "fc-round9-http-serialization-fixture.json",
+    "fc-round9-metadata.json",
+    "fc-round9-notices-current.json",
+    "fc-round9-notices-restored.json",
+    "fc-round9-notices.json",
+    "fc-round9-selfCheck.log",
+    "fc-round9-verify.py",
+    "fc-round9-win7-build.log",
+    "fc-round9-win7-http-probe.log",
+    "fc-round9-win7-probe.log",
+    "fc-round9-windows-build.log",
+    "fc-round9-windows-clippy.log",
+    "fc-round9-windows-final-source.json",
+    "fc-round9-windows-http-trace-build.log",
+    "fc-round9-windows-probe.log",
+    "fc-round9-windows-tests-build.log",
+    "fc-round9-windows-tests.jsonl"
+  ],
+  "temporaryPrefixAbsent": true,
+  "windows": {
+    "sshd": "Running",
+    "tasks": [],
+    "processes": [],
+    "identity": "Eliora\\Elior",
+    "roots": [],
+    "persistentPrivateKeyExists": true,
+    "persistentPrivateKeyMode": "0o600"
+  },
+  "finalRemoteRuns": [
+    {
+      "report": "2026-10-30-windows11-runtime-http-round9.json",
+      "cleanup": "PASS"
+    },
+    {
+      "report": "2026-10-30-win7-gnu-runtime-http-on-windows11-round9.json",
+      "cleanup": "PASS"
+    },
+    {
+      "report": "2026-10-30-windows11-http-iocp-round9.json",
+      "cleanup": "PASS"
+    },
+    {
+      "report": "2026-10-30-win7-gnu-http-iocp-on-windows11-round9.json",
+      "cleanup": "PASS"
+    }
+  ],
+  "httpUrlReservations": "Final two HTTP harnesses report urlAclAfter ABSENT; only owned temporary URLACL removed; no TLS/firewall/global HTTP configuration changed",
+  "sourceTreeSha256": "259f68cb5304b0ab5570101ff241f66618c109e3536df411b38aff42df76de2a",
+  "releaseOrTagCreated": false
+}

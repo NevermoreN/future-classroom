@@ -123,19 +123,54 @@ enum Operation {
         expected: Revision,
     },
 }
+impl Operation {
+    fn positive(&self) -> bool {
+        matches!(
+            self,
+            Self::Reserve { .. }
+                | Self::Publish { .. }
+                | Self::Submit { .. }
+                | Self::Driver(VoiceDriverUpdate {
+                    action: VoiceDriverAction::Start
+                        | VoiceDriverAction::FirstWrite
+                        | VoiceDriverAction::NaturalComplete,
+                    ..
+                })
+                | Self::SetEnabled { enabled: true, .. }
+        )
+    }
+}
 impl<S: Send + 'static> BusinessRepository<S> {
     fn voice_operation(&self, op: Operation) -> Result<Value, VoiceRepositoryError> {
-        let bytes = self
+        let active =
+            self.voice_timeout
+                .as_ref()
+                .filter(|_| op.positive())
+                .map(|(timeout, generation)| {
+                    let deadline = std::time::Instant::now().checked_add(*timeout);
+                    let generation = generation.clone();
+                    Arc::new(move || {
+                        deadline.is_some_and(|d| std::time::Instant::now() < d) && generation()
+                    }) as Arc<dyn Fn() -> bool + Send + Sync>
+                });
+        if active.as_ref().is_some_and(|check| !check()) {
+            return Err(VoiceRepositoryError::Faulted);
+        }
+        let ticket = self
             .handle
             .try_transaction(VoiceTask {
                 op,
                 clock: self.clock.clone(),
                 session: self.session.clone(),
                 factory: self.factory.clone(),
+                active,
             })
-            .map_err(error)?
-            .wait()
             .map_err(error)?;
+        let bytes = match &self.voice_timeout {
+            Some((timeout, _)) => ticket.wait_timeout(*timeout),
+            None => ticket.wait(),
+        }
+        .map_err(error)?;
         codec::value(&bytes).map_err(error)
     }
     /// Trusted executor only. Start and FirstWrite recheck the original exact
@@ -254,6 +289,7 @@ struct VoiceTask<S> {
     clock: Arc<dyn Clock + Send + Sync>,
     session: SessionGuard,
     factory: Factory<S>,
+    active: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
 }
 /// Fixed-size per-account limiter persists independently of reclaimable bodies.
 /// Installation account bounds cap this table at MAX_ACCOUNTS documents.
@@ -389,6 +425,9 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
         self: Box<Self>,
         d: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError> {
+        if self.active.as_ref().is_some_and(|check| !check()) {
+            return Err(StorageError::Indeterminate);
+        }
         let identity = load_identity(d)?;
         startup_check(d, &identity)?;
         let mut s = load(d)?;
@@ -739,6 +778,16 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 Ok(())
             }) as Box<dyn FnOnce() -> Result<(), StorageError> + Send>
         });
+        let precommit = match self.active {
+            Some(active) => Some(Box::new(move || {
+                if !active() {
+                    return Err(StorageError::Indeterminate);
+                }
+                precommit.map_or(Ok(()), |check| check())
+            })
+                as Box<dyn FnOnce() -> Result<(), StorageError> + Send>),
+            None => precommit,
+        };
         let outcome = if snapshot_outcome {
             dto::snapshot(&s)
         } else {

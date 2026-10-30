@@ -66,6 +66,7 @@ pub struct BusinessRepository<S> {
     session: SessionGuard,
     material_scene: MaterialSceneGuard,
     lesson_observations: lesson::Observations,
+    voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
 }
 impl<S> Clone for BusinessRepository<S> {
     fn clone(&self) -> Self {
@@ -76,6 +77,7 @@ impl<S> Clone for BusinessRepository<S> {
             session: self.session.clone(),
             material_scene: self.material_scene.clone(),
             lesson_observations: self.lesson_observations.clone(),
+            voice_timeout: self.voice_timeout.clone(),
         }
     }
 }
@@ -92,6 +94,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
             session: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
             material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
             lesson_observations: Arc::new(std::sync::Mutex::new(None)),
+            voice_timeout: None,
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
@@ -101,6 +104,17 @@ impl<S: Send + 'static> BusinessRepository<S> {
     }
     pub fn with_material_scene_guard(mut self, guard: MaterialSceneGuard) -> Self {
         self.material_scene = guard;
+        self
+    }
+    /// Audio-domain clone only. Positive voice effects require the captured
+    /// runtime generation through COMMIT. Cleanup can still settle old tokens
+    /// after invalidation, and every operation has a bounded caller wait.
+    pub fn with_voice_timeout(
+        mut self,
+        timeout: std::time::Duration,
+        active: Arc<dyn Fn() -> bool + Send + Sync>,
+    ) -> Self {
+        self.voice_timeout = Some((timeout, active));
         self
     }
     pub fn load_identity(&self) -> Result<IdentityState, StorageError> {

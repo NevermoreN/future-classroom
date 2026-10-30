@@ -583,7 +583,7 @@ pub(super) fn run() -> Check<()> {
             .handle();
         let clock = Arc::new(CurrentClock::new());
         let (backend, control) = match product(&handle, Work::Open(root.clone(), clock.clone()))? {
-            Outcome::Opened(backend, control, _) => (backend, control),
+            Outcome::Opened(backend, control, _, _) => (backend, control),
             _ => return Err("materials-probe: open result".into()),
         };
         harness.backend = Some(backend.clone());
@@ -806,7 +806,7 @@ pub(super) fn run() -> Check<()> {
         product(&handle, Work::Shutdown(session.backend.clone()))?;
         harness.backend = None;
         let restored = match product(&handle, Work::Open(root.clone(), clock))? {
-            Outcome::Opened(backend, control, _) => {
+            Outcome::Opened(backend, control, _, _) => {
                 session.backend = backend.clone();
                 session.control = control;
                 backend

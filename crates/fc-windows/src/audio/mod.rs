@@ -1,9 +1,11 @@
 //! WinMM single-stream output. All calls belong to the existing audio domain.
 //! The driver owns submitted pointers until DONE and successful UnprepareHeader.
 //! No callback function, extra thread, volume change, input device, or whole-file Vec.
+pub mod device;
 use crate::materials::files::LockedFile;
 use fc_ports::audio::{
-    AudioOutputError as Error, AudioOutputPort, AudioOutputProgress as Progress,
+    AudioAuthorization as Authorization, AudioOutputError as Error, AudioOutputPort,
+    AudioOutputProgress as Progress,
 };
 use std::{
     cell::UnsafeCell,
@@ -296,6 +298,8 @@ struct Stream<D: Driver> {
     natural: bool,
     closed: bool,
     failure: Option<u32>,
+    ready: Option<(usize, usize)>,
+    started: bool,
 }
 impl<D: Driver> Stream<D> {
     fn cancel(&mut self) {
@@ -311,18 +315,28 @@ impl<D: Driver> Stream<D> {
             }
         }
     }
-    fn fill(&mut self, authorize: &mut dyn FnMut() -> bool, maximum: usize) -> Result<(), Error> {
+    fn fill(
+        &mut self,
+        authorize: &mut dyn FnMut() -> Authorization,
+        maximum: usize,
+    ) -> Result<(), Error> {
         let mut submitted = 0;
-        for buffer in &mut self.buffers {
-            if self.remaining == 0 {
-                break;
+        while self.remaining > 0 && submitted < maximum {
+            if self.ready.is_none() {
+                authorized(authorize())?;
+                let Some(index) = self.buffers.iter().position(|b| {
+                    matches!(b.state, BufferState::Allocated | BufferState::Returned)
+                }) else {
+                    break;
+                };
+                let length = BUFFER_BYTES.min(self.remaining);
+                self.buffers[index].fill(self.source.as_mut(), length)?;
+                self.ready = Some((index, length));
             }
-            if !matches!(buffer.state, BufferState::Allocated | BufferState::Returned) {
-                continue;
-            }
-            let length = BUFFER_BYTES.min(self.remaining);
-            buffer.fill(self.source.as_mut(), length)?;
+            let (index, length) = self.ready.expect("one owned ready block");
+            let buffer = &mut self.buffers[index];
             if buffer.state == BufferState::Allocated {
+                authorized(authorize())?;
                 let code = self.driver.prepare(buffer.header());
                 if code != 0 {
                     self.driver.poison();
@@ -332,9 +346,7 @@ impl<D: Driver> Stream<D> {
             }
             // Reusing a prepared header may shorten dwBufferLength but never exceed
             // its original prepared capacity. Every first write/repeat rechecks authority.
-            if !authorize() {
-                return Err(Error::Unauthorized);
-            }
+            authorized(authorize())?;
             let code = self.driver.write(buffer.header());
             if code != 0 {
                 self.driver.poison();
@@ -342,10 +354,8 @@ impl<D: Driver> Stream<D> {
             }
             buffer.state = BufferState::Queued;
             self.remaining -= length;
+            self.ready = None;
             submitted += 1;
-            if submitted == maximum {
-                break;
-            }
         }
         Ok(())
     }
@@ -407,6 +417,13 @@ impl<D: Driver> Stream<D> {
         }
     }
 }
+fn authorized(decision: Authorization) -> Result<(), Error> {
+    match decision {
+        Authorization::Authorized => Ok(()),
+        Authorization::Deferred => Err(Error::Deferred),
+        Authorization::Revoked => Err(Error::Unauthorized),
+    }
+}
 impl<D: Driver> Drop for Stream<D> {
     fn drop(&mut self) {
         // Engine removes only closed streams normally. This fallback applies during
@@ -417,12 +434,19 @@ impl<D: Driver> Drop for Stream<D> {
 }
 struct Engine<D: Driver> {
     stream: Option<Stream<D>>,
+    pending: Option<Pending>,
     poisoned: bool,
+}
+struct Pending {
+    source: Box<dyn Read>,
+    bytes: usize,
+    generation: u64,
 }
 impl<D: Driver> Engine<D> {
     fn new() -> Self {
         Self {
             stream: None,
+            pending: None,
             poisoned: false,
         }
     }
@@ -431,20 +455,36 @@ impl<D: Driver> Engine<D> {
         source: Box<dyn Read>,
         bytes: usize,
         generation: u64,
-        authorize: &mut dyn FnMut() -> bool,
+        authorize: &mut dyn FnMut() -> Authorization,
     ) -> Result<(), Error> {
         if self.poisoned {
             return Err(Error::CleanupPending);
         }
-        if self.stream.is_some() {
+        if self.stream.is_some() || self.pending.is_some() {
             return Err(Error::Busy);
         }
         if generation == 0 || bytes == 0 {
             return Err(Error::InvalidSource);
         }
-        if !authorize() {
-            return Err(Error::Unauthorized);
+        self.pending = Some(Pending {
+            source,
+            bytes,
+            generation,
+        });
+        self.activate(authorize)
+    }
+    fn activate(&mut self, authorize: &mut dyn FnMut() -> Authorization) -> Result<(), Error> {
+        if let Err(error) = authorized(authorize()) {
+            if error != Error::Deferred {
+                self.pending = None;
+            }
+            return Err(error);
         }
+        let Pending {
+            source,
+            bytes,
+            generation,
+        } = self.pending.take().expect("owned pending source");
         self.stream = Some(Stream {
             driver: D::open()?,
             buffers: std::array::from_fn(|_| Buffer::new()),
@@ -456,24 +496,38 @@ impl<D: Driver> Engine<D> {
             natural: false,
             closed: false,
             failure: None,
+            ready: None,
+            started: false,
         });
         let stream = self.stream.as_mut().expect("just initialized");
         // Return immediately after the first successful Write. No later fallible
         // operation can turn this successful native start into an ambiguous Err;
         // application can durably record FirstWrite before polling/feeding the rest.
         if let Err(error) = stream.fill(authorize, 1) {
+            if error == Error::Deferred {
+                return Err(error);
+            }
             stream.cancel();
             self.poisoned |=
                 stream.failure.is_some() || matches!(error, Error::Driver(_) | Error::Io);
             return Err(error);
         }
+        stream.started = true;
         Ok(())
     }
     fn poll(
         &mut self,
         wait_ms: u32,
-        authorize: &mut dyn FnMut() -> bool,
+        authorize: &mut dyn FnMut() -> Authorization,
     ) -> Result<Progress, Error> {
+        if let Some(pending) = self.pending.as_ref() {
+            let generation = pending.generation;
+            return match self.activate(authorize) {
+                Ok(()) => Ok(Progress::FirstWrite { generation }),
+                Err(Error::Deferred) => Ok(Progress::Deferred { generation }),
+                Err(error) => Err(error),
+            };
+        }
         let Some(stream) = self.stream.as_mut() else {
             return Ok(Progress::Idle);
         };
@@ -485,22 +539,41 @@ impl<D: Driver> Engine<D> {
         }
         stream.returns();
         if stream.cleaning.is_none() {
-            if !authorize() {
-                stream.cancel();
-            } else {
-                if let Err(error) = stream.fill(authorize, BUFFER_COUNT) {
-                    self.poisoned |= matches!(error, Error::Driver(_) | Error::Io);
-                    stream.cancel();
-                    return Err(error);
+            match authorize() {
+                Authorization::Deferred => {
+                    return Ok(Progress::Deferred {
+                        generation: stream.generation,
+                    })
                 }
-                if stream.remaining == 0
-                    && stream
-                        .buffers
-                        .iter()
-                        .all(|b| b.state != BufferState::Queued)
-                {
-                    stream.natural = true;
-                    stream.cleaning = Some(Instant::now());
+                Authorization::Revoked => stream.cancel(),
+                Authorization::Authorized => {
+                    if let Err(error) =
+                        stream.fill(authorize, if stream.started { BUFFER_COUNT } else { 1 })
+                    {
+                        if error == Error::Deferred {
+                            return Ok(Progress::Deferred {
+                                generation: stream.generation,
+                            });
+                        }
+                        self.poisoned |= matches!(error, Error::Driver(_) | Error::Io);
+                        stream.cancel();
+                        return Err(error);
+                    }
+                    if !stream.started {
+                        stream.started = true;
+                        return Ok(Progress::FirstWrite {
+                            generation: stream.generation,
+                        });
+                    }
+                    if stream.remaining == 0
+                        && stream
+                            .buffers
+                            .iter()
+                            .all(|b| b.state != BufferState::Queued)
+                    {
+                        stream.natural = true;
+                        stream.cleaning = Some(Instant::now());
+                    }
                 }
             }
         }
@@ -522,6 +595,13 @@ impl<D: Driver> Engine<D> {
         failure.map_or(Ok(progress), |code| Err(Error::Driver(code)))
     }
     fn stop(&mut self, generation: u64) -> Result<Progress, Error> {
+        if let Some(pending) = self.pending.as_ref() {
+            if pending.generation != generation {
+                return Err(Error::Unauthorized);
+            }
+            self.pending = None;
+            return Ok(Progress::Released { generation });
+        }
         let Some(stream) = self.stream.as_mut() else {
             return Ok(Progress::Idle);
         };
@@ -579,12 +659,16 @@ impl AudioOutputPort for WinMmAudioOutput {
         &mut self,
         source: VerifiedWave,
         generation: u64,
-        auth: &mut dyn FnMut() -> bool,
+        auth: &mut dyn FnMut() -> Authorization,
     ) -> Result<(), Error> {
         let bytes = source.bytes as usize;
         self.engine.start(Box::new(source), bytes, generation, auth)
     }
-    fn poll(&mut self, wait_ms: u32, auth: &mut dyn FnMut() -> bool) -> Result<Progress, Error> {
+    fn poll(
+        &mut self,
+        wait_ms: u32,
+        auth: &mut dyn FnMut() -> Authorization,
+    ) -> Result<Progress, Error> {
         self.engine.poll(wait_ms, auth)
     }
     fn stop(&mut self, generation: u64) -> Result<Progress, Error> {

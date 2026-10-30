@@ -11,7 +11,8 @@ mod lesson_editor;
 mod materials_editor;
 mod schedule_editor;
 use fc_application::identity::SessionLease;
-use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl};
+use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl, VoiceService};
+use fc_bootstrap::voice_runtime::{NativeFactory, RuntimePhase, StopReason, VoiceRuntime};
 use fc_domain::desktop::{DesktopFacts, DisplaySettings};
 use fc_domain::materials::{MaterialCursor, MaterialPage};
 use fc_domain::schedule_document::ScheduleDocument;
@@ -32,7 +33,10 @@ use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
-    sync::{Arc, Mutex, OnceLock},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex, OnceLock,
+    },
     time::{Duration, Instant},
 };
 
@@ -279,7 +283,13 @@ fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
 }
 
 enum Outcome {
-    Opened(Arc<Mutex<Backend>>, SessionControl, IdentityState),
+    Opened(
+        Arc<Mutex<Backend>>,
+        SessionControl,
+        IdentityState,
+        VoiceService,
+    ),
+    ExitAuthorized,
     Updated {
         state: IdentityState,
         lease: Option<SessionLease>,
@@ -319,7 +329,7 @@ enum Work {
     Open(PathBuf, Arc<CurrentClock>),
     Request(Request),
     Refresh(Arc<Mutex<Backend>>),
-    MaintainVoice(PathBuf, Arc<Mutex<Backend>>),
+    MaintainVoice(PathBuf, VoiceService),
     Shutdown(Arc<Mutex<Backend>>),
     ValidateOffice(PathBuf),
     LoadSchedule(Arc<Mutex<Backend>>, SessionLease),
@@ -400,10 +410,16 @@ impl Task for Work {
                         .lock()
                         .map_err(|_| Failure::Stopped)?
                         .session_control();
-                    Ok((state, control))
+                    let voice = backend
+                        .lock()
+                        .map_err(|_| Failure::Stopped)?
+                        .voice_service();
+                    Ok((state, control, voice))
                 })();
                 match opened {
-                    Ok((state, control)) => Ok(Outcome::Opened(backend, control, state)),
+                    Ok((state, control, voice)) => {
+                        Ok(Outcome::Opened(backend, control, state, voice))
+                    }
                     Err(error) => {
                         // The UI has not received this writer yet. Every failed
                         // startup path closes/joins it on this worker before the
@@ -417,10 +433,9 @@ impl Task for Work {
                     }
                 }
             }
-            Self::MaintainVoice(root, backend) => {
-                let mut backend = backend.try_lock().map_err(|_| Failure::Stopped)?;
+            Self::MaintainVoice(root, service) => {
                 fc_bootstrap::voice_files::ControlledVoiceFiles::new(&root)
-                    .and_then(|files| files.reconcile(&mut backend))
+                    .and_then(|files| files.reconcile_service(&service))
                     .map_err(|_| invalid("声音数据维护未完成。"))?;
                 context.checkpoint().map_err(|_| Failure::Stopped)?;
                 Ok(Outcome::MaterialCleaned)
@@ -765,8 +780,8 @@ fn execute(mut r: Request) -> Result<Outcome> {
             )?;
         }
         (_, EXIT) => {
-            backend.close_authorized(require_lease()?)?;
-            return Ok(Outcome::Closed);
+            backend.authorize_exit(require_lease()?)?;
+            return Ok(Outcome::ExitAuthorized);
         }
         _ => return Err(invalid("此操作在当前页面不可用。")),
     }
@@ -819,6 +834,11 @@ struct App {
     clock: Arc<CurrentClock>,
     backend: Option<Arc<Mutex<Backend>>>,
     control: Option<SessionControl>,
+    voice_service: Option<VoiceService>,
+    audio: Option<VoiceRuntime>,
+    audio_slot: Arc<OnceLock<VoiceRuntime>>,
+    audio_suspended: Arc<AtomicBool>,
+    next_audio_availability: Instant,
     state: Arc<IdentityState>,
     lease: Option<SessionLease>,
     screen: Screen,
@@ -1192,6 +1212,9 @@ impl App {
             return;
         }
         self.stopping = true;
+        if let Some(audio) = &self.audio {
+            audio.shutdown();
+        }
         self.desktop.stop();
         self.shell.stop();
         self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
@@ -1201,6 +1224,15 @@ impl App {
     }
     fn schedule_shutdown(&mut self) {
         if self.shutdown.is_some() {
+            return;
+        }
+        // Audio settles its old driver tokens while the unique writer remains
+        // alive. The UI only polls; it never waits for native drain or a thread.
+        if self.audio.as_ref().is_some_and(|audio| {
+            audio.status().map_or(true, |s| {
+                s.phase != RuntimePhase::Closed || s.physical_thread_running
+            })
+        }) {
             return;
         }
         if let Some(backend) = &self.backend {
@@ -1879,6 +1911,26 @@ impl App {
         self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
+        if let Some(audio) = &self.audio {
+            if audio.reap_nonblocking().is_err() && !self.stopping {
+                self.terminate_required = true;
+                self.begin_shutdown();
+            }
+        }
+        if !self.stopping && Instant::now() >= self.next_audio_availability {
+            self.next_audio_availability = Instant::now() + Duration::from_secs(1);
+            if let Some(audio) = &self.audio {
+                let available = !self.audio_suspended.load(Ordering::Acquire)
+                    && fc_windows::host::interactive_session_available();
+                if audio.set_available(available).is_err() {
+                    self.terminate_required = true;
+                    self.begin_shutdown();
+                }
+            }
+        }
+        if self.stopping {
+            self.schedule_shutdown();
+        }
         if let Some(ticket) = self.voice_maintenance.as_mut() {
             match ticket.try_result() {
                 Ok(None) => {}
@@ -1907,9 +1959,9 @@ impl App {
             && Instant::now() >= self.next_voice_maintenance
             && self.state.installation.is_some()
         {
-            if let Some(backend) = &self.backend {
+            if let Some(service) = &self.voice_service {
                 if let Ok(ticket) = self.pool.handle().try_submit(
-                    Work::MaintainVoice(self.root.clone(), backend.clone()),
+                    Work::MaintainVoice(self.root.clone(), service.clone()),
                     Instant::now() + Duration::from_secs(5),
                 ) {
                     self.voice_maintenance = Some(ticket);
@@ -1988,8 +2040,22 @@ impl App {
                 return Ok(());
             }
             match outcome {
-                Ok(Outcome::Opened(backend, control, state)) => {
+                Ok(Outcome::Opened(backend, control, state, voice)) => {
                     self.backend = Some(backend);
+                    let audio = VoiceRuntime::new(Arc::new(NativeFactory::new(
+                        voice.clone(),
+                        self.root.clone(),
+                        self.clock.clone(),
+                    )));
+                    voice
+                        .set_waker(audio.weak_waker())
+                        .map_err(|_| "无法绑定声音执行域".to_owned())?;
+                    let _ = self.audio_slot.set(audio.clone());
+                    if self.stopping {
+                        audio.shutdown();
+                    }
+                    self.audio = Some(audio);
+                    self.voice_service = Some(voice);
                     let _ = self.control_slot.set(control.clone());
                     self.control = Some(control);
                     self.state = Arc::new(state);
@@ -2093,15 +2159,8 @@ impl App {
                     }
                     self.status = "桌面显示设置已保存，关闭工作台后在系统桌面生效。".into();
                 }
-                Ok(Outcome::Closed) => {
-                    self.stopping = true;
-                    self.desktop.stop();
-                    self.shell.stop();
-                    self.shutdown_deadline
-                        .get_or_insert(Instant::now() + Duration::from_secs(5));
-                    self.pool.request_stop();
-                    self.window.hide();
-                }
+                Ok(Outcome::ExitAuthorized) => self.begin_shutdown(),
+                Ok(Outcome::Closed) => return Err("关闭结果进入了普通请求通道".into()),
                 Ok(Outcome::Office(_) | Outcome::Desktop(_) | Outcome::MaterialCleaned) => {
                     return Err("后台结果类型不匹配".into())
                 }
@@ -2153,7 +2212,28 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let mut app = create_app(clock.clone(), probe)?;
     app.root = paths.root().to_owned();
     let control_slot = app.control_slot.clone();
+    let audio_slot = app.audio_slot.clone();
+    let audio_suspended = app.audio_suspended.clone();
     host.set_control_callback(Arc::new(move |hints| {
+        // This direct path also runs inside modal native pumps. No backend
+        // mutex, database, allocation, worker slot, or join is involved.
+        if hints.contains(HostHints::SUSPENDING) {
+            audio_suspended.store(true, Ordering::Release);
+        }
+        if hints.contains(HostHints::RESUMED) {
+            audio_suspended.store(false, Ordering::Release);
+        }
+        if let Some(audio) = audio_slot.get() {
+            if hints.contains(HostHints::SHUTDOWN) {
+                audio.shutdown();
+            } else if hints.contains(HostHints::SUSPENDING) {
+                audio.request_stop(StopReason::Suspend);
+            } else if hints.contains(HostHints::SESSION_CHANGED) {
+                audio.request_stop(StopReason::SessionUnavailable);
+            } else if hints.contains(HostHints::EMERGENCY_STOP_AUDIO) {
+                audio.request_stop(StopReason::Emergency);
+            }
+        }
         if hints.contains(HostHints::SESSION_LOCKED)
             || hints.contains(HostHints::SESSION_CHANGED)
             || hints.contains(HostHints::POWER_CHANGED)
@@ -2343,7 +2423,14 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         if app
             .shutdown_deadline
             .is_some_and(|deadline| Instant::now() >= deadline)
-            && (app.terminate_required || !app.pool.is_finished() || !app.shell.is_finished())
+            && (app.terminate_required
+                || !app.pool.is_finished()
+                || !app.shell.is_finished()
+                || app.audio.as_ref().is_some_and(|audio| {
+                    audio.status().map_or(true, |s| {
+                        s.phase != RuntimePhase::Closed || s.physical_thread_running
+                    })
+                }))
         {
             eprintln!("未来教室关闭超时，停止当前进程并保留数据供启动核对。");
             std::process::exit(2);
@@ -2351,6 +2438,11 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         if app.stopping
             && app.pool.is_finished()
             && app.shell.is_finished()
+            && app.audio.as_ref().is_none_or(|audio| {
+                audio
+                    .status()
+                    .is_ok_and(|s| s.phase == RuntimePhase::Closed && !s.physical_thread_running)
+            })
             && !app.terminate_required
         {
             stop.stop();
@@ -2391,6 +2483,11 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         clock,
         backend: None,
         control: None,
+        voice_service: None,
+        audio: None,
+        audio_slot: Arc::new(OnceLock::new()),
+        audio_suspended: Arc::new(AtomicBool::new(false)),
+        next_audio_availability: Instant::now(),
         state: Arc::new(IdentityState::default()),
         lease: None,
         screen: Screen::Starting,
@@ -3341,6 +3438,7 @@ mod tests {
         let paths = DataPaths::isolated_test(root.clone()).unwrap();
         paths.prepare_for_current_user().unwrap();
         let mut app = create_app(Arc::new(CurrentClock::new()), true).unwrap();
+        app.root = root.clone();
         app.render().unwrap();
         app.submit(Work::Open(root.clone(), app.clock.clone()))
             .unwrap();
@@ -3369,6 +3467,96 @@ mod tests {
         wait_for(&mut app, |a| a.pool.is_finished());
         assert!(app.backend.is_some());
         assert!(app.control.as_ref().unwrap().is_local_locked());
+        assert!(app
+            .backend
+            .as_ref()
+            .unwrap()
+            .lock()
+            .unwrap()
+            .state()
+            .is_err());
+        app.pool.join().unwrap();
+    }
+    #[test]
+    fn shutdown_keeps_writer_alive_until_audio_acknowledges_native_release() {
+        use fc_bootstrap::voice_runtime::{
+            AudioDomain, DomainProgress, RuntimeControl, RuntimeError, RuntimeFactory, StopReasons,
+        };
+        struct ReleaseGate {
+            entered: Arc<AtomicBool>,
+            release: Arc<AtomicBool>,
+        }
+        struct Domain(ReleaseGate);
+        impl RuntimeFactory for ReleaseGate {
+            fn invalidate_runtime(&self) {}
+            fn create(
+                &self,
+                _: RuntimeControl,
+            ) -> std::result::Result<Box<dyn AudioDomain>, RuntimeError> {
+                Ok(Box::new(Domain(ReleaseGate {
+                    entered: self.entered.clone(),
+                    release: self.release.clone(),
+                })))
+            }
+        }
+        impl AudioDomain for Domain {
+            fn interrupt(&mut self, _: StopReasons) -> std::result::Result<(), RuntimeError> {
+                self.0.entered.store(true, Ordering::Release);
+                Ok(())
+            }
+            fn step(&mut self) -> std::result::Result<DomainProgress, RuntimeError> {
+                Ok(if self.0.release.load(Ordering::Acquire) {
+                    DomainProgress::Idle
+                } else {
+                    DomainProgress::Draining
+                })
+            }
+            fn has_native_ownership(&self) -> bool {
+                !self.0.release.load(Ordering::Acquire)
+            }
+            fn resume_admission(&mut self) -> std::result::Result<(), RuntimeError> {
+                Ok(())
+            }
+            fn finish(&mut self) -> std::result::Result<bool, RuntimeError> {
+                Ok(!self.has_native_ownership())
+            }
+        }
+        let _serial = SERIAL.lock().unwrap();
+        let (_scratch, mut app) = fixture();
+        wait_for(&mut app, |a| a.pending.is_none());
+        let entered = Arc::new(AtomicBool::new(false));
+        let release = Arc::new(AtomicBool::new(false));
+        // No real audio task was submitted and its initial supervisor has never
+        // spawned. Replace only this isolated app's empty native factory.
+        assert_eq!(
+            app.audio
+                .as_ref()
+                .unwrap()
+                .status()
+                .unwrap()
+                .physical_threads_started,
+            0
+        );
+        app.audio = Some(VoiceRuntime::new(Arc::new(ReleaseGate {
+            entered: entered.clone(),
+            release: release.clone(),
+        })));
+        app.begin_shutdown();
+        wait_for(&mut app, |_| entered.load(Ordering::Acquire));
+        assert!(
+            app.shutdown.is_none(),
+            "writer shutdown was admitted while native audio was held"
+        );
+        assert!(app
+            .backend
+            .as_ref()
+            .unwrap()
+            .lock()
+            .unwrap()
+            .state()
+            .is_ok());
+        release.store(true, Ordering::Release);
+        wait_for(&mut app, |a| a.pool.is_finished());
         assert!(app
             .backend
             .as_ref()

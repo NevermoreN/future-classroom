@@ -1,0 +1,62 @@
+{
+  "kind": "host-voice-service-contention-before-test-serialization",
+  "date_utc": "2026-10-30",
+  "command": "cargo test -p fc-bootstrap --lib backend::voice::tests --locked -- --nocapture",
+  "environment": "Linux host; four service fixtures each perform a real password KDF and real SQLite operations; concurrent development/build activity was not controlled or fully measured.",
+  "runtime_writer_deadline_ms": 100,
+  "product_deadline_relaxed": false,
+  "observation": "Concurrent fixture runs produced Voice(Faulted); a real bounded operation must fail closed when its result is unknown. VoiceService::conclude invalidates the runtime generation and closes admission on Faulted. The raw error also covers authority/storage failures and does not by itself uniquely identify the timeout source.",
+  "cause_limits": "Deadline/scheduling contention is suspected from the parallel KDF workload and successful controlled runs. No unique causal trigger, scheduler trace, or independent per-operation elapsed-time measurement was captured; this evidence does not claim one.",
+  "implementation_changes_after_failure": [
+    "Serialize only this module's four expensive fixture tests with a test-only Mutex; the explicit Backend/KDF concurrency and blocked-writer timeout scenarios remain concurrent.",
+    "Keep production writer waits at 100 ms, generation invalidation, unknown-result handling, positive precommit checks, and cleanup fencing unchanged."
+  ],
+  "failure_log": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.67s\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 4 tests\n\nthread 'backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf' (8280) panicked at crates/fc-bootstrap/src/backend/voice.rs:1334:18:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\ntest backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok\ntest backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok\ntest backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok\ntest backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... FAILED\n\nfailures:\n\nfailures:\n    backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf\n\ntest result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 17.77s\n\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n",
+  "line_number_scope": "The log is preserved verbatim from its compiled test binary; subsequent source edits and formatting changed line numbers.",
+  "controlled_followup": {
+    "command": "cargo test -p fc-bootstrap --lib backend::voice::tests --locked -- --nocapture --test-threads=1",
+    "result": "4 passed; 0 failed; 13 filtered out",
+    "duration_seconds": 43.9,
+    "scope": "Host service tests; no Windows/native output evidence is claimed."
+  },
+  "checks": {
+    "strict_clippy": "cargo clippy -p fc-bootstrap --lib --tests --locked -- -D warnings: passed"
+  },
+  "additional_after_fixture_serialization": {
+    "command": "cargo test -p fc-bootstrap --lib backend::voice::tests --locked -- --nocapture",
+    "result": "3 passed; 1 failed; 14 filtered out; 35.03s",
+    "observation": "A further Faulted occurred during the initial Submit, before this test spawned its KDF worker. The fixture-only serialization does not prove the failure eliminated; this prevents claiming KDF overlap as the unique trigger.",
+    "log": "thread 'backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf' (9738) panicked at crates/fc-bootstrap/src/backend/voice.rs:1280:51:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nfailures:\n    backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf\n\ntest result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 35.03s\n"
+  },
+  "additional_fully_serial_run": {
+    "command": "cargo test -p fc-bootstrap --lib backend::voice::tests --locked -- --nocapture --test-threads=1",
+    "result": "2 passed; 2 failed; 14 filtered out; 44.70s",
+    "log": "thread 'backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf' (11178) panicked at crates/fc-bootstrap/src/backend/voice.rs:1258:57:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread 'backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission' (11229) panicked at crates/fc-bootstrap/src/backend/voice.rs:1711:43:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\n\nfailures:\n    backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf\n    backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission\n\ntest result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 14 filtered out; finished in 44.70s\n",
+    "limits": "The failures occurred in initial Reserve and final Recover, respectively; no deliberate blocker should still be held at those points. Both the workspace and /tmp are NAS btrfs on /dev/mapper/cachedev_0; filesystem latency is a candidate, not a measured or uniquely established cause."
+  },
+  "earlier_concurrent_faulted_run": {
+    "result": "0 passed; 4 failed; 13 filtered out; 11.80s",
+    "log": "thread 'backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf' (7114) panicked at crates/fc-bootstrap/src/backend/voice.rs:1242:57:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread 'backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding' (7112) panicked at crates/fc-bootstrap/src/backend/voice.rs:1242:57:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\n\nthread 'backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real' (7113) panicked at crates/fc-bootstrap/src/backend/voice.rs:1127:14:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\n\nthread 'backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission' (7115) panicked at crates/fc-bootstrap/src/backend/voice.rs:1631:43:\ncalled `Result::unwrap()` on an `Err` value: Voice(Faulted)\n\ntest result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 13 filtered out; finished in 11.80s\n"
+  },
+  "intermediate_deterministic_regression": {
+    "result": "3 passed; 1 failed; 13 filtered out; 18.57s",
+    "log": "thread 'backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real' (7750) panicked at crates/fc-bootstrap/src/backend/voice.rs:1092:59:\ncalled `Result::unwrap()` on an `Err` value: Voice(Domain(Permission(StaleAuthorization)))\n",
+    "cause_and_fix": "Moving every old-session Start precheck into the writer changed a known stale exact lease into repository Faulted, invalidating the runtime before terminal retry. Restored the memory exact-lease precheck when a current authority snapshot is available; only explicit GateError::Updating defers that check to writer evaluation/precommit. Existing terminal retry regression test retained unchanged."
+  },
+  "host_fixture_scope_after_fix": {
+    "test_only": true,
+    "linux_root": "/dev/shm if directory exists, otherwise platform temp directory",
+    "windows_root": "platform TEMP disk, unchanged",
+    "sqlite": "Real file-backed SQLite, same WAL/FULL settings, unique per-test directories, same writer/transaction code; tmpfs is not disk durability evidence.",
+    "production": "No path, timeout, permissions, generation, or SQL durability setting changed. The product 100 ms deadline disk-performance/failure matrix remains unaccepted.",
+    "assertion_diagnostics": "Fresh-runtime Start now uses expect with the actual error rather than an opaque is_ok assertion."
+  },
+  "after_tmpfs_fixture_followup": {
+    "command": "cargo test -p fc-bootstrap --lib backend::voice::tests --locked -- --nocapture --test-threads=1",
+    "result": "4 passed; 0 failed; 14 filtered out",
+    "duration_seconds": 40.06,
+    "source_sha256": "3cd9e151db2c82b722812a56a452309e09204ab9a652dfeeb758783f38d793d2",
+    "cleanup": "Each private fixture directory was removed by RAII; no FutureClassroom-Voice-* directory remained in /dev/shm.",
+    "claim_limit": "One passing controlled host protocol/control run; this neither proves the cause of earlier Faulted failures nor validates production disk durability/100ms fsync behavior."
+  }
+}

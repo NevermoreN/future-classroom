@@ -150,7 +150,7 @@ def main():
             if report["native"].get("audioExitCode") != 0:
                 raise RuntimeError("isolated silent WinMM integration failed")
             report["audioStatus"] = "NOT_RUN" if any("AUDIO_SILENT_NOT_RUN" in line or "VOICE_PIPELINE_NOT_RUN" in line for line in audio) else "PASS"
-            if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio)):
+            if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio) and any("VOICE_RUNTIME_PASS" in line for line in audio)):
                 raise RuntimeError("silent audio result missing")
         print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
         report["status"] = "PASS"

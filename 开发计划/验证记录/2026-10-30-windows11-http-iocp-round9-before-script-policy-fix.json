@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "scope": "HTTP.sys actual IOCP; two same-process synthetic loopback cycles only",
+  "tls": "NOT_RUN",
+  "cleanup": "PASS",
+  "status": "FAIL",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "dbe96785aa421b70f039ad9d5da8adb170baa22ddbfc8772d5ce786ce5153d25",
+  "error": "#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><S S=\"Error\">&amp; : 无法加载文件 C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Http-dd7390138c794eb8a4a65c4aa6b9081f\\http-probe.ps1，_x000D__x000A_</S><S S=\"Error\">因为在此系统上禁止运行脚本。有关详细信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Execution_Policies。_x000D__x000A_</S><S S=\"Error\">所在位置 行:1 字符: 180_x000D__x000A_</S><S S=\"Error\">+ ... tEncoding;&amp; (Join-Path 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClass ..._x000D__x000A_</S><S S=\"Error\">+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~_x000D__x000A_</S><S S=\"Error\">    + CategoryInfo          : SecurityError: (:) []，ParentContainsErrorRecordException_x000D__x000A_</S><S S=\"Error\">    + FullyQualifiedErrorId : UnauthorizedAccess_x000D__x000A_</S></Objs>"
+}

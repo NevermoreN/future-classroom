@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "HTTP.sys actual IOCP; two same-process synthetic loopback cycles only",
+  "tls": "NOT_RUN",
+  "cleanup": "PASS",
+  "status": "FAIL",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "dbe96785aa421b70f039ad9d5da8adb170baa22ddbfc8772d5ce786ce5153d25",
+  "runner": {
+    "exitCode": 0,
+    "output": [
+      "{\"urlAclBefore\":\"ABSENT\",\"win10\":\"NOT_RUN\",\"scope\":\"HTTP-only synthetic loopback; no TLS/campus/browser/authentication evidence\",\"serverPid\":35208,\"stdout\":[],\"win7\":\"NOT_RUN\",\"stderr\":[],\"steps\":[{\"status\":\"PASS\",\"case\":\"fixed-body-crosses-64KiB\",\"bytes\":65537},{\"status\":\"PASS\",\"case\":\"chunked-body-explicit-EOF\",\"bytes\":65582},{\"status\":\"PASS\",\"case\":\"streamed-three-response-chunks\",\"bytes\":196608},{\"status\":\"PASS\",\"case\":\"eight-concurrent-requests\",\"count\":8},{\"status\":\"PASS\",\"case\":\"overlong-header-rejected-kernel-or-adapter\",\"statusCode\":400},{\"case\":\"probe-cannot-authenticate\",\"status\":\"PASS\"},{\"case\":\"client-aborted-pending-body\",\"status\":\"PASS\"},{\"case\":\"client-aborted-stream-response\",\"status\":\"PASS\"}],\"administratorToken\":true,\"urlAclAfter\":\"ABSENT\",\"prefix\":\"http://127.0.0.1:58576/FutureClassroom-Test-Http-e8a70e441b2a47a898d57b66aa5be3df/\",\"error\":\"header deadline not observed within 7 seconds\",\"urlAclMode\":\"ADMIN_DIRECT_NO_MUTATION\",\"status\":\"FAIL\",\"tls\":\"NOT_RUN\"}"
+    ]
+  },
+  "native": {
+    "urlAclBefore": "ABSENT",
+    "win10": "NOT_RUN",
+    "scope": "HTTP-only synthetic loopback; no TLS/campus/browser/authentication evidence",
+    "serverPid": 35208,
+    "stdout": [],
+    "win7": "NOT_RUN",
+    "stderr": [],
+    "steps": [
+      {
+        "status": "PASS",
+        "case": "fixed-body-crosses-64KiB",
+        "bytes": 65537
+      },
+      {
+        "status": "PASS",
+        "case": "chunked-body-explicit-EOF",
+        "bytes": 65582
+      },
+      {
+        "status": "PASS",
+        "case": "streamed-three-response-chunks",
+        "bytes": 196608
+      },
+      {
+        "status": "PASS",
+        "case": "eight-concurrent-requests",
+        "count": 8
+      },
+      {
+        "status": "PASS",
+        "case": "overlong-header-rejected-kernel-or-adapter",
+        "statusCode": 400
+      },
+      {
+        "case": "probe-cannot-authenticate",
+        "status": "PASS"
+      },
+      {
+        "case": "client-aborted-pending-body",
+        "status": "PASS"
+      },
+      {
+        "case": "client-aborted-stream-response",
+        "status": "PASS"
+      }
+    ],
+    "administratorToken": true,
+    "urlAclAfter": "ABSENT",
+    "prefix": "http://127.0.0.1:58576/FutureClassroom-Test-Http-e8a70e441b2a47a898d57b66aa5be3df/",
+    "error": "header deadline not observed within 7 seconds",
+    "urlAclMode": "ADMIN_DIRECT_NO_MUTATION",
+    "status": "FAIL",
+    "tls": "NOT_RUN"
+  },
+  "error": "header deadline not observed within 7 seconds"
+}

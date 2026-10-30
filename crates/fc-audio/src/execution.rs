@@ -16,7 +16,7 @@ pub trait VoiceExecutionPort<S> {
     fn civil_seconds(&self) -> i64;
     fn inventory(&mut self) -> Result<VoiceSnapshot, VoiceRepositoryError>;
     fn drive(&mut self, update: VoiceDriverUpdate) -> Result<VoiceJob, VoiceRepositoryError>;
-    fn authorize(&mut self, job: &VoiceJob) -> bool;
+    fn authorize(&mut self, job: &VoiceJob) -> AudioAuthorization;
     fn source(&mut self, asset: &VoiceAsset) -> Result<S, VoiceRepositoryError>;
 }
 
@@ -55,6 +55,7 @@ struct Budget {
     job_id: VoiceJobId,
     deadline_ms: u64,
     gap_until_ms: Option<u64>,
+    total_ms: u64,
 }
 pub struct VoiceExecutor<O: AudioOutputPort> {
     output: O,
@@ -110,7 +111,7 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                         || matches!(progress, Ok(AudioOutputProgress::Idle))
                 };
                 if released(self.output.stop(active.generation))
-                    || released(self.output.poll(0, &mut || false))
+                    || released(self.output.poll(0, &mut || AudioAuthorization::Revoked))
                 {
                     active.released = true;
                 }
@@ -159,7 +160,7 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
             if matches!(progress, AudioOutputProgress::Playing { .. }) {
                 progress = self
                     .output
-                    .poll(wait_ms.min(50), &mut || false)
+                    .poll(wait_ms.min(50), &mut || AudioAuthorization::Revoked)
                     .map_err(ExecutionError::Output)?;
             }
             match progress {
@@ -277,7 +278,14 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
             if !snapshot.enabled {
                 return self.stop_job(port, job, Some(VoiceFailure::Disabled), wait_ms);
             }
-            if !port.authorize(&job) {
+            if job.state == VoiceState::Starting
+                && job.first_started_at.is_none()
+                && now >= job.latest_start_at
+            {
+                let job = Self::update(port, &job, VoiceDriverAction::ExpireBeforeWrite)?;
+                return self.stop_job(port, job, None, 0);
+            }
+            if port.authorize(&job) == AudioAuthorization::Revoked {
                 return self.stop_job(port, job, Some(VoiceFailure::Revoked), wait_ms);
             }
             if self
@@ -287,7 +295,7 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
             {
                 return self.stop_job(port, job, Some(VoiceFailure::Timeout), wait_ms);
             }
-            if job.state != VoiceState::Playing {
+            if !matches!(job.state, VoiceState::Playing | VoiceState::Starting) {
                 return Err(ExecutionError::Invariant);
             }
             let deadline = self
@@ -296,10 +304,26 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                 .ok_or(ExecutionError::Invariant)?
                 .deadline_ms;
             let progress = match self.output.poll(wait_ms, &mut || {
-                port.monotonic_millis() < deadline && port.authorize(&job)
+                if port.monotonic_millis() >= deadline
+                    || job.first_started_at.is_none() && port.civil_seconds() >= job.latest_start_at
+                {
+                    AudioAuthorization::Revoked
+                } else {
+                    port.authorize(&job)
+                }
             }) {
                 Ok(progress) => progress,
                 Err(error) => {
+                    if error == AudioOutputError::Unauthorized {
+                        if job.first_started_at.is_none()
+                            && port.civil_seconds() >= job.latest_start_at
+                        {
+                            let job =
+                                Self::update(port, &job, VoiceDriverAction::ExpireBeforeWrite)?;
+                            return self.stop_job(port, job, None, 0);
+                        }
+                        return self.stop_job(port, job, Some(VoiceFailure::Revoked), 0);
+                    }
                     self.stop_job(port, job, Some(VoiceFailure::Device), 0)?;
                     return Err(ExecutionError::Output(error));
                 }
@@ -312,6 +336,30 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                 return self.stop_job(port, job, Some(VoiceFailure::Timeout), 0);
             }
             match progress {
+                AudioOutputProgress::Deferred { generation } if generation == active.generation => {
+                    Ok(ExecutionStatus::Waiting {
+                        job_id: job.id,
+                        until_civil: now,
+                    })
+                }
+                AudioOutputProgress::FirstWrite { generation }
+                    if generation == active.generation && job.state == VoiceState::Starting =>
+                {
+                    if job.first_started_at.is_none() {
+                        let budget = self.budget.as_mut().ok_or(ExecutionError::Invariant)?;
+                        budget.deadline_ms = after_wait
+                            .checked_add(budget.total_ms)
+                            .ok_or(ExecutionError::Invariant)?;
+                    }
+                    let job = Self::update(port, &job, VoiceDriverAction::FirstWrite)?;
+                    if job.state == VoiceState::Stopping {
+                        return self.stop_job(port, job, None, 0);
+                    }
+                    Ok(ExecutionStatus::Active {
+                        job_id: job.id,
+                        generation,
+                    })
+                }
                 AudioOutputProgress::Playing { generation } if generation == active.generation => {
                     Ok(ExecutionStatus::Active {
                         job_id: job.id,
@@ -394,7 +442,19 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                 self.budget = None;
                 return Ok(ExecutionStatus::Idle);
             }
-            if !snapshot.enabled || !port.authorize(&job) {
+            let authorization = port.authorize(&job);
+            if self.budget.as_ref().is_some_and(|b| mono >= b.deadline_ms) {
+                Self::update(port, &job, VoiceDriverAction::Fail(VoiceFailure::Timeout))?;
+                self.budget = None;
+                return Ok(ExecutionStatus::Idle);
+            }
+            if authorization == AudioAuthorization::Deferred && snapshot.enabled {
+                return Ok(ExecutionStatus::Waiting {
+                    job_id: job.id,
+                    until_civil: now,
+                });
+            }
+            if !snapshot.enabled || authorization == AudioAuthorization::Revoked {
                 Self::update(
                     port,
                     &job,
@@ -468,6 +528,7 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                     // starts the full playback budget using a fresh clock below.
                     deadline_ms: mono.checked_add(5000).ok_or(ExecutionError::Invariant)?,
                     gap_until_ms: None,
+                    total_ms: total,
                 });
             }
             if let Some(budget) = self.budget.as_mut() {
@@ -497,10 +558,13 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                 return self.stop_job(port, job, Some(VoiceFailure::Timeout), 0);
             }
             match self.output.start(source, generation, &mut || {
-                port.monotonic_millis() < deadline
-                    && (job.first_started_at.is_some()
-                        || port.civil_seconds() < job.latest_start_at)
-                    && port.authorize(&job)
+                if port.monotonic_millis() >= deadline
+                    || job.first_started_at.is_none() && port.civil_seconds() >= job.latest_start_at
+                {
+                    AudioAuthorization::Revoked
+                } else {
+                    port.authorize(&job)
+                }
             }) {
                 Ok(()) => {
                     if first_attempt {
@@ -527,6 +591,12 @@ impl<O: AudioOutputPort> VoiceExecutor<O> {
                     })
                 }
                 Err(error) => {
+                    if error == AudioOutputError::Deferred {
+                        return Ok(ExecutionStatus::Waiting {
+                            job_id: job.id,
+                            until_civil: now,
+                        });
+                    }
                     if error == AudioOutputError::Unauthorized
                         && job.first_started_at.is_none()
                         && port.civil_seconds() >= job.latest_start_at

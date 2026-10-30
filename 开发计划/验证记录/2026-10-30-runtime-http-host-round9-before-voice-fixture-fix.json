@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "scope": "Round 9 host workspace development checks; Windows evidence independent",
+  "status": "FAIL",
+  "sourceBinding": {
+    "manifest": "2026-10-30-runtime-http-round9-build-inputs-before-voice-fixture-fix.json",
+    "files": 136,
+    "sha256": "f025b5bba68d87577e79381e269934fe5ff1146602644cd66009d89d708bb1c0"
+  },
+  "commands": [
+    {
+      "label": "format",
+      "argv": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.82,
+      "output": ""
+    },
+    {
+      "label": "architecture",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.13,
+      "output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+    },
+    {
+      "label": "hostStrictClippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.86,
+      "output": "    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.78s\n"
+    },
+    {
+      "label": "hostTests",
+      "argv": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "exitCode": 101,
+      "elapsedSeconds": 168.61,
+      "output": "   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.55s\n     Running unittests src/lib.rs (target/debug/deps/fc_application-07ac2c263ee5035b)\n\nrunning 17 tests\ntest identity::tests::domain_epoch_change_revokes_even_before_event_delivery_and_new_lease_is_not_old_lease ... ok\ntest identity::tests::first_login_is_password_change_only_and_monotonic_regression_fails_closed ... ok\ntest identity::tests::invalid_lifetimes_and_sequence_overflow_do_not_mutate_live_sessions ... ok\ntest identity::tests::lock_local_does_not_revoke_independent_web_channel ... ok\ntest identity::tests::login_penalty_survives_restart_and_cannot_be_skipped_by_wall_clock_changes ... ok\ntest identity::tests::real_input_extends_idle_only_up_to_absolute_session_deadline ... ok\ntest identity::tests::snapshot_reads_do_not_renew_five_minute_local_idle_and_wall_rollback_does_not_help ... ok\ntest identity::tests::stale_queued_logout_cannot_revoke_replacement_lease_but_current_logout_revokes_all_channels ... ok\ntest identity::tests::verified_continuous_input_stream_preserves_exact_lease_idle_and_absolute_limits ... ok\ntest tests::idempotency_does_not_bypass_cas_or_allow_changed_payload ... ok\ntest tests::local_reminder_write_is_denied_even_for_global_admin ... ok\ntest tests::midnight_commit_and_reads_expire_without_waiting_for_cleanup ... ok\ntest tests::own_homework_is_independent_of_other_teacher_same_subject ... ok\ntest tests::role_is_independent_of_residual_teaching_assignments ... ok\ntest tests::school_scope_disabled_assignment_and_session_expiry_are_enforced ... ok\ntest tests::shared_reminders_cover_managed_classes_without_teaching_scope ... ok\ntest tests::writer_rechecks_revocation_after_admission ... ok\n\ntest result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/fc_audio-fba3f86df4fe4ef8)\n\nrunning 22 tests\ntest execution::tests::cancel_before_done_drains_exact_old_generation_without_counting ... ok\ntest execution::tests::cancel_between_native_first_write_and_commit_and_between_done_and_commit_wins ... ok\ntest execution::tests::crossing_a_civil_second_does_not_shortcut_the_full_monotonic_repeat_gap ... ok\ntest execution::tests::durable_three_repeats_have_first_write_before_natural_and_release_before_next ... ok\ntest execution::tests::fifo_next_job_cannot_start_until_the_canceled_device_is_confirmed_released ... ok\ntest execution::tests::first_five_minute_expiry_opens_no_file_or_device ... ok\ntest execution::tests::lost_release_response_is_settled_only_from_inventory_and_known_device_release ... ok\ntest execution::tests::new_executor_cannot_adopt_persisted_live_or_gap_ownership ... ok\ntest execution::tests::no_device_and_midstream_driver_error_fail_and_drain_then_preserve_error_without_replay ... ok\ntest execution::tests::persistent_clock_rollback_still_settles_durable_terminal_without_replay ... ok\ntest execution::tests::preparation_and_open_deadlines_are_fresh_and_playback_budget_starts_at_first_write ... ok\ntest execution::tests::read_fault_source_fault_revocation_timeout_and_rollback_fail_closed ... ok\ntest execution::tests::ten_max_duration_repeats_are_not_expired_at_the_initial_five_minute_deadline ... ok\ntest execution::tests::unknown_storage_after_first_write_stops_and_cannot_replay_on_recovery ... ok\ntest execution::tests::updating_defers_queued_first_write_and_natural_without_reopening_or_counting ... ok\ntest execution::tests::wait_return_time_starts_gap_and_expired_wait_cannot_count_completion ... ok\ntest tests::cancellation_done_is_never_counted_and_next_job_waits_for_release ... ok\ntest tests::late_cleanup_cannot_finish_a_reused_id_with_a_new_generation ... ok\ntest tests::later_jobs_do_not_start_during_repeat_gap_and_emergency_cancels_all ... ok\ntest tests::quota_expiry_revocation_and_emergency_are_independent_of_desktop ... ok\ntest tests::submission_failure_waits_for_release_and_never_counts_as_a_repeat ... ok\ntest tests::total_three_means_three_and_one_second_gaps ... ok\n\ntest result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n     Running unittests src/lib.rs (target/debug/deps/fc_bootstrap-c433b3f92a6bc3d0)\n\nrunning 18 tests\ntest backend::tests::authorized_close_requires_fresh_local_admin_and_consumes_exact_permission ... ok\ntest backend::tests::display_backend_uses_captured_cas_and_public_facts_do_not_renew_management ... ok\ntest backend::tests::lesson_backend_requires_exact_local_admin_and_persists_override_restore_cas ... ok\ntest backend::tests::material_backend_owner_and_guest_permissions_are_fresh_memory_guards ... ok\ntest backend::tests::real_backend_accounts_catalog_homework_recovery_and_exact_local_input_survive_reopen ... ok\ntest backend::tests::session_control_faults_actual_authority_while_backend_mutex_is_unavailable ... ok\ntest backend::tests::timetable_backend_uses_ui_revision_and_recovers_independent_schedule_state ... ok\ntest backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok\ntest backend::voice::tests::exact_original_voice_session_guards_cancel_disable_and_terminal_retry_are_real ... ok\ntest backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf ... FAILED\ntest backend::voice::tests::voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission ... ok\ntest voice_runtime::tests::concurrent_wake_and_idle_exit_never_lose_jobs_or_create_two_audio_domains ... ok\ntest voice_runtime::tests::independent_stop_blocks_writes_then_ack_requires_native_release_and_no_old_replay ... ok\ntest voice_runtime::tests::ordinary_listener_callback_drain_does_not_fault_or_start_new_jobs_on_unregistered_listener ... ok\ntest voice_runtime::tests::retained_driver_never_gets_a_replacement_and_shutdown_waits_for_actual_release ... ok\ntest voice_runtime::tests::service_waker_is_weak_and_empty_shutdown_needs_no_audio_device ... ok\ntest voice_runtime::tests::wake_during_native_finish_is_pending_until_the_old_physical_thread_exits ... ok\ntest voice_runtime::tests::writer_resume_and_finish_never_hold_the_supervisor_ui_lock ... ok\n\nfailures:\n\n---- backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf stdout ----\n\nthread 'backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf' (14400) panicked at crates/fc-bootstrap/src/backend/voice.rs:1403:9:\nassertion failed: fresh.drive(VoiceDriverUpdate {\n            job_id: queued.id,\n            expected_revision: queued.revision,\n            generation: 0,\n            action: VoiceDriverAction::Start,\n        }).is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    backend::voice::tests::independent_voice_service_progresses_during_actual_backend_mutex_and_kdf\n\ntest result: FAILED. 17 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 152.97s\n\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n"
+    }
+  ],
+  "testExecution": "--test-threads=1; explicit concurrency tests retain their own controlled threads",
+  "limitations": [
+    "Not Win7/Win10 or complete product evidence",
+    "Teacher browser, TLS deployment/pairing and full Web application remain incomplete"
+  ],
+  "testCount": 39,
+  "testGroups": 2,
+  "testSuiteCompleted": false,
+  "limitation": "First final host full run stopped after fc-bootstrap service failure; remaining binaries were not run."
+}

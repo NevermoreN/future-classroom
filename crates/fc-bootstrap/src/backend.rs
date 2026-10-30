@@ -47,7 +47,7 @@ use std::{
     },
     time::{Duration, Instant},
 };
-pub use voice::{VoiceGuard, VoicePlaybackAuthorization};
+pub use voice::{VoiceGuard, VoicePlaybackAuthorization, VoiceRuntimeHandle, VoiceService};
 
 pub type Result<T> = std::result::Result<T, BackendError>;
 type Snapshot = PreparedAuthority<IdentityState>;
@@ -400,8 +400,7 @@ impl RandomSource for PlatformRandom {
 }
 
 pub struct Backend {
-    voice: voice::VoiceSessions,
-    authority: fc_runtime::authority::AuthorityReader<IdentityState>,
+    voice: voice::VoiceService,
     writer: Option<StorageWriter<Snapshot>>,
     handle: StorageHandle<Snapshot>,
     repository: Repository,
@@ -468,9 +467,16 @@ impl Backend {
             observed_generation: 1,
             local: None,
         }));
+        let voice = voice::VoiceService::new(
+            repository.clone(),
+            ledger.clone(),
+            control.clone(),
+            authority.clone(),
+            clock.clone(),
+            monotonic.clone(),
+        );
         Ok(Self {
-            voice: voice::VoiceSessions::default(),
-            authority,
+            voice,
             writer: Some(writer),
             handle,
             repository,
@@ -512,6 +518,12 @@ impl Backend {
     /// Authenticated native exit. Consume the exact local lease immediately
     /// before closing; no database/KDF lookup occurs after this final admission.
     pub fn close_authorized(&mut self, lease: SessionLease) -> Result<()> {
+        self.authorize_exit(lease)?;
+        self.close()
+    }
+    /// Consume the exact exit authorization without closing the writer. Normal
+    /// composition first drains the audio domain, then closes SQLite on a worker.
+    pub fn authorize_exit(&mut self, lease: SessionLease) -> Result<()> {
         if lease.origin() != TrustedOrigin::Local {
             return Err(BackendError::Identity(IdentityRepositoryError::Domain(
                 IdentityError::Permission(PermissionError::LocalOnly),
@@ -539,10 +551,11 @@ impl Backend {
         if self.control.generation() != generation {
             return Err(BackendError::Session(SessionError::Revoked));
         }
-        self.close()
+        Ok(())
     }
     /// Explicit joining close belongs on a shutdown worker/coordinator, never the UI.
     pub fn close(&mut self) -> Result<()> {
+        self.voice.invalidate_runtime();
         self.control.0.health.stop();
         self.control.0.closed.store(true, Ordering::Release);
         self.control.lock_local();

@@ -1,0 +1,41 @@
+{
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "scope": "runner catch/finally JSON only; no native server or settings",
+  "status": "PASS",
+  "cleanup": "PASS",
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "providerMetadata": false,
+      "finalPhase": "finished",
+      "case": "empty-stdout-single-stderr",
+      "elapsedMilliseconds": 19,
+      "jsonBytes": 535,
+      "status": "FAIL"
+    },
+    {
+      "providerMetadata": false,
+      "finalPhase": "finished",
+      "case": "multi-line-logs",
+      "elapsedMilliseconds": 15,
+      "jsonBytes": 556,
+      "status": "FAIL"
+    },
+    {
+      "providerMetadata": false,
+      "finalPhase": "finished",
+      "case": "large-plain-line",
+      "elapsedMilliseconds": 20,
+      "jsonBytes": 66049,
+      "status": "FAIL"
+    }
+  ],
+  "scriptCleanup": "PASS",
+  "runnerSha256": "aac7d9a205fff37ac4a7228dc1b463860fd199cf0b23d1c55d2d4b39e3f59621",
+  "uploadedClientSourceSha256": "02952df50eb590fb29885c9f859c7006e4386a1b7b60593d252c5cab42573bf8",
+  "fixtureSha256": "c0d420d37a876337836ad91ed9150f12aae4fd07e4d547c52b09ec768bd6c8be"
+}

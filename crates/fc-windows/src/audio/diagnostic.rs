@@ -59,7 +59,7 @@ pub fn silent_probe() -> Result<WinMmProbeReport, Error> {
         file.sync_all().map_err(|_| Error::Io)?;
     }
     let mut output = WinMmAudioOutput::new();
-    let mut authorization = || true;
+    let mut authorization = || Authorization::Authorized;
     output.start(VerifiedWave::open(&path)?, 1, &mut authorization)?;
     let deadline = Instant::now() + Duration::from_secs(8);
     loop {

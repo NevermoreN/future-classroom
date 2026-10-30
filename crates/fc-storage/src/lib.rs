@@ -179,6 +179,15 @@ impl<T> Ticket<T> {
             .recv()
             .map_err(|_| StorageError::WorkerDisconnected)?
     }
+    /// A deadline only bounds the caller's wait; it cannot undo a COMMIT that
+    /// has already started. Callers must fence further effects and reconcile an
+    /// indeterminate outcome, rather than retrying a new command automatically.
+    pub fn wait_timeout(self, timeout: Duration) -> Result<T, StorageError> {
+        self.0.recv_timeout(timeout).map_err(|e| match e {
+            mpsc::RecvTimeoutError::Timeout => StorageError::Indeterminate,
+            mpsc::RecvTimeoutError::Disconnected => StorageError::WorkerDisconnected,
+        })?
+    }
 }
 
 /// A bounded view valid only during one writer transaction. It exposes owned

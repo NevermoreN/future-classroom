@@ -1,6 +1,6 @@
 //! Controlled, handle-pinned canonical voice objects. Call only on the shared
 //! bounded file worker, after installation ACL read-back and instance locking.
-use crate::backend::Backend;
+use crate::backend::{Backend, VoiceService};
 use fc_domain::voice::*;
 use fc_materials::{
     office::{ContainerError, ValidationControl},
@@ -201,7 +201,10 @@ impl ControlledVoiceFiles {
     /// exclusive actual deletion precedes quota finalization. Native-held files
     /// retain their charged bytes and are retried after the driver returns them.
     pub fn reconcile(&self, backend: &mut Backend) -> io::Result<VoiceCleanup> {
-        let inventory = backend.voice_maintain().map_err(file_error)?;
+        self.reconcile_service(&backend.voice_service())
+    }
+    pub fn reconcile_service(&self, service: &VoiceService) -> io::Result<VoiceCleanup> {
+        let inventory = service.maintain().map_err(file_error)?;
         let mut report = VoiceCleanup::default();
         let ids: BTreeSet<_> = inventory.assets.iter().map(|a| a.id).collect();
         for asset in &inventory.assets {
@@ -216,8 +219,8 @@ impl ControlledVoiceFiles {
                 }
             }
             if complete {
-                backend
-                    .voice_finalize_delete(asset.id, asset.revision)
+                service
+                    .finalize(asset.id, asset.revision)
                     .map_err(file_error)?;
                 report.finalized_assets += 1;
             } else {
@@ -247,7 +250,7 @@ impl ControlledVoiceFiles {
                             // Pin the exact orphan before consulting current DB state.
                             // A newly reserved upload may have appeared after the
                             // first inventory was captured; it must never be removed.
-                            match backend.voice_inventory() {
+                            match service.inventory() {
                                 Ok(fresh) => !fresh.assets.iter().any(|a| a.id == id),
                                 Err(_) => {
                                     unavailable = true;

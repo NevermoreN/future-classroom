@@ -18,6 +18,8 @@ struct Device {
     wait_advance_ms: u64,
     open_advance_ms: u64,
     open_advance_civil: i64,
+    defer_start: bool,
+    pending: bool,
 }
 struct Output {
     device: Rc<RefCell<Device>>,
@@ -31,13 +33,14 @@ impl AudioOutputPort for Output {
         &mut self,
         _: (),
         generation: u64,
-        auth: &mut dyn FnMut() -> bool,
+        auth: &mut dyn FnMut() -> AudioAuthorization,
     ) -> Result<(), AudioOutputError> {
         self.monotonic
             .set(self.monotonic.get() + self.device.borrow().open_advance_ms);
         self.civil
             .set(self.civil.get() + self.device.borrow().open_advance_civil);
-        if !auth() {
+        let decision = auth();
+        if decision == AudioAuthorization::Revoked {
             return Err(AudioOutputError::Unauthorized);
         }
         let mut d = self.device.borrow_mut();
@@ -46,6 +49,11 @@ impl AudioOutputPort for Output {
             return Err(AudioOutputError::DeviceUnavailable);
         }
         d.generation = Some(generation);
+        if decision == AudioAuthorization::Deferred || d.defer_start {
+            d.pending = true;
+            return Err(AudioOutputError::Deferred);
+        }
+        d.pending = false;
         d.starts += 1;
         if d.after_write_cancel {
             let mut state = self.storage.borrow_mut();
@@ -59,7 +67,7 @@ impl AudioOutputPort for Output {
     fn poll(
         &mut self,
         _: u32,
-        auth: &mut dyn FnMut() -> bool,
+        auth: &mut dyn FnMut() -> AudioAuthorization,
     ) -> Result<AudioOutputProgress, AudioOutputError> {
         let mut d = self.device.borrow_mut();
         self.monotonic.set(self.monotonic.get() + d.wait_advance_ms);
@@ -69,12 +77,21 @@ impl AudioOutputPort for Output {
         if d.error {
             return Err(AudioOutputError::Driver(1));
         }
-        if !auth() {
+        let decision = auth();
+        if decision == AudioAuthorization::Deferred {
+            return Ok(AudioOutputProgress::Deferred { generation });
+        }
+        if decision == AudioAuthorization::Revoked {
             if d.hold_release {
                 return Ok(AudioOutputProgress::Playing { generation });
             }
             d.generation = None;
             return Ok(AudioOutputProgress::Released { generation });
+        }
+        if d.pending {
+            d.pending = false;
+            d.starts += 1;
+            return Ok(AudioOutputProgress::FirstWrite { generation });
         }
         if d.natural {
             d.natural = false;
@@ -93,6 +110,7 @@ impl AudioOutputPort for Output {
                 return Ok(AudioOutputProgress::Playing { generation });
             }
             d.generation = None;
+            d.pending = false;
             Ok(AudioOutputProgress::Released { generation })
         } else {
             Ok(AudioOutputProgress::Idle)
@@ -114,6 +132,7 @@ struct Port {
     monotonic: Rc<Cell<u64>>,
     source_advance_ms: u64,
     source_advance_civil: i64,
+    deferred: bool,
 }
 impl VoiceExecutionPort<()> for Port {
     fn monotonic_millis(&self) -> u64 {
@@ -167,11 +186,18 @@ impl VoiceExecutionPort<()> for Port {
         }
         Ok(job)
     }
-    fn authorize(&mut self, job: &VoiceJob) -> bool {
+    fn authorize(&mut self, job: &VoiceJob) -> AudioAuthorization {
         self.authorizations += 1;
-        self.allowed
+        if !(self.allowed
             && self.state.borrow().jobs.iter().any(|j| j == job)
-            && (job.first_started_at.is_some() || self.civil.get() < job.latest_start_at)
+            && (job.first_started_at.is_some() || self.civil.get() < job.latest_start_at))
+        {
+            AudioAuthorization::Revoked
+        } else if self.deferred {
+            AudioAuthorization::Deferred
+        } else {
+            AudioAuthorization::Authorized
+        }
     }
     fn source(&mut self, _: &VoiceAsset) -> Result<(), VoiceRepositoryError> {
         self.sources += 1;
@@ -245,6 +271,7 @@ fn fixture(total: u8, frames: u32) -> (VoiceExecutor<Output>, Port, Rc<RefCell<D
         monotonic,
         source_advance_ms: 0,
         source_advance_civil: 0,
+        deferred: false,
     };
     (VoiceExecutor::new(output), port, device)
 }
@@ -296,6 +323,52 @@ fn durable_three_repeats_have_first_write_before_natural_and_release_before_next
         ]
         .repeat(3)
     );
+}
+#[test]
+fn updating_defers_queued_first_write_and_natural_without_reopening_or_counting() {
+    let (mut e, mut p, d) = fixture(3, 16_000);
+    p.deferred = true;
+    tick(&mut e, &mut p, 0).unwrap();
+    assert_eq!(p.sources, 0);
+    assert!(p.actions.is_empty());
+    p.deferred = false;
+    d.borrow_mut().defer_start = true;
+    tick(&mut e, &mut p, 0).unwrap();
+    assert_eq!(p.state.borrow().jobs[0].state, VoiceState::Starting);
+    assert_eq!(d.borrow().starts, 0);
+    assert_eq!(p.sources, 1);
+    p.deferred = true;
+    tick(&mut e, &mut p, 1).unwrap();
+    assert_eq!(d.borrow().stops, 0);
+    p.deferred = false;
+    d.borrow_mut().defer_start = false;
+    tick(&mut e, &mut p, 2).unwrap();
+    assert_eq!(p.state.borrow().jobs[0].state, VoiceState::Playing);
+    assert_eq!(d.borrow().starts, 1);
+    assert_eq!(p.sources, 1);
+    d.borrow_mut().natural = true;
+    p.deferred = true;
+    tick(&mut e, &mut p, 3).unwrap();
+    assert_eq!(p.state.borrow().jobs[0].completed_repeats, 0);
+    assert_eq!(d.borrow().stops, 0);
+    p.deferred = false;
+    tick(&mut e, &mut p, 4).unwrap();
+    assert_eq!(p.state.borrow().jobs[0].completed_repeats, 1);
+    assert_eq!(
+        p.actions
+            .iter()
+            .filter(|a| **a == VoiceDriverAction::FirstWrite)
+            .count(),
+        1
+    );
+    let (mut e, mut p, d) = fixture(1, 16_000);
+    d.borrow_mut().defer_start = true;
+    tick(&mut e, &mut p, 299).unwrap();
+    p.deferred = true;
+    tick(&mut e, &mut p, 300).unwrap();
+    assert_eq!(p.state.borrow().jobs[0].state, VoiceState::Expired);
+    assert_eq!(d.borrow().starts, 0);
+    assert!(!p.actions.contains(&VoiceDriverAction::FirstWrite));
 }
 #[test]
 fn ten_max_duration_repeats_are_not_expired_at_the_initial_five_minute_deadline() {

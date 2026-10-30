@@ -2,6 +2,7 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 #[cfg(windows)]
 pub mod audio;
+pub mod http;
 #[cfg(windows)]
 mod native;
 #[cfg(windows)]

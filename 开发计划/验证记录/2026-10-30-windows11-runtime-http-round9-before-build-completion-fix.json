@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "exeSha256": "2110a78a62915ce336ae2aa6ab7d4a3de4e91434b28a7d44447f9977d4cf58f0",
+  "status": "FAIL",
+  "error": "remote executable digest mismatch",
+  "causeLimits": "Runner started before cargo test --no-run finished writing artifacts; no executable was accepted as tested. Full rerun required after build completion."
+}

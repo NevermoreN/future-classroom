@@ -18,6 +18,7 @@ struct FakeState {
     unprepare_failure: bool,
     close_failure: bool,
     write_failure: bool,
+    samples: Vec<u8>,
 }
 thread_local! { static FAKE: RefCell<Rc<RefCell<FakeState>>> = RefCell::new(Rc::new(RefCell::new(FakeState::default()))); }
 struct Fake(Rc<RefCell<FakeState>>);
@@ -38,6 +39,9 @@ impl Driver for Fake {
         if s.write_failure {
             return 1;
         }
+        // SAFETY: fake driver observes a live, prepared fixed PCM allocation;
+        // no native thread accesses this fake-driver memory.
+        s.samples.push(unsafe { (*h).lpData.0.read() });
         s.returned.remove(&(h as usize));
         s.queued.insert(h as usize);
         0
@@ -107,9 +111,86 @@ fn not_run_device_classification_does_not_hide_unexpected_driver_errors() {
     );
     assert_eq!(open_error(987), Error::Driver(987));
 }
+#[test]
+fn deferred_start_has_no_native_submission_and_resumes_same_source_once() {
+    let (mut e, s) = setup();
+    assert_eq!(
+        e.start(Box::new(Cursor::new([0; 100])), 100, 7, &mut || {
+            Authorization::Deferred
+        }),
+        Err(Error::Deferred)
+    );
+    assert!(e.stream.is_none());
+    assert!(s.borrow().pointers.is_empty());
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Deferred),
+        Ok(Progress::Deferred { generation: 7 })
+    );
+    assert_eq!(s.borrow().resets, 0);
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::FirstWrite { generation: 7 })
+    );
+    assert_eq!(s.borrow().writes, 1);
+    s.borrow_mut().return_on_reset = true;
+    assert_eq!(e.stop(7), Ok(Progress::Released { generation: 7 }));
+}
+#[test]
+fn deferral_after_prepare_preserves_ready_block_order_and_never_counts_done_early() {
+    let (mut e, s) = setup();
+    s.borrow_mut().natural = true;
+    let mut bytes = Vec::new();
+    for value in 0..4 {
+        bytes.extend(std::iter::repeat_n(value, BUFFER_BYTES));
+    }
+    let mut checks = 0;
+    assert_eq!(
+        e.start(
+            Box::new(Cursor::new(bytes)),
+            BUFFER_BYTES * 4,
+            7,
+            &mut || {
+                checks += 1;
+                if checks == 4 {
+                    Authorization::Deferred
+                } else {
+                    Authorization::Authorized
+                }
+            }
+        ),
+        Err(Error::Deferred)
+    );
+    assert_eq!(s.borrow().writes, 0);
+    assert_eq!(s.borrow().pointers.len(), 1);
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Deferred),
+        Ok(Progress::Deferred { generation: 7 })
+    );
+    assert_eq!(s.borrow().resets, 0);
+    assert_eq!(s.borrow().unprepares, 0);
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::FirstWrite { generation: 7 })
+    );
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Deferred),
+        Ok(Progress::Deferred { generation: 7 })
+    );
+    assert_eq!(s.borrow().writes, 1);
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::Playing { generation: 7 })
+    );
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::NaturallyCompleted { generation: 7 })
+    );
+    assert_eq!(s.borrow().samples, vec![0, 1, 2, 3]);
+    assert_eq!(s.borrow().resets, 0);
+}
 fn begin(e: &mut Engine<Fake>, bytes: usize) {
     e.start(Box::new(Cursor::new(vec![0; bytes])), bytes, 7, &mut || {
-        true
+        Authorization::Authorized
     })
     .unwrap();
 }
@@ -119,22 +200,25 @@ fn stream_reuses_three_fixed_addresses_and_releases_before_natural_completion() 
     s.borrow_mut().natural = true;
     begin(&mut e, BUFFER_BYTES * 8 + 100);
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Playing { generation: 7 })
     );
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Playing { generation: 7 })
     );
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Playing { generation: 7 })
     );
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::NaturallyCompleted { generation: 7 })
     );
-    assert_eq!(e.poll(0, &mut || true), Ok(Progress::Idle));
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::Idle)
+    );
     let s = s.borrow();
     assert_eq!(s.writes, 9);
     assert_eq!(s.pointers.len(), 3);
@@ -152,7 +236,10 @@ fn reset_done_releases_without_counting_natural_and_stale_stop_cannot_cancel() {
     assert_eq!(e.stop(7), Ok(Progress::Released { generation: 7 }));
     assert_eq!(s.borrow().resets, 1);
     assert_eq!(s.borrow().closes, 1);
-    assert_eq!(e.poll(0, &mut || true), Ok(Progress::Idle));
+    assert_eq!(
+        e.poll(0, &mut || Authorization::Authorized),
+        Ok(Progress::Idle)
+    );
 }
 #[test]
 fn late_return_and_stillplaying_keep_allocations_and_admission_closed() {
@@ -160,7 +247,7 @@ fn late_return_and_stillplaying_keep_allocations_and_admission_closed() {
     s.borrow_mut().reset_failure = true;
     begin(&mut e, 64_000);
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Playing { generation: 7 })
     );
     assert_eq!(e.stop(7), Err(Error::Driver(1)));
@@ -175,11 +262,13 @@ fn late_return_and_stillplaying_keep_allocations_and_admission_closed() {
     assert_eq!(s.borrow().unprepares, 0);
     e.stream.as_mut().unwrap().cleaning = Some(Instant::now() - CLEANUP_LIMIT);
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Retained { generation: 7 })
     );
     assert_eq!(
-        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || true),
+        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || {
+            Authorization::Authorized
+        }),
         Err(Error::CleanupPending)
     );
     assert_eq!(
@@ -199,21 +288,21 @@ fn late_return_and_stillplaying_keep_allocations_and_admission_closed() {
         s.unprepare_failure = true;
     }
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Retained { generation: 7 })
     );
     assert_eq!(s.borrow().closes, 0);
     s.borrow_mut().unprepare_failure = false;
     s.borrow_mut().close_failure = true;
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Retained { generation: 7 })
     );
     assert_eq!(s.borrow().unprepares, 3);
     assert!(e.stream.is_some());
     s.borrow_mut().close_failure = false;
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Released { generation: 7 })
     );
     assert!(s.borrow().poisoned);
@@ -232,7 +321,9 @@ fn failed_reset_even_when_all_buffers_return_releases_safely_but_forbids_reopeni
     assert_eq!(s.borrow().closes, 1);
     assert!(s.borrow().poisoned);
     assert_eq!(
-        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || true),
+        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || {
+            Authorization::Authorized
+        }),
         Err(Error::CleanupPending)
     );
 }
@@ -247,23 +338,25 @@ fn revoked_authority_and_failed_write_use_cleanup_without_a_natural_event() {
         7,
         &mut || {
             calls += 1;
-            true
+            Authorization::Authorized
         },
     );
     assert_eq!(start, Ok(()));
-    assert_eq!(calls, 2);
+    assert!(calls >= 2);
     assert_eq!(s.borrow().writes, 1);
     assert_eq!(
-        e.poll(0, &mut || false),
+        e.poll(0, &mut || Authorization::Revoked),
         Ok(Progress::Released { generation: 7 })
     );
     s.borrow_mut().write_failure = true;
     assert_eq!(
-        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || true),
+        e.start(Box::new(Cursor::new([0; 2])), 2, 8, &mut || {
+            Authorization::Authorized
+        }),
         Err(Error::Driver(1))
     );
     assert_eq!(
-        e.poll(0, &mut || true),
+        e.poll(0, &mut || Authorization::Authorized),
         Ok(Progress::Released { generation: 8 })
     );
 }

@@ -1,5 +1,11 @@
 //! One stream owned by the audio execution domain. No native handle crosses this port.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AudioAuthorization {
+    Authorized,
+    Deferred,
+    Revoked,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AudioOutputError {
     DeviceUnavailable,
     InvalidSource,
@@ -8,12 +14,21 @@ pub enum AudioOutputError {
     Io,
     Driver(u32),
     CleanupPending,
+    /// Adapter retains the same bounded source/stream; no first Write succeeded.
+    /// Poll resumes it and emits FirstWrite after authority becomes Authorized.
+    Deferred,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AudioOutputProgress {
     Idle,
     Playing {
+        generation: u64,
+    },
+    Deferred {
+        generation: u64,
+    },
+    FirstWrite {
         generation: u64,
     },
     /// All bytes naturally returned AND native unprepare/close completed. This
@@ -45,14 +60,14 @@ pub trait AudioOutputPort {
         &mut self,
         source: Self::Source,
         generation: u64,
-        authorize: &mut dyn FnMut() -> bool,
+        authorize: &mut dyn FnMut() -> AudioAuthorization,
     ) -> Result<(), AudioOutputError>;
     /// Wait at most 50 ms in the audio domain; never call from UI or the writer.
     /// Natural completion means every byte was submitted and returned without reset.
     fn poll(
         &mut self,
         wait_ms: u32,
-        authorize: &mut dyn FnMut() -> bool,
+        authorize: &mut dyn FnMut() -> AudioAuthorization,
     ) -> Result<AudioOutputProgress, AudioOutputError>;
     /// Invalidate this generation BEFORE reset. Canceled DONE may only release
     /// ownership; it can never emit NaturallyCompleted. Exact generation is required.

@@ -48,6 +48,8 @@ impl HostHints {
     pub const TASKBAR_RECREATED: Self = Self(1024);
     const TRAY_CONTEXT: Self = Self(2048);
     pub const FOREGROUND_CHANGED: Self = Self(4096);
+    pub const SUSPENDING: Self = Self(8192);
+    pub const RESUMED: Self = Self(16384);
     pub fn contains(self, hint: Self) -> bool {
         self.0 & hint.0 != 0
     }
@@ -67,6 +69,53 @@ impl HostControl {
 }
 
 pub type ControlCallback = Arc<dyn Fn(HostHints) + Send + Sync>;
+
+/// Audio needs the process's active, unlocked interactive session, independently
+/// of which application is foreground. No desktop switch or input is performed.
+pub fn interactive_session_available() -> bool {
+    use windows::Win32::System::{StationsAndDesktops::*, Threading::*};
+    // SAFETY: WTS owns its output buffer (freed below); the returned desktop
+    // handle is queried synchronously into a bounded buffer and always closed.
+    unsafe {
+        let mut sid = 0;
+        if ProcessIdToSessionId(GetCurrentProcessId(), &mut sid).is_err() || sid == 0 {
+            return false;
+        }
+        let mut ptr = windows::core::PWSTR::null();
+        let mut bytes = 0;
+        if WTSQuerySessionInformationW(None, sid, WTSConnectState, &mut ptr, &mut bytes).is_err() {
+            if !ptr.is_null() {
+                WTSFreeMemory(ptr.0.cast());
+            }
+            return false;
+        }
+        let active = !ptr.is_null()
+            && bytes as usize >= std::mem::size_of::<WTS_CONNECTSTATE_CLASS>()
+            && *ptr.0.cast::<WTS_CONNECTSTATE_CLASS>() == WTSActive;
+        if !ptr.is_null() {
+            WTSFreeMemory(ptr.0.cast());
+        }
+        if !active {
+            return false;
+        }
+        let desktop = match OpenInputDesktop(DF_ALLOWOTHERACCOUNTHOOK, false, DESKTOP_READOBJECTS) {
+            Ok(d) => d,
+            Err(_) => return false,
+        };
+        let mut name = [0u16; 64];
+        let mut needed = 0;
+        let valid = GetUserObjectInformationW(
+            HANDLE(desktop.0),
+            UOI_NAME,
+            Some(name.as_mut_ptr().cast()),
+            std::mem::size_of_val(&name) as u32,
+            Some(&mut needed),
+        )
+        .is_ok();
+        let closed = CloseDesktop(desktop).is_ok();
+        valid && closed && needed == 16 && name[..8] == [68, 101, 102, 97, 117, 108, 116, 0]
+    }
+}
 
 struct State {
     hints: AtomicU32,
@@ -324,7 +373,7 @@ impl HiddenHost {
             .0;
             match selected {
                 1 => self.state.hint(HostHints::OPEN_STATUS),
-                2 => self.state.hint(HostHints::EMERGENCY_STOP_AUDIO),
+                2 => self.state.control_hint(HostHints::EMERGENCY_STOP_AUDIO),
                 3 => self.state.hint(HostHints::EXIT_REQUESTED),
                 _ => {}
             }
@@ -404,7 +453,17 @@ unsafe extern "system" fn window_proc(
                     }
                     WM_TIMECHANGE => state.hint(HostHints::TIME_CHANGED),
                     WM_DISPLAYCHANGE | WM_SETTINGCHANGE => state.hint(HostHints::DISPLAY_CHANGED),
-                    WM_POWERBROADCAST => state.control_hint(HostHints::POWER_CHANGED),
+                    WM_POWERBROADCAST => {
+                        let event = match wparam.0 as u32 {
+                            PBT_APMSUSPEND => HostHints::SUSPENDING.0,
+                            PBT_APMRESUMEAUTOMATIC
+                            | PBT_APMRESUMESUSPEND
+                            | PBT_APMRESUMECRITICAL => HostHints::RESUMED.0,
+                            _ => 0,
+                        };
+                        state.control_hint(HostHints(HostHints::POWER_CHANGED.0 | event));
+                        return LRESULT(1);
+                    }
                     WM_WTSSESSION_CHANGE => {
                         let bits = HostHints::SESSION_CHANGED.0
                             | if wparam.0 as u32 == WTS_SESSION_LOCK {
@@ -544,7 +603,13 @@ mod tests {
             let _ = SendMessageW(
                 host.hwnd,
                 WM_POWERBROADCAST,
-                Some(WPARAM(0)),
+                Some(WPARAM(PBT_APMSUSPEND as usize)),
+                Some(LPARAM(0)),
+            );
+            let _ = SendMessageW(
+                host.hwnd,
+                WM_POWERBROADCAST,
+                Some(WPARAM(PBT_APMRESUMEAUTOMATIC as usize)),
                 Some(LPARAM(0)),
             );
             let _ = SendMessageW(host.hwnd, WM_ENDSESSION, Some(WPARAM(1)), Some(LPARAM(0)));
@@ -554,6 +619,8 @@ mod tests {
         let bits = direct.load(Ordering::Acquire);
         assert_ne!(bits & HostHints::SESSION_LOCKED.0, 0);
         assert_ne!(bits & HostHints::POWER_CHANGED.0, 0);
+        assert_ne!(bits & HostHints::SUSPENDING.0, 0);
+        assert_ne!(bits & HostHints::RESUMED.0, 0);
         assert_ne!(bits & HostHints::SHUTDOWN.0, 0);
         let mut ticks = 0;
         let mut time_changed = false;

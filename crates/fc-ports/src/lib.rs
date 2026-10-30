@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 pub mod audio;
+pub mod http;
 use fc_domain::ids::Revision;
 use fc_domain::{
     auth::{ActorContext, AuthorityContext},
