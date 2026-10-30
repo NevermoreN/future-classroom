@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "round": "round12",
+  "scope": "fc-storage/fc-ports content Web reads, durable day observation and sender-only command outcomes",
+  "status": "PASS",
+  "recordedUtc": "2026-10-30T14:04:28.643676+00:00",
+  "cwd": "/workspace/共享/Eliora/未来教室计划",
+  "host": "Linux-4.4.302+-x86_64-with-glibc2.39",
+  "toolchain": {
+    "file": "[toolchain]\nchannel = \"1.97.1\"\nprofile = \"minimal\"\ncomponents = [\"rustfmt\", \"clippy\"]\n",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "target": "default host; no --target argument",
+    "targetDirectory": "target (workspace default; captured binaries under target/debug/deps)",
+    "profiles": "Cargo test default test profile and clippy default dev profile; Cargo.toml has no dev/test override",
+    "environmentNote": "Historical invocation environment was not separately dumped; profile and binary path are evidenced by captured Cargo output."
+  },
+  "evidenceProvenance": "The recorded console strings were captured in the active functions.exec/exec_command/write_stdin tool results and transcribed verbatim here; original raw log files did not exist. This is not a replay or newly fabricated console. Capture-session IDs are tool-session references, not persistent external evidence.",
+  "checks": [
+    {
+      "command": "cargo test -p fc-storage --lib content_web_tests --locked",
+      "profile": "test (Cargo default, unoptimized + debuginfo)",
+      "exitCode": 0,
+      "passed": 10,
+      "failed": 0,
+      "filtered": 24,
+      "testSeconds": 1.24,
+      "captureSession": 48129,
+      "captureKind": "verbatim merged stdout/stderr from tool output; final completion chunk",
+      "output": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.99s\n     Running unittests src/lib.rs (target/debug/deps/fc_storage-50351b439967861c)\n\nrunning 10 tests\ntest business::content_web_tests::web_precommit_lease_revocation_rolls_back_receipt_and_slot ... ok\ntest business::content_web_tests::web_global_target_requires_fresh_assignment_but_native_global_semantics_stay_compatible ... ok\ntest business::content_web_tests::web_cleared_slot_retains_cas_and_receipts_are_historical_sender_only_without_recommit ... ok\ntest business::content_web_tests::web_receipt_requires_current_account_epoch_but_new_own_session_can_query_original_commit ... ok\ntest business::content_web_tests::web_read_only_new_day_observation_survives_restart_and_wall_rollback_without_desktop ... ok\ntest business::content_web_tests::web_receipt_shape_digest_length_duplicates_and_record_corruption_are_rejected ... ok\ntest business::content_web_tests::web_midnight_and_persistent_day_floor_never_release_expired_or_cleared_text ... ok\ntest business::content_web_tests::web_receipts_recheck_exact_channel_after_read_and_local_lock_does_not_revoke_web ... ok\ntest business::content_web_tests::web_committed_but_midnight_or_revoked_result_release_is_unknown_not_prewrite_denial ... ok\ntest business::content_web_tests::web_reminder_receipts_require_web_origin_and_do_not_grant_other_authors_access ... ok\n\ntest result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 1.24s\n\n",
+      "earlierCompileChunk": "   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n"
+    },
+    {
+      "command": "cargo test -p fc-storage --lib --locked",
+      "profile": "test (Cargo default, unoptimized + debuginfo)",
+      "exitCode": 0,
+      "passed": 34,
+      "failed": 0,
+      "filtered": 0,
+      "testSeconds": 6.9,
+      "captureSession": 17085,
+      "captureKind": "verbatim merged stdout/stderr from tool output; final completion chunk",
+      "output": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.79s\n     Running unittests src/lib.rs (target/debug/deps/fc_storage-50351b439967861c)\n\nrunning 34 tests\ntest business::codec::json_tests::record_objects_are_strict_and_preserve_existing_semantic_corruption_checks ... ok\ntest business::codec::json_tests::exact_object_helper_rejects_missing_null_unknown_and_nonobjects ... ok\ntest business::codec::json_tests::every_identity_object_rejects_unknown_and_missing_fields_including_nullable_fields ... ok\ntest business::codec::json_tests::bounded_json_rejects_recursive_and_escaped_duplicate_keys_before_value_conversion ... ok\ntest business::codec::json_tests::storage_json_enforces_exact_byte_depth_and_container_budgets ... ok\ntest business::content_web_tests::web_precommit_lease_revocation_rolls_back_receipt_and_slot ... ok\ntest business::content_web_tests::web_cleared_slot_retains_cas_and_receipts_are_historical_sender_only_without_recommit ... ok\ntest business::content_web_tests::web_receipt_requires_current_account_epoch_but_new_own_session_can_query_original_commit ... ok\ntest business::lesson_codec::tests::format_one_remains_unproved_and_format_two_proof_is_strict ... ok\ntest business::content_web_tests::web_read_only_new_day_observation_survives_restart_and_wall_rollback_without_desktop ... ok\ntest business::content_web_tests::web_global_target_requires_fresh_assignment_but_native_global_semantics_stay_compatible ... ok\ntest business::content_web_tests::web_midnight_and_persistent_day_floor_never_release_expired_or_cleared_text ... ok\ntest business::voice_codec::tests::damaged_time_and_active_state_in_compact_audit_fail_closed ... ok\ntest business::voice_codec::tests::full_audit_with_twenty_digit_ids_four_active_and_max_pending_assets_fits_document ... ok\ntest login::tests::oversized_security_blob_is_rejected_without_creating_an_owned_copy ... ok\ntest business::content_web_tests::web_receipt_shape_digest_length_duplicates_and_record_corruption_are_rejected ... ok\ntest business::content_web_tests::web_receipts_recheck_exact_channel_after_read_and_local_lock_does_not_revoke_web ... ok\ntest business::content_web_tests::web_reminder_receipts_require_web_origin_and_do_not_grant_other_authors_access ... ok\ntest business::content_web_tests::web_committed_but_midnight_or_revoked_result_release_is_unknown_not_prewrite_denial ... ok\ntest business::logout_tests::logout_sqlite_revalidates_live_session_after_authority_update_before_commit ... ok\ntest tests::canceled_backup_removes_only_its_new_partial_file ... ok\ntest tests::batch_sql_failure_rolls_back_data_journal_and_authority ... ok\ntest tests::committed_publication_error_fails_closed ... ok\ntest business::logout_tests::logout_sqlite_rejects_other_accounts_stale_expected_epoch_and_initial_password ... ok\ntest tests::committed_publication_panic_fails_closed ... ok\ntest tests::future_schema_and_invalid_commands_are_rejected ... ok\ntest tests::full_queue_returns_busy_and_stop_has_independent_capacity ... ok\ntest tests::durable_reopen_cas_journal_and_cleanup ... ok\ntest business::logout_tests::logout_sqlite_epoch_survives_restart_and_old_local_and_web_actors_stay_revoked ... ok\ntest tests::oversized_database_blob_is_rejected_at_borrow_before_allocating_a_document ... ok\ntest tests::coherent_backup_reopens_with_original_journal_and_cas ... ok\ntest tests::unused_vector_capacity_is_charged_to_the_ingress_budget ... ok\ntest tests::metadata_scan_short_byte_limited_pages_keep_explicit_continuation ... ok\ntest tests::byte_budget_saturates_before_slot_count_and_has_no_retry_drift ... ok\n\ntest result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.90s\n\n",
+      "earlierCompileChunk": "   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n"
+    },
+    {
+      "command": "cargo clippy -p fc-storage -p fc-ports --all-targets --locked -- -D warnings",
+      "profile": "dev (Cargo default, unoptimized + debuginfo)",
+      "exitCode": 0,
+      "captureSession": 64438,
+      "captureKind": "verbatim merged stdout/stderr, concatenating initial and completion tool output chunks",
+      "output": "    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.97s\n"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "profile": "not applicable (Python architecture checker)",
+      "exitCode": 0,
+      "captureKind": "verbatim architecture-output excerpt from combined read-only tool command; not an independent logfile",
+      "output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 36567,
+      "sha256": "33a1e5516dbefff3b8b92b484b5bb2210442df459848025435f3712bb651a67a"
+    },
+    {
+      "path": "crates/fc-storage/src/business/content_web.rs",
+      "bytes": 13730,
+      "sha256": "bc303da7b969447b287d843d9499ac66743049a4c064b2dc0ac323b52a8f5eb1"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/content_web.rs",
+      "bytes": 25155,
+      "sha256": "8a8e7ef264edc5320fa3fcff88ef2dfe0e8d01b544dfa11de0eede003b41e9a2"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 21706,
+      "sha256": "c60562a4b7ad52001fa98d8d691ab24e1a70f3f1563ab82c6a953766faf5c6f4"
+    },
+    {
+      "path": "crates/fc-ports/src/content_web.rs",
+      "bytes": 1343,
+      "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6"
+    }
+  ],
+  "historicalFailures": [
+    {
+      "kind": "test-fixture compilation failure",
+      "captureSession": 66988,
+      "status": "FIXED",
+      "summary": "Initial synthetic fingerprint fixture used unsupported serde_json json!([0; 31]) repetition syntax. Changed fixture to json!(vec![0; 31]); no product behavior weakened.",
+      "evidenceKind": "summary of captured compile failure; full log not retained as a separate file"
+    },
+    {
+      "kind": "invalid identity fixture",
+      "captureSessions": [
+        42768,
+        54632
+      ],
+      "status": "FIXED",
+      "summary": "Two initial tests removed all enabled assignments from TeacherAdmin accounts. IdentityState::validate correctly rejects TeacherAdmin without any assignment, so expected Permission errors instead received Unavailable from damaged reconstructed state. Fixed fixtures to retain stable assignments while disabling the target teacher or class, and explicitly validate fixture state. Product identity checks were not relaxed.",
+      "affectedTests": [
+        "web_global_target_requires_fresh_assignment_but_native_global_semantics_stay_compatible",
+        "web_reminder_receipts_require_web_origin_and_do_not_grant_other_authors_access"
+      ],
+      "historicalResult": {
+        "passed": 6,
+        "failed": 2,
+        "total": 8
+      },
+      "evidenceKind": "summary of original tool-captured failed runs, not a recreated console transcript"
+    }
+  ],
+  "cleanup": {
+    "fixturePolicy": "Each test owns a 0700 Unix directory (platform-owned TEMP on Windows), explicitly shuts down/joins its writer, and removes its directory through RAII. Existing storage tests also clean their own fixtures.",
+    "command": "find /tmp -maxdepth 1 -type d -name 'FutureClassroom-ContentWeb-*' -print",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "",
+    "observation": "No matching content Web fixture directories remained at evidence creation. No deletion of target/build caches was performed; final whole-round cleanup belongs to root.",
+    "sshAuthorization": "Untouched; no Windows SSH service/key/private-key mutation."
+  },
+  "limitations": [
+    "This is host-side storage/ports evidence, not final whole-workspace, Windows, Web UI, package or product acceptance.",
+    "No KDF suite rerun, separate target directory, production deadline or worker-count change was introduced.",
+    "The v1 receipt remains fingerprint + record; validation checks exact schema, 32 fingerprint bytes and canonical record, not an added result digest.",
+    "Only the five assigned source files are hashed here; root must bind the final combined source tree and binaries independently."
+  ],
+  "validationTarget": "Linux host storage/ports scope only",
+  "readOnlyBackendReview": {
+    "path": "crates/fc-bootstrap/src/backend/content_web.rs",
+    "findings": [],
+    "confirmed": [
+      "expires_at now uses LocalDateTime::new(next_day(now)?.date, 0), preserving the generic next_day helper for other uses.",
+      "Save performs representable-expiry precheck before writer mutation, uses strict storage write, and maps all subsequent document/lease/date release failures to Unavailable/RESULT_UNKNOWN.",
+      "Read/outcome release rebuilds metadata from fresh state, checks actor and target, and rejects date rollover; scopes observes durable day and checks identity revision and date before return.",
+      "No additional concrete defect found in this read-only pass; final HTTP send guard/Windows execution remain root integration evidence."
+    ]
+  }
+}

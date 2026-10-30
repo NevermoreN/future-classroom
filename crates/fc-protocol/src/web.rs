@@ -7,6 +7,7 @@ use fc_ports::{http::*, voice::*};
 use serde::Deserialize;
 
 pub mod assets;
+pub mod content;
 pub mod pairing;
 pub mod responses;
 
@@ -30,6 +31,10 @@ pub enum Route {
     PairingPoll { request_id: u64 },
     Session,
     SessionLogout,
+    ContentScopes { kind: content::Kind, offset: usize },
+    ContentRead { key: content::Key },
+    ContentSave { key: content::Key },
+    ContentCommand { command_id: CommandId },
     VoiceCapabilities,
     VoiceUpload { class_id: ClassId },
     VoiceSubmit,
@@ -50,6 +55,7 @@ impl Route {
             }
             Self::VoiceUpload { .. } => 2 * 1024 * 1024,
             Self::VoiceSubmit | Self::VoiceCancel { .. } => crate::MAX_JSON_BYTES as u64,
+            Self::ContentSave { .. } => crate::MAX_JSON_BYTES as u64,
             _ => 0,
         }
     }
@@ -62,6 +68,7 @@ impl Route {
             Self::PairingCreate
                 | Self::PairingPoll { .. }
                 | Self::SessionLogout
+                | Self::ContentSave { .. }
                 | Self::VoiceUpload { .. }
                 | Self::VoiceSubmit
                 | Self::VoiceCancel { .. }
@@ -124,7 +131,38 @@ impl WebBoundary {
             "voice/capabilities" => Route::VoiceCapabilities,
             "voice/broadcasts" => Route::VoiceSubmit,
             _ => {
-                if let Some(id) = path
+                if let Some(offset) = path.strip_prefix("content/homework/scopes/") {
+                    Route::ContentScopes {
+                        kind: content::Kind::Homework,
+                        offset: content::route_offset(offset).ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some(offset) = path.strip_prefix("content/reminders/scopes/") {
+                    Route::ContentScopes {
+                        kind: content::Kind::Reminder,
+                        offset: content::route_offset(offset).ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some(key) = path.strip_prefix("content/homework/") {
+                    let key = content::route_key(content::Kind::Homework, key)
+                        .ok_or(WebError::NotFound)?;
+                    if method == "POST" {
+                        Route::ContentSave { key }
+                    } else {
+                        Route::ContentRead { key }
+                    }
+                } else if let Some(key) = path.strip_prefix("content/reminders/") {
+                    let key = content::route_key(content::Kind::Reminder, key)
+                        .ok_or(WebError::NotFound)?;
+                    if method == "POST" {
+                        Route::ContentSave { key }
+                    } else {
+                        Route::ContentRead { key }
+                    }
+                } else if let Some(id) = path.strip_prefix("content/commands/") {
+                    Route::ContentCommand {
+                        command_id: CommandId::new(decimal(id, false).ok_or(WebError::NotFound)?)
+                            .map_err(|_| WebError::NotFound)?,
+                    }
+                } else if let Some(id) = path
                     .strip_prefix("pairing/requests/")
                     .and_then(|s| s.strip_suffix("/poll"))
                 {

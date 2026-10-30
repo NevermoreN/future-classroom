@@ -82,7 +82,7 @@ function fixedStatus(value: unknown, expected: string): void {
   if (v.status !== expected) fail()
 }
 export function loggedOut(value: unknown): void { fixedStatus(value, 'LOGGED_OUT') }
-export const errorCodes = ['INVALID_REQUEST', 'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'RESULT_UNKNOWN'] as const
+export const errorCodes = ['INVALID_REQUEST', 'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'RESULT_UNKNOWN', 'REVISION_CONFLICT', 'DAY_CHANGED', 'IDEMPOTENCY_CONFLICT'] as const
 export type ErrorCode = typeof errorCodes[number]
 export function errorCode(value: unknown): ErrorCode {
   const v = object(value, ['schemaVersion', 'code']); version(v.schemaVersion)

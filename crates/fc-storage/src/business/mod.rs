@@ -1,6 +1,10 @@
 //! Typed business repositories on the existing SQLite writer. The synchronous
 //! facade is for application workers; native/HTTP event loops poll tickets.
 pub(crate) mod codec;
+mod content_web;
+#[cfg(test)]
+#[path = "tests/content_web.rs"]
+mod content_web_tests;
 mod desktop;
 mod display;
 mod display_codec;
@@ -132,6 +136,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
         let bytes = self
             .handle
             .try_transaction(ReadContent {
+                web_strict: false,
                 key,
                 actor: actor.clone(),
                 clock: self.clock.clone(),
@@ -151,6 +156,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
         actor: ActorContext,
     ) -> Result<Ticket<Vec<u8>>, StorageError> {
         self.handle.try_transaction(ContentTask {
+            web_strict: false,
             command,
             actor,
             clock: self.clock.clone(),
@@ -236,6 +242,7 @@ fn authority(s: &IdentityState, a: &ActorContext) -> Result<AuthorityContext, St
     })
 }
 struct ReadContent {
+    web_strict: bool,
     key: ContentKey,
     actor: ActorContext,
     clock: Arc<dyn Clock + Send + Sync>,
@@ -253,25 +260,15 @@ impl<S> TransactionTask<S> for ReadContent {
         (self.session)(&state, &self.actor)?;
         let now = self.clock.now();
         let a = authority(&state, &self.actor)?;
-        let actual_date = match &self.key {
-            ContentKey::Homework(k) => {
-                a.authorize_owned_content(
-                    &self.actor,
-                    now,
-                    k.class_id,
-                    k.subject_id,
-                    k.owner_teacher_id,
-                )
+        content_web::authorize_key(&self.key, &a, &self.actor, now)?;
+        if self.web_strict {
+            content_web::validate_web_target(&state, &self.key, &self.actor)?;
+            content_web::require_current_day(d, &state, &self.key, now)?;
+        }
+        if !content_web::date_is_current(d, &state, &self.key, now)? {
+            (self.session)(&state, &self.actor)?;
+            a.validate_actor(&self.actor, self.clock.now())
                 .map_err(|e| StorageError::Content(ContentError::Permission(e)))?;
-                k.actual_date
-            }
-            ContentKey::SharedReminder(k) => {
-                a.authorize_shared_reminder(&self.actor, now, k.class_id)
-                    .map_err(|e| StorageError::Content(ContentError::Permission(e)))?;
-                k.actual_date
-            }
-        };
-        if actual_date != now.date {
             return Ok(TransactionDecision {
                 precommit: None,
                 outcome: b"null".to_vec(),
@@ -288,16 +285,22 @@ impl<S> TransactionTask<S> for ReadContent {
                 if record.key != self.key {
                     return Err(StorageError::Database);
                 }
-                (self.session)(&state, &self.actor)?;
-                a.validate_actor(&self.actor, self.clock.now())
-                    .map_err(|e| StorageError::Content(ContentError::Permission(e)))?;
-                if record.visible_text(self.clock.now().date).is_some() {
-                    v
-                } else {
-                    Value::Null
-                }
+                v
             }
             None => Value::Null,
+        };
+        (self.session)(&state, &self.actor)?;
+        let now = self.clock.now();
+        content_web::authorize_key(&self.key, &a, &self.actor, now)?;
+        if self.web_strict {
+            content_web::validate_web_target(&state, &self.key, &self.actor)?;
+            content_web::require_current_day(d, &state, &self.key, now)?;
+        }
+        // Empty is a real committed slot with a CAS revision, not an absent row.
+        let value = if content_web::date_is_current(d, &state, &self.key, now)? {
+            value
+        } else {
+            Value::Null
         };
         Ok(TransactionDecision {
             precommit: None,
@@ -307,6 +310,7 @@ impl<S> TransactionTask<S> for ReadContent {
     }
 }
 struct ContentTask<S> {
+    web_strict: bool,
     command: ContentCommand,
     actor: ActorContext,
     clock: Arc<dyn Clock + Send + Sync>,
@@ -324,6 +328,10 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
         let state = load_identity(d)?;
         (self.session)(&state, &self.actor)?;
         let a = authority(&state, &self.actor)?;
+        content_web::require_current_day(d, &state, &self.command.key, self.clock.now())?;
+        if self.web_strict {
+            content_web::validate_web_target(&state, &self.command.key, &self.actor)?;
+        }
         let journal = format!("business/receipt/content/{}", self.command.command_id.get());
         let payload = codec::bytes(
             &json!({"actor":codec::actor(&self.actor),"key":codec::key(&self.command.key),"expected":self.command.expected_revision.get(),"text":self.command.text}),
@@ -340,7 +348,7 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
             if expected != digest {
                 return Err(StorageError::Content(ContentError::IdempotencyConflict));
             }
-            let record = codec::read_record(&v["record"])?;
+            let record = content_web::receipt(&v)?;
             if record.key != self.command.key
                 || record.last_actor_id != self.actor.principal_id
                 || record.text != self.command.normalized_text()
@@ -354,8 +362,14 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
                 return Err(StorageError::Database);
             }
             // Replays never mutate; current authority still gates release of original result.
+            (self.session)(&state, &self.actor)?;
+            let now = self.clock.now();
+            content_web::require_current_day(d, &state, &self.command.key, now)?;
+            if self.web_strict {
+                content_web::validate_web_target(&state, &self.command.key, &self.actor)?;
+            }
             self.command
-                .validate(&a, &self.actor, self.clock.now())
+                .validate(&a, &self.actor, now)
                 .map_err(StorageError::Content)?;
             return Ok(TransactionDecision {
                 precommit: None,
@@ -375,6 +389,7 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
             return Err(StorageError::Database);
         }
         let now = self.clock.now();
+        content_web::require_current_day(d, &state, &self.command.key, now)?;
         let record = self
             .command
             .apply(&a, &self.actor, now, current.as_ref())
@@ -410,9 +425,13 @@ impl<S: Send> TransactionTask<S> for ContentTask<S> {
         let actor = self.actor.clone();
         let clock = self.clock.clone();
         let command = self.command.clone();
+        let web_strict = self.web_strict;
         Ok(TransactionDecision {
             precommit: Some(Box::new(move || {
                 session(&state, &actor)?;
+                if web_strict {
+                    content_web::validate_web_target(&state, &command.key, &actor)?;
+                }
                 command
                     .validate(&a, &actor, clock.now())
                     .map_err(StorageError::Content)

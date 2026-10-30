@@ -1,0 +1,45 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "fc-bootstrap",
+    "--lib",
+    "--release",
+    "web_application::tests::content_tests",
+    "--locked",
+    "--",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 42.848,
+  "output": "   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 38.44s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 4 tests\ntest web_application::tests::content_tests::content_http_authority_and_csrf_injection_fail_before_durable_mutation ... ok\ntest web_application::tests::content_tests::content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automatic_rewrite ... ok\ntest web_application::tests::content_tests::content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_clock_rollback ... ok\ntest web_application::tests::content_tests::content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_accounts ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 41 filtered out; finished in 4.35s\n\n",
+  "sourceSha256": {
+    "crates/fc-protocol/src/web.rs": "ae4ea0c60a7e55e1f0ed9e31c01a53e595e1fc5f5dc869175b7673f572c09954",
+    "crates/fc-protocol/src/web/responses.rs": "f4dcf33a4d1881a7b6530f6211e023d9782d0d5b953c9cf76c12f255d23429a0",
+    "crates/fc-protocol/src/web/content.rs": "a6c8a23b6529d7502118811bb8ac19d3fefe8279e19a53a749d45bb7a016f7d7",
+    "crates/fc-protocol/src/web/content/tests.rs": "56669b3b27234bd2263c6cb1874c19518807e5257fc0b7ecf343418e8d966442",
+    "crates/fc-bootstrap/src/web_application.rs": "ed24650014cb5f3e77b88a9fb625d90cb5fb503f36e78379aff5f95679997dd0",
+    "crates/fc-bootstrap/src/web_application/content.rs": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245",
+    "crates/fc-bootstrap/src/web_application/tests.rs": "4b52318299ea13d9fdf3a8291ee9a4a971803f366346e5649ab94f90e4e465dd",
+    "crates/fc-bootstrap/src/web_application/content/tests.rs": "9d2149897ccd4965253ac370b507aa27f6038969a9d4aed00bf68ccd1a002bc6"
+  },
+  "sharedFixtureRegression": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-bootstrap",
+      "--lib",
+      "--release",
+      "web_application::",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 6.663,
+    "output": "    Finished `release` profile [optimized] target(s) in 0.06s\n     Running unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 7 tests\ntest web_application::tests::content_tests::content_http_authority_and_csrf_injection_fail_before_durable_mutation ... ok\ntest web_application::tests::content_tests::content_http_clear_keeps_cas_and_receipts_keep_original_result_without_automatic_rewrite ... ok\ntest web_application::tests::content_tests::content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_clock_rollback ... ok\ntest web_application::tests::content_tests::content_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_accounts ... ok\ntest web_application::tests::dispatcher_rejects_another_backend_even_when_exact_lease_numbers_collide ... ok\ntest web_application::tests::pairing_session_csrf_and_account_logout_cross_the_real_backend_and_persist_epoch ... ok\ntest web_application::tests::public_status_is_non_sensitive_and_frame_origin_cookie_fail_before_mutation ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 38 filtered out; finished in 6.56s\n\n"
+  },
+  "fixtureDirectoriesRemaining": []
+}

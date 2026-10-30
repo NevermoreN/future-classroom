@@ -1,0 +1,637 @@
+{
+  "scope": "SYNTHETIC browser/request fixtures only; not actual Rust HTTP/TLS/Windows acceptance",
+  "steps": [
+    {
+      "name": "materials_voice_remain_explicitly_unimplemented",
+      "status": "PASS"
+    },
+    {
+      "name": "home_bottom_reminder_action",
+      "status": "PASS"
+    },
+    {
+      "name": "homework_first_page_twenty_real_scopes",
+      "status": "PASS"
+    },
+    {
+      "name": "scope_total_not_silently_truncated",
+      "status": "PASS"
+    },
+    {
+      "name": "homework_last_page_one_item",
+      "status": "PASS"
+    },
+    {
+      "name": "keyboard_explicit_save_once",
+      "status": "PASS"
+    },
+    {
+      "name": "raw_whitespace_normalized_FEFF_retained_server_result",
+      "status": "PASS"
+    },
+    {
+      "name": "first_save_CAS_zero_to_one",
+      "status": "PASS"
+    },
+    {
+      "name": "all_private_writes_exact_CSRF_browser_Origin",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel_navigation_preserves_draft_no_submit",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel_logout_preserves_draft_no_POST",
+      "status": "PASS"
+    },
+    {
+      "name": "conflict_no_unconditional_overwrite",
+      "status": "PASS"
+    },
+    {
+      "name": "conflict_preserves_original_draft",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh_GET_still_requires_explicit_merge",
+      "status": "PASS"
+    },
+    {
+      "name": "merge_submits_fresh_CAS_only_after_confirmation",
+      "status": "PASS"
+    },
+    {
+      "name": "clear_uses_CAS_keeps_nonzero_revision",
+      "status": "PASS"
+    },
+    {
+      "name": "RESULT_UNKNOWN_not_resent",
+      "status": "PASS"
+    },
+    {
+      "name": "NOT_FOUND_not_proof_no_auto_retry",
+      "status": "PASS"
+    },
+    {
+      "name": "query_result_does_not_replace_editor",
+      "status": "PASS"
+    },
+    {
+      "name": "historical_receipt_not_current_revision",
+      "status": "PASS"
+    },
+    {
+      "name": "manual_GET_current_distinguishes_later_version",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit_adopt_current_without_new_POST",
+      "status": "PASS"
+    },
+    {
+      "name": "reminder_outside_own_assignments_supported",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile390_editor_no_horizontal_overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "business_page_bottom_reminder_action",
+      "status": "PASS"
+    },
+    {
+      "name": "scope_change_retains_reviewable_draft",
+      "status": "PASS"
+    },
+    {
+      "name": "scope_change_blocks_old_target",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit_scope_reload_does_not_rebind_old_draft",
+      "status": "PASS"
+    },
+    {
+      "name": "DAY_CHANGED_old_draft_readonly_no_date_rewrite",
+      "status": "PASS"
+    },
+    {
+      "name": "new_day_requires_fresh_scope_selection_no_old_text_transfer",
+      "status": "PASS"
+    },
+    {
+      "name": "server_midnight_timer_prevents_submission",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong_CONTENT_key_not_adopted",
+      "status": "PASS"
+    },
+    {
+      "name": "403_clears_editor_and_pairing_session_mirror",
+      "status": "PASS"
+    },
+    {
+      "name": "revocation_stops_automatic_operations",
+      "status": "PASS"
+    },
+    {
+      "name": "401_read_clears_pairing_session_mirror",
+      "status": "PASS"
+    },
+    {
+      "name": "401_stops_automatic_operations",
+      "status": "PASS"
+    },
+    {
+      "name": "logout_unsaved_guard_cancel_no_POST",
+      "status": "PASS"
+    },
+    {
+      "name": "confirmed_logout_clears_content_state",
+      "status": "PASS"
+    },
+    {
+      "name": "no_persistent_draft_or_secret_storage",
+      "status": "PASS"
+    },
+    {
+      "name": "all_same_origin_no_secret_query_and_CSRF",
+      "status": "PASS"
+    },
+    {
+      "name": "production_CSP_nosniff_no_security_console_errors",
+      "status": "PASS"
+    },
+    {
+      "name": "no_uncaught_runtime_errors",
+      "status": "PASS"
+    }
+  ],
+  "requests": [
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/20",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "10517780596732430537",
+      "expectedRevision": "0",
+      "rawBytes": 29
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "22105006544396109",
+      "expectedRevision": "1",
+      "rawBytes": 24
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "18248933747611191449",
+      "expectedRevision": "2",
+      "rawBytes": 24
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "18273197582453681404",
+      "expectedRevision": "3",
+      "rawBytes": 0
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "16309611335938013898",
+      "expectedRevision": "4",
+      "rawBytes": 30
+    },
+    {
+      "path": "content/commands/16309611335938013898",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/commands/16309611335938013898",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/reminders/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/reminders/99/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/reminders/99/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true,
+      "commandId": "2088375549440906262",
+      "expectedRevision": "0",
+      "rawBytes": 33
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/1/2/9/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/20",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-30",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-30",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "status",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/scopes/0",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "content/homework/2/2/9/2026-10-31",
+      "method": "GET",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    },
+    {
+      "path": "session/logout",
+      "method": "POST",
+      "queryEmpty": true,
+      "originOK": true,
+      "csrfOK": true
+    }
+  ],
+  "screenshots": [
+    "/tmp/fc-round12-homework-desktop.png",
+    "/tmp/fc-round12-query-result-desktop.png",
+    "/tmp/fc-round12-reminder-mobile.png",
+    "/tmp/fc-round12-reminder-mobile-viewport.png",
+    "/tmp/fc-round12-reminder-320-viewport.png"
+  ],
+  "status": "PASS",
+  "counts": {
+    "writes": 6,
+    "queries": 2,
+    "logouts": 1,
+    "dialogs": 9
+  },
+  "cspErrors": [],
+  "runtimeErrors": [],
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "completed": true,
+  "additionalChecks": [
+    {
+      "name": "mobile320_fixed_bottom_reminder_no_overflow",
+      "status": "PASS",
+      "dock": {
+        "top": 672,
+        "bottom": 740,
+        "width": 320,
+        "viewportHeight": 740,
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "native_beforeunload_cancel_keeps_draft",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP_preview_blocks_pairing_and_private_API",
+      "status": "PASS",
+      "apiCalls": 0
+    }
+  ],
+  "cleanup": {
+    "ownedRoutesRemoved": true,
+    "ownedCookiesRemaining": 0,
+    "ownedPageClosed": true,
+    "ownedPreviewPort4173Closed": true,
+    "distAndNodeModulesRetainedForRoot": true
+  },
+  "artifacts": {
+    "manifest": {
+      "schemaVersion": 1,
+      "apiVersion": 1,
+      "uiCompatibilityVersion": 1,
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "sizeBytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-C45a6naV.js",
+          "sizeBytes": 337498,
+          "sha256": "ea422711de8dc44726292c8aff087951c63f0359be6069197cd4ab1417ee81be"
+        },
+        {
+          "path": "assets/index-h5ed8Pzc.css",
+          "sizeBytes": 32004,
+          "sha256": "9e4f5b1ce67f548a0a1baf502642af80030c15a9d2fafd0175cf598521ebe1f7"
+        },
+        {
+          "path": "index.html",
+          "sizeBytes": 684,
+          "sha256": "7d9f8eb853bcc7170c1ce8664721349ea0422d92affdb8a61f0716bb22378269"
+        }
+      ]
+    },
+    "manifestSha256": "4e08c9662e0e5b5e822f8b7485dacdc87636d7e28cc65e17a686d70b5b68c08c",
+    "budget": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "assetCount": 4,
+      "totalBytes": 370468,
+      "totalLimitBytes": 5242880,
+      "gzipJsCssBytes": 110045,
+      "gzipJsCssLimitBytes": 524288,
+      "scope": "static build only; listener, wire TLS, real browser pairing not established by this report"
+    },
+    "screenshots": [
+      {
+        "path": "/tmp/fc-round12-homework-desktop.png",
+        "sha256": "902d545b01a59fa1ba821920e425353596061f4550159518fbcae0e5d7859b4a"
+      },
+      {
+        "path": "/tmp/fc-round12-query-result-desktop.png",
+        "sha256": "77db0f8420b0b1e82197d314a64a00fb3921e4a1d85f31940527020072d58bb5"
+      },
+      {
+        "path": "/tmp/fc-round12-reminder-mobile.png",
+        "sha256": "9671d5bf154f10d5dfb3bd5e46e76876601f96fafd91fa1ea5c919d57c423391"
+      },
+      {
+        "path": "/tmp/fc-round12-reminder-mobile-viewport.png",
+        "sha256": "995eb7c1bea71b316a751a83fda9bb779a34ba805c5d452d791860022f3988c2"
+      },
+      {
+        "path": "/tmp/fc-round12-reminder-320-viewport.png",
+        "sha256": "d4ca6259e863e9e9a8e8c314223548a8c5b97e459cf3ba9517776b3f1f33b4f1"
+      }
+    ]
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "unitTests": 43,
+    "staticBuild": "PASS",
+    "dependencyLockChanged": false
+  },
+  "evidenceLimits": [
+    "Synthetic browser mock API responses, not real Rust HTTP/TLS or Windows acceptance.",
+    "Expected HTTP 409/503/401/403 browser console messages are fixture responses; CSP violations and uncaught runtime errors were zero.",
+    "This round adds HOMEWORK and REMINDER; materials and voice business UIs remain unavailable.",
+    "Runner output may yield at native dialog; persisted Page report completed=true is used as final evidence."
+  ],
+  "archivedScreenshots": [
+    {
+      "file": "2026-10-30-teacher-content-synthetic-round12-homework-desktop.png",
+      "sha256": "902d545b01a59fa1ba821920e425353596061f4550159518fbcae0e5d7859b4a"
+    },
+    {
+      "file": "2026-10-30-teacher-content-synthetic-round12-query-result-desktop.png",
+      "sha256": "77db0f8420b0b1e82197d314a64a00fb3921e4a1d85f31940527020072d58bb5"
+    },
+    {
+      "file": "2026-10-30-teacher-content-synthetic-round12-reminder-320-viewport.png",
+      "sha256": "d4ca6259e863e9e9a8e8c314223548a8c5b97e459cf3ba9517776b3f1f33b4f1"
+    },
+    {
+      "file": "2026-10-30-teacher-content-synthetic-round12-reminder-mobile-viewport.png",
+      "sha256": "995eb7c1bea71b316a751a83fda9bb779a34ba805c5d452d791860022f3988c2"
+    },
+    {
+      "file": "2026-10-30-teacher-content-synthetic-round12-reminder-mobile.png",
+      "sha256": "9671d5bf154f10d5dfb3bd5e46e76876601f96fafd91fa1ea5c919d57c423391"
+    }
+  ],
+  "runner": {
+    "language": "JavaScript",
+    "scope": "Primary synthetic browser reproduction code; additionalChecks evidence kept separately in this report",
+    "code": "async page => {\n const report={scope:\"SYNTHETIC browser/request fixtures only; not actual Rust HTTP/TLS/Windows acceptance\",steps:[],requests:[],screenshots:[]};\n page.__fcRound12Report=report;\n const check=(condition,name)=>{if(!condition)throw new Error(name);report.steps.push({name,status:\"PASS\"});};\n let phase=\"setup\",today=\"2026-10-30\",serverClock=\"10:00:00\",identity=\"1\",changedScopes=false,changeOnNext=false,mode=\"normal\",force403=false,force401=false,wrongKey=false,authorized=true,acceptDialogs=false,dialogCount=0;\n let writes=0,queries=0,logouts=0,unknownId=null,notFoundOnce=false;\n const slots=new Map(),receipts=new Map(),calls=[],cspErrors=[],runtimeErrors=[],csrf=\"b\".repeat(64),bearer=\"c\".repeat(64);\n const onConsole=m=>{if(m.type()===\"error\"&&/Content Security Policy|Refused to|violates.*directive|unsafe-inline/i.test(m.text()))cspErrors.push(m.text());};\n const onError=e=>runtimeErrors.push(e.message),onDialog=async d=>{dialogCount++;if(acceptDialogs||phase===\"setup\")await d.accept();else await d.dismiss();};\n page.on(\"console\",onConsole);page.on(\"pageerror\",onError);page.on(\"dialog\",onDialog);\n const nextDay=d=>d===\"2026-10-30\"?\"2026-10-31\":\"2026-11-01\";\n const normalize=s=>s.replace(/^\\p{White_Space}+|\\p{White_Space}+$/gu,\"\");\n const keyForPath=path=>{const p=path.split(\"/\");return p[1]===\"homework\"?{kind:\"HOMEWORK\",classId:p[2],subjectId:p[3],ownerTeacherId:p[4],date:p[5]}:{kind:\"REMINDER\",classId:p[2],date:p[3]};};\n const slot=path=>slots.get(path)||{revision:\"0\",text:\"\"};\n const doc=path=>{const key=keyForPath(path),r=slot(path);return {schemaVersion:1,status:\"CONTENT\",today,serverNow:today+\"T\"+serverClock,expiresAt:nextDay(key.date)+\"T00:00:00\",key,revision:r.revision,text:r.text,lastActorId:r.revision===\"0\"?null:\"9\",updatedAt:r.revision===\"0\"?null:today+\"T09:00:00\"};};\n const seed=(path,revision,text)=>slots.set(path,{revision:String(revision),text});\n const currentPath=()=> \"content/homework/\"+(changedScopes?\"2\":\"1\")+\"/2/9/\"+today;\n const bodyText=()=>page.locator(\"body\").innerText();\n try{\n await page.setViewportSize({width:1440,height:1000});\n await page.unroute(\"https://teacher-content.synthetic/**\");\n await page.context().addCookies([{name:\"__Host-FutureClassroom\",value:bearer,domain:\"teacher-content.synthetic\",path:\"/\",secure:true,httpOnly:true,sameSite:\"Strict\"}]);\n const csp=\"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'\";\n await page.route(\"https://teacher-content.synthetic/**\",async route=>{\n  const req=route.request(),url=new URL(req.url()),headers=req.headers();\n  if(!url.pathname.startsWith(\"/fc/api/v1/\")){const response=await route.fetch({url:\"http://172.30.0.2:4173\"+url.pathname});return route.fulfill({response,headers:{...response.headers(),\"content-security-policy\":csp,\"x-content-type-options\":\"nosniff\",\"referrer-policy\":\"no-referrer\",\"permissions-policy\":\"camera=(), geolocation=(), microphone=(self)\"}});}\n  const path=url.pathname.slice(11),body=req.postDataJSON();\n  const log={path,method:req.method(),queryEmpty:!url.search,originOK:req.method()!==\"POST\"||headers.origin===\"https://teacher-content.synthetic\",csrfOK:req.method()!==\"POST\"||headers[\"x-fc-csrf\"]===csrf};\n  calls.push(log);\n  const answer=(status,value,extra={})=>route.fulfill({status,headers:{\"content-type\":\"application/json\",\"cache-control\":\"no-store\",...extra},body:JSON.stringify(value)});\n  if(path===\"status\")return answer(200,{schemaVersion:1,apiVersion:1,uiCompatibilityVersion:1,online:true});\n  if(path===\"session\"){\n   if(!authorized||force401)return answer(401,{schemaVersion:1,code:\"UNAUTHORIZED\"});\n   if(!headers.cookie?.includes(\"__Host-FutureClassroom=\"+bearer))throw new Error(\"synthetic secure cookie missing\");\n   return answer(200,{schemaVersion:1,status:\"AUTHENTICATED\",principal:{id:\"9\",displayName:\"合成教师\",role:\"TEACHER_ADMIN\"},currentClassId:\"1\",assignments:Array.from({length:21},(_,i)=>({classId:String(i+1),subjectId:\"2\"})),csrf});\n  }\n  if(path===\"session/logout\"){logouts++;authorized=false;return answer(200,{schemaVersion:1,status:\"LOGGED_OUT\"},{\"set-cookie\":\"__Host-FutureClassroom=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0\"});}\n  if(force403){force403=false;return answer(403,{schemaVersion:1,code:\"FORBIDDEN\"});}\n  if(force401){force401=false;return answer(401,{schemaVersion:1,code:\"UNAUTHORIZED\"});}\n  const scopeMatch=/^content\\/(homework|reminders)\\/scopes\\/(\\d+)$/.exec(path);\n  if(scopeMatch){\n   const kind=scopeMatch[1]===\"homework\"?\"HOMEWORK\":\"REMINDER\",offset=Number(scopeMatch[2]);\n   if(changeOnNext&&offset===20){identity=\"2\";changedScopes=true;changeOnNext=false;}\n   const ids=kind===\"HOMEWORK\"?Array.from({length:21},(_,i)=>i+(changedScopes?2:1)):[1,99];\n   const items=ids.slice(offset,offset+20).map(id=>kind===\"HOMEWORK\"?{classId:String(id),className:\"合成班级\"+id,subjectId:\"2\",subjectName:\"合成数学\",ownerTeacherId:\"9\",ownerDisplayName:\"合成教师\"}:{classId:String(id),className:id===99?\"非任教共同班级99\":\"共同提醒班级1\"});\n   return answer(200,{schemaVersion:1,status:\"SCOPES\",kind,today,identityRevision:identity,offset,total:ids.length,nextOffset:offset+items.length<ids.length?offset+items.length:null,items});\n  }\n  if(path.startsWith(\"content/commands/\")){\n   queries++;const id=path.split(\"/\").at(-1),receipt=receipts.get(id);\n   if(receipt&&receipt.key.date!==today)return answer(409,{schemaVersion:1,code:\"DAY_CHANGED\"});\n   if(notFoundOnce){notFoundOnce=false;return answer(200,{schemaVersion:1,status:\"COMMAND_RESULT\",commandId:id,state:\"NOT_FOUND\",content:null});}\n   return answer(200,{schemaVersion:1,status:\"COMMAND_RESULT\",commandId:id,state:receipt?\"COMMITTED\":\"NOT_FOUND\",content:receipt||null});\n  }\n  if(path.startsWith(\"content/homework/\")||path.startsWith(\"content/reminders/\")){\n   const key=keyForPath(path);if(key.date!==today)return answer(409,{schemaVersion:1,code:\"DAY_CHANGED\"});\n   if(req.method()===\"GET\"){\n    const value=doc(path);if(wrongKey){wrongKey=false;value.key={...value.key,classId:\"999\"};}\n    return answer(200,value);\n   }\n   writes++;log.commandId=body?.commandId;log.expectedRevision=body?.expectedRevision;log.rawBytes=new TextEncoder().encode(body?.text||\"\").length;\n   if(Object.keys(body).sort().join(\",\")!==\"commandId,expectedRevision,schemaVersion,text\"||typeof body.commandId!==\"string\"||!/^[1-9][0-9]{0,19}$/.test(body.commandId)||BigInt(body.commandId)>18446744073709551615n||headers[\"x-fc-csrf\"]!==csrf)throw new Error(\"invalid write payload/CSRF/id\");\n   if(body.expectedRevision!==slot(path).revision)return answer(409,{schemaVersion:1,code:\"REVISION_CONFLICT\"});\n   if(receipts.has(body.commandId))return answer(409,{schemaVersion:1,code:\"IDEMPOTENCY_CONFLICT\"});\n   seed(path,BigInt(body.expectedRevision)+1n,normalize(body.text));const result=doc(path);receipts.set(body.commandId,result);\n   if(mode===\"unknown\"){mode=\"normal\";unknownId=body.commandId;notFoundOnce=true;seed(path,BigInt(result.revision)+1n,\"后续教师的新版本\");return answer(503,{schemaVersion:1,code:\"RESULT_UNKNOWN\"});}\n   return answer(200,{schemaVersion:1,status:\"COMMITTED\",commandId:body.commandId,content:result});\n  }\n  return answer(404,{schemaVersion:1,code:\"NOT_FOUND\"});\n });\n phase=\"home\";await page.goto(\"https://teacher-content.synthetic/fc/\");await page.getByRole(\"heading\",{name:/你好，合成教师/}).waitFor({timeout:10000});\n check(await page.getByRole(\"button\",{name:\"尚未接入服务\"}).count()===2,\"materials_voice_remain_explicitly_unimplemented\");\n check(await page.getByRole(\"button\",{name:\"管理今日提醒\",exact:true}).isVisible(),\"home_bottom_reminder_action\");\n await page.getByRole(\"button\",{name:\"管理今日作业\",exact:true}).click();\n await page.getByRole(\"button\",{name:/合成班级1.*合成数学.*合成教师/}).first().waitFor({timeout:10000});\n check(await page.locator(\".scope-option\").count()===20,\"homework_first_page_twenty_real_scopes\");\n check((await bodyText()).includes(\"共 21 项\"),\"scope_total_not_silently_truncated\");\n await page.getByRole(\"button\",{name:\"下一页\",exact:true}).click();await page.getByRole(\"button\",{name:/合成班级21.*合成数学.*合成教师/}).waitFor({timeout:10000});\n check(await page.locator(\".scope-option\").count()===1,\"homework_last_page_one_item\");\n await page.getByRole(\"button\",{name:\"上一页\",exact:true}).click();await page.getByRole(\"button\",{name:/合成班级1.*合成数学.*合成教师/}).first().waitFor();\n await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").waitFor();\n phase=\"keyboard_save\";const raw=\" \\t\\n　\\ufeff合成作业\\ufeff　\\r \";\n await page.locator(\"#content-text\").focus();await page.keyboard.type(raw);await page.keyboard.press(\"Tab\");await page.keyboard.press(\"Enter\");\n await page.getByText(\"白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。\").waitFor({timeout:10000});\n check(writes===1,\"keyboard_explicit_save_once\");\n check(await page.locator(\"#content-text\").inputValue()===\"\\ufeff合成作业\\ufeff\",\"raw_whitespace_normalized_FEFF_retained_server_result\");\n check(slot(currentPath()).revision===\"1\",\"first_save_CAS_zero_to_one\");\n check(calls.filter(c=>c.method===\"POST\").every(c=>c.csrfOK&&c.originOK),\"all_private_writes_exact_CSRF_browser_Origin\");\n await page.screenshot({path:\"/tmp/fc-round12-homework-desktop.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round12-homework-desktop.png\");phase=\"draft_guard\";await page.locator(\"#content-text\").fill(\"未保存的合成草稿\");\n const beforeDialog=dialogCount;await page.getByRole(\"button\",{name:\"管理今日提醒\",exact:true}).click();\n check(dialogCount===beforeDialog+1&&await page.locator(\"#content-text\").inputValue()===\"未保存的合成草稿\",\"cancel_navigation_preserves_draft_no_submit\");\n const beforeLogout=logouts;await page.getByRole(\"button\",{name:\"注销账号\",exact:true}).click();\n check(logouts===beforeLogout&&await page.locator(\"#content-text\").isVisible(),\"cancel_logout_preserves_draft_no_POST\");\n phase=\"conflict\";seed(currentPath(),2,\"其他教师并发更新\");await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();\n await page.getByText(\"其他人已更新内容。草稿已保留，请载入最新修订后明确核对合并。\").waitFor();\n check(await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).isDisabled(),\"conflict_no_unconditional_overwrite\");\n check(await page.locator(\"#content-text\").inputValue()===\"未保存的合成草稿\",\"conflict_preserves_original_draft\");\n await page.getByRole(\"button\",{name:\"载入最新修订（保留草稿）\",exact:true}).click();await page.getByRole(\"heading\",{name:\"当前服务器内容 · 修订 2\"}).waitFor();\n check(await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).isDisabled(),\"fresh_GET_still_requires_explicit_merge\");\n await page.getByRole(\"button\",{name:\"已核对合并，保留我的草稿\",exact:true}).click();\n await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();await page.getByText(\"白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。\").waitFor();\n check(slot(currentPath()).revision===\"3\"&&slot(currentPath()).text===\"未保存的合成草稿\",\"merge_submits_fresh_CAS_only_after_confirmation\");\n phase=\"clear\";acceptDialogs=true;await page.getByRole(\"button\",{name:\"清空当天内容\",exact:true}).click();acceptDialogs=false;await page.getByText(\"白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。\").waitFor();\n await page.locator(\".editor-badge\").filter({hasText:\"修订 4\"}).waitFor();check(slot(currentPath()).revision===\"4\"&&slot(currentPath()).text===\"\",\"clear_uses_CAS_keeps_nonzero_revision\");\n phase=\"unknown\";await page.locator(\"#content-text\").fill(\"原未知命令的合成正文\");mode=\"unknown\";await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();\n await page.getByText(\"提交结果尚未确认。原命令、日期、修订和正文已保留在本页内存；只会按你的操作查询，不会重发。\").waitFor();\n const unknownWrites=writes;await page.waitForTimeout(800);check(writes===unknownWrites,\"RESULT_UNKNOWN_not_resent\");\n await page.getByRole(\"button\",{name:\"手动查询原命令\",exact:true}).click();await page.getByText(\"当前未查到原命令结果。这不证明从未写入，排队中的提交可能尚未完成；不会因此重发。\").waitFor();\n check(writes===unknownWrites,\"NOT_FOUND_not_proof_no_auto_retry\");\n await page.getByRole(\"button\",{name:\"手动查询原命令\",exact:true}).click();await page.getByRole(\"heading\",{name:/原命令已保存的结果/}).waitFor();\n check(await page.locator(\"#content-text\").inputValue()===\"原未知命令的合成正文\",\"query_result_does_not_replace_editor\");\n check((await page.locator(\".editor-badge\").innerText()).includes(\"4\"),\"historical_receipt_not_current_revision\");\n await page.screenshot({path:\"/tmp/fc-round12-query-result-desktop.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round12-query-result-desktop.png\");\n await page.getByRole(\"button\",{name:\"读取当前内容核对\",exact:true}).click();await page.getByRole(\"heading\",{name:\"当前服务器内容 · 修订 6\"}).waitFor();\n check(await page.locator(\".merge-panel pre\").innerText()===\"后续教师的新版本\",\"manual_GET_current_distinguishes_later_version\");\n await page.getByRole(\"button\",{name:\"采用服务器内容，放弃草稿\",exact:true}).click();\n check(await page.locator(\"#content-text\").inputValue()===\"后续教师的新版本\"&&writes===unknownWrites,\"explicit_adopt_current_without_new_POST\");\n phase=\"reminders\";await page.getByRole(\"button\",{name:\"管理今日提醒\",exact:true}).click();await page.getByRole(\"button\",{name:/非任教共同班级99/}).waitFor();\n await page.getByRole(\"button\",{name:/非任教共同班级99/}).click();await page.locator(\"#content-text\").waitFor();await page.locator(\"#content-text\").fill(\"其他班级的共同合成提醒\");\n await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();await page.getByText(\"白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。\").waitFor();\n check(slot(\"content/reminders/99/\"+today).text===\"其他班级的共同合成提醒\",\"reminder_outside_own_assignments_supported\");\n await page.setViewportSize({width:390,height:844});\n check(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),\"mobile390_editor_no_horizontal_overflow\");\n await page.screenshot({path:\"/tmp/fc-round12-reminder-mobile.png\",fullPage:true});report.screenshots.push(\"/tmp/fc-round12-reminder-mobile.png\");\n check(await page.getByRole(\"button\",{name:\"管理今日提醒\",exact:true}).isVisible(),\"business_page_bottom_reminder_action\");\n phase=\"scope_change\";await page.getByRole(\"button\",{name:\"返回工作台\",exact:true}).click();await page.getByRole(\"button\",{name:\"管理今日作业\",exact:true}).click();await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").waitFor();\n await page.locator(\"#content-text\").fill(\"范围变更仍需审阅的草稿\");changeOnNext=true;acceptDialogs=true;await page.getByRole(\"button\",{name:\"下一页\",exact:true}).click();acceptDialogs=false;\n await page.getByText(\"授权范围或白板日期已变化，旧分页已停止使用。请从第一页重新核对；不会把旧草稿绑定到新目标。\").waitFor();\n check(await page.locator(\"#content-text\").inputValue()===\"范围变更仍需审阅的草稿\",\"scope_change_retains_reviewable_draft\");\n check(await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).isDisabled(),\"scope_change_blocks_old_target\");\n acceptDialogs=true;await page.getByRole(\"button\",{name:\"重新加载范围\",exact:true}).click();acceptDialogs=false;\n await page.getByRole(\"button\",{name:/合成班级2.*合成数学.*合成教师/}).first().waitFor();\n check(await page.locator(\"#content-text\").count()===0,\"explicit_scope_reload_does_not_rebind_old_draft\");\n phase=\"cross_day\";await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").waitFor();await page.locator(\"#content-text\").fill(\"跨日不可自动发送的旧草稿\");today=\"2026-10-31\";\n await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();await page.getByText(\"白板日期已经变化。旧草稿已过期，不能自动提交到新日。\").waitFor();\n check(await page.locator(\"#content-text\").inputValue()===\"跨日不可自动发送的旧草稿\"&&await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).isDisabled(),\"DAY_CHANGED_old_draft_readonly_no_date_rewrite\");\n acceptDialogs=true;await page.getByRole(\"button\",{name:\"重新加载范围\",exact:true}).click();acceptDialogs=false;await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").waitFor();\n check(await page.locator(\"#content-text\").inputValue()===\"\"&&(await page.locator(\".server-date\").innerText()).includes(\"2026-10-31\"),\"new_day_requires_fresh_scope_selection_no_old_text_transfer\");\n phase=\"timer\";await page.getByRole(\"button\",{name:\"重新加载范围\",exact:true}).click();serverClock=\"23:59:59\";await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").fill(\"服务器午夜草稿\");await page.waitForTimeout(1200);\n check((await page.locator(\".editor-badge\").innerText()).includes(\"过期\")&&await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).isDisabled(),\"server_midnight_timer_prevents_submission\");\n phase=\"wrong_key\";serverClock=\"10:00:00\";acceptDialogs=true;await page.getByRole(\"button\",{name:\"重新加载范围\",exact:true}).click();acceptDialogs=false;wrongKey=true;await page.locator(\".scope-option\").first().click();\n await page.getByText(\"白板返回了不兼容或无效的数据，请联系管理员。\").waitFor();\n check(await page.locator(\"#content-text\").count()===0,\"wrong_CONTENT_key_not_adopted\");\n phase=\"403\";await page.getByRole(\"button\",{name:\"重新加载范围\",exact:true}).click();await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").fill(\"撤销后应清除的敏感草稿\");force403=true;\n await page.getByRole(\"button\",{name:\"保存当天内容\",exact:true}).click();await page.locator(\"#pair-code\").waitFor({timeout:10000});\n check(!(await bodyText()).includes(\"撤销后应清除的敏感草稿\")&&!(await bodyText()).includes(\"你好，合成教师\"),\"403_clears_editor_and_pairing_session_mirror\");\n const stopped=calls.length;await page.waitForTimeout(700);check(calls.length===stopped,\"revocation_stops_automatic_operations\");\n phase=\"401\";await page.reload();await page.getByRole(\"heading\",{name:/你好，合成教师/}).waitFor();await page.getByRole(\"button\",{name:\"管理今日作业\",exact:true}).click();force401=true;await page.locator(\".scope-option\").first().click();await page.locator(\"#pair-code\").waitFor();check(!(await bodyText()).includes(\"你好，合成教师\"),\"401_read_clears_pairing_session_mirror\");const stopped401=calls.length;await page.waitForTimeout(650);check(calls.length===stopped401,\"401_stops_automatic_operations\");\n phase=\"logout\";await page.reload();await page.getByRole(\"heading\",{name:/你好，合成教师/}).waitFor({timeout:10000});await page.getByRole(\"button\",{name:\"管理今日作业\",exact:true}).click();await page.locator(\".scope-option\").first().click();await page.locator(\"#content-text\").fill(\"注销前未保存的草稿\");\n const oldLogouts=logouts;await page.getByRole(\"button\",{name:\"注销账号\",exact:true}).click();check(logouts===oldLogouts,\"logout_unsaved_guard_cancel_no_POST\");\n acceptDialogs=true;await page.getByRole(\"button\",{name:\"注销账号\",exact:true}).click();acceptDialogs=false;await page.locator(\"#pair-code\").waitFor();\n check(logouts===oldLogouts+1&&!(await bodyText()).includes(\"注销前未保存的草稿\"),\"confirmed_logout_clears_content_state\");\n check(await page.evaluate(()=>localStorage.length===0&&sessionStorage.length===0),\"no_persistent_draft_or_secret_storage\");\n check(calls.every(c=>c.queryEmpty&&c.originOK&&c.csrfOK),\"all_same_origin_no_secret_query_and_CSRF\");\n check(cspErrors.length===0,\"production_CSP_nosniff_no_security_console_errors\");check(runtimeErrors.length===0,\"no_uncaught_runtime_errors\");\n report.status=\"PASS\";\n }catch(error){report.status=\"FAIL\";report.failurePhase=phase;report.error=String(error);report.currentText=await bodyText();}\n report.requests=calls;report.counts={writes,queries,logouts,dialogs:dialogCount};report.cspErrors=cspErrors;report.runtimeErrors=runtimeErrors;\n report.browser=await page.evaluate(()=>navigator.userAgent);report.completed=true;page.off(\"console\",onConsole);page.off(\"pageerror\",onError);page.off(\"dialog\",onDialog);return report;\n}\n",
+    "sha256": "fb657d1b0d2863b6af761e38dc71f7a1a2c9cc73b7ff4ad03f90872c98a0f020"
+  },
+  "round12SourceInputs": "8a695e23b0f3525389eda90e91115f40bc7e490a7fbb9833f939434eca18ec52"
+}

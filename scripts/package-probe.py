@@ -145,7 +145,7 @@ def frontend_payloads(web_dist: Path) -> tuple[dict[str, bytes], dict]:
         "asset_count": len(declared),
         "asset_bytes": total,
         "third_party_notices": "web/THIRD-PARTY-NOTICES.txt",
-        "scope": "Partial pairing/session UI and verified static foundation only; four business entries unconnected; normal TLS/listener disabled.",
+        "scope": "Pairing/session plus authenticated homework/shared-reminder UI and content application ports; material/voice browser entries unconnected; normal TLS/listener disabled.",
     }
 
 
@@ -195,7 +195,7 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
     web_files, frontend = frontend_payloads(web_dist) if web_dist is not None else ({}, {
         "included": False,
         "status": "NOT_INCLUDED",
-        "scope": "No browser payload in this package; pass an explicit --web-dist to include a verified partial pairing/session UI.",
+        "scope": "No browser payload in this package; pass an explicit --web-dist to include the verified partial teacher UI.",
     })
     entries = [{"path": name, "size": path.stat().st_size, "sha256": sha256_file(path)} for name, path in files.items()]
     if entries[0]["sha256"] != audited_digest:
@@ -229,11 +229,12 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
             "voice_execution": "exact original Web session independent of Backend/KDF lock; bounded writer wait and on-demand single physical WinMM thread, tray/WTS/power/shutdown stop fence and endpoint monitor; canonical staged WAV/3x16KiB buffers; actual teacher Web submission and browser recording incomplete",
             "http_transport": "HTTP.sys v2 aligned fixed slots/OVERLAPPED/IOCP with bounded body/response pieces, cancel/drain and cycle tokens; explicit two-cycle synthetic loopback diagnostic only; production listener, TLS deployment and browser application incomplete",
             "web_pairing_port": "direct service pairing with process-local eight-digit one-use request and exact local-global-admin approval, 256-bit poll/cookie/CSRF secrets and independent device leases; CNG/DPAPI/SQLite plus synthetic trusted-TLS request metadata through session/CSRF/logout ports only, not end-to-end POST pairing dispatch; real HTTPS/TLS/browser/listening delivery incomplete",
+            "teacher_content_port": "Authenticated Web application-port scopes, current-day homework/shared-reminder read/save/clear, exact CAS, durable original-command outcome, midnight expiry and persistent observed-day rollback protection; CNG/DPAPI/SQLite probe uses synthetic trusted transport metadata; no actual TLS/browser/network delivery evidence",
             "http_transport_initial_header_deadline": "NOT_VALIDATED: HTTP.sys uses driver defaults before the first complete header is attributed to a URL group; group HeaderWait=5 does not prove a first-request 5s bound. Kernel connection limits/QoS and P0 platform decision remain open.",
             "normal_start": "manual workbench; --autostart stays locked and hidden; creates project-only protected ProgramData deployment",
             "native_visual_probe": "3% glass, clock text, click-through and foreground avoidance; hidden scene tests do not replace interactive QA",
             "complete_application": "NOT_IMPLEMENTED",
-            "teacher_management_web_application": "PARTIAL: pairing/session UI and verified static foundation; four business entries unconnected; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
+            "teacher_management_web_application": "PARTIAL: pairing/session, homework/shared reminders with CAS and durable original-command query; material/voice browser entries unconnected; normal TLS/listener disabled; payload inclusion is recorded separately in frontend.included",
         },
         "gates": {
             "Win7_SP1_x86": "NOT_VALIDATED",

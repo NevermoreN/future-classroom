@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "sourceInputs": "8a695e23b0f3525389eda90e91115f40bc7e490a7fbb9833f939434eca18ec52",
+  "checks": {
+    "frozenInputFileHashes": 202,
+    "independentBackendReview": "PASS / 14 bound files",
+    "hostRawPassed": 380,
+    "windowsRawPassed": 468,
+    "testedWindowsArtifactHashesMatchFinalCargoMetadata": 16,
+    "browserSyntheticChecks": 45,
+    "browserUnitTests": 43,
+    "staticManifestRustIntegration": "PASS",
+    "developmentPackageMembersAndHashes": "PASS / 11 members / byte-identical independent repack",
+    "packageStatus": "NOT_VALIDATED",
+    "Win7GnuOnWin11": "PASS supplemental; not Win7 runtime"
+  },
+  "limitations": [
+    "Normal HTTPS listener remains disabled; real TLS/campus browser NOT_RUN",
+    "Actual Win7 and Win10, formal MSVC, visible Siwo/PPT/touch/DPI/installer/72h still pending",
+    "P0 first unassociated TCP/TLS header deadline and complete resource bound unresolved; no requirement relaxed"
+  ],
+  "sourceEditAfterFreeze": false
+}

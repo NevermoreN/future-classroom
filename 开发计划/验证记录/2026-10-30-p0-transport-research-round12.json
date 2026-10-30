@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "researchDateUtc": "2026-10-30",
+  "status": "RESEARCH_COMPLETE_P0_UNRESOLVED",
+  "scope": "只读Microsoft Learn/Rust官方文档研究；非实现、非测试、非ADR决定。只新增本/tmp研究产物，未修改仓库代码/计划，未运行cargo、Windows命令或改系统配置。",
+  "constraints": {
+    "firstHeaderDeadlineMillis": 5000,
+    "doNotRelaxDeadline": true,
+    "noGlobalHttpOrSchannelChanges": true,
+    "formalWindowsTargets": [
+      "Windows 7 SP1 x86",
+      "Windows 10",
+      "Windows 11"
+    ],
+    "productionListener": "OFF"
+  },
+  "executiveConclusion": {
+    "documentedHttpSysSolution": "NO_DOCUMENTED_WIN7_PLUS_APP_SCOPED_SOLUTION_FOR_ALL_REQUIRED_PROPERTIES",
+    "fact": "首次请求未解析完头时HTTP.sys不能归属queue/group，应用HeaderWait和IdleConnection不适用；API-wide timer才覆盖此阶段。",
+    "inference": "QoS/queue长度/已知request的connection信息不能据此成为未归属TCP/TLS连接数量、内存和首次头5s的应用私有限额。没有检索到可覆盖所有要求的受支持HTTP.sys接口。此为公开接口能力结论，不断言OS内部没有任何未公开机制。",
+    "recommendation": "保持listener off；仅推进有界Winsock+Schannel接受域的隔离验证原型。优先直接对接既有request/application port，暂不叠加HTTP.sys loopback代理。正式选择需D11 ADR，原型通过前不得宣称P0解决。",
+    "strongestUnresolvedBoundary": "若硬要求包括所有尚未accept的TCP连接、SYN/backlog和整个内核/Schannel缓存的精确数量/字节硬界，单纯用户态socket+固定slot也没有官方通用保证。不得将建议候选写为已满足全部资源要求。"
+  },
+  "facts": [
+    {
+      "id": "F1",
+      "claim": "HTTP.sys初头和idle timer首次归属之前为API-wide；group/session设置5s不覆盖首次头。",
+      "sourceIds": [
+        "http-timeouts",
+        "http-specific-timeouts"
+      ]
+    },
+    {
+      "id": "F2",
+      "claim": "正确URLgroup连接QoS API为HttpSetUrlGroupProperty(HttpServerQosProperty,HTTP_QOS_SETTING_INFO{ConnectionLimit,...})；它限制服务该group的outstanding connections。queue limit只限制queued requests。",
+      "sourceIds": [
+        "http-qos",
+        "http-conn-limit",
+        "http-queue"
+      ]
+    },
+    {
+      "id": "F3",
+      "claim": "WaitForDisconnect只观察已知ConnectionId，CancelHttpRequest须RequestId；这些ID在receive request后取得。较新QueryRequestProperty亦需已收到的request且最低Win10 1709。",
+      "sourceIds": [
+        "http-overview",
+        "http-disconnect",
+        "http-cancel",
+        "http-request-property"
+      ]
+    },
+    {
+      "id": "F4",
+      "claim": "ListenEndpoint只控制IP监听共享/通配；不能因endpoint独占或仅一个URLgroup而推导driver提前按端口应用deadline。",
+      "sourceIds": [
+        "http-endpoint",
+        "http-timeouts"
+      ]
+    },
+    {
+      "id": "F5",
+      "claim": "HTTP-wide timeout、driver注册表MaxConnections/MaxRequestBytes、全局SSL throttle不属于本题允许的私有配置解法。",
+      "sourceIds": [
+        "http-service-config",
+        "http-registry"
+      ]
+    },
+    {
+      "id": "F6",
+      "claim": "TCP表能观察endpoint，SetTcpEntry需提升且仅删除IPv4 TCP条目。二者没有原子连接准入和私有owner句柄语义。",
+      "sourceIds": [
+        "tcp-observe",
+        "tcp-delete"
+      ]
+    },
+    {
+      "id": "F7",
+      "claim": "AcceptEx receiveLength=0无需首字节即可取得自有socket；需要固定OVERLAPPED生命周期，close后仍要排空completion。",
+      "sourceIds": [
+        "winsock-accept",
+        "winsock-close"
+      ]
+    },
+    {
+      "id": "F8",
+      "claim": "listen backlog会被provider调整且没有标准实际值查询；socketbuffer不是整个stack/SSPI字节上界。条件accept会关闭内建SYN防护。",
+      "sourceIds": [
+        "winsock-listen",
+        "winsock-options",
+        "winsock-conditional"
+      ]
+    },
+    {
+      "id": "F9",
+      "claim": "Schannel由应用搬运TLS token并推进同步SSPI状态机；单个SSPI调用没有deadline/cancel参数；应用recordbuffers可查询大小但内部context/cache无同类总量上限契约。",
+      "sourceIds": [
+        "schannel-accept",
+        "schannel-loop",
+        "schannel-sizes",
+        "schannel-legacy"
+      ]
+    },
+    {
+      "id": "F10",
+      "claim": "Win7支持TLS1.2能力但默认禁用；必须验证本应用credential选择、补丁/证书链和实际浏览器交集，不能退回TLS1.0或改全局系统来凑通过。现代SCH_CREDENTIALS最低1809不能作为Win7路径。",
+      "sourceIds": [
+        "schannel-os",
+        "schannel-legacy",
+        "schannel-modern"
+      ]
+    },
+    {
+      "id": "F11",
+      "claim": "Rust read_timeout是单次read语义；逐字节读可持续刷新每调用等待。绝对期限应单独以checked单调deadline维护；Instant对sleep/suspend的语义不能跨平台臆测。",
+      "sourceIds": [
+        "rust-stream",
+        "rust-instant"
+      ]
+    }
+  ],
+  "inferences": [
+    {
+      "id": "I1",
+      "basis": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "conclusion": "自有IP:port、独立queue、单group、额外receive槽均无法建立未归属连接的文档化硬预算；不能将QoS连接限额映射成accept前总数。"
+    },
+    {
+      "id": "I2",
+      "basis": [
+        "F3",
+        "F6"
+      ],
+      "conclusion": "全机TCP轮询/ETW/netsh快照最多诊断；有扫描时差、tuple复用/IPv6/权限问题，无法原子控制准入或保证5s；不采用管理员SetTcpEntry轮询清连接。"
+    },
+    {
+      "id": "I3",
+      "basis": [
+        "F7",
+        "F8",
+        "F9"
+      ],
+      "conclusion": "自有socket允许应用拥有首次头前的每个accepted连接，给握手/头/缓冲和取消状态设置固定槽与绝对期限；这消除HTTP.sys应用不可见阶段，但未消除listen backlog、内核网络内存与SSPI同步调用/缓存的证据缺口。"
+    },
+    {
+      "id": "I4",
+      "basis": [
+        "F9",
+        "F10"
+      ],
+      "conclusion": "TLS透传gate无法在加密字节中判完整HTTP头，不能靠看到TLS流量刷新/满足HTTP头期限；能检查头的gate必须终止TLS，因而本就引入Schannel/解析/信任边界。"
+    },
+    {
+      "id": "I5",
+      "basis": [
+        "F7",
+        "F8",
+        "F11"
+      ],
+      "conclusion": "计时从acceptcompletion消费瞬间开始可能漏算已在backlog/IOCP等待的时间。必须在ADR固定时间原点并在客户端连接成功到server关闭的实际wire测量；不能把TCP连接到首头5s悄悄改成worker收到消息后5s。"
+    },
+    {
+      "id": "I6",
+      "basis": [
+        "F9"
+      ],
+      "conclusion": "硬超时不能只在同步AcceptSecurityContext返回后检查；网络timer必须独立且不受业务/KDF队列阻塞。关闭socket能终止网络等待，但不能证明正在执行的SSPI同步CPU调用已停止/内存已归还。需有界所有者/故障退出而非强杀线程或提前释放context。"
+    }
+  ],
+  "options": [
+    {
+      "id": "A",
+      "name": "HTTP.sys原路径+应用QoS/session HeaderWait",
+      "decision": "REJECT_AS_P0_FIX",
+      "reason": "可补已归属阶段防御，但不满足未归属首头与总连接预算。",
+      "d11Change": "无须改平台但P0继续不通过。"
+    },
+    {
+      "id": "B",
+      "name": "自有Winsock+Schannel入站，直接对接既有request port",
+      "decision": "RECOMMENDED_NEXT_ISOLATED_PROTOTYPE_NOT_APPROVED_IMPLEMENTATION",
+      "shape": [
+        "fc-windows内实现single transport execution domain；保持12crate和领域/协议不含Windows句柄。",
+        "先固定8个连接准入槽与另计的有限accept/reject槽；从TLS未握手到头/正文/响应/closing全状态都计数，未归还completion/context不回收名额。这里只是候选初值，不能拿原8请求槽假充全部网络连接。",
+        "AcceptEx receiveLength=0、自有exclusive bind，有限且单独报告backlog；容量满必须及时accept后abortive拒绝或停止listener，不能只不再accept而留未知已连队列。拒绝路径亦须固定内存与有限工作量。",
+        "TLS1.2最低共同路径，提供可信学校server证书；禁止关闭client验证/降级protocol。HTTP/1.1固定语法/16KiB头/64字段/URI2048，普通JSON64KiB，stream块64KiB，沿用route更低限额。不要协商未实现HTTP2/3。",
+        "TLS accept至首头使用一个不因字节到达续租的绝对5s候选预算，含握手更保守；若原要求另有准确时间原点，须保留更早的基准且纳入wire验证，不能隐式增加TLS独立5s再加header5s。",
+        "header完整后只投有界request descriptor到原应用工作器；TLS事实从成功Schannelcontext生成私有metadata，绝不从X-Forwarded-Proto等clientheader信任。",
+        "绝对timer/Stop控制面独立于共享业务worker；握手SSPI单context串行，有界CPU/调用次数、tokenbytes和generation；半关闭、重协商、extra bytes、client cancel均fail-closed。",
+        "cancel/close后排空真实IOCP，再DeleteSecurityContext/FreeCredentialsHandle并回收；迟到完成按generation拒绝；5s排空失败保留所有者且禁replacement进入FAULTED。"
+      ],
+      "remainingP0Gates": [
+        "未accept backlog与SYN资源不能以固定slot简单证明；需要精确测量和平台级可验证策略。",
+        "Schannel内部context/sessioncache与同步调用耗时无本次文档硬上界；必须独立证据，不能只报自有Vec容量。",
+        "严格5s时间起点、backlog滞留、scheduler拥塞与sleep恢复必须验证；任何超界保留FAIL，不扩大容忍窗口冒充5s通过。",
+        "Win7旧credential结构现代文档minimum8.1有历史范围歧义；必须用目标SDK/import审计与实机握手证据闭环，不能仅据flag存在宣布兼容。"
+      ],
+      "d11Change": [
+        "入站固定HTTP.sys决策改为Winsock/Schannel，需ADR更新主计划39行、共同协议/FFI第5节、P0-05/P6-11及部署/发布门槛。",
+        "新增自有HTTP wire parser/response encoder、TLScontext所有权和单域资源账；现有auth/session/CSRF/WebApplication与资产层可复用。",
+        "低权限部署从HTTP.sys URLACL/SSLcert绑定转为socket独占bind与server证书私钥ACL；防火墙/学校信任安装仍单独授权和验收，无全局HTTP/Schannel修改。",
+        "不改变5s、资源总账、TLS信任、3系统目标；未验证的部分明确继续P0开放。"
+      ]
+    },
+    {
+      "id": "C",
+      "name": "自有Schannel gate前置+私有loopback HTTP.sys backend",
+      "decision": "SECONDARY_MORE_COMPLEX",
+      "shape": [
+        "外部gate仍必须先拥有socket并终止TLS、完成严格有界头解析，受B相同全部预算。",
+        "仅完整合法请求再转发到固定loopback backend；需要有界连接/正文/response backpressure、两跳绝对deadline和全部取消排空，不能提前打开无限后端连接。",
+        "HTTP.sys仅绑定loopback不等于其他本机进程不可访问；不得仅凭loopback或forwardedheader将明文认定trusted TLS，须私有受保护IPC/认证或后端独立TLS和明确endpoint配对。",
+        "严格丢弃/拒绝client forwardedmetadata，消除双解析request-smuggling：CL/TE/duplicateheaders、absoluteURI、Host和body framing必须一套canonical规则。纯TCP/TLS透传不算headergate。"
+      ],
+      "d11Change": [
+        "保留HTTP.sys内部adapter但公开入口平台已变更；要新增前置TLS、可信两跳元数据、loopback例外或后端TLS认证ADR。",
+        "新增进程/线程/两份buffer与并发账，既有只允许可信HTTPS的ListenPrefix不能私自放宽为LAN明文。"
+      ],
+      "whyNotFirst": "相较直接port，不能省去TLS和头解析，增加第二层队列/缓冲/信任/cleanup；同样不能仅靠此证明所有内核内存硬界。"
+    },
+    {
+      "id": "D",
+      "name": "WFP/内核callout或受控外部网关",
+      "decision": "NOT_MINIMAL_NOT_SELECTED",
+      "reason": "若必须对SYN/尚未accept连接精确配额需进一步平台控制研究；意味着驱动签名/安装/过滤或额外受控设备、新依赖及Win7维护面，本次未验证，不将其当即成解法。任何其他进程共享全局策略影响仍须避免。"
+    },
+    {
+      "id": "E",
+      "name": "全局HTTP timeout/注册表SSL throttle/SetTcpEntry轮询",
+      "decision": "EXCLUDED",
+      "reason": "前两者违反不改全局策略；轮询不具原子准入和时限保障且须提升，影响面不合项目要求。"
+    }
+  ],
+  "minimumNextProbePlan": {
+    "status": "PROPOSED_ONLY_NOT_RUN",
+    "purpose": "首先验证B能否满足严格时间原点/资源上界；不接学校真实资料、不开放生产监听、不替代TLS/Win7/Win10验收。",
+    "phase0": "ADR中明确5s原点（不能晚于现有要求），列应用固定内存、SSPI内部、socketbuffer、listen backlog、SYN/transport内核内存五本账及可证上界。现有候选没有后两本账硬保证，先不要批准生产。",
+    "fixture": "隔离TEMP marker、自有进程、loopback专用动态端口、SO_EXCLUSIVEADDRUSE；不新增防火墙/URLACL/HTTP SSL绑定/证书信任。TLS证书仅fixture临时memory store/自有临时key，测试client只认fixture专用pin；这不是校园浏览器信任证据。需要持久key时精确标识并在finally销毁自有key。",
+    "cases": [
+      "TCP连上零字节；半ClientHello逐字节/完整握手后零HTTP；HTTP请求行/Host前/完整Host但未终止头；每100-500ms滴一字节，不允许续租；超长TLS record/握手累计token/16KiB头全部有界拒绝。",
+      "对比client connect完成、server acceptpost/acceptcompletion/dequeue、每次TLS步骤、完整头和实际FIN/RST时间；所有用例按原5s判，保留测量误差独立列，不把7s观察窗变成通过门槛。",
+      "容量N、N+1、有限burst；先占满8慢连接，再请求合法连接；记录accepted/pendingaccept/rejecting/SSPIcontexts/inflightcompletion的同时峰值和内存；不能只统计成功业务requests。",
+      "IOCP消费/业务worker拥塞、服务禁用/退出、clientabort同时到deadline、socket数字复用、迟到IO和SSPIcontext未退；名额不得提前回收，控制Stop不争最后一个业务槽。",
+      "连续短连接/握手cache、session resumption与拒绝路径循环，观察进程privatecommit、系统pool/自有port连接表和baseline恢复；观测平稳不等于所有对抗输入硬上界，缺乏契约项继续NOT_VALIDATED。",
+      "成功TLS1.2+真实header/body/response，证书hostname/过期/链拒绝；未经实现的TLS renegotiation、HTTP2upgrade和畸形CL/TE必须fail-closed；不引入clientheader可信TLS通道。",
+      "分开运行Win7 SP1 x86、目标Win10、Win11；imports/subsystem/TLSprotocol/cipher/servercert私钥访问分别记录；Win11+Win7GNU补充不能代替Win7真机。"
+    ],
+    "cleanupBoundary": [
+      "先停止自有listener和准入；按自有generation关闭accepted/pending/reject sockets，等待原始OVERLAPPED completion排空，之后释放TLScontext/credentials及IOCP，最后WSACleanup；不靠WSACleanup跳过completion。",
+      "还原/销毁仅fixture证书key与内存store，删除自有marker TEMP/日志；只停止ownExePath/ownPID，不碰其他服务/连接/前台/声音/Office。",
+      "验证端口不再listener、ownsocket/context/inflight计数0、ownprocess/task/dir0，保存cleanupPASS原始证据。持久Windows SSH服务、公钥授权及仓库外测试私钥完全保留。",
+      "异常或未排空保留诊断、进入失败而非重复创建listener；不释放被原生IO引用的内存。"
+    ],
+    "successCriteria": "仅当三系统与原始5s/完整资源范围均有可复现证据才能变更P0；单套loopback PASS不启动生产。"
+  },
+  "notPerformed": [
+    "未实现prototype",
+    "未运行cargo",
+    "未远程登录或执行Windows命令",
+    "未变更Windows/HTTP/Schannel/防火墙/证书信任",
+    "未编辑开发计划或仓库源码",
+    "未创建或完成目标",
+    "未spawn subagent"
+  ],
+  "sources": [
+    {
+      "id": "http-timeouts",
+      "title": "HTTP_TIMEOUT_LIMIT_INFO",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_timeout_limit_info",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "Remarks与HeaderWait/IdleConnection：请求头解析前不能确定queue/group，首次使用driver默认值；应用级配置不改driver范围；全局默认表为120s。"
+    },
+    {
+      "id": "http-specific-timeouts",
+      "title": "Configuring application-specific timeouts",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/http/configuring-the-application-specific-timeouts",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "仅首次请求收到并与队列关联后应用HeaderWait/IdleConnection生效。"
+    },
+    {
+      "id": "http-service-config",
+      "title": "HttpSetServiceConfiguration",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpsetserviceconfiguration",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "HttpServiceConfigTimeout为API-wide；配置适用于机器HTTP应用，持久化；SNI SSL配置最低Windows8。"
+    },
+    {
+      "id": "http-qos",
+      "title": "HttpSetUrlGroupProperty",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpseturlgroupproperty",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "HttpServerQosProperty + HTTP_QOS_SETTING_INFO.QosType=HttpQosSettingTypeConnectionLimit设置URLgroup outstanding connections。"
+    },
+    {
+      "id": "http-conn-limit",
+      "title": "HTTP_CONNECTION_LIMIT_INFO",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_connection_limit_info",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "限额对象为URLgroup；MaxConnections可设置HTTP_LIMIT_INFINITE；最低Vista。文中旧HttpServerConnectionsProperty称呼与当前Qos API文字不一致，实际设置依据HttpSetUrlGroupProperty。"
+    },
+    {
+      "id": "http-queue",
+      "title": "HttpSetRequestQueueProperty",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpsetrequestqueueproperty",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "允许State、QueueLength、503Verbosity；QueueLength限队列内outstanding requests，不是socket计数。"
+    },
+    {
+      "id": "http-overview",
+      "title": "HTTP Server API Overview",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/http/http-server-api-overview",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "应用收到已路由request；连接建立/销毁细节总体被API隐藏。"
+    },
+    {
+      "id": "http-disconnect",
+      "title": "HttpWaitForDisconnect",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpwaitfordisconnect",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "ConnectionId由HttpReceiveHttpRequest返回HTTP_REQUEST的字段取得，只是断开通知。"
+    },
+    {
+      "id": "http-cancel",
+      "title": "HttpCancelHttpRequest",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpcancelhttprequest",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "须给queuehandle和RequestId；关闭该已知request底层transport，未提供按未知连接枚举/接收接口。"
+    },
+    {
+      "id": "http-request-property",
+      "title": "HttpQueryRequestProperty",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/http/http/nf-http-httpqueryrequestproperty",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "输入收到请求所在queuehandle+opaque request ID；诊断连接/SNI/计时，不是accept；最低Win10 1709，且须动态获取。"
+    },
+    {
+      "id": "http-endpoint",
+      "title": "HTTP_LISTEN_ENDPOINT_INFO",
+      "url": "https://learn.microsoft.com/es-es/windows/win32/api/http/ns-http-http_listen_endpoint_info",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "Flags+EnableSharing仅控制IP URL绑定特定IP/通配；没有初头deadline/accept或内存字段。英文页本次fetch失败，微软西语同API页可读。"
+    },
+    {
+      "id": "http-registry",
+      "title": "HTTP.sys registry settings",
+      "url": "https://learn.microsoft.com/en-us/troubleshoot/developer/webapps/iis/iisadmin-service-inetinfo/httpsys-registry-windows",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "HTTP Parameters的MaxConnections/MaxRequestBytes/MaxFieldLength为driver注册表配置，不是自有endpoint私有限额。"
+    },
+    {
+      "id": "tcp-observe",
+      "title": "GetExtendedTcpTable",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/iphlpapi/nf-iphlpapi-getextendedtcptable",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "返回TCP endpoint表，IPv4/IPv6 OWNER_PID表可查询；不是拥有socket/accept准入接口。"
+    },
+    {
+      "id": "tcp-delete",
+      "title": "SetTcpEntry",
+      "url": "https://learn.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-settcpentry",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "只允许DELETE_TCB；Vista+需提升管理员；MIB_TCPROW是IPv4。"
+    },
+    {
+      "id": "winsock-accept",
+      "title": "AcceptEx",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-acceptex",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "dwReceiveDataLength=0时连接到达即完成、不等数据；运行时WSAIoctl取指针；需要自有acceptsocket/固定OVERLAPPED；SO_CONNECT_TIME给已连接整秒龄。desktop最低Vista。"
+    },
+    {
+      "id": "winsock-listen",
+      "title": "listen",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "backlog为等待接受队列长度；provider可静默调整，没有标准方式读实际backlog，SOMAXCONN为provider合理最大。"
+    },
+    {
+      "id": "winsock-close",
+      "title": "closesocket",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "发起取消不等于全部OVERLAPPED已完成；资源必须保留到实际completion；socket值可复用；正常graceful关闭可使transport资源继续保留，linger零可abortive关闭。"
+    },
+    {
+      "id": "winsock-options",
+      "title": "setsockopt",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-setsockopt",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "SO_RCVTIMEO只影响blocking receive；SO_RCVBUF/SO_SNDBUF是每socket缓冲设置。"
+    },
+    {
+      "id": "winsock-exclusive",
+      "title": "Using SO_REUSEADDR and SO_EXCLUSIVEADDRUSE",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/using-so-reuseaddr-and-so-exclusiveaddruse",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "Win7+可用；exclusive在bind前设置；SO_REUSEADDR可劫持端口，不能用于抢占现有listener。"
+    },
+    {
+      "id": "winsock-conditional",
+      "title": "SO_CONDITIONAL_ACCEPT",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/so-conditional-accept",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "会禁用TCP内建SYN防护、实质取消backlog，微软总体建议保持关闭；不能为数量预算贸然替换。"
+    },
+    {
+      "id": "schannel-accept",
+      "title": "AcceptSecurityContext (Schannel)",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "调用者提供/传输token；可INCOMPLETE_MESSAGE或CONTINUE_NEEDED；同context不能并发调用；函数无异步取消或绝对deadline参数。"
+    },
+    {
+      "id": "schannel-loop",
+      "title": "Creating a Schannel security context",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/creating-an-schannel-security-context",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "由应用读取/发送token并推动状态机；错误需DeleteSecurityContext销毁部分context。"
+    },
+    {
+      "id": "schannel-legacy",
+      "title": "SCHANNEL_CRED",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/schannel/ns-schannel-schannel_cred",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "paCred持server cert/privatekey；grbitEnabledProtocols选择应用credential协议，系统禁用优先；dwSessionLifespan为cache生存时间不是数量/字节限额；现代页面deprecation及minimum8.1需与Win7 SDK/实测核对。"
+    },
+    {
+      "id": "schannel-modern",
+      "title": "SCH_CREDENTIALS",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/schannel/ns-schannel-sch_credentials",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "最低Win10 1809；不能直接当Win7共同结构。"
+    },
+    {
+      "id": "schannel-os",
+      "title": "Protocols in TLS/SSL (Schannel SSP)",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/protocols-in-tls-ssl--schannel-ssp-",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "Win7 TLS1.2表为Disabled而非Not supported；Win10默认支持TLS1.2；TLS1.3从Win11/Server2022支持。表不是本项目握手通过证据。"
+    },
+    {
+      "id": "schannel-sizes",
+      "title": "EncryptMessage (Schannel)",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/encryptmessage--schannel",
+      "officialAuthority": "Microsoft",
+      "verifiedNotes": "SECPKG_ATTR_STREAM_SIZES可得记录header/message/trailer大小；只是应用recordbuffer，不证明SSPI内部context/cache/内核总内存有界。"
+    },
+    {
+      "id": "rust-stream",
+      "title": "Rust TcpStream",
+      "url": "https://doc.rust-lang.org/std/net/struct.TcpStream.html",
+      "officialAuthority": "Rust project",
+      "verifiedNotes": "set_read_timeout约束read调用；nonblocking使不能立即完成的操作返回WouldBlock；不是整个HTTP头阶段绝对deadline。"
+    },
+    {
+      "id": "rust-instant",
+      "title": "Rust Instant",
+      "url": "https://doc.rust-lang.org/std/time/struct.Instant.html",
+      "officialAuthority": "Rust project",
+      "verifiedNotes": "Windows当前用QPC，但可变化；不保证suspend计时语义；checked_duration_since可检出倒退，checked_add避免溢出panic。"
+    },
+    {
+      "id": "rust-win7",
+      "title": "Rust Win7 MSVC targets",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/win7-windows-msvc.html",
+      "officialAuthority": "Rust project",
+      "verifiedNotes": "Tier3的i686/x86_64-win7-windows-msvc无预编译std需build-std等；目标可构建不等于全部DLL导入/TLS/实机兼容。"
+    }
+  ]
+}

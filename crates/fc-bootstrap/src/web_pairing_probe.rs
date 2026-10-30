@@ -8,6 +8,11 @@ use fc_bootstrap::{
     },
     web_application::WebApplication,
 };
+use fc_domain::{
+    auth::Role,
+    identity::{AssignmentScope, IdentityCommand, Rgb},
+    ids::{ClassId, SubjectId},
+};
 use fc_ports::http::*;
 use fc_security::{web::PairingCode, CredentialRecordCodec, Password};
 use fc_windows::{
@@ -20,6 +25,7 @@ use std::{
     sync::Arc,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
+mod content_probe;
 
 fn check<T, E: std::fmt::Debug>(r: Result<T, E>) -> Result<T, String> {
     r.map_err(|e| format!("web-pairing: {e:?}"))
@@ -135,6 +141,46 @@ fn run_owned() -> Result<(), String> {
         },
         check(Password::new(PASSWORD.into()))?,
     ))?);
+    let local = check(backend.login("probe", check(Password::new(PASSWORD.into()))?))?;
+    let class = check(ClassId::new(7))?;
+    let subject = check(SubjectId::new(9))?;
+    check(backend.identity(
+        local,
+        IdentityCommand::CreateClass {
+            id: class,
+            name: "Synthetic content class".into(),
+        },
+    ))?;
+    check(backend.identity(local, IdentityCommand::BindCurrentClass { id: class }))?;
+    check(backend.identity(
+        local,
+        IdentityCommand::PutSubject {
+            id: subject,
+            name: "Synthetic content subject".into(),
+            enabled: true,
+            color: Rgb {
+                red: 30,
+                green: 80,
+                blue: 150,
+            },
+            expected_revision: None,
+        },
+    ))?;
+    check(backend.identity(
+        local,
+        IdentityCommand::UpdateAccount {
+            id: local.principal_id(),
+            display_name: "Synthetic pairing administrator".into(),
+            role: Role::GlobalAdmin,
+            enabled: true,
+            scopes: vec![AssignmentScope {
+                class_id: class,
+                subject_id: subject,
+            }],
+        },
+    ))?;
+    // Updating assignments revokes the original local epoch. Do not transfer it
+    // to the new pairing window or bypass the ordinary password login.
     let local = check(backend.login("probe", check(Password::new(PASSWORD.into()))?))?;
     let service = backend.web_service();
     require(
@@ -260,6 +306,13 @@ fn run_owned() -> Result<(), String> {
         "wrong CSRF logged out account",
     )?;
     check(backend.check_session(lease, SessionPurpose::Manage))?;
+    content_probe::run(
+        &mut backend,
+        &application,
+        cookie,
+        authentication.csrf.as_str(),
+        lease,
+    )?;
     let before = check(backend.state())?
         .account(lease.principal_id())
         .map_err(|_| "missing account")?

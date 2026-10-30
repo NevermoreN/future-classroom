@@ -113,5 +113,9 @@ export class PairingController {
       this.publish({ phase: 'logout-unknown' })
     }
   }
+  invalidate(notice = '白板会话已失效，页面已停止操作并清除会话信息。请重新配对。'): void {
+    if (this.disposed) return
+    this.operation?.abort(); this.sequence++; this.publish({ phase: 'anonymous', notice })
+  }
   dispose(): void { this.disposed = true; this.sequence++; this.operation?.abort(); this.operation = undefined }
 }

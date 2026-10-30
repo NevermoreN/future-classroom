@@ -1,0 +1,25 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "fc-protocol",
+    "--lib",
+    "--release",
+    "web::content",
+    "--locked"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 13.035,
+  "output": "   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Finished `release` profile [optimized] target(s) in 12.96s\n     Running unittests src/lib.rs (target/release/deps/fc_protocol-88395ea77e50a397)\n\nrunning 5 tests\ntest web::content::tests::canonical_routes_preserve_all_id_bits_and_reject_aliases_dates_and_offsets ... ok\ntest web::content::tests::content_mutation_requires_json_same_origin_framing_and_exact_csrf ... ok\ntest web::content::tests::exact_content_committed_and_command_result_disclosures_keep_revisions_after_clear ... ok\ntest web::content::tests::strict_save_rejects_duplicate_authority_injection_noncanonical_ids_and_invalid_text ... ok\ntest web::content::tests::response_date_record_text_and_page_bounds_fail_closed_without_truncation ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.00s\n\n",
+  "sourceSha256": {
+    "crates/fc-protocol/src/web.rs": "ae4ea0c60a7e55e1f0ed9e31c01a53e595e1fc5f5dc869175b7673f572c09954",
+    "crates/fc-protocol/src/web/responses.rs": "f4dcf33a4d1881a7b6530f6211e023d9782d0d5b953c9cf76c12f255d23429a0",
+    "crates/fc-protocol/src/web/content.rs": "a6c8a23b6529d7502118811bb8ac19d3fefe8279e19a53a749d45bb7a016f7d7",
+    "crates/fc-protocol/src/web/content/tests.rs": "56669b3b27234bd2263c6cb1874c19518807e5257fc0b7ecf343418e8d966442",
+    "crates/fc-bootstrap/src/web_application.rs": "ed24650014cb5f3e77b88a9fb625d90cb5fb503f36e78379aff5f95679997dd0",
+    "crates/fc-bootstrap/src/web_application/content.rs": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245",
+    "crates/fc-bootstrap/src/web_application/tests.rs": "4b52318299ea13d9fdf3a8291ee9a4a971803f366346e5649ab94f90e4e465dd",
+    "crates/fc-bootstrap/src/web_application/content/tests.rs": "9d2149897ccd4965253ac370b507aa27f6038969a9d4aed00bf68ccd1a002bc6"
+  }
+}

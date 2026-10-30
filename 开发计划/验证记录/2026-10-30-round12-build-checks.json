@@ -1,0 +1,460 @@
+{
+  "status": "PASS",
+  "sourceInputs": "8a695e23b0f3525389eda90e91115f40bc7e490a7fbb9833f939434eca18ec52",
+  "architecture": "12 crates, 33 first-party edges",
+  "checks": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0,
+      "output": "",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "exitCode": 0,
+      "output": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "outputSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "command": "cargo check for modern Windows target (earlier invocation; exact flags not re-recorded in this aggregate)",
+      "exitCode": 0,
+      "output": "   Compiling version_check v0.9.5\n    Checking cfg-if v1.0.5\n   Compiling proc-macro2 v1.0.107\n    Checking typenum v1.20.1\n   Compiling unicode-ident v1.0.27\n   Compiling quote v1.0.47\n    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking subtle v2.6.1\n    Checking windows-link v0.2.1\n    Checking cpufeatures v0.2.17\n   Compiling serde_core v1.0.228\n   Compiling rustversion v1.0.23\n   Compiling zerocopy v0.8.63\n    Checking windows-strings v0.5.1\n    Checking windows-result v0.4.1\n    Checking memchr v2.8.3\n   Compiling generic-array v0.14.7\n   Compiling ahash v0.8.12\n   Compiling shlex v2.0.1\n   Compiling find-msvc-tools v0.1.15\n   Compiling cc v1.10.0\n   Compiling syn v2.0.119\n    Checking crypto-common v0.1.7\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking block-buffer v0.10.4\n   Compiling serde_json v1.0.145\n    Checking digest v0.10.7\n   Compiling crc32fast v1.5.3\n    Checking sha2 v0.10.9\n   Compiling serde v1.0.228\n   Compiling vcpkg v0.2.15\n    Checking once_cell v1.21.4\n   Compiling pkg-config v0.3.34\n   Compiling encoding_rs v0.8.42\n    Checking inout v0.1.4\n    Checking adler2 v2.0.1\n    Checking smallvec v1.16.4\n    Checking itoa v1.0.18\n    Checking ryu v1.0.23\n    Checking simd-adler32 v0.3.10\n    Checking cipher v0.4.4\n    Checking miniz_oxide v0.9.1\n    Checking windows-threading v0.2.1\n   Compiling multiversion_no_op v1.0.0\n    Checking zeroize v1.8.2\n    Checking core_detect v1.0.0\n    Checking zlib-rs v0.6.8\n    Checking scopeguard v1.2.0\n    Checking simdutf8 v0.1.5\n    Checking aes v0.8.4\n    Checking hmac v0.12.1\n    Checking rustc-hash v2.1.3\n    Checking fallible-streaming-iterator v0.1.9\n    Checking fallible-iterator v0.3.0\n    Checking log v0.4.34\n    Checking bitflags v2.13.2\n    Checking pbkdf2 v0.12.2\n    Checking flate2 v1.1.10\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n   Compiling libsqlite3-sys v0.30.1\n    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\n    Checking quick-xml v0.42.0\n    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n    Checking pdf-syntax v0.6.1\n    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n    Checking hashbrown v0.14.5\n   Compiling windows-implement v0.60.2\n   Compiling windows-interface v0.59.3\n   Compiling serde_derive v1.0.228\n    Checking hashlink v0.9.1\n    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n    Checking windows-core v0.62.2\n    Checking windows-collections v0.3.2\n    Checking windows-future v0.3.2\n    Checking windows-numerics v0.3.1\n    Checking windows v0.62.2\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking rusqlite v0.32.1\n    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 28s\n",
+      "outputSha256": "ca92b60445b2601d970b2704c50c2604d3e31ffa1061553a4a2b06b0329522b0"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exitCode": 0,
+      "output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.22s\n",
+      "outputSha256": "7c4665a2854320b3426c26dcedf3985e7752ee48b555d323c94be097359564b4"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exitCode": 0,
+      "output": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.68s\n",
+      "outputSha256": "e395fb59c2ed763a11e01cd3c2561432254b66ced5217eadfc8d38a476b67e4f"
+    },
+    {
+      "command": "cargo build -p fc-bootstrap --release --target i686-pc-windows-gnu --locked",
+      "exitCode": 0,
+      "output": "    Blocking waiting for file lock on build directory\n    Finished `release` profile [optimized] target(s) in 2m 04s\n",
+      "outputSha256": "6346bb17e3c22fff74b14c675e7e40528695f74e59c83be09fb04c8c612290d0"
+    },
+    {
+      "command": "cargo test --workspace --no-run --target i686-pc-windows-gnu --locked --message-format=json",
+      "exitCode": 0,
+      "output": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s\n",
+      "outputSha256": "f3aef8cf46a8c5d4328d4d5d2a14bc6996ff0c7dd6ea1dc1cab274351aaf706c"
+    },
+    {
+      "command": "CC_i686_win7_windows_gnu=i686-w64-mingw32-gcc AR_i686_win7_windows_gnu=i686-w64-mingw32-ar cargo +nightly-2026-10-29 build -p fc-bootstrap --release --target i686-win7-windows-gnu -Z build-std=std,panic_unwind --locked",
+      "exitCode": 0,
+      "output": "    Blocking waiting for file lock on build directory\n   Compiling compiler_builtins v0.1.160 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)\n   Compiling core v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)\n   Compiling libc v0.2.191\n   Compiling object v0.39.1\n   Compiling std v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)\n   Compiling windows-link v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/windows_link)\n   Compiling version_check v0.9.5\n   Compiling proc-macro2 v1.0.107\n   Compiling unicode-ident v1.0.27\n   Compiling quote v1.0.47\n   Compiling zerocopy v0.8.63\n   Compiling generic-array v0.14.7\n   Compiling serde_core v1.0.228\n   Compiling rustversion v1.0.23\n   Compiling ahash v0.8.12\n   Compiling find-msvc-tools v0.1.15\n   Compiling shlex v2.0.1\n   Compiling pkg-config v0.3.34\n   Compiling crc32fast v1.5.3\n   Compiling cc v1.10.0\n   Compiling vcpkg v0.2.15\n   Compiling serde v1.0.228\n   Compiling serde_json v1.0.145\n   Compiling multiversion_no_op v1.0.0\n   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n   Compiling encoding_rs v0.8.42\n   Compiling syn v2.0.119\n   Compiling libsqlite3-sys v0.30.1\n   Compiling windows-implement v0.60.2\n   Compiling windows-interface v0.59.3\n   Compiling serde_derive v1.0.228\n   Compiling rustc-std-workspace-core v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)\n   Compiling alloc v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)\n   Compiling memchr v2.8.3\n   Compiling adler2 v2.0.1\n   Compiling rustc-demangle v0.1.28\n   Compiling cfg-if v1.0.4\n   Compiling rustc-literal-escaper v0.0.8\n   Compiling unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)\n   Compiling rustc-std-workspace-alloc v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)\n   Compiling panic_abort v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)\n   Compiling panic_unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)\n   Compiling gimli v0.34.0\n   Compiling hashbrown v0.17.1\n   Compiling miniz_oxide v0.9.1\n   Compiling std_detect v0.1.5 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)\n   Compiling addr2line v0.27.1\n   Compiling proc_macro v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)\n   Compiling cfg-if v1.0.5\n   Compiling typenum v1.20.1\n   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n   Compiling subtle v2.6.1\n   Compiling windows-link v0.2.1\n   Compiling cpufeatures v0.2.17\n   Compiling windows-strings v0.5.1\n   Compiling windows-result v0.4.1\n   Compiling windows-core v0.62.2\n   Compiling once_cell v1.21.4\n   Compiling ryu v1.0.23\n   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n   Compiling crypto-common v0.1.7\n   Compiling block-buffer v0.10.4\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-ports/src/http.rs:128:14\n    |\n128 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n128 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n128 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\n   Compiling digest v0.10.7\nwarning: `fc-ports` (lib) generated 1 warning (run `cargo fix --lib -p fc-ports` to apply 1 suggestion)\n   Compiling inout v0.1.4\n   Compiling sha2 v0.10.9\n   Compiling smallvec v1.16.4\n   Compiling simd-adler32 v0.3.10\n   Compiling itoa v1.0.18\n   Compiling cipher v0.4.4\n   Compiling windows-threading v0.2.1\n   Compiling scopeguard v1.2.0\n   Compiling zlib-rs v0.6.8\n   Compiling core_detect v1.0.0\n   Compiling zeroize v1.8.2\n   Compiling simdutf8 v0.1.5\n   Compiling windows-future v0.3.2\n   Compiling flate2 v1.1.10\n   Compiling aes v0.8.4\n   Compiling hmac v0.12.1\n   Compiling windows-collections v0.3.2\n   Compiling windows-numerics v0.3.1\n   Compiling fallible-streaming-iterator v0.1.9\n   Compiling fallible-iterator v0.3.0\n   Compiling hashbrown v0.14.5\n   Compiling bitflags v2.13.2\n   Compiling log v0.4.34\n   Compiling rustc-hash v2.1.3\n   Compiling quick-xml v0.42.0\n   Compiling windows v0.62.2\n   Compiling pbkdf2 v0.12.2\n   Compiling pdf-syntax v0.6.1\n   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n   Compiling hashlink v0.9.1\n   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n  --> crates/fc-runtime/src/cancel.rs:33:14\n   |\n33 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n   |              ^^^^^^^^^^^^\n   |\n   = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n   |\n33 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n33 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n   |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-runtime/src/worker.rs:106:14\n    |\n106 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n106 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n106 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\n   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)\nwarning: `fc-runtime` (lib) generated 2 warnings (run `cargo fix --lib -p fc-runtime` to apply 2 suggestions)\n   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)\n   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)\n   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)\n   Compiling rusqlite v0.32.1\n   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-storage/src/login.rs:364:14\n    |\n364 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n364 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n364 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-storage/src/lib.rs:362:14\n    |\n362 |         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n362 -         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n362 +         used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n    |\n\nwarning: `fc-storage` (lib) generated 2 warnings (run `cargo fix --lib -p fc-storage` to apply 2 suggestions)\n   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u32>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-windows/src/audio/device.rs:170:10\n    |\n170 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n    |          ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n170 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n170 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/backend/voice.rs:161:14\n    |\n161 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n161 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n161 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/backend.rs:255:14\n    |\n255 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n255 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n255 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/voice_runtime.rs:137:14\n    |\n137 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n137 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n137 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n    |\n\nwarning: `fc-windows` (lib) generated 1 warning (run `cargo fix --lib -p fc-windows` to apply 1 suggestion)\nwarning: `fc-bootstrap` (lib) generated 3 warnings (run `cargo fix --lib -p fc-bootstrap` to apply 3 suggestions)\n    Finished `release` profile [optimized] target(s) in 8m 40s\n",
+      "outputSha256": "1c14641b5803bc60cbceb40c0c9c6dc018fc52b766f8b40b89e484852ca737db"
+    }
+  ],
+  "metadataSha256": "5e2937c3abe67c7ee764709bc90433a518eb39cee9ac7c03dac50be632c3c389",
+  "testArtifacts": [
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_windows-95fad28d15fea78d.exe",
+      "sha256": "48b9599f095ce05dea327317e55daf6795239654075a2a7b6f02d9effcd0dc90",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_materials-2221de66f2e97130.exe",
+      "sha256": "7443be00594b45b04469e639edb1fbeec2ff5c2a8a5b07af8d2498d35b5e6af3",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_materials",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-materials/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_storage-9549596680176a3f.exe",
+      "sha256": "af6580bc5c5d95e5f437cea731ea4250462a71bd614907fbf00619ee3d450559",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_storage",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-storage/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+      "sha256": "e0677a31ecd9845be5f1044c5d57397da14f6d758ac329bef816c6ee7d5d0b02",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_bootstrap",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_security-9c7f88663f75f873.exe",
+      "sha256": "4e97287575e8c1f8ab948b3218daecab64039b6342fc578c21b6a7a816308b6a",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_security",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-security/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/runtime_storage-d7df388ce9405226.exe",
+      "sha256": "826baaaee55f87faf7d3b884da1bd24a6059cd1416c177f58f9539c6af29f0f1",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "runtime_storage",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/runtime_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/business_storage-17bf377bec8f2f7e.exe",
+      "sha256": "f789638e12a663936052d402ab3dfedbc752f21ef29b6736c86adbd0a21a880d",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "business_storage",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/business_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+      "sha256": "23e414a1184f4e9e5f6bc4b70561e5223cfb0787971e4fc4890bb83f1b41725d",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/voice_storage-bf022395eae863de.exe",
+      "sha256": "31a105b34657ea43484ead5fbf624dff8bb96b3d591a1b2eef7bc5a09ced4ff3",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voice_storage",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/tests/voice_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_protocol-186900fcb7bfa5db.exe",
+      "sha256": "b0252bee012659b07dbf3cb025a0da32468176cbe5c879b7a81f54332120c68f",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_protocol",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-protocol/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_presentation-bf0074726aa5b441.exe",
+      "sha256": "3160ac63e26a33f707976c2dda17f216d4d3985f39c8d743516a1ad2b54f2674",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_presentation",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-presentation/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_runtime-fad3e5e278e2d80c.exe",
+      "sha256": "83df57b7f2061c70192871767508b4fecb3ae9009828276d9e0dc21e5bb522cf",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_runtime",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-runtime/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_application-8ad1e6c8c699ab50.exe",
+      "sha256": "5e266dea48f2594e33d52c98ba456f2aa866ec9812edc947fbb92ba032af93c7",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_application",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-application/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_audio-35e3156477d0188a.exe",
+      "sha256": "3c188d00d4b791ac9eeecb4449ba91df745d909bb4263a8daeb2b3aef7f2de69",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_audio",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-audio/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_ports-361bddc8b2876cc0.exe",
+      "sha256": "1507b251949f6d6c64e9226b6e507bbffc16f121d39c50fb7c78edc58ecd68fe",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_ports",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-ports/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "executable": "/workspace/共享/Eliora/未来教室计划/target/i686-pc-windows-gnu/debug/deps/fc_domain-915566e140287178.exe",
+      "sha256": "148421375cb73167cc5fb86adbd482e5f2a4e7dc147c0033db93c2ca1b6beb71",
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_domain",
+        "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-domain/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    }
+  ],
+  "testArtifactCount": 16,
+  "win7WarningScope": "Pinned newer nightly emits pre-existing fetch_update rename deprecations; build succeeded. Strict -D warnings applies to stable Host and modern Windows target; no formal MSVC/Win7 runtime claim."
+}

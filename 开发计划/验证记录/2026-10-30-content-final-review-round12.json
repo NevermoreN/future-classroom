@@ -1,0 +1,103 @@
+{
+  "review": "Round12 independent read-only backend/content Web and Windows content probe review",
+  "createdUtc": "2026-10-30T14:19:12.902293+00:00",
+  "conclusion": "PASS_READ_ONLY_NO_CONFIRMED_CONTRACT_VIOLATION",
+  "findings": [],
+  "checks": [
+    {
+      "area": "authority freshness",
+      "conclusion": "PASS by inspection",
+      "evidence": "Only exact live Web-origin Manage leases enter; role User denied. Writer session guard binds actual actor to captured lease/generation and checks again before COMMIT. New backend response metadata revalidates the ledger; scopes reject changed identityRevision. Local UI lock remains independent of existing Web leases."
+    },
+    {
+      "area": "date floor and expiry",
+      "conclusion": "PASS by inspection",
+      "evidence": "Read/save/receipt/scopes route through bounded writer ObserveContentDay; watermark is persistent and rollback returns WrongDate. Read/replay/pre-COMMIT require current date; backend checks key.date and record.updated_at.date, builds expires_at using next_day(now).date with second_of_day=0, rechecks date before release. No representable next day fails closed."
+    },
+    {
+      "area": "unknown mutation result",
+      "conclusion": "PASS by inspection",
+      "evidence": "Storage successful write is followed by original-result read; all failures after successful write map to Unavailable. Backend post-write document failure likewise maps to Unavailable; application non-definite write errors and encoding failure return 503 RESULT_UNKNOWN. Known pre-COMMIT Domain permission/conflict/day failures remain 403/409 without current revision."
+    },
+    {
+      "area": "original author and idempotency",
+      "conclusion": "PASS by inspection",
+      "evidence": "ReadOutcome filters receipt.last_actor_id against authenticated principal, including global admin; foreign and missing both become None. Original author still needs current scope/date/lease. Receipt preserves original record revision after later writes/clear. Payload fingerprint includes raw text while persisted record uses existing trim semantics; no automatic POST retry is introduced."
+    },
+    {
+      "area": "scope pagination bounds",
+      "conclusion": "PASS by inspection",
+      "evidence": "Validated identity bounds assignments<=4096/classes<=128. Compact sorted references are paged 20 at a time; homework numeric class/subject/owner sort with teacher-own vs global-all; reminders use all enabled managed classes. Offset>4096 or >total rejected, offset==total empty accepted; wire DTO nextOffset uses offset+items.length strictly below total."
+    },
+    {
+      "area": "Windows diagnostic claims and isolation",
+      "conclusion": "PASS by inspection",
+      "evidence": "Parent probe initializes owned DPAPI codec and SQLite plus an ordinarily approved exact Web lease; locks only its own local channel. Child exercises authenticated GET/POST scopes, wrong-CSRF nonmutation, durable homework/clear/CAS/idempotency/original result query and real desktop reminder facts. Output explicitly states synthetic request metadata and wire_TLS_browser_listener=NOT_RUN; parent closes/reopens owned DB and removes owned root."
+    }
+  ],
+  "limitations": [
+    "No cargo, remote Windows command, browser, listener or TLS handshake was rerun for this read-only review; prior targeted host reports and root unified validation remain separate evidence.",
+    "Windows child diagnostic uses a single synthetic global account, one assignment and current real local date. It does not itself prove teacher/foreign-account permission edges, >20 pagination, controlled midnight/rollback, or injected post-COMMIT failures; those require the separate host tests/storage barriers and parent acceptance results.",
+    "Inspection is of the SHA-bound source and documented shared application-worker composition; it is not a formal proof of every possible scheduler interleaving or every later caller of the public Backend API.",
+    "No real classroom data, UI automation, user input injection or Windows SSH authorization change was used in this review."
+  ],
+  "sources": {
+    "crates/fc-bootstrap/src/backend/content_web.rs": {
+      "sha256": "6eb505650a248f2e3d60cd92569499e920f08d4079f7bfe54029b7cee1f8134b",
+      "reviewScope": "full file: Web actor/target/document/scopes/read/save/outcome"
+    },
+    "crates/fc-bootstrap/src/web_pairing_probe/content_probe.rs": {
+      "sha256": "79ddb806fc0ef8ea2eca4d9ca6672d27cfdbc0a35e1917ed555fd03fe4d448d9",
+      "reviewScope": "full file: Windows synthetic HTTP content diagnostic"
+    },
+    "crates/fc-bootstrap/src/web_pairing_probe.rs": {
+      "sha256": "db373af57a8478cf4723dfa1f7e2d642d5946e34fc3a10a50a3639df8308d1b4",
+      "reviewScope": "parent run_owned setup/DPAPI/pairing/real-Web lease/local-lock/call/close/reopen/cleanup"
+    },
+    "crates/fc-bootstrap/src/backend.rs": {
+      "sha256": "66049ccd1b50990dd54c4433a207147f4b1abf68f3cdf4db2cb2b7b41a45371f",
+      "reviewScope": "context: state, actor, guarded, ledger synchronize, SessionControl check"
+    },
+    "crates/fc-storage/src/business/content_web.rs": {
+      "sha256": "bc303da7b969447b287d843d9499ac66743049a4c064b2dc0ac323b52a8f5eb1",
+      "reviewScope": "full file: observation/read outcome/Web-only entry points"
+    },
+    "crates/fc-storage/src/business/mod.rs": {
+      "sha256": "33a1e5516dbefff3b8b92b484b5bb2210442df459848025435f3712bb651a67a",
+      "reviewScope": "context: ReadContent, ContentTask, repository_error, load_identity, authority"
+    },
+    "crates/fc-storage/src/business/desktop.rs": {
+      "sha256": "87b65ddf822fbc02f8370f74fef240114c9dd6b27d9147052051b8260373577f",
+      "reviewScope": "context: persistent observed-day floor read/advance and desktop facts"
+    },
+    "crates/fc-ports/src/content_web.rs": {
+      "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6",
+      "reviewScope": "full file: original-author receipt contract"
+    },
+    "crates/fc-domain/src/auth.rs": {
+      "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d",
+      "reviewScope": "context: actor, owned/shared permission checks"
+    },
+    "crates/fc-domain/src/identity.rs": {
+      "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa",
+      "reviewScope": "context: reconstructed-state bounds and is_teacher"
+    },
+    "crates/fc-domain/src/content.rs": {
+      "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f",
+      "reviewScope": "context: validation, raw-to-normalized record semantics"
+    },
+    "crates/fc-bootstrap/src/web_application/content.rs": {
+      "sha256": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245",
+      "reviewScope": "context: HTTP classification and post-commit encoding failure"
+    },
+    "crates/fc-protocol/src/web/content.rs": {
+      "sha256": "a6c8a23b6529d7502118811bb8ac19d3fefe8279e19a53a749d45bb7a016f7d7",
+      "reviewScope": "context: bounded DTO validation and nextOffset"
+    },
+    "开发计划/12-教师内容API契约.md": {
+      "sha256": "4712303f4bd287b9626939cfc434292ca3ecbab4ed993c83141858fff7170abf",
+      "reviewScope": "full contract"
+    }
+  },
+  "mutations": "Only this /tmp review JSON was created; all source files remained unchanged."
+}

@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.24 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.25 / 详细设计D11，2026-10-30（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十一轮449项debug测试、release主EXE配对端口/隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十二轮468项debug测试、release主EXE配对/内容端口及隐藏工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -118,3 +118,14 @@ Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑�
 本轮缓存304修复在自有HTTP loopback诊断核对实际wire headers/body，未修改系统全局超时、证书、防火墙或SSH服务。Win7GNU继续只作补充导入/Win11运行证据；实际Win7 SP1 x86、Windows10 32/64位与正式MSVC门槛仍各自保留。最终源码/测试/清理绑定见[第十一轮实施记录](10-实施进度与验证记录.md)。
 
 本轮最终Win11为449项/16个debug测试EXE（未优化）与release主EXE配对/隐藏工作台/资料/全零音频链PASS，[报告](验证记录/2026-10-30-windows11-teacher-web-round11.json)；新原生页7项已包含，不另加。浏览器30项属于Linux headless synthetic拦截，未走真实Windows TLS；HTTP loopback两轮304实际wire和完成排空通过但首连接期限仍NOT_VALIDATED。现代PE0/5、Win7GNU0/0，后者在Win11组合probe通过且未运行额外test EXE。三系统整体验收仍未完成。
+
+
+## 10. 第十二轮增量：今日作业与共同提醒
+
+教师内容API、真实SQLite读写/原命令查询与React编辑均按D11接入；Host380项release与浏览器45项synthetic检查分开记录，现代Windows与Win7GNU均重建。strict Web lease、CSRF、CAS、清空保留修订、原提交者回执、跨日持久高水位和结果不确定语义见[第十二轮实施记录](10-实施进度与验证记录.md)及[内容契约](12-教师内容API契约.md)。
+
+浏览器在Linux headless使用生产静态资源及合成拦截API，真实Windows内容probe使用DPAPI/SQLite与应用请求端口并标明synthetic_request_metadata=true。两者均不能代替Windows真实TLS/校园网络/办公室浏览器或可见希沃验收。正常监听保持关闭，HTTP.sys首连接P0保留；29项官方来源研究未解除该门槛。实际Win7 SP1 x86、Win10 32/64位、正式MSVC、安装/设备矩阵与72小时仍独立保留。
+
+第十二轮[Win11最终报告](验证记录/2026-10-30-windows11-teacher-content-round12.json)为468项/16个未优化debug测试EXE PASS，主release EXE独立断言WEB_PAIRING_PASS与WEB_CONTENT_PASS，清理PASS；bootstrap库47项154.65秒、bin43项11.28秒，单EXE预算600秒。真实DPAPI/SQLite仅证明端口业务与隔离原生链，视觉仍NOT_RUN。
+
+[第十二轮Win7GNU在Win11补充运行](验证记录/2026-10-30-win7-gnu-teacher-content-on-windows11-round12.json)也通过两Web端口标记、隐藏原生/资料/全零声音及清理，无额外test EXE；PE为0结构错误/0已知触发。不能替代实际Win7 SP1 x86、Win10 32/64位或正式MSVC的独立证据。

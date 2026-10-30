@@ -1,5 +1,7 @@
 #![forbid(unsafe_code)]
 pub mod audio;
+pub mod content_web;
+pub use content_web::ContentOutcomeRepository;
 pub mod http;
 use fc_domain::ids::Revision;
 use fc_domain::{

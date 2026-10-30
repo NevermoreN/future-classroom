@@ -5,25 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { HttpApi, trustedApiBase } from './api/client'
 import { PairingController, type ViewState } from './api/controller'
-import type { Role, Session } from './api/protocol'
-const roleName: Record<Role, string> = { GLOBAL_ADMIN: '全局主管理员', TEACHER_ADMIN: '教师管理员', USER: '普通用户' }
-const features = [
-  { icon: ClipboardList, title: '我的今日作业', description: '按真实任教范围管理当天作业', accent: 'blue' },
-  { icon: FolderOpen, title: '我的课堂资料', description: '整理课堂需要的文件与资料', accent: 'violet' },
-  { icon: Radio, title: '语音播报', description: '向已授权的班级发起播报', accent: 'peach' },
-  { icon: BookOpen, title: '今日提醒', description: '管理班级当天的共同提醒', accent: 'green' },
-] as const
+import TeacherWorkspace from './TeacherWorkspace'
 function Brand() { return <a className="brand" href={import.meta.env.BASE_URL} aria-label="未来教室首页"><span className="brand-icon"><GraduationCap size={25} strokeWidth={1.8} /></span><span>未来教室<small>TEACHER WORKSPACE</small></span></a> }
-function SessionView({ session, onLogout, onRefresh }: { session: Session; onLogout: () => void; onRefresh: () => void }) {
-  return <main id="main-content" className="workspace">
-    <div className="workspace-heading"><div><p className="eyebrow">你的课堂，从这里连接</p><h1>你好，{session.principal.displayName}<span className="hello-dot">。</span></h1><p>以下账号与任教范围由白板确认。</p></div><Button variant="outline" onClick={onRefresh}><RefreshCw />核对会话</Button></div>
-    <section className="identity-summary" aria-label="当前授权"><div className="avatar"><GraduationCap size={28} /></div><div><strong>{session.principal.displayName}</strong><span>{roleName[session.principal.role]}</span></div><div className="summary-divider" /><div><small>白板当前班级</small><strong>{session.currentClassId === null ? '尚未绑定班级' : `班级 ID ${session.currentClassId}`}</strong></div><span className="verified"><ShieldCheck size={15} />白板已确认</span></section>
-    <div className="section-label"><h2>教师工作台</h2><span>业务功能正在接入</span></div>
-    <div className="feature-grid">{features.map(({ icon: Icon, title, description, accent }) => <Card key={title} className="feature-card"><CardContent><span className={`feature-icon ${accent}`}><Icon size={24} strokeWidth={1.7} /></span><h3>{title}</h3><p>{description}</p><Button disabled variant="ghost">尚未接入服务<ChevronRight size={16} /></Button></CardContent></Card>)}</div>
-    <Card className="scope-card"><CardHeader><CardTitle>当前任教范围</CardTitle><CardDescription>按白板返回的班级与科目 ID 显示，不推测名称。</CardDescription></CardHeader><CardContent>{session.assignments.length === 0 ? <p className="empty-scope">当前账号没有可显示的任教范围。请联系本地管理员核对。</p> : <ul className="scope-list">{session.assignments.map(a => <li key={`${a.classId}:${a.subjectId}`}><BookOpen size={17} /><span>班级 ID {a.classId}</span><span>科目 ID {a.subjectId}</span></li>)}</ul>}</CardContent></Card>
-    <div className="logout-row"><LockKeyhole size={16} /><p>使用完毕请注销。注销会使这个账号的全部渠道授权失效。</p><Button variant="outline" onClick={onLogout}><LogOut />注销账号</Button></div>
-  </main>
-}
 function PairingForm({ enabled, onSubmit }: { enabled: boolean; onSubmit: (form: { code: string; loginName: string; deviceName: string }) => void }) {
   const [code, setCode] = useState(''), [loginName, setLoginName] = useState(''), [deviceName, setDeviceName] = useState('')
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -50,14 +33,14 @@ export default function App() {
   }, [])
   const busy = ['checking', 'creating', 'waiting', 'logging-out'].includes(view.phase)
   const connected = ['anonymous', 'creating', 'waiting', 'authenticated', 'logging-out', 'logout-unknown', 'expired'].includes(view.phase)
-  return <div className="app-shell"><div className="sr-only" role="status" aria-live="polite">{view.phase === 'authenticated' ? '白板已确认登录，教师工作台已就绪。' : view.phase === 'logout-unknown' ? '注销结果尚未确认，需要主动核对白板会话。' : ''}</div><a className="skip-link" href="#main-content">跳到主要内容</a>
+  return <div className={view.phase === 'authenticated' ? 'app-shell authenticated-shell' : 'app-shell'}><div className="sr-only" role="status" aria-live="polite">{view.phase === 'authenticated' ? '白板已确认登录，教师工作台已就绪。' : view.phase === 'logout-unknown' ? '注销结果尚未确认，需要主动核对白板会话。' : ''}</div><a className="skip-link" href="#main-content">跳到主要内容</a>
     <header className="site-header"><Brand /><div className="header-right"><span className={`connection-status ${connected ? 'connected' : ''}`}><span />{connected ? '白板连接已核验' : busy ? '正在检查连接' : '连接待核验'}</span><span className="workspace-label">教师工作台</span></div></header>
-    {view.phase === 'authenticated' ? <SessionView session={view.session} onLogout={() => { void controller.current?.logout() }} onRefresh={() => { void controller.current?.connect() }} /> : <main id="main-content" className="pairing-layout">
+    {view.phase === 'authenticated' ? <TeacherWorkspace session={view.session} onLogout={() => { void controller.current?.logout() }} onRefresh={() => { void controller.current?.connect() }} onRevoked={() => controller.current?.invalidate()} /> : <main id="main-content" className="pairing-layout">
       <section className="intro-panel"><span className="intro-tag"><Sparkles size={14} />让教学，轻松一步</span><h1>连接你的教室，<br />专注每一堂课<span>。</span></h1><p className="intro-description">从自己的设备安全连接白板。<br />课堂里的准备与协作，从这里开始。</p>
         <div className="classroom-illustration" aria-hidden="true"><div className="board-top"><span /><span /><span /></div><div className="board-content"><span className="board-caption">未来教室</span><div className="board-line long" /><div className="board-line short" /><div className="board-tiles"><span><BookOpen size={28} /></span><span><Radio size={26} /></span><span><FolderOpen size={28} /></span></div></div><div className="device-bubble"><Smartphone size={24} /><span>你的设备</span><i><Check size={12} /></i></div><div className="board-stand" /></div>
         <ol className="pairing-steps"><li><span>01</span><div><strong>获取配对码</strong><p>请管理员在白板开启配对</p></div></li><li><span>02</span><div><strong>提交连接申请</strong><p>填写账号与当前设备名称</p></div></li><li><span>03</span><div><strong>等待本地确认</strong><p>管理员批准后即可连接</p></div></li></ol>
       </section>
-      <Card className="pairing-card"><CardHeader><div className="card-icon"><MonitorUp size={23} strokeWidth={1.6} /></div><CardTitle>连接白板</CardTitle><CardDescription>使用已有教师账号，提交设备配对申请。</CardDescription></CardHeader><CardContent>
+      <Card className="pairing-card"><CardHeader><div className="card-icon"><MonitorUp size={23} strokeWidth={1.6} /></div><CardTitle role="heading" aria-level={2}>连接白板</CardTitle><CardDescription>使用已有教师账号，提交设备配对申请。</CardDescription></CardHeader><CardContent>
         <div className="feedback-region" aria-live="polite" aria-atomic="true">
           {view.phase === 'checking' && <div className="state-panel"><LoaderCircle className="spinner" size={28} /><h2>正在检查白板连接</h2><p>正在核对服务版本与当前会话。</p></div>}
           {view.phase === 'anonymous' && view.notice && <p className="notice"><CircleAlert size={17} />{view.notice}</p>}

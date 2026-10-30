@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "assetCount": 4,
+  "totalBytes": 370468,
+  "totalLimitBytes": 5242880,
+  "gzipJsCssBytes": 110045,
+  "gzipJsCssLimitBytes": 524288,
+  "scope": "static build only; listener, wire TLS, real browser pairing not established by this report",
+  "sourceInputs": "8a695e23b0f3525389eda90e91115f40bc7e490a7fbb9833f939434eca18ec52",
+  "rustIntegration": {
+    "exitCode": 0,
+    "output": "    Finished `release` profile [optimized] target(s) in 0.09s\n     Running `target/release/examples/verify_web_assets web/dist`\nSTATIC_BUILD_INTEGRATION_PASS assets=4 bytes=370468 synthetic_metadata_only=true listener_started=false\n"
+  },
+  "manifestSha256": "4e08c9662e0e5b5e822f8b7485dacdc87636d7e28cc65e17a686d70b5b68c08c"
+}

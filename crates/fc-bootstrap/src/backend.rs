@@ -1,8 +1,10 @@
 //! Synchronous product business service. Invoke only on the shared bounded worker
 //! pool: every SQLite wait and every password KDF is deliberately off the UI thread.
 //! UI session controls use atomics and a private atomic coalescing input stream instead.
+mod content_web;
 mod voice;
 pub mod web;
+pub use content_web::{WebContentDocument, WebContentKind, WebContentScope, WebContentScopes};
 use fc_application::identity::{IdentitySessions, SessionError, SessionLease, SessionPurpose};
 use fc_domain::{
     auth::*,

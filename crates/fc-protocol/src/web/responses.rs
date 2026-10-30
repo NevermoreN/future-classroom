@@ -16,6 +16,9 @@ pub enum ErrorCode {
     RateLimited,
     ServiceUnavailable,
     ResultUnknown,
+    RevisionConflict,
+    DayChanged,
+    IdempotencyConflict,
 }
 #[derive(Default)]
 struct BoundedJson {

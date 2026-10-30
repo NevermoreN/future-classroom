@@ -15,6 +15,8 @@ use fc_protocol::{
 };
 use fc_security::web::{PairingCode, WebSecret};
 
+mod content;
+
 /// Contains explicitly disclosed session headers/body. Deliberately no Debug or
 /// Clone: transport ownership must not turn credentials into routine diagnostics.
 pub struct WebResponse {
@@ -157,6 +159,15 @@ impl WebApplication {
                     ),
                     Err(_) => failure(503, responses::ErrorCode::ResultUnknown),
                 }
+            }
+            Route::ContentScopes { .. }
+            | Route::ContentRead { .. }
+            | Route::ContentSave { .. }
+            | Route::ContentCommand { .. } => {
+                let Some(session) = authenticated else {
+                    return failure(401, responses::ErrorCode::Unauthorized);
+                };
+                content::dispatch(backend, session.lease(), route, body)
             }
             _ => failure(404, responses::ErrorCode::NotFound),
         }

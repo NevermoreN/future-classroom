@@ -1,0 +1,10 @@
+{
+  "command": "cargo test -p fc-bootstrap --lib --release web_application::tests::content_tests --locked -- --test-threads=1",
+  "exitCode": 101,
+  "compileSeconds": 187,
+  "testSeconds": 5.51,
+  "testsPassed": 3,
+  "testsFailed": 1,
+  "classification": "fixture expectation corrected, product correctly rejects clock rollback with definite DAY_CHANGED 409 before mutation",
+  "rawOutput": "Finished `release` profile [optimized] target(s) in 3m 07s\nRunning unittests src/lib.rs (target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\nrunning 4 tests\ncontent_http_authority_and_csrf_injection_fail_before_durable_mutation ... ok\ncontent_http_clear_keeps_cas_and_receipts_keep_original_result_without_automatic_rewrite ... ok\ncontent_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_clock_rollback ... FAILED\ncontent_http_teacher_scope_global_pagination_and_receipt_privacy_use_actual_accounts ... ok\nthread 'web_application::tests::content_tests::content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_clock_rollback' (11530) panicked at crates/fc-bootstrap/src/web_application/content/tests.rs:94:5:\nassertion `left == right` failed: {\"schemaVersion\":1,\"code\":\"DAY_CHANGED\"}\n  left: 409\n right: 503\ntest result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 41 filtered out; finished in 5.51s\nerror: test failed, to rerun pass `-p fc-bootstrap --lib`\n"
+}

@@ -1,3 +1,4 @@
+import { bodyText, commandResult, committed, content, contentPath, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopePage } from './content-protocol'
 import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
 export class ApiError extends Error {
   constructor(public readonly status: number, public readonly code: ErrorCode) { super('白板未能完成此次请求。'); this.name = 'ApiError' }
@@ -49,7 +50,13 @@ export interface ServerApi {
   poll(id: string, proof: string, signal: AbortSignal): Promise<PollResult>
   logout(csrf: string, signal: AbortSignal): Promise<void>
 }
-export class HttpApi implements ServerApi {
+export interface ContentApi {
+  scopes(kind: ContentKind, offset: number, signal: AbortSignal): Promise<ScopePage>
+  content(key: ContentKey, signal: AbortSignal): Promise<ContentDocument>
+  saveContent(key: ContentKey, command: ContentCommand, csrf: string, signal: AbortSignal): Promise<Committed>
+  commandResult(commandId: string, signal: AbortSignal): Promise<CommandResult>
+}
+export class HttpApi implements ServerApi, ContentApi {
   constructor(private readonly base: URL, private readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
   private async request(path: string, signal: AbortSignal, input?: unknown, csrf?: string): Promise<{ status: number; value: unknown }> {
     if (signal.aborted) throw abortError()
@@ -97,4 +104,29 @@ export class HttpApi implements ServerApi {
     if (r.status !== 200) throw new ProtocolFault()
     loggedOut(r.value)
   }
+  async scopes(kind: ContentKind, offset: number, signal: AbortSignal) {
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 4096) throw new ProtocolFault()
+    const r = await this.request(`content/${kind === 'HOMEWORK' ? 'homework' : 'reminders'}/scopes/${offset}`, signal)
+    if (r.status !== 200) throw new ProtocolFault()
+    return scopes(r.value, kind, offset)
+  }
+  async content(key: ContentKey, signal: AbortSignal) {
+    const r = await this.request(contentPath(key), signal)
+    if (r.status !== 200) throw new ProtocolFault()
+    const document = content(r.value)
+    if (!sameKey(document.key, key)) throw new ProtocolFault()
+    return document
+  }
+  async saveContent(key: ContentKey, command: ContentCommand, csrf: string, signal: AbortSignal) {
+    const input = { schemaVersion: 1, commandId: decimal(command.commandId), expectedRevision: revision(command.expectedRevision), text: bodyText(command.text) }
+    const r = await this.request(contentPath(key), signal, input, csrf)
+    if (r.status !== 200) throw new ProtocolFault()
+    return committed(r.value, input.commandId, key, input.expectedRevision, input.text)
+  }
+  async commandResult(commandId: string, signal: AbortSignal) {
+    const id = decimal(commandId), r = await this.request(`content/commands/${id}`, signal)
+    if (r.status !== 200) throw new ProtocolFault()
+    return commandResult(r.value, id)
+  }
+
 }

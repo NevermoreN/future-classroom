@@ -15,10 +15,15 @@ use std::{
 };
 
 const PASSWORD: &str = "Synthetic-Web-Application-Password-2026";
-struct Time(AtomicU64);
+struct Time(AtomicU64, AtomicU64);
 impl Clock for Time {
     fn now(&self) -> LocalDateTime {
-        LocalDateTime::new(LocalDate::new(2026, 10, 30).unwrap(), 36_000).unwrap()
+        let seconds = self.1.load(Ordering::Acquire);
+        LocalDateTime::new(
+            LocalDate::new(2026, 10, if seconds < 86_400 { 30 } else { 31 }).unwrap(),
+            (seconds % 86_400) as u32,
+        )
+        .unwrap()
     }
 }
 impl MonotonicClock for Time {
@@ -69,7 +74,7 @@ impl BackendFixture {
     }
     fn new() -> Self {
         let directory = Directory::new();
-        let clock = Arc::new(Time(AtomicU64::new(1000)));
+        let clock = Arc::new(Time(AtomicU64::new(1000), AtomicU64::new(36_000)));
         let mut backend = Self::open(&directory, clock.clone());
         drop(
             backend
@@ -109,10 +114,13 @@ impl BackendFixture {
         response
     }
     fn pair(&mut self, device: &str, pending_first: bool) -> String {
+        self.pair_login("admin", device, pending_first)
+    }
+    fn pair_login(&mut self, login: &str, device: &str, pending_first: bool) -> String {
         let window = self.service.begin_pairing(self.admin).unwrap();
         let code = window.code.expose_text();
         let body = format!(
-            r#"{{"schemaVersion":1,"code":"{}","loginName":"admin","deviceName":"{device}"}}"#,
+            r#"{{"schemaVersion":1,"code":"{}","loginName":"{login}","deviceName":"{device}"}}"#,
             code.as_str()
         );
         let created = self.dispatch(
@@ -495,3 +503,6 @@ fn public_status_is_non_sensitive_and_frame_origin_cookie_fail_before_mutation()
         401
     );
 }
+
+#[path = "content/tests.rs"]
+mod content_tests;

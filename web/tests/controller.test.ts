@@ -13,6 +13,12 @@ const form = { code: '01234567', loginName: 'client-claimed-name', deviceName: '
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0) })
 afterEach(() => { vi.useRealTimers() })
 describe('pairing ownership and uncertain outcomes', () => {
+  it('explicit revocation clears the authenticated mirror and stops existing operations', async () => {
+    const f = fixture(); f.api.session.mockResolvedValueOnce(actual); await f.controller.connect()
+    expect(f.last().phase).toBe('authenticated'); f.controller.invalidate()
+    expect(f.last().phase).toBe('anonymous'); expect(JSON.stringify(f.last())).not.toContain(actual.principal.displayName)
+    expect(JSON.stringify(f.last())).not.toContain(actual.csrf); f.controller.dispose()
+  })
   it('creates once, polls at >=500ms, and learns identity only from GETsession', async () => {
     const f = fixture(); await f.controller.connect()
     const work = f.controller.create(form); await vi.advanceTimersByTimeAsync(0)
