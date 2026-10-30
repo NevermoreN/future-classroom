@@ -8,8 +8,11 @@ use fc_ports::{CredentialError, CredentialIdentityRepository};
 use fc_runtime::health::Health;
 use std::{
     path::PathBuf,
+    sync::atomic::AtomicU64,
     time::{SystemTime, UNIX_EPOCH},
 };
+
+static DIRECTORY_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 struct ClockFixture;
 impl Clock for ClockFixture {
@@ -29,12 +32,13 @@ impl Directory {
     }
     fn under(root: PathBuf) -> Self {
         let path = root.join(format!(
-            "FutureClassroom-Accounts-R15-{}-{}",
+            "FutureClassroom-Accounts-R15-{}-{}-{}",
             std::process::id(),
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_nanos()
+                .as_nanos(),
+            DIRECTORY_SEQUENCE.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&path).unwrap();
         #[cfg(unix)]

@@ -1,6 +1,6 @@
 # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
 
-总计划1.29 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+总计划1.30 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
 
 ## 1. 正式支持目标与架构
 
@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十五轮512项/16个debug测试EXE、release主EXE配对/内容/资料/语音端口及隐藏账号编辑/多任教/撤权/独立busy锁定、工作台/9组资料/全零声音通过；前轮1080p/4K低DIB通过；实际TLS/可见桌面/安装/长稳仍NOT_RUN |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300上第十七轮16个最终debug产物覆盖600个不同用例（完整16程序后补跑受影响lib65项，不是单冻结快照一次600）；release组合39步工作台/原生画布、配对/内容/资料/语音四Web标记及全零声音通过，补充Win7GNU在同机通过。实际TLS/可见桌面/安装/长稳仍NOT_RUN |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -167,3 +167,16 @@ Web业务服务默认关闭，逻辑enable不创建监听、URLACL、证书绑�
 两轮旧bin各68通过/6失败和[精确回溯](验证记录/2026-10-31-round16-idle-fault-diagnostic.json)继续保留；显式reaper修复后的单项1通过不与最终585累计。Win7GNU补充EXE SHA `fd538a5c604c9a7d81c4ea44fa533fa4473f5dca132fd0289fa2eae0338a90ee`，8794112字节；[PE检查](验证记录/2026-10-31-round16-win7-imports-stable.json)0/0；[Win11同机补充运行](验证记录/2026-10-31-round16-win7-on-windows11.json)组合与清理PASS，新增单测EXE为0。[现代PE](验证记录/2026-10-31-round16-modern-imports-stable.json)仍有5项已知Win7风险。[开发包13成员及重包一致性](验证记录/2026-10-31-round16-package.json)、[最终绑定复核](验证记录/2026-10-31-round16-final-readonly-review.json)和[远端清理](验证记录/2026-10-31-round16-remote-cleanup.json)PASS，[整轮本地清理](验证记录/2026-10-31-round16-cleanup.json)PASS，同步详见[第十六轮实施记录](10-实施进度与验证记录.md)。
 
 Windows 7 SP1 x86、Windows 10、Windows 11继续是三个正式目标。实际Win7/Win10设备本轮尚未测试；补充GNU构建/导入审计或在同一Win11上运行不能代验。隐藏原生示例画布/合成拖动不是可见希沃/PPT/触控/DPI与真实桌面图标空间的验收，独立文字/图片/TXT/分页图片和P4完整布局也未完成。严格5秒P0仍FAIL，正常可信TLS/校园网络、正式安装与72小时门槛不变。完整目标继续active，长期Windows SSH授权保留。
+
+
+## 第十七轮增量：统一内容测量与原生排版
+
+[契约18](18-统一内容测量与原生排版.md)统一场景与DirectWrite的完整正文分块、可用宽度、块内留白、资料行距、操作44 DIP最小高度及末块padding；固定/百分比父宽先解析再传给子树。动态钟面/课间区域、0%布局、资源上限与实时文件授权保持。
+
+[Host实际457/28 PASS](验证记录/2026-10-31-round17-host-final.json)；[Windows最终600个不同用例/16个产物覆盖通过](验证记录/2026-10-31-round17-windows-final.json)：完整16程序600 PASS后，最终目录夹具变更只改变1个lib测试程序，再补跑65，其余15程序哈希未变。不是同一最终快照单次600，也不合计为665。新增10项纯规则、4项DirectWrite/分页和1项实际画布间距回归均在这些数内。[原生39步及资料/全零音频/Web端口组合](验证记录/2026-10-31-round17-windows-post-handshake.json)绑定最终相同release EXE，runner cleanup通过；实际主机仍是Win11 Pro x64 build26300/WOW64，不是可见希沃或Win10/Win7设备证据。
+
+最终269仓库输入SHA `d2cd0aec…`；实际Rust构建/Host快照`e069d16f…`后只修改非编译runner的远端哈希采集，Rust、EXE和包内容未变。初始语音两项失败、单项波动、ExitCode=null采集错误、Host目录冲突及旧runner读取后来本地hash的限制全部保留，详见[本轮进度与历史](10-实施进度与验证记录.md#第十七轮统一内容测量与原生排版)。临时分阶段诊断已还原；只保留测试预算预留握手和目录序号，生产100ms及成功断言未放宽。后续成功不唯一证明原语音失败原因。
+
+[开发包](验证记录/2026-10-31-round17-package-final.json)13成员、CRC/SHA和同名独立复现通过，全部平台与完整应用门禁仍未完成；静态导入现代GNU0结构错误/5已知Win7风险，补充Win7GNU0/0。[Win7GNU同一Win11的原生/系统/39步工作台/资料及cleanup通过](验证记录/2026-10-31-round17-win7-on-win11-final.json)；[修复后runner实际远端哈希核验通过](验证记录/2026-10-31-round17-runner-hash-runtime-verification.json)。该核验随行的50项纯规则来自现代GNU测试EXE，不作Win7用例或新增600计数；未请求音频/Web组合重复运行。[整轮清理PASS](验证记录/2026-10-31-round17-cleanup.json)：157个自有顶层路径、13,662文件、6,199,262,816逻辑字节，命名空间剩余0；远端目录/任务/进程均0、sshd Running、私钥0600。预存IDE target/dist/node_modules及全局缓存保留，整轮验证后同步既有仓库main；实际提交SHA以Git历史及本轮回复为准。
+
+正式Windows7 SP1 x86、Win10设备/MSVC、希沃可见触控/DPI/PPT、安装及72小时仍待各自证据。P0严格5秒保留FAIL，正常可信TLS/生产监听关闭，完整目标继续active；长期Windows SSH服务、公钥和仓库外私钥保留。

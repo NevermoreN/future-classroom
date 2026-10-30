@@ -1,0 +1,323 @@
+{
+  "round": 17,
+  "scope": "Native desktop uses shared presentation CardBodySpec for DirectWrite layout, geometry, clipping and page endpoint",
+  "recordedAtUtc": "2026-10-30T19:03:54.566339+00:00",
+  "frozen": true,
+  "status": "CROSS_COMPILE_STATIC_PASS_NATIVE_EXECUTION_PENDING",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 117747,
+      "sha256": "d8c62c109200ac5d69685d419cab660f69664688f99717da2c113b43a744e59d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18260,
+      "sha256": "9fdc40166bf321c75209c772374d2667e2d07a300b68d5bf0d7f18d02a52c6ef"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.85s\n"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.45s\n"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "exitCode": 0,
+      "rawOutput": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "exitCode": 0,
+      "rawOutput": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "exitCode": 0,
+      "rawOutput": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+    },
+    {
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.46s\n"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.57s\n"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+      "exitCode": 0,
+      "rawOutput": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+      "exitCode": 0,
+      "rawOutput": ""
+    },
+    {
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final shared text_width and equal-valued TEXT_PADDING8/TEXT_INSET24 constants authority extraction",
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.31s\n"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-windows",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--lib",
+        "--tests",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final shared text_width and equal-valued TEXT_PADDING8/TEXT_INSET24 constants authority extraction",
+      "exitCode": 0,
+      "rawOutput": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.20s\n"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final shared text_width and equal-valued TEXT_PADDING8/TEXT_INSET24 constants authority extraction",
+      "exitCode": 0,
+      "rawOutput": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/card_body_tests.rs"
+      ],
+      "env": {
+        "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+      },
+      "phase": "Final shared text_width and equal-valued TEXT_PADDING8/TEXT_INSET24 constants authority extraction",
+      "exitCode": 0,
+      "rawOutput": ""
+    }
+  ],
+  "initialCrossCheck": {
+    "evidence": "Tool console captured, summarized here; not preserved as a separate raw log file",
+    "command": "CARGO_TARGET_DIR=/tmp/fc-round17-native-target cargo check -p fc-windows --target i686-pc-windows-gnu --lib --tests --locked",
+    "exitCode": 0,
+    "profile": "dev unoptimized+debuginfo",
+    "elapsedSeconds": 54.11
+  },
+  "testExecution": {
+    "nativeTestsExecuted": 0,
+    "windowsOrRemoteSessionsStarted": 0,
+    "reason": "Root owns unified remote Windows validation. Cross-check and Clippy compile tests but do not execute them.",
+    "target": "i686-pc-windows-gnu",
+    "cargoTargetDir": "/tmp/fc-round17-native-target"
+  },
+  "nativeTestsAdded": [
+    "desktop::card_body_tests::shared_body_materials_actual_compositor_one_page_with_gaps_rows_note_and_full_more_target",
+    "desktop::card_body_tests::shared_body_homework_labels_and_text_use_actual_width_full_utf16_and_page_line_coverage",
+    "desktop::card_body_tests::shared_body_course_unverified_subtitle_reserves_real_header_and_complete_capsule_padding",
+    "desktop::card_body_tests::shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_existing_bounds"
+  ],
+  "behavior": [
+    "card_body_spec drives exact text/center/fill/leaf/action roles; native only creates actual DirectWrite layouts and line metrics. spec.arrange owns block top/height/gaps and complete last-block padding.",
+    "ContentLayout caches shared top/bottom insets; draw clipping, page viewport and material input clipping reuse them. body_top forwards to the one presentation authority.",
+    "MaterialRow(index) maps only to that actual record ID/version; MaterialMore maps to actual cursor. Warning/header insertion never changes action identities. No skip-index mapping remains.",
+    "Clock/recess/control dynamic drawing remains separate; prepare runs only on scene rebuild. No new1Hz whole-tree measurement.",
+    "Graphics validates UTF16 count before allocating a text buffer; complete content remains owned, untruncated."
+  ],
+  "regressionCoverage": [
+    "Actual compose_layout using NativeTextMeasure assigns rectangles before hidden renderer layout. Materials1..5 with gaps23/64 and warning, complete44DIP more target, actual clipped tree button events and stable generation/IDs.",
+    "Homework2block label/body actual DirectWrite line coverage/fullUTF16 and filled header attribution, followed by constrained-height pagination without missing lines.",
+    "Courses current temporary label uses actual lines, unverified heading50DIP and actual subtitle metrics show no overlap; verified/unverified total height differs18DIP.",
+    "700-line full text creates more than50pages;50is not the text cap. Full64homework/128blocks, exact262144UTF16 and128courses are accepted by actual native preparation; over-limit content is rejected."
+  ],
+  "limitsPreserved": {
+    "courseRows": 128,
+    "homeworkRows": 64,
+    "materialsRows": 5,
+    "utf16Units": 262144,
+    "textPages": 16384,
+    "visibleLeaves": 64,
+    "rgbaBudgetBytes": 16777216,
+    "imageDocumentPages50": "Separate unimplemented paged-image document limit; not applied to text."
+  },
+  "initialFailures": [],
+  "cleanup": "No fixture database/task/remote process or native runtime test was created by this child. Dedicated build cache retained for root final cleanup. No target deletion performed.",
+  "reviewLimits": "This report is authored by the implementer; it does not claim independent review or native/visible machine PASS.",
+  "historicalFrozenSources": [
+    {
+      "phase": "Initial shared-spec integration before equal-valued text-width/padding authority extraction",
+      "sourceFiles": [
+        {
+          "path": "crates/fc-windows/src/desktop.rs",
+          "bytes": 117544,
+          "sha256": "387adfc35815ed83127026bbdc123d31430beb80c4498268702643dfe0854563"
+        },
+        {
+          "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+          "bytes": 18260,
+          "sha256": "9fdc40166bf321c75209c772374d2667e2d07a300b68d5bf0d7f18d02a52c6ef"
+        }
+      ],
+      "checksRetained": "All original checks remain in checks; no historical result rewritten.",
+      "reportSha256BeforeUpdate": "21ce905c4075781bc0dad9c833346f9b27104ef42f9309a0b98ba3a3fe90b0f2"
+    }
+  ],
+  "sharedConstantsCorrection": {
+    "request": "Root self-review: one shared authority for body width and text insets, without numerical or heading/footer changes.",
+    "sharedAPIConfirmedOnDiskBeforeEdit": true,
+    "changes": [
+      "Body layout width now comes from spec.text_width(card.rect.width) with invalid-argument conversion.",
+      "Relative DirectWrite line origins use CARD_BODY_TEXT_PADDING8.",
+      "Only the body DrawTextLayout origin uses CARD_BODY_TEXT_INSET24 and CARD_BODY_TEXT_PADDING8; independent heading/footer coordinates remain unchanged."
+    ],
+    "testSourceUnchanged": true,
+    "runtimeExecutedByChild": false
+  }
+}

@@ -1,0 +1,496 @@
+{
+  "schemaVersion": 1,
+  "round": 17,
+  "status": "RESEARCH_COMPLETE_P0_UNRESOLVED",
+  "createdAtUtc": "2026-10-30T18:53:58.518583+00:00",
+  "repositoryHead": "dbbc102d49da478eb519c56a11cf5dbab8cd3017",
+  "scope": {
+    "mode": "read-only source/ADR review and Microsoft primary-document browsing",
+    "productionCodeModified": false,
+    "planModified": false,
+    "nativeExecutions": 0,
+    "windowsExecutions": 0,
+    "cargoInvocations": 0,
+    "sshInvocations": 0,
+    "reportOnlyWrites": "/tmp/fc-round17-p0-platform-review.json and local report-generation helper",
+    "runtimePassClaim": false
+  },
+  "decision": {
+    "productionAdoption": "NO; normal HTTPS listener must remain disabled pending existing P0 gates",
+    "requirementUnchanged": "Strict first-header deadline remains5,000,000,000ns from real server TCP establishment, not application accept/dequeue/handshake dispatch. Upload120s and shutdown-drain5s are separate budgets.",
+    "independentlyImplementable": "YES: explicit isolated persistent TLS diagnostic with fixed native/SSPI owners and real decrypted RequestHead boundary. Its success can demonstrate TLS/lifecycle/resource-accounting behavior, not the missing strict TCP-origin5s or all-kernel resource proof.",
+    "noHardRealtimeProof": "No documented worst-case scheduler, Winsock close, SSPI-call return or peer-observation bound found in the inspected APIs. This is a limit of available contracts and this candidate, not a proof that every conceivable Windows platform architecture is mathematically impossible."
+  },
+  "sourceBindings": [
+    {
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "bytes": 4566,
+      "sha256": "ea1dff0f503c270ad599293218748ae3d65cf289963d661ea66b0f9c8f3e4536"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-p0-transport-research-round12.json",
+      "bytes": 27655,
+      "sha256": "323be9276d9d2396adf81226896b6746de12f14ba2ca675385fbb09627a9d410"
+    },
+    {
+      "path": "开发计划/验证记录/2026-10-30-tcp-frontdoor-round13.json",
+      "bytes": 21179,
+      "sha256": "66b01bcc0ddc34318589842a0933f8949723993b19d7dd9d6bd76e16cc54a8ad"
+    },
+    {
+      "path": "开发计划/未来教室项目完整开发计划.md",
+      "bytes": 31612,
+      "sha256": "5a1b676f2249cb3db7bdb933c58bdda4f0f948de4b8dbca51bc799df99b7ef66"
+    },
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "bytes": 15988,
+      "sha256": "8e8de2751b437ca2f338fe8d6b2df2d9c829aca2c2bdf7ad5c04131a7f8b1321"
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "bytes": 14607,
+      "sha256": "d9614fbc247c747d3f318fef161f8a1cc2e73bfb0fba969782b83bfb3f17d365"
+    },
+    {
+      "path": "开发计划/06-整体Review与风险登记.md",
+      "bytes": 31261,
+      "sha256": "bf113592dc56a413217c127787797018a1f3148c66e5c607e96c7645e6ac8983"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/mod.rs",
+      "bytes": 3090,
+      "sha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/native.rs",
+      "bytes": 22123,
+      "sha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3"
+    },
+    {
+      "path": "crates/fc-windows/src/http/mod.rs",
+      "bytes": 442,
+      "sha256": "c91355053e2d939e199a75c1207c62eddf1188154567e81b65137f35ec7c7c1a"
+    },
+    {
+      "path": "crates/fc-windows/src/http/native.rs",
+      "bytes": 56782,
+      "sha256": "e1461aa0eddd1b8f3fbbf6cedd90e4f5f747b1b6a94d6a035a098f94f86c93f4"
+    },
+    {
+      "path": "crates/fc-windows/src/http/README.md",
+      "bytes": 10152,
+      "sha256": "4cd5e0437eaafad38cd87e0952adb3cbdcfd4e3329a76937931917daceabbca2"
+    },
+    {
+      "path": "crates/fc-ports/src/http.rs",
+      "bytes": 13329,
+      "sha256": "e0b6f0bfa38a04316182159150db14d468ce0b665eba78d4fbb1d710ce70e966"
+    }
+  ],
+  "sourceAggregateSha256": "d65fdd656a60fc6d2503dc72858cfff7c8c2f7ad7445e50d897fe15ee943f4c6",
+  "baseline": {
+    "budgets": {
+      "requests": 8,
+      "headerReceivers": 2,
+      "uploadStreams": 2,
+      "wireHeaderBytes": 16384,
+      "headerFields": 64,
+      "targetBytes": 2048,
+      "jsonBytes": 65536,
+      "streamChunkBytes": 65536,
+      "transportMaxBodyBytes": 52428800,
+      "headerSeconds": 5,
+      "uploadSeconds": 120,
+      "shutdownDrainSeconds": 5,
+      "webIdleIncrementMiB": 16,
+      "webIdleSingleCoreCpuPercent": 0.1,
+      "privateBytesMiB": {
+        "ordinary": 64,
+        "settingsOrImage": 96,
+        "shortPeak": 160
+      }
+    },
+    "existingTcpCandidate": [
+      "Four pinned AcceptEx slots, receiveLength0, one IOCP, IPv4 loopback, finite batch only; no TLS or business dispatch.",
+      "Deadline captured before each post, never renewed by bytes; closes listener after four accepts; never replenishes slots.",
+      "Cancellation and closesocket do not clear pending; only matching IOCP completion does. Drain timeout retains owner/slots/IOCP/Winsock and permanently prevents replacement.",
+      "fixed_owner_bytes excludes allocator overhead, diagnostic capacities beyond stated payload, socket buffers/backlog/TCBs, and Schannel state."
+    ],
+    "existingHttpSys": "Fixed application-owned slots/RequestIds and private group timers cannot prove deadlines or bounds for first unparsed, unassigned kernel connections.",
+    "existingSchannel": "No Schannel/AcceptSecurityContext/AcquireCredentialsHandle implementation was found in crates by targeted source search; this is a source inspection, not a linker/OS runtime survey.",
+    "historicalRound13": {
+      "reexecuted": false,
+      "sourcePath": "开发计划/验证记录/2026-10-30-tcp-frontdoor-round13.json",
+      "thresholdNanoseconds": 5000000000,
+      "observedNanoseconds": [
+        5000577000,
+        5000505900,
+        5000457500,
+        5000411200,
+        1200854500,
+        5000019800,
+        1222017900,
+        4999886800
+      ],
+      "exceededCount": 5,
+      "maxOvershootNanoseconds": 577000,
+      "originLimit": "Client connect_timeout return, not exact server ESTABLISHED transition. Older truncated5000ms cannot override raw nanosecond FAIL.7s was a failure collection window."
+    }
+  },
+  "factsFromPrimarySources": [
+    {
+      "id": "acceptEx",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-acceptex",
+      "finding": "Zero receive length completes on connection arrival without waiting for data; address storage must include transport maximum plus16 per address; set accept context. No completion-dequeue establishment timestamp contract.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "socketOptions",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options",
+      "finding": "SO_CONNECT_TIME returns connected seconds, not documented quantization/error bounds. Socket buffer options do not state a bound on all kernel connection resources.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "listen",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen",
+      "finding": "Backlog is pending-connection queue; no standard actual-backlog query. Repeating listen does not change backlog; listen(0) is not a proper reset.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "wsaAccept",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaaccept",
+      "finding": "SYN attack protection can complete the three-way handshake before reporting a request, rendering SO_CONDITIONAL_ACCEPT ineffective for preventing that handshake.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "conditionalAccept",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/so-conditional-accept",
+      "finding": "Application accept/reject callbacks alter admission/backlog behavior; this is not a documented universal pre-handshake ownership guarantee.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "tcpInfo",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mstcpip/ns-mstcpip-tcp_info_v0",
+      "finding": "ConnectionTimeMs is connection lifetime in milliseconds; minimum client Windows10 version1703. No documented conservative reconstruction error bound here.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "mibTimestamp",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcprow_owner_module",
+      "finding": "liCreateTimestamp describes the context-bind operation creating the TCP link, not explicitly the ESTABLISHED transition.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "asc",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel",
+      "finding": "Same-context concurrent calls unsupported. Inspect security attributes on final success; output tokens may exist even on SEC_E_OK. Signature exposes no deadline/cancellation parameter; documentation supplies no WCET.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "schannelCreation",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/creating-an-schannel-security-context",
+      "finding": "Input/output tokens require repeated handshake calls; incomplete input is not handshake success, and failed partial contexts require deletion.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "schannelShutdown",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/shutting-down-an-schannel-connection",
+      "finding": "Graceful shutdown is ApplyControlToken followed by SSPI/output token processing; it is not documented cancellation of an executing handshake call.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "acquireCredentials",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/acquirecredentialshandle--schannel",
+      "finding": "Acquire a credential handle for Schannel; no deadline or process-memory quota parameter is exposed by the API.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "deleteContext",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-deletesecuritycontext",
+      "finding": "Delete partial, failed, or completed contexts when no longer needed; same-handle concurrent deletion is not thread-safe.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "freeCredentials",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-freecredentialshandle",
+      "finding": "Delete associated contexts before freeing credential handle; credentials are removable when all references disappear.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "packageInfo",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sspi/ns-sspi-secpkginfoa",
+      "finding": "cbMaxToken limits token bytes; it is not a limit on SSP internal allocations, credential/session caches, or call time.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "queryContext",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/secauthn/querycontextattributes--schannel",
+      "finding": "Query established-context attributes including stream sizes and connection information; attribute availability is version-specific.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "streamSizes",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sspi/ns-sspi-secpkgcontext_streamsizes",
+      "finding": "cbHeader/cbTrailer/cbMaximumMessage describe stream framing and must be checked before forming packet buffers.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "cancelIoEx",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelioex",
+      "finding": "Cancellation requests do not wait. OVERLAPPED remains alive until actual completion, which may be normal, canceled, or another error.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "closeSocket",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket",
+      "finding": "Handle values may be reused immediately; do not close concurrently with another Winsock call on the socket. Pending overlapped ownership survives close until completion; abortive close differs from graceful linger.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "cancelSync",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelsynchronousio",
+      "finding": "Targets synchronous I/O pending on a thread and does not wait; documentation does not promise arbitrary SSPI-call cancellation.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "setTimer",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-setwaitabletimer",
+      "finding": "Hardware affects timer accuracy; relative timers include sleep on Win7 but exclude it on Win8+. Signaling does not provide an application execution deadline.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "waitableTimer",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/sync/waitable-timer-objects",
+      "finding": "Signaling, execution, and APC delivery are separate; callback delivery does not guarantee a hard scheduling bound.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "qpc",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps",
+      "finding": "QPC supports interval measurement across target OS generations, is independent of UTC changes, includes sleep, and has cross-thread ordering ambiguity within one tick. A precise clock does not force execution.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "tickCount",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-gettickcount64",
+      "finding": "Available since Vista; usual timer resolution10–16ms. Do not use truncated millisecond observations as exact5s evidence.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    },
+    {
+      "id": "httpTimeout",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_timeout_limit_info",
+      "finding": "First unparsed request cannot be assigned to a URL group/queue, so application HeaderWait/IdleConnection overrides do not cover it; global defaults normally2min.",
+      "verifiedVia": "web.run direct open/find/search this round; Microsoft primary source",
+      "runtimeEvidence": false
+    }
+  ],
+  "inferencesAndCounterexamples": [
+    {
+      "id": "continuousRearmOrigin",
+      "kind": "source-backed counterfactual; not executed",
+      "inputs": [
+        "listen",
+        "acceptEx",
+        "socketOptions"
+      ],
+      "trace": [
+        "All four physical slots occupied; listener remains listening to permit future rearm.",
+        "A fifth TCP connection establishes and waits in the pending queue.",
+        "One old slot completes and is reused; a new AcceptEx is posted after that fifth connection already exists.",
+        "Deadline(postTime+5s) grants the queued connection more than5s after its real establishment."
+      ],
+      "conclusion": "AcceptEx receiveLength0 makes application ownership earlier than waiting for HTTP bytes; it does not retroactively prove this connection was created after the new post."
+    },
+    {
+      "id": "timestampAlternatives",
+      "kind": "contract gap",
+      "inputs": [
+        "socketOptions",
+        "tcpInfo",
+        "mibTimestamp"
+      ],
+      "conclusion": "SO_CONNECT_TIME seconds have no inspected rounding/error contract permitting a safe +1s reconstruction. TCP_INFO is unavailable on Win7 and its millisecond lifetime has no stated absolute-error guarantee. MIB bind time is not explicitly ESTABLISHED and a table snapshot is not an atomic per-slot ownership clock. None solves the shared three-system proof."
+    },
+    {
+      "id": "conditionalAccept",
+      "kind": "rejected apparent shortcut",
+      "inputs": [
+        "wsaAccept",
+        "conditionalAccept"
+      ],
+      "conclusion": "Do not claim callback execution precedes all handshakes: Microsoft documents SYN-protection behavior completing handshakes before callback. No disabling global SYN protection or security settings is proposed."
+    },
+    {
+      "id": "epochLowerBound",
+      "kind": "conditional mathematical observation",
+      "inputs": [
+        "listen"
+      ],
+      "conclusion": "For a fresh own listener, a sample before listen is a candidate lower bound L on subsequent establishment times. That bound cannot be advanced at each slot post without proof no older queued connections remain. Keeping one epoch L forever makes all later handshakes immediately expire after the first5s; restarting listener epochs is not evidence of continuously available service or safe active-upload behavior."
+    },
+    {
+      "id": "earlyAbort",
+      "kind": "conditional proof obligation",
+      "formula": "If L<=trueEstablish, abort is attempted at D=L+5s-margin, and scheduling+close delay<=margin, then localClose<=trueEstablish+5s.",
+      "unprovenPremises": [
+        "An applicable conservative L for each queued connection.",
+        "Finite upper bound on scheduler pause and actual close delay under the supported load/power model.",
+        "Definition and relation of local close, actual I/O completion, SSP cleanup, and peer EOF/RST observation."
+      ],
+      "conclusion": "A250ms or1s early-close margin would be an experimental parameter, not a proven upper bound. The historical577us overshoot is an observation, not a safe WCET. No finite margin rescues arbitrary suspension/provider stalls."
+    },
+    {
+      "id": "sleepAndTimers",
+      "kind": "source-backed clock design constraint",
+      "inputs": [
+        "qpc",
+        "setTimer",
+        "tickCount"
+      ],
+      "conclusion": "Use an explicit monotonic absolute clock and recompute remaining time before every post/dequeue/SSPI result. QPC includes sleep per Microsoft; relative waitable-timer low-power behavior differs between Win7 and modern Windows. Recheck expired slots after wake before admission; that detects lateness but cannot undo a missed deadline while execution was suspended."
+    },
+    {
+      "id": "socketVsSspi",
+      "kind": "ownership inference from separate API contracts",
+      "inputs": [
+        "asc",
+        "cancelIoEx",
+        "closeSocket",
+        "cancelSync",
+        "deleteContext"
+      ],
+      "conclusion": "Closing the socket or CancelSynchronousIo is not documented cancellation/completion of a running AcceptSecurityContext call. A worker holding only owned token buffers/context can remain alive after its socket is logically dead; those owners and their physical slot must remain charged until the call actually returns."
+    }
+  ],
+  "nextImplementationSlice": {
+    "name": "Isolated persistent TLS lifecycle candidate; strict-origin gate remains visibly unresolved",
+    "rollout": [
+      "First implement pure bounded state/ledger with a controllably blocked fake SSP call and dual-completion retirement; no native release claims.",
+      "Then explicit IPv4-loopback-only TLS1.2 fixture using project-owned in-memory certificate/key material and no system trust/store/URLACL/firewall mutation. Confirm fixture provider leaves no persisted private-key files; if unavoidable, record and clean only exact own files.",
+      "Then sustain more than one four-connection batch with real TLS decrypt, minimal synthetic GET/HEAD health route, and one request per connection/Connection: close. Production business dispatch remains disabled."
+    ],
+    "owners": {
+      "ioDomain": 1,
+      "sspiWorker": 1,
+      "connectionSlots": 4,
+      "simultaneousHeaderHandshakePermitsAtMost": 2,
+      "sspiCallsInFlightAtMost": 1,
+      "jobMailboxEntriesAtMost": 4,
+      "perConnectionPermanentWorker": false,
+      "newWorkerOnTimeout": false
+    },
+    "apiProposal": [
+      "DeadlineEvidence::{PreListenEpochLowerBound, UnprovenAdmission}; carry origin/margin/observed timestamps explicitly, never mint Established evidence from dequeue or SO_CONNECT_TIME.",
+      "SlotKey {generation,slot,serial}; generation process-unique, serial checked on all IOCP and SSPI replies; stale results cannot become RequestHead.",
+      "Slot lifecycle: Vacant -> AcceptPending -> TlsQueued/TlsCalling -> HeaderReceiving -> RequestReady -> Closing -> DrainingIoAndSsp -> Vacant; independent logicalCancelled, pendingIo count and sspInFlight/cleanupAck.",
+      "Retire requires closed socket plus all exact IOCP completions plus SSP return/partial-context destruction/output-buffer release acknowledgment. Slot/permit is strongly owned through physical retirement.",
+      "Graceful close_notify only when budget remains; expiry must not wait for a graceful TLS round trip. Record abort attempts/results separately from completion/peer observations."
+    ],
+    "sspiOwnership": [
+      "AcquireCredentialsHandle and certificate/bootstrap work before enabling the diagnostic listener; publish no ready state until successful.",
+      "The SSPI worker owns each call context, SecBuffer descriptors and input/output storage until function return. I/O owner does not concurrently mutate buffers used by SSPI; encrypted input/output ownership moves through bounded jobs.",
+      "All same-context handshake/query/encrypt/decrypt/delete operations are serialized; worker owns no Winsock descriptor, allowing I/O owner to close only on its own socket execution domain.",
+      "After timeout: deny output, close socket, retain call/context/buffers/credential references and slot. Do not call DeleteSecurityContext concurrently. Return late data only to cleanup path; never resume business dispatch.",
+      "If worker/drain exceeds shutdown budget: close admission and enter retained FAULTED; retain exact worker/owner; no restart/extra worker/slot batch. UI/Writer never join indefinitely. Normal local UI survives ordinary web disable; a retained irrecoverable fault follows existing controlled-process policy.",
+      "Delete all context handles, including partial/error contexts, after their calls return; free SSP output with FreeContextBuffer where allocated; only then free credential handle after all associated contexts are gone."
+    ],
+    "requestHeadBoundary": [
+      "Only final verified confidentiality/integrity/protocol context success can set tls=true; final output tokens must still be sent when required. No TLS bool from client headers/fixtures.",
+      "Handle split records, SEC_E_INCOMPLETE_MESSAGE, SECBUFFER_EXTRA and partial writes with fixed bounds; stop on full incomplete token buffer, never grow to peer-supplied missing-byte count.",
+      "Parse decrypted HTTP with16KiB/64fields/2048target limits and existing strict framing/Host/Origin boundaries. RequestToken is correlation, not authorization.",
+      "Initial slice intentionally excludes body uploads, HTTP2/upgrade/keepalive and production actors; later120s body budget begins only after independently admitted endpoint/body quotas and retains physical upload<=2."
+    ],
+    "acceptPolicy": [
+      "Rearm only a physically vacant slot; one stable pinned OVERLAPPED per outstanding operation, no memory reuse before completion.",
+      "Bound posted accepts/accepted slots/handshakes separately; on exhaustion do not allocate a spare batch. A reserved reject slot, if later selected, must be inside the same total ledger.",
+      "No claim that listen(backlog=4) bounds SYNs, TCBs or all OS memory. Keeping listener open without a free posted accept explicitly records unowned queue exposure.",
+      "Continue diagnostics can use an explicitly unproven admission deadline to test TLS lifecycle, but it cannot enable the normal listener or satisfy strict5s. If policy forbids such diagnostic semantics, implement the ledger/real TLS finite fixture first rather than silently relabel the clock."
+    ],
+    "notAnAcceptedProductionTransport": true
+  },
+  "resourceLedgerProposal": {
+    "status": "Proposed reservations, not measured/proven implementation allocation limits",
+    "fixedPerSlotPayloadBytes": {
+      "httpHeader": 16384,
+      "encryptedReceive": 65536,
+      "plainReceiveOrBodyChunk": 65536,
+      "outboundTokenOrEncryptedSend": 65536,
+      "sum": 212992
+    },
+    "fourSlotPayloadBytes": 851968,
+    "otherOwnCharges": [
+      "Pinned AcceptEx address storage: max sockaddr size for enabled address family+16 for each endpoint; current64-byte array is IPv4-only, not an IPv6 proof.",
+      "Distinct pinned accept/receive/send OVERLAPPED records and descriptor arrays; control events; fixed mailboxes and diagnostics/log high-water capacities.",
+      "One fixed SSP worker thread actual committed stack/private bytes and reserved address space reported separately, including retained worker on failure.",
+      "One credential owner, at most four context handles, owned certificate/key contexts and all provider output allocations; actual Vec capacities, not only len.",
+      "Bound TLS input/output buffers at initialization; query cbMaxToken and stream framing sizes, reject unsupported sizes without growing. A chosen64KiB token cap is a service admission policy, not a guarantee every valid certificate chain fits.",
+      "Avoid ASC_REQ_ALLOCATE_MEMORY where caller-owned output buffers are supported. If SSP allocation is required, record actual allocation/free after return; do not claim caller cap bounds allocation before it happened."
+    ],
+    "unprovenSeparateCharges": [
+      "Kernel SYN/backlog/TCBs/socket receive/send buffers and associated OS allocations. SO_RCVBUF/SO_SNDBUF settings are not all-kernel hard caps.",
+      "SSP/credential/session/certificate/private-key-provider caches and internal allocations/call duration; cbMaxToken does not bound them.",
+      "Base process/runtime/thread/allocator overhead and existing HTTP.sys/desktop/audio resources; include all own processes in total64/96/160MiB and webidle16MiB budget; OS system increment separately."
+    ],
+    "noNewCapacityFromTimeout": "Logically expired SSP calls retain full physical reservation. Admission may fall to zero; no credit is returned by a timer, dropped public request, weak registry, socket close or cancellation request."
+  },
+  "futureValidationPlanNotRun": [
+    "More than four sequential real TLS handshakes reuse exactly the same four physical slots and one SSP worker; no hidden per-connection threads.",
+    "Queue a fifth established connection while all slots busy, then free/rearm one slot: preserve evidence it predates post and never label post-based deadline as TCP establishment.",
+    "Controlled fake SSP call stays blocked across cancellation and app/host replacement attempts: no permit return, no buffer mutation/free/context delete and no replacement worker until real return.",
+    "Actual overlapped accept/recv/send cancellation: completion may arrive normal/canceled/error; exact pinned storage retained until matching packets; old generation/serial output ignored.",
+    "Real split/oversized/incomplete TLS tokens, extra records and partial sends; no allocation growth beyond reservations, no false tls=true before final context attributes.",
+    "Log raw QPC timestamps for pre-listen/post/IOCP/SSP begin/end/abort-call/IOCP-drained/peer EOF separately. Never round a failing nanosecond sample down or enlarge5s.",
+    "Load, delayed dequeue, fixed-worker stall, power sleep/resume and process suspension each reported separately. A pass under one bounded scenario does not prove universal real-time.",
+    "Win7 SP1 x86, Win10 and Win11 each need actual native/TLS/trust evidence, provider/API support and separate process/kernel resource high-water accounting; Win7GNU executable on Win11 is not Win7 execution."
+  ],
+  "compatibilityCaveats": [
+    "The current Microsoft Schannel AcceptSecurityContext page lists minimum Windows8.1, while generic SSPI structures/context deletion list XP. This documentation mismatch is not evidence to drop Win7 nor to claim it proven; verify chosen SDK/imports/Schannel flags and actual Win7 TLS1.2 runtime separately.",
+    "TCP_INFO_v0 minimum Windows10 1703 cannot be a mandatory Win7 import. Modern optional telemetry must be runtime-gated and is not the common proof basis.",
+    "Relative timer sleep behavior differs across Win7 and Win10/11. Precise measurement and early-abort heuristics still cannot schedule user code during arbitrary suspension."
+  ],
+  "reviewLimits": [
+    "Read-only architecture research; no new runtime, build, benchmark or formal proof.",
+    "Primary docs were actually browsed this round. Absence of a WCET/cancellation guarantee in these pages is recorded as an unproven contract, not a claim of exhaustive Windows API impossibility.",
+    "Other round17 agents may modify unrelated presentation/UI sources concurrently; only listed source hashes bind this review.",
+    "Only /tmp report/helper files created by this task; no tests/remote artifacts exist to clean, and no SSH service/key changes were made."
+  ],
+  "postReviewDocumentationDelta": [
+    {
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "reviewedSha256": "ea1dff0f503c270ad599293218748ae3d65cf289963d661ea66b0f9c8f3e4536",
+      "currentSha256": "bd19a59c1802ae0f465b9c6db702cd06a5b07a39615571c5263f47666e4c24b7",
+      "reason": "Round17 plan version/progress or appended research summary after read-only review; original frozen source binding retained."
+    },
+    {
+      "path": "开发计划/未来教室项目完整开发计划.md",
+      "reviewedSha256": "5a1b676f2249cb3db7bdb933c58bdda4f0f948de4b8dbca51bc799df99b7ef66",
+      "currentSha256": "aa240a9cd3c6a0e9a6cb84f6d785d8fb85de75c3a25836e3c9e8db464a6876ba",
+      "reason": "Round17 plan version/progress or appended research summary after read-only review; original frozen source binding retained."
+    }
+  ],
+  "transportSourceUnchangedAtIntegration": true
+}

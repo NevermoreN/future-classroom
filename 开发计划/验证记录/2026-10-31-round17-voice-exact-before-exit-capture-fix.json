@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "EXACT_CASE_FAILURE_REPRODUCED",
+  "round": 17,
+  "scope": "Two exact existing failing tests individually in fresh processes; original full-suite failure retained separately; no real audio/foreground/new source changes",
+  "startedUtc": "2026-10-30T19:17:29.244080+00:00",
+  "originalFailure": "/tmp/fc-round17-windows-initial-full-failure.json",
+  "artifactManifest": {
+    "path": "/tmp/fc-round17-artifacts-final.json",
+    "sha256": "49c49604367585eaaddd5c5319cd39e72093c22136754642e8ab078f05f837c2"
+  },
+  "executable": {
+    "targetName": "fc_bootstrap",
+    "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+    "fileName": "fc_bootstrap-153172ad9c1ad7f3.exe",
+    "bytes": 119548584,
+    "sha256": "4ced44e25808cfddb27d1e01bacdaf097257d6795a5fefc30334a41dfc471d31",
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    }
+  },
+  "sourceShaBefore": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "sha256": "cebedc4e53bfd901daaafdcc014b091f426dd89e3714c4629f1706dfcf1475ba"
+    }
+  ],
+  "cases": [
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e\\temp",
+      "processId": 13176,
+      "stdout": "\nrunning 1 test\ntest backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 3.66s\n\n",
+      "case": "backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding",
+      "stderr": "",
+      "elapsedMilliseconds": 3885,
+      "timedOut": false,
+      "exitCode": null,
+      "arguments": [
+        "--exact",
+        "backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '0-stdout.log';$stderr=Join-Path $root '0-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};$p.Refresh();@{case='backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-exact-0-stdout.log",
+        "sha256": "8bd5229ee0edf609b4599e870db92519d3c3e983b96f71278f9ffe288eed20ea"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-exact-0-stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e\\temp",
+      "processId": 30372,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 8.04s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "",
+      "elapsedMilliseconds": 8182,
+      "timedOut": false,
+      "exitCode": null,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '1-stdout.log';$stderr=Join-Path $root '1-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};$p.Refresh();@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-exact-1-stdout.log",
+        "sha256": "8633bc328bb5736dbd52baf70920050f9ca93875a4397408bb563df675ec7f3e"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-exact-1-stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "cleanup": "PASS",
+  "scheduledTasksCreated": 0,
+  "marker": "FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e",
+  "remoteDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-35d070c95828460aad6a003c251c982e",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "remoteExecutableSha256": "4ced44e25808cfddb27d1e01bacdaf097257d6795a5fefc30334a41dfc471d31",
+  "cleanupResult": {
+    "ownScheduledTasks": 0,
+    "ownProcesses": 0,
+    "sshd": "Running",
+    "rootExists": false
+  },
+  "sourceShaAfter": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "sha256": "cebedc4e53bfd901daaafdcc014b091f426dd89e3714c4629f1706dfcf1475ba"
+    }
+  ],
+  "finishedUtc": "2026-10-30T19:17:46.511495+00:00",
+  "helperSha256": "a650db1cf3ab899671648070e73111ad7d8adf92b39ff7a388fb1bac50747899"
+}

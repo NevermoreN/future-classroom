@@ -12,6 +12,7 @@ use fc_domain::{
 };
 use fc_ports::PublicLayoutState;
 use fc_presentation::{
+    card_body::card_body_spec,
     layout::{compose_layout, PaintGlass, SceneProfileStamp, WidgetMeasure},
     scene::{
         CardContent, ClockContent, CourseCapsule, HomeworkEntry, MaterialListContent, PageInfo,
@@ -59,9 +60,10 @@ pub(super) fn render(
     let samples = samples(identity, public, subject, now)?;
     let specs: Vec<_> = samples.iter().map(|sample| {
         let c = &sample.component;
-        WidgetMeasure {
+        Ok(WidgetMeasure {
             kind: sample.widget,
-            text: sample.measure_text.clone(),
+            body: card_body_spec(c.kind, &sample.content, false, None)
+                .map_err(|_| "预览内容无法完成有界测量。".to_owned())?,
             font_dip: f32::from(c.font_dip),
             opacity: f32::from(c.opacity_percent) / 100.,
             min_width: f32::from(c.min_width), max_width: f32::from(c.max_width),
@@ -72,8 +74,8 @@ pub(super) fn render(
                 surface_alpha: f32::from(public.display.glass_surface_percent) / 100.,
                 edge_alpha: f32::from(public.display.edge_reflection_percent) / 100.,
             },
-        }
-    }).collect();
+        })
+    }).collect::<Result<_, String>>()?;
     let mut tree = compose_layout(
         &public.layout.tree,
         subject.map(|p| &p.tree),
@@ -213,7 +215,6 @@ struct Sample {
     widget: WidgetKind,
     component: ComponentSettings,
     content: CardContent,
-    measure_text: String,
     page: PageInfo,
     leaf_limit: u8,
 }
@@ -300,20 +301,87 @@ fn samples(
     } else {
         0.
     };
-    let entries=vec![
-        (WidgetKind::Clock,CardContent::Clock(ClockContent{mode:public.display.clock_mode,show_seconds:public.display.clock_seconds}),"示例时钟\n23:59:59".into(),1),
-        (WidgetKind::Date,CardContent::Text(format!("示例日期 · {}年{}月{}日",now.date.year(),now.date.month(),now.date.day())),"示例日期\n2026年10月31日".into(),1),
-        (WidgetKind::Schedule,CardContent::Courses(vec![CourseCapsule{key:lesson.clone(),subject_id,name:format!("示例 · {subject_name}"),color,current:true,temporary:false,fill_alpha:course_fill,stroke_width:0.}]),format!("今日课表 · 示例\n{subject_name}\n正在上课\n"),1),
-        (WidgetKind::Homework,CardContent::Homework(vec![HomeworkEntry{subject_id,teacher_id,subject_name:format!("示例 · {subject_name}"),teacher_name:teacher_name.into(),text:"示例作业：阅读课堂材料，完成练习并记录思考。\n此内容仅用于布局预览。".into(),color,fill_alpha:f32::from(public.display.homework_fill_percent)/100.}]),format!("示例作业\n{subject_name} · {teacher_name}\n阅读课堂材料，完成练习并记录思考。\n此内容仅用于布局预览。"),1),
-        (WidgetKind::Reminder,CardContent::Text("示例共同提醒：请准备课堂用品。".into()),"示例共同提醒\n请准备课堂用品。".into(),1),
-        (WidgetKind::DateCountdown,CardContent::Text("示例活动 · 还有 12 天".into()),"示例日期倒计时\n示例活动 · 还有 12 天".into(),1),
-        (WidgetKind::Materials,CardContent::Materials(Box::new(MaterialListContent {
-            source:MaterialSource{kind:MaterialSourceKind::CurrentLesson,lesson,subject_id,teacher_id,evidence:MaterialSourceEvidence::BaseTimetableOnly},
-            folder_id:Some(folder_id),folder_revision:Revision::new(1),teacher_name:format!("示例 · {teacher_name}"),subject_name:subject_name.into(),rows:files,next_cursor:None,total:u64::from(rows),visible_rows:rows,row_gap_dip:materials_settings.map_or(8,|m|m.row_gap_dip),
-        })),format!("课堂资料 · 示例\n{}\n{}",teacher_name,(1..=rows).map(|i|format!("示例资料 {i} · 课堂练习.pdf\n")).collect::<String>()),rows),
+    let entries = vec![
+        (
+            WidgetKind::Clock,
+            CardContent::Clock(ClockContent {
+                mode: public.display.clock_mode,
+                show_seconds: public.display.clock_seconds,
+            }),
+            1,
+        ),
+        (
+            WidgetKind::Date,
+            CardContent::Text(format!(
+                "示例日期 · {}年{}月{}日",
+                now.date.year(),
+                now.date.month(),
+                now.date.day()
+            )),
+            1,
+        ),
+        (
+            WidgetKind::Schedule,
+            CardContent::Courses(vec![CourseCapsule {
+                key: lesson.clone(),
+                subject_id,
+                name: format!("示例 · {subject_name}"),
+                color,
+                current: true,
+                temporary: false,
+                fill_alpha: course_fill,
+                stroke_width: 0.,
+            }]),
+            1,
+        ),
+        (
+            WidgetKind::Homework,
+            CardContent::Homework(vec![HomeworkEntry {
+                subject_id,
+                teacher_id,
+                subject_name: format!("示例 · {subject_name}"),
+                teacher_name: teacher_name.into(),
+                text: "示例作业：阅读课堂材料，完成练习并记录思考。\n此内容仅用于布局预览。".into(),
+                color,
+                fill_alpha: f32::from(public.display.homework_fill_percent) / 100.,
+            }]),
+            1,
+        ),
+        (
+            WidgetKind::Reminder,
+            CardContent::Text("示例共同提醒：请准备课堂用品。".into()),
+            1,
+        ),
+        (
+            WidgetKind::DateCountdown,
+            CardContent::Text("示例活动 · 还有 12 天".into()),
+            1,
+        ),
+        (
+            WidgetKind::Materials,
+            CardContent::Materials(Box::new(MaterialListContent {
+                source: MaterialSource {
+                    kind: MaterialSourceKind::CurrentLesson,
+                    lesson,
+                    subject_id,
+                    teacher_id,
+                    evidence: MaterialSourceEvidence::BaseTimetableOnly,
+                },
+                folder_id: Some(folder_id),
+                folder_revision: Revision::new(1),
+                teacher_name: format!("示例 · {teacher_name}"),
+                subject_name: subject_name.into(),
+                rows: files,
+                next_cursor: None,
+                total: u64::from(rows),
+                visible_rows: rows,
+                row_gap_dip: materials_settings.map_or(8, |m| m.row_gap_dip),
+            })),
+            rows,
+        ),
     ];
     let mut result = Vec::new();
-    for (widget, content, measure_text, leaf_limit) in entries {
+    for (widget, content, leaf_limit) in entries {
         let kind = widget.component_kind().ok_or("未知预览组件。")?;
         let component = if kind == ComponentKind::Materials {
             materials_settings
@@ -328,7 +396,6 @@ fn samples(
                 widget,
                 component: component.clone(),
                 content,
-                measure_text,
                 page: PageInfo {
                     offset: 0,
                     shown: if kind == ComponentKind::Materials {
@@ -476,5 +543,50 @@ mod tests {
             .bgra
             .chunks_exact(4)
             .all(|p| p[..3].iter().all(|c| *c <= p[3])));
+    }
+
+    #[test]
+    fn native_preview_material_spacing_expands_the_actual_subject_card() {
+        let key = fc_domain::profile::SubjectProfileKey {
+            class_id: ClassId::new(11).unwrap(),
+            subject_id: SubjectId::new(12).unwrap(),
+            teacher_id: PrincipalId::new(13).unwrap(),
+        };
+        let mut public = PublicLayoutState {
+            layout: Default::default(),
+            display: Default::default(),
+        };
+        for component in &mut public.display.components {
+            component.visible = component.kind == ComponentKind::Materials;
+        }
+        let mut subject = SubjectProfileDocument::new(ProfileId::new(7).unwrap(), key);
+        subject.materials.visible_rows = 3;
+        subject.materials.component.max_height = 1000;
+        subject.materials.row_gap_dip = 0;
+        let now = LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
+            9 * 3600,
+        )
+        .unwrap();
+        let compact = render(&IdentityState::default(), &public, Some(&subject), 101, now).unwrap();
+        subject.materials.row_gap_dip = 64;
+        let spacious =
+            render(&IdentityState::default(), &public, Some(&subject), 102, now).unwrap();
+        let leaf_height = |image: &LayoutPreview| {
+            image
+                .nodes
+                .iter()
+                .find(|n| n.key.id != subject.tree.root)
+                .unwrap()
+                .rect
+                .height
+        };
+        // This observes the exported native preview's actual model rectangle,
+        // rather than deriving an expected value from the shared measurer.
+        assert!(leaf_height(&spacious) > leaf_height(&compact) + 80.);
+        assert_eq!(compact.nodes.len(), spacious.nodes.len());
+        assert_eq!((spacious.width, spacious.height), (960, 540));
+        assert_eq!(spacious.bgra.len(), 960 * 540 * 4);
+        assert!(spacious.bgra.capacity() <= MAX_PREVIEW_BYTES);
     }
 }

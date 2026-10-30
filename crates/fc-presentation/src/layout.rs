@@ -1,7 +1,7 @@
 //! Width-first, bounded layout of the selected public/subject trees. A height
 //! budget is not a percentage reference: content height stays unknown until its
 //! children have been measured. No native handles or renderer caches live here.
-use crate::Rect;
+use crate::{card_body::CardBodySpec, Rect};
 use fc_domain::{ids::LayoutNodeId, layout::*};
 use fc_ports::TextMeasure;
 
@@ -47,7 +47,7 @@ pub struct SceneProfileStamp {
 #[derive(Clone, Debug)]
 pub struct WidgetMeasure {
     pub kind: WidgetKind,
-    pub text: String,
+    pub body: CardBodySpec,
     pub font_dip: f32,
     pub opacity: f32,
     pub min_width: f32,
@@ -198,6 +198,15 @@ impl<'a> Solver<'a> {
             ));
         }
         let (flow, pad, gap) = self.flow(n);
+        let axis = self.axes(n).expect("container").0;
+        // A known fixed/percentage parent width is the child's percentage
+        // reference, not the outer work area's larger available budget. Content
+        // width has no such reference (domain rejects that dependency cycle).
+        let child_available = if axis.is_content() {
+            available
+        } else {
+            Self::axis(axis, Some(available), 0.)?.1
+        };
         let children: Vec<_> = self
             .children(n)
             .into_iter()
@@ -206,7 +215,7 @@ impl<'a> Solver<'a> {
         let mut min: f32 = 0.;
         let mut pref: f32 = 0.;
         for c in &children {
-            let (a, b, _) = self.widths(*c, (available - pad * 2.).max(0.))?;
+            let (a, b, _) = self.widths(*c, (child_available - pad * 2.).max(0.))?;
             if flow == Flow::Row {
                 min += a;
                 pref += b;
@@ -222,7 +231,6 @@ impl<'a> Solver<'a> {
         }
         min += pad * 2.;
         pref += pad * 2.;
-        let axis = self.axes(n).expect("container").0;
         // The subject root gets its external viewport only after the outlet's
         // width has been allocated. Its percentage is not an intrinsic minimum
         // of the surrounding content-sized public outlet.
@@ -282,14 +290,15 @@ impl<'a> Solver<'a> {
                 return Err(TreeLayoutError::OutOfSpace);
             }
             let width = width.min(s.max_width);
-            let measured = self
-                .measure
-                .height(&s.text, (width - 32.).max(1.), s.font_dip)
+            let measured = s
+                .body
+                .intrinsic_height(width, s.font_dip, self.measure)
                 .map_err(|_| TreeLayoutError::InvalidMeasurement)?;
             if !measured.is_finite() || !(0. ..=16_777_216.).contains(&measured) {
                 return Err(TreeLayoutError::InvalidMeasurement);
             }
-            let height = (measured.ceil() + 32.)
+            let height = measured
+                .ceil()
                 .max(s.min_height)
                 .min(s.max_height)
                 .min(height_budget);
@@ -513,7 +522,7 @@ pub fn compose_layout(
     }
     let mut kinds = std::collections::HashSet::new();
     for s in specs {
-        if !kinds.insert(s.kind) || s.text.len() > 16_384 {
+        if !kinds.insert(s.kind) || s.body.validate().is_err() {
             return Err(TreeLayoutError::Capacity);
         }
         if [

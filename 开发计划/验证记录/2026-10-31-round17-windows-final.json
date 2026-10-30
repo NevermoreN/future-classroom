@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINAL_ARTIFACT_COVERAGE_ACROSS_TWO_RUNS",
+  "derivedReport": true,
+  "repositoryFinalInputSnapshot": "d2cd0aec7f0d0fb79f98be5ef01f432e1d525ad425dd8db51d2809a2c93bb165",
+  "rustBuildSourceInputs": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+  "distinctFinalTestsPassed": 600,
+  "failed": 0,
+  "finalTestExecutableCount": 16,
+  "singleFinalSnapshotWholeRun": false,
+  "completeWholeRun": {
+    "report": "2026-10-31-round17-windows-post-handshake.json",
+    "sourceInputs": "3676f62efe8ad551cddab4dfb316ca33e6d0abd4309a47a22be78c0b9dde71fb",
+    "passed": 600,
+    "programs": 16,
+    "limitation": "One recorded lib digest is post-rebuild local value; original retained and limitation annotated. This report does not claim old run executed final9b43."
+  },
+  "changedProgramRun": {
+    "report": "2026-10-31-round17-windows-final-changed-program.json",
+    "passed": 65,
+    "replacesPrior65ForFinalCoverage": true,
+    "totalIsNot665": true
+  },
+  "artifacts": [
+    {
+      "name": "fc_bootstrap-2c9facf31078f737.exe",
+      "sha256": "00bfbcc522a2b5b5cbfcb7884da59e63ea9cea9a87692263fac7e25e7e34fa9e",
+      "passed": 75,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_windows-95fad28d15fea78d.exe",
+      "sha256": "4d0172829166f1bb33bec71ad56e04ef4bb26b4373f52fdf923a486e998d58b8",
+      "passed": 71,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "business_storage-17bf377bec8f2f7e.exe",
+      "sha256": "45d04cdbff283817ba5802ec7110bce8baa215ed7b34743d94c47cc8e69e3e03",
+      "passed": 43,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_application-8ad1e6c8c699ab50.exe",
+      "sha256": "d168b03b544c23a975dfb44ebce931cbe7de0ae9e315365a1c96d41c0853e244",
+      "passed": 25,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_audio-35e3156477d0188a.exe",
+      "sha256": "25bb253c0167d7a7e61e4ad27d5f5df313592b0ef0054fb5a406add668887348",
+      "passed": 22,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_bootstrap-153172ad9c1ad7f3.exe",
+      "sha256": "9b43c0f49ea376861ff0c63ae29b52cc21d74b448ba2a4d3cd6531f86e629562",
+      "passed": 65,
+      "report": "2026-10-31-round17-windows-final-changed-program.json",
+      "identityMethod": "Frozen pre/post local9b43, no concurrent Rust build; old runner remote-digest limitation disclosed"
+    },
+    {
+      "name": "fc_domain-915566e140287178.exe",
+      "sha256": "c7f1fd233e1cb2245a8ad7f9ee3714f980f8672a19c29c6c90fbc26cd5afb746",
+      "passed": 74,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_materials-2221de66f2e97130.exe",
+      "sha256": "5db35e8b923639a3ff89da7a6c502e5ae88612cc7bfdcc573af91b2f035387a6",
+      "passed": 35,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_ports-361bddc8b2876cc0.exe",
+      "sha256": "c27c75349f32fd971a2f1bc1ad4345fb9c5a58d2c30a159c913180e824988cf4",
+      "passed": 6,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_presentation-bf0074726aa5b441.exe",
+      "sha256": "9e5fa18eb2aa43329179397ac8943ce97dd1e1bc57480c5cdcdd2cc0a00c594d",
+      "passed": 50,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_protocol-186900fcb7bfa5db.exe",
+      "sha256": "bcf3f66a584f27db596870803ac4beb104a99da03624b2a58f05aa92b272813e",
+      "passed": 29,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_runtime-fad3e5e278e2d80c.exe",
+      "sha256": "d50e31586b58f71ea80731f35342c63395280ce11735f89dffd2631c2e347fe2",
+      "passed": 26,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_security-9c7f88663f75f873.exe",
+      "sha256": "9479a3861c227ffad86294f1d39d578d1dafb10f5e7438b6df28e0d781ca174a",
+      "passed": 17,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "fc_storage-9549596680176a3f.exe",
+      "sha256": "e2de7307d6819a67fdcefcff496369eaf88b7e3c06d0f7e8360ed2b25ffa9070",
+      "passed": 53,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "runtime_storage-d7df388ce9405226.exe",
+      "sha256": "7c8ccdf688d1129b6f85f5660bf6a7e43d853807f5e04c1884fe9eee821cbba4",
+      "passed": 3,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    },
+    {
+      "name": "voice_storage-bf022395eae863de.exe",
+      "sha256": "75df195476a95a2b98fc251f9614afe351b3dd7527dfee2d8d9e2a4052ba4c95",
+      "passed": 6,
+      "report": "2026-10-31-round17-windows-post-handshake.json",
+      "identityMethod": "Pre-upload artifact SHA and final artifact SHA equal; old runner records post-run local SHA; executable unchanged during run"
+    }
+  ],
+  "productionCombination": {
+    "report": "2026-10-31-round17-windows-post-handshake.json",
+    "exeSha256": "4c267b25085b7a6ea9390989a134ee1ca4946c66d89de9048fd57c037ec130d0",
+    "sameAsFinalModernRelease": true,
+    "profileNativeSteps": 39,
+    "selfCheck": 0,
+    "webPairing": "PASS",
+    "native": 0,
+    "materials": 0,
+    "application": 0,
+    "audio": "PASS",
+    "webVoice": "PASS",
+    "profile": "PASS"
+  },
+  "cleanup": "PASS_BOTH_RUNS",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "actualWin7": "NOT_VALIDATED",
+  "actualWin10": "NOT_VALIDATED",
+  "formalMSVC": "NOT_VALIDATED",
+  "rootCauseLimits": "Original initial two voice failures remain preserved and not uniquely diagnosed. Later success does not establish100ms success guarantee under disk/CPU congestion.",
+  "runnerFix": "2026-10-31-round17-runner-hash-fix.json",
+  "counts": "15 byte-identical test artifacts from complete run plus final changed65-program run represent600 final distinct cases. No diagnostics/frontend/Win7 supplemental cases added.",
+  "runnerFixedRuntimeReport": "2026-10-31-round17-runner-hash-runtime-verification.json",
+  "supplementalWin7OnWin11Report": "2026-10-31-round17-win7-on-win11-final.json"
+}

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-10-30T19:20:51.820615+00:00",
+  "scope": "Round17 read-only source diagnosis of actual_authority_publication_defers_without_revoking_then_rechecks_current_binding",
+  "status": "SOURCE_DIAGNOSIS_COMPLETE_RUNTIME_CAUSE_NOT_UNIQUELY_ESTABLISHED",
+  "ownership": {
+    "sourceChanged": false,
+    "planChanged": false,
+    "productTestsRun": 0,
+    "remoteCommandsRun": 0,
+    "onlyOutput": "/tmp/fc-round17-voice-publication-source-diagnosis.json",
+    "independentWindowsExactDiagnostics": "Parent assigned tcp_frontdoor; not run or counted here"
+  },
+  "inputs": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "bytes": 88624,
+      "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+    },
+    {
+      "path": "crates/fc-storage/src/business/voice.rs",
+      "bytes": 31051,
+      "sha256": "c5a5be994e1f0bba8827745998502c2bc4a6610648babf2d6e1a260f2b9c46b4"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 61545,
+      "sha256": "511e43ba9e2e21bbbf394df0aa770a26334213e675fa348e2a3eb6d4480cca4c"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 37258,
+      "sha256": "681be913f1a868005fad5c4ea2123e09e2871f6955b6b44d13e826bd34d6f2f2"
+    },
+    {
+      "path": "/tmp/fc-round17-windows-initial-full-failure.json",
+      "bytes": 42709,
+      "sha256": "c1600c4ab8fa477e0e17af4dc162b87d4aa817309169938c7581d27a1c5a0e2e"
+    }
+  ],
+  "observedFailure": {
+    "report": "/tmp/fc-round17-windows-initial-full-failure.json",
+    "platform": "Windows 11 10.0.26300 x64 OS, x86 executable",
+    "libraryBinary": "fc_bootstrap-153172ad9c1ad7f3.exe",
+    "libraryBinarySha256": "4ced44e25808cfddb27d1e01bacdaf097257d6795a5fefc30334a41dfc471d31",
+    "wholeLibrary": {
+      "passed": 63,
+      "failed": 2,
+      "elapsedSeconds": 243.68
+    },
+    "targetFailure": {
+      "location": "crates/fc-bootstrap/src/backend/voice.rs:1895",
+      "operation": "runtime.drive(VoiceDriverAction::Start).unwrap()",
+      "error": "Voice(Faulted)"
+    },
+    "otherFailure": {
+      "location": "crates/fc-bootstrap/src/web_application/voice_tests.rs:591",
+      "error": "RESULT_UNKNOWN",
+      "relation": "Separate failure, not a demonstrated poisoned-mutex cascade and not diagnosed by this source-only task"
+    },
+    "cleanupInInputReport": "PASS",
+    "missingRuntimeEvidence": [
+      "No stage timestamps for second held publication / release / queue send / Start evaluate / Start precommit / COMMIT / receiver return",
+      "No underlying StorageError retained in Voice(Faulted) output",
+      "No exact phase or competing-test scheduling trace",
+      "No sampled final gate health, runtime generation, held ticket result or durable Start outcome after this panic"
+    ]
+  },
+  "sourceFindings": [
+    {
+      "id": "F1",
+      "location": "crates/fc-bootstrap/src/backend/voice.rs:1736-1763; crates/fc-storage/src/lib.rs:847-938",
+      "finding": "HoldPublication is a real SQLite transaction. entered is set in precommit after begin_update, SQL mutations and state_meta writes, before COMMIT and authority publish. Its release flag only permits continuation; it does not acknowledge either COMMIT or publication. After release, the held real commit/publication must finish before the only writer can run Start."
+    },
+    {
+      "id": "F2",
+      "location": "crates/fc-bootstrap/src/backend/voice.rs:1872-1896",
+      "finding": "Second publication waits for entered, then spawns a helper which sleeps 10 ms and releases; Start runs on the scoped caller. There is no request-specific admission handshake. Sleep is neither a maximum release delay nor proof that Start observed Updating or was successfully enqueued before release. Its helper could be delayed, or could release before Start is scheduled."
+    },
+    {
+      "id": "F3",
+      "location": "crates/fc-bootstrap/src/backend/voice.rs:226-285,343-391,792-833",
+      "finding": "Start on Updating deliberately bypasses VoiceService::actor() polling and queues the exact original lease. The actor-loop 100 ms deadline is relevant to other status/publish paths, but is not the direct deadline for this Start. repository_mode supplies the unchanged production 100 ms voice timeout."
+    },
+    {
+      "id": "F4",
+      "location": "crates/fc-storage/src/business/voice.rs:144-177,424-432,763-789; crates/fc-storage/src/lib.rs:178-188",
+      "finding": "Positive Start active closure captures real std::time::Instant + 100 ms before enqueue; it is checked before enqueue, at writer evaluate, and immediately before commit. Ticket recv_timeout starts after successful enqueue with another 100 ms duration. This elapsed-time safety budget includes queue residence and real writer work; fixture ClockFixture date and monotonic_millis=0 do not freeze it. The two deadlines start at slightly different instants."
+    },
+    {
+      "id": "F5",
+      "location": "crates/fc-storage/src/business/voice.rs:53-64; crates/fc-bootstrap/src/backend/voice.rs:220-224",
+      "finding": "Indeterminate (including ticket timeout or expired active), AuthorityUnavailable, PublicationFailed and WorkerPanicked all map to VoiceRepositoryError::Faulted. conclude then invalidates the runtime epoch/admission. This label alone does not prove global HealthGate Faulted, SQL commit failure, disk slowness, or which deadline/authorization check failed."
+    },
+    {
+      "id": "F6",
+      "location": "crates/fc-storage/src/business/voice.rs:607-631,763-789; crates/fc-storage/src/lib.rs:900-938",
+      "finding": "Start rechecks original job authorization/class and exact session against identity read in the same writer transaction; precommit checks again. Precommit error causes rollback plus authority rollback; a ticket timeout by itself cannot establish rollback or undo an already-started commit. Preserve fail-closed generation fencing and reconcile unknown results, without automatic positive retries."
+    },
+    {
+      "id": "F7",
+      "location": "crates/fc-storage/src/lib.rs:561-573,614-642; crates/fc-bootstrap/src/backend/voice.rs:1220-1251,1509-1562",
+      "finding": "Windows fixture uses ordinary TEMP and real SQLite WAL + synchronous FULL (busy_timeout 250 ms); no fake disk or frozen elapsed clock is used. VOICE_FIXTURE serializes this tests module, not the complete backend/Web suite. No contention duration or physical disk latency is present in the failure report. Source comments mention Linux-only tmpfs; that is not evidence about Windows root cause."
+    },
+    {
+      "id": "F8",
+      "location": "crates/fc-storage/src/lib.rs:357-375,402-412,467-468,640-642",
+      "finding": "queued_bytes() already exists and accounting is removed at writer pop. While HoldPublication blocks the sole private writer, zero baseline plus one new Start producer makes positive queued bytes evidence that Start reached queue-budget reservation. But reserve increments before sender.try_send: the metric is not an exact successful-send acknowledgement."
+    }
+  ],
+  "causalAssessment": {
+    "established": "The success fixture depends on a sleep-based release race while a positive operation has a genuine 100 ms deadline spanning an unrelated real commit/publication and its own transaction. This is a concrete synchronization/coverage weakness.",
+    "plausibleButUnproven": [
+      "Helper-thread scheduling delayed release",
+      "Held transaction commit/publication or Start transaction exceeded remaining elapsed budget",
+      "Caller/writer scheduling or concurrent synthetic KDF/filesystem workload consumed budget",
+      "Another Faulted-mapped storage/authority failure"
+    ],
+    "notEstablished": [
+      "A production logical authorization regression",
+      "A permanent authority revocation caused merely by unrelated publication",
+      "A specific disk, antivirus, scheduler or SQLite phase as the unique cause",
+      "A causal connection from Round17 presentation measurement changes to this voice/SQLite call chain",
+      "That an isolated exact PASS would erase the recorded whole-suite FAIL"
+    ],
+    "round16Comparison": "Parent reports the same voice sources passed the prior whole65 Round16 run. Current git diff for backend/voice.rs, storage/business/voice.rs and storage/lib.rs is empty. This supports investigating timing/environment and the fixture race, but is not a fresh independent reconstruction of the Round16 binary or proof of the failure cause."
+  },
+  "fixtureRecommendations": [
+    {
+      "priority": 1,
+      "name": "Exact post-send coordination, if a narrowly scoped admission observer is accepted",
+      "proposal": "Keep HoldPublication entered/AuthorityUpdating barrier. Observe the exact matching Start only after successful try_transaction admission, immediately release its private HoldPublication flag from that observer, then perform the existing production wait. Observer must be per-repository/request-scoped, nonblocking and atomic-only, with no SQL/reentry; install through test support rather than a global callback. Maintain the real Windows TEMP/WAL/FULL writer, production 100 ms, original exact lease, Starting/zero-repeat and real class-binding revocation assertions. Capture admission/release/evaluate/precommit/commit/result phase times for diagnosis.",
+      "why": "Removes the arbitrary 10 ms helper sleep and proves actual admission while the writer is in the publication barrier.",
+      "limitation": "There is no exact post-send observer in the current API. A cfg(test) item only in dependency fc-storage is not automatically available to bootstrap unit tests: implementation needs correctly scoped test-support wiring or an existing composition seam, not an assumed callable API. Even exact admission cannot guarantee real disk/OS completion within 100 ms."
+    },
+    {
+      "priority": 2,
+      "name": "Smallest fixture-only improvement using existing queue accounting",
+      "proposal": "For the second private HoldPublication only, assert queued_bytes baseline zero while entered and no other producer is active; replace the separate sleep10ms releaser with a bounded precommit wait which releases immediately when the one positive Start producer makes queued_bytes exceed baseline. Keep Release RAII cleanup and fail rather than silently accepting its outer diagnostic timeout. Keep every existing success/binding assertion and unchanged real disk/100 ms limits.",
+      "why": "Requires no production API or timeout change; Start has already passed the Updating snapshot branch and established active deadline when its descriptor reserves queue bytes. Removes fixed-delay scheduling as the coordination mechanism.",
+      "limitation": "Call this queue-reservation handshake, not post-send admission or writer execution. Accounting precedes try_send; release can occur before send if the caller is preempted between them. It improves semantic overlap evidence and removes a scheduled releaser, but does not prove an exact channel-send event or hard real-time success."
+    },
+    {
+      "priority": 3,
+      "name": "Retain explicit timeout safety and improve evidence before further change",
+      "proposal": "Keep voice_timeout_invalidates_runtime_and_late_submit_cannot_commit_or_reopen_admission unchanged as the complementary expired-request safety test. Preserve the original whole-suite failure report. If the coordinated real-disk success case still exceeds 100 ms, record phase timings and investigate scheduling/real IO before changing fixtures again; do not convert arbitrary Voice(Faulted) to success, silently retry, remove Starting assertion, freeze Instant or raise production timeout.",
+      "limitation": "Real elapsed 100 ms plus unconstrained OS scheduling/filesystem cannot be made mathematically deterministic by test synchronization alone. A test can deterministically establish ordering, while successful completion still requires the actual environment to meet its budget."
+    }
+  ],
+  "deadlockWarning": "Do not wait for Start::evaluate or Start precommit before releasing HoldPublication: both require the same sole writer, currently blocked inside HoldPublication precommit. Such a handshake deadlocks until a timeout and does not test a valid publication race.",
+  "nextEvidence": "tcp_frontdoor is assigned exact original Windows diagnostics; their outcome and logs remain separate runtime evidence. This report performs zero product tests and makes no platform/P0/P4 completion claim."
+}

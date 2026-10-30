@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_DEVELOPMENT_PACKAGE_ONLY",
+  "zipPath": "/mnt/data/FutureClassroom-0.1.0-content-layout-dev.zip",
+  "bytes": 4293630,
+  "sha256": "b2acca23c2a85df863013c00605aa6942dcb50a96fc2088362e0a9144f77f03c",
+  "members": [
+    {
+      "path": "fc-bootstrap.exe",
+      "bytes": 8688702,
+      "sha256": "4c267b25085b7a6ea9390989a134ee1ca4946c66d89de9048fd57c037ec130d0",
+      "crc32": "be4d8c91"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1067,
+      "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+      "crc32": "7a6b93f4"
+    },
+    {
+      "path": "PROBE-README.txt",
+      "bytes": 11379,
+      "sha256": "fde9a4dbbf8708ec17260f9bc2ec7958a0673833e39814bb78a64016940bcbbb",
+      "crc32": "22a852a8"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.txt",
+      "bytes": 2400197,
+      "sha256": "372382560a2d656d222d68be2d13b3d03daab01cb70e72039d4ae9e3b0ebe957",
+      "crc32": "5ac17f00"
+    },
+    {
+      "path": "web/THIRD-PARTY-NOTICES.txt",
+      "bytes": 25543,
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+      "crc32": "e5388c3e"
+    },
+    {
+      "path": "web/assets/favicon-CXuYoSfB.svg",
+      "bytes": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "crc32": "42ea869c"
+    },
+    {
+      "path": "web/assets/index-Cr8Ck6mT.js",
+      "bytes": 402597,
+      "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78",
+      "crc32": "c94b462a"
+    },
+    {
+      "path": "web/assets/index-DFFVdc8-.css",
+      "bytes": 38836,
+      "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+      "crc32": "58efa4b4"
+    },
+    {
+      "path": "web/assets/pcm-worklet-DQjgdlBf.js",
+      "bytes": 1440,
+      "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d",
+      "crc32": "df2c6257"
+    },
+    {
+      "path": "web/assets/wav-worker-LSywWbpJ.js",
+      "bytes": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+      "crc32": "dd4aea29"
+    },
+    {
+      "path": "web/fc-assets.json",
+      "bytes": 1072,
+      "sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+      "crc32": "b8a1ad53"
+    },
+    {
+      "path": "web/index.html",
+      "bytes": 684,
+      "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf",
+      "crc32": "8d732a1c"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 22232,
+      "sha256": "6cfcab028e8079c2eb0dc610345e7ccda3907947e6d8f3d37479334cda22c39e",
+      "crc32": "1715d58c"
+    }
+  ],
+  "crc": "PASS",
+  "reproduction": {
+    "path": "/tmp/fc-round17-package-repro/FutureClassroom-0.1.0-content-layout-dev.zip",
+    "sameBasename": true,
+    "byteEqual": true,
+    "sha256": "b2acca23c2a85df863013c00605aa6942dcb50a96fc2088362e0a9144f77f03c"
+  },
+  "finalSourceInputs": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+  "scope": "GNU x86 development probe; full application incomplete; all platform gates remain NOT_VALIDATED; actual frontend payload reused, tests not rerun.",
+  "sourceAlignment": "Package built before last account test helper sequence. Final production EXE rebuild is byte-identical SHA4c267b..., all other package input files unchanged."
+}

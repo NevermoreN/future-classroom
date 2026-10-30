@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_HOST_ONLY",
+  "createdUtc": "2026-10-30T18:57:32.615705+00:00",
+  "scope": "fc-presentation shared complete card body specification and pure arrangement; no Windows/bootstrap/storage/plan source edited",
+  "authorBoundary": "Own implementation tests and pure source checks; not an independent review of own module and not native runtime evidence.",
+  "sources": [
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "sha256": "646bbcc72c0aa23421490156a2408a6a28b675a421f3b5e50cc30ade340b2af1",
+      "bytes": 14778
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body_tests.rs",
+      "sha256": "35172d190b54722e025ce774d6340fa54b0d05cc02b3330c0231bf5bb082e044",
+      "bytes": 12905
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "sha256": "0ad649f76bba84b1346d17053e84e0c8f25a451555225cab2c87db11e186b6b0",
+      "bytes": 23182
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "sha256": "0f08925ef2195acbb304228a47d8ecc389b1410cfd2941b4ed1e2ce8a1dc9001",
+      "bytes": 16081
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "sha256": "afc0feb0a3fddcb1d9c0e34730c8f393e490f64ebfe552642f269c06cddc9515",
+      "bytes": 25854
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "sha256": "8fb04a46681006e42bed0aab082431a6ce919f940cce2e2da118d6a053df34fb",
+      "bytes": 37581
+    },
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "sha256": "b9cc0be8ca02241ed817b43d8af819ab46f711e7fd7574a7b0ff71c58e6e69b7",
+      "bytes": 15410
+    }
+  ],
+  "aggregateSha256": "7a6dd9356770b3bc7fd53249216486b2bb214fe759e89159f5d80f8a132cd920",
+  "finalHost": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-presentation",
+      "--lib",
+      "--locked"
+    ],
+    "targetDir": "/tmp/fc-round17-presentation-target",
+    "passed": 50,
+    "failed": 0,
+    "baselineTests": 40,
+    "newTests": 10,
+    "elapsedTestBodySeconds": 0.42,
+    "log": "/tmp/fc-round17-presentation-shared-constants-tests.log"
+  },
+  "strictClippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-presentation",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "log": "/tmp/fc-round17-presentation-shared-constants-clippy.log"
+  },
+  "format": {
+    "command": "rustfmt --check --edition 2021 --config skip_children=true crates/fc-presentation/src/card_body.rs",
+    "exitCode": 0,
+    "log": "/tmp/fc-round17-presentation-shared-constants-format.log"
+  },
+  "api": {
+    "module": "fc_presentation::card_body",
+    "factory": "card_body_spec(ComponentKind, &CardContent, unverified: bool, note: Option<&str>) -> Result<CardBodySpec,CardBodyError>",
+    "blocks": "Complete text + center/fill/leaf/role/min_height, max128; MaterialRow(index)/MaterialMore input identity mapping is explicit.",
+    "positions": "arrange(&[f32]) -> ordered top/height and total_body_height; perblock max(DWrite+16,minheight), gap only between blocks; complete final padding retained.",
+    "intrinsic": "intrinsic_height(outer_width,font,&dyn TextMeasure): static each complete block at outer-48 then top32/50 plus bottom12; typed dynamic clock outer-32+54/analog160/Recess100/control caption width+24 minimum56.",
+    "widget": "WidgetMeasure.body replaces the old concatenated and 16KiB-truncated text sample; scene includes actual profile gap and profile_configuration_warning note."
+  },
+  "capacityBoundary": {
+    "maxUtf16PerCard": 262144,
+    "maxBlocks": 128,
+    "maxCourses": 128,
+    "maxHomeworkEntries": 64,
+    "maxMaterialRows": 5,
+    "materialVisibleRowsRange": "1..5",
+    "rowGapDipRange": "0..64",
+    "visibleLeaves": "existing64 unchanged",
+    "textMaxPages": "existing16384 unchanged",
+    "imageDocumentMaxPages": "existing50 applies to paginated image documents; not implemented or modified by this scope",
+    "noTruncation": true,
+    "noNewDependency": true
+  },
+  "meaningfulCoverage": [
+    "Wrapped multi-line homework label and body measured as distinct native blocks with same leaf index",
+    "Material1/3/5 rows at gap0/23/64, full long names, explicit More role and 44-DIP minimum",
+    "50-DIP unverified Schedule heading vs32 ordinary and exact profile warning in Material body",
+    "Complete final line padding contributes to intrinsic height, no old plain last-block minus8",
+    "Exact262144 UTF16 fulltext retained beyond16KiB; over-limit rejected",
+    "Original128 courses/64 homework/5 material bounds and invalid alpha/count/font/measure failures",
+    "Explicit dynamic clock/native patch width and control geometry without tick-dependent full-tree remeasure",
+    "Actual scene profile gap changes real measured card height, warning grows fallback body",
+    "Valid fixed400 parent and100% child width resolves before body measure; fulltext measured at352 DIP and0% leaf retains geometry",
+    "Existing hidden/zero-alpha/Content vsPercent cycle/scene source/64-leaf tests remain passing"
+  ],
+  "initialFailuresPreserved": true,
+  "logs": [
+    {
+      "path": "/tmp/fc-round17-presentation-initial.log",
+      "exitCode": 101,
+      "sha256": "10a6c27fb1a00161e235e630a930b183ae84a666ec4d0dd60ee09886459a72bb",
+      "meaning": "Initial compile missed new card_body_spec import after prior rustfmt reordered the scene import; fixed only the import."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-second.log",
+      "exitCode": 0,
+      "sha256": "0442ab47d2d38881ba7220beb52e165d45d9a0994b557479e58dda3a3c4c683e",
+      "meaning": "48 Host tests passed after 8 shared-body regressions."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-third.log",
+      "exitCode": 101,
+      "sha256": "8d2fff32f2d02b4ad1f2a1a748ab5123170ff923a1b0e83df8b2fe25a088b102",
+      "meaning": "49 passed/1 failed: new valid fixed-width400 parent/100% Outlet regression reproduced false OutOfSpace because child percentage was evaluated against outer width1600. No body measurement occurred."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-fourth.log",
+      "exitCode": 0,
+      "sha256": "249c9c9fa93e469bdd176991858e889575b39dd1e2971052d4540577ae9abd5e",
+      "meaning": "50 passed after propagating known parent width before child intrinsic widths."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-final-tests.log",
+      "exitCode": 0,
+      "sha256": "e4e066b6e4f829024bc5b3e4349ee52cbd48154b7b0cce6f0f9156636b0c494e",
+      "meaning": "Final 50 passed/0 failed, including explicit 128-course/129-reject and shared control geometry additions."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-clippy-initial.log",
+      "exitCode": 0,
+      "sha256": "5be56884d8c8c7d39e8ec308da3a9759f09b078ece85d98d43caab00fc49d097",
+      "meaning": "First all-target strict Clippy passed."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-final-clippy.log",
+      "exitCode": 0,
+      "sha256": "d47c818d5b043e481b4003e468bf45b1c1624adf9c022f86ed25cb93c0213304",
+      "meaning": "Final all-target strict Clippy passed."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-format.log",
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "meaning": "Own seven files rustfmt --check passed."
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-shared-constants-tests.log",
+      "exitCode": 0,
+      "sha256": "5e3e5355361e5f79f39eda4fd0e22e61b867ee17eddf879a21de16596eb969a0",
+      "meaning": "Shared constants:50 tests pass with unchanged behavior"
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-shared-constants-clippy.log",
+      "exitCode": 0,
+      "sha256": "54b35f34bdb817e55dd21e49e55fa8a0a52add44e71542740735be3f9d126c38",
+      "meaning": "Shared constants:strict all-target Clippy pass"
+    },
+    {
+      "path": "/tmp/fc-round17-presentation-shared-constants-format.log",
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "meaning": "Shared constants:own changed file format check pass"
+    }
+  ],
+  "runtimeBoundary": "No Windows/native test executed by this agent. Native consumer integration/tests belong to business_storage/root. No P4/platform completion claim.",
+  "cleanup": "No DB/directory/task/native process created. Target and all original logs retained for root unified review/cleanup; no commit or push.",
+  "producerFreezeHistory": [
+    {
+      "aggregateSha256": "7444edf1c4c4c8e1378d72b52824f3888573dafe305d6030410ecaff4bc99d7f",
+      "sources": [
+        {
+          "path": "crates/fc-presentation/src/card_body.rs",
+          "sha256": "1996c4d00779371b77189a1018d774f629dc1c6eeca67c4a1d38767ee12a7677",
+          "bytes": 14645
+        },
+        {
+          "path": "crates/fc-presentation/src/card_body_tests.rs",
+          "sha256": "35172d190b54722e025ce774d6340fa54b0d05cc02b3330c0231bf5bb082e044",
+          "bytes": 12905
+        },
+        {
+          "path": "crates/fc-presentation/src/layout.rs",
+          "sha256": "0ad649f76bba84b1346d17053e84e0c8f25a451555225cab2c87db11e186b6b0",
+          "bytes": 23182
+        },
+        {
+          "path": "crates/fc-presentation/src/layout_tests.rs",
+          "sha256": "0f08925ef2195acbb304228a47d8ecc389b1410cfd2941b4ed1e2ce8a1dc9001",
+          "bytes": 16081
+        },
+        {
+          "path": "crates/fc-presentation/src/scene.rs",
+          "sha256": "afc0feb0a3fddcb1d9c0e34730c8f393e490f64ebfe552642f269c06cddc9515",
+          "bytes": 25854
+        },
+        {
+          "path": "crates/fc-presentation/src/scene_tests.rs",
+          "sha256": "8fb04a46681006e42bed0aab082431a6ce919f940cce2e2da118d6a053df34fb",
+          "bytes": 37581
+        },
+        {
+          "path": "crates/fc-presentation/src/lib.rs",
+          "sha256": "b9cc0be8ca02241ed817b43d8af819ab46f711e7fd7574a7b0ff71c58e6e69b7",
+          "bytes": 15410
+        }
+      ],
+      "finalHost": {
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "fc-presentation",
+          "--lib",
+          "--locked"
+        ],
+        "targetDir": "/tmp/fc-round17-presentation-target",
+        "passed": 50,
+        "failed": 0,
+        "baselineTests": 40,
+        "newTests": 10,
+        "elapsedTestBodySeconds": 0.2,
+        "log": "/tmp/fc-round17-presentation-final-tests.log"
+      },
+      "strictClippy": {
+        "command": [
+          "cargo",
+          "clippy",
+          "-p",
+          "fc-presentation",
+          "--all-targets",
+          "--locked",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exitCode": 0,
+        "log": "/tmp/fc-round17-presentation-final-clippy.log"
+      },
+      "format": {
+        "command": "rustfmt --check --edition 2021 --config skip_children=true [seven owned files]",
+        "exitCode": 0
+      },
+      "reason": "Previous producer freeze metadata reconstructed from retained initial269 SHA manifest and original raw logs after correcting shallow-reference metadata contamination; not claimed to be an untouched original report."
+    }
+  ],
+  "sameValueConstantsUnification": {
+    "previousCardBodySha256": "1996c4d00779371b77189a1018d774f629dc1c6eeca67c4a1d38767ee12a7677",
+    "finalCardBodySha256": "646bbcc72c0aa23421490156a2408a6a28b675a421f3b5e50cc30ade340b2af1",
+    "constants": {
+      "CARD_BODY_TEXT_PADDING": 8.0,
+      "CARD_BODY_TEXT_INSET": 24.0
+    },
+    "change": "Export existing vertical text padding8 and horizontal inset24; Static text_width uses2*INSET and arrange uses2*PADDING. Only producer card_body.rs changed; all values, limits, geometry and remaining API semantics unchanged. Native consumer owns its separate replacement of hardcoded coordinates."
+  },
+  "sourceFrozen": true,
+  "updatedUtc": "2026-10-30T19:03:44.284456+00:00",
+  "evidenceMetadataCorrection": {
+    "kind": "Report metadata only; no product source modification or product test execution",
+    "correctedUtc": "2026-10-30T19:09:02.226757+00:00",
+    "cause": "Shared list/dict references were inserted into producerFreezeHistory and then main sources/finalHost/strictClippy were updated in-place. Serialization therefore recorded new sources/log metadata under the old aggregate. This was a reporting bug, not a product/test failure.",
+    "preservedProblemReport": {
+      "path": "/tmp/fc-round17-presentation-history-metadata-before-correction.json",
+      "sha256": "55dd75b9878139705aa04d8f58f2cce9b8f5035ef2df84c619c3eae031e81531",
+      "bytes": 11823,
+      "method": "Byte-for-byte copy of current affected report before any correction; not overwritten"
+    },
+    "originalHashesEvidence": {
+      "path": "/tmp/fc-round17-source-inputs-initial.json",
+      "sha256": "a37743583e50e5781669b92a381bc29367ef204bc2dde15bd21221aa2cfcc781",
+      "manifestSha256": "e95b17b19d31688add3297fd9d808b2c624e4fec90eda3dab52ece9ae9005cc9",
+      "fileCount": 269
+    },
+    "oldSourceReconstruction": "For each of7 prior source paths use SHA from retained initial269 manifest. Six unchanged files match actual bytes; original card_body bytes reconstructed only in memory by removing the2 added constant definitions and restoring literals48/16, then verified against1996c4d00779371b77189a1018d774f629dc1c6eeca67c4a1d38767ee12a7677 before recording14645 bytes. No product file was written.",
+    "oldResultsEvidence": {
+      "hostLog": "/tmp/fc-round17-presentation-final-tests.log",
+      "hostLogSha256": "e4e066b6e4f829024bc5b3e4349ee52cbd48154b7b0cce6f0f9156636b0c494e",
+      "actualSummary": "test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s",
+      "clippyLog": "/tmp/fc-round17-presentation-final-clippy.log",
+      "clippyLogSha256": "d47c818d5b043e481b4003e468bf45b1c1624adf9c022f86ed25cb93c0213304",
+      "format": "Original seven-file rustfmt command metadata unaffected; no format rerun in this correction"
+    },
+    "aggregateAlgorithm": "SHA256 of recorded source order: UTF8(path + NUL + sha256 + newline)",
+    "validation": {
+      "oldAggregateRecomputed": "7444edf1c4c4c8e1378d72b52824f3888573dafe305d6030410ecaff4bc99d7f",
+      "oldAggregateMatches": true,
+      "newAggregateRecomputed": "7a6dd9356770b3bc7fd53249216486b2bb214fe759e89159f5d80f8a132cd920",
+      "newAggregateMatches": true,
+      "mainCurrentSourcesAndResultsUnchanged": true,
+      "additionalProductTestExecutions": 0
+    },
+    "historicalBoundary": "Affected old history was reconstructed, not asserted to have remained intact. Original faulty metadata and all existing raw logs retained."
+  }
+}

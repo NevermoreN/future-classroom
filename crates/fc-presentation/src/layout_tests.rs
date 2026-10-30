@@ -34,7 +34,13 @@ fn specs() -> Vec<WidgetMeasure> {
     .into_iter()
     .map(|kind| WidgetMeasure {
         kind,
-        text: "full owned content".into(),
+        body: crate::card_body::card_body_spec(
+            fc_domain::desktop::ComponentKind::Date,
+            &crate::scene::CardContent::Text("full owned content".into()),
+            false,
+            None,
+        )
+        .unwrap(),
         font_dip: 22.,
         opacity: 1.,
         min_width: 160.,
@@ -435,4 +441,78 @@ fn bottom_right_subject_anchor_is_relative_to_its_fixed_outlet() {
         .unwrap();
     assert!((root.rect.x + root.rect.width - outlet.rect.x - outlet.rect.width).abs() < 0.01);
     assert!((root.rect.y + root.rect.height - outlet.rect.y - outlet.rect.height).abs() < 0.01);
+}
+
+#[test]
+fn full_typed_body_is_measured_at_final_width_even_when_leaf_opacity_is_zero() {
+    use crate::{card_body::card_body_spec, scene::CardContent};
+    use std::cell::RefCell;
+    struct ExactWidth(RefCell<Vec<(String, f32)>>);
+    impl TextMeasure for ExactWidth {
+        fn height(&self, text: &str, width: f32, _: f32) -> Result<f32, fc_ports::MeasureError> {
+            self.0.borrow_mut().push((text.into(), width));
+            Ok(100.)
+        }
+    }
+    let mut public = default_public_layout();
+    public.nodes.retain(|n| [1, 10, 12].contains(&n.id.get()));
+    let root = public
+        .nodes
+        .iter_mut()
+        .find(|n| n.id == public.root)
+        .unwrap();
+    root.children = vec![id(10)];
+    root.kind = NodeKind::Root {
+        flow: Flow::Column,
+        padding: 0,
+        gap: 0,
+        anchor: Anchor::TopLeft,
+        width: AxisSize::Fixed(400),
+        height: AxisSize::Content {
+            min: 0,
+            preferred: 0,
+            max: 2160,
+        },
+    };
+    public
+        .nodes
+        .iter_mut()
+        .find(|n| n.id == id(10))
+        .unwrap()
+        .kind = NodeKind::Outlet {
+        width: AxisSize::Percent {
+            basis_points: 10000,
+            min: 160,
+            max: 800,
+        },
+        height: AxisSize::Content {
+            min: 0,
+            preferred: 0,
+            max: 2160,
+        },
+    };
+    let full = format!("前{}终", "完整材料🦀".repeat(4000));
+    let mut spec = specs()
+        .into_iter()
+        .find(|s| s.kind == WidgetKind::Materials)
+        .unwrap();
+    spec.opacity = 0.;
+    spec.body = card_body_spec(
+        fc_domain::desktop::ComponentKind::Materials,
+        &CardContent::Text(full.clone()),
+        false,
+        None,
+    )
+    .unwrap();
+    let measure = ExactWidth(RefCell::new(vec![]));
+    let tree = compose_layout(&public, None, &[spec], work(), &measure).unwrap();
+    assert_eq!(measure.0.borrow().as_slice(), [(full, 352.)]);
+    let leaf = tree
+        .nodes
+        .iter()
+        .find(|n| n.widget_kind == Some(WidgetKind::Materials))
+        .unwrap();
+    assert_eq!((leaf.rect.width, leaf.rect.height), (400., 160.));
+    assert_eq!(leaf.effective_opacity, 0.);
+    assert!(tree.nodes.iter().any(|n| n.key.id == id(10)));
 }

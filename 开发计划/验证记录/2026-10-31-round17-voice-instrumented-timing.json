@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "status": "EXACT_CASES_PASS_ORIGINAL_SUITE_FAILURE_PRESERVED",
+  "round": 17,
+  "scope": "Two exact existing failing tests individually in fresh processes; original full-suite failure retained separately; no real audio/foreground/new source changes",
+  "startedUtc": "2026-10-30T19:22:56.014706+00:00",
+  "originalFailure": "/tmp/fc-round17-windows-initial-full-failure.json",
+  "artifactBinding": "Explicit EXE path + independently supplied SHA256; Cargo metadata/build provenance remains caller responsibility",
+  "executable": {
+    "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+    "fileName": "fc_bootstrap-153172ad9c1ad7f3.exe",
+    "bytes": 119907081,
+    "sha256": "2f3d399ee6a9cf7c0a3627923d2036658d004e74e6600043b29cc86c80df1998"
+  },
+  "sourceShaBefore": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "sha256": "535147fd6cfd680bd0564c351db882048ba426645d6b79f79cb178699c407b61"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "dbae589ffa663d82dbf609fefe80d36986d0c80d3eb29619e010392b1a6a8759"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "sha256": "cebedc4e53bfd901daaafdcc014b091f426dd89e3714c4629f1706dfcf1475ba"
+    }
+  ],
+  "cases": [
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac\\temp",
+      "processId": 40524,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 7.32s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "FC_VOICE_DIAG storage ok elapsed=359.7µs\nFC_VOICE_DIAG storage ok elapsed=1.1212ms\nFC_VOICE_DIAG reserve ok elapsed=6.3252ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.136ms\nFC_VOICE_DIAG reserve ok elapsed=6.3322ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.152ms\nFC_VOICE_DIAG storage ok elapsed=1.279ms\nFC_VOICE_DIAG reserve ok elapsed=6.5394ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.3934ms\nFC_VOICE_DIAG reserve ok elapsed=6.5044ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.5533ms\nFC_VOICE_DIAG storage ok elapsed=575.4µs\n",
+      "elapsedMilliseconds": 7518,
+      "timedOut": false,
+      "exitCode": 0,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '0-stdout.log';$stderr=Join-Path $root '0-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$ownedProcessHandle=$p.Handle;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-0-stdout.log",
+        "sha256": "46285ef4313aad2cf92a69fe3982f88dba4a06855a8cd7cc17665a3fcf826e96"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-0-stderr.log",
+        "sha256": "2cfca7f5a389a07a7e8fb4f56519981fd8bc633085c5b93e9c552b59cd0a9818"
+      }
+    },
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac\\temp",
+      "processId": 38828,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 7.32s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "FC_VOICE_DIAG storage ok elapsed=228.5µs\nFC_VOICE_DIAG storage ok elapsed=1.1183ms\nFC_VOICE_DIAG reserve ok elapsed=6.4195ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.6027ms\nFC_VOICE_DIAG reserve ok elapsed=7.2487ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.3787ms\nFC_VOICE_DIAG storage ok elapsed=1.7652ms\nFC_VOICE_DIAG reserve ok elapsed=7.0283ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.5263ms\nFC_VOICE_DIAG reserve ok elapsed=6.7717ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.4791ms\nFC_VOICE_DIAG storage ok elapsed=890.4µs\n",
+      "elapsedMilliseconds": 7357,
+      "timedOut": false,
+      "exitCode": 0,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '1-stdout.log';$stderr=Join-Path $root '1-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$ownedProcessHandle=$p.Handle;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-1-stdout.log",
+        "sha256": "46285ef4313aad2cf92a69fe3982f88dba4a06855a8cd7cc17665a3fcf826e96"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-1-stderr.log",
+        "sha256": "a1cbe8f7915ab38d168aca9b5b43fa4c82227d6462d83aa271cd97299510fb80"
+      }
+    },
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac\\temp",
+      "processId": 35388,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 7.27s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "FC_VOICE_DIAG storage ok elapsed=240.1µs\nFC_VOICE_DIAG storage ok elapsed=1.1703ms\nFC_VOICE_DIAG reserve ok elapsed=6.3567ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.1159ms\nFC_VOICE_DIAG reserve ok elapsed=6.2445ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.1208ms\nFC_VOICE_DIAG storage ok elapsed=1.2339ms\nFC_VOICE_DIAG reserve ok elapsed=6.8887ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.3496ms\nFC_VOICE_DIAG reserve ok elapsed=6.5926ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.359ms\nFC_VOICE_DIAG storage ok elapsed=528.2µs\n",
+      "elapsedMilliseconds": 7301,
+      "timedOut": false,
+      "exitCode": 0,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '2-stdout.log';$stderr=Join-Path $root '2-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$ownedProcessHandle=$p.Handle;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-2-stdout.log",
+        "sha256": "c69af62e631ad69456e17103303a6563c6e533e5586bc886fef4412c39c6bd7c"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-2-stderr.log",
+        "sha256": "27c7c12c49e5c55574ed263717d40ce587967d056dde9047839b7c800ae2adc4"
+      }
+    },
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac\\temp",
+      "processId": 29996,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 7.33s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "FC_VOICE_DIAG storage ok elapsed=232.2µs\nFC_VOICE_DIAG storage ok elapsed=1.1085ms\nFC_VOICE_DIAG reserve ok elapsed=6.3009ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.1049ms\nFC_VOICE_DIAG reserve ok elapsed=6.2692ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.0996ms\nFC_VOICE_DIAG storage ok elapsed=1.4475ms\nFC_VOICE_DIAG reserve ok elapsed=6.5965ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.2026ms\nFC_VOICE_DIAG reserve ok elapsed=6.5364ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.1965ms\nFC_VOICE_DIAG storage ok elapsed=453.8µs\n",
+      "elapsedMilliseconds": 7366,
+      "timedOut": false,
+      "exitCode": 0,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '3-stdout.log';$stderr=Join-Path $root '3-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$ownedProcessHandle=$p.Handle;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-3-stdout.log",
+        "sha256": "51e33d839bc72675855bf094358567568425a57eb6de0f725ef7b3cb336b100e"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-3-stderr.log",
+        "sha256": "a806b6e7cda062866b67fa2171498dc6137757cb4b48770f72366869c6eb886e"
+      }
+    },
+    {
+      "temp": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac\\temp",
+      "processId": 2144,
+      "stdout": "\nrunning 1 test\ntest web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 7.31s\n\n",
+      "case": "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+      "stderr": "FC_VOICE_DIAG storage ok elapsed=251.2µs\nFC_VOICE_DIAG storage ok elapsed=1.0931ms\nFC_VOICE_DIAG reserve ok elapsed=6.3174ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.0942ms\nFC_VOICE_DIAG reserve ok elapsed=6.2669ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.0946ms\nFC_VOICE_DIAG storage ok elapsed=1.2738ms\nFC_VOICE_DIAG reserve ok elapsed=6.4687ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.5284ms\nFC_VOICE_DIAG reserve ok elapsed=6.7225ms generation=1\nFC_VOICE_DIAG storage ok elapsed=1.2584ms\nFC_VOICE_DIAG storage ok elapsed=463.1µs\n",
+      "elapsedMilliseconds": 7344,
+      "timedOut": false,
+      "exitCode": 0,
+      "arguments": [
+        "--exact",
+        "web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "rustBacktrace": "1",
+      "powershellCommand": "$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac';$env:TEMP=Join-Path $root \"temp\";New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;$env:RUST_BACKTRACE=\"1\";$exe=Join-Path $root 'fc_bootstrap-153172ad9c1ad7f3.exe';$stdout=Join-Path $root '4-stdout.log';$stderr=Join-Path $root '4-stderr.log';$clock=[Diagnostics.Stopwatch]::StartNew();$p=Start-Process -FilePath $exe -ArgumentList @(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\") -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru;$ownedProcessHandle=$p.Handle;$timedOut= -not $p.WaitForExit(90000);if($timedOut){$owned=Get-CimInstance Win32_Process -Filter (\"ProcessId=\"+$p.Id);if($owned -and $owned.ExecutablePath -eq $exe){Stop-Process -Id $p.Id -Force};$p.WaitForExit()};@{case='web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement';exitCode=$p.ExitCode;timedOut=$timedOut;elapsedMilliseconds=$clock.ElapsedMilliseconds;stdout=[IO.File]::ReadAllText($stdout,[Text.Encoding]::UTF8);stderr=[IO.File]::ReadAllText($stderr,[Text.Encoding]::UTF8);processId=$p.Id;temp=$env:TEMP;arguments=@(\"--exact\",'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement',\"--test-threads=1\",\"--nocapture\");rustBacktrace=$env:RUST_BACKTRACE}|ConvertTo-Json -Compress -Depth 5",
+      "timeoutSeconds": 90,
+      "stdoutLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-4-stdout.log",
+        "sha256": "bfba17b51c54e21cd4a0aae9c5af935d31e626fcb641ddf973583f10311176b2"
+      },
+      "stderrLog": {
+        "path": "/tmp/fc-round17-voice-instrumented-timing-4-stderr.log",
+        "sha256": "3e6f525bf6f9b1f56b8e7418d08351f048f18ab5b30cf3a03723243b976971f6"
+      }
+    }
+  ],
+  "cleanup": "PASS",
+  "scheduledTasksCreated": 0,
+  "marker": "FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac",
+  "remoteDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Voice-Exact-Round17-2cd4b8685426426f86ac0a88b1e13eac",
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "remoteExecutableSha256": "2f3d399ee6a9cf7c0a3627923d2036658d004e74e6600043b29cc86c80df1998",
+  "cleanupResult": {
+    "ownScheduledTasks": 0,
+    "ownProcesses": 0,
+    "sshd": "Running",
+    "rootExists": false
+  },
+  "sourceShaAfter": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "sha256": "535147fd6cfd680bd0564c351db882048ba426645d6b79f79cb178699c407b61"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "dbae589ffa663d82dbf609fefe80d36986d0c80d3eb29619e010392b1a6a8759"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "sha256": "cebedc4e53bfd901daaafdcc014b091f426dd89e3714c4629f1706dfcf1475ba"
+    }
+  ],
+  "finishedUtc": "2026-10-30T19:23:39.290629+00:00",
+  "helperSha256": "2fb954c7aa3c3aa5539a0bb0f171c96aad45f37d72578e5f10e5a9c12b00e1f3"
+}

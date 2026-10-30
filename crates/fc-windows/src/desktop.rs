@@ -10,6 +10,7 @@ use fc_domain::{
 };
 use fc_ports::{MeasureError, TextMeasure};
 use fc_presentation::{
+    card_body::{card_body_spec, CardBodyRole, CARD_BODY_TEXT_INSET, CARD_BODY_TEXT_PADDING},
     scene::{CardContent, SceneCard, SceneSnapshot},
     Rect,
 };
@@ -44,7 +45,7 @@ pub use tree::DesktopPreview;
 
 pub const DESKTOP_SCOPE: u64 = 0xfc00_0001;
 pub const DIB_BUDGET: u64 = 16 * 1024 * 1024;
-const MAX_TEXT_UNITS: usize = 262_144;
+const MAX_TEXT_UNITS: usize = fc_presentation::card_body::MAX_CARD_TEXT_UNITS;
 
 pub struct PublicationGuard<'a> {
     pub gate: &'a HealthGate,
@@ -340,6 +341,9 @@ impl Graphics {
         }
     }
     fn layout(&self, text: &str, width: f32, size: f32, center: bool) -> Result<IDWriteTextLayout> {
+        if text.encode_utf16().take(MAX_TEXT_UNITS + 1).count() > MAX_TEXT_UNITS {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
         let mut units: Vec<u16> = text.encode_utf16().collect();
         if units.is_empty() {
             units.push(0x200b);
@@ -426,6 +430,8 @@ struct Block {
     leaf: Option<usize>,
 }
 struct ContentLayout {
+    top_inset: f32,
+    bottom_inset: f32,
     blocks: Vec<Block>,
     pages: Vec<f32>,
     units: usize,
@@ -1468,48 +1474,52 @@ fn prepare_content_with_note(
     unverified: bool,
     note: Option<&str>,
 ) -> Result<ContentLayout> {
+    let spec = card_body_spec(c.kind, &c.content, unverified, note)
+        .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+    let top_inset = body_top(c, unverified);
+    debug_assert_eq!(top_inset, spec.top_inset);
     if matches!(c.content, CardContent::LessonControl { .. }) {
         return Ok(ContentLayout {
+            top_inset,
+            bottom_inset: spec.bottom_inset,
             blocks: Vec::new(),
             pages: vec![0.],
             units: 0,
             visible_leaves: vec![1],
         });
     }
-    let width = c.rect.width - 32.;
-    let viewport = c.rect.height - body_top(c, unverified) - 12.;
+    let width = spec
+        .text_width(c.rect.width)
+        .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+    let viewport = c.rect.height - top_inset - spec.bottom_inset;
     if viewport < 20. {
         return Err(Error::from_hresult(E_INVALIDARG));
     }
-    let mut blocks = Vec::new();
-    let mut top = 0.;
+    let mut blocks = Vec::with_capacity(spec.blocks.len());
+    let mut measured = Vec::with_capacity(spec.blocks.len());
     let mut units = 0usize;
-    let leaf = Cell::new(None);
-    let mut add = |text: String, center: bool, fill: Option<(Rgb, f32, f32)>| -> Result<()> {
+    for item in &spec.blocks {
         units = units
-            .checked_add(text.encode_utf16().count())
+            .checked_add(item.text.encode_utf16().count())
             .filter(|n| *n <= MAX_TEXT_UNITS)
             .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
-        let layout = g.layout(&text, width - 16., c.font_dip, center)?;
-        let mut m = DWRITE_TEXT_METRICS::default();
-        // SAFETY: exclusively owned local metrics output; apartment-owned layout.
+        let layout = g.layout(&item.text, width, c.font_dip, item.center)?;
+        let mut metrics = DWRITE_TEXT_METRICS::default();
+        // SAFETY: apartment-owned immutable layout writes local bounded outputs.
         unsafe {
-            layout.GetMetrics(&mut m)?;
+            layout.GetMetrics(&mut metrics)?;
         }
+        measured.push(metrics.height);
         let mut count = 0;
-        // SAFETY: count query intentionally supplies no buffer, then allocates the
-        // exact bounded count and checks the second synchronous fill.
         let _ = unsafe { layout.GetLineMetrics(None, &mut count) };
-        if count > MAX_TEXT_UNITS as u32 {
+        if count == 0 || count > MAX_TEXT_UNITS as u32 {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
         let mut native = vec![DWRITE_LINE_METRICS::default(); count as usize];
-        if count > 0 {
-            unsafe {
-                layout.GetLineMetrics(Some(&mut native), &mut count)?;
-            }
+        unsafe {
+            layout.GetLineMetrics(Some(&mut native), &mut count)?;
         }
-        let mut y = top + 8.;
+        let mut y = CARD_BODY_TEXT_PADDING;
         let lines = native
             .into_iter()
             .map(|line| {
@@ -1518,145 +1528,65 @@ fn prepare_content_with_note(
                 result
             })
             .collect();
-        let height = (m.height + 16.).max(if fill.is_some() { 44. } else { 24. });
+        let action = match &item.role {
+            CardBodyRole::Plain => None,
+            CardBodyRole::MaterialRow(index) => {
+                let CardContent::Materials(list) = &c.content else {
+                    return Err(Error::from_hresult(E_INVALIDARG));
+                };
+                let row = list
+                    .rows
+                    .get(*index)
+                    .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+                Some(InputAction::MaterialOpen {
+                    source: list.source.clone(),
+                    folder_id: list
+                        .folder_id
+                        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
+                    folder_revision: list.folder_revision,
+                    material_id: row.material_id,
+                    resource_version: row.resource_version,
+                })
+            }
+            CardBodyRole::MaterialMore => {
+                let CardContent::Materials(list) = &c.content else {
+                    return Err(Error::from_hresult(E_INVALIDARG));
+                };
+                Some(InputAction::MaterialPage {
+                    source: list.source.clone(),
+                    cursor: list
+                        .next_cursor
+                        .clone()
+                        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
+                })
+            }
+        };
         blocks.push(Block {
             layout,
-            top,
-            height,
-            fill,
+            top: 0.,
+            height: 0.,
+            fill: item.fill,
             lines,
-            action: None,
-            leaf: leaf.get(),
+            action,
+            leaf: item.leaf,
         });
-        top += height + 8.;
-        Ok(())
-    };
-    match &c.content {
-        CardContent::LessonControl { .. } => unreachable!("control handled above"),
-        CardContent::Text(text) => add(text.clone(), false, None)?,
-        CardContent::Courses(rows) => {
-            if rows.len() > 128 {
-                return Err(Error::from_hresult(E_INVALIDARG));
-            }
-            for (i, r) in rows.iter().enumerate() {
-                leaf.set(Some(i));
-                if !r.fill_alpha.is_finite()
-                    || !(0. ..=1.).contains(&r.fill_alpha)
-                    || !r.stroke_width.is_finite()
-                    || !(0. ..=4.).contains(&r.stroke_width)
-                {
-                    return Err(Error::from_hresult(E_INVALIDARG));
-                }
-                add(
-                    if r.current {
-                        format!(
-                            "{}\n{}",
-                            r.name,
-                            if r.temporary {
-                                "临时 · 仅本节有效"
-                            } else {
-                                "正在上课"
-                            }
-                        )
-                    } else {
-                        r.name.clone()
-                    },
-                    true,
-                    Some((r.color, r.fill_alpha, r.stroke_width)),
-                )?;
-            }
-        }
-        CardContent::Homework(rows) => {
-            if rows.len() > 64 {
-                return Err(Error::from_hresult(E_INVALIDARG));
-            }
-            for (i, r) in rows.iter().enumerate() {
-                leaf.set(Some(i));
-                add(
-                    format!("{} · {}", r.subject_name, r.teacher_name),
-                    false,
-                    Some((r.color, r.fill_alpha, 0.)),
-                )?;
-                add(r.text.clone(), false, None)?;
-            }
-        }
-        CardContent::Materials(list) => {
-            if let Some(note) = note {
-                add(note.into(), false, None)?;
-            }
-            if list.rows.len() > fc_domain::materials::DESKTOP_MATERIAL_PAGE
-                || !(1..=5).contains(&list.visible_rows)
-                || list.row_gap_dip > 64
-                || !list.rows.is_empty() && list.folder_id.is_none()
-            {
-                return Err(Error::from_hresult(E_INVALIDARG));
-            }
-            add(
-                format!("{} · {}", list.subject_name, list.teacher_name),
-                false,
-                None,
-            )?;
-            if list.rows.is_empty() {
-                add("该老师暂无课堂资料".into(), false, None)?;
-            }
-            for (i, row) in list.rows.iter().enumerate() {
-                leaf.set(Some(i));
-                add(row.name.clone(), false, None)?;
-            }
-            leaf.set(None);
-            if list.next_cursor.is_some() {
-                add("更多资料 ›".into(), false, None)?;
-            }
-        }
-        CardContent::MaterialsUnavailable => {
-            if let Some(note) = note {
-                add(note.into(), false, None)?;
-            }
-            add("资料尚未就绪".into(), false, None)?;
-        }
-        _ => {}
     }
-    if let CardContent::Materials(list) = &c.content {
-        for (block, row) in blocks
-            .iter_mut()
-            .skip(1 + usize::from(note.is_some()))
-            .zip(&list.rows)
-        {
-            block.action = Some(InputAction::MaterialOpen {
-                source: list.source.clone(),
-                folder_id: list
-                    .folder_id
-                    .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?,
-                folder_revision: list.folder_revision,
-                material_id: row.material_id,
-                resource_version: row.resource_version,
-            });
-        }
-        if let Some(cursor) = &list.next_cursor {
-            blocks
-                .last_mut()
-                .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?
-                .action = Some(InputAction::MaterialPage {
-                source: list.source.clone(),
-                cursor: cursor.clone(),
-            });
-        }
-        let mut y = 0.;
-        for block in &mut blocks {
-            let delta = y - block.top;
-            for (line, _) in &mut block.lines {
-                *line += delta;
-            }
-            block.top = y;
-            if block.action.is_some() {
-                block.height = block.height.max(44.);
-            }
-            y += block.height + list.row_gap_dip as f32;
+    let geometry = spec
+        .arrange(&measured)
+        .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+    if geometry.blocks.len() != blocks.len() {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    for (block, position) in blocks.iter_mut().zip(&geometry.blocks) {
+        block.top = position.top;
+        block.height = position.height;
+        for (y, _) in &mut block.lines {
+            *y += position.top;
         }
     }
-    let total = blocks.last().map_or(0., |b| {
-        b.top + b.height - if b.fill.is_none() { 8. } else { 0. }
-    });
+    // The shared endpoint includes the complete final block padding. Native
+    // page clipping and presentation intrinsic height consume this same bound.
+    let total = geometry.total_body_height;
     if !(1..=64).contains(&c.visible_leaf_limit) {
         return Err(Error::from_hresult(E_INVALIDARG));
     }
@@ -1720,6 +1650,8 @@ fn prepare_content_with_note(
     }
 
     Ok(ContentLayout {
+        top_inset,
+        bottom_inset: spec.bottom_inset,
         blocks,
         pages,
         units,
@@ -1837,16 +1769,19 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
                 );
             }
             let offset = c.body.pages[c.page];
-            let page_span = c.body.pages.get(c.page + 1).map_or(
-                h - body_top(&c.source, c.calendar_unverified) - 12.,
-                |next| *next - offset,
-            );
+            let page_span = c
+                .body
+                .pages
+                .get(c.page + 1)
+                .map_or(h - c.body.top_inset - c.body.bottom_inset, |next| {
+                    *next - offset
+                });
             target.PushAxisAlignedClip(
                 &D2D_RECT_F {
                     left: 12.,
-                    top: body_top(&c.source, c.calendar_unverified),
+                    top: c.body.top_inset,
                     right: w - 12.,
-                    bottom: body_top(&c.source, c.calendar_unverified) + page_span,
+                    bottom: c.body.top_inset + page_span,
                 },
                 D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
             );
@@ -1855,7 +1790,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
                 if block.top + block.height < offset || block.top >= bottom {
                     continue;
                 }
-                let y = body_top(&c.source, c.calendar_unverified) + block.top - offset;
+                let y = c.body.top_inset + block.top - offset;
                 if let Some((rgb, alpha, stroke)) = block.fill {
                     let brush = target.CreateSolidColorBrush(
                         &color(
@@ -1876,7 +1811,7 @@ fn render_card(g: &Graphics, c: &mut Card) -> Result<()> {
                     }
                 }
                 target.DrawTextLayout(
-                    xy(24., y + 8.).point,
+                    xy(CARD_BODY_TEXT_INSET, y + CARD_BODY_TEXT_PADDING).point,
                     &block.layout,
                     &text,
                     D2D1_DRAW_TEXT_OPTIONS_NONE,
@@ -2211,13 +2146,15 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
         }
     }
     if material {
-        let top = body_top(&c.source, c.calendar_unverified);
+        let top = c.body.top_inset;
         let offset = c.body.pages[c.page];
         let span = c
             .body
             .pages
             .get(c.page + 1)
-            .map_or(c.source.rect.height - top - 12., |next| *next - offset);
+            .map_or(c.source.rect.height - top - c.body.bottom_inset, |next| {
+                *next - offset
+            });
         for block in &c.body.blocks {
             let Some(action) = &block.action else {
                 continue;
@@ -2336,12 +2273,12 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
 }
 
 fn body_top(c: &SceneCard, unverified: bool) -> f32 {
-    if c.kind == ComponentKind::Schedule && unverified {
-        50.
-    } else {
-        32.
-    }
+    fc_presentation::card_body::body_top(c.kind, unverified)
 }
+
+#[cfg(test)]
+#[path = "desktop/card_body_tests.rs"]
+mod card_body_tests;
 
 #[cfg(test)]
 mod tests {

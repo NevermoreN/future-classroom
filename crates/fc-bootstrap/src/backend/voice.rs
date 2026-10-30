@@ -1880,19 +1880,38 @@ mod tests {
             assert!(Instant::now() < deadline);
             std::thread::sleep(Duration::from_millis(1));
         }
+        assert_eq!(
+            service.inner.authority.gate().status().health,
+            Health::AuthorityUpdating
+        );
+        assert_eq!(handle.queued_bytes(), 0);
+        let (observer_ready, ready) = std::sync::mpsc::sync_channel(1);
         let starting = std::thread::scope(|scope| {
-            scope.spawn(|| {
-                std::thread::sleep(Duration::from_millis(10));
+            let observer = scope.spawn(|| {
+                let _release = Release(release.clone());
+                observer_ready.send(()).unwrap();
+                let deadline = Instant::now() + Duration::from_secs(10);
+                // This private writer is held and Start is its only producer.
+                // Budget reservation precedes try_send: this observes Start's
+                // queue reservation, not a successful-send acknowledgement.
+                while handle.queued_bytes() == 0 {
+                    assert!(
+                        Instant::now() < deadline,
+                        "Start did not reserve queue budget"
+                    );
+                    std::thread::sleep(Duration::from_millis(1));
+                }
                 release.store(true, Ordering::Release);
             });
-            runtime
-                .drive(VoiceDriverUpdate {
-                    job_id: queued.id,
-                    expected_revision: queued.revision,
-                    generation: 0,
-                    action: VoiceDriverAction::Start,
-                })
-                .unwrap()
+            ready.recv_timeout(Duration::from_secs(10)).unwrap();
+            let starting = runtime.drive(VoiceDriverUpdate {
+                job_id: queued.id,
+                expected_revision: queued.revision,
+                generation: 0,
+                action: VoiceDriverAction::Start,
+            });
+            observer.join().unwrap();
+            starting.unwrap()
         });
         pending.wait().unwrap();
         assert_eq!(starting.state, VoiceState::Starting);

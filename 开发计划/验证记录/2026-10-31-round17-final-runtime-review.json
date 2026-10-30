@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "round": 17,
+  "status": "PASS",
+  "scope": "EXISTING_RUNTIME_REPORT_AUDIT",
+  "createdUtc": "2026-10-30T19:44:32.219854+00:00",
+  "role": "Independent read-only review of retained reports and existing local artifact bindings; reviewer executes no product test, SSH, Windows process, Cargo or source mutation in this task.",
+  "newProductTests": 0,
+  "sshInvocations": 0,
+  "cargoInvocations": 0,
+  "sourceModifications": 0,
+  "producerOrPreviousReportsModified": 0,
+  "inputReports": [
+    {
+      "path": "/tmp/fc-round17-windows-final.json",
+      "sha256": "b2e5d9cf71665b2259ea998f7dc55d1846622cba71e492a4b9f830e553a16a0c"
+    },
+    {
+      "path": "/tmp/fc-round17-windows-post-handshake.json",
+      "sha256": "e5b3b4c3072327ce76d7b9bf326d8e6a759e70413ce2266d318861aebb06079a"
+    },
+    {
+      "path": "/tmp/fc-round17-windows-post-handshake-before-hash-annotation.json",
+      "sha256": "366f339d56b0ed328184222788bd4a0bf960a29e92233e1c66f26de175d30040"
+    },
+    {
+      "path": "/tmp/fc-round17-windows-final-changed-program.json",
+      "sha256": "dbe3ea4ac2edb4b413a62bab106c641b39d0b2441d946325fdd77422466796c4"
+    },
+    {
+      "path": "/tmp/fc-round17-win7-on-win11-final.json",
+      "sha256": "4e4e8a9a03985d2f8fd06e565c79a95e4e0202261c844d982bbd7c5d03dd56b8"
+    },
+    {
+      "path": "/tmp/fc-round17-runner-hash-runtime-verification.json",
+      "sha256": "dc61a5d8fb8914a21ae7c4ee63666d7529f40397b47dfb949aeb807f2a7579fa"
+    },
+    {
+      "path": "/tmp/fc-round17-remote-final-audit.json",
+      "sha256": "17ad591fe2066f9e65f1d62d480576e8ae9427e1c69d923c7908e299c20f02f7"
+    },
+    {
+      "path": "/tmp/fc-round17-artifacts-final.json",
+      "sha256": "979af8ba46322fdaeec4fda3e36bc99a5c84889974ac296206c70d2dbcba34ef"
+    },
+    {
+      "path": "/tmp/fc-round17-artifacts-final-before-account-sequence.json",
+      "sha256": "56ede84c64c3cecc9fe14e11fdeb2ed7d7b1aa3bb30f12baa130949e3a36b355"
+    },
+    {
+      "path": "/tmp/fc-round17-source-inputs-final.json",
+      "sha256": "c4c6277fca9088be9f11f7f21dd4c007b18eef364de18745ddf000f2e9941730"
+    }
+  ],
+  "inputSnapshots": {
+    "repository": "d2cd0aec7f0d0fb79f98be5ef01f432e1d525ad425dd8db51d2809a2c93bb165",
+    "unchangedRustBuildInputs": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+    "boundary": "Runner-only d2cd change/Rust0delta already source-reviewed separately; no full-source re-audit or rebuild performed here."
+  },
+  "coverage": {
+    "distinctFinalCases": 600,
+    "failed": 0,
+    "finalProgramCount": 16,
+    "method": "15 unchanged artifacts from original whole600/16 plus final changed library65/1 replacing prior65; not665 or650 and not a single final-frozen-source600 run.",
+    "singleFinalSnapshotWholeRun": false,
+    "programs": [
+      {
+        "name": "fc_bootstrap-2c9facf31078f737.exe",
+        "sha256": "00bfbcc522a2b5b5cbfcb7884da59e63ea9cea9a87692263fac7e25e7e34fa9e",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 75,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_windows-95fad28d15fea78d.exe",
+        "sha256": "4d0172829166f1bb33bec71ad56e04ef4bb26b4373f52fdf923a486e998d58b8",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 71,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "business_storage-17bf377bec8f2f7e.exe",
+        "sha256": "45d04cdbff283817ba5802ec7110bce8baa215ed7b34743d94c47cc8e69e3e03",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 43,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_application-8ad1e6c8c699ab50.exe",
+        "sha256": "d168b03b544c23a975dfb44ebce931cbe7de0ae9e315365a1c96d41c0853e244",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 25,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_audio-35e3156477d0188a.exe",
+        "sha256": "25bb253c0167d7a7e61e4ad27d5f5df313592b0ef0054fb5a406add668887348",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 22,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "sha256": "9b43c0f49ea376861ff0c63ae29b52cc21d74b448ba2a4d3cd6531f86e629562",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 65,
+        "origin": "final changed-program supplement",
+        "identityMethod": "Final9b43 local artifact was frozen before upload and stayed byte-identical through completion; no concurrent Rust/source/EXE rebuild. Old runner records local post-run hash, not independent remote per-test hash. Harness Python-only fix happened while this process ran and does not affect compiled Rust inputs.",
+        "oldAffectedHashNotUsedAsProof": true
+      },
+      {
+        "name": "fc_domain-915566e140287178.exe",
+        "sha256": "c7f1fd233e1cb2245a8ad7f9ee3714f980f8672a19c29c6c90fbc26cd5afb746",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 74,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_materials-2221de66f2e97130.exe",
+        "sha256": "5db35e8b923639a3ff89da7a6c502e5ae88612cc7bfdcc573af91b2f035387a6",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 35,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_ports-361bddc8b2876cc0.exe",
+        "sha256": "c27c75349f32fd971a2f1bc1ad4345fb9c5a58d2c30a159c913180e824988cf4",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 6,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "sha256": "9e5fa18eb2aa43329179397ac8943ce97dd1e1bc57480c5cdcdd2cc0a00c594d",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 50,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_protocol-186900fcb7bfa5db.exe",
+        "sha256": "bcf3f66a584f27db596870803ac4beb104a99da03624b2a58f05aa92b272813e",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 29,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_runtime-fad3e5e278e2d80c.exe",
+        "sha256": "d50e31586b58f71ea80731f35342c63395280ce11735f89dffd2631c2e347fe2",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 26,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_security-9c7f88663f75f873.exe",
+        "sha256": "9479a3861c227ffad86294f1d39d578d1dafb10f5e7438b6df28e0d781ca174a",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 17,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "fc_storage-9549596680176a3f.exe",
+        "sha256": "e2de7307d6819a67fdcefcff496369eaf88b7e3c06d0f7e8360ed2b25ffa9070",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 53,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "runtime_storage-d7df388ce9405226.exe",
+        "sha256": "7c8ccdf688d1129b6f85f5660bf6a7e43d853807f5e04c1884fe9eee821cbba4",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 3,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      },
+      {
+        "name": "voice_storage-bf022395eae863de.exe",
+        "sha256": "75df195476a95a2b98fc251f9614afe351b3dd7527dfee2d8d9e2a4052ba4c95",
+        "actualCurrentExeSha256Matches": true,
+        "passed": 6,
+        "origin": "byte-identical artifact in original whole run",
+        "identityMethod": "Before-upload manifest and final artifact agree, with unchanged file; old runner lacks per-test remote hash",
+        "oldAffectedHashNotUsedAsProof": false
+      }
+    ],
+    "originalWhole600OutputVerified": true,
+    "changedSupplement65OutputVerified": true,
+    "supplementalHarness50ExcludedFromDistinctTotal": true,
+    "all16FinalCurrentLocalExeHashesMatchArtifactTable": true
+  },
+  "oldHashAnnotationAudit": {
+    "preservedOriginalSha256": "366f339d56b0ed328184222788bd4a0bf960a29e92233e1c66f26de175d30040",
+    "onlyAddedField": "artifactIdentityLimitation",
+    "otherFieldsAnd16RawOutputsAndHashesUnchanged": true,
+    "originalMistakenLocalHash": "9b43c0f49ea376861ff0c63ae29b52cc21d74b448ba2a4d3cd6531f86e629562",
+    "preuploadManifestExpectedOldLib": "75051c1e55f05da7d55b48e7230010688f2bf731fd7bacc7e4f2ee2105cd1e43",
+    "finalLibCoverageComesOnlyFromChangedProgram": true,
+    "limit": "Old whole record is not proof final9b43 was executed. Changed-program65 uses documented frozen pre/post local9b43/no concurrent build, with old-runner remote-hash limitation disclosed; it is not retroactively promoted to new-harness remote attestation."
+  },
+  "productionCombination": {
+    "actualFinalModernExeSha256": "4c267b25085b7a6ea9390989a134ee1ca4946c66d89de9048fd57c037ec130d0",
+    "sameAsWholeAndSupplementMainExe": true,
+    "existingWholeSelfCheckAndNativeExitCodes": 0,
+    "profileNativeSteps": 39,
+    "webVoiceMarkersVerified": [
+      "WEB_MATERIALS_PASS",
+      "WEB_VOICE_PASS",
+      "WEB_CONTENT_PASS",
+      "WEB_PAIRING_PASS"
+    ],
+    "runtimeStopAckGeneration": 3,
+    "runtimeStopAckEqual": true,
+    "scope": "Actual existing hidden own fixture/zeroPCM combination under Win11; synthetic trusted transport metadata, no realTLS/browser/campus or visible希沃 acceptance."
+  },
+  "fixedHarnessActualVerification": {
+    "reportSha256MatchesSupplementBytes": true,
+    "uploadedArtifacts": [
+      {
+        "name": "fc-bootstrap.exe",
+        "sha256": "3137002475515e81c3e7e06b97cfcf6af3a0805614d6a2f7e6527fb41b7c3339"
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "sha256": "9e5fa18eb2aa43329179397ac8943ce97dd1e1bc57480c5cdcdd2cc0a00c594d"
+      }
+    ],
+    "remoteReturnedTestDigest": "9e5fa18eb2aa43329179397ac8943ce97dd1e1bc57480c5cdcdd2cc0a00c594d",
+    "allFrozenUploadAndReturnedDigestsMatchFinalArtifactIdentity": true,
+    "testCasesObserved": 50,
+    "newDistinctProductCases": 0,
+    "testTarget": "modern i686-pc-windows-gnu presentation test EXE",
+    "mainTarget": "supplemental i686-win7-windows-gnu release",
+    "scope": "Confirms new-harness successful remote upload/hash/test-result path on retained report; does not itself reproduce deliberate mismatch failure or adversarial remote TOCTOU."
+  },
+  "supplementalPlatformBoundary": {
+    "actualPlatform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "sameActualWin11AsModernRuns": true,
+    "mainExeSha256": "3137002475515e81c3e7e06b97cfcf6af3a0805614d6a2f7e6527fb41b7c3339",
+    "nativeSystemHostApplicationMaterialsOnly": true,
+    "profileNativeSteps": 39,
+    "audioWebPairingWebVoiceNotRequested": true,
+    "actualWin7": "NOT_VALIDATED",
+    "actualWin10": "NOT_VALIDATED",
+    "formalMSVC": "NOT_VALIDATED",
+    "distinctCountContribution": 0
+  },
+  "finalCleanupAudit": {
+    "path": "/tmp/fc-round17-remote-final-audit.json",
+    "sha256": "17ad591fe2066f9e65f1d62d480576e8ae9427e1c69d923c7908e299c20f02f7",
+    "existingAuditStatus": "PASS",
+    "ownTasks": 0,
+    "ownDirectories": 0,
+    "ownProcesses": 0,
+    "sshd": "Running",
+    "privateKeyMode": "0o600",
+    "authorizationPreserved": true,
+    "auditScope": "Only own RustProbe and round17 exact marker namespaces queried; no foreground/input/audio/SSH configuration mutation.",
+    "independentlyReranRemoteAudit": false
+  },
+  "limits": [
+    "PASS audits existing evidence coverage and identities at their stated strength; no new tests or remote verification were executed by this reviewer.",
+    "600 distinct final cases is assembled artifact coverage across two runs, not a single600 run on final frozen input. Extra65 and harness50 are repetitions and not added.",
+    "15-artifact identity derives from retained preupload/final manifests and unchanged files under old runner; changed65 has frozen local pre/post identity. Only supplemental presentation50 uses corrected per-upload/per-test remote digest path.",
+    "Earlier actual failures, intermittent RESULT_UNKNOWN, collectorExitCode-null attempt, metadata correction and hash identity bug remain historical evidence; later success does not prove a100ms or strict5s success guarantee under congestion.",
+    "Win7GNU running on Win11 is not actualWin7; modern presentation EXE is not a Win7 test binary. RealWin7/Win10/MSVC/productTLS/visibleDPI/touch/72h acceptance remain open.",
+    "All reports/artifacts reviewed in place without overwriting producer or prior reviews; no new remote/test residue created. Local review JSON/helper retained for root unified archive/cleanup."
+  ],
+  "allReadsComplete": true
+}

@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "round": 17,
+  "status": "PASS",
+  "scope": "FINAL_SOURCE_ONLY_REVIEW",
+  "createdUtc": "2026-10-30T19:25:21.800487+00:00",
+  "reviewerRole": "Independent read-only round17 integration/fixture review; contextual prior-round tree/layout code partly authored by this reviewer is not recertified as entirely independent code.",
+  "execution": {
+    "newProductTests": 0,
+    "cargo": 0,
+    "ssh": 0,
+    "windows": 0,
+    "sourcePlanOrExistingReportEdits": 0,
+    "ownWrites": "Only this new /tmp/fc-round17-final-source-review.json"
+  },
+  "finalSnapshot": {
+    "path": "/tmp/fc-round17-source-inputs-final.json",
+    "fileSha256": "b568e5d088f1f421e4893015a2288f9dd0623280b852bfa55f9ad8f7e6f8c021",
+    "fileCount": 269,
+    "algorithm": "SHA256 of each sorted UTF8 sha256 + two spaces + path + newline",
+    "declaredAggregate": "3676f62efe8ad551cddab4dfb316ca33e6d0abd4309a47a22be78c0b9dde71fb",
+    "independentlyComputedAggregate": "3676f62efe8ad551cddab4dfb316ca33e6d0abd4309a47a22be78c0b9dde71fb",
+    "allCurrentSourcesMatch": true
+  },
+  "previousSnapshot": {
+    "path": "/tmp/fc-round17-source-inputs-before-fixture-handshake.json",
+    "fileSha256": "488e4b03496961248ee322c56479db338db20c8096d4de1e7dfcd7beeb6bbe6f",
+    "aggregate": "8e6b502841c9d80cb07a70b18b68c75bdf8e6ecefe336a6886bb48319bdb06d8",
+    "independentlyComputedAggregate": "8e6b502841c9d80cb07a70b18b68c75bdf8e6ecefe336a6886bb48319bdb06d8",
+    "preservedHistoricalBinding": true
+  },
+  "previousReview": {
+    "path": "/tmp/fc-round17-integration-readonly-review.json",
+    "sha256": "28d809aa3b2d5048422f086366d93201f6f3aa1b005f3dcb518bf874635a2d07",
+    "scope": "Original8e6b source-only cross-module review kept unchanged; not called final fixture/rebuild/runtime evidence"
+  },
+  "reviewedCrossModuleSources": [
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "bytes": 14778,
+      "sha256": "646bbcc72c0aa23421490156a2408a6a28b675a421f3b5e50cc30ade340b2af1"
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body_tests.rs",
+      "bytes": 12905,
+      "sha256": "35172d190b54722e025ce774d6340fa54b0d05cc02b3330c0231bf5bb082e044"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 23182,
+      "sha256": "0ad649f76bba84b1346d17053e84e0c8f25a451555225cab2c87db11e186b6b0"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 16081,
+      "sha256": "0f08925ef2195acbb304228a47d8ecc389b1410cfd2941b4ed1e2ce8a1dc9001"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 25854,
+      "sha256": "afc0feb0a3fddcb1d9c0e34730c8f393e490f64ebfe552642f269c06cddc9515"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 37581,
+      "sha256": "8fb04a46681006e42bed0aab082431a6ce919f940cce2e2da118d6a053df34fb"
+    },
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "bytes": 15410,
+      "sha256": "b9cc0be8ca02241ed817b43d8af819ab46f711e7fd7574a7b0ff71c58e6e69b7"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 117747,
+      "sha256": "d8c62c109200ac5d69685d419cab660f69664688f99717da2c113b43a744e59d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18260,
+      "sha256": "9fdc40166bf321c75209c772374d2667e2d07a300b68d5bf0d7f18d02a52c6ef"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 67592,
+      "sha256": "9ab03cde1cb909c3779a27666701e2e1ac90fa5264645e180ecc5cf53c1d277f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 21716,
+      "sha256": "34af109ac3f4c2c361a1c5d221ccd95706b1d65dd0a4fe0bfe38e4cb091887ed"
+    }
+  ],
+  "reviewedCrossModuleSourcesUnchanged": true,
+  "changedInputs": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "beforeSha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0",
+      "afterSha256": "535147fd6cfd680bd0564c351db882048ba426645d6b79f79cb178699c407b61",
+      "currentBytes": 89624,
+      "baselineBytesFromGitHeadMatchOldManifest": true,
+      "productionPrefixBeforeCfgTestExactlyIdentical": true,
+      "diff": "diff --git a/crates/fc-bootstrap/src/backend/voice.rs b/crates/fc-bootstrap/src/backend/voice.rs\nindex 6a2044d..12b6fb0 100644\n--- a/crates/fc-bootstrap/src/backend/voice.rs\n+++ b/crates/fc-bootstrap/src/backend/voice.rs\n@@ -1880,19 +1880,38 @@ mod tests {\n             assert!(Instant::now() < deadline);\n             std::thread::sleep(Duration::from_millis(1));\n         }\n+        assert_eq!(\n+            service.inner.authority.gate().status().health,\n+            Health::AuthorityUpdating\n+        );\n+        assert_eq!(handle.queued_bytes(), 0);\n+        let (observer_ready, ready) = std::sync::mpsc::sync_channel(1);\n         let starting = std::thread::scope(|scope| {\n-            scope.spawn(|| {\n-                std::thread::sleep(Duration::from_millis(10));\n+            let observer = scope.spawn(|| {\n+                let _release = Release(release.clone());\n+                observer_ready.send(()).unwrap();\n+                let deadline = Instant::now() + Duration::from_secs(10);\n+                // This private writer is held and Start is its only producer.\n+                // Budget reservation precedes try_send: this observes Start's\n+                // queue reservation, not a successful-send acknowledgement.\n+                while handle.queued_bytes() == 0 {\n+                    assert!(\n+                        Instant::now() < deadline,\n+                        \"Start did not reserve queue budget\"\n+                    );\n+                    std::thread::sleep(Duration::from_millis(1));\n+                }\n                 release.store(true, Ordering::Release);\n             });\n-            runtime\n-                .drive(VoiceDriverUpdate {\n-                    job_id: queued.id,\n-                    expected_revision: queued.revision,\n-                    generation: 0,\n-                    action: VoiceDriverAction::Start,\n-                })\n-                .unwrap()\n+            ready.recv_timeout(Duration::from_secs(10)).unwrap();\n+            let starting = runtime.drive(VoiceDriverUpdate {\n+                job_id: queued.id,\n+                expected_revision: queued.revision,\n+                generation: 0,\n+                action: VoiceDriverAction::Start,\n+            });\n+            observer.join().unwrap();\n+            starting.unwrap()\n         });\n         pending.wait().unwrap();\n         assert_eq!(starting.state, VoiceState::Starting);\n"
+    }
+  ],
+  "fixtureHandshakeReview": {
+    "previousBehavior": "A helper slept10ms then released held authority publication; elapsed sleep did not prove Start had reached its bounded writer admission under scheduling variation.",
+    "currentBehavior": [
+      "Wait until real HoldPublication precommit announces entered; assert Health::AuthorityUpdating and queued_bytes==0.",
+      "Create bounded1-entry observer-ready channel; observer announces readiness before main calls runtime.drive(Start).",
+      "Observer waits up to10s for writer queue byte reservation to become nonzero, then releases exact held publication.",
+      "Main calls original runtime.drive(Start), joins observer, requires successful result and original Starting/completed_repeats/authorization assertions."
+    ],
+    "reservedNotEnqueued": "StorageHandle::send reserves QueueLease before try_send. Observer is accurately described as seeing reservation, not a successful-send acknowledgment. No stronger queued/COMMIT ordering claim is made.",
+    "whyZeroIsMeaningful": "Single private fixture writer drops an Envelope QueueLease immediately after popping before evaluating/precommit; the held transaction is in-flight and does not keep queue bytes. Start is the only added producer in this section.",
+    "authorizationBoundary": "Production drive still obtains exact stored lease and admits GateError::Updating only for bounded writer revalidation. Fixture changes only scheduling, not actor/session/current-class or writer-precommit checks.",
+    "cleanupOnFailure": "Existing outer Release and new observer-local Release guards store release=true on Drop; ready recv and queue wait each have10s budgets. No new production worker/resource/authorization path is added.",
+    "assertionsPreserved": [
+      "AuthorityUpdating defers rather than authorizes native Write.",
+      "Unrelated publication returns original exact session authorization and queued0-repeat job.",
+      "Original Start result is Starting with0completed repeats.",
+      "Original permission remains authorized across unrelated class creation, then revokes on actual bound-class change."
+    ],
+    "limits": [
+      "No compile/runtime result is asserted here; final unified tests must run against this exact source.",
+      "Within finite fixture timing budgets, queue-reservation handshake is stronger than elapsed sleep. It is not a universal scheduler/hard-real-time proof or a production Start COMMIT acknowledgment.",
+      "The separate intermittent file RESULT_UNKNOWN remains historical evidence; no assumption this fixture change alone fixes every observed Windows failure."
+    ]
+  },
+  "diagnosticRestoration": {
+    "searchCommand": [
+      "rg",
+      "-n",
+      "FC_VOICE_DIAG",
+      "crates"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "",
+    "matches": 0,
+    "allOther268InputsMatchPreviousSnapshot": true,
+    "meaning": "All manifest-covered files other than fixture-only backend/voice.rs are byte-identical to old8e6b; this includes reviewed voice_files/storage voice diagnostic locations. No diagnostic tag remains in crates."
+  },
+  "contextReadBindings": [
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "511e43ba9e2e21bbbf394df0aa770a26334213e675fa348e2a3eb6d4480cca4c",
+      "matchesFinalSnapshot": true
+    },
+    {
+      "path": "crates/fc-storage/src/business/voice.rs",
+      "sha256": "c5a5be994e1f0bba8827745998502c2bc4a6610648babf2d6e1a260f2b9c46b4",
+      "matchesFinalSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be",
+      "matchesFinalSnapshot": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f",
+      "matchesFinalSnapshot": true
+    }
+  ],
+  "plan18": {
+    "path": "开发计划/18-统一内容测量与原生排版.md",
+    "sha256": "a5b84ad25dc128d221881dc98f56b087c6765a3b4a268f21f0d02107a5d7ada3",
+    "alignment": "Whole-card spec, shared48/8/top32or50/bottom12, typed role, real DWrite width, final padding,0alpha geometry, fixed-parent percentage,64leaves and dynamic-patch boundaries remain consistent with earlier unchanged11-source review."
+  },
+  "blockingFindings": [],
+  "pendingEvidence": [
+    "Final Host compilation/tests with exact input/depinfo scope.",
+    "Final Windows16 unique debug test EXEs/metadata/profile/SHA and actual complete run, no sum with diagnostic or failed-run subsets.",
+    "Release artifacts, Win7GNU-on-Win11 supplemental run, package member hashes/CRCs, reused frontend assets and remote cleanup audit separately."
+  ],
+  "limits": [
+    "PASS means no blocking source issue found; not final product/build/test/package/runtime PASS.",
+    "All previous source-only and runtime failure/diagnostic reports remain unchanged and separate; no test counts combined.",
+    "Win7/Win10 physical execution, productionTLS/strict5s P0, visible希沃/PPT/DPI/touch and72h evidence are not established by this review.",
+    "No remote or product test resources created; shared targets/logs left for root unified archive/cleanup."
+  ],
+  "allReadsComplete": true
+}

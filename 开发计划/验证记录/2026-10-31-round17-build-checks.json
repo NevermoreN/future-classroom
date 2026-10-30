@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_BUILD_CHECKS_RUNTIME_SEPARATE",
+  "finalSourceInputs": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+  "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+  "checks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo test --workspace --target i686-pc-windows-gnu --no-run --message-format=json --locked",
+      "exitCode": 0,
+      "log": "   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.83s\n",
+      "logSha256": "4925dd10da5c9765305133011936deef528e727a100051caca63dfa5f1ce72ba"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo build -p fc-bootstrap --release --target i686-pc-windows-gnu --locked",
+      "exitCode": 0,
+      "log": "    Finished `release` profile [optimized] target(s) in 0.13s\n",
+      "logSha256": "1ff8bbcb4151dc887e69b78a29bc241d5062cba4757aa5f4639926ae712a8181"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-win7-target CC_i686_win7_windows_gnu=i686-w64-mingw32-gcc AR_i686_win7_windows_gnu=i686-w64-mingw32-ar cargo +nightly-2026-10-29 build -p fc-bootstrap --release --target i686-win7-windows-gnu -Z build-std=std,panic_unwind --locked",
+      "exitCode": 0,
+      "log": "warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-ports/src/http.rs:128:14\n    |\n128 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n128 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n128 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\nwarning: `fc-ports` (lib) generated 1 warning (run `cargo fix --lib -p fc-ports` to apply 1 suggestion)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n  --> crates/fc-runtime/src/cancel.rs:33:14\n   |\n33 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n   |              ^^^^^^^^^^^^\n   |\n   = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n   |\n33 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n33 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n   |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-runtime/src/worker.rs:106:14\n    |\n106 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n106 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n106 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\nwarning: `fc-runtime` (lib) generated 2 warnings (run `cargo fix --lib -p fc-runtime` to apply 2 suggestions)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u32>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-windows/src/audio/device.rs:170:10\n    |\n170 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n    |          ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n170 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n170 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {\n    |\n\nwarning: `fc-windows` (lib) generated 1 warning (run `cargo fix --lib -p fc-windows` to apply 1 suggestion)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-storage/src/login.rs:364:14\n    |\n364 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n364 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n364 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-storage/src/lib.rs:363:14\n    |\n363 |         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n363 -         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n363 +         used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {\n    |\n\nwarning: `fc-storage` (lib) generated 2 warnings (run `cargo fix --lib -p fc-storage` to apply 2 suggestions)\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/backend/voice.rs:193:14\n    |\n193 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n    |              ^^^^^^^^^^^^\n    |\n    = note: `#[warn(deprecated)]` on by default\nhelp: replace the use of the deprecated method\n    |\n193 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n193 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/backend.rs:268:14\n    |\n268 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n268 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n268 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency\n   --> crates/fc-bootstrap/src/voice_runtime.rs:137:14\n    |\n137 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n    |              ^^^^^^^^^^^^\n    |\nhelp: replace the use of the deprecated method\n    |\n137 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n137 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))\n    |\n\nwarning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency\n --> crates/fc-bootstrap/src/web_application/shared_upload.rs:9:14\n  |\n9 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {\n  |              ^^^^^^^^^^^^\n  |\nhelp: replace the use of the deprecated method\n  |\n9 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {\n9 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |count| {\n  |\n\nwarning: `fc-bootstrap` (lib) generated 4 warnings (run `cargo fix --lib -p fc-bootstrap` to apply 4 suggestions)\n    Finished `release` profile [optimized] target(s) in 0.64s\n",
+      "logSha256": "f2e6555fa060602a21602fbf67d4c4f0bf1348368d09768f0c8c94b73ebaaa45"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo clippy --workspace --all-targets --target i686-pc-windows-gnu --locked -- -D warnings",
+      "exitCode": 0,
+      "log": "    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.70s\n",
+      "logSha256": "78d1fb60ccd28958461c85e00254afe0c5dd00995f85cc1bdca8bb8f9425c03a"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-integration-target cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exitCode": 0,
+      "log": "    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)\n    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.76s\n",
+      "logSha256": "b55ff02016f70d1bcd85345404fc1024356930849d32fd0f29f727b034cb2036"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0,
+      "log": "",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "exitCode": 0,
+      "log": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "logSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    }
+  ],
+  "artifactsReport": "2026-10-31-round17-artifacts-final.json",
+  "testExecutableCount": 16,
+  "testProfile": "debug opt0/debuginfo2, debug_assertions/overflow_checks true; runtime threads2",
+  "hostWorkspaceReport": "2026-10-31-round17-host-final.json",
+  "initialMixedSourceFailure": "2026-10-31-round17-initial-integration-failures.json",
+  "initialHostFailure": "2026-10-31-round17-host-directory-collision.json",
+  "warningScope": "Stable1.97.1 strict all-target Clippy passes. Supplemental nightly Win7 build retains deprecation warnings. No actual Win7/Win10/formal MSVC claim."
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "ORIGINAL_FAILURE_ROOT_CAUSE_UNRESOLVED",
+  "originalFullRun": "2026-10-31-round17-windows-initial-full-failure.json",
+  "reports": [
+    {
+      "report": "2026-10-31-round17-voice-exact-diagnostic.json",
+      "sha256": "171747993f2a82e503e20cdd2e34bfacf0dddd9d6ef155cf2d0d792d3b81a612"
+    },
+    {
+      "report": "2026-10-31-round17-voice-instrumented-exact.json",
+      "sha256": "346662a814c690020852459c004370cbb6855e1fa23021e860826a66ecfe4900"
+    },
+    {
+      "report": "2026-10-31-round17-voice-instrumented-timing.json",
+      "sha256": "d468a49532c6e52a2fad492df62c391fb7fb8f33af3510a5e163f71dfe987a1c"
+    },
+    {
+      "report": "2026-10-31-round17-voice-publication-source-diagnosis.json",
+      "sha256": "429b8c832fc9620f50cc136801445841a785c523d73f17d90a75c9eec8a397a6"
+    },
+    {
+      "report": "2026-10-31-round17-voice-physical-source-diagnosis.json",
+      "sha256": "b92b6f63429044b6179ce4835b07e671dc232ab7b1b6f50fb6294f43194d3a89"
+    },
+    {
+      "report": "2026-10-31-round17-voice-publication-fixture.json",
+      "sha256": "19d209a361810769caeb100ec5eeeec4b1c9ddbd168d71876201d8fac89c7bb2"
+    }
+  ],
+  "observations": {
+    "originalPartialRun": "6 of16 test programs ran: first5 PASS; bootstraplib63PASS2FAIL. Not a complete regression.",
+    "exactOriginalArtifact": "Authority exit0; physical exit101 at shared initial-prepare panic572. No iteration evidence.",
+    "instrumentedFirstPair": "Both exact processes exited0; backend fixture source edit overlapped build, cannot claim exact backend source binding.",
+    "instrumentedBoundedSeries": "Five fresh physical exact processes exited0; 40 successful storage operation samples, maximum1.7652ms. These successes did not reproduce original error and do not explain it.",
+    "temporaryChanges": "Error/timing diagnostics at Web reserve/body and storage enqueue/wait/evaluate/precommit, all reverted byte-for-byte. No product deadline/auth/resource/error semantics changed.",
+    "remainingPermanentChange": "Authority fixture uses bounded queue-budget-reservation handshake instead of sleep10ms. Reservation is not send ACK; real100ms/SQLite/positive assertions retained.",
+    "collectorCorrection": "Initial helper stdout saidPASS but ExitCode null; raw and original JSON preserved. Corrected helper takes Process.Handle before WaitForExit and records real exit codes.",
+    "limits": "Do not attribute original failure to fsync, CPU, permission, capacity, or100ms without precise failure trace; real disk/CPU availability matrix still open. No automatic command retry or raised deadline."
+  },
+  "counts": "Diagnostics are separate and must not be added to final workspace/regression totals.",
+  "finalSourceInputs": "3676f62efe8ad551cddab4dfb316ca33e6d0abd4309a47a22be78c0b9dde71fb"
+}

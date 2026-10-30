@@ -69,6 +69,12 @@ def main():
         if not tests:
             raise RuntimeError("no test executables in supplied Cargo metadata")
     tests = list(dict.fromkeys(tests))
+    # Freeze input identities before uploading. A local rebuild during a remote
+    # test must never rewrite the identity of the already-uploaded executable.
+    input_digests = {
+        path: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in dict.fromkeys([args.exe, *tests])
+    }
     remote = Remote(args.host, args.identity)
     token = uuid.uuid4().hex
     task = "FutureClassroom-RustProbe-" + token
@@ -80,13 +86,14 @@ def main():
     report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN", "testTimeoutSeconds": args.test_timeout_seconds}
     try:
         report["platform"] = json.loads(remote.powershell("$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}|ConvertTo-Json -Compress"))
-        for path in [args.exe, *tests]:
+        report["uploadedArtifacts"] = []
+        for path in dict.fromkeys([args.exe, *tests]):
             remote.upload(path, directory)
-        digest = hashlib.sha256(args.exe.read_bytes()).hexdigest()
-        report["exeSha256"] = digest
-        actual = remote.powershell("(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path " + root + " " + ps_literal(args.exe.name) + ")).Hash.ToLowerInvariant()")
-        if actual != digest:
-            raise RuntimeError("remote executable digest mismatch")
+            actual = remote.powershell("(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path " + root + " " + ps_literal(path.name) + ")).Hash.ToLowerInvariant()")
+            if actual != input_digests[path]:
+                raise RuntimeError("uploaded executable digest mismatch: " + path.name)
+            report["uploadedArtifacts"].append({"name": path.name, "sha256": actual})
+        report["exeSha256"] = input_digests[args.exe]
         script = child_temp + "$root=" + root + ";$exe=Join-Path $root " + ps_literal(args.exe.name) + ";$output=@(& $exe --self-check 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
         report["selfCheck"] = json.loads(remote.powershell(script, timeout=180))
         if report["selfCheck"]["exitCode"] != 0:
@@ -113,7 +120,7 @@ def main():
         for test_index, path in enumerate(tests):
             test_arguments = " --test-threads=2" + (" --nocapture" if path.name.startswith("fc_windows-") else "")
             log = ps_literal(directory + "\\test-" + str(test_index) + ".log")
-            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$log=" + log + ";$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$log=" + log + ";$digest=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant();if($digest-ne " + ps_literal(input_digests[path]) + "){throw 'test executable digest mismatch'};$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";binarySha256=$digest;exitCode=$code;output=$output}|ConvertTo-Json -Compress"
             try:
                 result = json.loads(remote.powershell(script, timeout=args.test_timeout_seconds))
             except subprocess.TimeoutExpired:
@@ -137,7 +144,8 @@ def main():
                     # command. Keep diagnostics useful without copying it.
                     timed_out["partialOutputReadError"] = type(read_error).__name__
                 raise RuntimeError(f"remote test timed out: {path.name} ({args.test_timeout_seconds}s); inspect timedOutTest") from None
-            result["binarySha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            if result.get("binarySha256") != input_digests[path]:
+                raise RuntimeError("executed test digest mismatch: " + path.name)
             result["timeoutSeconds"] = args.test_timeout_seconds
             report["tests"].append(result)
             print(path.name, "PASS" if result["exitCode"] == 0 else "FAIL", flush=True)

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "STATIC_CHECK_PASS_REMOTE_VERIFICATION_PENDING",
+  "sourceDelta": [
+    {
+      "path": "scripts/windows-probe.py",
+      "before": "cebedc4e53bfd901daaafdcc014b091f426dd89e3714c4629f1706dfcf1475ba",
+      "after": "583eb01cb16898ad064bb976ae0005445ae546bf72543244915b7da0757d66d4"
+    }
+  ],
+  "repositoryFinalInputSnapshot": "d2cd0aec7f0d0fb79f98be5ef01f432e1d525ad425dd8db51d2809a2c93bb165",
+  "unchangedRustBuildInputSnapshot": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+  "dependencyFilesChecked": 5,
+  "dependencyFiles": [
+    "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/release/libfc_bootstrap.d",
+    "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/release/fc-bootstrap.d",
+    "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/examples/verify_web_assets.d",
+    "/tmp/fc-round17-win7-target/i686-win7-windows-gnu/release/fc-bootstrap.d",
+    "/tmp/fc-round17-integration-target/release/examples/verify_web_assets.d"
+  ],
+  "runnerExcludedFromAllDepInfo": true,
+  "originalWholeRun": "2026-10-31-round17-windows-post-handshake-before-hash-annotation.json",
+  "annotatedWholeRun": "2026-10-31-round17-windows-post-handshake.json",
+  "rootCause": "Root rebuilt one local libtest binary while old runner was executing its already-uploaded previous bytes. Old binarySha256 was read locally after execution, not from remote file.",
+  "correction": "Freeze identities before upload; verify every uploaded remote EXE; hash/check remote test EXE immediately before invoking it and report that digest. Never read later local file as remote execution identity.",
+  "history": "Original output and original incorrect hash field preserved; annotation identifies limit. Final changed65 run source/EXE frozen and must pass independently.",
+  "verification": "ast.parse PASS, diff check PASS; actual fixed-harness remote run still pending"
+}

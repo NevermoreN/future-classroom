@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_TEST_FIXTURE_ONLY",
+  "sourcePath": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+  "sourceSha256": "28f16b4da5295ef6fb22648e1c12ba0ee8f736fde66d61fc4af8707e564b2edb",
+  "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-integration-target cargo test --release -p fc-bootstrap --lib --locked backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically -- --exact --test-threads=1",
+  "exitCode": 0,
+  "passed": 1,
+  "failed": 0,
+  "filtered": 59,
+  "elapsedSeconds": 6.28,
+  "rawLog": "   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)\n    Finished `release` profile [optimized] target(s) in 47.45s\n     Running unittests src/lib.rs (/tmp/fc-round17-integration-target/release/deps/fc_bootstrap-fede0e4f4c3723bc)\n\nrunning 1 test\ntest backend::account_management_tests::accounts_domain_valid_large_assignment_document_rejects_real_64k_capacity_atomically ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 59 filtered out; finished in 6.28s\n\n",
+  "rawLogSha256": "504da5ef599a42bafca2f42ee22c43195f4678012a13c770f35a12cfebd842ce",
+  "formatCheck": {
+    "exitCode": 0,
+    "rawLog": ""
+  },
+  "originalFailure": "2026-10-31-round17-host-directory-collision.json",
+  "productionChange": false,
+  "cleanup": "Fixture Drop retained; no arbitrary existing directory deleted",
+  "scope": "Synthetic Directory naming helper only. Original create_dir AlreadyExists output did not identify actual creator/clock behavior."
+}

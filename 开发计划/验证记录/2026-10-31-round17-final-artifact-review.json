@@ -1,0 +1,607 @@
+{
+  "schemaVersion": 1,
+  "round": 17,
+  "status": "PASS",
+  "scope": "ARTIFACT_AND_PACKAGE_ONLY",
+  "createdUtc": "2026-10-30T19:34:49.443066+00:00",
+  "role": "Independent read-only source/build-report/artifact/development-package binding review; no new product tests/builds/SSH and no source/plan/previous-report modifications.",
+  "newProductTests": 0,
+  "cargoInvocations": 0,
+  "sshInvocations": 0,
+  "windowsInvocations": 0,
+  "reportInputs": [
+    {
+      "path": "/tmp/fc-round17-artifacts-final.json",
+      "sha256": "979af8ba46322fdaeec4fda3e36bc99a5c84889974ac296206c70d2dbcba34ef"
+    },
+    {
+      "path": "/tmp/fc-round17-build-checks.json",
+      "sha256": "7f9ad962002f5af6d2f7d5e48baaff7b73e7b76cbc1e2d27a0ae467713040433"
+    },
+    {
+      "path": "/tmp/fc-round17-host-final.json",
+      "sha256": "f7f6baaaf6c68fbef6573a8d41e6496714eadb355f7f10179114b1de1d39985c"
+    },
+    {
+      "path": "/tmp/fc-round17-source-inputs-final.json",
+      "sha256": "185d7bcd3a9dcd8e066f75c571640dcad419b752b63ac72136709012143a36ea"
+    },
+    {
+      "path": "/tmp/fc-round17-package-final.json",
+      "sha256": "c7ee5eb050d5d3f7cee2be10c6e99268e9493020287ba441c5d31c64892a9f75"
+    }
+  ],
+  "finalSourceBinding": {
+    "count": 269,
+    "aggregate": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+    "allCurrentBytesMatch": true,
+    "cargoLockSha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+    "deltaFrom3676": [
+      {
+        "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+        "before": "4b82829fa066af7a773ab001895e52c2df3eb50d03a51555a276c8761ddb86a5",
+        "after": "28f16b4da5295ef6fb22648e1c12ba0ee8f736fde66d61fc4af8707e564b2edb"
+      }
+    ],
+    "sourceOnlyReview": {
+      "path": "/tmp/fc-round17-final-source-review.json",
+      "sha256": "9cef43f05720c28719b2c0c6947e67f93527793b874fbb7d591fe4496c0df4f6"
+    }
+  },
+  "windowsTestBuild": {
+    "compilerMetadataSha256": "3779968a6e15a915fcd081f3695196735a6119b224c935921d03329360a99743",
+    "buildFinished": [
+      {
+        "reason": "build-finished",
+        "success": true
+      }
+    ],
+    "uniqueTestExeCount": 16,
+    "runOrderSha256": "c4ee7dd932d1c2a12945f44d54b8325ed84b2a3703866c81c7ebae150d875b76",
+    "runOrderRecordsEqualOriginalCompilerArtifacts": true,
+    "artifacts": [
+      {
+        "targetName": "fc-bootstrap",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-2c9facf31078f737.exe",
+        "fileName": "fc_bootstrap-2c9facf31078f737.exe",
+        "bytes": 131215569,
+        "sha256": "00bfbcc522a2b5b5cbfcb7884da59e63ea9cea9a87692263fac7e25e7e34fa9e",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "bin"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_windows",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_windows-95fad28d15fea78d.exe",
+        "fileName": "fc_windows-95fad28d15fea78d.exe",
+        "bytes": 58751181,
+        "sha256": "4d0172829166f1bb33bec71ad56e04ef4bb26b4373f52fdf923a486e998d58b8",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "business_storage",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/business_storage-17bf377bec8f2f7e.exe",
+        "fileName": "business_storage-17bf377bec8f2f7e.exe",
+        "bytes": 46728684,
+        "sha256": "45d04cdbff283817ba5802ec7110bce8baa215ed7b34743d94c47cc8e69e3e03",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "test"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_application",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_application-8ad1e6c8c699ab50.exe",
+        "fileName": "fc_application-8ad1e6c8c699ab50.exe",
+        "bytes": 16540005,
+        "sha256": "d168b03b544c23a975dfb44ebce931cbe7de0ae9e315365a1c96d41c0853e244",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_audio",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_audio-35e3156477d0188a.exe",
+        "fileName": "fc_audio-35e3156477d0188a.exe",
+        "bytes": 17252998,
+        "sha256": "25bb253c0167d7a7e61e4ad27d5f5df313592b0ef0054fb5a406add668887348",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_bootstrap",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-153172ad9c1ad7f3.exe",
+        "fileName": "fc_bootstrap-153172ad9c1ad7f3.exe",
+        "bytes": 119895044,
+        "sha256": "9b43c0f49ea376861ff0c63ae29b52cc21d74b448ba2a4d3cd6531f86e629562",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_domain",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_domain-915566e140287178.exe",
+        "fileName": "fc_domain-915566e140287178.exe",
+        "bytes": 17678291,
+        "sha256": "c7f1fd233e1cb2245a8ad7f9ee3714f980f8672a19c29c6c90fbc26cd5afb746",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_materials",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_materials-2221de66f2e97130.exe",
+        "fileName": "fc_materials-2221de66f2e97130.exe",
+        "bytes": 34260520,
+        "sha256": "5db35e8b923639a3ff89da7a6c502e5ae88612cc7bfdcc573af91b2f035387a6",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_ports",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_ports-361bddc8b2876cc0.exe",
+        "fileName": "fc_ports-361bddc8b2876cc0.exe",
+        "bytes": 16028779,
+        "sha256": "c27c75349f32fd971a2f1bc1ad4345fb9c5a58d2c30a159c913180e824988cf4",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_presentation",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_presentation-bf0074726aa5b441.exe",
+        "fileName": "fc_presentation-bf0074726aa5b441.exe",
+        "bytes": 21053767,
+        "sha256": "9e5fa18eb2aa43329179397ac8943ce97dd1e1bc57480c5cdcdd2cc0a00c594d",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_protocol",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_protocol-186900fcb7bfa5db.exe",
+        "fileName": "fc_protocol-186900fcb7bfa5db.exe",
+        "bytes": 22430492,
+        "sha256": "bcf3f66a584f27db596870803ac4beb104a99da03624b2a58f05aa92b272813e",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_runtime",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_runtime-fad3e5e278e2d80c.exe",
+        "fileName": "fc_runtime-fad3e5e278e2d80c.exe",
+        "bytes": 19713505,
+        "sha256": "d50e31586b58f71ea80731f35342c63395280ce11735f89dffd2631c2e347fe2",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_security",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_security-9c7f88663f75f873.exe",
+        "fileName": "fc_security-9c7f88663f75f873.exe",
+        "bytes": 17362997,
+        "sha256": "9479a3861c227ffad86294f1d39d578d1dafb10f5e7438b6df28e0d781ca174a",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "fc_storage",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/fc_storage-9549596680176a3f.exe",
+        "fileName": "fc_storage-9549596680176a3f.exe",
+        "bytes": 45624265,
+        "sha256": "e2de7307d6819a67fdcefcff496369eaf88b7e3c06d0f7e8360ed2b25ffa9070",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "lib"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "runtime_storage",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/runtime_storage-d7df388ce9405226.exe",
+        "fileName": "runtime_storage-d7df388ce9405226.exe",
+        "bytes": 39255015,
+        "sha256": "7c8ccdf688d1129b6f85f5660bf6a7e43d853807f5e04c1884fe9eee821cbba4",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "test"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      },
+      {
+        "targetName": "voice_storage",
+        "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/debug/deps/voice_storage-bf022395eae863de.exe",
+        "fileName": "voice_storage-bf022395eae863de.exe",
+        "bytes": 40696997,
+        "sha256": "75df195476a95a2b98fc251f9614afe351b3dd7527dfee2d8d9e2a4052ba4c95",
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "cargoTargetKind": [
+          "test"
+        ],
+        "actualSha256Matches": true,
+        "actualBytesMatch": true,
+        "profileMatchesCargoMetadata": true
+      }
+    ],
+    "runtimeConclusion": "NONE; current Windows run not reviewed by this task"
+  },
+  "releaseArtifacts": [
+    {
+      "target": "modern",
+      "path": "/tmp/fc-round17-modern-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 8688702,
+      "sha256": "4c267b25085b7a6ea9390989a134ee1ca4946c66d89de9048fd57c037ec130d0",
+      "profile": "release optimized",
+      "actualSha256Matches": true,
+      "actualBytesMatch": true,
+      "peMachineHex": "0x14c",
+      "peOptionalMagicHex": "0x10b",
+      "format": "PE32 x86"
+    },
+    {
+      "target": "win7GNU",
+      "path": "/tmp/fc-round17-win7-target/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 8801792,
+      "sha256": "3137002475515e81c3e7e06b97cfcf6af3a0805614d6a2f7e6527fb41b7c3339",
+      "profile": "release optimized",
+      "actualSha256Matches": true,
+      "actualBytesMatch": true,
+      "peMachineHex": "0x14c",
+      "peOptionalMagicHex": "0x10b",
+      "format": "PE32 x86"
+    }
+  ],
+  "buildChecks": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo test --workspace --target i686-pc-windows-gnu --no-run --message-format=json --locked",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "4925dd10da5c9765305133011936deef528e727a100051caca63dfa5f1ce72ba",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo build -p fc-bootstrap --release --target i686-pc-windows-gnu --locked",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "1ff8bbcb4151dc887e69b78a29bc241d5062cba4757aa5f4639926ae712a8181",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-win7-target CC_i686_win7_windows_gnu=i686-w64-mingw32-gcc AR_i686_win7_windows_gnu=i686-w64-mingw32-ar cargo +nightly-2026-10-29 build -p fc-bootstrap --release --target i686-win7-windows-gnu -Z build-std=std,panic_unwind --locked",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "f2e6555fa060602a21602fbf67d4c4f0bf1348368d09768f0c8c94b73ebaaa45",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-modern-target cargo clippy --workspace --all-targets --target i686-pc-windows-gnu --locked -- -D warnings",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "78d1fb60ccd28958461c85e00254afe0c5dd00995f85cc1bdca8bb8f9425c03a",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-integration-target cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "b55ff02016f70d1bcd85345404fc1024356930849d32fd0f29f727b034cb2036",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "embeddedLogHashVerified": true
+    },
+    {
+      "command": "python3 scripts/check-architecture.py",
+      "recordedExitCode": 0,
+      "embeddedLogSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "embeddedLogHashVerified": true
+    }
+  ],
+  "hostExistingRunReportReview": {
+    "status": "PASS_RECORDED_RAW_VERIFIED",
+    "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-integration-target cargo test --release --workspace --locked -- --test-threads=2",
+    "recordedExitCode": 0,
+    "independentlyCountedPassed": 457,
+    "independentlyCountedFailed": 0,
+    "independentlyCountedResultGroups": 28,
+    "rawLogSha256": "c3769fc4d323d1740aa85739cfc7d5c40786b39bbc830c404fe61198f385d6dd",
+    "inputSnapshot": "e069d16ff8c29a7688d8463e68ae60b07dda7b5ffe2bb6ce6b39df201aa9b2d6",
+    "limits": "Verifies existing owner execution report/raw content; no Host test reproduced here. Host only compiles applicable cfg input; final269 current hashes do not imply Windows-only native/preview tests executed on Host."
+  },
+  "package": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-content-layout-dev.zip",
+    "bytes": 4293630,
+    "sha256": "b2acca23c2a85df863013c00605aa6942dcb50a96fc2088362e0a9144f77f03c",
+    "memberCount": 13,
+    "testzip": "PASS",
+    "allMemberBytesShaCrcVerified": true,
+    "members": [
+      {
+        "path": "fc-bootstrap.exe",
+        "bytes": 8688702,
+        "sha256": "4c267b25085b7a6ea9390989a134ee1ca4946c66d89de9048fd57c037ec130d0",
+        "crc32": "be4d8c91",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1067,
+        "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+        "crc32": "7a6b93f4",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "PROBE-README.txt",
+        "bytes": 11379,
+        "sha256": "fde9a4dbbf8708ec17260f9bc2ec7958a0673833e39814bb78a64016940bcbbb",
+        "crc32": "22a852a8",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "THIRD-PARTY-NOTICES.txt",
+        "bytes": 2400197,
+        "sha256": "372382560a2d656d222d68be2d13b3d03daab01cb70e72039d4ae9e3b0ebe957",
+        "crc32": "5ac17f00",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/THIRD-PARTY-NOTICES.txt",
+        "bytes": 25543,
+        "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+        "crc32": "e5388c3e",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/assets/favicon-CXuYoSfB.svg",
+        "bytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "crc32": "42ea869c",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/assets/index-Cr8Ck6mT.js",
+        "bytes": 402597,
+        "sha256": "30317145ce38c8cc58c180406f4b3c2bd76408b7f442cd2f7477f20428b9bf78",
+        "crc32": "c94b462a",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/assets/index-DFFVdc8-.css",
+        "bytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+        "crc32": "58efa4b4",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/assets/pcm-worklet-DQjgdlBf.js",
+        "bytes": 1440,
+        "sha256": "c563ac56cfcc7461885c2efe7b6191e51c8592abb286edaffe0a746101792b1d",
+        "crc32": "df2c6257",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/assets/wav-worker-LSywWbpJ.js",
+        "bytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "crc32": "dd4aea29",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/fc-assets.json",
+        "bytes": 1072,
+        "sha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+        "crc32": "b8a1ad53",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "web/index.html",
+        "bytes": 684,
+        "sha256": "a2c18007c02dd59369bcfbb243b994f78417ac02bcda79176696a868de48feaf",
+        "crc32": "8d732a1c",
+        "actualBytesShaCrcMatch": true
+      },
+      {
+        "path": "manifest.json",
+        "bytes": 22232,
+        "sha256": "6cfcab028e8079c2eb0dc610345e7ccda3907947e6d8f3d37479334cda22c39e",
+        "crc32": "1715d58c",
+        "actualBytesShaCrcMatch": true
+      }
+    ],
+    "manifestFileEntriesExactExceptManifestSelf": true,
+    "mainExeByteEqualModernRelease": true,
+    "reproduction": {
+      "path": "/tmp/fc-round17-package-repro/FutureClassroom-0.1.0-content-layout-dev.zip",
+      "sameBasename": true,
+      "actualByteEqual": true,
+      "sha256": "b2acca23c2a85df863013c00605aa6942dcb50a96fc2088362e0a9144f77f03c"
+    },
+    "gates": {
+      "Win7_SP1_x86": "NOT_VALIDATED",
+      "Windows_10": "NOT_VALIDATED",
+      "Windows_11_complete_product": "NOT_VALIDATED",
+      "formal_MSVC_baseline": "NOT_VALIDATED",
+      "real_machine_acceptance": "NOT_VALIDATED",
+      "release_tag": "NOT_ALLOWED"
+    },
+    "artifactType": "development-probe",
+    "statusInManifest": "NOT_VALIDATED",
+    "modernTargetRole": "modern-GNU-development-only",
+    "frontend": {
+      "assetCount": 6,
+      "assetBytes": 444723,
+      "allAssetPayloadHashesVerified": true,
+      "manifestSha256": "8e2901ceb33e00db363d4cb00596dd486789abc681b773a47282438bed3f6eca",
+      "included": true,
+      "status": "PARTIAL_NOT_VALIDATED",
+      "testsThisRound": "NOT_RERUN; reused existing payload is inclusion/hash evidence only"
+    },
+    "featureBoundaryReview": "Complete application NOT_IMPLEMENTED, release tag NOT_ALLOWED, platform/formal-MSVC/real-machine gates NOT_VALIDATED, initial-header deadline unvalidated, normalTLS/listener incomplete/disabled. Package does not present partial native/Web implementation as complete deployment.",
+    "peHeaderVerified": "Both actual releases PE32 x86; manifest import audit remains NOT_VALIDATED. Static header/import checks do not establish runtime OS compatibility."
+  },
+  "pendingRuntime": "Windows whole-run and supplemental Win7-on-Win11 results are deliberately outside this review; windows-post-handshake.json was not opened. No runtime or cleanup conclusion for that active run is made.",
+  "limits": [
+    "PASS means the local report/artifact/package bindings checked here match. It is not complete product, native Windows runtime, real Win7/10 machine, MSVC, campusTLS, strict5s P0, visible display/DPI/touch or72h acceptance.",
+    "The package was created before account test-directory fixture change; final executable is actually byte-identical and other package inputs unchanged. This does not permit substituting old test-library EXE for the final9b43 library EXE.",
+    "Compiler metadata/logs are existing producer records; source-byte and artifact-hash equality do not constitute an independent hermetic-build or toolchain-provenance proof. Packager manifest correctly separates packaging-environment toolchain from binary-build provenance.",
+    "Historical partial failures/exact diagnostic passes/failures/collector errors are not added to457 Host or any future Windows totals.",
+    "No own remote or test artifacts created. This new JSON/helper are local review evidence; shared caches/artifacts retained for root archive/cleanup."
+  ],
+  "allReadsComplete": true
+}

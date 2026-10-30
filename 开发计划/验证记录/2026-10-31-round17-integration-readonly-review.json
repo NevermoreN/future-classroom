@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "round": 17,
+  "status": "PASS",
+  "createdUtc": "2026-10-30T19:08:59.422948+00:00",
+  "role": "Independent read-only review of round17 changes authored by root/identity_rules/business_storage. Some contextual layout/tree code was authored by this reviewer in earlier rounds; this is not a fresh independent certification of all prior-round code.",
+  "newProductTestsExecuted": 0,
+  "cargoInvocations": 0,
+  "windowsExecutions": 0,
+  "sourceOrPlanEdits": 0,
+  "scope": "Shared whole-card body -> width-first pure scene/layout -> actual DirectWrite blocks/native paging/action map -> synthetic hidden profile preview; contextual tree raster budget/tick path",
+  "blockingFindings": [],
+  "sourceBindings": [
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "bytes": 14778,
+      "sha256": "646bbcc72c0aa23421490156a2408a6a28b675a421f3b5e50cc30ade340b2af1"
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body_tests.rs",
+      "bytes": 12905,
+      "sha256": "35172d190b54722e025ce774d6340fa54b0d05cc02b3330c0231bf5bb082e044"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 23182,
+      "sha256": "0ad649f76bba84b1346d17053e84e0c8f25a451555225cab2c87db11e186b6b0"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 16081,
+      "sha256": "0f08925ef2195acbb304228a47d8ecc389b1410cfd2941b4ed1e2ce8a1dc9001"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 25854,
+      "sha256": "afc0feb0a3fddcb1d9c0e34730c8f393e490f64ebfe552642f269c06cddc9515"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 37581,
+      "sha256": "8fb04a46681006e42bed0aab082431a6ce919f940cce2e2da118d6a053df34fb"
+    },
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "bytes": 15410,
+      "sha256": "b9cc0be8ca02241ed817b43d8af819ab46f711e7fd7574a7b0ff71c58e6e69b7"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 117747,
+      "sha256": "d8c62c109200ac5d69685d419cab660f69664688f99717da2c113b43a744e59d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18260,
+      "sha256": "9fdc40166bf321c75209c772374d2667e2d07a300b68d5bf0d7f18d02a52c6ef"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 67592,
+      "sha256": "9ab03cde1cb909c3779a27666701e2e1ac90fa5264645e180ecc5cf53c1d277f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 21716,
+      "sha256": "34af109ac3f4c2c361a1c5d221ccd95706b1d65dd0a4fe0bfe38e4cb091887ed"
+    }
+  ],
+  "expectedFrozenHashMatches": {
+    "crates/fc-presentation/src/card_body.rs": true,
+    "crates/fc-presentation/src/card_body_tests.rs": true,
+    "crates/fc-presentation/src/layout.rs": true,
+    "crates/fc-presentation/src/layout_tests.rs": true,
+    "crates/fc-presentation/src/scene.rs": true,
+    "crates/fc-presentation/src/scene_tests.rs": true,
+    "crates/fc-presentation/src/lib.rs": true,
+    "crates/fc-windows/src/desktop.rs": true
+  },
+  "sourceAggregateSha256": "f0d5d0216f178e64c1f1f5d04ec40991f2ecdaf113de86c995d853e29262d627",
+  "findings": [
+    {
+      "area": "Complete measured body",
+      "fact": "card_body_spec bounds source UTF16 before formatting/cloning, retains complete text, and validates assembled blocks after labels/status/warnings are included. Homework label and body are distinct measured blocks sharing one leaf. Schedule includes current/temporary label. Materials includes warning, owner heading, full filenames and More; no shadowtext/16KiB measurement sample remains in these reviewed paths.",
+      "paths": [
+        "crates/fc-presentation/src/card_body.rs",
+        "crates/fc-presentation/src/scene.rs",
+        "crates/fc-bootstrap/src/application/profiles_preview.rs"
+      ],
+      "limit": "A composed label may make an otherwise individually valid source exceed the overall262144-unit card cap; rejection is explicit rather than truncation."
+    },
+    {
+      "area": "Actual DWrite width and padding",
+      "fact": "CardBodySpec::text_width is used both by intrinsic_height and native prepare_content_with_note. Static text width is outer width minus twice shared24DIP inset. Both arrange and native line/ink positions use shared8DIP padding. Native GetMetrics height feeds shared arrange; final block retains its complete bottom padding, plus card bottom12 and top32/50.",
+      "paths": [
+        "crates/fc-presentation/src/card_body.rs",
+        "crates/fc-windows/src/desktop.rs"
+      ],
+      "limit": "Static code agreement does not prove font raster output on any target OS. NativeTextMeasure uses the same Graphics layout method, while center flag changes alignment; no new font/version assumptions are introduced."
+    },
+    {
+      "area": "Width-first parent reference",
+      "fact": "Solver::widths propagates a known fixed/percentage parent width minus its padding into child intrinsic widths; percentages are not evaluated against the larger external work budget. Widget body is measured after final assigned width. Content-height budget is not a percent reference. Fixed400 parent/percent child and fulltext0opacity case are represented in producer regression source.",
+      "paths": [
+        "crates/fc-presentation/src/layout.rs",
+        "crates/fc-presentation/src/layout_tests.rs"
+      ],
+      "limit": "Layout can explicitly fail OutOfSpace; it does not promise every valid model fits every work area, nor shrink fonts to conceal failure."
+    },
+    {
+      "area": "0percent logical geometry",
+      "fact": "Visibility controls whether widget spec exists; opacity0 remains a spec, is measured and published with identical geometry/scoped identity. Tree effective alpha controls input/painting and skips dynamic updates at0; zero alpha is not treated as removal.",
+      "paths": [
+        "crates/fc-presentation/src/layout.rs",
+        "crates/fc-presentation/src/scene.rs",
+        "crates/fc-windows/src/desktop/tree.rs",
+        "crates/fc-bootstrap/src/application/profiles_preview.rs"
+      ]
+    },
+    {
+      "area": "Materials exact action identity",
+      "fact": "Native CardBodyRole::MaterialRow(index) looks up original row then creates MaterialOpen with original source, folder ID/revision, material ID and resource version. MaterialMore resolves original next_cursor; headers/warnings/empty row remain Plain without actions. Row gaps/minimum44DIP are shared with measurement. Existing tree aggregate clips input to exact card/node and generation.",
+      "paths": [
+        "crates/fc-presentation/src/card_body.rs",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/tree.rs"
+      ],
+      "limit": "These typed actions are correlation/context, not Backend authorization. Revalidation at actual effect remains necessary and outside this review."
+    },
+    {
+      "area": "UTF16 preallocation and counts",
+      "fact": "add_units counts with take(MAX+1) and checked aggregate before body copies; final formatted text is revalidated. Graphics::layout rejects over262144 units before collecting UTF16. Max128 blocks,128 courses,64 homework and5 material rows remain explicit; larger input errors. Native pages retain complete text and line metadata instead of truncating.",
+      "paths": [
+        "crates/fc-presentation/src/card_body.rs",
+        "crates/fc-windows/src/desktop.rs"
+      ],
+      "limit": "DWrite layouts/line vectors and provider caches consume process memory beyond the16MiB raster budget. No total PrivateBytes or all-native memory proof follows from UTF16/blocks caps."
+    },
+    {
+      "area": "64 actual data leaves",
+      "fact": "Scene and synthetic preview allocate at least1 leaf/card then distribute remaining64 budget fairly. Tree validate rejects sum visible_leaf_limit>64. Native paginator ends a page before the next new leaf when its per-card limit is reached; homework label/body share leaf identity. Metrics count current page leaves, not whole DTO rows. Materials additionally min(leaflimit, visible_rows).",
+      "paths": [
+        "crates/fc-presentation/src/scene.rs",
+        "crates/fc-windows/src/desktop.rs",
+        "crates/fc-windows/src/desktop/tree.rs",
+        "crates/fc-bootstrap/src/application/profiles_preview.rs"
+      ],
+      "limit": "The separate existing lesson-control input adapter is not another business content card. This review does not reinterpret it as the ninth top-level business card."
+    },
+    {
+      "area": "Clock tick and real tree patch",
+      "fact": "Tree present rebuild is gated by generation/revision/tree/card/tone/unverified changes. Unchanged clock tick calls render_dynamic then composes only its dynamic rectangle through affected ancestor groups; no CardBodySpec intrinsic_height, compose_layout or prepare_content call occurs on the unchanged tick branch. Existing native test source checks dirty rectangle/pixels outside patch and text-layout counter.",
+      "paths": [
+        "crates/fc-windows/src/desktop/tree.rs"
+      ],
+      "limit": "This confirms native cached-scene path only. It does not independently prove caller never chooses to rebuild a new generation every tick, nor count all DWrite internals: dynamic glyph layout is still expected work."
+    },
+    {
+      "area": "Raster budget and preview ownership",
+      "fact": "Existing tree charge/reserve keeps leaf, dynamic, input, group and background DIBs plus simultaneous CPU scratch/actual Vec capacity under16MiB. export_preview_bgra checks image<=960x540/2MiB and base+actual capacity. Root preview constructs sample data explicitly, uses NativeTextMeasure/CardBodySpec, own hidden ephemeral authority/renderer and drops local renderer; output nodes include only editable exact scope and actual export transform.",
+      "paths": [
+        "crates/fc-windows/src/desktop/tree.rs",
+        "crates/fc-bootstrap/src/application/profiles_preview.rs"
+      ],
+      "limit": "Not a whole-process or GDI/COM/provider memory bound. Sample preview is not current classroom facts, teacher authorization, visible user test, wall capture, nor Win7/10 evidence."
+    },
+    {
+      "area": "Review of meaningful test source",
+      "fact": "New native tests inspect real DWrite line lengths/heights, whole final padding, action targets/events with original ID/version/cursor, Unicode bodies and overlimits rather than deriving all expected values from shared arrange. Preview gap0/64 test performs two native renders and compares exported actual leaf rectangles.",
+      "paths": [
+        "crates/fc-windows/src/desktop/card_body_tests.rs",
+        "crates/fc-bootstrap/src/application/profiles_preview.rs"
+      ],
+      "limit": "Only source assertions were reviewed here; root unified test run must establish actual success."
+    }
+  ],
+  "evidenceMetadataNotes": [
+    {
+      "kind": "non-product report inconsistency reported to root and owner",
+      "path": "/tmp/fc-round17-presentation.json",
+      "observation": "At review read, producerFreezeHistory[0] kept old aggregate7444edf but its embedded card_body source entry was already final646bbc; sameValueConstantsUnification separately records previous1996c4. Main final source list/current7a6dd aggregate match. Old history source list is not used as final binding proof.",
+      "resolution": "CORRECTED_AND_INDEPENDENTLY_VERIFIED: original faulty bytes preserved; old seven-source history reconstructed from retained initial269 manifest plus verified in-memory old card_body; original old logs restored, final source/result list unchanged. Metadata-only fix; not product bug or new test execution."
+    },
+    {
+      "kind": "historical build failure boundary supplied by root",
+      "observation": "Initial Win7 build imported new native constants against an older presentation build snapshot and failed E0432. It is not a demonstrated Win7 API incompatibility; no initial stale-artifact build is represented as final success in this review.",
+      "finalBuildStatus": "Await root unified final snapshot/build/test evidence; this review executes none."
+    }
+  ],
+  "limits": [
+    "PASS means no blocking issue found in this bounded static integration review. It is not compilation, native execution, test reproduction, performance acceptance or formal proof.",
+    "Producer50 Host tests/Clippy and new native tests are referenced as producer report/source only, not newly executed or independently passed by this reviewer.",
+    "No P0/strict5s/TLS production or overall Win7/10/11 compatibility completion claim.",
+    "No source/doc changes or remote resources created. Only this local JSON report was written; shared target/tmp are left for root unified archive/cleanup."
+  ],
+  "metadataCorrectionVerification": {
+    "checkedUtc": "2026-10-30T19:09:51.200777+00:00",
+    "correctedProducerReportSha256": "af6ee3d65739271910b3639ba7dcdf932434fce503827d4a84c5278dadab0098",
+    "faultyOriginal": {
+      "path": "/tmp/fc-round17-presentation-history-metadata-before-correction.json",
+      "sha256": "55dd75b9878139705aa04d8f58f2cce9b8f5035ef2df84c619c3eae031e81531",
+      "bytes": 11823,
+      "method": "Byte-for-byte copy of current affected report before any correction; not overwritten"
+    },
+    "initial269Manifest": {
+      "path": "/tmp/fc-round17-source-inputs-initial.json",
+      "sha256": "a37743583e50e5781669b92a381bc29367ef204bc2dde15bd21221aa2cfcc781",
+      "manifestSha256": "e95b17b19d31688add3297fd9d808b2c624e4fec90eda3dab52ece9ae9005cc9",
+      "fileCount": 269
+    },
+    "previous7SourcesAggregate": "7444edf1c4c4c8e1378d72b52824f3888573dafe305d6030410ecaff4bc99d7f",
+    "current7SourcesAggregate": "7a6dd9356770b3bc7fd53249216486b2bb214fe759e89159f5d80f8a132cd920",
+    "oldCardBodyMemoryOnlySha256": "1996c4d00779371b77189a1018d774f629dc1c6eeca67c4a1d38767ee12a7677",
+    "oldCardBodyBytes": 14645,
+    "existingLogsChecked": [
+      {
+        "phase": "previous",
+        "field": "finalHost",
+        "path": "/tmp/fc-round17-presentation-final-tests.log",
+        "sha256": "e4e066b6e4f829024bc5b3e4349ee52cbd48154b7b0cce6f0f9156636b0c494e",
+        "existingLogOnly": true
+      },
+      {
+        "phase": "previous",
+        "field": "strictClippy",
+        "path": "/tmp/fc-round17-presentation-final-clippy.log",
+        "sha256": "d47c818d5b043e481b4003e468bf45b1c1624adf9c022f86ed25cb93c0213304",
+        "existingLogOnly": true
+      },
+      {
+        "phase": "final",
+        "field": "finalHost",
+        "path": "/tmp/fc-round17-presentation-shared-constants-tests.log",
+        "sha256": "5e3e5355361e5f79f39eda4fd0e22e61b867ee17eddf879a21de16596eb969a0",
+        "existingLogOnly": true
+      },
+      {
+        "phase": "final",
+        "field": "strictClippy",
+        "path": "/tmp/fc-round17-presentation-shared-constants-clippy.log",
+        "sha256": "54b35f34bdb817e55dd21e49e55fa8a0a52add44e71542740735be3f9d126c38",
+        "existingLogOnly": true
+      }
+    ],
+    "newProductTestsExecuted": 0
+  },
+  "final269SnapshotBinding": {
+    "path": "/tmp/fc-round17-source-inputs-final.json",
+    "reportSha256": "488e4b03496961248ee322c56479db338db20c8096d4de1e7dfcd7beeb6bbe6f",
+    "fileCount": 269,
+    "algorithm": "SHA256 of each sorted UTF8 sha256 + two spaces + path + newline",
+    "declaredAggregate": "8e6b502841c9d80cb07a70b18b68c75bdf8e6ecefe336a6886bb48319bdb06d8",
+    "independentAggregate": "8e6b502841c9d80cb07a70b18b68c75bdf8e6ecefe336a6886bb48319bdb06d8",
+    "allCurrentSourcesMatch": true,
+    "reviewed11SourcesStillMatch": true,
+    "scope": "read-only source binding, not compiled artifact provenance or execution result"
+  },
+  "checkerHistory": [
+    {
+      "kind": "read-only verification script error, not product/test failure",
+      "raw": "Initial verifier used seven-source path+NUL+SHA algorithm against the269-file snapshot, whose declared algorithm is SHA + two spaces + path + newline; assertion failed. No report/product source written in that attempt. Corrected verifier uses each manifest own declared algorithm; both7source groups and269source group now match.",
+      "newProductTestsExecuted": 0
+    }
+  ],
+  "allReadsComplete": true
+}

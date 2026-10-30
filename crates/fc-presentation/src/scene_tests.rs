@@ -1122,3 +1122,77 @@ fn transparent_public_ancestor_preserves_clock_slot_and_suppresses_seconds_work(
         .unwrap();
     assert_eq!(node.effective_opacity, 0.);
 }
+
+#[test]
+fn actual_profile_material_gap_and_warning_drive_intrinsic_scene_height() {
+    // One real current teacher folder with three rows. Hide unrelated widgets so
+    // height differences cannot merely be clipping against another card's budget.
+    let mut facts = material_facts(3);
+    selected_profile(&mut facts);
+    for component in &mut facts.display.components {
+        component.visible = component.kind == ComponentKind::Materials;
+    }
+    let profile = facts.profiles.subject_profile.as_mut().unwrap();
+    profile.materials.component.font_dip = 18;
+    profile.materials.component.max_height = 1200;
+    profile.materials.row_gap_dip = 0;
+    let zero = scene(&facts);
+    facts
+        .profiles
+        .subject_profile
+        .as_mut()
+        .unwrap()
+        .materials
+        .row_gap_dip = 23;
+    let middle = scene(&facts);
+    facts
+        .profiles
+        .subject_profile
+        .as_mut()
+        .unwrap()
+        .materials
+        .row_gap_dip = 64;
+    let large = scene(&facts);
+    let height = |s: &SceneSnapshot| {
+        s.cards
+            .iter()
+            .find(|c| c.kind == ComponentKind::Materials)
+            .unwrap()
+            .rect
+            .height
+    };
+    assert!(height(&middle) > height(&zero) + 60.);
+    assert!(height(&large) > height(&middle) + 100.);
+    let card = large
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Materials)
+        .unwrap();
+    let expected = card_body_spec(card.kind, &card.content, false, None)
+        .unwrap()
+        .intrinsic_height(card.rect.width, card.font_dip, &Measure)
+        .unwrap()
+        .ceil();
+    assert_eq!(card.rect.height, expected);
+
+    let mut fallback = material_facts(3);
+    for component in &mut fallback.display.components {
+        component.visible = component.kind == ComponentKind::Materials;
+    }
+    let view = scene(&fallback);
+    let card = view
+        .cards
+        .iter()
+        .find(|c| c.kind == ComponentKind::Materials)
+        .unwrap();
+    let warning =
+        profile_configuration_warning(view.paint_tree.as_ref().unwrap().selection_reason).unwrap();
+    let spec = card_body_spec(card.kind, &card.content, false, Some(warning)).unwrap();
+    assert_eq!(spec.blocks[0].text, warning);
+    assert_eq!(
+        card.rect.height,
+        spec.intrinsic_height(card.rect.width, card.font_dip, &Measure)
+            .unwrap()
+            .ceil()
+    );
+}

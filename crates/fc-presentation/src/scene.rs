@@ -1,5 +1,6 @@
 //! Pure, transaction-consistent desktop composition. Native visibility and health
 //! checks remain mandatory immediately before every publication.
+use crate::card_body::card_body_spec;
 use crate::layout::{compose_layout, TreeLayoutError, WidgetMeasure};
 pub use crate::layout::{
     PaintGlass, SceneNodeKey, ScenePaintNode, ScenePaintTree, SceneProfileStamp,
@@ -247,55 +248,7 @@ fn widget_kind(kind: ComponentKind) -> WidgetKind {
         ComponentKind::Recess => WidgetKind::Recess,
     }
 }
-fn measure_text(content: &CardContent) -> String {
-    let text = match content {
-        CardContent::Clock(clock) => {
-            if clock.mode == ClockMode::Analog {
-                "时钟\n\n\n".into()
-            } else {
-                "时钟\n23:59:59".into()
-            }
-        }
-        CardContent::Text(s) => format!("信息\n{s}"),
-        CardContent::Courses(rows) => rows
-            .iter()
-            .map(|r| {
-                format!(
-                    "{}{}\n\n",
-                    r.name,
-                    if r.current { "\n正在上课" } else { "" }
-                )
-            })
-            .collect(),
-        CardContent::Homework(rows) => rows
-            .iter()
-            .map(|r| format!("{} · {}\n{}\n\n", r.subject_name, r.teacher_name, r.text))
-            .collect(),
-        CardContent::MaterialsUnavailable => "课堂资料\n当前无有效授课老师".into(),
-        CardContent::Materials(list) => format!(
-            "{} · {}\n{}",
-            list.teacher_name,
-            list.subject_name,
-            if list.rows.is_empty() {
-                "该老师暂无课堂资料".into()
-            } else {
-                list.rows
-                    .iter()
-                    .map(|row| format!("{}\n", row.name))
-                    .collect::<String>()
-            }
-        ),
-        CardContent::Recess { .. } => "00:00".into(),
-        CardContent::LessonControl { caption, .. } => caption.clone(),
-    };
-    // Only the layout sample is bounded. Full owned texts remain in the DTO for
-    // native DirectWrite paging; no text is silently truncated at publication.
-    let mut end = text.len().min(16_384);
-    while !text.is_char_boundary(end) {
-        end -= 1
-    }
-    text[..end].into()
-}
+
 fn card(
     settings: &DisplaySettings,
     k: ComponentKind,
@@ -616,10 +569,19 @@ pub fn build_scene(
         if text_width < 80. {
             return Err(SceneError::Layout(LayoutError::OutOfSpace));
         }
-        let measured = measure
-            .height(&caption, text_width, 16.)
-            .map_err(|_| SceneError::Capacity)?;
-        if !measured.is_finite() || !(0. ..=384.).contains(&measured) {
+        let height = card_body_spec(
+            ComponentKind::Schedule,
+            &CardContent::LessonControl {
+                caption: caption.clone(),
+                can_change,
+            },
+            false,
+            None,
+        )
+        .and_then(|body| body.intrinsic_height(width, 16., measure))
+        .map_err(|_| SceneError::Capacity)?;
+        // Preserve the existing 384-DIP measured-caption admission limit.
+        if !(56. ..=408.).contains(&height) {
             return Err(SceneError::Capacity);
         }
         Some(LessonControlContent {
@@ -627,7 +589,7 @@ pub fn build_scene(
                 x: work.x,
                 y: work.y,
                 width,
-                height: (measured.ceil() + 24.).max(56.),
+                height: height.ceil(),
             },
             caption,
             can_change,
@@ -655,9 +617,7 @@ pub fn build_scene(
         let c = component(*k).ok_or(SceneError::Schedule)?;
         Ok(WidgetMeasure {
             kind: widget_kind(*k),
-            text: if *k == ComponentKind::Schedule && public_unverified {
-                format!("调休资料未核验\n{}", measure_text(content))
-            } else { measure_text(content) },
+            body: card_body_spec(*k, content, public_unverified, if *k == ComponentKind::Materials { profile_configuration_warning(facts.profiles.reason) } else { None }).map_err(|_| SceneError::Capacity)?,
             font_dip: c.font_dip as f32, opacity: c.opacity_percent as f32 / 100.,
             min_width: c.min_width as f32, max_width: c.max_width as f32,
             min_height: (c.min_height as f32).max(if matches!(content, CardContent::Clock(clock) if clock.mode == ClockMode::Analog) {160.} else {84.}),

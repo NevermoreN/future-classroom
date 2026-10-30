@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-10-30T19:23:57.798882+00:00",
+  "status": "PASS_HOST_EXACT_FIXTURE_ONLY_WINDOWS_FINAL_PENDING",
+  "scope": "Replace only authority-publication test fixed-delay release with bounded Start queue-budget reservation observation",
+  "source": {
+    "path": "crates/fc-bootstrap/src/backend/voice.rs",
+    "bytes": 89624,
+    "sha256": "535147fd6cfd680bd0564c351db882048ba426645d6b79f79cb178699c407b61",
+    "editBoundary": "Only actual_authority_publication_defers_without_revoking_then_rechecks_current_binding test block; no production code or other source/plan changes by this task",
+    "diff": "diff --git a/crates/fc-bootstrap/src/backend/voice.rs b/crates/fc-bootstrap/src/backend/voice.rs\nindex 6a2044d..12b6fb0 100644\n--- a/crates/fc-bootstrap/src/backend/voice.rs\n+++ b/crates/fc-bootstrap/src/backend/voice.rs\n@@ -1880,19 +1880,38 @@ mod tests {\n             assert!(Instant::now() < deadline);\n             std::thread::sleep(Duration::from_millis(1));\n         }\n+        assert_eq!(\n+            service.inner.authority.gate().status().health,\n+            Health::AuthorityUpdating\n+        );\n+        assert_eq!(handle.queued_bytes(), 0);\n+        let (observer_ready, ready) = std::sync::mpsc::sync_channel(1);\n         let starting = std::thread::scope(|scope| {\n-            scope.spawn(|| {\n-                std::thread::sleep(Duration::from_millis(10));\n+            let observer = scope.spawn(|| {\n+                let _release = Release(release.clone());\n+                observer_ready.send(()).unwrap();\n+                let deadline = Instant::now() + Duration::from_secs(10);\n+                // This private writer is held and Start is its only producer.\n+                // Budget reservation precedes try_send: this observes Start's\n+                // queue reservation, not a successful-send acknowledgement.\n+                while handle.queued_bytes() == 0 {\n+                    assert!(\n+                        Instant::now() < deadline,\n+                        \"Start did not reserve queue budget\"\n+                    );\n+                    std::thread::sleep(Duration::from_millis(1));\n+                }\n                 release.store(true, Ordering::Release);\n             });\n-            runtime\n-                .drive(VoiceDriverUpdate {\n-                    job_id: queued.id,\n-                    expected_revision: queued.revision,\n-                    generation: 0,\n-                    action: VoiceDriverAction::Start,\n-                })\n-                .unwrap()\n+            ready.recv_timeout(Duration::from_secs(10)).unwrap();\n+            let starting = runtime.drive(VoiceDriverUpdate {\n+                job_id: queued.id,\n+                expected_revision: queued.revision,\n+                generation: 0,\n+                action: VoiceDriverAction::Start,\n+            });\n+            observer.join().unwrap();\n+            starting.unwrap()\n         });\n         pending.wait().unwrap();\n         assert_eq!(starting.state, VoiceState::Starting);\n"
+  },
+  "change": [
+    "Assert the held second real publication is AuthorityUpdating and queue budget starts at zero.",
+    "Prepare an observer physical thread and wait for bounded ready acknowledgement before Start begins its unchanged production deadline.",
+    "Observer checks the isolated writer only new producer until queued_bytes > 0; then releases HoldPublication immediately, with 10 s diagnostic observation bound and Release RAII on exit.",
+    "Explicit comment says this is pre-send queue-budget reservation, not successful-send acknowledgement.",
+    "Original real SQLite publication, 100 ms production timeout, Starting/zero-repeat, permission and real class-binding assertions all preserved."
+  ],
+  "commands": [
+    {
+      "command": "rustfmt --edition 2021 crates/fc-bootstrap/src/backend/voice.rs",
+      "exitCode": 0,
+      "purpose": "Format only owned file"
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/fc-round17-integration-target cargo test --release -p fc-bootstrap --lib --locked backend::voice::tests::actual_authority_publication_defers_without_revoking_then_rechecks_current_binding -- --exact --test-threads=1 > /tmp/fc-round17-voice-publication-fixture-host-exact.log 2>&1",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "filteredOut": 59,
+      "testElapsedSeconds": 0.1,
+      "compilationElapsedSeconds": 59.49,
+      "log": {
+        "path": "/tmp/fc-round17-voice-publication-fixture-host-exact.log",
+        "bytes": 602,
+        "sha256": "e8688f5837a7e9a14f5fe1157f5dd83d46fdd05a314aee01ab4266a67973b13a"
+      }
+    },
+    {
+      "command": "rustfmt --edition 2021 --check crates/fc-bootstrap/src/backend/voice.rs > /tmp/fc-round17-voice-publication-fixture-fmt.log 2>&1",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round17-voice-publication-fixture-fmt.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "git diff --check > /tmp/fc-round17-voice-publication-fixture-diff-check.log 2>&1",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round17-voice-publication-fixture-diff-check.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "evidenceLimitations": [
+    "Parent was adding temporary storage/voice_files diagnostics during this build; this is one actual Host exact result, not a final formally aligned all-source whole-suite run.",
+    "Host Linux fixture uses existing private tmpfs when available; unchanged Windows fixture uses ordinary TEMP SQLite WAL/FULL. No Windows/remote test performed here.",
+    "Reservation is observed before try_send and is not a strict post-send ACK. Sole private writer and single producer establish the intended Updating path reached queue-budget reservation; no arbitrary 10 ms scheduling assumption remains.",
+    "Real OS scheduling and real disk commits still have no mathematical hard-real-time guarantee under 100 ms. This change does not raise the production deadline or accept Faulted as success.",
+    "Original whole Windows library 63 PASS / 2 FAIL report remains intact; one Host exact PASS does not erase it."
+  ],
+  "preservedEvidence": [
+    "/tmp/fc-round17-windows-initial-full-failure.json",
+    "/tmp/fc-round17-voice-publication-source-diagnosis.json"
+  ],
+  "cleanup": {
+    "testFixture": "PASS by successful existing fixture Directory/SharedService Drop cleanup",
+    "sharedBuildCache": "Reused /tmp/fc-round17-integration-target; retained for parent final validation and unified cleanup",
+    "sshOrRemoteCommands": 0
+  },
+  "sourceFrozen": true
+}

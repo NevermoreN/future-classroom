@@ -29,3 +29,10 @@ SO_CONNECT_TIME实际读到1秒，配合人为延迟dequeue1.2秒，说明从应
 ## 依据
 
 [AcceptEx](https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-acceptex)、[getsockopt](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt)、[SO_CONNECT_TIME等选项](https://learn.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options)、[CancelIoEx](https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelioex)、[closesocket](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket)、[GetQueuedCompletionStatus](https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-getqueuedcompletionstatus)、[listen](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-listen)、[AcceptSecurityContext/Schannel](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel)。本轮浏览内容、事实/推断、命令原文、精度修正前后结果及清理均归档在第十三轮原生证据；原型未运行Schannel。
+
+
+## 第十七轮只读平台复核
+
+[平台复核报告](验证记录/2026-10-31-round17-p0-platform-review.json)重新核对当前候选与微软文档，未改传输源码、未执行Cargo/SSH/Windows测试。当前有限批次改成持续rearm后，backlog中可能已有建立的连接；新投递AcceptEx时重新起算5秒，会给旧连接额外期限。已有秒级连接年龄、后续新系统专用TCP信息和绑定时刻都不能直接作为三系统精确ESTABLISHED起点证明。旧577微秒超时只是一组失败观察，不是未来调度/网络/关断延迟的上界。
+
+可独立推进固定owner的真实TLS生命周期：接纳/IOCP域与固定SSPI调用worker分开；期限到达先逻辑失效并关socket，原物理slot及许可仍保留，直到内核IOCP完成和SSPI调用实际返回均已观察到，超时保留并故障闭锁，不启动替代owner。该切片尚未实现，不代表持续接纳、内核/SSP总资源或严格5秒已解。正常listener保持关闭，完整开发目标继续；现有期限与平台门槛没有放宽。

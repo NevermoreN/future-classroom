@@ -1,0 +1,155 @@
+[
+  {
+    "command": [
+      "cargo",
+      "check",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--lib",
+      "--tests",
+      "--locked"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "exitCode": 0,
+    "rawOutput": "    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.85s\n"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--lib",
+      "--tests",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "exitCode": 0,
+    "rawOutput": "    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)\n    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)\n    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)\n    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)\n    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)\n    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.45s\n"
+  },
+  {
+    "command": [
+      "rustfmt",
+      "--edition",
+      "2021",
+      "--check",
+      "crates/fc-windows/src/desktop.rs",
+      "crates/fc-windows/src/desktop/card_body_tests.rs"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "exitCode": 0,
+    "rawOutput": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "crates/fc-windows/src/desktop.rs",
+      "crates/fc-windows/src/desktop/card_body_tests.rs"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "exitCode": 0,
+    "rawOutput": ""
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/check-architecture.py"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "exitCode": 0,
+    "rawOutput": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n"
+  },
+  {
+    "command": [
+      "cargo",
+      "check",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--lib",
+      "--tests",
+      "--locked"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+    "exitCode": 0,
+    "rawOutput": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.46s\n"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "fc-windows",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--lib",
+      "--tests",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+    "exitCode": 0,
+    "rawOutput": "    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.57s\n"
+  },
+  {
+    "command": [
+      "rustfmt",
+      "--edition",
+      "2021",
+      "--check",
+      "crates/fc-windows/src/desktop.rs",
+      "crates/fc-windows/src/desktop/card_body_tests.rs"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+    "exitCode": 0,
+    "rawOutput": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "crates/fc-windows/src/desktop.rs",
+      "crates/fc-windows/src/desktop/card_body_tests.rs"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/tmp/fc-round17-native-target"
+    },
+    "phase": "Final after128course/262144UTF16/subtitle native regression additions",
+    "exitCode": 0,
+    "rawOutput": ""
+  }
+]

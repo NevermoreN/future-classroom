@@ -1,0 +1,228 @@
+{
+  "round": 17,
+  "scope": "Read-only source diagnosis of voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement",
+  "recordedAtUtc": "2026-10-30T19:21:19.203011+00:00",
+  "status": "FAILURE_PRESERVED_CAUSE_NOT_YET_DISAMBIGUATED",
+  "conclusion": "The observed RESULT_UNKNOWN proves the physical permit was acquired before this prepare failed; it is not the physical-budget CAPACITY branch. In the full run the failure occurs before final_proof is returned, so commit_voice_upload/publish never runs for that attempt. Source admits two RESULT_UNKNOWN exits: reserve/error(true), or failed file preparation with authorize false. 100ms reserve actor/writer control timing is a concrete candidate, but raw evidence does not identify the underlying phase/error or prove fsync latency. Fresh exact threads1 reproduction fails within the initial prepare loop, excluding SQL expiry, application replacement and proof Drop as necessary triggers, and excluding concurrent test execution as a necessary condition. No confirmed physical permit leak or authorization bypass is identified.",
+  "executionByReviewer": {
+    "sourceEdits": 0,
+    "planEdits": 0,
+    "productTestsExecuted": 0,
+    "windowsSessionsStarted": 0,
+    "commands": "Only local source/log JSON reads and this report write. Remote exact run is tcp_frontdoor evidence, not reviewer execution."
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "sha256": "01a15c8b93c8e3981f7ab39f40c7da15fd393cb690a3d64604d6360e0edee8be"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "sha256": "6214cd401daf6bd6a0ceb2cf8cba8d5d01904ef2bc25b3f3cdeddfdd56c88e1c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+      "sha256": "503d58aa12656f307ab2ba4a2aaf0d3fc62262fac8863e68f1465e3fb23a47ac"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_files.rs",
+      "sha256": "b5888996701aad9b8a453212e679a5ce5188694f8b7133d7e452bf3be4e86d1e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "sha256": "1844a2d0e6042424f11aa86bb69f63e37e31126bc28b621c8759bcfe1cc8c9f0"
+    },
+    {
+      "path": "crates/fc-storage/src/business/voice.rs",
+      "sha256": "c5a5be994e1f0bba8827745998502c2bc4a6610648babf2d6e1a260f2b9c46b4"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "sha256": "511e43ba9e2e21bbbf394df0aa770a26334213e675fa348e2a3eb6d4480cca4c"
+    },
+    {
+      "path": "crates/fc-domain/src/voice.rs",
+      "sha256": "186d3f71d00a0860bfacac13262a646e80b29be7e92cb32a46f1cf657cb80574"
+    }
+  ],
+  "fullFailure": {
+    "path": "/tmp/fc-round17-windows-initial-full-failure.json",
+    "sha256": "c1600c4ab8fa477e0e17af4dc162b87d4aa817309169938c7581d27a1c5a0e2e",
+    "testExe": "fc_bootstrap-153172ad9c1ad7f3.exe",
+    "binarySha256": "4ced44e25808cfddb27d1e01bacdaf097257d6795a5fefc30334a41dfc471d31",
+    "exitCode": 101,
+    "rawFailure": "---- web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement stdout ----\n\nthread 'web_application::tests::voice_tests::voice_windows_physical_proofs_survive_sql_expiry_and_application_replacement' (1016) panicked at crates/fc-bootstrap/src/web_application/voice_tests.rs:591:19:\n{\"schemaVersion\":1,\"code\":\"RESULT_UNKNOWN\"}\n",
+    "location": "voice_tests.rs:591 final prepare; not publish/commit"
+  },
+  "freshExactEvidence": {
+    "provider": "tcp_frontdoor",
+    "stderrPath": "/tmp/fc-round17-voice-exact-1-stderr.log",
+    "stderrSha256": "deae0eff76dea432d0ba2e5579b29bd1b09cbeab0b7f175783a325490bcffc67",
+    "reportedExeSha256": "4ced44e25808cfddb27d1e01bacdaf097257d6795a5fefc30334a41dfc471d31",
+    "reportedTestThreads": 1,
+    "reportedExitCode": 101,
+    "location": "voice_tests.rs:572, one of the initial two prepare attempts",
+    "iterationNotObserved": true,
+    "scope": "The same line executes for both iterations; backtrace does not prove whether the first or second attempt failed. tcp confirmed no iteration-specific stdout observation.",
+    "implication": "Failure can occur before expire_sql_reservations, replace_file_application or any explicit proof Drop. Not a proof that an isolated physical-permit regression itself fails.",
+    "historicalCollectorCaveat": "Earlier exact stdout containing1PASS with null collected exit code is retained by tcp; it is not used as a clean PASS or as causal proof. Earlier source/test passes do not establish this failure cause."
+  },
+  "prepareControlFlow": [
+    {
+      "stage": "upload_auth",
+      "source": "web_application/voice_files.rs:74; voice.rs::upload_auth",
+      "observations": "Request/cookie/CSRF checked before the physical permit. Authentication/boundary errors are distinct from RESULT_UNKNOWN."
+    },
+    {
+      "stage": "binding try_lock/configured",
+      "source": "web_application/voice_files.rs:75-81",
+      "observations": "Failure returns503 SERVICE_UNAVAILABLE, not current RESULT_UNKNOWN."
+    },
+    {
+      "stage": "check_web_target before permit",
+      "source": "web_application/voice_files.rs:82-86",
+      "observations": "Mapped with mutating=false. A failure here does not produce RESULT_UNKNOWN."
+    },
+    {
+      "stage": "PhysicalUploadPermit::take",
+      "source": "web_application/voice_files.rs:87-88; shared_upload.rs",
+      "observations": "Saturation returns429 CAPACITY before any input read/reserve; current503 RESULT_UNKNOWN means a physical token was acquired."
+    },
+    {
+      "stage": "VoiceService::reserve",
+      "source": "web_application/voice_files.rs:89-92; backend/voice.rs:546",
+      "observations": "Mapped with mutating=true. Concrete Domain Capacity/Quota/OwnerLimit/Permission/Expired have429/403/409 mappings; generic Closed/Session/CryptoUnavailable/Busy/Unavailable/Faulted and unclassified domain errors can map503 RESULT_UNKNOWN. No publish occurs here."
+    },
+    {
+      "stage": "prepare_body/error plus authorize false",
+      "source": "web_application/voice_files.rs:95-104,142-152; voice_files.rs::BodyPreparation",
+      "observations": "File streaming/create/seal/hash/controlled rename fails; if the recheck is false because30s elapsed or check_web_upload fails, return503 RESULT_UNKNOWN. Ordinary file/format failure with authorize still true returns400 INVALID_WAV instead."
+    },
+    {
+      "stage": "return opaque proof",
+      "source": "web_application/voice_files.rs:160",
+      "observations": "Only success returns the permit owner. commit_voice_upload/service.publish is after the failed test line and cannot be the direct phase for this failed attempt."
+    }
+  ],
+  "physicalOwnership": {
+    "limit": 2,
+    "state": "One process-global AtomicUsize shared by material and voice uploads; capacity is not owned by WebApplication.",
+    "dropOrder": "PreparedWebVoiceUpload custom Drop first takes/drops pending to release LockedFile pin, then discard_unpublished while attempted=false. Automatic field drop then releases the non-Clone PhysicalUploadPermit via fetch_sub. The permit remains owned through real file cleanup rather than being freed by SQL expiry or application replacement.",
+    "fullRunSequence": "Initial two proofs own2; SQL maintain does not free physical tokens; replacement application still sees saturation and test checks429 before NeverRead. Dropping one proof reduces2→1, replacement prepare succeeds1→2, replacement Drop2→1 and remaining proof Drop1→0. Final prepare then acquires a token before entering its failing branch.",
+    "failureSafety": "A prepare returning Err drops its local permit automatically; current reported outer RESULT_UNKNOWN panic is not an internal permit-underflow panic. Deletion failure may leave a recoverable file but does not suppress automatic permit Drop.",
+    "notProven": "Current logs have no physical counter snapshot and cannot prove all concurrent global-owner histories, but current response itself excludes direct physical saturation as the failing branch."
+  },
+  "sqlAndFileResources": {
+    "sqlExpiry": "expire_sql_reservations advances fake clocks601s and maintain verifies no Reserved assets. Domain maintain converts old Reserved/Ready to DeletePending; it does not necessarily finalize their quota or delete pinned files. VoiceService.maintain prunes matching old upload leases only if the sessions version has not advanced.",
+    "abandonedProofs": "Dropping a prepared proof discards its unattempted WAV, but does not cancel the corresponding SQL reservation immediately. The replacement reservation remains Reserved until expiry/maintenance. That is relevant to later capacity but does not overfill this test before final prepare.",
+    "fullRunExpectedAtFinalReserve": {
+      "oldDeletePending": 2,
+      "replacementReserved": 1,
+      "finalAdditionalReserved": 1,
+      "allAssetsIncludingFinal": 4,
+      "assetCap": 32,
+      "reservedAssetsIncludingFinal": 2,
+      "ownerReservedReadyIncludingFinal": 2,
+      "chargedUpperBoundBytes": 7680176,
+      "globalQuotaBytes": 16777216,
+      "rateWindow": "At most the replacement and final reserve in the new60s window; below10/min."
+    },
+    "responseEvidence": "If SQL/byte quota were the direct returned domain error it would be429 CAPACITY, or429 OWNER_LIMIT. Current503 cannot establish a quota breach.",
+    "filePreparation": "Root-controlled unique resource IDs,32KiB reads, canonical16,044-byte fixture WAV, seal/hash/rename and pinned ownership. File failures alone with fresh authorization map400; unknown requires an additional stale/time/health/session/generation observation. The30s wall bound is real; fake clocks remain fixed after the intentional601s step."
+  },
+  "deadlineAndUnknown": {
+    "actor": "VoiceService::actor retries authority snapshot/publication coherency for100ms, returns StorageError::Busy when elapsed. Called from reserve after the pre-target check, this Busy is mapped to RESULT_UNKNOWN because prepare labels reserve mutating=true. Thus transient Busy is NOT excluded by this response.",
+    "writer": "VoiceService::repository_mode installs100ms; voice_operation has an Instant-based positive-operation active check plus StorageTicket.wait_timeout100ms. Timeout=>StorageError::Indeterminate; evaluate/precommit expired-active=>Indeterminate. Storage mapping Indeterminate/AuthorityUnavailable/PublicationFailed/WorkerPanicked=>VoiceRepositoryError::Faulted. conclude(Faulted) invalidates runtime and prevents late positive effects. SQLite is WAL+synchronousFULL, but no elapsed/fsync observation in failure proves this path.",
+    "permissions": "Pre-target/cookie authentication must have passed, so an already-invalid target/physical quota was not silently accepted. However permission/session/generation may change after that check; a body authorize failure or mutating BackendError::Session is also UNKNOWN. Therefore general authorization failure cannot be categorically excluded.",
+    "semantic": "RESULT_UNKNOWN means the caller cannot safely claim no reservation mutation occurred; retaining that classification and original command/cleanup reconciliation is appropriate. It is not an acknowledgement of publish or proof of physical limit corruption."
+  },
+  "diagnosticRecommendations": [
+    "Add cfg(test)-only redacted phase/error tracing around reserve and prepare_body: monotonic elapsed, operation phase, non-secret BackendError/StorageError category, health/revision before/after, runtime generation/admitting and physical-count snapshots. Do not log cookies/CSRF/raw WAV/passwords or alter error responses.",
+    "Distinguish reserve actor Busy before any writer ticket from ticket timeout, task active expiry, post-COMMIT runtime invalidation and filesystem30s/check_web_upload failure. An outer backtrace alone cannot distinguish these paths.",
+    "Record the initial-loop iteration and final-prepare labels in the test harness, so future raw failure locations are not misread as a particular attempt.",
+    "Keep the100ms control bound and all physical ownership/429/NeverRead/final201 assertions. Do not treat retry-until-pass or a prior source PASS as a fix. Preserve the original failing binary/hash/raw logs.",
+    "After identifying a concrete timed path, use a controlled test fixture that isolates physical-owner lifetime from unrelated SQL scheduling/disk latency, while retaining separate real persistent SQLite deadline/failclosed tests. Any fixture injection must be explicit; do not claim it proves real disk100ms admission.",
+    "If a real permit count/duplicate return invariant fails under explicit checkpoints, repair owner accounting/Drop ordering. If write/commit delay exceeds100ms, retain unknown/fencing and investigate bounded writer scheduling/durability path rather than relaxing the safety deadline. If body authority unexpectedly changes under fixed fake time, investigate exact session/generation/health transitions instead of masking it as I/O."
+  ],
+  "productBugAssessment": "Not enough telemetry to classify this specific failure as an implementation bug or as a timing-only fixture problem. The physical-permit flow is consistent with the observed error and the new exact failure occurs before lifetime edge cases.100ms/30s are real unmocked temporal assumptions in a test that expects unconditional success; source supplies plausible legitimate failclosed exits but does not prove which occurred.",
+  "relationToOtherFailure": "Both cases can traverse VoiceService100ms actor/writer paths and map to Faulted/UNKNOWN. They do not yet have a proven common cause. The other case is assigned to a separate reviewer.",
+  "planDeadlineReview": {
+    "reviewedAtUtc": "2026-10-30T19:23:23.844892+00:00",
+    "scope": "Read-only plan interpretation after root began temporary diagnostics; no further product tests or source/plan changes by this reviewer.",
+    "references": [
+      {
+        "path": "开发计划/10-实施进度与验证记录.md",
+        "line": 303,
+        "exactText": "VoiceService独立于Backend管理互斥锁，原Web精确SessionLease、单writer、代次与短内存映射共同约束上传/任务/原生许可。音频域的数据库等待初值100ms；正向任务在入队、evaluate及precommit同时检查实际单调期限与运行代次，超时视为结果不确定并关闭准入，随后按原token结算，不能自动重发或继续供给缓冲。自然完成也受代次检查，旧停止代次只可中断/失败/释放。取消先使原native能力失效，提交点仍核精确会话/CAS。维护按映射版本、任务sequence及完整stamp处理并发返回，旧终态不能清掉同ID的新任务会话。",
+        "sha256": "37b1155fc08cce5f17733161394f2458ca53df96b6a8e80d01a1269c8acb8875"
+      },
+      {
+        "path": "开发计划/10-实施进度与验证记录.md",
+        "line": 319,
+        "exactText": "只将Linux声音服务的两类测试fixture放到私有/dev/shm（存在时）；这些仍执行真实SQLite writer/WAL/事务、精确会话、显式并发与100ms超时反例，验证状态协议，不作为磁盘durability/fsync证据。Windows继续真实TEMP磁盘，既有storage/business持久化及恢复测试继续原磁盘目录；生产100ms期限未放宽。此初值的适用磁盘性能、慢盘/CPU拥塞与完整故障恢复矩阵仍列为P0/Q25后续门槛。",
+        "sha256": "37b1155fc08cce5f17733161394f2458ca53df96b6a8e80d01a1269c8acb8875"
+      },
+      {
+        "path": "开发计划/10-实施进度与验证记录.md",
+        "line": 328,
+        "exactText": "Win11完整组合回归首次通过全部测试exe、工作台及资料链，但正常音频链返回Closed，原失败保留，未捕获逐阶段信息，不能将其唯一归因于某一调用。代码审查发现VoiceService正向API把AuthorityUpdating映射为Closed：现改为最多100ms仅重读内存中的最新权威，等待期间不持会话账本锁、不续租、不重发SQL；超过期限返回Busy且不关闭全局运行代次，Fault/Stopping仍立即关闭。reserve/publish/submit在等待之前捕获原运行代次，等待后再次核验，旧请求不能跨停止接入新运行。真实SQLite反例覆盖短更新后的status/publish成功、持续更新Busy不撤销原能力、实际换班后拒绝旧Prepared及停止等待者拒绝；随后重跑整轮验证。",
+        "sha256": "37b1155fc08cce5f17733161394f2458ca53df96b6a8e80d01a1269c8acb8875"
+      },
+      {
+        "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+        "line": 35,
+        "exactText": "5. 若事务回滚且可证明数据库与内存都仍是旧权威，恢复旧数据版本下的HEALTHY，但healthEpoch继续单调递增，已失效许可不复活；COMMIT后权威交换失败/panic、或提交结果不明且不能证明一致，则首先FAULTED。",
+        "sha256": "d9614fbc247c747d3f318fef161f8a1cc2e73bfb0fba969782b83bfb3f17d365"
+      },
+      {
+        "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+        "line": 60,
+        "exactText": "首版选HTTP.sys API v2队列+OVERLAPPED/IOCP模型，1个HTTP执行域管理全部请求。初始最多8个in-flight请求、2个头接收槽、2个上传体流槽；头部16KiB、普通JSON64KiB；上传上限仍按图片/资料/语音各自策略。请求体/响应分块64KiB，不把50MiB原件读入Vec。截止初值为头部5秒/上传120秒，P0按校园实际网络校准，超时通过取消协议而非释放指针强行结束。",
+        "sha256": "d9614fbc247c747d3f318fef161f8a1cc2e73bfb0fba969782b83bfb3f17d365"
+      },
+      {
+        "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+        "line": 80,
+        "exactText": "fc-materials按32KiB以内流式块累计实际输出字节/时间，不能相信归档声明长度或先read_to_end再查额度。XML解析前/扫描过程中执行字节事件预算，不等巨型事件已分配后才数节点；禁DTD/外部实体，拒绝路径遍历、重复规范路径、加密/宏及不支持结构。验证过程中不将DOCX压缩条目解到任意文件系统路径。初值CPU10秒/墙上30秒（不含排队），每块检查取消/截止；P0/样例校准可调整数值但须保留有限上限和Q04/Q12证据。",
+        "sha256": "d9614fbc247c747d3f318fef161f8a1cc2e73bfb0fba969782b83bfb3f17d365"
+      },
+      {
+        "path": "开发计划/15-教师语音API契约.md",
+        "line": 32,
+        "exactText": "保留4条非终态/每教师2、全局2个未提交上传、16MiB正文与预留共同计费、32个含待删除物理资产、主体上传/提交分别每60秒10次的既有门槛。上传先SQL预留最大1920044字节，再直接流入唯一已计费受控对象，完整校验固定44字节头PCM16LE/单声道/16000Hz、8000–960000帧与实际SHA后发布。资料与语音共用进程全局两个物理预约；typed proof持有真实pin及预约至实际Drop，不能因过期/撤权/替换WebApplication提前释放。校验不持Backend/KDF长锁。失败/丢弃且确定未尝试publish的proof可清理自己的未发布文件，但SQLReserved预约仍按600秒维护到期清退，不能宣称Drop立即归还SQL配额。",
+        "sha256": "3624e953b3a35b112fd24cc956375cb3d1b3595a782fcddbcf104eacbf94e4f6"
+      },
+      {
+        "path": "开发计划/15-教师语音API契约.md",
+        "line": 34,
+        "exactText": "任何已尝试COMMIT后的停止代次、授权、编码或结果交付失败统一503 RESULT_UNKNOWN，不能误报确定403并删除可能已提交文件。提交同commandId同负载读回现有任务当前状态，不重播；异负载409 IDEMPOTENCY_CONFLICT。结果未知只手动GET原jobId（等于原commandId），404不证明从未提交，不能自动生成新命令补发。",
+        "sha256": "3624e953b3a35b112fd24cc956375cb3d1b3595a782fcddbcf104eacbf94e4f6"
+      },
+      {
+        "path": "开发计划/15-教师语音API契约.md",
+        "line": 50,
+        "exactText": "同步Read端口只接受已到达的受控File/Cursor等有限字节。前后单调超时检查不能物理中断任意阻塞网络Read；真实完成事件到计费stage、物理上传worker/取消完成与120秒期限仍待正常网络调度集成，不能据受控字节测试扩张为网络期限PASS。",
+        "sha256": "3624e953b3a35b112fd24cc956375cb3d1b3595a782fcddbcf104eacbf94e4f6"
+      },
+      {
+        "path": "开发计划/05-测试验收与发布清理.md",
+        "line": 123,
+        "exactText": "| 隐藏延迟 | P95≤100ms、P99≤250ms，非硬实时承诺 |",
+        "sha256": "59ecf49ca0034f36378d98f69cec7b52171614c4139c04c61f0ad45ccc8430b2"
+      }
+    ],
+    "numericOrigin": "Only the implementation progress record specifies the voice100ms number. Line303 calls it the initial database wait for the audio domain; line319 explicitly leaves applicability to disk performance, slow disk and CPU congestion to P0/Q25. The module11 voice product requirements and API15 contract do not separately promise every upload reserve/publish will complete within100ms.",
+    "separateBudgets": "Do not conflate the100ms audio-domain database wait, the100ms authority-memory coherency barrier, P95 desktop hide100ms/P99 250ms, file-validation wall30s/CPU10s, and actual transport upload120s. They protect different phases and have different evidence requirements.",
+    "currentSharedPolicy": "VoiceService.repository_mode uses100ms for reserve/publish as well as native driver/control metadata and other repository calls. That is the existing implementation policy whose behavior is recorded; API15 reuses VoiceService but does not require one numerical timeout for all these operation classes.",
+    "whenReserveTakesOver100ms": "Under current code the caller remains bounded. If the writer ticket result is unknown at timeout, failing closed in the voice runtime, blocking further positive effects and preserving any possibly committed asset for reconciliation is consistent with progress10:303 and API15:34. It must not claim a definite failure/noCOMMIT or automatically replay the upload. The plan does not establish that ordinary NTFS guarantees completion under100ms; a slow but correct fsync can legitimately drive this existing policy to UNKNOWN.",
+    "busyVsFaulted": "The source needs stage-specific classification. A pure authority-update wait timing out before issuing SQL is StorageError::Busy and should not invalidate the voice runtime (progress10:328). A writer timeout/indeterminate path invalidates the voice runtime through VoiceService.conclude. VoiceRepositoryError::Faulted is not automatically the process HealthGate::Faulted.",
+    "globalHealthNuance": "Transaction evaluate deadline expiry returns before authority update; precommit failure with successful SQL rollback and publisher.rollback restores old Healthy. Message::Transaction does not blanket mark every Indeterminate result globally faulted. Actual commit ambiguity, rollback failure, worker panic or failed authority publication do mark the HealthGate faulted. This matches08:35; the blanket Indeterminate check in worker_loop belongs to Message::Login, not transaction voice tasks.",
+    "shouldNativeAndWebShare100ms": "They must share exact original lease/generation, single-writer consistency, bounded ownership and failclosed effect gates. They do not inherently need the same numeric wait. Native feeding/stop paths cannot block behind long upload/disk/KDF work; an upload metadata operation on a bounded worker could have a separately finite, measured admission/COMMIT budget without allowing UI/audio to wait. This would be a deliberate budget-policy change with explicit P0/Q25 calibration, not an ad hoc increase to make the failed test pass.",
+    "recommendedDecisionNow": "Keep existing numbers and all assertions while collecting root diagnostic phase/elapsed/error data. Do not blame NTFS, declare a permit bug, weaken the final201, add automatic retry or count an old PASS as causal evidence. If the trace proves normal disk commits repeatedly exceed100ms, treat it as a real availability/design constraint of the shared policy; decide whether to optimize bounded writer work or explicitly separate upload-metadata and native-control budgets, with corresponding plan updates and deadline/cancellation/lateCOMMIT tests. Preserve100ms for the native/control path unless separately justified.",
+    "notAChangeRequest": "Reviewer did not edit code or plan, did not execute the temporary diagnostic binary, and does not assert which path caused the observed failure."
+  }
+}
