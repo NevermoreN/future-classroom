@@ -242,7 +242,11 @@ impl VoiceRuntime {
         self.start_locked(&mut state)
     }
     fn reap_locked(&self, state: &mut State) -> Result<(), RuntimeError> {
-        if state.thread.as_ref().is_some_and(JoinHandle::is_finished) {
+        if state
+            .thread
+            .as_ref()
+            .is_some_and(crate::physical_thread::is_finished)
+        {
             // is_finished proves the physical audio thread and its destructors
             // have completed. This join cannot wait on native or writer work.
             if state
@@ -309,7 +313,10 @@ impl VoiceRuntime {
         Ok(RuntimeStatus {
             phase: state.phase,
             physical_threads_started: state.starts,
-            physical_thread_running: state.thread.as_ref().is_some_and(|t| !t.is_finished()),
+            physical_thread_running: state
+                .thread
+                .as_ref()
+                .is_some_and(|t| !crate::physical_thread::is_finished(t)),
             stop_generation: self.shared.generation.load(Ordering::Acquire),
             ack_generation: state.ack_generation,
             available: self.shared.available.load(Ordering::Acquire),
@@ -447,13 +454,11 @@ fn run_owned(shared: &Arc<Shared>) {
                     {
                         state.ack_generation = interrupted_generation;
                     }
-                    // A stop may arrive after finish/resume. Leave it pending for
-                    // the reaper; never publish Closed with an unproved new fence.
-                    state.phase = if shared.closed.load(Ordering::Acquire)
-                        && state.ack_generation >= control.generation()
-                        && shared.reasons.load(Ordering::Acquire) == 0
-                    {
-                        RuntimePhase::Closed
+                    // The domain and native TLS destructors have not exited yet.
+                    // Only reap_locked may publish Closed after the OS confirms
+                    // physical termination and the join has completed.
+                    state.phase = if shared.closed.load(Ordering::Acquire) {
+                        RuntimePhase::Stopping
                     } else if shared.faulted.load(Ordering::Acquire) {
                         RuntimePhase::Halted
                     } else {
@@ -500,3 +505,5 @@ mod native;
 pub use native::NativeFactory;
 #[cfg(test)]
 mod tests;
+#[cfg(all(test, windows))]
+mod tls_exit_tests;

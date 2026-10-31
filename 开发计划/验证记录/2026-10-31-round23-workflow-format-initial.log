@@ -1,0 +1,626 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:26:
+     }
+ }
+ impl<T> Slot<T> {
+[31m-    pub fn same(&self, other: &Self) -> bool { Arc::ptr_eq(&self.0, &other.0) }
+(B[m[32m+    pub fn same(&self, other: &Self) -> bool {
+(B[m[32m+        Arc::ptr_eq(&self.0, &other.0)
+(B[m[32m+    }
+(B[m     pub fn new() -> Self {
+         let inner = Arc::new(Inner {
+             state: Mutex::new(State {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:78:
+         Some(value)
+     }
+     pub fn publish_irreversible(&self, generation: u64, value: T) -> bool {
+[31m-        let Ok(mut state) = self.0.state.lock() else { return false };
+(B[m[32m+        let Ok(mut state) = self.0.state.lock() else {
+(B[m[32m+            return false;
+(B[m[32m+        };
+(B[m         if state.generation != generation || state.value.is_some() || state.phase == Phase::Empty {
+             return false;
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:92:
+     }
+     pub fn take_irreversible(&self, generation: u64) -> Option<T> {
+         let mut state = self.0.state.lock().ok()?;
+[31m-        if state.generation != generation { return None; }
+(B[m[32m+        if state.generation != generation {
+(B[m[32m+            return None;
+(B[m[32m+        }
+(B[m         let value = state.value.take()?;
+         state.phase = Phase::Working;
+         Some(value)
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:105:
+         }
+     }
+     pub fn retirement_pending(&self) -> bool {
+[31m-        self.0.state.lock().is_ok_and(|state| {
+(B[m[31m-            state.phase == Phase::Retired && state.value.is_some()
+(B[m[31m-        })
+(B[m[32m+        self.0
+(B[m[32m+            .state
+(B[m[32m+            .lock()
+(B[m[32m+            .is_ok_and(|state| state.phase == Phase::Retired && state.value.is_some())
+(B[m     }
+     /// Only the existing shared worker calls this, then drops the returned T.
+     pub fn take_retired(&self) -> Option<(u64, T)> {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:129:
+         self.release_if_closed_and_idle();
+     }
+     pub fn is_idle(&self) -> bool {
+[31m-        self.0.state.lock().is_ok_and(|state| state.phase == Phase::Empty)
+(B[m[32m+        self.0
+(B[m[32m+            .state
+(B[m[32m+            .lock()
+(B[m[32m+            .is_ok_and(|state| state.phase == Phase::Empty)
+(B[m     }
+     pub fn request_close(&self) {
+         if let Ok(mut state) = self.0.state.lock() {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/slot.rs:203:
+             let (generation, value) = retained.take_retired().unwrap();
+             drop(value);
+             retained.finish(generation);
+[31m-        }).join().unwrap();
+(B[m[32m+        })
+(B[m[32m+        .join()
+(B[m[32m+        .unwrap();
+(B[m         receive.recv().unwrap();
+         assert!(weak.upgrade().is_none());
+     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:2:
+ use crate::{
+     backend::{Backend, BackendError, ConfirmedRestore, OrdinaryBackupAccess, RestorePreview},
+     recovery::{BackupError, ColdShutdown, ShutdownError},
+[31m-    recovery_files::{ColdCommitReceipt, ExportReceipt, PreparedRestore, RecoveryFileError, RecoveryFiles},
+(B[m[32m+    recovery_files::{
+(B[m[32m+        ColdCommitReceipt, ExportReceipt, PreparedRestore, RecoveryFileError, RecoveryFiles,
+(B[m[32m+    },
+(B[m     voice_runtime::VoiceRuntime,
+ };
+ use fc_application::identity::SessionLease;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:11:
+ use fc_storage::recovery::ExecutionFence;
+ use fc_windows::{materials::chooser::SelectedFile, system::DataPaths};
+ use std::{
+[31m-    sync::{atomic::{AtomicBool, Ordering}, Arc, Condvar, Mutex},
+(B[m[32m+    sync::{
+(B[m[32m+        atomic::{AtomicBool, Ordering},
+(B[m[32m+        Arc, Condvar, Mutex,
+(B[m[32m+    },
+(B[m     thread::{self, JoinHandle},
+     time::Duration,
+ };
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:25:
+     Shutdown(ShutdownError),
+ }
+ impl From<BackendError> for WorkflowError {
+[31m-    fn from(value: BackendError) -> Self { Self::Backend(value) }
+(B[m[32m+    fn from(value: BackendError) -> Self {
+(B[m[32m+        Self::Backend(value)
+(B[m[32m+    }
+(B[m }
+ impl From<RecoveryFileError> for WorkflowError {
+[31m-    fn from(value: RecoveryFileError) -> Self { Self::Files(value) }
+(B[m[32m+    fn from(value: RecoveryFileError) -> Self {
+(B[m[32m+        Self::Files(value)
+(B[m[32m+    }
+(B[m }
+ impl From<ShutdownError> for WorkflowError {
+[31m-    fn from(value: ShutdownError) -> Self { Self::Shutdown(value) }
+(B[m[32m+    fn from(value: ShutdownError) -> Self {
+(B[m[32m+        Self::Shutdown(value)
+(B[m[32m+    }
+(B[m }
+ type Result<T> = std::result::Result<T, WorkflowError>;
+ 
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:45:
+     pub payload_bytes: u64,
+ }
+ enum Payload {
+[31m-    Preview { prepared: PreparedRestore, preview: RestorePreview },
+(B[m[31m-    Confirmed { prepared: PreparedRestore, confirmed: ConfirmedRestore },
+(B[m[32m+    Preview {
+(B[m[32m+        prepared: PreparedRestore,
+(B[m[32m+        preview: RestorePreview,
+(B[m[32m+    },
+(B[m[32m+    Confirmed {
+(B[m[32m+        prepared: PreparedRestore,
+(B[m[32m+        confirmed: ConfirmedRestore,
+(B[m[32m+    },
+(B[m }
+ /// One preview/confirmation/coordinator slot for the entire native application.
+ /// No additional ordinary file worker is created here.
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:62:
+     armed: bool,
+ }
+ impl ReviewBundle {
+[31m-    pub fn summary(&self) -> &ReviewSummary { &self.summary }
+(B[m[32m+    pub fn summary(&self) -> &ReviewSummary {
+(B[m[32m+        &self.summary
+(B[m[32m+    }
+(B[m }
+ impl Drop for ReviewBundle {
+     fn drop(&mut self) {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:69:
+[31m-        if self.armed { self.workflow.slot.retire(self.generation); }
+(B[m[32m+        if self.armed {
+(B[m[32m+            self.workflow.slot.retire(self.generation);
+(B[m[32m+        }
+(B[m     }
+ }
+ /// Lightweight notification only. The irreversible capability remains in the
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:82:
+ }
+ impl Drop for Reservation {
+     fn drop(&mut self) {
+[31m-        if self.active { self.workflow.slot.finish(self.generation); }
+(B[m[32m+        if self.active {
+(B[m[32m+            self.workflow.slot.finish(self.generation);
+(B[m[32m+        }
+(B[m     }
+ }
+ impl RecoveryWorkflow {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:89:
+[31m-    pub fn new(paths: DataPaths) -> Self { Self { paths, slot: Slot::new() } }
+(B[m[31m-    pub fn is_idle(&self) -> bool { self.slot.is_idle() }
+(B[m[32m+    pub fn new(paths: DataPaths) -> Self {
+(B[m[32m+        Self {
+(B[m[32m+            paths,
+(B[m[32m+            slot: Slot::new(),
+(B[m[32m+        }
+(B[m[32m+    }
+(B[m[32m+    pub fn is_idle(&self) -> bool {
+(B[m[32m+        self.slot.is_idle()
+(B[m[32m+    }
+(B[m     pub fn retirement_pending(&self) -> bool {
+         !self.has_confirmed() && self.slot.retirement_pending()
+     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:94:
+     /// UI-safe: no filesystem operation or heavy destructor runs here.
+[31m-    pub fn request_close(&self) { self.slot.request_close(); }
+(B[m[32m+    pub fn request_close(&self) {
+(B[m[32m+        self.slot.request_close();
+(B[m[32m+    }
+(B[m     /// Run only on an existing shared worker. The slot remains occupied through
+     /// the final physical destructor, including recursive workspace removal.
+     pub fn retire_pending_on_worker(&self) -> bool {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:99:
+[31m-        if self.has_confirmed() { return false; }
+(B[m[32m+        if self.has_confirmed() {
+(B[m[32m+            return false;
+(B[m[32m+        }
+(B[m         if let Some((generation, payload)) = self.slot.take_retired() {
+             drop(payload);
+             self.slot.finish(generation);
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:106:
+     /// A durable barrier is never discarded merely because its UI job became
+     /// stale, was cancelled, or was dropped before consuming its result.
+     pub fn has_confirmed(&self) -> bool {
+[31m-        self.slot.inspect(|_, value| matches!(value, Some(Payload::Confirmed { .. }))) == Some(true)
+(B[m[32m+        self.slot
+(B[m[32m+            .inspect(|_, value| matches!(value, Some(Payload::Confirmed { .. })))
+(B[m[32m+            == Some(true)
+(B[m     }
+     pub fn confirmed_bundle(&self) -> Option<ConfirmedBundle> {
+[31m-        self.slot.inspect(|generation, value| {
+(B[m[31m-            matches!(value, Some(Payload::Confirmed { .. })).then(|| ConfirmedBundle {
+(B[m[31m-                workflow: self.clone(), generation,
+(B[m[32m+        self.slot
+(B[m[32m+            .inspect(|generation, value| {
+(B[m[32m+                matches!(value, Some(Payload::Confirmed { .. })).then(|| ConfirmedBundle {
+(B[m[32m+                    workflow: self.clone(),
+(B[m[32m+                    generation,
+(B[m[32m+                })
+(B[m             })
+[31m-        }).flatten()
+(B[m[32m+            .flatten()
+(B[m     }
+     /// Shared worker only; the export adapter rechecks exact authority after
+     /// acquiring all original pins and immediately before publishing its file.
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:120:
+[31m-    pub fn export(&self, access: OrdinaryBackupAccess, fence: ExecutionFence) -> Result<ExportReceipt> {
+(B[m[31m-        crate::recovery::export_ordinary_backup(&self.paths, access, fence).map_err(|error| match error {
+(B[m[31m-            BackupError::Backend(error) => WorkflowError::Backend(error),
+(B[m[31m-            BackupError::Files(error) => WorkflowError::Files(error),
+(B[m[32m+    pub fn export(
+(B[m[32m+        &self,
+(B[m[32m+        access: OrdinaryBackupAccess,
+(B[m[32m+        fence: ExecutionFence,
+(B[m[32m+    ) -> Result<ExportReceipt> {
+(B[m[32m+        crate::recovery::export_ordinary_backup(&self.paths, access, fence).map_err(|error| {
+(B[m[32m+            match error {
+(B[m[32m+                BackupError::Backend(error) => WorkflowError::Backend(error),
+(B[m[32m+                BackupError::Files(error) => WorkflowError::Files(error),
+(B[m[32m+            }
+(B[m         })
+     }
+     /// Shared worker only. Both framing/media and the complete ordinary SQL
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:127:
+     /// projection succeed before any review is exposed to the UI.
+[31m-    pub fn preflight(&self, selected: SelectedFile, access: OrdinaryBackupAccess, execution: ExecutionFence) -> Result<ReviewBundle> {
+(B[m[32m+    pub fn preflight(
+(B[m[32m+        &self,
+(B[m[32m+        selected: SelectedFile,
+(B[m[32m+        access: OrdinaryBackupAccess,
+(B[m[32m+        execution: ExecutionFence,
+(B[m[32m+    ) -> Result<ReviewBundle> {
+(B[m         let generation = self.slot.reserve().ok_or(WorkflowError::Busy)?;
+[31m-        let mut reservation = Reservation { workflow: self.clone(), generation, active: true };
+(B[m[32m+        let mut reservation = Reservation {
+(B[m[32m+            workflow: self.clone(),
+(B[m[32m+            generation,
+(B[m[32m+            active: true,
+(B[m[32m+        };
+(B[m         let slot = self.slot.clone();
+         let fence: ExecutionFence = Arc::new(move || {
+             slot.permits(generation)
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:134:
+[31m-                && std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| execution())).unwrap_or(false)
+(B[m[32m+                && std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| execution()))
+(B[m[32m+                    .unwrap_or(false)
+(B[m         });
+         let files = RecoveryFiles::new(&self.paths)?;
+         let prepared = files.preflight_package(selected, &*fence)?;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:138:
+         let preview = access.preflight_restore(
+             prepared.ordinary_database().to_owned(),
+[31m-            prepared.ordinary_database().with_file_name("preview.sqlite3"),
+(B[m[31m-            prepared.manifest().clone(), prepared.manifest_sha256(), fence.clone(),
+(B[m[32m+            prepared
+(B[m[32m+                .ordinary_database()
+(B[m[32m+                .with_file_name("preview.sqlite3"),
+(B[m[32m+            prepared.manifest().clone(),
+(B[m[32m+            prepared.manifest_sha256(),
+(B[m[32m+            fence.clone(),
+(B[m         )?;
+[31m-        if !fence() { return Err(WorkflowError::Cancelled); }
+(B[m[32m+        if !fence() {
+(B[m[32m+            return Err(WorkflowError::Cancelled);
+(B[m[32m+        }
+(B[m         let mut summary = ReviewSummary {
+             source_revision: preview.manifest().revision,
+             current_revision: preview.current_revision(),
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:147:
+             document_count: preview.document_count(),
+[31m-            material_count: 0, profile_media_count: 0, payload_bytes: 0,
+(B[m[32m+            material_count: 0,
+(B[m[32m+            profile_media_count: 0,
+(B[m[32m+            payload_bytes: 0,
+(B[m         };
+         for entry in &preview.manifest().entries {
+[31m-            summary.payload_bytes = summary.payload_bytes.checked_add(entry.bytes()).ok_or(WorkflowError::Files(RecoveryFileError::InvalidPackage))?;
+(B[m[32m+            summary.payload_bytes = summary
+(B[m[32m+                .payload_bytes
+(B[m[32m+                .checked_add(entry.bytes())
+(B[m[32m+                .ok_or(WorkflowError::Files(RecoveryFileError::InvalidPackage))?;
+(B[m             match entry {
+                 BackupEntry::Material { .. } => summary.material_count += 1,
+                 BackupEntry::ProfileMedia { .. } => summary.profile_media_count += 1,
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:155:
+[31m-                BackupEntry::Database { .. } => {},
+(B[m[32m+                BackupEntry::Database { .. } => {}
+(B[m             }
+         }
+[31m-        if !self.slot.publish(generation, Payload::Preview { prepared, preview }) {
+(B[m[32m+        if !self
+(B[m[32m+            .slot
+(B[m[32m+            .publish(generation, Payload::Preview { prepared, preview })
+(B[m[32m+        {
+(B[m             return Err(WorkflowError::Cancelled);
+         }
+         reservation.active = false;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:162:
+[31m-        Ok(ReviewBundle { workflow: self.clone(), generation, summary, armed: true })
+(B[m[32m+        Ok(ReviewBundle {
+(B[m[32m+            workflow: self.clone(),
+(B[m[32m+            generation,
+(B[m[32m+            summary,
+(B[m[32m+            armed: true,
+(B[m[32m+        })
+(B[m     }
+     /// Shared worker only. No mutex spans the SQLite barrier. Cancellation can
+     /// prevent its commit, but cannot erase a capability already committed.
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:166:
+[31m-    pub fn confirm(&self, mut bundle: ReviewBundle, backend: Arc<Mutex<Backend>>, lease: SessionLease, fence: ExecutionFence) -> Result<ConfirmedBundle> {
+(B[m[31m-        if !self.slot.same(&bundle.workflow.slot) { return Err(WorkflowError::Busy); }
+(B[m[32m+    pub fn confirm(
+(B[m[32m+        &self,
+(B[m[32m+        mut bundle: ReviewBundle,
+(B[m[32m+        backend: Arc<Mutex<Backend>>,
+(B[m[32m+        lease: SessionLease,
+(B[m[32m+        fence: ExecutionFence,
+(B[m[32m+    ) -> Result<ConfirmedBundle> {
+(B[m[32m+        if !self.slot.same(&bundle.workflow.slot) {
+(B[m[32m+            return Err(WorkflowError::Busy);
+(B[m[32m+        }
+(B[m         let generation = bundle.generation;
+[31m-        let payload = self.slot.take_ready(generation).ok_or(WorkflowError::Cancelled)?;
+(B[m[32m+        let payload = self
+(B[m[32m+            .slot
+(B[m[32m+            .take_ready(generation)
+(B[m[32m+            .ok_or(WorkflowError::Cancelled)?;
+(B[m         bundle.armed = false;
+[31m-        let mut reservation = Reservation { workflow: self.clone(), generation, active: true };
+(B[m[31m-        let Payload::Preview { prepared, preview } = payload else { return Err(WorkflowError::Busy); };
+(B[m[31m-        let review = backend.lock().map_err(|_| WorkflowError::Backend(BackendError::Closed))?
+(B[m[32m+        let mut reservation = Reservation {
+(B[m[32m+            workflow: self.clone(),
+(B[m[32m+            generation,
+(B[m[32m+            active: true,
+(B[m[32m+        };
+(B[m[32m+        let Payload::Preview { prepared, preview } = payload else {
+(B[m[32m+            return Err(WorkflowError::Busy);
+(B[m[32m+        };
+(B[m[32m+        let review = backend
+(B[m[32m+            .lock()
+(B[m[32m+            .map_err(|_| WorkflowError::Backend(BackendError::Closed))?
+(B[m             .review_preflighted_restore(lease, preview)?;
+         let confirmed = review.confirm(fence)?;
+         // Cancellation is intentionally not consulted after the durable barrier.
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:177:
+         // This slot cannot be reused while the reservation owns its generation.
+[31m-        if !self.slot.publish_irreversible(generation, Payload::Confirmed { prepared, confirmed }) {
+(B[m[32m+        if !self.slot.publish_irreversible(
+(B[m[32m+            generation,
+(B[m[32m+            Payload::Confirmed {
+(B[m[32m+                prepared,
+(B[m[32m+                confirmed,
+(B[m[32m+            },
+(B[m[32m+        ) {
+(B[m             // Poison is fail-closed. The backend remains recovering and ordinary
+             // admission cannot resume. Normal operation never enters this arm.
+             return Err(WorkflowError::Backend(BackendError::Closed));
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:182:
+         }
+         reservation.active = false;
+[31m-        Ok(ConfirmedBundle { workflow: self.clone(), generation })
+(B[m[32m+        Ok(ConfirmedBundle {
+(B[m[32m+            workflow: self.clone(),
+(B[m[32m+            generation,
+(B[m[32m+        })
+(B[m     }
+ }
+ 
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:188:
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+[31m-pub enum RestorePhase { Waiting, Draining, PreparingDatabase, Sealing, Committing, Retained, Finished }
+(B[m[32m+pub enum RestorePhase {
+(B[m[32m+    Waiting,
+(B[m[32m+    Draining,
+(B[m[32m+    PreparingDatabase,
+(B[m[32m+    Sealing,
+(B[m[32m+    Committing,
+(B[m[32m+    Retained,
+(B[m[32m+    Finished,
+(B[m[32m+}
+(B[m #[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct RestoreStatus {
+     pub phase: RestorePhase,
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:220:
+ impl<T: Task> PreparedCoordinator<T> {
+     pub fn prepare() -> std::io::Result<Self> {
+         let state = Arc::new(CoordinatorState {
+[31m-            input: Mutex::new(None), wake: Condvar::new(),
+(B[m[31m-            aborted: AtomicBool::new(false), cancel: AtomicBool::new(false),
+(B[m[31m-            status: Mutex::new(RestoreStatus { phase: RestorePhase::Waiting, cancellation_requested: false, result: None }),
+(B[m[32m+            input: Mutex::new(None),
+(B[m[32m+            wake: Condvar::new(),
+(B[m[32m+            aborted: AtomicBool::new(false),
+(B[m[32m+            cancel: AtomicBool::new(false),
+(B[m[32m+            status: Mutex::new(RestoreStatus {
+(B[m[32m+                phase: RestorePhase::Waiting,
+(B[m[32m+                cancellation_requested: false,
+(B[m[32m+                result: None,
+(B[m[32m+            }),
+(B[m         });
+         let owned = state.clone();
+[31m-        let thread = thread::Builder::new().name("fc-restore-close".into()).spawn(move || coordinator(owned))?;
+(B[m[31m-        Ok(Self { state, thread: Some(thread) })
+(B[m[32m+        let thread = thread::Builder::new()
+(B[m[32m+            .name("fc-restore-close".into())
+(B[m[32m+            .spawn(move || coordinator(owned))?;
+(B[m[32m+        Ok(Self {
+(B[m[32m+            state,
+(B[m[32m+            thread: Some(thread),
+(B[m[32m+        })
+(B[m     }
+[31m-    pub fn start(mut self, bundle: ConfirmedBundle, backend: Arc<Mutex<Backend>>, workers: WorkerPool<T>, audio: VoiceRuntime) -> RestoreOperation<T> {
+(B[m[31m-        *self.state.input.lock().unwrap_or_else(|error| error.into_inner()) = Some(Inputs { bundle, backend, workers, audio });
+(B[m[32m+    pub fn start(
+(B[m[32m+        mut self,
+(B[m[32m+        bundle: ConfirmedBundle,
+(B[m[32m+        backend: Arc<Mutex<Backend>>,
+(B[m[32m+        workers: WorkerPool<T>,
+(B[m[32m+        audio: VoiceRuntime,
+(B[m[32m+    ) -> RestoreOperation<T> {
+(B[m[32m+        *self
+(B[m[32m+            .state
+(B[m[32m+            .input
+(B[m[32m+            .lock()
+(B[m[32m+            .unwrap_or_else(|error| error.into_inner()) = Some(Inputs {
+(B[m[32m+            bundle,
+(B[m[32m+            backend,
+(B[m[32m+            workers,
+(B[m[32m+            audio,
+(B[m[32m+        });
+(B[m         self.state.wake.notify_one();
+[31m-        RestoreOperation { state: self.state.clone(), thread: self.thread.take() }
+(B[m[32m+        RestoreOperation {
+(B[m[32m+            state: self.state.clone(),
+(B[m[32m+            thread: self.thread.take(),
+(B[m[32m+        }
+(B[m     }
+ }
+ impl<T: Task> Drop for PreparedCoordinator<T> {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:238:
+     fn drop(&mut self) {
+[31m-        if self.thread.is_some() { self.state.aborted.store(true, Ordering::Release); self.state.wake.notify_one(); }
+(B[m[32m+        if self.thread.is_some() {
+(B[m[32m+            self.state.aborted.store(true, Ordering::Release);
+(B[m[32m+            self.state.wake.notify_one();
+(B[m[32m+        }
+(B[m     }
+ }
+ impl<T: Task> RestoreOperation<T> {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:243:
+[31m-    pub fn cancel(&self) { self.state.cancel.store(true, Ordering::Release); }
+(B[m[32m+    pub fn cancel(&self) {
+(B[m[32m+        self.state.cancel.store(true, Ordering::Release);
+(B[m[32m+    }
+(B[m     pub fn status(&self) -> RestoreStatus {
+[31m-        let mut status = self.state.status.lock().unwrap_or_else(|error| error.into_inner()).clone();
+(B[m[32m+        let mut status = self
+(B[m[32m+            .state
+(B[m[32m+            .status
+(B[m[32m+            .lock()
+(B[m[32m+            .unwrap_or_else(|error| error.into_inner())
+(B[m[32m+            .clone();
+(B[m         status.cancellation_requested = self.state.cancel.load(Ordering::Acquire);
+         status
+     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:249:
+     /// The result alone is insufficient: only this physical join releases the
+     /// UI's operation slot. Polling is always nonblocking.
+     pub fn reap_nonblocking(&mut self) -> bool {
+[31m-        if self.thread.as_ref().is_some_and(|thread| !thread.is_finished()) { return false; }
+(B[m[32m+        if self
+(B[m[32m+            .thread
+(B[m[32m+            .as_ref()
+(B[m[32m+            .is_some_and(|thread| !thread.is_finished())
+(B[m[32m+        {
+(B[m[32m+            return false;
+(B[m[32m+        }
+(B[m         if let Some(thread) = self.thread.take() {
+             if thread.join().is_err() {
+[31m-                let mut status = self.state.status.lock().unwrap_or_else(|error| error.into_inner());
+(B[m[32m+                let mut status = self
+(B[m[32m+                    .state
+(B[m[32m+                    .status
+(B[m[32m+                    .lock()
+(B[m[32m+                    .unwrap_or_else(|error| error.into_inner());
+(B[m                 status.phase = RestorePhase::Retained;
+                 status.result = Some(Err(WorkflowError::Backend(BackendError::Closed)));
+             }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:269:
+     }
+ }
+ fn set_phase<T: Task>(state: &CoordinatorState<T>, phase: RestorePhase) {
+[31m-    state.status.lock().unwrap_or_else(|error| error.into_inner()).phase = phase;
+(B[m[32m+    state
+(B[m[32m+        .status
+(B[m[32m+        .lock()
+(B[m[32m+        .unwrap_or_else(|error| error.into_inner())
+(B[m[32m+        .phase = phase;
+(B[m }
+ fn coordinator<T: Task>(state: Arc<CoordinatorState<T>>) {
+[31m-    let mut input = state.input.lock().unwrap_or_else(|error| error.into_inner());
+(B[m[32m+    let mut input = state
+(B[m[32m+        .input
+(B[m[32m+        .lock()
+(B[m[32m+        .unwrap_or_else(|error| error.into_inner());
+(B[m     while input.is_none() && !state.aborted.load(Ordering::Acquire) {
+[31m-        input = state.wake.wait(input).unwrap_or_else(|error| error.into_inner());
+(B[m[32m+        input = state
+(B[m[32m+            .wake
+(B[m[32m+            .wait(input)
+(B[m[32m+            .unwrap_or_else(|error| error.into_inner());
+(B[m     }
+[31m-    let Some(input_value) = input.take() else { return; };
+(B[m[32m+    let Some(input_value) = input.take() else {
+(B[m[32m+        return;
+(B[m[32m+    };
+(B[m     drop(input);
+[31m-    let Inputs { bundle, backend, workers, audio } = input_value;
+(B[m[32m+    let Inputs {
+(B[m[32m+        bundle,
+(B[m[32m+        backend,
+(B[m[32m+        workers,
+(B[m[32m+        audio,
+(B[m[32m+    } = input_value;
+(B[m     let workflow = bundle.workflow;
+     let generation = bundle.generation;
+     let payload = workflow.slot.take_irreversible(generation);
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:285:
+     let result = match payload {
+[31m-        Some(Payload::Confirmed { prepared, confirmed }) => {
+(B[m[31m-            restore_owned(&state, prepared, confirmed, backend, workers, audio)
+(B[m[31m-        }
+(B[m[32m+        Some(Payload::Confirmed {
+(B[m[32m+            prepared,
+(B[m[32m+            confirmed,
+(B[m[32m+        }) => restore_owned(&state, prepared, confirmed, backend, workers, audio),
+(B[m         other => {
+             // This can only be an invalid caller token. Physical owners must
+             // still drain before any heavyweight payload is retired.
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:292:
+             workers.request_stop();
+             audio.shutdown();
+[31m-            while !workers.is_finished() { thread::park_timeout(Duration::from_millis(10)); }
+(B[m[32m+            while !workers.is_finished() {
+(B[m[32m+                thread::park_timeout(Duration::from_millis(10));
+(B[m[32m+            }
+(B[m             let _ = workers.join();
+             loop {
+                 let _ = audio.reap_nonblocking();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:298:
+[31m-                if audio.status().is_ok_and(|status| status.phase == crate::voice_runtime::RuntimePhase::Closed && !status.physical_thread_running && status.ack_generation >= status.stop_generation) { break; }
+(B[m[32m+                if audio.status().is_ok_and(|status| {
+(B[m[32m+                    status.phase == crate::voice_runtime::RuntimePhase::Closed
+(B[m[32m+                        && !status.physical_thread_running
+(B[m[32m+                        && status.ack_generation >= status.stop_generation
+(B[m[32m+                }) {
+(B[m[32m+                    break;
+(B[m[32m+                }
+(B[m                 set_phase(&state, RestorePhase::Retained);
+                 thread::park_timeout(Duration::from_millis(20));
+             }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:302:
+[31m-            if let Ok(mut backend) = backend.lock() { let _ = backend.close(); }
+(B[m[32m+            if let Ok(mut backend) = backend.lock() {
+(B[m[32m+                let _ = backend.close();
+(B[m[32m+            }
+(B[m             drop(other);
+             Err(WorkflowError::Cancelled)
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:306:
+     };
+     workflow.slot.finish(generation);
+     workflow.request_close();
+[31m-    let mut status = state.status.lock().unwrap_or_else(|error| error.into_inner());
+(B[m[32m+    let mut status = state
+(B[m[32m+        .status
+(B[m[32m+        .lock()
+(B[m[32m+        .unwrap_or_else(|error| error.into_inner());
+(B[m     status.phase = RestorePhase::Finished;
+     status.result = Some(result);
+ }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:313:
+[31m-fn restore_owned<T: Task>(state: &Arc<CoordinatorState<T>>, prepared: PreparedRestore, confirmed: ConfirmedRestore, backend: Arc<Mutex<Backend>>, workers: WorkerPool<T>, audio: VoiceRuntime) -> Result<ColdCommitReceipt> {
+(B[m[32m+fn restore_owned<T: Task>(
+(B[m[32m+    state: &Arc<CoordinatorState<T>>,
+(B[m[32m+    prepared: PreparedRestore,
+(B[m[32m+    confirmed: ConfirmedRestore,
+(B[m[32m+    backend: Arc<Mutex<Backend>>,
+(B[m[32m+    workers: WorkerPool<T>,
+(B[m[32m+    audio: VoiceRuntime,
+(B[m[32m+) -> Result<ColdCommitReceipt> {
+(B[m     set_phase(state, RestorePhase::Draining);
+     let mut shutdown = ColdShutdown::begin(confirmed, backend, workers, audio)?;
+     let drained = loop {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:317:
+         match shutdown.poll() {
+             Ok(Some(drained)) => break drained,
+[31m-            Ok(None) => {},
+(B[m[32m+            Ok(None) => {}
+(B[m             Err(error) => {
+                 set_phase(state, RestorePhase::Retained);
+                 loop {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/recovery_workflow/windows.rs:323:
+[31m-                    if shutdown.finish_failed_nonblocking().unwrap_or(false) { return Err(error.into()); }
+(B[m[32m+                    if shutdown.finish_failed_nonblocking().unwrap_or(false) {
+(B[m[32m+                        return Err(error.into());
+(B[m[32m+                    }
+(B[m                     thread::park_timeout(Duration::from_millis(20));
+                 }
+             }

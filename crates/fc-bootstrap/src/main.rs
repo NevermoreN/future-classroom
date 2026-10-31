@@ -33,6 +33,27 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, root, nonce] if flag == "--recovery-probe-reopen" => {
+            #[cfg(windows)]
+            {
+                application::recovery_probe_reopen(std::path::Path::new(root), nonce)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (root, nonce);
+                Err("native recovery reopen probe requires Windows".into())
+            }
+        }
+        [flag] if flag == "--recovery-probe" => {
+            #[cfg(windows)]
+            {
+                application::recovery_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("native recovery workflow probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--autostart-probe" => {
             #[cfg(windows)]
             {

@@ -1,0 +1,43 @@
+{
+  "scope": "round23 picker display path addition and full destination display rejection",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/materials/chooser.rs",
+      "sha256": "adf2a6e9dd83a34551270decf27a14128b4c9d24551a29aa38d9859283156e6a"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination.rs",
+      "sha256": "37e1989b4012e3d6bb0833c9338b19cae3ff61a7b2b68c91dc9d0c91a66ec0d7"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination_tests.rs",
+      "sha256": "e621860e68c5829219dea3b4fc6cb845157460b52e246ee6c416abac164e9e3d"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/validation.rs",
+      "sha256": "55ee9a03818c84075855022e3f17bd2e2adf44f190c5baa5347d8903f7b331ad"
+    }
+  ],
+  "executable": {
+    "path": "/tmp/fc-round23-picker-target/i686-pc-windows-gnu/debug/deps/fc_windows-387bc2bf53f679e5.exe",
+    "bytes": 69172656,
+    "sha256": "6f75b38ef04cedb4d5abd9a7b5eda968371406c0bb74a66023ae2c241aff940e"
+  },
+  "host": {
+    "passed": 4,
+    "log": "/tmp/fc-round23-picker-host-tests-display.log"
+  },
+  "windows_cross_compile": {
+    "exit_code": 0,
+    "metadata": "/tmp/fc-round23-picker-windows-tests-display-final.jsonl",
+    "log": "/tmp/fc-round23-picker-windows-build-display-final.log",
+    "filter": "materials::chooser",
+    "test_count": 11
+  },
+  "windows_clippy": {
+    "exit_code": 0,
+    "log": "/tmp/fc-round23-picker-windows-clippy-display.log"
+  },
+  "actual_windows_run": "pending parent runner; no remote action by subagent",
+  "cleanup_owner": "parent after archive/Windows verification; /tmp/fc-round23-picker-* only"
+}

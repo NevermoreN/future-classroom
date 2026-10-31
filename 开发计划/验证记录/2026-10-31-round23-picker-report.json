@@ -1,0 +1,44 @@
+{
+  "scope": "round23 native backup pickers and opaque safe destination copy",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/materials/chooser.rs",
+      "sha256": "c5d867e2f4e78554388d229490865a53b120523e5ebd32326550e40f4b7e52aa"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination.rs",
+      "sha256": "591bda385dc896d264664a466f916a08ea37502f034de5ef0a8f6fac7b7a71e3"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination_tests.rs",
+      "sha256": "44546f725f5dfdd425befd70bbbe5b33d1d7fdb90c39ba8bf1028dbea2f99ff8"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/validation.rs",
+      "sha256": "f9612d14cbbf437c9639da70c7ad4052b09f869c61b4aaebd1e17b676471323e"
+    }
+  ],
+  "executable": {
+    "path": "/tmp/fc-round23-picker-target/i686-pc-windows-gnu/debug/deps/fc_windows-387bc2bf53f679e5.exe",
+    "bytes": 69138975,
+    "sha256": "0bf4dde63038431023f9d9616d4f57f6de82732e9be0a642950f32723b728988"
+  },
+  "host": {
+    "passed": 3,
+    "log": "/tmp/fc-round23-picker-host-tests-final.log"
+  },
+  "windows_cross_compile": {
+    "exit_code": 0,
+    "metadata": "/tmp/fc-round23-picker-windows-tests-final.jsonl",
+    "log": "/tmp/fc-round23-picker-windows-build-final.log",
+    "filter": "materials::chooser",
+    "test_count": 9
+  },
+  "windows_clippy": {
+    "exit_code": 0,
+    "log": "/tmp/fc-round23-picker-windows-clippy.log"
+  },
+  "actual_windows_run": "pending parent runner; no remote action by this subagent",
+  "initial_failure": "/tmp/fc-round23-picker-host-build.log: pub(super) module cannot be standalone rustc crate; corrected test-only harness includes it as submodule",
+  "cleanup_owner": "parent after archive and Windows verification; only /tmp/fc-round23-picker-*"
+}

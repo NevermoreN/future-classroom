@@ -92,36 +92,39 @@ pub struct ColdShutdown<T: Task> {
     failed: bool,
 }
 impl<T: Task> ColdShutdown<T> {
-    /// The caller owns InstanceGuard and must have physically drained any
-    /// listener/HTTP IO domain; WebService closure alone is not such evidence.
-    /// Stop worker acceptance immediately. Drop old UI tickets/previews/media pins
-    /// before switching; retained handles also make the adapter's rename fail.
-    pub fn begin(
+    /// The caller owns InstanceGuard and has physically drained external IO.
+    /// Production coordinators retain every physical owner even if deployment
+    /// validation fails. The accompanying error forbids switching, but cannot
+    /// release a live worker or audio thread.
+    pub fn begin_retained(
         confirmed: ConfirmedRestore,
         backend: Arc<Mutex<Backend>>,
         workers: WorkerPool<T>,
         audio: VoiceRuntime,
-    ) -> Result<Self, ShutdownError> {
-        {
-            let owned = backend
-                .lock()
-                .map_err(|_| ShutdownError::Backend(BackendError::Closed))?;
-            if owned.recovery_database_path() != confirmed.live_database() {
-                return Err(ShutdownError::WrongDeployment);
+    ) -> (Self, Option<ShutdownError>) {
+        let error = match backend.lock() {
+            Ok(owned) if owned.recovery_database_path() != confirmed.live_database() => {
+                Some(ShutdownError::WrongDeployment)
             }
-            if !owned.session_control().is_recovering() {
-                return Err(ShutdownError::NotRecovering);
+            Ok(owned) if !owned.session_control().is_recovering() => {
+                Some(ShutdownError::NotRecovering)
             }
-        }
+            Ok(_) => None,
+            Err(_) => Some(ShutdownError::Backend(BackendError::Closed)),
+        };
         workers.request_stop();
         audio.shutdown();
-        Ok(Self {
-            backend,
-            workers: Some(workers),
-            audio,
-            confirmed: Some(confirmed),
-            failed: false,
-        })
+        let failed = error.is_some();
+        (
+            Self {
+                backend,
+                workers: Some(workers),
+                audio,
+                confirmed: Some(confirmed),
+                failed,
+            },
+            error,
+        )
     }
     /// Poll from the shutdown coordinator, outside the UI and shared workers.
     /// None retains this SAME ownership. No deadline frees a live native owner.
@@ -137,6 +140,40 @@ impl<T: Task> ColdShutdown<T> {
             }
         }
         result
+    }
+    /// Fault settlement only, on the independent coordinator. A logical error
+    /// does not prove any native owner has returned. Never publishes a permit.
+    pub fn finish_failed_nonblocking(&mut self) -> Result<bool, ShutdownError> {
+        if !self.failed {
+            return Err(ShutdownError::NotRecovering);
+        }
+        let _ = self.audio.reap_nonblocking();
+        let status = match self.audio.status() {
+            Ok(status) => status,
+            Err(_) => return Ok(false),
+        };
+        if status.phase != RuntimePhase::Closed
+            || status.physical_thread_running
+            || status.ack_generation < status.stop_generation
+            || self
+                .workers
+                .as_ref()
+                .is_some_and(|pool| !pool.is_finished_with(crate::physical_thread::is_finished))
+        {
+            return Ok(false);
+        }
+        if let Some(pool) = self.workers.take() {
+            // A faulted result still joins both already-finished threads. The
+            // original operation remains failed; this only settles ownership.
+            let _ = pool.join();
+        }
+        self.backend
+            .lock()
+            .map_err(|_| ShutdownError::Backend(BackendError::Closed))?
+            .close()
+            .map_err(ShutdownError::Backend)?;
+        self.confirmed.take();
+        Ok(true)
     }
     fn poll_owned(&mut self) -> Result<Option<DrainedRestore>, ShutdownError> {
         self.audio
@@ -155,7 +192,7 @@ impl<T: Task> ColdShutdown<T> {
         if self
             .workers
             .as_ref()
-            .is_some_and(|pool| !pool.is_finished())
+            .is_some_and(|pool| !pool.is_finished_with(crate::physical_thread::is_finished))
         {
             return Ok(None);
         }

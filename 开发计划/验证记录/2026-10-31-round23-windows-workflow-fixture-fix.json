@@ -1,0 +1,26 @@
+{
+  "scope": "Targeted Windows noninteractive test; source and exe frozen for this component only, not whole workspace acceptance.",
+  "filter": "recovery_workflow::windows::tests",
+  "exeSha256": "5036cd10b96ec8a01c1ad327cf4732ccdfcb70e8bf1ae5b3fdfb7953371aa4b8",
+  "status": "PASS",
+  "cleanup": {
+    "sshd": "Running",
+    "rootAbsent": true
+  },
+  "result": {
+    "output": [
+      "",
+      "running 5 tests",
+      "test recovery_workflow::windows::tests::abandoned_review_is_only_removed_by_the_existing_file_worker ... ok",
+      "test recovery_workflow::windows::tests::abort_without_restore_capability_waits_for_the_real_worker_and_keeps_original_data ... ok",
+      "test recovery_workflow::windows::tests::cancelling_cold_restore_keeps_real_worker_and_source_pin_until_it_exits ... ok",
+      "test recovery_workflow::windows::tests::panicked_coordinator_never_publishes_a_shutdown_completion ... ok",
+      "test recovery_workflow::windows::tests::lost_confirmation_notification_remains_claimable_and_commits_after_real_drain ... ok",
+      "",
+      "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 115 filtered out; finished in 18.97s",
+      ""
+    ],
+    "exitCode": 0,
+    "sha256": "5036cd10b96ec8a01c1ad327cf4732ccdfcb70e8bf1ae5b3fdfb7953371aa4b8"
+  }
+}

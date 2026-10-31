@@ -1,0 +1,106 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+    Checking subtle v2.6.1
+    Checking memchr v2.8.3
+   Compiling rustversion v1.0.23
+   Compiling zerocopy v0.8.63
+   Compiling ahash v0.8.12
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+    Checking digest v0.10.7
+   Compiling pkg-config v0.3.34
+    Checking once_cell v1.21.4
+    Checking sha2 v0.10.9
+   Compiling cc v1.10.0
+    Checking serde_json v1.0.145
+   Compiling vcpkg v0.2.15
+   Compiling crc32fast v1.5.3
+    Checking smallvec v1.16.4
+    Checking inout v0.1.4
+    Checking adler2 v2.0.1
+    Checking simd-adler32 v0.3.10
+    Checking cipher v0.4.4
+   Compiling encoding_rs v0.8.42
+    Checking miniz_oxide v0.9.1
+    Checking scopeguard v1.2.0
+   Compiling multiversion_no_op v1.0.0
+    Checking simdutf8 v0.1.5
+    Checking core_detect v1.0.0
+    Checking zlib-rs v0.6.8
+    Checking aes v0.8.4
+    Checking hmac v0.12.1
+    Checking bitflags v2.13.2
+    Checking fallible-iterator v0.3.0
+    Checking fallible-streaming-iterator v0.1.9
+    Checking log v0.4.34
+    Checking rustc-hash v2.1.3
+    Checking pbkdf2 v0.12.2
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking flate2 v1.1.10
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking pdf-syntax v0.6.1
+    Checking quick-xml v0.42.0
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+   Compiling libsqlite3-sys v0.30.1
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking hashbrown v0.14.5
+    Checking hashlink v0.9.1
+    Checking rusqlite v0.32.1
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+   --> crates/fc-bootstrap/src/application/backup_controller.rs:64:76
+    |
+ 64 |                 let access = backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease)?;
+    |                                                                            ^^^^^^^^^^^^^^^^^^^^^^------- argument #2 of type `fc_domain::ids::Revision` is missing
+    |
+note: method defined here
+   --> crates/fc-bootstrap/src/backend/recovery.rs:292:12
+    |
+292 |     pub fn ordinary_backup_access(
+    |            ^^^^^^^^^^^^^^^^^^^^^^
+help: provide the argument
+    |
+ 64 |                 let access = backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease, /* fc_domain::ids::Revision */)?;
+    |                                                                                                        ++++++++++++++++++++++++++++++++
+
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+   --> crates/fc-bootstrap/src/application/backup_controller.rs:68:76
+    |
+ 68 |                 let access = backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease)?;
+    |                                                                            ^^^^^^^^^^^^^^^^^^^^^^------- argument #2 of type `fc_domain::ids::Revision` is missing
+    |
+note: method defined here
+   --> crates/fc-bootstrap/src/backend/recovery.rs:292:12
+    |
+292 |     pub fn ordinary_backup_access(
+    |            ^^^^^^^^^^^^^^^^^^^^^^
+help: provide the argument
+    |
+ 68 |                 let access = backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease, /* fc_domain::ids::Revision */)?;
+    |                                                                                                        ++++++++++++++++++++++++++++++++
+
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+   --> crates/fc-bootstrap/src/application/backup_controller.rs:78:85
+    |
+ 78 |                 let access = Arc::new(backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease)?);
+    |                                                                                     ^^^^^^^^^^^^^^^^^^^^^^------- argument #2 of type `fc_domain::ids::Revision` is missing
+    |
+note: method defined here
+   --> crates/fc-bootstrap/src/backend/recovery.rs:292:12
+    |
+292 |     pub fn ordinary_backup_access(
+    |            ^^^^^^^^^^^^^^^^^^^^^^
+help: provide the argument
+    |
+ 78 |                 let access = Arc::new(backend.lock().map_err(|_| Failure::Stopped)?.ordinary_backup_access(lease, /* fc_domain::ids::Revision */)?);
+    |                                                                                                                 ++++++++++++++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0061`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 3 previous errors

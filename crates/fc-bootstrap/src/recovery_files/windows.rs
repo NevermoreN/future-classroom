@@ -108,14 +108,51 @@ impl ValidationControl for Control<'_> {
     }
 }
 fn digest(source: &mut LockedFile, check: &dyn Fn() -> bool) -> Result<(u64, [u8; 32])> {
+    let expected = source.len().map_err(unavailable)?;
+    if expected > MAX_DATABASE_BYTES {
+        return Err(RecoveryFileError::InvalidPackage);
+    }
     source
         .file_mut()
         .seek(SeekFrom::Start(0))
         .map_err(unavailable)?;
-    let out =
-        fc_materials::validation::hash_file(source.file_mut(), &Control(check)).map_err(invalid)?;
+    let mut hash = fc_security::Sha256Stream::default();
+    let mut total = 0u64;
+    let mut block = [0; 32 * 1024];
+    loop {
+        ensure(check)?;
+        let n = source.file_mut().read(&mut block).map_err(unavailable)?;
+        if n == 0 {
+            break;
+        }
+        total = total
+            .checked_add(n as u64)
+            .ok_or(RecoveryFileError::InvalidPackage)?;
+        if total > expected {
+            return Err(RecoveryFileError::InvalidPackage);
+        }
+        hash.update(&block[..n]);
+    }
+    if total != expected {
+        return Err(RecoveryFileError::InvalidPackage);
+    }
     ensure(check)?;
-    Ok(out)
+    Ok((total, hash.finish()))
+}
+
+struct DigestWriter<'a> {
+    inner: &'a mut std::fs::File,
+    hash: fc_security::Sha256Stream,
+}
+impl Write for DigestWriter<'_> {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        let n = self.inner.write(bytes)?;
+        self.hash.update(&bytes[..n]);
+        Ok(n)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.inner.flush()
+    }
 }
 fn verify_media(
     source: &mut LockedFile,
@@ -201,6 +238,7 @@ pub struct ExportReceipt {
     pub path: PathBuf,
     pub bytes: u64,
     pub manifest_sha256: [u8; 32],
+    pub package_sha256: [u8; 32],
 }
 /// Every immutable original and its ancestors remain pinned through the actual
 /// package publication. Acquiring the complete set may fail/retry under GC;
@@ -397,9 +435,13 @@ impl RecoveryFiles {
             files: &self.files,
             path: Some(stage),
         };
-        {
+        let package_sha256 = {
+            let mut output = DigestWriter {
+                inner: out.file_mut(),
+                hash: fc_security::Sha256Stream::default(),
+            };
             let mut writer =
-                PackageWriter::new_while(out.file_mut(), manifest, check).map_err(framing)?;
+                PackageWriter::new_while(&mut output, manifest, check).map_err(framing)?;
             for (entry, source) in manifest.entries.iter().zip(pinned.sources.iter_mut()) {
                 ensure(check)?;
                 if source.len().map_err(unavailable)? != entry.bytes() {
@@ -414,7 +456,8 @@ impl RecoveryFiles {
                     .map_err(framing)?;
             }
             writer.finish_while(check).map_err(framing)?;
-        }
+            output.hash.finish()
+        };
         ensure(check)?;
         let pinned = out.seal().map_err(unavailable)?;
         let bytes = pinned.len().map_err(unavailable)?;
@@ -428,6 +471,7 @@ impl RecoveryFiles {
             path: target,
             bytes,
             manifest_sha256: fc_security::sha256(&encode_manifest(manifest).map_err(invalid)?),
+            package_sha256,
         })
     }
     pub fn preflight_package(

@@ -74,6 +74,46 @@ impl AudioDomain for Audio {
     }
 }
 #[test]
+fn invalid_deployment_still_retains_actual_worker_and_audio_until_final_settlement() {
+    let source = Fixture::new();
+    let other = Fixture::new();
+    let (_, confirmed) = source.confirm();
+    let workers = WorkerPool::<HeldTask>::start().unwrap();
+    let hold = Arc::new(Hold::default());
+    let _ticket = workers
+        .handle()
+        .try_submit(
+            HeldTask(hold.clone()),
+            Instant::now() + Duration::from_secs(60),
+        )
+        .map_err(|_| ())
+        .unwrap();
+    hold.entered();
+    let audio_hold = Arc::new(Hold::default());
+    let audio = VoiceRuntime::new(Arc::new(AudioFactory(audio_hold.clone())));
+    let (mut shutdown, error) =
+        ColdShutdown::begin_retained(confirmed, other.backend.clone(), workers, audio);
+    assert_eq!(error, Some(ShutdownError::WrongDeployment));
+    // Reaping starts the shutdown-only audio owner; merely setting closed does
+    // not create it. Wait only after the real owner was asked to progress.
+    assert!(!shutdown.finish_failed_nonblocking().unwrap());
+    audio_hold.entered();
+    assert!(!shutdown.finish_failed_nonblocking().unwrap());
+    audio_hold.release();
+    for _ in 0..16 {
+        assert!(!shutdown.finish_failed_nonblocking().unwrap());
+        std::thread::yield_now();
+    }
+    hold.release();
+    let until = Instant::now() + Duration::from_secs(15);
+    while !shutdown.finish_failed_nonblocking().unwrap() {
+        assert!(Instant::now() < until);
+        std::thread::yield_now();
+    }
+    assert!(other.backend.lock().unwrap().state().is_err());
+    assert!(!other.root.join("candidate.sqlite3").exists());
+}
+#[test]
 fn cold_switch_permit_waits_for_physical_worker_audio_destructors_and_writer_close() {
     let f = Fixture::new();
     let (_, confirmed) = f.confirm();
@@ -91,7 +131,9 @@ fn cold_switch_permit_waits_for_physical_worker_audio_destructors_and_writer_clo
     hold.entered();
     let audio_hold = Arc::new(Hold::default());
     let audio = VoiceRuntime::new(Arc::new(AudioFactory(audio_hold.clone())));
-    let mut shutdown = ColdShutdown::begin(confirmed, f.backend.clone(), pool, audio).unwrap();
+    let (mut shutdown, error) =
+        ColdShutdown::begin_retained(confirmed, f.backend.clone(), pool, audio);
+    assert_eq!(error, None);
     assert!(shutdown.poll().unwrap().is_none());
     audio_hold.entered();
     // A cancelled worker owns its real slot; audio completion alone is not proof.

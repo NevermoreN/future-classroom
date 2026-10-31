@@ -1,0 +1,110 @@
+{
+  "scope": "Final Round23 stage5 source and build identity map; Host compiled inputs and 19 successful Host executables unchanged. Windows production App and three Windows-only test inputs changed after stage2. Windows artifact acceptance uses separately checked actual execution results, not this file.",
+  "stage2SourceSha256": "ebeb95be0330605e77b8e4b942772c62c55b847d3942ddad3707c0e65af379c6",
+  "finalSourceSha256": "789b68e9c6db4d4eb9e98b633e7607e93953c4507f47bb2809e63b2f88483abd",
+  "changedInputs": [
+    "crates/fc-bootstrap/src/application.rs",
+    "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+    "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+    "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs"
+  ],
+  "all19SuccessfulHostExecutablesUnchanged": true,
+  "cargoFreshConfirmation": {
+    "modern": [
+      {
+        "target": "build-script-build",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc_bootstrap",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc-bootstrap",
+        "test": false,
+        "fresh": true
+      }
+    ],
+    "win7": [
+      {
+        "target": "build-script-build",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc_bootstrap",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc-bootstrap",
+        "test": false,
+        "fresh": true
+      }
+    ],
+    "hostTests": [
+      {
+        "target": "build-script-build",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc_bootstrap",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "fc_bootstrap",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "calendar_execution_fence",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "voice_storage",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "verify_web_assets",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "schedule_operations",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "fc-bootstrap",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "business_storage",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "runtime_storage",
+        "test": true,
+        "fresh": true
+      },
+      {
+        "target": "fc-bootstrap",
+        "test": false,
+        "fresh": true
+      },
+      {
+        "target": "autostart_coordinator",
+        "test": true,
+        "fresh": true
+      }
+    ]
+  }
+}

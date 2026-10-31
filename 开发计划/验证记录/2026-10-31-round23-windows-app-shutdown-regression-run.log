@@ -1,0 +1,6 @@
+{"scope": "Targeted Windows noninteractive test; source and exe frozen for this component only, not whole workspace acceptance.", "filter": "application::backup_shutdown_tests", "exeSha256": "d4cfbd1171200dcfa30d4a7fd6b3807d5d9ef9528cb529f8fc44721dfce2594c", "status": "FAIL", "cleanup": {"sshd": "Running", "rootAbsent": true}}
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 131 filtered out; finished in 0.09s
+Traceback (most recent call last):
+  File "/tmp/fc-round23-run-targeted.py", line 24, in <module>
+    assert report['status']=='PASS' and report['cleanup'].get('rootAbsent') and report['cleanup'].get('sshd')=='Running'
+AssertionError

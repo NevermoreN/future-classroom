@@ -3,6 +3,18 @@
 mod autostart_controller;
 mod autostart_editor;
 mod autostart_probe;
+mod backup_controller;
+mod backup_editor;
+mod backup_probe;
+#[cfg(test)]
+mod backup_shutdown_tests;
+pub fn recovery_probe() -> std::result::Result<(), String> {
+    backup_probe::run()
+}
+pub fn recovery_probe_reopen(root: &Path, nonce: &str) -> std::result::Result<(), String> {
+    backup_probe::reopen(root, nonce)
+}
+mod shared_pool;
 pub fn autostart_probe() -> std::result::Result<(), String> {
     autostart_probe::run()
 }
@@ -98,6 +110,7 @@ const TO_SCHEDULE: ActionId = ActionId(17);
 const TO_DISPLAY: ActionId = ActionId(18);
 const TO_MATERIALS: ActionId = ActionId(21);
 const TO_LESSON: ActionId = ActionId(22);
+const TO_BACKUP: ActionId = ActionId(26);
 const TO_WEB: ActionId = ActionId(23);
 const TO_PROFILES: ActionId = ActionId(24);
 const TO_AUTOSTART: ActionId = ActionId(25);
@@ -123,6 +136,8 @@ enum Screen {
     Schedule,
     Calendar,
     Autostart,
+    Backup,
+    Restoring,
     Display,
     Profiles,
     ProfileContent,
@@ -352,6 +367,7 @@ fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
 }
 
 enum Outcome {
+    Backup(backup_controller::Completed),
     Opened(
         Arc<Mutex<Backend>>,
         SessionControl,
@@ -420,6 +436,9 @@ struct Request {
     clock: Arc<CurrentClock>,
 }
 enum Work {
+    #[cfg(test)]
+    HoldForShutdown(Arc<backup_shutdown_tests::Hold>),
+    Backup(Box<backup_controller::Job>),
     Open(DataPaths, Arc<CurrentClock>),
     Request(Request),
     Refresh(Arc<Mutex<Backend>>),
@@ -490,6 +509,9 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            #[cfg(test)]
+            Self::HoldForShutdown(_) => Some(0),
+            Self::Backup(job) => job.allocation_bytes(),
             Self::Open(paths, _) => Some(paths.root().as_os_str().len().saturating_mul(2)),
             Self::ValidateOffice(p)
             | Self::MaintainVoice(p, _)
@@ -550,6 +572,12 @@ impl Task for Work {
     fn run(self, context: &JobContext) -> Self::Output {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
+            #[cfg(test)]
+            Self::HoldForShutdown(hold) => {
+                hold.wait();
+                Ok(Outcome::MaterialCleaned)
+            }
+            Self::Backup(job) => job.run(context),
             Self::Open(paths, clock) => {
                 let root = paths.root().to_owned();
                 // The first frame is already visible. Recovery owns the same
@@ -1100,7 +1128,7 @@ struct Pending {
 }
 struct App {
     window: Window,
-    pool: WorkerPool<Work>,
+    pool: shared_pool::SharedPool<Work>,
     clock: Arc<CurrentClock>,
     backend: Option<Arc<Mutex<Backend>>>,
     control: Option<SessionControl>,
@@ -1121,6 +1149,7 @@ struct App {
     last_input: Instant,
     stopping: bool,
     shutdown: Option<JobTicket<Result<Outcome>>>,
+    writer_closed: bool,
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
     schedule: Option<ScheduleEditor>,
@@ -1128,6 +1157,7 @@ struct App {
     autostart: Option<autostart_editor::Editor>,
     autostart_job: Option<Pending>,
     autostart_scope: Option<fc_windows::system::RunScope>,
+    backup: backup_controller::State,
     calendar_job: Option<Pending>,
     next_calendar_maintenance: Instant,
     display: Option<display_editor::Editor>,
@@ -1169,6 +1199,11 @@ impl App {
             (_, true) => self.status.clone(),
             _ => format!("{}\n{}", self.status, self.desktop_notice),
         };
+        if matches!(self.screen, Screen::Backup | Screen::Restoring) {
+            if let Some(view) = self.backup.view(&status) {
+                return view;
+            }
+        }
         if self.screen == Screen::Profiles {
             if let Some(editor) = &self.profiles {
                 let mut view = editor.view(&status, self.pending.is_some() || self.stopping);
@@ -1260,6 +1295,11 @@ impl App {
                     view.actions.push(Action {
                         id: TO_AUTOSTART,
                         label: "登录自启动".into(),
+                        enabled: true,
+                    });
+                    view.actions.push(Action {
+                        id: TO_BACKUP,
+                        label: "完整备份与恢复".into(),
                         enabled: true,
                     });
                 }
@@ -1407,7 +1447,7 @@ impl App {
                         action(TO_SUBJECTS, "基础科目"),
                         action(TO_ACCOUNTS, "账号与任教管理"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
-                        action(TO_DISPLAY, "桌面与启动设置"),
+                        action(TO_DISPLAY, "桌面、启动与备份"),
                         action(TO_LESSON, "本节临时换课"),
                         action(TO_WEB, "教师设备与配对"),
                     ]);
@@ -1544,6 +1584,10 @@ impl App {
             Screen::Schedule => {
                 view.title = "正在加载课表".into();
             }
+            Screen::Backup | Screen::Restoring => {
+                view.title = "完整备份与恢复".into();
+                view.description = "正在核对备份服务，请稍候。".into();
+            }
             Screen::Autostart => {
                 view.title = "正在读取登录自启动".into();
             }
@@ -1595,10 +1639,22 @@ impl App {
         Ok(())
     }
     fn lock(&mut self) {
+        if self.backup.irreversible()
+            || self
+                .control
+                .as_ref()
+                .is_some_and(SessionControl::is_recovering)
+        {
+            if let Some(control) = &self.control {
+                control.lock_local();
+            }
+            return;
+        }
         if self.backend.is_none() && self.screen == Screen::Starting {
             return;
         }
         self.leave_web();
+        self.lock_backup();
         self.clear_profile_preview();
         if let Some(c) = &self.control {
             c.lock_local();
@@ -1659,10 +1715,29 @@ impl App {
         self.status.clear();
     }
     fn begin_shutdown(&mut self) {
+        if self
+            .control
+            .as_ref()
+            .is_some_and(SessionControl::is_recovering)
+        {
+            let _ = self.poll_backup();
+        }
+        if self.backup.irreversible()
+            || self
+                .control
+                .as_ref()
+                .is_some_and(SessionControl::is_recovering)
+        {
+            self.close_backup();
+            self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(5));
+            self.shell.stop();
+            return;
+        }
         if self.stopping {
             return;
         }
         self.stopping = true;
+        self.close_backup();
         if let Some(ticket) = &self.content_maintenance {
             ticket.cancel();
         }
@@ -1680,6 +1755,12 @@ impl App {
         self.schedule_shutdown();
     }
     fn schedule_shutdown(&mut self) {
+        if self.writer_closed {
+            return;
+        }
+        if self.backup.irreversible() || !self.backup.retirement_complete() {
+            return;
+        }
         if self.shutdown.is_some() || self.autostart_job.is_some() {
             return;
         }
@@ -1698,7 +1779,14 @@ impl App {
                 Instant::now() + Duration::from_secs(5),
             ) {
                 Ok(ticket) => self.shutdown = Some(ticket),
-                Err(_) => self.pool.request_stop(),
+                Err(rejected) => match rejected.kind {
+                    fc_runtime::worker::Rejection::Busy
+                    | fc_runtime::worker::Rejection::Deadline => {}
+                    _ => {
+                        self.terminate_required = true;
+                        self.pool.request_stop();
+                    }
+                },
             }
         } else if self.pending.is_none() {
             self.pool.request_stop();
@@ -1751,6 +1839,24 @@ impl App {
         self.render()
     }
     fn event(&mut self, event: Event) -> std::result::Result<(), String> {
+        if self
+            .control
+            .as_ref()
+            .is_some_and(SessionControl::is_recovering)
+        {
+            self.poll_backup()?;
+        }
+        if self.backup.irreversible() {
+            return match event {
+                Event::Submit(action, data) => self.backup_event(action, data),
+                Event::Close => {
+                    self.close_backup();
+                    self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(30));
+                    self.render()
+                }
+                _ => Ok(()),
+            };
+        }
         match event {
             Event::Input => {
                 self.last_input = Instant::now();
@@ -1887,6 +1993,9 @@ impl App {
                     self.lock();
                     return self.render();
                 }
+                if self.screen == Screen::Backup && !self.stopping {
+                    return self.backup_event(action, data);
+                }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
                 }
@@ -1897,6 +2006,14 @@ impl App {
                         }
                     }
                     return self.open_profiles();
+                }
+                if action == TO_BACKUP {
+                    if self.screen == Screen::Display {
+                        if let Some(editor) = &mut self.display {
+                            editor.capture(data);
+                        }
+                    }
+                    return self.open_backup();
                 }
                 if action == TO_AUTOSTART {
                     if self.screen == Screen::Display {
@@ -1960,6 +2077,8 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Schedule
+                            } else if owner.is_some_and(|owner| self.backup.has_review(owner)) {
+                                Screen::Backup
                             } else if self.autostart.as_ref().is_some_and(|e| {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
@@ -3065,9 +3184,11 @@ impl App {
         let Some(owner) = self.current_global_owner() else {
             return false;
         };
-        self.autostart
-            .as_ref()
-            .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+        self.backup.has_review(owner)
+            || self
+                .autostart
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
             || self
                 .schedule
                 .as_ref()
@@ -3167,6 +3288,14 @@ impl App {
         self.render()
     }
     fn poll(&mut self) -> std::result::Result<(), String> {
+        if self.shell.reap_nonblocking().is_err() && !self.terminate_required {
+            self.terminate_required = true;
+            self.begin_shutdown();
+        }
+        self.poll_backup()?;
+        if self.backup.irreversible() {
+            return Ok(());
+        }
         if !self.stopping
             && self.control.as_ref().is_some_and(|control| {
                 matches!(
@@ -3358,12 +3487,14 @@ impl App {
         if let Some(ticket) = &mut self.shutdown {
             match ticket.try_result() {
                 Ok(Some(Ok(Outcome::Closed))) => {
+                    self.writer_closed = true;
                     self.shutdown = None;
                     self.pool.request_stop();
                 }
                 Ok(None) => {}
                 _ => {
                     self.shutdown = None;
+                    self.terminate_required = true;
                     self.pool.request_stop();
                 }
             }
@@ -3555,6 +3686,7 @@ impl App {
                     }
                 }
                 Ok(Outcome::Autostart(..)) => {}
+                Ok(Outcome::Backup(..)) => return Err("备份结果进入了普通请求通道".into()),
                 Ok(Outcome::Calendar(loaded)) => self.calendar_loaded(*loaded),
                 Ok(Outcome::CalendarMaintained { .. }) => {}
                 Ok(Outcome::ScheduleLoaded(document)) => {
@@ -3694,6 +3826,9 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     let clock = Arc::new(CurrentClock::new());
     let mut app = create_app(clock.clone(), probe)?;
     app.root = paths.root().to_owned();
+    app.backup.workflow = Some(fc_bootstrap::recovery_workflow::RecoveryWorkflow::new(
+        paths.clone(),
+    ));
     app.desktop.set_root(paths.root().to_owned());
     let control_slot = app.control_slot.clone();
     let audio_slot = app.audio_slot.clone();
@@ -3950,8 +4085,10 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             .shutdown_deadline
             .is_some_and(|deadline| Instant::now() >= deadline)
             && (app.terminate_required
+                || (!app.backup.irreversible() && app.backend.is_some() && !app.writer_closed)
                 || !app.pool.is_finished()
                 || !app.shell.is_finished()
+                || !app.backup.exit_ready()
                 || app.audio.as_ref().is_some_and(|audio| {
                     audio.status().map_or(true, |s| {
                         s.phase != RuntimePhase::Closed || s.physical_thread_running
@@ -3962,6 +4099,8 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             std::process::exit(2);
         }
         if app.stopping
+            && (app.backup.irreversible() || app.backend.is_none() || app.writer_closed)
+            && app.backup.exit_ready()
             && app.pool.is_finished()
             && app.shell.is_finished()
             && app.audio.as_ref().is_none_or(|audio| {
@@ -4018,7 +4157,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         .map_err(|_| "无法注册独立锁定操作".to_owned())?;
     Ok(App {
         window,
-        pool: WorkerPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
+        pool: shared_pool::SharedPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
         clock,
         backend: None,
         control: None,
@@ -4039,6 +4178,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         last_input: Instant::now(),
         stopping: false,
         shutdown: None,
+        writer_closed: false,
         shutdown_deadline: None,
         terminate_required: false,
         schedule: None,
@@ -4046,6 +4186,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         autostart: None,
         autostart_job: None,
         autostart_scope: None,
+        backup: backup_controller::State::default(),
         calendar_job: None,
         next_calendar_maintenance: Instant::now() + Duration::from_secs(30),
         lesson_editor: None,

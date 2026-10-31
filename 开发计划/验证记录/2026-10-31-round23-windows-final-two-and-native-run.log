@@ -1,0 +1,10 @@
+Web pairing port probe PASS; real HTTPS/TLS/browser/listening delivery remains unvalidated
+fc_bootstrap-7ad323ce2c7a7df5.exe PASS
+fc_bootstrap-bddbc100d4f6b331.exe PASS
+cleanup: PASS
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 348, in <module>
+    main()
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 249, in main
+    raise RuntimeError("isolated native workbench application failed")
+RuntimeError: isolated native workbench application failed

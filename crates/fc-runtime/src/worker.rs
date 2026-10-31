@@ -488,9 +488,15 @@ impl<T: Task> WorkerPool<T> {
     pub fn request_stop(&self) {
         self.handle.request_stop();
     }
-    /// True only after both physical threads have exited, not merely after cancel.
+    /// Rust join-ready state for both threads, not merely cancellation. Native
+    /// callers that require completed platform TLS must use is_finished_with.
     pub fn is_finished(&self) -> bool {
         self.threads.iter().all(JoinHandle::is_finished)
+    }
+    /// Native composition may require an OS thread-termination witness as well
+    /// as Rust's join-ready flag, which can precede platform TLS destruction.
+    pub fn is_finished_with(&self, finished: impl FnMut(&JoinHandle<()>) -> bool) -> bool {
+        self.threads.iter().all(finished)
     }
     pub fn is_faulted(&self) -> bool {
         self.handle.is_faulted()

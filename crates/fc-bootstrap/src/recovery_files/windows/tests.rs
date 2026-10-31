@@ -77,6 +77,10 @@ fn complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area
         .export_package(&manifest, &workspace.ordinary_database(), &|| true)
         .unwrap();
     let pin = LockedFile::open(&receipt.path, MAX_PACKAGE_BYTES).unwrap();
+    assert_eq!(
+        fc_security::sha256(&std::fs::read(&receipt.path).unwrap()),
+        receipt.package_sha256
+    );
     let prepared = f.f().preflight_pinned(pin, &|| true).unwrap();
     assert_eq!(prepared.manifest(), &manifest);
     assert_eq!(prepared.manifest_sha256(), receipt.manifest_sha256);
@@ -93,6 +97,32 @@ fn complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area
     let operation = workspace.operation.clone();
     drop(workspace);
     assert!(!operation.exists());
+}
+#[test]
+fn database_digest_exceeds_the_material_limit_without_a_full_file_allocation() {
+    let f = Fixture::new();
+    let workspace = f.f().workspace().unwrap();
+    let path = workspace.ordinary_database();
+    let mut source = f.f().files.create_new(&path).unwrap();
+    source.file_mut().set_len(51 * 1024 * 1024).unwrap();
+    source.finish().unwrap();
+    let mut pin = LockedFile::open(&path, MAX_DATABASE_BYTES).unwrap();
+    assert_eq!(
+        digest(&mut pin, &|| false),
+        Err(RecoveryFileError::Cancelled)
+    );
+    let (bytes, hash) = digest(&mut pin, &|| true).unwrap();
+    assert_eq!(bytes, 51 * 1024 * 1024);
+    // Independent Python hashlib/OpenSSL result for 51MiB of zero bytes.
+    assert_eq!(
+        hash,
+        [
+            0x71, 0xc6, 0xd5, 0xfd, 0x8d, 0xd1, 0xda, 0x3c, 0xf5, 0x73, 0x50, 0xf8, 0x97, 0x97,
+            0x98, 0x0a, 0x86, 0x67, 0xe3, 0x5d, 0x1d, 0xb9, 0x34, 0x2f, 0x59, 0x24, 0xc2, 0x83,
+            0x12, 0x8b, 0xce, 0xc5
+        ]
+    );
+    drop(pin);
 }
 #[test]
 fn hash_valid_malformed_image_and_cancelled_package_never_leave_candidate_files() {

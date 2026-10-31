@@ -1,0 +1,36 @@
+{
+  "scope": "round23 Shell physical native thread exit and public Windows completion predicate",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "sha256": "38dbb14924529f9f4788967c0d0dab425501e481856b635250d9489c5332eb96"
+    },
+    {
+      "path": "crates/fc-windows/src/system/mod.rs",
+      "sha256": "975cfa67604d69c3cf06640c1026d0390ce88befcf505599a2a0585b44cdf14b"
+    },
+    {
+      "path": "crates/fc-windows/src/system/thread_exit.rs",
+      "sha256": "a7535d4ef7111061481a2eac4c2d331f53f85af780059921f0e13b556c74964d"
+    }
+  ],
+  "new_tests": 3,
+  "shell_test_count": 7,
+  "native_test_requirements": [
+    "logical-finished flag and Rust JoinHandle packet true while real TLS destructor gate held: public native predicate remains false, reap false, no replacement",
+    "reap preserves unconsumed results and outstanding blocks retirement",
+    "actual joined outer panic returns sticky ThreadUnavailable and stops new admission"
+  ],
+  "verification": {
+    "before_public_extraction": "targeted fc-windows Windows no-run exit0; /tmp/fc-round23-shell-windows-tests.jsonl and windows-build.log",
+    "final_extracted_source": "parent统一编译及实机，subagent按要求不再构建"
+  },
+  "std_source_evidence": {
+    "toolchain": "Rust1.97.1",
+    "lifecycle_path": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs",
+    "is_finished_implementation": "Arc::strong_count(&self.packet)==1; rust_start drops packet before thread-local destructors",
+    "join_handle_path": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/join_handle.rs",
+    "documented_boundary": "is_finished proves main function returned, potentially before actual thread stops"
+  },
+  "cleanup": "root archives logs then cleans own round23 shell prefix; picker prefix contains pre-extraction test build cache"
+}

@@ -158,8 +158,9 @@ impl Fixture {
         let (_, confirmed) = self.confirm();
         let pool = fc_runtime::worker::WorkerPool::<QuietTask>::start().unwrap();
         let audio = crate::voice_runtime::VoiceRuntime::new(Arc::new(QuietFactory));
-        let mut drain =
-            super::ColdShutdown::begin(confirmed, self.backend.clone(), pool, audio).unwrap();
+        let (mut drain, error) =
+            super::ColdShutdown::begin_retained(confirmed, self.backend.clone(), pool, audio);
+        assert_eq!(error, None);
         let until = std::time::Instant::now() + std::time::Duration::from_secs(15);
         loop {
             if let Some(drained) = drain.poll().unwrap() {

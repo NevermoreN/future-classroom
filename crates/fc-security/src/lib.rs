@@ -22,6 +22,19 @@ pub fn sha256(bytes: &[u8]) -> [u8; 32] {
     Sha256::digest(bytes).into()
 }
 
+/// Fixed-size incremental content hashing, independent of material-file limits.
+/// The caller still enforces byte quotas, cancellation and source ownership.
+#[derive(Default)]
+pub struct Sha256Stream(Sha256);
+impl Sha256Stream {
+    pub fn update(&mut self, bytes: &[u8]) {
+        self.0.update(bytes);
+    }
+    pub fn finish(self) -> [u8; 32] {
+        self.0.finalize().into()
+    }
+}
+
 pub const PASSWORD_FORMAT: u32 = 1;
 pub const PBKDF2_ITERATIONS: u32 = 600_000;
 pub const SALT_BYTES: usize = 32;
@@ -238,6 +251,19 @@ mod tests {
                 0xf2, 0x00, 0x15, 0xad,
             ]
         );
+    }
+    #[test]
+    fn incremental_content_hash_preserves_empty_and_arbitrary_chunk_boundaries() {
+        for bytes in [&b""[..], &b"abc"[..], &vec![0x41; 65539][..]] {
+            for chunk in [1, 31, 32768] {
+                let mut stream = Sha256Stream::default();
+                for part in bytes.chunks(chunk) {
+                    stream.update(part);
+                    stream.update(&[]);
+                }
+                assert_eq!(stream.finish(), sha256(bytes));
+            }
+        }
     }
     #[test]
     fn unicode_bounds_and_redaction() {

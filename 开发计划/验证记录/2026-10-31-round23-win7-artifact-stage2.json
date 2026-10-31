@@ -1,0 +1,9 @@
+{
+  "stage": "Round23 supplemental Win7 GNU stage2; not real Win7 acceptance",
+  "sourceSha256": "ebeb95be0330605e77b8e4b942772c62c55b847d3942ddad3707c0e65af379c6",
+  "exeSha256": "968bfe79167ed1cc1e379ff43110eafebecd4d1b63715c99e3206e9f4e8538f8",
+  "exeBytes": 10999808,
+  "exactSourceInputs": 365,
+  "toolchain": "nightly-2026-10-29",
+  "command": "env CC_i686_win7_windows_gnu=i686-w64-mingw32-gcc AR_i686_win7_windows_gnu=i686-w64-mingw32-ar CARGO_TARGET_DIR=/tmp/fc-round23-win7-target cargo +nightly-2026-10-29 build -Z build-std=std,panic_unwind --target i686-win7-windows-gnu --release -p fc-bootstrap --locked --message-format=json"
+}

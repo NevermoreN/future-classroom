@@ -1,0 +1,47 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+error[E0583]: file not found for module `backup_controller`
+ --> crates/fc-bootstrap/src/application.rs:6:1
+  |
+6 | mod backup_controller;
+  | ^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: to create the module `backup_controller`, create file "crates/fc-bootstrap/src/application/backup_controller.rs" or "crates/fc-bootstrap/src/application/backup_controller/mod.rs"
+  = note: if there is a `mod backup_controller` elsewhere in the crate already, import it with `use crate::...` instead
+
+error[E0004]: non-exhaustive patterns: `application::Screen::Backup` and `application::Screen::Restoring` not covered
+    --> crates/fc-bootstrap/src/application.rs:1343:15
+     |
+1343 |         match self.screen {
+     |               ^^^^^^^^^^^ patterns `application::Screen::Backup` and `application::Screen::Restoring` not covered
+     |
+note: `application::Screen` defined here
+    --> crates/fc-bootstrap/src/application.rs:113:6
+     |
+ 113 | enum Screen {
+     |      ^^^^^^
+...
+ 130 |     Backup,
+     |     ------ not covered
+ 131 |     Restoring,
+     |     --------- not covered
+     = note: the matched value is of type `application::Screen`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+     |
+1583 ~             },
+1584 +             application::Screen::Backup | application::Screen::Restoring => todo!()
+     |
+
+Some errors have detailed explanations: E0004, E0583.
+For more information about an error, try `rustc --explain E0004`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 2 previous errors

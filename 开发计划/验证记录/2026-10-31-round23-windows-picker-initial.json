@@ -1,0 +1,32 @@
+{
+  "scope": "Targeted Windows noninteractive test; source and exe frozen for this component only, not whole workspace acceptance.",
+  "filter": "materials::chooser",
+  "exeSha256": "6f75b38ef04cedb4d5abd9a7b5eda968371406c0bb74a66023ae2c241aff940e",
+  "status": "PASS",
+  "cleanup": {
+    "sshd": "Running",
+    "rootAbsent": true
+  },
+  "result": {
+    "output": [
+      "",
+      "running 11 tests",
+      "test materials::chooser::backup_destination::tests::cng_sha256_matches_known_vector_and_copy_uses_actual_bytes ... ok",
+      "test materials::chooser::backup_destination::tests::destination_constructor_rejects_undisplayable_complete_paths_before_io ... ok",
+      "test materials::chooser::backup_destination::tests::copy_cancellation_and_late_cancel_delete_only_the_owned_inode ... ok",
+      "test materials::chooser::backup_destination::tests::diagnostic_destinations_require_the_isolated_marker_and_safe_backup_name ... ok",
+      "test materials::chooser::backup_destination::tests::existing_and_racing_destinations_are_never_overwritten ... ok",
+      "test materials::chooser::backup_destination::tests::destination_reparse_directory_is_rejected_before_any_copy ... ok",
+      "test materials::chooser::validation::tests::backup_names_reject_devices_ads_navigation_and_wrong_extensions ... ok",
+      "test materials::chooser::validation::tests::cancellation_lengths_truncation_and_trailing_bytes_are_rejected ... ok",
+      "test materials::chooser::validation::tests::complete_display_paths_preserve_chinese_and_emoji_but_reject_bidi_and_controls ... ok",
+      "test materials::chooser::validation::tests::short_writes_hash_exactly_the_written_bytes ... ok",
+      "test materials::chooser::backup_destination::tests::source_pin_denies_mutation_and_bad_hash_or_tail_has_no_published_output ... ok",
+      "",
+      "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 102 filtered out; finished in 0.08s",
+      ""
+    ],
+    "exitCode": 0,
+    "sha256": "6f75b38ef04cedb4d5abd9a7b5eda968371406c0bb74a66023ae2c241aff940e"
+  }
+}

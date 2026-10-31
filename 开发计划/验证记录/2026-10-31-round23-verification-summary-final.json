@@ -1,0 +1,76 @@
+{
+  "scope": "Round23 ordinary backup/recovery workbench development milestone, not the complete product",
+  "status": "PASS",
+  "allDevelopmentComplete": false,
+  "sourceSha256": "789b68e9c6db4d4eb9e98b633e7607e93953c4507f47bb2809e63b2f88483abd",
+  "sourceInputs": 365,
+  "parentCommit": "3e8681d21425e4ff199f13c080759460c8a0e260",
+  "host": {
+    "passed": 686,
+    "resultGroups": 31,
+    "nonzeroGroups": 18,
+    "evidence": "host-summary-final.json"
+  },
+  "windows": {
+    "passed": 957,
+    "executables": 19,
+    "method": "SHA-bound composite; see windows-test-acceptance-final.json"
+  },
+  "modern": {
+    "scope": "Round23 stage5 production artifact after normal close acknowledgement fix",
+    "sourceSha256": "789b68e9c6db4d4eb9e98b633e7607e93953c4507f47bb2809e63b2f88483abd",
+    "exeSha256": "9984583fbcaf3ca0953dc6436cb27f84b1e63aa484319f222c980d1119a3a121",
+    "exeBytes": 10921305
+  },
+  "supplementalWin7Gnu": {
+    "scope": "Round23 stage5 production artifact after normal close acknowledgement fix",
+    "sourceSha256": "789b68e9c6db4d4eb9e98b633e7607e93953c4507f47bb2809e63b2f88483abd",
+    "exeSha256": "996847f689ee0c526276812f9533469e957334db2a005b1c55cf3bb1a1d0dbd2",
+    "exeBytes": 10999808
+  },
+  "nativeForEachArtifact": {
+    "contentSteps": 52,
+    "scheduleSteps": 65,
+    "recoverySteps": 23,
+    "autostartSteps": 25,
+    "normalWorkbenchExitCode": 0,
+    "independentRecoveryExecutableReopen": "PASS",
+    "visiblePickers": "NOT_TESTED",
+    "actualWin7Win10": "NOT_RUN"
+  },
+  "package": {
+    "scope": "Round23 stage5 development ZIP; not formal product, installer or compatibility certification",
+    "status": "PASS",
+    "productStatus": "NOT_VALIDATED",
+    "sourceSha256": "789b68e9c6db4d4eb9e98b633e7607e93953c4507f47bb2809e63b2f88483abd",
+    "artifactName": "FutureClassroom-0.1.0-recovery-workbench-dev.zip",
+    "bytes": 5274950,
+    "sha256": "0f18aca757636c51f1956467def50cd1bec71a1b84d2844c26e098703dea6cb8",
+    "memberCount": 13,
+    "crcVerified": true,
+    "manifestMembersVerified": 12,
+    "independentSameBasenameRepackIdentical": true
+  },
+  "architecture": {
+    "crates": 12,
+    "firstPartyEdges": 33
+  },
+  "notices": {
+    "registryComponents": 86,
+    "licenseTexts": 181
+  },
+  "frontend": {
+    "unchangedInputs": 61,
+    "reusedAssets": 6,
+    "assetBytes": 444723,
+    "newNpmBrowserExecution": false
+  },
+  "remaining": [
+    "cross-installation mapping",
+    "reinitialization",
+    "strict P0 request deadlines",
+    "production TLS/listener/browser flows",
+    "formal MSVC and real Win7/Win10",
+    "visible Seewo/touch/PPT/login/install/72h acceptance"
+  ]
+}

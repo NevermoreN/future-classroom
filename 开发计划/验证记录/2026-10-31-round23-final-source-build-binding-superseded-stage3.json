@@ -1,0 +1,181 @@
+{
+  "scope": "Exact source change map and cached rebuild confirmation; only two Windows-only test files changed after stage2. No production/Host test code changes. Runtime test evidence is separate.",
+  "stage2SourceSha256": "ebeb95be0330605e77b8e4b942772c62c55b847d3942ddad3707c0e65af379c6",
+  "finalSourceSha256": "b09ed45c92673e4c1374638ee11418c2ef4ad584e7fc9390dd74e8c5b4114b25",
+  "changedInputs": [
+    "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+    "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs"
+  ],
+  "productionArtifactsUnchanged": true,
+  "all19SuccessfulHostExecutablesUnchanged": true,
+  "cargoFinalFreshArtifacts": {
+    "modern": [
+      {
+        "target": "build-script-build",
+        "kinds": [
+          "custom-build"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc_bootstrap",
+        "kinds": [
+          "lib"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc-bootstrap",
+        "kinds": [
+          "bin"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-picker-target/i686-pc-windows-gnu/release/fc-bootstrap.exe"
+      }
+    ],
+    "win7": [
+      {
+        "target": "build-script-build",
+        "kinds": [
+          "custom-build"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc_bootstrap",
+        "kinds": [
+          "lib"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc-bootstrap",
+        "kinds": [
+          "bin"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-win7-target/i686-win7-windows-gnu/release/fc-bootstrap.exe"
+      }
+    ],
+    "hostTests": [
+      {
+        "target": "build-script-build",
+        "kinds": [
+          "custom-build"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc_bootstrap",
+        "kinds": [
+          "lib"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "target": "fc_bootstrap",
+        "kinds": [
+          "lib"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/fc_bootstrap-0a9672e9745706e7"
+      },
+      {
+        "target": "autostart_coordinator",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/autostart_coordinator-6c4783af952b92db"
+      },
+      {
+        "target": "voice_storage",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/voice_storage-f7159a76dfa4ad3b"
+      },
+      {
+        "target": "fc-bootstrap",
+        "kinds": [
+          "bin"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/fc-bootstrap"
+      },
+      {
+        "target": "calendar_execution_fence",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/calendar_execution_fence-10a2d572a15dd873"
+      },
+      {
+        "target": "verify_web_assets",
+        "kinds": [
+          "example"
+        ],
+        "test": false,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/examples/verify_web_assets"
+      },
+      {
+        "target": "fc-bootstrap",
+        "kinds": [
+          "bin"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/fc_bootstrap-83fd785a586e3513"
+      },
+      {
+        "target": "runtime_storage",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/runtime_storage-4691c1541845bad1"
+      },
+      {
+        "target": "schedule_operations",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/schedule_operations-e3dea8a910862e92"
+      },
+      {
+        "target": "business_storage",
+        "kinds": [
+          "test"
+        ],
+        "test": true,
+        "fresh": true,
+        "executable": "/tmp/fc-round23-workflow-target/release/deps/business_storage-0f739afb18058961"
+      }
+    ]
+  }
+}

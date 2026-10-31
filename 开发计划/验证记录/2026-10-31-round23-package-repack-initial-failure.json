@@ -1,0 +1,26 @@
+{
+  "command": "Independent repack to a different basename, followed by byte equality assertion",
+  "observedResult": "AssertionError; both build commands exit 0",
+  "diagnosis": "Manifest intentionally records output artifact_name; independent deterministic repack must use the same basename in another directory. No source edit required.",
+  "differentMembers": [
+    "manifest.json"
+  ],
+  "manifestDifferences": {
+    "artifact_name": [
+      "fc-round23-package-stage2.zip",
+      "fc-round23-package-repack-stage2.zip"
+    ]
+  },
+  "artifacts": [
+    {
+      "name": "fc-round23-package-stage2.zip",
+      "sha256": "e37a4c1e82ad83a8693973aea8b5881e1c81f283a8f44a3b1f901c1ea68d2a47",
+      "bytes": 5274965
+    },
+    {
+      "name": "fc-round23-package-repack-stage2.zip",
+      "sha256": "2e72ba060ddbe04a5e756ec12b490f920ab97e578b903889efdb312d9f95255f",
+      "bytes": 5274968
+    }
+  ]
+}

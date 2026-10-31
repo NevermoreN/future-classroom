@@ -1,0 +1,29 @@
+    Updating crates.io index
+     Locking 4 packages to latest compatible versions
+      Adding zeroize v1.8.2 (available: v1.9.1)
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling zeroize v1.8.2
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-round23-editor-harness v0.0.0 (/tmp/fc-round23-editor-harness)
+    Finished `release` profile [optimized] target(s) in 12.96s
+     Running unittests src/lib.rs (/tmp/fc-round23-editor-target/release/deps/fc_round23_editor_harness-22629cc10087bbc8)
+
+running 8 tests
+test backup_editor::tests::cancel_reselect_close_and_invalidation_reject_late_preflight_and_old_confirmations ... ok
+test backup_editor::tests::confirmation_requires_live_preflight_explicit_ack_and_is_consumed_once ... ok
+test backup_editor::tests::opening_rendering_and_navigation_never_submit_restore_or_export_automatically ... ok
+test backup_editor::tests::owner_and_exact_monotone_pending_sequence_bind_review ... ok
+test backup_editor::tests::long_unicode_paths_are_complete_paginated_and_readonly_without_truncation ... ok
+test backup_editor::tests::forged_readonly_fields_cannot_replace_preflight_identity_or_path ... ok
+test backup_editor::tests::review_explains_full_replacement_retained_current_security_and_restart ... ok
+test backup_editor::tests::controls_oversize_paths_and_status_cannot_inject_unbounded_ui_text ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests fc_round23_editor_harness
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

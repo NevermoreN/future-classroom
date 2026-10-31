@@ -495,7 +495,9 @@ fn complete_backup_cold_restore_preserves_current_security_txt_and_both_wic_imag
     assert!(f.backend.lock().unwrap().role(lease).is_err());
     let pool = WorkerPool::<QuietTask>::start().unwrap();
     let audio = VoiceRuntime::new(Arc::new(QuietFactory));
-    let mut drain = ColdShutdown::begin(confirmed, f.backend.clone(), pool, audio).unwrap();
+    let (mut drain, error) =
+        ColdShutdown::begin_retained(confirmed, f.backend.clone(), pool, audio);
+    assert_eq!(error, None);
     let until = Instant::now() + Duration::from_secs(30);
     let drained = loop {
         if let Some(drained) = drain.poll().unwrap() {

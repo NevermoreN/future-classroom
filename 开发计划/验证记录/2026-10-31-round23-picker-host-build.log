@@ -1,0 +1,27 @@
+error[E0433]: too many leading `super` keywords
+ --> crates/fc-windows/src/materials/chooser/validation.rs:4:5
+  |
+4 | pub(super) const COPY_BLOCK_BYTES: usize = 32 * 1024;
+  |     ^^^^^ there are too many leading `super` keywords
+
+error[E0433]: too many leading `super` keywords
+ --> crates/fc-windows/src/materials/chooser/validation.rs:6:5
+  |
+6 | pub(super) fn backup_name(name: &str) -> bool {
+  |     ^^^^^ there are too many leading `super` keywords
+
+error[E0433]: too many leading `super` keywords
+  --> crates/fc-windows/src/materials/chooser/validation.rs:49:5
+   |
+49 | pub(super) fn copy_exact(
+   |     ^^^^^ there are too many leading `super` keywords
+
+error[E0433]: too many leading `super` keywords
+  --> crates/fc-windows/src/materials/chooser/validation.rs:28:5
+   |
+28 | pub(super) enum CopyError {
+   |     ^^^^^ there are too many leading `super` keywords
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

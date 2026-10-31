@@ -1,0 +1,22 @@
+{
+  "scope": "Targeted Windows noninteractive test; source and exe frozen for this component only, not whole workspace acceptance.",
+  "filter": "application::backup_shutdown_tests",
+  "exeSha256": "ab8c751303ad7cac04ba0891b7ca771529a3735e338ae9efbd5b36bfca4310b9",
+  "status": "PASS",
+  "cleanup": {
+    "sshd": "Running",
+    "rootAbsent": true
+  },
+  "result": {
+    "output": [
+      "",
+      "running 1 test",
+      "test application::backup_shutdown_tests::full_shared_queue_delays_shutdown_until_the_writer_can_really_close ... ok",
+      "",
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 131 filtered out; finished in 0.09s",
+      ""
+    ],
+    "exitCode": 0,
+    "sha256": "ab8c751303ad7cac04ba0891b7ca771529a3735e338ae9efbd5b36bfca4310b9"
+  }
+}

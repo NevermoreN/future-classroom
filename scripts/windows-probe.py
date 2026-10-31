@@ -44,6 +44,7 @@ def main():
     parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
     parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
+    parser.add_argument("--recovery", action="store_true", help="isolated hidden native ordinary backup/save/preflight/review/cold restore and independent process reopen; no visible picker")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
@@ -56,6 +57,8 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
+    if args.recovery and (args.application or args.calendar or args.autostart):
+        parser.error("run the dedicated recovery workflow separately to preserve its independent ownership and budget")
     if args.autostart and (args.application or args.calendar):
         parser.error("run the dedicated autostart workflow separately to preserve independent budgets")
     if args.calendar and args.application:
@@ -215,6 +218,15 @@ def main():
             anchor = matched[0]
             body = body.replace(anchor, command + "@{autostartExitCode=$autostartCode;autostartOutput=$autostartOutput;" + anchor[2:])
 
+        if args.recovery:
+            command = "$recoveryOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --recovery-probe 2>&1|ForEach-Object{\"$_\"});$recoveryCode=$LASTEXITCODE;"
+            anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1:
+                raise RuntimeError("recovery report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{recoveryExitCode=$recoveryCode;recoveryOutput=$recoveryOutput;" + anchor[2:])
+
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -224,9 +236,11 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials or args.web_voice or args.calendar or args.autostart:
+        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
+        if args.recovery:
+            launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
+        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -261,6 +275,18 @@ def main():
             if schedule_steps != list(range(65)):
                 raise RuntimeError("schedule operations did not complete exactly 65 ordered steps")
             report["scheduleOperationsNativeSteps"] = len(schedule_steps)
+        if args.recovery:
+            output = report["native"].get("recoveryOutput", [])
+            if report["native"].get("recoveryExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native recovery workflow failed")
+            steps = [line for line in output if line.startswith("RECOVERY_NATIVE_STEP index=")]
+            if len(steps) != 23 or any(not line.startswith(f"RECOVERY_NATIVE_STEP index={i} ") for i, line in enumerate(steps)):
+                raise RuntimeError("native recovery did not complete exactly 23 ordered steps")
+            if not any("reopen=fresh_App_AND_independent_executable_production_Open" in line for line in output):
+                raise RuntimeError("independent recovery process reopen marker missing")
+            report["recoveryNativeStatus"] = "PASS"
+            report["recoveryNativeSteps"] = len(steps)
+            report["recoveryScope"] = "Hidden native controls and real DPAPI/SQLite/current-security/cold switching/independent executable reopen; picker return capabilities simulated under isolated marker; visible dialogs and hardware power loss NOT_RUN"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):

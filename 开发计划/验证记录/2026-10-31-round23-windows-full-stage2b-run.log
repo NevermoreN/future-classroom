@@ -1,0 +1,26 @@
+Web pairing port probe PASS; real HTTPS/TLS/browser/listening delivery remains unvalidated
+fc_security-9c7f88663f75f873.exe PASS
+fc_storage-aaa73ac6ae3d50c0.exe PASS
+fc_materials-2221de66f2e97130.exe PASS
+fc_presentation-bf0074726aa5b441.exe PASS
+fc_protocol-186900fcb7bfa5db.exe PASS
+fc_audio-35e3156477d0188a.exe PASS
+fc_application-8ad1e6c8c699ab50.exe PASS
+fc_ports-361bddc8b2876cc0.exe PASS
+fc_domain-915566e140287178.exe PASS
+fc_runtime-fad3e5e278e2d80c.exe PASS
+fc_windows-d929a73b96b71a34.exe PASS
+voice_storage-caa057e7b94511b4.exe PASS
+runtime_storage-003a62f54de65504.exe PASS
+business_storage-2e2a220b65b596c0.exe PASS
+schedule_operations-b657d73c62d998f4.exe PASS
+calendar_execution_fence-1b8ee9b2e4016362.exe PASS
+autostart_coordinator-081a9cde7eb805cd.exe PASS
+fc_bootstrap-7ad323ce2c7a7df5.exe FAIL
+cleanup: PASS
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 348, in <module>
+    main()
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 171, in main
+    raise RuntimeError("remote test failed: " + path.name)
+RuntimeError: remote test failed: fc_bootstrap-7ad323ce2c7a7df5.exe

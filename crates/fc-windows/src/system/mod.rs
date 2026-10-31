@@ -3,10 +3,12 @@ mod autorun;
 mod clock;
 mod crypto;
 mod paths;
+mod thread_exit;
 pub use autorun::{AutostartReadback, RunAtLogin, RunScope};
 pub use clock::CurrentClock;
 pub use crypto::{CurrentUserDpapi, SecretBytes};
 pub use paths::{current_user_sid, DataPaths, DeploymentDirectory, DirectoryAclReadback};
+pub use thread_exit::thread_is_finished;
 
 #[derive(Debug)]
 pub struct SystemProbeReport {

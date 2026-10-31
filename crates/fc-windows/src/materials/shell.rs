@@ -78,6 +78,7 @@ struct Shared {
 struct Worker {
     sender: SyncSender<LaunchRequest>,
     results: Receiver<LaunchResult>,
+    thread: Option<std::thread::JoinHandle<()>>,
 }
 #[derive(Clone)]
 struct ProbeConfig {
@@ -127,6 +128,7 @@ pub struct ShellLauncher {
     recent: VecDeque<(u64, ResourceVersionId, Instant)>,
     probe: Option<ProbeConfig>,
     idle: Duration,
+    thread_failed: bool,
 }
 impl Default for ShellLauncher {
     fn default() -> Self {
@@ -146,6 +148,7 @@ impl ShellLauncher {
             recent: VecDeque::new(),
             probe: None,
             idle: Duration::from_secs(30),
+            thread_failed: false,
         }
     }
     /// Explicit isolated diagnostics. Registers a unique private ProgID bound
@@ -236,6 +239,7 @@ impl ShellLauncher {
         if self.shared.stopped.load(Ordering::Acquire) {
             return Err(SubmitError::Stopped);
         }
+        self.reap_nonblocking()?;
         if request.request_id == 0 || !copy_allowed(request.path.path(), self.probe.as_ref()) {
             return Err(SubmitError::InvalidCopy);
         }
@@ -244,7 +248,11 @@ impl ShellLauncher {
         // cannot race a retiring receiver and silently lose the request.
         let shared = self.shared.clone();
         let mut accepting = shared.accepting.lock().map_err(|_| SubmitError::Stopped)?;
-        if self.worker.is_some() && shared.finished.load(Ordering::Acquire) {
+        if self
+            .worker
+            .as_ref()
+            .is_some_and(|worker| worker.thread.is_none())
+        {
             if shared.outstanding.load(Ordering::Acquire) != 0 {
                 return Err(SubmitError::Busy);
             }
@@ -271,7 +279,7 @@ impl ShellLauncher {
             let probe = self.probe.clone();
             let idle = self.idle;
             shared.finished.store(false, Ordering::Release);
-            if std::thread::Builder::new()
+            let thread = match std::thread::Builder::new()
                 .name("fc-shell-sta".into())
                 .spawn(move || {
                     struct Finished(Arc<Shared>);
@@ -282,13 +290,18 @@ impl ShellLauncher {
                     }
                     let _finished = Finished(shared.clone());
                     run(pending, complete, shared, probe, idle);
-                })
-                .is_err()
-            {
-                self.shared.finished.store(true, Ordering::Release);
-                return Err(SubmitError::ThreadUnavailable);
-            }
-            self.worker = Some(Worker { sender, results });
+                }) {
+                Ok(thread) => thread,
+                Err(_) => {
+                    self.shared.finished.store(true, Ordering::Release);
+                    return Err(SubmitError::ThreadUnavailable);
+                }
+            };
+            self.worker = Some(Worker {
+                sender,
+                results,
+                thread: Some(thread),
+            });
         }
         let id = request.request_id;
         let version = request.version;
@@ -330,7 +343,37 @@ impl ShellLauncher {
         self.shared.stopped.store(true, Ordering::Release);
     }
     pub fn is_finished(&self) -> bool {
-        self.shared.finished.load(Ordering::Acquire)
+        self.worker.as_ref().is_none_or(|worker| {
+            worker
+                .thread
+                .as_ref()
+                .is_none_or(crate::system::thread_is_finished)
+        })
+    }
+    /// Reap only an OS-terminated thread. A Rust closure/packet can finish before
+    /// TLS destructors, so JoinHandle::is_finished alone is insufficient. The
+    /// zero-timeout native thread query prevents blocking the UI in join.
+    /// Unconsumed results stay in their receiver until take_results consumes them.
+    pub fn reap_nonblocking(&mut self) -> std::result::Result<bool, SubmitError> {
+        if self.thread_failed {
+            return Err(SubmitError::ThreadUnavailable);
+        }
+        let Some(worker) = self.worker.as_mut() else {
+            return Ok(true);
+        };
+        let Some(thread) = worker.thread.as_ref() else {
+            return Ok(true);
+        };
+        if !crate::system::thread_is_finished(thread) {
+            return Ok(false);
+        }
+        let thread = worker.thread.take().expect("finished thread still owned");
+        if thread.join().is_err() {
+            self.thread_failed = true;
+            self.stop();
+            return Err(SubmitError::ThreadUnavailable);
+        }
+        Ok(true)
     }
 }
 impl Drop for ShellLauncher {
@@ -550,6 +593,57 @@ mod tests {
     use fc_domain::ids::{AuthEpoch, Revision};
     use fc_runtime::authority::AuthorityStore;
     use std::{fs, sync::atomic::AtomicU32};
+    struct LogicalFinished(Arc<Shared>);
+    impl Drop for LogicalFinished {
+        fn drop(&mut self) {
+            self.0.finished.store(true, Ordering::Release);
+        }
+    }
+    struct HeldTls {
+        entered: SyncSender<()>,
+        release: Receiver<()>,
+    }
+    impl Drop for HeldTls {
+        fn drop(&mut self) {
+            let _ = self.entered.send(());
+            let _ = self.release.recv();
+        }
+    }
+    thread_local! {
+        static HELD_TLS: std::cell::RefCell<Option<HeldTls>> = const { std::cell::RefCell::new(None) };
+    }
+    struct ReleaseTls(Option<SyncSender<()>>);
+    impl ReleaseTls {
+        fn release(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    impl Drop for ReleaseTls {
+        fn drop(&mut self) {
+            self.release();
+        }
+    }
+    fn install_worker(
+        launcher: &mut ShellLauncher,
+        results: Receiver<LaunchResult>,
+        thread: std::thread::JoinHandle<()>,
+    ) {
+        let (sender, _) = mpsc::sync_channel(1);
+        launcher.worker = Some(Worker {
+            sender,
+            results,
+            thread: Some(thread),
+        });
+    }
+    fn wait_finished(launcher: &ShellLauncher) {
+        let deadline = Instant::now() + Duration::from_secs(3);
+        while !launcher.is_finished() {
+            assert!(Instant::now() < deadline, "native STA thread end deadline");
+            std::thread::yield_now();
+        }
+    }
     struct Tree(PathBuf);
     impl Tree {
         fn new() -> Self {
@@ -839,5 +933,130 @@ mod tests {
         })
         .join()
         .unwrap();
+    }
+    #[test]
+    fn logical_finish_and_rust_packet_do_not_hide_a_held_tls_destructor() {
+        let tree = Tree::new();
+        let mut launcher = ShellLauncher::new();
+        launcher.shared.finished.store(false, Ordering::Release);
+        *launcher.shared.accepting.lock().unwrap() = false;
+        let shared = launcher.shared.clone();
+        let (entered, in_tls) = mpsc::sync_channel(1);
+        let (release, wait) = mpsc::sync_channel(1);
+        let mut release = ReleaseTls(Some(release));
+        let (complete, results) = mpsc::sync_channel(MAX_OUTSTANDING);
+        let thread = std::thread::spawn(move || {
+            let _finished = LogicalFinished(shared);
+            HELD_TLS.with(|slot| {
+                *slot.borrow_mut() = Some(HeldTls {
+                    entered,
+                    release: wait,
+                })
+            });
+            drop(complete);
+        });
+        let id = thread.thread().id();
+        install_worker(&mut launcher, results, thread);
+        in_tls.recv_timeout(Duration::from_secs(3)).unwrap();
+        assert!(launcher.shared.finished.load(Ordering::Acquire));
+        assert!(
+            launcher
+                .worker
+                .as_ref()
+                .unwrap()
+                .thread
+                .as_ref()
+                .unwrap()
+                .is_finished(),
+            "the Rust packet already finished while TLS is still executing"
+        );
+        assert!(!launcher.is_finished());
+        let before = Instant::now();
+        assert_eq!(launcher.reap_nonblocking(), Ok(false));
+        assert!(before.elapsed() < Duration::from_millis(50));
+        let gate = gate();
+        assert_eq!(
+            launcher.submit(request(&tree, 1, &gate, Arc::new(|| false))),
+            Err(SubmitError::Busy)
+        );
+        assert_eq!(
+            launcher
+                .worker
+                .as_ref()
+                .unwrap()
+                .thread
+                .as_ref()
+                .unwrap()
+                .thread()
+                .id(),
+            id
+        );
+        release.release();
+        wait_finished(&launcher);
+        assert_eq!(launcher.reap_nonblocking(), Ok(true));
+        assert!(launcher.worker.as_ref().unwrap().thread.is_none());
+    }
+    #[test]
+    fn native_reap_keeps_unconsumed_results_and_blocks_replacement_until_consumed() {
+        let tree = Tree::new();
+        let mut launcher = ShellLauncher::new();
+        let shared = launcher.shared.clone();
+        shared.finished.store(false, Ordering::Release);
+        shared.outstanding.store(1, Ordering::Release);
+        let (complete, results) = mpsc::sync_channel(MAX_OUTSTANDING);
+        let thread = std::thread::spawn(move || {
+            let _finished = LogicalFinished(shared);
+            complete
+                .send(LaunchResult {
+                    request_id: 9,
+                    outcome: LaunchOutcome::Canceled,
+                })
+                .unwrap();
+        });
+        install_worker(&mut launcher, results, thread);
+        wait_finished(&launcher);
+        assert_eq!(launcher.reap_nonblocking(), Ok(true));
+        let gate = gate();
+        assert_eq!(
+            launcher.submit(request(&tree, 1, &gate, Arc::new(|| false))),
+            Err(SubmitError::Busy)
+        );
+        assert_eq!(launcher.shared.outstanding.load(Ordering::Acquire), 1);
+        assert_eq!(
+            launcher.take_results(),
+            [LaunchResult {
+                request_id: 9,
+                outcome: LaunchOutcome::Canceled
+            }]
+        );
+        assert_eq!(launcher.shared.outstanding.load(Ordering::Acquire), 0);
+        assert_eq!(launcher.reap_nonblocking(), Ok(true));
+    }
+    #[test]
+    fn outer_thread_panic_is_sticky_and_stops_new_admission_after_reap() {
+        let tree = Tree::new();
+        let mut launcher = ShellLauncher::new();
+        let shared = launcher.shared.clone();
+        shared.finished.store(false, Ordering::Release);
+        let (_, results) = mpsc::sync_channel(MAX_OUTSTANDING);
+        let thread = std::thread::spawn(move || {
+            let _finished = LogicalFinished(shared);
+            panic!("injected outer STA failure, without any Shell call");
+        });
+        install_worker(&mut launcher, results, thread);
+        wait_finished(&launcher);
+        assert_eq!(
+            launcher.reap_nonblocking(),
+            Err(SubmitError::ThreadUnavailable)
+        );
+        assert_eq!(
+            launcher.reap_nonblocking(),
+            Err(SubmitError::ThreadUnavailable)
+        );
+        let gate = gate();
+        assert_eq!(
+            launcher.submit(request(&tree, 1, &gate, Arc::new(|| false))),
+            Err(SubmitError::Stopped)
+        );
     }
 }

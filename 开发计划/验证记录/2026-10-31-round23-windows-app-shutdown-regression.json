@@ -1,0 +1,36 @@
+{
+  "scope": "Targeted Windows noninteractive test; source and exe frozen for this component only, not whole workspace acceptance.",
+  "filter": "application::backup_shutdown_tests",
+  "exeSha256": "d4cfbd1171200dcfa30d4a7fd6b3807d5d9ef9528cb529f8fc44721dfce2594c",
+  "status": "FAIL",
+  "cleanup": {
+    "sshd": "Running",
+    "rootAbsent": true
+  },
+  "result": {
+    "output": [
+      "",
+      "running 1 test",
+      "test application::backup_shutdown_tests::full_shared_queue_delays_shutdown_until_the_writer_can_really_close ... FAILED",
+      "",
+      "failures:",
+      "",
+      "---- application::backup_shutdown_tests::full_shared_queue_delays_shutdown_until_the_writer_can_really_close stdout ----",
+      "PROBE_SUBMIT tick=1 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=54 kind=other page=正在打开未来教室",
+      "",
+      "thread 'application::backup_shutdown_tests::full_shared_queue_delays_shutdown_until_the_writer_can_really_close' (11268) panicked at crates/fc-bootstrap/src/application/backup_shutdown_tests.rs:102:37:",
+      "running hold was not admitted",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    application::backup_shutdown_tests::full_shared_queue_delays_shutdown_until_the_writer_can_really_close",
+      "",
+      "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 131 filtered out; finished in 0.09s",
+      ""
+    ],
+    "exitCode": 101,
+    "sha256": "d4cfbd1171200dcfa30d4a7fd6b3807d5d9ef9528cb529f8fc44721dfce2594c"
+  }
+}
