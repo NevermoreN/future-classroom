@@ -1,0 +1,86 @@
+    Checking subtle v2.6.1
+   Compiling rustversion v1.0.23
+   Compiling zerocopy v0.8.63
+   Compiling ahash v0.8.12
+    Checking memchr v2.8.3
+   Compiling find-msvc-tools v0.1.15
+   Compiling shlex v2.0.1
+   Compiling vcpkg v0.2.15
+    Checking digest v0.10.7
+   Compiling cc v1.10.0
+   Compiling crc32fast v1.5.3
+    Checking sha2 v0.10.9
+   Compiling pkg-config v0.3.34
+    Checking once_cell v1.21.4
+    Checking inout v0.1.4
+    Checking smallvec v1.16.4
+    Checking adler2 v2.0.1
+    Checking simd-adler32 v0.3.10
+    Checking cipher v0.4.4
+    Checking serde_json v1.0.145
+    Checking miniz_oxide v0.9.1
+    Checking simdutf8 v0.1.5
+   Compiling multiversion_no_op v1.0.0
+    Checking scopeguard v1.2.0
+    Checking zlib-rs v0.6.8
+    Checking core_detect v1.0.0
+   Compiling encoding_rs v0.8.42
+    Checking aes v0.8.4
+    Checking hmac v0.12.1
+    Checking fallible-iterator v0.3.0
+    Checking rustc-hash v2.1.3
+    Checking bitflags v2.13.2
+    Checking fallible-streaming-iterator v0.1.9
+    Checking log v0.4.34
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking pbkdf2 v0.12.2
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking flate2 v1.1.10
+    Checking pdf-syntax v0.6.1
+   Compiling libsqlite3-sys v0.30.1
+    Checking quick-xml v0.42.0
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking hashbrown v0.14.5
+    Checking hashlink v0.9.1
+    Checking rusqlite v0.32.1
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+warning: function `validate_ordinary` is never used
+   --> crates/fc-storage/src/business/recovery.rs:231:15
+    |
+231 | pub(crate) fn validate_ordinary(d:&dyn TransactionDocuments,i:&IdentityState)->Result<(),StorageError>{
+    |               ^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fc-storage` (lib) generated 1 warning
+warning: unnecessary parentheses around `if` condition
+   --> crates/fc-bootstrap/src/backend/web.rs:201:16
+    |
+201 |             if (self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()) {
+    |                ^                                                                                         ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+201 -             if (self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()) {
+201 +             if self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering() {
+    |
+
+warning: unnecessary parentheses around `if` condition
+   --> crates/fc-bootstrap/src/backend/web.rs:228:12
+    |
+228 |         if (self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()) {
+    |            ^                                                                                         ^
+    |
+help: remove these parentheses
+    |
+228 -         if (self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()) {
+228 +         if self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering() {
+    |
+
+warning: `fc-bootstrap` (lib) generated 2 warnings (run `cargo fix --lib -p fc-bootstrap` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 22.30s

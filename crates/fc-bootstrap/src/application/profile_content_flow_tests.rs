@@ -441,7 +441,10 @@ impl Harness {
         let handle = owner.pool.as_ref().unwrap().handle();
         let (backend, control) = match product(
             &handle,
-            Work::Open(root.clone(), Arc::new(CurrentClock::new())),
+            Work::Open(
+                DataPaths::isolated_test(root.clone()).unwrap(),
+                Arc::new(CurrentClock::new()),
+            ),
         )
         .unwrap()
         {
@@ -539,7 +542,10 @@ impl Harness {
         self.backend = None;
         let (backend, control) = match product(
             &handle,
-            Work::Open(self.root.clone(), Arc::new(CurrentClock::new())),
+            Work::Open(
+                DataPaths::isolated_test(self.root.clone()).unwrap(),
+                Arc::new(CurrentClock::new()),
+            ),
         )
         .unwrap()
         {

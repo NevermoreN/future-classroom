@@ -1,0 +1,46 @@
+{
+  "scope": "Win11 x86 isolated recovery files tests; no visible UI, no real settings",
+  "sha256": "1220e64fbc69b413f5f83ff6b5ffe321084f3b67cb38fb12666268a867368764",
+  "token": "fdc5a1f2a4ff449994d449dcbf238a9e",
+  "result": {
+    "output": [
+      "",
+      "running 11 tests",
+      "test recovery_files::tests::cold_switch_accepts_only_three_recoverable_locations ... ok",
+      "test recovery_files::tests::typed_paths_are_canonical_and_cannot_contain_teacher_text ... ok",
+      "test recovery_files::windows::journal::tests::committed_set_is_verified_before_rollback_copy_cleanup_and_later_writes_are_allowed ... ok",
+      "test recovery_files::windows::journal::tests::ambiguous_extra_tree_corrupt_journal_and_changed_old_bytes_preserve_all_evidence ... ok",
+      "test recovery_files::windows::journal::tests::hardlinked_old_original_is_not_adopted_or_deleted_during_recovery ... ok",
+      "test recovery_files::windows::journal::tests::interrupted_terminal_cleanup_is_idempotent_and_does_not_revisit_live_database ... ok",
+      "test recovery_files::windows::journal::tests::missing_arm_receipt_still_recovers_from_complete_journal ... ok",
+      "System.Management.Automation.RemoteException",
+      "thread 'recovery_files::windows::tests::complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area' (38620) panicked at crates/fc-bootstrap/src/recovery_files/windows/tests.rs:90:5:",
+      "assertion failed: !candidate_operation.exists()",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "test recovery_files::windows::tests::complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area ... FAILED",
+      "test recovery_files::windows::tests::directory_pin_prevents_cold_move_and_candidate_acl_is_protected ... ok",
+      "test recovery_files::windows::tests::hash_valid_malformed_image_and_cancelled_package_never_leave_candidate_files ... ok",
+      "test recovery_files::windows::journal::tests::every_rename_cut_with_and_without_following_receipt_restores_complete_old_set ... ok",
+      "",
+      "failures:",
+      "",
+      "failures:",
+      "    recovery_files::windows::tests::complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area",
+      "",
+      "test result: FAILED. 10 passed; 1 failed; 0 ignored; 0 measured; 90 filtered out; finished in 1.92s",
+      ""
+    ],
+    "exitCode": 101,
+    "sha256": "1220e64fbc69b413f5f83ff6b5ffe321084f3b67cb38fb12666268a867368764",
+    "platform": {
+      "Caption": "Microsoft Windows 11 专业版",
+      "Version": "10.0.26300",
+      "BuildNumber": "26300"
+    }
+  },
+  "cleanup": {
+    "ownedProcessesStopped": 0,
+    "rootAbsent": true,
+    "sshd": "Running"
+  }
+}

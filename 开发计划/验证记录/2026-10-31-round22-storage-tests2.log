@@ -1,0 +1,15 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `release` profile [optimized] target(s) in 2m 16s
+     Running unittests src/lib.rs (/tmp/fc-round22-storage-target/release/deps/fc_storage-4851e2ad8397fc42)
+
+running 5 tests
+test recovery::tests::cancelled_and_wrong_origin_barriers_leave_live_data_and_security_unchanged ... ok
+test recovery::tests::ordinary_projection_never_writes_credentials_security_or_authorization_pages ... ok
+test recovery::tests::ordinary_cannot_hide_unknown_rows_outside_the_program_namespace ... ok
+test recovery::tests::stale_barrier_and_malicious_schema_do_not_create_a_candidate ... ok
+test recovery::tests::streaming_restore_exceeds_normal_mutation_and_queue_limits_and_keeps_current_security ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 128 filtered out; finished in 3.96s
+

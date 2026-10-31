@@ -1,0 +1,38 @@
+{
+  "scope": "Win11 x86 isolated recovery files tests; no visible UI, no real settings",
+  "sha256": "2b0aa777db0b74a3fb022be21c0fc884ca82a2faf5a174318943921345c102a6",
+  "token": "b672dbdbcc5f42d6a4538fae4d922c3a",
+  "result": {
+    "output": [
+      "",
+      "running 12 tests",
+      "test recovery_files::tests::cold_switch_accepts_only_three_recoverable_locations ... ok",
+      "test recovery_files::tests::typed_paths_are_canonical_and_cannot_contain_teacher_text ... ok",
+      "test recovery_files::windows::journal::tests::committed_set_is_verified_before_rollback_copy_cleanup_and_later_writes_are_allowed ... ok",
+      "test recovery_files::windows::journal::tests::ambiguous_extra_tree_corrupt_journal_and_changed_old_bytes_preserve_all_evidence ... ok",
+      "test recovery_files::windows::journal::tests::hardlinked_old_original_is_not_adopted_or_deleted_during_recovery ... ok",
+      "test recovery_files::windows::journal::tests::interrupted_terminal_cleanup_is_idempotent_and_does_not_revisit_live_database ... ok",
+      "test recovery_files::windows::journal::tests::missing_arm_receipt_still_recovers_from_complete_journal ... ok",
+      "test recovery_files::windows::tests::cancelled_sealed_candidate_releases_its_pin_before_workspace_cleanup ... ok",
+      "test recovery_files::windows::tests::complete_package_roundtrip_pins_ordinary_and_removes_only_cancelled_work_area ... ok",
+      "test recovery_files::windows::tests::directory_pin_prevents_cold_move_and_candidate_acl_is_protected ... ok",
+      "test recovery_files::windows::tests::hash_valid_malformed_image_and_cancelled_package_never_leave_candidate_files ... ok",
+      "test recovery_files::windows::journal::tests::every_rename_cut_with_and_without_following_receipt_restores_complete_old_set ... ok",
+      "",
+      "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 92 filtered out; finished in 1.91s",
+      ""
+    ],
+    "exitCode": 0,
+    "sha256": "2b0aa777db0b74a3fb022be21c0fc884ca82a2faf5a174318943921345c102a6",
+    "platform": {
+      "Caption": "Microsoft Windows 11 专业版",
+      "Version": "10.0.26300",
+      "BuildNumber": "26300"
+    }
+  },
+  "cleanup": {
+    "ownedProcessesStopped": 0,
+    "rootAbsent": true,
+    "sshd": "Running"
+  }
+}

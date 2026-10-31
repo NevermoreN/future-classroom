@@ -7,6 +7,8 @@ pub mod profile_content_cache;
 pub mod profile_content_files;
 #[cfg(windows)]
 pub mod profile_content_startup;
+pub mod recovery;
+pub mod recovery_files;
 pub mod voice_runtime;
 pub mod web_application;
 pub mod web_assets;

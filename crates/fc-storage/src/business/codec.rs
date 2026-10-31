@@ -69,7 +69,7 @@ impl<'de> Visitor<'de> for Bounded {
     }
 }
 
-pub(super) fn bytes(value: &Value) -> Result<Vec<u8>, StorageError> {
+pub(crate) fn bytes(value: &Value) -> Result<Vec<u8>, StorageError> {
     serde_json::to_vec(value).map_err(|_| StorageError::Database)
 }
 /// Keep duplicate keys observable during a bounded first pass, before Value
@@ -99,7 +99,7 @@ pub(crate) fn object_fields(value: &Value, fields: &[&str]) -> Result<(), Storag
     }
     Ok(())
 }
-pub(super) fn number(value: &Value, name: &str) -> Result<u64, StorageError> {
+pub(crate) fn number(value: &Value, name: &str) -> Result<u64, StorageError> {
     value[name].as_u64().ok_or(StorageError::Database)
 }
 pub(super) fn text(value: &Value, name: &str) -> Result<String, StorageError> {
@@ -119,7 +119,7 @@ macro_rules! id {
         <$t>::new(number($v, $n)?).map_err(|_| StorageError::Database)?
     };
 }
-pub(super) fn date(value: LocalDate) -> Value {
+pub(crate) fn date(value: LocalDate) -> Value {
     json!([value.year(), value.month(), value.day()])
 }
 pub(super) fn read_date(value: &Value) -> Result<LocalDate, StorageError> {
@@ -248,7 +248,7 @@ pub(super) fn read_assignment(v: &Value) -> Result<TeachingAssignment, StorageEr
     })
 }
 use fc_domain::identity::*;
-pub(super) fn identity(s: &IdentityState) -> Value {
+pub(crate) fn identity(s: &IdentityState) -> Value {
     json!({"format":1,"revision":s.revision.get(),"installation":s.installation.as_ref().map(|i|json!({"school":i.school_id.get(),"name":i.school_name,"class":i.current_class.map(ClassId::get)})),
       "accounts":s.accounts.iter().map(|a|json!({"principal":principal(&a.principal),"login":a.login_name,"display":a.display_name,"change":a.must_change_password,"credential":a.credential_version,"recovery":a.recovery_version})).collect::<Vec<_>>(),
       "classes":s.classes.iter().map(|c|json!({"id":c.id.get(),"school":c.school_id.get(),"name":c.name,"enabled":c.enabled})).collect::<Vec<_>>(),

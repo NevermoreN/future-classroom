@@ -1,0 +1,20 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.04s
+     Running unittests src/lib.rs (/tmp/fc-round22-storage-target/debug/deps/fc_storage-3d8bafbe260afef3)
+
+running 12 tests
+test recovery::tests::cancelled_and_wrong_origin_barriers_leave_live_data_and_security_unchanged ... ok
+test recovery::tests::migration_keeps_an_existing_installation_identifier_and_rejects_corruption ... ok
+test recovery::tests::ordinary_projection_never_writes_credentials_security_or_authorization_pages ... ok
+test recovery::tests::preview_rejects_a_different_installation_even_when_numeric_school_and_teacher_ids_match ... ok
+test recovery::tests::ordinary_cannot_hide_unknown_rows_outside_the_program_namespace ... ok
+test recovery::tests::barrier_precommit_revocation_rolls_back_and_later_cleanup_can_advance_revision ... ok
+test recovery::tests::account_display_labels_restore_but_current_login_security_and_grants_do_not_revert ... ok
+test recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors ... ok
+test recovery::tests::stale_barrier_and_malicious_schema_do_not_create_a_candidate ... ok
+test recovery::tests::restoring_an_older_empty_package_keeps_profile_media_folder_and_node_allocator_floors ... ok
+test recovery::tests::projection_covers_two_resource_namespaces_previous_images_and_pending_media_without_replay ... ok
+test recovery::tests::streaming_restore_exceeds_normal_mutation_and_queue_limits_and_keeps_current_security ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 128 filtered out; finished in 8.65s
+

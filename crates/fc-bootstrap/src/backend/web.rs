@@ -198,7 +198,9 @@ impl WebService {
     fn snapshot(&self) -> WebResult<Arc<AuthoritySnapshot<IdentityState>>> {
         let deadline = Instant::now() + Duration::from_millis(100);
         loop {
-            if self.inner.control.0.closed.load(Ordering::Acquire) {
+            if self.inner.control.0.closed.load(Ordering::Acquire)
+                || self.inner.control.is_recovering()
+            {
                 return Err(WebServiceError::Disabled);
             }
             match self.inner.authority.snapshot() {
@@ -225,7 +227,8 @@ impl WebService {
     }
     fn current(&self, snapshot: &AuthoritySnapshot<IdentityState>) -> WebResult<()> {
         let status = self.inner.control.health_gate().status();
-        if self.inner.control.0.closed.load(Ordering::Acquire) {
+        if self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()
+        {
             return Err(WebServiceError::Disabled);
         }
         if status.health == Health::Healthy

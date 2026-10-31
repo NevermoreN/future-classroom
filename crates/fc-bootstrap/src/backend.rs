@@ -9,6 +9,11 @@ mod content_web;
 mod materials_web;
 mod profile_content;
 mod profiles;
+mod recovery;
+pub use recovery::{
+    ConfirmedRestore, OrdinaryBackupAccess, PreparedRecoveryDatabase, RestoreConfirmation,
+    RestorePreview,
+};
 mod voice;
 pub mod web;
 pub use content_web::{WebContentDocument, WebContentKind, WebContentScope, WebContentScopes};
@@ -173,6 +178,7 @@ struct Control {
     active_local: AtomicU64,
     active_principal: AtomicU64,
     closed: AtomicBool,
+    recovering: AtomicBool,
     input_sequence: AtomicU64,
     input_lease: AtomicU64,
     input_generation: AtomicU64,
@@ -214,6 +220,11 @@ impl MaterialOpenGuard {
 #[derive(Clone)]
 pub struct SessionControl(Arc<Control>);
 impl SessionControl {
+    /// Recovery admission is irreversible for this process. Trusted voice
+    /// interruption may still finish while ordinary users are already denied.
+    pub fn is_recovering(&self) -> bool {
+        self.0.recovering.load(Ordering::Acquire)
+    }
     pub fn publish_material_scene(
         &self,
         source: &MaterialSource,
@@ -222,6 +233,7 @@ impl SessionControl {
     ) -> bool {
         let status = self.0.health.status();
         if self.0.closed.load(Ordering::Acquire)
+            || self.is_recovering()
             || status.health != fc_runtime::health::Health::Healthy
             || status.revision != revision
         {
@@ -232,7 +244,10 @@ impl SessionControl {
             return false;
         };
         let status = self.0.health.status();
-        if status.health != fc_runtime::health::Health::Healthy || status.revision != revision {
+        if self.is_recovering()
+            || status.health != fc_runtime::health::Health::Healthy
+            || status.revision != revision
+        {
             return false;
         }
         *scene = Some(PublishedMaterialScene {
@@ -262,6 +277,7 @@ impl SessionControl {
     ) -> bool {
         let status = self.0.health.status();
         if self.0.closed.load(Ordering::Acquire)
+            || self.is_recovering()
             || status.health != fc_runtime::health::Health::Healthy
             || status.revision != revision
         {
@@ -302,6 +318,7 @@ impl SessionControl {
     }
     pub fn note_input(&self, lease: SessionLease, tick: u64) -> bool {
         if self.0.closed.load(Ordering::Acquire)
+            || self.is_recovering()
             || lease.origin() != TrustedOrigin::Local
             || self.0.active_local.load(Ordering::Acquire) != lease.id()
         {
@@ -373,13 +390,15 @@ impl SessionControl {
         None
     }
     pub fn is_local_locked(&self) -> bool {
-        self.0.active_local.load(Ordering::Acquire) == 0 || self.0.closed.load(Ordering::Acquire)
+        self.0.active_local.load(Ordering::Acquire) == 0
+            || self.0.closed.load(Ordering::Acquire)
+            || self.is_recovering()
     }
     fn generation(&self) -> u64 {
         self.0.generation.load(Ordering::Acquire)
     }
     fn check(&self, lease: SessionLease, generation: u64) -> Result<()> {
-        if self.0.closed.load(Ordering::Acquire) {
+        if self.0.closed.load(Ordering::Acquire) || self.is_recovering() {
             return Err(BackendError::Closed);
         }
         if lease.origin() == TrustedOrigin::Local
@@ -443,6 +462,7 @@ impl RandomSource for PlatformRandom {
 }
 
 pub struct Backend {
+    database_path: std::path::PathBuf,
     web: web::WebService,
     voice: voice::VoiceService,
     writer: Option<StorageWriter<Snapshot>>,
@@ -465,7 +485,9 @@ impl Backend {
         clock: Arc<dyn Clock + Send + Sync>,
         monotonic: Arc<dyn MonotonicClock + Send + Sync>,
     ) -> Result<Self> {
+        let database_path = path.as_ref().to_owned();
         let facts = startup_state(path.as_ref())?;
+        let initialized = facts.identity.installation.is_some();
         let (mut publisher, reader) =
             AuthorityStore::new(facts.identity, facts.revision, AuthEpoch::new(1));
         publisher
@@ -481,15 +503,32 @@ impl Backend {
                 .map_err(|_| StorageError::AuthorityUnavailable)
         });
         let repository = BusinessRepository::new(handle.clone(), clock.clone(), factory);
-        // Exclusive deployment ownership is already held. Recovered voice work
-        // becomes Interrupted before any new output executor can be constructed.
-        repository.recover_voice()?;
+        let recovered = (|| -> Result<()> {
+            if initialized {
+                let mut installation_id = [0; 32];
+                PlatformRandom
+                    .fill(&mut installation_id)
+                    .map_err(|_| BackendError::CryptoUnavailable)?;
+                repository.ensure_recovery_installation(installation_id)?;
+            }
+            // Exclusive deployment ownership is already held. Recovered voice
+            // work becomes Interrupted before a new executor can be constructed.
+            repository.recover_voice()?;
+            Ok(())
+        })();
+        if let Err(error) = recovered {
+            // Return the instance to composition only after the failed startup's
+            // physical SQLite thread and connection have actually finished.
+            writer.shutdown()?;
+            return Err(error);
+        }
         let control = SessionControl(Arc::new(Control {
             health,
             generation: AtomicU64::new(1),
             active_local: AtomicU64::new(0),
             active_principal: AtomicU64::new(0),
             closed: AtomicBool::new(false),
+            recovering: AtomicBool::new(false),
             input_sequence: AtomicU64::new(0),
             input_lease: AtomicU64::new(0),
             input_generation: AtomicU64::new(0),
@@ -529,6 +568,7 @@ impl Backend {
             monotonic.clone(),
         );
         Ok(Self {
+            database_path,
             web,
             voice,
             writer: Some(writer),
@@ -550,7 +590,10 @@ impl Backend {
         self.web.clone()
     }
     fn check_open(&self) -> Result<()> {
-        if self.writer.is_none() || self.control.0.closed.load(Ordering::Acquire) {
+        if self.writer.is_none()
+            || self.control.0.closed.load(Ordering::Acquire)
+            || self.control.is_recovering()
+        {
             Err(BackendError::Closed)
         } else {
             self.control
@@ -860,11 +903,13 @@ impl Backend {
         self.validate_identity(&state, &request, None)?;
         let (change, code) = prepare_initial_credentials(&mut self.crypto, &password, request)
             .map_err(|_| BackendError::CryptoUnavailable)?;
-        let transition = self.repository.execute_credentials(
-            self.encode(change, id, 1, 1)?,
-            None,
-            self.clock.as_ref(),
-        )?;
+        let mut installation_id = [0; 32];
+        self.crypto_random(&mut installation_id)?;
+        let transition = self
+            .repository
+            .clone()
+            .with_initial_installation_identity(installation_id)
+            .execute_credentials(self.encode(change, id, 1, 1)?, None, self.clock.as_ref())?;
         self.apply(&transition)?;
         Ok(code)
     }
@@ -1985,6 +2030,7 @@ mod tests {
         let mut repo = service
             .repository
             .clone()
+            .with_initial_installation_identity([47; 32])
             .with_session_guard(Arc::new(|_, _| Ok(())));
         let admin = PrincipalId::new(1).unwrap();
         let teacher = PrincipalId::new(2).unwrap();

@@ -237,6 +237,34 @@ fn rename_handle(file: &File, target: &Path) -> Result<()> {
     Ok(())
 }
 
+/// A directory and its ancestors held without delete sharing. This capability
+/// prevents a checked deployment root from being replaced while trusted recovery
+/// performs bounded operations below it. It does not freeze its descendants.
+pub struct PinnedDirectory {
+    _directory: File,
+    _parents: Vec<File>,
+}
+impl PinnedDirectory {
+    pub fn open(path: &Path) -> Result<Self> {
+        let parents = pins(path)?;
+        let directory = OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(path)?;
+        let i = info(&directory)?;
+        if i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 == 0
+        {
+            return Err(denied());
+        }
+        Ok(Self {
+            _directory: directory,
+            _parents: parents,
+        })
+    }
+}
+
 /// Private deployment tree. New subdirectories inherit its protected DACL.
 /// Call only after DataPaths::prepare_for_current_user/read_back and hold the
 /// deployment's instance lock. Every component is checked before returning.
@@ -257,6 +285,66 @@ impl ControlledFiles {
     }
     pub fn root(&self) -> &Path {
         &self.root
+    }
+    /// Create one new owned directory while its already checked parent remains
+    /// pinned. An existing object is an error, never an adopted recovery tree.
+    pub fn create_directory_new(&self, path: &Path) -> Result<PinnedDirectory> {
+        self.check(path)?;
+        let _parents = pins(path)?;
+        std::fs::create_dir(path)?;
+        PinnedDirectory::open(path)
+    }
+    /// Cold recovery only: rename an exact directory handle, on the same volume,
+    /// without replacing a destination. Existing descendant pins prevent this
+    /// operation from acquiring DELETE access. No recursive traversal is implied.
+    pub fn rename_directory(&self, source: &Path, target: &Path) -> Result<()> {
+        self.check(source)?;
+        self.check(target)?;
+        let _source_parents = pins(source)?;
+        let _target_parents = pins(target)?;
+        let directory = OpenOptions::new()
+            .read(true)
+            .access_mode(GENERIC_READ.0 | DELETE.0)
+            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(source)?;
+        let i = info(&directory)?;
+        if i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 == 0
+        {
+            return Err(denied());
+        }
+        rename_handle(&directory, target)
+    }
+    /// Remove only this exact empty directory, refusing links and replacement.
+    /// Recovery callers enumerate and validate their own files before using it.
+    pub fn remove_empty_directory(&self, path: &Path) -> Result<()> {
+        self.check(path)?;
+        let _parents = pins(path)?;
+        let directory = OpenOptions::new()
+            .read(true)
+            .access_mode(GENERIC_READ.0 | DELETE.0)
+            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(path)?;
+        let i = info(&directory)?;
+        if i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 == 0
+        {
+            return Err(denied());
+        }
+        let disposition = FILE_DISPOSITION_INFO { DeleteFile: true };
+        // SAFETY: the live owned directory handle has DELETE rights. The kernel
+        // refuses nonempty directories; no pathname is followed by disposition.
+        unsafe {
+            SetFileInformationByHandle(
+                handle(&directory),
+                FileDispositionInfo,
+                &disposition as *const _ as _,
+                std::mem::size_of_val(&disposition) as u32,
+            )?;
+        }
+        Ok(())
     }
     pub fn directory(&self, components: &[String]) -> Result<PathBuf> {
         let mut path = self.root.clone();

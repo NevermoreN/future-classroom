@@ -1,0 +1,16 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+warning: method `reopen` is never used
+  --> crates/fc-bootstrap/src/recovery/test_support.rs:58:12
+   |
+18 | impl Fixture {
+   | ------------ method in this implementation
+...
+58 |     pub fn reopen(&self,database:&std::path::Path)->Backend {
+   |            ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fc-bootstrap` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.83s
+  Executable unittests src/lib.rs (/tmp/fc-round22-files-target/i686-pc-windows-gnu/debug/deps/fc_bootstrap-269e28898d6be620.exe)

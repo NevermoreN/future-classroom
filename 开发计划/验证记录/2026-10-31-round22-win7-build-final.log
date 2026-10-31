@@ -1,0 +1,234 @@
+    Blocking waiting for file lock on package cache
+   Compiling compiler_builtins v0.1.160 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling libc v0.2.191
+   Compiling object v0.39.1
+   Compiling std v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+   Compiling windows-link v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/windows_link)
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling zerocopy v0.8.63
+   Compiling rustversion v1.0.23
+   Compiling serde_core v1.0.228
+   Compiling find-msvc-tools v0.1.15
+   Compiling shlex v2.0.1
+   Compiling generic-array v0.14.7
+   Compiling ahash v0.8.12
+   Compiling pkg-config v0.3.34
+   Compiling cc v1.10.0
+   Compiling serde_json v1.0.145
+   Compiling crc32fast v1.5.3
+   Compiling vcpkg v0.2.15
+   Compiling serde v1.0.228
+   Compiling multiversion_no_op v1.0.0
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+   Compiling encoding_rs v0.8.42
+   Compiling syn v2.0.119
+   Compiling libsqlite3-sys v0.30.1
+   Compiling windows-implement v0.60.2
+   Compiling windows-interface v0.59.3
+   Compiling serde_derive v1.0.228
+   Compiling rustc-std-workspace-core v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)
+   Compiling memchr v2.8.3
+   Compiling adler2 v2.0.1
+   Compiling rustc-demangle v0.1.28
+   Compiling cfg-if v1.0.4
+   Compiling rustc-literal-escaper v0.0.8
+   Compiling unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)
+   Compiling rustc-std-workspace-alloc v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling panic_abort v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)
+   Compiling panic_unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling gimli v0.34.0
+   Compiling hashbrown v0.17.1
+   Compiling std_detect v0.1.5 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)
+   Compiling miniz_oxide v0.9.1
+   Compiling addr2line v0.27.1
+   Compiling proc_macro v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling subtle v2.6.1
+   Compiling windows-link v0.2.1
+   Compiling cpufeatures v0.2.17
+   Compiling windows-strings v0.5.1
+   Compiling windows-result v0.4.1
+   Compiling windows-core v0.62.2
+   Compiling once_cell v1.21.4
+   Compiling smallvec v1.16.4
+   Compiling itoa v1.0.18
+   Compiling simd-adler32 v0.3.10
+   Compiling ryu v1.0.23
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling inout v0.1.4
+   Compiling cipher v0.4.4
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling windows-threading v0.2.1
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-ports/src/http.rs:128:14
+    |
+128 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+128 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+128 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+   Compiling simdutf8 v0.1.5
+   Compiling scopeguard v1.2.0
+warning: `fc-ports` (lib) generated 1 warning (run `cargo fix --lib -p fc-ports` to apply 1 suggestion)
+   Compiling zeroize v1.8.2
+   Compiling core_detect v1.0.0
+   Compiling zlib-rs v0.6.8
+   Compiling windows-future v0.3.2
+   Compiling aes v0.8.4
+   Compiling hmac v0.12.1
+   Compiling windows-collections v0.3.2
+   Compiling flate2 v1.1.10
+   Compiling hashbrown v0.14.5
+   Compiling windows-numerics v0.3.1
+   Compiling log v0.4.34
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling fallible-iterator v0.3.0
+   Compiling bitflags v2.13.2
+   Compiling rustc-hash v2.1.3
+   Compiling pdf-syntax v0.6.1
+   Compiling windows v0.62.2
+   Compiling quick-xml v0.42.0
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+   Compiling hashlink v0.9.1
+   Compiling pbkdf2 v0.12.2
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+  --> crates/fc-runtime/src/cancel.rs:33:14
+   |
+33 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+   |              ^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+   |
+33 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+33 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+   |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-runtime/src/worker.rs:106:14
+    |
+106 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+106 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+106 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+warning: `fc-runtime` (lib) generated 2 warnings (run `cargo fix --lib -p fc-runtime` to apply 2 suggestions)
+   Compiling fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+   Compiling fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+   Compiling fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+   Compiling fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+   Compiling rusqlite v0.32.1
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-storage/src/login.rs:364:14
+    |
+364 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+364 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+364 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-storage/src/lib.rs:378:14
+    |
+378 |         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+378 -         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+378 +         used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+    |
+
+warning: `fc-storage` (lib) generated 2 warnings (run `cargo fix --lib -p fc-storage` to apply 2 suggestions)
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u32>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-windows/src/audio/device.rs:170:10
+    |
+170 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |          ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+170 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+170 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/backend/voice.rs:193:14
+    |
+193 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+193 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+193 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/backend.rs:311:14
+    |
+311 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+311 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+311 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/voice_runtime.rs:137:14
+    |
+137 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+137 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+137 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+ --> crates/fc-bootstrap/src/web_application/shared_upload.rs:9:14
+  |
+9 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+  |              ^^^^^^^^^^^^
+  |
+help: replace the use of the deprecated method
+  |
+9 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+9 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+  |
+
+warning: `fc-windows` (lib) generated 1 warning (run `cargo fix --lib -p fc-windows` to apply 1 suggestion)
+warning: `fc-bootstrap` (lib) generated 4 warnings (run `cargo fix --lib -p fc-bootstrap` to apply 4 suggestions)
+    Finished `release` profile [optimized] target(s) in 7m 36s

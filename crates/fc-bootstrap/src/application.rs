@@ -420,7 +420,7 @@ struct Request {
     clock: Arc<CurrentClock>,
 }
 enum Work {
-    Open(PathBuf, Arc<CurrentClock>),
+    Open(DataPaths, Arc<CurrentClock>),
     Request(Request),
     Refresh(Arc<Mutex<Backend>>),
     MaintainVoice(PathBuf, VoiceService),
@@ -490,8 +490,8 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
-            Self::Open(p, _)
-            | Self::ValidateOffice(p)
+            Self::Open(paths, _) => Some(paths.root().as_os_str().len().saturating_mul(2)),
+            Self::ValidateOffice(p)
             | Self::MaintainVoice(p, _)
             | Self::MaintainProfileContent(p, _, _) => Some(p.as_os_str().len().saturating_mul(2)),
             Self::Request(r) => r.data.allocation_bytes()?.checked_add(256 * 1024),
@@ -550,7 +550,19 @@ impl Task for Work {
     fn run(self, context: &JobContext) -> Self::Output {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
-            Self::Open(root, clock) => {
+            Self::Open(paths, clock) => {
+                let root = paths.root().to_owned();
+                // The first frame is already visible. Recovery owns the same
+                // worker deadline/cancellation and precedes full child creation,
+                // SQLite, ordinary GC, audio and every network capability.
+                fc_bootstrap::recovery_files::RecoveryFiles::new(&paths)
+                    .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
+                    .map_err(|_| Failure::Deployment("备份恢复状态需要修复；原数据已保留。"))?;
+                context.checkpoint().map_err(|_| Failure::Stopped)?;
+                paths
+                    .prepare_for_current_user()
+                    .and_then(|deployment| deployment.read_back())
+                    .map_err(|_| Failure::Deployment("数据目录权限读回失败，需要修复。"))?;
                 let mut backend = open_backend(&root, clock)?;
                 if context.checkpoint().is_err() {
                     backend.close()?;
@@ -3659,12 +3671,22 @@ pub fn run(autostart: bool) -> std::result::Result<(), String> {
     run_at(paths, autostart, false)
 }
 fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result<(), String> {
-    let deployment = paths
-        .prepare_for_current_user()
-        .map_err(|_| "数据目录权限不符合部署要求，请使用原部署账号或修复权限".to_owned())?;
-    deployment
-        .read_back()
-        .map_err(|_| "数据目录权限读回失败".to_owned())?;
+    // A torn cold switch may have deliberately moved state/teachers away. Do
+    // not create empty replacements before checking its durable journal.
+    if paths
+        .root()
+        .try_exists()
+        .map_err(|_| "无法读取部署目录".to_owned())?
+    {
+        paths
+            .verify_root_for_current_user()
+            .map_err(|_| "部署根目录权限不符合要求，需要修复".to_owned())?;
+    } else {
+        paths
+            .prepare_for_current_user()
+            .and_then(|deployment| deployment.read_back())
+            .map_err(|_| "无法创建受控部署目录".to_owned())?;
+    }
     let _instance = InstanceGuard::acquire(paths.root())
         .map_err(|_| "未来教室已运行，或数据目录被其他会话占用".to_owned())?;
     let host = HiddenHost::new(!probe).map_err(|_| "无法创建托盘宿主".to_owned())?;
@@ -3711,7 +3733,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     if !autostart {
         app.window.show(true);
     }
-    app.submit(Work::Open(paths.root().to_owned(), clock))?;
+    app.submit(Work::Open(paths.clone(), clock))?;
     let started = Instant::now();
     let mut stage = 0u8;
     let mut lesson_stage = 0u8;
@@ -3970,7 +3992,6 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             .join()
             .map_err(|_| "后台执行池关闭失败".to_owned())?;
     }
-    drop(deployment);
     result.map_err(|_| "原生宿主已因错误关闭，请核对数据后重新启动".to_owned())?;
     if let Some(error) = probe_error {
         return Err(error);
@@ -5015,8 +5036,7 @@ mod tests {
         app.root = root.clone();
         app.desktop.set_root(root.clone());
         app.render().unwrap();
-        app.submit(Work::Open(root.clone(), app.clock.clone()))
-            .unwrap();
+        app.submit(Work::Open(paths, app.clock.clone())).unwrap();
         (Scratch(root), app)
     }
     pub(super) fn wait_for(app: &mut App, condition: impl Fn(&App) -> bool) {

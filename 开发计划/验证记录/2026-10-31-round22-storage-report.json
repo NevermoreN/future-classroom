@@ -1,0 +1,264 @@
+{
+  "component": "fc-storage recovery round22",
+  "source_files": [
+    {
+      "path": "crates/fc-storage/Cargo.toml",
+      "bytes": 390,
+      "sha256": "6412ef4096052ea7fe0b6c7866ddab7e38a4c356ca8b58a1b043e5afc973828b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/codec.rs",
+      "bytes": 15173,
+      "sha256": "722f4faef10f921734562c3bcf1669d479ab3dcc50124c0460d189312f9a5139"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "bytes": 59195,
+      "sha256": "f7cc6239a1af2dbfda01cfa53a286f1641fc0e8fec7a9b6915d2f2c0832c031b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 40696,
+      "sha256": "42c1ddf0105b3efc600b88c06adc737176ff9f5a3c0898ed154eae55e4eb615d"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_media.rs",
+      "bytes": 26135,
+      "sha256": "1299af88fca01f81c1e54df178b2c6c5d087c4aa4528a855d916e072620a849b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/recovery.rs",
+      "bytes": 51129,
+      "sha256": "d1b6d37a00bbd62f5fc8921314e31a8c67cf338a8ab440908f126147b97ca551"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 63622,
+      "sha256": "d20791d87785ae9471ff1c80e5533f3d1ef3e87b459dc39178e7c7e39d24162b"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery.rs",
+      "bytes": 32970,
+      "sha256": "de0767700ae41a789200821fb109ea20b93373e3575a23e678cb4883c7926933"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery_tests.rs",
+      "bytes": 42280,
+      "sha256": "2bfa72aac4363be2fc6041861bf9d79a27dd8d013d1893ad80fac5db9262c6ee"
+    }
+  ],
+  "cargo_lock_sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+  "verification": {
+    "targeted": {
+      "log": "/tmp/fc-round22-storage-tests13.log",
+      "passed": 16,
+      "failed": 0
+    },
+    "complete_release": {
+      "log": "/tmp/fc-round22-storage-all-final.log",
+      "passed": 144,
+      "failed": 0
+    },
+    "clippy": {
+      "log": "/tmp/fc-round22-storage-clippy-final.log",
+      "all_targets": true,
+      "deny_warnings": true,
+      "exit_code": 0
+    },
+    "diff_check": 0
+  },
+  "logs": [
+    {
+      "path": "/tmp/fc-round22-storage-all-final.log",
+      "bytes": 16123,
+      "sha256": "9ee4cf6ceb108da487bdccfe5fcba009c9050ca964c30d148177a55486a30bd4"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check.log",
+      "bytes": 9076,
+      "sha256": "dbedf11e1b36f2400bd231fbc811a5796143ffeaa4e3fb52b6a6d177c0ab8fcc"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check10.log",
+      "bytes": 167,
+      "sha256": "fad7b20a75c98db6ee71a4905537c493232ffc8c71a751cf8e9e533ea1491f52"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check11.log",
+      "bytes": 249,
+      "sha256": "829e3de220f4fea1ee62be3c6417e7a1f408b2e951c45dbe285888494bc58ced"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check12.log",
+      "bytes": 167,
+      "sha256": "33f58f48897e6ac986481b9247bd342c1286cd99815a4a6c18b7883c236ddfbd"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check13.log",
+      "bytes": 167,
+      "sha256": "33f58f48897e6ac986481b9247bd342c1286cd99815a4a6c18b7883c236ddfbd"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check2.log",
+      "bytes": 7777,
+      "sha256": "a0eb525ec400fe2a3c463366ea7eab2c21e7ade5735ce47dde2da063df897292"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check3.log",
+      "bytes": 167,
+      "sha256": "0029dd080d1e1c15053124c2856e1f53981c465b3dfb012c1b0463a146e0cc4d"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check4.log",
+      "bytes": 167,
+      "sha256": "13ad3fa08031ad0e80633605eb2f6c1f23786a5459484174404001675eba19b8"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check5.log",
+      "bytes": 167,
+      "sha256": "c948f30fb3558c7a3abecdeb9553db8d242e4b88e5b90594f16748bb333673c3"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check6.log",
+      "bytes": 351,
+      "sha256": "6e77bf77b5884ddf884ad24784b0e5bb95f0c4880fd70fe84ce41c73100ddda1"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check7.log",
+      "bytes": 887,
+      "sha256": "8fc54efa9f10030bd5b0daabf5d74ab899a9eb18bf8d03f56f95c6f2a56761f3"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check8.log",
+      "bytes": 167,
+      "sha256": "fba6acbfa9ffefc68c6d9ad4cf2900b513a48c760290ea30ecc12dc3cc365178"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-check9.log",
+      "bytes": 167,
+      "sha256": "00ffc61ed4ba8125e366679a0aa7b6d1da5a341ffcc5af96c618545f9f9b2a33"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-clippy-final.log",
+      "bytes": 167,
+      "sha256": "30942a3155ff4d9aa561b8a0bee2f9c6dab2e8394652b7c4a37efe85b543f76d"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-clippy1.log",
+      "bytes": 404,
+      "sha256": "b47d83ab2419ee67cf2ce8ed000650b7c5e6c83c5c559356a214164fb0ad9efb"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-clippy2.log",
+      "bytes": 2572,
+      "sha256": "fe24c6140a02eebca32bf79ede30f7992d603f7d8589d2e117ba105119a102c6"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-clippy3.log",
+      "bytes": 167,
+      "sha256": "ace2142fa89fb8263441aab393264bb2683d51677ab8a3ce17a381bfe5570142"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-media-debug1.log",
+      "bytes": 1023,
+      "sha256": "ae79e9956fb7dc25c61463bcebdc0d24f40ae8ad52c37999caf468ba540b9321"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-media-debug2.log",
+      "bytes": 1069,
+      "sha256": "9582faaddea2e145ebe8a6915af96071a014ed72b67208ce1118d5a41db62c52"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-media-debug3.log",
+      "bytes": 1097,
+      "sha256": "c47313e0623e9b46fb45dea0b63f1571fdaae46777bea602c8e7a56813356228"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests1.log",
+      "bytes": 2572,
+      "sha256": "bee30711c28a79977993ac99edb25f2b8982b4817aa88de7cb5c90a0b757063a"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests10.log",
+      "bytes": 1119,
+      "sha256": "754cc23ff6fb3f703afeb4da27a67e8d66044459b7cf0eb4ec5981ece0fe5975"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests11.log",
+      "bytes": 1684,
+      "sha256": "f30547e55e89718c3673ffce1ad63996b8c0b9d4297bd0f0255debed38a3d27a"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests12.log",
+      "bytes": 1907,
+      "sha256": "5ae5c7f6ddc31290f0da92ab8d1f8395ec0749ce6296ab2182ff4cf741f599b5"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests13.log",
+      "bytes": 2138,
+      "sha256": "350649597e6983d92ab583f50ebd3b8fe24a4cc9d1c73ef9e3328c6ae264d3fc"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests2.log",
+      "bytes": 1073,
+      "sha256": "247550f625c4273886a9c62f130b972b5f927b337a2b346ebd32f3c6ad81855b"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests3.log",
+      "bytes": 2287,
+      "sha256": "f8edb0ed24bb10a4c8e72bfb4d83238d267838658ab939dd1534128e2c32ee89"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests4.log",
+      "bytes": 1325,
+      "sha256": "ec700d603b28a68317bf932eb0df52ee8c5132c22674e12da90fc804a35c46e5"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests5.log",
+      "bytes": 2001,
+      "sha256": "f4de569fddca82c3de5189d82bd20a9bf865721a9638edd3fa94efda6ce9bcf6"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests6.log",
+      "bytes": 1988,
+      "sha256": "c8c2b1bb5d581925a2522aaff27c67383623d53f7bcda7f16b51cdcd78ce6550"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests7.log",
+      "bytes": 971,
+      "sha256": "47409f6ef8b1cdba84d522748b5e5eb2b9883d010556b1316c54af422d8e3b79"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests8.log",
+      "bytes": 1463,
+      "sha256": "cee89adb70a1e28d908ba4bf53a877a03fdc73d62c6f3b50ef9fb69892ddac5d"
+    },
+    {
+      "path": "/tmp/fc-round22-storage-tests9.log",
+      "bytes": 2543,
+      "sha256": "c372776d0d655bd1559cd42aa6e45c0a35827fe49039a0144b2593434e00bd05"
+    }
+  ],
+  "failure_explanations": {
+    "check.log": "Initial module visibility errors; internal codec helpers now crate-visible, no public external expansion.",
+    "tests1.log": "Test fixture attempted private BusinessRepository.handle; now uses the actual StorageWriter handle.",
+    "tests3.log,tests4.log": "Test fixture called nonexistent MaterialRepository::append; corrected append_material.",
+    "tests5.log": "Synthetic admin fixture had no teaching assignment, so material scope correctly rejected; fixture now explicitly teaches class/subject.",
+    "tests6.log,media-debug1.log,media-debug2.log,media-debug3.log": "Actual restore defect: changing profile content published revision without rebasing immutable current/previous violated domain history. Preserve exact published historical pair; advance independent view/layout/security generations and retired command ledger. Regression now proves current+previous and later publish.",
+    "tests7.log": "Missing injected Clock in material-list fixture, corrected.",
+    "tests9.log,clippy2.log": "Voice test used root namespace rather than fc_ports::voice, corrected.",
+    "tests10.log": "Test helper Arc closure needed explicit ExecutionFence coercion, corrected.",
+    "check7.log": "Intermediate preflight refactor placed barrier field reads outside proof branch, corrected."
+  },
+  "boundaries": [
+    "Storage APIs assume trusted protected staging paths, caller-held file pins and physical worker/media quiescence; they do not perform live cold switching.",
+    "Ordinary SQLite files are fresh whitelist projections with no copied credential pages; current protected snapshots only build isolated candidates.",
+    "Only an identical nonzero 32-byte installation binding can restore automatically; cross-installation identity mapping is unsupported and rejected.",
+    "Current credentials, login penalties, disabled roles/assignments, current OS operation journal survive; labels and defaults restore only against existing current identity.",
+    "Published component revision and immutable previous/current pair preserve source historical meaning; safety epochs, layout/view generations, ID allocators and operation tombstones move forward.",
+    "Calendar automatic policy grant is removed, pending operations never replay, voice assets/active queue/leases are removed; exact old system grants are not restored.",
+    "16GiB database and combined 2GiB media allowances are independent recovery limits. SQLite per-value/SQL limits and progress checks are not a hard cap on every SQLite allocation or wall-clock preemption.",
+    "Unit media and voice preparation is synthetic metadata, not proof of WIC, filesystem, native audio, Windows7/10/11 behavior."
+  ],
+  "own_test_directory_residuals": []
+}

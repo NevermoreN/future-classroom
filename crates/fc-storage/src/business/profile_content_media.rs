@@ -615,6 +615,26 @@ pub(super) fn startup_check(
             if k == CATALOG || k.starts_with(&format!("{ROOT}entries/")) {
                 continue;
             }
+            if let Some(id) = k.strip_prefix(&format!("{ROOT}recovery-owners/")) {
+                let id =
+                    MediaVersionId::new(id.parse::<u64>().map_err(|_| StorageError::Database)?)
+                        .map_err(|_| StorageError::Database)?;
+                if k != format!("{ROOT}recovery-owners/{:020}", id.get())
+                    || !declared.insert(id)
+                    || declared.len() as u64 > count
+                {
+                    return Err(StorageError::Database);
+                }
+                let v = codec::value(&row.value)?;
+                codec::object_fields(&v, &["format", "id"])?;
+                if codec::number(&v, "format")? != 1
+                    || codec::number(&v, "id")? != id.get()
+                    || load(d, id)?.state == MediaState::Reserved
+                {
+                    return Err(StorageError::Database);
+                }
+                continue;
+            }
             if !k.starts_with(&format!("{ROOT}reservations/")) {
                 return Err(StorageError::Database);
             }

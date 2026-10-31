@@ -78,7 +78,7 @@ impl SessionControl {
         valid_until: Option<LocalDateTime>,
     ) -> bool {
         let status = self.0.health.status();
-        if self.0.closed.load(Ordering::Acquire)
+        if (self.0.closed.load(Ordering::Acquire) || self.is_recovering())
             || status.health != fc_runtime::health::Health::Healthy
             || status.revision != revision
             || generation.get() == 0
@@ -98,7 +98,7 @@ impl SessionControl {
             return false;
         };
         let status = self.0.health.status();
-        if self.0.closed.load(Ordering::Acquire)
+        if (self.0.closed.load(Ordering::Acquire) || self.is_recovering())
             || status.health != fc_runtime::health::Health::Healthy
             || status.revision != revision
             || generation.get() < state.high_water
@@ -148,7 +148,9 @@ impl SessionControl {
                     || allow_updating
                         && status.health == fc_runtime::health::Health::AuthorityUpdating)
         };
-        if self.0.closed.load(Ordering::Acquire) || !healthy(self.0.health.status()) {
+        if (self.0.closed.load(Ordering::Acquire) || self.is_recovering())
+            || !healthy(self.0.health.status())
+        {
             return false;
         }
         let Ok(state) = self.0.profile_content_scene.lock() else {
@@ -165,7 +167,9 @@ impl SessionControl {
                     entry.slot == slot && entry.revision == content && entry.view_revision == view
                 })
         });
-        matches && !self.0.closed.load(Ordering::Acquire) && healthy(self.0.health.status())
+        matches
+            && !(self.0.closed.load(Ordering::Acquire) || self.is_recovering())
+            && healthy(self.0.health.status())
     }
 }
 fn unavailable() -> BackendError {

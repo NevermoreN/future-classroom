@@ -146,7 +146,7 @@ pub struct ResourceRetirement {
 fn inventory(v: &ResourceInventory) -> Value {
     json!({"format":1,"resource":dto::resource(&v.resource),"scope":dto::scope(v.scope),"material":v.material_id.get(),"revision":v.revision.get(),"references":v.references,"state":match v.state{ResourceState::Referenced=>"referenced",ResourceState::Unreferenced=>"unreferenced",ResourceState::Retiring=>"retiring",ResourceState::Removed=>"removed"}})
 }
-fn read_inventory(v: &Value) -> Result<ResourceInventory, StorageError> {
+pub(super) fn read_inventory(v: &Value) -> Result<ResourceInventory, StorageError> {
     codec::object_fields(
         v,
         &[

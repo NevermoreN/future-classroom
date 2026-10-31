@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "0982b68f1b9897fc6ca12d9c713d4c0c4f1df4170aee9a7bd96b0f7010b6edd7"
+    }
+  ],
+  "exeSha256": "0982b68f1b9897fc6ca12d9c713d4c0c4f1df4170aee9a7bd96b0f7010b6edd7",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1008 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "autostartOutput": [
+      "PROBE_EVENT tick=133 action=18 page=Synthetic autostart school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=133 kind=display-load page=Synthetic autostart school · 工作台",
+      "PROBE_COMPLETE tick=135 kind=display page=Synthetic autostart school · 工作台",
+      "PROBE_EVENT tick=167 action=25 page=桌面显示设置 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=0 name=native-open-settings",
+      "AUTOSTART_NATIVE_STEP index=1 name=generated-scratch-and-no-startup-intent",
+      "PROBE_EVENT tick=179 action=650 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=2 name=native-enable-review-no-effect",
+      "PROBE_EVENT tick=185 action=653 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=3 name=native-cancel-no-intent",
+      "PROBE_EVENT tick=189 action=650 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=4 name=native-enable-review-again",
+      "PROBE_EVENT tick=196 action=652 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=5 name=native-confirm-enable-real-readback",
+      "PROBE_EVENT tick=206 action=654 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=6 name=native-refresh-is-observation-only",
+      "PROBE_EVENT tick=209 action=651 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=7 name=native-disable-review",
+      "PROBE_EVENT tick=215 action=6 page=登录自启动 pending=false generation=0",
+      "AUTOSTART_NATIVE_STEP index=8 name=native-lock-clears-pending-review",
+      "PROBE_EVENT tick=218 action=3 page=Synthetic autostart school · 登录工作台 pending=false generation=1",
+      "PROBE_SUBMIT tick=218 kind=request page=Synthetic autostart school · 登录工作台",
+      "PROBE_COMPLETE tick=272 kind=updated page=Synthetic autostart school · 登录工作台",
+      "AUTOSTART_NATIVE_STEP index=9 name=native-relogin",
+      "PROBE_EVENT tick=276 action=18 page=Synthetic autostart school · 工作台 pending=false generation=1",
+      "PROBE_EVENT tick=305 action=25 page=桌面显示设置 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=10 name=native-reopen-saved-state",
+      "PROBE_EVENT tick=317 action=651 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=11 name=native-disable-review-again",
+      "PROBE_EVENT tick=324 action=652 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=12 name=native-confirm-disable-real-readback",
+      "PROBE_EVENT tick=329 action=650 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=13 name=native-capture-review-revision",
+      "AUTOSTART_NATIVE_STEP index=14 name=external-drift-observed-without-repair",
+      "PROBE_EVENT tick=338 action=652 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=15 name=native-stale-review-rejected",
+      "PROBE_EVENT tick=343 action=654 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=16 name=native-refresh-current-drift",
+      "PROBE_EVENT tick=345 action=651 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=17 name=native-review-disable-drift",
+      "PROBE_EVENT tick=352 action=652 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=18 name=native-confirm-disable-drift",
+      "AUTOSTART_NATIVE_STEP index=19 name=simulate-interruption-after-physical-effect",
+      "AUTOSTART_NATIVE_STEP index=20 name=startup-observe-interrupted-facts",
+      "PROBE_EVENT tick=375 action=654 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=21 name=native-refresh-never-replays-interrupted-intent",
+      "PROBE_EVENT tick=377 action=651 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=22 name=native-review-explicit-recovery",
+      "PROBE_EVENT tick=384 action=652 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=23 name=native-confirm-explicit-recovery",
+      "PROBE_EVENT tick=390 action=655 page=登录自启动 pending=false generation=1",
+      "AUTOSTART_NATIVE_STEP index=24 name=native-close-settings",
+      "autostart_intent_readback_confirm_cancel_lock_stale_drift_reconcile_native_worker=PASS autostart_native_steps=25 real_run=UNTOUCHED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=427"
+    ],
+    "sessionId": 1,
+    "exitCode": 0,
+    "autostartExitCode": 0
+  },
+  "autostartNativeSteps": 25,
+  "autostartNativeStatus": "PASS",
+  "status": "PASS"
+}

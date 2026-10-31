@@ -27,7 +27,7 @@ const CHILDREN: &[&str] = &[
 
 /// Paths are constructed by the local bootstrap, never from network DTOs.
 /// Discovery has no filesystem side effect and does not loosen ProgramData ACLs.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DataPaths {
     root: PathBuf,
 }
@@ -64,6 +64,51 @@ impl DataPaths {
     }
     pub fn open_copies(&self) -> PathBuf {
         self.root.join("open-copies")
+    }
+    /// Before recovery may inspect missing/moved children, verify the existing
+    /// deployment root without creating or silently repairing any directory.
+    pub fn verify_root_for_current_user(&self) -> Result<()> {
+        check_local_ancestors(&self.root)?;
+        verify_acl(&self.root, &Descriptor::for_user(&current_user_sid()?)?)
+    }
+    /// Trusted recovery composition only. The candidate is a fixed `new` child
+    /// of one opaque operation below this deployment's `recovery` namespace.
+    /// Protected ACLs are installed at creation, including the three trees that
+    /// may later be renamed into the live deployment.
+    pub fn prepare_recovery_candidate(&self, candidate: &Path) -> Result<DeploymentDirectory> {
+        self.verify_root_for_current_user()?;
+        let relative = candidate
+            .strip_prefix(&self.root)
+            .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+        let parts: Vec<_> = relative.components().collect();
+        if parts.len() != 3
+            || parts[0].as_os_str() != "recovery"
+            || parts[2].as_os_str() != "new"
+            || parts[1].as_os_str().to_str().is_none_or(|s| {
+                s.len() != 35
+                    || !s.starts_with("op-")
+                    || !s[3..]
+                        .bytes()
+                        .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+            })
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        check_local_ancestors(candidate)?;
+        let user_sid = current_user_sid()?;
+        let expected = Descriptor::for_user(&user_sid)?;
+        ensure_directory(candidate, &expected)?;
+        for child in CHILDREN.iter().copied().chain(["profile-content"]) {
+            ensure_directory(&candidate.join(child), &expected)?;
+        }
+        let prepared = DeploymentDirectory {
+            root: candidate.to_owned(),
+            user_sid,
+            _thread: PhantomData,
+        };
+        prepared.read_back()?;
+        verify_acl(&candidate.join("profile-content"), &expected)?;
+        Ok(prepared)
     }
     /// Explicit deployment operation. Creates only this project's directories with
     /// a protected DACL present at creation: SYSTEM, Administrators, deployment user.

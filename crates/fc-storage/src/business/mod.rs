@@ -23,6 +23,7 @@ pub mod profile_content;
 mod profile_content_codec;
 mod profiles;
 mod profiles_codec;
+pub(crate) mod recovery;
 mod schedule;
 mod schedule_codec;
 pub mod voice;
@@ -50,19 +51,27 @@ pub fn startup_state(path: impl AsRef<Path>) -> Result<StartupState, StorageErro
         .map_err(|_| StorageError::Database)?;
     let revision = read_revision(&transaction)?;
     let identity = load_identity(&TransactionView(&transaction))?;
-    schedule::load(&TransactionView(&transaction), &identity)?;
-    autostart::startup_check(&TransactionView(&transaction))?;
-    calendar::startup_check(&TransactionView(&transaction))?;
-    schedule::change_proof(&TransactionView(&transaction))?;
-    lesson::load(&TransactionView(&transaction))?;
-    display::load(&TransactionView(&transaction), &identity)?;
-    profiles::startup_check(&TransactionView(&transaction), &identity)?;
-    desktop::read_watermark(&TransactionView(&transaction), &identity)?;
-    materials::startup_check(&TransactionView(&transaction), &identity)?;
-    voice::startup_check(&TransactionView(&transaction), &identity)?;
-    profile_content::startup_check(&TransactionView(&transaction), &identity)?;
+    validate_documents(&TransactionView(&transaction), &identity)?;
     transaction.rollback().map_err(|_| StorageError::Database)?;
     Ok(StartupState { identity, revision })
+}
+pub(crate) fn validate_documents(
+    d: &dyn TransactionDocuments,
+    identity: &IdentityState,
+) -> Result<(), StorageError> {
+    schedule::load(d, identity)?;
+    autostart::startup_check(d)?;
+    calendar::startup_check(d)?;
+    schedule::change_proof(d)?;
+    lesson::load(d)?;
+    display::load(d, identity)?;
+    profiles::startup_check(d, identity)?;
+    desktop::read_watermark(d, identity)?;
+    materials::startup_check(d, identity)?;
+    voice::startup_check(d, identity)?;
+    profile_content::startup_check(d, identity)?;
+    recovery::startup_check(d)?;
+    Ok(())
 }
 
 const IDENTITY: &str = "business/identity/v1";
@@ -95,6 +104,7 @@ pub struct BusinessRepository<S> {
     calendar_execution: CalendarExecutionGuard,
     autostart_execution: AutostartExecutionGuard,
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
+    initial_installation_identity: Option<[u8; 32]>,
 }
 impl<S> Clone for BusinessRepository<S> {
     fn clone(&self) -> Self {
@@ -109,6 +119,7 @@ impl<S> Clone for BusinessRepository<S> {
             calendar_execution: self.calendar_execution.clone(),
             autostart_execution: self.autostart_execution.clone(),
             voice_timeout: self.voice_timeout.clone(),
+            initial_installation_identity: self.initial_installation_identity,
         }
     }
 }
@@ -129,11 +140,18 @@ impl<S: Send + 'static> BusinessRepository<S> {
             calendar_execution: Arc::new(|| true),
             autostart_execution: Arc::new(|| true),
             voice_timeout: None,
+            initial_installation_identity: None,
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
         self.session = guard;
+        self
+    }
+    /// Bind a CSPRNG installation identifier to the same initial credential
+    /// transaction. This value is public identity, never an authentication key.
+    pub fn with_initial_installation_identity(mut self, id: [u8; 32]) -> Self {
+        self.initial_installation_identity = Some(id);
         self
     }
     /// Bind the shared-worker lifetime through intent/Applying writer COMMIT.
@@ -560,6 +578,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
                 clock: self.clock.clone(),
                 factory: self.factory.clone(),
                 session: self.session.clone(),
+                initial_installation_identity: self.initial_installation_identity,
             })
             .map_err(identity_error)?
             .wait()
@@ -642,6 +661,7 @@ impl<S> TransactionTask<S> for ReadCredential {
     }
 }
 struct IdentityTask<S> {
+    initial_installation_identity: Option<[u8; 32]>,
     request: IdentityRequest,
     actor: Option<ActorContext>,
     credentials: Option<PreparedCredentials>,
@@ -750,6 +770,12 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
         let journal = format!("business/receipt/identity/{}", request.command_id.get());
         let mut digest = Sha256::new();
         digest.update(format!("{:?}", request));
+        if matches!(request.command, IdentityCommand::FirstAdministrator { .. }) {
+            if let Some(id) = self.initial_installation_identity {
+                digest.update(b"installation/v1\0");
+                digest.update(id);
+            }
+        }
         digest.update(codec::bytes(
             &self.actor.as_ref().map(codec::actor).unwrap_or(Value::Null),
         )?);
@@ -815,6 +841,18 @@ impl<S: Send> TransactionTask<S> for IdentityTask<S> {
             .map_err(StorageError::Identity)?;
         schedule::check_identity_change(d, &state, &transition.next)?;
         let mut mutations = Vec::new();
+        if matches!(request.command, IdentityCommand::FirstAdministrator { .. }) {
+            if let Some(id) = self.initial_installation_identity {
+                recovery::validate_installation_id(id)?;
+                if recovery::installation(d)?.is_some() {
+                    return Err(StorageError::RecoveryConflict);
+                }
+                mutations.push(Mutation::Put {
+                    key: recovery::INSTALLATION.into(),
+                    value: recovery::installation_bytes(id)?,
+                });
+            }
+        }
         if transition.next.installation.is_some() {
             let document = schedule::load(d, &state)?;
             let (_, change) = lesson::observe(d, &transition.next, &document, self.clock.now())?;

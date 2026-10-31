@@ -1,0 +1,186 @@
+{
+  "scope": "Round22 recovery service/startup milestone; native backup/restore UI, cross-install mapping and reinitialization incomplete; full goal remains active.",
+  "source": {
+    "fileCount": 349,
+    "aggregateSha256": "d1de285f751eb6063e4608ae356932fe8ec119bbaa5bb475d70574a14da84fa2",
+    "parentCommit": "61fc6538a22eed7fc12f6ec23956277a0b4dcebe"
+  },
+  "host": {
+    "passed": 680,
+    "failed": 0,
+    "resultGroups": 31,
+    "nonzeroResultGroups": 18,
+    "threads": 2,
+    "sourceSha256": "d1de285f751eb6063e4608ae356932fe8ec119bbaa5bb475d70574a14da84fa2"
+  },
+  "windows": {
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "programs": 19,
+    "nonzeroPrograms": 19,
+    "passed": 919,
+    "failed": 0,
+    "recoveryFileTestsIncluded": 14,
+    "completeRecoveryIntegrationIncluded": true,
+    "details": [
+      {
+        "name": "fc_windows-d929a73b96b71a34.exe",
+        "passed": 102,
+        "failed": 0,
+        "sha256": "e06a563f0fe41f301e16c17d398e1e56067a2c8ba8b362fc26f1a47b0204fc3a"
+      },
+      {
+        "name": "fc_materials-2221de66f2e97130.exe",
+        "passed": 39,
+        "failed": 0,
+        "sha256": "edf188f5514875cb83b3a61a23d1b51b32baea5928d746cac370311683ae7ca8"
+      },
+      {
+        "name": "fc_storage-aaa73ac6ae3d50c0.exe",
+        "passed": 144,
+        "failed": 0,
+        "sha256": "96084f32f7a2e001dbcb858997ffdc7cd269ba21bb4e438789900a262f295815"
+      },
+      {
+        "name": "fc_security-9c7f88663f75f873.exe",
+        "passed": 18,
+        "failed": 0,
+        "sha256": "2f117161d2a4e13244b1007026390547d49634cc4dee7492af30c1a03ee313d5"
+      },
+      {
+        "name": "fc_protocol-186900fcb7bfa5db.exe",
+        "passed": 43,
+        "failed": 0,
+        "sha256": "9ce3140fbabdaffc6d0987e1f84a5c4ef12cea8b1f2236c7bfcc2c9a237238da"
+      },
+      {
+        "name": "fc_presentation-bf0074726aa5b441.exe",
+        "passed": 58,
+        "failed": 0,
+        "sha256": "fa28012184b2f210b92cfe2cb788262919a9cbabbc330afcf2e029c7635a9cb0"
+      },
+      {
+        "name": "fc_application-8ad1e6c8c699ab50.exe",
+        "passed": 25,
+        "failed": 0,
+        "sha256": "585e091b768bb6b110288ccda100e555b3b2e11c16f1426ec013b28cc2624ca7"
+      },
+      {
+        "name": "fc_audio-35e3156477d0188a.exe",
+        "passed": 22,
+        "failed": 0,
+        "sha256": "c3c1f5210881d0c282fe2d674e50d587996b08ce8b64ad9845ee0f3f5b769b18"
+      },
+      {
+        "name": "fc_runtime-fad3e5e278e2d80c.exe",
+        "passed": 26,
+        "failed": 0,
+        "sha256": "1f0804bccc2e51171a7d267871f6c65cb1b20d556b4f2df905e025600ea4a4c1"
+      },
+      {
+        "name": "fc_ports-361bddc8b2876cc0.exe",
+        "passed": 8,
+        "failed": 0,
+        "sha256": "7df386217bd8e3321d8d2e4f11568cdfdec754cee740bd09d1219f5f562d1fc7"
+      },
+      {
+        "name": "fc_domain-915566e140287178.exe",
+        "passed": 131,
+        "failed": 0,
+        "sha256": "6cd3ac2b26cee8d31aa565dca6040f3cadcd5264c4242ca559c42cc52c95ef0f"
+      },
+      {
+        "name": "voice_storage-caa057e7b94511b4.exe",
+        "passed": 6,
+        "failed": 0,
+        "sha256": "50109efeb7400933cb4b7315c4c0d94d431e95707463f1e123046b9c8b63ee96"
+      },
+      {
+        "name": "business_storage-2e2a220b65b596c0.exe",
+        "passed": 43,
+        "failed": 0,
+        "sha256": "254af2e4ac4f905f75f3aaf0d69b51db1d2879137fc7c1a9efd1cd58d2a7e847"
+      },
+      {
+        "name": "autostart_coordinator-081a9cde7eb805cd.exe",
+        "passed": 13,
+        "failed": 0,
+        "sha256": "d96eed307ebb18efc13c76030b3394d1f69abb9b50cc712b4d59938cd6dfb6cf"
+      },
+      {
+        "name": "calendar_execution_fence-1b8ee9b2e4016362.exe",
+        "passed": 4,
+        "failed": 0,
+        "sha256": "4718a445b5703bba0edaf51c8ea3dd822dfc852b1392ed5006d7c9a3df397581"
+      },
+      {
+        "name": "schedule_operations-b657d73c62d998f4.exe",
+        "passed": 5,
+        "failed": 0,
+        "sha256": "aceeb5ca8caf8581407c15500f161babf2a9825fe4b52b2cb0f0278bcafc6ed1"
+      },
+      {
+        "name": "runtime_storage-003a62f54de65504.exe",
+        "passed": 3,
+        "failed": 0,
+        "sha256": "5581f9a24cb77fde73091f4ae4eb96ef8589e766f381153fee2c19d8a488b6dc"
+      },
+      {
+        "name": "fc_bootstrap-7ad323ce2c7a7df5.exe",
+        "passed": 108,
+        "failed": 0,
+        "sha256": "ea7b4d7b7cc276096cf0d06ddb398d507c09d8e3af700e129f641fbf550b18fe"
+      },
+      {
+        "name": "fc_bootstrap-bddbc100d4f6b331.exe",
+        "passed": 121,
+        "failed": 0,
+        "sha256": "ffda0c9318ba6f7ea67c0e7b1e76b142baaf0cf51a22662747e171948e36ea0d"
+      }
+    ]
+  },
+  "modernExecutable": {
+    "bytes": 10534988,
+    "sha256": "8328635ff080e7f902949e2242805c91ecc0e0bdabebb4f0754ceb36baa13d34"
+  },
+  "supplementalWin7GnuExecutable": {
+    "bytes": 10630144,
+    "sha256": "0982b68f1b9897fc6ca12d9c713d4c0c4f1df4170aee9a7bd96b0f7010b6edd7",
+    "actualRuntimeOS": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "actualWin7": "NOT_RUN"
+  },
+  "nativeAutostartStepsEach": 25,
+  "package": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-recovery-core-dev.zip",
+    "bytes": 5104273,
+    "sha256": "d3bf8b7bd54e6ee3ccc99f255a5575645490390566974e68924a7dfa30ece846",
+    "members": 13,
+    "deterministicRepack": true,
+    "status": "NOT_VALIDATED"
+  },
+  "staticChecks": {
+    "hostClippy": "PASS",
+    "modernWindowsClippy": "PASS",
+    "format": "PASS",
+    "architecture": {
+      "crates": 12,
+      "firstPartyEdges": 33
+    },
+    "registryComponents": 86,
+    "originalLicenseFiles": 181
+  },
+  "limits": [
+    "Actual Win7/Win10, MSVC, visible Seewo, actual logon/startup, hardware power loss, strict P0, production TLS/listener, installation and 72h acceptance remain pending.",
+    "SQLite progress/IO cancellation is cooperative, not hard wall-clock preemption.",
+    "The development diagnostic executable has no user-facing backup/restore workflow."
+  ]
+}

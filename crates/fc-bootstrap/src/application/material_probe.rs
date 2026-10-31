@@ -582,7 +582,7 @@ pub(super) fn run() -> Check<()> {
             .ok_or("materials-probe: pool missing")?
             .handle();
         let clock = Arc::new(CurrentClock::new());
-        let (backend, control) = match product(&handle, Work::Open(root.clone(), clock.clone()))? {
+        let (backend, control) = match product(&handle, Work::Open(paths.clone(), clock.clone()))? {
             Outcome::Opened(backend, control, _, _) => (backend, control),
             _ => return Err("materials-probe: open result".into()),
         };
@@ -805,7 +805,7 @@ pub(super) fn run() -> Check<()> {
         )?;
         product(&handle, Work::Shutdown(session.backend.clone()))?;
         harness.backend = None;
-        let restored = match product(&handle, Work::Open(root.clone(), clock))? {
+        let restored = match product(&handle, Work::Open(paths.clone(), clock))? {
             Outcome::Opened(backend, control, _, _) => {
                 session.backend = backend.clone();
                 session.control = control;

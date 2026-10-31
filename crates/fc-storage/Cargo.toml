@@ -9,7 +9,7 @@ publish.workspace = true
 [dependencies]
 fc-domain.workspace = true
 fc-ports.workspace = true
-rusqlite = { version = "=0.32.1", features = ["bundled", "backup"] }
+rusqlite = { version = "=0.32.1", features = ["bundled", "backup", "limits", "hooks"] }
 sha2.workspace = true
 serde_json.workspace = true
 serde.workspace = true

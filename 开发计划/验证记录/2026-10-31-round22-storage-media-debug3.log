@@ -1,0 +1,21 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.99s
+     Running unittests src/lib.rs (/tmp/fc-round22-storage-target/debug/deps/fc_storage-50351b439967861c)
+
+running 1 test
+validation: profile content
+recovery stage: candidate business validation
+
+thread 'recovery::tests::projection_covers_two_resource_namespaces_previous_images_and_pending_media_without_replay' (5235) panicked at crates/fc-storage/src/recovery_tests.rs:482:10:
+called `Result::unwrap()` on an `Err` value: Database
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test recovery::tests::projection_covers_two_resource_namespaces_previous_images_and_pending_media_without_replay ... FAILED
+
+failures:
+
+failures:
+    recovery::tests::projection_covers_two_resource_namespaces_previous_images_and_pending_media_without_replay
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 137 filtered out; finished in 1.49s
+
+error: test failed, to rerun pass `-p fc-storage --lib`

@@ -19,6 +19,7 @@ use std::{
 
 pub mod business;
 pub mod login;
+pub mod recovery;
 
 pub const SCHEMA_VERSION: i64 = 1;
 pub const MAX_COMMAND_BYTES: usize = 4 * 1024 * 1024;
@@ -68,6 +69,9 @@ pub enum StorageError {
     WorkerPanicked,
     BackupDestinationExists,
     BackupTimedOut,
+    RecoveryInvalidPackage,
+    RecoveryConflict,
+    RecoveryCancelled,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -247,6 +251,7 @@ pub(crate) fn read_limited_blob(
 struct TransactionView<'a>(&'a Connection);
 impl TransactionDocuments for TransactionView<'_> {
     fn get(&self, key: &str) -> Result<Option<Document>, StorageError> {
+        recovery::check_retired_command(self.0, key)?;
         self.0
             .query_row(
                 "SELECT value,revision FROM documents WHERE key=?1",
@@ -335,6 +340,11 @@ impl TransactionDocuments for TransactionView<'_> {
 
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
+    RecoveryBarrier(
+        Box<dyn TransactionTask<S>>,
+        Reply<recovery::RecoveryBarrier>,
+    ),
+    Recovery(recovery::Job, Reply<recovery::RecoveryDatabaseReceipt>),
     Login(login::Operation, Reply<login::Response>),
     Transaction(Box<dyn TransactionTask<S>>, Reply<Vec<u8>>),
     Commit(CommitCommand, S, Reply<CommitReceipt>),
@@ -346,6 +356,8 @@ enum Message<S> {
 impl<S> Message<S> {
     fn queued_bytes(&self) -> Option<usize> {
         let allocations = match self {
+            Self::RecoveryBarrier(task, _) => task.allocation_bytes(),
+            Self::Recovery(job, _) => job.allocation_bytes(),
             Self::Login(_, _) => std::mem::size_of::<login::Operation>(),
             Self::Transaction(task, _) => task.allocation_bytes(),
             Self::Commit(command, _, _) => command.allocation_bytes()?,
@@ -723,12 +735,46 @@ fn writer_loop<P: AuthorityPublisher>(
                 };
                 let _ = reply.send(result);
             }
+            Message::Recovery(job, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| recovery::execute(&mut db, job, &stop)))
+                    {
+                        Ok(result) => result,
+                        Err(_) => Err(StorageError::WorkerPanicked),
+                    }
+                };
+                let _ = reply.send(result);
+            }
+            Message::RecoveryBarrier(task, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        execute_transaction(&mut db, &mut publisher, task, &stop, &mut faulted)
+                    })) {
+                        Ok(result) => result.and_then(recovery::decode_barrier),
+                        Err(_) => {
+                            mark_fault(&mut publisher, &mut faulted);
+                            Err(StorageError::WorkerPanicked)
+                        }
+                    }
+                };
+                let _ = reply.send(result);
+            }
         }
     }
     // Drain only already bounded descriptors and return explicit cancellation.
     for Envelope { message, lease } in receiver.try_iter() {
         drop(lease);
         match message {
+            Message::RecoveryBarrier(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::Recovery(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
             Message::Login(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }

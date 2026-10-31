@@ -1,0 +1,15 @@
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+error[E0425]: cannot find value `barrier` in this scope
+   --> crates/fc-storage/src/recovery.rs:463:74
+    |
+463 |             if business::codec::number(&security_value, "principal")? != barrier.principal.get()
+    |                                                                          ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `barrier` in this scope
+   --> crates/fc-storage/src/recovery.rs:464:77
+    |
+464 |                 || business::codec::number(&security_value, "revision")? != barrier.revision.get()
+    |                                                                             ^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `fc-storage` (lib) due to 2 previous errors
