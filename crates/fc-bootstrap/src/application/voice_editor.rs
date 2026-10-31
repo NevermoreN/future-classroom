@@ -1,12 +1,17 @@
 //! Local administrator consent for the remote voice setting. The editor owns
 //! neither an audio device nor a connection service; only a fresh backend
 //! snapshot can enable another change after submission or invalidation.
-use fc_bootstrap::backend::VoiceManagementSnapshot;
+use fc_application::identity::SessionLease;
+use fc_bootstrap::backend::{
+    VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceManagementSnapshot,
+};
 use fc_domain::{
     ids::{PrincipalId, Revision},
+    time::LocalDateTime,
     voice::VoiceLimits,
 };
 use fc_presentation::workbench::*;
+use std::time::Instant;
 
 #[cfg(test)]
 #[path = "voice_editor/tests.rs"]
@@ -20,6 +25,7 @@ pub(super) const REFRESH: ActionId = ActionId(854);
 pub(super) const CLOSE: ActionId = ActionId(855);
 pub(super) const SAVE_LIMITS: ActionId = ActionId(856);
 pub(super) const DISCARD_LIMITS: ActionId = ActionId(857);
+pub(super) const CHECK_OUTPUT: ActionId = ActionId(858);
 pub(super) const ACK: FieldId = FieldId(850);
 pub(super) const DURATION_SECONDS: FieldId = FieldId(851);
 pub(super) const PENDING_JOBS: FieldId = FieldId(852);
@@ -30,6 +36,12 @@ pub(super) enum Command {
     Stay,
     Close,
     Refresh,
+    CheckOutput {
+        expected_publication: Revision,
+        expected: Revision,
+        expected_identity: Revision,
+        expected_runtime: u64,
+    },
     SetLimits {
         expected: Revision,
         expected_identity: Revision,
@@ -49,6 +61,14 @@ struct Review {
     expected: Revision,
     runtime_generation: u64,
     target: Target,
+}
+/// Presentation metadata only. The controller accepts the backend's exact
+/// lease receipt before this projection is created; it owns no audio handle.
+struct DeviceDisplay {
+    result: VoiceDeviceCheckResult,
+    observed_at: LocalDateTime,
+    expires: Instant,
+    current: bool,
 }
 #[derive(Clone, Copy)]
 enum Target {
@@ -135,6 +155,7 @@ pub(super) struct Editor {
     draft: Draft,
     review: Option<Review>,
     requires_refresh: bool,
+    device: Option<DeviceDisplay>,
 }
 
 fn controlled_status(status: &str) -> String {
@@ -155,13 +176,16 @@ fn controlled_status(status: &str) -> String {
 
 impl Editor {
     pub fn new(owner: PrincipalId, snapshot: VoiceManagementSnapshot) -> Self {
-        Self {
+        let mut editor = Self {
             owner,
             draft: Draft::from(snapshot.limits),
             snapshot,
             review: None,
             requires_refresh: false,
-        }
+            device: None,
+        };
+        editor.adopt_device_observation();
+        editor
     }
 
     pub fn owner(&self) -> PrincipalId {
@@ -178,11 +202,84 @@ impl Editor {
         self.snapshot = snapshot;
         self.review = None;
         self.requires_refresh = false;
+        self.expire_device();
+        self.adopt_device_observation();
     }
 
     pub fn invalidate(&mut self) {
         self.review = None;
         self.requires_refresh = true;
+        self.snapshot.device_observation = None;
+        self.expire_device();
+    }
+
+    fn expire_device(&mut self) {
+        if let Some(device) = &mut self.device {
+            device.current = false;
+        }
+    }
+
+    fn adopt_device_observation(&mut self) {
+        // Capture UI time BEFORE reading the remaining backend lifetime, so
+        // delivery never starts another 30 seconds or extends the original TTL.
+        let now = Instant::now();
+        if let Some(observation) = &self.snapshot.device_observation {
+            let remaining = observation.remaining_validity();
+            self.device = Some(DeviceDisplay {
+                result: observation.result,
+                observed_at: observation.observed_at,
+                expires: now.checked_add(remaining).unwrap_or(now),
+                current: !remaining.is_zero(),
+            });
+        }
+    }
+
+    pub fn retained_device_observation(
+        &self,
+        snapshot: &VoiceManagementSnapshot,
+        lease: SessionLease,
+    ) -> Option<VoiceDeviceObservation> {
+        self.snapshot
+            .device_observation
+            .as_ref()
+            .filter(|observation| observation.is_current_for(snapshot, lease))
+            .cloned()
+    }
+
+    pub fn loaded_versions(&self) -> (Revision, u64) {
+        (
+            self.snapshot.publication_revision,
+            self.snapshot.runtime_generation,
+        )
+    }
+
+    /// Local-only repaint predicate. No query, job, lease renewal or timer is
+    /// created. Invalidation preserves the administrator's unsaved limits.
+    pub fn tick(&mut self, now: Instant, context_current: bool) -> bool {
+        let mut changed = false;
+        if !context_current && !self.requires_refresh {
+            self.invalidate();
+            changed = true;
+        }
+        if let Some(device) = &mut self.device {
+            if device.current && now >= device.expires {
+                device.current = false;
+                changed = true;
+            }
+        }
+        changed
+    }
+
+    pub fn needs_tick(&self, now: Instant, context_current: bool) -> bool {
+        (!context_current && !self.requires_refresh)
+            || self
+                .device
+                .as_ref()
+                .is_some_and(|device| device.current && now >= device.expires)
+    }
+
+    pub fn is_reviewing(&self) -> bool {
+        self.review.is_some()
     }
 
     pub fn has_unsaved_changes(&self) -> bool {
@@ -258,6 +355,37 @@ impl Editor {
         if self.requires_refresh {
             description.push_str("\n本次状态已失效或变更已提交，请重新读取后再操作。");
         }
+        description.push_str("\n默认输出只在点击检查时读取；不播放声音。上次格式检查不代表设备当前可用或教室实际有声，30 秒后须重新检查。");
+        if let Some(device) = &self.device {
+            let time = device.observed_at;
+            let date = time.date;
+            let seconds = time.second_of_day();
+            description.push_str(&format!(
+                "\n检查时间：{:04}-{:02}-{:02} {:02}:{:02}:{:02}。",
+                date.year(),
+                date.month(),
+                date.day(),
+                seconds / 3600,
+                seconds / 60 % 60,
+                seconds % 60,
+            ));
+            if !device.current || Instant::now() >= device.expires {
+                description.push_str("上次检查结果已过期，请重新检查。");
+            } else {
+                description.push_str(match device.result {
+                    VoiceDeviceCheckResult::Supported => {
+                        "上次检查：支持播报格式（不代表实际有声）。"
+                    }
+                    VoiceDeviceCheckResult::FormatUnsupported => {
+                        "上次检查：默认输出不支持播报格式。"
+                    }
+                    VoiceDeviceCheckResult::Unavailable => "上次检查：未发现可用默认输出。",
+                    VoiceDeviceCheckResult::Failed => "上次检查：检查失败，请稍后重新检查。",
+                });
+            }
+        } else {
+            description.push_str("\n尚未检查默认输出。");
+        }
         let action = |id, label: &str, enabled| Action {
             id,
             label: label.into(),
@@ -328,6 +456,7 @@ impl Editor {
                     can_change && self.snapshot.enabled,
                 ),
                 action(REFRESH, "重新读取状态", !busy),
+                action(CHECK_OUTPUT, "检查默认输出", can_change),
                 action(CLOSE, "返回工作台", !busy),
             ]
         };
@@ -343,6 +472,20 @@ impl Editor {
     }
 
     pub fn handle(&mut self, action: ActionId, mut data: FormData) -> Result<Command, String> {
+        if action == CHECK_OUTPUT {
+            if !data.is_empty() {
+                return Err("检查默认输出不接纳表单字段。".into());
+            }
+            if self.requires_refresh || self.review.is_some() {
+                return Err("请先重新读取状态或取消当前确认，再检查默认输出。".into());
+            }
+            return Ok(Command::CheckOutput {
+                expected_publication: self.snapshot.publication_revision,
+                expected: self.snapshot.revision,
+                expected_identity: self.snapshot.identity_revision,
+                expected_runtime: self.snapshot.runtime_generation,
+            });
+        }
         if action == CANCEL {
             let _ = data.take(ACK);
         }
@@ -410,6 +553,8 @@ impl Editor {
                 }
                 let review = self.review.take().ok_or("当前没有待确认的变更。")?;
                 self.requires_refresh = true;
+                self.snapshot.device_observation = None;
+                self.expire_device();
                 Ok(match review.target {
                     Target::Enabled(enabled) => Command::SetEnabled {
                         expected: review.expected,
@@ -430,7 +575,8 @@ impl Editor {
                 Ok(Command::Stay)
             }
             REFRESH => {
-                self.invalidate();
+                self.review = None;
+                self.requires_refresh = true;
                 Ok(Command::Refresh)
             }
             CLOSE => {

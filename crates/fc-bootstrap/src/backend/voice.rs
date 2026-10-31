@@ -16,7 +16,7 @@ mod native_participation;
 pub use native_participation::VoiceNativeParticipation;
 #[cfg(test)]
 mod upload_authorization_tests;
-pub use management::VoiceManagementSnapshot;
+pub use management::{VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceManagementSnapshot};
 
 #[derive(Default)]
 struct VoiceSessions {

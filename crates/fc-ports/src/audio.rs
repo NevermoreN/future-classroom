@@ -1,4 +1,13 @@
 //! One stream owned by the audio execution domain. No native handle crosses this port.
+/// A point-in-time query of the canonical format through the default output mapper.
+/// Supported does not confirm a playback handle, an audible signal, or future support.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DefaultOutputSupport {
+    Supported,
+    FormatUnsupported,
+    Unavailable,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AudioAuthorization {
     Authorized,

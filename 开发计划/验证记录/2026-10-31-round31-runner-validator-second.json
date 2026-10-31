@@ -1,0 +1,167 @@
+{
+  "scope": "LOCAL_SYNTHETIC_VERIFIER_TESTS_NOT_WINDOWS_OR_DEVICE_EVIDENCE",
+  "status": "PASS",
+  "sourceSha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af",
+  "beforeSourceSha256": "c3a3f0b06736248837e04a6c39b6f1729a6b9bc861e2a47d1fe66f611ec3b81e",
+  "changeReason": "Reject a claimed real thirty-second expiry completed in under30000ms, and premature final summary markers. Original successful Windows result remains required separately.",
+  "diff": "--- before\n+++ after\n@@ -105,9 +105,12 @@\n                + r\" ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)\")\n     if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):\n         raise RuntimeError(\"output query exact final observation/expiry/cleanup marker missing or malformed\")\n+    elapsed_ms = int(summary.group(3))\n+    if elapsed_ms < 30_000 or output.index(summaries[0]) < output.index(expected[-1]):\n+        raise RuntimeError(\"output query must complete the real thirty-second expiry before its final marker\")\n     return {\"steps\": len(steps), \"stepNames\": list(VOICE_OUTPUT_STEPS),\n             \"firstResult\": summary.group(1), \"secondResult\": summary.group(2),\n-            \"elapsedMs\": int(summary.group(3))}\n+            \"elapsedMs\": elapsed_ms}\n \n \n def validate_voice_settings_output(exit_code, output):\n",
+  "cases": [
+    {
+      "name": "valid-Supported",
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "passed": true
+    },
+    {
+      "name": "valid-FormatUnsupported",
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "passed": true
+    },
+    {
+      "name": "valid-Unavailable",
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "passed": true
+    },
+    {
+      "name": "valid-Failed",
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "passed": true
+    },
+    {
+      "name": "elapsed-exact-30000",
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "passed": true
+    },
+    {
+      "name": "elapsed-zero",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "elapsed-below-real-ttl",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "summary-before-last-step",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "summary-before-all-steps",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "nonzero-exit",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "non-list",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "non-string-line",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "missing-step",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "duplicate-step",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "reordered-step",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "wrong-step-name",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "wrong-step-index",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "duplicate-summary",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "wrong-enum",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "wrong-cleanup",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "wrong-playback-scope",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "malformed-time",
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "passed": true
+    },
+    {
+      "name": "old-36-step-validator-unchanged",
+      "passed": true
+    }
+  ],
+  "caseCount": 23,
+  "cliConflict": {
+    "command": [
+      "/config/.python/python/bin/python3",
+      "-B",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/nonexistent",
+      "--exe",
+      "/nonexistent",
+      "--voice-output",
+      "--voice-settings",
+      "--report",
+      "/nonexistent"
+    ],
+    "exitCode": 2,
+    "stdout": "",
+    "stderr": "usage: windows-probe.py [-h] --host HOST --identity IDENTITY --exe EXE\n                        [--test-metadata TEST_METADATA]\n                        [--test-timeout-seconds TEST_TIMEOUT_SECONDS]\n                        [--native-seconds NATIVE_SECONDS] [--system-host]\n                        [--audio-silent] [--materials] [--recovery]\n                        [--reinitialization] [--migration] [--autostart]\n                        [--voice-settings] [--voice-output] [--calendar]\n                        [--calendar-download] [--application] [--web-voice]\n                        [--web-pairing] --report REPORT\nwindows-probe.py: error: run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it\n"
+  }
+}

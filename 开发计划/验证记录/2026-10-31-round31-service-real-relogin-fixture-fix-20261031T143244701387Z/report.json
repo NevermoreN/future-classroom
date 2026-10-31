@@ -1,0 +1,14 @@
+{
+  "scope": "Only device_check/tests.rs real-relogin fixture fix",
+  "source": "/tmp/fc-round31-device-worktree/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+  "beforeSha256": "cfaef2301e7087dda3e1c1da45120f128e5f07c43fe4366ec743172ed188a7e0",
+  "afterSha256": "565622e70d18a323cfca47479425fd67229919b67e2506692a3ee6ca9601dabf",
+  "failureLog": "/tmp/fc-round31-device-evidence/host-workspace-second.run.stdout.log",
+  "failureLogSha256": "79aaf67d224aebb21a2a9a7e29d73f28ff802f5f4b50912fd972559022da97bd",
+  "rootCause": "The old test calls SessionControl::lock_local(), and its old-lease negative read returns at control.check before Ledger::synchronize. fixtures::issue bypasses real login and directly adds a lease and active atomics without synchronizing the changed control generation or installing input/local ledger state. The replacement first reaches Ledger::synchronize (backend.rs:423), which correctly locks all local sessions for that previously unobserved generation and revokes the artificially issued replacement. Backend::login_origin (backend.rs:1020) first synchronizes the ledger, then revokes old local sessions, issues the current lease, installs input and ledger.local under the captured generation, and verifies that generation did not change. This fixture now uses the existing real login with only the original synthetic fixture account/password. Original saved-policy and old-observation assertions remain, and explicit unequal-lease/old-lease-rejected assertions are added. No service authorization, deadlines, native query, configuration, or production behavior changed.",
+  "validation": "scoped rustfmt only; root will run fresh third Host stage",
+  "cargoRun": false,
+  "windowsRun": false,
+  "gitRun": false,
+  "diff": "--- tests.before.rs\n+++ tests.after.rs\n@@ -542,7 +542,20 @@\n     assert!(saved.device_observation.is_none());\n     service.inner.control.lock_local();\n     assert!(service.management_snapshot(local).is_err());\n-    let replacement = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);\n+    // Re-enter through real login: synchronizing the lock generation and\n+    // installing the new input lease must precede validating the replacement.\n+    // The generic issue() helper deliberately bypasses that production path.\n+    let replacement = backend\n+        .0\n+        .lock()\n+        .unwrap()\n+        .login(\n+            \"admin\",\n+            Password::new(\"Independent voice password 2026!\".into()).unwrap(),\n+        )\n+        .unwrap();\n+    assert_ne!(replacement, local);\n+    assert!(service.management_snapshot(local).is_err());\n     let fresh = service.management_snapshot(replacement).unwrap();\n     assert!(!observation.is_current_for(&fresh, replacement));\n     assert!(!observation.is_current_for(&checked, replacement));\n"
+}

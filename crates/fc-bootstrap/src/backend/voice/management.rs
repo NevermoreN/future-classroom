@@ -1,6 +1,8 @@
-//! Local management metadata. No upload, device or playback capability is exposed.
+//! Local management metadata. Format observations grant no playback capability.
 use super::*;
 use fc_runtime::{authority::AuthoritySnapshot, health::HealthStatus};
+mod device_check;
+pub use device_check::{VoiceDeviceCheckResult, VoiceDeviceObservation};
 #[cfg(test)]
 mod tests;
 
@@ -21,6 +23,8 @@ pub struct VoiceManagementSnapshot {
     pub queued_jobs: usize,
     /// Only the durable Playing state; excludes Starting and Stopping.
     pub playing_jobs: usize,
+    /// Explicit historical format check only; ordinary reads never query native.
+    pub device_observation: Option<VoiceDeviceObservation>,
 }
 
 #[derive(Clone, Copy)]
@@ -292,6 +296,7 @@ impl VoiceService {
                 .iter()
                 .filter(|job| job.state == VoiceState::Playing)
                 .count(),
+            device_observation: None,
         };
         if self.management_actor(lease, generation, &snapshot)? != actor
             || self.management_current(&snapshot)? != health

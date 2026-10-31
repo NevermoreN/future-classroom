@@ -1,0 +1,13 @@
+{
+  "scope": "Test-only public worker type correction; no production, assertion, deadline, or pool sizing change.",
+  "source": "/tmp/fc-round31-device-worktree/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+  "beforeSha256": "a779e7801d14b35c7dcbf3b2c1469110ce570ed437a30b1c9effe871dec9d722",
+  "afterSha256": "cfaef2301e7087dda3e1c1da45120f128e5f07c43fe4366ec743172ed188a7e0",
+  "replacements": 4,
+  "startCallReplacements": 3,
+  "cargoRun": false,
+  "windowsRun": false,
+  "gitRun": false,
+  "diff": "--- tests.before.rs\n+++ tests.after.rs\n@@ -1,7 +1,7 @@\n use super::*;\n use crate::backend::voice::tests as fixtures;\n use fc_domain::identity::{AssignmentScope, NewAccount};\n-use fc_runtime::worker::{JobError, JobTicket, Rejection, SharedPool, Task, WorkerHandle};\n+use fc_runtime::worker::{JobError, JobTicket, Rejection, Task, WorkerHandle, WorkerPool};\n use std::sync::{atomic::AtomicUsize, mpsc};\n \n type Check = Box<dyn FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send>;\n@@ -34,7 +34,7 @@\n fn run(\n     check: impl FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send + 'static,\n ) -> Result<VoiceManagementSnapshot> {\n-    let pool = SharedPool::<Work>::start().unwrap();\n+    let pool = WorkerPool::<Work>::start().unwrap();\n     let ticket = submit(\n         &pool.handle(),\n         Work(Box::new(check)),\n@@ -400,7 +400,7 @@\n     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);\n     let review = service.management_snapshot(local).unwrap();\n     let original = service.inventory().unwrap();\n-    let pool = SharedPool::<Work>::start().unwrap();\n+    let pool = WorkerPool::<Work>::start().unwrap();\n     let (entered, begun) = mpsc::channel();\n     let (release, released) = mpsc::channel();\n     let action_service = service.clone();\n@@ -444,7 +444,7 @@\n     assert_eq!(ticket.wait(), Err(JobError::Cancelled));\n     pool.join().unwrap();\n     assert!(rejected.load(Ordering::Acquire));\n-    let pool = SharedPool::<Work>::start().unwrap();\n+    let pool = WorkerPool::<Work>::start().unwrap();\n     let ticket = submit(\n         &pool.handle(),\n         Work(Box::new(move |context| {\n",
+  "scopedRustfmt": true
+}

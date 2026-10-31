@@ -1,0 +1,2765 @@
+{
+  "utc": "2026-10-31T13:59:17.635473+00:00",
+  "scope": "Immutable base Git blob observation; not a claim of worktree capture before agent edits or a compiler input trace",
+  "base_source_sha": "551299e17ba69f6944cf924917c632eaa005e07a",
+  "source_worktree": "/tmp/fc-round31-device-worktree",
+  "isolated_branch": "codex/voice-output-observation",
+  "ongoing_prior_ci_run": 41207536551,
+  "inputs": [
+    {
+      "path": ".cargo/config.toml",
+      "bytes": 387,
+      "sha256": "c9f891471ee47afd946b8ee0142233c51fa5d85b79c9474301285aa044f4a83d",
+      "git_blob": "f7e95e2083f632d2bccd8a2d23b3d05131f18bdb"
+    },
+    {
+      "path": ".github/workflows/windows-msvc.yml",
+      "bytes": 4639,
+      "sha256": "9142a7dad234808965460a4d0d6a06af11cbe5391bd8c7370fbb62541e5ddec5",
+      "git_blob": "db2055c717a23bad760809ffae9c76fa3c9ccf2e"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 1121,
+      "sha256": "c72769fa8cc86771cd5e9d9c80dba2f52d19b6716a1306b6e034295eecc92e6d",
+      "git_blob": "6952cf4f888fca531e536b8ba5485ca3672b5367"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21005,
+      "sha256": "0334d16a8814289fc62d5886bc6fe5bc47da62adbfec2d1a4ccde279513b6b9f",
+      "git_blob": "467ac4429120c4bd93e48ac8ca6344a08ee0af22"
+    },
+    {
+      "path": "Cargo.toml",
+      "bytes": 1173,
+      "sha256": "95d5c4a52c154ef80ae54a42dc228e081bb3956a0ede5e4260b967d723fd7de7",
+      "git_blob": "08908681c49056b96d63c7e4cffecec495b51f02"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1067,
+      "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+      "git_blob": "19a49862fa67aaf0f8d92a4d6eccf84b9c658145"
+    },
+    {
+      "path": "crates/fc-application/Cargo.toml",
+      "bytes": 233,
+      "sha256": "be7be2a202b5e417e4c4273fbf0470517aaf6a73018352947d4d4f894e3acbaf",
+      "git_blob": "53d6be2815b095223491e0d462d59aed73b1b6de"
+    },
+    {
+      "path": "crates/fc-application/src/identity.rs",
+      "bytes": 16252,
+      "sha256": "3788eebafdeff4d1207801977a0380c92122ab1610607c12dbada36baf2e0ac6",
+      "git_blob": "74e27e084d246f96e633e5ce9dd1c992ddb55d2a"
+    },
+    {
+      "path": "crates/fc-application/src/identity/tests.rs",
+      "bytes": 21988,
+      "sha256": "6525b50764bde780f7cd98586199f828b6ff94f0273467609e260d909b479bed",
+      "git_blob": "8d8b6acef4ba8ef39717931ea8b5d5f06f9fb318"
+    },
+    {
+      "path": "crates/fc-application/src/lib.rs",
+      "bytes": 701,
+      "sha256": "692eaee6032cab5b35e9ff721df5112b6a9afe0bcba4c4038885c0464a7f3cc1",
+      "git_blob": "bf8e26e1b73ce330ffb6e53c2c66b68596beaf37"
+    },
+    {
+      "path": "crates/fc-application/src/tests.rs",
+      "bytes": 9013,
+      "sha256": "3623de53c9dc82e80025e303cb61d6de79aa967f81cb095795a260db4df3e272",
+      "git_blob": "de78989c4f09bddc08900e930ab8c104521dfc30"
+    },
+    {
+      "path": "crates/fc-audio/Cargo.toml",
+      "bytes": 227,
+      "sha256": "0c3584e356d1476cdbb4ef704a0f0895daff485faf2fd389b5f3d33e2cfb3125",
+      "git_blob": "dc0de6bfb3536952fabb0dad658f8ae6a56f3b9f"
+    },
+    {
+      "path": "crates/fc-audio/src/execution.rs",
+      "bytes": 26478,
+      "sha256": "dd3bd726f73c1f1d534d66254b8500825381023fd38cb43d18ed4abf96d52261",
+      "git_blob": "0d74350a5eeafef0d8adf2607196955d31514749"
+    },
+    {
+      "path": "crates/fc-audio/src/execution/tests.rs",
+      "bytes": 24987,
+      "sha256": "2124fc2fe014d9f108be91d70ed029bac44f5e839240ea5717a7f8cdc26b4f6c",
+      "git_blob": "56a9129fd5261face484503d2dedc4ef0a1a0c0c"
+    },
+    {
+      "path": "crates/fc-audio/src/lib.rs",
+      "bytes": 14495,
+      "sha256": "4022243e3747fb6b9c6c4a1013036cb55f39bee644d9cf2acc094656f9bde004",
+      "git_blob": "d113c0f8ac9a0e9d0807241182f0d9d5eae83490"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 494,
+      "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66",
+      "git_blob": "5cfde28f1e449848b4b3a80b355a203562c63be6"
+    },
+    {
+      "path": "crates/fc-bootstrap/build.rs",
+      "bytes": 244,
+      "sha256": "cd8bf3a9b0cfc76468a2e459ceee2e0e22dbb335ed42b81756375718f53a489e",
+      "git_blob": "1e5382090e155b0ab9be3313732276b1d5be9a9a"
+    },
+    {
+      "path": "crates/fc-bootstrap/examples/verify_web_assets.rs",
+      "bytes": 4018,
+      "sha256": "4dbcb46566319f67f4f8969cba543c1b0306956e27e6b1f244741aec6f33450e",
+      "git_blob": "888307f48019f60e5fce48561ed98926c26d1278"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 241099,
+      "sha256": "2276321f292f66999955cbdc56a78ffcdc5701483fe83d1c3ac68e83de1d3ff7",
+      "git_blob": "0eea97144e465823120ac88f43116d9714e9567d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/accounts_editor.rs",
+      "bytes": 57942,
+      "sha256": "9531485e934483b4a08a1343662d2715524dcb683d97dcbc0f8e3d2e298d1855",
+      "git_blob": "acd66ae6063c253565242e22e925b7a6809610be"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/accounts_probe.rs",
+      "bytes": 10217,
+      "sha256": "f669f1c91f6d31fe82347eb016bd4151fbeba1a15834fca4b85d2c9cd9fd371c",
+      "git_blob": "5e1b7296af9a86cf3ba6c5e81819b41af11ff2d6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_controller.rs",
+      "bytes": 5555,
+      "sha256": "f911e2cd3058d0c8d5f820cdffe3167695f6b12bf269a27b8325c35971b994f6",
+      "git_blob": "6cb90978f4361870e112118fa22b0016f1f513b0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_editor.rs",
+      "bytes": 8371,
+      "sha256": "82ea00ae7eb7dccfc8d42bc2cd85273f6fe467a640151b160f11b9529e6dcaf2",
+      "git_blob": "958165ba54b644bed17e78fccdb6be3965c4d212"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_editor_tests.rs",
+      "bytes": 5875,
+      "sha256": "71891d8ca4cb39494c8885913aef26fe7326e4a4f77dee4ac84af0972481baba",
+      "git_blob": "49f25e9c95b650cfe78f830dfedb67af4db8be03"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_probe.rs",
+      "bytes": 16156,
+      "sha256": "f75a548132632231c883d4b6c352d83a260b240f70531855f7281468d4c43c6a",
+      "git_blob": "d1ec0b35ae559d469049787342d68c0ff7654f57"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "bytes": 33452,
+      "sha256": "a9531e9257d10b83fb1cfa28c325953f4163172b0c774a3a2dbf3ee6836d8d5b",
+      "git_blob": "f461e3a5e8568846cd50d7dd159ba9e0b01a1012"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_editor.rs",
+      "bytes": 15135,
+      "sha256": "9fb9e6f7356e8dc343284ee102a2f4f0ffec2e7edf4507ee2044b53f3a6690d8",
+      "git_blob": "472ab7a5c0ee8d904738b15beb51868905c87c6b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_editor/tests.rs",
+      "bytes": 10831,
+      "sha256": "f93ee00e0963c91e9161283364980c31c03da3df9fb0d86bceb0478b4ea1ada7",
+      "git_blob": "1782855948b3f0d065608638b09141507c4944be"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_probe.rs",
+      "bytes": 30116,
+      "sha256": "da8e08bb0d8a7332eb12658083050236da8ee0d385fd881b2fbe63532255eeae",
+      "git_blob": "e155d611781b093d399f45fbdf9e4e630c298d27"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+      "bytes": 11970,
+      "sha256": "0cf5375403e42f8f614910930b0bd52114a5c12c988e2b28228ebec80582bc5e",
+      "git_blob": "53aa0f23c17d25312c383d692a57e625b1795120"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_controller.rs",
+      "bytes": 9398,
+      "sha256": "be060324658ee61172dc6c4a5e62c06577e5a81dd4a2a460ba5af3aef41e5a34",
+      "git_blob": "cb07cd7509e391d50a1c799eac5d8e81abcfcb5c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_editor.rs",
+      "bytes": 43514,
+      "sha256": "6a584d13c750f3f5634dd72f3d734c46bcc118ad610558bec156666fe5a37c6a",
+      "git_blob": "a69785b6dbd72e03b9e58630376a92932f0fd85a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_flow.rs",
+      "bytes": 10903,
+      "sha256": "96073294a77cccb3f1eb4ea9a70a579d05944401d88d716a57b58e3a51db4a6e",
+      "git_blob": "b315dc286d3a00ab7adf4541e8ffcbf3df49e914"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_probe.rs",
+      "bytes": 20197,
+      "sha256": "469fb666d7b346a839a7c38862a330e247b9c87d5062e46a9ff3837a15c8fdd4",
+      "git_blob": "1330440d2b4d7948cf2cc3619053dfc20d6c2dc5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+      "bytes": 14367,
+      "sha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b",
+      "git_blob": "3f56cf74601c1ef9cd3ac4cca5b5357d0f734e21"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 58567,
+      "sha256": "18735bd45392525e28bd253c3703d2d3b2c7726e44bbc683d8e16b8bf3cab33d",
+      "git_blob": "c4a351d95147e96198061bf50b5a7e4b32701f86"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+      "bytes": 30006,
+      "sha256": "7951237b658fbdcccf3121f704ddabd446cdab7d604d68e27c0389479589b8df",
+      "git_blob": "ad38506e61ca42b1145d5883af3c429ae0d8d8b9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 20043,
+      "sha256": "f305dc8f41c0d391cc18fa2f320d643900cf1ddb8851beddb7fb034b35094e6e",
+      "git_blob": "c2e6351a6b3cab5d6c0ae8e6e218f7bea7380ec0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+      "bytes": 7720,
+      "sha256": "cabc00e64879a24bc0e7c5f4d6b5cf12358210d242017462d3e8a6b0e03b0610",
+      "git_blob": "150c749ee8c1801e4676855c2dd881e4c93840e8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/lesson_editor.rs",
+      "bytes": 17847,
+      "sha256": "6703f8a25d44972e3214c96bc0780bf179575523fb61b5e2c4515b19d76409c1",
+      "git_blob": "81ef4eeb8227afa90f778ea6fdaff4cae4fbc13e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/material_flow.rs",
+      "bytes": 28647,
+      "sha256": "c1cf53d137cd257e05592b157c5ef972750dcb39df1c971bba0a66d503a0ed7e",
+      "git_blob": "1227700ad7bca0ee272be8761a66280637d8a773"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/material_probe.rs",
+      "bytes": 35326,
+      "sha256": "10400ccf3ff9763a1ef99f88d3b558ce1a5a41ee665351c118b3ea4b187230fe",
+      "git_blob": "79a7bf7f809c572a3c96105a795199f912c1cd3e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/materials_editor.rs",
+      "bytes": 32030,
+      "sha256": "fd617d92c62571ab0fdb9825eca38ebc5cec2c1436684a52081ca47046249ef0",
+      "git_blob": "a777628569ee38f4b992f64ea95db6b01498982d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/migration_controller.rs",
+      "bytes": 10829,
+      "sha256": "60122e1bc9ac1097f0dfd5c6d3755f9f04f93825d5fdfb62a3cee2f15ec9e603",
+      "git_blob": "ceb49e74cfeee18731288c11bf8580224f376b1d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/migration_editor.rs",
+      "bytes": 34355,
+      "sha256": "662281680634e80ff79199d09cf5cb29c875e785f72bb6e49f935d53b602cae0",
+      "git_blob": "9cc9ae46128f6006e1f335902034408bb5661015"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/migration_editor/tests.rs",
+      "bytes": 19902,
+      "sha256": "5318519dcc6f2d993e5b0a405902fb0d36cb942bcd167479972d417086cecac1",
+      "git_blob": "09134155b3d30fc7d92c705827abbf5e754ae12e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/migration_probe.rs",
+      "bytes": 22364,
+      "sha256": "97a6ce2a04bbd8a48509dcc10c359ec7c02222d0bc8fb00ed71d044c7afb7352",
+      "git_blob": "c8eb8b235107ca059268ad2e33e0075b12c3b955"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/migration_probe_fixture.rs",
+      "bytes": 32346,
+      "sha256": "90d6c7953a4fe54dc5b170ce68730c8e2defd3acd3dd1cfb65fd70fd71546b7e",
+      "git_blob": "9024dbfae4578749f1734b147268fec6cec4fdd2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_editor.rs",
+      "bytes": 24189,
+      "sha256": "1fffe689af231fa994260073da0c38877077763336bab9268bc9b601e18b3893",
+      "git_blob": "3e6a683567820537e09bc9a22465f9697470fc18"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_editor_tests.rs",
+      "bytes": 9993,
+      "sha256": "916f73648cd962df1271bc695a903775f08ac5b9be2f9fe175478c6107005df6",
+      "git_blob": "5bc963f82d6e0bf750314a5b8671d6ed1afc0330"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow.rs",
+      "bytes": 19511,
+      "sha256": "e68bdef30af96521b8b80894302a91c067c0ae582bd5555bad6c90cdd2ea7f6f",
+      "git_blob": "8be4a2e04070bd4c4b679ba680d143be686bd745"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "bytes": 50950,
+      "sha256": "46c3ba90eabf69e2b7dc78427da869f8bbcab6112e4440be1370c0d61adcea43",
+      "git_blob": "a6e02eff3ff73b05bed8e4d1781403f3d4c96d0d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "bytes": 22128,
+      "sha256": "0613df63600cae84ad68cdbb97a803b37b420bbbae0fe910f0a6dbc04517d73f",
+      "git_blob": "8a55834340ff4ea5b1ea77e5d6bafce4828b8222"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_flow.rs",
+      "bytes": 4676,
+      "sha256": "7a0683176bc3f57913498f517600efb411f21501eec98b129cef5217a0492cff",
+      "git_blob": "a84701eaac432afd38db381376d41c7ddb5d11c4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 109403,
+      "sha256": "b65e630599e6db7d21d3c9aca85e5d78f3df10be84584be5eb781c3ba473b0da",
+      "git_blob": "4f08c15a69f6a0c328149578600bc22d7fd7e585"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 36862,
+      "sha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd",
+      "git_blob": "5905220e48f577d90af9e31f28d8d05f8779e554"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview_flow.rs",
+      "bytes": 15034,
+      "sha256": "1289bc982a3227f73a25cad0f5850e9aec6e5e7a5e23674661a76764a3debdbc",
+      "git_blob": "6686c3248a5d2743d5fc8d33fd31e4ce6678afd9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_probe.rs",
+      "bytes": 13026,
+      "sha256": "e128116a8f0b22520d393307274839f82d5f1265e52245e9f72f034ee7c89cc7",
+      "git_blob": "e42c3a7055eebcadbb375930a4b6a9a7556ef822"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/reinitialize_editor.rs",
+      "bytes": 8905,
+      "sha256": "2b2a4d25bddc7373d0d10a1b020eafebbbad56b467eb58f806c611052fcba855",
+      "git_blob": "9f5a6e188c100f75be0ffbb9bbbb463521c5ea72"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/reinitialize_editor/tests.rs",
+      "bytes": 10530,
+      "sha256": "accae4ec80186156ef7348f6160ec03ef0e602504921203041e4722c56370452",
+      "git_blob": "3a91472bd20e019ba841e288cb53eb94de48378d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/reinitialize_entry_tests.rs",
+      "bytes": 3517,
+      "sha256": "7c02c907cfde7fe1ce62d33030f0571fe1c3aa24ea8e315ea119cd936c5d0026",
+      "git_blob": "2880fda5b085c241028becf6c6335d494539dfc8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/reinitialize_probe.rs",
+      "bytes": 19995,
+      "sha256": "1562a2844f550fc56cf9a7ffe5193b541bd9b810642e1c5f5b0f58bd6a96d4a3",
+      "git_blob": "2e538d4c80896a95c15a98df053ae238636d4f18"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/schedule_editor.rs",
+      "bytes": 91382,
+      "sha256": "bb4263b622c3cb6b73fbd3818dacace07b1d86df736b4f055d6784aefc44c549",
+      "git_blob": "4106bd2b9d427e891bcc1ba07e62112121150d35"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/schedule_editor/operations_tests.rs",
+      "bytes": 9037,
+      "sha256": "60a35a5e8abe1d932e2559f5ce94ad0e47ab8f5d1e6143ef55abee1c636f8cde",
+      "git_blob": "cebd52c80609bf403b5be94e0c88f397c391192a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/schedule_operations_probe.rs",
+      "bytes": 22128,
+      "sha256": "01ecb4a252a97cbc88e356be35e15e1aa4c5778de1e5241b4140b053f7dcb620",
+      "git_blob": "33f28f30d1b6b1b1775c0b16e21d23710b684861"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/shared_pool.rs",
+      "bytes": 1603,
+      "sha256": "67bd40fea2ef4cb466d31d1baaf75b2b08e1b9f072921bf851989718a1ffc3d1",
+      "git_blob": "1fb68ba6d6332c40f7e88defc0e76636b477266e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_controller.rs",
+      "bytes": 8153,
+      "sha256": "9c939bfc88e5d11b723ec8571fc7609ad814a77f047b99e97d83b47b99d0fc77",
+      "git_blob": "51966e82cbd2dd087d2ec4067ecce3c164e1c987"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_editor.rs",
+      "bytes": 18110,
+      "sha256": "1dc55a41ded3e9c461d881635561be10935d9f8ac9cf294add3da8b2dc2c7b86",
+      "git_blob": "5a43925fd40ae033358f31437cb564a83935c424"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_editor/tests.rs",
+      "bytes": 16522,
+      "sha256": "1cb45265f957b0c947bb8a5f1f6f5ffd3bc1dfa3779e3d4ca295e70b5553ef97",
+      "git_blob": "51398c6bea9bdaf58dbfdd24d107b55914c714bb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_management_probe.rs",
+      "bytes": 25524,
+      "sha256": "a12c2d72ffc2c40b7a7fb587cb8da693dcb0ee7c8efa07cd1537d5d28cf584d7",
+      "git_blob": "16a6a27982b65def571a73deb56ed441bd52d0e7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22196,
+      "sha256": "4103d908c78eb4037d54c739e95a33fb9630141dcd95ec1dd57f606b0300621f",
+      "git_blob": "f49de0cf7b7c28c35cd161d8cc630a0627efd2b7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor/tests.rs",
+      "bytes": 16299,
+      "sha256": "f4460eaadf51119fe09b4f42b30e72db174e4226a3f3d11952b82ffc798a30d6",
+      "git_blob": "9bef1348118fe3c9b5f6baf49f6475b9e560ec92"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/autostart.rs",
+      "bytes": 9710,
+      "sha256": "59ab81cc3dd73a2be8d9ac61fdfd8a84e102974d3e005ce719062dfbb2242e0f",
+      "git_blob": "9dc31d4f0a89a7e24464d36bea0a74bf986ea496"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 105920,
+      "sha256": "71fd438e30cad8d961a283d678d5edce14fc7182c33cdcfe40f7677293530b63",
+      "git_blob": "7625867dba920244ddb7a78571161ddad3f4d253"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/account_management_tests.rs",
+      "bytes": 39320,
+      "sha256": "28f16b4da5295ef6fb22648e1c12ba0ee8f736fde66d61fc4af8707e564b2edb",
+      "git_blob": "003559b692da12031eb607f7bce4de53c32b42fd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/autostart.rs",
+      "bytes": 5650,
+      "sha256": "c9df172086f79e28545c9e6f62605b16ca405348dd5c35d1e354fc5679b4a506",
+      "git_blob": "25dab040a725053f1ad4c988e439a7bd3ed5455f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/calendar.rs",
+      "bytes": 4842,
+      "sha256": "69a98e0b842967d9a0228c4bb5664c86337bfe0a1116b74c9ba0849ea98d018e",
+      "git_blob": "8d29143c77ff52a79b14c977be6f46790557deef"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/content_web.rs",
+      "bytes": 11130,
+      "sha256": "6eb505650a248f2e3d60cd92569499e920f08d4079f7bfe54029b7cee1f8134b",
+      "git_blob": "7b7ecbb144ee7ea84b35e098014650f71c8227f5"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/execution_scope_tests.rs",
+      "bytes": 7796,
+      "sha256": "b022e24c1abb59df00612464f64a12c4cdf82db9cf2c4fd2aeb052bfd129324c",
+      "git_blob": "68888c158b2ba59604908034f03f946d706be3b3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/materials_web.rs",
+      "bytes": 11451,
+      "sha256": "d62de5929a9ec75b167db75af461be1af0a67b1848a4441e1adb20c83399f4b5",
+      "git_blob": "1bb0b8277398de87210a54735cb62d41a21ebd7e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "bytes": 71948,
+      "sha256": "7b34248fd328b37277ff019a04a89e746f688af3e4aa50cfdb12543b0ee55f97",
+      "git_blob": "b247ace4d25cfbc0340bfaf3e8e53270475eabd9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles.rs",
+      "bytes": 2934,
+      "sha256": "dc7f56958d34bb45e4f3bd639800c706d5b22e8dad95732559792d7abab9d508",
+      "git_blob": "aead05a48e86612b12f707d173511f1797dbcc7c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profiles/tests.rs",
+      "bytes": 17877,
+      "sha256": "bc063feb2c2b5d5334d2872da8605f6647939a8d5a878e8a15a9ee6d5e260fb5",
+      "git_blob": "2514ae4ebeb2ddd786fd3686edc150152d0418c6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/recovery.rs",
+      "bytes": 13373,
+      "sha256": "c2208664cdb1364bc1f20b03f6ff9828387ed7041066363bd3de3973b9874ce0",
+      "git_blob": "2a60857309450c01bcd8f530d7a63000a5f4e297"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/recovery/migration.rs",
+      "bytes": 5353,
+      "sha256": "5c78c43eb4adcbe450a844084fff49faa278a5c527427adcedf5f3d09f3593a8",
+      "git_blob": "54f067ec2f70afff33cbf70c3792635e224a5dcb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/recovery/migration/tests.rs",
+      "bytes": 6841,
+      "sha256": "1c65308a6544313a53fa00cbf487c72e32a11adedbaab3cf6b0df99cbe2a4587",
+      "git_blob": "1273d35cb244fbcab67baa75f971aeced27fd6b4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/recovery/tests.rs",
+      "bytes": 10546,
+      "sha256": "f472449b4216d5fa4ff956fc14bb4fed529e49858bf15a2454c8895b977fc287",
+      "git_blob": "ab2303062dd0ff1dbf308507400d47e2166706df"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "bytes": 98804,
+      "sha256": "0007d53240529764307a8a5e401ad5139fe521dbdda4155fb63c1a49b4594547",
+      "git_blob": "666bafe9d95ef9ac0eef84a7f713988262c8234a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/limits_tests.rs",
+      "bytes": 17140,
+      "sha256": "2a217cb3eb746ea8c1b104c2aea1f2f401e41a6b2e13228bde8ecdaeab39ca71",
+      "git_blob": "a0980824e3d16ff31f43078a1ba27e039c013821"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/management.rs",
+      "bytes": 11661,
+      "sha256": "fd0ccacc2957f77598a694eb8b86b99bd5fbba1b0416f1a56b09aad637d5d9a1",
+      "git_blob": "1ba1069ef13a6a403bc5275ac715ebae1a19507e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/management/tests.rs",
+      "bytes": 25444,
+      "sha256": "bd08d05ad9eccb808acf2f4d3af0047e79770e9227ca52427b8447f20cfaeb11",
+      "git_blob": "764f72aafee9b2b8f6373bd5380cc66934afaa06"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/native_participation.rs",
+      "bytes": 1292,
+      "sha256": "eac79d8e38a32c1cea33e3be2820ca0398c5847625d3b54c307456c029d621c5",
+      "git_blob": "50a4ea25fe157c858b8976a7495f299fd4e80df2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/native_participation/tests.rs",
+      "bytes": 4114,
+      "sha256": "11213724fae4f08322bbb1f1f04feddd4441d1d23cfdd3a928abab7ed479629f",
+      "git_blob": "0314d1c23d042c203a69f2b92cd6e991218a8afd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/policy_handoff.rs",
+      "bytes": 7301,
+      "sha256": "59b0c5788b789e7b12ad8c2e87f60edda088a49a207d840b2f32543719a4c2cf",
+      "git_blob": "53c2c28f69a6e4c183e82eebaff378fe42dba1d6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/policy_handoff/tests.rs",
+      "bytes": 13810,
+      "sha256": "71483d7f805f49e8a69c927593f6f8207a9362bd0d0c859d180d1d02781b3c23",
+      "git_blob": "834272d23f2a537feb957759ba644e49a68485d7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/request_fence_tests.rs",
+      "bytes": 3733,
+      "sha256": "a0ed028982e602fb33716d551ec85fcc4ef64c64d45bc6b0cf6743760c184551",
+      "git_blob": "32f4f0dea3e6018f391fdbd0edd6c4483c19c4d0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs",
+      "bytes": 16621,
+      "sha256": "4043b4c8fefe8246ce2728c19ceb9d815ae1b17754da25485a715748c92e24cc",
+      "git_blob": "49500f9c0e71cc08d19aa1dbdb6e09a93bbdd22f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 41749,
+      "sha256": "df3502bd6cd6e99daeda405ae252b4ccf1001ee3f5c3f0fc67ecf8739104c33d",
+      "git_blob": "cc1ad5aa40dcf59a7ec87e5dfb4f2b820ded3590"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/material_send_fence_tests.rs",
+      "bytes": 4497,
+      "sha256": "320e17791ea39183915af6a39d211889fd816eeead3c69452a4b133d7773d41a",
+      "git_blob": "d04d124cb020b776b680a009d06a8ff01da1f055"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/tests.rs",
+      "bytes": 37196,
+      "sha256": "7f6de0084ce44133e6de2142ac8f4b65f185b58c9cbf57850fa25de8cd28c009",
+      "git_blob": "5af8038a7d7a8edfed5e069502d6f5998d3c5649"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/calendar_download_probe.rs",
+      "bytes": 2524,
+      "sha256": "f1439622a05a745b6d8289bf5f999f060a27fff053348606b0cd0a6fc1a7249b",
+      "git_blob": "baf0609508451e3f613c77551199ee3faa34fd1a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/credential_probe.rs",
+      "bytes": 19178,
+      "sha256": "5ef49bc2ec2994d7e214f467dd33261969d531c2000b89c16927c5990b53089d",
+      "git_blob": "3f989b427b2b93620d27d38c8a320665d71f8879"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/lib.rs",
+      "bytes": 587,
+      "sha256": "4793b3d8614157539195e1d3d81d7410b652ce6afb09bcbcd72c47acdf1b6399",
+      "git_blob": "fe43c145609c72be6a6e465c441210a6ad959dcf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 17819,
+      "sha256": "a87196a8c15e78ca0e8874fa95165e120fdba2ec0dfcfcf571a551d1e27f9056",
+      "git_blob": "54d3027feb8a1409d3798bfa48009a9de726d667"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/material_helper.rs",
+      "bytes": 3312,
+      "sha256": "4d674c8a0b6b20397ee9a6f486f0101c7b15e29b072aa9e07c68ff95db428418",
+      "git_blob": "a92386025ab98c95bb7fc02463aa35bea3bb3f9d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/physical_thread.rs",
+      "bytes": 391,
+      "sha256": "aa250255a7392ebf038145c8d86aade24d6f2e0108f1d32d429bd61e82933d96",
+      "git_blob": "69f6d5afad77fda7f4b41d41277a2abe8c34feb7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_cache.rs",
+      "bytes": 14436,
+      "sha256": "6b10d2b0f55ef3cbf4f5649b994ade6d12e9d9e2dbd7cb7a0055814900e271fe",
+      "git_blob": "eeba12b8a5f793969012c5a2c540586df0735c05"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files.rs",
+      "bytes": 25177,
+      "sha256": "f906572103d2abddcfc6a01b5a341d9e4da59f2f8774fcf3c2f54a07a91c2696",
+      "git_blob": "69ec37e12e3c1379c5c1dcf31fc786fb8fcf4689"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files/inventory.rs",
+      "bytes": 5350,
+      "sha256": "5e422a4ca1bc023c65623dc4a34377b4c78e19da667f5c882e88e5911b12df4f",
+      "git_blob": "d7913000ddc7bf5f694b2bfb4522db74c3521957"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "bytes": 14049,
+      "sha256": "90dddaca552aa1c2e4f627ee4757142e7afed07a09a6d01f2369001200034451",
+      "git_blob": "d13808af21a8db92320f27cae97f030244298078"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup.rs",
+      "bytes": 6993,
+      "sha256": "54a352c67bba1678a75d68359d3f275cb407e1d09d804d336a85a666d4a209c6",
+      "git_blob": "e8f56ad50418012a268e487dbaeb474423a45969"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_startup_tests.rs",
+      "bytes": 15639,
+      "sha256": "cc65915cce24b6762ddc2578c81d24dbaef0ac1ec2b2ddc650c69b9c99a6674f",
+      "git_blob": "d5bd0f2c984c70092c5aaa81fdc633f16c664332"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery.rs",
+      "bytes": 8924,
+      "sha256": "2693d6e1190301699363c3c197619e54de88ec2b48884725aaf2acfd1751fcb1",
+      "git_blob": "f664de1bb56d7f53e8f9b0ef46cb959627a6b825"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery/integration_windows.rs",
+      "bytes": 21422,
+      "sha256": "bd567fe91bf11c2d471258ac5cb4a95ef6a5753b9cf58e6c1e402a70aaa9152d",
+      "git_blob": "a5c3a9feeff573c2385cd55d68519d602811982c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery/test_support.rs",
+      "bytes": 7600,
+      "sha256": "d709a5a751e5a352e97ed3cff409c2d4cd9e97d0ea65b70cbc6783bce802606f",
+      "git_blob": "c2dfcf7c52b427d64ce674411f07a4d5d1a798d9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery/tests.rs",
+      "bytes": 5783,
+      "sha256": "5227d1e0a82983b0f4196ba83a2d2362d3145b46a1aa30149ad123e2532744eb",
+      "git_blob": "e79beef564dfca658ce3fbaf36746b93c7aefcf2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files.rs",
+      "bytes": 5623,
+      "sha256": "838022b6cc9527337386d842d8e35921f3850bc7d7b22665b2737ca4951690ee",
+      "git_blob": "e0c2882f3d799479b676a2f89c42169f2b05af09"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files/windows.rs",
+      "bytes": 27717,
+      "sha256": "a06004d1d25a5424dd80c4e25276fe6ac4e3a73c47874bf357034be1d82ae36c",
+      "git_blob": "60c3154fe5835706e711b313bf1f1b2358338279"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files/windows/journal.rs",
+      "bytes": 39926,
+      "sha256": "bb2235ab8436518c538c08f5c0ac1e7e1887ee72c78bdf0e2c62c329fa0ea3f1",
+      "git_blob": "faa198c8ac41e36bd00ecc2b6e532ddba8f29989"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files/windows/migration.rs",
+      "bytes": 15046,
+      "sha256": "faf80f59d8715279936e16a787801a0e3473bb104068d6b774a3f00ad6cbe6bd",
+      "git_blob": "d39a0445c93c800b6226180a9d5b32b447c48802"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files/windows/migration/tests.rs",
+      "bytes": 14525,
+      "sha256": "51a1a48bc0e41899331f7c8b4c972735c23728496b24af59e48d02395dd4a05e",
+      "git_blob": "22cb338d7e562dd5c218d8b9e7cac11d28dfa45b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_files/windows/tests.rs",
+      "bytes": 10093,
+      "sha256": "39b0a7e8c5b1ec72eb5b820743baee6b9d25a0812e43c29c5eb0ee8358872d4d",
+      "git_blob": "f98a96b923c2c975fb6f68df1dc414cd169aa486"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow.rs",
+      "bytes": 334,
+      "sha256": "3b6da512715cf11363f54a712c8b865d6e43b2e4cb7610f7f64766a342d24c8d",
+      "git_blob": "bcbd371a8c0f2e5a6b3b356355c012e01ac133a9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow/slot.rs",
+      "bytes": 8996,
+      "sha256": "e9319f2b4b0f74ad5b7d419b17aca3877f390c26c2a89fb52f917a1c9fb06152",
+      "git_blob": "56345bf79df973ec20baa9a1d5fac4fbf1e68f8b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows.rs",
+      "bytes": 22990,
+      "sha256": "46e797121361ade19744c45e1f4b55d467c632c5c383e75113e213cbd2dac8cf",
+      "git_blob": "04075b126999f453cc02e7475719cb63e59aa6a0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows/migration.rs",
+      "bytes": 8590,
+      "sha256": "3251488f2510de09a8f187313c0ecf7058c99bd31d55fa39754e28b9ef0d9409",
+      "git_blob": "8b9ac27ef75c9928786148ca1d3134357a215a8d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+      "bytes": 11359,
+      "sha256": "70caee6b03e6423bbba0c3581b0db413fc6e6f35539e91456f23efdffab9a315",
+      "git_blob": "67554bf3f5bd8ad84be8626e3a96ff07d24bf63c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests/migration_tests.rs",
+      "bytes": 11043,
+      "sha256": "059f236da0820be8903ba7666b8d5e4263b01fbfa961a82610676910ccf7aa69",
+      "git_blob": "731c093158f7663e3ee6001dc970ff094b34b5c9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization.rs",
+      "bytes": 11779,
+      "sha256": "3bfb5ee863c2a0615515e0abe67089f893b25d3dbcdcf517f36ee671cf97078f",
+      "git_blob": "17781c2ca044767a74344d60d9791860d0f66936"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests.rs",
+      "bytes": 11352,
+      "sha256": "8ecea096f0c2360c14939e1ccfc5fa1c752fa131d30e0e15dd75bc3160b3715f",
+      "git_blob": "bbd371f3b82f48bb8d627267a200fc69c4c261a2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 4786,
+      "sha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab",
+      "git_blob": "1a31dd131446c9ec35eeb33827469a7cf2062d6a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files.rs",
+      "bytes": 986,
+      "sha256": "cd2bc1b15760d189fb701a15dd21cdaee074bbb4ce611529177d80e6ec4487e8",
+      "git_blob": "b64869eaa55f4c4778da5f90dfbc3342037ddce2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows.rs",
+      "bytes": 10610,
+      "sha256": "b8744531a7ceb537c434a2a11f9d321c2b58178617474a3b80924f3ef806e6b6",
+      "git_blob": "747e48c484307c6d3ba51bb9de58c8b980171a5f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/journal.rs",
+      "bytes": 36571,
+      "sha256": "d5e5a2eaeea376662c37d0788fcf1ca0ec24bf7f174e774264e0728b28caf76a",
+      "git_blob": "ffc6d8aaa57953d21696123634e6589646d1b36c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/journal/tests.rs",
+      "bytes": 12578,
+      "sha256": "6537fe25730a43cb55e043233af01f4a844f8a507c20e24481eff6b5db6e1731",
+      "git_blob": "bf12f7a55cd000e68af23acdecd16f1f1e553b14"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs",
+      "bytes": 15647,
+      "sha256": "2d69df4b16164caecdefce7a804a2a88826d9c5b2a15977c87550b06e5c33dc7",
+      "git_blob": "d00b8cead4a97069199b7a57cf8b5c1adfbda6f3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/tests.rs",
+      "bytes": 11378,
+      "sha256": "6b313a519497d30d4c6c67f1777e71fdbb344ffca15c8b6bf7681e1e1982f184",
+      "git_blob": "e8b826a7037753c3a99e5a7d3ed1821f2acdf896"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_workflow.rs",
+      "bytes": 145,
+      "sha256": "d6c0526113a1702fdb88d8f99c150e7878287391a1799bc5de98aabfc0c612b4",
+      "git_blob": "bd069b9ec04fac5fdcbbf1be4ea022c3a9cc1b4d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_workflow/windows.rs",
+      "bytes": 7789,
+      "sha256": "9e7e3c7b1fea13e6501d77a1030c52d51d456db514e3706905913c95082ae51b",
+      "git_blob": "52178d3cfc453220f42b227235b016118bdf7068"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "bytes": 23662,
+      "sha256": "dcadeffda5381ec202f077aec780048e48e16ad9ea2ab2be7ae384496f9ec5f0",
+      "git_blob": "acca5a659d905559cbb47f08434ddcdd7d9dcb16"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application/slot.rs",
+      "bytes": 4219,
+      "sha256": "b01cf906e19b8ad004dc1af80056e64f5347d6116180b39be4fc2481ddc4e759",
+      "git_blob": "95bd402da4181b1728f86ee94d832efe657a9fce"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_files.rs",
+      "bytes": 26021,
+      "sha256": "e760a5c1ae6043fc6b08977a40dd769374526747738c2272b8ef6de0503d5d12",
+      "git_blob": "02f6b804609ccc8cb646d4306a1c00db5aa0525c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 21798,
+      "sha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c",
+      "git_blob": "93120aec7c5b4c34567defcf8821cac07c90c948"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime.rs",
+      "bytes": 18682,
+      "sha256": "86a643b57a82f967ad0a465db60a3f3bc0a480daf5a431907e01f27ad3f09983",
+      "git_blob": "aa7526e3e586b867ca5d1d5348a37f62747fb79a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/native.rs",
+      "bytes": 15403,
+      "sha256": "5be2c9542999556336a801b38b27ce73f19830ec2d76b286f4e87d14d453cf31",
+      "git_blob": "eec3831064cc02f712216ed0398b354bb059267f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/native_policy_tests.rs",
+      "bytes": 17387,
+      "sha256": "707cb61dd84a78a6980be1c322be9a636276e16d1cab33a8b4515a7cad914351",
+      "git_blob": "fecb1e67d9dfa39d3f90261f1e9e54ca084ccbd2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tests.rs",
+      "bytes": 12402,
+      "sha256": "980b202a504f5660e8148cab37dded83e1bafabc8257a5f0334d863181d5ce2b",
+      "git_blob": "35964797b1b310d0d381de3baf1e7eb2a569709c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6638,
+      "sha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e",
+      "git_blob": "e67a49fb39a151c9da42babb1d4a58feb5ff71b6"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "bytes": 16861,
+      "sha256": "36b529cfd29f5236ddcde2c2be840140e740cd853a9dac82bbf483a5975ec26f",
+      "git_blob": "f4ec81472065fcf0b2f2eb2dc1af8c6cbdfa81ec"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content.rs",
+      "bytes": 6781,
+      "sha256": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245",
+      "git_blob": "08c8e038347267f65fa34f4db1cd3fcef86ee3f8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content/tests.rs",
+      "bytes": 15549,
+      "sha256": "9d2149897ccd4965253ac370b507aa27f6038969a9d4aed00bf68ccd1a002bc6",
+      "git_blob": "0bad3083dc37e95fa64f75eb370c37d52a32955a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs",
+      "bytes": 10343,
+      "sha256": "8067d7ed3f68eab72cb87deb4b66e96bdac1fd8245a908adaca4ada918e4de04",
+      "git_blob": "5841e323f82078d3f23fcdcb3948a11bc54a9f67"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "bytes": 66839,
+      "sha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4",
+      "git_blob": "0a93252d02a983c03fbfd48522e9988b556586e3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+      "bytes": 32785,
+      "sha256": "fb75113d5dc39fd580ddf8826568be8b305a97b905a836b1effbcb859fa01bc2",
+      "git_blob": "a4e94a982e3287efcf0c247bdde322e5db37e868"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "bytes": 8874,
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48",
+      "git_blob": "9368d6b6ed8359b6fca61e3458957014c40e0e9b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials_tests.rs",
+      "bytes": 25137,
+      "sha256": "c6ed0240635fd01d691a8d4747ea9de0a21b40ea4001efe0fba3617021452b72",
+      "git_blob": "daef8abf247d3f7edcc29f89e86699aa600b3c85"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "bytes": 5036,
+      "sha256": "7577675d9be344a35a1a9f2c8dd1e896be94ca8c64dc44e7bb8fdc49b90e7d1e",
+      "git_blob": "86da225133c8f393fafbc747b37941fcb2c27688"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload/cleanup_tests.rs",
+      "bytes": 5514,
+      "sha256": "1561c63f46269b0c414347937727ef5c897c3a5c2007d8d6e5d24d0912a1d3a4",
+      "git_blob": "3ccfad77279416b78b43dbc1f8671ccefae442ee"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+      "bytes": 21403,
+      "sha256": "82a044081e56a37e323f56b22eae71eaed99aa346a5a02119ab1956c315bbc31",
+      "git_blob": "3e59a7e288fc203f057560462975202fd067f425"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice.rs",
+      "bytes": 6226,
+      "sha256": "23e966efcd363f86506c1bed083e6e3f89a044a4f9f9a9086fe09cc268c18644",
+      "git_blob": "8865a3335b219b0e5810c3be862f823715ea7797"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files.rs",
+      "bytes": 17396,
+      "sha256": "9ded9359a8e5e5286bc9f15cabd5e3c25fe744e6fbbe6b7b125a53a568e892a1",
+      "git_blob": "91c4dbc424595eb35314de27b7cea6b809303d10"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+      "bytes": 23133,
+      "sha256": "a56f4d378be1d88abc208091412ad4487ba9f63a36811782c60049a1953a588c",
+      "git_blob": "ab29d4cab8f7eceeb2d540a66367902c6d423631"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+      "bytes": 24233,
+      "sha256": "1b086209a74db841a80dcbfed0585fc5bfbb928c23181d81ba670b521d0c8c7f",
+      "git_blob": "10b74c2d3fc11019f81f9095b057db5049ade401"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets.rs",
+      "bytes": 9415,
+      "sha256": "02539e6523e6aac3ba1fb734472b870d5c0e1ce3c967a66639f2677bbf5c6a77",
+      "git_blob": "b62b853d929fd5172025026e87c5fa0f1df9da19"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets/loader.rs",
+      "bytes": 5175,
+      "sha256": "640bc4637badf3d6fb2735be72db75c9e24f43808e15713bd2153c6ed097c575",
+      "git_blob": "04cd2eeb3a8657879fba8eee37b55cbec9e8cc62"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets/loader/tests.rs",
+      "bytes": 8946,
+      "sha256": "f74bd6e36947438a1ae2c643fa47ed4488836b8164888b7cbb59fcff3a8f149a",
+      "git_blob": "a87530c482d1af6f273e98ccd299ee321c3046fd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets/tests.rs",
+      "bytes": 12507,
+      "sha256": "2331d781298c17781134a28c1084b98954c49ae4cae9c96b1eac863ddaae077f",
+      "git_blob": "e08e0c7c0ba16bce5a7e627d1eb263a1f0e15b04"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe.rs",
+      "bytes": 13399,
+      "sha256": "00a86796d0eb5701673e29faa8e1c297c0103135378a6b1b913ac6a80d7f97b2",
+      "git_blob": "48e377b146caaa5ff854083f3636b8bbecaa434e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe/content_probe.rs",
+      "bytes": 7035,
+      "sha256": "79ddb806fc0ef8ea2eca4d9ca6672d27cfdbc0a35e1917ed555fd03fe4d448d9",
+      "git_blob": "22e5071da843d3cf6b0c2d74f695e4bf6a0c349a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe/materials_probe.rs",
+      "bytes": 12449,
+      "sha256": "c81b127e7d62a922a871dccd4011a6b4f9183fb9efbe9af5dcdcf68effb1b272",
+      "git_blob": "0fae76778d6c14f1173015c3621b58a93fc768ca"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_pairing_probe/voice_probe.rs",
+      "bytes": 10435,
+      "sha256": "30148b2dd2008c4395b74ba6232458fab66d49eb219fd578902e8f5a1d0337d6",
+      "git_blob": "1656278f2d6f4fd9b2a724248b305cb7ab834e59"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer.rs",
+      "bytes": 10324,
+      "sha256": "6eef089d5874c8dcb0183e5eba210f4af3bd749d39b48dc8ffe2c5bb2127773e",
+      "git_blob": "aa366c073413b483f0579cb4108e007e494d8822"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/download_work.rs",
+      "bytes": 4830,
+      "sha256": "fe5bc307065b4aed115c83026c848d91cda9c9386a36863411d9987f83477ca8",
+      "git_blob": "6243a216b021d558c8b4e4cb063a7d036daca129"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+      "bytes": 2757,
+      "sha256": "2ab112c243df3d8bde58d848db0acf3cd5afd430d41722d7c8131fd00bc444d5",
+      "git_blob": "d9f2a9da5343456180777fa2379867aa3656d621"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "bytes": 17963,
+      "sha256": "02f539c1532d4004acb709a148774988bcc97f11e5d8dcd8756988e53be6b404",
+      "git_blob": "191dcad77b176180f21fbf1dcc8fe3008779deaf"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads/tests.rs",
+      "bytes": 10830,
+      "sha256": "160ba5efab16f86919584a4f9bab3df3b168e6ddd9d8789268a24364555bb7a4",
+      "git_blob": "6b2651e21595a82bd23e6c365d4d457f6ebc292f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+      "bytes": 3209,
+      "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4",
+      "git_blob": "f719f4cfec8deda7d8b76ca55a147386cc692e09"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 57800,
+      "sha256": "d13e2f0b5d21387019f71d255ed819ad7ccf6f7a5b074c8f5225bfc2312a4b86",
+      "git_blob": "692806768815ec0710e145537c782d3eb9bcf5f2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network/tests.rs",
+      "bytes": 15700,
+      "sha256": "5dba9275ce932b5f9fc62156fc3b3491f6003d1940cab3dbca7b8a6ec40f3d5d",
+      "git_blob": "e59122447270150283db4cb39627f3ab526c1169"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/tests.rs",
+      "bytes": 6924,
+      "sha256": "6657cd17058bd9f677b9d7fcda30c7ce552829d640185f5d05382bb2bef0aef5",
+      "git_blob": "8b7782effa5889ffcaf8f0654b7fc65282c64375"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/upload_work.rs",
+      "bytes": 11545,
+      "sha256": "be2c9f514cf854409b597c930f3d31b3a521cfefbf68f3c1b00eb73fead738d8",
+      "git_blob": "242771b6c6226b717b3cfaeed06ed6da87bf05db"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/upload_work/tests.rs",
+      "bytes": 5675,
+      "sha256": "386fa97dfdfa591ad0097afda402fa644c1c1033ef21158a903fd0afa2abca3d",
+      "git_blob": "d2832a354f0ca4cee837b29cfbaf822ff509d666"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "bytes": 35988,
+      "sha256": "c546cb5c4f07002ff940ffb5aae59744e69d84e857422dfb90747551e4979517",
+      "git_blob": "4d25d340310f8cdd10f3e81194f803929f6411bb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "bytes": 44733,
+      "sha256": "ce09781c730c11d2ae3c8888765430aaa64891d78ef0a0246135df4442dedb04",
+      "git_blob": "68aba984ec3a0fce18edd5f99a2fa1c4366844d1"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work.rs",
+      "bytes": 6053,
+      "sha256": "f3292e6ccb39be8402b1f87732bb1effdc7775ef7d49bb619ae93b9d2c2fed63",
+      "git_blob": "7b6b22c2cada4ef7765cf5ed776714dd0f70125a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "bytes": 7402,
+      "sha256": "dfcb43dc8582677852a6ee6ef7937930f6a74ff2ba01fec44f3872b21cca3d6d",
+      "git_blob": "cb14f82b4f25dc29eb97cbc1388f80ce08d78bdc"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/autostart_coordinator.rs",
+      "bytes": 22702,
+      "sha256": "c7b3316b0130fad36817aaf67e2ace8a386c46624dfab14aa913d1ca6b5ea293",
+      "git_blob": "bae0d7f50a05b64097113664f8461ca08124f068"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/business_storage.rs",
+      "bytes": 162118,
+      "sha256": "4ec5751b1fa0e8c7994b2047cbe30ae62658721b0106057d0e02169c9a0a8609",
+      "git_blob": "88779b526e2bd913d55743be7fd89f22e60ebb26"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+      "bytes": 13936,
+      "sha256": "2974e02720b046a2f4bc168c930d05329a099bb067e03596fbb02fbe2f0690c0",
+      "git_blob": "e12fe37b864351f1a84a6e8dfea0997a11bca853"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/fixtures/README.txt",
+      "bytes": 328,
+      "sha256": "8fa198ac0647e1610e6e7fe576f884afb1ad96bb7542e16aae321228f14298f3",
+      "git_blob": "8af1e3254e43828cbe9b402e65ac9f4ef656ba37"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/fixtures/minimal.docx",
+      "bytes": 768,
+      "sha256": "67f52b08c3dacda0c45aeb6a6370220aa68079d8e77d93147c48fec26b976675",
+      "git_blob": "9da5cee07b360bc5e336de7709d36192fccce02c"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/runtime_storage.rs",
+      "bytes": 12948,
+      "sha256": "a74680a9e4b7ec4bf1a36c661636f8ba3394ee2442292e46552873c1b76f43e2",
+      "git_blob": "33169c7e783498f9fb426ba1f709c3ac2af52a53"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/schedule_operations.rs",
+      "bytes": 26372,
+      "sha256": "2242f27288271f4c7ff71f9ce6b37c8a1b401efaa80b67f56b5c8230c4616039",
+      "git_blob": "52659b033b48ca3fe17581cb952d5bd27c907529"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/voice_limits_storage.rs",
+      "bytes": 22608,
+      "sha256": "2521bc095be581c2c68c825ef97f02c3c04d4f418942b10405b1bc6381799d24",
+      "git_blob": "82dc1de6b2d167f944397f2077020d22876e7616"
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/voice_storage.rs",
+      "bytes": 27908,
+      "sha256": "efc0f2e7ec05fefcc280664b55b1a3b5da77e3bfdc789aa8cc358d728e3396d8",
+      "git_blob": "492d20823751dd2795f4f98cb5801b3b626d5848"
+    },
+    {
+      "path": "crates/fc-domain/Cargo.toml",
+      "bytes": 175,
+      "sha256": "79be768cf77d3e968eab4fee89e0e57a5cbe7545216a28d24503dfea39886792",
+      "git_blob": "ab19c2319748e276ebda76131c2f64351e149a9a"
+    },
+    {
+      "path": "crates/fc-domain/src/auth.rs",
+      "bytes": 4600,
+      "sha256": "ee29aac2c7f2d157fe0c50cfbe8813c9bc3ca11a4a60c1531a0949f83e77cc9d",
+      "git_blob": "1fa6b87058749ca969e9578bdcb089b1da68d79c"
+    },
+    {
+      "path": "crates/fc-domain/src/autostart.rs",
+      "bytes": 9182,
+      "sha256": "420d4e94607dee907e252b0ee7a13bb8db182dbb72bd5bea6238a54cf8d47ec4",
+      "git_blob": "eb38361eebc150b1097807e0e8a6c19bf7049957"
+    },
+    {
+      "path": "crates/fc-domain/src/calendar.rs",
+      "bytes": 14220,
+      "sha256": "6dd611c6f17974eb15694227db382ad3fe5a675520985235c8bcb0d640e1ad5e",
+      "git_blob": "7753e142689f2e760413d34c266bdc8e037a7785"
+    },
+    {
+      "path": "crates/fc-domain/src/calendar_tests.rs",
+      "bytes": 21898,
+      "sha256": "97868e860c88b0ddd6ca6eb3806bc8f17c4ec4f749409c25eeb8af74d608bf83",
+      "git_blob": "515d2fa8e1382f0923f38ff2dea2f168b7ace73f"
+    },
+    {
+      "path": "crates/fc-domain/src/content.rs",
+      "bytes": 3783,
+      "sha256": "250a50b370ad3d29801e935d81fb83ad05ef0d461b63376680c0b059f43ef87f",
+      "git_blob": "0acef386c0616460c27dd46afc550d5f18eb7612"
+    },
+    {
+      "path": "crates/fc-domain/src/desktop.rs",
+      "bytes": 21094,
+      "sha256": "c8fb60a73f3f30e07fd5684a35c45fa6f0eba9a515f36597c0bcef2fbedaaf89",
+      "git_blob": "8486f95352cb6deb33bf2eff67df117721970c50"
+    },
+    {
+      "path": "crates/fc-domain/src/identity.rs",
+      "bytes": 32091,
+      "sha256": "1e53dc7a6859138725abc30b23080162c2bc4777cea5e95e2ecea490b415dafa",
+      "git_blob": "b5c3e7bfe384dc47cfa6a642ad52e02dfb427e32"
+    },
+    {
+      "path": "crates/fc-domain/src/identity/tests.rs",
+      "bytes": 17476,
+      "sha256": "f502a37887102dbbacb64aed9119aad6e329d5fd397b7b925c6c9d15c307ecbc",
+      "git_blob": "7524c668ec530d0caeae2fb15fc4e65896d865df"
+    },
+    {
+      "path": "crates/fc-domain/src/ids.rs",
+      "bytes": 1760,
+      "sha256": "44dffdbb90c86a6bc0e57a4323736c9b33089ae83897a91b0d726839e5ecf0c2",
+      "git_blob": "f5a7512fb8f88d966c08acf695f91407d6c29107"
+    },
+    {
+      "path": "crates/fc-domain/src/layout.rs",
+      "bytes": 22466,
+      "sha256": "a9ab98415f1ff2c573a553ef6ef56acb226f61e772e4cf812d3e614afef2b518",
+      "git_blob": "07441b17b75f7df42de036d50313a70caa0c778b"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "bytes": 19927,
+      "sha256": "1cfd35b716381155578e0d37f5db507fb12a6916411c636f73f9fdf09f869834",
+      "git_blob": "a91e1d5f69a209267e2c14dca8c3205352eae3e1"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3442,
+      "sha256": "724eaab4629c21abc60c907f9bb2375f03cdb3f0a323fd820c2dc30bf9c792a5",
+      "git_blob": "6c5110636ea06e36301633e0fbda6e9c2f2999aa"
+    },
+    {
+      "path": "crates/fc-domain/src/lib.rs",
+      "bytes": 335,
+      "sha256": "4924bc868af334f2de095060df2810ebb168c0395d48338f5eae736d3f64ac17",
+      "git_blob": "cc5f44b0ae61b86561000e63be9d12e691548d50"
+    },
+    {
+      "path": "crates/fc-domain/src/materials.rs",
+      "bytes": 24453,
+      "sha256": "676dd4c7ebd4589b68a2ffa4826fdda3ce541c0de6afd35e7000df30ecbdf45d",
+      "git_blob": "2f256c77fff3801733ba5944a4be3d1b1b310bc3"
+    },
+    {
+      "path": "crates/fc-domain/src/materials/tests.rs",
+      "bytes": 16338,
+      "sha256": "516ca209bb9d89efc88ad87cb249749a0688a670c7cfa5b8b1c5609837f30de2",
+      "git_blob": "75ba3ed90f12d18dc34babd58cce47d5876637c0"
+    },
+    {
+      "path": "crates/fc-domain/src/profile.rs",
+      "bytes": 41234,
+      "sha256": "c3749ff5e73cd82a9da76e5014901f384658a3ae51254d4ac43ec20ca5f50ee4",
+      "git_blob": "65f1c9b3a25cec5745f0ce978be481890c71c940"
+    },
+    {
+      "path": "crates/fc-domain/src/profile_content.rs",
+      "bytes": 49812,
+      "sha256": "7f8b62e2471fccf48c991eebe316971f7f02df2f51d87c3677c84a6b67ca3590",
+      "git_blob": "0fdb8192c9d513f05710a4e6804d510e75b8befb"
+    },
+    {
+      "path": "crates/fc-domain/src/recovery.rs",
+      "bytes": 9590,
+      "sha256": "8f321972924fed1bfae2afe27b9e36e8e694c0f60e835b096c3cedb98cd08a8d",
+      "git_blob": "06d50dab508fd0092182b01e43b5b39eacab521a"
+    },
+    {
+      "path": "crates/fc-domain/src/recovery/migration.rs",
+      "bytes": 13000,
+      "sha256": "1771d4d380f116afd88b10fa494fd241d2307643d1ccf88b2d7a450b247544e7",
+      "git_blob": "64638d9d313c0a92bc5c7a308c6dfb9803079f3e"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule.rs",
+      "bytes": 21791,
+      "sha256": "330d4c72670fa1eeb82508c97ec2a6fe94c9b34605d8b6a3f06338fe19f7438b",
+      "git_blob": "157478c345ddf40c37d7f7c0e0451554ae0ff37c"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule/tests.rs",
+      "bytes": 12357,
+      "sha256": "b257722c966df36b12277090070448dd096a549adc2c9ad6ce700ebcdaa38e5c",
+      "git_blob": "89df8f6d18e331fe86efffb0bf8f58cec92ffd33"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule_document.rs",
+      "bytes": 61001,
+      "sha256": "527b62f4477863d92558f3a2755d164753bb7b0f7e28d719c28409383d0792e2",
+      "git_blob": "7f3691dbc3507258f7dd3ce242ad4d253abd7260"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule_document/row_operations.rs",
+      "bytes": 15222,
+      "sha256": "266c4549402298dc79604a608f46156b961e50bf888f37bb6f83a522b950b7b2",
+      "git_blob": "27c79b97606d08d4e6ef9c0d9d031b6d06569b8c"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule_document/row_operations_tests.rs",
+      "bytes": 22819,
+      "sha256": "a9b2acf32806b32459a9b572c407635404156a22711d64a17eb0ea91d5eb682e",
+      "git_blob": "620ea2c9d6e50c52b3b4999c0ad88e48fdb3299a"
+    },
+    {
+      "path": "crates/fc-domain/src/schedule_document/tests.rs",
+      "bytes": 28085,
+      "sha256": "3429a284637dd283dcb9143fc2b60cdabb9fa36a500f54b84bff2a9a9ccfec12",
+      "git_blob": "c23e2b5122b5ef2aea42c33e2f4a50cbd1dd696d"
+    },
+    {
+      "path": "crates/fc-domain/src/time.rs",
+      "bytes": 10313,
+      "sha256": "b8763ff445240f5e91e38b77654d6d92784e21feee07e8fc051187ae9ed88f3a",
+      "git_blob": "ccbcba97bf502d9a98ec5110e271644a579e4bed"
+    },
+    {
+      "path": "crates/fc-domain/src/voice.rs",
+      "bytes": 52799,
+      "sha256": "04c7c57839d2c33c9360f6e2dad93b491da660704a8051683f56df1bd3ca0cc8",
+      "git_blob": "b214534d34a628fb22b36239af5c908975e1323d"
+    },
+    {
+      "path": "crates/fc-materials/Cargo.toml",
+      "bytes": 505,
+      "sha256": "cc6978efb0b994dd58a973ba0c8a0dfd25d956b645dda3ed0e1d3a9a63d43e90",
+      "git_blob": "d69e61e5afc637d88e2cc035c6107806b4e35cb2"
+    },
+    {
+      "path": "crates/fc-materials/src/lib.rs",
+      "bytes": 12600,
+      "sha256": "50df8abf64d9bd8111226841b80f5be31548dc8a2bd24458530611b427b37535",
+      "git_blob": "1edca596c743516cfef9cbb75a5fca05f42b4fd5"
+    },
+    {
+      "path": "crates/fc-materials/src/office.rs",
+      "bytes": 19511,
+      "sha256": "b4accc4d3bea1c6c5a2dbd0a8a2b00c179b5a58a45e303006af50a88d6323cd9",
+      "git_blob": "52a6519af415d62baef342bbbea68567430ad864"
+    },
+    {
+      "path": "crates/fc-materials/src/office/tests.rs",
+      "bytes": 13858,
+      "sha256": "ee5ab79e9776fe3cb82c1bd6111e278c1d43e60d4e0f98fec4a12814c735e872",
+      "git_blob": "85ebf603556dc04865cd5b8f4c515b94ad28893f"
+    },
+    {
+      "path": "crates/fc-materials/src/office/xml.rs",
+      "bytes": 23666,
+      "sha256": "4cb71a65edc6e6d04a1dff94db0651e0431e1199a18e6e6aeaf2c5400f458bc4",
+      "git_blob": "fe635df98794fa02d1422faed8d914f998c6e54c"
+    },
+    {
+      "path": "crates/fc-materials/src/pdf_validation.rs",
+      "bytes": 45472,
+      "sha256": "48e5f9ebe364d45efe7b015f02b34752c98062964c31a7e8649c9e7a978af93c",
+      "git_blob": "070d2ff19fbe6f6d92fc17ead90c571a28391b39"
+    },
+    {
+      "path": "crates/fc-materials/src/validation.rs",
+      "bytes": 32142,
+      "sha256": "f97243102870985a510b99eee2242058a84f2851ad032b2e2fdb0a5943ea8ff6",
+      "git_blob": "8eba6f86c090a7c0e44f086c2630776ac6330dcf"
+    },
+    {
+      "path": "crates/fc-ports/Cargo.toml",
+      "bytes": 201,
+      "sha256": "eb4da687dda49f120d097c61d25b4fd41498045990b722108a489823661677f7",
+      "git_blob": "3f51fc3748eaa6f59111ce4502ae8bf96a02800b"
+    },
+    {
+      "path": "crates/fc-ports/src/audio.rs",
+      "bytes": 2789,
+      "sha256": "15b76c1a2af5d2d26bdd9f5b475b3fdc6ef79c19b8385cb8cbd3da80ed94c656",
+      "git_blob": "d22342b6168a752aebf38d4a1558dc37a882229c"
+    },
+    {
+      "path": "crates/fc-ports/src/autostart.rs",
+      "bytes": 2189,
+      "sha256": "b6b756713aa67b2576aa0be56ffaaed030759c01fe440bb00e4ee53cb627f004",
+      "git_blob": "983631b46cf979939909f64fe568bdce5819a34d"
+    },
+    {
+      "path": "crates/fc-ports/src/calendar.rs",
+      "bytes": 4678,
+      "sha256": "9ace57504633429ca746151467e381a301f4699e13906399442ab32e495873ad",
+      "git_blob": "09a50d45d8fccff5b795f09b704e6b5e73047901"
+    },
+    {
+      "path": "crates/fc-ports/src/content_web.rs",
+      "bytes": 1343,
+      "sha256": "871c4ca4dfe9a008b1232fa53c16aaa0b3801036c285d942e3e3f356f37c8df6",
+      "git_blob": "e9765590f8023577c34baea87fade88800c3ae93"
+    },
+    {
+      "path": "crates/fc-ports/src/http.rs",
+      "bytes": 13329,
+      "sha256": "e0b6f0bfa38a04316182159150db14d468ce0b665eba78d4fbb1d710ce70e966",
+      "git_blob": "d2a93531a91ebd5e2dc85e0336f429686ae11ebb"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22168,
+      "sha256": "38f5b77e31eb9a744bc0230a8fda3c27b83f31b46e440e9756e30262cb60b4b2",
+      "git_blob": "6a07ee42f82e6f90c9182cf174be0b3ab742dc5f"
+    },
+    {
+      "path": "crates/fc-ports/src/material_outcome.rs",
+      "bytes": 1310,
+      "sha256": "582f6428c0e55a9f65caee04d0df95dc9fc16dd200298a72cf048fc174596da5",
+      "git_blob": "fa082fbce2431069734caf7616def8b9c85ab542"
+    },
+    {
+      "path": "crates/fc-ports/src/profile_content.rs",
+      "bytes": 11002,
+      "sha256": "16671837bdd2b1ebfa27096836f4bc129cd13d02f5aecd36f6b80eb39d2e2182",
+      "git_blob": "f6eba5feac58844c6713499352219760b0cd206b"
+    },
+    {
+      "path": "crates/fc-ports/src/profiles.rs",
+      "bytes": 2420,
+      "sha256": "117bdd744f1ac287aa84b2d93f9a9b35c872fddf9a4c8faad1bc74a7a8035249",
+      "git_blob": "14d263e0f26780d8275204e954ae39fd463663c9"
+    },
+    {
+      "path": "crates/fc-ports/src/voice.rs",
+      "bytes": 3538,
+      "sha256": "4d8656e865bf85d39911b704477eba47f3b3dd7d45fc78469aa64f2bd67e1ded",
+      "git_blob": "b87c4735b2412c125e86c120f1e5ee00bf4d5fc1"
+    },
+    {
+      "path": "crates/fc-presentation/Cargo.toml",
+      "bytes": 253,
+      "sha256": "1cfa8132a30fae2d570c18bb3cd6b9a672f02025b9980147e20992870ee3d3fe",
+      "git_blob": "041b8cc2975b333c399df731e6884e8ce77defdc"
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body.rs",
+      "bytes": 19436,
+      "sha256": "53c45b293552b32aa10e8c2990320654c5de72b2a042067848cd5f11a3971eaf",
+      "git_blob": "87469e70abebdce06afd0dce64e581a6bd23fdab"
+    },
+    {
+      "path": "crates/fc-presentation/src/card_body_tests.rs",
+      "bytes": 12905,
+      "sha256": "35172d190b54722e025ce774d6340fa54b0d05cc02b3330c0231bf5bb082e044",
+      "git_blob": "7b03e5e9e5ed384d31f675c48f657bb3a0d69322"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout.rs",
+      "bytes": 23719,
+      "sha256": "141061c85c69d66ff7712df24055338a940656c87510c69d5d997229acd49421",
+      "git_blob": "9a3e46f0fca7bc7e40263ae3ca5e77fca38eb4d6"
+    },
+    {
+      "path": "crates/fc-presentation/src/layout_tests.rs",
+      "bytes": 18214,
+      "sha256": "345db5de6631e637a5b10b8b6f7bfb949d4862175a49b41e01772939cb6b37f0",
+      "git_blob": "d75bdd1ac5982a1d8750a7eb4ceee2b12d78d113"
+    },
+    {
+      "path": "crates/fc-presentation/src/lib.rs",
+      "bytes": 15410,
+      "sha256": "b9cc0be8ca02241ed817b43d8af819ab46f711e7fd7574a7b0ff71c58e6e69b7",
+      "git_blob": "49164e432ef5ada7ec23db4fdf93321ff7c0b5cf"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene.rs",
+      "bytes": 31921,
+      "sha256": "0cd07f148ccce95aced264f5be08d76ed0848aed50f9347db3431d8648cf1b84",
+      "git_blob": "e79b6aa087947536cc4e81df35b25c02bf99ebab"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_content_tests.rs",
+      "bytes": 14873,
+      "sha256": "cff93c4dcff6fbf046b9fcf95fb5fd6edba8ef1791291021709201ef44f1264f",
+      "git_blob": "afaf858e3a27eb4feb3afd5ff09d295c40e54ae2"
+    },
+    {
+      "path": "crates/fc-presentation/src/scene_tests.rs",
+      "bytes": 38348,
+      "sha256": "875b1b304db073a448e595dca8fbc484844663848335f588703b38d922644afb",
+      "git_blob": "b571fba1d0183505b0c0d26ef4a1bf0c58d7d281"
+    },
+    {
+      "path": "crates/fc-presentation/src/workbench.rs",
+      "bytes": 12957,
+      "sha256": "fe627678ec7c54551e22c45551a71c91a16c29d633916bc14578cac5dc7c1768",
+      "git_blob": "2e1e59a48a83ac9696ec0ab8d3a0a5c508bbad63"
+    },
+    {
+      "path": "crates/fc-protocol/Cargo.toml",
+      "bytes": 303,
+      "sha256": "45582e343dfe52a120d485872447dfb45c824d461bd8661c579e040362ac0ce8",
+      "git_blob": "43670b263e73495fc97c503f81f726827fa77613"
+    },
+    {
+      "path": "crates/fc-protocol/src/calendar_feed.rs",
+      "bytes": 8485,
+      "sha256": "dafc338ae189abc82c13bcfa839de349e1fad8e15e350884d34a3228a72e84c6",
+      "git_blob": "5bbc1a66cfed0bb800999d569da356c3bcd033cd"
+    },
+    {
+      "path": "crates/fc-protocol/src/http1.rs",
+      "bytes": 11049,
+      "sha256": "206bde860aec083efbaf81f78d8910e38eec94d5021331f594b43168ba6c6e9e",
+      "git_blob": "f8afb60736f8f3f94f0d9e61685ef7fd5d6f3eb1"
+    },
+    {
+      "path": "crates/fc-protocol/src/http1/response.rs",
+      "bytes": 10614,
+      "sha256": "5d4bf42a459000098a4ffe5912e2d1d3b422187f8e50fdb4728d25eab236b52a",
+      "git_blob": "ac518c36388c241417e71ce8604988924ad94802"
+    },
+    {
+      "path": "crates/fc-protocol/src/http1/response/tests.rs",
+      "bytes": 17670,
+      "sha256": "9f446008e9dc1a122d9cd5ceb871a75d609ac54a2ca8a2caa86393a38865bab1",
+      "git_blob": "5944be4c706cf7185cd1ab6ac9a2cb5557d07561"
+    },
+    {
+      "path": "crates/fc-protocol/src/http1/tests.rs",
+      "bytes": 11180,
+      "sha256": "fa77342b9242cf5a6c19d88a1e9d7fd34d6251d3ff5d67c9c7df7cf9006e0942",
+      "git_blob": "2b4ecc16b444d89408d2ac4d37f88ac105619e59"
+    },
+    {
+      "path": "crates/fc-protocol/src/lib.rs",
+      "bytes": 8009,
+      "sha256": "0cc731c5f0b1cdfb12a099f6e9e899a117b570b81293a881aa7b98a1bd7f246b",
+      "git_blob": "d63d387c447f48c8d2ab2f5d097bb0221fd9b8e8"
+    },
+    {
+      "path": "crates/fc-protocol/src/recovery.rs",
+      "bytes": 34496,
+      "sha256": "9a39a2effa800d6333bbebba9f071b550e26ef456235fd6e4f8d0c8b26f747fb",
+      "git_blob": "722a894d1a35baaaead042a85ea28454abc679df"
+    },
+    {
+      "path": "crates/fc-protocol/src/web.rs",
+      "bytes": 37213,
+      "sha256": "51cc243aa1f09422099708bac414e48e9c1e6df8008d6cb79714b5a1850b00d9",
+      "git_blob": "cb72f577f2e038af34b3e8c48b146da659174a47"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/assets.rs",
+      "bytes": 11547,
+      "sha256": "5dad29687e99e8b774e35ae178f21d75765049a699cd18911a399f38064ff56c",
+      "git_blob": "dbca30f48895cdb2e9df9dc1d1e47f5f377bdeb8"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/content.rs",
+      "bytes": 12972,
+      "sha256": "a6c8a23b6529d7502118811bb8ac19d3fefe8279e19a53a749d45bb7a016f7d7",
+      "git_blob": "d0d4c5434486194bf51ed1d029e8b765a3d87c9a"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/content/tests.rs",
+      "bytes": 9585,
+      "sha256": "56669b3b27234bd2263c6cb1874c19518807e5257fc0b7ecf343418e8d966442",
+      "git_blob": "105d636e9245068cc6b01544ef23f4ce313e6e09"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/materials.rs",
+      "bytes": 19271,
+      "sha256": "d8e9808b1b2f5425b21b29f8a848efc5bc033513eecd63cbbca4eba76f3ace5a",
+      "git_blob": "a7f9a215e72b47bb73cb2cc0a186ef1b8a6e156e"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/pairing.rs",
+      "bytes": 5975,
+      "sha256": "2e745037c65a936b91312c6ceeb43a87bf04b6e1c0ab84ed40b3d80d49cfe0b2",
+      "git_blob": "02c730ed7abf7a76c1a8fac88b187298087eaab2"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/responses.rs",
+      "bytes": 9981,
+      "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7",
+      "git_blob": "4be5127fa61f5de78f13a262f86c94b776aac34b"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/voice.rs",
+      "bytes": 11136,
+      "sha256": "ec1198ec3fa67245d98f1a78176b8363ccb7ca28d013860f67132638a3486544",
+      "git_blob": "d81fe48b54f043346aa50e5913618a159bcae0c3"
+    },
+    {
+      "path": "crates/fc-runtime/Cargo.toml",
+      "bytes": 229,
+      "sha256": "8d0fd38ef235c6876fe54fd3bac0efd793f6924c42b227a115f3a6bcdfe6a770",
+      "git_blob": "939d0fb3436986946ef79c3b052cb8b542f9b74b"
+    },
+    {
+      "path": "crates/fc-runtime/src/authority.rs",
+      "bytes": 17524,
+      "sha256": "0b5cbf90ebf1915e025243b0a6842f468e6ac309de0d94c36155f48122e1ddf2",
+      "git_blob": "2db85eaebd2fc251675623980a821d08c77e5e11"
+    },
+    {
+      "path": "crates/fc-runtime/src/cancel.rs",
+      "bytes": 2034,
+      "sha256": "786ad31bb2257318268252259ea959d78aef08e6fa06e990c6c2e6e317eff390",
+      "git_blob": "abcf5ba1524736dd73fa65be2bb7e6eeff7877f1"
+    },
+    {
+      "path": "crates/fc-runtime/src/control.rs",
+      "bytes": 1097,
+      "sha256": "b7eea2a41d144d6476ad2e5b347ac7df8e7afb00d2a5b77923cd914bade8b979",
+      "git_blob": "507618dad3382c41614c1f48775907fe02b560b3"
+    },
+    {
+      "path": "crates/fc-runtime/src/health.rs",
+      "bytes": 8836,
+      "sha256": "f8c92ee5d160b651180c31d0a57d3f0cfa4329e04330cdd9c420b0f8d67284ea",
+      "git_blob": "e966f62adbcead3a2f7091d512cb39cd89c48cc5"
+    },
+    {
+      "path": "crates/fc-runtime/src/lib.rs",
+      "bytes": 162,
+      "sha256": "45b76c8e6bc3d5de804fe0e12bdb9a590c02a9c8cccae42d3c4a060e0a2795e8",
+      "git_blob": "56a2acf60a86dbb0f1d20412ea39a3abc97178f8"
+    },
+    {
+      "path": "crates/fc-runtime/src/mailbox.rs",
+      "bytes": 7978,
+      "sha256": "83e2c24da87f0b3609971d5e533e87ac6ed6f72ca689821c20d508dee08b58dd",
+      "git_blob": "eabb9abd0b26160dec08307d5f082a551203f7be"
+    },
+    {
+      "path": "crates/fc-runtime/src/observer.rs",
+      "bytes": 3601,
+      "sha256": "d05ae71babbfc29a96e7678852b58d6f5bafc03550826f571bcd8f2f0ae1abd7",
+      "git_blob": "edca4710e13a423e4aa54c6e9c21c0f070cae35b"
+    },
+    {
+      "path": "crates/fc-runtime/src/shutdown.rs",
+      "bytes": 5587,
+      "sha256": "67dca134c0f7230426bff25595eb0732b4044b4a08f3e9b7b33e57e2abc338c8",
+      "git_blob": "4b88429ba9f5464de1efadddb717b0c0e0500e86"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "bytes": 20117,
+      "sha256": "e050f358dc1d6776f0998210478833daaa6fe11eb2758a45e90ba598a26043eb",
+      "git_blob": "e95d9ba3713e2379c9eb10d16327d7854b2602d9"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker/tests.rs",
+      "bytes": 24506,
+      "sha256": "94af522c84b281a7719998ec115df59630c5d737fab24213c050eef74f8a28ec",
+      "git_blob": "4d9c9d6edb1ecfe75666b090b2b252c3512646db"
+    },
+    {
+      "path": "crates/fc-security/Cargo.toml",
+      "bytes": 325,
+      "sha256": "4879a172c15f9cfa7503d565a191016915c829a2e4118edc3e0c2cbb2502a7ad",
+      "git_blob": "6cb46c2662f819c3ddbb03008cc55f461fa4d7fc"
+    },
+    {
+      "path": "crates/fc-security/src/codec.rs",
+      "bytes": 11197,
+      "sha256": "af2372d6de1b714b04a607b446f815724bdcb06b091b18ab2b2757edecb9c3c2",
+      "git_blob": "d0daa74256ce772803d384a46a4c9122522d473e"
+    },
+    {
+      "path": "crates/fc-security/src/lib.rs",
+      "bytes": 10947,
+      "sha256": "6b2a1329f89513116d4f10c6627f49422d2a16a27940aeef9a965138e3621bba",
+      "git_blob": "6bd19316b432e8fbf97c481b432b4ff404a024a1"
+    },
+    {
+      "path": "crates/fc-security/src/recovery.rs",
+      "bytes": 8396,
+      "sha256": "d63a66afe1ba11f42a3e64ea4ae595a7412d8899cada4df09a0682465f73e39d",
+      "git_blob": "d678f19380efddadb673a6816879c3294dd9ca85"
+    },
+    {
+      "path": "crates/fc-security/src/web.rs",
+      "bytes": 13956,
+      "sha256": "447fff04d2821183d06fa6575dafe5e92e620d8193c182b9a5fcaed993a90daf",
+      "git_blob": "83fed60f328227d653263622aa4f086a91e286ef"
+    },
+    {
+      "path": "crates/fc-storage/Cargo.toml",
+      "bytes": 390,
+      "sha256": "6412ef4096052ea7fe0b6c7866ddab7e38a4c356ca8b58a1b043e5afc973828b",
+      "git_blob": "861aca7b8145f6344650261a22619ef0560896d9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/autostart.rs",
+      "bytes": 19124,
+      "sha256": "2f0394cbe7642705854a2b9c86202f0018e459f393e68d03ed89cf46be09d37f",
+      "git_blob": "871366ad5eac7259c3a7bfb4891bd59e86a7d219"
+    },
+    {
+      "path": "crates/fc-storage/src/business/autostart_codec.rs",
+      "bytes": 7184,
+      "sha256": "f6b5903e5c6bc47d1a9cab833b4e0b5f7498f5324ad5fcd452a48bf3690747de",
+      "git_blob": "6c0b67b4b46d44cedf20e76e173868045c0ffe71"
+    },
+    {
+      "path": "crates/fc-storage/src/business/calendar.rs",
+      "bytes": 35822,
+      "sha256": "c98e5d726028cf0e447d641a61196de9c63b6987f429a9db61671ee0f17333c2",
+      "git_blob": "6bcc5eb5ad1e91eb506082c4f9b995fdc242498b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/calendar_codec.rs",
+      "bytes": 11720,
+      "sha256": "797b29a840f821be3de4417bcacaacce8f17d2c22aa7e15e20e078ab24532884",
+      "git_blob": "7dff7ee5247295f2a262776fc71ec8e3576239bb"
+    },
+    {
+      "path": "crates/fc-storage/src/business/codec.rs",
+      "bytes": 15173,
+      "sha256": "722f4faef10f921734562c3bcf1669d479ab3dcc50124c0460d189312f9a5139",
+      "git_blob": "930b6a3215990f63fbde470139ffb684f8c1fbe9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/content_web.rs",
+      "bytes": 13730,
+      "sha256": "bc303da7b969447b287d843d9499ac66743049a4c064b2dc0ac323b52a8f5eb1",
+      "git_blob": "71876a5b50ad28c36b6028cf4e65de389c9e4d56"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop.rs",
+      "bytes": 12179,
+      "sha256": "b84e695a12f750de681186a369cac4ba955edcde2c03f84cbd9df9bf2974878f",
+      "git_blob": "c62e4f9af040bded2dd5492fbb1da8d0e3a880af"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display.rs",
+      "bytes": 11471,
+      "sha256": "df1c073229fee6646f6c91c0b449a9e5f4b948a0647b1b05e01e5a986cb37ab9",
+      "git_blob": "fcb419ee2aadaf32e0f4f037c0d4e9091220ccb2"
+    },
+    {
+      "path": "crates/fc-storage/src/business/display_codec.rs",
+      "bytes": 10933,
+      "sha256": "eba31fd12d8887c60065a04212195c987f824b8330d675e204fa0692370ed3ad",
+      "git_blob": "0069126dd017cc95eeb6dde3a3171123cbc4a509"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson.rs",
+      "bytes": 16440,
+      "sha256": "84744b5000d1941ff5db4851e2ce23ba6ecd808991116853fc46f4a4b987c1d0",
+      "git_blob": "23fa61a860ec00acc0970e75e46c1536c6a11c27"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson_codec.rs",
+      "bytes": 8183,
+      "sha256": "082c8b498c10a7ed7080a61d3bdbc9942156717dda0f3ab1bf766d3e723477df",
+      "git_blob": "558fd2d44feb3b82074c37e7399d45611a3775a8"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials.rs",
+      "bytes": 59195,
+      "sha256": "f7cc6239a1af2dbfda01cfa53a286f1641fc0e8fec7a9b6915d2f2c0832c031b",
+      "git_blob": "080e00c5003bd16fc72996a1a9938932186d2e29"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials_codec.rs",
+      "bytes": 10782,
+      "sha256": "6d8c49c21d49b4f49e46ef30594bf25b7e2077b6cb435cf3b03f348541cf6986",
+      "git_blob": "e51d449fcc750d815991a263118e7552adad9fb9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials_outcome_tests.rs",
+      "bytes": 19623,
+      "sha256": "e424317c29218bfcc644d0040084a2c3be32f73a8b37c0eaa61f264cc87a94a0",
+      "git_blob": "17c1a6b05b16e1c1b3111f1692cea34bac04f595"
+    },
+    {
+      "path": "crates/fc-storage/src/business/migration.rs",
+      "bytes": 8187,
+      "sha256": "a02007fe1719f39ec1dcd9fb0851424423b656ce0046d4e60e18fc5ff0894a53",
+      "git_blob": "0b349a32e75d75b5026b3b74a87cd593401fefb9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/migration/documents.rs",
+      "bytes": 10352,
+      "sha256": "c01b4ba139e2df62db7b448a60a987ff2d56c0206fce613c5ee0f7c06704a61b",
+      "git_blob": "fa1a3191da6d0fa96847064382a2150600f53d38"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 41499,
+      "sha256": "c7658ce6d10a056dbe89c9f77ed59faf9918533d98ac4e8627f0732653140bf0",
+      "git_blob": "8defa2a3486084fbc5a6dbc648738cb32c861eea"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content.rs",
+      "bytes": 43192,
+      "sha256": "7a135212258bced7606ae349e0a15fead8a66e7cc52595b5e21c4b945f51223b",
+      "git_blob": "fd49d99d341a8b5a2d975957ef56f8f70faef620"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_codec.rs",
+      "bytes": 9782,
+      "sha256": "29942eb8fad7243e7256c6e111076ff78ffdaf533a707e951867992a1e9deea1",
+      "git_blob": "8ec8c0a510a82e06f5afb9149ddbce08daca97dd"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profile_content_media.rs",
+      "bytes": 26135,
+      "sha256": "1299af88fca01f81c1e54df178b2c6c5d087c4aa4528a855d916e072620a849b",
+      "git_blob": "2f9bbe1dea7e1f561fb92df74ed88ffee8a268b9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles.rs",
+      "bytes": 33983,
+      "sha256": "699831ac32521671d64fb6af462e0b05922556c9138c121c08923b7be4b0aa0e",
+      "git_blob": "be9f6679ad72cbe753aecf0f6f1dbd54fb2f2be9"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles/tests.rs",
+      "bytes": 34609,
+      "sha256": "52448a786fd4b591070087705db28d424adbff53bd87232d0732d4cf67a86c5a",
+      "git_blob": "a955ba2af7c2891aad3475f1dde92ae72f0d7ad7"
+    },
+    {
+      "path": "crates/fc-storage/src/business/profiles_codec.rs",
+      "bytes": 17221,
+      "sha256": "dc01cf7c6611015ed311117805632170575bf009d71114605f538a54daa73661",
+      "git_blob": "b20153abeab385612ee433a81f83ed29d804087a"
+    },
+    {
+      "path": "crates/fc-storage/src/business/recovery.rs",
+      "bytes": 53741,
+      "sha256": "6c7b11e3355760cd04f7693e3ca0088719b13cf3ff9528e2d1817be419e9a520",
+      "git_blob": "957c52a0fb1472c51a4edac1f750f314e7e6a8aa"
+    },
+    {
+      "path": "crates/fc-storage/src/business/schedule.rs",
+      "bytes": 15748,
+      "sha256": "f5f0ba5070b0dbd367733d9cadc2c9d403f84bf19bfb18b7dca24442fbb58d23",
+      "git_blob": "50ec1283d183ac427bc8a2b59165c5fc79aa2feb"
+    },
+    {
+      "path": "crates/fc-storage/src/business/schedule_codec.rs",
+      "bytes": 14258,
+      "sha256": "57acc4d45e52ab60e41ea374d5567d78c4671fc46c6e8c0da275f010a2f38c99",
+      "git_blob": "988967c11a5c0dfa39ab3d41f8ca17294d96c591"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/autostart.rs",
+      "bytes": 31183,
+      "sha256": "80f3c6ef5eba1284a7e73bfe6c453e6bb0248ab14aa6a234525416e0d532dafc",
+      "git_blob": "69259a7055753dde7fd3be72a3e3490ce9042b35"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/calendar.rs",
+      "bytes": 37740,
+      "sha256": "86350ed3273e2122cfcfe5c13d080389b6af59679e204bbc84169d5a1242fcfa",
+      "git_blob": "d3377854052f3352f0aad19f0a0f4ab6e6dd7461"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/content_web.rs",
+      "bytes": 25155,
+      "sha256": "8a8e7ef264edc5320fa3fcff88ef2dfe0e8d01b544dfa11de0eede003b41e9a2",
+      "git_blob": "1dc020e13cd025001faf8e7a599c7262e1399dde"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/json.rs",
+      "bytes": 6521,
+      "sha256": "af9b384c221b7f67b7c300b15e2720aa8a38b0cc1f86f2fb4dc30aaeeefcc931",
+      "git_blob": "e8a098c5df9524405f2e560541f4278acc219c09"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/logout.rs",
+      "bytes": 12894,
+      "sha256": "65ba0653a1ede61c77cc728e0816c69ccba1f984d499cb553d7060bde7b7a1d4",
+      "git_blob": "54569e46115f37e9805c742a97829240776402b5"
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/profile_content.rs",
+      "bytes": 28136,
+      "sha256": "101c6156ed2431319251c2c673cc0e372a3dccc3d646bd1cc5b1921c1c276a63",
+      "git_blob": "d1133a642614201a4430ded6fb85ac7d57c46286"
+    },
+    {
+      "path": "crates/fc-storage/src/business/voice.rs",
+      "bytes": 34699,
+      "sha256": "2a26ffee67cc0accf0c2a2ff346a1e33310f09f26838a773c8078c955ca3b61d",
+      "git_blob": "c13a0d7515a980c8c4dfe8d263e17da5a5593c49"
+    },
+    {
+      "path": "crates/fc-storage/src/business/voice_codec.rs",
+      "bytes": 22308,
+      "sha256": "6b0b720a54d9ec42e50fb693f1dd7ab20378adc814fafb72ec298374ac3f4df0",
+      "git_blob": "0c5b99d5428f201f872a272e237b7fd64b465139"
+    },
+    {
+      "path": "crates/fc-storage/src/execution_fence_tests.rs",
+      "bytes": 14134,
+      "sha256": "c95b83014d82baa1fc88ffbc71718d0459ed9b264a923c11f9bf3b6d615adc19",
+      "git_blob": "f23f41676aeccb6b2966c7acc966ee7135f031a5"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 69182,
+      "sha256": "b3aedee25b92c95cef579fcd8cc4c0c288b67f8daa4143acad5c25888a9eef15",
+      "git_blob": "a24c254fc74edb846a7ecdf2cc1baa6abc51c78d"
+    },
+    {
+      "path": "crates/fc-storage/src/login.rs",
+      "bytes": 19712,
+      "sha256": "8b4ccd7ab9fe12b783a27975ba1ddab4faec4b0af0c61f93c7cb266a9a06a25b",
+      "git_blob": "34c17c138644b372db58d720d5220ae11d5fd7ac"
+    },
+    {
+      "path": "crates/fc-storage/src/migration_tests.rs",
+      "bytes": 20175,
+      "sha256": "d480305bcc79d76032aed8029d891494c23b5d09f1c16a5fffa3a6c5f44b6fb2",
+      "git_blob": "8439c38f84d6525c272a4eb09df5bdba55969c5a"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery.rs",
+      "bytes": 33364,
+      "sha256": "8e705461090bbcc837fb3db25fe3417cb703192ad02d6e955762b6b584ea0293",
+      "git_blob": "34876e6374480c63003e7eaf3ff52d23ee0955f4"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery/migration.rs",
+      "bytes": 8807,
+      "sha256": "c2d5999a901d24b2098e531670e3cb3101a57f9f45a7e6c5d853d3206962a990",
+      "git_blob": "c8c1de1cb14287b53cdaf412e0cd5e8d379c0a24"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery_tests.rs",
+      "bytes": 42990,
+      "sha256": "700a33802c06c2510567f50bbd553afe69b4164e80ff4b842983fa3e8c03c9f7",
+      "git_blob": "cb7b20b716cc9487e4abfdcd58adbeab72e0710d"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery_voice_policy_tests.rs",
+      "bytes": 5007,
+      "sha256": "3d0d0d5a30da25df670bf44c7ba291a2e0b5395a30361d447802bc030726e24a",
+      "git_blob": "90a69e14c3aa8ffdca0468ca2877bc0d038ed609"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1456,
+      "sha256": "ce29c39c11ec01b24802adf7008d6273650d2bad77c163b6bfc3fb88aa7d138d",
+      "git_blob": "e1e8b61367d1221d6e27200730d5acd263ab97a2"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "bytes": 17428,
+      "sha256": "91bb2a0583e3828a8a9c79fb943a9f588bfd5f1d15092969cefc49682bef9f04",
+      "git_blob": "7c03d79e0e291003331ffd52775a0b87070119dc"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/diagnostic.rs",
+      "bytes": 3890,
+      "sha256": "36925671241565e419a67d6dd6024b82354b2ef96148e0b9f7f03982c9663f9a",
+      "git_blob": "040f0e4e964c22b0e19409c7a77f8efa0082008f"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/mod.rs",
+      "bytes": 23597,
+      "sha256": "bde2965bacc59f91b1deb72e55bf119dfef2b29f78ce4716b84e61f2a07a5b13",
+      "git_blob": "5dbc654540aaa35bea40b873e01aa78d0ab1eb13"
+    },
+    {
+      "path": "crates/fc-windows/src/audio/tests.rs",
+      "bytes": 11081,
+      "sha256": "f53505d3b96c3b9a38a93fe4dd78a318ca91a5d6909214e0adb1fa7482db07e2",
+      "git_blob": "ea2e9890885b22bd3de0c8b6d6d12db6466f669f"
+    },
+    {
+      "path": "crates/fc-windows/src/calendar_download.rs",
+      "bytes": 16941,
+      "sha256": "9815d5c2af1a59a3c0ea587eafd09769a88ffbbe973337816adbc9156ca76410",
+      "git_blob": "d8de7def2df8daa26ef16885cd4c22b5c945b3f9"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 120821,
+      "sha256": "2eeda0d99c15cb44c44f4582acb0b3c7208811c06c2962cac4efbdd268e235d0",
+      "git_blob": "af2f52475aa9717ce4b30034685e67ccdca5af95"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "bytes": 17632,
+      "sha256": "3764ddd8f59cb289f31e54a5850b4bdad87b963cd238e8c4fb54dd053673775e",
+      "git_blob": "c02457e4ea49cdd7de124bcf1ec2c5c8f1e944b0"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18631,
+      "sha256": "a1e660ec54873c1c5b313bf7d08dda8ae5b75d6117a70d98432c253071f3dd46",
+      "git_blob": "2c81c507d11160d2643d97f1d41305f38962410a"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/content.rs",
+      "bytes": 9399,
+      "sha256": "f328ea45e91a1282f2b2798ad39eeec10e2db6bb4d56eccc84edd36f600222dc",
+      "git_blob": "d4009fd19e84476885ad8b9b248994db818b8014"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/content_tests.rs",
+      "bytes": 13108,
+      "sha256": "061e629d992db8fa57c907e6c0f20ff28a0efbcb3b38d715b2354ac857440992",
+      "git_blob": "8f0ba0598a22dcb0949511469c2f18295813ebe5"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 69161,
+      "sha256": "61c976b963f0629032c581ad37e09f1b70b636ca5c3cade8df4c8eaf49e24e51",
+      "git_blob": "6d46cf0e998cdca56967654c2c5a4f09337eda47"
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "bytes": 25056,
+      "sha256": "a9c7a5ee3612f5e81428a9790d9c22e7466954bfd6fc849b718dedd361f4403b",
+      "git_blob": "23749da00bd6e52d302ef96f8b483f5e1a595a39"
+    },
+    {
+      "path": "crates/fc-windows/src/http/README.md",
+      "bytes": 10692,
+      "sha256": "2cd066a4a33c0b21e2deba6aa41e3a4d3cdfcf45aec5aeb64ffa743b000739bf",
+      "git_blob": "dbbf34117029afffb56e7ed7ec2578997d0290f0"
+    },
+    {
+      "path": "crates/fc-windows/src/http/diagnostic.rs",
+      "bytes": 12381,
+      "sha256": "a389e056896ac61578b6ff4465da401c30d329d6b268cdeb1f0b7d9670799c90",
+      "git_blob": "79058c4a0a720b183b19b3ce01361eda28cd975f"
+    },
+    {
+      "path": "crates/fc-windows/src/http/lifecycle.rs",
+      "bytes": 8016,
+      "sha256": "4276583752383129f79a6e91c420fc73058595648a5d7c50cc25b86fbe11dc28",
+      "git_blob": "bef2e61276b64220ec2a1eca304d8d71dca20b55"
+    },
+    {
+      "path": "crates/fc-windows/src/http/mod.rs",
+      "bytes": 442,
+      "sha256": "c91355053e2d939e199a75c1207c62eddf1188154567e81b65137f35ec7c7c1a",
+      "git_blob": "cfe0665f49e4c6ab62f5a10b007b55ed31f285ab"
+    },
+    {
+      "path": "crates/fc-windows/src/http/native.rs",
+      "bytes": 56782,
+      "sha256": "e1461aa0eddd1b8f3fbbf6cedd90e4f5f747b1b6a94d6a035a098f94f86c93f4",
+      "git_blob": "0485e50c7bf90b272dc2152b46529ff00f7bab31"
+    },
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "bytes": 815,
+      "sha256": "60cb98cb3b7992852f52964b91187f33ae22725c072be876b73b1c92f97e4700",
+      "git_blob": "dfd7a04d5de401d919a74605b759160ba7268630"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser.rs",
+      "bytes": 9516,
+      "sha256": "7bdc43fff3dba9f9e44ec79d7f3fc3c1deb3563997dc6ef951379d38df16fd32",
+      "git_blob": "d174aa59a2dc20f4f8f6ab224a46c06f8cac3600"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination.rs",
+      "bytes": 10517,
+      "sha256": "30f9934c02fecf2e661cf7e6baf58ba14a1bbb73c4944c1db1ff0b630f11db42",
+      "git_blob": "71518bdb04763feba32527914a44abf5e2c64079"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/backup_destination_tests.rs",
+      "bytes": 8497,
+      "sha256": "8d88f2213f6780aa7d453c15519ed71098f3c3c5df303b4a9f18c31261262d66",
+      "git_blob": "20d73a0b9200bbf50c074fa831fbe79160ab5aaa"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser/validation.rs",
+      "bytes": 7307,
+      "sha256": "55ee9a03818c84075855022e3f17bd2e2adf44f190c5baa5347d8903f7b331ad",
+      "git_blob": "7662a7358e9392b806f5f86d90fa6c5e24cac0b6"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "bytes": 34678,
+      "sha256": "35773416bdb8ffed37b49a4436db3b52531c3c020ebb340e3239bdbd12d71c51",
+      "git_blob": "ded181425c9f249e2218c069317c40704814250b"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/helper.rs",
+      "bytes": 4349,
+      "sha256": "245d36c5910e11e4a643888168f8ede7006baafc236936551721f2b3e7a82cca",
+      "git_blob": "76265c3735e9bcd546534c55e8f0af88d3a85ad9"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image.rs",
+      "bytes": 6014,
+      "sha256": "fc2e438cc67e1e02e2f92285a996d3c9e4508219c8dbccf9df3357049bcb23a2",
+      "git_blob": "1a06760d18688cb918bf1657de36fa0286193756"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/image_admission_tests.rs",
+      "bytes": 9835,
+      "sha256": "de890369e02798faa6d8fc4d0aa2947f85140af897f24b1426faf6907d2c05d2",
+      "git_blob": "e5a167e26e0c5f1647d90dcd0f819d6477e00b95"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/mod.rs",
+      "bytes": 156,
+      "sha256": "03c6a71efadb0d4045268004cc0c4ea742580672e48bce1761ed4ab1dd5b118c",
+      "git_blob": "c7b21b40faa5e11f8bf2162a27a5fe7105a36078"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster.rs",
+      "bytes": 11406,
+      "sha256": "c6eaf20174c430e869c3036284a9256a3a64a9a504798cdaae71bc3d08b63037",
+      "git_blob": "ea27c50706ef3fb82f5028b141343a614dc7d12f"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster_tests.rs",
+      "bytes": 9745,
+      "sha256": "47b6e860805632918e7195a59d02c5a1c5b283d89bf55abebd4e17cf766a9d0b",
+      "git_blob": "b6fe8952fe69d8303700f4f54cd6eae67dcf0a7b"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "bytes": 38770,
+      "sha256": "38dbb14924529f9f4788967c0d0dab425501e481856b635250d9489c5332eb96",
+      "git_blob": "e27dbe9be9a34aaaaeeb44e6be3cddbd8d42db7b"
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "bytes": 21451,
+      "sha256": "078f80e3bc5b4176015bcc39618ea2c87a0bb284fd457bde8044bafd01a9612a",
+      "git_blob": "856d4f9180fa67813b18e05f08f1c96414ba62b3"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 14463,
+      "sha256": "2283a4188d2dbc101eeb3e9220e2fc6967c903243ffe2bab6e235b1a26b3ec5b",
+      "git_blob": "93f8da3880ddc519d0c0bbabdca045e7fdc1439f"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_tests.rs",
+      "bytes": 11794,
+      "sha256": "e1d9443f560dfc8fda6f8e8c4c6319d9037c7184fc7343ed2f3fa8a24ce5bb70",
+      "git_blob": "301785daae773d23ce64f85027cbcdffe05331b0"
+    },
+    {
+      "path": "crates/fc-windows/src/system/clock.rs",
+      "bytes": 1922,
+      "sha256": "5c8210c364c2b5a588168be4c88e377ee90b7f568d66127b4fd80be46814b9ca",
+      "git_blob": "e8894a541e00abf4d360b3d448676f38cd429f07"
+    },
+    {
+      "path": "crates/fc-windows/src/system/crypto.rs",
+      "bytes": 5248,
+      "sha256": "90506fa8133b7d6701f34618e5286a61a33bbbce8bb6b1edc99c7766ba771038",
+      "git_blob": "63a87562c2e85e790271cabd637526a5af877c66"
+    },
+    {
+      "path": "crates/fc-windows/src/system/mod.rs",
+      "bytes": 2775,
+      "sha256": "975cfa67604d69c3cf06640c1026d0390ce88befcf505599a2a0585b44cdf14b",
+      "git_blob": "21aeed409afb94999c17ec19e5ec97e97cfaa7bf"
+    },
+    {
+      "path": "crates/fc-windows/src/system/paths.rs",
+      "bytes": 23275,
+      "sha256": "15a43c6e75caf7de62c1bdc6e136f631470088b1907e3c33a5f76bccafdf434e",
+      "git_blob": "14372ef034789c39714929043cd79b39bb703530"
+    },
+    {
+      "path": "crates/fc-windows/src/system/thread_exit.rs",
+      "bytes": 1229,
+      "sha256": "a7535d4ef7111061481a2eac4c2d331f53f85af780059921f0e13b556c74964d",
+      "git_blob": "f61ae616996123a59925b737484e7c8ea1a6cafe"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/mod.rs",
+      "bytes": 3090,
+      "sha256": "5b7e4c6161de82a7071c595d706676e56a42f99f9dfa1ec13150d61f8269da0f",
+      "git_blob": "b0dd37d17bae9f96d8c8a53ba5ed0c5f1d86c7f4"
+    },
+    {
+      "path": "crates/fc-windows/src/tcp_frontdoor/native.rs",
+      "bytes": 22123,
+      "sha256": "46482bcdf75080c401cd006cc43960ab24e95f6db472b9f3f71ceabf7ed27cf3",
+      "git_blob": "108a675f258cc0bacb6b9e5678d26ea9afae1a18"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 10011,
+      "sha256": "7c50bac6203b3e191815084db9e67c29d4372bb5b86870c23e00d4c7e1d4004a",
+      "git_blob": "7452345969f5347190df1ce13d5853bd7543c83d"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/http_date.rs",
+      "bytes": 4154,
+      "sha256": "5a633f3052b5e413763bdb11bb6a1f20f2b492ed54f21d603423f2a37652f875",
+      "git_blob": "6911cb949ac9d0afd7b33041bc50134cb9f28eab"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/http_date/tests.rs",
+      "bytes": 8630,
+      "sha256": "1863fade872c52f70be42821ea8b1f888d38274dc03ad49f523bc1ac671181d4",
+      "git_blob": "c8e63430fcfe49e6ff473edb63729fded6090977"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 6955,
+      "sha256": "3db842b50771e846ef9319f2067e5c6b18033128108486ed9213b218491ece87",
+      "git_blob": "e97b04fabdb9dd5e48228c4459052fb88192813d"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 53146,
+      "sha256": "e9b059ab65b8742d196b05cccbf4fc99ff74491f732c652dd8f98e4d5df69932",
+      "git_blob": "e28eb9d0bbbda53b9b6b146a5179e89071b8cf8a"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 36374,
+      "sha256": "675b593cb2bbd9d0bd6b91e31bbb567a8b1e5b6aa771c36011021e183dd44008",
+      "git_blob": "e313bffb5c50ec12613812814abc085bf2d77f17"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 31955,
+      "sha256": "72f198641d3157e083f4776c414c5ee660e17e52785b15df4587ec7b00df6600",
+      "git_blob": "1ce7100197bef5168716d1a3f9d899dac44f6a54"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "bytes": 15822,
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "git_blob": "cf40fbe0bec6121b3a526a218ba983eefa847c28"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "bytes": 30065,
+      "sha256": "a66ad6672d756e0c918607c571f5070ad505e150908dbd6996fd62ecb78309ae",
+      "git_blob": "9bea145cfb73022e01ebdc36317b84441dbeafe5"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "bytes": 16232,
+      "sha256": "212aa5bf10175bc553d2c4e720baf5d3f3843be90937f71348336de6f1194591",
+      "git_blob": "367fb9f9fb2cb9c97b51e30256d614787f54a21c"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "bytes": 29129,
+      "sha256": "e6d1eb60a4bf21f66f584c4e981ac986a579e55ca2d17ef4030ba0afb75c8952",
+      "git_blob": "a29efa2d7df127e352e192848815c94398d58bc0"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 99261,
+      "sha256": "c47f81f8cada2fa8569d4ae2dccbdcf63a29b18584e53d4ddccfd092c4509dd6",
+      "git_blob": "f1caf9ec33d7395fec5e486fec318322435cb01f"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/preview.rs",
+      "bytes": 28514,
+      "sha256": "de049603b262b19166a57c66c71dcf4bba864c5d4c0fca0c129d1636adb4379d",
+      "git_blob": "84f6f546cf07a8f32c21180ebfa12331236c0d07"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/widgets.rs",
+      "bytes": 25499,
+      "sha256": "8f227ff809ff4142c0c10b6d802b430eb1c03851a6c0b4355fbc490febadbda9",
+      "git_blob": "116ae49abe67d8d92212d4a18e10dcb9f3df00fd"
+    },
+    {
+      "path": "packaging/PROBE-README.txt",
+      "bytes": 19164,
+      "sha256": "8fc737de46fbc068224d0ca2d7426c9b8affdeaf4c70fa3bd6202e91429cce80",
+      "git_blob": "e327738358af0878219f8465f77ba130fd2450f2"
+    },
+    {
+      "path": "packaging/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2401720,
+      "sha256": "b611a4c99e2f65d2c5c2f1618f088dec978cab792cbdef2810937cc60d7ed6b0",
+      "git_blob": "689195cd635f52eb942228734846542f3ed2c887"
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "bytes": 86,
+      "sha256": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62",
+      "git_blob": "010f002cf56497ce0a1b4ac124a2e2d86a97bc3d"
+    },
+    {
+      "path": "scripts/audit-pe.py",
+      "bytes": 5367,
+      "sha256": "a64eec6cbc04da1ab03ec6c2de42bddf2fab891f63ded7076cf00d486e8ef1d5",
+      "git_blob": "6ba663c6650a810592e41a86ca6314744a5d37cd"
+    },
+    {
+      "path": "scripts/check-architecture.py",
+      "bytes": 4218,
+      "sha256": "d779551f4850ff2ea1520cdd237bd76d3da110e83d53c3c479ada99509b62d82",
+      "git_blob": "bf0c2e548ee50385c9b6f4f166b66e3fd85a5ab1"
+    },
+    {
+      "path": "scripts/link-win7-gnu.sh",
+      "bytes": 2027,
+      "sha256": "a0f0da43212de83f69d28f1241e03cfdefcf06b9ec7c9f17ef1341778326d3d2",
+      "git_blob": "b4d3944ca1b89cff79e36fbcd90037bf5a4a8fe4"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "bytes": 27828,
+      "sha256": "704744dfd8c896bbf9597fff6f3ad5c954ece6d779866987371b11bac93d7127",
+      "git_blob": "695bc026bfb21d3778ee666c880bcce612d6be5d"
+    },
+    {
+      "path": "scripts/update-third-party-notices.py",
+      "bytes": 11532,
+      "sha256": "9f121f22d34c2785d2f1c1adda5e64a822f359d70794db24f2cd541b2f196adc",
+      "git_blob": "f3e5ed824f406c5d84325c57698d26f28e0a1d58"
+    },
+    {
+      "path": "scripts/verify.sh",
+      "bytes": 789,
+      "sha256": "735ff1000dee4ed3815ed2c0af10fa08945604817249c1dea931068df9b24a9d",
+      "git_blob": "00c1d52e48ac9d334493f33761bb92fe90b0a89c"
+    },
+    {
+      "path": "scripts/windows-http-probe.py",
+      "bytes": 26849,
+      "sha256": "cb4e02785c3b842da4199c53eb324343946c0377429a71f1b3405dbf180031b9",
+      "git_blob": "d2ea0f934156b2cc25680b7fecde0678fcc396c7"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 28700,
+      "sha256": "e7142bf65e1fc19decfe19e0e810c39bd7f604b738aeec3a87da5cf2e9ff6cee",
+      "git_blob": "4063f84cf9a72cc4b97bfb7f5bc9fbeb91708fad"
+    },
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 46843,
+      "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e",
+      "git_blob": "3d1b4fac0c9410a3ceb7ab7a96e5b50d4c2621b5"
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 26244,
+      "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91",
+      "git_blob": "363e9a4c8423c7c3ed82dfd0a9a82166bde12b93"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "bytes": 45878,
+      "sha256": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0",
+      "git_blob": "b58ca897f7d05cbd4d7068f1dd247c111f5c9936"
+    },
+    {
+      "path": "scripts/windows-test-edge-owner.py",
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "git_blob": "fb76961115fd9c0bf8e3ed3a692f9cc1d3412c81"
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 67685,
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf",
+      "git_blob": "6e5fd3d8423a4208031da263f58d6db3253eb7b7"
+    },
+    {
+      "path": "scripts/windows-tls-probe.py",
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+      "git_blob": "4276703ae8a25a9a50b8b6e52a65ecc5a8161036"
+    },
+    {
+      "path": "web/.gitignore",
+      "bytes": 64,
+      "sha256": "74140837624a9fd6159c9fcc39706512099c766e055c089fa8b9c912dea4f636",
+      "git_blob": "e822e6fc0396d27b510b1ebba78c4c40fe317a3a"
+    },
+    {
+      "path": "web/README.md",
+      "bytes": 9540,
+      "sha256": "5a6f82e222b73a530fdd4ff6240bc248d5b57d3f5fa590b454d97ccc683182d3",
+      "git_blob": "d93751e320897e3363929267cef5c725ae75825c"
+    },
+    {
+      "path": "web/SHADCN-LICENSE.md",
+      "bytes": 1063,
+      "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
+      "git_blob": "fad4d887a681dd49233e5ed01ee2c7a1513089a0"
+    },
+    {
+      "path": "web/THIRD-PARTY-NOTICES.txt",
+      "bytes": 25543,
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+      "git_blob": "046df6602c4c0f243960859e20fc66cdb95419d9"
+    },
+    {
+      "path": "web/components.json",
+      "bytes": 323,
+      "sha256": "402545171089ee61148662f512dfa00674719ddfbbc58ddfbb32a55b0080e10d",
+      "git_blob": "c11b6330ecf94c42c3f1c95698f1cff049f86557"
+    },
+    {
+      "path": "web/index.html",
+      "bytes": 1113,
+      "sha256": "c841f960af70c7830267ee30acf6b4d00a03ca4c45fd999e0e6338bb036401fc",
+      "git_blob": "68c9ef704087d3376fad9263c8cbfdb2f2052345"
+    },
+    {
+      "path": "web/package-lock.json",
+      "bytes": 75816,
+      "sha256": "62601282a27fae2ee1e37977e38c0f85529c7eb267a5aaa5b4f748543c2180d0",
+      "git_blob": "b8fe1472086266c4e9fd6ffef2fff1fe2e780ff6"
+    },
+    {
+      "path": "web/package.json",
+      "bytes": 989,
+      "sha256": "acc11c2c55929a9854a61fbaee215fb04d7fb4262a1f94d8538072a9ee8b031f",
+      "git_blob": "66f6b83b6d66adc4350e87e4150d72ab013d4c51"
+    },
+    {
+      "path": "web/scripts/budget.mjs",
+      "bytes": 2058,
+      "sha256": "81ab36b8100794cf9e555fa1a7566bdfbb179e2ac300c469edcd7580d0f66f88",
+      "git_blob": "8aa3ae48d17f9dbea799aa33e292a4a52753185f"
+    },
+    {
+      "path": "web/scripts/licenses.mjs",
+      "bytes": 1086,
+      "sha256": "ee82684c2ede30a17292ebc77767c12dea38f5eb3b5fa06574d643ab399241ea",
+      "git_blob": "b3c8d48f193a7d1ec1909d80478fe725267ae8fe"
+    },
+    {
+      "path": "web/src/App.tsx",
+      "bytes": 9498,
+      "sha256": "6449bed79b9f1e3c119c45dd592c6cae661351257a9c4bcc61ff6951bf0be54d",
+      "git_blob": "8ef12cbaccc46a4ca5b7768de3aa9a2494aa0f31"
+    },
+    {
+      "path": "web/src/MaterialsPane.tsx",
+      "bytes": 9367,
+      "sha256": "3a51172610c41c676658dd38381a2e832c149b461e1d68c858844452b0f1892c",
+      "git_blob": "1d5cabf0d4d816d210908b0ae0fdde137aa70c8a"
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "bytes": 17804,
+      "sha256": "1a8743d4dee03a136e295b7f7699cfde016eff6e2beac597f64af89712e87b55",
+      "git_blob": "79eaaa9fb129cca0e37d000188796173627692c3"
+    },
+    {
+      "path": "web/src/VoicePane.tsx",
+      "bytes": 10035,
+      "sha256": "c737d172f949bf1f454a1b08fc40cfad67a7d1e6c680b6fd9bc4fd8a69e8ec1d",
+      "git_blob": "0263d8ebb4a54bb14ce22adc76ebc08e96499f7f"
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "bytes": 8610,
+      "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b",
+      "git_blob": "70d25381c4123d8cbd3eab402fd2288efc089805"
+    },
+    {
+      "path": "web/src/api/content-controller.ts",
+      "bytes": 15972,
+      "sha256": "496234e5e13a4fd5e09739b05c51389e96845c6dab9d7a5c287f8865ef5a80bb",
+      "git_blob": "366ef44df0f79610507eec3d7c3cbd7df036cc42"
+    },
+    {
+      "path": "web/src/api/content-protocol.ts",
+      "bytes": 10720,
+      "sha256": "8e67c635da345d8c5ea71f3c537153d7e7abf889dd424e3efe8e493f8c96a179",
+      "git_blob": "5e6482e3256b0557195b366ffa735d55c16f68af"
+    },
+    {
+      "path": "web/src/api/controller.ts",
+      "bytes": 7725,
+      "sha256": "c34b147305470a3afbf0ddaffa08957b91135123c60fc7a6adfbf7e551bf20ff",
+      "git_blob": "76bad9d4ed37ab74cbf9cc7eebed3c7d5bc0005f"
+    },
+    {
+      "path": "web/src/api/material-client.ts",
+      "bytes": 7824,
+      "sha256": "fdd2cfd51961e02ed5e1f03a1f391bb6e83e8abbc55b40d13fa60faf099aa4f6",
+      "git_blob": "fc662b058c2a92cc611835f92fbe71b2ff4e5f5e"
+    },
+    {
+      "path": "web/src/api/material-controller.ts",
+      "bytes": 16960,
+      "sha256": "0d07ae1994ea3369b2485eec77e5020019b30670121f097d5d7dc0f583b0f91b",
+      "git_blob": "5b4a97b8b00404ef105d3f2c062faeebb2d7a123"
+    },
+    {
+      "path": "web/src/api/material-protocol.ts",
+      "bytes": 11203,
+      "sha256": "3f7adc04cc3cf233c5c66db150a2f8fc6f76fe9e964138dccb94420985a56a4d",
+      "git_blob": "16b25063d9037093989740eb6971bd729edd05ca"
+    },
+    {
+      "path": "web/src/api/protocol.ts",
+      "bytes": 8023,
+      "sha256": "9e7375de562f479f07e8637ade1707cf066afbe206dc00a6486ce5e5df8d7f29",
+      "git_blob": "adf6130170402a48e7212bbf4dd9e88b989f6656"
+    },
+    {
+      "path": "web/src/api/voice-client.ts",
+      "bytes": 3525,
+      "sha256": "e1daf0ccad3c9c910a71f79b6552c38117a38c915af5df27029c7b63609adeda",
+      "git_blob": "6c5e60cb4980e0d72b5e987322cfe2ca1286cba3"
+    },
+    {
+      "path": "web/src/api/voice-controller.ts",
+      "bytes": 15604,
+      "sha256": "1134b4dd2d34914dd8dc23f9108e575520a7486099165d8382bf154ff6050342",
+      "git_blob": "c4f1e5628cd65623d34143498a95cf6856cab6de"
+    },
+    {
+      "path": "web/src/api/voice-protocol.ts",
+      "bytes": 8569,
+      "sha256": "2e7dbb5f4ed33bd159f6e833b5bf22565c3522c5f5bb342f1a563427c0d9c555",
+      "git_blob": "8b194c7b222fe0828f0ddce65b943f33f7663d6a"
+    },
+    {
+      "path": "web/src/components/ui/button.tsx",
+      "bytes": 1902,
+      "sha256": "c2b999a96781e6c932632bd089095368e973bf5602e1b1a62156b7d2b43f1e84",
+      "git_blob": "65d4fcd9ca74240125c5f72cf84c873781141fea"
+    },
+    {
+      "path": "web/src/components/ui/card.tsx",
+      "bytes": 1828,
+      "sha256": "525c4bb2c051987be64df0e92e1d90174912b219bf541e24ffbc4a3406de49e8",
+      "git_blob": "cabfbfc59d955db9efc2049783cad4a71db55442"
+    },
+    {
+      "path": "web/src/components/ui/input.tsx",
+      "bytes": 768,
+      "sha256": "6299a6a387dc55e528aec4342deaea0b83f1ea3a365c135a31a18ee55334f441",
+      "git_blob": "69b64fb2455114c3eeda2d18741af0027b3c5e89"
+    },
+    {
+      "path": "web/src/favicon.svg",
+      "bytes": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "git_blob": "28f9aafb906a1eebf5da775d09eea24cff109517"
+    },
+    {
+      "path": "web/src/lib/utils.ts",
+      "bytes": 163,
+      "sha256": "00708463d307471ed1a3ac36642e9c00a766730d7be61e2351f283a580017ea6",
+      "git_blob": "981516fc36b85ff73f6d0c8f8a932869ca54ea8f"
+    },
+    {
+      "path": "web/src/main.tsx",
+      "bytes": 219,
+      "sha256": "4539ea4af64c63a1fcb708d2e3b8de4bca9e51ea75ff816569e9c2fbdc64cd02",
+      "git_blob": "07e2ca38fe646857af5d353d3897c4a9d69dece5"
+    },
+    {
+      "path": "web/src/styles.css",
+      "bytes": 28749,
+      "sha256": "46a6ffdc2b008ed82d73d91c756fbd9a4ad4a83bf5855d3522e02a206141b3c6",
+      "git_blob": "a8d44270e94b80d801fb3f1a95b123d693e617dd"
+    },
+    {
+      "path": "web/src/voice/browser-capture.ts",
+      "bytes": 7594,
+      "sha256": "0da2e0a6a274ce592517797ab593b1e1e01051a4d7a0b3e61121ed169935bbe2",
+      "git_blob": "9bd5395503fc3167b4840ef6ed830fb2e15fe63b"
+    },
+    {
+      "path": "web/src/voice/normalize.ts",
+      "bytes": 4856,
+      "sha256": "5c14f29c9de0a931efe2adc1d3d9bbbf8620cab039359d6e3184a0dc9616b40f",
+      "git_blob": "038110614901614aacbf321769cb5f36b50c1861"
+    },
+    {
+      "path": "web/src/voice/pcm-worklet.ts",
+      "bytes": 2317,
+      "sha256": "e3da536a2d8c346d4baeb11fb3ad211c5661fd1f69366cf57d0649a58dbf7a68",
+      "git_blob": "4b176eac26221130a3cabfa288adb7829aa7111b"
+    },
+    {
+      "path": "web/src/voice/pcm.ts",
+      "bytes": 3336,
+      "sha256": "ad925f133b98596671d17a2f426844477b66577072369fe97b227b88a9eab9ff",
+      "git_blob": "68f3e673384950605a480a3e69f69f61850e27cb"
+    },
+    {
+      "path": "web/src/voice/ports.ts",
+      "bytes": 2115,
+      "sha256": "ef92534dde84bce4d75cc5d70c8487d7b665e723822e997437a32c82c74006a5",
+      "git_blob": "ac38c6ff471be1c381faa175ef74be9951954a97"
+    },
+    {
+      "path": "web/src/voice/recorder.ts",
+      "bytes": 9107,
+      "sha256": "a3932b4335fdae51783eaea8a387b2891ea551272ff1afbc00bd37b7298f9824",
+      "git_blob": "27cb79da2c33b7d3799b724b673c5e61f0d81a51"
+    },
+    {
+      "path": "web/src/voice/wav-worker.ts",
+      "bytes": 464,
+      "sha256": "01f8446d6ae342c00e924304f08549d6b8ae4fef45309ed64846dd91527ea0b1",
+      "git_blob": "f72593a5835396345598f4a46eaf95d0320addba"
+    },
+    {
+      "path": "web/tests/client.test.ts",
+      "bytes": 5060,
+      "sha256": "83a75ce8ae175563806c1cb7a5df6c9c8ecab7bc227422ebe611d03879c6c59c",
+      "git_blob": "545d6cfae05c3d49d23f58d85c9965e9d76f6851"
+    },
+    {
+      "path": "web/tests/content-client.test.ts",
+      "bytes": 3738,
+      "sha256": "2e14e37a9700c1db11d0ea15237ddb337334097434cfc1a082e4d677edd0ee01",
+      "git_blob": "5bf9e9ac66da2c6ed4580be2194360dfe3d93040"
+    },
+    {
+      "path": "web/tests/content-controller.test.ts",
+      "bytes": 15823,
+      "sha256": "350bb7d324bd00aeb4b01d3171453fbbb045db9e25cfee7244fd2f30a37b8ef3",
+      "git_blob": "45db4b8a5e0731b1d901a97be0c40dbfebcaad6a"
+    },
+    {
+      "path": "web/tests/content-fixtures.ts",
+      "bytes": 1934,
+      "sha256": "f6c04d5919750ce23e17f86537bc08e92ad0ad7fb5dc0565bd0363288f37b471",
+      "git_blob": "96e54b54438374554ce3c71e7b399eb9c1944a3a"
+    },
+    {
+      "path": "web/tests/content-protocol.test.ts",
+      "bytes": 7748,
+      "sha256": "b79691285826d9b6663f92f9b2a462f624a04254488f1d55e8d8d91780215d14",
+      "git_blob": "94bf878feca1237e53ef5b8632a785960c28cb84"
+    },
+    {
+      "path": "web/tests/controller.test.ts",
+      "bytes": 11053,
+      "sha256": "d53d858971ba27faf5b52c9799a53e980a0c414c4f1a8318900336befab2f97b",
+      "git_blob": "0229f82bc784ba3247a7a740645b28bf42ab7fda"
+    },
+    {
+      "path": "web/tests/material-client.test.ts",
+      "bytes": 11689,
+      "sha256": "3ce1ce334eeed1450262a14e84e215022f297798cdba6965cf54c6f6dd5f53e9",
+      "git_blob": "a06f7b98bece52c349e1dbe80703716a659f08d5"
+    },
+    {
+      "path": "web/tests/material-controller.test.ts",
+      "bytes": 21684,
+      "sha256": "d4bd9169ee961dbc106e28af963ba3330fcd84137e09a5c4b1c9b415b29b81cb",
+      "git_blob": "272d437c913e36af0a74b3e869251bde6fdfaa2a"
+    },
+    {
+      "path": "web/tests/material-protocol.test.ts",
+      "bytes": 9811,
+      "sha256": "52c88e8d4c5a6435f45ee07f4d332dd2a9521bda1e315071fc5a50aae9344f20",
+      "git_blob": "d15e307fb7d3ae208ac55da4776221eac603351d"
+    },
+    {
+      "path": "web/tests/material-unicode.test.ts",
+      "bytes": 2333,
+      "sha256": "5edf37bc14a8a3804663f9575f0259367848bc21671491ea195b2d4e834cd1d0",
+      "git_blob": "599735724b63ba3c89bf035e82e1fc4a604f4428"
+    },
+    {
+      "path": "web/tests/protocol.test.ts",
+      "bytes": 6282,
+      "sha256": "06388724db5ffd3747c1282841ce4025c50fd5d3120fe6303cae675818a84922",
+      "git_blob": "7f22e5585ad38921bba389e6f5e8e4626babe616"
+    },
+    {
+      "path": "web/tests/voice-client.test.ts",
+      "bytes": 5907,
+      "sha256": "9f08dff8a4ea2b922257cdfcadbdf445d654325b15aa4b397afcdb91cc3dfd52",
+      "git_blob": "3abd9e6b4aa025d5ca31cd2ce99ada817d70f769"
+    },
+    {
+      "path": "web/tests/voice-controller.test.ts",
+      "bytes": 20979,
+      "sha256": "c095d1318c27e386ce6801c823ca0cdaa10296c587859f78fa76d73e07bf82f7",
+      "git_blob": "5d84f7abc7c2e54399cb1526ec7d8cab03ee289f"
+    },
+    {
+      "path": "web/tests/voice-fixtures.ts",
+      "bytes": 2909,
+      "sha256": "a5c5a3ce4b6af558bb6c9f180897e62b6b8b49ecd4a3a7b2b3dfb20ae6b5d94e",
+      "git_blob": "98cb3447fc82ba6484514ec1ee7b9407cea2bf2c"
+    },
+    {
+      "path": "web/tests/voice-protocol.test.ts",
+      "bytes": 8426,
+      "sha256": "80d3b3dadd5bcafd739c2563f6a3b6d1e03c82a70bf48f90fe502ceb6b2ff75e",
+      "git_blob": "ecec079354b0cb594f1d3e705e3f240a04970230"
+    },
+    {
+      "path": "web/tests/voice-recorder-capture.test.ts",
+      "bytes": 15959,
+      "sha256": "8b54420c3de792dad9a0cc55142a347a3757bb6d237cdaf830ca2b1f26eb103a",
+      "git_blob": "889468ca74b1368e1dfd51fea1e2c0d58d43f933"
+    },
+    {
+      "path": "web/tests/voice-recorder-normalize.test.ts",
+      "bytes": 14930,
+      "sha256": "b4c18ed8fd268d446eb504e03b7b736e757c99be5c353e093304a1569f623ec4",
+      "git_blob": "52f61501c42b94aced674e2c7c8e14c451641095"
+    },
+    {
+      "path": "web/tests/voice-recorder-pcm.test.ts",
+      "bytes": 3644,
+      "sha256": "e2b56e03162055f2fd101e21d5e0308e6f43f0a27b1d8cae72ec509aa864072f",
+      "git_blob": "8f517dabd0d8312aa2c87e678a0abe42109442a1"
+    },
+    {
+      "path": "web/tests/voice-recorder-worklet.test.ts",
+      "bytes": 6984,
+      "sha256": "30e4daae6ba9fdea759708c7a4d8dd75f8d447a24105301b0180675da57e7f10",
+      "git_blob": "0aa39a7a8f9cd641502ad8d3461cabf51782115b"
+    },
+    {
+      "path": "web/tests/voice-recorder.test.ts",
+      "bytes": 17799,
+      "sha256": "ed14e87b05bf4337f6257e6172a804c9df4c44e47f0bdbef6f856fee95011600",
+      "git_blob": "cdd56030188700f78b834c59be833b84aab8de86"
+    },
+    {
+      "path": "web/tsconfig.json",
+      "bytes": 459,
+      "sha256": "87c47fe75ba6fc4b590e985b04805571d35d3e182fd13be128fdacbb751e6508",
+      "git_blob": "a1ca60d128008cdbb982631394c468f9bfb1c92f"
+    },
+    {
+      "path": "web/vite.config.ts",
+      "bytes": 872,
+      "sha256": "5dbf2580941fa0a1a4b1d249bde58d5249bc9d5df2b9db7da338582cedc5a9ff",
+      "git_blob": "cddc209edbf1910ad8661d11e7fccc8381db8998"
+    }
+  ],
+  "status": "BASE_RECORDED_NEW_IMPLEMENTATION_IN_PROGRESS"
+}

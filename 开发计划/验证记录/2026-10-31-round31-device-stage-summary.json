@@ -1,0 +1,807 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_BOUNDED_ROUND31_STAGE_NOT_FULL_GOAL",
+  "scope": "Local global-admin explicit default-output historical format check on original shared2workers. Exact original failed/static records retained; successful Host and actual Win11 GNU evidence separate. No microphone/playback/volume/foreground or current audibility claim.",
+  "plan": {
+    "version": "1.44",
+    "baseline": "D11",
+    "stableIds": [
+      "R34",
+      "M18",
+      "P6-10",
+      "P3-13",
+      "Q24",
+      "Q02",
+      "Q25",
+      "R09",
+      "Q13"
+    ],
+    "requirementsOrTaskRenumbered": false
+  },
+  "host": {
+    "first": {
+      "status": "FAIL",
+      "phase": "compile",
+      "error": "E0432",
+      "fix": "WorkerPool is read through its actual defining module in fixture only."
+    },
+    "second": {
+      "status": "FAIL",
+      "compileExitCode": 0,
+      "phase": "run",
+      "error": "Session(Revoked)",
+      "fix": "Fixture relogin uses original real login/ledger synchronization; no authorization bypass or production gate relaxation."
+    },
+    "third": {
+      "passed": 859,
+      "groups": 32,
+      "testExecutables": 20,
+      "strictClippy": "PASS"
+    },
+    "originalFailureReportsAndLogsKept": true
+  },
+  "windows": {
+    "crossTarget": "i686-pc-windows-gnu",
+    "crossCompileProductAndStrictClippy": "PASS",
+    "actualPlatform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "testExecutables": 21,
+    "totalPassed": 1307,
+    "failed": 0,
+    "ignored": 0,
+    "groups": [
+      {
+        "program": "business_storage-878d46a6a29de0ae.exe",
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "voice_limits_storage-588693116cdd8d9e.exe",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "calendar_execution_fence-7355fabc2ed3f8f9.exe",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_bootstrap-4203463b9d6de1f5.exe",
+        "passed": 297,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "verify_web_assets-218b2490fe079db8.exe",
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_bootstrap-30fa512284e56867.exe",
+        "passed": 186,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "runtime_storage-fef60aaa0dc7b0a4.exe",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "autostart_coordinator-97dc96264f35cfe2.exe",
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "schedule_operations-705da6e05a75b965.exe",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "voice_storage-9d353cd95d53ae2d.exe",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_windows-b3d43bc67b5340a1.exe",
+        "passed": 162,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_materials-f1a7d58c131e95d5.exe",
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_security-2889fa9301b88e80.exe",
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_presentation-b847dfa3b68d1237.exe",
+        "passed": 58,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "passed": 162,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_runtime-a09be73363edd23a.exe",
+        "passed": 33,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_protocol-4316bb63b92dda4d.exe",
+        "passed": 80,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_audio-e1b4eabc9ef1420f.exe",
+        "passed": 22,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_application-fb16268b5eff3acf.exe",
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_ports-15b1ad689f79c490.exe",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "program": "fc_domain-367747e306a1dd0e.exe",
+        "passed": 138,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "normalSha256": "81ae6c690b4e8ac2516f76a6b70cea55adc8ddef79ac621fc2813759abfeb3d3",
+    "output15": {
+      "steps": 15,
+      "stepNames": [
+        "native-setup-global-administrator",
+        "native-open-voice-settings",
+        "saved-default-enabled-no-jobs",
+        "native-draft-refresh-no-write",
+        "native-nonempty-check-rejected",
+        "native-explicit-output-query",
+        "query-keeps-saved-state-and-draft",
+        "native-refresh-retains-exact-observation",
+        "real-thirty-second-observation-expiry",
+        "native-explicit-recheck-new-observation",
+        "native-lock-discards-observation-and-draft",
+        "native-relogin-new-lease",
+        "native-reopen-unchecked-original-settings",
+        "app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "firstResult": "Supported",
+      "secondResult": "Supported",
+      "elapsedMs": 30391
+    },
+    "oldSettings36": {
+      "steps": 36,
+      "stepNames": [
+        "native-setup-global-administrator",
+        "native-open-voice-settings",
+        "saved-default-enabled-no-jobs",
+        "native-disable-review-no-write",
+        "native-unchecked-confirm-rejected",
+        "native-cancel-no-write",
+        "native-confirm-disable-persisted",
+        "native-refresh-disabled",
+        "native-enable-review-no-write",
+        "native-lock-discards-review",
+        "native-relogin",
+        "native-reopen-saved-disabled",
+        "native-limits-edit-review-no-write",
+        "native-limits-unchecked-confirm-rejected",
+        "native-limits-cancel-keeps-unsaved-draft",
+        "native-limits-confirm-custom-persisted",
+        "first-app-physical-shutdown",
+        "second-app-real-database-reopen",
+        "native-relogin-after-database-reopen",
+        "native-reopen-persisted-disabled",
+        "native-limits-persisted-after-database-reopen",
+        "native-confirm-enable-persisted",
+        "native-disable-review-captured",
+        "external-concurrent-cas-disable",
+        "native-stale-review-rejected",
+        "native-refresh-current-config",
+        "native-confirm-enable-after-refresh",
+        "native-limits-capture-review",
+        "external-concurrent-limits-cas",
+        "native-limits-stale-review-rejected",
+        "native-limits-refresh-preserves-draft",
+        "native-limits-confirm-after-refresh",
+        "native-limits-restore-defaults",
+        "native-close-settings",
+        "second-app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "elapsedMs": 646
+    },
+    "cleanup": "PASS",
+    "physicalPlayback": "NOT_EXERCISED",
+    "scope": "Actual queries returned Supported twice. Historical format observation does not prove a currently connected/unmuted or audible classroom device."
+  },
+  "validator": {
+    "first17": {
+      "status": "PASS",
+      "sourceSha256": "c3a3f0b06736248837e04a6c39b6f1729a6b9bc861e2a47d1fe66f611ec3b81e",
+      "limitation": "Old17 synthetic verifier cases did not enforce >=30000ms or final-summary order; original weaker verifier kept."
+    },
+    "second23": {
+      "status": "PASS",
+      "sourceSha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af",
+      "scope": "Local synthetic verifier/CLI cases only; require exact15 plus elapsed>=30000ms/final-marker order and preserve original36 contract."
+    },
+    "actualRecordedNativeOutputsIndependentlyRevalidatedWithSecondExactSource": true
+  },
+  "binding": {
+    "unchangedRustCargoInputs": 385,
+    "hostAndGnuBeforeAfterAndCurrentBytesEqual": true,
+    "changedSourceBeforeEvidenceArchive": 31,
+    "gitBaseBeforeFeatureCommit": "c622aea0f178e42dcc776afbea96c4b2dfe43ce9",
+    "completeWorkingDiffSha256": "bd438edbee1013004064d9f57b91c795eb6d575e730a608fcff24fa929888034",
+    "all22ProgramMetadataMatchActualUploadedSHA": true,
+    "programsAlreadyDeletedAfterBinding": true,
+    "postBinaryBuildChanges": "Package feature metadata/README and evidence line-ending attributes only; no Rust/Cargo input changes.",
+    "scope": "Not a new feature MSVC build or a replacement for current platform-specific runtime proof."
+  },
+  "cleanup": {
+    "windows": {
+      "status": "PASS",
+      "ownedDirectories": 0,
+      "ownedProcesses": 0,
+      "ownedTasks": 0,
+      "sshd": "Running",
+      "publicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+      "runBothViewsUnchanged": true,
+      "privateKeyMode": "0o600",
+      "privateKeyContentsRead": false
+    },
+    "localStatus": "PASS",
+    "removedFiles": 2561,
+    "removedLogicalBytes": 1092643081,
+    "allReportedLocalRootsAbsent": true,
+    "originalEvidenceAndSourceWorktreeRetained": true,
+    "developmentPackageRetained": {
+      "path": "/mnt/data/FutureClassroom-0.1.0-voice-output-dev.zip",
+      "bytes": 5961063,
+      "sha256": "94318a24871e33ffaa530662201b7dd231e4501f96b27c719d8af873f20f4015"
+    }
+  },
+  "developmentPackage": {
+    "status": "NOT_VALIDATED",
+    "artifact": {
+      "path": "/mnt/data/FutureClassroom-0.1.0-voice-output-dev.zip",
+      "bytes": 5961063,
+      "sha256": "94318a24871e33ffaa530662201b7dd231e4501f96b27c719d8af873f20f4015"
+    },
+    "members": 13,
+    "payloadFiles": 12,
+    "crcAndAllMemberShaIndependentlyRechecked": true,
+    "normalSha256": "81ae6c690b4e8ac2516f76a6b70cea55adc8ddef79ac621fc2813759abfeb3d3",
+    "webPayloadFiles": 8,
+    "webPayloadBytesEqualPreviousPackage": true,
+    "repackByteIdenticalAsOriginalReport": true,
+    "scope": "Development probe package only; no release/installer/formal three-OS/Seewo or feature MSVC validation."
+  },
+  "preservation": {
+    "originalFiles": [
+      {
+        "original": "/tmp/fc-round31-device-evidence/audio-capability-before.json",
+        "archived": "2026-10-31-round31-audio-capability-before.json",
+        "bytes": 35626,
+        "sha256": "44b58803f13fa794b47a8f4e2f3fd71d336b48f9a4484294d8a39a8bf17554e9"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/audio-capability-frozen-static.json",
+        "archived": "2026-10-31-round31-audio-capability-frozen-static.json",
+        "bytes": 84042,
+        "sha256": "5879b51d5fefe17f2f0e4b9ab45a550d91fd40c042c74fc9fb1ffe32eb8954be"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/audit-windows-readonly.py",
+        "archived": "2026-10-31-round31-audit-windows-readonly.py",
+        "bytes": 9871,
+        "sha256": "bae8fdfce1d820afabfe27451ee315fab4b05a036a1abc6b1625fcfc07ad5be0"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/base-git-input-observation.json",
+        "archived": "2026-10-31-round31-base-git-input-observation.json",
+        "bytes": 110411,
+        "sha256": "57c69e4f473ca5076b0ae7ea263dd295cced6659dd6edb398102c377167a2a30"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/check-voice-output-probe-static-final.py",
+        "archived": "2026-10-31-round31-check-voice-output-probe-static-final.py",
+        "bytes": 3700,
+        "sha256": "79123614998578783c54a852c332c7ce8c4dcd4c352e3c3c02bb3da46198ecfd"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/check-voice-output-probe-static.py",
+        "archived": "2026-10-31-round31-check-voice-output-probe-static.py",
+        "bytes": 3694,
+        "sha256": "16e2d990038a085858129bfae16db0593c0967a934ff6409855d350a37ac6862"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/core-final-readonly-review.json",
+        "archived": "2026-10-31-round31-core-final-readonly-review.json",
+        "bytes": 31718,
+        "sha256": "45e335f01c98267a1466162cd43ec20f8ec4d9646afee5d8d72a8a2b0e8327ae"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/core-voice-output-no-unsafe.patch",
+        "archived": "2026-10-31-round31-core-voice-output-no-unsafe.patch",
+        "bytes": 1526,
+        "sha256": "367b6a4d809bbd52853d2c8f8b4f5c1f3f2bb835fc86bf3250a76214430fb5bd"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/editor-source-freeze.json",
+        "archived": "2026-10-31-round31-editor-source-freeze.json",
+        "bytes": 2210,
+        "sha256": "438a9e5c07a9b8ce6c11959596e9290d2ed80f916427bf8bc19053ebfdf68768"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-first.compile.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-first.compile.stderr.log",
+        "bytes": 2945,
+        "sha256": "fcbe7b72b6177788f4a364c8a091e5d045897c8e8b3f4442c58929f83b5a9706"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-first.compile.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-first.compile.stdout.log",
+        "bytes": 73723,
+        "sha256": "40e055149d3d4ba5c1de7d25440f3de5a1b5d6912b0137e519f46cb2c5fd19dd"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-first.json",
+        "archived": "2026-10-31-round31-host-workspace-first.json",
+        "bytes": 129285,
+        "sha256": "141e57079405d6f2f83008bc43e363eb02fcfdd60cbfaba65b3ff6f29ec8b92a"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-second.compile.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-second.compile.stderr.log",
+        "bytes": 907,
+        "sha256": "4e405394dfae2c7146f61d7be0fa965c9333c93beafeedfc076c2d448dabfb97"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-second.compile.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-second.compile.stdout.log",
+        "bytes": 83710,
+        "sha256": "172eb83ae7523e90838815980f30c4cd64c560e2de2ceac5f8b57dc47b90ce8d"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-second.json",
+        "archived": "2026-10-31-round31-host-workspace-second.json",
+        "bytes": 134041,
+        "sha256": "be09a839b7c5478b739469aa59e121c42653ba071b7f79a0fe9e1211ba27df97"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-second.run.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-second.run.stderr.log",
+        "bytes": 445,
+        "sha256": "7af9f2fecd1de9fec2fbc786d75d86383ee12ad95d2c288314e280be6603c588"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-second.run.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-second.run.stdout.log",
+        "bytes": 25080,
+        "sha256": "79aaf67d224aebb21a2a9a7e29d73f28ff802f5f4b50912fd972559022da97bd"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.clippy.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-third.clippy.stderr.log",
+        "bytes": 2465,
+        "sha256": "594023b278fe6fd0eb86cad0165f8a99a4a9df57fd3898460c48020c5940ca23"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.clippy.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-third.clippy.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.compile.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-third.compile.stderr.log",
+        "bytes": 150,
+        "sha256": "b227021d2ba6d5f597d159f37937cd415927ab602ee12d5a1ca966a9a2c98426"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.compile.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-third.compile.stdout.log",
+        "bytes": 83692,
+        "sha256": "5f0556736cb1514e571e0ec0c0ea52c22c04f554fa6327d21d0847cc27b272e5"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.json",
+        "archived": "2026-10-31-round31-host-workspace-third.json",
+        "bytes": 136879,
+        "sha256": "6bda5f8d5822eb3a3cfdb9a91facb486e4f44eef7f546796be230976a21f6e16"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.run.stderr.log",
+        "archived": "2026-10-31-round31-host-workspace-third.run.stderr.log",
+        "bytes": 2622,
+        "sha256": "b8e982ffa8fa395192d62d5d0f981c54a1fd2d34006fdc3f2483115b8f3316fe"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/host-workspace-third.run.stdout.log",
+        "archived": "2026-10-31-round31-host-workspace-third.run.stdout.log",
+        "bytes": 91139,
+        "sha256": "4b656628be192c43b31b087cdc199568ed97c728e1f706a82d450127d7af5986"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/main-ci-merge-and-plan-application.json",
+        "archived": "2026-10-31-round31-main-ci-merge-and-plan-application.json",
+        "bytes": 5943,
+        "sha256": "cc5ff875d057a54d6aeea41b28b6a81341a698dfff0ae1c1dcb90b5c3066d31e"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/pre-windows-static-and-main-evidence-merge.json",
+        "archived": "2026-10-31-round31-pre-windows-static-and-main-evidence-merge.json",
+        "bytes": 34373,
+        "sha256": "be255f2a2ac04dcaeeaa520980e84d32ccc4f6efabdea547bf9f0ca413709f6b"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/prepare-round31-plan-draft.py",
+        "archived": "2026-10-31-round31-prepare-round31-plan-draft.py",
+        "bytes": 13119,
+        "sha256": "1276702926937e2840ebcb3cd4b28d12c5c6609b97f2e495eecd3bce675561b3"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/run-host-workspace-first.py",
+        "archived": "2026-10-31-round31-run-host-workspace-first.py",
+        "bytes": 3025,
+        "sha256": "adc6e12613b68789681fff360a3c6714020b945917cc00a88aae77ef98736080"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/run-host-workspace-second.py",
+        "archived": "2026-10-31-round31-run-host-workspace-second.py",
+        "bytes": 3028,
+        "sha256": "34a5fdcf3c9cb00485707baef45fe7e1f74b3e474821a6ee527860ce79f8e2c0"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/run-host-workspace-third.py",
+        "archived": "2026-10-31-round31-run-host-workspace-third.py",
+        "bytes": 3025,
+        "sha256": "fb5061212c145eac9ca6d98fe537e9ba21ce2da344d8eb2eb2618d46e8cdd993"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/run-runner-validator-second.py",
+        "archived": "2026-10-31-round31-run-runner-validator-second.py",
+        "bytes": 4321,
+        "sha256": "3a603dca1f3f3c75fb704bb9336771b6a9e606638491b10c6cef9d5092cd63c2"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/run-windows-workspace-first.py",
+        "archived": "2026-10-31-round31-run-windows-workspace-first.py",
+        "bytes": 4570,
+        "sha256": "6d596ed2d264f933c3b049dc6ffddc26c1df0ea3fccf77be7f47d038d45dbf84"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/runner-validator-first.json",
+        "archived": "2026-10-31-round31-runner-validator-first.json",
+        "bytes": 2560,
+        "sha256": "68fd1f8c2f3954e1aa26b4b02f968854e1e59af4be321666e0247a7562b3c1e2"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/runner-validator-second.json",
+        "archived": "2026-10-31-round31-runner-validator-second.json",
+        "bytes": 5634,
+        "sha256": "5a3b2facf8de3ce216911bea96ed94d314dc9e39fae4e7608d4ecb935fb31b0f"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/voice-output-probe-frozen-static-final.json",
+        "archived": "2026-10-31-round31-voice-output-probe-frozen-static-final.json",
+        "bytes": 434804,
+        "sha256": "2d5fd3275988821b610fe65177a34908a43f15132c2aa7372653aec922b621be"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/voice-output-probe-frozen-static.json",
+        "archived": "2026-10-31-round31-voice-output-probe-frozen-static.json",
+        "bytes": 434695,
+        "sha256": "55ba0d6eab407744f638c83813164d86ed636e89dbcdc3ca408804ded809e104"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/voice-output-probe-no-unsafe-applied.json",
+        "archived": "2026-10-31-round31-voice-output-probe-no-unsafe-applied.json",
+        "bytes": 28882,
+        "sha256": "3f318b89fae6f740dd0aae65999e4fc0ea94cedef8bc8b1e0b68a564fdb08e05"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/voice_output_probe.no_unsafe.rs",
+        "archived": "2026-10-31-round31-voice_output_probe.no_unsafe.rs",
+        "bytes": 9725,
+        "sha256": "0794124dc508c369733ae15637c28fadce2fef4093c31cebae5fc92c7fab4626"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-before.json",
+        "archived": "2026-10-31-round31-windows-before.json",
+        "bytes": 16649,
+        "sha256": "b0db95534d2a6487ffca34e20ca219a10007a8c29c594970d4785f98a7cc23c7"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-probe.before-timing-guard.py",
+        "archived": "2026-10-31-round31-windows-probe.before-timing-guard.py",
+        "bytes": 50142,
+        "sha256": "c3a3f0b06736248837e04a6c39b6f1729a6b9bc861e2a47d1fe66f611ec3b81e"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-probe.timing-guard-frozen.py",
+        "archived": "2026-10-31-round31-windows-probe.timing-guard-frozen.py",
+        "bytes": 50368,
+        "sha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-test-metadata.jsonl",
+        "archived": "2026-10-31-round31-windows-test-metadata.jsonl",
+        "bytes": 16281,
+        "sha256": "c91631f8763e8d9f7be4cb96b82a83206ea87f6db20ceeb6eee1ce4bb178e74d"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.clippy.stderr.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.clippy.stderr.log",
+        "bytes": 2782,
+        "sha256": "5913662e3bebba544c013fded13db723405222e9181dbd5bcf5a9a40b4cea2a8"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.clippy.stdout.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.clippy.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.compile.stderr.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.compile.stderr.log",
+        "bytes": 2922,
+        "sha256": "66a1691ed26007c06c84dc0e96f9516c6fb20917b6039a6579b762154d723317"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.compile.stdout.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.compile.stdout.log",
+        "bytes": 97657,
+        "sha256": "c119996173987af9f5628cb0d5715f1124699c698db73952d80fa7d0de4a8045"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.json",
+        "archived": "2026-10-31-round31-windows-workspace-first.json",
+        "bytes": 146841,
+        "sha256": "4ed780947ebc90bbd132b1b37e0d11f4f9768d87156a2846e7185e0f336a4a53"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.linker-version.stderr.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.linker-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.linker-version.stdout.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.linker-version.stdout.log",
+        "bytes": 238,
+        "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.product.stderr.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.product.stderr.log",
+        "bytes": 62,
+        "sha256": "a58a7822e22f5f9a949095cf5e2189dcdded99435193789598a16b73f325b4b1"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.product.stdout.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.product.stdout.log",
+        "bytes": 81510,
+        "sha256": "1ee0a731e7c6436571e9962b9b1ce809ef05d4b2a4276c2a9a4b71ea02e54c0d"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.rust-version.stderr.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.rust-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-workspace-first.rust-version.stdout.log",
+        "archived": "2026-10-31-round31-windows-workspace-first.rust-version.stdout.log",
+        "bytes": 196,
+        "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/workbench-empty-action-frozen-static.json",
+        "archived": "2026-10-31-round31-workbench-empty-action-frozen-static.json",
+        "bytes": 286592,
+        "sha256": "4d2540288bd0da08507e1b8b5f962787dfead27b39340a99fb03ba0db786e9d9"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-real-relogin-fixture-fix-20261031T143244701387Z/change.diff",
+        "archived": "2026-10-31-round31-service-real-relogin-fixture-fix-20261031T143244701387Z/change.diff",
+        "bytes": 1057,
+        "sha256": "e4392d14efa04396e5cf460f61eb608d05efb0449642cfff81cffbee02ec532a"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-real-relogin-fixture-fix-20261031T143244701387Z/reason.txt",
+        "archived": "2026-10-31-round31-service-real-relogin-fixture-fix-20261031T143244701387Z/reason.txt",
+        "bytes": 1078,
+        "sha256": "6fe2bce46030ca691e45fb3e62a1bb71b3e34de6dd17ed59ccb52e8cd5a700a0"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-real-relogin-fixture-fix-20261031T143244701387Z/report.json",
+        "archived": "2026-10-31-round31-service-real-relogin-fixture-fix-20261031T143244701387Z/report.json",
+        "bytes": 2871,
+        "sha256": "af050214e9714f36ff5d718e74e1565ef93e8c6f924a3d58a7b71a1145c13716"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-real-relogin-fixture-fix-20261031T143244701387Z/tests.after.rs",
+        "archived": "2026-10-31-round31-service-real-relogin-fixture-fix-20261031T143244701387Z/tests.after.rs",
+        "bytes": 20602,
+        "sha256": "565622e70d18a323cfca47479425fd67229919b67e2506692a3ee6ca9601dabf"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-real-relogin-fixture-fix-20261031T143244701387Z/tests.before.rs",
+        "archived": "2026-10-31-round31-service-real-relogin-fixture-fix-20261031T143244701387Z/tests.before.rs",
+        "bytes": 20146,
+        "sha256": "cfaef2301e7087dda3e1c1da45120f128e5f07c43fe4366ec743172ed188a7e0"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-workerpool-type-fix-20261031T141901663114Z/change.diff",
+        "archived": "2026-10-31-round31-service-workerpool-type-fix-20261031T141901663114Z/change.diff",
+        "bytes": 1650,
+        "sha256": "aee3e002ad301c94528fa0646a8ba40ff6121c6247c352307c25e173c5f95ecd"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-workerpool-type-fix-20261031T141901663114Z/report.json",
+        "archived": "2026-10-31-round31-service-workerpool-type-fix-20261031T141901663114Z/report.json",
+        "bytes": 2247,
+        "sha256": "e123de463ab934553766b2dc59bff8ac24d0e0b47ae2ab4b8d5c580fe0384c76"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-workerpool-type-fix-20261031T141901663114Z/tests.after.rs",
+        "archived": "2026-10-31-round31-service-workerpool-type-fix-20261031T141901663114Z/tests.after.rs",
+        "bytes": 20146,
+        "sha256": "cfaef2301e7087dda3e1c1da45120f128e5f07c43fe4366ec743172ed188a7e0"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/service-workerpool-type-fix-20261031T141901663114Z/tests.before.rs",
+        "archived": "2026-10-31-round31-service-workerpool-type-fix-20261031T141901663114Z/tests.before.rs",
+        "bytes": 20146,
+        "sha256": "a779e7801d14b35c7dcbf3b2c1469110ce570ed437a30b1c9effe871dec9d722"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/round31-plan-draft/README.md",
+        "archived": "2026-10-31-round31-round31-plan-draft/README.md",
+        "bytes": 3071,
+        "sha256": "88a9d02c4b142b9a40a7f6b0d7197815313c4dadb2be46b499398fcb1d7a5c75"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/round31-plan-draft/draft-binding.json",
+        "archived": "2026-10-31-round31-round31-plan-draft/draft-binding.json",
+        "bytes": 2895,
+        "sha256": "ca7d5bda86786420fc97fe497375b194f5e15ab9baaf27bc8e500b05d36fbc7d"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/round31-plan-draft/round31-plan.patch",
+        "archived": "2026-10-31-round31-round31-plan-draft/round31-plan.patch",
+        "bytes": 34762,
+        "sha256": "8ce0b14f659726dfe496e9890e6915080095befc4659030de3ef555489ed6c8e"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-full-and-voice-output-first.json",
+        "archived": "2026-10-31-round31-windows-full-and-voice-output-first.json",
+        "bytes": 178251,
+        "sha256": "65fea679af1b02bc07122bb33cd0801af6bf8f30c8d1663143c49b6314b1795d"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-voice-settings-regression-first.json",
+        "archived": "2026-10-31-round31-windows-voice-settings-regression-first.json",
+        "bytes": 16380,
+        "sha256": "8ebfcb20fb5663a235d320ea10dc29c7e04fdc469ee1f21455a788998e224adf"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/windows-after.json",
+        "archived": "2026-10-31-round31-windows-after.json",
+        "bytes": 16651,
+        "sha256": "31916396cc9c27eaaff5e3859ced10f168bb00086b013004f28442dcf9a20d4e"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/build-development-package.py",
+        "archived": "2026-10-31-round31-build-development-package.py",
+        "bytes": 3496,
+        "sha256": "e434471a04c531bf7c9c3c07785ab543b12ee0ecdc5a3d6ad98bce215ae7e3d1"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/development-package-first.json",
+        "archived": "2026-10-31-round31-development-package-first.json",
+        "bytes": 39400,
+        "sha256": "5533b82c065671be84467fd2d0b5bdaed227acb2c94828572a03ae8016c79f5a"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/post-runtime-main-ci-merge.json",
+        "archived": "2026-10-31-round31-post-runtime-main-ci-merge.json",
+        "bytes": 10316,
+        "sha256": "6fcc192a52daa55ab0bfc5c7c913f9909205eb062d12355913342b6bdeed5544"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/freeze-final-source-and-runtime.py",
+        "archived": "2026-10-31-round31-freeze-final-source-and-runtime.py",
+        "bytes": 5943,
+        "sha256": "bec4548df3ea66ff199ceeb636909fe38725e660033d71e98272dd88bf0de143"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/final-source-and-runtime-binding.json",
+        "archived": "2026-10-31-round31-final-source-and-runtime-binding.json",
+        "bytes": 93328,
+        "sha256": "24fd373e13bf0c8b6ba5c9a79f686b7bde937cfe81c243eaa00a645286ce519a"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/final-feature-working-diff.patch",
+        "archived": "2026-10-31-round31-final-feature-working-diff.patch",
+        "bytes": 155375,
+        "sha256": "bd438edbee1013004064d9f57b91c795eb6d575e730a608fcff24fa929888034"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/cleanup-local-test-builds.py",
+        "archived": "2026-10-31-round31-cleanup-local-test-builds.py",
+        "bytes": 2696,
+        "sha256": "e885a2f507512925c8e5dbe3986179df9926b2c6cb040cf834aaa5297b0593e3"
+      },
+      {
+        "original": "/tmp/fc-round31-device-evidence/local-build-and-test-cleanup.json",
+        "archived": "2026-10-31-round31-local-build-and-test-cleanup.json",
+        "bytes": 1111,
+        "sha256": "89c860a78552b23a3078679717aaca1090624f9478893967f0fd6ef061f82e7a"
+      }
+    ],
+    "originalCount": 77,
+    "round30IndexFiles": 743,
+    "round30IndexSha256": "7ad3e92fa452e00b3060a1eb1149934d84625abef0657372bde008edab600dfa",
+    "oldRound30BytesUnchanged": true,
+    "privateKeyPolicy": "Only persistent key path/stat recorded; no private-key content read/copied. Concrete credentials/private key bodies/signedURLs/binary ZIP/EXE/B64 rejected.",
+    "originalStaticPendingAndFailedStatesPreserved": true,
+    "nextTcpDesignExcluded": "tcp-original-header-deadline-next-design.md is next-stage read-only design, not this feature evidence."
+  },
+  "remaining": [
+    "Strict first TCP-to-complete-header5seconds =5_000_000_000ns remains unvalidated; original Round13 FAIL unchanged",
+    "Continuous production HTTPS/listener, campus trust/network and actual teacher hardware microphone",
+    "Actual Windows7/Windows10 and feature formal MSVC build/runtime; sameWin11 GNU does not replace them",
+    "Visible Seewo touch/DPI, PPT audibility, device hotplug/mute and physical playback/stop",
+    "Installer/upgrade/logoff-login and72hour stability"
+  ],
+  "ciStatus": {
+    "baselineMain": "c622aea0f178e42dcc776afbea96c4b2dfe43ce9",
+    "baselineHostedRun": 41212282071,
+    "baselineJob": 124569595660,
+    "lastRootObservation": "in_progress",
+    "liveCIReportsIncluded": false,
+    "featureCommitOrDispatch": "NOT_YET_PERFORMED_AT_RECORD_TIME",
+    "scope": "Prior CI compile success/FAIL repairs belong to Round30 originals, not this feature Rust target. No feature MSVC pass inferred."
+  },
+  "fullObjective": "ACTIVE_NOT_COMPLETE"
+}

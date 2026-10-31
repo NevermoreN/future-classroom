@@ -1,0 +1,48 @@
+{
+  "status": "SOURCE_FROZEN_NOT_TESTED",
+  "worktree": "/tmp/fc-round31-device-worktree",
+  "scope": "Local administrator explicit query-only default-output UI; original shared Work::Voice/JobContext, no new thread or automatic native query",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 241282,
+      "sha256": "c558438e2fb866c13c54a8aaab37fc176a6863ae60e54db01379bdd70c5d96cb"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_controller.rs",
+      "bytes": 12143,
+      "sha256": "38b7fd3e53b6cd31a9c00c0e3b0d4fdeced64bd35238a822d21ff9147b8b613c"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_editor.rs",
+      "bytes": 23860,
+      "sha256": "ecad9aeb77fe15dac0a3b54ec76cd73fb5d4eac03da5aed7de36fd6b24a085a2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/voice_editor/tests.rs",
+      "bytes": 25546,
+      "sha256": "4536b9a26948427f5aa320e26c1ce7097bfc2d82d6ceffdfe47a25370c3ae15f"
+    }
+  ],
+  "checks": {
+    "rustfmt_selected_files": "PASS",
+    "selected_files_diff_check": "PASS",
+    "cargo": "NOT_RUN_BY_THIS_AGENT",
+    "native_execution": "NOT_RUN_BY_THIS_AGENT"
+  },
+  "new_tests": [
+    "output_check_accepts_only_empty_form_and_captures_all_loaded_versions",
+    "output_check_does_not_replace_a_pending_confirmation_or_its_default_ack",
+    "output_observation_expires_at_original_boundary_without_automatic_query",
+    "output_observation_context_invalidation_preserves_draft_and_requires_a_load",
+    "output_history_cannot_survive_a_version_change_as_current",
+    "output_result_labels_are_historical_timed_and_never_assert_audibility",
+    "output_history_is_invalidated_by_save_close_or_lock_style_reset"
+  ],
+  "test_filter": "application::voice_editor::tests::output_",
+  "limitations": [
+    "Presentation-only DeviceDisplay tests do not mint or verify backend observation receipts. Backend receipt/fence tests are owned by the service agent.",
+    "Actual Windows WAVE_FORMAT_QUERY and shared-worker/lock/later-result lifecycle still require the independent hidden native integration probe, owned by root.",
+    "No new normal startup listener or Web status change."
+  ]
+}

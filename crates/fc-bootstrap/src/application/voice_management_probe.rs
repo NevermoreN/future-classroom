@@ -7,8 +7,8 @@ use voice_editor as v;
 
 type Check<T> = std::result::Result<T, String>;
 pub(super) const STEPS: usize = 36;
-const LOGIN_NAME: &str = "synthetic-voice-settings-admin";
-const PASSWORD_VALUE: &str = "Synthetic voice settings 2026!";
+pub(super) const LOGIN_NAME: &str = "synthetic-voice-settings-admin";
+pub(super) const PASSWORD_VALUE: &str = "Synthetic voice settings 2026!";
 const ORDER: [&str; STEPS] = [
     "native-setup-global-administrator",
     "native-open-voice-settings",
@@ -48,10 +48,10 @@ const ORDER: [&str; STEPS] = [
     "isolated-deployment-cleanup",
 ];
 
-fn checked<T, E>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
+pub(super) fn checked<T, E>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
     value.map_err(|_| format!("voice-settings-probe: {stage}"))
 }
-fn require(value: bool, stage: &str) -> Check<()> {
+pub(super) fn require(value: bool, stage: &str) -> Check<()> {
     if value {
         Ok(())
     } else {
@@ -65,7 +65,7 @@ fn mark(step: &mut usize, label: &str) -> Check<()> {
     Ok(())
 }
 
-fn pump(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn pump(app: &mut App, deadline: Instant) -> Check<()> {
     loop {
         require(Instant::now() < deadline, "native workflow deadline")?;
         for event in checked(app.window.take_events(), "take hidden native events")? {
@@ -83,7 +83,7 @@ fn pump(app: &mut App, deadline: Instant) -> Check<()> {
     }
 }
 
-fn submit(
+pub(super) fn submit(
     app: &mut App,
     action: ActionId,
     overrides: &[(FieldId, &str)],
@@ -111,7 +111,7 @@ fn submit(
 /// All product changes, including refresh, still use App::submit through its
 /// normal native event route. Only the explicitly marked concurrent writer below
 /// invokes set_enabled directly.
-fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
+pub(super) fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
     checked(
         app.voice_service
             .as_ref()
@@ -124,7 +124,7 @@ fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
     )
 }
 
-fn no_jobs(state: &VoiceManagementSnapshot) -> Check<()> {
+pub(super) fn no_jobs(state: &VoiceManagementSnapshot) -> Check<()> {
     require(
         state.active_jobs == 0 && state.queued_jobs == 0 && state.playing_jobs == 0,
         "no audio tasks created by settings probe",
@@ -143,7 +143,10 @@ fn shown(app: &App, state: &VoiceManagementSnapshot) -> Check<()> {
         "native rendered metadata matches actual saved setting and zero job counts",
     )
 }
-fn same_saved(before: &VoiceManagementSnapshot, after: &VoiceManagementSnapshot) -> Check<()> {
+pub(super) fn same_saved(
+    before: &VoiceManagementSnapshot,
+    after: &VoiceManagementSnapshot,
+) -> Check<()> {
     require(
         before.identity_revision == after.identity_revision
             && before.revision == after.revision
@@ -268,7 +271,7 @@ fn changed(
     Ok(actual)
 }
 
-fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
+pub(super) fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
     let mut app = create_app(Arc::new(CurrentClock::new()), true)?;
     app.root = paths.root().to_owned();
     app.desktop.set_root(paths.root().to_owned());
@@ -279,11 +282,11 @@ fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
     app.next_calendar_maintenance = deadline;
     Ok(app)
 }
-fn open(app: &mut App, paths: &DataPaths, deadline: Instant) -> Check<()> {
+pub(super) fn open(app: &mut App, paths: &DataPaths, deadline: Instant) -> Check<()> {
     app.submit(Work::Open(paths.clone(), app.clock.clone()))?;
     pump(app, deadline)
 }
-fn login(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn login(app: &mut App, deadline: Instant) -> Check<()> {
     submit(
         app,
         LOG_IN,
@@ -299,7 +302,7 @@ fn login(app: &mut App, deadline: Instant) -> Check<()> {
         "real local global administrator login",
     )
 }
-fn open_settings(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn open_settings(app: &mut App, deadline: Instant) -> Check<()> {
     checked(
         app.view().validate(),
         "valid home within original action budget",
@@ -598,7 +601,7 @@ fn second_app(
     mark(steps, "native-close-settings")
 }
 
-fn stop_owned_app(mut app: App, deadline: Instant) -> Check<()> {
+pub(super) fn stop_owned_app(mut app: App, deadline: Instant) -> Check<()> {
     app.begin_shutdown();
     while !app.shutdown_complete() {
         require(

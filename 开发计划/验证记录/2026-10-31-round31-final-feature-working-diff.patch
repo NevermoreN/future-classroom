@@ -1,0 +1,2827 @@
+diff --git a/.gitattributes b/.gitattributes
+index a5eebbd..2b84cae 100644
+--- a/.gitattributes
++++ b/.gitattributes
+@@ -24,3 +24,7 @@ packaging/THIRD-PARTY-NOTICES.txt -whitespace
+ # Round30 keeps original failures, CDP evidence and native raw files unchanged.
+ 开发计划/验证记录/2026-10-31-round30-* -text -whitespace
+ 开发计划/验证记录/2026-10-31-round30-*-raw/** -text -whitespace
++
++# Round31 retains original build, regression and native observation evidence.
++开发计划/验证记录/2026-10-31-round31-* -text -whitespace
++开发计划/验证记录/2026-10-31-round31-*/** -text -whitespace
+diff --git a/crates/fc-bootstrap/src/application.rs b/crates/fc-bootstrap/src/application.rs
+index 0eea971..011d997 100644
+--- a/crates/fc-bootstrap/src/application.rs
++++ b/crates/fc-bootstrap/src/application.rs
+@@ -76,10 +76,14 @@ mod schedule_operations_probe;
+ mod voice_controller;
+ mod voice_editor;
+ mod voice_management_probe;
++mod voice_output_probe;
+ mod web_editor;
+ pub fn voice_settings_probe() -> std::result::Result<(), String> {
+     voice_management_probe::run()
+ }
++pub fn voice_output_probe() -> std::result::Result<(), String> {
++    voice_output_probe::run()
++}
+ use fc_application::identity::SessionLease;
+ use fc_bootstrap::backend::web::{WebService, WebServiceError};
+ use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl, VoiceService};
+@@ -3467,6 +3471,7 @@ impl App {
+             self.status = "数据健康状态已失效，正在关闭；请保留数据供修复。".into();
+             self.render()?;
+         }
++        self.poll_voice_management()?;
+         if self
+             .web_editor
+             .as_mut()
+@@ -4340,6 +4345,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
+     window
+         .set_lock_action(LOCK)
+         .map_err(|_| "无法注册独立锁定操作".to_owned())?;
++    window
++        .set_empty_form_action(voice_editor::CHECK_OUTPUT)
++        .map_err(|_| "无法注册默认输出检查操作".to_owned())?;
+     Ok(App {
+         window,
+         pool: shared_pool::SharedPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,
+diff --git a/crates/fc-bootstrap/src/application/voice_controller.rs b/crates/fc-bootstrap/src/application/voice_controller.rs
+index 51966e8..22423f8 100644
+--- a/crates/fc-bootstrap/src/application/voice_controller.rs
++++ b/crates/fc-bootstrap/src/application/voice_controller.rs
+@@ -4,6 +4,12 @@ use super::*;
+ 
+ pub(super) enum Operation {
+     Refresh,
++    CheckOutput {
++        expected_publication: Revision,
++        expected: Revision,
++        expected_identity: Revision,
++        expected_runtime: u64,
++    },
+     SetEnabled {
+         expected: Revision,
+         expected_identity: Revision,
+@@ -31,6 +37,24 @@ pub(super) fn run(
+     context.checkpoint().map_err(|_| Failure::Stopped)?;
+     match operation {
+         Operation::Refresh => {}
++        Operation::CheckOutput {
++            expected_publication,
++            expected,
++            expected_identity,
++            expected_runtime,
++        } => {
++            let loaded = service.check_default_output_reviewed(
++                lease,
++                expected_publication,
++                expected,
++                expected_identity,
++                expected_runtime,
++                context,
++                fc_windows::audio::query_default_output_format,
++            )?;
++            context.checkpoint().map_err(|_| Failure::Stopped)?;
++            return Ok(Outcome::VoiceLoaded(lease, Box::new(loaded)));
++        }
+         Operation::SetEnabled {
+             expected,
+             expected_identity,
+@@ -142,6 +166,19 @@ impl App {
+             Ok(voice_editor::Command::Refresh) => {
+                 return self.submit_voice_management(Operation::Refresh);
+             }
++            Ok(voice_editor::Command::CheckOutput {
++                expected_publication,
++                expected,
++                expected_identity,
++                expected_runtime,
++            }) => {
++                return self.submit_voice_management(Operation::CheckOutput {
++                    expected_publication,
++                    expected,
++                    expected_identity,
++                    expected_runtime,
++                });
++            }
+             Ok(voice_editor::Command::SetEnabled {
+                 expected,
+                 expected_identity,
+@@ -176,7 +213,7 @@ impl App {
+     pub(super) fn voice_management_loaded(
+         &mut self,
+         lease: SessionLease,
+-        loaded: fc_bootstrap::backend::VoiceManagementSnapshot,
++        mut loaded: fc_bootstrap::backend::VoiceManagementSnapshot,
+     ) -> std::result::Result<(), String> {
+         if self.screen != Screen::Voice
+             || self.lease != Some(lease)
+@@ -216,6 +253,18 @@ impl App {
+             self.status = "语音状态已更新，请重新读取后核对。".into();
+             return Ok(());
+         }
++        let had_check = loaded.device_observation.is_some();
++        let check_expired = had_check && loaded.current_device_observation(lease).is_none();
++        if check_expired {
++            // Receipt delivery itself may arrive after the original 30 seconds.
++            // Never start a new lifetime or substitute an older successful one.
++            loaded.device_observation = None;
++        } else if !had_check {
++            loaded.device_observation = self
++                .voice_editor
++                .as_ref()
++                .and_then(|editor| editor.retained_device_observation(&loaded, lease));
++        }
+         if let Some(editor) = self.voice_editor.as_mut() {
+             if editor.owner() != lease.principal_id() {
+                 self.lock();
+@@ -225,7 +274,58 @@ impl App {
+         } else {
+             self.voice_editor = Some(voice_editor::Editor::new(lease.principal_id(), loaded));
+         }
+-        self.status = "已重新读取已保存的语音开关和任务状态；设备释放与实际听到须另行确认。".into();
++        self.status = if check_expired {
++            "检查结果已过期，请重新检查默认输出。".into()
++        } else if had_check {
++            "已完成默认输出格式检查；实际是否有声须另行确认。".into()
++        } else {
++            "已重新读取已保存的语音开关和任务状态；设备释放与实际听到须另行确认。".into()
++        };
+         Ok(())
+     }
++
++    /// Use the existing pump only for local memory invalidation and repaint.
++    /// No query, worker submission, SQLite read or additional timer occurs here.
++    pub(super) fn poll_voice_management(&mut self) -> std::result::Result<(), String> {
++        if self.screen != Screen::Voice || self.stopping {
++            return Ok(());
++        }
++        let Some(lease) = self
++            .lease
++            .filter(|lease| self.voice_management_allowed(*lease))
++        else {
++            self.lock();
++            return self.render();
++        };
++        let Some(editor) = self.voice_editor.as_ref() else {
++            return Ok(());
++        };
++        if editor.owner() != lease.principal_id() {
++            self.lock();
++            return self.render();
++        }
++        let (publication, runtime) = editor.loaded_versions();
++        let current = self.control.as_ref().is_some_and(|control| {
++            let status = control.health_gate().status();
++            status.health == fc_runtime::health::Health::Healthy && status.revision == publication
++        }) && self
++            .voice_service
++            .as_ref()
++            .is_some_and(|service| service.generation() == runtime);
++        let now = Instant::now();
++        if !editor.needs_tick(now, current) {
++            return Ok(());
++        }
++        // EN_CHANGE already captures normal editing. Also preserve any native
++        // edit awaiting its Input event immediately before an expiry repaint.
++        let capture = self.pending.is_none() && !editor.is_reviewing();
++        let draft = capture.then(|| self.window.draft_nonsecret());
++        if let Some(editor) = self.voice_editor.as_mut() {
++            if let Some(Ok(draft)) = draft {
++                let _ = editor.capture(draft);
++            }
++            editor.tick(now, current);
++        }
++        self.render()
++    }
+ }
+diff --git a/crates/fc-bootstrap/src/application/voice_editor.rs b/crates/fc-bootstrap/src/application/voice_editor.rs
+index 5a43925..c903ecc 100644
+--- a/crates/fc-bootstrap/src/application/voice_editor.rs
++++ b/crates/fc-bootstrap/src/application/voice_editor.rs
+@@ -1,12 +1,17 @@
+ //! Local administrator consent for the remote voice setting. The editor owns
+ //! neither an audio device nor a connection service; only a fresh backend
+ //! snapshot can enable another change after submission or invalidation.
+-use fc_bootstrap::backend::VoiceManagementSnapshot;
++use fc_application::identity::SessionLease;
++use fc_bootstrap::backend::{
++    VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceManagementSnapshot,
++};
+ use fc_domain::{
+     ids::{PrincipalId, Revision},
++    time::LocalDateTime,
+     voice::VoiceLimits,
+ };
+ use fc_presentation::workbench::*;
++use std::time::Instant;
+ 
+ #[cfg(test)]
+ #[path = "voice_editor/tests.rs"]
+@@ -20,6 +25,7 @@ pub(super) const REFRESH: ActionId = ActionId(854);
+ pub(super) const CLOSE: ActionId = ActionId(855);
+ pub(super) const SAVE_LIMITS: ActionId = ActionId(856);
+ pub(super) const DISCARD_LIMITS: ActionId = ActionId(857);
++pub(super) const CHECK_OUTPUT: ActionId = ActionId(858);
+ pub(super) const ACK: FieldId = FieldId(850);
+ pub(super) const DURATION_SECONDS: FieldId = FieldId(851);
+ pub(super) const PENDING_JOBS: FieldId = FieldId(852);
+@@ -30,6 +36,12 @@ pub(super) enum Command {
+     Stay,
+     Close,
+     Refresh,
++    CheckOutput {
++        expected_publication: Revision,
++        expected: Revision,
++        expected_identity: Revision,
++        expected_runtime: u64,
++    },
+     SetLimits {
+         expected: Revision,
+         expected_identity: Revision,
+@@ -50,6 +62,14 @@ struct Review {
+     runtime_generation: u64,
+     target: Target,
+ }
++/// Presentation metadata only. The controller accepts the backend's exact
++/// lease receipt before this projection is created; it owns no audio handle.
++struct DeviceDisplay {
++    result: VoiceDeviceCheckResult,
++    observed_at: LocalDateTime,
++    expires: Instant,
++    current: bool,
++}
+ #[derive(Clone, Copy)]
+ enum Target {
+     Enabled(bool),
+@@ -135,6 +155,7 @@ pub(super) struct Editor {
+     draft: Draft,
+     review: Option<Review>,
+     requires_refresh: bool,
++    device: Option<DeviceDisplay>,
+ }
+ 
+ fn controlled_status(status: &str) -> String {
+@@ -155,13 +176,16 @@ fn controlled_status(status: &str) -> String {
+ 
+ impl Editor {
+     pub fn new(owner: PrincipalId, snapshot: VoiceManagementSnapshot) -> Self {
+-        Self {
++        let mut editor = Self {
+             owner,
+             draft: Draft::from(snapshot.limits),
+             snapshot,
+             review: None,
+             requires_refresh: false,
+-        }
++            device: None,
++        };
++        editor.adopt_device_observation();
++        editor
+     }
+ 
+     pub fn owner(&self) -> PrincipalId {
+@@ -178,11 +202,84 @@ impl Editor {
+         self.snapshot = snapshot;
+         self.review = None;
+         self.requires_refresh = false;
++        self.expire_device();
++        self.adopt_device_observation();
+     }
+ 
+     pub fn invalidate(&mut self) {
+         self.review = None;
+         self.requires_refresh = true;
++        self.snapshot.device_observation = None;
++        self.expire_device();
++    }
++
++    fn expire_device(&mut self) {
++        if let Some(device) = &mut self.device {
++            device.current = false;
++        }
++    }
++
++    fn adopt_device_observation(&mut self) {
++        // Capture UI time BEFORE reading the remaining backend lifetime, so
++        // delivery never starts another 30 seconds or extends the original TTL.
++        let now = Instant::now();
++        if let Some(observation) = &self.snapshot.device_observation {
++            let remaining = observation.remaining_validity();
++            self.device = Some(DeviceDisplay {
++                result: observation.result,
++                observed_at: observation.observed_at,
++                expires: now.checked_add(remaining).unwrap_or(now),
++                current: !remaining.is_zero(),
++            });
++        }
++    }
++
++    pub fn retained_device_observation(
++        &self,
++        snapshot: &VoiceManagementSnapshot,
++        lease: SessionLease,
++    ) -> Option<VoiceDeviceObservation> {
++        self.snapshot
++            .device_observation
++            .as_ref()
++            .filter(|observation| observation.is_current_for(snapshot, lease))
++            .cloned()
++    }
++
++    pub fn loaded_versions(&self) -> (Revision, u64) {
++        (
++            self.snapshot.publication_revision,
++            self.snapshot.runtime_generation,
++        )
++    }
++
++    /// Local-only repaint predicate. No query, job, lease renewal or timer is
++    /// created. Invalidation preserves the administrator's unsaved limits.
++    pub fn tick(&mut self, now: Instant, context_current: bool) -> bool {
++        let mut changed = false;
++        if !context_current && !self.requires_refresh {
++            self.invalidate();
++            changed = true;
++        }
++        if let Some(device) = &mut self.device {
++            if device.current && now >= device.expires {
++                device.current = false;
++                changed = true;
++            }
++        }
++        changed
++    }
++
++    pub fn needs_tick(&self, now: Instant, context_current: bool) -> bool {
++        (!context_current && !self.requires_refresh)
++            || self
++                .device
++                .as_ref()
++                .is_some_and(|device| device.current && now >= device.expires)
++    }
++
++    pub fn is_reviewing(&self) -> bool {
++        self.review.is_some()
+     }
+ 
+     pub fn has_unsaved_changes(&self) -> bool {
+@@ -258,6 +355,37 @@ impl Editor {
+         if self.requires_refresh {
+             description.push_str("\n本次状态已失效或变更已提交，请重新读取后再操作。");
+         }
++        description.push_str("\n默认输出只在点击检查时读取；不播放声音。上次格式检查不代表设备当前可用或教室实际有声，30 秒后须重新检查。");
++        if let Some(device) = &self.device {
++            let time = device.observed_at;
++            let date = time.date;
++            let seconds = time.second_of_day();
++            description.push_str(&format!(
++                "\n检查时间：{:04}-{:02}-{:02} {:02}:{:02}:{:02}。",
++                date.year(),
++                date.month(),
++                date.day(),
++                seconds / 3600,
++                seconds / 60 % 60,
++                seconds % 60,
++            ));
++            if !device.current || Instant::now() >= device.expires {
++                description.push_str("上次检查结果已过期，请重新检查。");
++            } else {
++                description.push_str(match device.result {
++                    VoiceDeviceCheckResult::Supported => {
++                        "上次检查：支持播报格式（不代表实际有声）。"
++                    }
++                    VoiceDeviceCheckResult::FormatUnsupported => {
++                        "上次检查：默认输出不支持播报格式。"
++                    }
++                    VoiceDeviceCheckResult::Unavailable => "上次检查：未发现可用默认输出。",
++                    VoiceDeviceCheckResult::Failed => "上次检查：检查失败，请稍后重新检查。",
++                });
++            }
++        } else {
++            description.push_str("\n尚未检查默认输出。");
++        }
+         let action = |id, label: &str, enabled| Action {
+             id,
+             label: label.into(),
+@@ -328,6 +456,7 @@ impl Editor {
+                     can_change && self.snapshot.enabled,
+                 ),
+                 action(REFRESH, "重新读取状态", !busy),
++                action(CHECK_OUTPUT, "检查默认输出", can_change),
+                 action(CLOSE, "返回工作台", !busy),
+             ]
+         };
+@@ -343,6 +472,20 @@ impl Editor {
+     }
+ 
+     pub fn handle(&mut self, action: ActionId, mut data: FormData) -> Result<Command, String> {
++        if action == CHECK_OUTPUT {
++            if !data.is_empty() {
++                return Err("检查默认输出不接纳表单字段。".into());
++            }
++            if self.requires_refresh || self.review.is_some() {
++                return Err("请先重新读取状态或取消当前确认，再检查默认输出。".into());
++            }
++            return Ok(Command::CheckOutput {
++                expected_publication: self.snapshot.publication_revision,
++                expected: self.snapshot.revision,
++                expected_identity: self.snapshot.identity_revision,
++                expected_runtime: self.snapshot.runtime_generation,
++            });
++        }
+         if action == CANCEL {
+             let _ = data.take(ACK);
+         }
+@@ -410,6 +553,8 @@ impl Editor {
+                 }
+                 let review = self.review.take().ok_or("当前没有待确认的变更。")?;
+                 self.requires_refresh = true;
++                self.snapshot.device_observation = None;
++                self.expire_device();
+                 Ok(match review.target {
+                     Target::Enabled(enabled) => Command::SetEnabled {
+                         expected: review.expected,
+@@ -430,7 +575,8 @@ impl Editor {
+                 Ok(Command::Stay)
+             }
+             REFRESH => {
+-                self.invalidate();
++                self.review = None;
++                self.requires_refresh = true;
+                 Ok(Command::Refresh)
+             }
+             CLOSE => {
+diff --git a/crates/fc-bootstrap/src/application/voice_editor/tests.rs b/crates/fc-bootstrap/src/application/voice_editor/tests.rs
+index 51398c6..1eebb25 100644
+--- a/crates/fc-bootstrap/src/application/voice_editor/tests.rs
++++ b/crates/fc-bootstrap/src/application/voice_editor/tests.rs
+@@ -12,6 +12,7 @@ fn snapshot(enabled: bool) -> VoiceManagementSnapshot {
+         active_jobs: 0,
+         queued_jobs: 0,
+         playing_jobs: 0,
++        device_observation: None,
+     }
+ }
+ 
+@@ -477,3 +478,251 @@ fn malformed_draft_can_be_cancelled_refreshed_or_used_with_switch_without_implic
+         }
+     }
+ }
++
++// This projection is deliberately presentation-only: receipt minting and exact
++// lease/four-version acceptance are tested by the backend device-check suite.
++fn show_device(e: &mut Editor, result: VoiceDeviceCheckResult, expires: Instant) {
++    e.device = Some(DeviceDisplay {
++        result,
++        observed_at: LocalDateTime::new(
++            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
++            9 * 3600 + 8 * 60 + 7,
++        )
++        .unwrap(),
++        expires,
++        current: true,
++    });
++}
++
++#[test]
++fn output_check_accepts_only_empty_form_and_captures_all_loaded_versions() {
++    let mut e = editor(false);
++    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
++    let before = e.draft.values.clone();
++    for data in [limits_form("60", "4", "2", "10"), acknowledged(), {
++        let mut data = FormData::new();
++        data.insert(FieldId(999), "lease/version/path".into())
++            .unwrap();
++        data
++    }] {
++        assert!(e.handle(CHECK_OUTPUT, data).is_err());
++        assert_eq!(e.draft.values, before);
++        assert!(!e.is_reviewing());
++    }
++    assert!(
++        matches!(act(&mut e, CHECK_OUTPUT).unwrap(), Command::CheckOutput {
++        expected_publication, expected, expected_identity, expected_runtime,
++    } if expected_publication == Revision::new(30)
++        && expected == Revision::new(12)
++        && expected_identity == Revision::new(7)
++        && expected_runtime == 3)
++    );
++    assert_eq!(e.draft.values, before);
++    assert!(e.has_unsaved_changes());
++    // Neither checking nor its successful load saves or replaces the draft.
++    e.loaded(snapshot(false));
++    assert_eq!(e.draft.values, before);
++    assert_eq!(e.snapshot.limits, VoiceLimits::default());
++    assert!(e.has_unsaved_changes());
++}
++
++#[test]
++fn output_check_does_not_replace_a_pending_confirmation_or_its_default_ack() {
++    let mut e = editor(false);
++    act(&mut e, ENABLE).unwrap();
++    assert!(act(&mut e, CHECK_OUTPUT).is_err());
++    assert!(e.handle(CHECK_OUTPUT, acknowledged()).is_err());
++    assert!(e.is_reviewing());
++    let view = e.view("", false);
++    assert_eq!(view.fields[0].id, ACK);
++    assert_eq!(view.fields[0].value, "0");
++    assert!(!view.actions.iter().any(|action| action.id == CHECK_OUTPUT));
++    assert!(act(&mut e, CONFIRM).is_err());
++    act(&mut e, CANCEL).unwrap();
++    assert!(matches!(
++        act(&mut e, CHECK_OUTPUT).unwrap(),
++        Command::CheckOutput { .. }
++    ));
++}
++
++#[test]
++fn output_observation_expires_at_original_boundary_without_automatic_query() {
++    let mut e = editor(false);
++    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
++    let draft = e.draft.values.clone();
++    let start = Instant::now();
++    let boundary = start + std::time::Duration::from_secs(30);
++    show_device(&mut e, VoiceDeviceCheckResult::Supported, boundary);
++    assert!(!e.needs_tick(boundary - std::time::Duration::from_nanos(1), true));
++    assert!(!e.tick(boundary - std::time::Duration::from_nanos(1), true));
++    assert!(e
++        .view("", false)
++        .description
++        .contains("上次检查：支持播报格式"));
++    assert!(e.needs_tick(boundary, true));
++    assert!(e.tick(boundary, true));
++    assert!(!e.tick(boundary, true));
++    let view = e.view("", false);
++    assert!(view.description.contains("上次检查结果已过期，请重新检查"));
++    assert!(!view.description.contains("上次检查：支持播报格式"));
++    assert_eq!(e.draft.values, draft);
++    assert!(
++        !e.requires_refresh,
++        "TTL expiry alone requires another explicit check, not a load"
++    );
++    assert!(matches!(
++        act(&mut e, CHECK_OUTPUT).unwrap(),
++        Command::CheckOutput { .. }
++    ));
++}
++
++#[test]
++fn output_observation_context_invalidation_preserves_draft_and_requires_a_load() {
++    let mut e = editor(false);
++    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
++    let draft = e.draft.values.clone();
++    let now = Instant::now();
++    show_device(
++        &mut e,
++        VoiceDeviceCheckResult::Supported,
++        now + std::time::Duration::from_secs(30),
++    );
++    assert_eq!(e.loaded_versions(), (Revision::new(30), 3));
++    assert!(e.needs_tick(now, false));
++    assert!(e.tick(now, false));
++    assert!(!e.tick(now, false));
++    assert_eq!(e.draft.values, draft);
++    assert!(act(&mut e, CHECK_OUTPUT).is_err());
++    let view = e.view("", false);
++    assert!(view.description.contains("上次检查结果已过期"));
++    assert!(
++        !view
++            .actions
++            .iter()
++            .find(|action| action.id == CHECK_OUTPUT)
++            .unwrap()
++            .enabled
++    );
++    assert!(matches!(act(&mut e, REFRESH).unwrap(), Command::Refresh));
++    assert!(act(&mut e, CHECK_OUTPUT).is_err());
++    e.loaded(snapshot(false));
++    assert_eq!(e.draft.values, draft);
++    assert!(matches!(
++        act(&mut e, CHECK_OUTPUT).unwrap(),
++        Command::CheckOutput { .. }
++    ));
++    assert!(
++        !e.device.as_ref().unwrap().current,
++        "loading without a valid receipt cannot revive history"
++    );
++}
++
++#[test]
++fn output_history_cannot_survive_a_version_change_as_current() {
++    for change in 0..4 {
++        let mut e = editor(false);
++        show_device(
++            &mut e,
++            VoiceDeviceCheckResult::Supported,
++            Instant::now() + std::time::Duration::from_secs(30),
++        );
++        let mut updated = snapshot(false);
++        match change {
++            0 => updated.publication_revision = Revision::new(31),
++            1 => updated.identity_revision = Revision::new(8),
++            2 => updated.revision = Revision::new(13),
++            _ => updated.runtime_generation = 4,
++        }
++        e.loaded(updated);
++        assert!(!e.device.as_ref().unwrap().current);
++        assert!(e.view("", false).description.contains("上次检查结果已过期"));
++        assert!(
++            matches!(act(&mut e, CHECK_OUTPUT).unwrap(), Command::CheckOutput {
++            expected_publication, expected_identity, expected, expected_runtime,
++        } if expected_publication == Revision::new(if change == 0 {31} else {30})
++            && expected_identity == Revision::new(if change == 1 {8} else {7})
++            && expected == Revision::new(if change == 2 {13} else {12})
++            && expected_runtime == if change == 3 {4} else {3})
++        );
++    }
++}
++
++#[test]
++fn output_result_labels_are_historical_timed_and_never_assert_audibility() {
++    for (result, expected) in [
++        (
++            VoiceDeviceCheckResult::Supported,
++            "上次检查：支持播报格式（不代表实际有声）",
++        ),
++        (
++            VoiceDeviceCheckResult::FormatUnsupported,
++            "上次检查：默认输出不支持播报格式",
++        ),
++        (
++            VoiceDeviceCheckResult::Unavailable,
++            "上次检查：未发现可用默认输出",
++        ),
++        (
++            VoiceDeviceCheckResult::Failed,
++            "上次检查：检查失败，请稍后重新检查",
++        ),
++    ] {
++        let mut e = editor(false);
++        show_device(
++            &mut e,
++            result,
++            Instant::now() + std::time::Duration::from_secs(30),
++        );
++        for busy in [false, true] {
++            let view = e.view("", busy);
++            view.validate().unwrap();
++            assert!(view.actions.len() <= 12);
++            assert!(view.description.contains(expected));
++            assert!(view.description.contains("检查时间：2026-10-31 09:08:07"));
++            assert!(view
++                .description
++                .contains("上次格式检查不代表设备当前可用或教室实际有声"));
++            assert!(view.description.contains("不播放声音"));
++            assert_eq!(
++                view.actions
++                    .iter()
++                    .find(|action| action.id == CHECK_OUTPUT)
++                    .unwrap()
++                    .enabled,
++                !busy
++            );
++        }
++    }
++}
++
++#[test]
++fn output_history_is_invalidated_by_save_close_or_lock_style_reset() {
++    for action in [CONFIRM, CLOSE] {
++        let mut e = editor(false);
++        show_device(
++            &mut e,
++            VoiceDeviceCheckResult::Supported,
++            Instant::now() + std::time::Duration::from_secs(30),
++        );
++        if action == CONFIRM {
++            act(&mut e, ENABLE).unwrap();
++            e.handle(CONFIRM, acknowledged()).unwrap();
++        } else {
++            act(&mut e, CLOSE).unwrap();
++        }
++        assert!(!e.device.as_ref().unwrap().current);
++        assert!(e.snapshot.device_observation.is_none());
++        assert!(e.requires_refresh);
++    }
++    // App::lock drops this editor entirely; a new session cannot inherit it.
++    let mut e = editor(false);
++    show_device(
++        &mut e,
++        VoiceDeviceCheckResult::Supported,
++        Instant::now() + std::time::Duration::from_secs(30),
++    );
++    e.invalidate();
++    assert!(!e.device.as_ref().unwrap().current);
++    drop(e);
++    assert!(editor(false).device.is_none());
++}
+diff --git a/crates/fc-bootstrap/src/application/voice_management_probe.rs b/crates/fc-bootstrap/src/application/voice_management_probe.rs
+index 16a6a27..ab14f84 100644
+--- a/crates/fc-bootstrap/src/application/voice_management_probe.rs
++++ b/crates/fc-bootstrap/src/application/voice_management_probe.rs
+@@ -7,8 +7,8 @@ use voice_editor as v;
+ 
+ type Check<T> = std::result::Result<T, String>;
+ pub(super) const STEPS: usize = 36;
+-const LOGIN_NAME: &str = "synthetic-voice-settings-admin";
+-const PASSWORD_VALUE: &str = "Synthetic voice settings 2026!";
++pub(super) const LOGIN_NAME: &str = "synthetic-voice-settings-admin";
++pub(super) const PASSWORD_VALUE: &str = "Synthetic voice settings 2026!";
+ const ORDER: [&str; STEPS] = [
+     "native-setup-global-administrator",
+     "native-open-voice-settings",
+@@ -48,10 +48,10 @@ const ORDER: [&str; STEPS] = [
+     "isolated-deployment-cleanup",
+ ];
+ 
+-fn checked<T, E>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
++pub(super) fn checked<T, E>(value: std::result::Result<T, E>, stage: &str) -> Check<T> {
+     value.map_err(|_| format!("voice-settings-probe: {stage}"))
+ }
+-fn require(value: bool, stage: &str) -> Check<()> {
++pub(super) fn require(value: bool, stage: &str) -> Check<()> {
+     if value {
+         Ok(())
+     } else {
+@@ -65,7 +65,7 @@ fn mark(step: &mut usize, label: &str) -> Check<()> {
+     Ok(())
+ }
+ 
+-fn pump(app: &mut App, deadline: Instant) -> Check<()> {
++pub(super) fn pump(app: &mut App, deadline: Instant) -> Check<()> {
+     loop {
+         require(Instant::now() < deadline, "native workflow deadline")?;
+         for event in checked(app.window.take_events(), "take hidden native events")? {
+@@ -83,7 +83,7 @@ fn pump(app: &mut App, deadline: Instant) -> Check<()> {
+     }
+ }
+ 
+-fn submit(
++pub(super) fn submit(
+     app: &mut App,
+     action: ActionId,
+     overrides: &[(FieldId, &str)],
+@@ -111,7 +111,7 @@ fn submit(
+ /// All product changes, including refresh, still use App::submit through its
+ /// normal native event route. Only the explicitly marked concurrent writer below
+ /// invokes set_enabled directly.
+-fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
++pub(super) fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
+     checked(
+         app.voice_service
+             .as_ref()
+@@ -124,7 +124,7 @@ fn saved(app: &App) -> Check<VoiceManagementSnapshot> {
+     )
+ }
+ 
+-fn no_jobs(state: &VoiceManagementSnapshot) -> Check<()> {
++pub(super) fn no_jobs(state: &VoiceManagementSnapshot) -> Check<()> {
+     require(
+         state.active_jobs == 0 && state.queued_jobs == 0 && state.playing_jobs == 0,
+         "no audio tasks created by settings probe",
+@@ -143,7 +143,10 @@ fn shown(app: &App, state: &VoiceManagementSnapshot) -> Check<()> {
+         "native rendered metadata matches actual saved setting and zero job counts",
+     )
+ }
+-fn same_saved(before: &VoiceManagementSnapshot, after: &VoiceManagementSnapshot) -> Check<()> {
++pub(super) fn same_saved(
++    before: &VoiceManagementSnapshot,
++    after: &VoiceManagementSnapshot,
++) -> Check<()> {
+     require(
+         before.identity_revision == after.identity_revision
+             && before.revision == after.revision
+@@ -268,7 +271,7 @@ fn changed(
+     Ok(actual)
+ }
+ 
+-fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
++pub(super) fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
+     let mut app = create_app(Arc::new(CurrentClock::new()), true)?;
+     app.root = paths.root().to_owned();
+     app.desktop.set_root(paths.root().to_owned());
+@@ -279,11 +282,11 @@ fn make_app(paths: &DataPaths, deadline: Instant) -> Check<App> {
+     app.next_calendar_maintenance = deadline;
+     Ok(app)
+ }
+-fn open(app: &mut App, paths: &DataPaths, deadline: Instant) -> Check<()> {
++pub(super) fn open(app: &mut App, paths: &DataPaths, deadline: Instant) -> Check<()> {
+     app.submit(Work::Open(paths.clone(), app.clock.clone()))?;
+     pump(app, deadline)
+ }
+-fn login(app: &mut App, deadline: Instant) -> Check<()> {
++pub(super) fn login(app: &mut App, deadline: Instant) -> Check<()> {
+     submit(
+         app,
+         LOG_IN,
+@@ -299,7 +302,7 @@ fn login(app: &mut App, deadline: Instant) -> Check<()> {
+         "real local global administrator login",
+     )
+ }
+-fn open_settings(app: &mut App, deadline: Instant) -> Check<()> {
++pub(super) fn open_settings(app: &mut App, deadline: Instant) -> Check<()> {
+     checked(
+         app.view().validate(),
+         "valid home within original action budget",
+@@ -598,7 +601,7 @@ fn second_app(
+     mark(steps, "native-close-settings")
+ }
+ 
+-fn stop_owned_app(mut app: App, deadline: Instant) -> Check<()> {
++pub(super) fn stop_owned_app(mut app: App, deadline: Instant) -> Check<()> {
+     app.begin_shutdown();
+     while !app.shutdown_complete() {
+         require(
+diff --git a/crates/fc-bootstrap/src/backend.rs b/crates/fc-bootstrap/src/backend.rs
+index 7625867..f3ba518 100644
+--- a/crates/fc-bootstrap/src/backend.rs
++++ b/crates/fc-bootstrap/src/backend.rs
+@@ -72,8 +72,9 @@ use std::{
+     time::{Duration, Instant},
+ };
+ pub use voice::{
+-    VoiceGuard, VoiceManagementSnapshot, VoiceNativeParticipation, VoicePlaybackAuthorization,
+-    VoicePolicyHandoff, VoicePolicyPhase, VoiceRuntimeHandle, VoiceService,
++    VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceGuard, VoiceManagementSnapshot,
++    VoiceNativeParticipation, VoicePlaybackAuthorization, VoicePolicyHandoff, VoicePolicyPhase,
++    VoiceRuntimeHandle, VoiceService,
+ };
+ 
+ pub type Result<T> = std::result::Result<T, BackendError>;
+diff --git a/crates/fc-bootstrap/src/backend/voice.rs b/crates/fc-bootstrap/src/backend/voice.rs
+index 666bafe..1011ab4 100644
+--- a/crates/fc-bootstrap/src/backend/voice.rs
++++ b/crates/fc-bootstrap/src/backend/voice.rs
+@@ -16,7 +16,7 @@ mod native_participation;
+ pub use native_participation::VoiceNativeParticipation;
+ #[cfg(test)]
+ mod upload_authorization_tests;
+-pub use management::VoiceManagementSnapshot;
++pub use management::{VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceManagementSnapshot};
+ 
+ #[derive(Default)]
+ struct VoiceSessions {
+diff --git a/crates/fc-bootstrap/src/backend/voice/management.rs b/crates/fc-bootstrap/src/backend/voice/management.rs
+index 1ba1069..fff38c2 100644
+--- a/crates/fc-bootstrap/src/backend/voice/management.rs
++++ b/crates/fc-bootstrap/src/backend/voice/management.rs
+@@ -1,6 +1,8 @@
+-//! Local management metadata. No upload, device or playback capability is exposed.
++//! Local management metadata. Format observations grant no playback capability.
+ use super::*;
+ use fc_runtime::{authority::AuthoritySnapshot, health::HealthStatus};
++mod device_check;
++pub use device_check::{VoiceDeviceCheckResult, VoiceDeviceObservation};
+ #[cfg(test)]
+ mod tests;
+ 
+@@ -21,6 +23,8 @@ pub struct VoiceManagementSnapshot {
+     pub queued_jobs: usize,
+     /// Only the durable Playing state; excludes Starting and Stopping.
+     pub playing_jobs: usize,
++    /// Explicit historical format check only; ordinary reads never query native.
++    pub device_observation: Option<VoiceDeviceObservation>,
+ }
+ 
+ #[derive(Clone, Copy)]
+@@ -292,6 +296,7 @@ impl VoiceService {
+                 .iter()
+                 .filter(|job| job.state == VoiceState::Playing)
+                 .count(),
++            device_observation: None,
+         };
+         if self.management_actor(lease, generation, &snapshot)? != actor
+             || self.management_current(&snapshot)? != health
+diff --git a/crates/fc-bootstrap/src/backend/voice/management/tests.rs b/crates/fc-bootstrap/src/backend/voice/management/tests.rs
+index 764f72a..8d34d89 100644
+--- a/crates/fc-bootstrap/src/backend/voice/management/tests.rs
++++ b/crates/fc-bootstrap/src/backend/voice/management/tests.rs
+@@ -19,7 +19,7 @@ fn assert_limits_denied(service: &VoiceService, lease: SessionLease) {
+     assert_eq!(service.generation(), epoch);
+ }
+ 
+-fn issue_account(
++pub(super) fn issue_account(
+     backend: &Backend,
+     principal: u64,
+     origin: TrustedOrigin,
+diff --git a/crates/fc-bootstrap/src/main.rs b/crates/fc-bootstrap/src/main.rs
+index 54d3027..bee9f57 100644
+--- a/crates/fc-bootstrap/src/main.rs
++++ b/crates/fc-bootstrap/src/main.rs
+@@ -128,6 +128,14 @@ fn run() -> Result<(), String> {
+                 Err("native recovery workflow probe requires Windows".into())
+             }
+         }
++        [flag] if flag == "--voice-output-probe" => {
++            #[cfg(windows)]
++            {
++                application::voice_output_probe()
++            }
++            #[cfg(not(windows))]
++            Err("native voice output query probe requires Windows".into())
++        }
+         [flag] if flag == "--voice-settings-probe" => {
+             #[cfg(windows)]
+             {
+diff --git a/crates/fc-ports/src/audio.rs b/crates/fc-ports/src/audio.rs
+index d22342b..ed48386 100644
+--- a/crates/fc-ports/src/audio.rs
++++ b/crates/fc-ports/src/audio.rs
+@@ -1,4 +1,13 @@
+ //! One stream owned by the audio execution domain. No native handle crosses this port.
++/// A point-in-time query of the canonical format through the default output mapper.
++/// Supported does not confirm a playback handle, an audible signal, or future support.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum DefaultOutputSupport {
++    Supported,
++    FormatUnsupported,
++    Unavailable,
++}
++
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+ pub enum AudioAuthorization {
+     Authorized,
+diff --git a/crates/fc-windows/src/audio/mod.rs b/crates/fc-windows/src/audio/mod.rs
+index 5dbc654..4d6058b 100644
+--- a/crates/fc-windows/src/audio/mod.rs
++++ b/crates/fc-windows/src/audio/mod.rs
+@@ -1,8 +1,10 @@
+ //! WinMM single-stream output. All calls belong to the existing audio domain.
+ //! The driver owns submitted pointers until DONE and successful UnprepareHeader.
+ //! No callback function, extra thread, volume change, input device, or whole-file Vec.
++mod capability;
+ pub mod device;
+ use crate::materials::files::LockedFile;
++pub use capability::query_default_output_format;
+ use fc_ports::audio::{
+     AudioAuthorization as Authorization, AudioOutputError as Error, AudioOutputPort,
+     AudioOutputProgress as Progress,
+@@ -190,15 +192,7 @@ impl Driver for NativeDriver {
+             return Err(Error::CleanupPending);
+         }
+         let reservation = Reservation::take()?;
+-        let format = WAVEFORMATEX {
+-            wFormatTag: 1,
+-            nChannels: 1,
+-            nSamplesPerSec: 16_000,
+-            nAvgBytesPerSec: 32_000,
+-            nBlockAlign: 2,
+-            wBitsPerSample: 16,
+-            cbSize: 0,
+-        };
++        let format = capability::canonical_pcm_format();
+         // SAFETY: query does not retain the format or open a device. This call is
+         // performed only in the audio execution domain; WAVE_MAPPER chooses output.
+         let query =
+diff --git a/crates/fc-windows/src/workbench.rs b/crates/fc-windows/src/workbench.rs
+index f1caf9e..9f142d1 100644
+--- a/crates/fc-windows/src/workbench.rs
++++ b/crates/fc-windows/src/workbench.rs
+@@ -223,6 +223,7 @@ struct State {
+     presented_secrets: RefCell<Vec<FieldId>>,
+     grid_cell: Cell<Option<(usize, usize)>>,
+     lock_action: Cell<Option<ActionId>>,
++    empty_form_action: Cell<Option<ActionId>>,
+     preview: RefCell<Option<preview::Canvas>>,
+ }
+ impl State {
+@@ -241,6 +242,7 @@ impl State {
+             presented_secrets: RefCell::new(Vec::new()),
+             grid_cell: Cell::new(None),
+             lock_action: Cell::new(None),
++            empty_form_action: Cell::new(None),
+             preview: RefCell::new(None),
+         }
+     }
+@@ -373,6 +375,9 @@ impl State {
+             self.discard_forms();
+             return self.queue_submit(action.id, FormData::new());
+         }
++        if self.empty_form_action.get() == Some(action.id) {
++            return self.queue_submit(action.id, FormData::new());
++        }
+         let fields = self
+             .controls
+             .try_borrow()
+@@ -543,7 +548,9 @@ impl Window {
+         if id.0 == 0 {
+             return Err(Error::from_hresult(E_INVALIDARG));
+         }
+-        if self.state.lock_action.get().is_some_and(|old| old != id) {
++        if self.state.lock_action.get().is_some_and(|old| old != id)
++            || self.state.empty_form_action.get() == Some(id)
++        {
+             return Err(Error::from_hresult(E_ACCESSDENIED));
+         }
+         let view = self
+@@ -570,6 +577,25 @@ impl Window {
+         }
+         Ok(())
+     }
++    /// Register one immutable action that submits no fields. Unlike Lock, this
++    /// action never bypasses busy or discards queued forms/nonsecret drafts.
++    /// The normal password-clearing rule still applies after an actual submit.
++    pub fn set_empty_form_action(&self, id: ActionId) -> Result<()> {
++        if id.0 == 0 {
++            return Err(Error::from_hresult(E_INVALIDARG));
++        }
++        if self
++            .state
++            .empty_form_action
++            .get()
++            .is_some_and(|old| old != id)
++            || self.state.lock_action.get() == Some(id)
++        {
++            return Err(Error::from_hresult(E_ACCESSDENIED));
++        }
++        self.state.empty_form_action.set(Some(id));
++        Ok(())
++    }
+     /// Initially hidden. Construction and hidden tests never change foreground.
+     pub fn new() -> Result<Self> {
+         let class = ClassLease::acquire()?;
+@@ -1216,6 +1242,51 @@ impl Window {
+             }
+             return Ok(());
+         }
++        if self.state.empty_form_action.get() == Some(id) {
++            if !form.is_empty() {
++                return Err(Error::from_hresult(E_INVALIDARG));
++            }
++            // SAFETY: exact current owned button; this path cannot enable it.
++            if !unsafe { IsWindowEnabled(action.hwnd) }.as_bool() {
++                return Err(Error::from_hresult(E_ACCESSDENIED));
++            }
++            if self.state.error.get() != 0 {
++                return Err(Error::from_hresult(E_UNEXPECTED));
++            }
++            let before = self
++                .state
++                .events
++                .try_borrow()
++                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
++                .len();
++            // SAFETY: same owned-button WM_COMMAND used by a real click; no
++            // field values are read or replaced and no global input is sent.
++            unsafe {
++                let _ = SendMessageW(
++                    self.hwnd,
++                    WM_COMMAND,
++                    Some(WPARAM(
++                        usize::from(action.native_id) | ((BN_CLICKED as usize) << 16),
++                    )),
++                    Some(LPARAM(action.hwnd.0 as isize)),
++                );
++            }
++            let events = self
++                .state
++                .events
++                .try_borrow()
++                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
++            if self.state.error.get() != 0
++                || events.len() != before + 1
++                || !events.get(before).is_some_and(|event| {
++                    matches!(event,
++                    Event::Submit(action_id, data) if *action_id == id && data.is_empty())
++                })
++            {
++                return Err(Error::from_hresult(E_UNEXPECTED));
++            }
++            return Ok(());
++        }
+         // Validate the entire supplied form before modifying even one native
+         // control. Every editable field is required; readonly/unknown IDs remain
+         // in FormData and are rejected, including fields with empty values.
+@@ -1783,6 +1854,10 @@ unsafe extern "system" fn window_proc(
+     }
+ }
+ 
++#[cfg(test)]
++#[path = "workbench/empty_action_tests.rs"]
++mod empty_action_tests;
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+diff --git a/packaging/PROBE-README.txt b/packaging/PROBE-README.txt
+index e327738..3804d6b 100644
+--- a/packaging/PROBE-README.txt
++++ b/packaging/PROBE-README.txt
+@@ -150,3 +150,5 @@ Round15 adds local global-admin account paging/edit/disable/multiple teaching sc
+ 关闭会取消当前及排队任务，设备物理停止仍须完成原释放流程；重开不恢复旧任务。
+ --voice-settings-probe 仅在独立合成部署通过隐藏原生控件验证确认、取消及未保存草稿、锁定、限制并发冲突、真实数据库重开和恢复默认值，
+ 不创建音频任务、不录音、不更改音量或前台；真实播放/浏览器/生产网络与三系统验收另行记录。
++“检查默认输出”仅查询当时的默认输出格式支持，显示的历史结果30秒后过期；刷新不重新查询，锁定后丢弃结果，未保存的限制草稿保持独立。
++--voice-output-probe 在独立合成部署通过隐藏原生控件验证15步流程和真实30秒过期，不播放、不录音、不改音量；格式支持不能证明当前可用或人耳可听。
+diff --git a/scripts/package-probe.py b/scripts/package-probe.py
+index 695bc02..b0ee1e8 100644
+--- a/scripts/package-probe.py
++++ b/scripts/package-probe.py
+@@ -221,11 +221,12 @@ def build_package(executable: Path, output: Path, target: str, objdump: str, dec
+             "ordinary_backup_restore": "local global-admin native export and opaque-picker verified non-overwrite save; full same-install isolated preflight, sequence-bound explicit impact review, current-security barrier, fixed shared-worker retirement, independent final physical-drain coordinator, three-tree cold switch/startup reconciliation and mandatory new login; visible dialogs/device/power-loss and formal three-OS acceptance incomplete",
+             "explicit_mapping_restore": "complete explicit injective source class/subject/principal mapping to existing current targets, no numeric/name auto-match or credential/authority import; typed fresh ordinary projection bound to source bytes/mapping/current target revision, preserves current installation/full directory labels/security/permissions and replaces the whole teaching collection; original ordinary foreign-installation guard unchanged; single owned slot, worker retirement, double acknowledgements and real physical cold restore; visible picker/touch/device and formal three-OS acceptance incomplete",
+             "local_voice_policy": "local global-admin explicit review with default-unconfirmed acknowledgement, captured voice/identity/runtime versions, exact local lease, fail-closed stop and same-writer configuration CAS; bounded configured duration/queue/repeat ceilings without raising fixed hard limits, task counts, lock discards review, actual SQLite close/reopen and exact policy epoch retirement; current target policy preserved across ordinary/mapped teaching restore; no audio job or physical playback claim in settings probe; production network and formal three-OS acceptance incomplete",
++            "default_output_history": "local global-admin explicit query-only WAVE_MAPPER format observation on the original two workers; exact lease/publication/identity/voice/runtime binding, unchanged draft/settings/jobs, original thirty-second lifetime, refresh without requery and lock/new-login invalidation; historical format support only, no physical playback or current-device/audibility certification",
+             "autostart_system_change": "local global-admin captured revision/preimage explicit review; fixed current-user project Run value/current-exe quoted command; durable Prepared/Applying/Succeeded/Failed/NeedsReconcile intent, exact ticket factual settlement and read-only startup CAS reconciliation without replay/automatic repair; fresh session/authority/execution checks, no HTTP effect API; actual logoff/login, Win7/Win10/MSVC and visible Seewo acceptance incomplete",
+             "no_code_reinitialization": "explicit abandon-all-local-data wizard in a separate never-opened repair process; real physical close, root identity claim and fixed 13-tree journaled switch retain root/runtime instance lock; two default-unconfirmed sequence-bound acknowledgements; clears local exports/credentials/media/voice, preserves external saved copies and Windows settings; restart creates new school/admin/DPAPI/install identity; hardware power-loss/real Win7/Win10 acceptance incomplete",
+             "public_calendar_candidates": "replaceable provider, bounded fixed HTTPS WinHTTP source and strict parser; independent cache, exact-source-year SHA/notice provenance, cross-year conflict and manual-priority mapping; explicit review/adoption with candidate+schedule CAS; default-off durable admin grant for same-source pure Rest/Absent changes only; synchronous hard preemption and actual Win7/Win10 remain unvalidated",
+             "compound_timetable_drafts": "local global-admin Odd/Even role swap preserving physical table identity and content; lossless shared activity weekday split and compatible merge, synchronized dual-table atomic structure edits; explicit kind-change loss review/cancel/owner lock resume; only final complete-document CAS Save publishes; visible touch/DPI and three-OS acceptance incomplete",
+-            "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--reinitialization-probe", "--migration-probe", "--recovery-probe", "--recovery-probe-reopen <isolated-root> <nonce>", "--autostart-probe", "--voice-settings-probe", "--calendar-probe", "--calendar-download-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe",
++            "declared_probe_commands": ["--version", "--self-check", "--system-probe", "--host-probe <1..30>", "--application-probe", "--reinitialization-probe", "--migration-probe", "--recovery-probe", "--recovery-probe-reopen <isolated-root> <nonce>", "--autostart-probe", "--voice-settings-probe", "--voice-output-probe", "--calendar-probe", "--calendar-download-probe", "--materials-probe", "--audio-silent-probe", "--web-pairing-probe",
+                 "--web-voice-probe", "--http-iocp-probe <port> <FutureClassroom-Test-marker> <1..120>", "--tls-lifecycle-probe <40hex-current-user-MY-thumbprint> <FutureClassroom-Test-TLS-32hex>", "--tls-business-probe <40hex-current-user-MY-thumbprint> <FutureClassroom-Test-TLS-32hex>", "--native-probe <1..300>"],
+             "native_management_workbench": "initial setup/login, school/classes/subjects, account list/create/edit/disable with multiple teaching scopes, explicit review/cancel/CAS and self-change re-login, independent busy lock action, password/recovery rotation, homework, native timetable grid/digit mask/dual history/calendar and display drafts, local global-admin current-lesson override/restore with captured CAS and durable actual-teacher intervals, unsaved-exit guard; full application incomplete",
+             "timetable_limits": "64 KiB complete document including bounded dual history; candidate/adopted provenance implemented; declared notice body is not automatically authenticated or interpreted",
+diff --git a/scripts/windows-probe.py b/scripts/windows-probe.py
+index b58ca89..09080dc 100644
+--- a/scripts/windows-probe.py
++++ b/scripts/windows-probe.py
+@@ -72,6 +72,47 @@ VOICE_SETTINGS_STEPS = (
+ )
+ 
+ 
++VOICE_OUTPUT_STEPS = (
++    "native-setup-global-administrator",
++    "native-open-voice-settings",
++    "saved-default-enabled-no-jobs",
++    "native-draft-refresh-no-write",
++    "native-nonempty-check-rejected",
++    "native-explicit-output-query",
++    "query-keeps-saved-state-and-draft",
++    "native-refresh-retains-exact-observation",
++    "real-thirty-second-observation-expiry",
++    "native-explicit-recheck-new-observation",
++    "native-lock-discards-observation-and-draft",
++    "native-relogin-new-lease",
++    "native-reopen-unchecked-original-settings",
++    "app-physical-shutdown",
++    "isolated-deployment-cleanup",
++)
++
++
++def validate_voice_output_output(exit_code, output):
++    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
++        raise RuntimeError("isolated native output query workflow failed")
++    steps = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_STEP")]
++    expected = [f"VOICE_OUTPUT_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_OUTPUT_STEPS)]
++    if steps != expected:
++        raise RuntimeError("output query exact15 ordered step indices/names missing, malformed or repeated")
++    summaries = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_PASS")]
++    result = r"(Supported|FormatUnsupported|Unavailable|Failed)"
++    pattern = (r"VOICE_OUTPUT_NATIVE_PASS steps=15 shared_workers=2 first_result=" + result
++               + r" second_result=" + result
++               + r" ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
++    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
++        raise RuntimeError("output query exact final observation/expiry/cleanup marker missing or malformed")
++    elapsed_ms = int(summary.group(3))
++    if elapsed_ms < 30_000 or output.index(summaries[0]) < output.index(expected[-1]):
++        raise RuntimeError("output query must complete the real thirty-second expiry before its final marker")
++    return {"steps": len(steps), "stepNames": list(VOICE_OUTPUT_STEPS),
++            "firstResult": summary.group(1), "secondResult": summary.group(2),
++            "elapsedMs": elapsed_ms}
++
++
+ def validate_voice_settings_output(exit_code, output):
+     if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+         raise RuntimeError("isolated native voice settings workflow failed")
+@@ -164,6 +205,7 @@ def main():
+     parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
+     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
+     parser.add_argument("--voice-settings", action="store_true", help="isolated hidden native local-admin voice policy confirmation, lock, CAS and durable reopen; no recording/playback")
++    parser.add_argument("--voice-output", action="store_true", help="isolated hidden native default-output format query, draft/refresh/expiry/lock; no recording or playback")
+     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
+     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
+     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
+@@ -175,7 +217,9 @@ def main():
+         parser.error("native seconds must be in 1..30")
+     if not 1 <= args.test_timeout_seconds <= 900:
+         parser.error("test timeout seconds must be in 1..900")
+-    if args.voice_settings and any((args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
++    if args.voice_output and any((args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
++        parser.error("run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it")
++    if args.voice_settings and any((args.voice_output, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+         parser.error("run the dedicated voice settings workflow separately; only test metadata and read-only system/host checks may accompany it")
+     if args.migration and any((args.application, args.calendar, args.calendar_download, args.autostart, args.recovery, args.reinitialization, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+         parser.error("run the dedicated migration workflow separately; only test metadata and read-only system/host checks may accompany it")
+@@ -377,6 +421,14 @@ def main():
+                 raise RuntimeError("voice settings report insertion point is ambiguous")
+             anchor = matched[0]
+             body = body.replace(anchor, command + "@{voiceSettingsExitCode=$voiceSettingsCode;voiceSettingsOutput=$voiceSettingsOutput;" + anchor[2:])
++        if args.voice_output:
++            command = "$voiceOutputOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --voice-output-probe 2>&1|ForEach-Object{\"$_\"});$voiceOutputCode=$LASTEXITCODE;"
++            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
++            matched = [anchor for anchor in anchors if anchor in body]
++            if len(matched) != 1 or body.count(matched[0]) != 1:
++                raise RuntimeError("output query report insertion point is ambiguous")
++            anchor = matched[0]
++            body = body.replace(anchor, command + "@{voiceOutputExitCode=$voiceOutputCode;voiceOutputOutput=$voiceOutputOutput;" + anchor[2:])
+         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
+         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
+         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
+@@ -386,11 +438,11 @@ def main():
+             remote.upload(native_script, directory)
+         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
+         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
+-        if args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
++        if args.voice_output or args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
+             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
+         if args.recovery or args.reinitialization or args.migration:
+             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
+-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings else 50).lstrip("\ufeff"))
++        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings or args.voice_output else 50).lstrip("\ufeff"))
+         if report["native"]["exitCode"] != 0:
+             raise RuntimeError("native probe failed")
+         if args.system_host and report["native"].get("hostExitCode") != 0:
+@@ -461,6 +513,15 @@ def main():
+             report["voiceSettingsElapsedMs"] = result["elapsedMs"]
+             report["voiceSettingsNativeStatus"] = "PASS"
+             report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin limits policy, unconfirmed/cancel/draft/lock, revision conflict, limits restore and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
++        if args.voice_output:
++            result = validate_voice_output_output(report["native"].get("voiceOutputExitCode"), report["native"].get("voiceOutputOutput"))
++            report["voiceOutputNativeStatus"] = "PASS"
++            report["voiceOutputNativeSteps"] = result["steps"]
++            report["voiceOutputNativeStepNames"] = result["stepNames"]
++            report["voiceOutputFirstResult"] = result["firstResult"]
++            report["voiceOutputSecondResult"] = result["secondResult"]
++            report["voiceOutputElapsedMs"] = result["elapsedMs"]
++            report["voiceOutputScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/SQLite and default WAVE_MAPPER format queries, draft retention, original observation expiry and lock/new lease; historical format support only, no audio job/playback/microphone/volume/foreground change or audible/device certification"
+         if args.autostart:
+             output = report["native"].get("autostartOutput", [])
+             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/00-\345\274\200\345\217\221\345\257\274\350\210\252\344\270\216\351\234\200\346\261\202\350\277\275\350\270\252.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/00-\345\274\200\345\217\221\345\257\274\350\210\252\344\270\216\351\234\200\346\261\202\350\277\275\350\270\252.md"
+index 78879d9..6071342 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/00-\345\274\200\345\217\221\345\257\274\350\210\252\344\270\216\351\234\200\346\261\202\350\277\275\350\270\252.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/00-\345\274\200\345\217\221\345\257\274\350\210\252\344\270\216\351\234\200\346\261\202\350\277\275\350\270\252.md"
+@@ -2,9 +2,9 @@
+ 
+ > 实施状态（2026-10-30）：用户已授权开始开发。本文保留 D11 设计基线；“仅计划、不开发/不测试/不同步”及“全部待实施”为历史状态，当前实现范围、证据与未完成门槛以[实施进度与验证记录](10-实施进度与验证记录.md)为准。
+ 
+-日期：2026-10-31；详细设计基线：D11；对应总计划：1.43。本文档组是开发规格，尚不是实现、编译或真机通过报告。
++日期：2026-10-31；详细设计基线：D11；对应总计划：1.44。本文档组是开发规格，尚不是实现、编译或真机通过报告。
+ 
+-补充实施契约：[教师内容API：今日作业与共同提醒](12-教师内容API契约.md)；[教师资料API](13-教师课堂资料API契约.md)；[P0独立TCP接纳候选ADR](14-P0独立TCP接纳候选ADR.md)；[教师语音API](15-教师语音API契约.md)；[本地账号管理与引用影响](16-本地账号管理与引用影响.md)；[公共布局与科目场景配置](17-公共布局与科目场景配置.md)；[统一内容测量与原生排版](18-统一内容测量与原生排版.md)；[独立文字与分页图片](19-独立文字与分页图片内容.md)；[课表角色交换与活动拆合](20-课表角色交换与活动拆合.md)。[公共校历候选与采用](21-公共校历候选与采用.md)。[自启动与系统变更核对](22-自启动与系统变更核对.md)；[完整备份与受控恢复](23-完整备份与受控恢复.md)；[无恢复码重新初始化](24-无恢复码重新初始化.md)；[跨安装显式映射恢复](25-跨安装显式映射恢复.md)；[本地远程语音设置](26-本地远程语音设置.md)。总计划1.43/D11，未改变稳定需求或任务编号。
++补充实施契约：[教师内容API：今日作业与共同提醒](12-教师内容API契约.md)；[教师资料API](13-教师课堂资料API契约.md)；[P0独立TCP接纳候选ADR](14-P0独立TCP接纳候选ADR.md)；[教师语音API](15-教师语音API契约.md)；[本地账号管理与引用影响](16-本地账号管理与引用影响.md)；[公共布局与科目场景配置](17-公共布局与科目场景配置.md)；[统一内容测量与原生排版](18-统一内容测量与原生排版.md)；[独立文字与分页图片](19-独立文字与分页图片内容.md)；[课表角色交换与活动拆合](20-课表角色交换与活动拆合.md)。[公共校历候选与采用](21-公共校历候选与采用.md)。[自启动与系统变更核对](22-自启动与系统变更核对.md)；[完整备份与受控恢复](23-完整备份与受控恢复.md)；[无恢复码重新初始化](24-无恢复码重新初始化.md)；[跨安装显式映射恢复](25-跨安装显式映射恢复.md)；[本地远程语音设置](26-本地远程语音设置.md)。总计划1.44/D11，未改变稳定需求或任务编号。
+ 
+ ## 1. 文档入口与阅读顺序
+ 
+@@ -36,6 +36,7 @@
+ | 24 | [完整备份与受控恢复](23-完整备份与受控恢复.md) | 无凭据完整普通包、安装绑定、当前安全底座与实际冷切换 |
+ | 25 | [无恢复码重新初始化](24-无恢复码重新初始化.md) | 独立修复进程、破坏性双确认与固定部署清除 |
+ | 26 | [跨安装显式映射恢复](25-跨安装显式映射恢复.md) | 全源手动映射、目标身份保留、精确修订及完整教学替换 |
++| 27 | [本地远程语音设置](26-本地远程语音设置.md) | 本地主管理员开关与限制复核、历史默认输出格式检查、原会话/修订/代次及物理完成边界 |
+ 
+ Rust语言、工程边界与平台验证：[Rust开发与验证计划](07-Rust开发与验证计划.md)。当前实现与分层验证见实施记录，完整产品及三系统验收尚未完成。
+ 
+@@ -117,3 +118,5 @@ GitHub仓库按用户要求清空，当前只维护本地计划与设计资料
+ 平台兼容补充：[Windows 7/10/11兼容矩阵与验收](11-Windows兼容矩阵与验收.md)；当前实现与证据：[实施进度](10-实施进度与验证记录.md)。
+ 
+ 新增实施契约：[本地远程语音设置](26-本地远程语音设置.md)对应本机功能开关、精确复核及任务计数；不扩大教师Web权限，不把保存开关当物理停止完成。实际验证和P6-10其余门槛见实施记录。
++
++第三十一轮仅细化原R34/M18/P6-10及P3-13的本地默认输出检查，复用Q24、Q02、Q25验证历史时效、精确权限与原worker归还；R09/Q13的三系统及希沃设备证据继续独立。上表顺序27是文档入口，不是新增需求或任务编号；33项需求、71项任务和原完成门槛不变。
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/03-\350\260\203\347\224\250\351\223\276\344\270\216\347\272\277\347\250\213\346\250\241\345\236\213.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/03-\350\260\203\347\224\250\351\223\276\344\270\216\347\272\277\347\250\213\346\250\241\345\236\213.md"
+index 336a08a..4b485e4 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/03-\350\260\203\347\224\250\351\223\276\344\270\216\347\272\277\347\250\213\346\250\241\345\236\213.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/03-\350\260\203\347\224\250\351\223\276\344\270\216\347\272\277\347\250\213\346\250\241\345\236\213.md"
+@@ -338,3 +338,7 @@ AuthenticatedCommand → CommandBus.try_submit [小owned消息/预算]
+ SensitiveRead/Download/EffectStart均先查同一HealthGate与AuthorityReader；Faulted不能只锁住Writer。C04事务提交遵守此协议，C06/C12带实际/源联合版本，C09网络用固定IoSlot及完成排空，C15本地主动打开比较新鲜StartPermit，C16 WinMM比较缓冲/播放代次。全部资源在原属线程结算一次；取消发出与原生完成分离。
+ 
+ 执行域及数量/字节上限、HTTP关闭和音频归还细节由[所有权/FFI册](08-Rust所有权与FFI生命周期.md)定义，不为每模块各建线程。其他调用链不允许绕开F20/C17恢复正常服务。
++
++### C16增量：显式默认输出格式观察
++
++本地主管理员原生空表单动作→捕获已加载权威发布/身份/语音修订/运行代次→原Work::Voice及固定双worker→原JobContext/精确本地会话/健康前检→WAVE_MAPPER/WAVE_FORMAT_QUERY→同原上下文后检→仅带历史结果与原观察时间的快照→当前页面/精确会话/版本再次匹配后交付。查询取消仍等原worker返回，不能用替代线程或晚到成功覆盖锁定页面。UI已有poll只使原30秒观察失效并重绘，不触发原生查询、SQLite读取或额外循环；刷新仅可保留仍精确匹配的原receipt剩余寿命。该链不接管播放句柄/PCM/音频任务，不放宽原C16实际播放许可和物理归还条件。
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/04-\345\274\200\345\217\221\351\230\266\346\256\265\344\270\216\344\273\273\345\212\241\346\255\245\351\252\244.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/04-\345\274\200\345\217\221\351\230\266\346\256\265\344\270\216\344\273\273\345\212\241\346\255\245\351\252\244.md"
+index e7a8b9e..175410b 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/04-\345\274\200\345\217\221\351\230\266\346\256\265\344\270\216\344\273\273\345\212\241\346\255\245\351\252\244.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/04-\345\274\200\345\217\221\351\230\266\346\256\265\344\270\216\344\273\273\345\212\241\346\255\245\351\252\244.md"
+@@ -157,3 +157,5 @@ Windows 10及Windows 11为R09首版必需兼容范围，P0-01/02/03/05/06/08/09
+ 
+ 
+ 第二十九轮推进P6-11的共用HTTP/1.1增量分帧、明确正文准入、64KiB响应发送回执及Schannel正常关闭/精确退休；当前仅隔离诊断接线，持续listener、真实应用worker/计费stage桥与原严格五秒FAIL继续分别推进，不将P6-01/P6-11或完整开发目标标为完成。
++
++第三十一轮继续细化原P6-10本地设置及P3-13格式检查：当前本地主管理员明确查询默认输出，沿原双worker/JobContext前后核对精确会话、权威发布/身份/语音修订及运行代次，结果从查询完成起最多30秒；本地过期重绘不查询，草稿保留、锁定/迟到结果丢弃及原worker实际归还须验证。Q24/Q02/Q25覆盖该增量，R09/Q13三系统仍分别取证。此处不新增任务编号或将P0-08/P3-13/P6-10标为完成；默认格式支持不等于实际可听、设备策略整体或物理停止。
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/05-\346\265\213\350\257\225\351\252\214\346\224\266\344\270\216\345\217\221\345\270\203\346\270\205\347\220\206.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/05-\346\265\213\350\257\225\351\252\214\346\224\266\344\270\216\345\217\221\345\270\203\346\270\205\347\220\206.md"
+index 080f094..b993d96 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/05-\346\265\213\350\257\225\351\252\214\346\224\266\344\270\216\345\217\221\345\270\203\346\270\205\347\220\206.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/05-\346\265\213\350\257\225\351\252\214\346\224\266\344\270\216\345\217\221\345\270\203\346\270\205\347\220\206.md"
+@@ -271,6 +271,7 @@ Q23当前NOT_RUN。P5-01必须等待新玻璃/权限/所有者/布局/Web任务
+ 6. waveOutReset返回WHDR_DONE不算播放完成；取消/撤权/关闭功能/设备拔出/锁屏/休眠/重启/超时/队列过期，终态不复活、不把旧回调归给下一任务；最长合法10遍任务不被5分钟待播有效期误截断。
+ 7. PPT前台收到老师语音可播放，整个桌面层仍隐藏且无焦点变化；课间大卡自动显示/隐藏本身不触发声音。与倒计时/上传/长稳并发按Q12进程树总预算测量。
+ 8. 音频在ProgramData受控目录，终态驱动释放后删正文，24小时/100条脱敏审计有界；备份/升级/恢复不恢复声音队列。测试后清理合成音/临时上传/账号/浏览器录音轨道/原型构建，不误删老师文件。
++9. 本地默认输出历史格式检查只接受当前Local GlobalAdmin空表单，沿原双worker/JobContext检查原精确会话及四版本；教师/Web/普通用户、锁定、取消、JobContext原期限耗尽和旧代次不得查询或交付结果。普通刷新不查询，检查保留限制草稿及确认默认未选；查询完成起30秒精确到期、交付/刷新不续期。独立隐藏15步原生探针实际执行WAVE_FORMAT_QUERY、记录真实枚举而不伪造Supported，等待原worker实际归还与隔离部署清理；原36步设置合同仍须回归。无声查询不代替真实播放、自然完成/停止、设备热插拔/静音或可听性；Win7/10/11及希沃设备分别记录，unit/fake端口不作真实设备证据。
+ 
+ Q24实现及完整验收均待执行，P5-01仍须等待4项新增任务。Win7实际驱动和教师实际浏览器能力须P0-08证据，不能用图稿声明通过。
+ 
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/11-Windows\345\205\274\345\256\271\347\237\251\351\230\265\344\270\216\351\252\214\346\224\266.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/11-Windows\345\205\274\345\256\271\347\237\251\351\230\265\344\270\216\351\252\214\346\224\266.md"
+index 9072d75..aa10c9d 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/11-Windows\345\205\274\345\256\271\347\237\251\351\230\265\344\270\216\351\252\214\346\224\266.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/11-Windows\345\205\274\345\256\271\347\237\251\351\230\265\344\270\216\351\252\214\346\224\266.md"
+@@ -1,6 +1,6 @@
+ # Windows 7 / Windows 10 / Windows 11 兼容矩阵与验收
+ 
+-总计划1.42 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
++总计划1.44 / 详细设计D11，2026-10-31（北京时间）。用户明确要求在现有开发持续进行时，将Windows 10和Windows 11纳入正式兼容范围。本册扩展现有R09，不改变33项需求、71项任务或十二crate架构；当前程序进度见[实施记录](10-实施进度与验证记录.md)。
+ 
+ ## 1. 正式支持目标与架构
+ 
+@@ -246,3 +246,16 @@ Windows 7 SP1 x86、Windows 10、Windows 11继续是三个正式目标。实际W
+ 
+ 
+ 第二十九轮：现代与补充Win7GNU x86在同一Win11 Pro build26300/WOW64分别通过真实Schannel/HTTP分帧/close_notify/精确上下文退休的隔离两批八连接；现代另实际执行1160项完整回归。测试MY证书/CNG私钥精确清理，持续SSH服务、公钥及仓库外私钥保留。PE现代5项既有审查触发、补充0项；不代表Win7/Win10实机或正式MSVC通过。持续生产监听、严格首TCP五秒原FAIL和三系统正式部署仍独立未完成，见[实施记录](10-实施进度与验证记录.md)。
++
++### 第三十一轮待验收范围：本地默认输出历史格式查询
++
++新增显式只读默认输出格式检查须逐系统保存OS build/位数、程序target及SHA、实际查询返回枚举、15步原生流程、30秒真实到期与清理原件。当前正在进行的构建/测试不在本节填PASS；既有Win11证据不自动扩展到本增量。
++
++| 环境 | 本增量所需证据 | 此草案状态 |
++| --- | --- | --- |
++| Windows 7 SP1 x86 | 正式候选目标在实际Win7设备上的默认格式查询/原生流程及驱动边界 | 待实机；Win7GNU在Win11运行不能替代 |
++| Windows 10 32位/64位WOW64 | 对应实际学校build、音频驱动及完整查询/锁定/清理 | 待独立实机 |
++| Windows 11 64位WOW64 | 原生真实按钮→原共享worker→实际默认格式查询、真实TTL及部署清理 | 待本轮终态原件；后续仅按该机/target/范围追加 |
++| 希沃实际白板 | 在目标系统/设备上的可见触控/DPI、实际设备/静音及可听/PPT共存 | 待独立验收；隐藏无声格式查询不覆盖 |
++
++历史支持结果不证明设备实时存在或人耳听到。持续TLS、严格首TCP五秒、正式MSVC构建及各系统运行、安装/自启动/升级和72小时仍按各自证据验收，不因新增查询按钮解除任何门槛。
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/26-\346\234\254\345\234\260\350\277\234\347\250\213\350\257\255\351\237\263\350\256\276\347\275\256.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/26-\346\234\254\345\234\260\350\277\234\347\250\213\350\257\255\351\237\263\350\256\276\347\275\256.md"
+index 28f9a5f..445f352 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/26-\346\234\254\345\234\260\350\277\234\347\250\213\350\257\255\351\237\263\350\256\276\347\275\256.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/26-\346\234\254\345\234\260\350\277\234\347\250\213\350\257\255\351\237\263\350\256\276\347\275\256.md"
+@@ -1,12 +1,12 @@
+ # 本地远程语音设置
+ 
+-总计划1.41 / D11，2026-10-31。对应P6-10的本机功能开关及P3-11/P3-13的关闭边界；本册不放宽原语音格式、资源硬界、权限或物理完成条件。当前验证结果见[实施记录](10-实施进度与验证记录.md)，完整首版及三系统验收仍未完成。
++总计划1.44 / D11，2026-10-31。对应P6-10的本机功能开关及P3-11/P3-13的关闭边界；本册不放宽原语音格式、资源硬界、权限或物理完成条件。当前验证结果见[实施记录](10-实施进度与验证记录.md)，完整首版及三系统验收仍未完成。
+ 
+ 主管理员从工作台“桌面与系统设置”打开“远程语音设置”，查看已保存的功能开关和最近读取的活跃、排队、播放中任务数量。刷新是显式只读操作，不续本地会话、不重试旧变更。计数只来自持久任务状态；配置开启不代表教师连接服务、输出设备或实际声音可用。生产HTTPS未就绪时页面仍明确说明连接服务不可用，不能借此打开监听或配对。
+ 
+ 开启或关闭均先显示影响复核，确认默认未选；选择确认后才把捕获的目标值、语音配置修订、身份修订和运行代次交给原固定双worker。表单不能指定身份、代次、修订、音频ID或任意路径。取消仅丢弃确认，包含真实控件随取消提交的确认字段也不能解释为许可。锁定丢弃页面及确认，重新登录必须重新读取；后台加载、错误和旧修订冲突同样使旧确认失效。不开自动刷新线程，不生成额外播放域。
+ 
+-后台管理查询和变更只接受当前有效Local GlobalAdmin且已完成初始改密的精确会话；Web、教师、普通用户、替换或锁定的旧本地会话均拒绝。读取前后复核健康、权威、精确lease和运行代次；只返回有界计数、开关与限制，不暴露上传资源、音频正文、路径或授权对象。提交前后继续使用同一writer会话检查，并在该检查中绑定原身份修订和确切执行代次，不把读取后的一次对比当作提交竞态防线。页面导航和按钮限制只是交互层，不能替代这些后台检查。
++后台管理查询和变更只接受当前有效Local GlobalAdmin且已完成初始改密的精确会话；Web、教师、普通用户、替换或锁定的旧本地会话均拒绝。读取前后复核健康、权威、精确lease和运行代次；只返回有界计数、开关、限制及显式查询的历史格式观察，不暴露上传资源、音频正文、路径或授权对象。提交前后继续使用同一writer会话检查，并在该检查中绑定原身份修订和确切执行代次，不把读取后的一次对比当作提交竞态防线。页面导航和按钮限制只是交互层，不能替代这些后台检查。
+ 
+ 关闭先失效语音接纳与原执行代次并唤醒原驱动，再等待原writer执行持久CAS和取消任务。持久写入拒绝或结果不确定时仍保持关闭并唤醒，显示未确认并要求重新读取，不自动恢复。旧修订在进入关闭之前即拒绝的请求不产生此变更。重新开启须明确新动作；旧任务不恢复。活跃计数包括Starting、Gap和Stopping，Playing仅为持久Playing；Stopping在真实Released之前不能被视为终态。设备reset、缓冲归还、unprepare/close及原线程终结继续服从已有执行域条件，保存开关本身不能声称物理停止完成。
+ 
+@@ -23,3 +23,17 @@ Web上传的纯内存权限检查允许在原100毫秒预算内等待正常权
+ 教师能力响应仍采用原严格字段形状，maxDurationMillis/maxRepeatTotal/maxWavBytes变为当前值且互相一致。网页锁定开始时的限制，真实Worklet精确截断采样帧，计时、归一化和上传前都复核；已观察配置/代次变化即取消未发送录音并释放麦克风。500ms按源采样离散为floor(rate/2)，只有该边界允许不足一个源采样的量化差并规范为8000帧，少一整帧仍拒绝。Worklet硬采样上限负责正常自动结束；墙钟到达而最终采样消息尚未齐时只给一次250ms宽限，仍不齐则释放并取消，不填充任意短录音或发送片段。现有任务历史仍可显示旧次数，不能把网页新的次数上限写回旧任务。普通同部署恢复与跨安装映射恢复保留当前目标语音开关和限制，教学包不能重新启用或放宽它们；旧完整记录只读兼容默认限制，新记录缺漏/未知/坏限制均拒绝。
+ 
+ 设备策略、生产持续TLS/校园网络/浏览器信任、真实Win7/Win10/MSVC、希沃触控/DPI与长稳仍分别推进，不由本轮配置功能声明整项或全部项目完成。
++
++## 第三十一轮增量：显式默认输出历史格式检查
++
++本地主管理员在“远程语音设置”中可明确点击“检查默认输出”。检查严格接受空表单，当前有效Local GlobalAdmin精确会话和已加载的权威发布、身份、语音配置修订及运行代次由可信应用捕获，不接收表单自报身份、修订、设备标识或路径。普通状态读取和重新读取不触发原生设备查询；确认变更期间不能用检查动作替换或默认同意原确认。
++
++检查复用原固定双worker及本次JobContext，在查询前后复核健康、原精确会话、四项版本及取消/原期限。实际WinMM仅以WAVE_MAPPER/WAVE_FORMAT_QUERY查询规范16kHz/单声道PCM16格式，不打开播放句柄、不创建音频任务、不录音、不修改静音或音量。同步调用取消后仍等待原worker实际返回；不另建替代线程，晚到结果不能交付给已锁定、导航离开或更换会话的页面。
++
++结果含原查询完成时的观察时间，分为“上次检查：支持播报格式（不代表实际有声）”“上次检查：默认输出不支持播报格式”“上次检查：未发现可用默认输出”及“上次检查：检查失败”。它是历史格式观察，不是当前设备连接状态、播放许可、物理停止证明或人耳可听保证；也不取消原实际播放前的检查。该结果只随本次内存快照交付，不作为持久设备策略或全局可用缓存。
++
++有效期从原查询完成的单调时刻起最多30秒，排队、结果交付、刷新和重绘不重新起算。已有UI轮询只做本地过期/版本失效重绘，不自动查询或新建线程。到期显示需重查；失去当前精确权限、健康或四项版本匹配时旧结果失效。显式重新读取仅在原receipt仍精确匹配原会话及新快照时保留剩余有效期，否则丢弃有效结果。保存开关/限制、锁定与离页不保留可用观察；重新登录须重新读取并明确检查。
++
++检查、查询完成、到期重绘和普通刷新保留未保存的限制草稿，不写入开关或限制，不改变已有任务次数，不把随表单出现的确认字段解释为检查许可；检查按钮沿真实原生空表单动作，不收集或清空其他草稿。教师网页device状态仍为UNVERIFIED，不因本地历史观察显示为当前可用。选择特定输出设备、设备热插拔策略、系统静音/音量及实际可听验证不在本增量交付内。
++
++新增独立隐藏诊断`--voice-output-probe`，runner仅以`--voice-output`显式调用；源码合同为15个固定有序步骤，要求原生真实控件、共享双worker、真实SQLite、实际查询、真实30秒到期、草稿保留/刷新不重查、锁定/新会话、物理关闭及隔离部署清理。实际结果Supported/FormatUnsupported/Unavailable/Failed均按原枚举记录，不要求伪造Supported；没有播放/录音或前台操作。原`--voice-settings-probe`的36步合同保持，不能以单个PASS子串或unit替身代替实机查询。此处定义待验收合同，具体构建/执行/清理结果须按实施记录中已终态原件另行填写。
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/\346\234\252\346\235\245\346\225\231\345\256\244\351\241\271\347\233\256\345\256\214\346\225\264\345\274\200\345\217\221\350\256\241\345\210\222.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/\346\234\252\346\235\245\346\225\231\345\256\244\351\241\271\347\233\256\345\256\214\346\225\264\345\274\200\345\217\221\350\256\241\345\210\222.md"
+index 62ce6bc..7ba9282 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/\346\234\252\346\235\245\346\225\231\345\256\244\351\241\271\347\233\256\345\256\214\346\225\264\345\274\200\345\217\221\350\256\241\345\210\222.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/\346\234\252\346\235\245\346\225\231\345\256\244\351\241\271\347\233\256\345\256\214\346\225\264\345\274\200\345\217\221\350\256\241\345\210\222.md"
+@@ -2,12 +2,14 @@
+ 
+ > 实施状态（2026-10-30）：用户已授权开始开发。本文保留 D11 设计基线；“仅计划、不开发/不测试/不同步”及“全部待实施”为历史状态，当前实现范围、证据与未完成门槛以[实施进度与验证记录](10-实施进度与验证记录.md)为准。
+ 
+-版本：1.43 / 详细设计 D11，日期：2026-10-31（北京时间）。此文件是唯一总计划。第三十轮已取得有限原生Schannel网络、资料分步上传/受权流下载、静态资源及真实隔离Edge今日作业保存/reload核对的阶段证据；仍未交付持续生产监听、严格首TCP五秒、正式Win7/Win10/MSVC、可见希沃及长稳验收，阶段通过不替代完整目标。已按 Rust 重新拆解实现层；教师 Web 保持 TypeScript/React，产品需求与18个业务模块保持，新增12项Rust实施任务并重排依赖。当前已推进原生桌面、工作台、资料链路、正常声音域及HTTP完成端口基础；第十轮实现教师配对、多设备精确会话、持久账号注销及Web应用端口门面；第十一轮继续接入原生教师设备管理页、React配对/会话页面与校验清单驱动的静态资源层。第十二轮接入教师今日作业与共同提醒的严格API、真实SQLite读写/查询及React编辑流程，接口细化见[教师内容API契约](12-教师内容API契约.md)。第十三轮新增网页资料的受控文件工作端口与编辑流程，并实现隔离TCP接纳候选、取得严格5秒的失败证据。第十四轮补齐教师语音API、规范WAV上传/任务查询/停止与浏览器AudioWorklet录音、重采样/Worker编码。第十五轮接入本地账号编辑/停用、多班级科目任教范围、确认/取消/CAS和本人变更后重登录，并保留课表引用影响门禁。第十六轮接入公共树与显示设置联合CAS、精确班级/科目/实际老师的独立资料布局、真实子树组透明度和有界原生示例预览/拖动草稿；独立文字/图片、完整图形参数与真实可见设备验收仍待推进。第十七轮统一实际内容分块的测量与原生几何规则，修正固定父宽下百分比子布局的宽度基准；实现范围见[统一排版契约](18-统一内容测量与原生排版.md)。第十八轮接入独立文字/TXT、最多50页有序图片、本地节点管理、精确内容CAS与清空/撤销、真实内容预览、WIC物理缓存及原件回收/重启核对；实现与验证边界见[独立内容契约](19-独立文字与分页图片内容.md)。第十九轮接入单双周角色交换、共用活动按星期无损拆合、同步双表原子变更及作息类型损失确认；契约见[课表角色交换与活动拆合](20-课表角色交换与活动拆合.md)。第二十轮接入[公共校历候选、差异确认与明确采用](21-公共校历候选与采用.md)，含独立缓存、来源留痕、跨年合并及默认关闭的受限自动策略；校历出站WinHTTP与教师入站监听分开验收。第二十一轮接入[登录自启动与系统变更核对](22-自启动与系统变更核对.md)，含管理员明确确认、持久变更记录、实际回读、移动路径修复及中断后只读核对；真实注销/登录另行验收。第二十二轮实现[完整普通备份与受控恢复的存储、文件及协调服务](23-完整备份与受控恢复.md)，含无凭据新鲜投影、安装绑定、完整媒体流、当前安全底座、真实任务排空与可核对冷切换；第二十三轮继续接通主工作台普通备份/另存、完整预检复核、取消回收与独立恢复进度；第二十四轮推进[无恢复码时清除本机资料并重新初始化](24-无恢复码重新初始化.md)，采用独立修复进程、双确认和保留实例锁的固定目录切换，验证结果以实施记录为准。第二十五轮新增[跨安装显式映射恢复](25-跨安装显式映射恢复.md)，采用全源完整且逐类型目标不重复的手动映射、当前目标精确修订绑定、保留目标目录与安全资料的教学投影、双确认及既有真实冷关闭/三树切换；普通同安装门禁保持，验证结果另见实施记录。跨安装验证与完整验收仍须按实际证据推进，P2-05不据此标为完成。第二十六轮实现固定四槽IOCP与单SSPI线程的真实Schannel TLS1.2候选，隔离联调已验证客户端信任、主机名、分片加密收发及完整原生关闭，细节见[P0候选ADR](14-P0独立TCP接纳候选ADR.md)。该有限批次不代表持续生产接纳；持续生产TLS监听、办公室到白板的正式浏览器闭环及正常网络调度尚未交付，HTTP首连接头期限门槛仍未解决。实施范围和未完成验收见[实施记录](10-实施进度与验证记录.md)；原始设计约束继续有效，详见[Rust开发与验证计划](07-Rust开发与验证计划.md)。
++版本：1.44 / 详细设计 D11，日期：2026-10-31（北京时间）。此文件是唯一总计划。第三十轮已取得有限原生Schannel网络、资料分步上传/受权流下载、静态资源及真实隔离Edge今日作业保存/reload核对的阶段证据；仍未交付持续生产监听、严格首TCP五秒、正式Win7/Win10/MSVC、可见希沃及长稳验收，阶段通过不替代完整目标。已按 Rust 重新拆解实现层；教师 Web 保持 TypeScript/React，产品需求与18个业务模块保持，新增12项Rust实施任务并重排依赖。当前已推进原生桌面、工作台、资料链路、正常声音域及HTTP完成端口基础；第十轮实现教师配对、多设备精确会话、持久账号注销及Web应用端口门面；第十一轮继续接入原生教师设备管理页、React配对/会话页面与校验清单驱动的静态资源层。第十二轮接入教师今日作业与共同提醒的严格API、真实SQLite读写/查询及React编辑流程，接口细化见[教师内容API契约](12-教师内容API契约.md)。第十三轮新增网页资料的受控文件工作端口与编辑流程，并实现隔离TCP接纳候选、取得严格5秒的失败证据。第十四轮补齐教师语音API、规范WAV上传/任务查询/停止与浏览器AudioWorklet录音、重采样/Worker编码。第十五轮接入本地账号编辑/停用、多班级科目任教范围、确认/取消/CAS和本人变更后重登录，并保留课表引用影响门禁。第十六轮接入公共树与显示设置联合CAS、精确班级/科目/实际老师的独立资料布局、真实子树组透明度和有界原生示例预览/拖动草稿；独立文字/图片、完整图形参数与真实可见设备验收仍待推进。第十七轮统一实际内容分块的测量与原生几何规则，修正固定父宽下百分比子布局的宽度基准；实现范围见[统一排版契约](18-统一内容测量与原生排版.md)。第十八轮接入独立文字/TXT、最多50页有序图片、本地节点管理、精确内容CAS与清空/撤销、真实内容预览、WIC物理缓存及原件回收/重启核对；实现与验证边界见[独立内容契约](19-独立文字与分页图片内容.md)。第十九轮接入单双周角色交换、共用活动按星期无损拆合、同步双表原子变更及作息类型损失确认；契约见[课表角色交换与活动拆合](20-课表角色交换与活动拆合.md)。第二十轮接入[公共校历候选、差异确认与明确采用](21-公共校历候选与采用.md)，含独立缓存、来源留痕、跨年合并及默认关闭的受限自动策略；校历出站WinHTTP与教师入站监听分开验收。第二十一轮接入[登录自启动与系统变更核对](22-自启动与系统变更核对.md)，含管理员明确确认、持久变更记录、实际回读、移动路径修复及中断后只读核对；真实注销/登录另行验收。第二十二轮实现[完整普通备份与受控恢复的存储、文件及协调服务](23-完整备份与受控恢复.md)，含无凭据新鲜投影、安装绑定、完整媒体流、当前安全底座、真实任务排空与可核对冷切换；第二十三轮继续接通主工作台普通备份/另存、完整预检复核、取消回收与独立恢复进度；第二十四轮推进[无恢复码时清除本机资料并重新初始化](24-无恢复码重新初始化.md)，采用独立修复进程、双确认和保留实例锁的固定目录切换，验证结果以实施记录为准。第二十五轮新增[跨安装显式映射恢复](25-跨安装显式映射恢复.md)，采用全源完整且逐类型目标不重复的手动映射、当前目标精确修订绑定、保留目标目录与安全资料的教学投影、双确认及既有真实冷关闭/三树切换；普通同安装门禁保持，验证结果另见实施记录。跨安装验证与完整验收仍须按实际证据推进，P2-05不据此标为完成。第二十六轮实现固定四槽IOCP与单SSPI线程的真实Schannel TLS1.2候选，隔离联调已验证客户端信任、主机名、分片加密收发及完整原生关闭，细节见[P0候选ADR](14-P0独立TCP接纳候选ADR.md)。该有限批次不代表持续生产接纳；持续生产TLS监听、办公室到白板的正式浏览器闭环及正常网络调度尚未交付，HTTP首连接头期限门槛仍未解决。实施范围和未完成验收见[实施记录](10-实施进度与验证记录.md)；原始设计约束继续有效，详见[Rust开发与验证计划](07-Rust开发与验证计划.md)。
+ 
+ 第二十七轮继续接通[本地远程语音设置](26-本地远程语音设置.md)，含主管理员默认未确认复核、精确会话/身份/语音修订/运行代次绑定、失败保持关闭与有界任务计数；实际构建、隐藏原生流程及未覆盖门槛分别记入实施记录，不据此通过生产网络或三系统验收。
+ 
+ 第二十八轮推进本地主管理员可配置语音时长、队列和次数上限，串起持久化/当前目标安全设置保留、精确音频代次交接以及教师网页能力与实际Worklet边界；完整目标及设备策略、生产网络和三系统验收仍分别推进。
+ 
++第三十一轮推进主管理员本地“检查默认输出”：复用原固定双worker执行只读格式查询，显示带观察时间且最多保留30秒的历史结果；精确会话、权威/身份/语音修订及运行代次失效后须重查。该检查不播放、录音或调音量，不证明当前设备可用或教室实际有声，教师网页设备状态保持UNVERIFIED。实现和独立隐藏原生流程的实际结果另记实施记录；真实Win7/Win10/Win11、希沃可见设备、驱动停止及长稳继续分别验收。
++
+ [开发导航与需求追踪](00-开发导航与需求追踪.md) · [模块接口](01-模块划分与接口契约.md) · [功能链](02-功能链与状态机.md) · [调用链](03-调用链与线程模型.md) · [详细步骤](04-开发阶段与任务步骤.md) · [测试验收](05-测试验收与发布清理.md) · [整体Review](06-整体Review与风险登记.md) · [最新UI](../UI设计/01-最新界面图册.md)
+ 
+ ## 1. 产品目标与运行方式
+diff --git "a/\345\274\200\345\217\221\350\256\241\345\210\222/\346\250\241\345\235\227/11-Web\346\214\211\344\275\217\345\275\225\351\237\263\344\270\216\346\234\254\345\234\260\350\257\255\351\237\263\346\222\255\346\212\245.md" "b/\345\274\200\345\217\221\350\256\241\345\210\222/\346\250\241\345\235\227/11-Web\346\214\211\344\275\217\345\275\225\351\237\263\344\270\216\346\234\254\345\234\260\350\257\255\351\237\263\346\222\255\346\212\245.md"
+index 6fc7e91..7ff9a1c 100644
+--- "a/\345\274\200\345\217\221\350\256\241\345\210\222/\346\250\241\345\235\227/11-Web\346\214\211\344\275\217\345\275\225\351\237\263\344\270\216\346\234\254\345\234\260\350\257\255\351\237\263\346\222\255\346\212\245.md"
++++ "b/\345\274\200\345\217\221\350\256\241\345\210\222/\346\250\241\345\235\227/11-Web\346\214\211\344\275\217\345\275\225\351\237\263\344\270\216\346\234\254\345\234\260\350\257\255\351\237\263\346\222\255\346\212\245.md"
+@@ -121,10 +121,16 @@ WinMM使用WAVE_MAPPER/规范PCM16单声道16kHz及CALLBACK_EVENT，固定3×16K
+ 
+ [总计划1.27/D11语音API契约](../15-教师语音API契约.md)补齐应用路由、严格响应、规范WAV受控流上传、当前绑定班级/原设备/运行代次门禁、任务列表及停止/未知命令查询；浏览器按住/上滑/键盘/迟到授权/隐藏取消、AudioWorklet mono、Offline重采样和Worker编码已落代码。正常按需音频域、托盘/WTS/电源停止沿用第九轮，不再把它们说成尚未接线。
+ 
+-独立分层运行结果以[本轮实施进度](../10-实施进度与验证记录.md)为准；真实教师手机/硬件麦克风、可信校园TLS、网络事件到计费stage/120秒硬期限、Win7/Win10及可听PPT共存仍未验收。能力页当前设备状态诚实为UNVERIFIED，首次实际播放才由现有WAVE_FORMAT_QUERY验证，不把会话可用伪装成扬声器保证。采集缓存32MiB与额外规范化源/输出/Worker副本分列预算，非整个浏览器heap实测上限。
++独立分层运行结果以[本轮实施进度](../10-实施进度与验证记录.md)为准；真实教师手机/硬件麦克风、可信校园TLS、网络事件到计费stage/120秒硬期限、Win7/Win10及可听PPT共存仍未验收。教师能力页设备状态仍诚实为UNVERIFIED；实际播放前继续执行原WAVE_FORMAT_QUERY，第三十一轮另有本地明确触发的历史格式检查，不把会话或历史检查当作扬声器保证。采集缓存32MiB与额外规范化源/输出/Worker副本分列预算，非整个浏览器heap实测上限。
+ 
+ ### 第二十八轮实施边界：本地可配置语音上限
+ 
+ 主管理员本地设置开始接通时长、全机/本人队列及次数上限的明确复核、原writer CAS与持久化，硬格式和资源界限不放宽，默认保持原60秒/4/2/10。设置保存取消旧任务和上传，不改写旧任务次数；网页能力与真实Worklet按捕获的当前限制工作，目标恢复不回滚当前本机语音安全设置。精确运行代次交接、草稿/取消、旧codec兼容、实际回归与未完成设备/三系统门槛见[本地设置契约](../26-本地远程语音设置.md)和实施记录；不能以局部自动化声称M18全部完成。
+ 
+ 墙钟与音频渲染时钟分别计量：到达当前时长上限时最终PCM消息尚未齐，只允许一次250ms宽限；Worklet采样上限始终不变，宽限耗尽取消并释放。500ms奇数源采样率仅容许不足一个源采样的离散边界差，不能放宽任意短输入。单槽原生参与屏障防止旧域退休前吸入新任务，标记不等同物理Released/线程退出；Failed清退按交接序号只成功一次，避免自唤醒循环。
++
++### 第三十一轮实施边界：本地默认输出历史格式检查
++
++[本地设置契约](../26-本地远程语音设置.md)细化原本地全局设备策略中的只读检查：管理员明确动作、原共享双worker、原精确会话及四版本检查、查询完成起最多30秒历史结果。检查仅验证默认输出对规范格式的支持，不播放或改变系统音量，不代表实际有声；普通刷新不查询，锁定、失效和迟到取消不能复活旧结果。教师网页能力仍为UNVERIFIED，实际播放前检查、缓冲归还及停止条件全部保留。
++
++新增独立隐藏原生查询探针与原36步设置探针分开记录；源码、Host规则、目标构建、实际Win11设备查询、实际Win7/Win10、可听PPT共存及希沃前台分别取证。本节不填写尚未终态的测试计数或PASS，不把查询作为M18或P6-10整项完成。
+diff --git a/crates/fc-bootstrap/src/application/voice_output_probe.rs b/crates/fc-bootstrap/src/application/voice_output_probe.rs
+new file mode 100644
+index 0000000..91f5c96
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/voice_output_probe.rs
+@@ -0,0 +1,260 @@
++//! Real hidden native controls -> original two shared workers -> WinMM query.
++//! No fake hardware, audio task, output stream, microphone, or volume operation.
++use super::*;
++use fc_bootstrap::backend::{
++    VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceManagementSnapshot,
++};
++use voice_editor as v;
++use voice_management_probe::{
++    checked, login, make_app, no_jobs, open, open_settings, pump, require, same_saved, saved,
++    stop_owned_app, submit, LOGIN_NAME, PASSWORD_VALUE,
++};
++
++type Check<T> = std::result::Result<T, String>;
++const ORDER: [&str; 15] = [
++    "native-setup-global-administrator",
++    "native-open-voice-settings",
++    "saved-default-enabled-no-jobs",
++    "native-draft-refresh-no-write",
++    "native-nonempty-check-rejected",
++    "native-explicit-output-query",
++    "query-keeps-saved-state-and-draft",
++    "native-refresh-retains-exact-observation",
++    "real-thirty-second-observation-expiry",
++    "native-explicit-recheck-new-observation",
++    "native-lock-discards-observation-and-draft",
++    "native-relogin-new-lease",
++    "native-reopen-unchecked-original-settings",
++    "app-physical-shutdown",
++    "isolated-deployment-cleanup",
++];
++fn mark(step: &mut usize, name: &str) -> Check<()> {
++    require(ORDER.get(*step) == Some(&name), "exact output-probe step")?;
++    println!("VOICE_OUTPUT_NATIVE_STEP index={} name={name}", *step);
++    *step += 1;
++    Ok(())
++}
++fn observation(app: &App, state: &VoiceManagementSnapshot) -> Option<VoiceDeviceObservation> {
++    app.voice_editor
++        .as_ref()?
++        .retained_device_observation(state, app.lease?)
++}
++fn draft_kept(app: &App) -> Check<()> {
++    let view = app.view();
++    for (id, expected) in [
++        (v::DURATION_SECONDS, "2.5"),
++        (v::PENDING_JOBS, "3"),
++        (v::PENDING_PER_OWNER, "1"),
++        (v::REPEAT_TOTAL, "2"),
++    ] {
++        require(
++            view.fields
++                .iter()
++                .any(|f| f.id == id && f.value == expected),
++            "actual native draft retained without saving",
++        )?;
++    }
++    require(
++        app.voice_editor
++            .as_ref()
++            .is_some_and(|editor| editor.has_unsaved_changes()),
++        "unsaved draft remains unsaved",
++    )
++}
++fn explicit_check(app: &mut App, deadline: Instant) -> Check<VoiceDeviceObservation> {
++    checked(
++        app.window.probe_submit(v::CHECK_OUTPUT, FormData::new()),
++        "real hidden empty-form output button",
++    )?;
++    pump(app, deadline)?;
++    observation(app, &saved(app)?).ok_or_else(|| "voice-output-probe: query receipt missing".into())
++}
++fn workflow(
++    app: &mut App,
++    paths: &DataPaths,
++    step: &mut usize,
++    deadline: Instant,
++) -> Check<(VoiceDeviceCheckResult, VoiceDeviceCheckResult)> {
++    open(app, paths, deadline)?;
++    require(app.screen == Screen::Setup, "fresh output-probe deployment")?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (SCHOOL, "Synthetic voice output school"),
++            (LOGIN, LOGIN_NAME),
++            (NAME, "Synthetic voice output administrator"),
++            (PASSWORD, PASSWORD_VALUE),
++            (CONFIRM, PASSWORD_VALUE),
++        ],
++        deadline,
++    )?;
++    require(app.screen == Screen::Code, "real native setup committed")?;
++    submit(app, ACK, &[], deadline)?;
++    if app.screen == Screen::Login {
++        login(app, deadline)?;
++    }
++    require(
++        app.screen == Screen::Home,
++        "local global administrator ready",
++    )?;
++    mark(step, "native-setup-global-administrator")?;
++    open_settings(app, deadline)?;
++    mark(step, "native-open-voice-settings")?;
++    let initial = saved(app)?;
++    no_jobs(&initial)?;
++    require(
++        initial.enabled && observation(app, &initial).is_none(),
++        "default enabled is not an output observation",
++    )?;
++    mark(step, "saved-default-enabled-no-jobs")?;
++    submit(
++        app,
++        v::REFRESH,
++        &[
++            (v::DURATION_SECONDS, "2.5"),
++            (v::PENDING_JOBS, "3"),
++            (v::PENDING_PER_OWNER, "1"),
++            (v::REPEAT_TOTAL, "2"),
++        ],
++        deadline,
++    )?;
++    draft_kept(app)?;
++    same_saved(&initial, &saved(app)?)?;
++    mark(step, "native-draft-refresh-no-write")?;
++    let mut forbidden = FormData::new();
++    checked(
++        forbidden.insert(v::DURATION_SECONDS, "2.5".into()),
++        "negative form",
++    )?;
++    require(
++        app.window.probe_submit(v::CHECK_OUTPUT, forbidden).is_err(),
++        "nonempty check rejected by actual native adapter",
++    )?;
++    pump(app, deadline)?;
++    require(
++        observation(app, &saved(app)?).is_none(),
++        "rejected check has no receipt",
++    )?;
++    same_saved(&initial, &saved(app)?)?;
++    draft_kept(app)?;
++    mark(step, "native-nonempty-check-rejected")?;
++    let first = explicit_check(app, deadline)?;
++    require(
++        first.is_fresh(),
++        "actual query returned a fresh observation",
++    )?;
++    mark(step, "native-explicit-output-query")?;
++    same_saved(&initial, &saved(app)?)?;
++    draft_kept(app)?;
++    mark(step, "query-keeps-saved-state-and-draft")?;
++    submit(app, v::REFRESH, &[], deadline)?;
++    require(
++        observation(app, &saved(app)?) == Some(first.clone()),
++        "explicit refresh retains exact original observation including Instant",
++    )?;
++    draft_kept(app)?;
++    same_saved(&initial, &saved(app)?)?;
++    mark(step, "native-refresh-retains-exact-observation")?;
++    // Real monotonic 30-second TTL, no fake clock or renewed observation budget.
++    while first.is_fresh() {
++        pump(app, deadline)?;
++        std::thread::sleep(Duration::from_millis(20));
++    }
++    pump(app, deadline)?;
++    require(
++        app.pending.is_none()
++            && observation(app, &saved(app)?).is_none()
++            && app
++                .view()
++                .description
++                .contains("上次检查结果已过期，请重新检查。"),
++        "ordinary local polling expires the receipt without an automatic query",
++    )?;
++    draft_kept(app)?;
++    same_saved(&initial, &saved(app)?)?;
++    mark(step, "real-thirty-second-observation-expiry")?;
++    let second = explicit_check(app, deadline)?;
++    require(
++        second.is_fresh()
++            && second != first
++            && second.observed_monotonic_millis > first.observed_monotonic_millis,
++        "only a second explicit query yields a new completion timestamp",
++    )?;
++    same_saved(&initial, &saved(app)?)?;
++    draft_kept(app)?;
++    mark(step, "native-explicit-recheck-new-observation")?;
++    let old_lease = app.lease.ok_or("voice-output-probe: lease missing")?;
++    submit(app, LOCK, &[], deadline)?;
++    require(
++        app.screen == Screen::Login && app.lease.is_none() && app.voice_editor.is_none(),
++        "real lock discards owned editor and observation/draft",
++    )?;
++    mark(step, "native-lock-discards-observation-and-draft")?;
++    login(app, deadline)?;
++    require(
++        app.lease != Some(old_lease),
++        "relogin has a different exact lease",
++    )?;
++    mark(step, "native-relogin-new-lease")?;
++    open_settings(app, deadline)?;
++    let reopened = saved(app)?;
++    same_saved(&initial, &reopened)?;
++    require(
++        observation(app, &reopened).is_none()
++            && app
++                .lease
++                .is_some_and(|lease| !second.is_current_for(&reopened, lease))
++            && app
++                .voice_editor
++                .as_ref()
++                .is_some_and(|editor| !editor.has_unsaved_changes())
++            && !app.view().description.contains("检查时间："),
++        "new editor has no old observation or unsaved draft",
++    )?;
++    mark(step, "native-reopen-unchecked-original-settings")?;
++    Ok((first.result, second.result))
++}
++
++pub(super) fn run() -> Check<()> {
++    let started = Instant::now();
++    let deadline = started + Duration::from_secs(120);
++    let mut random = [0u8; 16];
++    checked(SystemRandom.fill(&mut random), "output deployment nonce")?;
++    let nonce: String = random.iter().map(|byte| format!("{byte:02x}")).collect();
++    let root = std::env::temp_dir().join(format!(
++        "FutureClassroom-Test-VoiceOutput-{}-{nonce}",
++        std::process::id()
++    ));
++    let paths = checked(
++        DataPaths::isolated_test(root.clone()),
++        "output isolated paths",
++    )?;
++    let deployment = checked(
++        paths.prepare_for_current_user(),
++        "output protected deployment",
++    )?;
++    checked(deployment.read_back(), "output ACL readback")?;
++    let instance = checked(
++        InstanceGuard::acquire(paths.root()),
++        "output instance guard",
++    )?;
++    let mut step = 0;
++    let mut app = make_app(&paths, deadline)?;
++    // Owned windows remain hidden and no foreground mutation is requested.
++    // This probe does not sample or claim global foreground-window stability.
++    let outcome = workflow(&mut app, &paths, &mut step, deadline);
++    // Even an assertion failure must physically finish the original workers,
++    // writer, shell, and audio owner before this deployment can be deleted.
++    stop_owned_app(app, deadline)?;
++    drop(instance);
++    drop(deployment);
++    checked(fs::remove_dir_all(&root), "remove closed output deployment")?;
++    require(!root.exists(), "output deployment cleanup complete")?;
++    let (first_result, second_result) = outcome?;
++    mark(&mut step, "app-physical-shutdown")?;
++    mark(&mut step, "isolated-deployment-cleanup")?;
++    require(step == ORDER.len(), "all fixed output-probe steps complete")?;
++    println!("VOICE_OUTPUT_NATIVE_PASS steps={step} shared_workers=2 first_result={first_result:?} second_result={second_result:?} ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms={}", started.elapsed().as_millis());
++    Ok(())
++}
+diff --git a/crates/fc-bootstrap/src/backend/voice/management/device_check.rs b/crates/fc-bootstrap/src/backend/voice/management/device_check.rs
+new file mode 100644
+index 0000000..8bc4c27
+--- /dev/null
++++ b/crates/fc-bootstrap/src/backend/voice/management/device_check.rs
+@@ -0,0 +1,190 @@
++//! A worker-owned query receipt, never a global cache or an audio permission.
++use super::*;
++use fc_ports::audio::{AudioOutputError, DefaultOutputSupport};
++use fc_runtime::worker::JobContext;
++
++const OBSERVATION_LIFETIME: Duration = Duration::from_secs(30);
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum VoiceDeviceCheckResult {
++    Supported,
++    FormatUnsupported,
++    Unavailable,
++    /// No native error code, path, endpoint identity or driver text is exposed.
++    Failed,
++}
++
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct VoiceDeviceObservation {
++    pub result: VoiceDeviceCheckResult,
++    pub observed_at: LocalDateTime,
++    pub observed_monotonic_millis: u64,
++    observed: Instant,
++    lease: SessionLease,
++    publication_revision: Revision,
++    identity_revision: Revision,
++    voice_revision: Revision,
++    runtime_generation: u64,
++}
++
++impl VoiceDeviceObservation {
++    /// Remaining historical observation lifetime, measured from completion of
++    /// the native query, never from UI delivery. Zero means expired.
++    pub fn remaining_validity(&self) -> Duration {
++        Instant::now()
++            .checked_duration_since(self.observed)
++            .map(|age| OBSERVATION_LIFETIME.saturating_sub(age))
++            .unwrap_or(Duration::ZERO)
++    }
++
++    pub fn is_fresh(&self) -> bool {
++        !self.remaining_validity().is_zero()
++    }
++
++    /// Historical format support only. This does not check current hardware,
++    /// authorize a session, establish physical release, or promise audible sound.
++    /// The UI must first accept the fresh snapshot through its normal lease gate.
++    pub fn is_current_for(&self, snapshot: &VoiceManagementSnapshot, lease: SessionLease) -> bool {
++        self.current_at(snapshot, lease, Instant::now())
++    }
++
++    fn current_at(
++        &self,
++        snapshot: &VoiceManagementSnapshot,
++        lease: SessionLease,
++        now: Instant,
++    ) -> bool {
++        lease == self.lease
++            && snapshot.publication_revision == self.publication_revision
++            && snapshot.identity_revision == self.identity_revision
++            && snapshot.revision == self.voice_revision
++            && snapshot.runtime_generation == self.runtime_generation
++            && now
++                .checked_duration_since(self.observed)
++                .is_some_and(|age| age < OBSERVATION_LIFETIME)
++    }
++}
++
++impl VoiceManagementSnapshot {
++    pub fn current_device_observation(
++        &self,
++        lease: SessionLease,
++    ) -> Option<&VoiceDeviceObservation> {
++        self.device_observation
++            .as_ref()
++            .filter(|observation| observation.is_current_for(self, lease))
++    }
++}
++
++impl VoiceService {
++    /// Invoke on an existing shared worker, with a trusted query-only platform
++    /// closure. No Backend/writer/session lock is held across that closure.
++    /// Cancellation is cooperative: an in-flight synchronous query still owns
++    /// its worker until return, but its late result cannot become an observation.
++    #[allow(clippy::too_many_arguments)]
++    pub fn check_default_output_reviewed(
++        &self,
++        lease: SessionLease,
++        expected_publication: Revision,
++        expected_voice: Revision,
++        expected_identity: Revision,
++        expected_runtime: u64,
++        context: &JobContext,
++        query: impl FnOnce() -> std::result::Result<DefaultOutputSupport, AudioOutputError>,
++    ) -> Result<VoiceManagementSnapshot> {
++        let checkpoint = || {
++            context
++                .checkpoint()
++                .map_err(|_| BackendError::Storage(StorageError::ExecutionCancelled))
++        };
++        checkpoint()?;
++        // This clone scopes every metadata writer wait to this job, without
++        // installing the job lifetime in the shared audio service.
++        let service = self.with_execution_fence(Arc::new(context.execution_fence()));
++        let matches_review = |view: &VoiceManagementSnapshot| -> Result<()> {
++            if view.runtime_generation != expected_runtime {
++                return Err(BackendError::Voice(VoiceRepositoryError::Domain(
++                    VoiceError::StaleGeneration,
++                )));
++            }
++            if view.publication_revision != expected_publication
++                || view.identity_revision != expected_identity
++                || view.revision != expected_voice
++            {
++                return Err(BackendError::Voice(VoiceRepositoryError::Domain(
++                    VoiceError::RevisionConflict,
++                )));
++            }
++            Ok(())
++        };
++        let initial = service.management_snapshot(lease)?;
++        matches_review(&initial)?;
++        let local_generation = service.inner.control.generation();
++        let authority = service
++            .inner
++            .authority
++            .snapshot()
++            .map_err(|_| BackendError::Closed)?;
++        if authority.revision != expected_publication
++            || authority.data.revision != expected_identity
++        {
++            return Err(BackendError::Storage(StorageError::Busy));
++        }
++        let actor = service.management_actor(lease, local_generation, &authority)?;
++        let health = service.management_current(&authority)?;
++        let runtime = service.inner.runtime_state.load(Ordering::Acquire);
++        let before_tick = service.inner.monotonic.monotonic_millis();
++        let interval_current = || -> Result<()> {
++            checkpoint()?;
++            let tick = service.inner.monotonic.monotonic_millis();
++            if tick < before_tick
++                || service.management_actor(lease, local_generation, &authority)? != actor
++                || service.management_current(&authority)? != health
++                || service.inner.runtime_state.load(Ordering::Acquire) != runtime
++                || runtime >> 1 != expected_runtime
++            {
++                return Err(BackendError::Storage(StorageError::Busy));
++            }
++            checkpoint()
++        };
++        interval_current()?;
++        let result = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(query)) {
++            Ok(Ok(DefaultOutputSupport::Supported)) => VoiceDeviceCheckResult::Supported,
++            Ok(Ok(DefaultOutputSupport::FormatUnsupported)) => {
++                VoiceDeviceCheckResult::FormatUnsupported
++            }
++            Ok(Ok(DefaultOutputSupport::Unavailable)) => VoiceDeviceCheckResult::Unavailable,
++            Ok(Err(_)) | Err(_) => VoiceDeviceCheckResult::Failed,
++        };
++        interval_current()?;
++        let observed_at = service.inner.clock.now();
++        let observed_monotonic_millis = service.inner.monotonic.monotonic_millis();
++        let observed = Instant::now();
++        let mut view = service.management_snapshot(lease)?;
++        matches_review(&view)?;
++        interval_current()?;
++        if service.inner.monotonic.monotonic_millis() < observed_monotonic_millis {
++            return Err(BackendError::Storage(StorageError::Busy));
++        }
++        view.device_observation = Some(VoiceDeviceObservation {
++            result,
++            observed_at,
++            observed_monotonic_millis,
++            observed,
++            lease,
++            publication_revision: expected_publication,
++            identity_revision: expected_identity,
++            voice_revision: expected_voice,
++            runtime_generation: expected_runtime,
++        });
++        interval_current()?;
++        if view.current_device_observation(lease).is_none() {
++            return Err(BackendError::Storage(StorageError::ExecutionCancelled));
++        }
++        interval_current()?;
++        Ok(view)
++    }
++}
++
++#[cfg(test)]
++mod tests;
+diff --git a/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs b/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs
+new file mode 100644
+index 0000000..71e9c6c
+--- /dev/null
++++ b/crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs
+@@ -0,0 +1,562 @@
++use super::*;
++use crate::backend::voice::tests as fixtures;
++use fc_domain::identity::{AssignmentScope, NewAccount};
++use fc_runtime::worker::{JobError, JobTicket, Rejection, Task, WorkerHandle, WorkerPool};
++use std::sync::{atomic::AtomicUsize, mpsc};
++
++type Check = Box<dyn FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send>;
++struct Work(Check);
++impl Task for Work {
++    type Output = Result<VoiceManagementSnapshot>;
++    fn allocation_bytes(&self) -> Option<usize> {
++        Some(std::mem::size_of::<Check>())
++    }
++    fn run(self, context: &JobContext) -> Self::Output {
++        (self.0)(context)
++    }
++}
++fn submit(
++    handle: &WorkerHandle<Work>,
++    mut work: Work,
++    deadline: Instant,
++) -> JobTicket<Result<VoiceManagementSnapshot>> {
++    loop {
++        match handle.try_submit(work, deadline) {
++            Ok(ticket) => return ticket,
++            Err(error) if error.kind == Rejection::Busy && Instant::now() < deadline => {
++                work = error.task;
++                std::thread::yield_now();
++            }
++            Err(error) => panic!("device-check fixture admission {:?}", error.kind),
++        }
++    }
++}
++fn run(
++    check: impl FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send + 'static,
++) -> Result<VoiceManagementSnapshot> {
++    let pool = WorkerPool::<Work>::start().unwrap();
++    let ticket = submit(
++        &pool.handle(),
++        Work(Box::new(check)),
++        Instant::now() + Duration::from_secs(15),
++    );
++    let result = ticket.wait().unwrap();
++    pool.join().unwrap();
++    result
++}
++fn check(
++    service: VoiceService,
++    lease: SessionLease,
++    review: VoiceManagementSnapshot,
++    query: impl FnOnce() -> std::result::Result<DefaultOutputSupport, AudioOutputError> + Send + 'static,
++) -> Result<VoiceManagementSnapshot> {
++    run(move |context| {
++        service.check_default_output_reviewed(
++            lease,
++            review.publication_revision,
++            review.revision,
++            review.identity_revision,
++            review.runtime_generation,
++            context,
++            query,
++        )
++    })
++}
++
++#[test]
++fn device_observation_is_local_historical_and_never_changes_voice_or_opens_admission() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, web, _class) = fixtures::shared_fixture();
++    let service = backend.0.lock().unwrap().voice_service();
++    let lease = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let original = service.management_snapshot(lease).unwrap();
++    service
++        .set_enabled(lease, false, original.revision)
++        .unwrap();
++    let review = service.management_snapshot(lease).unwrap();
++    let inventory = service.inventory().unwrap();
++    let epoch = service.generation();
++    for (answer, expected) in [
++        (
++            Ok(DefaultOutputSupport::Supported),
++            VoiceDeviceCheckResult::Supported,
++        ),
++        (
++            Ok(DefaultOutputSupport::FormatUnsupported),
++            VoiceDeviceCheckResult::FormatUnsupported,
++        ),
++        (
++            Ok(DefaultOutputSupport::Unavailable),
++            VoiceDeviceCheckResult::Unavailable,
++        ),
++        (
++            Err(AudioOutputError::Driver(0xdead_beef)),
++            VoiceDeviceCheckResult::Failed,
++        ),
++        (
++            Err(AudioOutputError::CleanupPending),
++            VoiceDeviceCheckResult::Failed,
++        ),
++    ] {
++        let query_backend = backend.0.clone();
++        let query_service = service.clone();
++        let view = check(service.clone(), lease, review.clone(), move || {
++            // A native adapter must not inherit a Backend or ledger mutex.
++            assert!(query_backend.try_lock().is_ok());
++            assert!(query_service.inner.ledger.try_lock().is_ok());
++            answer
++        })
++        .unwrap();
++        let observation = view.current_device_observation(lease).unwrap();
++        assert_eq!(observation.result, expected);
++        assert!(observation.is_fresh());
++        assert!(!observation.is_current_for(&view, web));
++        assert!(observation.remaining_validity() <= OBSERVATION_LIFETIME);
++        assert_eq!(observation.observed_at, service.inner.clock.now());
++        assert!(!view.enabled && !view.admitting);
++        assert!(observation.current_at(
++            &view,
++            lease,
++            observation.observed + Duration::from_millis(29_999)
++        ));
++        assert!(!observation.current_at(&view, lease, observation.observed + OBSERVATION_LIFETIME));
++        assert!(!observation.current_at(
++            &view,
++            lease,
++            observation.observed - Duration::from_millis(1)
++        ));
++        let refreshed = service.management_snapshot(lease).unwrap();
++        assert!(refreshed.device_observation.is_none());
++        assert!(observation.is_current_for(&refreshed, lease));
++        for field in ["publication", "identity", "voice", "runtime"] {
++            let mut changed = refreshed.clone();
++            match field {
++                "publication" => changed.publication_revision = Revision::new(999),
++                "identity" => changed.identity_revision = Revision::new(999),
++                "voice" => changed.revision = Revision::new(999),
++                "runtime" => changed.runtime_generation += 1,
++                _ => unreachable!(),
++            }
++            assert!(!observation.is_current_for(&changed, lease));
++        }
++        assert_eq!(service.inventory().unwrap(), inventory);
++        assert_eq!(service.generation(), epoch);
++    }
++    let fresh = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let next = service.management_snapshot(fresh).unwrap();
++    assert!(next.device_observation.is_none());
++}
++
++#[test]
++fn stale_reviews_and_unauthorized_leases_never_invoke_the_native_query() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, web, _class) = fixtures::shared_fixture();
++    let service = backend.0.lock().unwrap().voice_service();
++    let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let review = service.management_snapshot(local).unwrap();
++    let calls = Arc::new(AtomicUsize::new(0));
++    let probe = |lease, review| {
++        let called = calls.clone();
++        assert!(check(service.clone(), lease, review, move || {
++            called.fetch_add(1, Ordering::AcqRel);
++            Ok(DefaultOutputSupport::Supported)
++        })
++        .is_err());
++    };
++    probe(web, review.clone());
++    for kind in ["publication", "identity", "voice", "runtime"] {
++        let mut stale = review.clone();
++        match kind {
++            "publication" => stale.publication_revision = Revision::new(999),
++            "identity" => stale.identity_revision = Revision::new(999),
++            "voice" => stale.revision = Revision::new(999),
++            "runtime" => stale.runtime_generation += 1,
++            _ => unreachable!(),
++        }
++        probe(local, stale);
++    }
++    let replacement = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    probe(local, review.clone());
++    backend
++        .0
++        .lock()
++        .unwrap()
++        .ledger
++        .lock()
++        .unwrap()
++        .sessions
++        .revoke_exact(replacement);
++    probe(replacement, review.clone());
++    let expired = super::super::tests::issue_account(
++        &backend.0.lock().unwrap(),
++        1,
++        TrustedOrigin::Local,
++        true,
++    );
++    probe(expired, review);
++    assert_eq!(calls.load(Ordering::Acquire), 0);
++}
++
++#[test]
++fn device_checks_require_global_role_and_password_change_without_querying() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, _web, class) = fixtures::shared_fixture();
++    let service = backend.0.lock().unwrap().voice_service();
++    let admin = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let review = service.management_snapshot(admin).unwrap();
++    let password = "Synthetic device manager 2026!";
++    backend
++        .0
++        .lock()
++        .unwrap()
++        .create_account(
++            admin,
++            NewAccount {
++                id: PrincipalId::new(2).unwrap(),
++                login_name: "device-manager".into(),
++                display_name: "Device manager".into(),
++                role: Role::GlobalAdmin,
++                scopes: vec![],
++            },
++            Password::new(password.into()).unwrap(),
++        )
++        .unwrap();
++    let must_change = super::super::tests::issue_account(
++        &backend.0.lock().unwrap(),
++        2,
++        TrustedOrigin::Local,
++        false,
++    );
++    assert!(
++        check(service.clone(), must_change, review.clone(), || panic!(
++            "must-change query"
++        ))
++        .is_err()
++    );
++    backend
++        .0
++        .lock()
++        .unwrap()
++        .change_password(
++            must_change,
++            Password::new(password.into()).unwrap(),
++            Password::new("Changed synthetic device manager 2026!".into()).unwrap(),
++        )
++        .unwrap();
++    let admin = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let subject = SubjectId::new(1).unwrap();
++    backend
++        .0
++        .lock()
++        .unwrap()
++        .identity(
++            admin,
++            IdentityCommand::PutSubject {
++                id: subject,
++                name: "Synthetic device subject".into(),
++                enabled: true,
++                color: fc_domain::identity::Rgb {
++                    red: 1,
++                    green: 2,
++                    blue: 3,
++                },
++                expected_revision: None,
++            },
++        )
++        .unwrap();
++    for (role, scopes) in [
++        (Role::User, vec![]),
++        (
++            Role::TeacherAdmin,
++            vec![AssignmentScope {
++                class_id: class,
++                subject_id: subject,
++            }],
++        ),
++    ] {
++        backend
++            .0
++            .lock()
++            .unwrap()
++            .identity(
++                admin,
++                IdentityCommand::UpdateAccount {
++                    id: PrincipalId::new(2).unwrap(),
++                    display_name: "Limited device account".into(),
++                    role,
++                    enabled: true,
++                    scopes,
++                },
++            )
++            .unwrap();
++        let review = service.management_snapshot(admin).unwrap();
++        let limited = super::super::tests::issue_account(
++            &backend.0.lock().unwrap(),
++            2,
++            TrustedOrigin::Local,
++            false,
++        );
++        assert!(check(service.clone(), limited, review, || panic!("limited query")).is_err());
++        // Restore the original active administrator without issuing an old lease.
++        service
++            .inner
++            .control
++            .0
++            .active_local
++            .store(admin.id(), Ordering::Release);
++        service
++            .inner
++            .control
++            .0
++            .active_principal
++            .store(admin.principal_id().get(), Ordering::Release);
++    }
++}
++
++#[test]
++fn native_results_after_lock_revoke_publication_voice_change_or_epoch_change_are_discarded() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    for kind in [
++        "lock", "revoke", "identity", "voice", "runtime", "fault", "request",
++    ] {
++        let (_directory, backend, web, class) = fixtures::shared_fixture();
++        let service = backend.0.lock().unwrap().voice_service();
++        let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++        let review = service.management_snapshot(local).unwrap();
++        let original = service.inventory().unwrap();
++        let action_service = service.clone();
++        let action_backend = backend.0.clone();
++        let alive = Arc::new(AtomicBool::new(true));
++        let current = alive.clone();
++        let scoped =
++            service.with_execution_fence(Arc::new(move || current.load(Ordering::Acquire)));
++        let result = check(scoped, local, review, move || {
++            match kind {
++                "lock" => action_service.inner.control.lock_local(),
++                "revoke" => {
++                    assert!(action_service
++                        .inner
++                        .ledger
++                        .lock()
++                        .unwrap()
++                        .sessions
++                        .revoke_exact(local));
++                }
++                "identity" => {
++                    action_backend
++                        .lock()
++                        .unwrap()
++                        .identity(
++                            local,
++                            IdentityCommand::PutSubject {
++                                id: SubjectId::new(1).unwrap(),
++                                name: "Changed device observation authority".into(),
++                                enabled: true,
++                                color: fc_domain::identity::Rgb {
++                                    red: 1,
++                                    green: 2,
++                                    blue: 3,
++                                },
++                                expected_revision: None,
++                            },
++                        )
++                        .unwrap();
++                }
++                "voice" => {
++                    let request = fixtures::independent_request(&action_service, web, class, 987);
++                    action_service.submit(web, request).unwrap();
++                }
++                "runtime" => {
++                    action_service.invalidate_runtime();
++                }
++                "fault" => action_service.inner.control.health_gate().fault(),
++                "request" => alive.store(false, Ordering::Release),
++                _ => unreachable!(),
++            }
++            Ok(DefaultOutputSupport::Supported)
++        });
++        assert!(result.is_err(), "late {kind} must not publish");
++        if matches!(kind, "request" | "revoke" | "lock") {
++            assert_eq!(service.inventory().unwrap(), original);
++        }
++    }
++}
++
++#[test]
++fn cancellation_and_original_deadline_suppress_late_query_result_but_keep_worker_until_return() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, _web, _class) = fixtures::shared_fixture();
++    let service = backend.0.lock().unwrap().voice_service();
++    let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let review = service.management_snapshot(local).unwrap();
++    let original = service.inventory().unwrap();
++    let pool = WorkerPool::<Work>::start().unwrap();
++    let (entered, begun) = mpsc::channel();
++    let (release, released) = mpsc::channel();
++    let action_service = service.clone();
++    let action_review = review.clone();
++    let rejected = Arc::new(AtomicBool::new(false));
++    let observed_rejection = rejected.clone();
++    let ticket = submit(
++        &pool.handle(),
++        Work(Box::new(move |context| {
++            let result = action_service.check_default_output_reviewed(
++                local,
++                action_review.publication_revision,
++                action_review.revision,
++                action_review.identity_revision,
++                action_review.runtime_generation,
++                context,
++                || {
++                    entered.send(()).unwrap();
++                    released.recv_timeout(Duration::from_secs(5)).unwrap();
++                    Ok(DefaultOutputSupport::Supported)
++                },
++            );
++            observed_rejection.store(
++                matches!(
++                    result,
++                    Err(BackendError::Storage(StorageError::ExecutionCancelled))
++                ),
++                Ordering::Release,
++            );
++            result
++        })),
++        Instant::now() + Duration::from_secs(15),
++    );
++    begun.recv_timeout(Duration::from_secs(5)).unwrap();
++    ticket.cancel();
++    assert!(
++        !ticket.is_finished(),
++        "native query still owns the running worker"
++    );
++    release.send(()).unwrap();
++    assert_eq!(ticket.wait(), Err(JobError::Cancelled));
++    pool.join().unwrap();
++    assert!(rejected.load(Ordering::Acquire));
++    let pool = WorkerPool::<Work>::start().unwrap();
++    let ticket = submit(
++        &pool.handle(),
++        Work(Box::new(move |context| {
++            service.check_default_output_reviewed(
++                local,
++                review.publication_revision,
++                review.revision,
++                review.identity_revision,
++                review.runtime_generation,
++                context,
++                || {
++                    while Instant::now() < context.deadline() {
++                        std::thread::yield_now();
++                    }
++                    Ok(DefaultOutputSupport::Supported)
++                },
++            )
++        })),
++        Instant::now() + Duration::from_millis(500),
++    );
++    assert_eq!(ticket.wait(), Err(JobError::Deadline));
++    pool.join().unwrap();
++    assert_eq!(
++        backend
++            .0
++            .lock()
++            .unwrap()
++            .voice_service()
++            .inventory()
++            .unwrap(),
++        original
++    );
++}
++
++struct Tick(AtomicU64);
++impl MonotonicClock for Tick {
++    fn monotonic_millis(&self) -> u64 {
++        self.0.load(Ordering::Acquire)
++    }
++}
++
++#[test]
++fn monotonic_regression_during_the_query_cannot_publish_an_observation() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, _web, _class) = fixtures::shared_fixture();
++    let original = backend.0.lock().unwrap().voice_service();
++    let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let clock = Arc::new(Tick(AtomicU64::new(100)));
++    let service = VoiceService::new(
++        original.inner.repository.clone(),
++        original.inner.ledger.clone(),
++        original.inner.control.clone(),
++        original.inner.authority.clone(),
++        original.inner.clock.clone(),
++        clock.clone(),
++    );
++    let review = service.management_snapshot(local).unwrap();
++    let epoch = service.generation();
++    assert!(check(service.clone(), local, review, move || {
++        clock.0.store(99, Ordering::Release);
++        Ok(DefaultOutputSupport::Supported)
++    })
++    .is_err());
++    assert_eq!(service.generation(), epoch);
++    assert!(service.inner.enabled.load(Ordering::Acquire));
++}
++
++#[test]
++fn saving_policy_invalidates_an_observation_and_lock_cannot_rebind_it_to_a_new_lease() {
++    let _fixture = fixtures::VOICE_FIXTURE
++        .lock()
++        .unwrap_or_else(|p| p.into_inner());
++    let (_directory, backend, _web, _class) = fixtures::shared_fixture();
++    let service = backend.0.lock().unwrap().voice_service();
++    let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    let review = service.management_snapshot(local).unwrap();
++    let checked = check(service.clone(), local, review, || {
++        Ok(DefaultOutputSupport::Supported)
++    })
++    .unwrap();
++    let observation = checked.device_observation.clone().unwrap();
++    service
++        .set_limits_reviewed(
++            local,
++            VoiceLimits::default(),
++            checked.revision,
++            checked.identity_revision,
++            checked.runtime_generation,
++        )
++        .unwrap();
++    let saved = service.management_snapshot(local).unwrap();
++    assert!(!observation.is_current_for(&saved, local));
++    assert!(saved.device_observation.is_none());
++    service.inner.control.lock_local();
++    assert!(service.management_snapshot(local).is_err());
++    // Re-enter through real login: synchronizing the lock generation and
++    // installing the new input lease must precede validating the replacement.
++    // The generic issue() helper deliberately bypasses that production path.
++    let replacement = backend
++        .0
++        .lock()
++        .unwrap()
++        .login(
++            "admin",
++            Password::new("Independent voice password 2026!".into()).unwrap(),
++        )
++        .unwrap();
++    assert_ne!(replacement, local);
++    assert!(service.management_snapshot(local).is_err());
++    let fresh = service.management_snapshot(replacement).unwrap();
++    assert!(!observation.is_current_for(&fresh, replacement));
++    assert!(!observation.is_current_for(&checked, replacement));
++}
+diff --git a/crates/fc-windows/src/audio/capability.rs b/crates/fc-windows/src/audio/capability.rs
+new file mode 100644
+index 0000000..8cee027
+--- /dev/null
++++ b/crates/fc-windows/src/audio/capability.rs
+@@ -0,0 +1,50 @@
++//! Read-only WinMM format support; no output handle or audio-domain reservation.
++use fc_ports::audio::{AudioOutputError, DefaultOutputSupport};
++use windows::Win32::Media::{
++    Audio::{
++        waveOutOpen, MIDI_WAVE_OPEN_TYPE, WAVEFORMATEX, WAVERR_BADFORMAT, WAVERR_SYNC,
++        WAVE_FORMAT_QUERY, WAVE_MAPPER,
++    },
++    MMSYSERR_ALLOCATED, MMSYSERR_BADDEVICEID, MMSYSERR_NODRIVER, MMSYSERR_NOERROR,
++    MMSYSERR_NOTENABLED,
++};
++
++pub(super) fn canonical_pcm_format() -> WAVEFORMATEX {
++    WAVEFORMATEX {
++        wFormatTag: 1,
++        nChannels: 1,
++        nSamplesPerSec: 16_000,
++        nAvgBytesPerSec: 32_000,
++        nBlockAlign: 2,
++        wBitsPerSample: 16,
++        cbSize: 0,
++    }
++}
++
++/// Query the same mapper/PCM format used by playback without opening a device.
++/// This synchronous driver call may block: execute on an existing worker and keep
++/// its physical slot until it actually returns, including after cancellation.
++/// A successful query is neither an output reservation nor proof of audible sound.
++pub fn query_default_output_format() -> Result<DefaultOutputSupport, AudioOutputError> {
++    query_using(|device, format, flags| {
++        // SAFETY: QUERY does not open a device or retain this stack format. No
++        // output-handle destination, callback, or callback instance is supplied.
++        unsafe { waveOutOpen(None, device, format, None, None, flags) }
++    })
++}
++
++fn query_using(
++    query: impl FnOnce(u32, &WAVEFORMATEX, MIDI_WAVE_OPEN_TYPE) -> u32,
++) -> Result<DefaultOutputSupport, AudioOutputError> {
++    let format = canonical_pcm_format();
++    match query(WAVE_MAPPER, &format, WAVE_FORMAT_QUERY) {
++        MMSYSERR_NOERROR => Ok(DefaultOutputSupport::Supported),
++        WAVERR_BADFORMAT => Ok(DefaultOutputSupport::FormatUnsupported),
++        MMSYSERR_ALLOCATED | MMSYSERR_BADDEVICEID | MMSYSERR_NODRIVER | MMSYSERR_NOTENABLED
++        | WAVERR_SYNC => Ok(DefaultOutputSupport::Unavailable),
++        code => Err(AudioOutputError::Driver(code)),
++    }
++}
++
++#[cfg(test)]
++mod tests;
+diff --git a/crates/fc-windows/src/audio/capability/tests.rs b/crates/fc-windows/src/audio/capability/tests.rs
+new file mode 100644
+index 0000000..edad3b7
+--- /dev/null
++++ b/crates/fc-windows/src/audio/capability/tests.rs
+@@ -0,0 +1,61 @@
++use super::*;
++use windows::Win32::Media::{MMSYSERR_ERROR, MMSYSERR_INVALPARAM, MMSYSERR_NOMEM};
++
++#[test]
++fn query_uses_only_mapper_query_and_exact_playback_pcm() {
++    let mut calls = 0;
++    let result = query_using(|device, format, flags| {
++        calls += 1;
++        assert_eq!(device, WAVE_MAPPER);
++        assert_eq!(flags, WAVE_FORMAT_QUERY);
++        // Copy packed fields before asserting; no unaligned references.
++        let actual = (
++            format.wFormatTag,
++            format.nChannels,
++            format.nSamplesPerSec,
++            format.nAvgBytesPerSec,
++            format.nBlockAlign,
++            format.wBitsPerSample,
++            format.cbSize,
++        );
++        assert_eq!(actual, (1, 1, 16_000, 32_000, 2, 16, 0));
++        MMSYSERR_NOERROR
++    });
++    assert_eq!(calls, 1);
++    assert_eq!(result, Ok(DefaultOutputSupport::Supported));
++}
++
++#[test]
++fn query_distinguishes_unsupported_format_from_unavailable_output() {
++    assert_eq!(
++        query_using(|_, _, _| WAVERR_BADFORMAT),
++        Ok(DefaultOutputSupport::FormatUnsupported)
++    );
++    for code in [
++        MMSYSERR_ALLOCATED,
++        MMSYSERR_BADDEVICEID,
++        MMSYSERR_NODRIVER,
++        MMSYSERR_NOTENABLED,
++        WAVERR_SYNC,
++    ] {
++        assert_eq!(
++            query_using(|_, _, _| code),
++            Ok(DefaultOutputSupport::Unavailable)
++        );
++    }
++}
++
++#[test]
++fn query_preserves_real_driver_and_resource_failures() {
++    for code in [
++        MMSYSERR_ERROR,
++        MMSYSERR_NOMEM,
++        MMSYSERR_INVALPARAM,
++        u32::MAX,
++    ] {
++        assert_eq!(
++            query_using(|_, _, _| code),
++            Err(AudioOutputError::Driver(code))
++        );
++    }
++}
+diff --git a/crates/fc-windows/src/workbench/empty_action_tests.rs b/crates/fc-windows/src/workbench/empty_action_tests.rs
+new file mode 100644
+index 0000000..c630394
+--- /dev/null
++++ b/crates/fc-windows/src/workbench/empty_action_tests.rs
+@@ -0,0 +1,243 @@
++use super::*;
++use crate::NATIVE_TEST_SERIAL;
++use fc_presentation::workbench::{Action, Choice, Field};
++
++const SAVE: ActionId = ActionId(1);
++const EMPTY: ActionId = ActionId(2);
++const LOCK: ActionId = ActionId(3);
++
++fn view() -> View {
++    View {
++        title: "Synthetic empty action".into(),
++        description: "Hidden owned controls only".into(),
++        status: String::new(),
++        busy: false,
++        grid: None,
++        fields: vec![
++            Field {
++                id: FieldId(1),
++                label: "Draft".into(),
++                kind: FieldKind::Text,
++                value: "60000".into(),
++                max_utf16: 32,
++            },
++            Field {
++                id: FieldId(2),
++                label: "Confirmation".into(),
++                kind: FieldKind::Choice(vec![
++                    Choice {
++                        value: "no".into(),
++                        label: "Not confirmed".into(),
++                    },
++                    Choice {
++                        value: "yes".into(),
++                        label: "Confirmed".into(),
++                    },
++                ]),
++                value: "no".into(),
++                max_utf16: 32,
++            },
++            Field {
++                id: FieldId(3),
++                label: "Synthetic password".into(),
++                kind: FieldKind::Password,
++                value: String::new(),
++                max_utf16: 64,
++            },
++        ],
++        actions: [SAVE, EMPTY, LOCK]
++            .into_iter()
++            .map(|id| Action {
++                id,
++                label: format!("Synthetic {}", id.0),
++                enabled: true,
++            })
++            .collect(),
++    }
++}
++
++fn field(window: &Window, id: u16) -> FieldBinding {
++    *window
++        .state
++        .controls
++        .borrow()
++        .fields
++        .iter()
++        .find(|field| field.id == FieldId(id))
++        .unwrap()
++}
++
++fn action(window: &Window, id: ActionId) -> ActionBinding {
++    *window
++        .state
++        .controls
++        .borrow()
++        .actions
++        .iter()
++        .find(|action| action.id == id)
++        .unwrap()
++}
++
++fn text(window: &Window, id: u16, text: &str) {
++    let text = HSTRING::from(text);
++    // SAFETY: only this hidden fixture's current owned control.
++    unsafe { SetWindowTextW(field(window, id).hwnd, &text).unwrap() };
++}
++
++fn click(window: &Window, action: ActionBinding) {
++    // SAFETY: exact owned button notification; no desktop input or focus request.
++    unsafe {
++        let _ = SendMessageW(
++            window.hwnd,
++            WM_COMMAND,
++            Some(WPARAM(
++                usize::from(action.native_id) | ((BN_CLICKED as usize) << 16),
++            )),
++            Some(LPARAM(action.hwnd.0 as isize)),
++        );
++    }
++}
++
++#[test]
++fn empty_action_preserves_native_drafts_confirmation_and_prior_forms() {
++    let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
++    // SAFETY: observe only; this test never shows a window.
++    let foreground = unsafe { GetForegroundWindow() };
++    let window = Window::new().unwrap();
++    window.set_empty_form_action(EMPTY).unwrap();
++    let model = view();
++    window.render(&model).unwrap();
++    let FieldKind::Choice(options) = &model.fields[1].kind else {
++        unreachable!()
++    };
++    set_choice(field(&window, 2).hwnd, options, "yes").unwrap();
++    text(&window, 1, "queued draft");
++    text(&window, 3, "SyntheticQueuedSecret");
++    click(&window, action(&window, SAVE));
++    // If the empty action reads this native draft, normal bounded capture fails.
++    text(&window, 1, &"x".repeat(33));
++    text(&window, 3, "SyntheticCurrentSecret");
++    click(&window, action(&window, EMPTY));
++    window.probe_submit(EMPTY, FormData::new()).unwrap();
++    let submits: Vec<_> = window
++        .take_events()
++        .unwrap()
++        .into_iter()
++        .filter_map(|event| match event {
++            Event::Submit(id, form) => Some((id, form)),
++            _ => None,
++        })
++        .collect();
++    assert_eq!(submits.len(), 3);
++    assert_eq!(submits[0].0, SAVE);
++    assert_eq!(submits[0].1.get(FieldId(1)), Some("queued draft"));
++    assert_eq!(submits[0].1.get(FieldId(2)), Some("yes"));
++    assert_eq!(submits[0].1.get(FieldId(3)), Some("SyntheticQueuedSecret"));
++    for (id, form) in &submits[1..] {
++        assert_eq!(*id, EMPTY);
++        assert!(form.is_empty());
++    }
++    assert_eq!(window.state.read_field(field(&window, 2)).unwrap(), "yes");
++    assert_eq!(window.state.read_field(field(&window, 3)).unwrap(), "");
++    // SAFETY: read only this owned nonsecret Edit's native length.
++    assert_eq!(unsafe { GetWindowTextLengthW(field(&window, 1).hwnd) }, 33);
++    text(&window, 1, "500");
++    click(&window, action(&window, SAVE));
++    let form = window
++        .take_events()
++        .unwrap()
++        .into_iter()
++        .find_map(|event| match event {
++            Event::Submit(id, form) if id == SAVE => Some(form),
++            _ => None,
++        })
++        .unwrap();
++    assert_eq!(form.get(FieldId(1)), Some("500"));
++    assert_eq!(form.get(FieldId(2)), Some("yes"));
++    assert_eq!(form.get(FieldId(3)), Some(""));
++    assert!(!window.is_visible());
++    // SAFETY: no mutation of the foreground window.
++    assert_eq!(unsafe { GetForegroundWindow() }, foreground);
++}
++
++#[test]
++fn empty_action_registration_is_immutable_and_disjoint_from_lock() {
++    let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
++    let window = Window::new().unwrap();
++    assert!(window.set_empty_form_action(ActionId(0)).is_err());
++    window.set_empty_form_action(EMPTY).unwrap();
++    window.set_empty_form_action(EMPTY).unwrap();
++    assert!(window.set_empty_form_action(ActionId(4)).is_err());
++    assert!(window.set_lock_action(EMPTY).is_err());
++    window.set_lock_action(LOCK).unwrap();
++    assert!(window.set_empty_form_action(LOCK).is_err());
++    let reverse = Window::new().unwrap();
++    reverse.set_lock_action(LOCK).unwrap();
++    assert!(reverse.set_empty_form_action(LOCK).is_err());
++    reverse.set_empty_form_action(EMPTY).unwrap();
++    assert!(reverse.set_lock_action(EMPTY).is_err());
++}
++
++#[test]
++fn empty_action_rejects_nonempty_disabled_busy_missing_and_spoofed_commands() {
++    let _serial = NATIVE_TEST_SERIAL.lock().unwrap_or_else(|p| p.into_inner());
++    let window = Window::new().unwrap();
++    window.set_empty_form_action(EMPTY).unwrap();
++    window.set_lock_action(LOCK).unwrap();
++    assert!(window.probe_submit(EMPTY, FormData::new()).is_err());
++    let mut model = view();
++    window.render(&model).unwrap();
++    text(&window, 1, "untouched draft");
++    text(&window, 3, "SyntheticNotSubmitted");
++    let mut nonempty = FormData::new();
++    nonempty.insert(FieldId(1), String::new()).unwrap();
++    assert!(window.probe_submit(EMPTY, nonempty).is_err());
++    assert_eq!(
++        window.state.read_field(field(&window, 1)).unwrap(),
++        "untouched draft"
++    );
++    assert_eq!(
++        window.state.read_field(field(&window, 3)).unwrap(),
++        "SyntheticNotSubmitted"
++    );
++    let empty = action(&window, EMPTY);
++    let save = action(&window, SAVE);
++    // SAFETY: deliberately mismatched ids/handles still target only our hidden
++    // owned window; the binding table must reject this local malformed message.
++    unsafe {
++        let _ = SendMessageW(
++            window.hwnd,
++            WM_COMMAND,
++            Some(WPARAM(usize::from(save.native_id))),
++            Some(LPARAM(empty.hwnd.0 as isize)),
++        );
++    }
++    assert!(!window
++        .take_events()
++        .unwrap()
++        .iter()
++        .any(|event| matches!(event, Event::Submit(..))));
++    model.busy = true;
++    window.render(&model).unwrap();
++    assert!(window.probe_submit(EMPTY, FormData::new()).is_err());
++    click(&window, empty);
++    assert!(window.take_events().unwrap().is_empty());
++    // Lock retains its original busy exemption and empty-event behavior.
++    window.probe_submit(LOCK, FormData::new()).unwrap();
++    assert!(window
++        .take_events()
++        .unwrap()
++        .iter()
++        .any(|event| matches!(event, Event::Submit(id, data) if *id == LOCK && data.is_empty())));
++    model.busy = false;
++    model.actions[1].enabled = false;
++    window.render(&model).unwrap();
++    assert!(window.probe_submit(EMPTY, FormData::new()).is_err());
++    click(&window, empty);
++    assert!(window.take_events().unwrap().is_empty());
++    model.actions.remove(1);
++    window.render(&model).unwrap();
++    assert!(window.probe_submit(EMPTY, FormData::new()).is_err());
++    click(&window, empty);
++    assert!(window.take_events().unwrap().is_empty());
++}

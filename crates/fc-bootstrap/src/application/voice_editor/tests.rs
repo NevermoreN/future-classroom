@@ -12,6 +12,7 @@ fn snapshot(enabled: bool) -> VoiceManagementSnapshot {
         active_jobs: 0,
         queued_jobs: 0,
         playing_jobs: 0,
+        device_observation: None,
     }
 }
 
@@ -476,4 +477,252 @@ fn malformed_draft_can_be_cancelled_refreshed_or_used_with_switch_without_implic
             assert!(!e.has_unsaved_changes());
         }
     }
+}
+
+// This projection is deliberately presentation-only: receipt minting and exact
+// lease/four-version acceptance are tested by the backend device-check suite.
+fn show_device(e: &mut Editor, result: VoiceDeviceCheckResult, expires: Instant) {
+    e.device = Some(DeviceDisplay {
+        result,
+        observed_at: LocalDateTime::new(
+            fc_domain::time::LocalDate::new(2026, 10, 31).unwrap(),
+            9 * 3600 + 8 * 60 + 7,
+        )
+        .unwrap(),
+        expires,
+        current: true,
+    });
+}
+
+#[test]
+fn output_check_accepts_only_empty_form_and_captures_all_loaded_versions() {
+    let mut e = editor(false);
+    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
+    let before = e.draft.values.clone();
+    for data in [limits_form("60", "4", "2", "10"), acknowledged(), {
+        let mut data = FormData::new();
+        data.insert(FieldId(999), "lease/version/path".into())
+            .unwrap();
+        data
+    }] {
+        assert!(e.handle(CHECK_OUTPUT, data).is_err());
+        assert_eq!(e.draft.values, before);
+        assert!(!e.is_reviewing());
+    }
+    assert!(
+        matches!(act(&mut e, CHECK_OUTPUT).unwrap(), Command::CheckOutput {
+        expected_publication, expected, expected_identity, expected_runtime,
+    } if expected_publication == Revision::new(30)
+        && expected == Revision::new(12)
+        && expected_identity == Revision::new(7)
+        && expected_runtime == 3)
+    );
+    assert_eq!(e.draft.values, before);
+    assert!(e.has_unsaved_changes());
+    // Neither checking nor its successful load saves or replaces the draft.
+    e.loaded(snapshot(false));
+    assert_eq!(e.draft.values, before);
+    assert_eq!(e.snapshot.limits, VoiceLimits::default());
+    assert!(e.has_unsaved_changes());
+}
+
+#[test]
+fn output_check_does_not_replace_a_pending_confirmation_or_its_default_ack() {
+    let mut e = editor(false);
+    act(&mut e, ENABLE).unwrap();
+    assert!(act(&mut e, CHECK_OUTPUT).is_err());
+    assert!(e.handle(CHECK_OUTPUT, acknowledged()).is_err());
+    assert!(e.is_reviewing());
+    let view = e.view("", false);
+    assert_eq!(view.fields[0].id, ACK);
+    assert_eq!(view.fields[0].value, "0");
+    assert!(!view.actions.iter().any(|action| action.id == CHECK_OUTPUT));
+    assert!(act(&mut e, CONFIRM).is_err());
+    act(&mut e, CANCEL).unwrap();
+    assert!(matches!(
+        act(&mut e, CHECK_OUTPUT).unwrap(),
+        Command::CheckOutput { .. }
+    ));
+}
+
+#[test]
+fn output_observation_expires_at_original_boundary_without_automatic_query() {
+    let mut e = editor(false);
+    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
+    let draft = e.draft.values.clone();
+    let start = Instant::now();
+    let boundary = start + std::time::Duration::from_secs(30);
+    show_device(&mut e, VoiceDeviceCheckResult::Supported, boundary);
+    assert!(!e.needs_tick(boundary - std::time::Duration::from_nanos(1), true));
+    assert!(!e.tick(boundary - std::time::Duration::from_nanos(1), true));
+    assert!(e
+        .view("", false)
+        .description
+        .contains("上次检查：支持播报格式"));
+    assert!(e.needs_tick(boundary, true));
+    assert!(e.tick(boundary, true));
+    assert!(!e.tick(boundary, true));
+    let view = e.view("", false);
+    assert!(view.description.contains("上次检查结果已过期，请重新检查"));
+    assert!(!view.description.contains("上次检查：支持播报格式"));
+    assert_eq!(e.draft.values, draft);
+    assert!(
+        !e.requires_refresh,
+        "TTL expiry alone requires another explicit check, not a load"
+    );
+    assert!(matches!(
+        act(&mut e, CHECK_OUTPUT).unwrap(),
+        Command::CheckOutput { .. }
+    ));
+}
+
+#[test]
+fn output_observation_context_invalidation_preserves_draft_and_requires_a_load() {
+    let mut e = editor(false);
+    e.capture(limits_form("1.25", "3", "1", "2")).unwrap();
+    let draft = e.draft.values.clone();
+    let now = Instant::now();
+    show_device(
+        &mut e,
+        VoiceDeviceCheckResult::Supported,
+        now + std::time::Duration::from_secs(30),
+    );
+    assert_eq!(e.loaded_versions(), (Revision::new(30), 3));
+    assert!(e.needs_tick(now, false));
+    assert!(e.tick(now, false));
+    assert!(!e.tick(now, false));
+    assert_eq!(e.draft.values, draft);
+    assert!(act(&mut e, CHECK_OUTPUT).is_err());
+    let view = e.view("", false);
+    assert!(view.description.contains("上次检查结果已过期"));
+    assert!(
+        !view
+            .actions
+            .iter()
+            .find(|action| action.id == CHECK_OUTPUT)
+            .unwrap()
+            .enabled
+    );
+    assert!(matches!(act(&mut e, REFRESH).unwrap(), Command::Refresh));
+    assert!(act(&mut e, CHECK_OUTPUT).is_err());
+    e.loaded(snapshot(false));
+    assert_eq!(e.draft.values, draft);
+    assert!(matches!(
+        act(&mut e, CHECK_OUTPUT).unwrap(),
+        Command::CheckOutput { .. }
+    ));
+    assert!(
+        !e.device.as_ref().unwrap().current,
+        "loading without a valid receipt cannot revive history"
+    );
+}
+
+#[test]
+fn output_history_cannot_survive_a_version_change_as_current() {
+    for change in 0..4 {
+        let mut e = editor(false);
+        show_device(
+            &mut e,
+            VoiceDeviceCheckResult::Supported,
+            Instant::now() + std::time::Duration::from_secs(30),
+        );
+        let mut updated = snapshot(false);
+        match change {
+            0 => updated.publication_revision = Revision::new(31),
+            1 => updated.identity_revision = Revision::new(8),
+            2 => updated.revision = Revision::new(13),
+            _ => updated.runtime_generation = 4,
+        }
+        e.loaded(updated);
+        assert!(!e.device.as_ref().unwrap().current);
+        assert!(e.view("", false).description.contains("上次检查结果已过期"));
+        assert!(
+            matches!(act(&mut e, CHECK_OUTPUT).unwrap(), Command::CheckOutput {
+            expected_publication, expected_identity, expected, expected_runtime,
+        } if expected_publication == Revision::new(if change == 0 {31} else {30})
+            && expected_identity == Revision::new(if change == 1 {8} else {7})
+            && expected == Revision::new(if change == 2 {13} else {12})
+            && expected_runtime == if change == 3 {4} else {3})
+        );
+    }
+}
+
+#[test]
+fn output_result_labels_are_historical_timed_and_never_assert_audibility() {
+    for (result, expected) in [
+        (
+            VoiceDeviceCheckResult::Supported,
+            "上次检查：支持播报格式（不代表实际有声）",
+        ),
+        (
+            VoiceDeviceCheckResult::FormatUnsupported,
+            "上次检查：默认输出不支持播报格式",
+        ),
+        (
+            VoiceDeviceCheckResult::Unavailable,
+            "上次检查：未发现可用默认输出",
+        ),
+        (
+            VoiceDeviceCheckResult::Failed,
+            "上次检查：检查失败，请稍后重新检查",
+        ),
+    ] {
+        let mut e = editor(false);
+        show_device(
+            &mut e,
+            result,
+            Instant::now() + std::time::Duration::from_secs(30),
+        );
+        for busy in [false, true] {
+            let view = e.view("", busy);
+            view.validate().unwrap();
+            assert!(view.actions.len() <= 12);
+            assert!(view.description.contains(expected));
+            assert!(view.description.contains("检查时间：2026-10-31 09:08:07"));
+            assert!(view
+                .description
+                .contains("上次格式检查不代表设备当前可用或教室实际有声"));
+            assert!(view.description.contains("不播放声音"));
+            assert_eq!(
+                view.actions
+                    .iter()
+                    .find(|action| action.id == CHECK_OUTPUT)
+                    .unwrap()
+                    .enabled,
+                !busy
+            );
+        }
+    }
+}
+
+#[test]
+fn output_history_is_invalidated_by_save_close_or_lock_style_reset() {
+    for action in [CONFIRM, CLOSE] {
+        let mut e = editor(false);
+        show_device(
+            &mut e,
+            VoiceDeviceCheckResult::Supported,
+            Instant::now() + std::time::Duration::from_secs(30),
+        );
+        if action == CONFIRM {
+            act(&mut e, ENABLE).unwrap();
+            e.handle(CONFIRM, acknowledged()).unwrap();
+        } else {
+            act(&mut e, CLOSE).unwrap();
+        }
+        assert!(!e.device.as_ref().unwrap().current);
+        assert!(e.snapshot.device_observation.is_none());
+        assert!(e.requires_refresh);
+    }
+    // App::lock drops this editor entirely; a new session cannot inherit it.
+    let mut e = editor(false);
+    show_device(
+        &mut e,
+        VoiceDeviceCheckResult::Supported,
+        Instant::now() + std::time::Duration::from_secs(30),
+    );
+    e.invalidate();
+    assert!(!e.device.as_ref().unwrap().current);
+    drop(e);
+    assert!(editor(false).device.is_none());
 }

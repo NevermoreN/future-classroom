@@ -1,0 +1,24 @@
+--- tests.before.rs
++++ tests.after.rs
+@@ -542,7 +542,20 @@
+     assert!(saved.device_observation.is_none());
+     service.inner.control.lock_local();
+     assert!(service.management_snapshot(local).is_err());
+-    let replacement = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
++    // Re-enter through real login: synchronizing the lock generation and
++    // installing the new input lease must precede validating the replacement.
++    // The generic issue() helper deliberately bypasses that production path.
++    let replacement = backend
++        .0
++        .lock()
++        .unwrap()
++        .login(
++            "admin",
++            Password::new("Independent voice password 2026!".into()).unwrap(),
++        )
++        .unwrap();
++    assert_ne!(replacement, local);
++    assert!(service.management_snapshot(local).is_err());
+     let fresh = service.management_snapshot(replacement).unwrap();
+     assert!(!observation.is_current_for(&fresh, replacement));
+     assert!(!observation.is_current_for(&checked, replacement));

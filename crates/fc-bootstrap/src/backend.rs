@@ -72,8 +72,9 @@ use std::{
     time::{Duration, Instant},
 };
 pub use voice::{
-    VoiceGuard, VoiceManagementSnapshot, VoiceNativeParticipation, VoicePlaybackAuthorization,
-    VoicePolicyHandoff, VoicePolicyPhase, VoiceRuntimeHandle, VoiceService,
+    VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceGuard, VoiceManagementSnapshot,
+    VoiceNativeParticipation, VoicePlaybackAuthorization, VoicePolicyHandoff, VoicePolicyPhase,
+    VoiceRuntimeHandle, VoiceService,
 };
 
 pub type Result<T> = std::result::Result<T, BackendError>;

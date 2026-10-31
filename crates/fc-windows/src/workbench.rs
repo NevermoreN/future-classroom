@@ -223,6 +223,7 @@ struct State {
     presented_secrets: RefCell<Vec<FieldId>>,
     grid_cell: Cell<Option<(usize, usize)>>,
     lock_action: Cell<Option<ActionId>>,
+    empty_form_action: Cell<Option<ActionId>>,
     preview: RefCell<Option<preview::Canvas>>,
 }
 impl State {
@@ -241,6 +242,7 @@ impl State {
             presented_secrets: RefCell::new(Vec::new()),
             grid_cell: Cell::new(None),
             lock_action: Cell::new(None),
+            empty_form_action: Cell::new(None),
             preview: RefCell::new(None),
         }
     }
@@ -371,6 +373,9 @@ impl State {
             // Lock supersedes queued forms, including their zeroizing secrets.
             // Never read the native fields or carry their values into this event.
             self.discard_forms();
+            return self.queue_submit(action.id, FormData::new());
+        }
+        if self.empty_form_action.get() == Some(action.id) {
             return self.queue_submit(action.id, FormData::new());
         }
         let fields = self
@@ -543,7 +548,9 @@ impl Window {
         if id.0 == 0 {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
-        if self.state.lock_action.get().is_some_and(|old| old != id) {
+        if self.state.lock_action.get().is_some_and(|old| old != id)
+            || self.state.empty_form_action.get() == Some(id)
+        {
             return Err(Error::from_hresult(E_ACCESSDENIED));
         }
         let view = self
@@ -568,6 +575,25 @@ impl Window {
                 }
             }
         }
+        Ok(())
+    }
+    /// Register one immutable action that submits no fields. Unlike Lock, this
+    /// action never bypasses busy or discards queued forms/nonsecret drafts.
+    /// The normal password-clearing rule still applies after an actual submit.
+    pub fn set_empty_form_action(&self, id: ActionId) -> Result<()> {
+        if id.0 == 0 {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        if self
+            .state
+            .empty_form_action
+            .get()
+            .is_some_and(|old| old != id)
+            || self.state.lock_action.get() == Some(id)
+        {
+            return Err(Error::from_hresult(E_ACCESSDENIED));
+        }
+        self.state.empty_form_action.set(Some(id));
         Ok(())
     }
     /// Initially hidden. Construction and hidden tests never change foreground.
@@ -1216,6 +1242,51 @@ impl Window {
             }
             return Ok(());
         }
+        if self.state.empty_form_action.get() == Some(id) {
+            if !form.is_empty() {
+                return Err(Error::from_hresult(E_INVALIDARG));
+            }
+            // SAFETY: exact current owned button; this path cannot enable it.
+            if !unsafe { IsWindowEnabled(action.hwnd) }.as_bool() {
+                return Err(Error::from_hresult(E_ACCESSDENIED));
+            }
+            if self.state.error.get() != 0 {
+                return Err(Error::from_hresult(E_UNEXPECTED));
+            }
+            let before = self
+                .state
+                .events
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?
+                .len();
+            // SAFETY: same owned-button WM_COMMAND used by a real click; no
+            // field values are read or replaced and no global input is sent.
+            unsafe {
+                let _ = SendMessageW(
+                    self.hwnd,
+                    WM_COMMAND,
+                    Some(WPARAM(
+                        usize::from(action.native_id) | ((BN_CLICKED as usize) << 16),
+                    )),
+                    Some(LPARAM(action.hwnd.0 as isize)),
+                );
+            }
+            let events = self
+                .state
+                .events
+                .try_borrow()
+                .map_err(|_| Error::from_hresult(E_UNEXPECTED))?;
+            if self.state.error.get() != 0
+                || events.len() != before + 1
+                || !events.get(before).is_some_and(|event| {
+                    matches!(event,
+                    Event::Submit(action_id, data) if *action_id == id && data.is_empty())
+                })
+            {
+                return Err(Error::from_hresult(E_UNEXPECTED));
+            }
+            return Ok(());
+        }
         // Validate the entire supplied form before modifying even one native
         // control. Every editable field is required; readonly/unknown IDs remain
         // in FormData and are rejected, including fields with empty values.
@@ -1782,6 +1853,10 @@ unsafe extern "system" fn window_proc(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "workbench/empty_action_tests.rs"]
+mod empty_action_tests;
 
 #[cfg(test)]
 mod tests {

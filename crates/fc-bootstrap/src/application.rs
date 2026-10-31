@@ -76,9 +76,13 @@ mod schedule_operations_probe;
 mod voice_controller;
 mod voice_editor;
 mod voice_management_probe;
+mod voice_output_probe;
 mod web_editor;
 pub fn voice_settings_probe() -> std::result::Result<(), String> {
     voice_management_probe::run()
+}
+pub fn voice_output_probe() -> std::result::Result<(), String> {
+    voice_output_probe::run()
 }
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::web::{WebService, WebServiceError};
@@ -3467,6 +3471,7 @@ impl App {
             self.status = "数据健康状态已失效，正在关闭；请保留数据供修复。".into();
             self.render()?;
         }
+        self.poll_voice_management()?;
         if self
             .web_editor
             .as_mut()
@@ -4340,6 +4345,9 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
     window
         .set_lock_action(LOCK)
         .map_err(|_| "无法注册独立锁定操作".to_owned())?;
+    window
+        .set_empty_form_action(voice_editor::CHECK_OUTPUT)
+        .map_err(|_| "无法注册默认输出检查操作".to_owned())?;
     Ok(App {
         window,
         pool: shared_pool::SharedPool::start().map_err(|_| "无法启动后台执行池".to_owned())?,

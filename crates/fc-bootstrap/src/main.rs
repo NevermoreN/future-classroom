@@ -128,6 +128,14 @@ fn run() -> Result<(), String> {
                 Err("native recovery workflow probe requires Windows".into())
             }
         }
+        [flag] if flag == "--voice-output-probe" => {
+            #[cfg(windows)]
+            {
+                application::voice_output_probe()
+            }
+            #[cfg(not(windows))]
+            Err("native voice output query probe requires Windows".into())
+        }
         [flag] if flag == "--voice-settings-probe" => {
             #[cfg(windows)]
             {

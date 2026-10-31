@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "scope": "All own completed Host/GNU build caches and frozen test-program snapshots removed only after physical process termination, source/runtime binding and deterministic current development ZIP verification. Source worktree and original public evidence remain for integration; persistent Windows SSH authorization/key and unrelated caches untouched.",
+  "removed": [
+    {
+      "root": "/tmp/fc-round31-device-target",
+      "files": 2539,
+      "logicalBytes": 991614698
+    },
+    {
+      "root": "/tmp/fc-round31-device-programs",
+      "files": 22,
+      "logicalBytes": 101028383
+    }
+  ],
+  "totalFiles": 2561,
+  "totalLogicalBytes": 1092643081,
+  "retainedDevelopmentPackage": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-voice-output-dev.zip",
+    "bytes": 5961063,
+    "sha256": "94318a24871e33ffaa530662201b7dd231e4501f96b27c719d8af873f20f4015"
+  },
+  "retainedPackageShaVerifiedAfterCleanup": true,
+  "windowsAudit": "windows-after.json PASS with no owned activity",
+  "sourceBinding": "final-source-and-runtime-binding.json",
+  "activeUserEnvironment": "UNTOUCHED"
+}

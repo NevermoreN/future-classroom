@@ -1,0 +1,38 @@
+--- tests.before.rs
++++ tests.after.rs
+@@ -1,7 +1,7 @@
+ use super::*;
+ use crate::backend::voice::tests as fixtures;
+ use fc_domain::identity::{AssignmentScope, NewAccount};
+-use fc_runtime::worker::{JobError, JobTicket, Rejection, SharedPool, Task, WorkerHandle};
++use fc_runtime::worker::{JobError, JobTicket, Rejection, Task, WorkerHandle, WorkerPool};
+ use std::sync::{atomic::AtomicUsize, mpsc};
+ 
+ type Check = Box<dyn FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send>;
+@@ -34,7 +34,7 @@
+ fn run(
+     check: impl FnOnce(&JobContext) -> Result<VoiceManagementSnapshot> + Send + 'static,
+ ) -> Result<VoiceManagementSnapshot> {
+-    let pool = SharedPool::<Work>::start().unwrap();
++    let pool = WorkerPool::<Work>::start().unwrap();
+     let ticket = submit(
+         &pool.handle(),
+         Work(Box::new(check)),
+@@ -400,7 +400,7 @@
+     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
+     let review = service.management_snapshot(local).unwrap();
+     let original = service.inventory().unwrap();
+-    let pool = SharedPool::<Work>::start().unwrap();
++    let pool = WorkerPool::<Work>::start().unwrap();
+     let (entered, begun) = mpsc::channel();
+     let (release, released) = mpsc::channel();
+     let action_service = service.clone();
+@@ -444,7 +444,7 @@
+     assert_eq!(ticket.wait(), Err(JobError::Cancelled));
+     pool.join().unwrap();
+     assert!(rejected.load(Ordering::Acquire));
+-    let pool = SharedPool::<Work>::start().unwrap();
++    let pool = WorkerPool::<Work>::start().unwrap();
+     let ticket = submit(
+         &pool.handle(),
+         Work(Box::new(move |context| {

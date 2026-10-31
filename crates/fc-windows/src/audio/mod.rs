@@ -1,8 +1,10 @@
 //! WinMM single-stream output. All calls belong to the existing audio domain.
 //! The driver owns submitted pointers until DONE and successful UnprepareHeader.
 //! No callback function, extra thread, volume change, input device, or whole-file Vec.
+mod capability;
 pub mod device;
 use crate::materials::files::LockedFile;
+pub use capability::query_default_output_format;
 use fc_ports::audio::{
     AudioAuthorization as Authorization, AudioOutputError as Error, AudioOutputPort,
     AudioOutputProgress as Progress,
@@ -190,15 +192,7 @@ impl Driver for NativeDriver {
             return Err(Error::CleanupPending);
         }
         let reservation = Reservation::take()?;
-        let format = WAVEFORMATEX {
-            wFormatTag: 1,
-            nChannels: 1,
-            nSamplesPerSec: 16_000,
-            nAvgBytesPerSec: 32_000,
-            nBlockAlign: 2,
-            wBitsPerSample: 16,
-            cbSize: 0,
-        };
+        let format = capability::canonical_pcm_format();
         // SAFETY: query does not retain the format or open a device. This call is
         // performed only in the audio execution domain; WAVE_MAPPER chooses output.
         let query =

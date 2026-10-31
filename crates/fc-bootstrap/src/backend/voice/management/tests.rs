@@ -19,7 +19,7 @@ fn assert_limits_denied(service: &VoiceService, lease: SessionLease) {
     assert_eq!(service.generation(), epoch);
 }
 
-fn issue_account(
+pub(super) fn issue_account(
     backend: &Backend,
     principal: u64,
     origin: TrustedOrigin,

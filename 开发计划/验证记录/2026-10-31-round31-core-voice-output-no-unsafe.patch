@@ -1,0 +1,26 @@
+--- a/crates/fc-bootstrap/src/application/voice_output_probe.rs
++++ b/crates/fc-bootstrap/src/application/voice_output_probe.rs
+@@ -241,21 +241,17 @@
+     )?;
+     let mut step = 0;
+     let mut app = make_app(&paths, deadline)?;
+-    // SAFETY: observe only the current foreground; every probe window stays hidden.
+-    let foreground = unsafe { windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow() };
++    // Owned windows remain hidden and no foreground mutation is requested.
++    // This probe does not sample or claim global foreground-window stability.
+     let outcome = workflow(&mut app, &paths, &mut step, deadline);
+     // Even an assertion failure must physically finish the original workers,
+     // writer, shell, and audio owner before this deployment can be deleted.
+     stop_owned_app(app, deadline)?;
+-    // SAFETY: read-only comparison; no focus/activation API is invoked.
+-    let foreground_unchanged =
+-        unsafe { windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow() == foreground };
+     drop(instance);
+     drop(deployment);
+     checked(fs::remove_dir_all(&root), "remove closed output deployment")?;
+     require(!root.exists(), "output deployment cleanup complete")?;
+     let (first_result, second_result) = outcome?;
+-    require(foreground_unchanged, "foreground remained untouched")?;
+     mark(&mut step, "app-physical-shutdown")?;
+     mark(&mut step, "isolated-deployment-cleanup")?;
+     require(step == ORDER.len(), "all fixed output-probe steps complete")?;

@@ -72,6 +72,47 @@ VOICE_SETTINGS_STEPS = (
 )
 
 
+VOICE_OUTPUT_STEPS = (
+    "native-setup-global-administrator",
+    "native-open-voice-settings",
+    "saved-default-enabled-no-jobs",
+    "native-draft-refresh-no-write",
+    "native-nonempty-check-rejected",
+    "native-explicit-output-query",
+    "query-keeps-saved-state-and-draft",
+    "native-refresh-retains-exact-observation",
+    "real-thirty-second-observation-expiry",
+    "native-explicit-recheck-new-observation",
+    "native-lock-discards-observation-and-draft",
+    "native-relogin-new-lease",
+    "native-reopen-unchecked-original-settings",
+    "app-physical-shutdown",
+    "isolated-deployment-cleanup",
+)
+
+
+def validate_voice_output_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native output query workflow failed")
+    steps = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_STEP")]
+    expected = [f"VOICE_OUTPUT_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_OUTPUT_STEPS)]
+    if steps != expected:
+        raise RuntimeError("output query exact15 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_PASS")]
+    result = r"(Supported|FormatUnsupported|Unavailable|Failed)"
+    pattern = (r"VOICE_OUTPUT_NATIVE_PASS steps=15 shared_workers=2 first_result=" + result
+               + r" second_result=" + result
+               + r" ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("output query exact final observation/expiry/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(3))
+    if elapsed_ms < 30_000 or output.index(summaries[0]) < output.index(expected[-1]):
+        raise RuntimeError("output query must complete the real thirty-second expiry before its final marker")
+    return {"steps": len(steps), "stepNames": list(VOICE_OUTPUT_STEPS),
+            "firstResult": summary.group(1), "secondResult": summary.group(2),
+            "elapsedMs": elapsed_ms}
+
+
 def validate_voice_settings_output(exit_code, output):
     if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
         raise RuntimeError("isolated native voice settings workflow failed")
@@ -164,6 +205,7 @@ def main():
     parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
     parser.add_argument("--voice-settings", action="store_true", help="isolated hidden native local-admin voice policy confirmation, lock, CAS and durable reopen; no recording/playback")
+    parser.add_argument("--voice-output", action="store_true", help="isolated hidden native default-output format query, draft/refresh/expiry/lock; no recording or playback")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
@@ -175,7 +217,9 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
-    if args.voice_settings and any((args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+    if args.voice_output and any((args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.voice_settings and any((args.voice_output, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
         parser.error("run the dedicated voice settings workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.migration and any((args.application, args.calendar, args.calendar_download, args.autostart, args.recovery, args.reinitialization, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
         parser.error("run the dedicated migration workflow separately; only test metadata and read-only system/host checks may accompany it")
@@ -377,6 +421,14 @@ def main():
                 raise RuntimeError("voice settings report insertion point is ambiguous")
             anchor = matched[0]
             body = body.replace(anchor, command + "@{voiceSettingsExitCode=$voiceSettingsCode;voiceSettingsOutput=$voiceSettingsOutput;" + anchor[2:])
+        if args.voice_output:
+            command = "$voiceOutputOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --voice-output-probe 2>&1|ForEach-Object{\"$_\"});$voiceOutputCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("output query report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{voiceOutputExitCode=$voiceOutputCode;voiceOutputOutput=$voiceOutputOutput;" + anchor[2:])
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -386,11 +438,11 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
+        if args.voice_output or args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
         if args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings or args.voice_output else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -461,6 +513,15 @@ def main():
             report["voiceSettingsElapsedMs"] = result["elapsedMs"]
             report["voiceSettingsNativeStatus"] = "PASS"
             report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin limits policy, unconfirmed/cancel/draft/lock, revision conflict, limits restore and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
+        if args.voice_output:
+            result = validate_voice_output_output(report["native"].get("voiceOutputExitCode"), report["native"].get("voiceOutputOutput"))
+            report["voiceOutputNativeStatus"] = "PASS"
+            report["voiceOutputNativeSteps"] = result["steps"]
+            report["voiceOutputNativeStepNames"] = result["stepNames"]
+            report["voiceOutputFirstResult"] = result["firstResult"]
+            report["voiceOutputSecondResult"] = result["secondResult"]
+            report["voiceOutputElapsedMs"] = result["elapsedMs"]
+            report["voiceOutputScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/SQLite and default WAVE_MAPPER format queries, draft retention, original observation expiry and lock/new lease; historical format support only, no audio job/playback/microphone/volume/foreground change or audible/device certification"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):

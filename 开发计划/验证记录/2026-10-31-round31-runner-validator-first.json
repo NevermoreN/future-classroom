@@ -1,0 +1,95 @@
+{
+  "scope": "LOCAL_SYNTHETIC_VERIFIER_TESTS_NOT_WINDOWS_OR_DEVICE_EVIDENCE",
+  "status": "PASS",
+  "sourceSha256": "c3a3f0b06736248837e04a6c39b6f1729a6b9bc861e2a47d1fe66f611ec3b81e",
+  "cases": [
+    {
+      "name": "valid-Supported",
+      "passed": true
+    },
+    {
+      "name": "valid-FormatUnsupported",
+      "passed": true
+    },
+    {
+      "name": "valid-Unavailable",
+      "passed": true
+    },
+    {
+      "name": "valid-Failed",
+      "passed": true
+    },
+    {
+      "name": "reject-nonzero",
+      "passed": true
+    },
+    {
+      "name": "reject-nonlist",
+      "passed": true
+    },
+    {
+      "name": "reject-nonstr",
+      "passed": true
+    },
+    {
+      "name": "reject-missingstep",
+      "passed": true
+    },
+    {
+      "name": "reject-duplicate",
+      "passed": true
+    },
+    {
+      "name": "reject-reordered",
+      "passed": true
+    },
+    {
+      "name": "reject-wrongname",
+      "passed": true
+    },
+    {
+      "name": "reject-wrongindex",
+      "passed": true
+    },
+    {
+      "name": "reject-doublesummary",
+      "passed": true
+    },
+    {
+      "name": "reject-wrongresult",
+      "passed": true
+    },
+    {
+      "name": "reject-wrongcleanup",
+      "passed": true
+    },
+    {
+      "name": "reject-wrongscope",
+      "passed": true
+    },
+    {
+      "name": "old-36-step-validator-retained",
+      "passed": true
+    }
+  ],
+  "cliConflict": {
+    "command": [
+      "/config/.python/python/bin/python3",
+      "-B",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/nonexistent",
+      "--exe",
+      "/nonexistent",
+      "--voice-output",
+      "--voice-settings",
+      "--report",
+      "/nonexistent"
+    ],
+    "exitCode": 2,
+    "stdout": "",
+    "stderr": "usage: windows-probe.py [-h] --host HOST --identity IDENTITY --exe EXE\n                        [--test-metadata TEST_METADATA]\n                        [--test-timeout-seconds TEST_TIMEOUT_SECONDS]\n                        [--native-seconds NATIVE_SECONDS] [--system-host]\n                        [--audio-silent] [--materials] [--recovery]\n                        [--reinitialization] [--migration] [--autostart]\n                        [--voice-settings] [--voice-output] [--calendar]\n                        [--calendar-download] [--application] [--web-voice]\n                        [--web-pairing] --report REPORT\nwindows-probe.py: error: run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it\n"
+  }
+}
