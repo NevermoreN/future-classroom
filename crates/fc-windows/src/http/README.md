@@ -144,3 +144,11 @@ No driver-wide connection/timeout registry or service configuration is changed.
 Sources: [URL-group QoS and connection-limit setting](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpseturlgroupproperty),
 [connection-limit structure](https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_connection_limit_info),
 [first-request timeout scope](https://learn.microsoft.com/en-us/windows/win32/api/http/ns-http-http_timeout_limit_info).
+
+Round26 adds a separate `tls_frontdoor` candidate: real Schannel TLS1.2, four
+owned IOCP slots and one fixed SSPI worker. Two finite loopback batches verify
+trusted encrypted requests/responses and actual wrong-CA/hostname rejection.
+It is entered only by its explicit diagnostic; this does not adopt it as the
+production transport or change the HTTP.sys first-header limitation above.
+Strict first-TCP timing, continuous admission, business/browser delivery,
+close_notify, full resource budgets and real Win7/Win10 remain separate gates.

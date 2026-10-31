@@ -35,6 +35,17 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, thumbprint, marker] if flag == "--tls-lifecycle-probe" => {
+            #[cfg(windows)]
+            {
+                fc_windows::tls_frontdoor::probe(thumbprint, marker)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (thumbprint, marker);
+                Err("native Schannel lifecycle probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--migration-probe" => {
             #[cfg(windows)]
             {

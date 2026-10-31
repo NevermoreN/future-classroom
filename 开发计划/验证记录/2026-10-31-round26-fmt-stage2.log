@@ -1,0 +1,10 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/mod.rs:170:
+     fn certificate_identity_is_exact_ascii_hex_without_aliases() {
+         let a = CertificateThumbprint::parse("aBcD0123456789abcdef0123456789abcdef0123").unwrap();
+         assert!(
+[31m-            a == CertificateThumbprint::parse("abcd0123456789abcdef0123456789abcdef0123")
+(B[m[31m-                .unwrap()
+(B[m[32m+            a == CertificateThumbprint::parse("abcd0123456789abcdef0123456789abcdef0123").unwrap()
+(B[m         );
+         for bad in [
+             "",

@@ -12,11 +12,13 @@
 | Writer（1） | Connection、事务、命令/权限权威状态与发布器 | 接收owned命令、提交结果与端口描述；Connection不共享给callback；无KDF/解码/文件大复制 |
 | Worker（最多2） | 密码派生、文件准备等单任务状态 | 队列8项且4MiB描述预算；准备并发2，容器验证与WIC解码分别最多1；KDF最多2，均计入同一worker额度，不额外扩线程 |
 | HTTP（启用时1） | 请求队列/IOCP、in-flight固定分配、HTTP状态/截止 | 不在完成回调里鉴权写库；解析成owned命令，通过票据回传响应 |
+| TLS SSPI（候选启用时最多1） | 四连接 Schannel 上下文、单一证书凭据、同步握手/加解密和释放 | 显式1MiB栈；自然Send的唯一拥有Frame跨固定邮箱；原生句柄与上下文不离开该线程，不借共享双worker扩容 |
 | Audio（有任务时1） | waveOut句柄/事件/WAVEHDR/PCM固定缓冲 | 只收身份/代次/资源租约及播放意图；查询权威经内存Reader；空队列释放资源/退出 |
 | Shell STA（有动作时1） | COM apartment、本次打开动作/句柄 | 仅本地主动受控open；无每文件线程、不等待外部PPT退出 |
+| Final coordinator（关闭/独立修复时最多1） | 原共享worker/音频的实际关闭、耐久候选与冷切换；独立修复进程的清除协调 | 先建协调器再转交原owner；同流程最多1，不在UI等待；栈与原有域并存阶段另计 |
 | Calendar（下载时1） | libcurl传输/取消状态 | 最多1次候选拉取，与任务描述/字节额度联动；网络结果不得直接写状态 |
 
-最大自有线程预算为上述执行域之和（常驻UI+Writer；按需域不得重复创建），标准库/HTTP.sys/驱动系统线程另报，不借此漏计进程资源。Worker上的WIC对象在实际解码线程创建/销毁，初始化相应COM apartment；不能把另一线程的COM对象塞进Send消息。
+上表包括原有恢复/重新初始化协调器，不能在本轮新增SSPI后继续漏计关闭阶段线程；独立修复与正常工作台分属互斥进程流程，Shell先实际退役再移交恢复协调器。保守最大自有线程预算为上述执行域之和（常驻UI+Writer；按需域不得重复创建），标准库/HTTP.sys/驱动系统线程另报，不借此漏计进程资源。Worker上的WIC对象在实际解码线程创建/销毁，初始化相应COM apartment；不能把另一线程的COM对象塞进Send消息。
 
 普通命令邮箱初始128项且合计4MiB（只传小描述，文件/像素不进队列）；观察者快照只保留最新1版，渲染在用旧版最多额外2版，超限合并/取消旧准备。控制面用独立事件/原子状态和预留消息位承载Stop/Fault/AuthorityInvalidated/ForegroundHidden，不能与上传/KDF争最后一个普通槽。禁止UI或FFI callback在满队列上blocking send；返回Busy或合并，控制信号不丢。
 
@@ -64,6 +66,12 @@ WinMM对象仅由Audio执行域持有。WAVEHDR与其PCM指向拥有型固定堆
 关闭状态：RUNNING→QUIESCING→CANCELING→DRAINING→CLOSED。先撤URL group的新接纳并关闭HTTP接纳闸门/配对，调用HttpShutdownRequestQueue取消尚在接收的请求；按活跃RequestId调用HttpCancelHttpRequest取消传输，不对请求队列句柄泛化使用CancelIoEx。继续处理IOCP直至所有接收/体/发送in-flight完成，才释放槽和关闭队列/IOCP。取消调用成功不等于原操作已完成；旧generation完成只结算原槽，不进入新监听周期。[队列停止](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpshutdownrequestqueue)、[按请求取消](https://learn.microsoft.com/en-us/windows/win32/api/http/nf-http-httpcancelhttprequest)
 
 关闭初始等待预算5秒，由关闭协调器管理，不在UI/Writer join；未排空进入FAULTED并保留原生持有槽直至受控结束本进程，不能早Drop或继续新建监听替代旧句柄。正常禁用Web只停HTTP及其会话/任务，桌面本地功能保持；全局FAULTED才使用全进程规则。
+
+### 第二十六轮：独立 TLS 候选的额外账与释放证明
+
+`tls_frontdoor` 仅由显式诊断命令进入，固定四槽、有限批次 loopback；正常生产接纳仍受 P0 阻挡。SSPI worker 与 IOCP 域独立：四份唯一拥有 Frame 各含64KiB输入和64KiB输出，四份 pinned 原生IO各64KiB，四份HTTP头各16KiB，四份Accept地址各64字节。显式 SSPI 线程栈1MiB，通道和结构元数据另计；四个排队描述只是移动这四个Frame的所有权，不重复分配四套payload。该账必须纳入原Web增量16MiB目标；Rust结构/缓冲的大小不能证明SSP、LSASS、socket、系统缓存或完整进程提交内存上界。
+
+调用中的Frame只由原worker拥有。关闭socket或发Stop不返还SSPI许可；排队工作只在worker真实归还Frame后取消结算。最终关闭必须收齐IOCP账和SSPI结果、检查原生释放结果，并用Windows线程句柄零等待查询确认实际线程终结后join。5秒排空失败保留原有限owner并置进程级故障，禁止新建替代listener/worker；一般Drop误用另由固定单隔离槽保留活worker，不能无限detach。
 
 ## 6. 实际与来源课表版本（RR-03）
 

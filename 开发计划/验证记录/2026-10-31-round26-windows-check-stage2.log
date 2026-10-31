@@ -1,0 +1,250 @@
+    Checking windows v0.62.2
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+warning: method `bytes` is never used
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:35:19
+   |
+17 | impl CertificateThumbprint {
+   | -------------------------- method in this implementation
+...
+35 |     pub(super) fn bytes(&self) -> &[u8; 20] { &self.0 }
+   |                   ^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: enum `Call` is never used
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:54:17
+   |
+54 | pub(super) enum Call { Handshake, Decrypt, Encrypt }
+   |                 ^^^^
+
+warning: enum `Step` is never used
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:57:17
+   |
+57 | pub(super) enum Step {
+   |                 ^^^^
+
+warning: struct `Frame` is never constructed
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:69:19
+   |
+69 | pub(super) struct Frame {
+   |                   ^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:80:12
+   |
+79 | impl Frame {
+   | ---------- associated function in this implementation
+80 |     pub fn new(token: RequestToken) -> Box<Self> {
+   |            ^^^
+
+warning: trait `Driver` is never used
+  --> crates/fc-windows/src/tls_frontdoor/mod.rs:98:18
+   |
+98 | pub(super) trait Driver {
+   |                  ^^^^^^
+
+warning: static `ADMITTED` is never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:16:8
+   |
+16 | static ADMITTED: AtomicBool = AtomicBool::new(false);
+   |        ^^^^^^^^
+
+warning: static `QUARANTINE` is never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:19:8
+   |
+19 | static QUARANTINE: Mutex<Option<Owner>> = Mutex::new(None);
+   |        ^^^^^^^^^^
+
+warning: struct `Shared` is never constructed
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:21:8
+   |
+21 | struct Shared {
+   |        ^^^^^^
+
+warning: struct `Owner` is never constructed
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:25:8
+   |
+25 | struct Owner {
+   |        ^^^^^
+
+warning: enum `ReadyState` is never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:38:6
+   |
+38 | enum ReadyState {
+   |      ^^^^^^^^^^
+
+warning: methods `actual_finished`, `release_admission`, and `reap` are never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:44:8
+   |
+43 | impl Owner {
+   | ---------- methods in this implementation
+44 |     fn actual_finished(&self) -> bool {
+   |        ^^^^^^^^^^^^^^^
+...
+47 |     fn release_admission(&mut self) {
+   |        ^^^^^^^^^^^^^^^^^
+...
+53 |     fn reap(&mut self) -> Result<bool, TlsError> {
+   |        ^^^^
+
+warning: function `actual_finished` is never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:81:4
+   |
+81 | fn actual_finished(thread: &JoinHandle<()>) -> bool {
+   |    ^^^^^^^^^^^^^^^
+
+warning: function `reap_quarantine` is never used
+  --> crates/fc-windows/src/tls_frontdoor/worker.rs:91:4
+   |
+91 | fn reap_quarantine() {
+   |    ^^^^^^^^^^^^^^^
+
+warning: struct `Worker` is never constructed
+   --> crates/fc-windows/src/tls_frontdoor/worker.rs:113:19
+    |
+113 | pub(super) struct Worker {
+    |                   ^^^^^^
+
+warning: multiple associated items are never used
+   --> crates/fc-windows/src/tls_frontdoor/worker.rs:118:19
+    |
+116 | impl Worker {
+    | ----------- associated items in this implementation
+117 |     #[cfg(windows)]
+118 |     pub(super) fn start(
+    |                   ^^^^^
+...
+126 |     pub(super) fn start_with_factory(
+    |                   ^^^^^^^^^^^^^^^^^^
+...
+171 |     pub(super) fn poll_ready(&mut self) -> Option<Result<(), TlsError>> {
+    |                   ^^^^^^^^^^
+...
+187 |     pub(super) fn try_submit(
+    |                   ^^^^^^^^^^
+...
+230 |     pub(super) fn poll(&mut self) -> Result<Option<Box<Frame>>, TlsError> {
+    |                   ^^^^
+...
+259 |     pub(super) fn request_stop(&self) {
+    |                   ^^^^^^^^^^^^
+...
+264 |     pub(super) fn reap_nonblocking(&mut self) -> Result<bool, TlsError> {
+    |                   ^^^^^^^^^^^^^^^^
+...
+270 |     pub(super) fn has_in_flight(&self) -> bool {
+    |                   ^^^^^^^^^^^^^
+
+warning: function `run` is never used
+   --> crates/fc-windows/src/tls_frontdoor/worker.rs:294:4
+    |
+294 | fn run(
+    |    ^^^
+
+warning: struct `Credentials` is never constructed
+ --> crates/fc-windows/src/tls_frontdoor/credentials.rs:9:19
+  |
+9 | pub(super) struct Credentials {
+  |                   ^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fc-windows/src/tls_frontdoor/credentials.rs:20:12
+   |
+19 | impl Credentials {
+   | ---------------- associated function in this implementation
+20 |     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
+   |            ^^^
+
+warning: function `server_auth_usage` is never used
+   --> crates/fc-windows/src/tls_frontdoor/credentials.rs:137:4
+    |
+137 | fn server_auth_usage(certificate: *const CERT_CONTEXT) -> Result<bool, TlsError> {
+    |    ^^^^^^^^^^^^^^^^^
+
+warning: constant `INVALID_HANDLE` is never used
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:14:7
+   |
+14 | const INVALID_HANDLE: SecHandle = SecHandle {
+   |       ^^^^^^^^^^^^^^
+
+warning: constant `ALERT_BYTES` is never used
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:18:7
+   |
+18 | const ALERT_BYTES: usize = 256;
+   |       ^^^^^^^^^^^
+
+warning: struct `Context` is never constructed
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:20:8
+   |
+20 | struct Context {
+   |        ^^^^^^^
+
+warning: methods `live` and `reset` are never used
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:37:8
+   |
+36 | impl Context {
+   | ------------ methods in this implementation
+37 |     fn live(&self) -> bool {
+   |        ^^^^
+...
+40 |     fn reset(&mut self) {
+   |        ^^^^^
+
+warning: struct `SchannelSet` is never constructed
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:65:19
+   |
+65 | pub(super) struct SchannelSet {
+   |                   ^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fc-windows/src/tls_frontdoor/schannel.rs:71:12
+   |
+70 | impl SchannelSet {
+   | ---------------- associated function in this implementation
+71 |     pub fn new(thumbprint: CertificateThumbprint) -> Result<Self, TlsError> {
+   |            ^^^
+
+warning: function `buffer` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:108:4
+    |
+108 | fn buffer(kind: u32, pointer: *mut u8, size: usize) -> SecBuffer {
+    |    ^^^^^^
+
+warning: function `description` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:115:4
+    |
+115 | fn description(buffers: &mut [SecBuffer]) -> SecBufferDesc {
+    |    ^^^^^^^^^^^
+
+warning: function `checked_range` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:122:4
+    |
+122 | fn checked_range(
+    |    ^^^^^^^^^^^^^
+
+warning: function `consumed` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:137:4
+    |
+137 | fn consumed(buffers: &[SecBuffer], input_len: usize) -> Result<usize, TlsError> {
+    |    ^^^^^^^^
+
+warning: function `handshake` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:155:4
+    |
+155 | fn handshake(
+    |    ^^^^^^^^^
+
+warning: function `decrypt` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:271:4
+    |
+271 | fn decrypt(context: &mut Context, frame: &mut Frame) -> Result<Step, TlsError> {
+    |    ^^^^^^^
+
+warning: function `encrypt` is never used
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:334:4
+    |
+334 | fn encrypt(context: &mut Context, frame: &mut Frame) -> Result<Step, TlsError> {
+    |    ^^^^^^^
+
+warning: `fc-windows` (lib) generated 33 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 39.90s

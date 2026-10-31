@@ -35,4 +35,20 @@ SO_CONNECT_TIME实际读到1秒，配合人为延迟dequeue1.2秒，说明从应
 
 [平台复核报告](验证记录/2026-10-31-round17-p0-platform-review.json)重新核对当前候选与微软文档，未改传输源码、未执行Cargo/SSH/Windows测试。当前有限批次改成持续rearm后，backlog中可能已有建立的连接；新投递AcceptEx时重新起算5秒，会给旧连接额外期限。已有秒级连接年龄、后续新系统专用TCP信息和绑定时刻都不能直接作为三系统精确ESTABLISHED起点证明。旧577微秒超时只是一组失败观察，不是未来调度/网络/关断延迟的上界。
 
-可独立推进固定owner的真实TLS生命周期：接纳/IOCP域与固定SSPI调用worker分开；期限到达先逻辑失效并关socket，原物理slot及许可仍保留，直到内核IOCP完成和SSPI调用实际返回均已观察到，超时保留并故障闭锁，不启动替代owner。该切片尚未实现，不代表持续接纳、内核/SSP总资源或严格5秒已解。正常listener保持关闭，完整开发目标继续；现有期限与平台门槛没有放宽。
+可独立推进固定owner的真实TLS生命周期：接纳/IOCP域与固定SSPI调用worker分开；期限到达先逻辑失效并关socket，原物理slot及许可仍保留，直到内核IOCP完成和SSPI调用实际返回均已观察到，超时保留并故障闭锁，不启动替代owner。第十七轮时该切片尚未实现，第二十六轮实现与证据另列下节；不代表持续接纳、内核/SSP总资源或严格5秒已解。正常listener保持关闭，完整开发目标继续；现有期限与平台门槛没有放宽。
+
+## 第二十六轮：真实 Schannel 执行域（有限批次实测通过）
+
+`fc-windows::tls_frontdoor` 增加固定一个 SSPI 线程，独占一份入站凭据和四个连接上下文。原生接纳、接收与发送使用同一 IOCP 域和四份固定 pinned 内存；握手、解密、加密通过四个唯一拥有 Frame 移交 SSPI 线程。每连接稳定 token 关联同一原生上下文，新监听周期使用新 generation。`INCOMPLETE_MESSAGE` 保留输入等待补齐，`EXTRA` 保留原输入后缀，握手输出全部发送完成后才处理后续密文。握手最终复核 TLS1.2、至少128位加密和 stream/confidentiality 属性及TLS记录保护，拒绝重协商；诊断只接收固定 nonce GET，不把该窄端点当成生产 HTTP 解析器。
+
+证书只按40位十六进制 SHA1 身份从当前用户 MY 只读选取，复核有效期、显式 serverAuth EKU 和对应私钥；不导入证书或创建/删除密钥。测试 runner 单独创建唯一 MY 测试证书及 CNG 私钥，客户端只信任导出的公共 PEM 并校验 localhost，结束后精确删除该证书和该密钥，核对 MY 摘要恢复。错误 CA/错误主机名须取得真实证书验证异常，不能以关闭证书验证代替通过。SSH、Root、HTTP.sys、URLACL 和防火墙不被配置变更。
+
+批次期限在 listen 之前记录，停止可关闭 socket 而不等待同步 SSPI。SSPI 的当前调用、排队 Frame 及物理许可要等真实结果取回；原生释放结果、IOCP 完成账和 Windows 线程对象终结须逐项确认。释放失败有专门 `Cleanup` 错误，包含部分初始化的清理失败；故障闭锁后不能构造替代域。线程栈及四槽缓冲的新增账已写入 D11 线程与所有权册，仍需完整 Web 增量资源验收。
+
+现代与补充Win7GNU均在同一Win11实际通过两批八连接，覆盖真实加密分片请求/响应、不完整 HTTP、不完整 TLS、TLS 后断开、错误主机名及错误 CA；各有4次握手、2次响应，IOCP45/45、SSPI25/25、Frame归还25、EXTRA2次62字节。完整Windows1053项回归另覆盖真实IOCP加假慢Driver的在途关闭/晚到结果/故障保留，不声称真实OS加密可中断。证据见实施记录第二十六轮；这组测试不证明生产持续接纳、校园可达、完整业务路由、TLS close_notify、真正 ESTABLISHED 起算的严格五秒、三系统证书部署或内核/SSP 总资源上界。正常监听继续关闭，原严格五秒 FAIL 保留。
+
+Schannel 不支持通用 `ASC_REQ_INTEGRITY` 签名请求位，不能据此设置请求或强制对应返回位；TLS1.2、加密强度、记录保护及真实客户端信任校验仍保持。第二次实机握手失败后按[微软通用契约](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--general)更正该实现错误，后续阶段3起真实握手成功，阶段5完整矩阵通过。
+
+原生契约依据：[Schannel 接纳](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel)、[EXTRA 缓冲](https://learn.microsoft.com/en-us/windows/win32/secauthn/extra-buffers-returned-by-schannel)、[旧凭据结构](https://learn.microsoft.com/en-us/windows/win32/api/schannel/ns-schannel-schannel_cred)、[私钥获取](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecertificateprivatekey)。上述文档约束与本轮实测分别记账；没有把同步调用的取消请求视作实际结束保证。
+
+真实Decrypt还暴露 input155/used124 的布局：HEADER13@0、DATA95@13、TRAILER47@108、EXTRA31@124。未使用header/trailer仅校验在原输入范围，DATA仍严格在已消费范围，EXTRA保留精确后缀；不能把合法trailer视图跨入EXTRA误判为越界，也不能让DATA越入EXTRA。保留失败原日志、加入布局/越界回归后再以真实TLS重测通过。

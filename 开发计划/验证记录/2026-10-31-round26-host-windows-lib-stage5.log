@@ -1,0 +1,31 @@
+    Blocking waiting for file lock on package cache
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Finished `release` profile [optimized] target(s) in 25.64s
+     Running unittests src/lib.rs (/tmp/fc-round26-host/release/deps/fc_windows-002f0ce4bf1568aa)
+
+running 22 tests
+test calendar_download::tests::response_bounds_and_status_do_not_accept_redirect_or_uncached_304 ... ok
+test calendar_download::tests::cancellation_panics_fail_closed_and_busy_never_releases_physical_owner ... ok
+test calendar_download::tests::validators_are_bounded_ascii_and_never_header_injection ... ok
+test http::lifecycle::tests::both_accepted_return_codes_wait_but_inline_failure_withdraws_without_packet ... ok
+test http::lifecycle::tests::cancellation_ack_never_releases_the_original_io ... ok
+test http::lifecycle::tests::closing_generation_cannot_publish_into_new_cycle_or_reuse_slot_early ... ok
+test http::lifecycle::tests::fixed_eight_slots_bound_all_admission ... ok
+test http::lifecycle::tests::original_completion_before_cancel_ack_also_retains_the_slot ... ok
+test http::lifecycle::tests::sync_success_and_pending_keep_ownership_until_one_completion ... ok
+test tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked ... ok
+test tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline ... ok
+test tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases ... ok
+test tls_frontdoor::tests::diagnostic_marker_cannot_inject_http_or_control_output ... ok
+test tls_frontdoor::worker::tests::checked_close_error_blocks_replacement_in_an_independent_process ... ok
+test tls_frontdoor::worker::tests::dropping_live_owner_quarantines_every_capability_until_physical_exit ... ok
+test tls_frontdoor::worker::tests::four_linear_permits_survive_stop_until_real_call_and_collection ... ok
+test tls_frontdoor::worker::tests::initialization_is_owned_nonblocking_and_stop_cannot_destroy_held_factory ... ok
+test tls_frontdoor::worker::tests::native_driver_is_constructed_on_worker_and_need_not_implement_send ... ok
+test tls_frontdoor::worker::tests::native_reap_keeps_uncollected_results_and_the_single_admission_lease ... ok
+test tls_frontdoor::worker::tests::panic_returns_linear_frame_and_requires_actual_reap ... ok
+test tls_frontdoor::worker::tests::readiness_must_be_collected_and_initialization_failure_keeps_its_error ... ok
+test tls_frontdoor::worker::tests::stale_generation_and_serial_cannot_rebind_an_existing_slot ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
+

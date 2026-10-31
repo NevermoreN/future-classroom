@@ -59,6 +59,8 @@ cargo run -p fc-bootstrap --locked -- --self-check
 
 新构建的 Windows 自检还覆盖 DPAPI 密钥和 SQLite 重开、真实登录限速端口、改密撤权及一次性恢复；系统探针只读，宿主探针限时创建自身隐藏窗口和托盘。现有历史开发 ZIP 的命令和范围以其包内 manifest 为准，不能用新源码的验证替代旧二进制证据。
 
+第二十六轮另有显式 Schannel TLS 生命周期探针，普通启动不会调用。`scripts/windows-tls-probe.py --exe <新构建x86.exe> --report <报告.json>` 使用现有 Windows SSH 别名，创建并清理唯一的当前用户 MY 测试证书和 CNG 私钥，经自有 SSH 转发验证 TLS1.2、证书与主机名、分片加密收发和实际关闭账。测试不安装 Root、不改 HTTP.sys/防火墙或 SSH 授权；现代系统的测试证书创建命令不能代表 Win7 支持。实际结果与 P0 未完成边界见 [接纳候选 ADR](开发计划/14-P0独立TCP接纳候选ADR.md)。
+
 Linux 上有 MinGW x86 时可交叉构建补充目标：
 
 ```sh

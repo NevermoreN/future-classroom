@@ -1,0 +1,57 @@
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.228
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling serde_json v1.0.145
+   Compiling serde v1.0.228
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling generic-array v0.14.7
+   Compiling cpufeatures v0.2.17
+   Compiling ryu v1.0.23
+   Compiling cfg-if v1.0.5
+   Compiling zeroize v1.8.2
+   Compiling syn v2.0.119
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+   Compiling serde_derive v1.0.228
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+   Compiling fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Finished `release` profile [optimized] target(s) in 26.67s
+     Running unittests src/lib.rs (/tmp/fc-round26-host/release/deps/fc_windows-002f0ce4bf1568aa)
+
+running 10 tests
+test tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases ... FAILED
+test tls_frontdoor::tests::diagnostic_marker_cannot_inject_http_or_control_output ... ok
+test tls_frontdoor::worker::tests::dropping_live_owner_quarantines_every_capability_until_physical_exit ... ok
+test tls_frontdoor::worker::tests::four_linear_permits_survive_stop_until_real_call_and_collection ... ok
+test tls_frontdoor::worker::tests::initialization_is_owned_nonblocking_and_stop_cannot_destroy_held_factory ... ok
+test tls_frontdoor::worker::tests::native_driver_is_constructed_on_worker_and_need_not_implement_send ... ok
+test tls_frontdoor::worker::tests::native_reap_keeps_uncollected_results_and_the_single_admission_lease ... ok
+test tls_frontdoor::worker::tests::panic_returns_linear_frame_and_requires_actual_reap ... ok
+test tls_frontdoor::worker::tests::stale_generation_and_serial_cannot_rebind_an_existing_slot ... ok
+test tls_frontdoor::worker::tests::readiness_must_be_collected_and_initialization_failure_keeps_its_error ... ok
+
+failures:
+
+---- tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases stdout ----
+
+thread 'tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases' (18739) panicked at crates/fc-windows/src/tls_frontdoor/mod.rs:147:90:
+called `Result::unwrap()` on an `Err` value: InvalidInput
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.13s
+
+error: test failed, to rerun pass `-p fc-windows --lib`

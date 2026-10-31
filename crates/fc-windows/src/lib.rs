@@ -7,6 +7,7 @@ pub mod http;
 #[cfg(windows)]
 mod native;
 pub mod tcp_frontdoor;
+pub mod tls_frontdoor;
 #[cfg(windows)]
 pub use native::{probe, program_data, InstanceGuard, NativeProbeReport, SystemRandom};
 #[cfg(windows)]

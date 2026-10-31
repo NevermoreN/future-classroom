@@ -1,0 +1,68 @@
+{
+  "scope": "Round26 preliminary failures and scope; failures retained, no acceptance thresholds weakened",
+  "events": [
+    {
+      "stage": "initial Windows check",
+      "result": "FAIL",
+      "details": "11 unresolved/gated SSPI imports: missing Win32_Security_Credentials feature; initial tool-output observation, not raw-log file",
+      "fix": "enable required windows feature; stage2 succeeds with expected then-unwired dead-code warnings"
+    },
+    {
+      "stage": "host-tls-stage1.log",
+      "result": "FAIL",
+      "details": "9 passed, valid thumbprint test fixture had 42 hex characters; parser correctly rejected it",
+      "fix": "fixture changed to exactly40; strict exact parser unchanged; host-tls-stage3 actual11 pass"
+    },
+    {
+      "stage": "fmt-stage2.log",
+      "result": "FAIL",
+      "details": "fixture shortening changed formatter wrap; applied cargo fmt",
+      "fix": "format source; final check pending"
+    },
+    {
+      "stage": "modern-tls-stage1.json",
+      "result": "FAIL",
+      "details": "Windows native credential readiness/listen reached; supervisor live ReadAllText conflicted with redirected stdout FileShare, no clients started",
+      "fix": "FileStream with ReadWrite|Delete share, strict UTF8 and same bounded whole-line parse; reuse identical real EXE for stage2",
+      "cleanup": "PASS: exact one certificate/CNG key removed, MY digest restored, owned processes/root absent; full remote raw files preserved by verified SHA"
+    },
+    {
+      "stage": "modern-tls-stage2.json",
+      "result": "FAIL",
+      "details": "4 real accepts; three OpenSSL clients EOF during handshake in ~67ms, zero successful handshakes/HTTP responses; partial TLS closed at original batch deadline; complete native/runner raw evidence preserved",
+      "cleanup": "PASS, exact own cert/key/process/root removed and MY collection restored",
+      "fix": "identified generic ASC_REQ_INTEGRITY unsupported by Schannel from official API docs; remove unsupported request/return assumption while retaining TLS1.2/confidentiality/stream/128bit/client verification; add bounded first native error/call and per-cycle accounting; effect awaiting actual rerun"
+    },
+    {
+      "stage": "modern-tls-stage3.json",
+      "result": "FAIL",
+      "details": "actual trusted TLS1.2 succeeded for3 clients with ECDHE-RSA-AES256-GCM-SHA384/256bit; fragmented complete GET failed during Decrypt Protocol; partialHTTP and partialTLS deadline closes + abruptTLS client passed",
+      "native": "accepted4, handshakes3, response0, firstTlsError Protocol/Decrypt, IO23/23 and SSPI10/10, checked cleanupComplete true",
+      "cleanup": "PASS; full originals downloaded before exact fixture/key/root deletion; MY collection restored",
+      "fix": "await bounded numeric SSPI buffer metadata and exact protocol-contract correction; no buffer/security/deadline threshold relaxation"
+    },
+    {
+      "stage": "modern-tls-stage4.json",
+      "result": "FAIL",
+      "details": "exact native success metadata input155/used124: HEADER13@0, DATA95@13, TRAILER47@108, EXTRA31@124; unused trailer spans16-byte authentication tag plus31 unprocessed input suffix, current guard incorrectly bounded trailer by used124",
+      "fix": "check unused header/trailer within original input155, keep DATA strictly within used124, preserve exact EXTRA suffix; add real-layout regression including out-of-owner trailer, DATA invading EXTRA, duplicate DATA/EXTRA; no input/plaintext/deadline/security budget changed",
+      "cleanup": "PASS: originals preserved before deleting exact own certificate/key/root; MY digest restored"
+    }
+  ],
+  "independentGates": {
+    "strictTcpToHeader5s": "NOT_VALIDATED; Round13 FAIL retained",
+    "productionListener": "NOT_ENABLED",
+    "actualWin7": "NOT_RUN",
+    "actualWin10": "NOT_RUN",
+    "visibleSeewoPptTouchDpi": "NOT_RUN"
+  },
+  "finalResolution": {
+    "modernTlsStage5": "PASS: fixed native trailer range; all8 cases and exact cleanup",
+    "supplementalWin7GnuOnSameWin11": "PASS; not actual Win7 acceptance",
+    "host": "717 PASS",
+    "windows": "1053 PASS across19 binaries",
+    "format": "PASS",
+    "clippy": "strict Host and final Windows PASS",
+    "scratchObservation": "package script stdout is plain text; one local JSON parse failed without altering package, renamed original stdout as package-final.log and independently verified manifest/payloads/repack"
+  }
+}

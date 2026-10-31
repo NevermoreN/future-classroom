@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "scope": "Explicit finite-batch Schannel/IOCP lifecycle; Python TLS1.2 via owned SSH loopback forward",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-a7eb402513f0448e88e0bf732e88e7e2",
+  "exeSha256": "b7195cca8535a209b3a2d6766078d48e7cd84cf597759129cf53940205f917ee",
+  "runnerSourceSha256": "17d56750d310f59e9580e5c95fb8da62eafe165bfda50ce689c01b73d0fb09b4",
+  "remoteScriptsSha256": "b0db93551ac8032a6b2860339cc8b39c304858a34a2e2261b6f05ca39c656f8f",
+  "events": [
+    {
+      "cycle": 1,
+      "case": "fragmented-https-response",
+      "status": "FAIL",
+      "forwardConnectNanos": 3933331,
+      "serverHostname": "localhost",
+      "trustSource": "only owned public PEM",
+      "tlsVersion": "TLSv1.2",
+      "cipher": [
+        "ECDHE-RSA-AES256-GCM-SHA384",
+        "TLSv1.2",
+        256
+      ],
+      "peerDerSha256": "6918476342bc1c6a6014d72dcfd873a63860f7daba75ec6e3ddfb876bbd71238",
+      "error": {
+        "kind": "RuntimeError",
+        "phase": "client/fragmented-https-response",
+        "message": "TLS diagnostic response incomplete"
+      },
+      "forwardObservationNanos": 78671190
+    },
+    {
+      "cycle": 1,
+      "case": "partial-http-header",
+      "status": "PASS",
+      "forwardConnectNanos": 4124469,
+      "serverHostname": "localhost",
+      "trustSource": "only owned public PEM",
+      "tlsVersion": "TLSv1.2",
+      "cipher": [
+        "ECDHE-RSA-AES256-GCM-SHA384",
+        "TLSv1.2",
+        256
+      ],
+      "peerDerSha256": "6918476342bc1c6a6014d72dcfd873a63860f7daba75ec6e3ddfb876bbd71238",
+      "closeKind": "SSLEOFError",
+      "forwardObservationNanos": 4976584003
+    },
+    {
+      "cycle": 1,
+      "case": "partial-tls-record",
+      "status": "PASS",
+      "forwardConnectNanos": 4223813,
+      "closeKind": "EOF",
+      "forwardObservationNanos": 4971774696
+    },
+    {
+      "cycle": 1,
+      "case": "tls-abrupt-close",
+      "status": "PASS",
+      "forwardConnectNanos": 4290626,
+      "serverHostname": "localhost",
+      "trustSource": "only owned public PEM",
+      "tlsVersion": "TLSv1.2",
+      "cipher": [
+        "ECDHE-RSA-AES256-GCM-SHA384",
+        "TLSv1.2",
+        256
+      ],
+      "peerDerSha256": "6918476342bc1c6a6014d72dcfd873a63860f7daba75ec6e3ddfb876bbd71238",
+      "forwardObservationNanos": 17771787
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-a7eb402513f0448e88e0bf732e88e7e2",
+  "uploadedScriptSha256": {
+    "cleanup": "7bf00c4ac8ae07a749570526d60e5dfafd0f4ad26bfa4fcd37729c443f18f86c",
+    "stop": "084dbc481cfeb884d99e9780da3003006719d863aa0faf3d9c0a750ead23e449",
+    "capture": "4ceb046f5f388a8f68cd1bb3e96889391ab84640d6e1bc7a33b6164cf2707abd",
+    "setup": "398f3911764f3326e814a4b88d058be789a987ca5846f41b9475d970d246bc9c",
+    "launch": "491c51128b06a126ff247243f1c74e3a002941b36f43d556872fde3dd73dbf6a"
+  },
+  "controlScriptsParse": "PASS",
+  "fixture": {
+    "thumbprint": "686E8846C82362F18FA772B556B73B6F07190C7C",
+    "keyName": "FutureClassroom-Test-TLS-a7eb402513f0448e88e0bf732e88e7e2-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "minTls": "TLSv1.2",
+    "maxTls": "TLSv1.2",
+    "publicCertificateSha256": "6918476342bc1c6a6014d72dcfd873a63860f7daba75ec6e3ddfb876bbd71238",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "wrongCaNegative": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "wrongHostnameNegative": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "wrongCaTrustSource": "default client trust roots; isolated fixture not added",
+    "closeNotify": "NOT_VALIDATED; exact HTTP Content-Length completion is checked independently",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "ready": [
+    {
+      "port": 60702,
+      "marker": "FutureClassroom-Test-TLS-a7eb402513f0448e88e0bf732e88e7e2",
+      "generation": 1,
+      "cycle": 1
+    }
+  ],
+  "nativeReports": [],
+  "nativeProcessExits": [
+    {
+      "code": 1
+    }
+  ],
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "actual-native-and-ssh-exit",
+    "message": "native TLS child or its SSH supervisor did not exit successfully"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 169,
+      "observedBytes": 169,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "0bf11355c74cda5ad2aed1ee207c82fa2de35aa9310c1b8c1c9c836d25def083",
+      "base64": "VExTX0ZST05URE9PUl9SRUFEWSB7InBvcnQiOjYwNzAyLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIiLCJnZW5lcmF0aW9uIjoxLCJjeWNsZSI6MX0NClRMU19GUk9OVERPT1JfUFJPQ0VTU19FWElUIHsiY29kZSI6MX0NCg=="
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 129,
+      "sha256": "020d928fbc9cafa9665899101874bedc2b587d7957c882ca32653e08e6cc6ca9"
+    },
+    ".tls-process.json": {
+      "bytes": 239,
+      "sha256": "56cd3ec06129ea8d373da133e7f05bed01c2c95f1052fe42e129ad20920728cf"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "7b2f146e3377a978f8734970ab1145603a43f29cba258a52f795b9c1a7f82b34"
+    },
+    "tls.stderr": {
+      "bytes": 815,
+      "sha256": "02bc98455d35cc038801827d9212fab046626f1bdefd135db4831cae6e98f0b8"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 186,
+      "sha256": "62ab7e3bf93fdc7c6321cf8a2a10d45d348d17b56cf79f7c77cb0012b10ce306"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "cbc3cda8cdc53effd228b8a0b299c9edd04654bf943f34a7399442e83734da30"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "2a5ceae33cf38bae7096e674e05a9430a2104761501f86f0a8a02437362fdf54"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 129,
+          "sha256": "020d928fbc9cafa9665899101874bedc2b587d7957c882ca32653e08e6cc6ca9"
+        },
+        "downloaded": {
+          "bytes": 129,
+          "sha256": "020d928fbc9cafa9665899101874bedc2b587d7957c882ca32653e08e6cc6ca9"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/tls.stdout",
+        "base64": "VExTX0ZST05URE9PUl9SRUFEWSB7InBvcnQiOjYwNzAyLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIiLCJnZW5lcmF0aW9uIjoxLCJjeWNsZSI6MX0K"
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 239,
+          "sha256": "56cd3ec06129ea8d373da133e7f05bed01c2c95f1052fe42e129ad20920728cf"
+        },
+        "downloaded": {
+          "bytes": 239,
+          "sha256": "56cd3ec06129ea8d373da133e7f05bed01c2c95f1052fe42e129ad20920728cf"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWE3ZWI0MDI1MTNmMDQ0OGU4OGUwYmY3MzJlODhlN2UyXFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjo1OTg0LCJzdGFydFRpY2tzIjoiNjM5MjkwMTgyODM5MjYzMDU1In0="
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "7b2f146e3377a978f8734970ab1145603a43f29cba258a52f795b9c1a7f82b34"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "7b2f146e3377a978f8734970ab1145603a43f29cba258a52f795b9c1a7f82b34"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRUW1KbTQ5WkZ5SjVMMDYrQjFabHVoakFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EUXpNekF5V2hjTk1qWXhNVEF4TURRek9EQXlXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDa3RjUDJPdFI0TXJNVUhCTjBrL1pZClFwWEtXeUQyM2FtWVJQTEg0MTZ3cElSZ1BCTXA3K053cEF2ZjRwb2szNGZFUHkwWHFNYmR6cEl5cU84ZVoyOWFVV0JhVFY0TnB5NnoKcnRhWnQreXdMWHFqZVd5RFhqV3ZMdS9TV0pBWHhDdkUwOU1GWXl2ZUNqZmpvczJBNlVMdU4zUGliUUNaRnNPRmNSaTVpWlp2bDNUUwo1OG1DdjNVRWluZDVJM3hJcmplK0hKMmJ0bDViSklNMGdvc2NvQ1VFb1hsT3pTWVJKb21iYkRIdEQ3UGNBWFRTWmdXaFlRZ3kvS0I3ClV6S3NvSXp6RW95cmU4ZEYzaWlpa25Ia0toOTNTUDRkQkhoNmlSTlAyVDFDcW95bThSZlZsNjFIY2RJSjJZUCtpR280dXUrR09IdXIKRXZuSitZbDRjMXdVZW9OQkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJUVHI5eVk5SnZwCkg2NGFvUWRDRHB2V2x0SVJzREFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBbzExUno4dmxzSHRka3JtRWxSMHB6VG0rNXgwcUxMNEUKZFBnWVhON1pKaHhSR0wzOHNMak1kNmNDT0Ura2g4c3QxdTFuQWhlOS9ZbXBnVGJQeXlpMG1mMGJLWGs3QjEvaFcyR3Nmdkw2UndKaApsVXR5WnNuNEhtcWMxa2FYanpteG5BZXorRE5rZ1BuZHJ3bDR6cEpDMnBza0o5bkNWQ2Rkb09adGdtck1CdHRMaGozdjdyaitQU012ClNvMjJMREdBOUhqaWh4U1pDd0hYeVBJdjRyeGNmTHhmclcwTVc3RlFQWlNpVDBPNTVZUGRxMnNpWUNpUUczdlBOcGhCVlVQZ0ZTeUIKVi9UN2tqeEl1UWM3WmMwYWV6RlpUcmVtOXJyTlE5ZTZGanVJTGtwU0F6RUlTc3ZSelJYYjViTnV1cUJjYmpxVy9WU2ZKbkVYUEVGYwp3VkI2Zmc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 815,
+          "sha256": "02bc98455d35cc038801827d9212fab046626f1bdefd135db4831cae6e98f0b8"
+        },
+        "downloaded": {
+          "bytes": 815,
+          "sha256": "02bc98455d35cc038801827d9212fab046626f1bdefd135db4831cae6e98f0b8"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/tls.stderr",
+        "base64": "VExTX0ZST05URE9PUl9DWUNMRSB7ImN5Y2xlIjoxLCJhY2NlcHRlZCI6NCwiaGFuZHNoYWtlcyI6MywicmVzcG9uc2VzIjowLCJ0bHNGYWlsdXJlcyI6MSwiZmlyc3RUbHNFcnJvciI6IlByb3RvY29sIiwiZmlyc3RUbHNDYWxsIjoiRGVjcnlwdCIsImhhbmRzaGFrZUNhbGxzIjo3LCJuZWVkSW5wdXRDb3VudCI6MSwiY29uc3VtZWRCeXRlcyI6MTE4MywiZXh0cmFFdmVudHMiOjAsImV4dHJhQnl0ZXMiOjAsImlvU3VibWlzc2lvbnMiOjIzLCJpb0NvbXBsZXRpb25zIjoyMywic3NwaVN1Ym1pc3Npb25zIjoxMCwic3NwaUNvbXBsZXRpb25zIjoxMCwiY2xlYW51cENvbXBsZXRlIjp0cnVlfQpGdXR1cmVDbGFzc3Jvb206IFRMUyBkaWFnbm9zdGljIGJhdGNoIDEgbWlzbWF0Y2g6IFJlcG9ydCB7IGFjY2VwdGVkOiA0LCBoYW5kc2hha2VzOiAzLCByZXNwb25zZXM6IDAsIHN1Ym1pc3Npb25zOiAyMywgY29tcGxldGlvbnM6IDIzLCBzc3BpX3N1Ym1pc3Npb25zOiAxMCwgc3NwaV9jb21wbGV0aW9uczogMTAsIHJldHVybmVkX2ZyYW1lczogMTAsIHNsb3RfZnJhbWVzX2F0X2RyYWluOiA0LCBkZWFkbGluZV9jbG9zZXM6IDIsIGNsb3NlZF93aXRoX3NzcGlfaW5fZmxpZ2h0OiAwLCBsYXRlX3NzcGlfY29tcGxldGlvbnM6IDAsIHRsc19mYWlsdXJlczogMSwgZmlyc3RfdGxzX2Vycm9yOiBTb21lKFByb3RvY29sKSwgZmlyc3RfdGxzX2NhbGw6IFNvbWUoRGVjcnlwdCksIGhhbmRzaGFrZV9jYWxsczogNywgbmVlZF9pbnB1dF9jb3VudDogMSwgY29uc3VtZWRfYnl0ZXM6IDExODMsIGV4dHJhX2V2ZW50czogMCwgZXh0cmFfYnl0ZXM6IDAgfQo="
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 186,
+          "sha256": "62ab7e3bf93fdc7c6321cf8a2a10d45d348d17b56cf79f7c77cb0012b10ce306"
+        },
+        "downloaded": {
+          "bytes": 186,
+          "sha256": "62ab7e3bf93fdc7c6321cf8a2a10d45d348d17b56cf79f7c77cb0012b10ce306"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6OTQyMCwic3RhcnRUaWNrcyI6IjYzOTI5MDE4MjgzNjcxNzQwMSJ9"
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "cbc3cda8cdc53effd228b8a0b299c9edd04654bf943f34a7399442e83734da30"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "cbc3cda8cdc53effd228b8a0b299c9edd04654bf943f34a7399442e83734da30"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MzY3MjQsInN0YXJ0VGlja3MiOiI2MzkyOTAxODI4MTE4OTYxNDgifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "2a5ceae33cf38bae7096e674e05a9430a2104761501f86f0a8a02437362fdf54"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "2a5ceae33cf38bae7096e674e05a9430a2104761501f86f0a8a02437362fdf54"
+        },
+        "artifact": "/tmp/fc-round26-evidence/modern-tls-stage3-a7eb402513f0448e88e0bf732e88e7e2-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiNjg2RTg4NDZDODIzNjJGMThGQTc3MkI1NTZCNzNCNkYwNzE5MEM3QyIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWE3ZWI0MDI1MTNmMDQ0OGU4OGUwYmY3MzJlODhlN2UyIiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1hN2ViNDAyNTEzZjA0NDhlODhlMGJmNzMyZTg4ZTdlMi1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "49de80544f091562e32262b92a4cb9098bf38940d9c182a43d866b380b744c2c",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "0e218ac00d4fb4ca18461351ee2ea1f7a8a11d6e8bc9a0afd133e6ad2fd75936",
+        "base64": "eyJ0aHVtYnByaW50IjoiNjg2RTg4NDZDODIzNjJGMThGQTc3MkI1NTZCNzNCNkYwNzE5MEM3QyIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTdlYjQwMjUxM2YwNDQ4ZTg4ZTBiZjczMmU4OGU3ZTIta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFRbUptNDlaRnlKNUwwNitCMVpsdWhqQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EUXpNekF5V2hjTk1qWXhNVEF4TURRek9EQXlXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQ2t0Y1AyT3RSNE1yTVVIQk4way9aWVxuUXBYS1d5RDIzYW1ZUlBMSDQxNndwSVJnUEJNcDcrTndwQXZmNHBvazM0ZkVQeTBYcU1iZHpwSXlxTzhlWjI5YVVXQmFUVjROcHk2elxucnRhWnQreXdMWHFqZVd5RFhqV3ZMdS9TV0pBWHhDdkUwOU1GWXl2ZUNqZmpvczJBNlVMdU4zUGliUUNaRnNPRmNSaTVpWlp2bDNUU1xuNThtQ3YzVUVpbmQ1STN4SXJqZStISjJidGw1YkpJTTBnb3Njb0NVRW9YbE96U1lSSm9tYmJESHREN1BjQVhUU1pnV2hZUWd5L0tCN1xuVXpLc29JenpFb3lyZThkRjNpaWlrbkhrS2g5M1NQNGRCSGg2aVJOUDJUMUNxb3ltOFJmVmw2MUhjZElKMllQK2lHbzR1dStHT0h1clxuRXZuSitZbDRjMXdVZW9OQkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCVFRyOXlZOUp2cFxuSDY0YW9RZENEcHZXbHRJUnNEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFvMTFSejh2bHNIdGRrcm1FbFIwcHpUbSs1eDBxTEw0RVxuZFBnWVhON1pKaHhSR0wzOHNMak1kNmNDT0Ura2g4c3QxdTFuQWhlOS9ZbXBnVGJQeXlpMG1mMGJLWGs3QjEvaFcyR3Nmdkw2UndKaFxubFV0eVpzbjRIbXFjMWthWGp6bXhuQWV6K0ROa2dQbmRyd2w0enBKQzJwc2tKOW5DVkNkZG9PWnRnbXJNQnR0TGhqM3Y3cmorUFNNdlxuU28yMkxER0E5SGppaHhTWkN3SFh5UEl2NHJ4Y2ZMeGZyVzBNVzdGUVBaU2lUME81NVlQZHEyc2lZQ2lRRzN2UE5waEJWVVBnRlN5QlxuVi9UN2tqeEl1UWM3WmMwYWV6RlpUcmVtOXJyTlE5ZTZGanVJTGtwU0F6RUlTc3ZSelJYYjViTnV1cUJjYmpxVy9WU2ZKbkVYUEVGY1xud1ZCNmZnPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 766,
+        "sha256": "2eca8ef15cf9ba0b9093eac019737bee0f5927d9b9316e8cb08443c28f93c7d4",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoxMjksInNoYTI1NiI6IjAyMGQ5MjhmYmM5Y2FmYTk2NjU4OTkxMDE4NzRiZWRjMmI1ODdkNzk1N2M4ODJjYTMyNjUzZTA4ZTZjYzZjYTkifSwiLnRscy1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjIzOSwic2hhMjU2IjoiNTZjZDNlYzA2MTI5ZWE4ZDM3M2RhMTMzZTdmMDViZWQwMWMyYzk1ZjEwNTJmZTQyZTEyOWFkMjA5MjA3MjhjZiJ9LCJ0bHMtcHVibGljLnBlbSI6eyJieXRlcyI6MTE0MSwic2hhMjU2IjoiN2IyZjE0NmUzMzc3YTk3OGY4NzM0OTcwYWIxMTQ1NjAzYTQzZjI5Y2JhMjU4YTUyZjc5NWI5YzFhN2Y4MmIzNCJ9LCJ0bHMuc3RkZXJyIjp7ImJ5dGVzIjo4MTUsInNoYTI1NiI6IjAyYmM5ODQ1NWQzNWNjMDM4ODAxODI3ZDkyMTJmYWIwNDY2MjZmMWJkZWZkMTM1ZGI0ODMxY2FlNmU5OGYwYjgifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE4Niwic2hhMjU2IjoiNjJhYjdlM2JmOTNmZGM3YzYzMjFjZjhhMmExMGQ0NWQzNDhkMTdiNTZjZjc5ZjdjNzdjYjAwMTJiMTBjZTMwNiJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTg3LCJzaGEyNTYiOiJjYmMzY2RhOGNkYzUzZWZmZDIyOGI4YTBiMjk5YzllZGQwNDY1NGJmOTQzZjM0YTczOTk0NDJlODM3MzRkYTMwIn0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozNzMsInNoYTI1NiI6IjJhNWNlYWUzM2NmMzhiYWU3MDk2ZTY3NGUwNWE5NDMwYTIxMDQ3NjE1MDFmODZmMGE4YTAyNDM3MzYyZmRmNTQifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}
