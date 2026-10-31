@@ -410,8 +410,15 @@ try {
     }
     if (@($executables | Where-Object { $_.role -eq 'tests' }).Count -lt 12 -or
         @($executables | Where-Object { $_.role -eq 'product' }).Count -ne 1) { throw 'Required workspace test/product executables missing.' }
-    $payloadBytes = ($executables | Measure-Object bytes -Sum).Sum
-    if ($payloadBytes -gt 512MB) { throw 'Executable package byte bound exceeded.' }
+    [long]$payloadBytes = 0
+    foreach ($executable in $executables) {
+        [long]$size = $executable['bytes']
+        if ($size -lt 256 -or $size -gt 128MB -or $payloadBytes -gt 512MB - $size) {
+            throw 'Executable package byte bound exceeded.'
+        }
+        $payloadBytes += $size
+    }
+    if ($payloadBytes -ne $script:PayloadBytes) { throw 'Executable package byte ledger mismatch.' }
     $number = 0
     foreach ($exe in $executables) {
         $imports = Invoke-Logged "pe-imports-$number" $dumpbin @('/DEPENDENTS',(Join-Path $Artifact $exe.relative_path))

@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "scope": "Round30 failed hosted MSVC run and CI-only payload-accounting repair. Round31 source worktree excluded; no new CI, runtime or OS acceptance inferred.",
+  "run": {
+    "id": 41207536551,
+    "headSha": "551299e17ba69f6944cf924917c632eaa005e07a",
+    "conclusion": "failure",
+    "commandsObservedPassed": [
+      {
+        "name": "workspace-test-compile",
+        "exitCode": 0,
+        "passed": true,
+        "durationSeconds": 841,
+        "evidence": "Exact hosted log line, not executable/runtime tests"
+      },
+      {
+        "name": "product-compile",
+        "exitCode": 0,
+        "passed": true,
+        "durationSeconds": 1,
+        "evidence": "Exact hosted log line, not executable/runtime tests"
+      },
+      {
+        "name": "clippy",
+        "exitCode": 0,
+        "passed": true,
+        "durationSeconds": 68,
+        "evidence": "Exact hosted log line, not executable/runtime tests"
+      }
+    ],
+    "jobCleanupStep": "success",
+    "artifactUploadStep": "success",
+    "dispatchInitialStatusPreserved": "RUN_IDENTIFIED"
+  },
+  "failure": {
+    "phase": "Post-compile executable collection byte accounting",
+    "reason": "Measure-Object bytes -Sum cannot obtain dictionary key bytes as an object property. Overall failure is preserved.",
+    "executableCount": "PENDING_ORIGINAL_ARTIFACT",
+    "PEImportChecks": "PENDING_ORIGINAL_ARTIFACT",
+    "rawCleanupDetails": "PENDING_ORIGINAL_ARTIFACT"
+  },
+  "artifactPending": {
+    "status": "NOT_ARCHIVED_IN_THIS_STAGE",
+    "reportedZipBytes": 37661711,
+    "reportedZipSha256": "52c64e8b7058a4423f0268e836c4a076eb1c97b26d02668988d9abd7fbf1c821",
+    "evidence": "Hosted upload log only; live download not touched or duplicated. Exact original payload metadata will be archived separately. No ZIP, EXE or binary base64 copied into Git."
+  },
+  "dictionaryReproduction": {
+    "powershell": "5.1.26100.9711",
+    "observations": [
+      {
+        "name": "exact_list_ordereddictionary_measure_property",
+        "outcome": "THREW",
+        "exception": "System.Management.Automation.PSArgumentException: 无法处理参数，因为参数“Property”的值无效。请更改“Property”参数的值，然后再次运行此操作。",
+        "error_record": "在任何对象的输入中都找不到属性“bytes”。",
+        "category": "InvalidArgument: (:) [Measure-Object]，PSArgumentException",
+        "fully_qualified_error_id": "GenericMeasurePropertyNotFound,Microsoft.PowerShell.Commands.MeasureObjectCommand",
+        "position": "所在位置 行:28 字符: 80\r\n+ ... ionary_measure_property' { ($list | Measure-Object bytes -Sum).Sum }) ...\r\n+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~",
+        "script_stack_trace": "在 <ScriptBlock>、<无文件> 中: 第 28 行\r\n在 Observe、<无文件> 中: 第 8 行\r\n在 <ScriptBlock>、<无文件> 中: 第 28 行\r\n在 <ScriptBlock>、<无文件> 中: 第 1 行"
+      },
+      {
+        "name": "array_ordereddictionary_measure_property",
+        "outcome": "THREW",
+        "exception": "System.Management.Automation.PSArgumentException: 无法处理参数，因为参数“Property”的值无效。请更改“Property”参数的值，然后再次运行此操作。",
+        "error_record": "在任何对象的输入中都找不到属性“bytes”。",
+        "category": "InvalidArgument: (:) [Measure-Object]，PSArgumentException",
+        "fully_qualified_error_id": "GenericMeasurePropertyNotFound,Microsoft.PowerShell.Commands.MeasureObjectCommand",
+        "position": "所在位置 行:29 字符: 76\r\n+ ... onary_measure_property' { ($array | Measure-Object bytes -Sum).Sum }) ...\r\n+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~",
+        "script_stack_trace": "在 <ScriptBlock>、<无文件> 中: 第 29 行\r\n在 Observe、<无文件> 中: 第 8 行\r\n在 <ScriptBlock>、<无文件> 中: 第 29 行\r\n在 <ScriptBlock>、<无文件> 中: 第 1 行"
+      },
+      {
+        "name": "array_pscustomobject_measure_property_control",
+        "outcome": "RETURNED",
+        "values": [
+          3
+        ]
+      },
+      {
+        "name": "existing_where_dictionary_access_control",
+        "outcome": "RETURNED",
+        "values": [
+          {
+            "tests": 1,
+            "product": 1
+          }
+        ]
+      },
+      {
+        "name": "explicit_dictionary_long_sum_control",
+        "outcome": "RETURNED",
+        "values": [
+          3
+        ]
+      },
+      {
+        "name": "project_values_before_measure_control",
+        "outcome": "RETURNED",
+        "values": [
+          3
+        ]
+      }
+    ],
+    "scope": "Actual read-only PS5.1 stdin-derived script. Original PS7 ReportPath probe is preserved as unexecuted source; not described as a PS7 execution."
+  },
+  "correction": {
+    "sourceSha256": "94e853dbb55f40d65ff914dbe767408ffc412cc75b3650e19a0f139f54d525cd",
+    "scope": "CI-only explicit bounded dictionary byte recount with independent original copy-ledger equality; no Rust/ZIP or compile exit policy changes",
+    "limits": "Each recorded PE >=256 bytes and <=128MiB; addition checked against same512MiB total before adding; sum must equal existing script:PayloadBytes updated only after successful copy",
+    "validationPendingOriginalPreserved": "Separate actual read-only PowerShell recount/bounds/ledger probe required; hosted fixed run not yet dispatched",
+    "actualReadonlyValidation": {
+      "powershell": "5.1.26100.9711",
+      "status": "PASS",
+      "parserErrors": 0,
+      "cases": [
+        {
+          "name": "ordered-dictionary-list-explicit-recount",
+          "passed": true,
+          "sum": 768
+        },
+        {
+          "name": "exact-512MiB-four-128MiB-entries",
+          "passed": true,
+          "sum": 536870912
+        },
+        {
+          "name": "total-exceeds-512MiB",
+          "passed": true
+        },
+        {
+          "name": "entry-exceeds-128MiB",
+          "passed": true
+        },
+        {
+          "name": "entry-below-valid-PE-size",
+          "passed": true
+        },
+        {
+          "name": "negative-entry",
+          "passed": true
+        },
+        {
+          "name": "independent-copy-ledger-mismatch",
+          "passed": true
+        },
+        {
+          "name": "missing-size-key",
+          "passed": true
+        },
+        {
+          "name": "malformed-size",
+          "passed": true
+        },
+        {
+          "name": "long-max-before-addition",
+          "passed": true
+        }
+      ],
+      "caseCount": 10,
+      "exitCode": 0,
+      "embeddedProductionSourceExact": true
+    },
+    "staticChecks": [
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "preservation": {
+    "oldFiles": 619,
+    "oldIndexSha256": "554ed7d818c9a5d4757fac3f42d7183d935dcd2b68a499531874e31b5b3c58bd",
+    "originals": [
+      {
+        "original": "/tmp/fc-round30-evidence/git-ci-linker-help-sync.json",
+        "archived": "2026-10-31-round30-git-ci-linker-help-sync.json",
+        "bytes": 31732,
+        "sha256": "55a5be68d75e78075f36dd693f82eeb3b9ba312ba1d37dc4dfeb2327bd674cba"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-dispatch-sixth-once.py",
+        "archived": "2026-10-31-round30-ci-dispatch-sixth-once.py",
+        "bytes": 4658,
+        "sha256": "5ab108eace17a81588d012fcf36089bba263f925ddcc05c99b9972f86c5519bb"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-dispatch-sixth.json",
+        "archived": "2026-10-31-round30-ci-dispatch-sixth.json",
+        "bytes": 21309,
+        "sha256": "e42ef8d86ae796b7a01390b55f3e9a6a68259d8f4b6c25dcf97ab296fef90077"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-fifth-accepted-jobs-initial.json",
+        "archived": "2026-10-31-round30-ci-fifth-accepted-jobs-initial.json",
+        "bytes": 1025,
+        "sha256": "84d2808827bab902464789885c038be5136eb5acf23a6bc9db7c3b410ccaa755"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-fifth-accepted-jobs-terminal.json",
+        "archived": "2026-10-31-round30-ci-fifth-accepted-jobs-terminal.json",
+        "bytes": 1132,
+        "sha256": "ffe20679d194ec2e209eb7fd4bb546ec2935eda6f5a9d981c2fd13af142948ff"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-fifth-run-tools.json",
+        "archived": "2026-10-31-round30-ci-fifth-run-tools.json",
+        "bytes": 27903,
+        "sha256": "84a0a07a09b3567554a9d9fbe5fe202fbd06874c368149f822ff1109b2cd4386"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/service-msvc-measure-readonly-probe.ps1",
+        "archived": "2026-10-31-round30-service-msvc-measure-readonly-probe.ps1",
+        "bytes": 3147,
+        "sha256": "034fab4f874c473a64219ea9c0188a0eb1a27e0756a74cee1f75785c231a7bef"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-measure-dictionary-stdin-probe.ps1",
+        "archived": "2026-10-31-round30-ci-measure-dictionary-stdin-probe.ps1",
+        "bytes": 2784,
+        "sha256": "2858eb39c267e15b2014b384ca80724bf75e9d5c875910b42357d012732d9814"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-measure-dictionary-windows-ps51.json",
+        "archived": "2026-10-31-round30-ci-measure-dictionary-windows-ps51.json",
+        "bytes": 12765,
+        "sha256": "e5a6cd0d2329817a085e76476611624050c82d139d3e8681a093428e335e4b4e"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-payload-accounting-correction.json",
+        "archived": "2026-10-31-round30-ci-payload-accounting-correction.json",
+        "bytes": 79291,
+        "sha256": "46d88fd237e5c16aa2c82a6ec34020a872af2f84774043c440d2a5761f32a632"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-payload-accounting-readonly-probe.ps1",
+        "archived": "2026-10-31-round30-ci-payload-accounting-readonly-probe.ps1",
+        "bytes": 41261,
+        "sha256": "49fa1614bcdbd498e76bd0f498cbb767430b03efc5485e2152da8dd099a4fdc7"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-payload-accounting-windows-readonly.json",
+        "archived": "2026-10-31-round30-ci-payload-accounting-windows-readonly.json",
+        "bytes": 3113,
+        "sha256": "e1ee6ca1371bd313bf9a1e2e8e2dfe1b2cd90972fc341069cf2a110954a84413"
+      }
+    ],
+    "checks": "All old and new files exact bytes/SHA; original status/validation_pending and CLIXML retained. Concrete credentials/private keys/signed URLs and binary archive payloads rejected."
+  },
+  "notClaimed": [
+    "Corrected hosted CI has not yet run",
+    "Compiled test binaries have not been executed by this evidence task",
+    "No Rust behavior or developer ZIP changes; no repeated Rust tests for this CI-only fix",
+    "No new Windows7/10/11, Seewo or production-listener acceptance"
+  ],
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}
