@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 #[cfg(test)]
 mod limits_tests;
 mod management;
+mod web_device;
+pub use web_device::WebVoiceDeviceAvailability;
 mod policy_handoff;
 #[cfg(test)]
 mod request_fence_tests;
@@ -68,6 +70,8 @@ struct Inner {
     policy: Mutex<policy_handoff::PolicySlot>,
     // Domain participation only. OS-thread/TLS exit is proved by the runtime.
     native_participating: AtomicBool,
+    // One short-lived device fact and one physical query owner, never a lease.
+    output_observation: web_device::OutputCache,
     enabled: AtomicBool,
     waker: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
     #[cfg(test)]
@@ -115,7 +119,7 @@ fn denied() -> BackendError {
         PermissionError::StaleAuthorization,
     )))
 }
-/// Browser capability metadata, containing no device/native claim.
+/// Browser metadata with conservative historical format status, never audio permission.
 pub struct WebVoiceCapabilities {
     pub publication_revision: Revision,
     pub identity_revision: Revision,
@@ -126,6 +130,7 @@ pub struct WebVoiceCapabilities {
     pub enabled: bool,
     pub admitting: bool,
     pub target_authorized: bool,
+    pub device_availability: WebVoiceDeviceAvailability,
 }
 fn result_unknown() -> BackendError {
     BackendError::Voice(VoiceRepositoryError::Unavailable)
@@ -151,6 +156,7 @@ impl VoiceService {
                 runtime_state: AtomicU64::new(3),
                 policy: Mutex::new(policy_handoff::PolicySlot::default()),
                 native_participating: AtomicBool::new(false),
+                output_observation: web_device::OutputCache::default(),
                 enabled: AtomicBool::new(true),
                 waker: Mutex::new(None),
                 #[cfg(test)]
@@ -639,6 +645,12 @@ impl VoiceService {
         self.check_web_target_until(lease, asset.class_id, generation, deadline, Some(asset))
     }
     pub fn web_capabilities(&self, lease: SessionLease) -> Result<WebVoiceCapabilities> {
+        self.web_capabilities_state(lease).map(|(view, _)| view)
+    }
+    fn web_capabilities_state(
+        &self,
+        lease: SessionLease,
+    ) -> Result<(WebVoiceCapabilities, web_device::Stamp)> {
         self.check_web_actor(lease)?;
         let snapshot = self
             .inner
@@ -676,7 +688,7 @@ impl VoiceService {
         {
             return Err(BackendError::Storage(StorageError::Busy));
         }
-        Ok(WebVoiceCapabilities {
+        let view = WebVoiceCapabilities {
             publication_revision: snapshot.revision,
             identity_revision: snapshot.data.revision,
             limits: inventory.limits,
@@ -686,7 +698,10 @@ impl VoiceService {
             enabled: inventory.enabled,
             admitting: inventory.enabled && enabled && runtime & 1 == 1,
             target_authorized: authorized,
-        })
+            device_availability: WebVoiceDeviceAvailability::Unverified,
+        };
+        let stamp = web_device::Stamp::new(&view, inventory.revision, runtime, enabled, status);
+        Ok((view, stamp))
     }
     pub fn web_jobs(&self, lease: SessionLease) -> Result<Vec<VoiceJob>> {
         self.check_web_actor(lease)?;

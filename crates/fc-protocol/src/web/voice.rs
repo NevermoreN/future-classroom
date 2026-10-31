@@ -21,7 +21,7 @@ struct Capabilities<'a> {
     enabled: bool,
     admission: &'static str,
     target_authorized: bool,
-    device_availability: &'static str,
+    device_availability: DeviceAvailability,
     default_repeat_total: u8,
     min_repeat_total: u8,
     max_repeat_total: u8,
@@ -33,10 +33,19 @@ struct Capabilities<'a> {
     max_wav_bytes: u64,
     upload_ttl_seconds: u16,
 }
+/// A recent negative format observation is not a current-device reservation.
+/// There is deliberately no positive/audibility claim in this response.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DeviceAvailability {
+    Unverified,
+    Unavailable,
+}
 pub struct CapabilityPolicy {
     pub enabled: bool,
     pub admitting: bool,
     pub target_authorized: bool,
+    pub device_availability: DeviceAvailability,
     pub limits: VoiceLimits,
 }
 pub fn capabilities(
@@ -63,7 +72,7 @@ pub fn capabilities(
         enabled: policy.enabled,
         admission: if policy.admitting { "OPEN" } else { "CLOSED" },
         target_authorized: policy.target_authorized,
-        device_availability: "UNVERIFIED",
+        device_availability: policy.device_availability,
         default_repeat_total: policy.limits.default_repeat_total(),
         min_repeat_total: 1,
         max_repeat_total: policy.limits.max_repeat_total,
@@ -273,6 +282,7 @@ mod tests {
                 enabled: true,
                 admitting: false,
                 target_authorized: false,
+                device_availability: DeviceAvailability::Unverified,
                 limits,
             },
         )
@@ -292,6 +302,7 @@ mod tests {
                 enabled: true,
                 admitting: true,
                 target_authorized: false,
+                device_availability: DeviceAvailability::Unverified,
                 limits: VoiceLimits {
                     max_pending_per_owner: 4,
                     ..limits
@@ -316,6 +327,7 @@ mod tests {
                 enabled: false,
                 admitting: false,
                 target_authorized: false,
+                device_availability: DeviceAvailability::Unverified,
                 limits: VoiceLimits::default(),
             },
         )

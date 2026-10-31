@@ -111,6 +111,31 @@ fn status(completed: WebCompletion, token: RequestToken) -> u16 {
 }
 
 #[test]
+fn capability_head_and_json_share_original_hundred_milliseconds_including_queue_time() {
+    let fixture = Fixture::new();
+    let mut head = fixture.head();
+    head.target = "/fc/api/v1/voice/capabilities".into();
+    let admitted = Instant::now() - Duration::from_millis(150);
+    let (_control, life) = TransferControl::new(head.token, admitted).unwrap();
+    assert!(life.is_active()); // Original ordinary 120-second lifetime remains live.
+    let first = WebTask::admit(&fixture.backend, &fixture.app, head.clone(), life.clone()).unwrap();
+    let second = WebTask::json(&fixture.backend, &fixture.app, head.clone(), vec![], life.clone()).unwrap();
+    assert_eq!(first.deadline(), admitted + Duration::from_millis(100));
+    assert_eq!(second.deadline(), first.deadline());
+    let pool = WorkerPool::start().unwrap();
+    let deadline = second.deadline();
+    assert_eq!(
+        pool.handle().try_submit(HttpJob::Web(Box::new(second)), deadline).err().unwrap().kind,
+        Rejection::Deadline
+    );
+    let shorter = life.bounded(Duration::from_millis(50)).unwrap();
+    let task = WebTask::json(&fixture.backend, &fixture.app, head, vec![], shorter.clone()).unwrap();
+    assert_eq!(task.deadline(), shorter.deadline());
+    pool.request_stop();
+    pool.join().unwrap();
+}
+
+#[test]
 fn real_worker_head_then_json_share_original_lifetime_without_creating_another_pool() {
     let fixture = Fixture::new();
     let pool = WorkerPool::start().unwrap();

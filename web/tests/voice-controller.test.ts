@@ -4,6 +4,7 @@ import { ProtocolVersionFault } from '../src/api/protocol'
 import { ApiError, NetworkFault } from '../src/api/client'
 import type { VoiceJob, VoiceUploaded } from '../src/api/voice-protocol'
 import { api, caps, csrf, deferred, job, recording, upload, wav } from './voice-fixtures'
+import { RecorderController, type CapturePort, type CaptureSession, type CaptureSink, type WavNormalizer } from '../src/voice/recorder'
 function fixture() { const transport = api(), states: VoiceState[] = [], revoked = vi.fn(), cancelRecorder = vi.fn(), ids = vi.fn().mockReturnValueOnce('71').mockReturnValueOnce('81').mockReturnValue('91'); const controller = new VoiceController(transport, csrf, state => states.push(state), revoked, cancelRecorder, ids); return { api: transport, controller, states, revoked, cancelRecorder, ids, state: () => controller.snapshot() } }
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -110,6 +111,68 @@ describe('voice recording and durable task lifecycle', () => {
   })
   it('rejects backwards or terminal-resurrected task progress instead of adopting it', async () => {
     const f = fixture(), old = job({ revision: '8', state: 'COMPLETED', currentRepeat: 3, completedRepeats: 3 }); f.api.voiceJobs.mockResolvedValueOnce([old]); await f.controller.open(); f.api.voiceJobs.mockResolvedValueOnce([job({ revision: '9', state: 'QUEUED' })]); await f.controller.refresh(); expect(f.state().jobs).toEqual([old]); expect(f.state().notice).toContain('无法核对'); f.controller.dispose()
+  })
+})
+
+describe('historical default-output capability admission', () => {
+  it('blocks new recordings and stale finalized output for a negative capability', async () => {
+    const f = fixture(); f.api.voiceCapabilities.mockResolvedValue(caps({ deviceAvailability: 'UNAVAILABLE' }))
+    try {
+      await f.controller.open()
+      expect(mayRecord(f.state().capabilities)).toBe(false)
+      expect(f.controller.beginRecording('negative-output')).toBeNull()
+      await f.controller.recorded(recording('negative-output'))
+      expect(f.state().context).toBeNull(); expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.api.submitVoice).not.toHaveBeenCalled()
+    } finally { f.controller.dispose() }
+  })
+  it.each(['AVAILABLE', 'UNVERIFIED'] as const)('keeps %s input compatibility while a later UNVERIFIED response permits the captured recording', async availability => {
+    const f = fixture(); f.api.voiceCapabilities.mockResolvedValueOnce(caps({ deviceAvailability: availability })).mockResolvedValue(caps({ deviceAvailability: 'UNVERIFIED' }))
+    try {
+      await f.controller.open(); expect(mayRecord(f.state().capabilities)).toBe(true)
+      expect(f.controller.beginRecording('historical-support')).not.toBeNull()
+      await f.controller.recorded(recording('historical-support'))
+      expect(f.state().capabilities?.deviceAvailability).toBe('UNVERIFIED'); expect(f.cancelRecorder).not.toHaveBeenCalled()
+      expect(f.api.uploadVoice).toHaveBeenCalledOnce(); expect(f.api.submitVoice).toHaveBeenCalledOnce(); expect(f.state().pending).toBeNull()
+    } finally { f.controller.dispose() }
+  })
+  it('keeps a repeated negative refresh blocked and requires a fresh gesture after later UNVERIFIED recovery', async () => {
+    const f = fixture(); f.api.voiceCapabilities.mockResolvedValue(caps({ deviceAvailability: 'UNAVAILABLE' }))
+    try {
+      await f.controller.open(); expect(f.controller.beginRecording('before-refresh')).toBeNull()
+      await f.controller.refresh(); expect(f.controller.beginRecording('still-negative')).toBeNull()
+      expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.api.submitVoice).not.toHaveBeenCalled()
+      f.api.voiceCapabilities.mockResolvedValue(caps({ deviceAvailability: 'UNVERIFIED' }))
+      await f.controller.refresh(); expect(f.state().phase).toBe('idle'); expect(f.state().context).toBeNull(); expect(mayRecord(f.state().capabilities)).toBe(true)
+      await f.controller.recorded(recording('before-refresh')); expect(f.api.uploadVoice).not.toHaveBeenCalled()
+      expect(f.controller.beginRecording('explicit-after-refresh')).not.toBeNull()
+      await f.controller.recorded(recording('explicit-after-refresh'))
+      expect(f.api.uploadVoice).toHaveBeenCalledOnce(); expect(f.api.submitVoice).toHaveBeenCalledOnce()
+    } finally { f.controller.dispose() }
+  })
+  it('a negative capability checkpoint aborts the real recorder session and rejects its late PCM and finalizer', async () => {
+    const transport = api(), session = { sampleRate: 16000, start: vi.fn(async () => {}), stop: vi.fn(async () => {}), abort: vi.fn() } satisfies CaptureSession
+    let sink!: CaptureSink, captureSignal!: AbortSignal
+    const capturePort = { open: vi.fn<CapturePort['open']>().mockImplementation(async (next, signal) => { sink = next; captureSignal = signal; return session }) }
+    const normalize = vi.fn<WavNormalizer['normalize']>().mockResolvedValue({ wav: wav(), frames: 8000, sampleRate: 16000 })
+    const onWav = vi.fn(), onError = vi.fn()
+    const recorder = new RecorderController({ capturePort, normalizer: { normalize }, onWav, onError })
+    const cancelRecorder = vi.fn(() => recorder.cancel())
+    const controller = new VoiceController(transport, csrf, () => {}, vi.fn(), cancelRecorder)
+    transport.voiceCapabilities.mockResolvedValue(caps({ deviceAvailability: 'UNVERIFIED' }))
+    try {
+      await controller.open(); const context = controller.beginRecording('recording-device-change')!
+      await recorder.start(context.recordingId, context.capabilities.maxDurationMillis)
+      sink.pcm(new Float32Array(8000), 16000); expect(recorder.state.phase).toBe('recording'); expect(recorder.state.elapsedMillis).toBe(500)
+      transport.voiceCapabilities.mockResolvedValue(caps({ deviceAvailability: 'UNAVAILABLE' }))
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(cancelRecorder).toHaveBeenCalledOnce(); expect(session.abort).toHaveBeenCalledOnce(); expect(captureSignal.aborted).toBe(true)
+      expect(recorder.state).toMatchObject({ phase: 'idle', recordingId: null, elapsedMillis: 0 }); expect(controller.snapshot()).toMatchObject({ phase: 'blocked', context: null })
+      expect(controller.beginRecording('while-negative')).toBeNull()
+      sink.pcm(new Float32Array(8000), 16000); sink.limit(); await recorder.finish(context.recordingId); await controller.recorded(recording(context.recordingId))
+      expect(session.stop).not.toHaveBeenCalled(); expect(normalize).not.toHaveBeenCalled(); expect(onWav).not.toHaveBeenCalled(); expect(onError).not.toHaveBeenCalled()
+      expect(transport.uploadVoice).not.toHaveBeenCalled(); expect(transport.submitVoice).not.toHaveBeenCalled()
+    } finally { controller.dispose(); recorder.dispose() }
+    expect(vi.getTimerCount()).toBe(0)
   })
 })
 

@@ -78,7 +78,7 @@ pub use subject_visuals::WebSubjectVisualPreview;
 pub use voice::{
     VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceGuard, VoiceManagementSnapshot,
     VoiceNativeParticipation, VoicePlaybackAuthorization, VoicePolicyHandoff, VoicePolicyPhase,
-    VoiceRuntimeHandle, VoiceService,
+    VoiceRuntimeHandle, VoiceService, WebVoiceCapabilities, WebVoiceDeviceAvailability,
 };
 
 pub type Result<T> = std::result::Result<T, BackendError>;

@@ -1,6 +1,8 @@
 //! Real credentials/SQLite/Web boundary with validated canonical zero-PCM bytes.
 //! Driver transitions below are synthetic state-machine inputs, never native
 //! output or evidence of sound. Actual Windows byte/file adapters are separate.
+#[path = "voice_capabilities_tests.rs"]
+mod capability_tests;
 use super::*;
 use fc_domain::{auth::*, identity::*, ids::*, voice::*};
 use fc_ports::voice::*;

@@ -17,7 +17,21 @@
 
 VOICE_CAPABILITIES：`{schemaVersion:1,status:"VOICE_CAPABILITIES",identityRevision,runtimeGeneration,serverNow,currentClass,enabled,admission,targetAuthorized,deviceAvailability,defaultRepeatTotal:3,minRepeatTotal:1,maxRepeatTotal:10,minDurationMillis:500,maxDurationMillis:60000,sampleRate:16000,channels:1,bitsPerSample:16,maxWavBytes:1920044,uploadTtlSeconds:600}`。
 
-currentClass为null或`{classId,className}`，班级名最多128字符；serverNow为白板本地民用日期时间。admission为OPEN/CLOSED，只表示当前运行代次接纳状态；deviceAvailability当前诚实返回UNVERIFIED，不能从interactive session或is_admitting冒认有扬声器。实际执行域首次打开时仍用WAVE_FORMAT_QUERY检查输出格式，并以真实驱动状态反馈失败。页面显示“将在实际播放时核验”，不把能力返回、上传或排队说成已听到；可信设备能力缓存仍须后续集成。
+currentClass为null或`{classId,className}`，班级名最多128字符；serverNow为白板本地民用日期时间。admission为OPEN/CLOSED，只表示当前运行代次接纳状态。此前第十四轮至第三十八轮的设备范围固定返回UNVERIFIED，页面显示“将在实际播放时核验”；这是保留的历史实现范围，第三十九轮拟按下节增加短期历史格式观察，不能从interactive session或is_admitting冒认有扬声器。实际执行域首次打开时仍用WAVE_FORMAT_QUERY检查输出格式，并以真实驱动状态反馈失败，不把能力返回、上传或排队说成已听到。
+
+## 第三十九轮设备能力增量合同（实现及运行验证待完成）
+
+教师GET `voice/capabilities`可在原共享worker上独立查询默认输出是否支持规范16kHz/单声道PCM16，使用WAVE_MAPPER/WAVE_FORMAT_QUERY；不复用本地主管理员显式检查的receipt，不提供设备标识、任意设备选择或Web修改设备策略入口。查询前、查询后及响应交付前均按原能力路径复核当前请求的精确Web设备/会话、目标班级/任教范围、健康与权威发布、身份/语音配置修订、运行代次和取消状态；缓存命中也不能跳过本次鉴权。内部版本或权限不匹配即不能使用旧观察，旧请求不得重新绑定到新会话、目标或代次。
+
+仅保留一个有界短期metadata缓存槽，内容为历史格式查询结果、原实际完成的观察时间/单调时刻及其版本绑定；不持有会话、请求对象或本地管理receipt，不持久化。有效期严格从原native查询实际完成起最多30秒，缓存命中、排队、交付、刷新或重绘均不续TTL。原版本、健康或有效权限区间失效后不得发布/使用旧结果；过期视为没有有效观察，不以后台轮询维持缓存。
+
+同一时刻最多一个物理查询flight，只能占原两个worker之一，不新建线程、线程池或替代查询域。同步native调用不能硬中断：取消或到期可使逻辑结果无效，但必须等原调用实际返回才归还flight/worker；期间其他能力请求不得再启动查询或等待其物理完成，设备状态按UNVERIFIED处理。native调用期间不持Backend、缓存、会话ledger或writer锁；缓存只作短内存访问，不在锁内执行native、SQL或等待。查询不打开播放句柄、不录音、不播音、不修改音量/静音或用户前台。
+
+一次能力查询全程沿用同一个绝对deadline：原100毫秒能力检查上限与更早的原请求/当前JobContext截止取最小值，鉴权、排队、缓存检查、native返回及交付均不重新计时。取消、期限到达或版本/健康/权限变化后的晚结果不得发布到缓存或响应；native错误或panic不得冒认为设备可用，也不得改变配置、任务、接纳或播放域故障状态。此100毫秒是结果有效性界限，不是阻塞native调用物理退出的保证。
+
+`deviceAvailability`保持原字段形状：仅近期仍有效的FormatUnsupported或Unavailable观察映射为UNAVAILABLE；Supported、检查错误、panic、过期、无有效观察或查询inflight一律为UNVERIFIED，**永不返回AVAILABLE**。Supported只说明此前查询时格式受支持，不证明当前设备存在、未静音、能播放或人耳听到；缓存不是播放许可，实际执行前仍独立检查。网页对UNAVAILABLE说明“近期检查默认输出不支持播报格式或未发现可用输出，请稍后刷新复核”；对UNVERIFIED说明尚未确认实际输出、将在播放时再次核验。不称“当前设备不可用/可用”，也不承诺刷新必定重新查询：刷新可能命中原剩余TTL或遇到原flight。
+
+本节仅确定待实现合同；权限/版本/健康/取消及绝对期限竞态、单flight实际归还、缓存命中不续期与错误分类均须独立验证。Host替身不代替真实Windows查询，有限无声查询不代替Win7/Win10/希沃设备或可听性验收，也不启用普通生产监听。
 
 VOICE_UPLOADED：`{schemaVersion:1,status:"VOICE_UPLOADED",assetId,assetRevision,classId,bytes,durationMillis,expiresAt}`。上传完成不等于已排队；bytes为44+2×帧数，durationMillis为帧数×1000/16000向下取整。临时上传最长600秒，由服务端生成assetId并绑定原精确Web设备、原实际班级和原runtimeGeneration，停止再恢复不得让旧流跨代次重新取得许可。
 

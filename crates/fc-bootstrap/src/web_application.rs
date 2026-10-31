@@ -22,6 +22,7 @@ mod materials;
 #[cfg(windows)]
 mod shared_upload;
 mod voice;
+mod voice_capabilities;
 #[cfg(windows)]
 mod voice_files;
 #[cfg(windows)]
@@ -79,7 +80,6 @@ impl WebApplication {
         std::sync::Arc::downgrade(&self.upload_binding)
     }
     /// Routing/length hint only, never admission or an authorization lease.
-    #[cfg(windows)]
     pub(crate) fn route_hint(&self, head: &RequestHead) -> Result<Route, WebError> {
         self.boundary.preflight(head)
     }

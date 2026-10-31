@@ -14,24 +14,7 @@ pub(super) fn dispatch(
 ) -> WebResponse {
     match route {
         Route::VoiceCapabilities => match service.web_capabilities(lease) {
-            Ok(c) => response(
-                200,
-                wire::capabilities(
-                    c.identity_revision,
-                    c.runtime_generation,
-                    c.now,
-                    c.current_class
-                        .as_ref()
-                        .map(|(id, name)| (*id, name.as_str())),
-                    wire::CapabilityPolicy {
-                        enabled: c.enabled,
-                        admitting: c.admitting,
-                        target_authorized: c.target_authorized,
-                        limits: c.limits,
-                    },
-                ),
-                None,
-            ),
+            Ok(c) => capabilities_response(&c),
             Err(e) => error(e, false),
         },
         Route::VoiceList => match service.web_jobs(lease) {
@@ -65,6 +48,30 @@ pub(super) fn dispatch(
         }
         _ => failure(404, responses::ErrorCode::NotFound),
     }
+}
+pub(super) fn capabilities_response(c: &crate::backend::WebVoiceCapabilities) -> WebResponse {
+    response(
+                200,
+                wire::capabilities(
+                    c.identity_revision,
+                    c.runtime_generation,
+                    c.now,
+                    c.current_class
+                        .as_ref()
+                        .map(|(id, name)| (*id, name.as_str())),
+                    wire::CapabilityPolicy {
+                        enabled: c.enabled,
+                        admitting: c.admitting,
+                        target_authorized: c.target_authorized,
+                        device_availability: match c.device_availability {
+                            crate::backend::WebVoiceDeviceAvailability::Unverified => wire::DeviceAvailability::Unverified,
+                            crate::backend::WebVoiceDeviceAvailability::Unavailable => wire::DeviceAvailability::Unavailable,
+                        },
+                        limits: c.limits,
+                    },
+                ),
+                None,
+            )
 }
 fn mutation(
     service: &VoiceService,
