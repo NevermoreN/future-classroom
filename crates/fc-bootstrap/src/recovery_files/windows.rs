@@ -20,7 +20,9 @@ use std::{
 };
 
 mod journal;
+mod migration;
 pub use journal::{ColdCommitReceipt, StartupRecovery};
+pub use migration::{MappedPreparedRestore, MappingStage};
 const OWNER: &[u8] = b"FUTURE_CLASSROOM_RECOVERY_FILES_V1\n";
 const MAX_PACKAGE_BYTES: u64 =
     MAX_DATABASE_BYTES + MAX_MEDIA_BYTES + MAX_MANIFEST_BYTES as u64 + 20;
@@ -299,6 +301,7 @@ impl RecoveryFiles {
             .create_directory_new(&operation)
             .map_err(unavailable)?;
         let workspace = RecoveryWorkspace {
+            paths: self.paths.clone(),
             files: ControlledFiles::new(self.paths.root()).map_err(unavailable)?,
             operation,
             pin: Some(pin),
@@ -494,6 +497,9 @@ impl RecoveryFiles {
         let candidate_files = ControlledFiles::new(&new).map_err(unavailable)?;
         let mut reader = PackageReader::new_while(source.file_mut(), check).map_err(framing)?;
         let manifest = reader.manifest().clone();
+        // Declare after workspace so every source/ancestor pin drops before
+        // its owned operation is retired on this worker, including errors.
+        let mut media = Vec::with_capacity(manifest.entries.len().saturating_sub(1));
         for entry in &manifest.entries {
             ensure(check)?;
             let path = if matches!(entry, BackupEntry::Database { .. }) {
@@ -514,6 +520,9 @@ impl RecoveryFiles {
             let path = file.finish().map_err(unavailable)?;
             let mut pin = LockedFile::open(&path, entry.bytes()).map_err(unavailable)?;
             verify_media(&mut pin, entry, check)?;
+            if !matches!(entry, BackupEntry::Database { .. }) {
+                media.push(pin);
+            }
         }
         reader.finish_while(check).map_err(framing)?;
         // Keep the exact ordinary SQLite file immutable until storage has
@@ -528,6 +537,7 @@ impl RecoveryFiles {
             manifest,
             manifest_sha256,
             ordinary: Some(ordinary),
+            media,
         })
     }
     pub fn reconcile_startup(&self, check: &dyn Fn() -> bool) -> Result<StartupRecovery> {
@@ -545,6 +555,7 @@ fn valid_operation(name: &str) -> bool {
 /// No credentials are present until storage builds candidate_database(). This
 /// object owns cleanup of its exact random operation, never a user directory.
 pub struct RecoveryWorkspace {
+    paths: DataPaths,
     files: ControlledFiles,
     operation: PathBuf,
     pin: Option<PinnedDirectory>,
@@ -559,6 +570,18 @@ impl RecoveryWorkspace {
     }
     pub fn new_root(&self) -> PathBuf {
         self.operation.join("new")
+    }
+    /// Actual file worker only, after every descendant pin has been released.
+    /// Failure preserves owned residue for startup reconciliation and is visible
+    /// to the caller instead of being hidden by the best-effort Drop fallback.
+    fn discard(mut self, check: &dyn Fn() -> bool) -> Result<()> {
+        ensure(check)?;
+        if self.armed {
+            return Err(RecoveryFileError::RepairRequired);
+        }
+        self.pin.take();
+        self.armed = true;
+        remove_owned_tree(&self.files, &self.operation, &mut 100_000)
     }
 }
 fn remove_owned_tree(files: &ControlledFiles, path: &Path, remaining: &mut usize) -> Result<()> {
@@ -596,6 +619,7 @@ pub struct PreparedRestore {
     // Rust drops fields in declaration order: release file/ancestor pins before
     // the workspace destructor tries to remove their directories.
     ordinary: Option<LockedFile>,
+    media: Vec<LockedFile>,
     manifest: BackupManifest,
     manifest_sha256: [u8; 32],
     workspace: RecoveryWorkspace,
@@ -690,6 +714,7 @@ impl PreparedRestore {
             candidate_sha256: sha256,
             candidate_revision,
             _candidate: candidate,
+            _media: self.media,
         })
     }
 }
@@ -699,6 +724,7 @@ pub struct ColdRestore {
     // Keep the physical pin first for cancellation/error cleanup as well as
     // successful switching. Moving fields does not run this enclosing drop order.
     _candidate: LockedFile,
+    _media: Vec<LockedFile>,
     manifest: BackupManifest,
     generation: u64,
     candidate_bytes: u64,

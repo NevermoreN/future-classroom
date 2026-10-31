@@ -24,6 +24,11 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
 确认清除包括学校、全部账号/凭据/恢复码、资料、图片、语音及部署目录内的导出备份。
 已另存到部署目录外的副本、Windows自动启动/网络/SSH及其他应用不被修改。
 完成后须重新启动正常程序，设置新学校和新的主管理员；不提供解锁或读取旧资料的入口。
+完整备份页支持显式映射恢复：来源全部班级、科目和账号须逐项选择当前目标，同类目标不可重复，
+相同编号或名称不会自动对应。缺少目标时先取消，通过现有学校/账号管理创建并发放新口令及任教权限。
+映射保留目标学校、安装标识、完整目录名称/颜色、账号登录名/标签、当前密码、恢复码、角色与授权。
+确认会完整替换教学集合，未映射目标目录保留但其原教学数据也被替换；不是部分合并。
+全部映射预检通过后，还须分别确认教学替换和目标安全资料边界，等待实际关闭及冷切换，重新启动登录。
 
 在 PowerShell 中解压后运行：
   .\fc-bootstrap.exe --version
@@ -32,6 +37,7 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --host-probe 2
   .\fc-bootstrap.exe --application-probe
   .\fc-bootstrap.exe --reinitialization-probe
+  .\fc-bootstrap.exe --migration-probe
   .\fc-bootstrap.exe --materials-probe
   .\fc-bootstrap.exe --audio-silent-probe
   .\fc-bootstrap.exe --web-pairing-probe
@@ -44,11 +50,13 @@ Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开
 --host-probe <seconds> 接受1至30秒，验证自身隐藏窗口、托盘和会话通知生命周期。
 --application-probe 使用隐藏原生控件及隔离临时数据执行真实账号/科目/教师/作业、课表/双表/校历/锁定草稿闭环，
 并在同一固定双worker池校验合成Office文件，不写正式ProgramData或自启动。
---reinitialization-probe 只使用自有临时合成部署，在独立当前程序子进程中验证取消、双确认、
-完整清除与正常重启的全新设置；不操作当前用户的正式ProgramData部署。
 它还验证显示设置保存重读、锁定草稿、临时换课/恢复/CAS拒绝、退出保护及真实事实到原生离屏场景；
 新增39步公共布局联合CAS、精确科目配置保存/停用及原生预览选择/拖动流程；不截图用户桌面。
 另有52步独立文字/分页图片和65步作息角色交换/活动拆合/确认取消/锁定恢复/真实CAS读回，均使用自有隐藏窗口及临时数据。
+--reinitialization-probe 只使用自有临时合成部署，在独立当前程序子进程中验证取消、双确认、
+完整清除与正常重启的全新设置；不操作当前用户的正式ProgramData部署。
+--migration-probe 使用两个独立受保护合成部署、隐藏原生控件及隔离选择能力，验证逐项映射、双确认、
+真实资料和两版图片、实际关闭/三树切换及独立程序重新登录；不打开可见系统选择器或修改正式部署。
 --native-probe <seconds> 接受 1 至 300 秒，验证原生透明窗口、3% 玻璃底色、
 时钟文字、点击穿透与前台避让。需在已登录的交互桌面观察实际效果。
 SSH/无交互桌面的输出不能代替前台、遮挡、缩放、点击和视觉验收。

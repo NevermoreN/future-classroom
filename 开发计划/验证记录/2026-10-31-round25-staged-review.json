@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "scope": "Final exact-path staging includes every original archive log (explicitly forced through generic *.log ignore); original raw whitespace remains unchanged. Strict code/plans cached diff check is zero.",
+  "stagedPathCount": 139,
+  "codePlanCachedDiffCheckExitCode": 0,
+  "fullCachedDiffCheckExitCode": 2,
+  "originalWhitespacePaths": [
+    "开发计划/验证记录/2026-10-31-round25-host-storage-disabled-stage2.log",
+    "开发计划/验证记录/2026-10-31-round25-host-tests-stage2.log"
+  ],
+  "originalWhitespaceOutput": "开发计划/验证记录/2026-10-31-round25-host-storage-disabled-stage2.log:13: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round25-host-tests-stage2.log:895: new blank line at EOF.\n",
+  "sourceInputsUnchanged": true,
+  "targetRepository": "NevermoreN/future-classroom",
+  "targetBranch": "main",
+  "forcePush": false,
+  "releaseOrTag": false
+}

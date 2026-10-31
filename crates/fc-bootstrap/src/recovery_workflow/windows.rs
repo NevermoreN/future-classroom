@@ -3,7 +3,8 @@ use crate::{
     backend::{Backend, BackendError, ConfirmedRestore, OrdinaryBackupAccess, RestorePreview},
     recovery::{BackupError, ColdShutdown, ShutdownError},
     recovery_files::{
-        ColdCommitReceipt, ExportReceipt, PreparedRestore, RecoveryFileError, RecoveryFiles,
+        ColdCommitReceipt, ColdRestore, ExportReceipt, MappedPreparedRestore, PreparedRestore,
+        RecoveryFileError, RecoveryFiles,
     },
     voice_runtime::VoiceRuntime,
 };
@@ -20,6 +21,9 @@ use std::{
     thread::{self, JoinHandle},
     time::Duration,
 };
+
+mod migration;
+pub use migration::{MigrationBundle, MigrationDetails};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum WorkflowError {
@@ -60,14 +64,47 @@ pub struct ReviewSummary {
     pub profile_media_bytes: u64,
 }
 enum Payload {
-    Preview {
+    Mapping {
         prepared: PreparedRestore,
+        inspection: Box<crate::backend::MigrationInspection>,
+    },
+    Preview {
+        prepared: RestorePayload,
         preview: RestorePreview,
     },
     Confirmed {
-        prepared: PreparedRestore,
+        prepared: RestorePayload,
         confirmed: ConfirmedRestore,
     },
+}
+enum RestorePayload {
+    Ordinary(Box<PreparedRestore>),
+    Mapped(Box<MappedPreparedRestore>),
+}
+impl RestorePayload {
+    fn candidate_database(&self) -> std::path::PathBuf {
+        match self {
+            Self::Ordinary(value) => value.candidate_database(),
+            Self::Mapped(value) => value.candidate_database(),
+        }
+    }
+    fn seal_candidate(
+        self,
+        database: &crate::backend::PreparedRecoveryDatabase,
+        check: &dyn Fn() -> bool,
+    ) -> std::result::Result<ColdRestore, RecoveryFileError> {
+        match self {
+            Self::Ordinary(value) => value.seal_candidate(database, check),
+            Self::Mapped(value) => value.seal_candidate(database, check),
+        }
+    }
+    #[cfg(test)]
+    fn ordinary_database(&self) -> &std::path::Path {
+        match self {
+            Self::Ordinary(value) => value.ordinary_database(),
+            Self::Mapped(value) => value.ordinary_database(),
+        }
+    }
 }
 /// One preview/confirmation/coordinator slot for the entire native application.
 /// No additional ordinary file worker is created here.
@@ -260,10 +297,13 @@ impl RecoveryWorkflow {
                 BackupEntry::Database { bytes, .. } => summary.database_bytes = *bytes,
             }
         }
-        if !self
-            .slot
-            .publish(generation, Payload::Preview { prepared, preview })
-        {
+        if !self.slot.publish(
+            generation,
+            Payload::Preview {
+                prepared: RestorePayload::Ordinary(Box::new(prepared)),
+                preview,
+            },
+        ) {
             return Err(WorkflowError::Cancelled);
         }
         reservation.active = false;
@@ -592,7 +632,7 @@ fn abort_original_owned<T: Task>(
 }
 fn restore_owned<T: Task>(
     state: &Arc<CoordinatorState<T>>,
-    prepared: PreparedRestore,
+    prepared: RestorePayload,
     confirmed: ConfirmedRestore,
     backend: Arc<Mutex<Backend>>,
     workers: WorkerPool<T>,

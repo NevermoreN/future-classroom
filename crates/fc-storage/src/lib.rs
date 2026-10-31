@@ -340,6 +340,14 @@ impl TransactionDocuments for TransactionView<'_> {
 
 type Reply<T> = mpsc::Sender<Result<T, StorageError>>;
 enum Message<S> {
+    MigrationInspect(
+        recovery::InspectJob,
+        Reply<recovery::MigrationSourceReceipt>,
+    ),
+    MigrationMap(
+        Box<recovery::MapJob>,
+        Reply<recovery::MappedOrdinaryReceipt>,
+    ),
     RecoveryBarrier(
         Box<dyn TransactionTask<S>>,
         Reply<recovery::RecoveryBarrier>,
@@ -356,6 +364,8 @@ enum Message<S> {
 impl<S> Message<S> {
     fn queued_bytes(&self) -> Option<usize> {
         let allocations = match self {
+            Self::MigrationInspect(job, _) => job.allocation_bytes(),
+            Self::MigrationMap(job, _) => job.allocation_bytes(),
             Self::RecoveryBarrier(task, _) => task.allocation_bytes(),
             Self::Recovery(job, _) => job.allocation_bytes(),
             Self::Login(_, _) => std::mem::size_of::<login::Operation>(),
@@ -735,6 +745,32 @@ fn writer_loop<P: AuthorityPublisher>(
                 };
                 let _ = reply.send(result);
             }
+            Message::MigrationInspect(job, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        recovery::migration::inspect(&db, job, &stop)
+                    })) {
+                        Ok(result) => result,
+                        Err(_) => Err(StorageError::WorkerPanicked),
+                    }
+                };
+                let _ = reply.send(result);
+            }
+            Message::MigrationMap(job, reply) => {
+                let result = if faulted {
+                    Err(StorageError::AuthorityUnavailable)
+                } else {
+                    match catch_unwind(AssertUnwindSafe(|| {
+                        recovery::migration::map(&db, *job, &stop)
+                    })) {
+                        Ok(result) => result,
+                        Err(_) => Err(StorageError::WorkerPanicked),
+                    }
+                };
+                let _ = reply.send(result);
+            }
             Message::Recovery(job, reply) => {
                 let result = if faulted {
                     Err(StorageError::AuthorityUnavailable)
@@ -769,6 +805,12 @@ fn writer_loop<P: AuthorityPublisher>(
     for Envelope { message, lease } in receiver.try_iter() {
         drop(lease);
         match message {
+            Message::MigrationInspect(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
+            Message::MigrationMap(_, reply) => {
+                let _ = reply.send(Err(StorageError::Stopping));
+            }
             Message::RecoveryBarrier(_, reply) => {
                 let _ = reply.send(Err(StorageError::Stopping));
             }

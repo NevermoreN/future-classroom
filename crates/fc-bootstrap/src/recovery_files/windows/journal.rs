@@ -3,7 +3,7 @@
 //! receipt was not flushed. Until the commit receipt exists, restart rolls back
 //! the complete old set; ambiguity retains every tree and fails closed.
 use super::*;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 const TREES: [&str; 3] = ["state", "teachers", "profile-content"];
 const MAGIC: &[u8; 16] = b"FCRESTOR-V1\r\n\x1a\n\0";
 const MAX_META: usize = MAX_MANIFEST_BYTES + 512;
@@ -221,6 +221,93 @@ fn tree_digest(files: &ControlledFiles, path: &Path, check: &dyn Fn() -> bool) -
     walk(files, path, path, &mut state, &mut 100_000, check)?;
     Ok(state)
 }
+/// Expected chain uses typed names and approved digests, never a newly observed
+/// directory member. Comparing the capture to this value prevents an object
+/// inserted after layout validation from being adopted into the cold journal.
+fn expected_candidate_digests(
+    manifest: &BackupManifest,
+    bytes: u64,
+    sha256: [u8; 32],
+) -> Result<[[u8; 32]; 3]> {
+    type Object = Option<(u64, [u8; 32])>;
+    let mut objects: BTreeMap<PathBuf, Object> = BTreeMap::new();
+    for tree in TREES {
+        objects.insert(PathBuf::from(tree), None);
+    }
+    objects.insert(PathBuf::from("profile-content").join("originals"), None);
+    objects.insert(PathBuf::from("profile-content").join("quarantine"), None);
+    let marker = b"FUTURE_CLASSROOM_PROFILE_CONTENT_V1\n";
+    objects.insert(
+        PathBuf::from("profile-content").join(".future-classroom-owner"),
+        Some((marker.len() as u64, fc_security::sha256(marker))),
+    );
+    for entry in &manifest.entries {
+        let path = entry_relative_path(entry);
+        let expected = if matches!(entry, BackupEntry::Database { .. }) {
+            (bytes, sha256)
+        } else {
+            (entry.bytes(), entry.sha256())
+        };
+        if objects.insert(path.clone(), Some(expected)).is_some() {
+            return Err(RecoveryFileError::InvalidPackage);
+        }
+        let mut parent = path.parent();
+        while let Some(path) = parent.filter(|p| !p.as_os_str().is_empty()) {
+            if objects.get(path).is_some_and(Option::is_some) {
+                return Err(RecoveryFileError::InvalidPackage);
+            }
+            objects.entry(path.to_owned()).or_insert(None);
+            parent = path.parent();
+        }
+    }
+    let mut result = [[0; 32]; 3];
+    for (index, tree) in TREES.iter().enumerate() {
+        let base = Path::new(tree);
+        let mut state = fc_security::sha256(b"FC_RECOVERY_TREE_V1");
+        // Path component ordering is the same parent-first depth-first order as
+        // the native walker: a directory precedes all its sorted descendants.
+        for (path, object) in &objects {
+            let Ok(relative) = path.strip_prefix(base) else {
+                continue;
+            };
+            if relative.as_os_str().is_empty() {
+                continue;
+            }
+            let name = relative.to_str().ok_or(RecoveryFileError::InvalidPackage)?;
+            let mut next = state.to_vec();
+            next.extend_from_slice(&(name.len() as u64).to_le_bytes());
+            next.extend_from_slice(name.as_bytes());
+            match object {
+                None => next.push(0),
+                Some((bytes, sha256)) => {
+                    next.push(1);
+                    next.extend_from_slice(&bytes.to_le_bytes());
+                    next.extend_from_slice(sha256);
+                }
+            }
+            state = fc_security::sha256(&next);
+        }
+        result[index] = state;
+    }
+    Ok(result)
+}
+fn capture_candidate_digests(
+    workspace: &RecoveryWorkspace,
+    manifest: &BackupManifest,
+    bytes: u64,
+    sha256: [u8; 32],
+    check: &dyn Fn() -> bool,
+) -> Result<[[u8; 32]; 3]> {
+    let expected = expected_candidate_digests(manifest, bytes, sha256)?;
+    for (index, name) in TREES.iter().enumerate() {
+        if tree_digest(&workspace.files, &workspace.new_root().join(name), check)?
+            != expected[index]
+        {
+            return Err(RecoveryFileError::RepairRequired);
+        }
+    }
+    Ok(expected)
+}
 fn verify_candidate(
     workspace: &RecoveryWorkspace,
     manifest: &BackupManifest,
@@ -331,22 +418,18 @@ pub(super) fn seal(
     )
 }
 pub(super) fn commit(
-    restore: ColdRestore,
+    mut restore: ColdRestore,
     permit: crate::recovery::ColdRestorePermit,
     check: &dyn Fn() -> bool,
 ) -> Result<ColdCommitReceipt> {
-    let ColdRestore {
-        mut workspace,
-        manifest,
-        generation,
-        candidate_bytes,
-        candidate_sha256,
-        candidate_revision,
-        _candidate,
-    } = restore;
-    // All exits after destructuring (including a mismatched permit) must release
-    // this pin before workspace cleanup. The permit has no file handles.
-    drop(_candidate);
+    // Keep the complete capability intact on every fallible validation path:
+    // its field order releases DB/media pins before worker-owned cleanup.
+    let workspace = &restore.workspace;
+    let manifest = &restore.manifest;
+    let generation = restore.generation;
+    let candidate_bytes = restore.candidate_bytes;
+    let candidate_sha256 = restore.candidate_sha256;
+    let candidate_revision = restore.candidate_revision;
     if permit.live_database()
         != workspace
             .files
@@ -357,16 +440,16 @@ pub(super) fn commit(
         || permit.generation() != generation
         || permit.revision() != candidate_revision
         || permit.manifest_sha256()
-            != fc_security::sha256(&encode_manifest(&manifest).map_err(invalid)?)
+            != fc_security::sha256(&encode_manifest(manifest).map_err(invalid)?)
     {
         return Err(RecoveryFileError::InvalidPackage);
     }
-    // Actual join/drain capability is consumed, then the last candidate DB pin
-    // is released. No old worker can repin a subtree while it is being switched.
+    // Actual join/drain capability is consumed. Exact immutable candidate pins
+    // remain held through allowed-layout validation and journal digest capture.
     ensure(check)?;
     verify_candidate(
-        &workspace,
-        &manifest,
+        workspace,
+        manifest,
         candidate_bytes,
         candidate_sha256,
         check,
@@ -382,13 +465,18 @@ pub(super) fn commit(
         candidate_revision,
         candidate_bytes,
         candidate_sha256,
-        manifest,
+        manifest: manifest.clone(),
         old: [[0; 32]; 3],
-        new: [[0; 32]; 3],
+        new: capture_candidate_digests(
+            workspace,
+            manifest,
+            candidate_bytes,
+            candidate_sha256,
+            check,
+        )?,
     };
     for (n, name) in TREES.iter().enumerate() {
         meta.old[n] = tree_digest(&workspace.files, &workspace.files.root().join(name), check)?;
-        meta.new[n] = tree_digest(&workspace.files, &workspace.new_root().join(name), check)?;
     }
     write_new(
         &workspace.files,
@@ -396,7 +484,18 @@ pub(super) fn commit(
         &encode(&meta)?,
     )?;
     phase(&workspace.files, &workspace.operation, generation, 0)?;
-    workspace.armed = true;
+    restore.workspace.armed = true;
+    let ColdRestore {
+        workspace,
+        _candidate,
+        _media,
+        ..
+    } = restore;
+    // Directory ancestor pins would prevent our own rename. Release them only
+    // after the durable journal captures the verified exact pinned bytes; the
+    // installed digest check below refuses any subsequent mutation.
+    drop(_candidate);
+    drop(_media);
     for (n, name) in TREES.iter().enumerate() {
         ensure(check)?;
         workspace
@@ -590,6 +689,63 @@ pub(super) fn reconcile(
 mod tests {
     use super::super::tests::{manifest, Fixture};
     use super::*;
+    #[test]
+    fn candidate_capture_refuses_unlisted_files_or_empty_directories() {
+        for directory in [false, true] {
+            let f = Fixture::new();
+            let workspace = f.f().workspace().unwrap();
+            let database = b"approved current-security candidate";
+            f.write(&workspace.candidate_database(), database);
+            let manifest = manifest(b"source ordinary");
+            let capture = || {
+                capture_candidate_digests(
+                    &workspace,
+                    &manifest,
+                    database.len() as u64,
+                    fc_security::sha256(database),
+                    &|| true,
+                )
+            };
+            capture().unwrap();
+            let injected = workspace.new_root().join("teachers").join("unlisted");
+            if directory {
+                drop(workspace.files.create_directory_new(&injected).unwrap());
+            } else {
+                f.write(&injected, b"unlisted bytes");
+            }
+            assert_eq!(capture(), Err(RecoveryFileError::RepairRequired));
+        }
+    }
+    #[test]
+    fn candidate_capture_refuses_changed_owner_marker_or_database() {
+        for owner in [false, true] {
+            let f = Fixture::new();
+            let workspace = f.f().workspace().unwrap();
+            let database = b"approved current-security candidate";
+            f.write(&workspace.candidate_database(), database);
+            let manifest = manifest(b"source ordinary");
+            let capture = || {
+                capture_candidate_digests(
+                    &workspace,
+                    &manifest,
+                    database.len() as u64,
+                    fc_security::sha256(database),
+                    &|| true,
+                )
+            };
+            capture().unwrap();
+            let path = if owner {
+                workspace
+                    .new_root()
+                    .join("profile-content")
+                    .join(".future-classroom-owner")
+            } else {
+                workspace.candidate_database()
+            };
+            std::fs::write(path, b"unexpected changed bytes").unwrap();
+            assert_eq!(capture(), Err(RecoveryFileError::RepairRequired));
+        }
+    }
     fn armed(f: &Fixture) -> (RecoveryWorkspace, Metadata) {
         f.write(&f.paths.database(), b"old-state");
         f.write(

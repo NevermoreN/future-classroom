@@ -2,6 +2,8 @@ use super::*;
 use crate::recovery::test_support::{Fixture, QuietFactory, QuietTask};
 use std::{path::PathBuf, time::Instant};
 
+mod migration_tests;
+
 fn preview(fixture: &Fixture) -> (RecoveryWorkflow, ReviewBundle) {
     let paths = DataPaths::isolated_test(fixture.root.clone()).unwrap();
     // The lightweight backend fixture does not perform Work::Open's content
@@ -52,6 +54,9 @@ fn operation_root(workflow: &RecoveryWorkflow) -> PathBuf {
     workflow
         .slot
         .inspect(|_, payload| match payload.unwrap() {
+            Payload::Mapping { prepared, .. } => {
+                prepared.ordinary_database().parent().unwrap().to_owned()
+            }
             Payload::Preview { prepared, .. } | Payload::Confirmed { prepared, .. } => {
                 prepared.ordinary_database().parent().unwrap().to_owned()
             }

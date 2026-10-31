@@ -6,6 +6,16 @@ mod autostart_probe;
 mod backup_controller;
 mod backup_editor;
 mod backup_probe;
+mod migration_controller;
+mod migration_editor;
+mod migration_probe;
+mod migration_probe_fixture;
+pub fn migration_probe() -> std::result::Result<(), String> {
+    migration_probe::run()
+}
+pub fn migration_probe_reopen(root: &Path, nonce: &str) -> std::result::Result<(), String> {
+    migration_probe::reopen(root, nonce)
+}
 mod reinitialize_probe;
 pub fn reinitialization_probe() -> std::result::Result<(), String> {
     reinitialize_probe::run()

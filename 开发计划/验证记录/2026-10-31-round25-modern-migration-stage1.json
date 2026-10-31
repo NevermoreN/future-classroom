@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "migrationRunBefore": {
+    "views": [
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry32"
+      },
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry64"
+      }
+    ]
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "588b6dcf7015e17002cc15a375a8f700f5b27c9037c286cb790d8246e161620a"
+    }
+  ],
+  "exeSha256": "588b6dcf7015e17002cc15a375a8f700f5b27c9037c286cb790d8246e161620a",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1008 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "migrationExitCode": 1,
+    "sessionId": 1,
+    "exitCode": 0,
+    "migrationOutput": [
+      "PROBE_SUBMIT tick=3 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=41 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=46 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=46 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=100 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=103 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=106 action=3 page=Synthetic migration source school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=106 kind=request page=Synthetic migration source school · 登录工作台",
+      "PROBE_COMPLETE tick=160 kind=updated page=Synthetic migration source school · 登录工作台",
+      "FutureClassroom: migration fixture: save subject-owned layout: Profile(Domain(Layout(TooManyTopLevel)))"
+    ]
+  },
+  "status": "FAIL",
+  "error": "isolated native cross-installation migration workflow failed",
+  "migrationRunAfter": {
+    "views": [
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry32"
+      },
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry64"
+      }
+    ]
+  },
+  "migrationRealRunAudit": "PASS"
+}

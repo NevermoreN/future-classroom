@@ -1,0 +1,15 @@
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+warning: method `sequence` is never used
+   --> crates/fc-bootstrap/src/application/migration_editor.rs:285:12
+    |
+185 | impl Editor {
+    | ----------- method in this implementation
+...
+285 |     pub fn sequence(&self) -> u64 {
+    |            ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fc-bootstrap` (bin "fc-bootstrap") generated 1 warning
+warning: `fc-bootstrap` (bin "fc-bootstrap" test) generated 1 warning (1 duplicate)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.52s

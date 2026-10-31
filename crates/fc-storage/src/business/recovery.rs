@@ -147,6 +147,69 @@ pub(crate) fn advance_identity(state: &IdentityState) -> Result<IdentityState, S
 }
 
 impl<S: Send + 'static> BusinessRepository<S> {
+    pub fn try_inspect_migration_source(
+        &self,
+        source: PathBuf,
+        actor: &ActorContext,
+        fence: ExecutionFence,
+    ) -> Result<Ticket<crate::recovery::MigrationSourceReceipt>, StorageError> {
+        crate::recovery::validate_path(&source)?;
+        self.handle.send(|reply| {
+            Message::MigrationInspect(
+                crate::recovery::InspectJob {
+                    source,
+                    actor: actor.clone(),
+                    session: self.session.clone(),
+                    clock: self.clock.clone(),
+                    fence,
+                },
+                reply,
+            )
+        })
+    }
+    pub fn try_map_ordinary(
+        &self,
+        source: PathBuf,
+        destination: PathBuf,
+        expected: crate::recovery::MigrationSourceReceipt,
+        mapping: fc_domain::recovery::MigrationMapping,
+        actor: &ActorContext,
+        fence: ExecutionFence,
+    ) -> Result<Ticket<crate::recovery::MappedOrdinaryReceipt>, StorageError> {
+        crate::recovery::validate_path(&source)?;
+        crate::recovery::validate_path(&destination)?;
+        if source == destination {
+            return Err(StorageError::InvalidCommand);
+        }
+        // Reject oversized descriptors before entering the bounded writer queue.
+        expected
+            .catalog()
+            .validate()
+            .map_err(|_| StorageError::InvalidCommand)?;
+        if mapping.classes.len() > fc_domain::identity::MAX_CLASSES
+            || mapping.subjects.len() > fc_domain::identity::MAX_SUBJECTS
+            || mapping.principals.len() > fc_domain::identity::MAX_ACCOUNTS
+        {
+            return Err(StorageError::ResourceQuota);
+        }
+        self.handle.send(|reply| {
+            Message::MigrationMap(
+                Box::new(crate::recovery::MapJob {
+                    inspection: crate::recovery::InspectJob {
+                        source,
+                        actor: actor.clone(),
+                        session: self.session.clone(),
+                        clock: self.clock.clone(),
+                        fence,
+                    },
+                    destination,
+                    expected,
+                    mapping,
+                }),
+                reply,
+            )
+        })
+    }
     /// Startup-only migration while the deployment owns its exclusive lock and
     /// has admitted no network/media jobs. Existing valid identifiers are kept;
     /// corrupt identifiers are never overwritten with a newly generated value.

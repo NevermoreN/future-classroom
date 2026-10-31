@@ -2,8 +2,8 @@ use super::*;
 use fc_bootstrap::{
     recovery_files::ExportReceipt,
     recovery_workflow::{
-        ConfirmationState, PreparedCoordinator, RecoveryWorkflow, RestoreOperation, RestorePhase,
-        ReviewBundle, WorkflowError,
+        ConfirmationState, MigrationBundle, PreparedCoordinator, RecoveryWorkflow,
+        RestoreOperation, RestorePhase, ReviewBundle, WorkflowError,
     },
 };
 use fc_windows::materials::{
@@ -25,6 +25,11 @@ pub(super) struct State {
     pub(super) job_owner: Option<PrincipalId>,
     pub(super) selected_name: String,
     pub(super) review: Option<ReviewBundle>,
+    pub(super) migration: Option<migration_editor::Editor>,
+    pub(super) mapping: Option<MigrationBundle>,
+    pub(super) mapping_draft_revision: u64,
+    pub(super) mapping_target_revision: Option<Revision>,
+    pub(super) migration_inspection_sequence: Option<u64>,
     pub(super) exported: Option<ExportReceipt>,
     pub(super) irreversible: bool,
     pub(super) coordinator: Option<RestoreOperation<Work>>,
@@ -34,6 +39,20 @@ pub(super) struct State {
     start_failed: bool,
 }
 pub(super) enum Job {
+    InspectMigration(
+        RecoveryWorkflow,
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        SelectedFile,
+    ),
+    MapMigration(
+        RecoveryWorkflow,
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        MigrationBundle,
+        fc_domain::recovery::MigrationMapping,
+        u64,
+    ),
     Export(RecoveryWorkflow, Arc<Mutex<Backend>>, SessionLease),
     Preflight(
         RecoveryWorkflow,
@@ -56,10 +75,18 @@ pub(super) enum Job {
     Retire(RecoveryWorkflow),
 }
 pub(super) enum Completed {
+    MigrationInspected(MigrationBundle),
+    MigrationPreflighted {
+        review: ReviewBundle,
+        draft_revision: u64,
+    },
     Exported(ExportReceipt),
     Preflighted(ReviewBundle),
     Confirmed,
-    Copied { path: String, bytes: u64 },
+    Copied {
+        path: String,
+        bytes: u64,
+    },
     Retired,
 }
 fn failure(error: WorkflowError) -> Failure {
@@ -86,6 +113,20 @@ fn access(
 impl Job {
     pub fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::InspectMigration(_, _, _, selected) => {
+                selected.allocation_bytes().checked_add(4096)
+            }
+            Self::MapMigration(_, _, _, bundle, mapping, _) => {
+                let pairs = mapping
+                    .classes
+                    .capacity()
+                    .checked_add(mapping.subjects.capacity())?
+                    .checked_add(mapping.principals.capacity())?;
+                bundle
+                    .allocation_bytes()?
+                    .checked_add(pairs.checked_mul(16)?)?
+                    .checked_add(4096)
+            }
             Self::Preflight(_, _, _, selected) => selected.allocation_bytes().checked_add(4096),
             Self::Copy(_, _, receipt, destination) => destination
                 .allocation_bytes()
@@ -97,6 +138,24 @@ impl Job {
     pub fn run(self, context: &JobContext) -> Result<Outcome> {
         let fence: fc_storage::recovery::ExecutionFence = Arc::new(context.execution_fence());
         let result = match self {
+            Self::InspectMigration(workflow, backend, lease, selected) => {
+                workflow.retire_pending_on_worker();
+                let access = access(&backend, lease)?;
+                Completed::MigrationInspected(
+                    workflow
+                        .inspect_migration(selected, access, fence)
+                        .map_err(failure)?,
+                )
+            }
+            Self::MapMigration(workflow, backend, lease, bundle, mapping, draft_revision) => {
+                let access = access(&backend, lease)?;
+                Completed::MigrationPreflighted {
+                    review: workflow
+                        .preflight_mapping(bundle, mapping, access, fence)
+                        .map_err(failure)?,
+                    draft_revision,
+                }
+            }
             Self::Export(workflow, backend, lease) => {
                 let access = access(&backend, lease)?;
                 Completed::Exported(workflow.export(access, fence).map_err(failure)?)
@@ -159,9 +218,13 @@ impl State {
             && self.workflow.as_ref().is_none_or(RecoveryWorkflow::is_idle)
     }
     pub fn has_review(&self, owner: PrincipalId) -> bool {
-        self.editor
+        self.migration
             .as_ref()
             .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
+                .editor
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
     }
     pub fn view(&self, status: &str) -> Option<View> {
         if self.irreversible {
@@ -169,8 +232,20 @@ impl State {
                 vec![Action { id: CLOSE_RESTORE, label: "关闭程序，稍后重新启动".into(), enabled: true }]
             } else { vec![Action { id: CANCEL_RESTORE, label: "请求安全中止并关闭".into(), enabled: self.coordinator.is_some() }] }, busy: false, grid: None });
         }
+        if let Some(editor) = &self.migration {
+            let mut view = editor.view(status, self.job.is_some() || self.cleanup.is_some());
+            view.actions.push(Action {
+                id: LOCK,
+                label: "锁定".into(),
+                enabled: true,
+            });
+            return Some(view);
+        }
         self.editor.as_ref().map(|e| {
             let mut view = e.view(status, self.job.is_some() || self.cleanup.is_some());
+            // The editor disables every ordinary action while a file job runs.
+            // Keep the explicitly enabled cancellation and lock controls usable.
+            view.busy = false;
             view.actions.push(Action {
                 id: LOCK,
                 label: "锁定".into(),
@@ -199,6 +274,10 @@ impl App {
             return self.render();
         }
         self.backup.review = None;
+        self.backup.mapping = None;
+        self.backup.migration = None;
+        self.backup.mapping_target_revision = None;
+        self.backup.migration_inspection_sequence = None;
         self.backup.exported = None;
         if self.backup.workflow.is_none() {
             return Err("备份服务尚未准备完成。".into());
@@ -213,6 +292,13 @@ impl App {
             return;
         }
         self.backup.review = None;
+        self.backup.mapping = None;
+        if let Some(editor) = &mut self.backup.migration {
+            editor.invalidate();
+        }
+        self.backup.migration = None;
+        self.backup.mapping_target_revision = None;
+        self.backup.migration_inspection_sequence = None;
         self.backup.exported = None;
         if let Some(editor) = &mut self.backup.editor {
             editor.invalidate();
@@ -235,7 +321,7 @@ impl App {
             workflow.request_close();
         }
     }
-    fn submit_backup(
+    pub(super) fn submit_backup(
         &mut self,
         job: Job,
         owner: PrincipalId,
@@ -375,6 +461,9 @@ impl App {
             self.lock();
             return self.render();
         }
+        if self.backup.migration.is_some() {
+            return self.migration_event(action, data, lease);
+        }
         if (self.backup.job.is_some() || self.backup.cleanup.is_some())
             && action != backup_editor::CANCEL
         {
@@ -389,6 +478,7 @@ impl App {
         match command {
             Ok(backup_editor::Command::Stay) => {}
             Ok(backup_editor::Command::Cancel) => {
+                self.backup.migration_inspection_sequence = None;
                 self.backup.review = None;
                 if let Some(job) = &self.backup.job {
                     job.ticket.cancel();
@@ -396,6 +486,7 @@ impl App {
                 self.status = "已取消本次备份操作；后台仍在结束时请稍候。".into();
             }
             Ok(backup_editor::Command::Close) => {
+                self.backup.migration_inspection_sequence = None;
                 self.backup.review = None;
                 self.backup.editor = None;
                 self.screen = Screen::Home;
@@ -415,6 +506,14 @@ impl App {
                 match fc_windows::materials::chooser::select_backup(None) {
                     Ok(Some(selected)) => return self.preflight_selected_backup(selected),
                     Ok(None) => self.status = "未选择备份。".into(),
+                    Err(_) => self.status = "无法选择备份，请选择本地完整 .fcbak 文件。".into(),
+                }
+            }
+            Ok(backup_editor::Command::SelectMigration) => {
+                self.backup.review = None;
+                match fc_windows::materials::chooser::select_backup(None) {
+                    Ok(Some(selected)) => return self.inspect_selected_migration(selected),
+                    Ok(None) => self.status = "未选择映射恢复包。".into(),
                     Err(_) => self.status = "无法选择备份，请选择本地完整 .fcbak 文件。".into(),
                 }
             }
@@ -457,6 +556,9 @@ impl App {
         self.render()
     }
     pub(super) fn poll_backup(&mut self) -> std::result::Result<(), String> {
+        if self.poll_migration_revision() {
+            self.render()?;
+        }
         let confirmed = self
             .backup
             .workflow
@@ -477,6 +579,10 @@ impl App {
             self.shell.stop();
             self.clear_profile_preview();
             self.backup.editor = None;
+            self.backup.migration = None;
+            self.backup.mapping = None;
+            self.backup.mapping_target_revision = None;
+            self.backup.migration_inspection_sequence = None;
             if let Some(pending) = self.pending.take() {
                 pending.ticket.cancel();
             }
@@ -597,6 +703,20 @@ impl App {
                 && !self.stopping;
             if current {
                 match completed {
+                    Ok(Outcome::Backup(Completed::MigrationInspected(bundle))) => {
+                        if self.backup.migration_inspection_sequence
+                            == Some(self.backup.job_sequence)
+                        {
+                            self.backup.migration_inspection_sequence = None;
+                            self.accept_migration_inspection(bundle)?;
+                        }
+                    }
+                    Ok(Outcome::Backup(Completed::MigrationPreflighted {
+                        review,
+                        draft_revision,
+                    })) => {
+                        self.accept_migration_review(review, draft_revision)?;
+                    }
                     Ok(Outcome::Backup(Completed::Exported(receipt))) => {
                         self.backup
                             .editor
@@ -646,6 +766,10 @@ impl App {
                         }
                     }
                     Err(error) => {
+                        self.backup.migration_inspection_sequence = None;
+                        if self.backup.migration.is_some() {
+                            self.migration_inspection_lost();
+                        }
                         self.backup.review = None;
                         self.backup.editor = self.backup.job_owner.map(backup_editor::Editor::new);
                         if fatal(&error) {

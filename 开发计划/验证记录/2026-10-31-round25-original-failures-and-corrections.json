@@ -1,0 +1,61 @@
+{
+  "scope": "Original failing reports/logs retained unchanged; corrections are separately verified, never rewrite a failing result as PASS",
+  "failures": [
+    {
+      "evidence": "windows-clippy-stage1.log",
+      "cause": "RestorePayload variants have markedly different physical owner sizes",
+      "correction": "Box both variants; physical owners remain in the one workflow slot and worker retirement path"
+    },
+    {
+      "evidence": "windows-check-stage2.log",
+      "cause": "unused Editor.sequence warning",
+      "correction": "controller now independently checks exact current owner and inspection sequence"
+    },
+    {
+      "evidence": "windows-clippy-stage3.log",
+      "cause": "synthetic WIC validator passed mutable reference to read-only image API",
+      "correction": "pass shared pinned reference after explicit rewind"
+    },
+    {
+      "evidence": "host-tests-stage1.log",
+      "actual": "149 passed and 1 failed in storage; workspace stopped at this group",
+      "cause": "new disabled target41 synthetic fixture omitted its required current password and recovery records",
+      "correction": "add independent target synthetic credential records and assert production startup identity before migration; focused test and full706 Host pass; no production validation relaxation"
+    },
+    {
+      "evidence": "modern-migration-stage1.json",
+      "actual": "source setup/login succeeded; native migration exited1 before cold restore; cleanup and real Run audit PASS",
+      "cause": "synthetic subject layout exceeded the actual combined public/subject top-level glass allowance",
+      "correction": "group Materials/Image/Text under a legitimate allocated container and check both structure and public composition; no production layout rule changes"
+    },
+    {
+      "evidence": "notices-stage1.log",
+      "cause": "audit CLI was incorrectly invoked with unsupported --check",
+      "correction": "rerun default read-only audit;86 components and181 license originals verified"
+    },
+    {
+      "evidence": "verification-summary-initial-aggregate-failure.json",
+      "additionalEvidence": [
+        "windows-test-acceptance-initial-aggregate-failure.json",
+        "final-acceptance-initial-failure.log"
+      ],
+      "cause": "root mistakenly treated actual string PASS repack field as boolean True when steering the aggregate script; original package/report remained correct",
+      "correction": "inspect the actual untouched report schema, restore strict string PASS comparison, then rerun complete aggregation; final actual exit0/Host706/Windows1037/all10 native reports PASS; original failed aggregates retained"
+    }
+  ],
+  "reviewFindings": [
+    {
+      "finding": "UI try_lock was followed by global_revision Ticket.wait, which could wait behind a large SQLite mapping job",
+      "correction": "published_revision reads published authority under short memory locks; no writer queue wait; exact durable admission checks retained",
+      "limits": "not lock-free or a hard real-time claim"
+    },
+    {
+      "finding": "source preparation pins were held through synthetic media reservation settlement",
+      "correction": "release actual preparation owner before settlement, matching production worker ordering"
+    },
+    {
+      "finding": "target exercise redundantly requested backup entry while already on that page",
+      "correction": "assert current backup screen; removed absent native action before first successful probe"
+    }
+  ]
+}

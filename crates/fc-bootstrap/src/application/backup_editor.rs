@@ -15,6 +15,7 @@ pub(super) const CLOSE: ActionId = ActionId(674);
 pub(super) const PREVIOUS_PATH: ActionId = ActionId(675);
 pub(super) const NEXT_PATH: ActionId = ActionId(676);
 pub(super) const SAVE_COPY: ActionId = ActionId(677);
+pub(super) const SELECT_MIGRATION: ActionId = ActionId(680);
 pub(super) const ACK: FieldId = FieldId(670);
 const SELECTED_PATH: FieldId = FieldId(671);
 const VERSIONS: FieldId = FieldId(672);
@@ -28,6 +29,7 @@ pub(super) enum Command {
     Close,
     Export,
     SelectRestore,
+    SelectMigration,
     SaveCopy,
     Cancel,
     Confirm { sequence: u64 },
@@ -227,6 +229,7 @@ impl Editor {
                 let mut actions = vec![
                     action(EXPORT, "导出完整备份", enabled),
                     action(SELECT_RESTORE, "选择备份并预检", enabled),
+                    action(SELECT_MIGRATION, "映射恢复（含其他安装）", enabled),
                     action(CLOSE, "返回工作台", enabled),
                 ];
                 if self.exported.is_some() {
@@ -357,6 +360,10 @@ impl Editor {
                 self.stage = Stage::Home;
                 self.exported = None;
                 Ok(Command::SelectRestore)
+            }
+            SELECT_MIGRATION if matches!(self.stage, Stage::Home) => {
+                self.exported = None;
+                Ok(Command::SelectMigration)
             }
             EXPORT if matches!(self.stage, Stage::Home) => Ok(Command::Export),
             SAVE_COPY if matches!(self.stage, Stage::Home) && self.exported.is_some() => {

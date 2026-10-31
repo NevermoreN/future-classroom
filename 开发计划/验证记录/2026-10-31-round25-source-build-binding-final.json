@@ -1,0 +1,61 @@
+{
+  "scope": "Early check/Clippy and initial failing Host run predate first398 input snapshot and are diagnostic history only. Final Host tests use unchanged Host-compiled code; interim differences are Windows diagnostics and packaged prose. Final native binaries built at stage3; final input differs solely by README paragraph ordering. Final exact19 no-run files are fresh and unchanged.",
+  "snapshots": {
+    "stage1": {
+      "fileCount": 398,
+      "inputSha256": "f26d7ba62d141da14327e909f50d59a69640e9d939d6b4e33ab26eb94239d886"
+    },
+    "stage2": {
+      "fileCount": 398,
+      "inputSha256": "ed7cb29481cfe83eb93face89a7e69326bbba7013ffe30a2bece5614da8d6dbb"
+    },
+    "stage3": {
+      "fileCount": 398,
+      "inputSha256": "f3e401f652c9cdd930bee274985bde0a4d1905d6ea795e30f3542ee41795a1c5"
+    },
+    "final": {
+      "fileCount": 398,
+      "inputSha256": "642a33271e94c7b5da27a09c0c7f985a35b50f1b77bf54863ccb709d94c9d4e0"
+    }
+  },
+  "changes": [
+    {
+      "from": "stage1",
+      "to": "stage2",
+      "changed": [
+        "crates/fc-bootstrap/src/application/migration_probe.rs",
+        "crates/fc-bootstrap/src/application/migration_probe_fixture.rs"
+      ]
+    },
+    {
+      "from": "stage2",
+      "to": "stage3",
+      "changed": [
+        "crates/fc-bootstrap/src/application/migration_probe_fixture.rs"
+      ]
+    },
+    {
+      "from": "stage3",
+      "to": "final",
+      "changed": [
+        "packaging/PROBE-README.txt"
+      ]
+    }
+  ],
+  "executableBindings": {
+    "modern": {
+      "sourceSnapshot": "source-inputs-stage3.json",
+      "finalDocOnlyEquivalent": true,
+      "bytes": 11735676,
+      "sha256": "12c2140a7c1ca0fb1185a339f2e0c855a0d5d92774a39547ca669569f5625137"
+    },
+    "supplementalWin7Gnu": {
+      "sourceSnapshot": "source-inputs-stage3.json",
+      "finalDocOnlyEquivalent": true,
+      "bytes": 11809792,
+      "sha256": "b15bd3ea838f9b88949d7e8c669609510069f72a6e3fe450a144f0a00e48bab5",
+      "actualRuntimeOs": "Win11 Pro build26300 x64/WOW64",
+      "actualWin7": "NOT_VALIDATED"
+    }
+  }
+}

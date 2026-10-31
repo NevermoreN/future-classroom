@@ -1,0 +1,35 @@
+    Checking fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Checking fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+    Checking fc-presentation v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-presentation)
+    Checking fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Checking fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Checking fc-audio v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-audio)
+    Checking fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Checking fc-application v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-application)
+    Checking fc-security v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-security)
+    Checking fc-materials v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-materials)
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+error: large size difference between variants
+  --> crates/fc-bootstrap/src/recovery_workflow/windows.rs:80:1
+   |
+80 | / enum RestorePayload {
+81 | |     Ordinary(PreparedRestore),
+   | |     ------------------------- the second-largest variant contains at least 216 bytes
+82 | |     Mapped(MappedPreparedRestore),
+   | |     ----------------------------- the largest variant contains at least 464 bytes
+83 | | }
+   | |_^ the entire enum is at least 464 bytes
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#large_enum_variant
+   = note: `-D clippy::large-enum-variant` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::large_enum_variant)]`
+help: consider boxing the large fields or introducing indirection in some other way to reduce the total size of the enum
+   |
+82 -     Mapped(MappedPreparedRestore),
+82 +     Mapped(Box<MappedPreparedRestore>),
+   |
+
+error: could not compile `fc-bootstrap` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (lib test) due to 1 previous error

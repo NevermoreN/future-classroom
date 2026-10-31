@@ -6,6 +6,9 @@ use fc_domain::recovery::{BackupEntry, BackupManifest};
 use fc_storage::recovery::{ExecutionFence, RecoveryBarrier, RecoveryDatabaseReceipt};
 use std::path::PathBuf;
 
+mod migration;
+pub use migration::MigrationInspection;
+
 pub struct OrdinaryBackupAccess {
     repository: Repository,
     actor: ActorContext,

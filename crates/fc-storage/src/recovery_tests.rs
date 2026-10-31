@@ -6,6 +6,8 @@ use fc_domain::{layout::*, materials::*, profile_content::*};
 use fc_ports::voice::VoiceRepository;
 use fc_ports::{MaterialRepository, ProfileContentRepository, ProfileRepository};
 use std::sync::atomic::AtomicU64;
+#[path = "migration_tests.rs"]
+mod migration_tests;
 static NEXT: AtomicU64 = AtomicU64::new(0);
 struct Temp(PathBuf);
 impl Temp {

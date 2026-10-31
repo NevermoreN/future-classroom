@@ -1,6 +1,8 @@
 //! Complete ordinary backup descriptions. No credentials, grants or paths.
 use crate::{ids::*, materials::*, profile_content::ImageFormat};
 use std::collections::BTreeSet;
+mod migration;
+pub use migration::*;
 
 pub const BACKUP_FORMAT: u16 = 1;
 pub const MAX_MEDIA_BYTES: u64 = 2 * 1024 * 1024 * 1024;

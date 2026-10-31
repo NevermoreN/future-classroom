@@ -1,0 +1,10 @@
+cleanup: PASS
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 465, in <module>
+    main()
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 385, in main
+    result = validate_migration_output(report["native"].get("migrationExitCode"), report["native"].get("migrationOutput"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 37, in validate_migration_output
+    raise RuntimeError("isolated native cross-installation migration workflow failed")
+RuntimeError: isolated native cross-installation migration workflow failed

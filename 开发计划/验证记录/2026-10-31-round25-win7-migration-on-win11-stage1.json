@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "migrationRunBefore": {
+    "views": [
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry32"
+      },
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry64"
+      }
+    ]
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "b15bd3ea838f9b88949d7e8c669609510069f72a6e3fe450a144f0a00e48bab5"
+    }
+  ],
+  "exeSha256": "b15bd3ea838f9b88949d7e8c669609510069f72a6e3fe450a144f0a00e48bab5",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1007 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "migrationExitCode": 0,
+    "sessionId": 1,
+    "exitCode": 0,
+    "migrationOutput": [
+      "PROBE_SUBMIT tick=3 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=41 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=45 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=45 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=103 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=106 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=109 action=3 page=Synthetic migration source school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=109 kind=request page=Synthetic migration source school · 登录工作台",
+      "PROBE_COMPLETE tick=162 kind=updated page=Synthetic migration source school · 登录工作台",
+      "MIGRATION_NATIVE_STEP index=0 name=source-native-setup-real-teaching",
+      "PROBE_EVENT tick=278 action=18 page=Synthetic migration source school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=278 kind=display-load page=Synthetic migration source school · 工作台",
+      "PROBE_COMPLETE tick=280 kind=display page=Synthetic migration source school · 工作台",
+      "PROBE_EVENT tick=311 action=26 page=桌面显示设置 pending=false generation=0",
+      "PROBE_EVENT tick=317 action=670 page=完整备份与恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=1 name=source-package-export-saved",
+      "PROBE_SUBMIT tick=1 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=39 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=43 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=43 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=97 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=100 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=102 action=3 page=Synthetic migration preserved target school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=102 kind=request page=Synthetic migration preserved target school · 登录工作台",
+      "PROBE_COMPLETE tick=156 kind=updated page=Synthetic migration preserved target school · 登录工作台",
+      "MIGRATION_NATIVE_STEP index=2 name=target-native-setup-distinct-authority",
+      "PROBE_EVENT tick=281 action=18 page=Synthetic migration preserved target school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=281 kind=display-load page=Synthetic migration preserved target school · 工作台",
+      "PROBE_COMPLETE tick=282 kind=display page=Synthetic migration preserved target school · 工作台",
+      "PROBE_EVENT tick=315 action=26 page=桌面显示设置 pending=false generation=0",
+      "PROBE_EVENT tick=320 action=670 page=完整备份与恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=3 name=ordinary-foreign-installation-denied",
+      "PROBE_EVENT tick=478 action=673 page=完整备份与恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=4 name=pending-inspection-native-cancel-retired",
+      "PROBE_EVENT tick=570 action=743 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=5 name=incomplete-mapping-preflight-rejected",
+      "PROBE_EVENT tick=581 action=741 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "PROBE_EVENT tick=590 action=741 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "PROBE_EVENT tick=604 action=741 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "PROBE_EVENT tick=613 action=742 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=6 name=explicit-class-subject-principal-choices",
+      "PROBE_EVENT tick=613 action=743 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=7 name=mapped-full-preflight-live-unchanged",
+      "PROBE_EVENT tick=749 action=744 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=8 name=native-default-confirmation-rejected",
+      "PROBE_EVENT tick=752 action=744 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=9 name=native-partial-confirmation-rejected",
+      "PROBE_EVENT tick=753 action=744 page=跨安装备份 · 显式映射恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=10 name=explicit-double-ack-revokes-and-handoffs",
+      "MIGRATION_NATIVE_STEP index=11 name=physical-shutdown-and-three-tree-cold-commit",
+      "MIGRATION_NATIVE_STEP index=12 name=native-result-close-acknowledged",
+      "MIGRATION_SUBPROCESS_REOPEN_PASS nonce=a4debbf1438b3314fd786463f9a074de target_credentials=PASS mapped_content=PASS physical_shutdown=PASS",
+      "PROBE_SUBMIT tick=3 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=87 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=90 action=3 page=Synthetic migration preserved target school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=90 kind=request page=Synthetic migration preserved target school · 登录工作台",
+      "PROBE_COMPLETE tick=144 kind=updated page=Synthetic migration preserved target school · 登录工作台",
+      "PROBE_EVENT tick=155 action=18 page=Synthetic migration preserved target school · 工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=155 kind=display-load page=Synthetic migration preserved target school · 工作台",
+      "PROBE_COMPLETE tick=157 kind=display page=Synthetic migration preserved target school · 工作台",
+      "PROBE_EVENT tick=187 action=26 page=桌面显示设置 pending=false generation=0",
+      "PROBE_EVENT tick=192 action=670 page=完整备份与恢复 pending=false generation=0",
+      "MIGRATION_NATIVE_STEP index=13 name=independent-process-current-target-login-and-mapped-content",
+      "MIGRATION_NATIVE_STEP index=14 name=source-package-and-target-key-unchanged",
+      "MIGRATION_NATIVE_STEP index=15 name=owned-synthetic-deployments-cleaned",
+      "migration_native=PASS migration_native_steps=16 reopen=independent_executable_production_Open picker=ISOLATED_CAPABILITY_ONLY visible_dialog=NOT_TESTED foreground=UNTOUCHED real_run=READ_ONLY isolated_cleanup=PASS elapsed_ms=1711"
+    ]
+  },
+  "migrationNativeStatus": "PASS",
+  "migrationNativeSteps": 16,
+  "migrationNativeStepNames": [
+    "source-native-setup-real-teaching",
+    "source-package-export-saved",
+    "target-native-setup-distinct-authority",
+    "ordinary-foreign-installation-denied",
+    "pending-inspection-native-cancel-retired",
+    "incomplete-mapping-preflight-rejected",
+    "explicit-class-subject-principal-choices",
+    "mapped-full-preflight-live-unchanged",
+    "native-default-confirmation-rejected",
+    "native-partial-confirmation-rejected",
+    "explicit-double-ack-revokes-and-handoffs",
+    "physical-shutdown-and-three-tree-cold-commit",
+    "native-result-close-acknowledged",
+    "independent-process-current-target-login-and-mapped-content",
+    "source-package-and-target-key-unchanged",
+    "owned-synthetic-deployments-cleaned"
+  ],
+  "migrationSubprocessNonce": "a4debbf1438b3314fd786463f9a074de",
+  "migrationElapsedMs": 1711,
+  "migrationScope": "Synthetic hidden native explicit class/subject/principal mapping, strict foreign-installation gate, actual cold three-tree restore and independent executable target login/mapped content; source package and target key unchanged; picker return capabilities isolated; visible dialogs and hardware power loss NOT_RUN",
+  "status": "PASS",
+  "migrationRunAfter": {
+    "views": [
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry32"
+      },
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry64"
+      }
+    ]
+  },
+  "migrationRealRunAudit": "PASS"
+}

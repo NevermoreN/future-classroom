@@ -35,6 +35,25 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--migration-probe" => {
+            #[cfg(windows)]
+            {
+                application::migration_probe()
+            }
+            #[cfg(not(windows))]
+            Err("native migration probe requires Windows".into())
+        }
+        [flag, root, nonce] if flag == "--migration-probe-reopen" => {
+            #[cfg(windows)]
+            {
+                application::migration_probe_reopen(std::path::Path::new(root), nonce)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (root, nonce);
+                Err("native migration reopen probe requires Windows".into())
+            }
+        }
         [flag] if flag == "--reinitialization-probe" => {
             #[cfg(windows)]
             {

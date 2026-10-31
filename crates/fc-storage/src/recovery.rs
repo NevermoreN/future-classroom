@@ -16,6 +16,15 @@ use fc_domain::{
 use fc_ports::Clock;
 use rusqlite::OpenFlags;
 use serde_json::json;
+pub(crate) mod migration;
+pub(crate) use migration::{InspectJob, MapJob};
+pub use migration::{MappedOrdinaryReceipt, MigrationSourceReceipt};
+/// Canonical mapping digest shared with the physical, pinned package stage.
+pub fn migration_mapping_sha256(
+    mapping: &fc_domain::recovery::MigrationMapping,
+) -> Result<[u8; 32], StorageError> {
+    business::migration::mapping_sha256(mapping)
+}
 
 pub type ExecutionFence = Arc<dyn Fn() -> bool + Send + Sync>;
 pub struct RecoveryBarrier {

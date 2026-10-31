@@ -6,10 +6,71 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import tempfile
 import uuid
+
+MIGRATION_STEPS = (
+    "source-native-setup-real-teaching",
+    "source-package-export-saved",
+    "target-native-setup-distinct-authority",
+    "ordinary-foreign-installation-denied",
+    "pending-inspection-native-cancel-retired",
+    "incomplete-mapping-preflight-rejected",
+    "explicit-class-subject-principal-choices",
+    "mapped-full-preflight-live-unchanged",
+    "native-default-confirmation-rejected",
+    "native-partial-confirmation-rejected",
+    "explicit-double-ack-revokes-and-handoffs",
+    "physical-shutdown-and-three-tree-cold-commit",
+    "native-result-close-acknowledged",
+    "independent-process-current-target-login-and-mapped-content",
+    "source-package-and-target-key-unchanged",
+    "owned-synthetic-deployments-cleaned",
+)
+
+
+def validate_migration_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native cross-installation migration workflow failed")
+    steps = [line for line in output if line.startswith("MIGRATION_NATIVE_STEP")]
+    expected = [f"MIGRATION_NATIVE_STEP index={index} name={name}" for index, name in enumerate(MIGRATION_STEPS)]
+    if steps != expected:
+        raise RuntimeError("migration exact16 ordered step indices/names missing, malformed or repeated")
+    children = [line for line in output if line.startswith("MIGRATION_SUBPROCESS_REOPEN_PASS")]
+    child_pattern = r"MIGRATION_SUBPROCESS_REOPEN_PASS nonce=([0-9a-f]{32}) target_credentials=PASS mapped_content=PASS physical_shutdown=PASS"
+    if len(children) != 1 or not (child := re.fullmatch(child_pattern, children[0])):
+        raise RuntimeError("migration exact independent-executable completion marker missing or malformed")
+    summaries = [line for line in output if line.startswith("migration_native=")]
+    summary_pattern = r"migration_native=PASS migration_native_steps=16 reopen=independent_executable_production_Open picker=ISOLATED_CAPABILITY_ONLY visible_dialog=NOT_TESTED foreground=UNTOUCHED real_run=READ_ONLY isolated_cleanup=PASS elapsed_ms=([0-9]+)"
+    if len(summaries) != 1 or not (summary := re.fullmatch(summary_pattern, summaries[0])):
+        raise RuntimeError("migration exact final scope/cleanup completion marker missing or malformed")
+    return {"steps": len(steps), "stepNames": list(MIGRATION_STEPS), "subprocessNonce": child.group(1), "elapsedMs": int(summary.group(1))}
+
+
+def project_run_snapshot_script():
+    """Read only this project's real Run value; disclose only kind/length/hash."""
+    return r"""
+$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){
+ $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;
+ try{$key=$base.OpenSubKey('Software\Microsoft\Windows\CurrentVersion\Run',$false);
+  $present=$false;$kind=$null;$digest=$null;$length=0;
+  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;
+   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);
+    if($value-is [byte[]]){$bytes=$value}else{
+     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}
+     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};
+     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)
+    };
+    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
+   }
+  };
+  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}
+ }finally{if($key){$key.Dispose()};$base.Dispose()}
+};@{views=$views}|ConvertTo-Json -Depth 5 -Compress
+"""
 
 
 def ps_literal(value):
@@ -46,6 +107,7 @@ def main():
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--recovery", action="store_true", help="isolated hidden native ordinary backup/save/preflight/review/cold restore and independent process reopen; no visible picker")
     parser.add_argument("--reinitialization", action="store_true", help="isolated hidden native no-code reset, cancellation, explicit acknowledgements and independent executable fresh setup; synthetic deployment only")
+    parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
@@ -58,6 +120,8 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
+    if args.migration and any((args.application, args.calendar, args.calendar_download, args.autostart, args.recovery, args.reinitialization, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated migration workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.recovery and (args.application or args.calendar or args.autostart):
         parser.error("run the dedicated recovery workflow separately to preserve its independent ownership and budget")
     if args.reinitialization and (args.application or args.calendar or args.autostart or args.recovery):
@@ -99,6 +163,8 @@ def main():
     report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN", "testTimeoutSeconds": args.test_timeout_seconds}
     try:
         report["platform"] = json.loads(remote.powershell("$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}|ConvertTo-Json -Compress"))
+        if args.migration:
+            report["migrationRunBefore"] = json.loads(remote.powershell(project_run_snapshot_script()))
         report["uploadedArtifacts"] = []
         for path in dict.fromkeys([args.exe, *tests]):
             remote.upload(path, directory)
@@ -238,6 +304,14 @@ def main():
                 raise RuntimeError("reinitialization report insertion point is ambiguous")
             anchor = matched[0]
             body = body.replace(anchor, command + "@{reinitializationExitCode=$resetCode;reinitializationOutput=$resetOutput;" + anchor[2:])
+        if args.migration:
+            command = "$migrationOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --migration-probe 2>&1|ForEach-Object{\"$_\"});$migrationCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("migration report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{migrationExitCode=$migrationCode;migrationOutput=$migrationOutput;" + anchor[2:])
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -247,11 +321,11 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization:
+        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
-        if args.recovery or args.reinitialization:
+        if args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -307,6 +381,14 @@ def main():
                 raise RuntimeError("reinitialization exact independent-child results or completion marker missing")
             report["reinitializationNativeStatus"] = "PASS"
             report["reinitializationScope"] = "Synthetic hidden native controls, cancel exact bytes, explicit full reset, new process DPAPI and school/admin initialization, old backup installation rejection; foreground and real Run untouched; hardware power loss NOT_RUN"
+        if args.migration:
+            result = validate_migration_output(report["native"].get("migrationExitCode"), report["native"].get("migrationOutput"))
+            report["migrationNativeStatus"] = "PASS"
+            report["migrationNativeSteps"] = result["steps"]
+            report["migrationNativeStepNames"] = result["stepNames"]
+            report["migrationSubprocessNonce"] = result["subprocessNonce"]
+            report["migrationElapsedMs"] = result["elapsedMs"]
+            report["migrationScope"] = "Synthetic hidden native explicit class/subject/principal mapping, strict foreign-installation gate, actual cold three-tree restore and independent executable target login/mapped content; source package and target key unchanged; picker return capabilities isolated; visible dialogs and hardware power loss NOT_RUN"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):
@@ -357,11 +439,26 @@ def main():
         except Exception as error:
             report["cleanup"] = "FAIL"
             report["cleanupError"] = str(error)
+        migration_audit_error = None
+        if args.migration and "migrationRunBefore" in report:
+            try:
+                report["migrationRunAfter"] = json.loads(remote.powershell(project_run_snapshot_script()))
+                if report["migrationRunBefore"] != report["migrationRunAfter"]:
+                    raise RuntimeError("project Run value snapshot changed during migration verification; no automatic repair attempted")
+                report["migrationRealRunAudit"] = "PASS"
+            except Exception as error:
+                report["migrationRealRunAudit"] = "FAIL"
+                report["migrationRealRunAuditError"] = str(error)
+                report["status"] = "FAIL"
+                report.setdefault("error", "migration real Run read-only audit failed")
+                migration_audit_error = str(error)
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
         print("cleanup:", report["cleanup"], flush=True)
         if report["cleanup"] != "PASS":
             raise RuntimeError("remote test cleanup failed; inspect report")
+        if migration_audit_error:
+            raise RuntimeError("migration real Run read-only audit failed; inspect report")
 
 
 if __name__ == "__main__":

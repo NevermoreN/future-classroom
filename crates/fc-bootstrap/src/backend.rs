@@ -11,8 +11,8 @@ mod profile_content;
 mod profiles;
 mod recovery;
 pub use recovery::{
-    ConfirmedRestore, OrdinaryBackupAccess, PreparedRecoveryDatabase, RestoreConfirmation,
-    RestorePreview,
+    ConfirmedRestore, MigrationInspection, OrdinaryBackupAccess, PreparedRecoveryDatabase,
+    RestoreConfirmation, RestorePreview,
 };
 mod voice;
 pub mod web;
@@ -636,6 +636,16 @@ impl Backend {
         let revision = self.handle.try_revision()?.wait()?;
         self.check_open()?;
         Ok(revision)
+    }
+    /// Presentation drift detection only. This reads the published authority
+    /// snapshot without submitting SQLite work; mutation admission still checks
+    /// the exact durable revision on the writer.
+    pub fn published_revision(&self) -> Result<Revision> {
+        self.check_open()?;
+        self.authority
+            .snapshot()
+            .map(|snapshot| snapshot.revision)
+            .map_err(|_| BackendError::Storage(StorageError::AuthorityUnavailable))
     }
     /// Authenticated native exit. Consume the exact local lease immediately
     /// before closing; no database/KDF lookup occurs after this final admission.

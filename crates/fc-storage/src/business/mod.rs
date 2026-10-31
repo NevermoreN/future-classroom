@@ -19,6 +19,7 @@ mod lesson_codec;
 mod logout_tests;
 pub mod materials;
 mod materials_codec;
+pub(crate) mod migration;
 pub mod profile_content;
 mod profile_content_codec;
 mod profiles;
