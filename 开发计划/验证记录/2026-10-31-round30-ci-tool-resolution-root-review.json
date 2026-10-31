@@ -1,0 +1,29 @@
+{
+  "utc": "2026-10-31T13:27:12.124266+00:00",
+  "source_sha256": "241b3afe56cd31075dc400e6808615f138b5f2b6c844e9c23a87cdeb0976cd81",
+  "probe_embedded_source_exact": true,
+  "production_helper_exact": true,
+  "seven_tool_bindings": true,
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "CI resolver-only correction; no Rust behavior changes or repeat of prior Rust tests; original failure retained"
+}

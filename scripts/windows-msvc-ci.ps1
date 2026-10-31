@@ -110,6 +110,26 @@ if ($Mode -eq 'Cleanup') {
     if ($retained) { exit 1 } else { exit 0 }
 }
 
+function Resolve-Application([string]$Name) {
+    # -All preserves execution precedence; duplicate PATH entries are legitimate.
+    $commands = @(Get-Command -Name $Name -CommandType Application -All -ErrorAction Stop |
+        Select-Object -First 1)
+    if ($commands.Count -ne 1) { throw "Application not found: $Name" }
+    $source = [string]$commands[0].Source
+    if ([string]::IsNullOrWhiteSpace($source) -or -not [IO.Path]::IsPathRooted($source)) {
+        throw "Application path is not absolute: $Name"
+    }
+    $path = [IO.Path]::GetFullPath($source)
+    # IsPathRooted alone also accepts C:relative and \drive-relative on Windows.
+    $sourceRoot = [IO.Path]::GetPathRoot($source).Replace('/', '\')
+    $fullRoot = [IO.Path]::GetPathRoot($path).Replace('/', '\')
+    if (-not [string]::Equals($sourceRoot, $fullRoot, [StringComparison]::OrdinalIgnoreCase) -or
+        -not [IO.File]::Exists($path)) {
+        throw "Application path is not an existing absolute file: $Name"
+    }
+    return $path
+}
+
 function Invoke-Logged {
     param([string]$Name, [string]$Executable, [string[]]$Arguments, [int]$TimeoutSeconds = 120,
         [int[]]$AllowedExitCodes = @(0))
@@ -260,7 +280,7 @@ try {
     if ($ExpectedSourceSha -ine $env:GITHUB_SHA) {
         throw 'Dispatch source differs from requested source_sha; no build admitted.'
     }
-    $git = (Get-Command git.exe -CommandType Application).Source
+    $git = Resolve-Application 'git.exe'
     $sha = Invoke-Logged 'source-sha' $git @('rev-parse','HEAD')
     Require-Step $sha
     $checkedOutSha = (Read-Output $sha).Trim()
@@ -268,9 +288,9 @@ try {
         $checkedOutSha -ine $ExpectedSourceSha -or $checkedOutSha -ine $env:GITHUB_SHA) {
         throw 'Checked-out source differs from requested/dispatch Git SHA; no build admitted.'
     }
-    $rustup = (Get-Command rustup.exe -CommandType Application).Source
-    $cargo = (Get-Command cargo.exe -CommandType Application).Source
-    $python = (Get-Command python.exe -CommandType Application).Source
+    $rustup = Resolve-Application 'rustup.exe'
+    $cargo = Resolve-Application 'cargo.exe'
+    $python = Resolve-Application 'python.exe'
     $clean = Invoke-Logged 'source-clean-before' $git @('status','--porcelain','--untracked-files=all')
     Require-Step $clean
     if ((Read-Output $clean).Length -ne 0) { throw 'Source is not a clean checkout.' }
@@ -311,9 +331,9 @@ try {
     if ($instances.Count -ne 1) { throw 'No unique installed Visual Studio 2022 x86/x64 toolchain.' }
     $vsPath = [string]$instances[0].installationPath
     & (Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1') -Arch x86 -HostArch amd64 -SkipAutomaticLocation | Out-Null
-    $cl = (Get-Command cl.exe -CommandType Application).Source
-    $link = (Get-Command link.exe -CommandType Application).Source
-    $dumpbin = (Get-Command dumpbin.exe -CommandType Application).Source
+    $cl = Resolve-Application 'cl.exe'
+    $link = Resolve-Application 'link.exe'
+    $dumpbin = Resolve-Application 'dumpbin.exe'
     foreach ($tool in @($cl,$link,$dumpbin)) {
         if (-not $tool.StartsWith($vsPath + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Wrong MSVC tool selected.' }
     }
