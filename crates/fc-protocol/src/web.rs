@@ -26,6 +26,23 @@ pub enum WebError {
     Body,
 }
 
+/// Fixed methods supported by a recognized API target, not authorization.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AllowedMethods {
+    Get,
+    Post,
+    GetPost,
+}
+impl AllowedMethods {
+    pub fn header_value(self) -> &'static str {
+        match self {
+            Self::Get => "GET",
+            Self::Post => "POST",
+            Self::GetPost => "GET, POST",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Route {
     Status,
@@ -46,6 +63,17 @@ pub enum Route {
     VoiceCancel { job_id: VoiceJobId },
 }
 impl Route {
+    pub fn allowed_methods(self) -> AllowedMethods {
+        match self {
+            Self::Materials { route } => route.allowed_methods(),
+            Self::ContentRead { .. }
+            | Self::ContentSave { .. }
+            | Self::VoiceList
+            | Self::VoiceSubmit => AllowedMethods::GetPost,
+            _ if self.post() => AllowedMethods::Post,
+            _ => AllowedMethods::Get,
+        }
+    }
     pub fn requires_session(self) -> bool {
         !matches!(
             self,
@@ -120,6 +148,31 @@ impl WebBoundary {
             authority,
             base: format!("/{path}api/v1/"),
         })
+    }
+    /// Pure path classification under this configured prefix. Unknown API
+    /// versions, incomplete API paths and queries still belong to the API
+    /// boundary, never to a static entry document. This grants no authority.
+    pub fn is_api_target(&self, target: &str) -> bool {
+        let Some(root) = self.base.strip_suffix("api/v1/") else {
+            return false;
+        };
+        target.strip_prefix(root).is_some_and(|relative| {
+            relative == "api" || relative.starts_with("api/") || relative.starts_with("api?")
+        })
+    }
+    /// Owned heap capacity only, excluding Self and any outer Arc allocation.
+    pub fn heap_bytes(&self) -> usize {
+        self.authority.capacity() + self.origin.capacity() + self.base.capacity()
+    }
+    /// Reuses strict API routing to describe an already recognized target for
+    /// an Allow response field. This does not check transport, Host, Origin,
+    /// CSRF or sessions; callers retain their original boundary checks.
+    pub fn allowed_methods(&self, target: &str) -> Result<AllowedMethods, WebError> {
+        match self.route("GET", target) {
+            Ok(route) => Ok(route.allowed_methods()),
+            Err(WebError::Method) => self.route("POST", target).map(Route::allowed_methods),
+            Err(error) => Err(error),
+        }
     }
     pub fn route(&self, method: &str, target: &str) -> Result<Route, WebError> {
         if target.len() > MAX_TARGET_BYTES
@@ -463,6 +516,173 @@ mod tests {
             content_length: Some(2),
             has_body: true,
         }
+    }
+    #[test]
+    fn api_target_classification_uses_each_configured_root_without_authorizing_routes() {
+        for root in ["/", "/fc/", "/classroom/nested-1_2/"] {
+            let prefix = ListenPrefix::https(&format!("https://board.school:8443{root}")).unwrap();
+            let boundary = WebBoundary::new(&prefix).unwrap();
+            for suffix in [
+                "api",
+                "api?x=1",
+                "api/",
+                "api/v1/status",
+                "api/v2/unknown",
+                "api/../index.html",
+            ] {
+                assert!(
+                    boundary.is_api_target(&format!("{root}{suffix}")),
+                    "{root}{suffix}"
+                );
+            }
+            for suffix in [
+                "",
+                "index.html",
+                "assets/app.js",
+                "apix",
+                "api-other",
+                "API/v1/status",
+            ] {
+                assert!(
+                    !boundary.is_api_target(&format!("{root}{suffix}")),
+                    "{root}{suffix}"
+                );
+            }
+            assert!(!boundary.is_api_target("https://board.school/api/v1/status"));
+            assert_eq!(
+                boundary.route("GET", &format!("{root}api/v2/unknown")),
+                Err(WebError::NotFound)
+            );
+            assert_eq!(
+                boundary.route("GET", &format!("{root}api?x=1")),
+                Err(WebError::NotFound)
+            );
+            if root != "/" {
+                assert!(!boundary.is_api_target("/api/v1/status"));
+            }
+        }
+    }
+    #[test]
+    fn boundary_heap_bytes_counts_owned_string_capacities_including_slack() {
+        let mut boundary = boundary();
+        boundary.authority.reserve_exact(17);
+        boundary.origin.reserve_exact(31);
+        boundary.base.reserve_exact(47);
+        let capacity =
+            boundary.authority.capacity() + boundary.origin.capacity() + boundary.base.capacity();
+        let used = boundary.authority.len() + boundary.origin.len() + boundary.base.len();
+        assert!(capacity > used);
+        assert_eq!(boundary.heap_bytes(), capacity);
+    }
+    #[test]
+    fn allowed_methods_preserve_single_and_shared_api_target_method_sets() {
+        let b = boundary();
+        for (path, allowed) in [
+            ("status", AllowedMethods::Get),
+            ("pairing/requests", AllowedMethods::Post),
+            ("pairing/requests/1/poll", AllowedMethods::Post),
+            ("session", AllowedMethods::Get),
+            ("session/logout", AllowedMethods::Post),
+            ("content/homework/scopes/0", AllowedMethods::Get),
+            ("content/reminders/scopes/0", AllowedMethods::Get),
+            ("content/homework/1/2/3/2026-10-30", AllowedMethods::GetPost),
+            ("content/reminders/1/2026-10-30", AllowedMethods::GetPost),
+            ("content/commands/1", AllowedMethods::Get),
+            ("materials/folders/1/2", AllowedMethods::Get),
+            ("materials/uploads/1/2", AllowedMethods::Post),
+            ("voice/capabilities", AllowedMethods::Get),
+            ("voice/broadcasts", AllowedMethods::GetPost),
+            ("voice/uploads?classId=1", AllowedMethods::Post),
+            ("voice/broadcasts/1", AllowedMethods::Get),
+            ("voice/broadcasts/1/cancel", AllowedMethods::Post),
+        ] {
+            let target = format!("/fc/api/v1/{path}");
+            assert_eq!(b.allowed_methods(&target), Ok(allowed), "{path}");
+            assert_eq!(
+                allowed.header_value(),
+                match allowed {
+                    AllowedMethods::Get => "GET",
+                    AllowedMethods::Post => "POST",
+                    AllowedMethods::GetPost => "GET, POST",
+                }
+            );
+            for method in ["GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "get"] {
+                let supported = match allowed {
+                    AllowedMethods::Get => method == "GET",
+                    AllowedMethods::Post => method == "POST",
+                    AllowedMethods::GetPost => matches!(method, "GET" | "POST"),
+                };
+                let routed = b.route(method, &target);
+                if supported {
+                    assert_eq!(routed.unwrap().allowed_methods(), allowed);
+                } else {
+                    assert_eq!(routed, Err(WebError::Method), "{method} {path}");
+                }
+            }
+        }
+    }
+    #[test]
+    fn allow_metadata_uses_configured_prefix_and_keeps_unknown_targets_not_found() {
+        let b = WebBoundary::new(
+            &ListenPrefix::https("https://board.school:8443/classroom/nested/").unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            b.allowed_methods("/classroom/nested/api/v1/voice/broadcasts"),
+            Ok(AllowedMethods::GetPost)
+        );
+        for target in [
+            "/fc/api/v1/status",
+            "/classroom/nested/index.html",
+            "/classroom/nested/api/v2/status",
+            "/classroom/nested/api/v1/status?x=1",
+            "/classroom/nested/api/v1/voice/broadcasts/01",
+            "/classroom/nested/api/v1/voice/broadcasts/1/",
+            "/classroom/nested/api/v1/content/reminders/1/2026-02-29",
+            "/classroom/nested/api/v1/materials/uploads/0/bytes",
+            "/classroom/nested/api/v1/voice/%62roadcasts",
+            "/classroom/nested/api/v1/voice/broadcasts#fragment",
+            "/classroom/nested/api/v1/voice/广播",
+        ] {
+            assert_eq!(
+                b.allowed_methods(target),
+                Err(WebError::NotFound),
+                "{target}"
+            );
+        }
+        assert_eq!(
+            b.allowed_methods(&format!(
+                "/classroom/nested/api/v1/{}",
+                "a".repeat(MAX_TARGET_BYTES)
+            )),
+            Err(WebError::NotFound)
+        );
+    }
+    #[test]
+    fn method_metadata_does_not_bypass_host_origin_or_csrf_checks() {
+        let b = boundary();
+        let mut request = head();
+        assert_eq!(
+            b.allowed_methods(&request.target),
+            Ok(AllowedMethods::GetPost)
+        );
+        assert_eq!(b.check(&request, None), Err(WebError::Csrf));
+        request
+            .headers
+            .iter_mut()
+            .find(|h| h.name == "Origin")
+            .unwrap()
+            .value = b"https://evil.school".to_vec();
+        assert_eq!(b.preflight(&request), Err(WebError::Origin));
+        request.method = "PUT".into();
+        assert_eq!(b.preflight(&request), Err(WebError::Method));
+        request
+            .headers
+            .iter_mut()
+            .find(|h| h.name == "Host")
+            .unwrap()
+            .value = b"evil.school".to_vec();
+        assert_eq!(b.preflight(&request), Err(WebError::Host));
     }
     #[test]
     fn origin_host_csrf_and_transport_are_independent() {

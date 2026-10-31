@@ -124,7 +124,10 @@ pub(super) fn upload_auth(
     app: &WebApplication,
     head: &RequestHead,
 ) -> Result<(SessionLease, fc_domain::ids::ClassId), WebResponse> {
-    let route = app.boundary.preflight(head).map_err(boundary_error)?;
+    let route = app
+        .boundary
+        .preflight(head)
+        .map_err(|error| app.request_boundary_error(head, error))?;
     let Route::VoiceUpload { class_id } = route else {
         return Err(failure(400, responses::ErrorCode::InvalidRequest));
     };
@@ -144,6 +147,6 @@ pub(super) fn upload_auth(
         .map_err(authentication_error)?;
     app.boundary
         .check(head, Some(session.csrf.as_str()))
-        .map_err(boundary_error)?;
+        .map_err(|error| app.request_boundary_error(head, error))?;
     Ok((session.lease(), class_id))
 }

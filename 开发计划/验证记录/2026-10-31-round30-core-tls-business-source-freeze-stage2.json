@@ -1,0 +1,61 @@
+{
+  "status": "SOURCE_FROZEN_STAGE2_FIXTURE_CORRECTION_LOCAL_CHECKS_PASSED",
+  "file": "scripts/windows-tls-business-probe.py",
+  "sha256": "4feb6edbe914611f812777734de19e50b72c259d608b373f9c241932f05c42c6",
+  "bytes": 38186,
+  "correction": {
+    "oldSourceSha256": "ff4961a7ca86fa1bb8970f6d9859ffd54e67088d578253ecc38012d97379640c",
+    "originalFault": "Old fixture 1600frames/100ms/3244bytes was a well-formed WAV but invalid under VoicePcmMetadata::validate minimum8000frames. Earlier pure checks only validated WAV/framing shape and did not cover domain minimum; no actual upload was run or claimed passed.",
+    "domainSource": "crates/fc-domain/src/voice.rs:107",
+    "domainSourceSha256": "04c7c57839d2c33c9360f6e2dad93b491da660704a8051683f56df1bd3ca0cc8",
+    "newFixture": {
+      "sampleRate": 16000,
+      "channels": 1,
+      "bitsPerSample": 16,
+      "frames": 8000,
+      "durationMillis": 500,
+      "pcmBytes": 16000,
+      "wavBytes": 16044,
+      "allPcmZero": true
+    },
+    "validatorChanged": false,
+    "newPureCheck": "Also asserts domain8000..960000frames, exact44+2*frames bytes, and500ms duration"
+  },
+  "preservedOriginalEvidence": {
+    "core-tls-business-source-freeze.json": {
+      "sha256": "ea8e4300fb642391af4a897111fd5420335e967d65e8c62ead6a7fe5a1ac590d",
+      "bytes": 2209,
+      "preserved": true
+    },
+    "core-tls-business-pure-selftest-final.json": {
+      "sha256": "891c9e4f5f152861eeaf16d023a971e59844503d4cd8c5a6d25e5834dd0b33a2",
+      "bytes": 692,
+      "preserved": true
+    }
+  },
+  "checks": [
+    "Python AST parse passed",
+    "five pure self-test groups passed with domain minimum assertion",
+    "git diff --check passed"
+  ],
+  "selfTest": {
+    "status": "PURE_LOCAL_CHECKS_PASS",
+    "checks": [
+      "fragmented/exact-CL response framing",
+      "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+      "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+      "120000-byte request fragmentation and head/body coalescing",
+      "READY identity and actual-drain final ledger required"
+    ],
+    "tls": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "business": "NOT_RUN"
+  },
+  "notRun": [
+    "Cargo/builds",
+    "remote Windows/SSH",
+    "actual TLS/socket traffic",
+    "actual voice upload",
+    "audio playback"
+  ]
+}

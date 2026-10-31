@@ -1,0 +1,656 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed explicit native-browser candidate stage only; no production listener, full Round30, P0, Win7/10 or physical Seewo acceptance is inferred.",
+  "preservation": "All selected original reports/failed attempts/raw bytes including hidden files remain unchanged. Original internal paths remain unchanged; path mapping resolves archived copies.",
+  "priorIndex": {
+    "verifiedFiles": 319,
+    "sha256BeforeAppend": "fe007974a7ea5dd2c4fce783a2de3a3251530a93e3d2ff7f6a9f8970f8e694b3"
+  },
+  "factsFromOriginalTerminalReports": {
+    "browser": {
+      "attempts": [
+        {
+          "attempt": "first",
+          "report": "native-browser-tls-first.json",
+          "overallStatus": "FAIL",
+          "cleanup": "PASS",
+          "nodeStatus": "FAIL",
+          "nodeError": {
+            "phase": "settle-observed-responses",
+            "code": "RUN_DEADLINE"
+          },
+          "elapsedMillis": null,
+          "maximumMillis": 12000,
+          "requests": 17,
+          "wireResponses": 14,
+          "cacheOnlyResponses": 3,
+          "apiResponses": 9,
+          "contentPosts": 1,
+          "contentRevision": "1",
+          "writeOutcome": "COMMITTED",
+          "ownerProcessActualExitCode": 0,
+          "originalEdgePrimaryExitCode": 1,
+          "physicalOwnerCleanup": "PASS",
+          "browserVersion": "Edg/156.0.4314.50",
+          "nodeChecks": [],
+          "rawHttpResponses": 31,
+          "rawCertificateNegativeEvents": 0,
+          "nativeDebugLines": [],
+          "nativeDrain": "NOT_VALIDATED: native report absent on original failed attempt",
+          "nodeSourceSha256": "9d55d662916657956699bde315563736d2aed6f9d7c2113768ac5510a5375bb6"
+        },
+        {
+          "attempt": "second",
+          "report": "native-browser-tls-second.json",
+          "overallStatus": "PASS",
+          "cleanup": "PASS",
+          "nodeStatus": "PASS",
+          "nodeError": null,
+          "elapsedMillis": 778,
+          "maximumMillis": 12000,
+          "requests": 17,
+          "wireResponses": 14,
+          "cacheOnlyResponses": 3,
+          "apiResponses": 9,
+          "contentPosts": 1,
+          "contentRevision": "1",
+          "writeOutcome": "COMMITTED",
+          "ownerProcessActualExitCode": 0,
+          "originalEdgePrimaryExitCode": 1,
+          "physicalOwnerCleanup": "PASS",
+          "browserVersion": "Edg/156.0.4314.50",
+          "nodeChecks": [
+            "Native HTML/JS/CSS exact manifest identities and CSP",
+            "Original approved HttpOnly cookie; actual session CSRF matched twice",
+            "One synthetic authorized scope and original empty content",
+            "Exactly one UI content POST with original CSRF/date/revision",
+            "Committed receipt and post-reload durable content match",
+            "Nine real no-store API responses; cache hits counted separately"
+          ],
+          "rawHttpResponses": 45,
+          "rawCertificateNegativeEvents": 2,
+          "nativeDebugLines": [
+            "TLS_BUSINESS_REPORT NetworkReport { heads: 59, admissions: 39, body_acks: 64, responses: 59, closed: 96, retired: 96, rearms: 92, stale_events: 0, active_records: 0, peak_records: 5, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1575756 }"
+          ],
+          "nativeDrain": {
+            "physicalNativeDrain": true,
+            "sharedWorkers": 2,
+            "workerJoin": true,
+            "hubPending": 0,
+            "downloadHubPending": 0,
+            "quarantined": 0,
+            "setupCleanup": true,
+            "approvals": 1,
+            "heads": 59,
+            "responses": 59,
+            "peakRecords": 5
+          },
+          "nodeSourceSha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e"
+        }
+      ],
+      "rawSets": [
+        {
+          "directory": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw",
+          "files": 8,
+          "hiddenFiles": 4,
+          "remoteInventoryFiles": 7,
+          "originalBytesBase64RemoteShaVerified": true
+        },
+        {
+          "directory": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-edge-owner-FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407-raw",
+          "files": 8,
+          "hiddenFiles": 5,
+          "remoteInventoryFiles": 8,
+          "originalBytesBase64RemoteShaVerified": true
+        },
+        {
+          "directory": "/tmp/fc-round30-evidence/native-browser-tls-second-ec0c8268df2d4bda931c982dae53e790-raw",
+          "files": 8,
+          "hiddenFiles": 4,
+          "remoteInventoryFiles": 7,
+          "originalBytesBase64RemoteShaVerified": true
+        },
+        {
+          "directory": "/tmp/fc-round30-evidence/native-browser-tls-second.json.browser-edge-owner-FutureClassroom-Test-Browser-f03461633907472793c6a181f59f8091-raw",
+          "files": 8,
+          "hiddenFiles": 5,
+          "remoteInventoryFiles": 8,
+          "originalBytesBase64RemoteShaVerified": true
+        }
+      ],
+      "scope": "Finite Win11 Edge UI and raw TLS candidate only. First overall failure remains FAIL even though its content write/reload had completed. Cache-only observations are excluded from native wire totals."
+    },
+    "localChecks": {
+      "cacheSettle": {
+        "localBeforeExpectedFailure": true,
+        "localAfterStatusOriginal": "LOCAL_REGRESSION_PASSED_WINDOWS_RETRY_NOT_RUN",
+        "originalFirstWindowsFailurePreserved": true,
+        "scope": "Local model/regression evidence; separate actual second Windows browser report proves its own PASS."
+      },
+      "observerMock": {
+        "report": "service-observer-local-checks-d9790467996d402f95573ee1d393fca3.json",
+        "status": "PASS",
+        "scope": "Host Python pure/mocked checks only; no SSH/browser/Windows/Cargo execution"
+      },
+      "msvcExactSha": {
+        "statusOriginal": "LOCAL_STATIC_AND_CONTRACT_MODEL_PASS_POWERSHELL_AST_PENDING",
+        "contractModelScope": "Python validation of requested SHA contract plus assertions of the matching PowerShell guards/order; not PowerShell execution",
+        "windowsReadOnlyAst": {
+          "status": "PASS",
+          "errors": [],
+          "execution": "AST_ONLY_NO_SCRIPT_EXECUTION",
+          "tokens": 4295
+        },
+        "ciDispatch": "NOT_RUN",
+        "toolchainInstall": "NOT_RUN",
+        "scope": "Required independent source_sha and fail-closed SHA checks have local static/model evidence plus actual Windows AST parse only. No CI run/build/runtime or main-branch promotion is inferred."
+      }
+    },
+    "host": {
+      "passed": 852,
+      "groups": 32,
+      "programs": 20
+    },
+    "windowsCompile": {
+      "exitCode": 0,
+      "elapsedSeconds": 527.1647725105286
+    },
+    "windowsRuntime": {
+      "programs": [
+        {
+          "name": "voice_limits_storage-588693116cdd8d9e.exe",
+          "sha256": "fce0f79619acb5373221d561c0bb40d9ce8aa1edb55d012672a37ae19300e859",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "business_storage-878d46a6a29de0ae.exe",
+          "sha256": "2e6bc700fcdd5a373a9fff3deedb544cf43d931f6f4cd56f28fa501a3a8f6505",
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "voice_storage-9d353cd95d53ae2d.exe",
+          "sha256": "b47d024f4f2ac0226a31b704e1867fdd512ce32861495d32013c915a54ba2efd",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "autostart_coordinator-97dc96264f35cfe2.exe",
+          "sha256": "31a08167e8e7d0e0bdd34e934e5f2bded6704bca5054dc7e66c39e052332010b",
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "schedule_operations-705da6e05a75b965.exe",
+          "sha256": "c80952e5b6b39e6d5724e0a0d10259d7ed905d72c47e6e79352b5d5db446df7e",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "calendar_execution_fence-7355fabc2ed3f8f9.exe",
+          "sha256": "38e68d346e2bc46088fa7a3779da072d27c1e64ffb6d3ff365721ebe8117bfcb",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_bootstrap-30fa512284e56867.exe",
+          "sha256": "eee61ca7851c363beaccbbe9c24f7c0df8a449340ac56f2d2a9181f0ca1522fc",
+          "passed": 179,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "runtime_storage-fef60aaa0dc7b0a4.exe",
+          "sha256": "788177758b4cb387e16e0ceab17c246f0bd322ebb331766e08176cec8f645cb3",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+          "sha256": "6213ffae0ded10014df9870c5c31c48bf666cb80ed409707c71e017745fd5098",
+          "passed": 290,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_materials-f1a7d58c131e95d5.exe",
+          "sha256": "cd3f8da3c97f0aa430aa0f8c5cf670dc3ca9a6b22fd1bcf79f4f3b4b89b7dcf5",
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_windows-b3d43bc67b5340a1.exe",
+          "sha256": "69b42816476bdd533c92f215da49ba0a579d1b15252fe4fe5929bf4e25d95599",
+          "passed": 156,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_security-2889fa9301b88e80.exe",
+          "sha256": "ada76b00129f844cc044ffc59036309e461b6134d045258372b44c8f0aae5f6e",
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+          "sha256": "4272b371a9ccfc7e4d970c6e78115f56aa2ef6627e15433f58ecf5e082fda7b9",
+          "passed": 162,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_presentation-b847dfa3b68d1237.exe",
+          "sha256": "1fe6352326c52d5b72f97745031bf6fba0d5bbf99dd289d6ca262447275b3a91",
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_protocol-4316bb63b92dda4d.exe",
+          "sha256": "39af5301ed07837a563d35c21a2a7e6608a7d2d522b1f865ee0045907e1d23dc",
+          "passed": 80,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_audio-e1b4eabc9ef1420f.exe",
+          "sha256": "22ad84fed5331f741ed627de220455d6937ebd69cb8c581c1bd6a1753e20dd08",
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_application-fb16268b5eff3acf.exe",
+          "sha256": "f6c4ff1a81fe56c9914baa56925f9ffec7f7db3078b35aff00dbe19e1e924fd1",
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_runtime-a09be73363edd23a.exe",
+          "sha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0",
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_ports-15b1ad689f79c490.exe",
+          "sha256": "b27c5337c3a590410e0d0fb66e7f6394adc00f1be9f81c91b33567a5e0cdcc82",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "name": "fc_domain-367747e306a1dd0e.exe",
+          "sha256": "eff293ae193fe256bf8b3d93f2b5c8e7a0606eeabe233f01e691aed278480490",
+          "passed": 138,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "passed": 1287,
+      "cleanup": "PASS",
+      "all20FrozenExesActuallyRehashed": true,
+      "normalActuallyRehashedAtNewSnapshot": {
+        "path": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc-bootstrap.exe",
+        "sha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a"
+      },
+      "oldNormalNotRebuiltByThisTestCompilation": true
+    },
+    "inputSnapshot": {
+      "files": 434,
+      "rustFiles": 360,
+      "webFiles": 58,
+      "crateManifests": 12,
+      "normalOriginalCaptureStillOmitted12Manifests": true
+    },
+    "formatArchitecture": {
+      "schemaVersion": 1,
+      "scope": "Current source static checks; not full project completion",
+      "checks": [
+        {
+          "command": [
+            "python3",
+            "scripts/check-architecture.py"
+          ],
+          "exitCode": 0,
+          "observedOutput": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.",
+          "evidence": "tool process completed exit0"
+        },
+        {
+          "command": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--",
+            "--check"
+          ],
+          "exitCode": 0,
+          "evidence": "original process 81537 completed exit0"
+        },
+        {
+          "command": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "scripts": {
+        "windows-tls-business-probe.py": {
+          "bytes": 67685,
+          "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf"
+        },
+        "windows-native-browser-observer.py": {
+          "bytes": 26244,
+          "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91"
+        },
+        "windows-native-browser-harness.mjs": {
+          "bytes": 46843,
+          "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e"
+        },
+        "windows-test-edge-owner.py": {
+          "bytes": 51071,
+          "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+        },
+        "windows-msvc-ci.ps1": {
+          "bytes": 26396,
+          "sha256": "75f37c6a6d344cf33d1df88dc236b1d56d56b926204ffb6829da44f502a18c02"
+        }
+      }
+    },
+    "windowsStrictClippy": {
+      "schemaVersion": 1,
+      "scope": "Record original completed tool result for Windows strict Clippy, without rerunning; build input tree still matches full compile snapshot",
+      "command": "cargo clippy --workspace --all-targets --release --locked --target i686-pc-windows-gnu --target-dir /tmp/fc-round30-win-target -- -D warnings",
+      "originalToolResult": {
+        "chunk_id": "d21122",
+        "wall_time_seconds": 0.128752624,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      },
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/fc-round30-evidence/native-browser-windows-clippy-first.log",
+        "bytes": 62,
+        "sha256": "c663462ee6e8bd687c13f4f43386d516f3f0bb8fc1cb3522d98b83bf3664d8fd"
+      },
+      "inputComparisonAtRecording": {
+        "compileReportSha256": "cfd515a166deb3d8683a8d78442a7115ffd50a43dbb251515f110e55926fb4bb",
+        "currentRustAndCargoInputsEqualCompileSnapshot": true
+      },
+      "limitation": "No separate contemporaneous before/after snapshot was captured around Clippy itself; full compile before/after and current compare are separate evidence"
+    },
+    "finalWindowsAudit": {
+      "schemaVersion": 1,
+      "scope": "Fresh read-only Windows inventory; no runtime/browser/test or cleanup mutation performed.",
+      "observedAtUtc": "2026-10-31T12:52:27.301726+00:00",
+      "contract": "No upload, registry/task/service/trust/file mutation, private-key read, browser interaction or process termination. Project activity is recorded only.",
+      "baseline": {
+        "path": "/tmp/fc-round30-evidence/head-windows-final-after.json",
+        "sha256": "0d47590f42f96923f07e76a136ab84ea564d531b94e9902baf96d4620e2d3c67"
+      },
+      "auditSource": {
+        "path": "/tmp/fc-round30-evidence/audit-native-browser-windows.py",
+        "sha256": "e56c740efeca106ad64ba701002ff53666604019ec5f3830ce25483517ce37de"
+      },
+      "remoteAdapterSource": {
+        "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+        "sha256": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0",
+        "scope": "Unmodified Remote SSH options and exact preamble; raw subprocess is captured here because Remote.powershell otherwise discards original stderr."
+      },
+      "powershell": {
+        "script": "\nfunction Read-ProjectRunSnapshot {\n\n$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){\n $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;\n try{$key=$base.OpenSubKey('Software\\Microsoft\\Windows\\CurrentVersion\\Run',$false);\n  $present=$false;$kind=$null;$digest=$null;$length=0;\n  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;\n   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);\n    if($value-is [byte[]]){$bytes=$value}else{\n     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}\n     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};\n     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)\n    };\n    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n   }\n  };\n  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}\n }finally{if($key){$key.Dispose()};$base.Dispose()}\n};@{views=$views}|ConvertTo-Json -Depth 5 -Compress\n\n}\n$runSnapshot = Read-ProjectRunSnapshot | ConvertFrom-Json;\n$dirs = @(Get-ChildItem -LiteralPath $env:TEMP -Directory -Force |\n Where-Object {$_.Name -like 'FutureClassroom*'} |\n Sort-Object Name | Select-Object -ExpandProperty Name);\n$processes = @(Get-CimInstance Win32_Process |\n Where-Object {\n  ($_.Name -like 'FutureClassroom*') -or\n  ($_.Name -match '^fc[-_]bootstrap(?:[.-].*)?\\.exe$') -or\n  ($_.ExecutablePath -and $_.ExecutablePath -match '(?:^|[\\\\/])FutureClassroom[^\\\\/]*(?:[\\\\/]|$)')\n } | Sort-Object ProcessId | ForEach-Object {\n  @{name=$_.Name;pid=$_.ProcessId;executablePath=$_.ExecutablePath}\n });\n$tasks = @(Get-ScheduledTask | Where-Object {$_.TaskName -like 'FutureClassroom*'} |\n Sort-Object TaskPath,TaskName | ForEach-Object {\n  @{name=$_.TaskName;path=$_.TaskPath;state=$_.State.ToString()}\n });\n$os = Get-CimInstance Win32_OperatingSystem;\n@{\n os=$os.Caption;build=$os.BuildNumber;version=$os.Version;osArchitecture=$os.OSArchitecture;\n sshd=(Get-Service sshd).Status.ToString();\n tempDirectory=$env:TEMP;scratchDirectories=$dirs;ownedProcesses=$processes;ownedTasks=$tasks;\n projectRunReadOnlySnapshot=$runSnapshot;\n sshPublicAuthorizationSha256=(Get-FileHash -LiteralPath \"$env:ProgramData\\ssh\\administrators_authorized_keys\" -Algorithm SHA256).Hash.ToLowerInvariant()\n} | ConvertTo-Json -Depth 10 -Compress\n",
+        "preamble": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;",
+        "fullSource": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;\nfunction Read-ProjectRunSnapshot {\n\n$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){\n $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;\n try{$key=$base.OpenSubKey('Software\\Microsoft\\Windows\\CurrentVersion\\Run',$false);\n  $present=$false;$kind=$null;$digest=$null;$length=0;\n  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;\n   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);\n    if($value-is [byte[]]){$bytes=$value}else{\n     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}\n     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};\n     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)\n    };\n    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n   }\n  };\n  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}\n }finally{if($key){$key.Dispose()};$base.Dispose()}\n};@{views=$views}|ConvertTo-Json -Depth 5 -Compress\n\n}\n$runSnapshot = Read-ProjectRunSnapshot | ConvertFrom-Json;\n$dirs = @(Get-ChildItem -LiteralPath $env:TEMP -Directory -Force |\n Where-Object {$_.Name -like 'FutureClassroom*'} |\n Sort-Object Name | Select-Object -ExpandProperty Name);\n$processes = @(Get-CimInstance Win32_Process |\n Where-Object {\n  ($_.Name -like 'FutureClassroom*') -or\n  ($_.Name -match '^fc[-_]bootstrap(?:[.-].*)?\\.exe$') -or\n  ($_.ExecutablePath -and $_.ExecutablePath -match '(?:^|[\\\\/])FutureClassroom[^\\\\/]*(?:[\\\\/]|$)')\n } | Sort-Object ProcessId | ForEach-Object {\n  @{name=$_.Name;pid=$_.ProcessId;executablePath=$_.ExecutablePath}\n });\n$tasks = @(Get-ScheduledTask | Where-Object {$_.TaskName -like 'FutureClassroom*'} |\n Sort-Object TaskPath,TaskName | ForEach-Object {\n  @{name=$_.TaskName;path=$_.TaskPath;state=$_.State.ToString()}\n });\n$os = Get-CimInstance Win32_OperatingSystem;\n@{\n os=$os.Caption;build=$os.BuildNumber;version=$os.Version;osArchitecture=$os.OSArchitecture;\n sshd=(Get-Service sshd).Status.ToString();\n tempDirectory=$env:TEMP;scratchDirectories=$dirs;ownedProcesses=$processes;ownedTasks=$tasks;\n projectRunReadOnlySnapshot=$runSnapshot;\n sshPublicAuthorizationSha256=(Get-FileHash -LiteralPath \"$env:ProgramData\\ssh\\administrators_authorized_keys\" -Algorithm SHA256).Hash.ToLowerInvariant()\n} | ConvertTo-Json -Depth 10 -Compress\n",
+        "sourceSha256Utf8": "49d0902c01bb24e7b20c7366f9a44fb27e0b60fba00f6d975f039618855ef5bb",
+        "sourceSha256Utf16Le": "66a76f06488774fceda811d21fad9e6780d751801eb0a64d0c9481e099d32f40",
+        "encodedCommand": "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAYQB1AGQAaQB0AFMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABhAHUAZABpAHQAUwBvAHUAcgBjAGUAKQApADsA",
+        "encodedWrapperSource": "[Console]::InputEncoding=[System.Text.UTF8Encoding]::new($false);$auditSource=[Console]::In.ReadToEnd();& ([ScriptBlock]::Create($auditSource));",
+        "encodedWrapperSourceSha256Utf16Le": "f54ebcc080e5cfda399b05cc12a2cf1cf627a039171ed711036ec66c6ba2e84a",
+        "stdin": {
+          "bytes": 3120,
+          "sha256": "49d0902c01bb24e7b20c7366f9a44fb27e0b60fba00f6d975f039618855ef5bb",
+          "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7JFByb2dyZXNzUHJlZmVyZW5jZT0nU2lsZW50bHlDb250aW51ZSc7W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bU3lzdGVtLlRleHQuVVRGOEVuY29kaW5nXTo6bmV3KCRmYWxzZSk7JE91dHB1dEVuY29kaW5nPVtDb25zb2xlXTo6T3V0cHV0RW5jb2Rpbmc7CmZ1bmN0aW9uIFJlYWQtUHJvamVjdFJ1blNuYXBzaG90IHsKCiR2aWV3cz1AKCk7Zm9yZWFjaCgkdmlldyBpbiBAKFtNaWNyb3NvZnQuV2luMzIuUmVnaXN0cnlWaWV3XTo6UmVnaXN0cnkzMixbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5Vmlld106OlJlZ2lzdHJ5NjQpKXsKICRiYXNlPVtNaWNyb3NvZnQuV2luMzIuUmVnaXN0cnlLZXldOjpPcGVuQmFzZUtleShbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5SGl2ZV06OkN1cnJlbnRVc2VyLCR2aWV3KTska2V5PSRudWxsOwogdHJ5eyRrZXk9JGJhc2UuT3BlblN1YktleSgnU29mdHdhcmVcTWljcm9zb2Z0XFdpbmRvd3NcQ3VycmVudFZlcnNpb25cUnVuJywkZmFsc2UpOwogICRwcmVzZW50PSRmYWxzZTska2luZD0kbnVsbDskZGlnZXN0PSRudWxsOyRsZW5ndGg9MDsKICBpZigka2V5KXskcHJlc2VudD1AKCRrZXkuR2V0VmFsdWVOYW1lcygpfFdoZXJlLU9iamVjdHtbU3RyaW5nXTo6RXF1YWxzKCRfLCdGdXR1cmVDbGFzc3Jvb20nLFtTdHJpbmdDb21wYXJpc29uXTo6T3JkaW5hbElnbm9yZUNhc2UpfSkuQ291bnQgLW5lIDA7CiAgIGlmKCRwcmVzZW50KXska2luZD0ka2V5LkdldFZhbHVlS2luZCgnRnV0dXJlQ2xhc3Nyb29tJykuVG9TdHJpbmcoKTskdmFsdWU9JGtleS5HZXRWYWx1ZSgnRnV0dXJlQ2xhc3Nyb29tJywkbnVsbCxbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5VmFsdWVPcHRpb25zXTo6RG9Ob3RFeHBhbmRFbnZpcm9ubWVudE5hbWVzKTsKICAgIGlmKCR2YWx1ZS1pcyBbYnl0ZVtdXSl7JGJ5dGVzPSR2YWx1ZX1lbHNlewogICAgIGlmKCR2YWx1ZS1pcyBbc3RyaW5nXSl7JGVuY29kZWQ9JHZhbHVlfWVsc2VpZigkdmFsdWUtaXMgW3N0cmluZ1tdXSl7JGVuY29kZWQ9Q29udmVydFRvLUpzb24gLUlucHV0T2JqZWN0ICR2YWx1ZSAtQ29tcHJlc3N9CiAgICAgZWxzZWlmKCR2YWx1ZS1pcyBbaW50XSAtb3IgJHZhbHVlLWlzIFtsb25nXSl7JGVuY29kZWQ9JHZhbHVlLlRvU3RyaW5nKFtHbG9iYWxpemF0aW9uLkN1bHR1cmVJbmZvXTo6SW52YXJpYW50Q3VsdHVyZSl9ZWxzZXt0aHJvdyAndW5zdXBwb3J0ZWQgcHJvamVjdCBSdW4gdmFsdWUgZm9yIHJlYWQtb25seSBhdWRpdCd9OwogICAgICRieXRlcz1bVGV4dC5FbmNvZGluZ106OlVURjguR2V0Qnl0ZXMoJGVuY29kZWQpCiAgICB9OwogICAgJGxlbmd0aD0kYnl0ZXMuTGVuZ3RoOyRzaGE9W1NlY3VyaXR5LkNyeXB0b2dyYXBoeS5TSEEyNTZdOjpDcmVhdGUoKTt0cnl7JGRpZ2VzdD0oW0JpdENvbnZlcnRlcl06OlRvU3RyaW5nKCRzaGEuQ29tcHV0ZUhhc2goJGJ5dGVzKSkpLlJlcGxhY2UoJy0nLCcnKS5Ub0xvd2VySW52YXJpYW50KCl9ZmluYWxseXskc2hhLkRpc3Bvc2UoKX0KICAgfQogIH07CiAgJHZpZXdzKz1Ae3ZpZXc9JHZpZXcuVG9TdHJpbmcoKTtrZXlQcmVzZW50PSgkbnVsbCAtbmUgJGtleSk7dmFsdWVQcmVzZW50PSRwcmVzZW50O2tpbmQ9JGtpbmQ7ZW5jb2RlZEJ5dGVzPSRsZW5ndGg7c2hhMjU2PSRkaWdlc3R9CiB9ZmluYWxseXtpZigka2V5KXska2V5LkRpc3Bvc2UoKX07JGJhc2UuRGlzcG9zZSgpfQp9O0B7dmlld3M9JHZpZXdzfXxDb252ZXJ0VG8tSnNvbiAtRGVwdGggNSAtQ29tcHJlc3MKCn0KJHJ1blNuYXBzaG90ID0gUmVhZC1Qcm9qZWN0UnVuU25hcHNob3QgfCBDb252ZXJ0RnJvbS1Kc29uOwokZGlycyA9IEAoR2V0LUNoaWxkSXRlbSAtTGl0ZXJhbFBhdGggJGVudjpURU1QIC1EaXJlY3RvcnkgLUZvcmNlIHwKIFdoZXJlLU9iamVjdCB7JF8uTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKid9IHwKIFNvcnQtT2JqZWN0IE5hbWUgfCBTZWxlY3QtT2JqZWN0IC1FeHBhbmRQcm9wZXJ0eSBOYW1lKTsKJHByb2Nlc3NlcyA9IEAoR2V0LUNpbUluc3RhbmNlIFdpbjMyX1Byb2Nlc3MgfAogV2hlcmUtT2JqZWN0IHsKICAoJF8uTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKicpIC1vcgogICgkXy5OYW1lIC1tYXRjaCAnXmZjWy1fXWJvb3RzdHJhcCg/OlsuLV0uKik/XC5leGUkJykgLW9yCiAgKCRfLkV4ZWN1dGFibGVQYXRoIC1hbmQgJF8uRXhlY3V0YWJsZVBhdGggLW1hdGNoICcoPzpefFtcXC9dKUZ1dHVyZUNsYXNzcm9vbVteXFwvXSooPzpbXFwvXXwkKScpCiB9IHwgU29ydC1PYmplY3QgUHJvY2Vzc0lkIHwgRm9yRWFjaC1PYmplY3QgewogIEB7bmFtZT0kXy5OYW1lO3BpZD0kXy5Qcm9jZXNzSWQ7ZXhlY3V0YWJsZVBhdGg9JF8uRXhlY3V0YWJsZVBhdGh9CiB9KTsKJHRhc2tzID0gQChHZXQtU2NoZWR1bGVkVGFzayB8IFdoZXJlLU9iamVjdCB7JF8uVGFza05hbWUgLWxpa2UgJ0Z1dHVyZUNsYXNzcm9vbSonfSB8CiBTb3J0LU9iamVjdCBUYXNrUGF0aCxUYXNrTmFtZSB8IEZvckVhY2gtT2JqZWN0IHsKICBAe25hbWU9JF8uVGFza05hbWU7cGF0aD0kXy5UYXNrUGF0aDtzdGF0ZT0kXy5TdGF0ZS5Ub1N0cmluZygpfQogfSk7CiRvcyA9IEdldC1DaW1JbnN0YW5jZSBXaW4zMl9PcGVyYXRpbmdTeXN0ZW07CkB7CiBvcz0kb3MuQ2FwdGlvbjtidWlsZD0kb3MuQnVpbGROdW1iZXI7dmVyc2lvbj0kb3MuVmVyc2lvbjtvc0FyY2hpdGVjdHVyZT0kb3MuT1NBcmNoaXRlY3R1cmU7CiBzc2hkPShHZXQtU2VydmljZSBzc2hkKS5TdGF0dXMuVG9TdHJpbmcoKTsKIHRlbXBEaXJlY3Rvcnk9JGVudjpURU1QO3NjcmF0Y2hEaXJlY3Rvcmllcz0kZGlycztvd25lZFByb2Nlc3Nlcz0kcHJvY2Vzc2VzO293bmVkVGFza3M9JHRhc2tzOwogcHJvamVjdFJ1blJlYWRPbmx5U25hcHNob3Q9JHJ1blNuYXBzaG90Owogc3NoUHVibGljQXV0aG9yaXphdGlvblNoYTI1Nj0oR2V0LUZpbGVIYXNoIC1MaXRlcmFsUGF0aCAiJGVudjpQcm9ncmFtRGF0YVxzc2hcYWRtaW5pc3RyYXRvcnNfYXV0aG9yaXplZF9rZXlzIiAtQWxnb3JpdGhtIFNIQTI1NikuSGFzaC5Ub0xvd2VySW52YXJpYW50KCkKfSB8IENvbnZlcnRUby1Kc29uIC1EZXB0aCAxMCAtQ29tcHJlc3MK",
+          "captureScope": "COMPLETE"
+        },
+        "command": [
+          "ssh",
+          "-i",
+          "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+          "-o",
+          "IdentitiesOnly=yes",
+          "-o",
+          "BatchMode=yes",
+          "-o",
+          "ConnectTimeout=8",
+          "elior@192.168.10.212",
+          "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAYQB1AGQAaQB0AFMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABhAHUAZABpAHQAUwBvAHUAcgBjAGUAKQApADsA"
+        ],
+        "timeoutSeconds": 45,
+        "originalRunSnapshotSourceSha256": "7f46e7240c7e7fbdb7c771d1793fc8b5451f3a07bef4e9069c602224d7464c5c"
+      },
+      "persistentKeyMetadata": {
+        "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "mode": "0o600",
+        "contentsRead": false
+      },
+      "persistentKeyMode": "0o600",
+      "ssh": {
+        "exitCode": 0,
+        "stdout": {
+          "bytes": 587,
+          "sha256": "14a095ff60bfe5eebee6fed6ea3ce585bc50ab023e10f2dd99cae0cd051ef4ed",
+          "base64": "eyJ0ZW1wRGlyZWN0b3J5IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCIsInNzaFB1YmxpY0F1dGhvcml6YXRpb25TaGEyNTYiOiJkNjY5YmE1OGY4ODE3OWI5OTYyYjIwMjEzMzIxNDFkMGZiMGZjODQ0NzhiNjk0NDkxMTU1YTFmMTg0ZDQzMmI1IiwiYnVpbGQiOiIyNjMwMCIsInByb2plY3RSdW5SZWFkT25seVNuYXBzaG90Ijp7InZpZXdzIjpbeyJrZXlQcmVzZW50Ijp0cnVlLCJzaGEyNTYiOm51bGwsImVuY29kZWRCeXRlcyI6MCwia2luZCI6bnVsbCwidmFsdWVQcmVzZW50IjpmYWxzZSwidmlldyI6IlJlZ2lzdHJ5MzIifSx7ImtleVByZXNlbnQiOnRydWUsInNoYTI1NiI6bnVsbCwiZW5jb2RlZEJ5dGVzIjowLCJraW5kIjpudWxsLCJ2YWx1ZVByZXNlbnQiOmZhbHNlLCJ2aWV3IjoiUmVnaXN0cnk2NCJ9XX0sIm9zIjoiTWljcm9zb2Z0IFdpbmRvd3MgMTEg5LiT5Lia54mIIiwic2NyYXRjaERpcmVjdG9yaWVzIjpbXSwib3NBcmNoaXRlY3R1cmUiOiI2NC1iaXQiLCJvd25lZFByb2Nlc3NlcyI6W10sIm93bmVkVGFza3MiOltdLCJzc2hkIjoiUnVubmluZyJ9DQo=",
+          "captureScope": "COMPLETE"
+        },
+        "stderr": {
+          "bytes": 453,
+          "sha256": "62b6cddfd574465e9ef07e9b5c9a692e7ea90c31cb82c98d1df4b5168cdca3d5",
+          "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4yPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPkdldC1TY2hlZHVsZWRUYXNrIHwgV2hlcmUtT2JqZWN0IHskXy5UYXNrTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKid9IHw8L0FWPjxBST4yNjMzMTA1NjU8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4xMDA8L1BDPjxUPkNvbXBsZXRlZDwvVD48U1I+MDwvU1I+PFNEPuW3suWujOaIkCAxLzE8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+",
+          "captureScope": "COMPLETE"
+        }
+      },
+      "tempDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp",
+      "version": "10.0.26300",
+      "sshPublicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+      "build": "26300",
+      "projectRunReadOnlySnapshot": {
+        "views": [
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry32"
+          },
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry64"
+          }
+        ]
+      },
+      "os": "Microsoft Windows 11 专业版",
+      "scratchDirectories": [],
+      "osArchitecture": "64-bit",
+      "ownedProcesses": [],
+      "ownedTasks": [],
+      "sshd": "Running",
+      "authentication": "PASS",
+      "publicAuthorizationUnchanged": true,
+      "projectRunUnchanged": true,
+      "integrityStatus": "PASS",
+      "activityObserved": false,
+      "activityHandling": "Recorded only; nothing stopped, changed or deleted.",
+      "status": "PASS",
+      "completedAtUtc": "2026-10-31T12:52:28.629284+00:00"
+    },
+    "localCleanup": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "scope": "Remove only redundant frozen previous four-program snapshot and disposable web ZIP after exact SHA verification; ongoing round current build inputs retained",
+      "deleted": [
+        {
+          "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc-bootstrap.exe",
+          "bytes": 12478242,
+          "sha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a",
+          "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc-bootstrap.exe"
+        },
+        {
+          "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_bootstrap-4203463b9d6de1f5.exe",
+          "bytes": 11670157,
+          "sha256": "6213ffae0ded10014df9870c5c31c48bf666cb80ed409707c71e017745fd5098",
+          "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_bootstrap-4203463b9d6de1f5.exe"
+        },
+        {
+          "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_protocol-4316bb63b92dda4d.exe",
+          "bytes": 1967056,
+          "sha256": "39af5301ed07837a563d35c21a2a7e6608a7d2d522b1f865ee0045907e1d23dc",
+          "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_protocol-4316bb63b92dda4d.exe"
+        },
+        {
+          "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_windows-b3d43bc67b5340a1.exe",
+          "bytes": 3244217,
+          "sha256": "69b42816476bdd533c92f215da49ba0a579d1b15252fe4fe5929bf4e25d95599",
+          "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_windows-b3d43bc67b5340a1.exe"
+        },
+        {
+          "path": "/tmp/fc-round30-windows-head-stage-snapshot/tests.jsonl",
+          "bytes": 2697,
+          "sha256": "b6930dcc6dc7028ce032c6407ea7865805f46c1c0ffb90ab4d80090681c4c339",
+          "sameBytesRetainedAt": "/tmp/fc-round30-evidence/native-browser-cleaned-old-test-metadata.jsonl"
+        },
+        {
+          "path": "/tmp/fc-round30-native-browser-web.zip",
+          "bytes": 134642,
+          "sha256": "eee678d5313f56900b246486b839e280b6c04da3c760721a121ecec4205290c9",
+          "binding": "native-browser-input-binding.json and both actual run invocation reports"
+        }
+      ],
+      "totalBytes": 29497011,
+      "retainedForOngoingRound": [
+        "/tmp/fc-round30-native-browser-windows-workspace-snapshot",
+        "/tmp/fc-round30-core-target",
+        "/tmp/fc-round30-win-target",
+        "/tmp/fc-round30-web-verified-dist/dist"
+      ],
+      "persistentSshAuthorization": "UNTOUCHED",
+      "persistentPrivateKey": "UNTOUCHED",
+      "fullRawEvidence": "RETAINED_FOR_ARCHIVE"
+    },
+    "remainingBoundaries": [
+      "Not final Round30/all-goal acceptance; main has not yet been synchronized.",
+      "Strict native first-five-second gate, Win7/Win10 actual runtime, MSVC CI and physical Seewo acceptance remain unvalidated.",
+      "Native browser evidence covers finite Win11 Edge synthetic homework only; no pairing/logout/microphone/playback UI acceptance is inferred."
+    ]
+  },
+  "allowlist": {
+    "path": "/tmp/fc-round30-evidence/native-browser-archive-allowlist.json",
+    "sha256": "afe44b9b03803132cbda4d5ab34ab72e3bcb5c03a764b1f231460df7f2760f7c",
+    "files": [
+      "archive-native-browser-stage.py",
+      "audit-native-browser-windows-first.py",
+      "audit-native-browser-windows.py",
+      "core-msvc-exactsha-after-source.json",
+      "core-msvc-exactsha-before-source.json",
+      "core-msvc-exactsha-static-final.json",
+      "core-native-browser-cache-settle-after.json",
+      "core-native-browser-cache-settle-before.json",
+      "core-native-browser-harness-selftest-final.json",
+      "freeze-native-browser-windows-workspace.py",
+      "native-browser-archive-allowlist.json",
+      "native-browser-cleaned-old-test-metadata.jsonl",
+      "native-browser-first-tested-windows-native-browser-harness.mjs",
+      "native-browser-first-tested-windows-native-browser-observer.py",
+      "native-browser-first-tested-windows-test-edge-owner.py",
+      "native-browser-first-tested-windows-tls-business-probe.py",
+      "native-browser-format-architecture-checks.json",
+      "native-browser-host-workspace-first.clippy.log",
+      "native-browser-host-workspace-first.compile.jsonl",
+      "native-browser-host-workspace-first.compile.stderr.log",
+      "native-browser-host-workspace-first.json",
+      "native-browser-host-workspace-first.run.log",
+      "native-browser-input-binding.json",
+      "native-browser-input-source-snapshot.json",
+      "native-browser-local-cleanup.json",
+      "native-browser-msvc-exactsha-powershell-ast.json",
+      "native-browser-owner-cli-local-checks.json",
+      "native-browser-second-tested-windows-native-browser-harness.mjs",
+      "native-browser-terminal-raw-verification.json",
+      "native-browser-tls-first-invocation.json",
+      "native-browser-tls-first.json",
+      "native-browser-tls-first.json.browser-edge-owner.json",
+      "native-browser-tls-first.json.browser-edge-owner.json.control.json.stop-b681c63985654eed9ed7dd9fe2f47609.json",
+      "native-browser-tls-first.json.browser-node.json",
+      "native-browser-tls-first.stderr.log",
+      "native-browser-tls-first.stdout.log",
+      "native-browser-tls-runner-self-test-first.json",
+      "native-browser-tls-second-invocation.json",
+      "native-browser-tls-second.json",
+      "native-browser-tls-second.json.browser-edge-owner.json",
+      "native-browser-tls-second.json.browser-edge-owner.json.control.json.stop-08b63d2d6c5049a7bda1701a0ef5a9c8.json",
+      "native-browser-tls-second.json.browser-node.json",
+      "native-browser-tls-second.stderr.log",
+      "native-browser-tls-second.stdout.log",
+      "native-browser-windows-after-first-failure.json",
+      "native-browser-windows-after.json",
+      "native-browser-windows-before-attempts.json",
+      "native-browser-windows-before-retry1.json",
+      "native-browser-windows-before.json",
+      "native-browser-windows-clippy-first.log",
+      "native-browser-windows-clippy-result.json",
+      "native-browser-windows-runtime-first-invocation.json",
+      "native-browser-windows-runtime-first.json",
+      "native-browser-windows-runtime-first.stderr.log",
+      "native-browser-windows-runtime-first.stdout.log",
+      "native-browser-windows-runtime-result.json",
+      "native-browser-windows-workspace-first.diagnostics.log",
+      "native-browser-windows-workspace-first.json",
+      "native-browser-windows-workspace-first.jsonl",
+      "native-browser-windows-workspace-first.stderr.log",
+      "native-browser-windows-workspace-frozen.json",
+      "prepare-native-browser-inputs.py",
+      "run-native-browser-tls-first.py",
+      "run-native-browser-tls-second.py",
+      "run-native-browser-windows-runtime-first.py",
+      "run-native-browser-windows-workspace-compile.py",
+      "service-observer-local-checks-d9790467996d402f95573ee1d393fca3.json"
+    ],
+    "rawDirectories": [
+      "native-browser-tls-first-4264bd16148349478181b920884054ed-raw",
+      "native-browser-tls-first.json.browser-edge-owner-FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407-raw",
+      "native-browser-tls-second-ec0c8268df2d4bda931c982dae53e790-raw",
+      "native-browser-tls-second.json.browser-edge-owner-FutureClassroom-Test-Browser-f03461633907472793c6a181f59f8091-raw"
+    ]
+  },
+  "expiredStopCapabilities": [
+    "native-browser-tls-first.json.browser-edge-owner.json.control.json.stop-b681c63985654eed9ed7dd9fe2f47609.json",
+    "native-browser-tls-second.json.browser-edge-owner.json.control.json.stop-08b63d2d6c5049a7bda1701a0ef5a9c8.json"
+  ],
+  "excludedCapabilities": [],
+  "archiverScope": "Local evidence copy/hash/index only. No original deletion, remote action, process/browser/task/service/trust/Run/SSH authorization mutation or private-key read.",
+  "sourceCoverageLimit": "New browser input observation includes all 12 crate manifests. It does not retroactively expand the old normal compiler capture or prove a new current-web-source build.",
+  "repositoryPromotion": {
+    "status": "NOT_SYNCHRONIZED",
+    "localMainRefAtPreparation": "54afc139ae5b2607e3c78da1b7d0517c00d89208",
+    "scope": "Local main ref observation only; this phase has not committed or synchronized its current working tree and has not triggered MSVC CI."
+  },
+  "priorHeadSummary": "2026-10-31-round30-head-stage-summary.json"
+}

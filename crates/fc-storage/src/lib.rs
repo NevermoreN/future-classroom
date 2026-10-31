@@ -29,6 +29,8 @@ pub const MAX_VALUE_BYTES: usize = 64 * 1024;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StorageError {
     InvalidCommand,
+    /// The scoped request no longer owns permission to execute or expose output.
+    ExecutionCancelled,
     CalendarCancelled,
     AutostartCancelled,
     DocumentTooLarge,
@@ -173,28 +175,46 @@ pub struct BackupReceipt {
 }
 
 /// Poll on UI/HTTP threads; blocking wait is for workers and startup/shutdown only.
-pub struct Ticket<T>(mpsc::Receiver<Result<T, StorageError>>);
+/// A scoped execution fence also checks positive reply delivery. Cancellation at
+/// delivery suppresses output; it cannot undo a write that previously committed
+/// while its fence was valid. Do not infer rollback or retry from that error.
+pub struct Ticket<T>(
+    mpsc::Receiver<Result<T, StorageError>>,
+    Option<TransactionExecutionFence>,
+);
 impl<T> Ticket<T> {
+    fn checked(&self, result: Result<T, StorageError>) -> Result<T, StorageError> {
+        // Preserve factual/typed failures. Only positive output is suppressed by
+        // expiry after the writer queued its reply, including read-only secrets.
+        let output = result?;
+        if let Some(fence) = &self.1 {
+            check_transaction_execution(fence)?;
+        }
+        Ok(output)
+    }
     pub fn try_result(&self) -> Result<Option<Result<T, StorageError>>, StorageError> {
         match self.0.try_recv() {
-            Ok(result) => Ok(Some(result)),
+            Ok(result) => Ok(Some(self.checked(result))),
             Err(mpsc::TryRecvError::Empty) => Ok(None),
             Err(mpsc::TryRecvError::Disconnected) => Err(StorageError::WorkerDisconnected),
         }
     }
     pub fn wait(self) -> Result<T, StorageError> {
-        self.0
+        let result = self
+            .0
             .recv()
-            .map_err(|_| StorageError::WorkerDisconnected)?
+            .map_err(|_| StorageError::WorkerDisconnected)?;
+        self.checked(result)
     }
     /// A deadline only bounds the caller's wait; it cannot undo a COMMIT that
     /// has already started. Callers must fence further effects and reconcile an
     /// indeterminate outcome, rather than retrying a new command automatically.
     pub fn wait_timeout(self, timeout: Duration) -> Result<T, StorageError> {
-        self.0.recv_timeout(timeout).map_err(|e| match e {
+        let result = self.0.recv_timeout(timeout).map_err(|e| match e {
             mpsc::RecvTimeoutError::Timeout => StorageError::Indeterminate,
             mpsc::RecvTimeoutError::Disconnected => StorageError::WorkerDisconnected,
-        })?
+        })?;
+        self.checked(result)
     }
 }
 
@@ -226,6 +246,43 @@ pub trait TransactionTask<S>: Send {
         self: Box<Self>,
         documents: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError>;
+}
+/// A short memory-only request lifetime check, never I/O or writer reentry.
+/// False and panic cancel only this request; this grants no actor authority.
+pub type TransactionExecutionFence = Arc<dyn Fn() -> bool + Send + Sync>;
+fn check_transaction_execution(fence: &TransactionExecutionFence) -> Result<(), StorageError> {
+    if catch_unwind(AssertUnwindSafe(|| fence())).unwrap_or(false) {
+        Ok(())
+    } else {
+        Err(StorageError::ExecutionCancelled)
+    }
+}
+struct FencedTransaction<S> {
+    task: Box<dyn TransactionTask<S>>,
+    fence: TransactionExecutionFence,
+}
+impl<S> TransactionTask<S> for FencedTransaction<S> {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>().saturating_add(self.task.allocation_bytes())
+    }
+    fn evaluate(
+        self: Box<Self>,
+        documents: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        check_transaction_execution(&self.fence)?;
+        let mut decision = self.task.evaluate(documents)?;
+        check_transaction_execution(&self.fence)?;
+        let original = decision.precommit.take();
+        let fence = self.fence;
+        decision.precommit = Some(Box::new(move || {
+            check_transaction_execution(&fence)?;
+            if let Some(original) = original {
+                original()?;
+            }
+            check_transaction_execution(&fence)
+        }));
+        Ok(decision)
+    }
 }
 pub struct TransactionDecision<S> {
     /// Memory-only final lease/date recheck after SQL writes, immediately before
@@ -408,6 +465,7 @@ pub struct StorageHandle<S> {
     sender: mpsc::SyncSender<Envelope<S>>,
     stopping: Arc<AtomicBool>,
     queued_bytes: Arc<AtomicUsize>,
+    transaction_execution: Option<TransactionExecutionFence>,
 }
 impl<S> Clone for StorageHandle<S> {
     fn clone(&self) -> Self {
@@ -415,6 +473,7 @@ impl<S> Clone for StorageHandle<S> {
             sender: self.sender.clone(),
             stopping: self.stopping.clone(),
             queued_bytes: self.queued_bytes.clone(),
+            transaction_execution: self.transaction_execution.clone(),
         }
     }
 }
@@ -431,7 +490,7 @@ impl<S> StorageHandle<S> {
         let bytes = message.queued_bytes().ok_or(StorageError::Busy)?;
         let lease = QueueLease::reserve(self.queued_bytes.clone(), bytes)?;
         match self.sender.try_send(Envelope { message, lease }) {
-            Ok(()) => Ok(Ticket(receiver)),
+            Ok(()) => Ok(Ticket(receiver, None)),
             Err(mpsc::TrySendError::Full(_)) => Err(StorageError::Busy),
             Err(mpsc::TrySendError::Disconnected(_)) => Err(StorageError::WorkerDisconnected),
         }
@@ -457,8 +516,38 @@ impl<S> StorageHandle<S> {
     pub fn try_transaction(
         &self,
         task: impl TransactionTask<S> + 'static,
-    ) -> Result<Ticket<Vec<u8>>, StorageError> {
-        self.send(|reply| Message::Transaction(Box::new(task), reply))
+    ) -> Result<Ticket<Vec<u8>>, StorageError>
+    where
+        S: 'static,
+    {
+        let task: Box<dyn TransactionTask<S>> = if let Some(fence) = &self.transaction_execution {
+            Box::new(FencedTransaction {
+                task: Box::new(task),
+                fence: fence.clone(),
+            })
+        } else {
+            Box::new(task)
+        };
+        let mut ticket = self.send(|reply| Message::Transaction(task, reply))?;
+        ticket.1 = self.transaction_execution.clone();
+        Ok(ticket)
+    }
+    /// Create a request-scoped clone. Repeated binding can only tighten an
+    /// existing fence. Generic commits/login/recovery and the base handle retain
+    /// their existing semantics; only try_transaction carries this fence.
+    pub fn with_transaction_execution_fence(&self, fence: TransactionExecutionFence) -> Self {
+        let mut scoped = self.clone();
+        scoped.transaction_execution = Some(match &self.transaction_execution {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || {
+                    check_transaction_execution(&previous).is_ok()
+                        && check_transaction_execution(&fence).is_ok()
+                })
+            }
+            None => fence,
+        });
+        scoped
     }
     pub fn try_commit(
         &self,
@@ -549,6 +638,7 @@ impl<S: Send + 'static> StorageWriter<S> {
                     sender,
                     stopping,
                     queued_bytes,
+                    transaction_execution: None,
                 },
                 worker: Some(worker),
             }),
@@ -951,6 +1041,9 @@ fn execute_transaction<P: AuthorityPublisher>(
     let current = read_revision(&transaction)?;
     let decision = task.evaluate(&TransactionView(&transaction))?;
     let Some((mutations, snapshot)) = decision.commit else {
+        if let Some(check) = decision.precommit {
+            check()?;
+        }
         transaction.rollback().map_err(|_| StorageError::Database)?;
         return Ok(decision.outcome);
     };
@@ -1150,6 +1243,8 @@ pub fn sqlite_version() -> &'static str {
     rusqlite::version()
 }
 
+#[cfg(test)]
+mod execution_fence_tests;
 #[cfg(test)]
 mod tests {
     use super::*;

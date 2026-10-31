@@ -1,0 +1,25 @@
+{
+  "scope": "Windows GNU current full workspace all-target strict Clippy, not target runtime certification",
+  "command": [
+    "cargo",
+    "clippy",
+    "--workspace",
+    "--all-targets",
+    "--release",
+    "--locked",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--target-dir",
+    "/tmp/fc-round30-win-target",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cargoBuildJobs": 2,
+  "exitCode": 0,
+  "executionResultSource": "Original exec session15402 actually returned exit_code0; no rerun or inferred exit from log",
+  "log": "/tmp/fc-round30-evidence/http-semantics-windows-clippy-first.log",
+  "logSha256": "43113719c4ee22c32294b9dd4bb01f24e712227e7e8c94b297376944ad3fab7c",
+  "sourceStillMatchesSuccessfulWorkspaceCompile": true,
+  "status": "PASS"
+}

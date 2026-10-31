@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "All current round own build caches, test executable snapshots and verified Web build removed after input/artifact and completed-runtime checks; evidence originals retained pending archival only",
+  "deleted": [
+    {
+      "path": "/tmp/fc-round30-core-target",
+      "files": 1422,
+      "directories": 269,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 348568463,
+      "status": "REMOVED"
+    },
+    {
+      "path": "/tmp/fc-round30-win-target",
+      "files": 1574,
+      "directories": 300,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 733461135,
+      "status": "REMOVED"
+    },
+    {
+      "path": "/tmp/fc-round30-final-win7-target",
+      "files": 974,
+      "directories": 204,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 695867442,
+      "status": "REMOVED"
+    },
+    {
+      "path": "/tmp/fc-round30-native-browser-windows-workspace-snapshot",
+      "files": 22,
+      "directories": 0,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 99691612,
+      "status": "REMOVED"
+    },
+    {
+      "path": "/tmp/fc-round30-final-win7-snapshot",
+      "files": 1,
+      "directories": 0,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 12386304,
+      "status": "REMOVED"
+    },
+    {
+      "path": "/tmp/fc-round30-web-verified-dist",
+      "files": 9,
+      "directories": 2,
+      "symlinksUnlinkedWithoutFollowing": 0,
+      "bytes": 478954,
+      "status": "REMOVED"
+    }
+  ],
+  "totalFiles": 4002,
+  "totalBytes": 1890453910,
+  "retainedDevelopmentZip": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-streaming-tls-dev.zip",
+    "sha256": "03f1f4ca2fa098688dedad32c5e3a274a21baba313ad2d1ff29c089b141caad6"
+  },
+  "publicEvidenceRoot": "/tmp/fc-round30-evidence",
+  "persistentSshAuthorization": "UNTOUCHED",
+  "persistentPrivateKey": "UNTOUCHED",
+  "sourceWorktree": "UNTOUCHED",
+  "actualCompletedProcessEvidence": [
+    "Host runner exit0",
+    "Windows20 runner exit0",
+    "Native Edge owner/Node/CDP actual cleanup PASS",
+    "Win7 build exit0",
+    "Win7 TLS runner exit0",
+    "final Windows read-only audit PASS"
+  ]
+}

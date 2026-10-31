@@ -1,0 +1,26 @@
+{
+  "status": "FAIL",
+  "error": "CDP observes a real HTTP cache service for previous main",
+  "checks": [
+    "no-route fixture delivers strict CSP and no-cache entry",
+    "unrouted browser fetch sees exact cached previous main bytes"
+  ],
+  "cases": [],
+  "diagnostics": [
+    {
+      "url": "https://172.30.0.2:46606/fc/",
+      "body": "白板已确认登录，教师工作台已就绪。\n跳到主要内容\n未来教室\nTEACHER WORKSPACE\n白板连接已核验\n\n你的课堂，从这里连接\n\n你好，合成缓存老师。\n\n账号与内容范围由白板确认，提交结果与屏幕显示分开核验。\n\n核对会话\n刷新页面\n合成缓存老师\n教师管理员\n白板当前班级\n班级 ID 7\n白板已确认\n教师工作台\n保存、查询与结果核对\n我的今日作业\n\n读取和管理真实任教老师的当天作业\n\n管理今日作业\n我的课堂资料\n\n上传、管理真实课堂文件，下载到当前设备\n\n管理课堂资料\n语音播报\n\n向已授权的班级发起播报\n\n打开语音播报\n今日提醒\n\n管理本安装学校共同的当天提醒\n\n查看共同提醒\n内容按白板授权读取\n班级、科目和内容所属老师的名称由服务返回。进入作业或提醒后分页加载，不以页面输入扩展权限。\n\n未保存草稿仅保留在本页内存。切换、刷新或离页前会提示；撤销会话后立即停止操作并清除编辑信息。\n\n注销会使这个账号的全部渠道授权失效。\n\n注销账号\n班级共同提醒\n按白板当天日期生效\n管理今日提醒\n未来教室 · 每一堂课，都有准备\n账号与范围由白板本地管理",
+      "microphone": {
+        "starts": 0,
+        "active": 0,
+        "stopped": 0,
+        "contextCount": 0,
+        "contextClosed": 0,
+        "ownerClosed": 0,
+        "modules": [],
+        "workers": [],
+        "liveWorkers": 0
+      }
+    }
+  ]
+}

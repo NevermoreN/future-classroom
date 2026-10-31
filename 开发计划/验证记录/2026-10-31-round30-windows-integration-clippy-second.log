@@ -1,0 +1,27 @@
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error: call to `set_readonly` with argument `false`
+   --> crates/fc-bootstrap/src/web_application/material_stream_tests.rs:852:17
+    |
+852 |                 permissions.set_readonly(false);
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: on Unix platforms this results in the file being world writable
+    = help: you can set the desired permissions using `PermissionsExt`. For more information, see
+            https://doc.rust-lang.org/std/os/unix/fs/trait.PermissionsExt.html
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#permissions_set_readonly_false
+    = note: `-D clippy::permissions-set-readonly-false` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::permissions_set_readonly_false)]`
+
+error: call to `set_readonly` with argument `false`
+   --> crates/fc-bootstrap/src/web_application/material_stream_tests.rs:890:9
+    |
+890 |         permissions.set_readonly(false);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: on Unix platforms this results in the file being world writable
+    = help: you can set the desired permissions using `PermissionsExt`. For more information, see
+            https://doc.rust-lang.org/std/os/unix/fs/trait.PermissionsExt.html
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#permissions_set_readonly_false
+
+error: could not compile `fc-bootstrap` (lib test) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

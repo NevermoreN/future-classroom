@@ -1,0 +1,67 @@
+{
+  "scope": "Round30 download stage only; not final full-workspace, full project or formal OS/MSVC acceptance",
+  "status": "PASS",
+  "windowsTests": [
+    {
+      "binary": "fc_bootstrap-30fa512284e56867.exe",
+      "sha256": "afc2df949b02c6bd63abaf2c302f4f7073c4c726f8a3407385ed7ec29e11dff1",
+      "passed": 179,
+      "report": "first"
+    },
+    {
+      "binary": "fc_windows-b3d43bc67b5340a1.exe",
+      "sha256": "019dc1d9b97299810086ff7ed28d19ab2574cfbbdafcf596a76979dddb73196c",
+      "passed": 146,
+      "report": "first"
+    },
+    {
+      "binary": "fc_bootstrap-4203463b9d6de1f5.exe",
+      "sha256": "86f9e29a238b62d7424a2228dae3ae090a3100010b23fdb7e13424553c755d0c",
+      "passed": 277,
+      "report": "second"
+    }
+  ],
+  "windowsPassedDeduplicated": 602,
+  "firstLibraryAttempt": {
+    "passed": 276,
+    "failed": 1,
+    "cause": "test helper treated unaccepted transient Busy as fatal; original failure preserved"
+  },
+  "onlySourceChangedBetweenCompiles": [
+    "crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs"
+  ],
+  "testFix": "resubmit only same unaccepted task with original fixed15sdeadline; no accepted operation replay, no production or domain-assertion changes",
+  "normalProgramSha256": "2b958fe9e2880614eef4de04f174f164a6db97b0c64543e4ce7ee7826e6c0e3f",
+  "normalProgramMatchesActualTls": true,
+  "httpRequests": 20,
+  "actualCertificateNegatives": 2,
+  "materialDownloadBytes": 120000,
+  "materialDownloadSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+  "binaryClientRetainedBodyBytes": 0,
+  "native": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 20,
+    "responses": 20,
+    "peakRecords": 5
+  },
+  "strictClippyAllTargets": "PASS",
+  "fmt": "PASS",
+  "architecture": "12 crates /33 first-party edges PASS",
+  "windowsCleanup": "PASS",
+  "sshAuthorization": "PRESERVED",
+  "notProven": [
+    "strict first TCP 5-second gate",
+    "actual device-revoke TLS stream or deterministic partial WSASend",
+    "static assets/browser/deployment",
+    "final frozen full Host/Windows workspace",
+    "Win7SP1 x86/Win10 actual systems or formal MSVC",
+    "visible Seewo/PPT/touch/DPI/installer/72h"
+  ]
+}

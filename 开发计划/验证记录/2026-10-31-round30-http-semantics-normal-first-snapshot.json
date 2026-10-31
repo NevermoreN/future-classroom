@@ -1,0 +1,114 @@
+{
+  "scope": "Individual normal executable already linked while remaining workspace test EXEs continue compiling; aggregate compile not yet inferred",
+  "sourceFreeze": {
+    "scope": "HTTP 304/Allow/UTC Date source freeze; builds and actual runtime must bind independently",
+    "files": {
+      "crates/fc-protocol/src/http1/response.rs": {
+        "bytes": 9692,
+        "sha256": "ca830f28ff5a56d7a4094dbbe529d0a4dfb0e2acf534d791bf868e65b6a98c67"
+      },
+      "crates/fc-protocol/src/http1/response/tests.rs": {
+        "bytes": 13659,
+        "sha256": "73e445f9e42f6e4d4116adf9a56d3edab6455f1fb15f5a0053db97fea4bda3a0"
+      },
+      "crates/fc-protocol/src/web.rs": {
+        "bytes": 37213,
+        "sha256": "51cc243aa1f09422099708bac414e48e9c1e6df8008d6cb79714b5a1850b00d9"
+      },
+      "crates/fc-protocol/src/web/materials.rs": {
+        "bytes": 19271,
+        "sha256": "d8e9808b1b2f5425b21b29f8a848efc5bc033513eecd63cbbca4eba76f3ace5a"
+      },
+      "crates/fc-bootstrap/src/web_application.rs": {
+        "bytes": 16861,
+        "sha256": "36b529cfd29f5236ddcde2c2be840140e740cd853a9dac82bbf483a5975ec26f"
+      },
+      "crates/fc-bootstrap/src/web_application/material_files.rs": {
+        "bytes": 66839,
+        "sha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4"
+      },
+      "crates/fc-bootstrap/src/web_application/tests.rs": {
+        "bytes": 21403,
+        "sha256": "82a044081e56a37e323f56b22eae71eaed99aa346a5a02119ab1956c315bbc31"
+      },
+      "crates/fc-bootstrap/src/web_transfer/network.rs": {
+        "bytes": 57800,
+        "sha256": "d13e2f0b5d21387019f71d255ed819ad7ccf6f7a5b074c8f5225bfc2312a4b86"
+      },
+      "crates/fc-bootstrap/src/web_transfer/network/tests.rs": {
+        "bytes": 15700,
+        "sha256": "5dba9275ce932b5f9fc62156fc3b3491f6003d1940cab3dbca7b8a6ec40f3d5d"
+      },
+      "crates/fc-windows/src/tls_frontdoor/mod.rs": {
+        "bytes": 6955,
+        "sha256": "3db842b50771e846ef9319f2067e5c6b18033128108486ed9213b218491ece87"
+      },
+      "crates/fc-windows/src/tls_frontdoor/native.rs": {
+        "bytes": 53139,
+        "sha256": "9a56af03bba7c1f10f3208a4d79f07910dc30b403b13c0247cadee76f0b9fe56"
+      },
+      "crates/fc-windows/src/tls_frontdoor/native/stream.rs": {
+        "bytes": 35693,
+        "sha256": "34745446bebb77370ab18a6dd4862538a876f606170f5637878d436c25a865a2"
+      },
+      "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs": {
+        "bytes": 23630,
+        "sha256": "3a8143f2c98f1c7eb043b5c1ce2745a06af3653b65c686d0f0ea0527e217be1f"
+      },
+      "crates/fc-windows/src/tls_frontdoor/http_date.rs": {
+        "bytes": 3999,
+        "sha256": "0a1c68c9e011e3cbe2dc008e2d10efb195ae51e2c0e4ba0b6f15401776efa723"
+      },
+      "crates/fc-windows/src/tls_frontdoor/http_date/tests.rs": {
+        "bytes": 6734,
+        "sha256": "e1d585a8ad6612357adafca3b5d4c9232bea833cbf5a98905e8e299e9d29f959"
+      },
+      "scripts/windows-tls-business-probe.py": {
+        "bytes": 60585,
+        "sha256": "ececa39457ffef2a782f5b14535772cb92eac49ee8ce9df5c0e3fddc9e8e27f0"
+      }
+    },
+    "knownGaps": [
+      "HEAD response body suppression is not implemented",
+      "voice.rs direct typed upload_auth still uses old Method error helper; real Net initial admission supplies Allow before it can enter voice upload",
+      "strict first TCP five-second gate remains failed",
+      "Win7/Win10 actual runtime and formal MSVC remain unvalidated"
+    ]
+  },
+  "compilerArtifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///workspace/%E5%85%B1%E4%BA%AB/Eliora/%E6%9C%AA%E6%9D%A5%E6%95%99%E5%AE%A4%E8%AE%A1%E5%88%92/crates/fc-bootstrap#0.1.0",
+    "manifest_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "fc-bootstrap",
+      "src_path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/main.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [],
+    "filenames": [
+      "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/fc-bootstrap.exe"
+    ],
+    "executable": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "fresh": false
+  },
+  "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+  "frozen": "/tmp/fc-round30-http-semantics-normal-frozen/fc-bootstrap.exe",
+  "bytes": 12477123,
+  "sha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09"
+}

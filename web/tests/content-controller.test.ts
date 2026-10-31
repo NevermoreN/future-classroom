@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, NetworkFault, type ContentApi } from '../src/api/client'
+import { ProtocolVersionFault } from '../src/api/protocol'
 import { ContentController, type ContentState } from '../src/api/content-controller'
 import { content, normalizedBodyText, type ContentDocument } from '../src/api/content-protocol'
 import { document, homeworkKey, page, wireDocument } from './content-fixtures'
@@ -119,5 +120,34 @@ describe('content draft and command lifecycle', () => {
     f.api.content.mockImplementationOnce(() => new Promise(resolve => { complete = resolve }))
     const old = f.controller.select(f.state().page!.items[0]!); f.controller.dispose(); complete(document()); await old
     expect(f.api.content.mock.calls.at(-1)![1].aborted).toBe(true); expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+describe('explicit version recovery preserves content commands', () => {
+  it('keeps the original save and draft, blocks new writes, and only queries the original ID manually', async () => {
+    const f = fixture(), fault = new ProtocolVersionFault(); await open(f); f.controller.edit('版本升级前的草稿')
+    f.api.saveContent.mockRejectedValueOnce(fault); await f.controller.save()
+    const original = f.editor().pending
+    expect(original?.command.commandId).toBe('77'); expect(f.editor().draft).toBe('版本升级前的草稿')
+    expect(f.editor().notice).toContain(fault.message); expect(f.state().notice).toContain('刷新页面'); expect(f.editor().phase).toBe('unknown')
+    expect(vi.getTimerCount()).toBe(0); expect(f.controller.leave()).toBe(false)
+    f.controller.edit('替换草稿'); await f.controller.save(); await f.controller.save(true); await f.controller.loadLatest(); await f.controller.loadScopes('HOMEWORK', 0, true)
+    expect(f.editor().pending).toBe(original); expect(f.editor().draft).toBe('版本升级前的草稿'); expect(f.api.saveContent).toHaveBeenCalledOnce(); expect(f.api.scopes).toHaveBeenCalledOnce(); expect(f.api.content).toHaveBeenCalledOnce()
+    await vi.advanceTimersByTimeAsync(60000); expect(f.api.commandResult).not.toHaveBeenCalled()
+    await f.controller.query(); expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain('不证明'); expect(f.editor().notice).toContain(fault.message)
+    f.api.commandResult.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', content: document(homeworkKey, '1', '版本升级前的草稿') }); await f.controller.query()
+    expect(f.editor().history?.text).toBe('版本升级前的草稿'); expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain(fault.message)
+    expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual(['77', '77']); await f.controller.save(); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+  it('a version fault during a read retains the local draft and never treats a reload as recovery', async () => {
+    const f = fixture(); await open(f); f.controller.edit('未提交的本地正文'); const loaded = f.editor().loaded
+    f.api.content.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.loadLatest()
+    expect(f.editor().loaded).toBe(loaded); expect(f.editor().draft).toBe('未提交的本地正文'); expect(f.editor().pending).toBeNull(); expect(f.editor().notice).toContain('管理员升级')
+    await f.controller.loadScopes('REMINDER', 0, true); await f.controller.save(); expect(f.api.scopes).toHaveBeenCalledOnce(); expect(f.api.saveContent).not.toHaveBeenCalled(); expect(f.controller.hasRiskyDraft()).toBe(true); f.controller.dispose()
+  })
+  it('a typed version failure of an explicit unknown-result query keeps its old command ID', async () => {
+    const f = fixture(); await open(f); f.controller.edit('等待核对'); f.api.saveContent.mockRejectedValueOnce(new NetworkFault()); await f.controller.save(); const original = f.editor().pending
+    f.api.commandResult.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.query()
+    expect(f.editor().pending).toBe(original); expect(f.editor().notice).toContain('刷新页面'); await f.controller.query(); expect(f.api.commandResult.mock.calls.map(call => call[0])).toEqual(['77', '77']); expect(f.api.saveContent).toHaveBeenCalledOnce(); f.controller.dispose()
   })
 })

@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "sourcesStillMatchFreeze": true,
+  "checks": [
+    {
+      "scope": "host-two-affected-crates",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "fc-protocol",
+        "-p",
+        "fc-windows",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round30-core-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "exitCodeSource": "Original exec session49405 actually completed exit_code0; no rerun/inference from log",
+      "log": "/tmp/fc-round30-evidence/head-host-clippy-first.log",
+      "logSha256": "4e5b4e498d968875c4a10be0c022f1da5247b675547c7280a9844f95a94544d1"
+    },
+    {
+      "scope": "windows-full-workspace-all-targets",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round30-win-target",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "exitCodeSource": "Original exec session60077 actually completed exit_code0; no rerun/inference from log",
+      "log": "/tmp/fc-round30-evidence/head-windows-clippy-first.log",
+      "logSha256": "9fd9c5cb81e61223e888b42c15aeaff2c81828780b8c06aa5f236c14706c9a36"
+    }
+  ]
+}

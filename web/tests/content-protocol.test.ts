@@ -1,8 +1,28 @@
 import { describe, expect, it } from 'vitest'
 import { bodyText, civilDate, civilTime, commandResult, committed, content, contentPath, newCommandId, nextDay, normalizedBodyText, revision, scopes } from '../src/api/content-protocol'
-import { ProtocolFault } from '../src/api/protocol'
+import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
 import { homeworkKey, wireDocument, wireScopes } from './content-fixtures'
 describe('teacher content strict wire contract', () => {
+  it('classifies only positive integer schema changes as refreshable, including nested committed content', () => {
+    const readers: ((version: unknown) => unknown)[] = [
+      version => scopes({ ...wireScopes(), schemaVersion: version }, 'HOMEWORK', 0),
+      version => content({ ...wireDocument(), schemaVersion: version }),
+      version => committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', content: wireDocument(homeworkKey, '1', '作业') }, '7', homeworkKey, '0', '作业'),
+      version => committed({ schemaVersion: 1, status: 'COMMITTED', commandId: '7', content: { ...wireDocument(homeworkKey, '1', '作业'), schemaVersion: version } }, '7', homeworkKey, '0', '作业'),
+      version => commandResult({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', content: null }, '7'),
+    ]
+    for (const read of readers) {
+      expect(() => read(1)).not.toThrow()
+      expect(() => read(2)).toThrow(ProtocolVersionFault)
+      for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
+        expect(() => read(invalid)).toThrow(ProtocolFault)
+        expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
+      }
+    }
+    const missing = { ...wireDocument() } as Record<string, unknown>; delete missing.schemaVersion
+    expect(() => content(missing)).toThrow(ProtocolFault)
+    expect(() => content(missing)).not.toThrow(ProtocolVersionFault)
+  })
   it('keeps command/revision 64 bits, allows only canonical zero revisions, never IDs', () => {
     expect(revision('0')).toBe('0'); expect(revision('18446744073709551615')).toBe('18446744073709551615')
     for (const invalid of ['00', '01', '-1', 0, '18446744073709551616']) expect(() => revision(invalid)).toThrow(ProtocolFault)

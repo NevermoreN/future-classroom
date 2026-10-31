@@ -1,12 +1,35 @@
 import { describe, expect, it } from 'vitest'
 import * as m from '../src/api/material-protocol'
-import { ProtocolFault, strictJson } from '../src/api/protocol'
+import { ProtocolFault, ProtocolVersionFault, strictJson } from '../src/api/protocol'
 const target = { ownerTeacherId: '18446744073709551615', subjectId: '9007199254740993' }
 function row() { return { materialId: '18446744073709551614', folderId: '8', displayName: '课件.pdf', resourceVersionId: '18446744073709551613', kind: 'PDF', bytes: 17, sha256: 'a'.repeat(64), allowedClassIds: ['9007199254740993'], addedAt: '2026-10-30T10:00:00', addedSequence: '7', status: 'PUBLISHED', revision: '1' } }
 function group() { return { ...target, ownerDisplayName: '老师', subjectName: '数学', classes: [{ classId: '9007199254740993', className: '一班' }], classTotal: 1, nextClassOffset: null } }
 function scopes() { return { schemaVersion: 1, status: 'MATERIAL_SCOPES', identityRevision: '18446744073709551615', offset: 0, total: 1, nextOffset: null, items: [group()] } }
 function page() { return { schemaVersion: 1, status: 'MATERIALS', scope: target, folderId: '8', folderRevision: '7', offset: 0, total: 1, items: [row()], nextCursor: null } }
 describe('materials wire values and immutable directory snapshots', () => {
+  it('requires refresh for typed new schema versions across every material response envelope', () => {
+    const readers: ((version: unknown) => unknown)[] = [
+      version => m.scopes({ ...scopes(), schemaVersion: version }, 0),
+      version => m.page({ ...page(), schemaVersion: version }, target, null),
+      version => m.ready({ schemaVersion: version, status: 'UPLOAD_READY', uploadId: '8', expiresInSeconds: 300, maxChunkBytes: 65536 }),
+      version => m.uploaded({ schemaVersion: version, status: 'UPLOADED', uploadId: '8', bytes: 17 }, '8', 17),
+      version => m.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '7', scope: target, record: row() }, '7', target),
+      version => m.outcome({ schemaVersion: version, status: 'COMMAND_RESULT', commandId: '7', state: 'NOT_FOUND', scope: null, record: null }, '7'),
+      version => m.cancelled({ schemaVersion: version, status: 'UPLOAD_CANCELLED', uploadId: '8' }, '8'),
+      version => m.classPage({ schemaVersion: version, status: 'MATERIAL_CLASSES', identityRevision: '1', scope: target, offset: 0, total: 1, nextOffset: null, items: [{ classId: '1', className: '班级' }] }, target, 0),
+    ]
+    for (const read of readers) {
+      expect(() => read(1)).not.toThrow()
+      expect(() => read(2)).toThrow(ProtocolVersionFault)
+      for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
+        expect(() => read(invalid)).toThrow(ProtocolFault)
+        expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
+      }
+    }
+    const missing = { ...page() } as Record<string, unknown>; delete missing.schemaVersion
+    expect(() => m.page(missing, target, null)).toThrow(ProtocolFault)
+    expect(() => m.page(missing, target, null)).not.toThrow(ProtocolVersionFault)
+  })
   it('preserves full u64 identities and accepts grouped classes without Number conversion', () => {
     expect(m.scopes(scopes(), 0).items[0]).toEqual(group())
     expect(m.page(page(), target, null).items[0]?.materialId).toBe('18446744073709551614')

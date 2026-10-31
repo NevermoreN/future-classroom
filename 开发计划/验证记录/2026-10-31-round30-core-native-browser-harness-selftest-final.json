@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "source": "/workspace/共享/Eliora/未来教室计划/scripts/windows-native-browser-harness.mjs",
+  "sourceSha256": "9d55d662916657956699bde315563736d2aed6f9d7c2113768ac5510a5375bb6",
+  "nodeVersion": "v22.20.0",
+  "windowsBrowser": "NOT_RUN",
+  "cargo": "NOT_RUN",
+  "remote": "NOT_RUN",
+  "checks": [
+    {
+      "args": [
+        "node",
+        "--check",
+        "scripts/windows-native-browser-harness.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMillis": 31,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "args": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "elapsedMillis": 179,
+      "stdout": {
+        "bytes": 504,
+        "sha256": "4536ddf71285c58e725c84ec53ce25268a6d2dd31b2d7f5cbbb7c4775945c105",
+        "base64": "eyJ0eXBlIjoiU0VMRl9URVNUIiwic3RhdHVzIjoiUEFTUyIsImJ1aWx0aW5XZWJTb2NrZXQiOiJmdW5jdGlvbiIsImNoZWNrcyI6WyJzdHJpY3QgSU5JVC9SVU4gYW5kIGZpbml0ZSBidWRnZXQiLCJwYWlyaW5nL2xvZ291dC9mb3JlaWduIHRhcmdldCByZWplY3Rpb24iLCJjYWNoZWQgcmVzcG9uc2UgZXhjbHVkZWQ7IHJhdzMwNCB3aXJlIHN0YXR1cyBjb3VudGVkIiwiQ29va2llL0NTUkYvU2V0LUNvb2tpZSBvbWl0dGVkIGZyb20gc3VtbWFyaWVzIiwiYWN0dWFsIGxvb3BiYWNrIFdlYlNvY2tldCBDRFAgY29ycmVsYXRpb24gYW5kIGRlYWRsaW5lIiwidW5rbm93bi9mYWlsZWQvb3duZWQgY29udGV4dCBkaXNwb3NhbCBhbmQgZXhwaXJlZCBwb3NpdGl2ZSBjb21tYW5kIHJlamVjdGlvbiJdLCJ3aW5kb3dzQnJvd3NlciI6Ik5PVF9SVU4iLCJzb3VyY2VTaGEyNTYiOiI5ZDU1ZDY2MjkxNjY1Nzk1NjY5OWJkZTMxNTU2MzczNmQyYWVkNmY5ZDdjMjExMzc2OGFjNTUxMGE1Mzc1YmI2In0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ],
+  "negativeChecks": {
+    "status": "PASS",
+    "invalidInitFailure": {
+      "args": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--report",
+        "/tmp/fc-native-browser-negative-8269himt/fresh.json"
+      ],
+      "exitCode": 1,
+      "elapsedMillis": 112,
+      "stdout": {
+        "bytes": 174,
+        "sha256": "879c7aeb6f8c339a28b668b9ccfcff89833b5c264847c708f25e4fc88887e878",
+        "base64": "eyJ0eXBlIjoiUkVTVUxUIiwic3RhdHVzIjoiRkFJTCIsIm1hcmtlciI6bnVsbCwid2lyZVJlc3BvbnNlQ291bnQiOjAsImNvbnRlbnRQb3N0cyI6MCwiY29udGV4dERpc3Bvc2VkIjpmYWxzZSwicmVwb3J0IjoiL3RtcC9mYy1uYXRpdmUtYnJvd3Nlci1uZWdhdGl2ZS04MjY5aGltdC9mcmVzaC5qc29uIn0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "existingReportRejected": {
+      "args": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--report",
+        "/tmp/fc-native-browser-negative-8269himt/fresh.json"
+      ],
+      "exitCode": 1,
+      "elapsedMillis": 137,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 67,
+        "sha256": "1908fe3961ed76811e1440e46ab3446dcf57a84faadd335a425eae43bfdb800e",
+        "base64": "eyJ0eXBlIjoiSEFSTkVTU19FUlJPUiIsInBoYXNlIjoiZW50cnkiLCJjb2RlIjoiSU5URVJOQUxfRkFJTFVSRSJ9Cg=="
+      }
+    },
+    "credentialSentinelAbsent": true,
+    "reportUnchanged": true,
+    "ownedTemporaryDirectoryRemoved": true
+  },
+  "whitespace": "PASS",
+  "status": "PASS"
+}

@@ -17,6 +17,7 @@ pub mod reinitialization_workflow;
 pub mod voice_runtime;
 pub mod web_application;
 pub mod web_assets;
+pub mod web_transfer;
 
 #[cfg(windows)]
 pub mod voice_files;

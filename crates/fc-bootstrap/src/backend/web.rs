@@ -170,8 +170,37 @@ struct Inner {
 #[derive(Clone)]
 pub struct WebService {
     inner: Arc<Inner>,
+    execution: Option<TransactionExecutionFence>,
 }
 impl WebService {
+    #[cfg(windows)]
+    pub(crate) fn has_execution_fence(&self) -> bool {
+        self.execution.is_some()
+    }
+    /// Request-local only: no request deadline is installed in the global
+    /// pairing service, and nested scopes can never relax an outer fence.
+    pub(crate) fn with_execution_fence(&self, fence: TransactionExecutionFence) -> Self {
+        let execution: TransactionExecutionFence = match &self.execution {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || previous() && fence())
+            }
+            None => fence,
+        };
+        Self {
+            inner: self.inner.clone(),
+            execution: Some(execution),
+        }
+    }
+    fn execution_checkpoint(&self) -> WebResult<()> {
+        if self.execution.as_ref().is_some_and(|fence| {
+            !std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fence())).unwrap_or(false)
+        }) {
+            Err(WebServiceError::Unavailable)
+        } else {
+            Ok(())
+        }
+    }
     /// Session lease numbers are local to one backend, never installation IDs.
     pub(crate) fn same_instance(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.inner, &other.inner)
@@ -193,11 +222,13 @@ impl WebService {
                 clock,
                 monotonic,
             }),
+            execution: None,
         }
     }
     fn snapshot(&self) -> WebResult<Arc<AuthoritySnapshot<IdentityState>>> {
         let deadline = Instant::now() + Duration::from_millis(100);
         loop {
+            self.execution_checkpoint()?;
             if self.inner.control.0.closed.load(Ordering::Acquire)
                 || self.inner.control.is_recovering()
             {
@@ -226,6 +257,7 @@ impl WebService {
         }
     }
     fn current(&self, snapshot: &AuthoritySnapshot<IdentityState>) -> WebResult<()> {
+        self.execution_checkpoint()?;
         let status = self.inner.control.health_gate().status();
         if self.inner.control.0.closed.load(Ordering::Acquire) || self.inner.control.is_recovering()
         {
@@ -480,6 +512,7 @@ impl WebService {
         if !state.enabled {
             return Err(WebServiceError::Disabled);
         }
+        self.execution_checkpoint()?;
         if tick.saturating_sub(state.attempt_start) >= PAIR_WINDOW_MILLIS {
             state.attempt_start = tick;
             state.attempts = 0;
@@ -518,6 +551,7 @@ impl WebService {
         if self.inner.monotonic.monotonic_millis() >= window_deadline {
             return Err(WebServiceError::Denied);
         }
+        self.execution_checkpoint()?;
         let id = state.next()?;
         state.requests.push(Request {
             id,
@@ -744,6 +778,7 @@ impl WebService {
         if tick < request.next_poll {
             return Err(WebServiceError::RateLimited);
         }
+        self.execution_checkpoint()?;
         request.next_poll = tick.checked_add(500).ok_or(WebServiceError::Overflow)?;
         let Some(approved) = &request.approved else {
             return Ok(PairingPoll::Pending);
@@ -781,6 +816,10 @@ impl WebService {
         if self.inner.monotonic.monotonic_millis() >= deadline {
             ledger.sessions.revoke_exact(lease);
             return Err(WebServiceError::Denied);
+        }
+        if let Err(error) = self.execution_checkpoint() {
+            ledger.sessions.revoke_exact(lease);
+            return Err(error);
         }
         let request = state.requests.remove(index);
         let device = WebDevice {
@@ -901,6 +940,84 @@ impl WebService {
             return Err(WebServiceError::Denied);
         }
         self.current(&snapshot)
+    }
+
+    /// Worker-minted authorization for each actual transport send. The returned
+    /// check never takes a waiting lock, reads SQL, refreshes activity or adopts
+    /// a newer authority publication. A local lock does not revoke a Web lease.
+    #[cfg(any(windows, test))]
+    pub(crate) fn material_send_fence(
+        &self,
+        lease: SessionLease,
+        scope: MaterialScope,
+        classes: &[ClassId],
+        lifetime: TransactionExecutionFence,
+    ) -> WebResult<(Revision, TransactionExecutionFence)> {
+        self.execution_checkpoint()?;
+        // Capture BEFORE any revision check, including the potentially waiting
+        // worker authorization. A publication/rollback cannot revive this token.
+        let cancelled = self.inner.control.health_gate().cancellation();
+        self.check_material_lease(lease, scope, classes)?;
+        let snapshot = self.snapshot()?;
+        if cancelled.is_cancelled() {
+            return Err(WebServiceError::Denied);
+        }
+        let revision = snapshot.revision;
+        let inner = self.inner.clone();
+        let last_tick = AtomicU64::new(inner.monotonic.monotonic_millis());
+        let invalid = AtomicBool::new(false);
+        let fence: TransactionExecutionFence = Arc::new(move || {
+            let check = || {
+                if invalid.load(Ordering::Acquire)
+                    || cancelled.is_cancelled()
+                    || inner.control.0.closed.load(Ordering::Acquire)
+                    || inner.control.is_recovering()
+                    || !lifetime()
+                {
+                    return false;
+                }
+                let Ok(state) = inner.state.try_lock() else {
+                    return false;
+                };
+                let Ok(ledger) = inner.ledger.try_lock() else {
+                    return false;
+                };
+                let tick = inner.monotonic.monotonic_millis();
+                let previous = last_tick.fetch_max(tick, Ordering::AcqRel);
+                if tick < previous || state.last_tick.is_some_and(|last| tick < last) {
+                    invalid.store(true, Ordering::Release);
+                    return false;
+                }
+                if !state.enabled || !state.devices.iter().any(|d| d.lease == lease) {
+                    return false;
+                }
+                // The immutable snapshot's scope was authorized on the worker;
+                // only this exact still-live session/device can use it. actor()
+                // checks the original absolute/wall times without renewing them.
+                if ledger
+                    .sessions
+                    .actor(
+                        &snapshot.data,
+                        lease,
+                        inner.clock.now(),
+                        tick,
+                        SessionPurpose::Manage,
+                    )
+                    .is_err()
+                {
+                    return false;
+                }
+                !cancelled.is_cancelled()
+                    && !inner.control.0.closed.load(Ordering::Acquire)
+                    && !inner.control.is_recovering()
+                    && lifetime()
+            };
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(check)).unwrap_or(false)
+        });
+        if !fence() {
+            return Err(WebServiceError::Denied);
+        }
+        Ok((revision, fence))
     }
 
     pub fn authenticate(&self, cookie: &WebSecret) -> WebResult<AuthenticatedWeb> {
@@ -1035,4 +1152,10 @@ pub const CLEAR_SESSION_COOKIE: &str =
     "__Host-FutureClassroom=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0";
 
 #[cfg(test)]
-mod tests;
+mod tests {
+    include!("web/tests.rs");
+    mod material_send_fence_tests {
+        use super::*;
+        include!("web/material_send_fence_tests.rs");
+    }
+}

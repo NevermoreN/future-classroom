@@ -1,0 +1,419 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "scope": "Finite raw HTTPS API diagnostic through owned SSH loopback forward",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "NOT_TESTED",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-1730ab7979da4792b77fe522c1607ca7",
+  "exeSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+  "runnerSourceSha256": "75ac9d0dc39129ab397d6d559a85a1dfba6c143e161b18e0e474c69178954cea",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "webBundleSha256": "21a247e268429f9f59267893342ffe99dd0f4a7321db972520d4b069cb288345",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "events": [
+    {
+      "case": "static-head-method",
+      "status": "FAIL",
+      "method": "HEAD",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:64551",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "1a787a44cd333464f0e1b88e89c84a78f4637f30f8cda3f570825418f4f5e11b",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:64551",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 67,
+      "coalescedHeaderTailBodyBytes": 0,
+      "error": {
+        "kind": "RuntimeError",
+        "phase": "client/static-head-method",
+        "message": "diagnostic HEAD/204/304 contract omits Content-Length"
+      },
+      "forwardObservationNanos": 35128181
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-1730ab7979da4792b77fe522c1607ca7",
+  "staticPackage": {
+    "manifestSha256": "1dfa13904bbbdf661b182e055944c0b6ead4cd91f5c2618a6ee0b6fe9d1271ee",
+    "payloadBytes": 452054,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-C3GlEF2q.js",
+        "sizeBytes": 409096,
+        "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sizeBytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "1dfa13904bbbdf661b182e055944c0b6ead4cd91f5c2618a6ee0b6fe9d1271ee",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-C3GlEF2q.js",
+        "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3",
+        "bytes": 409096
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+        "bytes": 38836
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "uploadedScriptSha256": {
+    "cleanup": "51b559b3da6c5dee74e558b3ded234cc6a34e4254a3c3bac0f716f3d0318785f",
+    "stop": "e5313a11beb824c3226a76420dfe7827f6e5ebcaa210723db4767e418473097f",
+    "capture": "1f1e208137af57aad545fa19414a05cff4faf9574ae5b923ccf957f41d5d1715",
+    "setup": "1e3f1d7c0a27f874001298a63d60c8ea9a7ff371106a3d7bacf32938902a1fc5",
+    "launch": "04358ed012ee9315bfe78c4908c4aaf21f8288d338cfb334abafbb33b167c0a4"
+  },
+  "controlScriptsParse": "PASS",
+  "fixture": {
+    "thumbprint": "B12A5CA0A33B4D1D0708C88F0786D6CDD2F34306",
+    "keyName": "FutureClassroom-Test-TLS-1730ab7979da4792b77fe522c1607ca7-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "1a787a44cd333464f0e1b88e89c84a78f4637f30f8cda3f570825418f4f5e11b",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "ready": [
+    {
+      "port": 64551,
+      "generation": 1,
+      "marker": "FutureClassroom-Test-TLS-1730ab7979da4792b77fe522c1607ca7",
+      "origin": "https://localhost:64551",
+      "basePath": "/fc/",
+      "classId": "1",
+      "subjectId": "1",
+      "loginName": "probe",
+      "staticAssets": 6
+    }
+  ],
+  "nativeReports": [],
+  "nativeProcessExits": [],
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "actual-tls-business-clients",
+    "message": "diagnostic HEAD/204/304 contract omits Content-Length"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 264,
+      "observedBytes": 264,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "5567aa3d76c07ae5bab0aac27041386874901d7a0db59af7b3081ec8b0b7c0ec",
+      "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjQ1NTEsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xNzMwYWI3OTc5ZGE0NzkyYjc3ZmU1MjJjMTYwN2NhNyIsInBhaXJpbmdDb2RlIjoiMDM2MjIxNTUiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2NDU1MSIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2fQ0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 2
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 263,
+      "sha256": "fecc07ef57a6c66d121bea2b50ce04ec874cab9de4c7598b3e69ad10ee8d5443"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "f4e16d0266f94b71855d9cfb5aac86477cf94af3ea63e8eff9562983af0714da"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "4725c74ca211f406c138b401f8cc8c6700645304998a0641ef19dcdb27fa9077"
+    },
+    "tls.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "f0ddd4b8a69ebde592f6d0a7fd232befa5d487baacf8bf56366c7f886a4664b8"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "dbee5d7fbbcea193f833fd7c81ed992f13da2ffcfcc3c54a7d5794c6fb39908a"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "aa140911a163c894e51f987f487253fb7aad7ab307693a052800c5802e1eeae8"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 263,
+          "sha256": "fecc07ef57a6c66d121bea2b50ce04ec874cab9de4c7598b3e69ad10ee8d5443"
+        },
+        "downloaded": {
+          "bytes": 263,
+          "sha256": "fecc07ef57a6c66d121bea2b50ce04ec874cab9de4c7598b3e69ad10ee8d5443"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/tls.stdout",
+        "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjQ1NTEsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xNzMwYWI3OTc5ZGE0NzkyYjc3ZmU1MjJjMTYwN2NhNyIsInBhaXJpbmdDb2RlIjoiMDM2MjIxNTUiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2NDU1MSIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2fQo="
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "f4e16d0266f94b71855d9cfb5aac86477cf94af3ea63e8eff9562983af0714da"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "f4e16d0266f94b71855d9cfb5aac86477cf94af3ea63e8eff9562983af0714da"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTczMGFiNzk3OWRhNDc5MmI3N2ZlNTIyYzE2MDdjYTciLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTE3MzBhYjc5NzlkYTQ3OTJiNzdmZTUyMmMxNjA3Y2E3XFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjozMzAzMiwic3RhcnRUaWNrcyI6IjYzOTI5MDQ1NDAyOTIwNTg5OCJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "4725c74ca211f406c138b401f8cc8c6700645304998a0641ef19dcdb27fa9077"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "4725c74ca211f406c138b401f8cc8c6700645304998a0641ef19dcdb27fa9077"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRSDcwa2RQY1dLcDVHUjllMHlOK2l6REFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1USXdOVEF4V2hjTk1qWXhNVEF4TVRJeE1EQXhXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDdit4YjhNV2o2T1Q5Z3lNOTBpandXCmNYc1Azbk5aaUw1cTNhWm1LdEN0dmJ1TXIzT3FRTkFraG1UVzFkUHFXTGt2MCtqWkFrYng2NUViWjJlWFB3ZmFMRmwvay9GdFUya08KVGQ4MlNqK0E5akk4R2lVZlk5OVd4WnVrTEZRYlVEUmQ5eEFyQ0N1S3JBMzhxWi80UHZZekR6eGliQ0ZOOHltRjUvb1hseVlnazR1aQpWTkt3UmtwMnVOUjJLR0lNbUNCdGxSRDNTWjRTdmFXemtIR1BqNnh5VW03WTFBKzA4Y0srVy9QTFlJUS9INGp3MW1VSU1FSkRJNTdqCnhDSUJxSGw4dytKK2VkQVdVaWpLWWNrNm1tVlR3WkVqaldOamJlOXR4aThpNTBTSGxBR3FIYmNOTDhHOGNpNEI3aWtNZkYzbFl4b1QKSVhiUlJ2Z3dkYlBZWjJoZEFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJSRzJrdy9mTzRECjlmQkR5MUVmV2xEdmZMQ29QekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBVDJ0UTZkYnE3VncrWncvWms5Q3BESUxrUUE4aWtZT0IKam9vUlVpOWJKS1p0Z01BZHpabm5YZFZMY0UrKzd4L1R6N2V6SW5mYkhXMStYY1VUMDRPVFpnUGNuTFkvNUJhWjhBUm9FMmZ2OTEvWgp2czFkOGxWU3FGeTMyZjQwWjBCVVc1VTAyM0JWbVJHa1FTU0c4aGNiN0NqUFI5M2VEcDRTZzh4N1M0ZFNoeHBQOU1DZXpVUnNzRHZpCmxCWjFpVWRPN3RTRG8vTGlBZmhrZmpzTzhPNWYzTmxqalErT0ZtZnJVT3dnckNILzI5SW56SVBsRjd3RlFhODBvNUY5aW9Uazlnb2oKb284ak9ZSkxtUzBTSlZjZXNBaTNDV1F5N1ovTnJObmU2OFZzNzA5YlYwZ3hKNzBoYVhMWHRmNlBvelZEWC9OL05XQjRacW44eE1hTwpzb0dPdHc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/tls.stderr",
+        "base64": ""
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "f0ddd4b8a69ebde592f6d0a7fd232befa5d487baacf8bf56366c7f886a4664b8"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "f0ddd4b8a69ebde592f6d0a7fd232befa5d487baacf8bf56366c7f886a4664b8"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTczMGFiNzk3OWRhNDc5MmI3N2ZlNTIyYzE2MDdjYTciLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTgzNjAsInN0YXJ0VGlja3MiOiI2MzkyOTA0NTQwMjY1NzcwMjAifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "dbee5d7fbbcea193f833fd7c81ed992f13da2ffcfcc3c54a7d5794c6fb39908a"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "dbee5d7fbbcea193f833fd7c81ed992f13da2ffcfcc3c54a7d5794c6fb39908a"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTczMGFiNzk3OWRhNDc5MmI3N2ZlNTIyYzE2MDdjYTciLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MjE3MjQsInN0YXJ0VGlja3MiOiI2MzkyOTA0NTQwMDM3MDE3ODYifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "aa140911a163c894e51f987f487253fb7aad7ab307693a052800c5802e1eeae8"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "aa140911a163c894e51f987f487253fb7aad7ab307693a052800c5802e1eeae8"
+        },
+        "artifact": "/tmp/fc-round30-evidence/head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiQjEyQTVDQTBBMzNCNEQxRDA3MDhDODhGMDc4NkQ2Q0REMkYzNDMwNiIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTE3MzBhYjc5NzlkYTQ3OTJiNzdmZTUyMmMxNjA3Y2E3IiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xNzMwYWI3OTc5ZGE0NzkyYjc3ZmU1MjJjMTYwN2NhNy1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "1c1fa8a7b53a7c02c17a899acacb39009b7889d7e51149c81a9c1a54048d3602",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "6b7bcbe2c0324a1efc1123582059304e9e7129c7bf3c68e98d679603bc3aa591",
+        "base64": "eyJ0aHVtYnByaW50IjoiQjEyQTVDQTBBMzNCNEQxRDA3MDhDODhGMDc4NkQ2Q0REMkYzNDMwNiIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTczMGFiNzk3OWRhNDc5MmI3N2ZlNTIyYzE2MDdjYTcta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFINzBrZFBjV0twNUdSOWUweU4raXpEQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1USXdOVEF4V2hjTk1qWXhNVEF4TVRJeE1EQXhXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQ3YreGI4TVdqNk9UOWd5TTkwaWp3V1xuY1hzUDNuTlppTDVxM2FabUt0Q3R2YnVNcjNPcVFOQWtobVRXMWRQcVdMa3YwK2paQWtieDY1RWJaMmVYUHdmYUxGbC9rL0Z0VTJrT1xuVGQ4MlNqK0E5akk4R2lVZlk5OVd4WnVrTEZRYlVEUmQ5eEFyQ0N1S3JBMzhxWi80UHZZekR6eGliQ0ZOOHltRjUvb1hseVlnazR1aVxuVk5Ld1JrcDJ1TlIyS0dJTW1DQnRsUkQzU1o0U3ZhV3prSEdQajZ4eVVtN1kxQSswOGNLK1cvUExZSVEvSDRqdzFtVUlNRUpESTU3alxueENJQnFIbDh3K0orZWRBV1VpaktZY2s2bW1WVHdaRWpqV05qYmU5dHhpOGk1MFNIbEFHcUhiY05MOEc4Y2k0Qjdpa01mRjNsWXhvVFxuSVhiUlJ2Z3dkYlBZWjJoZEFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCUkcya3cvZk80RFxuOWZCRHkxRWZXbER2ZkxDb1B6QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFUMnRRNmRicTdWdytady9aazlDcERJTGtRQThpa1lPQlxuam9vUlVpOWJKS1p0Z01BZHpabm5YZFZMY0UrKzd4L1R6N2V6SW5mYkhXMStYY1VUMDRPVFpnUGNuTFkvNUJhWjhBUm9FMmZ2OTEvWlxudnMxZDhsVlNxRnkzMmY0MFowQlVXNVUwMjNCVm1SR2tRU1NHOGhjYjdDalBSOTNlRHA0U2c4eDdTNGRTaHhwUDlNQ2V6VVJzc0R2aVxubEJaMWlVZE83dFNEby9MaUFmaGtmanNPOE81ZjNObGpqUStPRm1mclVPd2dyQ0gvMjlJbnpJUGxGN3dGUWE4MG81Rjlpb1RrOWdvalxub284ak9ZSkxtUzBTSlZjZXNBaTNDV1F5N1ovTnJObmU2OFZzNzA5YlYwZ3hKNzBoYVhMWHRmNlBvelZEWC9OL05XQjRacW44eE1hT1xuc29HT3R3PT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "b7a85300637df210d2170b26d85a2f20440d422007e033a6d649eba03eb9aabf",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjJ9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 764,
+        "sha256": "004b62b465edc2fb95bebb72091499fb1352d8557e2f3029cd39aa23493a4c7f",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoyNjMsInNoYTI1NiI6ImZlY2MwN2VmNTdhNmM2NmQxMjFiZWEyYjUwY2UwNGVjODc0Y2FiOWRlNGM3NTk4YjNlNjlhZDEwZWU4ZDU0NDMifSwiLnRscy1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjI0MCwic2hhMjU2IjoiZjRlMTZkMDI2NmY5NGI3MTg1NWQ5Y2ZiNWFhYzg2NDc3Y2Y5NGFmM2VhNjNlOGVmZjk1NjI5ODNhZjA3MTRkYSJ9LCJ0bHMtcHVibGljLnBlbSI6eyJieXRlcyI6MTE0MSwic2hhMjU2IjoiNDcyNWM3NGNhMjExZjQwNmMxMzhiNDAxZjhjYzhjNjcwMDY0NTMwNDk5OGEwNjQxZWYxOWRjZGIyN2ZhOTA3NyJ9LCJ0bHMuc3RkZXJyIjp7ImJ5dGVzIjowLCJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0sIi50bHMtc3VwZXJ2aXNvci5qc29uIjp7ImJ5dGVzIjoxODcsInNoYTI1NiI6ImYwZGRkNGI4YTY5ZWJkZTU5MmY2ZDBhN2ZkMjMyYmVmYTVkNDg3YmFhY2Y4YmY1NjM2NmM3Zjg4NmE0NjY0YjgifSwiLnRscy1zZXR1cC1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiZGJlZTVkN2ZiYmNlYTE5M2Y4MzNmZDdjODFlZDk5MmYxM2RhMmZmY2ZjYzNjNTRhN2Q1Nzk0YzZmYjM5OTA4YSJ9LCIudGxzLWZpeHR1cmUuanNvbiI6eyJieXRlcyI6MzczLCJzaGEyNTYiOiJhYTE0MDkxMWExNjNjODk0ZTUxZjk4N2Y0ODcyNTNmYjdhYWQ3YWIzMDc2OTNhMDUyODAwYzU4MDJlMWVlYWU4In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

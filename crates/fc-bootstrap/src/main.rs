@@ -35,6 +35,17 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag, thumbprint, marker] if flag == "--tls-business-probe" => {
+            #[cfg(windows)]
+            {
+                application::tls_business_probe(thumbprint, marker)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (thumbprint, marker);
+                Err("native TLS business probe requires Windows".into())
+            }
+        }
         [flag, thumbprint, marker] if flag == "--tls-lifecycle-probe" => {
             #[cfg(windows)]
             {

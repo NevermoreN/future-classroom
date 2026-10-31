@@ -1,0 +1,112 @@
+{
+  "status": "PASS",
+  "reportSha256": "1be6190294e5a089db7b8480ce5d22b950f3d1b9bfd02e56187f28a41a218572",
+  "httpRequests": 45,
+  "headRequests": 7,
+  "certificateNegatives": 2,
+  "originalFiles": [
+    {
+      "name": "tls.stdout",
+      "bytes": 778,
+      "sha256": "c13b8bf2e38582a80bedbaaa195464cffa128eeef29ea622994d68aaad91c8dd"
+    },
+    {
+      "name": ".tls-process.json",
+      "bytes": 240,
+      "sha256": "4ed7a8a859c5bef9190124fb2245bc7d15f38035675650ff4c3bfbe8ff02c46d"
+    },
+    {
+      "name": "tls-public.pem",
+      "bytes": 1141,
+      "sha256": "c047f6939380ee4fd7c315c5d6ea170e3e6e7b2472fc18c98aa4185d861f272d"
+    },
+    {
+      "name": "tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": ".tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "f5e04fbfaa12fa829b340c28c02f70d0bcae0e0922d72c727b90527eda1cf285"
+    },
+    {
+      "name": ".tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "c190637f793456d71610ddd6a5147acbcbdc6eff35a810891e60cc2b1470653b"
+    },
+    {
+      "name": ".tls-fixture.json",
+      "bytes": 373,
+      "sha256": "2d37ec88027f1ce4cd54728fc84dcb8e9617d5d7fb02fef126c8c452fe8460c7"
+    }
+  ],
+  "heads": [
+    {
+      "case": "static-head-method",
+      "httpStatus": 405,
+      "responseAllow": "GET",
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "static-head-host",
+      "httpStatus": 403,
+      "responseAllow": null,
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "api-head-get",
+      "httpStatus": 405,
+      "responseAllow": "GET",
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "api-head-post",
+      "httpStatus": 405,
+      "responseAllow": "POST",
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "api-head-shared",
+      "httpStatus": 405,
+      "responseAllow": "GET, POST",
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "api-head-unknown",
+      "httpStatus": 404,
+      "responseAllow": null,
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    },
+    {
+      "case": "api-head-host",
+      "httpStatus": 403,
+      "responseAllow": null,
+      "responseBodyBytes": 0,
+      "responseDate": "Sat, 31 Oct 2026 12:21:25 GMT",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "closeNotify": "PASS: actual clean TLS EOF"
+    }
+  ],
+  "nativeDebugLines": [
+    "TLS_BUSINESS_REPORT NetworkReport { heads: 45, admissions: 25, body_acks: 50, responses: 45, closed: 83, retired: 83, rearms: 79, stale_events: 0, active_records: 0, peak_records: 5, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1575756 }"
+  ]
+}

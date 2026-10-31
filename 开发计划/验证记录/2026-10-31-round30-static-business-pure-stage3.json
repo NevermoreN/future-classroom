@@ -1,0 +1,15 @@
+{
+  "status": "PURE_LOCAL_CHECKS_PASS",
+  "checks": [
+    "fragmented/exact-CL response framing",
+    "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+    "binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected",
+    "ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected",
+    "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+    "120000-byte request fragmentation and head/body coalescing",
+    "READY identity and actual-drain final ledger required"
+  ],
+  "tls": "NOT_RUN",
+  "windows": "NOT_RUN",
+  "business": "NOT_RUN"
+}

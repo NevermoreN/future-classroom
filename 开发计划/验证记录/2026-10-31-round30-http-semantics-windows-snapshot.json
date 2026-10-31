@@ -1,0 +1,450 @@
+{
+  "scope": "Frozen current HTTP semantics compile; runtime not inferred",
+  "compileReport": "/tmp/fc-round30-evidence/http-semantics-windows-workspace-first.json",
+  "compileReportSha256": "73053a6b2bbb41ddd12394a0f8aee8662585f756ba2ea618434b312a3409b1cb",
+  "normal": "/tmp/fc-round30-windows-http-semantics-snapshot/fc-bootstrap.exe",
+  "testMetadata": "/tmp/fc-round30-windows-http-semantics-snapshot/tests.jsonl",
+  "files": [
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352710,
+      "sha256": "cd3f8da3c97f0aa430aa0f8c5cf670dc3ca9a6b22fd1bcf79f4f3b4b89b7dcf5",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_materials",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-materials/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/voice_storage-9d353cd95d53ae2d.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/voice_storage-9d353cd95d53ae2d.exe",
+      "bytes": 5189101,
+      "sha256": "3fb9744e839bc21516ab30a10721599a9e27e8999c394ff984a10d3b0334abcd",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voice_storage",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/voice_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/runtime_storage-fef60aaa0dc7b0a4.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/runtime_storage-fef60aaa0dc7b0a4.exe",
+      "bytes": 4941086,
+      "sha256": "7bfa90bb37396132545270c91caf1740c1caa65d5ce7d63c7a52254dd010acc7",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "runtime_storage",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/runtime_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/autostart_coordinator-97dc96264f35cfe2.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/autostart_coordinator-97dc96264f35cfe2.exe",
+      "bytes": 5484948,
+      "sha256": "316cef2b984a5d4dc3ed6dc76d0a545da31e2119ba55b5480a57bb895fe8c019",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "autostart_coordinator",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/autostart_coordinator.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_bootstrap-4203463b9d6de1f5.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_bootstrap-4203463b9d6de1f5.exe",
+      "bytes": 11644213,
+      "sha256": "df9c37ba2b7e398d682e194a4855a2a7e1053331a42777cd13e8f44761d50cba",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_bootstrap",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/voice_limits_storage-588693116cdd8d9e.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/voice_limits_storage-588693116cdd8d9e.exe",
+      "bytes": 5146110,
+      "sha256": "e529b3bac7c3a76a188bd6d632153048624d7dcb35d6a6e5a9e23da288c39c9b",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voice_limits_storage",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/voice_limits_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/schedule_operations-705da6e05a75b965.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/schedule_operations-705da6e05a75b965.exe",
+      "bytes": 5733012,
+      "sha256": "690c3f316cbbc5cbc91b1c38b43d7acf1366d9b2c691383d08f8757bf9449fff",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "schedule_operations",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/schedule_operations.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/business_storage-878d46a6a29de0ae.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/business_storage-878d46a6a29de0ae.exe",
+      "bytes": 6135349,
+      "sha256": "adbfd214d4953320012ca124ec5e0adfad7ce474945eccfcaffbc6ca6e8fcceb",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "business_storage",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/business_storage.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-7355fabc2ed3f8f9.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/calendar_execution_fence-7355fabc2ed3f8f9.exe",
+      "bytes": 5574694,
+      "sha256": "f086941398db02da7f176b9028f6488bc62de636fd0b02f322079414103adf03",
+      "test": true,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "calendar_execution_fence",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/tests/calendar_execution_fence.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc-bootstrap.exe",
+      "bytes": 12477123,
+      "sha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+      "test": false,
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_windows-b3d43bc67b5340a1.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_windows-b3d43bc67b5340a1.exe",
+      "bytes": 3209427,
+      "sha256": "c57ba19240975215cb06e804e63fdbba83f0c4894a1ba1910e6914204f08ea1f",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "ada76b00129f844cc044ffc59036309e461b6134d045258372b44c8f0aae5f6e",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_security",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-security/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_bootstrap-30fa512284e56867.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_bootstrap-30fa512284e56867.exe",
+      "bytes": 11697988,
+      "sha256": "50c6fbe7e7964c03000e034054b2c90d0056cab89fa26e37b30fe044b37dab95",
+      "test": true,
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853168,
+      "sha256": "1fe6352326c52d5b72f97745031bf6fba0d5bbf99dd289d6ca262447275b3a91",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_presentation",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-presentation/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 7559730,
+      "sha256": "4272b371a9ccfc7e4d970c6e78115f56aa2ef6627e15433f58ecf5e082fda7b9",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_storage",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-storage/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_runtime",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-runtime/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1956037,
+      "sha256": "b3272e412851da2f24a11357c92237018efc6d08ef19ed0278c20970446bee2b",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_protocol",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-protocol/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246224,
+      "sha256": "22ad84fed5331f741ed627de220455d6937ebd69cb8c581c1bd6a1753e20dd08",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_audio",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-audio/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "f6c4ff1a81fe56c9914baa56925f9ffec7f7db3078b35aff00dbe19e1e924fd1",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_application",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-application/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1184868,
+      "sha256": "b27c5337c3a590410e0d0fb66e7f6394adc00f1be9f81c91b33567a5e0cdcc82",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_ports",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-ports/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "frozen": "/tmp/fc-round30-windows-http-semantics-snapshot/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2279668,
+      "sha256": "eff293ae193fe256bf8b3d93f2b5c8e7a0606eeabe233f01e691aed278480490",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_domain",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-domain/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    }
+  ]
+}

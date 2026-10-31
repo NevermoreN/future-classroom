@@ -1,0 +1,178 @@
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error[E0308]: mismatched types
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:81:60
+    |
+ 81 |                 let scoped = backend.begin_execution_scope(context.execution_fence());
+    |                                      --------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Arc<dyn Fn() -> bool + Send + Sync>`, found opaque type
+    |                                      |
+    |                                      arguments to this method are incorrect
+    |
+   ::: crates/fc-runtime/src/worker.rs:146:38
+    |
+146 |     pub fn execution_fence(&self) -> impl Fn() -> bool + Send + Sync + 'static {
+    |                                      ----------------------------------------- the found opaque type
+    |
+    = note:   expected struct `std::sync::Arc<(dyn std::ops::Fn() -> bool + std::marker::Send + std::marker::Sync + 'static)>`
+            found opaque type `impl (Fn() -> bool) + std::marker::Send + std::marker::Sync + 'static`
+note: method defined here
+   --> crates/fc-bootstrap/src/backend.rs:515:12
+    |
+515 |     pub fn begin_execution_scope(
+    |            ^^^^^^^^^^^^^^^^^^^^^
+
+error[E0277]: the trait bound `application::Failure: std::convert::From<fc_bootstrap::backend::web::WebServiceError>` is not satisfied
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:86:52
+    |
+ 86 |                     Err(error) => return Err(error.into()),
+    |                                                    ^^^^ unsatisfied trait bound
+    |
+help: the trait `std::convert::From<fc_bootstrap::backend::web::WebServiceError>` is not implemented for `application::Failure`
+   --> crates/fc-bootstrap/src/application.rs:188:1
+    |
+188 | enum Failure {
+    | ^^^^^^^^^^^^
+help: `application::Failure` implements trait `std::convert::From<T>`
+   --> crates/fc-bootstrap/src/application.rs:224:1
+    |
+224 | impl From<BackendError> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::backend::BackendError>`
+...
+229 | impl From<fc_bootstrap::autostart::Error> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::autostart::Error>`
+    = note: there are multiple different versions of crate `fc_bootstrap` in the dependency graph
+    = help: you can use `cargo tree` to explore your dependency tree
+    = note: required for `fc_bootstrap::backend::web::WebServiceError` to implement `std::convert::Into<application::Failure>`
+
+error[E0277]: `?` couldn't convert the error to `application::Failure`
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:91:88
+    |
+ 91 |                     service.approve(admin, review.request_id, review.identity_revision)?;
+    |                             -----------------------------------------------------------^ the trait `std::convert::From<fc_bootstrap::backend::web::WebServiceError>` is not implemented for `application::Failure`
+    |                             |
+    |                             this can't be annotated with `?` because it has type `Result<_, fc_bootstrap::backend::web::WebServiceError>`
+    |
+note: `application::Failure` needs to implement `From<fc_bootstrap::backend::web::WebServiceError>`
+   --> crates/fc-bootstrap/src/application.rs:188:1
+    |
+188 | enum Failure {
+    | ^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: `application::Failure` implements trait `std::convert::From<T>`
+   --> crates/fc-bootstrap/src/application.rs:224:1
+    |
+224 | impl From<BackendError> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::backend::BackendError>`
+...
+229 | impl From<fc_bootstrap::autostart::Error> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::autostart::Error>`
+    = note: there are multiple different versions of crate `fc_bootstrap` in the dependency graph
+    = help: you can use `cargo tree` to explore your dependency tree
+
+error[E0308]: mismatched types
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:152:56
+    |
+152 |         let mut scoped = backend.begin_execution_scope(context.execution_fence());
+    |                                  --------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Arc<dyn Fn() -> bool + Send + Sync>`, found opaque type
+    |                                  |
+    |                                  arguments to this method are incorrect
+    |
+   ::: crates/fc-runtime/src/worker.rs:146:38
+    |
+146 |     pub fn execution_fence(&self) -> impl Fn() -> bool + Send + Sync + 'static {
+    |                                      ----------------------------------------- the found opaque type
+    |
+    = note:   expected struct `std::sync::Arc<(dyn std::ops::Fn() -> bool + std::marker::Send + std::marker::Sync + 'static)>`
+            found opaque type `impl (Fn() -> bool) + std::marker::Send + std::marker::Sync + 'static`
+note: method defined here
+   --> crates/fc-bootstrap/src/backend.rs:515:12
+    |
+515 |     pub fn begin_execution_scope(
+    |            ^^^^^^^^^^^^^^^^^^^^^
+
+error[E0277]: `?` couldn't convert the error to `application::Failure`
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:215:37
+    |
+ 99 | fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> Result<Setup> {
+    |                                                                                ------------- expected `application::Failure` because of this
+...
+215 |     service.set_enabled(admin, true)?;
+    |             ------------------------^ the trait `std::convert::From<fc_bootstrap::backend::web::WebServiceError>` is not implemented for `application::Failure`
+    |             |
+    |             this can't be annotated with `?` because it has type `Result<_, fc_bootstrap::backend::web::WebServiceError>`
+    |
+note: `application::Failure` needs to implement `From<fc_bootstrap::backend::web::WebServiceError>`
+   --> crates/fc-bootstrap/src/application.rs:188:1
+    |
+188 | enum Failure {
+    | ^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: `application::Failure` implements trait `std::convert::From<T>`
+   --> crates/fc-bootstrap/src/application.rs:224:1
+    |
+224 | impl From<BackendError> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::backend::BackendError>`
+...
+229 | impl From<fc_bootstrap::autostart::Error> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::autostart::Error>`
+    = note: there are multiple different versions of crate `fc_bootstrap` in the dependency graph
+    = help: you can use `cargo tree` to explore your dependency tree
+
+error[E0277]: `?` couldn't convert the error to `application::Failure`
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:216:47
+    |
+ 99 | fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> Result<Setup> {
+    |                                                                                ------------- expected `application::Failure` because of this
+...
+216 |     let pairing = service.begin_pairing(admin)?;
+    |                           --------------------^ the trait `std::convert::From<fc_bootstrap::backend::web::WebServiceError>` is not implemented for `application::Failure`
+    |                           |
+    |                           this can't be annotated with `?` because it has type `Result<_, fc_bootstrap::backend::web::WebServiceError>`
+    |
+note: `application::Failure` needs to implement `From<fc_bootstrap::backend::web::WebServiceError>`
+   --> crates/fc-bootstrap/src/application.rs:188:1
+    |
+188 | enum Failure {
+    | ^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: `application::Failure` implements trait `std::convert::From<T>`
+   --> crates/fc-bootstrap/src/application.rs:224:1
+    |
+224 | impl From<BackendError> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::backend::BackendError>`
+...
+229 | impl From<fc_bootstrap::autostart::Error> for Failure {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `std::convert::From<fc_bootstrap::autostart::Error>`
+    = note: there are multiple different versions of crate `fc_bootstrap` in the dependency graph
+    = help: you can use `cargo tree` to explore your dependency tree
+
+error[E0599]: no method named `try_submit` found for struct `application::shared_pool::SharedPool<application::Work>` in the current scope
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:263:10
+    |
+262 |       let mut ticket = pool
+    |  ______________________-
+263 | |         .try_submit(
+    | |         -^^^^^^^^^^ method not found in `application::shared_pool::SharedPool<application::Work>`
+    | |_________|
+    |
+    |
+   ::: crates/fc-bootstrap/src/application/shared_pool.rs:6:1
+    |
+  6 |   pub(super) struct SharedPool<T: Task> {
+    |   ------------------------------------- method `try_submit` not found for this struct
+
+error[E0599]: no method named `try_submit` found for struct `application::shared_pool::SharedPool<application::Work>` in the current scope
+   --> crates/fc-bootstrap/src/application/http_business_probe.rs:330:28
+    |
+330 |                 match pool.try_submit(job, until) {
+    |                            ^^^^^^^^^^ method not found in `application::shared_pool::SharedPool<application::Work>`
+    |
+   ::: crates/fc-bootstrap/src/application/shared_pool.rs:6:1
+    |
+  6 | pub(super) struct SharedPool<T: Task> {
+    | ------------------------------------- method `try_submit` not found for this struct
+
+Some errors have detailed explanations: E0277, E0308, E0599.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap" test) due to 8 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (bin "fc-bootstrap") due to 8 previous errors

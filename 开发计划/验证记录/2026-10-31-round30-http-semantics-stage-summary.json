@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed HTTP-semantics stage only; not final Round30 source freeze, production listener or full-goal acceptance.",
+  "preservation": "Original reports, failed CLI observation, complete logs and raw hidden files remain byte-identical; original internal paths are unchanged. Separate mapping resolves archived paths.",
+  "priorIndex": {
+    "verifiedFiles": 221,
+    "sha256BeforeAppend": "a281ad5091ba26d451eef5d6c2cbb8b2113734a20804633aad9f0cb0d95e6dcf"
+  },
+  "sourceBinding": {
+    "hostAndWindowsSourceAfterExactlyEqual": true,
+    "capturedFiles": 376,
+    "bothChangedInputs": [],
+    "narrowFreezePathsMatched": [
+      "crates/fc-protocol/src/http1/response.rs",
+      "crates/fc-protocol/src/http1/response/tests.rs",
+      "crates/fc-protocol/src/web.rs",
+      "crates/fc-protocol/src/web/materials.rs",
+      "crates/fc-bootstrap/src/web_application.rs",
+      "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "crates/fc-bootstrap/src/web_application/tests.rs",
+      "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "crates/fc-bootstrap/src/web_transfer/network/tests.rs",
+      "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "crates/fc-windows/src/tls_frontdoor/http_date.rs",
+      "crates/fc-windows/src/tls_frontdoor/http_date/tests.rs"
+    ],
+    "originalKnownGaps": [
+      "HEAD response body suppression is not implemented",
+      "voice.rs direct typed upload_auth still uses old Method error helper; real Net initial admission supplies Allow before it can enter voice upload",
+      "strict first TCP five-second gate remains failed",
+      "Win7/Win10 actual runtime and formal MSVC remain unvalidated"
+    ]
+  },
+  "host": {
+    "report": "2026-10-31-round30-http-semantics-host-workspace-first.json",
+    "passed": 848,
+    "groups": 32,
+    "programs": 20,
+    "commands": [
+      {
+        "name": "compile",
+        "exitCode": 0
+      },
+      {
+        "name": "run",
+        "exitCode": 0
+      },
+      {
+        "name": "clippy",
+        "exitCode": 0
+      }
+    ],
+    "scope": "Host runtime plus Host strict Clippy only; original source/artifact bindings retained."
+  },
+  "windowsCompile": {
+    "report": "2026-10-31-round30-http-semantics-windows-workspace-first.json",
+    "exitCode": 0,
+    "elapsedSeconds": 746.8945817947388,
+    "changedInputs": [],
+    "reportedArtifacts": 22
+  },
+  "windowsStrictClippy": {
+    "scope": "Windows GNU current full workspace all-target strict Clippy, not target runtime certification",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--release",
+      "--locked",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--target-dir",
+      "/tmp/fc-round30-win-target",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "cargoBuildJobs": 2,
+    "exitCode": 0,
+    "executionResultSource": "Original exec session15402 actually returned exit_code0; no rerun or inferred exit from log",
+    "log": "/tmp/fc-round30-evidence/http-semantics-windows-clippy-first.log",
+    "logSha256": "43113719c4ee22c32294b9dd4bb01f24e712227e7e8c94b297376944ad3fab7c",
+    "sourceStillMatchesSuccessfulWorkspaceCompile": true,
+    "status": "PASS"
+  },
+  "windowsRuntime": {
+    "report": "2026-10-31-round30-http-semantics-windows-runtime-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "programs": [
+      {
+        "name": "fc_materials-f1a7d58c131e95d5.exe",
+        "binarySha256": "cd3f8da3c97f0aa430aa0f8c5cf670dc3ca9a6b22fd1bcf79f4f3b4b89b7dcf5",
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "voice_storage-9d353cd95d53ae2d.exe",
+        "binarySha256": "3fb9744e839bc21516ab30a10721599a9e27e8999c394ff984a10d3b0334abcd",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "runtime_storage-fef60aaa0dc7b0a4.exe",
+        "binarySha256": "7bfa90bb37396132545270c91caf1740c1caa65d5ce7d63c7a52254dd010acc7",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "autostart_coordinator-97dc96264f35cfe2.exe",
+        "binarySha256": "316cef2b984a5d4dc3ed6dc76d0a545da31e2119ba55b5480a57bb895fe8c019",
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+        "binarySha256": "df9c37ba2b7e398d682e194a4855a2a7e1053331a42777cd13e8f44761d50cba",
+        "passed": 288,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "voice_limits_storage-588693116cdd8d9e.exe",
+        "binarySha256": "e529b3bac7c3a76a188bd6d632153048624d7dcb35d6a6e5a9e23da288c39c9b",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "schedule_operations-705da6e05a75b965.exe",
+        "binarySha256": "690c3f316cbbc5cbc91b1c38b43d7acf1366d9b2c691383d08f8757bf9449fff",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "business_storage-878d46a6a29de0ae.exe",
+        "binarySha256": "adbfd214d4953320012ca124ec5e0adfad7ce474945eccfcaffbc6ca6e8fcceb",
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "calendar_execution_fence-7355fabc2ed3f8f9.exe",
+        "binarySha256": "f086941398db02da7f176b9028f6488bc62de636fd0b02f322079414103adf03",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_windows-b3d43bc67b5340a1.exe",
+        "binarySha256": "c57ba19240975215cb06e804e63fdbba83f0c4894a1ba1910e6914204f08ea1f",
+        "passed": 152,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_security-2889fa9301b88e80.exe",
+        "binarySha256": "ada76b00129f844cc044ffc59036309e461b6134d045258372b44c8f0aae5f6e",
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_bootstrap-30fa512284e56867.exe",
+        "binarySha256": "50c6fbe7e7964c03000e034054b2c90d0056cab89fa26e37b30fe044b37dab95",
+        "passed": 179,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_presentation-b847dfa3b68d1237.exe",
+        "binarySha256": "1fe6352326c52d5b72f97745031bf6fba0d5bbf99dd289d6ca262447275b3a91",
+        "passed": 58,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+        "binarySha256": "4272b371a9ccfc7e4d970c6e78115f56aa2ef6627e15433f58ecf5e082fda7b9",
+        "passed": 162,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "binarySha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0",
+        "passed": 33,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "binarySha256": "b3272e412851da2f24a11357c92237018efc6d08ef19ed0278c20970446bee2b",
+        "passed": 77,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_audio-e1b4eabc9ef1420f.exe",
+        "binarySha256": "22ad84fed5331f741ed627de220455d6937ebd69cb8c581c1bd6a1753e20dd08",
+        "passed": 22,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_application-fb16268b5eff3acf.exe",
+        "binarySha256": "f6c4ff1a81fe56c9914baa56925f9ffec7f7db3078b35aff00dbe19e1e924fd1",
+        "passed": 25,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_ports-15b1ad689f79c490.exe",
+        "binarySha256": "b27c5337c3a590410e0d0fb66e7f6394adc00f1be9f81c91b33567a5e0cdcc82",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_domain-367747e306a1dd0e.exe",
+        "binarySha256": "eff293ae193fe256bf8b3d93f2b5c8e7a0606eeabe233f01e691aed278480490",
+        "passed": 138,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      }
+    ],
+    "passed": 1278,
+    "failed": 0,
+    "ignored": 0,
+    "normalSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+    "independentNormalAndFullSnapshotAndTlsAndRuntimeMatch": true,
+    "all21FrozenLocalFilesActuallyRehashed": true,
+    "selfCheck": {
+      "exitCode": 0,
+      "output": [
+        "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+        "credential.dpapi-key-reopen: PASS",
+        "credential.sqlite-reopen-login-kdf: PASS",
+        "credential.password-rotation-old-lease: PASS",
+        "credential.recovery-one-use-rotation: PASS",
+        "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+        "isolated_test_cleanup=PASS"
+      ]
+    },
+    "native": {
+      "output": [
+        "native_lifecycle=PASS elapsed_ms=1246 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+        "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+      ],
+      "exitCode": 0,
+      "sessionId": 1
+    }
+  },
+  "nativeTls": {
+    "report": "2026-10-31-round30-http-semantics-tls-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "httpResponses": 38,
+    "certificateRejections": 2,
+    "exeSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+    "runnerSourceSha256": "ececa39457ffef2a782f5b14535772cb92eac49ee8ce9df5c0e3fddc9e8e27f0",
+    "conditional304": [
+      {
+        "case": "static-304-assets/index-DFFVdc8-.css",
+        "wireBodyBytes": 0,
+        "framing": "status-defined empty; CL/TE omitted by diagnostic contract"
+      },
+      {
+        "case": "static-304-index.html",
+        "wireBodyBytes": 0,
+        "framing": "status-defined empty; CL/TE omitted by diagnostic contract"
+      }
+    ],
+    "uniqueCanonicalUtcDatesCheckedByTestedRunner": 38,
+    "allowAssertionsByExactTestedRunner": {
+      "static-wrong-method": "GET",
+      "api-wrong-method-status": "GET",
+      "api-wrong-method-pairing/requests": "POST",
+      "api-wrong-method-voice/broadcasts": "GET, POST"
+    },
+    "allowEvidenceScope": "The exact archived runner asserted unique Allow headers for these 405 cases. Original event schema records statuses but does not expose a separate Allow-value field.",
+    "native": {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 38,
+      "responses": 38,
+      "peakRecords": 5
+    },
+    "business": {
+      "materialBytes": 120000,
+      "materialSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "uploadId": "815440005276047582",
+      "commandId": "9001001",
+      "receiptSha256": "979dd10adbd8e6509a61d5c67a93e8a06d0cb22365647d0cf2705315c1cfcd01",
+      "exactRetryReceipt": true,
+      "downloadBytes": 120000,
+      "downloadSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "downloadClientRetainedBodyBytes": 0,
+      "jsonCancelledReadyIds": [
+        "8605751709015209743",
+        "14696433686442253865"
+      ],
+      "subsequentBinaryBeginReusedHubSlot": true,
+      "voiceWavBytes": 16044,
+      "voiceSamples": 8000,
+      "voiceDurationMillis": 500,
+      "voicePcmAllZero": true,
+      "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"
+    },
+    "raw": {
+      "directory": "2026-10-31-round30-http-semantics-tls-first-ae4e7386dc434cdd8347517166eb8972-raw",
+      "remoteInventoryFiles": 7,
+      "allLocalFilesIncludingMetadata": 8,
+      "hiddenFiles": 4,
+      "allRemoteBytesShaAndPreservedBase64Verified": true
+    }
+  },
+  "cliRejection": {
+    "report": "2026-10-31-round30-http-semantics-windows-runtime-first-cli-rejection.json",
+    "exitCode": 2,
+    "scope": "Local CLI rejection before any remote operation; observed original tool output retained in conversation",
+    "note": "Original alias CLI rejection occurred locally before remote work. Subsequently corrected host argument is recorded by actual runtime evidence; no runner edit is inferred."
+  },
+  "cleanup": {
+    "finalWindowsAudit": {
+      "build": "26300",
+      "scratchDirectories": [],
+      "sshd": "Running",
+      "ownedProcesses": [],
+      "sshPublicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+      "ownedTasks": [],
+      "os": "Microsoft Windows 11 专业版",
+      "projectRunReadOnlySnapshot": {
+        "views": [
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry32"
+          },
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry64"
+          }
+        ]
+      },
+      "persistentKeyMode": "0o600",
+      "authentication": "PASS",
+      "publicAuthorizationUnchanged": true,
+      "projectRunUnchanged": true,
+      "status": "PASS"
+    },
+    "intermediateLocal": {
+      "status": "PASS",
+      "temporaryWebZipAbsent": true,
+      "individualNormalSnapshotAbsent": true,
+      "current20ProgramSnapshot": "retained for active actual Windows tests",
+      "webDistAndCargoCaches": "retained for continuing Round30 work; not final round cleanup"
+    },
+    "obsoleteSnapshots": {
+      "status": "PASS",
+      "scope": "Only obsolete owned Round30 executable/test metadata snapshots; all originals have prior archived source/build/runtime bindings; current20-exe snapshot retained for continuing work",
+      "directories": [
+        {
+          "directory": "/tmp/fc-round30-windows-stage-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12109141,
+              "sha256": "91145d56bc162e2dadc76eaea09569f438da9ed49b0074d36c9b894a82de2f04"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 10981712,
+              "sha256": "30ef621b40d16d678cb6ed43ffc312fd6ae9f49d344cdc5e01a1a78a25f99c3e"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-hub-transport-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12121997,
+              "sha256": "d840998a479f262a6545c402db52989dfa7330768298a661269fef251bffa85e"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11188000,
+              "sha256": "f88d0501ea2cfa3c7dc4a034e55b42a79cbb59d8bbe0e41b1d719fe3cd7ba9e8"
+            },
+            {
+              "name": "fc_windows-b3d43bc67b5340a1.exe",
+              "bytes": 3144874,
+              "sha256": "3979746153eda8fa90360bf2341885f2685952c55383c3b7f583d242a782515a"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-shared-adapter-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12188833,
+              "sha256": "9f2f7caab393fe4bb248b5a698f1ac9088f3a050bb50522b8b8ba4c73ac3d4d0"
+            },
+            {
+              "name": "fc_bootstrap-30fa512284e56867.exe",
+              "bytes": 11566205,
+              "sha256": "3d1a7c1123cfecc6b03ddfb0ca35455f2c3f64ac52070b475595ea42fbf08adc"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11188000,
+              "sha256": "073c9cd39a43a7e1a1263507e3638ef3812fcb5746de52ba2767a6154f03e0f7"
+            },
+            {
+              "name": "fc_windows-b3d43bc67b5340a1.exe",
+              "bytes": 3144874,
+              "sha256": "7e33aa0651677a6dbd9c04f32d37e6e630c9ccd2643b850022a3d6f75cd47f63"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-business-network-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12348572,
+              "sha256": "e99178caba513ca1cff9375c3b383708036f70fc0444fbe74d117a2f1ee3f39d"
+            },
+            {
+              "name": "fc_bootstrap-30fa512284e56867.exe",
+              "bytes": 11613391,
+              "sha256": "d76434add18def8c1b48ef708e42ff734668676916d465a17c83c2dda9796913"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11329232,
+              "sha256": "edb16b5ac856fada3c5514deff7a554e1fc242dd644b3416ec964da063a13551"
+            },
+            {
+              "name": "fc_windows-b3d43bc67b5340a1.exe",
+              "bytes": 3144874,
+              "sha256": "7e33aa0651677a6dbd9c04f32d37e6e630c9ccd2643b850022a3d6f75cd47f63"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-business-fixture-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12349596,
+              "sha256": "e340742968265db3e7a5c5c382319e59cacb4e0b87d9df3656af15ea7cf25885"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-download-stage-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12414218,
+              "sha256": "2b958fe9e2880614eef4de04f174f164a6db97b0c64543e4ce7ee7826e6c0e3f"
+            },
+            {
+              "name": "fc_bootstrap-30fa512284e56867.exe",
+              "bytes": 11664612,
+              "sha256": "afc2df949b02c6bd63abaf2c302f4f7073c4c726f8a3407385ed7ec29e11dff1"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11570066,
+              "sha256": "24e622cea4d7502543ade64bc0ecdcfd23b71fb228b518e434fd6520203aa889"
+            },
+            {
+              "name": "fc_windows-b3d43bc67b5340a1.exe",
+              "bytes": 3175303,
+              "sha256": "019dc1d9b97299810086ff7ed28d19ab2574cfbbdafcf596a76979dddb73196c"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-download-retry-snapshot",
+          "files": [
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11573138,
+              "sha256": "86f9e29a238b62d7424a2228dae3ae090a3100010b23fdb7e13424553c755d0c"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-static-stage-snapshot",
+          "files": [
+            {
+              "name": "fc-bootstrap.exe",
+              "bytes": 12470829,
+              "sha256": "63a44d1ed1999f1d9c7e49cead99550dadba3866c60f87706f498fe2aee6f87b"
+            },
+            {
+              "name": "fc_bootstrap-30fa512284e56867.exe",
+              "bytes": 11696639,
+              "sha256": "505090f52b234cda0451cf429f8bb846c36275d89fa4ad67d0fe8bfadc4717ef"
+            },
+            {
+              "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+              "bytes": 11634562,
+              "sha256": "a01527d45b75537f6f9a52d7f38eaa12fb92676d61d9c37caa9003826afb26d6"
+            },
+            {
+              "name": "fc_windows-b3d43bc67b5340a1.exe",
+              "bytes": 3175303,
+              "sha256": "1267151bca23b8e6cf1809cae042456d9f17c38061e6b50106e6bf89b2f579c6"
+            },
+            {
+              "name": "tests.jsonl",
+              "bytes": 2710,
+              "sha256": "563983c001cec78a9bbfb471cc4bc1ca2910f42b0c5966d736093bb68ccc693d"
+            }
+          ],
+          "absent": true
+        },
+        {
+          "directory": "/tmp/fc-round30-windows-runtime-fixture-snapshot",
+          "files": [
+            {
+              "name": "fc_runtime-a09be73363edd23a.exe",
+              "bytes": 1430273,
+              "sha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0"
+            },
+            {
+              "name": "tests.jsonl",
+              "bytes": 898,
+              "sha256": "03be5d69626a34f93d346e6b7f2865155daaeb1251e006f39814794739756c69"
+            }
+          ],
+          "absent": true
+        }
+      ],
+      "removedBytes": 229227852,
+      "retained": [
+        "/tmp/fc-round30-windows-http-semantics-snapshot",
+        "/tmp/fc-round30-core-target",
+        "/tmp/fc-round30-win-target",
+        "/tmp/fc-round30-web-verified-dist",
+        "/tmp/fc-round30-evidence"
+      ],
+      "sshAuthorization": "retained unchanged"
+    },
+    "scope": "These are exactly the recorded cleanup scopes. Nine obsolete local snapshots and temporary ZIP/duplicate individual normal were removed earlier; current20-program snapshot, two Cargo caches, verified web dist and evidence are retained for continued Round30. No final-round cleanup is claimed.",
+    "archiverActions": "Local copy/hash/index only. Original evidence and current frozen EXEs are not deleted. No process, service, port, trust store, Run key, SSH authorization or private key is mutated."
+  },
+  "remainingBoundaries": [
+    "HEAD response body suppression is not implemented",
+    "voice.rs direct typed upload_auth still uses old Method error helper; real Net initial admission supplies Allow before it can enter voice upload",
+    "strict first TCP five-second gate remains failed",
+    "Win7/Win10 actual runtime and formal MSVC remain unvalidated",
+    "No physical Seewo/visible desktop/audio playback acceptance is supplied by this phase.",
+    "Earlier Chromium6/33 used routed APIs/cache disabled; earlier WinEdge2/13 used true cache but Python fixture304 still emitted CL0. Those historical browser reports remain unchanged and are not retrospectively corrected by this native HTTP phase.",
+    "This is independent stage evidence, not a final whole-workspace freeze or release package."
+  ],
+  "priorBrowserStageSummary": "2026-10-31-round30-web-upgrade-stage-summary.json",
+  "excludedCandidates": []
+}

@@ -1,0 +1,46 @@
+{
+  "status": "STATIC_CHECKS_PASSED_NOT_EXECUTED",
+  "checks": [
+    "YAML parsed with BaseLoader (on preserved)",
+    "manual own-repository-only hosted runner",
+    "read-only token and non-persisted checkout credentials",
+    "official actions full 40-character pins",
+    "exact project Rust/target and explicit static CRT",
+    "release locked workspace compile-only tests and normal product",
+    "fmt, architecture and strict Clippy commands present",
+    "always cleanup/upload and fourteen-day artifact retention",
+    "owned-root-only cleanup and immutable raw command logs",
+    "source/toolchain/SDK/PE hashes and compile-only NOT_RUN labels",
+    "bounded per-stream logs and pre-copy executable payload cap"
+  ],
+  "files": {
+    ".github/workflows/windows-msvc.yml": {
+      "bytes": 3783,
+      "sha256": "3d5856f84a3215c3d6f3fc099b5bb65e7d55abebea74f52d1cc06eb46b67bb0a"
+    },
+    "scripts/windows-msvc-ci.ps1": {
+      "bytes": 25878,
+      "sha256": "7144be936a918c9ac574ebe3e0d7d3d548d66ee8e080e07749c945a9a735276e"
+    }
+  },
+  "not_run": [
+    "PowerShell script execution",
+    "MSVC compilation",
+    "GitHub Actions dispatch",
+    "test executables",
+    "remote repository API/push"
+  ],
+  "independent_parser": {
+    "parent_report": "root-msvc-script-parse-third.json",
+    "parent_reported": "Windows PowerShell 5.1 AST ParseInput zero errors; parse only, PS1 not executed"
+  },
+  "official_sources": [
+    "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "https://github.com/actions/checkout/releases/tag/v7.0.1",
+    "https://github.com/actions/upload-artifact/releases/tag/v7.0.2",
+    "https://github.com/rust-lang/rust/releases/tag/1.97.1",
+    "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+    "https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes",
+    "https://learn.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs"
+  ]
+}

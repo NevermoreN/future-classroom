@@ -1,0 +1,73 @@
+{
+  "status": "SOURCE_FROZEN_SYNTAX_TRANSFORM_PASSED_NOT_TYPECHECKED_OR_TESTED",
+  "files": {
+    "web/src/api/protocol.ts": {
+      "bytes": 8023,
+      "sha256": "9e7375de562f479f07e8637ade1707cf066afbe206dc00a6486ce5e5df8d7f29"
+    },
+    "web/tests/protocol.test.ts": {
+      "bytes": 6282,
+      "sha256": "06388724db5ffd3747c1282841ce4025c50fd5d3120fe6303cae675818a84922"
+    },
+    "web/src/api/content-protocol.ts": {
+      "bytes": 10720,
+      "sha256": "8e67c635da345d8c5ea71f3c537153d7e7abf889dd424e3efe8e493f8c96a179"
+    },
+    "web/tests/content-protocol.test.ts": {
+      "bytes": 7748,
+      "sha256": "b79691285826d9b6663f92f9b2a462f624a04254488f1d55e8d8d91780215d14"
+    },
+    "web/src/api/material-protocol.ts": {
+      "bytes": 11203,
+      "sha256": "3f7adc04cc3cf233c5c66db150a2f8fc6f76fe9e964138dccb94420985a56a4d"
+    },
+    "web/tests/material-protocol.test.ts": {
+      "bytes": 9811,
+      "sha256": "52c88e8d4c5a6435f45ee07f4d332dd2a9521bda1e315071fc5a50aae9344f20"
+    },
+    "web/src/api/voice-protocol.ts": {
+      "bytes": 8569,
+      "sha256": "2e7dbb5f4ed33bd159f6e833b5bf22565c3522c5f5bb342f1a563427c0d9c555"
+    },
+    "web/tests/voice-protocol.test.ts": {
+      "bytes": 8426,
+      "sha256": "80d3b3dadd5bcafd739c2563f6a3b6d1e03c82a70bf48f90fe502ceb6b2ff75e"
+    },
+    "web/src/api/controller.ts": {
+      "bytes": 7725,
+      "sha256": "c34b147305470a3afbf0ddaffa08957b91135123c60fc7a6adfbf7e551bf20ff"
+    },
+    "web/tests/controller.test.ts": {
+      "bytes": 11053,
+      "sha256": "d53d858971ba27faf5b52c9799a53e980a0c414c4f1a8318900336befab2f97b"
+    }
+  },
+  "interface": {
+    "fault": "ProtocolVersionFault extends ProtocolFault",
+    "message": "白板与页面版本不兼容，请刷新页面；如仍不兼容请联系管理员升级。",
+    "versionHelper": "protocolVersions(first:unknown,...others:unknown[]):void",
+    "pairingView": "error.refreshRequired?:boolean; true only for instanceof ProtocolVersionFault"
+  },
+  "contracts": [
+    "exact field and type envelope guards preserved",
+    "all advertised schema/API/UI versions checked by same helper; any malformed version remains ordinary ProtocolFault even mixed with positive incompatible version",
+    "positive safe integer version!=1 is typed version fault",
+    "Pairing compatibility failure prevents session read and pairing POST; typed version error clears compatibility and canPair:false",
+    "version-unknown pairing create/poll outcomes explicitly unconfirmed and never automatically resent",
+    "version-unknown logout drops authenticated UI mirror, explicitly unconfirmed and never automatically resent",
+    "ordinary protocol/network faults never inferred as version mismatch from message text"
+  ],
+  "checks": [
+    "git diff --check passed for ten owned files",
+    "Node22.20.0 stripTypeScriptTypes transform passed10/10; syntax only"
+  ],
+  "dependenciesAdded": false,
+  "repositoryNodeModulesCreated": false,
+  "notRun": [
+    "tsc typecheck",
+    "Vitest",
+    "npm build",
+    "Cargo",
+    "remote Windows/browser"
+  ]
+}

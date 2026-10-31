@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scope": "first flag-form rejection observed again; correct self-test subcommand is local only",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/windows-test-edge-owner.py",
+        "--self-test"
+      ],
+      "exitCode": 2,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 142,
+        "sha256": "8f9c77f58dd6294c4d8498c54d23b8a47296ccd71ffc0baa91c3fb728fc16384",
+        "base64": "dXNhZ2U6IHdpbmRvd3MtdGVzdC1lZGdlLW93bmVyLnB5IFstaF0ge3J1bixzdG9wLHNlbGYtdGVzdH0gLi4uCndpbmRvd3MtdGVzdC1lZGdlLW93bmVyLnB5OiBlcnJvcjogdGhlIGZvbGxvd2luZyBhcmd1bWVudHMgYXJlIHJlcXVpcmVkOiBtb2RlCg=="
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/windows-test-edge-owner.py",
+        "self-test"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 265,
+        "sha256": "72ae248b21cec323dbd7bcc848d18e2c0752a523889715ff247432ec039fb3cb",
+        "base64": "eyJzdGF0dXMiOiAiUFVSRV9TVEFUSUNfQ0hFQ0tTX1BBU1MiLCAid2luZG93cyI6ICJOT1RfUlVOIiwgImNzaGFycENvbXBpbGUiOiAiTk9UX1JVTiIsICJzb3VyY2VTaGEyNTYiOiAiNDY4OWNkN2FhN2UwYTQ2ZGExMDNlNDU5ZTY5MmFhNjdkNzAwNDFiMDZjMWYyMGE0MzJjNWI5MmExNTNiOTc1NSIsICJ0ZXN0ZWRQcm90b3R5cGVTaGEyNTYiOiAiZmE2YTA2ZDhkODE4NjkxNTFjZWY1NGY4ZDEyZTdiMGQ5Y2VhODc0OWZjZDhmMTdiN2ViOGE5NjUzM2RhZjJlMCJ9Cg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

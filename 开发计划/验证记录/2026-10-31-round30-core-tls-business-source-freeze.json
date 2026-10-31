@@ -1,0 +1,56 @@
+{
+  "status": "SOURCE_FROZEN_LOCAL_PURE_CHECKS_PASSED",
+  "file": "scripts/windows-tls-business-probe.py",
+  "bytes": 37917,
+  "sha256": "ff4961a7ca86fa1bb8970f6d9859ffd54e67088d578253ecc38012d97379640c",
+  "checks": [
+    "Python AST parse passed",
+    "self-test five pure contract groups passed",
+    "CLI --help passed",
+    "source privacy/trust/framing/ownership invariants checked"
+  ],
+  "selfTest": {
+    "status": "PURE_LOCAL_CHECKS_PASS",
+    "checks": [
+      "fragmented/exact-CL response framing",
+      "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+      "valid 1600-sample silent PCM fixture",
+      "120000-byte request fragmentation and head/body coalescing",
+      "READY identity and actual-drain final ledger required"
+    ],
+    "tls": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "business": "NOT_RUN"
+  },
+  "notRun": [
+    "remote SSH or Windows execution",
+    "TLS network exchanges",
+    "native business binary",
+    "browser acceptance",
+    "audio playback",
+    "strict native TCP-to-head 5-second gate",
+    "Win7/Win10 compatibility"
+  ],
+  "reuse": {
+    "ownershipHelper": "scripts/windows-tls-probe.py",
+    "helperSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+    "exactTemplateChanges": [
+      "LAUNCH lifecycle flag -> business flag",
+      "STOP exact nonce-command flag -> business flag"
+    ],
+    "privateKeyExport": false
+  },
+  "runtimeCases": [
+    "public status200",
+    "private unauth session401",
+    "bad Origin pairing403",
+    "real pairing202 and >=650ms poll until200+secure cookie",
+    "authenticated session/CSRF200",
+    "120000-byte material reserve201 + fragmented/coalesced binary upload200",
+    "material append200/201 committed content hash + identical retry receipt",
+    "changed classes same command409 IDEMPOTENCY_CONFLICT",
+    "RIFF PCM16k mono16bit 1600zero samples voice upload201; no broadcast",
+    "actual wrong-CA and wrong-hostname SSLCertVerificationError"
+  ],
+  "cleanup": "same exact process STOP -> complete original raw byte/hash download -> owned MY certificate/CNG key/root removal, no root-trust/HTTP.sys/firewall/SSH changes; failures retain owned evidence root"
+}

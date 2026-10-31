@@ -53,6 +53,13 @@ fn reason(status: u16) -> &'static str {
 /// connection/framing or upgrade negotiation field is accepted. All automatic
 /// fields and the status line count towards the same 16KiB limit.
 pub fn encode_head(head: &ResponseHead) -> Result<Vec<u8>, ResponseError> {
+    encode_head_inner(head, false)
+}
+
+fn encode_head_inner(
+    head: &ResponseHead,
+    for_head_request: bool,
+) -> Result<Vec<u8>, ResponseError> {
     head.validate().map_err(|error| match error {
         HttpError::TooLarge => ResponseError::TooLarge,
         _ => ResponseError::InvalidHead,
@@ -83,9 +90,10 @@ pub fn encode_head(head: &ResponseHead) -> Result<Vec<u8>, ResponseError> {
         }
     }
     let status = format!("HTTP/1.1 {} {}\r\n", head.status, reason(head.status));
-    // RFC framing forbids Content-Length on a 204. The existing port restricts
-    // 304 to length zero; this adapter does not infer a selected representation.
-    let length = if head.status == 204 {
+    // On HEAD/304, Content-Length would describe the corresponding GET/200
+    // representation, not the zero wire body. No selected length is inferred.
+    // RFC 9110 also forbids the field on a 204.
+    let length = if for_head_request || matches!(head.status, 204 | 304) {
         String::new()
     } else {
         format!("Content-Length: {}\r\n", head.content_length)
@@ -165,6 +173,21 @@ impl BodySender {
     /// A successfully encoded, bounded head is frozen before any body admission.
     pub fn new(token: RequestToken, head: &ResponseHead) -> Result<Self, ResponseError> {
         let encoded = encode_head(head)?;
+        Self::from_encoded(token, encoded, head.content_length)
+    }
+    /// For an original HEAD request: validate and freeze the complete response
+    /// head, omit Content-Length and admit no wire body regardless of the
+    /// supplied response length. Explicit EOF is still required for logical
+    /// completion; it proves neither header transmission nor native retirement.
+    pub fn new_for_head(token: RequestToken, head: &ResponseHead) -> Result<Self, ResponseError> {
+        let encoded = encode_head_inner(head, true)?;
+        Self::from_encoded(token, encoded, 0)
+    }
+    fn from_encoded(
+        token: RequestToken,
+        encoded: Vec<u8>,
+        total: u64,
+    ) -> Result<Self, ResponseError> {
         let sender = NEXT_SENDER
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
                 next.checked_add(1)
@@ -175,7 +198,7 @@ impl BodySender {
             token,
             sender,
             head: encoded,
-            total: head.content_length,
+            total,
             acknowledged: 0,
             sequence: 0,
             flight: None,

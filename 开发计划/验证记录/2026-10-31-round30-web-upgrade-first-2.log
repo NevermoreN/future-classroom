@@ -1,0 +1,27 @@
+
+> future-classroom-teacher@0.1.0 build
+> tsc --noEmit && node scripts/licenses.mjs && vite build && node scripts/budget.mjs
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2057 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/favicon-CXuYoSfB.svg       0.28 kB │ gzip:   0.21 kB
+dist/assets/wav-worker-LSywWbpJ.js     0.88 kB
+dist/index.html                        1.23 kB │ gzip:   0.77 kB
+dist/assets/pcm-worklet-B7E4LRoP.js    1.72 kB
+dist/assets/index-DFFVdc8-.css        38.83 kB │ gzip:   9.17 kB
+dist/assets/index-C3GlEF2q.js        409.09 kB │ gzip: 123.89 kB
+
+✓ built in 494ms
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "assetCount": 6,
+  "totalBytes": 452054,
+  "totalLimitBytes": 5242880,
+  "gzipJsCssBytes": 132917,
+  "gzipJsCssLimitBytes": 524288,
+  "scope": "static build only; listener, wire TLS, real browser pairing not established by this report"
+}

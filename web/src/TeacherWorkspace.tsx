@@ -49,6 +49,11 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
   }, [api, session.csrf])
   const canManage = session.principal.role !== 'USER'
   function consent() { return !(owner.current?.hasRiskyDraft() || materialOwner.current?.hasRiskyDraft() || voiceOwner.current?.hasRiskyDraft()) || window.confirm('本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？') }
+  function refreshPage() {
+    if (!consent()) return
+    owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true)
+    window.location.reload()
+  }
   function open(kind: ContentKind) { if (!canManage || !consent()) return; materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setPage(kind); void owner.current?.loadScopes(kind, 0, true) }
   function home() { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); setPage('HOME') } }
   function openMaterials() { if (!canManage || !consent()) return; owner.current?.leave(true); voiceOwner.current?.leave(true); setPage('MATERIALS'); void materialOwner.current?.loadScopes(0, true) }
@@ -57,7 +62,7 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
   function reload(offset = 0) { if (page !== 'HOME' && page !== 'MATERIALS' && page !== 'VOICE' && consent()) void owner.current?.loadScopes(page, offset, true) }
   const scopes = state.page
   return <main id="main-content" className="workspace teacher-workspace">
-    <div className="workspace-heading"><div><p className="eyebrow">{page === 'HOME' ? '你的课堂，从这里连接' : '以白板实际日期与授权范围为准'}</p><h1>{page === 'HOME' ? `你好，${session.principal.displayName}` : page === 'VOICE' ? '语音播报' : page === 'MATERIALS' ? '我的课堂资料' : page === 'HOMEWORK' ? '我的今日作业' : '管理今日提醒'}<span className="hello-dot">。</span></h1><p>{page === 'HOME' ? '账号与内容范围由白板确认，提交结果与屏幕显示分开核验。' : page === 'VOICE' ? '核对白板当前班级，按住说话、松开发送。' : page === 'MATERIALS' ? '选择老师与科目目录，上传、校验后添加；下载到当前设备。' : page === 'HOMEWORK' ? '选择实际老师、班级和科目；每次保存检查当前修订。' : '共同提醒覆盖受管班级，不受你本人任教班级限制。'}</p></div><div className="workspace-top-actions">{page !== 'HOME' && <Button variant="outline" onClick={home}><ArrowLeft />返回工作台</Button>}<Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onRefresh() } }}><RefreshCw />核对会话</Button></div></div>
+    <div className="workspace-heading"><div><p className="eyebrow">{page === 'HOME' ? '你的课堂，从这里连接' : '以白板实际日期与授权范围为准'}</p><h1>{page === 'HOME' ? `你好，${session.principal.displayName}` : page === 'VOICE' ? '语音播报' : page === 'MATERIALS' ? '我的课堂资料' : page === 'HOMEWORK' ? '我的今日作业' : '管理今日提醒'}<span className="hello-dot">。</span></h1><p>{page === 'HOME' ? '账号与内容范围由白板确认，提交结果与屏幕显示分开核验。' : page === 'VOICE' ? '核对白板当前班级，按住说话、松开发送。' : page === 'MATERIALS' ? '选择老师与科目目录，上传、校验后添加；下载到当前设备。' : page === 'HOMEWORK' ? '选择实际老师、班级和科目；每次保存检查当前修订。' : '共同提醒覆盖受管班级，不受你本人任教班级限制。'}</p></div><div className="workspace-top-actions">{page !== 'HOME' && <Button variant="outline" onClick={home}><ArrowLeft />返回工作台</Button>}<Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onRefresh() } }}><RefreshCw />核对会话</Button><Button variant="outline" onClick={refreshPage}><RefreshCw />刷新页面</Button></div></div>
     {page === 'HOME' ? <>
       <section className="identity-summary" aria-label="当前授权"><div className="avatar"><GraduationCap size={28} /></div><div><strong>{session.principal.displayName}</strong><span>{roles[session.principal.role]}</span></div><div className="summary-divider" /><div><small>白板当前班级</small><strong>{session.currentClassId === null ? '尚未绑定班级' : `班级 ID ${session.currentClassId}`}</strong></div><span className="verified"><ShieldCheck size={15} />白板已确认</span></section>
       <div className="section-label"><h2>教师工作台</h2><span>保存、查询与结果核对</span></div>

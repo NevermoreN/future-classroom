@@ -1,0 +1,646 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Finite raw HTTPS API diagnostic through owned SSH loopback forward",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "NOT_TESTED",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-a685ececa05e4713af6b903b0dbd9496",
+  "exeSha256": "e340742968265db3e7a5c5c382319e59cacb4e0b87d9df3656af15ea7cf25885",
+  "runnerSourceSha256": "f278a2bda836105c5d68a8b9f4893a28a7aa9c707e73df35e2786ee5454782ff",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "events": [
+    {
+      "case": "public-status",
+      "status": "PASS",
+      "method": "GET",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 69,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 223,
+      "responseWireSha256": "9bd9ee00f0e45538b6bf21c1c8f0c59271866ae6192eba48d17a09e24bde3f39",
+      "responseBodyBytes": 75,
+      "responseBodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 79741781
+    },
+    {
+      "case": "unauthorized-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 70,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 199,
+      "responseWireSha256": "ebbe08ddb03fe6226ccd0ded0d55b7336315a0ee4b1e51b1b6d13f5654a086f1",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 111901545
+    },
+    {
+      "case": "bad-origin-pairing",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "0a8401a252594e1374158546b83942cef2d3fb8b503c709fe9fc57ce590b853d",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 131,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 403,
+      "responseWireBytes": 193,
+      "responseWireSha256": "9e244d6d0d91cc3b63a324afec2c058e2316e6ce05505980037ddcfd9996a5b1",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 110970157
+    },
+    {
+      "case": "pairing-request",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "0a8401a252594e1374158546b83942cef2d3fb8b503c709fe9fc57ce590b853d",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 133,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 202,
+      "responseWireBytes": 308,
+      "responseWireSha256": "9ea0e7469910141420f76598b39e6dca706ac9286dc2963fe4f4603b262f77bc",
+      "responseBodyBytes": 153,
+      "responseBodySha256": "aed16df9dae3013d6cf14e947df6968849725f57dcea0e6d01ea2dd2533b5ed1",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 76041859
+    },
+    {
+      "case": "pairing-poll-1",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests/2/poll",
+      "requestBodyBytes": 99,
+      "requestBodySha256": "afd857d115e29d8f5861e219350733c1b3e67264a925715b81af43688377b893",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 139,
+      "coalescedHeaderTailBodyBytes": 99,
+      "httpStatus": 200,
+      "responseWireBytes": 333,
+      "responseWireSha256": "60bfde4d71b5a52331dfe22775acf1944706fd2c71c50dcc772e0c745245bfd2",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "02151c8ea64179d2d4c57898e15e5a53992a0f321cc4c7666c320c84a7acca0f",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 75775508
+    },
+    {
+      "case": "authenticated-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 167,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 425,
+      "responseWireSha256": "6befc87c158735d0d128f9b08af3dbaebc3bcd7cb45365bb3dbc0a2e107614d7",
+      "responseBodyBytes": 276,
+      "responseBodySha256": "996381ad5efb7d9651424fce0a427bbe8fde677bcc63f53416507f14ba2d556a",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 78860985
+    },
+    {
+      "case": "material-create",
+      "status": "PASS",
+      "method": "POST",
+      "route": "materials/uploads/1/1",
+      "requestBodyBytes": 67,
+      "requestBodySha256": "85be9db90476a8e58537fe8831176be8b0ada3585bf503ad13971041d0189fb1",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 311,
+      "coalescedHeaderTailBodyBytes": 67,
+      "httpStatus": 201,
+      "responseWireBytes": 275,
+      "responseWireSha256": "c230c56b627b19c9db1568a233b012259b0ab9de0154bcc5924270467a2f175a",
+      "responseBodyBytes": 121,
+      "responseBodySha256": "71d15620e71221063f15c9526480fada11bf2a847cc97a275afa39defc3775c5",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 76548139
+    },
+    {
+      "case": "material-binary-stream",
+      "status": "PASS",
+      "method": "POST",
+      "route": "materials/uploads/9204013303645827317/bytes",
+      "requestBodyBytes": 120000,
+      "requestBodySha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 12,
+      "maxSendCallBytes": 16384,
+      "coalescedHeaderTailBodyBytes": 4096,
+      "httpStatus": 200,
+      "responseWireBytes": 235,
+      "responseWireSha256": "12762de3a70bc22641361e66491dcba44de51a3de270c89bdbea9372689f2892",
+      "responseBodyBytes": 87,
+      "responseBodySha256": "f2d58d72f6d8eb5bc85e4926744b7cd1d19888bf217922b27dee2528b1448d28",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 115611547
+    },
+    {
+      "case": "material-append",
+      "status": "PASS",
+      "method": "POST",
+      "route": "materials/folders/1/1/append",
+      "requestBodyBytes": 98,
+      "requestBodySha256": "de3851a31b00089ade578641efd43b5101a6ee63ed48c56787ea9225586c5dbc",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 318,
+      "coalescedHeaderTailBodyBytes": 98,
+      "httpStatus": 200,
+      "responseWireBytes": 611,
+      "responseWireSha256": "1d209d98232c9df7c7654b0e29937e4bc894e76e212fce28ec31196b96637c46",
+      "responseBodyBytes": 462,
+      "responseBodySha256": "ed36f9a699a720075ec97bb383c942653bb2d1ad6446179940c0edc1ef97a6a3",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 81510954
+    },
+    {
+      "case": "material-append-exact-retry",
+      "status": "PASS",
+      "method": "POST",
+      "route": "materials/folders/1/1/append",
+      "requestBodyBytes": 98,
+      "requestBodySha256": "de3851a31b00089ade578641efd43b5101a6ee63ed48c56787ea9225586c5dbc",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 318,
+      "coalescedHeaderTailBodyBytes": 98,
+      "httpStatus": 200,
+      "responseWireBytes": 611,
+      "responseWireSha256": "1d209d98232c9df7c7654b0e29937e4bc894e76e212fce28ec31196b96637c46",
+      "responseBodyBytes": 462,
+      "responseBodySha256": "ed36f9a699a720075ec97bb383c942653bb2d1ad6446179940c0edc1ef97a6a3",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 76189464
+    },
+    {
+      "case": "material-append-changed-classes",
+      "status": "PASS",
+      "method": "POST",
+      "route": "materials/folders/1/1/append",
+      "requestBodyBytes": 98,
+      "requestBodySha256": "9a311242bd09c6dc91c2af8b382b74b3f272f99515a4d8b1a5f2ce45f15ecfe1",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 318,
+      "coalescedHeaderTailBodyBytes": 98,
+      "httpStatus": 409,
+      "responseWireBytes": 203,
+      "responseWireSha256": "f7f3634cb41744e1184f752915f526593915b0b86462b924a0884e4bd4e9cc94",
+      "responseBodyBytes": 49,
+      "responseBodySha256": "ea3c134573d8d3513cee0bfdf12a8dcd76198e6fa16453372c75f7bcdc002b97",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 114023682
+    },
+    {
+      "case": "silent-voice-upload-only",
+      "status": "PASS",
+      "method": "POST",
+      "route": "voice/uploads?classId=1",
+      "requestBodyBytes": 16044,
+      "requestBodySha256": "358c6dcef4442790decb0a5c03fb320154f9d1dd5b4618e301f9e6661a413cb5",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49322",
+      "clientSendCalls": 5,
+      "maxSendCallBytes": 11948,
+      "coalescedHeaderTailBodyBytes": 4096,
+      "httpStatus": 201,
+      "responseWireBytes": 334,
+      "responseWireSha256": "28b87ed7cb9e06b64d7e9205a60f82f93a55dd62f9e0b56023ecb231604a300c",
+      "responseBodyBytes": 180,
+      "responseBodySha256": "d21681a291c05e572377b1a53b4b3813a13af354c71d6a1759c10c79c1238647",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "forwardObservationNanos": 90836108
+    },
+    {
+      "case": "wrong-ca-rejected",
+      "status": "PASS",
+      "serverHostname": "localhost",
+      "trustSource": "default client roots, fixture not added",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 18,
+      "verifyMessage": "self-signed certificate"
+    },
+    {
+      "case": "wrong-hostname-rejected",
+      "status": "PASS",
+      "serverHostname": "wrong.invalid",
+      "trustSource": "only owned public PEM",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 62,
+      "verifyMessage": "Hostname mismatch, certificate is not valid for 'wrong.invalid'."
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-a685ececa05e4713af6b903b0dbd9496",
+  "uploadedScriptSha256": {
+    "cleanup": "6b7afbf1f50e315c9ef677aa48c05012d352d9681251528c1aa37b3dacadfa40",
+    "stop": "f54c44f8c5c2732ed585af1f5c466c281b0b4af171a5534ef2febde29f55c814",
+    "capture": "d079fa0699a6231abb3956b648c581c116611794731e4d712fea44a821263d7d",
+    "setup": "fbffa9d9a8bb3c9b1669496bb336aefb8671b0fabcff7e7896ffc924eded7f55",
+    "launch": "a9e9480a54f09ee0203fb5494ce1cf5890f2bc7923662376ae4956def343de7e"
+  },
+  "controlScriptsParse": "PASS",
+  "fixture": {
+    "thumbprint": "7E86D2840624BE227B94CD8A41045E291DC4CAB7",
+    "keyName": "FutureClassroom-Test-TLS-a685ececa05e4713af6b903b0dbd9496-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "9b76b3a306cf074c79882e29498053c85acf552b6bf67d88ad8f21dc33361f32",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "ready": [
+    {
+      "port": 49322,
+      "generation": 1,
+      "marker": "FutureClassroom-Test-TLS-a685ececa05e4713af6b903b0dbd9496",
+      "origin": "https://localhost:49322",
+      "basePath": "/fc/",
+      "classId": "1",
+      "subjectId": "1",
+      "loginName": "probe"
+    }
+  ],
+  "nativeReports": [
+    {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 12,
+      "responses": 12,
+      "peakRecords": 5
+    }
+  ],
+  "nativeProcessExits": [
+    {
+      "code": 0
+    }
+  ],
+  "business": {
+    "materialBytes": 120000,
+    "materialSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+    "uploadId": "9204013303645827317",
+    "commandId": "9001001",
+    "receiptSha256": "ed36f9a699a720075ec97bb383c942653bb2d1ad6446179940c0edc1ef97a6a3",
+    "exactRetryReceipt": true,
+    "voiceWavBytes": 16044,
+    "voiceSamples": 8000,
+    "voiceDurationMillis": 500,
+    "voicePcmAllZero": true,
+    "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"
+  },
+  "nativeDebugLines": [
+    "TLS_BUSINESS_REPORT NetworkReport { heads: 12, admissions: 10, body_acks: 19, responses: 12, closed: 52, retired: 52, rearms: 48, stale_events: 0, active_records: 0, peak_records: 5, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1121460 }"
+  ],
+  "native": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 12,
+    "responses": 12,
+    "peakRecords": 5
+  },
+  "nativeProcessExit": {
+    "code": 0
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 780,
+      "observedBytes": 780,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "1df77e5f7625ea724f3270448417cd792517208aa09408e0641f61889cff2df0",
+      "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NDkzMjIsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1hNjg1ZWNlY2EwNWU0NzEzYWY2YjkwM2IwZGJkOTQ5NiIsInBhaXJpbmdDb2RlIjoiODEzMzg5NjYiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo0OTMyMiIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIn0NClRMU19CVVNJTkVTU19SRVBPUlQgTmV0d29ya1JlcG9ydCB7IGhlYWRzOiAxMiwgYWRtaXNzaW9uczogMTAsIGJvZHlfYWNrczogMTksIHJlc3BvbnNlczogMTIsIGNsb3NlZDogNTIsIHJldGlyZWQ6IDUyLCByZWFybXM6IDQ4LCBzdGFsZV9ldmVudHM6IDAsIGFjdGl2ZV9yZWNvcmRzOiAwLCBwZWFrX3JlY29yZHM6IDUsIHBlbmRpbmdfam9iczogMCwgY2xlYW51cF9wZW5kaW5nOiAwLCByZXRhaW5lZF9jbGVhbnVwOiAwLCBuYXRpdmVfZHJhaW5lZDogdHJ1ZSwgc3RvcHBpbmc6IHRydWUsIG93bmVkX2J5dGVzOiAxMTIxNDYwIH0NClRMU19CVVNJTkVTU19QQVNTIHsicGh5c2ljYWxOYXRpdmVEcmFpbiI6dHJ1ZSwic2hhcmVkV29ya2VycyI6Miwid29ya2VySm9pbiI6dHJ1ZSwiaHViUGVuZGluZyI6MCwicXVhcmFudGluZWQiOjAsInNldHVwQ2xlYW51cCI6dHJ1ZSwiYXBwcm92YWxzIjoxLCJoZWFkcyI6MTIsInJlc3BvbnNlcyI6MTIsInBlYWtSZWNvcmRzIjo1fQ0KVExTX0ZST05URE9PUl9QUk9DRVNTX0VYSVQgeyJjb2RlIjowfQ0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 738,
+      "sha256": "22480634d178e5bb0a4a0912e47c88e3771e5478107994ede5a3652467e7714d"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "aa537f7c3802f35b27f2007b23b51c00ed96e9aa67f195b99451741733859337"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "47c4313e74d56d5ca6343c6e37ffcf26fe7e75ac1941bf5c5e4c8d845984efda"
+    },
+    "tls.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "68ac96599ca7f9247aa1f2564d66d9b0e49e7bc0b74f849ad3e87251e5ed5718"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "c0428a80df952225fb05ccdc98d938c91d743f48dc6385519a6800b3379afe1e"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "46cbc51008b26d413e2571df38a72f6f03a93b0f1cb25c1a83a4c034eb9ab6fa"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 738,
+          "sha256": "22480634d178e5bb0a4a0912e47c88e3771e5478107994ede5a3652467e7714d"
+        },
+        "downloaded": {
+          "bytes": 738,
+          "sha256": "22480634d178e5bb0a4a0912e47c88e3771e5478107994ede5a3652467e7714d"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/tls.stdout",
+        "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NDkzMjIsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1hNjg1ZWNlY2EwNWU0NzEzYWY2YjkwM2IwZGJkOTQ5NiIsInBhaXJpbmdDb2RlIjoiODEzMzg5NjYiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo0OTMyMiIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIn0KVExTX0JVU0lORVNTX1JFUE9SVCBOZXR3b3JrUmVwb3J0IHsgaGVhZHM6IDEyLCBhZG1pc3Npb25zOiAxMCwgYm9keV9hY2tzOiAxOSwgcmVzcG9uc2VzOiAxMiwgY2xvc2VkOiA1MiwgcmV0aXJlZDogNTIsIHJlYXJtczogNDgsIHN0YWxlX2V2ZW50czogMCwgYWN0aXZlX3JlY29yZHM6IDAsIHBlYWtfcmVjb3JkczogNSwgcGVuZGluZ19qb2JzOiAwLCBjbGVhbnVwX3BlbmRpbmc6IDAsIHJldGFpbmVkX2NsZWFudXA6IDAsIG5hdGl2ZV9kcmFpbmVkOiB0cnVlLCBzdG9wcGluZzogdHJ1ZSwgb3duZWRfYnl0ZXM6IDExMjE0NjAgfQpUTFNfQlVTSU5FU1NfUEFTUyB7InBoeXNpY2FsTmF0aXZlRHJhaW4iOnRydWUsInNoYXJlZFdvcmtlcnMiOjIsIndvcmtlckpvaW4iOnRydWUsImh1YlBlbmRpbmciOjAsInF1YXJhbnRpbmVkIjowLCJzZXR1cENsZWFudXAiOnRydWUsImFwcHJvdmFscyI6MSwiaGVhZHMiOjEyLCJyZXNwb25zZXMiOjEyLCJwZWFrUmVjb3JkcyI6NX0K"
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "aa537f7c3802f35b27f2007b23b51c00ed96e9aa67f195b99451741733859337"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "aa537f7c3802f35b27f2007b23b51c00ed96e9aa67f195b99451741733859337"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTY4NWVjZWNhMDVlNDcxM2FmNmI5MDNiMGRiZDk0OTYiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWE2ODVlY2VjYTA1ZTQ3MTNhZjZiOTAzYjBkYmQ5NDk2XFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjoxMjAzNiwic3RhcnRUaWNrcyI6IjYzOTI5MDM3MTk0NDk1MjI5MSJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "47c4313e74d56d5ca6343c6e37ffcf26fe7e75ac1941bf5c5e4c8d845984efda"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "47c4313e74d56d5ca6343c6e37ffcf26fe7e75ac1941bf5c5e4c8d845984efda"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRR3N1dHVuZTJQcnBFTlc0bUxFNHpUVEFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EazBPREV5V2hjTk1qWXhNVEF4TURrMU16RXlXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEQ0l6RVlRSHI0d0habGMyMW93SkNBClZmVHpGNHVXNkp4Zzd4UmxTR2tZRzhZeVVnK1dLcmp5OTdlY0xBckVuWGEwSkoyM3U2QXU1bU00WkxSQmVsWThFblRsVWNLcXZOSGsKRFVrWFd1RHpEUS9tY0YrSlhlSzFVMmN6UkZHQjBRcTYzVE00S1ErdlY4MkI5aUc1cXJvY2JUMkNva0VmVExxRjJ3cWxiVnorN3Q2TwpjNS9CaVM1eUp2WGhvOHNWQys3b2RMYUNqbjhDRXd5aWgyREV2UWV6NWY4MC9RdWp0K2dWWktVMEZzRUE5S3Y1ZTg4RUZibi9MdXpwClI1TS9sQ3dFWXEyTlRrSG8yTGZlaGt3L0V3Z2Y4VEtZdFkrVDR6cFBKamZaTkxqOEFHOWFXMDZkTmIxdzlMR1Nua1NrR1BQa1JmeXMKMDZIcmZsbVFPR0JMRXkyMUFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJRN3R4VGQ3aDZFCkVPZGw3eWdONFBDcEVWRGtkVEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBYkkrUndrQ1BTekJlSk95ZFEya2FWV1JtRjZXMm5sSGYKSFVBMHllUUNCT1B1ZFFlWXdLSy8wd1RzRzh1TDl5K1NuOGIzOXQ3c3l4L2Y0RkgvbjdENlVWeHpkVzRYVnRQUmR2YmZWc2I5Z2RpTwpuOHBnT3I0OEZiblpDUC9KNk5ucHRzb0ZVOVVjSjYzUzRMVy9vMGtzdjB4dGFLSGVETXNiS29yVDltUnRGRktuaER3SFcwOThoVVY2ClhMVWJTSHFrUDlTQXc4ZEcyYkdlV0FEQTM3bkt1Q09PNHU5NzV2THJrRkVCNmRXQ05kdytPVmVXdHVVRTlmbEJvbTY4SDlIeUZoNEYKNG9kOExKclpFMkk2eW5WZnVYK2VsQ1pnUGRmUjZBMjZuNTZUWG93ckc3VlllNG45bUFKd2hHVCtFMTZZY2U4dHhacUtJL1hZeEYxZAp4cXdYS1E9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/tls.stderr",
+        "base64": ""
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "68ac96599ca7f9247aa1f2564d66d9b0e49e7bc0b74f849ad3e87251e5ed5718"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "68ac96599ca7f9247aa1f2564d66d9b0e49e7bc0b74f849ad3e87251e5ed5718"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTY4NWVjZWNhMDVlNDcxM2FmNmI5MDNiMGRiZDk0OTYiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MzAxNjgsInN0YXJ0VGlja3MiOiI2MzkyOTAzNzE5NDIzODY0MTgifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "c0428a80df952225fb05ccdc98d938c91d743f48dc6385519a6800b3379afe1e"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "c0428a80df952225fb05ccdc98d938c91d743f48dc6385519a6800b3379afe1e"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTY4NWVjZWNhMDVlNDcxM2FmNmI5MDNiMGRiZDk0OTYiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MzI3NTIsInN0YXJ0VGlja3MiOiI2MzkyOTAzNzE5MTg5NDE4ODcifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "46cbc51008b26d413e2571df38a72f6f03a93b0f1cb25c1a83a4c034eb9ab6fa"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "46cbc51008b26d413e2571df38a72f6f03a93b0f1cb25c1a83a4c034eb9ab6fa"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-second-a685ececa05e4713af6b903b0dbd9496-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiN0U4NkQyODQwNjI0QkUyMjdCOTRDRDhBNDEwNDVFMjkxREM0Q0FCNyIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLWE2ODVlY2VjYTA1ZTQ3MTNhZjZiOTAzYjBkYmQ5NDk2IiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1hNjg1ZWNlY2EwNWU0NzEzYWY2YjkwM2IwZGJkOTQ5Ni1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "5296245a7d94c0721df25e5faf3849a1f458c7edd879f4ae9b9ed2e71ea44a3b",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "e879c261f72b82c410bddae72890a0a7176c7216328f8f262e60153c279512c7",
+        "base64": "eyJ0aHVtYnByaW50IjoiN0U4NkQyODQwNjI0QkUyMjdCOTRDRDhBNDEwNDVFMjkxREM0Q0FCNyIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtYTY4NWVjZWNhMDVlNDcxM2FmNmI5MDNiMGRiZDk0OTYta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFHc3V0dW5lMlBycEVOVzRtTEU0elRUQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EazBPREV5V2hjTk1qWXhNVEF4TURrMU16RXlXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRRENJekVZUUhyNHdIWmxjMjFvd0pDQVxuVmZUekY0dVc2SnhnN3hSbFNHa1lHOFl5VWcrV0tyank5N2VjTEFyRW5YYTBKSjIzdTZBdTVtTTRaTFJCZWxZOEVuVGxVY0txdk5Ia1xuRFVrWFd1RHpEUS9tY0YrSlhlSzFVMmN6UkZHQjBRcTYzVE00S1ErdlY4MkI5aUc1cXJvY2JUMkNva0VmVExxRjJ3cWxiVnorN3Q2T1xuYzUvQmlTNXlKdlhobzhzVkMrN29kTGFDam44Q0V3eWloMkRFdlFlejVmODAvUXVqdCtnVlpLVTBGc0VBOUt2NWU4OEVGYm4vTHV6cFxuUjVNL2xDd0VZcTJOVGtIbzJMZmVoa3cvRXdnZjhUS1l0WStUNHpwUEpqZlpOTGo4QUc5YVcwNmROYjF3OUxHU25rU2tHUFBrUmZ5c1xuMDZIcmZsbVFPR0JMRXkyMUFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCUTd0eFRkN2g2RVxuRU9kbDd5Z040UENwRVZEa2RUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFiSStSd2tDUFN6QmVKT3lkUTJrYVZXUm1GNlcybmxIZlxuSFVBMHllUUNCT1B1ZFFlWXdLSy8wd1RzRzh1TDl5K1NuOGIzOXQ3c3l4L2Y0RkgvbjdENlVWeHpkVzRYVnRQUmR2YmZWc2I5Z2RpT1xubjhwZ09yNDhGYm5aQ1AvSjZObnB0c29GVTlVY0o2M1M0TFcvbzBrc3YweHRhS0hlRE1zYktvclQ5bVJ0RkZLbmhEd0hXMDk4aFVWNlxuWExVYlNIcWtQOVNBdzhkRzJiR2VXQURBMzduS3VDT080dTk3NXZMcmtGRUI2ZFdDTmR3K09WZVd0dVVFOWZsQm9tNjhIOUh5Rmg0RlxuNG9kOExKclpFMkk2eW5WZnVYK2VsQ1pnUGRmUjZBMjZuNTZUWG93ckc3VlllNG45bUFKd2hHVCtFMTZZY2U4dHhacUtJL1hZeEYxZFxueHF3WEtRPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 764,
+        "sha256": "f5ded31c939b298d903329883290b97ac224c7b7a6fa34531031c08f1d538012",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjo3MzgsInNoYTI1NiI6IjIyNDgwNjM0ZDE3OGU1YmIwYTRhMDkxMmU0N2M4OGUzNzcxZTU0NzgxMDc5OTRlZGU1YTM2NTI0NjdlNzcxNGQifSwiLnRscy1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjI0MCwic2hhMjU2IjoiYWE1MzdmN2MzODAyZjM1YjI3ZjIwMDdiMjNiNTFjMDBlZDk2ZTlhYTY3ZjE5NWI5OTQ1MTc0MTczMzg1OTMzNyJ9LCJ0bHMtcHVibGljLnBlbSI6eyJieXRlcyI6MTE0MSwic2hhMjU2IjoiNDdjNDMxM2U3NGQ1NmQ1Y2E2MzQzYzZlMzdmZmNmMjZmZTdlNzVhYzE5NDFiZjVjNWU0YzhkODQ1OTg0ZWZkYSJ9LCJ0bHMuc3RkZXJyIjp7ImJ5dGVzIjowLCJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0sIi50bHMtc3VwZXJ2aXNvci5qc29uIjp7ImJ5dGVzIjoxODcsInNoYTI1NiI6IjY4YWM5NjU5OWNhN2Y5MjQ3YWExZjI1NjRkNjZkOWIwZTQ5ZTdiYzBiNzRmODQ5YWQzZTg3MjUxZTVlZDU3MTgifSwiLnRscy1zZXR1cC1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiYzA0MjhhODBkZjk1MjIyNWZiMDVjY2RjOThkOTM4YzkxZDc0M2Y0OGRjNjM4NTUxOWE2ODAwYjMzNzlhZmUxZSJ9LCIudGxzLWZpeHR1cmUuanNvbiI6eyJieXRlcyI6MzczLCJzaGEyNTYiOiI0NmNiYzUxMDA4YjI2ZDQxM2UyNTcxZGYzOGE3MmY2ZjAzYTkzYjBmMWNiMjVjMWE4M2E0YzAzNGViOWFiNmZhIn19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "files": {
+    "crates/fc-protocol/src/web.rs": {
+      "bytes": 31222,
+      "sha256": "b9a592f0766fa03c875feb68190f5f4c3c318e323c6c89afaf797bd4dadc793a"
+    },
+    "crates/fc-protocol/src/web/assets.rs": {
+      "bytes": 11547,
+      "sha256": "5dad29687e99e8b774e35ae178f21d75765049a699cd18911a399f38064ff56c"
+    }
+  },
+  "checks": [
+    "direct rustfmt edition2021 skip_children check passed",
+    "owned files git diff --check passed"
+  ],
+  "changes": [
+    "Exact8-byte ASCII alnum/_/- hash at filename suffix with preceding delimiter and nonempty basename; retains legacy>=8 alnum/_ hashes",
+    "UTF8 byte indexing rather than unchecked str slicing; direct invalidUTF8-boundary filename regression",
+    "WebBoundary::is_api_target(&self,target:&str)->bool configured-root API/API-slash/API-query classification only, no authorization",
+    "WebBoundary::heap_bytes(&self)->usize exact authority+origin+base String capacities, excludes Self and outer Arc"
+  ],
+  "testsAdded": [
+    "cache_control_recognizes_exact_vite_base64url_suffix_and_preserves_legacy_hashes",
+    "api_target_classification_uses_each_configured_root_without_authorizing_routes",
+    "boundary_heap_bytes_counts_owned_string_capacities_including_slack"
+  ],
+  "unchanged": [
+    "valid_path restrictions",
+    "Manifest file/count/aggregate byte/hash/version boundaries",
+    "route/preflight/check authorization rules"
+  ],
+  "notRun": [
+    "Cargo builds/tests/Clippy",
+    "remote Windows or browser execution"
+  ]
+}

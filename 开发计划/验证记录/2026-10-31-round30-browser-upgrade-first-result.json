@@ -1,0 +1,67 @@
+{
+  "status": "FAIL",
+  "error": "page.waitForFunction: Timeout 30000ms exceeded.",
+  "checks": [
+    "owned fixture deployment b switched",
+    "incompatible initial API has explicit refresh and upgrade message",
+    "incompatible status never requests session or pairing",
+    "only explicit reload checks compatible status and session again without POST",
+    "owned fixture deployment a switched",
+    "owned fixture deployment b switched",
+    "retired entry module leaves self-contained visible HTML recovery",
+    "entry recovery link is same-origin canonical root",
+    "entry reload reaches current bundle without replay",
+    "owned fixture deployment a switched",
+    "fixture uses exact restrictive production CSP"
+  ],
+  "cases": [
+    {
+      "case": "API version mismatch explicit reload",
+      "apiCalls": [
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/session",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "case": "entry asset retired between HTML and module fetch",
+      "retiredEntry": "https://172.30.0.2:45636/fc/assets/previous-index-C3GlEF2q.js",
+      "failures": [
+        {
+          "url": "https://172.30.0.2:45636/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 404
+        },
+        {
+          "url": "https://172.30.0.2:45636/fc/assets/previous-favicon-CXuYoSfB.svg",
+          "status": 404
+        }
+      ]
+    }
+  ],
+  "diagnostics": [
+    {
+      "url": "https://172.30.0.2:45636/fc/",
+      "body": "白板已确认登录，教师工作台已就绪。\n跳到主要内容\n未来教室\nTEACHER WORKSPACE\n白板连接已核验\n\n以白板实际日期与授权范围为准\n\n语音播报。\n\n核对白板当前班级，按住说话、松开发送。\n\n返回工作台\n核对会话\n刷新页面\n目标以这台白板当前绑定班级为准\n核对目标与任务\n\n无法核对语音服务。已提交任务不会因断网自动撤回；可以主动刷新。\n\n教师主动发起 · 独立语音通知\n\n尚未取得白板班级\n核对班级后录音。发送后按已锁定次数顺序播放，不改变系统音量。\n正在核对服务\n总播放次数\n1 遍\n2 遍\n3 遍（默认）\n4 遍\n5 遍\n6 遍\n7 遍\n8 遍\n9 遍\n10 遍\n\n包含首次，每遍间隔 1 秒。录音开始后锁定目标及次数；修改下次设置不会改变已排队任务。\n\n按住说话，松开发送\n0.0 / 60 秒\n\n白板当前允许 0.5–60 秒。按住空格或 Enter 也可录音；Esc 取消。达到 60 秒按当前手势发送或丢弃，随后松手不会重复发送。\n\n点击开始录音\n取消录音\n\n仅采集当前教师设备麦克风。切换目标、隐藏或离开页面会取消未发送录音并释放麦克风。没有云端转码或语音识别。\n\n白板播报任务\n排队任务不会因网页断网自动撤回。前台有活动任务时每秒查询，后台停止查询。\n\n当前没有可见任务。上传成功与任务已排队是两个独立阶段。\n\n“驱动播放完成”表示本机驱动报告自然结束，不保证扬声器开启或人耳听到。此页不能控制其他应用或系统音量。\n\n注销会使这个账号的全部渠道授权失效。\n\n注销账号\n班级共同提醒\n按白板当天日期生效\n管理今日提醒\n未来教室 · 每一堂课，都有准备\n账号与范围由白板本地管理",
+      "microphone": {
+        "starts": 0,
+        "active": 0,
+        "stopped": 0,
+        "contextCount": 0,
+        "contextClosed": 0,
+        "ownerClosed": 0,
+        "modules": [],
+        "workers": [],
+        "liveWorkers": 0
+      }
+    }
+  ]
+}

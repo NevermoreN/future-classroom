@@ -247,6 +247,161 @@ fn head(
 }
 
 #[test]
+fn method_rejections_report_exact_allowed_methods_without_changing_other_boundary_errors() {
+    let mut fixture = BackendFixture::new();
+    for (route, allowed) in [
+        ("status", "GET"),
+        ("pairing/requests", "POST"),
+        ("voice/broadcasts", "GET, POST"),
+        ("content/reminders/1/2026-10-31", "GET, POST"),
+        ("materials/uploads/1/2", "POST"),
+    ] {
+        let request = head("DELETE", route, 0, None, None);
+        for response in [
+            fixture
+                .app
+                .admit_request(&fixture.backend, &request)
+                .err()
+                .unwrap(),
+            fixture.dispatch(&request, b""),
+        ] {
+            assert_eq!(response.head.status, 405, "{route}");
+            let fields: Vec<_> = response
+                .head
+                .headers
+                .iter()
+                .filter(|header| header.name.eq_ignore_ascii_case("allow"))
+                .collect();
+            assert_eq!(fields.len(), 1, "{route}");
+            assert_eq!(fields[0].value, allowed.as_bytes(), "{route}");
+        }
+    }
+    for (mut request, status) in [
+        (head("DELETE", "missing", 0, None, None), 404),
+        (head("DELETE", "status", 0, None, None), 403),
+    ] {
+        if status == 403 {
+            request.headers[0].value = b"other.school".to_vec();
+        }
+        let response = fixture.dispatch(&request, b"");
+        assert_eq!(response.head.status, status);
+        assert!(!response
+            .head
+            .headers
+            .iter()
+            .any(|header| header.name.eq_ignore_ascii_case("allow")));
+    }
+}
+
+#[test]
+fn head_admission_authenticates_before_body_without_creating_pairing_or_sql_work() {
+    let mut fixture = BackendFixture::new();
+    let revision = fixture.backend.global_revision().unwrap();
+    let requested = head("POST", "pairing/requests", 120, None, None);
+    assert_eq!(
+        fixture.app.admit_request(&fixture.backend, &requested).ok(),
+        Some(Route::PairingCreate)
+    );
+    assert!(fixture.service.pending(fixture.admin).unwrap().is_empty());
+    assert_eq!(fixture.backend.global_revision().unwrap(), revision);
+    let private = head("POST", "session/logout", 19, None, None);
+    assert_eq!(
+        fixture
+            .app
+            .admit_request(&fixture.backend, &private)
+            .err()
+            .unwrap()
+            .head
+            .status,
+        401
+    );
+    let cookie = fixture.pair("head-admission", false);
+    let session = fixture.dispatch(&head("GET", "session", 0, Some(&cookie), None), b"");
+    let csrf = field(&session.body, "csrf");
+    let mut private = head("POST", "session/logout", 19, Some(&cookie), Some("wrong"));
+    assert_eq!(
+        fixture
+            .app
+            .admit_request(&fixture.backend, &private)
+            .err()
+            .unwrap()
+            .head
+            .status,
+        403
+    );
+    private
+        .headers
+        .iter_mut()
+        .find(|h| h.name == "X-FC-CSRF")
+        .unwrap()
+        .value = csrf.into_bytes();
+    assert_eq!(
+        fixture.app.admit_request(&fixture.backend, &private).ok(),
+        Some(Route::SessionLogout)
+    );
+    // Admission did not consume the logout or grant a lasting capability.
+    assert_eq!(
+        fixture
+            .dispatch(&head("GET", "session", 0, Some(&cookie), None), b"")
+            .head
+            .status,
+        200
+    );
+    fixture.service.set_enabled(fixture.admin, false).unwrap();
+    assert_eq!(
+        fixture
+            .dispatch(&private, br#"{"schemaVersion":1}"#)
+            .head
+            .status,
+        503
+    );
+}
+
+#[test]
+fn head_admission_rejects_another_backend_and_rechecks_sensitive_headers() {
+    let mut first = BackendFixture::new();
+    let second = BackendFixture::new();
+    let cookie = first.pair("admission-installation", false);
+    let mut request = head("GET", "session", 0, Some(&cookie), None);
+    assert_eq!(
+        first
+            .app
+            .admit_request(&second.backend, &request)
+            .err()
+            .unwrap()
+            .head
+            .status,
+        503
+    );
+    request.headers.push(Header {
+        name: "Cookie".into(),
+        value: cookie.as_bytes().to_vec(),
+    });
+    assert_eq!(
+        first
+            .app
+            .admit_request(&first.backend, &request)
+            .err()
+            .unwrap()
+            .head
+            .status,
+        400
+    );
+    request.headers.pop();
+    request.tls = false;
+    assert_eq!(
+        first
+            .app
+            .admit_request(&first.backend, &request)
+            .err()
+            .unwrap()
+            .head
+            .status,
+        403
+    );
+}
+
+#[test]
 fn dispatcher_rejects_another_backend_even_when_exact_lease_numbers_collide() {
     let mut first = BackendFixture::new();
     let mut second = BackendFixture::new();

@@ -38,11 +38,12 @@ function environment(mode = 'success') {
       if (mode === 'worker-pending') return
       queueMicrotask(() => {
         if (mode === 'worker-error') this.onerror?.()
+        else if (mode === 'worker-message-error') this.onmessageerror?.()
         else if (mode === 'worker-malformed') this.onmessage?.({ data: { wav: new ArrayBuffer(1) } })
         else this.onmessage?.({ data: { wav: encodeWav(pcm) } })
       })
     })
-    constructor(readonly url: URL, readonly options: unknown) { workers.push(this) }
+    constructor(readonly url: URL, readonly options: unknown) { if (mode === 'worker-constructor-throws') throw new Error('private constructor details'); workers.push(this) }
   }
   vi.stubGlobal('OfflineAudioContext', Context); vi.stubGlobal('Worker', Encoder)
   return { contexts, workers, rendering, normalizer: new BrowserWavNormalizer(), abort: new AbortController() }
@@ -170,16 +171,39 @@ describe('bounded offline resampling and disposable encoding worker', () => {
     await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toThrow('render setup unavailable')
     expect(f.contexts).toHaveLength(2); expect(f.workers).toHaveLength(0)
   })
-  it.each(['worker-error', 'worker-malformed', 'post-throws'])('%s terminates the encoding worker and never yields a WAV', async mode => {
+  it.each([['worker-error', 'RESOURCE_UNAVAILABLE'], ['worker-message-error', 'RECORDING_FAILED'], ['worker-malformed', 'RECORDING_FAILED'], ['post-throws', 'RECORDING_FAILED']])('%s terminates the encoding worker and never yields a WAV', async (mode, code) => {
     const f = environment(mode)
-    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code: 'RECORDING_FAILED' })
+    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code })
     expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()
+  })
+  it('worker construction failure offers cautious resource refresh guidance after releasing render references', async () => {
+    const f = environment('worker-constructor-throws')
+    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code: 'RESOURCE_UNAVAILABLE', message: expect.stringContaining('刷新页面') })
+    expect(f.workers).toHaveLength(0); expect(f.contexts[0]!.source.disconnect).toHaveBeenCalled(); expect(f.contexts[0]!.source.buffer).toBeNull()
+  })
+  it('cancellation during worker construction is an interruption, not an upgrade error', async () => {
+    const f = environment()
+    vi.stubGlobal('Worker', class { constructor() { f.abort.abort(); throw new Error('constructor failed after cancel') } })
+    await expect(f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })
+    expect(f.workers).toHaveLength(0); expect(f.contexts[0]!.source.buffer).toBeNull()
   })
   it('aborting an encoding worker terminates it once and ignores a late WAV message', async () => {
     const f = environment('worker-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)
     await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); expect(f.workers).toHaveLength(1)
+    const lateMessage = f.workers[0]!.onmessage, lateError = f.workers[0]!.onerror
     f.abort.abort(); await expect(operation).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })
-    f.workers[0]!.onmessage?.({ data: { wav: new ArrayBuffer(16044) } }); expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()
+    lateError?.(); lateMessage?.({ data: { wav: new ArrayBuffer(16044) } })
+    expect(f.workers[0]!.onmessage).toBeNull(); expect(f.workers[0]!.onerror).toBeNull(); expect(f.workers[0]!.onmessageerror).toBeNull()
+    expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()
+  })
+  it('same-turn cancellation wins a pending resource error and late worker callbacks cannot replace it', async () => {
+    const f = environment('worker-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); expect(f.workers).toHaveLength(1)
+    const lateError = f.workers[0]!.onerror, lateMessage = f.workers[0]!.onmessage
+    lateError?.(); f.abort.abort()
+    await expect(operation).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })
+    lateMessage?.({ data: { wav: new ArrayBuffer(16044) } }); lateError?.()
+    expect(f.workers[0]!.terminate).toHaveBeenCalledOnce(); expect(f.workers).toHaveLength(1)
   })
   it('worker deadline terminates an otherwise permanently pending encoder', async () => {
     vi.useFakeTimers(); const f = environment('worker-pending'), operation = f.normalizer.normalize([new Float32Array(8000)], 16000, f.abort.signal)

@@ -1,0 +1,45 @@
+{
+  "scope": "Final local phase checks; not full project acceptance",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.10845526703633368,
+      "log": "/tmp/fc-round30-evidence/head-final-architecture.log",
+      "logSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.5358694409951568,
+      "log": "/tmp/fc-round30-evidence/head-final-fmt.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.027124154847115278,
+      "log": "/tmp/fc-round30-evidence/head-final-diff.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "testedRustCargoSourcesStillMatch": true,
+  "testedRunnerStillMatches": true
+}

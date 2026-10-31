@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual isolated Windows Edge UI against existing frozen native Rust EXE; original second attempt bytes retained",
+  "command": [
+    "/config/.python/python/bin/python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--ssh-target",
+    "future-classroom-win11",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round30-windows-head-stage-snapshot/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round30-native-browser-web.zip",
+    "--browser",
+    "--report",
+    "/tmp/fc-round30-evidence/native-browser-tls-second.json"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 65.7082695949357,
+  "sourceBefore": {
+    "scripts/windows-tls-business-probe.py": {
+      "bytes": 67685,
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf"
+    },
+    "scripts/windows-native-browser-observer.py": {
+      "bytes": 26244,
+      "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91"
+    },
+    "scripts/windows-native-browser-harness.mjs": {
+      "bytes": 46843,
+      "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e"
+    },
+    "scripts/windows-test-edge-owner.py": {
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    },
+    "scripts/windows-tls-probe.py": {
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    "scripts/windows-probe.py": {
+      "bytes": 45878,
+      "sha256": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0"
+    }
+  },
+  "sourceAfter": {
+    "scripts/windows-tls-business-probe.py": {
+      "bytes": 67685,
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf"
+    },
+    "scripts/windows-native-browser-observer.py": {
+      "bytes": 26244,
+      "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91"
+    },
+    "scripts/windows-native-browser-harness.mjs": {
+      "bytes": 46843,
+      "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e"
+    },
+    "scripts/windows-test-edge-owner.py": {
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    },
+    "scripts/windows-tls-probe.py": {
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    "scripts/windows-probe.py": {
+      "bytes": 45878,
+      "sha256": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0"
+    }
+  },
+  "changedInputs": [],
+  "exeSha256Before": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a",
+  "exeSha256After": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a",
+  "bundleSha256After": "eee678d5313f56900b246486b839e280b6c04da3c760721a121ecec4205290c9",
+  "streams": {
+    "stdout": {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-second.stdout.log",
+      "bytes": 252,
+      "sha256": "681e9cc1526a4be2a0e063fd586922a3a2248a27c35b99187cbe827140d6961a",
+      "base64": "VExTX0JVU0lORVNTX1JVTk5FUl9QQVNTIHsicmVwb3J0IjoiL3RtcC9mYy1yb3VuZDMwLWV2aWRlbmNlL25hdGl2ZS1icm93c2VyLXRscy1zZWNvbmQuanNvbiIsImV4ZVNoYTI1NiI6ImJiZmE0YjM4MThlZDRhYTE1YWJkZmI4NzllNGQyZjgzMzlmNzNiMzY3MzBiOGU4ZTgzYjZkOGQ5MjY1NzRkNmEiLCJjbGVhbnVwIjoiUEFTUyIsInN0cmljdFAwIjoiTk9UX1ZBTElEQVRFRCIsInBoeXNpY2FsUGxheWJhY2siOiJOT1RfRVhFUkNJU0VEIn0K"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  }
+}

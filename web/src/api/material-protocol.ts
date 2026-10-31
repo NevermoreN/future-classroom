@@ -1,4 +1,4 @@
-import { decimal, ProtocolFault, unicodeText } from './protocol'
+import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 import { civilTime } from './content-protocol'
 export const MAX_FILE_BYTES = 50 * 1024 * 1024
 export interface MaterialScope { ownerTeacherId: string; subjectId: string }
@@ -13,7 +13,7 @@ export interface MaterialCommitted { commandId: string; scope: MaterialScope; re
 export type MaterialOutcome = { commandId: string; state: 'COMMITTED'; scope: MaterialScope; record: MaterialRecord } | { commandId: string; state: 'NOT_FOUND'; scope: null; record: null }
 const fail = (): never => { throw new ProtocolFault() }
 function object(x: unknown, keys: readonly string[]): Record<string, unknown> { if (!x || typeof x !== 'object' || Array.isArray(x) || Object.keys(x).length !== keys.length || Object.keys(x).some(k => !keys.includes(k))) return fail(); return x as Record<string, unknown> }
-function schema(x: Record<string, unknown>, status: string) { if (x.schemaVersion !== 1 || x.status !== status) fail() }
+function schema(x: Record<string, unknown>, status: string) { protocolVersions(x.schemaVersion); if (x.status !== status) fail() }
 function count(x: unknown, max: number): number { if (typeof x !== 'number' || !Number.isSafeInteger(x) || x < 0 || x > max) return fail(); return x }
 function name(x: unknown, max = 64): string { if (typeof x !== 'string' || !x.replace(/\p{White_Space}/gu, '') || [...x].length > max || /[\u0000-\u001f\u007f-\u009f]/u.test(x)) return fail(); return unicodeText(x) }
 export function fileName(x: unknown): string {

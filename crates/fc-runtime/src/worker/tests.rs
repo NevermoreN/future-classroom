@@ -82,14 +82,23 @@ fn deadline() -> Instant {
     Instant::now() + Duration::from_secs(10)
 }
 fn submit(handle: &WorkerHandle<Work>, task: Work) -> JobTicket<usize> {
-    let until = Instant::now() + Duration::from_secs(3);
-    let mut task = task;
+    submit_before(handle, task, deadline())
+}
+// Positive fixture setup may encounter the pool's nonblocking lock. Retry only
+// the same unaccepted task, bounded by the original deadline and setup budget.
+// Tests of intentional queue/capacity rejection keep using try_submit directly.
+fn submit_before<T: Task>(
+    handle: &WorkerHandle<T>,
+    mut task: T,
+    due: Instant,
+) -> JobTicket<T::Output> {
+    let until = (Instant::now() + Duration::from_secs(3)).min(due);
     loop {
-        match handle.try_submit(task, deadline()) {
+        match handle.try_submit(task, due) {
             Ok(ticket) => return ticket,
             Err(error) if error.kind == Rejection::Busy && Instant::now() < until => {
                 task = error.task;
-                thread::yield_now();
+                thread::sleep(Duration::from_millis(1));
             }
             Err(error) => panic!("unexpected rejection {:?}", error.kind),
         }
@@ -138,6 +147,290 @@ fn stats(handle: &WorkerHandle<Work>) -> PoolStats {
         assert!(Instant::now() < until);
         thread::yield_now();
     }
+}
+
+struct HeldOutput {
+    entered: mpsc::Sender<thread::ThreadId>,
+    release: mpsc::Receiver<()>,
+    dropped: Arc<AtomicUsize>,
+}
+impl Drop for HeldOutput {
+    fn drop(&mut self) {
+        let _ = self.entered.send(thread::current().id());
+        // A test failure must not leave a permanently held physical worker.
+        let _ = self.release.recv_timeout(Duration::from_secs(3));
+        self.dropped.fetch_add(1, Ordering::AcqRel);
+    }
+}
+struct HeldOutputWork {
+    started: mpsc::Sender<thread::ThreadId>,
+    run_release: mpsc::Receiver<()>,
+    output: HeldOutput,
+}
+impl Task for HeldOutputWork {
+    type Output = HeldOutput;
+    fn allocation_bytes(&self) -> Option<usize> {
+        Some(0)
+    }
+    fn run(self, _: &JobContext) -> HeldOutput {
+        let _ = self.started.send(thread::current().id());
+        let _ = self.run_release.recv_timeout(Duration::from_secs(3));
+        self.output
+    }
+}
+#[derive(Clone, Copy)]
+enum SuppressOutput {
+    Cancel,
+    Deadline,
+    Stop,
+}
+fn suppressed_output_cleanup(mode: SuppressOutput) {
+    let pool = WorkerPool::<HeldOutputWork>::start().unwrap();
+    let handle = pool.handle();
+    let (start_send, start_receive) = mpsc::channel();
+    let (run_send, run_receive) = mpsc::channel();
+    let (drop_send, drop_receive) = mpsc::channel();
+    let (release_drop, receive_drop) = mpsc::channel();
+    let dropped = Arc::new(AtomicUsize::new(0));
+    let due = if matches!(mode, SuppressOutput::Deadline) {
+        Instant::now() + Duration::from_millis(100)
+    } else {
+        deadline()
+    };
+    let mut ticket = submit_before(
+        &handle,
+        HeldOutputWork {
+            started: start_send,
+            run_release: run_receive,
+            output: HeldOutput {
+                entered: drop_send,
+                release: receive_drop,
+                dropped: dropped.clone(),
+            },
+        },
+        due,
+    );
+    let worker = started(&start_receive);
+    let expected = match mode {
+        SuppressOutput::Cancel => {
+            ticket.cancel();
+            JobError::Cancelled
+        }
+        SuppressOutput::Deadline => {
+            while Instant::now() < due {
+                thread::sleep(Duration::from_millis(1));
+            }
+            JobError::Deadline
+        }
+        SuppressOutput::Stop => {
+            pool.request_stop();
+            JobError::Stopped
+        }
+    };
+    run_send.send(()).unwrap();
+    let drop_worker = started(&drop_receive);
+    // Capture evidence while the physical destructor is held, then always release
+    // and join before asserting. This also gives failing old code bounded cleanup.
+    let prematurely_done = ticket.is_finished();
+    let pending = matches!(ticket.try_result(), Ok(None));
+    let running = handle.try_stats().expect("uncontended statistics").running;
+    let completion_generation = handle.completion_generation();
+    let pool_finished = pool.is_finished();
+    let physically_dropped = dropped.load(Ordering::Acquire);
+    if matches!(mode, SuppressOutput::Stop) {
+        // Repeated stop cannot substitute for physical output cleanup or spawn a
+        // replacement. Both original thread handles remain owned by this pool.
+        pool.request_stop();
+        assert_eq!(pool.threads.len(), WORKER_THREADS);
+    }
+    release_drop.send(()).unwrap();
+    let until = Instant::now() + Duration::from_secs(3);
+    let terminal = loop {
+        match ticket.try_result() {
+            Err(error) => break error,
+            Ok(Some(_)) => panic!("suppressed output was published"),
+            Ok(None) => {
+                assert!(Instant::now() < until, "cleanup completion timeout");
+                thread::yield_now();
+            }
+        }
+    };
+    pool.join().unwrap();
+    assert_eq!(worker, drop_worker, "output cleanup belongs to its worker");
+    assert!(!prematurely_done, "done preceded suppressed output cleanup");
+    assert!(
+        pending,
+        "negative result preceded suppressed output cleanup"
+    );
+    assert_eq!(running, 1, "cleanup must retain the physical running slot");
+    assert_eq!(completion_generation, 0, "cleanup is not a completion");
+    assert!(!pool_finished, "held worker is not join-ready");
+    assert_eq!(physically_dropped, 0);
+    assert_eq!(dropped.load(Ordering::Acquire), 1);
+    assert_eq!(terminal, expected);
+}
+#[test]
+fn cancelled_output_drop_retains_running_slot_and_delays_terminal_result() {
+    suppressed_output_cleanup(SuppressOutput::Cancel);
+}
+#[test]
+fn deadline_output_drop_retains_running_slot_and_delays_terminal_result() {
+    suppressed_output_cleanup(SuppressOutput::Deadline);
+}
+#[test]
+fn stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join() {
+    suppressed_output_cleanup(SuppressOutput::Stop);
+}
+
+enum DisposalWork {
+    Block(mpsc::Sender<thread::ThreadId>, mpsc::Receiver<()>),
+    Discard(HeldOutput, Arc<AtomicUsize>),
+}
+impl Task for DisposalWork {
+    type Output = ();
+    fn allocation_bytes(&self) -> Option<usize> {
+        Some(0)
+    }
+    fn run(self, _: &JobContext) {
+        match self {
+            Self::Block(start, release) => {
+                let _ = start.send(thread::current().id());
+                let _ = release.recv_timeout(Duration::from_secs(3));
+            }
+            Self::Discard(resource, runs) => {
+                runs.fetch_add(1, Ordering::AcqRel);
+                drop(resource);
+            }
+        }
+    }
+}
+fn skipped_task_cleanup(expired: bool, stopped: bool) {
+    let pool = WorkerPool::<DisposalWork>::start().unwrap();
+    let handle = pool.handle();
+    let mut blockers = Vec::new();
+    let mut releases = Vec::new();
+    for _ in 0..WORKER_THREADS {
+        let (start, seen) = mpsc::channel();
+        let (release, gate) = mpsc::channel();
+        blockers.push(submit_before(
+            &handle,
+            DisposalWork::Block(start, gate),
+            deadline(),
+        ));
+        started(&seen);
+        releases.push(release);
+    }
+    let (drop_send, drop_receive) = mpsc::channel();
+    let (release_drop, receive_drop) = mpsc::channel();
+    let dropped = Arc::new(AtomicUsize::new(0));
+    let runs = Arc::new(AtomicUsize::new(0));
+    let due = if expired {
+        Instant::now() + Duration::from_millis(30)
+    } else {
+        deadline()
+    };
+    let mut skipped = submit_before(
+        &handle,
+        DisposalWork::Discard(
+            HeldOutput {
+                entered: drop_send,
+                release: receive_drop,
+                dropped: dropped.clone(),
+            },
+            runs.clone(),
+        ),
+        due,
+    );
+    let expected = if stopped {
+        pool.request_stop();
+        JobError::Stopped
+    } else if expired {
+        while Instant::now() < due {
+            thread::sleep(Duration::from_millis(1));
+        }
+        JobError::Deadline
+    } else {
+        skipped.cancel();
+        JobError::Cancelled
+    };
+    releases[0].send(()).unwrap();
+    started(&drop_receive);
+    let prematurely_done = skipped.is_finished();
+    let pending = matches!(skipped.try_result(), Ok(None));
+    let running = handle.try_stats().expect("uncontended statistics").running;
+    release_drop.send(()).unwrap();
+    let terminal = skipped.wait();
+    releases[1].send(()).unwrap();
+    pool.join().unwrap();
+    assert!(
+        !prematurely_done,
+        "discarded task must finish its destructor"
+    );
+    assert!(pending);
+    assert_eq!(running, WORKER_THREADS);
+    assert_eq!(terminal, Err(expected));
+    assert_eq!(runs.load(Ordering::Acquire), 0);
+    assert_eq!(dropped.load(Ordering::Acquire), 1);
+}
+#[test]
+fn queued_cancelled_task_drop_retains_running_slot_before_negative_completion() {
+    skipped_task_cleanup(false, false);
+}
+#[test]
+fn queued_expired_task_drop_retains_running_slot_before_negative_completion() {
+    skipped_task_cleanup(true, false);
+}
+#[test]
+fn stopped_queued_task_drop_retains_running_slot_before_negative_completion() {
+    skipped_task_cleanup(false, true);
+}
+#[test]
+fn late_cancel_of_successful_reply_disposes_output_on_polling_caller() {
+    let pool = WorkerPool::<HeldOutputWork>::start().unwrap();
+    let handle = pool.handle();
+    let (start, seen) = mpsc::channel();
+    let (run_release, run_gate) = mpsc::channel();
+    let (drop_send, drop_receive) = mpsc::channel();
+    let (drop_release, drop_gate) = mpsc::channel();
+    let dropped = Arc::new(AtomicUsize::new(0));
+    let mut ticket = submit_before(
+        &handle,
+        HeldOutputWork {
+            started: start,
+            run_release: run_gate,
+            output: HeldOutput {
+                entered: drop_send,
+                release: drop_gate,
+                dropped: dropped.clone(),
+            },
+        },
+        deadline(),
+    );
+    let worker = started(&seen);
+    run_release.send(()).unwrap();
+    let until = Instant::now() + Duration::from_secs(3);
+    while !ticket.is_finished() || handle.try_stats().is_none_or(|s| s.running != 0) {
+        assert!(Instant::now() < until, "positive reply timeout");
+        thread::yield_now();
+    }
+    ticket.cancel();
+    // Deliberately poll from a diagnostic thread: try_result must not be mistaken
+    // for a destructor-free Net API when O has physical ownership.
+    let caller = thread::spawn(move || match ticket.try_result() {
+        Err(error) => error,
+        _ => panic!("late cancellation was not enforced"),
+    });
+    let drop_thread = started(&drop_receive);
+    let caller_finished = caller.is_finished();
+    let physically_dropped = dropped.load(Ordering::Acquire);
+    drop_release.send(()).unwrap();
+    let terminal = caller.join().unwrap();
+    pool.join().unwrap();
+    assert_ne!(drop_thread, worker);
+    assert!(!caller_finished);
+    assert_eq!(physically_dropped, 0);
+    assert_eq!(dropped.load(Ordering::Acquire), 1);
+    assert_eq!(terminal, JobError::Cancelled);
 }
 #[test]
 fn two_physical_workers_are_shared_by_mixed_jobs_and_eight_more_may_queue() {

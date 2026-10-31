@@ -1,0 +1,43 @@
+{
+  "scope": "Current phase final local formatting/architecture/diff; no platform acceptance implied",
+  "checks": [
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.09809849387966096,
+      "log": "/tmp/fc-round30-evidence/http-semantics-final-architecture.log",
+      "logSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.922645047074184,
+      "log": "/tmp/fc-round30-evidence/http-semantics-final-fmt.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.0652883390430361,
+      "log": "/tmp/fc-round30-evidence/http-semantics-final-diff.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "status": "PASS"
+}

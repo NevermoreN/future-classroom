@@ -1,0 +1,192 @@
+{
+  "status": "PASS",
+  "browserVersion": "154.0.8037.97",
+  "checks": [
+    "owned fixture deployment b switched",
+    "incompatible initial API has explicit refresh and upgrade message",
+    "incompatible status never requests session or pairing",
+    "only explicit reload checks compatible status and session again without POST",
+    "owned fixture deployment a switched",
+    "owned fixture deployment b switched",
+    "retired entry module leaves self-contained visible HTML recovery",
+    "entry recovery link is same-origin canonical root",
+    "entry reload reaches current bundle without replay",
+    "owned fixture deployment a switched",
+    "fixture uses exact restrictive production CSP",
+    "owned fixture deployment b switched",
+    "old page requests retired Worklet and releases every synthetic track/context",
+    "missing Worklet produces no upload or broadcast",
+    "mobile recovery has no horizontal overflow",
+    "owned fixture deployment a switched",
+    "fixture uses exact restrictive production CSP",
+    "owned fixture deployment b switched",
+    "old Worker is terminated after package changes during recording",
+    "missing Worker produces no upload or broadcast",
+    "owned fixture deployment b switched",
+    "fixture uses exact restrictive production CSP",
+    "cancel refresh keeps unsaved draft and performs no request",
+    "version mismatch retains original draft and unknown command",
+    "version mismatch disables new content save",
+    "only explicit GET uses original ID, without new POST",
+    "cancel reload preserves original command and draft after unknown response",
+    "confirmed reload discards memory and never replays old POST",
+    "owned fixture deployment b switched",
+    "fixture uses exact restrictive production CSP",
+    "new deployment real Worklet/render/Worker succeeds after refresh implementation",
+    "successful recording has no unhandled page error",
+    "no credentials/drafts in browser storage"
+  ],
+  "checkCount": 33,
+  "cases": [
+    {
+      "case": "API version mismatch explicit reload",
+      "apiCalls": [
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/session",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "case": "entry asset retired between HTML and module fetch",
+      "retiredEntry": "https://172.30.0.2:45636/fc/assets/previous-index-C3GlEF2q.js",
+      "failures": [
+        {
+          "url": "https://172.30.0.2:45636/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 404
+        }
+      ]
+    },
+    {
+      "case": "opened previous page then upgrade, lazy Worklet retired",
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "contextCount": 1,
+        "contextClosed": 1,
+        "ownerClosed": 1,
+        "modules": [
+          "/fc/assets/previous-pcm-worklet-B7E4LRoP.js"
+        ],
+        "workers": [],
+        "liveWorkers": 0
+      },
+      "failures": [],
+      "pageErrors": []
+    },
+    {
+      "case": "recording on previous package then upgrade before lazy Worker fetch",
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "contextCount": 1,
+        "contextClosed": 1,
+        "ownerClosed": 1,
+        "modules": [
+          "/fc/assets/previous-pcm-worklet-B7E4LRoP.js"
+        ],
+        "workers": [
+          "https://172.30.0.2:45636/fc/assets/previous-wav-worker-LSywWbpJ.js"
+        ],
+        "liveWorkers": 0
+      },
+      "failures": [
+        {
+          "url": "https://172.30.0.2:45636/fc/assets/previous-wav-worker-LSywWbpJ.js",
+          "status": 404
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "case": "dirty/unknown command refresh consent and original-ID manual query",
+      "dialogs": [
+        {
+          "type": "confirm",
+          "message": "本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？"
+        },
+        {
+          "type": "confirm",
+          "message": "本页有未保存草稿或结果尚未确认的命令。离开会丢弃本页内存信息，不会撤销已经提交的命令，也不会自动保存。确认离开？"
+        }
+      ],
+      "original": {
+        "schemaVersion": 1,
+        "commandId": "10969294115874699586",
+        "expectedRevision": "0",
+        "text": "合成升级草稿：保留原命令"
+      },
+      "apiCalls": [
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/session",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/content/homework/scopes/0",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/content/homework/7/2/9/2026-10-31",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/content/homework/7/2/9/2026-10-31",
+          "method": "POST"
+        },
+        {
+          "path": "/fc/api/v1/content/commands/10969294115874699586",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/status",
+          "method": "GET"
+        },
+        {
+          "path": "/fc/api/v1/session",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "case": "current bundled recording positive control",
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "contextCount": 1,
+        "contextClosed": 1,
+        "ownerClosed": 1,
+        "modules": [
+          "/fc/assets/pcm-worklet-B7E4LRoP.js"
+        ],
+        "workers": [
+          "https://172.30.0.2:45636/fc/assets/wav-worker-LSywWbpJ.js"
+        ],
+        "liveWorkers": 0
+      },
+      "uploads": [
+        {
+          "bytes": 23078,
+          "frames": 11517
+        }
+      ],
+      "commands": 1,
+      "pageErrors": []
+    }
+  ],
+  "scope": "Actual Chromium DOM and bundled Worklet/OfflineAudio/Worker, zero-source synthetic MediaStream, synthetic two-package static HTTPS switch (previous URLs renamed), API intercepted, ignoreHTTPSErrors=true fixture only; not Rust native browser TLS, real hardware, installer or three-OS acceptance"
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Tail documentation/packaging/Git-evidence preservation checks; Rust tests not repeated after no Rust/Cargo changes",
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "command": [
+        "git",
+        "check-attr",
+        "-z",
+        "text",
+        "whitespace",
+        "--",
+        "开发计划/验证记录/2026-10-31-round30-native-browser-tls-second.json",
+        "开发计划/验证记录/2026-10-31-round30-native-browser-tls-second-ec0c8268df2d4bda931c982dae53e790-raw/tls.stdout"
+      ],
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 446,
+        "sha256": "156aa28301adf550df495481933a270ca6166b3400519bbf6ec34cc175421268",
+        "base64": "5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtbmF0aXZlLWJyb3dzZXItdGxzLXNlY29uZC5qc29uAHRleHQAdW5zZXQA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtbmF0aXZlLWJyb3dzZXItdGxzLXNlY29uZC5qc29uAHdoaXRlc3BhY2UAdW5zZXQA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtbmF0aXZlLWJyb3dzZXItdGxzLXNlY29uZC1lYzBjODI2OGRmMmQ0YmRhOTMxYzk4MmRhZTUzZTc5MC1yYXcvdGxzLnN0ZG91dAB0ZXh0AHVuc2V0AOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLW5hdGl2ZS1icm93c2VyLXRscy1zZWNvbmQtZWMwYzgyNjhkZjJkNGJkYTkzMWM5ODJkYWU1M2U3OTAtcmF3L3Rscy5zdGRvdXQAd2hpdGVzcGFjZQB1bnNldAA="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ],
+  "source460UnchangedFromTestedArtifactObservation": true,
+  "additionalGitAttributeSource": {
+    "path": ".gitattributes",
+    "bytes": 1652,
+    "sha256": "d9fbda2d72e08ab0ebf44bcd1a91191b7b4f6ed32f25c1e9c77d899b05dddd6c",
+    "purpose": "Disable all newline conversion and whitespace rewriting for current original Round30 evidence"
+  },
+  "existingFullRegression": {
+    "Host": 852,
+    "Windows11": 1287,
+    "executablesEach": 20,
+    "status": "PASS; separate original reports"
+  },
+  "developmentZipSha256": "03f1f4ca2fa098688dedad32c5e3a274a21baba313ad2d1ff29c089b141caad6",
+  "fullGoal": "ACTIVE_NOT_COMPLETE",
+  "githubSync": "NOT_YET_RUN",
+  "msvcCi": "NOT_YET_RUN"
+}

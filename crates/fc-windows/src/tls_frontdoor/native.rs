@@ -27,6 +27,8 @@ use windows::{
         System::IO::{CancelIoEx, CreateIoCompletionPort, GetQueuedCompletionStatus, OVERLAPPED},
     },
 };
+mod stream;
+pub use stream::{TlsHttpEvent, TlsHttpHost};
 const BUDGET: Duration = Duration::from_secs(5);
 static OWNER_ACTIVE: AtomicBool = AtomicBool::new(false);
 static OWNER_FAULTED: AtomicBool = AtomicBool::new(false);
@@ -68,6 +70,27 @@ struct Slot {
     send_len: usize,
     sent: usize,
     close_after_send: bool,
+    stream: Option<stream::Stream>,
+}
+impl Slot {
+    fn wipe_retired_http(&mut self) {
+        if let Some(stream) = self.stream.as_mut() {
+            stream.retire_response();
+            if let Some(frame) = self.frame.as_mut() {
+                frame.wipe();
+            }
+            // SAFETY: callers have witnessed actual IOCP return and SSPI
+            // retirement (or actual worker join). No native borrower remains.
+            unsafe {
+                for byte in (&mut *self.memory.bytes.get()).iter_mut() {
+                    ptr::write_volatile(byte, 0);
+                }
+            }
+            std::sync::atomic::compiler_fence(Ordering::SeqCst);
+            self.send_len = 0;
+            self.sent = 0;
+        }
+    }
 }
 struct Resources {
     slots: [Slot; CONNECTION_SLOTS],
@@ -112,6 +135,8 @@ struct Owner {
     stopping: bool,
     drained: bool,
     report: Report,
+    issuer: TokenIssuer,
+    http_mode: bool,
 }
 fn socket_handle(socket: SOCKET) -> HANDLE {
     HANDLE(socket.0 as *mut _)
@@ -190,6 +215,7 @@ impl Owner {
                         send_len: 0,
                         sent: 0,
                         close_after_send: false,
+                        stream: None,
                     }
                 }),
                 listener: INVALID_SOCKET,
@@ -205,6 +231,8 @@ impl Owner {
             stopping: false,
             drained: false,
             report: Report::default(),
+            issuer,
+            http_mode: false,
         })
     }
     fn start(&mut self, thumbprint: CertificateThumbprint) -> Result<(), String> {
@@ -342,22 +370,43 @@ impl Owner {
                 }
                 // Immediate success queues an IOCP packet as well.
                 slot.pending = Some(Operation::Accept);
+                if let Some(stream) = slot.stream.as_mut() {
+                    stream.deadline = Instant::now() + BUDGET;
+                }
                 self.report.submissions += 1;
             }
         }
         Ok(())
     }
     fn close_slot(&mut self, index: usize, abortive: bool) -> Result<(), String> {
+        let expired = self.expired(index);
+        let listener = self.resources.listener;
         let slot = &mut self.resources.slots[index];
         if slot.phase != Phase::Closed && slot.socket != INVALID_SOCKET {
-            if self.started.elapsed() >= BUDGET {
+            if expired {
                 self.report.deadline_closes += 1;
             }
             if slot.frame.is_none() {
                 self.report.closed_with_sspi_in_flight += 1;
             }
         }
+        if slot.phase != Phase::Closed {
+            if let Some(stream) = slot.stream.as_mut() {
+                if !matches!(stream.event, Some(TlsHttpEvent::ResponseComplete(_))) {
+                    stream.event = None;
+                }
+                stream.deferred_final = None;
+                stream.closed_event = true;
+            }
+        }
         slot.phase = Phase::Closed;
+        if slot.pending == Some(Operation::Accept) && listener != INVALID_SOCKET {
+            // AcceptEx belongs to the listener, not the proposed accept socket.
+            // Its exact operation remains charged until that packet returns.
+            unsafe {
+                let _ = CancelIoEx(socket_handle(listener), Some(slot.memory.operation.get()));
+            }
+        }
         if slot.socket != INVALID_SOCKET
             && matches!(slot.pending, Some(Operation::Receive | Operation::Send))
         {
@@ -385,7 +434,7 @@ impl Owner {
         Ok(())
     }
     fn receive(&mut self, index: usize) -> Result<(), String> {
-        if self.stopping || self.started.elapsed() >= BUDGET {
+        if self.stopping || self.expired(index) {
             return self.close_slot(index, true);
         }
         self.prepare_io(index)?;
@@ -425,7 +474,7 @@ impl Owner {
         Ok(())
     }
     fn send(&mut self, index: usize) -> Result<(), String> {
-        if self.stopping || self.started.elapsed() >= BUDGET {
+        if self.stopping || self.expired(index) {
             return self.close_slot(index, true);
         }
         self.prepare_io(index)?;
@@ -435,6 +484,17 @@ impl Owner {
             .checked_sub(slot.sent)
             .filter(|n| *n > 0)
             .ok_or("TLS empty send")?;
+        // The response may have waited for SSPI or a partial IOCP completion.
+        // Recheck here for EVERY business ciphertext submission, including a
+        // suffix resend. Handshake and close_notify retain their original path.
+        if slot.phase == Phase::Response
+            && slot
+                .stream
+                .as_ref()
+                .is_some_and(|stream| !stream.response_allowed())
+        {
+            return self.close_slot(index, true);
+        }
         // SAFETY: the immutable suffix belongs to this pin until its matching
         // completion; the stack WSABUF descriptor itself is captured by Winsock.
         unsafe {
@@ -482,8 +542,11 @@ impl Owner {
         if self.stopping || self.resources.slots[index].phase == Phase::Closed {
             return Ok(());
         }
-        if self.started.elapsed() >= BUDGET {
+        if self.expired(index) {
             return self.close_slot(index, true);
+        }
+        if self.http_mode {
+            return self.drive_http(index);
         }
         let slot = &mut self.resources.slots[index];
         if slot.pending.is_some() || slot.frame.is_none() {
@@ -570,19 +633,26 @@ impl Owner {
                 return Err("TLS retirement before native IO returned".into());
             }
             slot.retired = true;
+            slot.wipe_retired_http();
+            if let Some(stream) = slot.stream.as_mut() {
+                stream.retired_event = true;
+            }
             self.report.explicit_retirements += 1;
             return Ok(());
         }
         if self.stopping || self.resources.slots[index].phase == Phase::Closed {
             return Ok(());
         }
-        if self.started.elapsed() >= BUDGET {
+        if self.expired(index) {
             return self.close_slot(index, true);
         }
         let step = match result {
             Ok(step) => step,
             Err(_) => return self.close_slot(index, true),
         };
+        if self.http_mode {
+            return self.complete_http_step(index, step);
+        }
         match step {
             Step::NeedInput => self.receive(index),
             Step::PeerClosed => {
@@ -667,7 +737,7 @@ impl Owner {
                         headers: Vec::new(),
                         content_length: self.marker.len() as u64,
                     };
-                    let mut sender = BodySender::new(slot.token, &response)
+                    let mut sender = super::http_date::body_sender(slot.token, response, false)
                         .map_err(|e| format!("TLS response head: {e:?}"))?;
                     let header = sender.head_bytes();
                     let length = header.len() + self.marker.len();
@@ -789,12 +859,15 @@ impl Owner {
                     }
                     self.report.accepted += 1;
                     self.drive(index)?;
-                    if self.report.accepted == CONNECTION_SLOTS {
+                    if !self.http_mode && self.report.accepted == CONNECTION_SLOTS {
                         close(&mut self.resources.listener, true)?;
                     }
                 }
                 Operation::Receive => {
                     if bytes == 0 {
+                        if self.http_mode {
+                            let _ = self.resources.slots[index].parser.finish_eof();
+                        }
                         self.close_slot(index, true)?;
                         continue;
                     }
@@ -831,6 +904,8 @@ impl Owner {
                     slot.sent = sent;
                     if sent != slot.send_len {
                         self.send(index)?;
+                    } else if self.http_mode {
+                        self.complete_http_send(index)?;
                     } else if slot.close_after_send {
                         match slot.phase {
                             Phase::Response => {
@@ -874,6 +949,13 @@ impl Owner {
         Ok(())
     }
     fn poll(&mut self) -> Result<(), String> {
+        if self.http_mode && !self.stopping {
+            for index in 0..CONNECTION_SLOTS {
+                if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
+                    self.close_slot(index, true)?;
+                }
+            }
+        }
         self.poll_io()?;
         for _ in 0..CONNECTION_SLOTS {
             let frame = match self.resources.worker.as_mut() {
@@ -910,6 +992,21 @@ impl Owner {
     }
     fn retire_closed_slot(&mut self, index: usize) -> Result<(), String> {
         let slot = &mut self.resources.slots[index];
+        if self.http_mode
+            && slot.phase == Phase::Closed
+            && slot.socket == INVALID_SOCKET
+            && slot.pending.is_none()
+            && !slot.context_submitted
+            && !slot.retired
+            && slot.frame.is_some()
+        {
+            // No call ever bound an SSPI context to this token. Actual native
+            // IO return plus its unique frame proves this empty slot retired.
+            slot.retired = true;
+            slot.wipe_retired_http();
+            slot.stream.as_mut().unwrap().retired_event = true;
+            return Ok(());
+        }
         if slot.phase != Phase::Closed
             || slot.socket != INVALID_SOCKET
             || slot.pending.is_some()
@@ -952,6 +1049,10 @@ impl Owner {
                 .iter()
                 .map(|slot| {
                     slot.parser.header_capacity()
+                        + slot
+                            .stream
+                            .as_ref()
+                            .map_or(0, stream::Stream::allocation_bytes)
                         + slot
                             .response_body
                             .as_ref()

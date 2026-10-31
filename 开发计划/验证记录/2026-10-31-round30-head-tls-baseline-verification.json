@@ -1,0 +1,49 @@
+{
+  "status": "EXPECTED_BASELINE_REJECTION_PASS",
+  "originalReportSha256": "b6a5b7fbb9d5b4333023c64246ecfa2de86fd11e9fa670308cf37b3a2c011557",
+  "frozenPreviousCandidateSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+  "observedFirstFailure": {
+    "kind": "RuntimeError",
+    "phase": "actual-tls-business-clients",
+    "message": "diagnostic HEAD/204/304 contract omits Content-Length"
+  },
+  "actualNativeDrain": "NOT_VALIDATED_ON_THIS_FAILED_CLIENT_RUN",
+  "cleanup": "PASS",
+  "originalRawBytesVerified": [
+    {
+      "name": "tls.stdout",
+      "bytes": 263,
+      "sha256": "fecc07ef57a6c66d121bea2b50ce04ec874cab9de4c7598b3e69ad10ee8d5443"
+    },
+    {
+      "name": ".tls-process.json",
+      "bytes": 240,
+      "sha256": "f4e16d0266f94b71855d9cfb5aac86477cf94af3ea63e8eff9562983af0714da"
+    },
+    {
+      "name": "tls-public.pem",
+      "bytes": 1141,
+      "sha256": "4725c74ca211f406c138b401f8cc8c6700645304998a0641ef19dcdb27fa9077"
+    },
+    {
+      "name": "tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": ".tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "f0ddd4b8a69ebde592f6d0a7fd232befa5d487baacf8bf56366c7f886a4664b8"
+    },
+    {
+      "name": ".tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "dbee5d7fbbcea193f833fd7c81ed992f13da2ffcfcc3c54a7d5794c6fb39908a"
+    },
+    {
+      "name": ".tls-fixture.json",
+      "bytes": 373,
+      "sha256": "aa140911a163c894e51f987f487253fb7aad7ab307693a052800c5802e1eeae8"
+    }
+  ]
+}

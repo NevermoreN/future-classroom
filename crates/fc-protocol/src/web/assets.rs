@@ -137,9 +137,26 @@ impl Asset {
             .path
             .strip_prefix("assets/")
             .and_then(|s| s.rsplit_once('.'))
-            .and_then(|(stem, _)| stem.rsplit_once('-'))
-            .is_some_and(|(_, hash)| {
-                hash.len() >= 8 && hash.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+            .is_some_and(|(stem, _)| {
+                // Vite's eight-byte base64url suffix may itself contain '-'.
+                // Locate its separator by byte length, never by the last '-'
+                // or an unchecked UTF-8 string boundary.
+                let bytes = stem.as_bytes();
+                let vite = bytes.len().checked_sub(9).is_some_and(|separator| {
+                    separator != 0
+                        && bytes[separator] == b'-'
+                        && bytes[separator + 1..].iter().all(|byte| {
+                            byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'-')
+                        })
+                });
+                // Preserve the existing longer alphanumeric/underscore hash
+                // convention; only the exact eight-byte form admits '-'.
+                let legacy = stem.rsplit_once('-').is_some_and(|(base, hash)| {
+                    !base.is_empty()
+                        && hash.len() >= 8
+                        && hash.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+                });
+                vite || legacy
             });
         if fingerprinted {
             "public, max-age=31536000, immutable"
@@ -247,6 +264,68 @@ mod tests {
             "assets/sub/a.js",
         ] {
             assert!(!valid_path(path), "{path}");
+        }
+    }
+    #[test]
+    fn cache_control_recognizes_exact_vite_base64url_suffix_and_preserves_legacy_hashes() {
+        let manifest = Manifest::parse(
+            doc(&[
+                entry("index.html", 3),
+                entry("assets/index-DFFVdc8-.css", 3),
+            ])
+            .as_bytes(),
+        )
+        .unwrap();
+        assert_eq!(manifest.assets[0].cache_control(), "no-cache");
+        assert_eq!(
+            manifest.assets[1].cache_control(),
+            "public, max-age=31536000, immutable"
+        );
+        for path in [
+            "assets/index-DFFVdc8-.css",
+            "assets/app--1234567.js",
+            "assets/app-123-4567.js",
+            "assets/app-1234567-.js",
+            "assets/app-_1234567.css",
+            "assets/app-123_4567.css",
+            "assets/app-1234567_.css",
+            "assets/app-A_-01-z_.svg",
+            "assets/my.app-abcdefgh.css",
+            "assets/app-0123456789abcdef.js",
+            "assets/long-base-name-1234_567_890.css",
+        ] {
+            assert!(valid_path(path), "{path}");
+            let asset = Asset {
+                path: path.into(),
+                size_bytes: 3,
+                sha256: [0; 32],
+            };
+            assert_eq!(
+                asset.cache_control(),
+                "public, max-age=31536000, immutable",
+                "{path}"
+            );
+        }
+        for path in [
+            "index.html",
+            "assets/app.css",
+            "assets/app-abcdefg.css",
+            "assets/app-a-bcdef.css",
+            "assets/app-abcdef-.css",
+            "assets/app-.css",
+            "assets/-01234567.js",
+            "assets/app-123456789-.css",
+            "assets/app-1234567!.css",
+            // Public Asset can be constructed directly, outside Manifest. Here
+            // len-9 is INSIDE the Chinese UTF-8 character: no string slicing.
+            "assets/中-1234567.css",
+        ] {
+            let asset = Asset {
+                path: path.into(),
+                size_bytes: 3,
+                sha256: [0; 32],
+            };
+            assert_eq!(asset.cache_control(), "no-cache", "{path}");
         }
     }
 }

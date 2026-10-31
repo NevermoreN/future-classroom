@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Original first command-line rejection retained; independent retry is the actual fresh read-only Windows before observation. No report overwritten.",
+  "firstAttempt": {
+    "path": "/tmp/fc-round30-evidence/native-browser-windows-before.json",
+    "sha256": "c51a23f0598d7323ab4a016873f1c70f4a2d4ef0deadeb911617b02dcd622df2",
+    "status": "FAIL",
+    "exitCode": 1,
+    "stderrDecodeEncoding": "gb18030",
+    "stderrDecoded": "命令行太长。\r\n",
+    "sourcePreservedAs": "/tmp/fc-round30-evidence/audit-native-browser-windows-first.py",
+    "sourceSha256": "1c481192219f94dfc950e51173c6f0536e7c67727c1e1b027ea6ac0d8ae00411"
+  },
+  "actualFreshBefore": {
+    "path": "/tmp/fc-round30-evidence/native-browser-windows-before-retry1.json",
+    "sha256": "9471b68db54ac78066534271dd333c76ddb99a2735d34ae3619b173a29c8147b",
+    "status": "PASS",
+    "source": {
+      "path": "/tmp/fc-round30-evidence/audit-native-browser-windows.py",
+      "sha256": "e56c740efeca106ad64ba701002ff53666604019ec5f3830ce25483517ce37de"
+    },
+    "powerShellFullSourceSha256": "49d0902c01bb24e7b20c7366f9a44fb27e0b60fba00f6d975f039618855ef5bb",
+    "stdoutBytes": 587,
+    "stderrBytes": 454,
+    "rawBytesAndSourceBindingsVerified": true
+  },
+  "mutationScope": "NONE. No remote file write, browser/process interaction, task/Run/service/SSH authorization change or private-key read. SSH uses persistent authorized key, only stat records its mode."
+}

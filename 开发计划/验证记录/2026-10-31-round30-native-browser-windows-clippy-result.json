@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "scope": "Record original completed tool result for Windows strict Clippy, without rerunning; build input tree still matches full compile snapshot",
+  "command": "cargo clippy --workspace --all-targets --release --locked --target i686-pc-windows-gnu --target-dir /tmp/fc-round30-win-target -- -D warnings",
+  "originalToolResult": {
+    "chunk_id": "d21122",
+    "wall_time_seconds": 0.128752624,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "exitCode": 0,
+  "log": {
+    "path": "/tmp/fc-round30-evidence/native-browser-windows-clippy-first.log",
+    "bytes": 62,
+    "sha256": "c663462ee6e8bd687c13f4f43386d516f3f0bb8fc1cb3522d98b83bf3664d8fd"
+  },
+  "inputComparisonAtRecording": {
+    "compileReportSha256": "cfd515a166deb3d8683a8d78442a7115ffd50a43dbb251515f110e55926fb4bb",
+    "currentRustAndCargoInputsEqualCompileSnapshot": true
+  },
+  "limitation": "No separate contemporaneous before/after snapshot was captured around Clippy itself; full compile before/after and current compare are separate evidence"
+}

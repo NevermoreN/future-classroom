@@ -1,0 +1,20 @@
+error[E0004]: non-exhaustive patterns: `Ok(executor::HttpCompletion::Download(_))` not covered
+  --> crates/fc-bootstrap/src/web_transfer/work/tests.rs:89:11
+   |
+89 |     match ticket.wait() {
+   |           ^^^^^^^^^^^^^ pattern `Ok(executor::HttpCompletion::Download(_))` not covered
+   |
+note: `std::result::Result<executor::HttpCompletion, JobError>` defined here
+  --> /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\core\src\result.rs:557:0
+  ::: /config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library\core\src\result.rs:561:4
+   |
+   = note: not covered
+   = note: the matched value is of type `std::result::Result<executor::HttpCompletion, JobError>`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern or an explicit pattern as shown
+   |
+93 ~         Err(e) => panic!("unexpected {e:?}"),
+94 ~         Ok(executor::HttpCompletion::Download(_)) => todo!(),
+   |
+
+
+For more information about this error, try `rustc --explain E0004`.

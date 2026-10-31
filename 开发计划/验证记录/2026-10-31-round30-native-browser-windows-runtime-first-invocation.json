@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "scope": "All twenty exact current GNU x86 test executables run on authorized Windows11 only; formal Win7/Win10/MSVC NOT_VALIDATED",
+  "command": [
+    "/config/.python/python/bin/python3",
+    "-B",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round30-native-browser-windows-workspace-snapshot/tests.jsonl",
+    "--test-timeout-seconds",
+    "180",
+    "--report",
+    "/tmp/fc-round30-evidence/native-browser-windows-runtime-first.json"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 130.87962084403262,
+  "runnerSourceBefore": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0",
+  "runnerSourceAfter": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0",
+  "frozenBindingSha256": "9e1e2e4f67b66dec0ec24cb711bb845f639284465cdc7492f6ae594940fc7c3c",
+  "inputChanges": [],
+  "artifactChanges": [],
+  "streams": {
+    "stdout": {
+      "path": "/tmp/fc-round30-evidence/native-browser-windows-runtime-first.stdout.log",
+      "bytes": 903,
+      "sha256": "839495d39435b2d3adedbef10128c90010bafa0c7bd2d32762d756f5a3a2e7d9",
+      "base64": "dm9pY2VfbGltaXRzX3N0b3JhZ2UtNTg4NjkzMTE2Y2RkOGQ5ZS5leGUgUEFTUwpidXNpbmVzc19zdG9yYWdlLTg3OGQ0NmE2YTI5ZGUwYWUuZXhlIFBBU1MKdm9pY2Vfc3RvcmFnZS05ZDM1M2NkOTVkNTNhZTJkLmV4ZSBQQVNTCmF1dG9zdGFydF9jb29yZGluYXRvci05N2RjOTYyNjRmMzVjZmUyLmV4ZSBQQVNTCnNjaGVkdWxlX29wZXJhdGlvbnMtNzA1ZGE2ZTA1YTc1Yjk2NS5leGUgUEFTUwpjYWxlbmRhcl9leGVjdXRpb25fZmVuY2UtNzM1NWZhYmMyZWQzZjhmOS5leGUgUEFTUwpmY19ib290c3RyYXAtMzBmYTUxMjI4NGU1Njg2Ny5leGUgUEFTUwpydW50aW1lX3N0b3JhZ2UtZmVmNjBhYWEwZGM3YjBhNC5leGUgUEFTUwpmY19ib290c3RyYXAtNDIwMzQ2M2I5ZDZkZTFmNS5leGUgUEFTUwpmY19tYXRlcmlhbHMtZjFhN2Q1OGMxMzFlOTVkNS5leGUgUEFTUwpmY193aW5kb3dzLWIzZDQzYmM2N2I1MzQwYTEuZXhlIFBBU1MKZmNfc2VjdXJpdHktMjg4OWZhOTMwMWI4OGU4MC5leGUgUEFTUwpmY19zdG9yYWdlLTNjY2Y3ZTViZWRiZjVkOTQuZXhlIFBBU1MKZmNfcHJlc2VudGF0aW9uLWI4NDdkZmEzYjY4ZDEyMzcuZXhlIFBBU1MKZmNfcHJvdG9jb2wtNDMxNmJiNjNiOTJkZGE0ZC5leGUgUEFTUwpmY19hdWRpby1lMWI0ZWFiYzllZjE0MjBmLmV4ZSBQQVNTCmZjX2FwcGxpY2F0aW9uLWZiMTYyNjhiNWVmZjNhY2YuZXhlIFBBU1MKZmNfcnVudGltZS1hMDliZTczMzYzZWRkMjNhLmV4ZSBQQVNTCmZjX3BvcnRzLTE1YjFhZDY4OWY3OWM0OTAuZXhlIFBBU1MKZmNfZG9tYWluLTM2Nzc0N2UzMDZhMWRkMGUuZXhlIFBBU1MKbmF0aXZlIHByb2JlIFBBU1M7IGZvcmVncm91bmQvaW50ZXJhY3Rpb24gZXZpZGVuY2UgcmVtYWlucyBsaW1pdGVkIHRvIGNvdW50ZXJzCmNsZWFudXA6IFBBU1MK"
+    },
+    "stderr": {
+      "path": "/tmp/fc-round30-evidence/native-browser-windows-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  }
+}

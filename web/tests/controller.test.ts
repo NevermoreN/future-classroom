@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, NetworkFault, type ServerApi } from '../src/api/client'
 import { PairingController, type ViewState } from '../src/api/controller'
-import type { Session } from '../src/api/protocol'
+import { ProtocolFault, ProtocolVersionFault, publicStatus, type Session } from '../src/api/protocol'
 const proof = 'a'.repeat(64), csrf = 'b'.repeat(64)
 const actual: Session = { principal: { id: '5', displayName: '白板确认的老师', role: 'TEACHER_ADMIN' }, currentClassId: '8', assignments: [{ classId: '8', subjectId: '9' }], csrf }
 function fixture() {
@@ -13,6 +13,72 @@ const form = { code: '01234567', loginName: 'client-claimed-name', deviceName: '
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(0) })
 afterEach(() => { vi.useRealTimers() })
 describe('pairing ownership and uncertain outcomes', () => {
+  it.each(['schemaVersion', 'apiVersion', 'uiCompatibilityVersion'])('blocks session/pairing before compatible %s and exposes only a typed refresh signal', async key => {
+    const f = fixture()
+    f.api.status.mockImplementationOnce(async () => publicStatus({ schemaVersion: 1, apiVersion: 1, uiCompatibilityVersion: 1, online: true, [key]: 2 }))
+    await f.controller.connect()
+    expect(f.last()).toEqual({ phase: 'error', message: new ProtocolVersionFault().message, canPair: false, refreshRequired: true })
+    f.controller.cancelPairing(); await f.controller.create(form)
+    await vi.advanceTimersByTimeAsync(120_000)
+    expect(f.api.status).toHaveBeenCalledOnce(); expect(f.api.session).not.toHaveBeenCalled()
+    expect(f.api.create).not.toHaveBeenCalled(); expect(f.api.poll).not.toHaveBeenCalled()
+    expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('does not promote malformed versions or message text into a refresh-required error', async () => {
+    for (const failure of [new ProtocolFault(new ProtocolVersionFault().message), new Error(new ProtocolVersionFault().message)]) {
+      const f = fixture(); f.api.status.mockRejectedValueOnce(failure)
+      await f.controller.connect()
+      expect(f.last().phase).toBe('error'); expect(f.last()).not.toHaveProperty('refreshRequired')
+      await f.controller.create(form)
+      expect(f.api.session).not.toHaveBeenCalled(); expect(f.api.create).not.toHaveBeenCalled(); f.controller.dispose()
+    }
+    const f = fixture()
+    f.api.status.mockImplementationOnce(async () => publicStatus({ schemaVersion: 1, apiVersion: '2', uiCompatibilityVersion: 1, online: true }))
+    await f.controller.connect()
+    expect(f.last().phase).toBe('error'); expect(f.last()).not.toHaveProperty('refreshRequired')
+    expect(f.api.session).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('keeps a version-unknown pairing POST single-shot and requires refresh instead of re-pairing', async () => {
+    const f = fixture(); await f.controller.connect(); f.api.create.mockRejectedValueOnce(new ProtocolVersionFault())
+    await f.controller.create(form)
+    expect(f.last()).toMatchObject({ phase: 'error', canPair: false, refreshRequired: true })
+    expect(f.last()).toHaveProperty('message', expect.stringContaining('配对结果尚未确认'))
+    expect(f.last()).toHaveProperty('message', expect.stringContaining('不会自动重发'))
+    f.controller.cancelPairing(); await f.controller.create(form); await vi.advanceTimersByTimeAsync(120_000)
+    expect(f.api.create).toHaveBeenCalledOnce(); expect(f.api.poll).not.toHaveBeenCalled()
+    expect(f.api.session).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('stops polling on a typed version fault without sending another pairing request', async () => {
+    const f = fixture(); await f.controller.connect(); f.api.poll.mockRejectedValueOnce(new ProtocolVersionFault())
+    const work = f.controller.create(form); await vi.advanceTimersByTimeAsync(500); await work
+    expect(f.last()).toMatchObject({ phase: 'error', canPair: false, refreshRequired: true })
+    await vi.advanceTimersByTimeAsync(120_000)
+    expect(f.api.create).toHaveBeenCalledOnce(); expect(f.api.poll).toHaveBeenCalledOnce()
+    expect(f.api.session).toHaveBeenCalledOnce(); expect(JSON.stringify(f.last())).not.toContain(proof)
+    expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('does not infer an authenticated view when the granted session has an incompatible version', async () => {
+    const f = fixture(); await f.controller.connect()
+    f.api.poll.mockResolvedValueOnce({ status: 'AUTHORIZED' }); f.api.session.mockRejectedValueOnce(new ProtocolVersionFault())
+    const work = f.controller.create(form); await vi.advanceTimersByTimeAsync(500); await work
+    expect(f.last()).toMatchObject({ phase: 'error', canPair: false, refreshRequired: true })
+    expect(f.api.session).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(120_000)
+    expect(f.api.create).toHaveBeenCalledOnce(); expect(f.api.poll).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
+  it('keeps logout result unknown on a version fault, clears the mirror and never resends POST', async () => {
+    const f = fixture(); f.api.session.mockResolvedValueOnce(actual); await f.controller.connect()
+    f.api.logout.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.logout()
+    expect(f.last()).toMatchObject({ phase: 'error', canPair: false, refreshRequired: true })
+    expect(f.last()).toHaveProperty('message', expect.stringContaining('注销结果尚未确认'))
+    expect(f.last()).toHaveProperty('message', expect.stringContaining('不会自动重发'))
+    expect(JSON.stringify(f.last())).not.toContain(actual.csrf)
+    expect(JSON.stringify(f.last())).not.toContain(actual.principal.displayName)
+    await f.controller.logout(); f.controller.cancelPairing(); await f.controller.create(form)
+    await vi.advanceTimersByTimeAsync(120_000)
+    expect(f.api.logout).toHaveBeenCalledOnce(); expect(f.api.create).not.toHaveBeenCalled()
+    expect(f.api.session).toHaveBeenCalledOnce(); expect(f.api.status).toHaveBeenCalledOnce(); f.controller.dispose()
+  })
   it('explicit revocation clears the authenticated mirror and stops existing operations', async () => {
     const f = fixture(); f.api.session.mockResolvedValueOnce(actual); await f.controller.connect()
     expect(f.last().phase).toBe('authenticated'); f.controller.invalidate()

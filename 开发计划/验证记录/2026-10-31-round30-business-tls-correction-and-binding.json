@@ -1,0 +1,18 @@
+{
+  "scope": "First actual business candidate failed before READY; repaired harness marker only, same compiled executable reused",
+  "firstReport": "business-tls-first.json",
+  "firstError": "FutureClassroom: TLS HTTP marker: InvalidInput",
+  "cause": "Harness appended Business- before nonce, violating unchanged native exact FutureClassroom-Test-TLS- +32hex capability grammar",
+  "correction": "Use native exact marker grammar in Python harness; no server grammar or admission relaxed",
+  "secondReport": "business-tls-stage2.json",
+  "actualExeSha256": "e340742968265db3e7a5c5c382319e59cacb4e0b87d9df3656af15ea7cf25885",
+  "scriptDeltaAfterProductCompile": [
+    "scripts/windows-tls-business-probe.py"
+  ],
+  "currentRunnerSha256": "f278a2bda836105c5d68a8b9f4893a28a7aa9c707e73df35e2786ee5454782ff",
+  "status": "ACTUAL_TLS_API_STAGE_PASS_NOT_FINAL_PROJECT_ACCEPTANCE",
+  "httpRequests": 12,
+  "tlsCertificateNegatives": 2,
+  "physicalPlayback": "NOT_EXERCISED",
+  "strictP0": "NOT_VALIDATED"
+}

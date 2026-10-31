@@ -1,0 +1,39 @@
+{
+  "scope": "Host only two affected library tests; not current full workspace or Windows native coverage",
+  "command": [
+    "cargo",
+    "test",
+    "-p",
+    "fc-protocol",
+    "-p",
+    "fc-windows",
+    "--lib",
+    "--release",
+    "--locked",
+    "--target-dir",
+    "/tmp/fc-round30-core-target",
+    "--",
+    "--test-threads=2"
+  ],
+  "exitCode": 0,
+  "exitCodeSource": "Original exec session9632 completed exit_code0",
+  "sourceFreeze": "head-source-freeze.json",
+  "sourcesMatchFreezeAfter": true,
+  "testGroups": [
+    {
+      "status": "ok",
+      "passed": 80,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "status": "ok",
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "passed": 111,
+  "logSha256": "df7737cec65d2f5a0a8a5572eb787e1f0a878b9f32884f07f0487dfa42238417",
+  "status": "PASS"
+}

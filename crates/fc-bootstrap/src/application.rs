@@ -37,6 +37,11 @@ pub fn recovery_probe() -> std::result::Result<(), String> {
 pub fn recovery_probe_reopen(root: &Path, nonce: &str) -> std::result::Result<(), String> {
     backup_probe::reopen(root, nonce)
 }
+mod http_business_probe;
+mod http_executor;
+pub fn tls_business_probe(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
+    http_business_probe::run(thumbprint, marker)
+}
 mod shared_pool;
 pub fn autostart_probe() -> std::result::Result<(), String> {
     autostart_probe::run()
@@ -401,6 +406,8 @@ fn create_file(path: &Path, bytes: &[u8]) -> Result<()> {
 }
 
 enum Outcome {
+    Http(fc_bootstrap::web_transfer::HttpCompletion),
+    HttpProbe(Box<http_business_probe::Completion>),
     Backup(backup_controller::Completed),
     Opened(
         Arc<Mutex<Backend>>,
@@ -474,6 +481,8 @@ struct Request {
     clock: Arc<CurrentClock>,
 }
 enum Work {
+    Http(fc_bootstrap::web_transfer::HttpJob),
+    HttpProbe(Box<http_business_probe::Job>),
     #[cfg(test)]
     HoldForShutdown(Arc<backup_shutdown_tests::Hold>),
     Backup(Box<backup_controller::Job>),
@@ -548,6 +557,8 @@ impl Task for Work {
     type Output = Result<Outcome>;
     fn allocation_bytes(&self) -> Option<usize> {
         match self {
+            Self::Http(job) => job.allocation_bytes(),
+            Self::HttpProbe(job) => job.allocation_bytes(),
             #[cfg(test)]
             Self::HoldForShutdown(_) => Some(0),
             Self::Backup(job) => job.allocation_bytes(),
@@ -612,6 +623,10 @@ impl Task for Work {
     fn run(self, context: &JobContext) -> Self::Output {
         context.checkpoint().map_err(|_| Failure::Stopped)?;
         match self {
+            Self::Http(job) => Ok(Outcome::Http(job.run(context))),
+            Self::HttpProbe(job) => job
+                .run(context)
+                .map(|done| Outcome::HttpProbe(Box::new(done))),
             #[cfg(test)]
             Self::HoldForShutdown(hold) => {
                 hold.wait();
@@ -3893,7 +3908,9 @@ impl App {
                 Ok(Outcome::ExitAuthorized) => self.begin_shutdown(),
                 Ok(Outcome::Closed) => return Err("关闭结果进入了普通请求通道".into()),
                 Ok(
-                    Outcome::Office(_)
+                    Outcome::Http(_)
+                    | Outcome::HttpProbe(_)
+                    | Outcome::Office(_)
                     | Outcome::Desktop(..)
                     | Outcome::ContentImages(_)
                     | Outcome::ContentPage { .. }

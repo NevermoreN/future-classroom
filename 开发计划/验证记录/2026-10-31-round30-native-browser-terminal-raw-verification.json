@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent exact original artifacts check after terminal browser/TLS runs; not full project completion",
+  "runs": [
+    {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-first.json",
+      "sha256": "6b724335498dc5e59fcfe0fe3c0714c6d34eaabecf381d5de2fe3b9178ad55f9",
+      "status": "FAIL",
+      "cleanup": "PASS",
+      "tlsFiles": 7,
+      "edgeFiles": 8
+    },
+    {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-second.json",
+      "sha256": "230c1831459770b2fe22043b1febee446c335a57b75b844d89ec3d46d8507d5b",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "tlsFiles": 7,
+      "edgeFiles": 8
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "scope": "Hub bounded inactive-owner reap and authenticated Append negative-cleanup alias only",
+  "files": {
+    "crates/fc-bootstrap/src/web_transfer/uploads.rs": {
+      "sha256": "8b1582402c8bdcc1f2a7ea5a2a0ed978f82eb78faf16dc9762b8739c86cfd04f",
+      "bytes": 34362
+    },
+    "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs": {
+      "sha256": "ecd5e3f1c5569737a8828b7f314e92541eba11e8cf764bf4c9ed4f74e25e2368",
+      "bytes": 40292
+    }
+  },
+  "checks": [
+    "direct rustfmt --edition 2021 passed",
+    "git diff --check for owned two files passed"
+  ],
+  "api": "UploadHub::reap_expired(&self, app: &WebApplication, context: &JobContext) -> Result<UploadHubCleanup, UploadHubError>",
+  "contracts": [
+    "begin reaps at most two inactive Owned exact keys after exact base App binding validation, before reserve; current context checked before/after",
+    "Busy stages remain physically owned; actual cleanup is outside descriptor lock; failed abort/drop/quarantine retains original charge",
+    "no live Ready cancellation or lifetime renewal",
+    "one Option<RequestToken> per Entry, bound after successful authenticated prepare and before Backend try_lock; Owned lookups accept original token or exact alias",
+    "reserve rejects an Owned original/alias token collision; aliases cannot overwrite an existing different token or steal another currently observed descriptor token",
+    "Busy aliases intentionally not exposed; Net must await actual Append task completion before cleanup lookup",
+    "prepare error before successful proof does not gain alias; original token/fresh bounded expiry cleanup remains available"
+  ],
+  "new_tests": [
+    "expired_ready_worker_reap_and_cancelled_ready_begin_reap_reuse_real_slots",
+    "expired_ready_real_delete_failure_retains_charge_until_worker_retry",
+    "authenticated_append_backend_busy_binds_new_cleanup_token_but_failed_csrf_does_not"
+  ],
+  "expanded_original_tests": [
+    "abandoned_owner_and_worker_panic_retain_exact_domain_until_join_and_explicit_final_cleanup: cancelled Busy owner is skipped by running reap",
+    "cancelled_receiving_owner_keeps_slot_until_worker_cleanup_then_reuse_rejects_old_serial: full-live capacity assertion runs before cancellation under new automatic-reap contract"
+  ],
+  "test_scope": "real shared Pool JobContext, SQLite/authenticated material stage and native deletion paths; expiry seam only tightens private Hub deadline, no 120-second wallclock or real connected listener claim",
+  "not_run": [
+    "Cargo build/tests/Clippy",
+    "Windows executions of new source",
+    "remote operations",
+    "CI/workflow changes for this patch"
+  ]
+}

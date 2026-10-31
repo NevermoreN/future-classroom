@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Remove only redundant frozen previous four-program snapshot and disposable web ZIP after exact SHA verification; ongoing round current build inputs retained",
+  "deleted": [
+    {
+      "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc-bootstrap.exe",
+      "bytes": 12478242,
+      "sha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a",
+      "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc-bootstrap.exe"
+    },
+    {
+      "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_bootstrap-4203463b9d6de1f5.exe",
+      "bytes": 11670157,
+      "sha256": "6213ffae0ded10014df9870c5c31c48bf666cb80ed409707c71e017745fd5098",
+      "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_bootstrap-4203463b9d6de1f5.exe"
+    },
+    {
+      "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1967056,
+      "sha256": "39af5301ed07837a563d35c21a2a7e6608a7d2d522b1f865ee0045907e1d23dc",
+      "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_protocol-4316bb63b92dda4d.exe"
+    },
+    {
+      "path": "/tmp/fc-round30-windows-head-stage-snapshot/fc_windows-b3d43bc67b5340a1.exe",
+      "bytes": 3244217,
+      "sha256": "69b42816476bdd533c92f215da49ba0a579d1b15252fe4fe5929bf4e25d95599",
+      "sameBytesRetainedAt": "/tmp/fc-round30-native-browser-windows-workspace-snapshot/fc_windows-b3d43bc67b5340a1.exe"
+    },
+    {
+      "path": "/tmp/fc-round30-windows-head-stage-snapshot/tests.jsonl",
+      "bytes": 2697,
+      "sha256": "b6930dcc6dc7028ce032c6407ea7865805f46c1c0ffb90ab4d80090681c4c339",
+      "sameBytesRetainedAt": "/tmp/fc-round30-evidence/native-browser-cleaned-old-test-metadata.jsonl"
+    },
+    {
+      "path": "/tmp/fc-round30-native-browser-web.zip",
+      "bytes": 134642,
+      "sha256": "eee678d5313f56900b246486b839e280b6c04da3c760721a121ecec4205290c9",
+      "binding": "native-browser-input-binding.json and both actual run invocation reports"
+    }
+  ],
+  "totalBytes": 29497011,
+  "retainedForOngoingRound": [
+    "/tmp/fc-round30-native-browser-windows-workspace-snapshot",
+    "/tmp/fc-round30-core-target",
+    "/tmp/fc-round30-win-target",
+    "/tmp/fc-round30-web-verified-dist/dist"
+  ],
+  "persistentSshAuthorization": "UNTOUCHED",
+  "persistentPrivateKey": "UNTOUCHED",
+  "fullRawEvidence": "RETAINED_FOR_ARCHIVE"
+}

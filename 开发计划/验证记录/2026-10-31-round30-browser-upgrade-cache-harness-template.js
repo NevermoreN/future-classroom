@@ -1,0 +1,35 @@
+async (page) => {
+  const server = __SERVER__, manifest = __MANIFEST__;
+  const base = `https://172.30.0.2:${server.port}`, browser = page.context().browser(), contexts = [], checks = [], cases = [];
+  const check = (name, value) => { if (!value) throw new Error(name); checks.push(name); };
+  const previousMain = manifest.assets.find(a => /^assets\/previous-index-.*\.js$/.test(a.path));
+  async function deploy(f, active) { const r = await f.context.request.put(`${base}/__qa/${server.controlToken}/deployment/${active}`, { data: '' }); if (!r.ok() || (await r.json()).active !== active) throw new Error('owned fixture deployment switch failed'); }
+  async function fixture() {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block', ignoreHTTPSErrors: true });contexts.push(context);
+    __INIT__
+    const tab = await context.newPage(), trace = [], cached = [], errors = [], posts = [], urls = new Map();
+    const session = await context.newCDPSession(tab); await session.send('Network.enable');
+    session.on('Network.requestWillBeSent', e => urls.set(e.requestId, e.request.url));
+    session.on('Network.requestServedFromCache', e => cached.push({ requestId: e.requestId, url: urls.get(e.requestId) }));
+    session.on('Network.responseReceived', e => trace.push({ url: e.response.url, status: e.response.status, fromDiskCache: e.response.fromDiskCache, fromPrefetchCache: e.response.fromPrefetchCache, mimeType: e.response.mimeType }));
+    tab.on('pageerror', e => errors.push(e.message));tab.on('request', r => { if (r.method() === 'POST') posts.push(r.url()); });
+    return { context, tab, trace, cached, errors, posts };
+  }
+  async function home(f) { const r = await f.tab.goto(base + '/fc/'); await f.tab.getByRole('button', { name: '打开语音播报' }).waitFor();return r; }
+  async function voice(f) { await f.tab.getByRole('button', { name: '打开语音播报' }).click(); await f.tab.waitForFunction(() => !document.querySelector('.voice-alternative button').disabled); }
+  async function hashFetch(f) { return f.tab.evaluate(async path => { const r = await fetch(path, { cache: 'default' }), data = await r.arrayBuffer(); const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', data))].map(x => x.toString(16).padStart(2, '0')).join('');return { status: r.status, bytes: data.byteLength, sha256: hash, cacheControl: r.headers.get('cache-control') }; }, '/fc/' + previousMain.path); }
+  async function release(f) { await f.tab.waitForFunction(() => { const q=window.__fcUpgradeQa;return q.active===0 && q.starts===q.stopped && q.starts===q.ownerClosed && q.contextCount===q.contextClosed && q.liveWorkers===0; });return f.tab.evaluate(() => window.__fcUpgradeQa); }
+  try {
+    const f = await fixture();await deploy(f,'a');const initial = await home(f);check('no-route fixture delivers strict CSP and no-cache entry', initial.headers()['cache-control']==='no-cache' && initial.headers()['content-security-policy'].includes("worker-src 'self'") && !initial.headers()['content-security-policy'].includes('unsafe-inline'));
+    const before = await hashFetch(f);check('unrouted browser fetch sees exact cached previous main bytes', before.status===200 && before.bytes===previousMain.sizeBytes && before.sha256===previousMain.sha256 && before.cacheControl.includes('immutable'));
+    check('CDP observes a real HTTP cache service for previous main', f.cached.some(x=>x.url===base+'/fc/'+previousMain.path) || f.trace.some(x=>x.url===base+'/fc/'+previousMain.path && x.fromDiskCache));
+    const revalidated=await home(f);check('same entry remains rendered after browser revalidation', revalidated.headers()['etag']===initial.headers()['etag']);await voice(f);await deploy(f,'b');const after=await hashFetch(f);check('retired previous JS is still available from browser HTTP cache', after.sha256===previousMain.sha256 && after.status===200);
+    await f.tab.getByRole('button',{name:'点击开始录音',exact:true}).click();await f.tab.getByText(/录音页面资源无法加载或运行/).waitFor();const stopped=await release(f);check('uncached old Worklet failure releases all tracks and contexts', stopped.starts===1 && stopped.stopped===1 && stopped.modules[0].includes('previous-pcm-worklet-'));
+    check('unrouted old Worklet failure never uploads or submits', f.posts.length===0);
+    const navigation=f.tab.waitForNavigation();await f.tab.getByRole('button',{name:'刷新页面',exact:true}).click();const current=await navigation;await f.tab.getByRole('button',{name:'打开语音播报'}).waitFor();check('explicit refresh revalidates old entry into changed current HTML', current.headers()['etag']!==initial.headers()['etag']);check('changed HTML selects current main asset instead of cached previous main', f.trace.some(x=>/\/assets\/index-.*\.js$/.test(new URL(x.url).pathname) && x.status===200));
+    check('unrouted Worklet scenario has no unhandled page error', f.errors.length===0);cases.push({case:'real HTTP cache enabled, entry revalidation, retired lazy Worklet and explicit refresh',before,after,initialEtag:initial.headers()['etag'],currentEtag:current.headers()['etag'],microphone:stopped,cacheEvents:f.cached,network:f.trace,posts:f.posts,pageErrors:f.errors});await f.context.close();
+    const w=await fixture();await deploy(w,'a');await home(w);await voice(w);await w.tab.getByRole('button',{name:'点击开始录音',exact:true}).click();await w.tab.waitForFunction(()=>document.querySelector('.voice-hold').classList.contains('is-recording'));await w.tab.waitForTimeout(650);await deploy(w,'b');await w.tab.getByRole('button',{name:'结束并发送',exact:true}).click();await w.tab.getByText(/录音页面资源无法加载或运行/).waitFor();const ended=await release(w);check('unrouted upgrade after capture retires lazy old Worker safely', ended.workers.length===1 && ended.workers[0].includes('previous-wav-worker-') && ended.liveWorkers===0 && ended.active===0);check('unrouted Worker failure never uploads or submits',w.posts.length===0);check('unrouted Worker scenario has no unhandled page error',w.errors.length===0);cases.push({case:'real HTTP cache enabled, upgrade between capture and Worker',microphone:ended,cacheEvents:w.cached,network:w.trace,posts:w.posts,pageErrors:w.errors});await w.context.close();
+    return {status:'PASS',browserVersion:browser.version(),checks,checkCount:checks.length,cases,scope:'Actual Chromium HTTP cache with no context/page routing and no cache disabling, strict same-origin static fixture plus synthetic server API, previous URLs renamed then actually retired; ignoreHTTPSErrors=true only this fixture. Not Rust native browser TLS, MSI, teacher hardware or formal three-OS compatibility.'};
+  }catch(error){const diagnostics=[];for(const c of contexts)for(const p of c.pages())diagnostics.push({url:p.url(),body:(await p.locator('body').innerText()).slice(-5000),microphone:await p.evaluate(()=>window.__fcUpgradeQa)});return {status:'FAIL',error:String(error.message),checks,cases,diagnostics};}
+  finally{for(const c of contexts)try{await c.close();}catch{}}
+}

@@ -1,0 +1,32 @@
+{
+  "scope": "normal executable linked during first compile; old test-only match omission caused aggregate command failure; no claim of full build pass",
+  "artifacts": [
+    {
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "executable": "/tmp/fc-round30-win-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "sha256": "2b958fe9e2880614eef4de04f174f164a6db97b0c64543e4ce7ee7826e6c0e3f",
+      "bytes": 12414218,
+      "frozenExecutable": "/tmp/fc-round30-windows-download-stage-snapshot/fc-bootstrap.exe"
+    }
+  ]
+}

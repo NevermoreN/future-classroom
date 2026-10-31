@@ -1,0 +1,1407 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "scope": "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "NOT_TESTED",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed",
+  "exeSha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a",
+  "runnerSourceSha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "webBundleSha256": "eee678d5313f56900b246486b839e280b6c04da3c760721a121ecec4205290c9",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "events": [
+    {
+      "case": "static-head-method",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 67,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 160,
+      "responseWireSha256": "05c319e33d5b986e40e9d508659128ac122634b6d01bb23d843d328c5433eb9f",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 76714852
+    },
+    {
+      "case": "static-head-host",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "wrong.invalid",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 65,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 139,
+      "responseWireSha256": "55744538c4756e8719e2542a48025915156e7f1b95d808daf5a64369b7affdad",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 107973300
+    },
+    {
+      "case": "api-head-get",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 70,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 193,
+      "responseWireSha256": "31cf886ed8495d579adadc607037955a10b3d7ce312129a58e81c54281c7620a",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 111035262
+    },
+    {
+      "case": "api-head-post",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "pairing/requests",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 80,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 194,
+      "responseWireSha256": "d130b88da38cbfe0ae9455290496a793e8da2b49ea723aa8bc2a53061de45030",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "POST",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 112853854
+    },
+    {
+      "case": "api-head-shared",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "voice/broadcasts",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 80,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 199,
+      "responseWireSha256": "74406b629a13c8ee5e7d82f73ddd640cac129787f4a95ecd6d60eb0a268c7e25",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET, POST",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 112406896
+    },
+    {
+      "case": "api-head-unknown",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "not-a-route",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 75,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 404,
+      "responseWireBytes": 172,
+      "responseWireSha256": "bee762413b28758da9e417c3effa26c97f52943ed7726be0332db4febfc8697d",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 73571667
+    },
+    {
+      "case": "api-head-host",
+      "status": "PASS",
+      "method": "HEAD",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "wrong.invalid",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 68,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 172,
+      "responseWireSha256": "cf1c5d9b79be42f58d34f273adc006a1aea6058184f0b90544e87768304053e4",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "HEAD response; CL/TE omitted and zero wire body",
+      "forwardObservationNanos": 111367595
+    },
+    {
+      "case": "static-assets/favicon-CXuYoSfB.svg",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/favicon-CXuYoSfB.svg",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 83,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 908,
+      "responseWireSha256": "b801fac3deb0515ab7e0d6fcf3f66bc86b23c99bdfb97612f06bea8f9d4705b7",
+      "responseBodyBytes": 282,
+      "responseBodySha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 78727081
+    },
+    {
+      "case": "static-assets/index-C3GlEF2q.js",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/index-C3GlEF2q.js",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 80,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 409742,
+      "responseWireSha256": "c94c625d47e4fd1402950a9fce295285f37a7c913053205da53f41071826b34f",
+      "responseBodyBytes": 409096,
+      "responseBodySha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3",
+      "responseDate": "Sat, 31 Oct 2026 12:45:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 115624464
+    },
+    {
+      "case": "static-assets/index-DFFVdc8-.css",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/index-DFFVdc8-.css",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 81,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 39474,
+      "responseWireSha256": "f7fdf78e91ec8ce26544e47ac07acaced56f24142ed029ee3bb09f178c4f1187",
+      "responseBodyBytes": 38836,
+      "responseBodySha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 44212953
+    },
+    {
+      "case": "static-304-assets/index-DFFVdc8-.css",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/index-DFFVdc8-.css",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 174,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 304,
+      "responseWireBytes": 625,
+      "responseWireSha256": "2019285eb395f9dd0a3611aedf44c1b1d2f2da913e398101453f7a19fb69f7ca",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "status-defined empty; CL/TE omitted by diagnostic contract",
+      "forwardObservationNanos": 74580097
+    },
+    {
+      "case": "static-assets/pcm-worklet-B7E4LRoP.js",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/pcm-worklet-B7E4LRoP.js",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 86,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 2368,
+      "responseWireSha256": "c320b3220bc660b64f78d159e9ab03a17e3e3da3a182b37b421efd8d94a734e5",
+      "responseBodyBytes": 1724,
+      "responseBodySha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 75258514
+    },
+    {
+      "case": "static-assets/wav-worker-LSywWbpJ.js",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/wav-worker-LSywWbpJ.js",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 85,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 1527,
+      "responseWireSha256": "9eba4e75340f55002532bb6c1d32345d6c448e91acb8804fc684ad2450716936",
+      "responseBodyBytes": 884,
+      "responseBodySha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 38875571
+    },
+    {
+      "case": "static-index.html",
+      "status": "PASS",
+      "method": "GET",
+      "route": "",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 56,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 1843,
+      "responseWireSha256": "fc115a267429827a21ddd7dc8f69e04672e1972f20cf375b638b52aa42d9a2ba",
+      "responseBodyBytes": 1232,
+      "responseBodySha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 37043848
+    },
+    {
+      "case": "static-304-index.html",
+      "status": "PASS",
+      "method": "GET",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 159,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 304,
+      "responseWireBytes": 599,
+      "responseWireSha256": "85348b489f200ffbce51d83a3041d225b87f500dca3a1737ece0679367f68379",
+      "responseBodyBytes": 0,
+      "responseBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "binaryClientRetainedBodyBytes": 0,
+      "responseFraming": "status-defined empty; CL/TE omitted by diagnostic contract",
+      "forwardObservationNanos": 76866488
+    },
+    {
+      "case": "static-missing",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/missing.js",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 73,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 404,
+      "responseWireBytes": 197,
+      "responseWireSha256": "3edbbf64faeb50474d951eb517a8c27606709d98e5c5945863cfbd9bea26d2d0",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "26b3db51141629b611ff139eb36fc2e810ea1d9c7470fc0a1f16d7526d5aa9c9",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 111005981
+    },
+    {
+      "case": "static-traversal",
+      "status": "PASS",
+      "method": "GET",
+      "route": "assets/../index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 76,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 404,
+      "responseWireBytes": 197,
+      "responseWireSha256": "3edbbf64faeb50474d951eb517a8c27606709d98e5c5945863cfbd9bea26d2d0",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "26b3db51141629b611ff139eb36fc2e810ea1d9c7470fc0a1f16d7526d5aa9c9",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 108076505
+    },
+    {
+      "case": "static-query-not-fallback",
+      "status": "PASS",
+      "method": "GET",
+      "route": "index.html?unknown=1",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 76,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 404,
+      "responseWireBytes": 197,
+      "responseWireSha256": "3edbbf64faeb50474d951eb517a8c27606709d98e5c5945863cfbd9bea26d2d0",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "26b3db51141629b611ff139eb36fc2e810ea1d9c7470fc0a1f16d7526d5aa9c9",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 110856755
+    },
+    {
+      "case": "static-bad-origin",
+      "status": "PASS",
+      "method": "GET",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 64,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 197,
+      "responseWireSha256": "aa8911c69f49d0d418d89104c700a7e52a15711b1b6b39c711f1987f3633f8ff",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 109015532
+    },
+    {
+      "case": "static-cross-site",
+      "status": "PASS",
+      "method": "GET",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 94,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 197,
+      "responseWireSha256": "aa8911c69f49d0d418d89104c700a7e52a15711b1b6b39c711f1987f3633f8ff",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 107937439
+    },
+    {
+      "case": "unknown-api-not-html",
+      "status": "PASS",
+      "method": "GET",
+      "route": "api/v1/not-a-route",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 74,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 404,
+      "responseWireBytes": 230,
+      "responseWireSha256": "123c40ff138be1066d5ddf4a2060bce8eb0ac94056a400bcc7cf9d2314db39d1",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "26b3db51141629b611ff139eb36fc2e810ea1d9c7470fc0a1f16d7526d5aa9c9",
+      "responseDate": "Sat, 31 Oct 2026 12:45:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 113323842
+    },
+    {
+      "case": "static-wrong-method",
+      "status": "PASS",
+      "method": "POST",
+      "route": "index.html",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 118,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 227,
+      "responseWireSha256": "0eb65f06d3c18188f6b1834328284d466a286ee5fc2e3a9e6d9bc3f3438dd4c0",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 70666822
+    },
+    {
+      "case": "api-wrong-method-status",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 72,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "bf8880d38e82aa89ca0a96c27972131b7f4031a85283dc15d6815b1ae04a47b6",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 117033940
+    },
+    {
+      "case": "api-wrong-method-pairing/requests",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "pairing/requests",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 261,
+      "responseWireSha256": "de4a1f4d77e2668c6ad4d635190ab44b166b248021595746225d48311acf0d4e",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 116145945
+    },
+    {
+      "case": "api-wrong-method-voice/broadcasts",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "voice/broadcasts",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 266,
+      "responseWireSha256": "5df045ba011d0dbb4ad2ad92f8a56cbd18a86bd64e3894c900609cba96682a39",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET, POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 111707039
+    },
+    {
+      "case": "public-status",
+      "status": "PASS",
+      "method": "GET",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 69,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 260,
+      "responseWireSha256": "5e50eeb54d9d7d45dd51c691026e6b41eb150366feb48f8e1596d956a7bb19be",
+      "responseBodyBytes": 75,
+      "responseBodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 117989778
+    },
+    {
+      "case": "unauthorized-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 70,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 236,
+      "responseWireSha256": "5742fb0e3558007299d5baed5129c42b2d7176d6fbe1f5a24d02e683fa06c641",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 113028891
+    },
+    {
+      "case": "bad-origin-pairing",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "274ccd2db64ab1c3ac298eed21877f79c0adae2f0a907c1b0500194413095e58",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 131,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 403,
+      "responseWireBytes": 230,
+      "responseWireSha256": "e642b4a67572721cd5cb0d2f817816a42e65f7f3b3cf18022331bf3a06090246",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 74046305
+    },
+    {
+      "case": "pairing-request",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "274ccd2db64ab1c3ac298eed21877f79c0adae2f0a907c1b0500194413095e58",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 133,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 202,
+      "responseWireBytes": 345,
+      "responseWireSha256": "56b6846e1f75196251e65f9698683219285895629e09c0f4f1c484b922284a8d",
+      "responseBodyBytes": 153,
+      "responseBodySha256": "b5bc674463f66beb898413d6563b4096985eda1281d2c429535f3fb4337db003",
+      "responseDate": "Sat, 31 Oct 2026 12:45:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 74926051
+    },
+    {
+      "case": "pairing-poll-1",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests/2/poll",
+      "requestBodyBytes": 99,
+      "requestBodySha256": "f476beaacd88af95916a3c77a0011cad14b8b0daf4256ec003990055f7641893",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 139,
+      "coalescedHeaderTailBodyBytes": 99,
+      "httpStatus": 200,
+      "responseWireBytes": 370,
+      "responseWireSha256": "393d0746f484bff5e557fa7186727d6e77f8ae931fe96fb8b83a6bd8684e2721",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "02151c8ea64179d2d4c57898e15e5a53992a0f321cc4c7666c320c84a7acca0f",
+      "responseDate": "Sat, 31 Oct 2026 12:45:07 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 75298335
+    },
+    {
+      "case": "authenticated-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60115",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60115",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 167,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 462,
+      "responseWireSha256": "ca784090bbcc6c1a60013dfcbb0a216d1a4cd01cb589aeb0dbec18c56302a36a",
+      "responseBodyBytes": 276,
+      "responseBodySha256": "24f53cf8041660f5fba6ac798211bcaa1f58b4368a2b6e4e9c456dc43e97f779",
+      "responseDate": "Sat, 31 Oct 2026 12:45:07 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 75150880
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed",
+  "staticPackage": {
+    "manifestSha256": "1dfa13904bbbdf661b182e055944c0b6ead4cd91f5c2618a6ee0b6fe9d1271ee",
+    "payloadBytes": 452054,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-C3GlEF2q.js",
+        "sizeBytes": 409096,
+        "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sizeBytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "1dfa13904bbbdf661b182e055944c0b6ead4cd91f5c2618a6ee0b6fe9d1271ee",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-C3GlEF2q.js",
+        "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3",
+        "bytes": 409096
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8",
+        "bytes": 38836
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "uploadedScriptSha256": {
+    "cleanup": "dd247f44589dbc6402329469d165a8be1232583007eeab697f7321e4f22d6382",
+    "stop": "ba9969d96fa3a717fbbeb413da08e6080b9c1f912eff0c8fa0e56a978d702847",
+    "capture": "a3e21567ed1f655531767343f462c3daa45b88453b973030c720e6d6228a3be3",
+    "setup": "de703c0e8d44760c1ea0e490ae99be77f40ac49d306b5c4ec3bd374f40af7170",
+    "launch": "f9ebbd8bf333a36e962decbdec964a3f05ba03465c4d5d516a9fd5fe05986cdd"
+  },
+  "controlScriptsParse": "PASS",
+  "fixture": {
+    "thumbprint": "73F9801CED90D7DA47DD0BAFBDD9AC0373A2DC70",
+    "keyName": "FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "2357520e40eaf628b4326334bc4fc19da1e9c3972b57c9a6b7108fd75daf469e",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "ready": [
+    {
+      "port": 60115,
+      "generation": 1,
+      "marker": "FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed",
+      "origin": "https://localhost:60115",
+      "basePath": "/fc/",
+      "classId": "1",
+      "subjectId": "1",
+      "loginName": "probe",
+      "staticAssets": 6
+    }
+  ],
+  "nativeReports": [],
+  "nativeProcessExits": [],
+  "static": {
+    "status": "PASS",
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "bytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-C3GlEF2q.js",
+        "bytes": 409096,
+        "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3"
+      },
+      {
+        "path": "assets/index-DFFVdc8-.css",
+        "bytes": 38836,
+        "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "bytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "bytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "bytes": 1232,
+        "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb"
+      }
+    ],
+    "conditionalResponses": 2,
+    "negativePaths": 7,
+    "headCases": [
+      {
+        "case": "static-head-method",
+        "httpStatus": 405,
+        "wireBodyBytes": 0,
+        "allow": "GET",
+        "status": "PASS"
+      },
+      {
+        "case": "static-head-host",
+        "httpStatus": 403,
+        "wireBodyBytes": 0,
+        "allow": null,
+        "status": "PASS"
+      },
+      {
+        "case": "api-head-get",
+        "httpStatus": 405,
+        "wireBodyBytes": 0,
+        "allow": "GET",
+        "status": "PASS"
+      },
+      {
+        "case": "api-head-post",
+        "httpStatus": 405,
+        "wireBodyBytes": 0,
+        "allow": "POST",
+        "status": "PASS"
+      },
+      {
+        "case": "api-head-shared",
+        "httpStatus": 405,
+        "wireBodyBytes": 0,
+        "allow": "GET, POST",
+        "status": "PASS"
+      },
+      {
+        "case": "api-head-unknown",
+        "httpStatus": 404,
+        "wireBodyBytes": 0,
+        "allow": null,
+        "status": "PASS"
+      },
+      {
+        "case": "api-head-host",
+        "httpStatus": 403,
+        "wireBodyBytes": 0,
+        "allow": null,
+        "status": "PASS"
+      }
+    ],
+    "source": "verified ZIP manifest; public resources before pairing",
+    "browser": "NOT_RUN"
+  },
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "actual-tls-business-clients",
+    "message": "NATIVE_BROWSER_RUN_FAILED"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 264,
+      "observedBytes": 264,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "973a3989920407b5deb92a88b8efc268bedf827db858b19c9f1a696bc4e1970a",
+      "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjAxMTUsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy00MjY0YmQxNjE0ODM0OTQ3ODE4MWI5MjA4ODQwNTRlZCIsInBhaXJpbmdDb2RlIjoiNzQzOTA0NjEiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2MDExNSIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2fQ0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "browser": {
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "marker": "FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed",
+    "credentialScope": "Cookie/CSRF private stdin only; no raw CDP frames",
+    "edgeSessionCapSeconds": 180,
+    "ownerExitObservationSeconds": 215,
+    "errors": [
+      {
+        "phase": "run-node-result-and-actual-exit",
+        "kind": "RuntimeError"
+      }
+    ],
+    "sourceSha256": {
+      "observer": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91",
+      "edgeOwner": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "nodeHarness": "9d55d662916657956699bde315563736d2aed6f9d7c2113768ac5510a5375bb6",
+      "tlsOwnershipHelpers": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    "spkiSha256Base64": "RQDbw9p3vQYyldvpuDhlKqVearCJ+C94l0J7PibQT94=",
+    "ownerReportPath": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-edge-owner.json",
+    "nodeReportPath": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-node.json",
+    "edgeReady": {
+      "pid": 38248,
+      "headless": true,
+      "muteAudio": true,
+      "jobName": "Local\\FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407-2df250431d9640e5be842d9343fe18ae",
+      "profile": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407\\profile",
+      "readyOriginalBytes": 60,
+      "boundLoopback": true,
+      "productVersion": "156.0.4314.50",
+      "readyOriginalSha256": "dc11e1f0457420f34d1fad8831876846fe300073a9c61d3f447ffa70ed2439bb",
+      "webSocketPath": "/devtools/browser/b76ef50d-848b-4078-9e89-090aee5d0572",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "fileVersion": "156.0.4314.50",
+      "port": 55360,
+      "startTicks": "639290475014540418",
+      "marker": "FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407",
+      "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-86484845dac74da98d43b64705654407",
+      "controlFile": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-edge-owner.json.control.json"
+    },
+    "nodeReady": {
+      "type": "READY",
+      "marker": "FutureClassroom-Test-TLS-4264bd16148349478181b920884054ed",
+      "browserVersion": "Edg/156.0.4314.50",
+      "scope": "Exclusive CDP context prepared; no Native navigation or new pairing yet"
+    },
+    "nodeActualExitCode": 1,
+    "nodeRaw": {
+      "stdout": {
+        "bytes": 455,
+        "observedBytes": 455,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "adc4272bd03684e9a697a699d8ec6573f172b3dc922e2807f0514cb50c26aeb2",
+        "base64": "eyJ0eXBlIjoiUkVBRFkiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQiLCJicm93c2VyVmVyc2lvbiI6IkVkZy8xNTYuMC40MzE0LjUwIiwic2NvcGUiOiJFeGNsdXNpdmUgQ0RQIGNvbnRleHQgcHJlcGFyZWQ7IG5vIE5hdGl2ZSBuYXZpZ2F0aW9uIG9yIG5ldyBwYWlyaW5nIHlldCJ9CnsidHlwZSI6IlJFU1VMVCIsInN0YXR1cyI6IkZBSUwiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQiLCJ3aXJlUmVzcG9uc2VDb3VudCI6MTQsImNvbnRlbnRQb3N0cyI6MSwiY29udGV4dERpc3Bvc2VkIjp0cnVlLCJyZXBvcnQiOiIvdG1wL2ZjLXJvdW5kMzAtZXZpZGVuY2UvbmF0aXZlLWJyb3dzZXItdGxzLWZpcnN0Lmpzb24uYnJvd3Nlci1ub2RlLmpzb24ifQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "nodeReport": {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-node.json",
+      "bytes": 17280,
+      "sha256": "4d79b527017078d59b7588131d6548e38b82025a4d6126f8a490af9c3e25c55d"
+    },
+    "cdpTunnelRaw": {
+      "stdout": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerStopRequest": {
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 355,
+        "sha256": "97e22bb5f70b155f07a2412e6e53e55a6a15094c815e644ec98b6290745e5c27",
+        "base64": "RURHRV9DQUNIRV9TVE9QX1JFUVVFU1QgeyJyZXN1bHQiOiAie1wibWFya2VyXCI6XCJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTg2NDg0ODQ1ZGFjNzRkYTk4ZDQzYjY0NzA1NjU0NDA3XCIsXCJzdGF0dXNcIjpcIlNUT1BfUkVRVUVTVEVEXCIsXCJwaHlzaWNhbEV4aXRcIjpcIldBSVRfRk9SX09SSUdJTkFMX1NVUEVSVklTT1JfUkVQT1JUXCJ9IiwgInJhd1JlcG9ydCI6ICIvdG1wL2ZjLXJvdW5kMzAtZXZpZGVuY2UvbmF0aXZlLWJyb3dzZXItdGxzLWZpcnN0Lmpzb24uYnJvd3Nlci1lZGdlLW93bmVyLmpzb24uY29udHJvbC5qc29uLnN0b3AtYjY4MWM2Mzk4NTY1NGVlZDllZDdkZDlmZTJmNDc2MDkuanNvbiJ9Cg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerActualExitCode": 0,
+    "ownerReport": {
+      "path": "/tmp/fc-round30-evidence/native-browser-tls-first.json.browser-edge-owner.json",
+      "bytes": 17261,
+      "sha256": "879086bc5fecbbed2590fe8244e4d2270f87793db6b743668ad2f95eb4533b4f"
+    },
+    "ownerPhysicalCleanup": "PASS",
+    "ownerSupervisorRaw": {
+      "stdout": {
+        "bytes": 1422,
+        "observedBytes": 1422,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "a69e3cbe84978b8493b4f2a0dbcd830ed745bd763ac2809595c5a75d6b00f6ab",
+        "base64": "RURHRV9DQUNIRV9DT05UUk9MIHsiY29udHJvbEZpbGUiOiAiL3RtcC9mYy1yb3VuZDMwLWV2aWRlbmNlL25hdGl2ZS1icm93c2VyLXRscy1maXJzdC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uLmNvbnRyb2wuanNvbiIsICJtYXJrZXIiOiAiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci04NjQ4NDg0NWRhYzc0ZGE5OGQ0M2I2NDcwNTY1NDQwNyJ9CkVER0VfQ0FDSEVfUkVBRFkgeyJwaWQiOiAzODI0OCwgImhlYWRsZXNzIjogdHJ1ZSwgIm11dGVBdWRpbyI6IHRydWUsICJqb2JOYW1lIjogIkxvY2FsXFxGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTg2NDg0ODQ1ZGFjNzRkYTk4ZDQzYjY0NzA1NjU0NDA3LTJkZjI1MDQzMWQ5NjQwZTViZTg0MmQ5MzQzZmUxOGFlIiwgInByb2ZpbGUiOiAiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItODY0ODQ4NDVkYWM3NGRhOThkNDNiNjQ3MDU2NTQ0MDdcXHByb2ZpbGUiLCAicmVhZHlPcmlnaW5hbEJ5dGVzIjogNjAsICJib3VuZExvb3BiYWNrIjogdHJ1ZSwgInByb2R1Y3RWZXJzaW9uIjogIjE1Ni4wLjQzMTQuNTAiLCAicmVhZHlPcmlnaW5hbFNoYTI1NiI6ICJkYzExZTFmMDQ1NzQyMGYzNGQxZmFkODgzMTg3Njg0NmZlMzAwMDczYTljNjFkM2Y0NDdmZmE3MGVkMjQzOWJiIiwgIndlYlNvY2tldFBhdGgiOiAiL2RldnRvb2xzL2Jyb3dzZXIvYjc2ZWY1MGQtODQ4Yi00MDc4LTllODktMDkwYWVlNWQwNTcyIiwgImV4ZSI6ICJDOlxcUHJvZ3JhbSBGaWxlcyAoeDg2KVxcTWljcm9zb2Z0XFxFZGdlXFxBcHBsaWNhdGlvblxcbXNlZGdlLmV4ZSIsICJmaWxlVmVyc2lvbiI6ICIxNTYuMC40MzE0LjUwIiwgInBvcnQiOiA1NTM2MCwgInN0YXJ0VGlja3MiOiAiNjM5MjkwNDc1MDE0NTQwNDE4IiwgIm1hcmtlciI6ICJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTg2NDg0ODQ1ZGFjNzRkYTk4ZDQzYjY0NzA1NjU0NDA3IiwgInJlbW90ZVJvb3QiOiAiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItODY0ODQ4NDVkYWM3NGRhOThkNDNiNjQ3MDU2NTQ0MDciLCAiY29udHJvbEZpbGUiOiAiL3RtcC9mYy1yb3VuZDMwLWV2aWRlbmNlL25hdGl2ZS1icm93c2VyLXRscy1maXJzdC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uLmNvbnRyb2wuanNvbiJ9CkVER0VfQ0FDSEVfT1dORVJfUkVTVUxUIHsic3RhdHVzIjoiUEFTUyIsImNsZWFudXAiOiJQQVNTIiwicmVwb3J0IjoiL3RtcC9mYy1yb3VuZDMwLWV2aWRlbmNlL25hdGl2ZS1icm93c2VyLXRscy1maXJzdC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uIiwiY2FjaGVBc3NlcnRpb25zIjoiU0VFX1NFUEFSQVRFX0NEUF9IQVJORVNTIn0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerProcessRetained": false
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 2
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 263,
+      "sha256": "8a8a421115b7f7e8389a227faa93135e4544720bc89f295ce2c76d9ccfb100f0"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "674c81e5666ba10e08bb6e4f4038c511baa380ae57560de8ea20b1bcf8e02f3b"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "582e4514c07c0c65993bb768feb30203089a08f5a38efa2c914fe14dd189d5f8"
+    },
+    "tls.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "735f0fce4220b872977e64e671837c952060fecc0fb033f375b95c974b02efd1"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 186,
+      "sha256": "4d7450e94359dce560dc7a8cdeff5df3d5c60fb45fa1d2ead9568e6e4803e29b"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "46f92b3029fe3df688ec8595ea232937f1837c85db84784938db739389325758"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 263,
+          "sha256": "8a8a421115b7f7e8389a227faa93135e4544720bc89f295ce2c76d9ccfb100f0"
+        },
+        "downloaded": {
+          "bytes": 263,
+          "sha256": "8a8a421115b7f7e8389a227faa93135e4544720bc89f295ce2c76d9ccfb100f0"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/tls.stdout",
+        "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjAxMTUsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy00MjY0YmQxNjE0ODM0OTQ3ODE4MWI5MjA4ODQwNTRlZCIsInBhaXJpbmdDb2RlIjoiNzQzOTA0NjEiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2MDExNSIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2fQo="
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "674c81e5666ba10e08bb6e4f4038c511baa380ae57560de8ea20b1bcf8e02f3b"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "674c81e5666ba10e08bb6e4f4038c511baa380ae57560de8ea20b1bcf8e02f3b"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTQyNjRiZDE2MTQ4MzQ5NDc4MTgxYjkyMDg4NDA1NGVkXFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjozMDg3Niwic3RhcnRUaWNrcyI6IjYzOTI5MDQ3NTAzODczMTIxMiJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "582e4514c07c0c65993bb768feb30203089a08f5a38efa2c914fe14dd189d5f8"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "582e4514c07c0c65993bb768feb30203089a08f5a38efa2c914fe14dd189d5f8"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRR1RibXJ0SVcvTDVPZDBXTDBtK3NKREFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1USXpPVFUzV2hjTk1qWXhNVEF4TVRJME5EVTNXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEVytIenRBTU1wT3k1cFJycUlReDkyCkZVMnplTUk5YW5JSkhtZStuNUxhbzdUY0dKV0RaM3FsblNsaWlkdVBJYTVCYVptZ1NubUVhTEx4aTB6M1N5eTlId1hXNGttMzlFdUcKVDhsZmUxdFRBWSswWDdNOHFoMmE4T2ExWUEzYitraTM3OUVZUGxjd1plajEwQU0xSnUxdWdlTUtUaGlhcU9BSFluVEgvRmJkVEI4dwpTWDk4UlJVZW82V2w1UjhSbDJlQStISkxFaUtHeVNYb2s4WWFPNjRNZktuWCtNcE1CNDRxOWRIcEpvNCt4Y2ZZVEo3Y1RvbVRNd3c0ClN4eGFWaFNKRVZoYTJ2TSttSlRza01zTWJnc1NFVHJLVXVYdGpSd3QyaFpYeWo3U3FYaU1tYThVR0QwSGplNXVRSVZsU0V6dy9SNmMKbTdJWGJ0R1kzRno4RERXRkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJTTjRJMUlYTTd6CnJCeGsrb3JZajNjcUpJWjc2VEFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBZWhDQlhnczlGRndNTFJ1aHRmeEZ1NHRqWlNVRXEvVEoKRGhGdzg4N25YU0JQMHlIL0V4NUlBalFWN0wrVGJYb2VVVlEzY20ySTJXdDRDTExMYmJmNmdBWkpxUUFBdDhpTnNzUmY2RXcrRER2TAprczRTcTk2YWlTM0MyOWM1bjFFRFJwMndCcmVPYy9Ha2dlY0UvaFJvU1dwK0FCVk9SZHNWbDZPdjlCNUpDdjNzTnA3QXpIL3AvZzF4CkpZM1NkeHNLUEFKMnBSb2ZMa0ZtQzIzVnhLWHJkZm1tT1o0bkJqV3V1L3VwaFhkcUdsdERVV1hPUyt4dHJjSUVaZW9tNlF4eG9IamYKMlNEL21SZElha0hXS05uaWtvcnhIM2l5eTRVWTVvczFhR2ptZVE4YStQQ3FkNTRqdUhobFBqbGkzamhzVW9FMlhINWFQd01ZdkY0WQplZWQ1cWc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/tls.stderr",
+        "base64": ""
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "735f0fce4220b872977e64e671837c952060fecc0fb033f375b95c974b02efd1"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "735f0fce4220b872977e64e671837c952060fecc0fb033f375b95c974b02efd1"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MzAyNTIsInN0YXJ0VGlja3MiOiI2MzkyOTA0NzUwMzYxMjIwODQifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 186,
+          "sha256": "4d7450e94359dce560dc7a8cdeff5df3d5c60fb45fa1d2ead9568e6e4803e29b"
+        },
+        "downloaded": {
+          "bytes": 186,
+          "sha256": "4d7450e94359dce560dc7a8cdeff5df3d5c60fb45fa1d2ead9568e6e4803e29b"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6ODg0OCwic3RhcnRUaWNrcyI6IjYzOTI5MDQ3NDk2NjU3ODg2NCJ9"
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "46f92b3029fe3df688ec8595ea232937f1837c85db84784938db739389325758"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "46f92b3029fe3df688ec8595ea232937f1837c85db84784938db739389325758"
+        },
+        "artifact": "/tmp/fc-round30-evidence/native-browser-tls-first-4264bd16148349478181b920884054ed-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzNGOTgwMUNFRDkwRDdEQTQ3REQwQkFGQkREOUFDMDM3M0EyREM3MCIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTQyNjRiZDE2MTQ4MzQ5NDc4MTgxYjkyMDg4NDA1NGVkIiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy00MjY0YmQxNjE0ODM0OTQ3ODE4MWI5MjA4ODQwNTRlZC1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "fa7066102a0bada86a74f307b60578be3567916cbd05202c9ae3f5c8ae86c55c",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "9ca7e4a74138bbf58b3b5416dd64b01f3d0bd905d7970bc7c2f8bd78d93a3f20",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzNGOTgwMUNFRDkwRDdEQTQ3REQwQkFGQkREOUFDMDM3M0EyREM3MCIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNDI2NGJkMTYxNDgzNDk0NzgxODFiOTIwODg0MDU0ZWQta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFHVGJtcnRJVy9MNU9kMFdMMG0rc0pEQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1USXpPVFUzV2hjTk1qWXhNVEF4TVRJME5EVTNXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRRFcrSHp0QU1NcE95NXBScnFJUXg5MlxuRlUyemVNSTlhbklKSG1lK241TGFvN1RjR0pXRFozcWxuU2xpaWR1UElhNUJhWm1nU25tRWFMTHhpMHozU3l5OUh3WFc0a20zOUV1R1xuVDhsZmUxdFRBWSswWDdNOHFoMmE4T2ExWUEzYitraTM3OUVZUGxjd1plajEwQU0xSnUxdWdlTUtUaGlhcU9BSFluVEgvRmJkVEI4d1xuU1g5OFJSVWVvNldsNVI4UmwyZUErSEpMRWlLR3lTWG9rOFlhTzY0TWZLblgrTXBNQjQ0cTlkSHBKbzQreGNmWVRKN2NUb21UTXd3NFxuU3h4YVZoU0pFVmhhMnZNK21KVHNrTXNNYmdzU0VUcktVdVh0alJ3dDJoWlh5ajdTcVhpTW1hOFVHRDBIamU1dVFJVmxTRXp3L1I2Y1xubTdJWGJ0R1kzRno4RERXRkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCU040STFJWE03elxuckJ4aytvcllqM2NxSklaNzZUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFlaENCWGdzOUZGd01MUnVodGZ4RnU0dGpaU1VFcS9USlxuRGhGdzg4N25YU0JQMHlIL0V4NUlBalFWN0wrVGJYb2VVVlEzY20ySTJXdDRDTExMYmJmNmdBWkpxUUFBdDhpTnNzUmY2RXcrRER2TFxua3M0U3E5NmFpUzNDMjljNW4xRURScDJ3QnJlT2MvR2tnZWNFL2hSb1NXcCtBQlZPUmRzVmw2T3Y5QjVKQ3Yzc05wN0F6SC9wL2cxeFxuSlkzU2R4c0tQQUoycFJvZkxrRm1DMjNWeEtYcmRmbW1PWjRuQmpXdXUvdXBoWGRxR2x0RFVXWE9TK3h0cmNJRVplb202UXh4b0hqZlxuMlNEL21SZElha0hXS05uaWtvcnhIM2l5eTRVWTVvczFhR2ptZVE4YStQQ3FkNTRqdUhobFBqbGkzamhzVW9FMlhINWFQd01ZdkY0WVxuZWVkNXFnPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "b7a85300637df210d2170b26d85a2f20440d422007e033a6d649eba03eb9aabf",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjJ9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 764,
+        "sha256": "f7858a2e48ddeb4d8f1677ab0a166dfaed95122f08c277acb26930c2518b8b4d",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoyNjMsInNoYTI1NiI6IjhhOGE0MjExMTViN2Y3ZTgzODlhMjI3ZmFhOTMxMzVlNDU0NDcyMGJjODlmMjk1Y2UyYzc2ZDljY2ZiMTAwZjAifSwiLnRscy1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjI0MCwic2hhMjU2IjoiNjc0YzgxZTU2NjZiYTEwZTA4YmI2ZTRmNDAzOGM1MTFiYWEzODBhZTU3NTYwZGU4ZWEyMGIxYmNmOGUwMmYzYiJ9LCJ0bHMtcHVibGljLnBlbSI6eyJieXRlcyI6MTE0MSwic2hhMjU2IjoiNTgyZTQ1MTRjMDdjMGM2NTk5M2JiNzY4ZmViMzAyMDMwODlhMDhmNWEzOGVmYTJjOTE0ZmUxNGRkMTg5ZDVmOCJ9LCJ0bHMuc3RkZXJyIjp7ImJ5dGVzIjowLCJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0sIi50bHMtc3VwZXJ2aXNvci5qc29uIjp7ImJ5dGVzIjoxODcsInNoYTI1NiI6IjczNWYwZmNlNDIyMGI4NzI5NzdlNjRlNjcxODM3Yzk1MjA2MGZlY2MwZmIwMzNmMzc1Yjk1Yzk3NGIwMmVmZDEifSwiLnRscy1zZXR1cC1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjE4Niwic2hhMjU2IjoiNGQ3NDUwZTk0MzU5ZGNlNTYwZGM3YThjZGVmZjVkZjNkNWM2MGZiNDVmYTFkMmVhZDk1NjhlNmU0ODAzZTI5YiJ9LCIudGxzLWZpeHR1cmUuanNvbiI6eyJieXRlcyI6MzczLCJzaGEyNTYiOiI0NmY5MmIzMDI5ZmUzZGY2ODhlYzg1OTVlYTIzMjkzN2YxODM3Yzg1ZGI4NDc4NDkzOGRiNzM5Mzg5MzI1NzU4In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

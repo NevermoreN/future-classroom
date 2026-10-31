@@ -240,6 +240,63 @@ fn wrong_code(original: &PairingCode) -> PairingCode {
 }
 
 #[test]
+fn request_cancellation_while_waiting_for_pairing_lock_preserves_original_code_and_global_service()
+{
+    use std::sync::mpsc;
+    let fixture = Fixture::new();
+    let service = fixture.service();
+    service.set_enabled(fixture.admin, true).unwrap();
+    let window = service.begin_pairing(fixture.admin).unwrap();
+    let text = window.code.expose_text().as_str().to_owned();
+    let active = Arc::new(AtomicBool::new(true));
+    let check = active.clone();
+    let (entered, seen) = mpsc::channel();
+    let notified = AtomicBool::new(false);
+    let scoped = service.with_execution_fence(Arc::new(move || {
+        if !notified.swap(true, Ordering::AcqRel) {
+            let _ = entered.send(());
+        }
+        check.load(Ordering::Acquire)
+    }));
+    let original_state = service.inner.state.lock().unwrap();
+    let thread =
+        std::thread::spawn(move || scoped.request_pairing(code(&text), "admin", "late-browser"));
+    seen.recv_timeout(Duration::from_secs(3)).unwrap();
+    active.store(false, Ordering::Release);
+    drop(original_state);
+    assert!(matches!(
+        thread.join().unwrap(),
+        Err(WebServiceError::Unavailable)
+    ));
+    assert!(service.pending(fixture.admin).unwrap().is_empty());
+    assert!(fixture
+        .backend
+        .control
+        .health_gate()
+        .check_sensitive()
+        .is_ok());
+    // The canceled view did not consume a code, disable the base service or
+    // mint a lease. The same original code is still valid for a fresh request.
+    let receipt = service
+        .request_pairing(window.code, "admin", "fresh-browser")
+        .unwrap();
+    assert!(receipt.request_id > 0);
+    let inner = service
+        .with_execution_fence(Arc::new(|| false))
+        .with_execution_fence(Arc::new(|| true));
+    assert_eq!(
+        inner.execution_checkpoint(),
+        Err(WebServiceError::Unavailable)
+    );
+    let panicking = service.with_execution_fence(Arc::new(|| panic!("diagnostic request fence")));
+    assert_eq!(
+        panicking.execution_checkpoint(),
+        Err(WebServiceError::Unavailable)
+    );
+    assert!(service.execution_checkpoint().is_ok());
+}
+
+#[test]
 fn disabled_default_and_only_exact_local_global_administrator_manages_pairing() {
     let mut f = Fixture::new();
     let service = f.service();

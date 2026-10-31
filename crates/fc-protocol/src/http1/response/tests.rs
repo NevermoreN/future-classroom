@@ -68,6 +68,10 @@ fn forbids_all_connection_negotiation_framing_and_nominated_field_tricks() {
             BodySender::new(token(), &input),
             Err(ResponseError::InvalidHead)
         ));
+        assert!(matches!(
+            BodySender::new_for_head(token(), &input),
+            Err(ResponseError::InvalidHead)
+        ));
     }
 }
 
@@ -85,29 +89,40 @@ fn forbids_crlf_controls_invalid_names_and_header_count_overflow() {
         let mut input = head(0);
         input.headers.push(header);
         assert_eq!(encode_head(&input), Err(ResponseError::InvalidHead));
+        assert!(matches!(
+            BodySender::new_for_head(token(), &input),
+            Err(ResponseError::InvalidHead)
+        ));
     }
     let mut input = head(0);
     input.headers = (0..=MAX_HEADERS).map(|_| field("X", b"a")).collect();
     assert_eq!(encode_head(&input), Err(ResponseError::TooLarge));
+    assert!(matches!(
+        BodySender::new_for_head(token(), &input),
+        Err(ResponseError::TooLarge)
+    ));
 }
 
 #[test]
 fn automatic_fields_status_and_final_crlf_all_share_the_exact_sixteen_kib_budget() {
-    let mut input = head(0);
-    let overhead = encode_head(&input).unwrap().len();
-    input.headers = vec![field("X", &vec![b'a'; MAX_HEADER_BYTES - overhead - 5])];
-    assert!(input.validate().is_ok());
-    assert_eq!(encode_head(&input).unwrap().len(), MAX_HEADER_BYTES);
-    input.headers[0].value.push(b'a');
-    assert!(
-        input.validate().is_ok(),
-        "application-only header budget still fits"
-    );
-    assert_eq!(encode_head(&input), Err(ResponseError::TooLarge));
-    assert!(matches!(
-        BodySender::new(token(), &input),
-        Err(ResponseError::TooLarge)
-    ));
+    for status in [200, 204, 205, 304] {
+        let mut input = head(0);
+        input.status = status;
+        let overhead = encode_head(&input).unwrap().len();
+        input.headers = vec![field("X", &vec![b'a'; MAX_HEADER_BYTES - overhead - 5])];
+        assert!(input.validate().is_ok());
+        assert_eq!(encode_head(&input).unwrap().len(), MAX_HEADER_BYTES);
+        input.headers[0].value.push(b'a');
+        assert!(
+            input.validate().is_ok(),
+            "application-only header budget still fits"
+        );
+        assert_eq!(encode_head(&input), Err(ResponseError::TooLarge));
+        assert!(matches!(
+            BodySender::new(token(), &input),
+            Err(ResponseError::TooLarge)
+        ));
+    }
 }
 
 #[test]
@@ -116,6 +131,10 @@ fn status_and_no_body_rules_do_not_emit_forbidden_framing() {
         let mut input = head(0);
         input.status = status;
         assert_eq!(encode_head(&input), Err(ResponseError::InvalidHead));
+        assert!(matches!(
+            BodySender::new_for_head(token(), &input),
+            Err(ResponseError::InvalidHead)
+        ));
     }
     for status in [204, 205, 304] {
         let mut input = head(0);
@@ -123,9 +142,20 @@ fn status_and_no_body_rules_do_not_emit_forbidden_framing() {
         let encoded = encode_head(&input).unwrap();
         let encoded = std::str::from_utf8(&encoded).unwrap();
         assert!(encoded.ends_with("Connection: close\r\n\r\n"));
-        assert_eq!(encoded.contains("Content-Length:"), status != 204);
+        assert_eq!(encoded.contains("Content-Length:"), status == 205);
+        if status == 205 {
+            assert!(encoded.contains("Content-Length: 0\r\n"));
+        }
         input.content_length = 1;
         assert_eq!(encode_head(&input), Err(ResponseError::InvalidHead));
+        assert!(matches!(
+            BodySender::new(token(), &input),
+            Err(ResponseError::InvalidHead)
+        ));
+        assert!(matches!(
+            BodySender::new_for_head(token(), &input),
+            Err(ResponseError::InvalidHead)
+        ));
     }
     for status in 200..=599 {
         let mut input = head(0);
@@ -136,6 +166,102 @@ fn status_and_no_body_rules_do_not_emit_forbidden_framing() {
         assert!(first
             .iter()
             .all(|byte| byte.is_ascii_graphic() || *byte == b' '));
+    }
+}
+
+#[test]
+fn not_modified_omits_selected_representation_length_and_preserves_validator() {
+    let mut input = head(0);
+    input.status = 304;
+    input.headers = vec![field("ETag", b"\"selected-asset\"")];
+    assert_eq!(
+        encode_head(&input).unwrap(),
+        b"HTTP/1.1 304 Not Modified\r\nETag: \"selected-asset\"\r\nConnection: close\r\n\r\n"
+    );
+}
+
+#[test]
+fn head_request_responses_omit_length_and_never_admit_body_or_infer_eof() {
+    for (status, bytes) in [
+        (200, 17),
+        (405, 33),
+        (404, 41),
+        (403, 14),
+        (304, 0),
+        (205, 0),
+    ] {
+        let request = token();
+        let mut input = head(bytes);
+        input.status = status;
+        input.headers = vec![field("Content-Type", b"application/json")];
+        let mut sender = BodySender::new_for_head(request, &input).unwrap();
+        let frozen = sender.head_bytes().to_vec();
+        let encoded = std::str::from_utf8(&frozen).unwrap();
+        assert!(encoded.starts_with(&format!("HTTP/1.1 {status} ")));
+        assert!(encoded.contains("Content-Type: application/json\r\n"));
+        assert!(!encoded.contains("Content-Length:"));
+        assert!(encoded.ends_with("Connection: close\r\n\r\n"));
+        assert_eq!(sender.remaining_bytes(), 0);
+        assert_eq!(sender.acknowledged_bytes(), 0);
+        for bytes in [0, 1, CHUNK_BYTES, CHUNK_BYTES + 1, usize::MAX] {
+            assert!(sender.begin_chunk(request, bytes).is_err());
+            assert!(!sender.has_in_flight());
+            assert!(!sender.is_complete());
+        }
+        input.headers.push(field("X-Later", b"ignored"));
+        assert_eq!(sender.head_bytes(), frozen);
+        sender.finish(request).unwrap();
+        assert!(sender.is_complete());
+        assert_eq!(sender.finish(request), Err(ResponseError::Closed));
+    }
+    assert!(matches!(
+        BodySender::new_for_head(token(), &head(MAX_TRANSFER_BYTES + 1)),
+        Err(ResponseError::InvalidHead)
+    ));
+}
+
+#[test]
+fn head_request_preserves_token_checks_and_rejects_unrelated_body_receipts() {
+    let mut issuer = TokenIssuer::new().unwrap();
+    let request = issuer.issue(0).unwrap();
+    let next = issuer.issue(0).unwrap();
+    let mut sender = BodySender::new_for_head(request, &head(4)).unwrap();
+    assert_eq!(
+        sender.begin_chunk(next, 1).err(),
+        Some(ResponseError::StaleRequest)
+    );
+    assert_eq!(sender.finish(next), Err(ResponseError::StaleRequest));
+    let mut normal = BodySender::new(request, &head(4)).unwrap();
+    let receipt = normal.begin_chunk(request, 4).unwrap();
+    assert_eq!(
+        sender.acknowledge_chunk(receipt, 4),
+        Err(ResponseError::StaleAcknowledgement)
+    );
+    assert!(!sender.is_complete());
+    assert!(!sender.has_in_flight());
+    assert_eq!(sender.acknowledged_bytes(), 0);
+    sender.finish(request).unwrap();
+    assert!(sender.is_complete());
+}
+
+#[test]
+fn head_request_uses_its_actual_encoded_head_for_the_exact_sixteen_kib_limit() {
+    for status in [200, 405, 404, 403, 304] {
+        let mut input = head(if status == 304 { 0 } else { 17 });
+        input.status = status;
+        let overhead = BodySender::new_for_head(token(), &input)
+            .unwrap()
+            .head_bytes()
+            .len();
+        input.headers = vec![field("X", &vec![b'a'; MAX_HEADER_BYTES - overhead - 5])];
+        let sender = BodySender::new_for_head(token(), &input).unwrap();
+        assert_eq!(sender.head_bytes().len(), MAX_HEADER_BYTES);
+        input.headers[0].value.push(b'a');
+        assert!(input.validate().is_ok());
+        assert!(matches!(
+            BodySender::new_for_head(token(), &input),
+            Err(ResponseError::TooLarge)
+        ));
     }
 }
 
@@ -327,13 +453,24 @@ fn replayed_old_chunk_ack_cannot_advance_or_retire_the_next_chunk() {
 #[test]
 fn zero_length_body_needs_no_empty_chunk_and_fifty_mib_stream_needs_no_body_allocation() {
     let request = token();
-    let mut empty = BodySender::new(request, &head(0)).unwrap();
-    assert!(matches!(
-        empty.begin_chunk(request, 0),
-        Err(ResponseError::InvalidChunk)
-    ));
-    empty.finish(request).unwrap();
-    assert!(empty.is_complete());
+    for status in [200, 204, 205, 304] {
+        let mut input = head(0);
+        input.status = status;
+        let mut empty = BodySender::new(request, &input).unwrap();
+        assert!(matches!(
+            empty.begin_chunk(request, 0),
+            Err(ResponseError::InvalidChunk)
+        ));
+        assert!(matches!(
+            empty.begin_chunk(request, 1),
+            Err(ResponseError::TooLong)
+        ));
+        assert!(!empty.has_in_flight());
+        assert_eq!(empty.acknowledged_bytes(), 0);
+        assert!(!empty.is_complete());
+        empty.finish(request).unwrap();
+        assert!(empty.is_complete());
+    }
     let mut download = BodySender::new(request, &head(MAX_TRANSFER_BYTES)).unwrap();
     while download.remaining_bytes() != 0 {
         let bytes = download.remaining_bytes().min(CHUNK_BYTES as u64) as usize;

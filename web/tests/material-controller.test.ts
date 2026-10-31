@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { ProtocolVersionFault } from '../src/api/protocol'
 import { ApiError, NetworkFault } from '../src/api/client'
 import { MaterialController, type MaterialState } from '../src/api/material-controller'
 import type { MaterialApi } from '../src/api/material-client'
@@ -127,5 +128,33 @@ describe('material drafts, one-shot commands and exact result correlation', () =
     f.api.createUpload.mockImplementationOnce(() => new Promise(resolve => { complete = resolve })); f.controller.pick(new File(['sample'], '课件.txt')); const operation = f.controller.uploadFile()
     expect(f.controller.leave()).toBe(false); expect(f.controller.leave(true)).toBe(true); complete(ready); await operation
     expect(f.api.createUpload.mock.calls[0]![3].aborted).toBe(true); expect(f.api.upload).not.toHaveBeenCalled(); expect(f.state().file).toBeNull(); expect(f.state().selected).toBeNull(); f.controller.dispose()
+  })
+})
+
+describe('material version recovery keeps files and original commands', () => {
+  it('preserves an incompatible append and file selection without another POST, including after manual result GET', async () => {
+    const f = fixture(), fault = new ProtocolVersionFault(); await open(f); await transfer(f)
+    const file = f.state().file, upload = f.state().upload, classes = f.state().classes
+    f.api.append.mockRejectedValueOnce(fault); await f.controller.append(); const pending = f.state().pending
+    expect(pending?.command.commandId).toBe('77'); expect(f.state().notice).toContain(fault.message); expect(f.state().phase).toBe('unknown')
+    expect(f.state().file).toBe(file); expect(f.state().upload).toBe(upload); expect(f.state().classes).toBe(classes)
+    await f.controller.append(); await f.controller.uploadFile(); await f.controller.cancelUpload(); await f.controller.delete(row()); await f.controller.loadPage(null, true); await f.controller.loadScopes(0, true)
+    f.controller.pick(new File(['other'], 'other.txt')); f.controller.setClasses(['2'])
+    expect(f.api.append).toHaveBeenCalledOnce(); expect(f.api.createUpload).toHaveBeenCalledOnce(); expect(f.api.cancelUpload).not.toHaveBeenCalled(); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); expect(f.api.materials).toHaveBeenCalledOnce(); expect(f.api.materialScopes).toHaveBeenCalledOnce()
+    await f.controller.query(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('不证明'); expect(f.state().notice).toContain(fault.message)
+    f.api.materialOutcome.mockResolvedValueOnce({ commandId: '77', state: 'COMMITTED', scope: target, record: row() }); await f.controller.query()
+    expect(f.state().pending).toBe(pending); expect(f.state().history?.materialId).toBe('5'); expect(f.state().file).toBe(file); expect(f.state().upload).toBe(upload); expect(f.state().classes).toBe(classes); expect(f.state().notice).toContain(fault.message)
+    expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual(['77', '77']); await f.controller.append(); expect(f.api.append).toHaveBeenCalledOnce(); expect(f.controller.leave()).toBe(false); f.controller.dispose()
+  })
+  it('keeps an unsubmitted file and classes on a typed upload failure and does not recreate the stage', async () => {
+    const f = fixture(); await open(f); const file = new File(['sample'], '课件.txt'); f.controller.pick(file); f.controller.setClasses(['1'])
+    f.api.createUpload.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.uploadFile()
+    expect(f.state().file).toBe(file); expect(f.state().classes).toEqual(['1']); expect(f.state().phase).toBe('blocked'); expect(f.state().pending).toBeNull(); expect(f.state().notice).toContain('刷新页面')
+    await f.controller.uploadFile(); await f.controller.append(); await f.controller.delete(row()); expect(f.api.createUpload).toHaveBeenCalledOnce(); expect(f.api.upload).not.toHaveBeenCalled(); expect(f.api.append).not.toHaveBeenCalled(); expect(f.api.deleteMaterial).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('keeps exact unknown delete metadata when command-query decoding reports a version change', async () => {
+    const f = fixture(); await open(f); f.api.deleteMaterial.mockRejectedValueOnce(new NetworkFault()); await f.controller.delete(row()); const pending = f.state().pending
+    f.api.materialOutcome.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.query(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('管理员升级')
+    await f.controller.query(); expect(f.api.materialOutcome.mock.calls.map(call => call[0])).toEqual(['77', '77']); expect(f.state().pending).toBe(pending); await f.controller.delete(row()); expect(f.api.deleteMaterial).toHaveBeenCalledOnce(); f.controller.dispose()
   })
 })

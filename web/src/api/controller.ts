@@ -1,5 +1,5 @@
 import { ApiError, isAborted, type ServerApi, abortError } from './client'
-import { ProtocolFault, validateForm, type PairingForm, type Session } from './protocol'
+import { ProtocolFault, ProtocolVersionFault, validateForm, type PairingForm, type Session } from './protocol'
 export type ViewState =
   | { phase: 'checking' }
   | { phase: 'anonymous'; notice?: string }
@@ -9,7 +9,7 @@ export type ViewState =
   | { phase: 'logging-out' }
   | { phase: 'logout-unknown' }
   | { phase: 'expired' }
-  | { phase: 'error'; message: string; canPair: boolean }
+  | { phase: 'error'; message: string; canPair: boolean; refreshRequired?: boolean }
 export function wait(milliseconds: number, signal: AbortSignal): Promise<void> {
   if (signal.aborted) return Promise.reject(abortError())
   return new Promise((resolve, reject) => {
@@ -34,6 +34,12 @@ export class PairingController {
     return { controller, id: ++this.sequence }
   }
   private current(id: number) { return !this.disposed && id === this.sequence }
+  private refreshOnVersionFault(error: unknown, uncertain = ''): boolean {
+    if (!(error instanceof ProtocolVersionFault)) return false
+    this.compatible = false
+    this.publish({ phase: 'error', message: error.message + uncertain, canPair: false, refreshRequired: true })
+    return true
+  }
   async connect(): Promise<void> {
     if (this.disposed || this.state.phase === 'creating' || this.state.phase === 'waiting' || this.state.phase === 'logging-out') return
     const { controller, id } = this.begin(); this.publish({ phase: 'checking' }); this.compatible = false
@@ -46,6 +52,7 @@ export class PairingController {
       if (this.current(id)) this.publish({ phase: 'authenticated', session })
     } catch (error) {
       if (!this.current(id) || isAborted(error)) return
+      if (this.refreshOnVersionFault(error)) return
       if (this.compatible && error instanceof ApiError && (error.status === 401 || error.status === 403)) {
         this.publish({ phase: 'anonymous' }); return
       }
@@ -85,6 +92,7 @@ export class PairingController {
       if (!this.current(id)) return
       if (timedOut) { this.publish({ phase: 'expired' }); return }
       if (isAborted(error)) return
+      if (this.refreshOnVersionFault(error, '配对结果尚未确认，页面不会自动重发。请在白板核对申请。')) return
       if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
         this.publish({ phase: 'anonymous', notice: '申请已失效或授权被拒绝。请让白板管理员重新开启配对窗口后再申请。' }); return
       }
@@ -105,6 +113,7 @@ export class PairingController {
       if (this.current(id)) this.publish({ phase: 'anonymous', notice: '白板已确认注销账号，原有渠道授权已失效。' })
     } catch (error) {
       if (!this.current(id) || isAborted(error)) return
+      if (this.refreshOnVersionFault(error, '注销结果尚未确认，页面不会自动重发。刷新后请主动核对会话。')) return
       if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
         this.publish({ phase: 'anonymous', notice: '会话不可用，页面已清除会话信息。请重新配对。' }); return
       }

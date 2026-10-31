@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed Web version-refresh/retired-assets stage evidence, BEFORE subsequent HTTP 304/Date/Allow corrections. Not final Round30 source or full-goal acceptance.",
+  "originalReports": "Original JSON/log/JS/Python/PEM bytes are unchanged, including absolute artifact paths, failures and all raw dotfiles; use the separate original-to-archive mapping.",
+  "index": "开发计划/验证记录/2026-10-31-round30-stage-progress-index.json",
+  "priorIndexVerified": {
+    "files": 124,
+    "bytes": 1935251,
+    "sha256BeforeAppend": "5574b1c3b98edaa301a78201153cd3549b15a56e21dfc78fb3d85418cbb79d7b"
+  },
+  "web": {
+    "report": "2026-10-31-round30-web-upgrade-first.json",
+    "commands": [
+      {
+        "command": [
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        "exitCode": 0
+      },
+      {
+        "command": [
+          "npm",
+          "test",
+          "--",
+          "--maxWorkers=2",
+          "--reporter=json",
+          "--outputFile=/tmp/fc-round30-evidence/web-upgrade-first-vitest.json"
+        ],
+        "exitCode": 0
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "exitCode": 0
+      }
+    ],
+    "changedInputs": [],
+    "generatedNoticesMatch": true,
+    "vitest": {
+      "success": true,
+      "numTotalTests": 290,
+      "numPassedTests": 290,
+      "numFailedTests": 0,
+      "numTotalTestSuites": 38,
+      "numPassedTestSuites": 38
+    },
+    "buildBudget": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "assetCount": 6,
+      "totalBytes": 452054,
+      "totalLimitBytes": 5242880,
+      "gzipJsCssBytes": 132917,
+      "gzipJsCssLimitBytes": 524288,
+      "scope": "static build only; listener, wire TLS, real browser pairing not established by this report"
+    }
+  },
+  "chromiumUpgrade": {
+    "report": "2026-10-31-round30-browser-upgrade-second-result.json",
+    "status": "PASS",
+    "browserVersion": "154.0.8037.97",
+    "checks": 33,
+    "cases": [
+      "API version mismatch explicit reload",
+      "entry asset retired between HTML and module fetch",
+      "opened previous page then upgrade, lazy Worklet retired",
+      "recording on previous package then upgrade before lazy Worker fetch",
+      "dirty/unknown command refresh consent and original-ID manual query",
+      "current bundled recording positive control"
+    ],
+    "originalScope": "Actual Chromium DOM and bundled Worklet/OfflineAudio/Worker, zero-source synthetic MediaStream, synthetic two-package static HTTPS switch (previous URLs renamed), API intercepted, ignoreHTTPSErrors=true fixture only; not Rust native browser TLS, real hardware, installer or three-OS acceptance",
+    "limits": "Six cases/33 checks use intercepted API routes; browser HTTP cache is disabled by that routed harness. This is DOM/resource-failure recovery and synthetic capture evidence, not genuine browser-cache acceptance or Rust-native browser TLS."
+  },
+  "windowsEdgeCache": {
+    "report": "2026-10-31-round30-windows-edge-cache-first-result.json",
+    "ownerReport": "2026-10-31-round30-windows-edge-cache-owner-first.json",
+    "status": "PASS",
+    "browserVersion": "156.0.4314.50",
+    "checks": 13,
+    "cases": [
+      "real HTTP cache enabled, entry revalidation, retired lazy Worklet and explicit refresh",
+      "real HTTP cache enabled, upgrade between capture and Worker"
+    ],
+    "originalScope": "Actual Windows11 headless Edge HTTP cache, isolated profile and job, exact owned certificate SPKI exception at launch, pages ignoreHTTPSErrors=false, no context/page routing or cache disabling. Static HTTPS plus synthetic server API through owned loopback SSH reverse; previous URLs renamed then actually retired. Not Rust native browser TLS, real microphone/playback, MSI or formal Win7/Win10 compatibility.",
+    "limits": "Two cases/13 checks use actual Windows11 Edge HTTP cache, no request routing/cache disabling, synthetic API and Python static HTTPS fixture. The archived Python fixture emitted Content-Length: 0 on 304; these historical browser results DO NOT validate the later corrected RFC response encoder or Rust-native browser TLS.",
+    "fixture304Source": [
+      "2026-10-31-round30-browser-upgrade-server.py",
+      "2026-10-31-round30-browser-upgrade-server-stage1.py"
+    ]
+  },
+  "nativeTlsHistoricalContract": {
+    "report": "2026-10-31-round30-windows-web-upgrade-tls-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "httpResponses": 35,
+    "certificateNegativeCases": 2,
+    "conditionalResponses": [
+      {
+        "case": "static-304-assets/index-DFFVdc8-.css",
+        "status": 304,
+        "bodyBytes": 0
+      },
+      {
+        "case": "static-304-index.html",
+        "status": 304,
+        "bodyBytes": 0
+      }
+    ],
+    "exeSha256": "63a44d1ed1999f1d9c7e49cead99550dadba3866c60f87706f498fe2aee6f87b",
+    "runnerSourceSha256": "45ec9f32866c5eec0c56fb7a32bfe2ad28bb4e4ed41cb8df7e295eed0d4c56ef",
+    "archivedTestedRunner": "2026-10-31-round30-web-upgrade-tls-runner-tested.py",
+    "native": {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 35,
+      "responses": 35,
+      "peakRecords": 5
+    },
+    "limits": "This original 35-HTTP + two certificate-negative PASS used the old mandatory-Content-Length diagnostic: its two 304 responses were accepted under CL:0. Preserve it as OLD CONTRACT evidence only; it is not evidence for the subsequent omitted-CL 304/204, Date or Allow corrections.",
+    "originalBoundaries": {
+      "strictP0": "NOT_VALIDATED",
+      "productionListener": "NOT_ENABLED",
+      "browserAcceptance": "NOT_TESTED",
+      "win7": "NOT_VALIDATED",
+      "win10": "NOT_VALIDATED",
+      "physicalPlayback": "NOT_EXERCISED"
+    }
+  },
+  "hostWorkspace": {
+    "firstReport": "2026-10-31-round30-root-host-workspace-static-first.json",
+    "firstTotalPassed": 630,
+    "firstFailedGroups": [
+      {
+        "status": "FAILED",
+        "passed": 32,
+        "failed": 1,
+        "ignored": 0
+      }
+    ],
+    "firstFailure": "Original run log records worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result: unexpected held-output rejection Busy; original exit 101 remains preserved.",
+    "secondReport": "2026-10-31-round30-root-host-workspace-static-second.json",
+    "secondTotalPassed": 837,
+    "secondCommands": [
+      {
+        "name": "compile",
+        "exitCode": 0
+      },
+      {
+        "name": "run",
+        "exitCode": 0
+      },
+      {
+        "name": "clippy",
+        "exitCode": 0
+      }
+    ],
+    "changedInputs": [],
+    "limits": "837 Host tests and this stage clippy passed before the new 304/Date/Allow edits; these are not final-current-source validation or Windows runtime acceptance."
+  },
+  "windowsRuntime": {
+    "report": "2026-10-31-round30-windows-runtime-fixture-stage-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "testResults": [
+      "test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+    ],
+    "uploadedArtifacts": [
+      {
+        "name": "fc-bootstrap.exe",
+        "sha256": "63a44d1ed1999f1d9c7e49cead99550dadba3866c60f87706f498fe2aee6f87b"
+      },
+      {
+        "name": "fc_runtime-a09be73363edd23a.exe",
+        "sha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0"
+      }
+    ],
+    "selfCheck": {
+      "exitCode": 0,
+      "output": [
+        "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+        "credential.dpapi-key-reopen: PASS",
+        "credential.sqlite-reopen-login-kdf: PASS",
+        "credential.password-rotation-old-lease: PASS",
+        "credential.recovery-one-use-rotation: PASS",
+        "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+        "isolated_test_cleanup=PASS"
+      ]
+    },
+    "native": {
+      "output": [
+        "native_lifecycle=PASS elapsed_ms=1001 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+        "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+      ],
+      "exitCode": 0,
+      "sessionId": 1
+    },
+    "limits": "33 actual runtime tests were run on Windows11 build 26300 with the captured prior artifacts, before new 304/Date/Allow edits. Offscreen native lifecycle is not visible desktop evidence. Win7/Win10 and physical Seewo validation remain separate."
+  },
+  "rawDirectories": {
+    "windows-edge-cache-owner-first-FutureClassroom-Test-Browser-9d148040a1d34ee096ab4e91ff3f1d5e-raw": {
+      "files": 8,
+      "dotfiles": 5,
+      "originalRemoteInventoryEntries": 8,
+      "allFilesIncludingUnlistedMetadataPreserved": true
+    },
+    "windows-web-upgrade-tls-first-8852515040b1493ea4e34dbae315913c-raw": {
+      "files": 8,
+      "dotfiles": 4,
+      "originalRemoteInventoryEntries": 7,
+      "allFilesIncludingUnlistedMetadataPreserved": true
+    }
+  },
+  "failedAttempts": {
+    "browserFirst": {
+      "report": "2026-10-31-round30-browser-upgrade-first-result.json",
+      "status": "FAIL",
+      "error": "page.waitForFunction: Timeout 30000ms exceeded."
+    },
+    "browserCacheAttempt": {
+      "report": "2026-10-31-round30-browser-upgrade-cache-first-result.json",
+      "status": "FAIL",
+      "error": "CDP observes a real HTTP cache service for previous main"
+    },
+    "preservation": "All selected first/second/third tool outputs, logs, compile diagnostics and raw files are copied completely, without replacing a failed attempt by a later PASS."
+  },
+  "cleanupEvidence": {
+    "originalReports": [
+      "2026-10-31-round30-browser-upgrade-browser-cleanup.json",
+      "2026-10-31-round30-browser-upgrade-fixture-cleanup.json",
+      "2026-10-31-round30-browser-upgrade-edge-fixture-cleanup.json",
+      "2026-10-31-round30-browser-upgrade-edge-fixture-address-verification.json",
+      "2026-10-31-round30-windows-edge-cache-all-temp-and-ports-final.json",
+      "2026-10-31-round30-windows-web-upgrade-and-runtime-final-after.json",
+      "2026-10-31-round30-web-upgrade-local-build-cleanup.json"
+    ],
+    "archiveOperation": "Local copy/hash/index only; no process, service, port, certificate, SSH authorization or source evidence was mutated or deleted.",
+    "historicalControlMetadata": "Original synthetic fixture control tokens/PID/CDP metadata are archived verbatim only after original server/root/ports and owned browser job retirement were recorded. They are expired test capabilities, not persistent credentials. No active control capability file is archived.",
+    "excludedPayloads": "No private key, active control, ZIP/package, executable/build output, verified-dist payload, node_modules, npm/browser cache or user data is copied.",
+    "retainedOutsideRepository": "All original /tmp evidence remains for this continuing round; only the reproducible archive helper and summary/mapping were generated here. The verified dist remains a separately reported staging resource, not an archived artifact.",
+    "persistentWindowsSsh": "Preserved; refer to original final-after/cleanup reports, no new remote audit was run by this archiver."
+  },
+  "excludedCandidates": []
+}

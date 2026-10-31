@@ -41,6 +41,13 @@ pub enum MaterialRoute {
     },
 }
 impl MaterialRoute {
+    pub fn allowed_methods(self) -> super::AllowedMethods {
+        if self.post() {
+            super::AllowedMethods::Post
+        } else {
+            super::AllowedMethods::Get
+        }
+    }
     pub fn post(self) -> bool {
         matches!(
             self,
@@ -535,6 +542,25 @@ pub fn cancelled(upload_id: u64) -> Result<Vec<u8>, ProtocolError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn each_material_target_reports_its_fixed_get_or_post_allow_value() {
+        use crate::web::AllowedMethods;
+        for (path, methods) in [
+            ("scopes/0", AllowedMethods::Get),
+            ("classes/1/2/0", AllowedMethods::Get),
+            ("folders/1/2", AllowedMethods::Get),
+            ("folders/1/2/3/4/0", AllowedMethods::Get),
+            ("uploads/1/2", AllowedMethods::Post),
+            ("uploads/1/bytes", AllowedMethods::Post),
+            ("uploads/1/cancel", AllowedMethods::Post),
+            ("folders/1/2/append", AllowedMethods::Post),
+            ("folders/1/2/delete", AllowedMethods::Post),
+            ("commands/1", AllowedMethods::Get),
+            ("download/1/2/3/4", AllowedMethods::Get),
+        ] {
+            assert_eq!(route(path).unwrap().allowed_methods(), methods, "{path}");
+        }
+    }
     #[test]
     fn routes_and_strict_inputs() {
         assert!(matches!(

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Current source static checks; not full project completion",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "observedOutput": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.",
+      "evidence": "tool process completed exit0"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "evidence": "original process 81537 completed exit0"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "scripts": {
+    "windows-tls-business-probe.py": {
+      "bytes": 67685,
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf"
+    },
+    "windows-native-browser-observer.py": {
+      "bytes": 26244,
+      "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91"
+    },
+    "windows-native-browser-harness.mjs": {
+      "bytes": 46843,
+      "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e"
+    },
+    "windows-test-edge-owner.py": {
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    },
+    "windows-msvc-ci.ps1": {
+      "bytes": 26396,
+      "sha256": "75f37c6a6d344cf33d1df88dc236b1d56d56b926204ffb6829da44f502a18c02"
+    }
+  }
+}

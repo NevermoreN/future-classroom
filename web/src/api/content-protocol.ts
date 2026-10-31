@@ -1,4 +1,4 @@
-import { decimal, ProtocolFault, unicodeText } from './protocol'
+import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 const fail = (): never => { throw new ProtocolFault() }
 export type ContentKind = 'HOMEWORK' | 'REMINDER'
 export type ContentKey = { kind: 'HOMEWORK'; classId: string; subjectId: string; ownerTeacherId: string; date: string } | { kind: 'REMINDER'; classId: string; date: string }
@@ -12,7 +12,7 @@ function object(value: unknown, fields: readonly string[]): Record<string, unkno
   if (typeof value !== 'object' || value === null || Array.isArray(value) || Object.keys(value).length !== fields.length || Object.keys(value).some(k => !fields.includes(k))) return fail()
   return value as Record<string, unknown>
 }
-function schema(value: Record<string, unknown>, status: string) { if (value.schemaVersion !== 1 || value.status !== status) fail() }
+function schema(value: Record<string, unknown>, status: string) { protocolVersions(value.schemaVersion); if (value.status !== status) fail() }
 export function revision(value: unknown): string { return value === '0' ? '0' : decimal(value) }
 const monthLength = (y: number, m: number) => m === 2 ? (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31
 export function civilDate(value: unknown): string {

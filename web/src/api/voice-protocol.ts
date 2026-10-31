@@ -1,5 +1,5 @@
 import { civilTime } from './content-protocol'
-import { decimal, ProtocolFault, unicodeText } from './protocol'
+import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
 
 const fail = (): never => { throw new ProtocolFault() }
 function object(value: unknown, keys: readonly string[]): Record<string, unknown> {
@@ -8,7 +8,8 @@ function object(value: unknown, keys: readonly string[]): Record<string, unknown
 }
 function envelope(value: unknown, status: string, keys: string[]) {
   const v = object(value, ['schemaVersion', 'status', ...keys])
-  if (v.schemaVersion !== 1 || v.status !== status) return fail()
+  protocolVersions(v.schemaVersion)
+  if (v.status !== status) return fail()
   return v
 }
 function integer(value: unknown, min: number, max: number): number {

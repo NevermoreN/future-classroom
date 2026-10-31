@@ -129,6 +129,12 @@ impl<S> Clone for BusinessRepository<S> {
     }
 }
 impl<S: Send + 'static> BusinessRepository<S> {
+    /// Request-scoped lifetime binding. The base repository and all existing
+    /// session/scene/policy guards remain intact; rebinding only tightens it.
+    pub fn with_execution_fence(mut self, fence: TransactionExecutionFence) -> Self {
+        self.handle = self.handle.with_transaction_execution_fence(fence);
+        self
+    }
     pub fn new(
         handle: StorageHandle<S>,
         clock: Arc<dyn Clock + Send + Sync>,

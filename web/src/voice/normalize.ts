@@ -53,15 +53,17 @@ export class BrowserWavNormalizer implements WavNormalizer {
     if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')
     const pcm = rendered.getChannelData(0).slice()
     // Always a separate, same-origin packaged worker; no blob/data URL or main-thread encoder fallback.
-    const worker = new Worker(new URL('./wav-worker.ts', import.meta.url), { type: 'module' })
+    let worker: Worker
+    try { worker = new Worker(new URL('./wav-worker.ts', import.meta.url), { type: 'module' }) }
+    catch { throw new RecorderError(signal.aborted ? 'MIC_INTERRUPTED' : 'RESOURCE_UNAVAILABLE') }
     const wav = await new Promise<ArrayBuffer>((resolve, reject) => {
       let active = true
-      const cleanup = () => { active = false; clearTimeout(timer); signal.removeEventListener('abort', abort); worker.terminate() }
-      const fail = (code: 'MIC_INTERRUPTED' | 'RECORDING_FAILED') => { if (active) { cleanup(); reject(new RecorderError(code)) } }
+      const cleanup = () => { active = false; clearTimeout(timer); signal.removeEventListener('abort', abort); worker.onmessage = null; worker.onerror = null; worker.onmessageerror = null; worker.terminate() }
+      const fail = (code: 'MIC_INTERRUPTED' | 'RECORDING_FAILED' | 'RESOURCE_UNAVAILABLE') => { if (active) { cleanup(); reject(new RecorderError(signal.aborted ? 'MIC_INTERRUPTED' : code)) } }
       const abort = () => fail('MIC_INTERRUPTED')
       const timer = globalThis.setTimeout(() => fail('RECORDING_FAILED'), 15000)
       signal.addEventListener('abort', abort, { once: true })
-      worker.onerror = () => fail('RECORDING_FAILED')
+      worker.onerror = () => fail('RESOURCE_UNAVAILABLE')
       worker.onmessageerror = () => fail('RECORDING_FAILED')
       worker.onmessage = event => {
         if (!active) return
@@ -71,7 +73,7 @@ export class BrowserWavNormalizer implements WavNormalizer {
       }
       if (signal.aborted) { abort(); return }
       try { worker.postMessage(pcm, [pcm.buffer]) } catch { fail('RECORDING_FAILED') }
-    })
+    }).catch(error => { throw signal.aborted ? new RecorderError('MIC_INTERRUPTED') : error })
     if (signal.aborted) throw new RecorderError('MIC_INTERRUPTED')
     return { wav: new Blob([wav], { type: 'audio/wav' }), frames, sampleRate: OUTPUT_RATE }
   }

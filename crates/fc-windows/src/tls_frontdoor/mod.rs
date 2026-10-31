@@ -143,8 +143,12 @@ pub(super) trait Driver {
 }
 #[cfg(windows)]
 mod credentials;
+#[cfg(any(windows, test))]
+mod http_date;
 #[cfg(windows)]
 mod native;
+#[cfg(windows)]
+pub use native::{TlsHttpEvent, TlsHttpHost};
 #[cfg(windows)]
 mod schannel;
 #[cfg(any(windows, test))]

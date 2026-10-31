@@ -75,7 +75,7 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 受控WAV→精确Web会话→SQLite持久任务→WinMM→释放后正文清理。无兼容设备记NOT_RUN。
 声音持久核心有4任务/每教师2、16MiB（含预留）、100条/24h审计和重启中断不重播；
 按需声音执行域已绑定托盘紧急停止、当前Windows会话/休眠/退出和默认输出设备变化；
-管理登录的后台锁不再阻挡音频停止。第十四轮已接语音Web应用端口和录音页面；正常TLS/网络调度尚未接入，不能据此称录音产品已交付。
+管理登录的后台锁不再阻挡音频停止。语音Web应用端口和录音页面已接入；独立有限TLS业务探针只验证规范全零PCM WAV上传，不播报、不播放、不请求硬件麦克风。正常持续TLS/网络交付尚未完成，不能据此称录音产品已交付。
 --audio-silent-probe 额外验证正常按需执行域、独立Web会话、停止全部待播和退出顺序。
 --web-pairing-probe 在隔离临时部署中使用真实Windows CNG随机源、DPAPI及SQLite，
 直接调用配对service验证8位一次请求、本地主管理员明确批准、256位轮询秘密及独立设备租约，
@@ -86,13 +86,24 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 在127.0.0.1显式测试前缀运行两轮真实IOCP；需要相应系统权限/URL预留，程序不自行提权或修改配置。
 它拒绝凭证与业务请求，不能作为HTTPS、校园可达或浏览器配对通过证据；正常启动默认没有Web监听。
 --tls-lifecycle-probe <40位MY证书指纹> <FutureClassroom-Test-TLS-32位hex> 是独立的真实TLS1.2有限批次探针。
-程序只读当前用户MY证书，不创建证书、私钥或Root信任；须由仓库外部测试runner准备并精确清理唯一测试证书和CNG密钥。
-固定四槽IOCP和一个SSPI线程验证分片加密收发及真实释放；错误CA/主机名由真实客户端验证拒绝。
-探针不接业务、不启用正常监听，不能证明持续接纳、严格首TCP五秒、TLS close_notify、校园可达或三系统验收。
+程序只读当前用户MY证书，不创建证书、私钥或Root信任；须由独立测试runner准备并精确清理唯一测试证书和CNG密钥。
+固定四槽IOCP和一个SSPI线程验证分片加密收发、实际close_notify发送、同token上下文退休及线程实际退出；错误CA/主机名由真实客户端验证拒绝。
+此生命周期探针不接业务、不启用正常监听，不能证明持续接纳、严格首TCP五秒、校园可达或三系统验收。
+--tls-business-probe <40位MY证书指纹> <FutureClassroom-Test-TLS-32位hex> 是另一个45秒有限隔离loopback诊断，
+须由外部runner准备自有标记根、web-package/fc-assets.json及逐项匹配的静态资源、唯一测试证书和CNG密钥，结束后精确清理。
+它使用与应用相同的两个共享业务worker，将真实HTTP事件接到SQLite和固定槽文件阶段，验证合成配对申请/轮询/会话、
+资料分块上传/下载、Ready资料JSON取消后槽位复用、追加原命令重查及变更载荷冲突；不调用用户日常关联程序。
+还验证HEAD错误响应没有正文且不伪造Content-Length: 0、405固定Allow、传输层Date、304无正文及条件缓存，
+并按静态manifest逐资源核对大小、SHA、MIME和CSP。退出须真实Native drain、共享worker join、上传/下载Hub及隔离部署清理。
+可配合外部隔离Edge observer，在同一个有限Native实例中加载真实页面；浏览器只注入该客户端已批准的HttpOnly Cookie，
+再由页面请求真实session取得CSRF，选择唯一合成作业范围、实际点击保存一次并刷新读回持久结果；缓存命中和真实网络响应分开记账。
+这不是浏览器配对界面或可见主管理员批准界面的通过证据。Edge仅使用全新测试profile、专属Job及限定公共SPKI例外，
+不改变Windows Root信任、不触碰现有浏览器、真实麦克风、音量或前台；原Job实际归零、原始日志取回和profile删除另存证据。
+这些有限验证不启用正常持续listener，不代表校园部署/真实OS信任配置；严格首TCP五秒尚未通过，Win7/Win10/MSVC及产品验收仍未完成。
 --web-pairing-probe还验证同一隔离部署的作业/提醒POST、清空后再写、命令幂等/查询与真实桌面事实；仅请求端口metadata，未开启网络监听。
 教师网页已接配对/会话、当天作业与共同提醒的真实应用端口，包含范围分页、读取/保存/清空、修订冲突和原命令查询；第十三轮补齐资料网页与受控文件工作端口，第十四轮补齐语音录音、规范WAV上传、持久任务/停止端口与未知结果查询。
 内容日期观察与写入走唯一SQLite writer，清空保留CAS；跨午夜草稿不能自动改日期发送。COMMITTED只表示已持久化，不表示当前可见；未知写入只能手动查询，不自动重发。
-正常启动仍没有正式TLS/Web监听；静态文件入包不代表网页已由应用托管或通过真实浏览器验收。
+正常启动仍没有正式TLS/Web监听；静态文件入包本身不代表正常持续托管。独立有限Native TLS及隔离Win11 Edge真实作业闭环的精确二进制证据另行保存，不升格整个产品的浏览器验收状态。
 完整图形参数和滑块仍待实现；真实TLS到白板语音工作流及三系统产品验收仍未交付。
 独立文字最多10,000个Unicode标量/40,000 UTF-8字节；TXT支持严格UTF-8或带BOM的UTF-16。图片每页10MiB/800万像素，与资料共用2GiB原件额度；当前和一个撤销版本保留引用，物理删除成功后才退额度。
 文字缓存4MiB、图片缓存32MiB，实际引用仍存活时不会因取消或清空查找表提前返还。重启先核对受保护命名空间、注册表及原件摘要，损坏数据进入修复；不按超时擅自删除仍被worker占用的原件。
@@ -123,7 +134,7 @@ frontend 字段记录本包实际是否附带静态产物及其范围；有无�
 manifest.json 记录目标、工具链声明、文件 SHA256、探针范围和 PE 风险。
 LICENSE 为项目许可；第三方组件、Rust/MinGW/GCC 运行时许可与版权见 THIRD-PARTY-NOTICES.txt。
 
-Round13 includes teacher material JSON and controlled file worker ports (TXT/Office/WIC/PDF helper, <=50MiB) plus browser management UI. WEB_MATERIALS_PASS is an owned DPAPI/SQLite/files diagnostic with synthetic request metadata, NOT actual TLS or network upload cancellation. Normal listener remains disabled. An isolated finite Winsock accept candidate has lifecycle evidence and a strict five-second observation FAIL; it is not a production TLS replacement.
+Teacher material JSON and controlled file ports (TXT/Office/WIC/PDF helper, <=50MiB) and the browser UI remain partial. WEB_MATERIALS_PASS itself uses synthetic request metadata. The separate finite TLS_BUSINESS probe has real streaming upload/download and JSON Ready-cancel/reuse evidence for smaller synthetic files; it does not prove the full50MiB/adversarial network matrix. Ordinary continuous listening remains disabled, the strict first-TCP five-second gate has not passed, and Win7/Win10/MSVC/full-product gates remain unvalidated.
 
 --web-voice-probe 使用自有合成账号/真实SQLite/规范零PCM上传和原生音频域，验证总3遍自然完成、原任务查询和停止/驱动归还；应由交互会话的隐藏测试任务运行。它仍只使用synthetic RequestHead，不开启TLS/网络listener，不请求硬件麦克风或改变音量/前台；普通--web-pairing-probe不启动原生声音。
 

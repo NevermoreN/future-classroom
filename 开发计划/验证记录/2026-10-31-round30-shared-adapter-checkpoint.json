@@ -1,0 +1,14 @@
+{
+  "scope": "Round30 continuation checkpoint, not final all-project freeze; stage runtime binaries precede only scoped candidate dead_code annotations in two application files",
+  "files": {
+    "crates/fc-bootstrap/src/application.rs": "51bc38ee98602e5c38892ec8915e799fcfbe4f758eb46c25f2f7984b4545a373",
+    "crates/fc-bootstrap/src/application/http_executor.rs": "cabc00e64879a24bc0e7c5f4d6b5cf12358210d242017462d3e8a6b0e03b0610",
+    "scripts/windows-msvc-ci.ps1": "7144be936a918c9ac574ebe3e0d7d3d548d66ee8e080e07749c945a9a735276e",
+    ".github/workflows/windows-msvc.yml": "3d5856f84a3215c3d6f3fc099b5bb65e7d55abebea74f52d1cc06eb46b67bb0a"
+  },
+  "lint": "root-windows-shared-adapter-clippy-second.log",
+  "format": "cargo fmt --all -- --check PASS",
+  "architecture": "12 crates / 33 edges PASS",
+  "runtimeReportPending": "windows-shared-adapter-stage-first.json",
+  "goal": "active; no create_goal/update_goal mutation"
+}

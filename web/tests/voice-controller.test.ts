@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { VoiceController, mayRecord, type VoiceState } from '../src/api/voice-controller'
+import { ProtocolVersionFault } from '../src/api/protocol'
 import { ApiError, NetworkFault } from '../src/api/client'
 import type { VoiceJob, VoiceUploaded } from '../src/api/voice-protocol'
 import { api, caps, csrf, deferred, job, recording, upload, wav } from './voice-fixtures'
@@ -109,5 +110,42 @@ describe('voice recording and durable task lifecycle', () => {
   })
   it('rejects backwards or terminal-resurrected task progress instead of adopting it', async () => {
     const f = fixture(), old = job({ revision: '8', state: 'COMPLETED', currentRepeat: 3, completedRepeats: 3 }); f.api.voiceJobs.mockResolvedValueOnce([old]); await f.controller.open(); f.api.voiceJobs.mockResolvedValueOnce([job({ revision: '9', state: 'QUEUED' })]); await f.controller.refresh(); expect(f.state().jobs).toEqual([old]); expect(f.state().notice).toContain('无法核对'); f.controller.dispose()
+  })
+})
+
+describe('voice version recovery stops activity without discarding original command metadata', () => {
+  it('keeps incompatible submit metadata, stops all polling/new POST, and allows only explicit original-ID GET', async () => {
+    const f = fixture(), fault = new ProtocolVersionFault(); await f.controller.open(); f.controller.beginRecording('recording-one'); f.api.submitVoice.mockRejectedValueOnce(fault); await f.controller.recorded(recording())
+    const pending = f.state().pending; expect(pending?.kind).toBe('SUBMIT'); expect(f.state().notice).toContain(fault.message); expect(f.state().phase).toBe('unknown'); expect(vi.getTimerCount()).toBe(0)
+    expect(f.controller.beginRecording('new-recording')).toBeNull(); await f.controller.recorded(recording()); await f.controller.refresh(); await f.controller.open(); await f.controller.stop(job()); await vi.advanceTimersByTimeAsync(60000)
+    expect(f.api.submitVoice).toHaveBeenCalledOnce(); expect(f.api.cancelVoice).not.toHaveBeenCalled(); expect(f.api.voiceJob).not.toHaveBeenCalled(); expect(f.api.voiceJobs).toHaveBeenCalledOnce(); expect(f.ids).toHaveBeenCalledOnce()
+    f.api.voiceJob.mockRejectedValueOnce(new ApiError(404, 'NOT_FOUND')); await f.controller.queryPending(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('不证明'); expect(f.state().notice).toContain(fault.message)
+    await f.controller.queryPending(); expect(f.api.voiceJob.mock.calls.map(call => call[0])).toEqual(['71', '71']); expect(f.state().jobs[0]?.jobId).toBe('71'); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain(fault.message); expect(vi.getTimerCount()).toBe(0); expect(f.controller.leave()).toBe(false); f.controller.dispose()
+  })
+  it('a typed version failure during cancellation preserves exact cancel metadata without retrying POST', async () => {
+    const f = fixture(), active = job({ state: 'PLAYING', currentRepeat: 1 }); f.api.voiceJobs.mockResolvedValueOnce([active]); await f.controller.open(); f.api.cancelVoice.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.stop(active)
+    const pending = f.state().pending; expect(pending?.kind).toBe('CANCEL'); expect(f.state().jobs).toEqual([active]); expect(f.state().notice).toContain('刷新页面')
+    await f.controller.stop(active); await vi.advanceTimersByTimeAsync(30000); expect(f.api.cancelVoice).toHaveBeenCalledOnce(); expect(f.api.voiceJob).not.toHaveBeenCalled()
+    f.api.voiceJob.mockResolvedValueOnce(job({ state: 'CANCELED', currentRepeat: 1, revision: '3' })); await f.controller.queryPending(); expect(f.state().pending).toBe(pending); expect(f.state().jobs[0]?.state).toBe('CANCELED'); expect(f.state().notice).toContain('管理员升级'); expect(f.api.voiceJob.mock.calls[0]![0]).toBe('71'); expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('an automatic recording capability check actually cancels capture and never schedules another poll', async () => {
+    const f = fixture(); await f.controller.open(); f.controller.beginRecording('recording-one'); const captured = f.state().capabilities
+    f.api.voiceCapabilities.mockRejectedValueOnce(new ProtocolVersionFault()); await vi.advanceTimersByTimeAsync(1000)
+    expect(f.cancelRecorder).toHaveBeenCalledOnce(); expect(f.state().context).toBeNull(); expect(f.state().capabilities).toBe(captured); expect(f.state().notice).toContain('刷新页面'); expect(vi.getTimerCount()).toBe(0)
+    await f.controller.recorded(recording()); f.controller.setVisible(false); f.controller.setVisible(true); await vi.advanceTimersByTimeAsync(60000)
+    expect(f.controller.beginRecording('new')).toBeNull(); expect(f.api.voiceCapabilities).toHaveBeenCalledTimes(2); expect(f.api.voiceJobs).toHaveBeenCalledOnce(); expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.api.submitVoice).not.toHaveBeenCalled(); f.controller.dispose()
+  })
+  it('a version fault while watching accepted jobs retains those jobs and stops periodic requests', async () => {
+    const f = fixture(), accepted = job(); f.api.voiceJobs.mockResolvedValueOnce([accepted]); await f.controller.open(); f.api.voiceJobs.mockRejectedValueOnce(new ProtocolVersionFault()); await vi.advanceTimersByTimeAsync(1000)
+    expect(f.state().jobs).toEqual([accepted]); expect(f.state().notice).toContain('管理员升级'); await vi.advanceTimersByTimeAsync(60000); expect(f.api.voiceJobs).toHaveBeenCalledTimes(2); expect(f.api.cancelVoice).not.toHaveBeenCalled(); expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('pre-upload version mismatch releases unsent capture without uploading bytes', async () => {
+    const f = fixture(); await f.controller.open(); f.controller.beginRecording('recording-one'); f.api.voiceCapabilities.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.recorded(recording())
+    expect(f.cancelRecorder).toHaveBeenCalledOnce(); expect(f.state().context).toBeNull(); expect(f.state().pending).toBeNull(); expect(f.state().notice).toContain('刷新页面'); expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.api.submitVoice).not.toHaveBeenCalled(); expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
+  })
+  it('manual status-query version errors never discard an older unknown command or restart polling', async () => {
+    const f = fixture(); await f.controller.open(); f.controller.beginRecording('recording-one'); f.api.submitVoice.mockRejectedValueOnce(new NetworkFault()); await f.controller.recorded(recording()); const pending = f.state().pending
+    f.api.voiceJob.mockRejectedValueOnce(new ProtocolVersionFault()); await f.controller.queryPending(); expect(f.state().pending).toBe(pending); expect(f.state().notice).toContain('刷新页面')
+    await f.controller.queryPending(); expect(f.api.voiceJob.mock.calls.map(call => call[0])).toEqual(['71', '71']); expect(f.state().pending).toBe(pending); expect(f.api.submitVoice).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0); f.controller.dispose()
   })
 })

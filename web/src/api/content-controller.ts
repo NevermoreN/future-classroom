@@ -1,5 +1,5 @@
 import { ApiError, isAborted, type ContentApi } from './client'
-import { ProtocolFault } from './protocol'
+import { ProtocolFault, ProtocolVersionFault } from './protocol'
 import { bodyText, compareScopes, keyFor, newCommandId, normalizedBodyText, remainingToday, sameKey, scopeKey, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopeItem, type ScopePage } from './content-protocol'
 
 export type EditorPhase = 'ready' | 'saving' | 'conflict' | 'merge' | 'unknown' | 'querying' | 'result' | 'expired' | 'scope-changed'
@@ -18,11 +18,28 @@ export class ContentController {
   private sequence = 0
   private offsets: number[] = []
   private disposed = false
+  private incompatible = ''
   private midnight: ReturnType<typeof setTimeout> | undefined
   constructor(private readonly api: ContentApi, private csrf: string,
     private readonly changed: (state: ContentState) => void, private readonly revoked: () => void,
     private readonly commandId = newCommandId) {}
-  private publish(patch: Partial<ContentState>) { if (!this.disposed) { this.state = { ...this.state, ...patch }; this.changed(this.state) } }
+  private publish(patch: Partial<ContentState>) {
+    if (this.disposed) return
+    if (this.incompatible) {
+      patch = { ...patch, notice: this.versionNotice(patch.notice ?? this.state.notice) }
+      if (patch.editor) patch.editor = { ...patch.editor, notice: this.versionNotice(patch.editor.notice) }
+    }
+    this.state = { ...this.state, ...patch }; this.changed(this.state)
+  }
+  private versionNotice(message: string) { return message.includes(this.incompatible) ? message : `${this.incompatible}${message ? ` ${message}` : ''}` }
+  private versionFault(error: unknown): boolean {
+    if (!(error instanceof ProtocolVersionFault)) return false
+    this.incompatible = error.message
+    this.operation?.abort(); this.sequence++; this.clearTimer()
+    const editor = this.state.editor
+    this.publish({ busy: false, pageBlocked: true, editor: editor ? { ...editor, phase: editor.pending ? 'unknown' : 'scope-changed', notice: editor.pending ? '提交结果尚未确认。原命令和草稿保留；只可手动查询原命令，不会重发。' : '原草稿已保留，刷新页面前不能继续提交。' } : null })
+    return true
+  }
   private begin() { this.operation?.abort(); const controller = new AbortController(); this.operation = controller; return { controller, id: ++this.sequence } }
   private current(id: number) { return !this.disposed && id === this.sequence }
   private clearTimer() { if (this.midnight !== undefined) clearTimeout(this.midnight); this.midnight = undefined }
@@ -43,7 +60,7 @@ export class ContentController {
     return !!e && (e.draft !== e.loaded.text || !!e.pending || e.phase === 'merge' || e.phase === 'conflict')
   }
   async loadScopes(kind: ContentKind, offset = 0, discardConfirmed = false): Promise<void> {
-    if (this.disposed || this.hasRiskyDraft() && !discardConfirmed) return
+    if (this.disposed || this.incompatible || this.hasRiskyDraft() && !discardConfirmed) return
     const previous = this.state.page, { controller, id } = this.begin()
     this.publish({ kind, busy: true, notice: '' })
     try {
@@ -61,12 +78,12 @@ export class ContentController {
       else this.offsets = []
       this.clearTimer(); this.publish({ page, editor: null, busy: false, pageBlocked: false, notice: '', previousOffset: this.offsets.at(-1) ?? null })
     } catch (error) {
-      if (!this.current(id) || isAborted(error) || this.unauthorized(error)) return
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       this.publish({ busy: false, pageBlocked: true, editor: this.state.editor ? { ...this.state.editor, phase: 'scope-changed' } : null, notice: error instanceof ProtocolFault ? error.message : '无法读取授权范围，请主动重新加载。旧列表不能用于提交。' })
     }
   }
   async select(scope: ScopeItem, discardConfirmed = false): Promise<void> {
-    if (this.disposed || this.state.busy || this.state.pageBlocked || this.hasRiskyDraft() && !discardConfirmed) return
+    if (this.disposed || this.incompatible || this.state.busy || this.state.pageBlocked || this.hasRiskyDraft() && !discardConfirmed) return
     const page = this.state.page
     if (!page || page.kind !== scope.kind || !page.items.some(item => scopeKey(item) === scopeKey(scope))) return
     const key = keyFor(scope, page.today), { controller, id } = this.begin()
@@ -77,18 +94,18 @@ export class ContentController {
       if (!sameKey(document.key, key)) throw new ProtocolFault()
       this.publish({ busy: false, editor: { scope, loaded: document, draft: document.text, phase: 'ready', expired: false, pending: null, latest: null, history: null, notice: '' } }); this.arm(document)
     } catch (error) {
-      if (!this.current(id) || isAborted(error) || this.unauthorized(error)) return
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       this.publish({ busy: false, notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '白板日期已经变化。请重新加载当天范围，旧日期不会自动更改。' : error instanceof ProtocolFault ? error.message : '读取内容失败，请重新选择或核对连接。', pageBlocked: error instanceof ProtocolFault || error instanceof ApiError && error.code === 'DAY_CHANGED', editor: error instanceof ProtocolFault && this.state.editor ? { ...this.state.editor, phase: 'scope-changed' } : this.state.editor })
     }
   }
   edit(draft: string): void {
     const e = this.state.editor
-    if (!e || !['ready', 'conflict', 'merge'].includes(e.phase) || e.expired || this.state.busy) return
+    if (this.incompatible || !e || !['ready', 'conflict', 'merge'].includes(e.phase) || e.expired || this.state.busy) return
     this.publish({ editor: { ...e, draft } })
   }
   async save(clear = false): Promise<void> {
     const e = this.state.editor
-    if (this.disposed || !e || e.phase !== 'ready' || e.expired || this.state.busy || this.state.pageBlocked) return
+    if (this.disposed || this.incompatible || !e || e.phase !== 'ready' || e.expired || this.state.busy || this.state.pageBlocked) return
     const text = clear ? '' : e.draft
     if (!draftValid(text)) { this.publish({ editor: { ...e, notice: '正文最多 16384 个 UTF-8 字节，不能包含不可显示的控制字符。' } }); return }
     if (e.loaded.revision === '18446744073709551615') { this.publish({ editor: { ...e, notice: '内容修订已到上限，请联系管理员。' } }); return }
@@ -105,7 +122,7 @@ export class ContentController {
       this.publish({ busy: false, editor: { ...current, loaded: result.content, draft: result.content.text, phase: current.expired ? 'expired' : 'ready', pending: null, notice: '白板已确认持久保存。此结果不代表内容此刻正在屏幕上显示。' } })
       if (!current.expired) this.arm(result.content)
     } catch (error) {
-      if (!this.current(id) || isAborted(error) || this.unauthorized(error)) return
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
       if (error instanceof ApiError && error.status === 409) {
         const expired = error.code === 'DAY_CHANGED'
@@ -132,14 +149,14 @@ export class ContentController {
       this.verify({ commandId: result.commandId, content: result.content }, pending)
       this.publish({ busy: false, editor: { ...current, phase: 'result', history: result.content, notice: '已查到原命令的持久结果。这是提交时的结果，不代表当前最新内容；请明确读取当前内容核对。' } })
     } catch (error) {
-      if (!this.current(id) || isAborted(error) || this.unauthorized(error)) return
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
       this.publish({ busy: false, editor: { ...current, phase: 'unknown', expired: current.expired || error instanceof ApiError && error.code === 'DAY_CHANGED', notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '原命令所属日期已过期，服务器不会返回旧日正文。旧草稿保留供审阅，不会发送到新日。' : error instanceof ProtocolFault ? '命令结果与原提交不匹配，已停止使用；原命令仍保留供核对。' : '查询尚未完成。原命令仍保留，请稍后主动查询；不会重发。' } })
     }
   }
   async loadLatest(): Promise<void> {
     const e = this.state.editor
-    if (this.disposed || !e || this.state.busy || !['ready', 'conflict', 'result', 'merge'].includes(e.phase) || e.expired) return
+    if (this.disposed || this.incompatible || !e || this.state.busy || !['ready', 'conflict', 'result', 'merge'].includes(e.phase) || e.expired) return
     const { controller, id } = this.begin(); this.publish({ busy: true })
     try {
       const latest = await this.api.content(e.loaded.key, controller.signal)
@@ -147,14 +164,14 @@ export class ContentController {
       if (!sameKey(latest.key, e.loaded.key)) throw new ProtocolFault()
       this.publish({ busy: false, editor: { ...this.state.editor!, latest, phase: 'merge', notice: '最新内容已载入。请对照两份正文，明确选择采用服务器内容，或保留并合并你的草稿。此处不会提交。' } }); this.arm(latest)
     } catch (error) {
-      if (!this.current(id) || isAborted(error) || this.unauthorized(error)) return
+      if (!this.current(id) || isAborted(error) || this.unauthorized(error) || this.versionFault(error)) return
       const current = this.state.editor!
       this.publish({ busy: false, editor: { ...current, expired: current.expired || error instanceof ApiError && error.code === 'DAY_CHANGED', phase: error instanceof ApiError && error.code === 'DAY_CHANGED' ? 'expired' : current.phase, notice: error instanceof ApiError && error.code === 'DAY_CHANGED' ? '白板日期已变化，旧草稿不能自动转移到新日。' : error instanceof ProtocolFault ? error.message : '无法核对当前内容，请主动重试读取。' } })
     }
   }
   acknowledgeMerge(useServer: boolean): void {
     const e = this.state.editor
-    if (!e?.latest || e.phase !== 'merge' || this.state.busy || e.expired) return
+    if (this.incompatible || !e?.latest || e.phase !== 'merge' || this.state.busy || e.expired) return
     this.publish({ editor: { ...e, loaded: e.latest, draft: useServer ? e.latest.text : e.draft, phase: 'ready', pending: null, latest: null, history: null, notice: useServer ? '已采用当前服务器内容，尚未产生新的提交。' : '已明确核对最新修订。你的草稿保持不变，只有点击保存才会生成新命令。' } })
   }
   leave(discardConfirmed = false): boolean {

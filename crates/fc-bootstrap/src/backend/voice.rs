@@ -9,6 +9,8 @@ use std::collections::BTreeMap;
 mod limits_tests;
 mod management;
 mod policy_handoff;
+#[cfg(test)]
+mod request_fence_tests;
 pub use policy_handoff::{VoicePolicyHandoff, VoicePolicyPhase};
 mod native_participation;
 pub use native_participation::VoiceNativeParticipation;
@@ -74,6 +76,7 @@ struct Inner {
 #[derive(Clone)]
 pub struct VoiceService {
     inner: Arc<Inner>,
+    execution: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
 }
 #[derive(Clone)]
 pub struct VoiceRuntimeHandle {
@@ -153,6 +156,34 @@ impl VoiceService {
                 #[cfg(test)]
                 after_commit: Mutex::new(None),
             }),
+            execution: None,
+        }
+    }
+    /// A request-local clone. Never installs a request lifetime in the shared
+    /// audio service or changes the authority of an independent cleanup owner.
+    pub fn with_execution_fence(&self, fence: Arc<dyn Fn() -> bool + Send + Sync>) -> Self {
+        let execution = match &self.execution {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || previous() && fence()) as Arc<dyn Fn() -> bool + Send + Sync>
+            }
+            None => fence,
+        };
+        Self {
+            inner: self.inner.clone(),
+            execution: Some(execution),
+        }
+    }
+    fn execution_current(&self) -> bool {
+        self.execution.as_ref().is_none_or(|fence| {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fence())).unwrap_or(false)
+        })
+    }
+    fn execution_checkpoint(&self) -> Result<()> {
+        if self.execution_current() {
+            Ok(())
+        } else {
+            Err(BackendError::Storage(StorageError::ExecutionCancelled))
         }
     }
     #[cfg(test)]
@@ -169,6 +200,7 @@ impl VoiceService {
         }
     }
     fn check_open(&self) -> Result<()> {
+        self.execution_checkpoint()?;
         if self.inner.control.0.closed.load(Ordering::Acquire) {
             return Err(BackendError::Closed);
         }
@@ -189,14 +221,20 @@ impl VoiceService {
         self.inner.runtime_state.load(Ordering::Acquire) & 1 == 1
     }
     fn current(&self, generation: u64) -> bool {
-        generation < (u64::MAX >> 1)
+        self.execution_current()
+            && generation < (u64::MAX >> 1)
             && self.inner.runtime_state.load(Ordering::Acquire) == (generation << 1 | 1)
     }
     fn epoch(&self) -> Result<u64> {
+        // Request cancellation is distinct from an independent runtime stop.
+        // Do not import check_open's health rules into the original epoch gate.
+        self.execution_checkpoint()?;
         let generation = self.generation();
         if self.current(generation) {
             Ok(generation)
         } else {
+            // A cancellation may have raced the first check/current() read.
+            self.execution_checkpoint()?;
             Err(BackendError::Voice(VoiceRepositoryError::Domain(
                 VoiceError::StaleGeneration,
             )))
@@ -389,6 +427,9 @@ impl VoiceService {
                 self.inner.control.generation(),
                 None,
             ));
+        }
+        if let Some(fence) = &self.execution {
+            repository = repository.with_execution_fence(fence.clone());
         }
         repository
     }
@@ -1305,22 +1346,25 @@ impl VoiceRuntimeHandle {
 }
 impl Backend {
     pub fn voice_service(&self) -> VoiceService {
-        self.voice.clone()
+        match &self.request_execution_fence {
+            Some(fence) => self.voice.with_execution_fence(fence.clone()),
+            None => self.voice.clone(),
+        }
     }
     pub fn voice_reserve(&mut self, l: SessionLease, c: ClassId) -> Result<VoiceAsset> {
-        self.voice.reserve(l, c)
+        self.voice_service().reserve(l, c)
     }
     pub fn voice_publish(&mut self, l: SessionLease, p: PreparedVoiceUpload) -> Result<VoiceAsset> {
-        self.voice.publish(l, p)
+        self.voice_service().publish(l, p)
     }
     pub fn voice_submit(&mut self, l: SessionLease, r: VoiceSubmitRequest) -> Result<VoiceJob> {
-        self.voice.submit(l, r)
+        self.voice_service().submit(l, r)
     }
     pub fn voice_status(&self, l: SessionLease, id: VoiceJobId) -> Result<VoiceJob> {
-        self.voice.status(l, id)
+        self.voice_service().status(l, id)
     }
     pub fn voice_cancel(&mut self, l: SessionLease, r: VoiceCancelRequest) -> Result<VoiceJob> {
-        self.voice.cancel(l, r)
+        self.voice_service().cancel(l, r)
     }
     pub fn voice_inventory(&self) -> Result<VoiceSnapshot> {
         self.voice.inventory()
@@ -1343,7 +1387,7 @@ impl Backend {
         e: bool,
         r: Revision,
     ) -> Result<VoiceSnapshot> {
-        self.voice.set_enabled(l, e, r)
+        self.voice_service().set_enabled(l, e, r)
     }
     pub fn voice_maintain(&mut self) -> Result<VoiceSnapshot> {
         self.voice.maintain()

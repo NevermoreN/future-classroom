@@ -12,7 +12,7 @@ use fc_ports::voice::{
 };
 use fc_windows::{
     audio::VerifiedWave,
-    materials::files::{ControlledFiles, LockedFile},
+    materials::files::{ControlledFiles, LockedFile, NewFile},
 };
 use std::{
     collections::BTreeSet,
@@ -92,6 +92,54 @@ pub struct PendingVoiceUpload {
     proof: PreparedVoiceUpload,
     pin: LockedFile,
 }
+/// The reservation's sole, exclusively held staging inode. No public path or
+/// constructor, no Clone, and no intermediate uncharged body file.
+pub struct VoiceUploadStage {
+    file: Option<NewFile>,
+    reservation: VoiceAsset,
+    written: u64,
+    started: Instant,
+    failed: bool,
+}
+impl VoiceUploadStage {
+    pub fn identity(&self) -> io::Result<(u32, u64)> {
+        self.file
+            .as_ref()
+            .ok_or_else(invalid)?
+            .identity()
+            .map_err(file_error)
+    }
+    pub fn write_chunk(&mut self, bytes: &[u8]) -> io::Result<()> {
+        if self.failed {
+            return Err(invalid());
+        }
+        self.failed = true;
+        if self.started.elapsed() >= Duration::from_secs(30) {
+            return Err(canceled());
+        }
+        if bytes.is_empty() || bytes.len() > fc_ports::http::CHUNK_BYTES {
+            return Err(invalid());
+        }
+        let next = self
+            .written
+            .checked_add(bytes.len() as u64)
+            .ok_or_else(invalid)?;
+        if next > MAX_WAV_BYTES {
+            return Err(invalid());
+        }
+        self.file
+            .as_mut()
+            .ok_or_else(invalid)?
+            .file_mut()
+            .write_all(bytes)?;
+        self.written = next;
+        self.failed = false;
+        Ok(())
+    }
+    pub fn bytes_written(&self) -> u64 {
+        self.written
+    }
+}
 impl PendingVoiceUpload {
     pub fn pcm(&self) -> &VoicePcmMetadata {
         self.proof.pcm()
@@ -145,8 +193,69 @@ impl ControlledVoiceFiles {
         }
         Ok(())
     }
+    /// Retry only deletion of the original charged inode. A replacement at
+    /// either controlled name is retained and can never be adopted as cleanup.
+    pub fn discard_unpublished_exact(
+        &self,
+        reservation: &VoiceAsset,
+        identity: (u32, u64),
+    ) -> io::Result<()> {
+        if reservation.state != VoiceAssetState::Reserved || reservation.pcm.is_some() {
+            return Err(invalid());
+        }
+        for active in [false, true] {
+            self.files
+                .remove_object_expected(&self.path(active, reservation.id), false, identity, |_| {
+                    true
+                })
+                .map_err(file_error)?;
+        }
+        Ok(())
+    }
     fn path(&self, active: bool, id: VoiceAssetId) -> PathBuf {
         (if active { &self.active } else { &self.staging }).join(format!("{}.wav", id.get()))
+    }
+    pub fn begin_body_stage(&self, reservation: VoiceAsset) -> io::Result<VoiceUploadStage> {
+        if reservation.state != VoiceAssetState::Reserved
+            || reservation.pcm.is_some()
+            || reservation.charged_bytes != MAX_WAV_BYTES
+        {
+            return Err(invalid());
+        }
+        Ok(VoiceUploadStage {
+            file: Some(
+                self.files
+                    .create_new(&self.path(false, reservation.id))
+                    .map_err(file_error)?,
+            ),
+            reservation,
+            written: 0,
+            started: Instant::now(),
+            failed: false,
+        })
+    }
+    /// Seal, inspect and rename this same already charged inode. Never calls the
+    /// copying local-input adapter or opens another output/staging body.
+    pub fn finish_body_stage(
+        &self,
+        stage: VoiceUploadStage,
+        authorize: &dyn Fn() -> bool,
+    ) -> io::Result<PendingVoiceUpload> {
+        let reservation = stage.reservation.clone();
+        let mut preparation = StagePreparation {
+            owner: self,
+            control: Control {
+                authorize,
+                start: stage.started,
+            },
+            pin: None,
+        };
+        let proof =
+            prepare_voice_upload(&mut preparation, stage, reservation).map_err(file_error)?;
+        Ok(PendingVoiceUpload {
+            proof,
+            pin: preparation.pin.take().ok_or_else(invalid)?,
+        })
     }
     /// Existing local immutable input adapter, used by the explicit synthetic
     /// probe. HTTP bodies must use prepare_body to avoid a second uncharged spool.
@@ -169,30 +278,36 @@ impl ControlledVoiceFiles {
         let pin = preparation.pin.take().ok_or_else(invalid)?;
         Ok(PendingVoiceUpload { proof, pin })
     }
-    /// Production upload body adapter: stream directly into the already charged
-    /// reservation's sole staging object. HTTP must supply a timeout-bounded
-    /// reader, run this on a reserved physical worker, and never spool a second
-    /// uncharged body. No client filename or path participates in publication.
+    /// Finite local-input adapter over the same incremental staging core.
+    /// A network Read must never be passed here; the network owner schedules
+    /// begin/write/finish operations on the existing shared worker instead.
     pub fn prepare_body<R: Read>(
         &self,
         input: R,
         reservation: VoiceAsset,
         authorize: &dyn Fn() -> bool,
     ) -> io::Result<PendingVoiceUpload> {
-        let mut preparation = BodyPreparation {
-            owner: self,
-            control: Control {
-                authorize,
-                start: Instant::now(),
-            },
-            input: Some(input),
-            pin: None,
+        let mut input = input;
+        let mut stage = self.begin_body_stage(reservation)?;
+        let control = Control {
+            authorize,
+            start: stage.started,
         };
-        let proof = prepare_voice_upload(&mut preparation, (), reservation).map_err(file_error)?;
-        Ok(PendingVoiceUpload {
-            proof,
-            pin: preparation.pin.take().ok_or_else(invalid)?,
-        })
+        let mut block = [0; 32 * 1024];
+        loop {
+            if control.canceled() {
+                return Err(canceled());
+            }
+            let n = input.read(&mut block)?;
+            if control.canceled() {
+                return Err(canceled());
+            }
+            if n == 0 {
+                break;
+            }
+            stage.write_chunk(&block[..n])?;
+        }
+        self.finish_body_stage(stage, authorize)
     }
     /// Hash and native stream open overlap immutable READ-only handles, so there
     /// is no verified-path/reopen replacement window. Both deny write/delete.
@@ -346,51 +461,35 @@ impl VoicePreparation for Preparation<'_> {
     }
 }
 
-struct BodyPreparation<'a, R: Read> {
+struct StagePreparation<'a> {
     owner: &'a ControlledVoiceFiles,
     control: Control<'a>,
-    input: Option<R>,
     pin: Option<LockedFile>,
 }
-impl<R: Read> VoicePreparation for BodyPreparation<'_, R> {
-    type Input = ();
+impl VoicePreparation for StagePreparation<'_> {
+    type Input = VoiceUploadStage;
     fn prepare(
         &mut self,
-        _: (),
+        mut stage: VoiceUploadStage,
         reservation: &VoiceAsset,
     ) -> Result<VoicePcmMetadata, VoiceRepositoryError> {
         let mut work = || -> io::Result<(VoicePcmMetadata, LockedFile)> {
             if self.control.canceled() {
                 return Err(canceled());
             }
-            let input = self.input.as_mut().ok_or_else(invalid)?;
-            let mut target = self
-                .owner
-                .files
-                .create_new(&self.owner.path(false, reservation.id))
-                .map_err(file_error)?;
-            let mut block = [0; 32 * 1024];
-            let mut bytes = 0u64;
-            loop {
-                if self.control.canceled() {
-                    return Err(canceled());
-                }
-                let n = input.read(&mut block)?;
-                if n == 0 {
-                    break;
-                }
-                bytes = bytes.checked_add(n as u64).ok_or_else(invalid)?;
-                if bytes > MAX_WAV_BYTES {
-                    return Err(invalid());
-                }
-                target.file_mut().write_all(&block[..n])?;
+            if stage.failed || &stage.reservation != reservation {
+                return Err(invalid());
+            }
+            let target = stage.file.take().ok_or_else(invalid)?;
+            if target.path() != self.owner.path(false, reservation.id) {
+                return Err(invalid());
             }
             if self.control.canceled() {
                 return Err(canceled());
             }
             let mut pin = target.seal().map_err(file_error)?;
             let pcm = inspect(&mut pin, &self.control)?;
-            if pcm.byte_length != bytes || self.control.canceled() {
+            if pcm.byte_length != stage.written || self.control.canceled() {
                 return Err(invalid());
             }
             pin = pin
@@ -548,6 +647,52 @@ mod tests {
         assert_eq!(files.files.entries(&files.active, 2).unwrap().len(), 1);
         assert!(pin.file_mut().write_all(&[1]).is_err());
         assert_eq!(pin.path(), files.path(true, id));
+        drop(pin);
+    }
+
+    #[test]
+    fn incremental_body_seals_hashes_and_publishes_the_same_original_file_identity() {
+        let directory = Directory(std::env::temp_dir().join(format!(
+                "FutureClassroom-Test-Voice-Incremental-{}-{}",
+                std::process::id(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            )));
+        std::fs::create_dir(&directory.0).unwrap();
+        let files = ControlledVoiceFiles::new(&directory.0).unwrap();
+        let asset = VoiceAsset {
+            id: VoiceAssetId::new(125).unwrap(),
+            owner: fc_domain::ids::PrincipalId::new(1).unwrap(),
+            class_id: fc_domain::ids::ClassId::new(1).unwrap(),
+            state: VoiceAssetState::Reserved,
+            revision: fc_domain::ids::Revision::new(1),
+            charged_bytes: MAX_WAV_BYTES,
+            pcm: None,
+            created_at: 0,
+            expires_at: 600,
+        };
+        let mut stage = files.begin_body_stage(asset.clone()).unwrap();
+        let original = stage.file.as_ref().unwrap().identity().unwrap();
+        let bytes = silence();
+        for chunk in bytes.chunks(1237) {
+            stage.write_chunk(chunk).unwrap();
+        }
+        assert_eq!(stage.bytes_written(), bytes.len() as u64);
+        assert_eq!(files.files.entries(&files.staging, 2).unwrap().len(), 1);
+        let pending = files.finish_body_stage(stage, &|| true).unwrap();
+        let (proof, mut pin) = pending.into_parts();
+        assert_eq!(proof.reservation(), &asset);
+        assert_eq!(
+            pin.identity().unwrap(),
+            original,
+            "seal and publish must preserve the charged inode"
+        );
+        assert_eq!(pin.path(), files.path(true, asset.id));
+        assert!(pin.file_mut().write_all(b"x").is_err());
+        assert!(files.files.entries(&files.staging, 2).unwrap().is_empty());
+        assert_eq!(files.files.entries(&files.active, 2).unwrap().len(), 1);
         drop(pin);
     }
 }

@@ -1,0 +1,68 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "files": {
+    "crates/fc-bootstrap/src/web_transfer.rs": {
+      "sha256": "6eef089d5874c8dcb0183e5eba210f4af3bd749d39b48dc8ffe2c5bb2127773e",
+      "bytes": 10324
+    },
+    "crates/fc-bootstrap/src/web_transfer/executor.rs": {
+      "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4",
+      "bytes": 3209
+    },
+    "crates/fc-bootstrap/src/web_transfer/downloads.rs": {
+      "sha256": "02f539c1532d4004acb709a148774988bcc97f11e5d8dcd8756988e53be6b404",
+      "bytes": 17963
+    },
+    "crates/fc-bootstrap/src/web_transfer/downloads/tests.rs": {
+      "sha256": "160ba5efab16f86919584a4f9bab3df3b168e6ddd9d8789268a24364555bb7a4",
+      "bytes": 10830
+    },
+    "crates/fc-bootstrap/src/web_transfer/download_work.rs": {
+      "sha256": "fe5bc307065b4aed115c83026c848d91cda9c9386a36863411d9987f83477ca8",
+      "bytes": 4830
+    },
+    "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs": {
+      "sha256": "2ab112c243df3d8bde58d848db0acf3cd5afd430d41722d7c8131fd00bc444d5",
+      "bytes": 2757
+    }
+  },
+  "checks": [
+    "direct rustfmt edition2021 skip_children passed on all six owned files",
+    "git diff --check passed",
+    "all new test mod paths present"
+  ],
+  "contracts": [
+    "No new pool/thread in production; HttpJob/HttpCompletion compose Download into original executor",
+    "one strong DownloadHubOwner; public DownloadHub only Weak; fixed MAX_REQUESTS8 slots with checked nonreused serial and complete trusted token",
+    "actual MaterialDownload Box and cached first chunk stay in worker Hub; Admission/Read replies only metadata/Arc send fence/<=64KiB Vec",
+    "begin uses real authenticated same-App API then first read verifies whole file hash before response head; first chunk cached for exactRead1 offset0",
+    "stable original lifetime spans queue/hash/read/send; no current JobContext/fence stored across jobs",
+    "same original life/current job/send fence checked on each Read; exact next sequence/offset, last chunk eof flag; no file close from EOF metadata",
+    "current cleanup_request by exact full token after original task actualdone closes pin on worker even original life expired/cancelled",
+    "taken slot remains Busy while owner outside mutex; unwind closes native pin on actual worker before tombstone restoration and closes domain",
+    "abnormal sole-owner Drop retains original fixed singleton strong owner; no replacement until recover plus actualpooljoin finaldrain",
+    "final actualjoin required before DownloadHubOwner drain; running descriptor counts or unrelated quarantine0 do not prove full physical retirement"
+  ],
+  "tests": [
+    "download_head_requires_verified_hash_and_chunks_keep_native_pin_until_fresh_cleanup",
+    "eight_pins_are_bounded_duplicate_tokens_and_old_serials_cannot_replace_current_owner",
+    "corrupt_published_bytes_cannot_escape_as_admitted_response_headers",
+    "worker_unwind_closes_pin_but_original_domain_is_retained_until_real_join_and_drain",
+    "cancelled_positive_download_admission_stays_worker_owned_until_fresh_http_cleanup_task"
+  ],
+  "newTestCount": 5,
+  "notRun": [
+    "Cargo/build/tests/Clippy",
+    "remote Windows execution",
+    "HTTP/TLS traffic",
+    "native 5second deadline gate",
+    "OS compatibility certification"
+  ],
+  "api": {
+    "begin": "DownloadTask::begin(hub,&ArcApp,&ArcBackend,head,life)->Result<Self,TransferError>",
+    "read": "DownloadTask::read(hub,key,sequence,offset,deadline)->Result<Self,TransferError>",
+    "cleanup": "DownloadTask::cleanup_request(hub,token,fresh_deadline)->Self",
+    "completion": "DownloadCompletion{token,result:Admitted(DownloadAdmission{key,head,send_fence})|Read(DownloadChunk{key,sequence,offset,bytes,eof})|CleanedRequest(token)}",
+    "owner": "DownloadHubOwner::new()/recover_retained()/handle()/drain_after_join()->DownloadHubCleanup{pending_slots}"
+  }
+}

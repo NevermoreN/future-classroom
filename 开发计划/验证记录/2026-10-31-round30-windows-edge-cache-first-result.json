@@ -1,0 +1,296 @@
+{
+  "status": "PASS",
+  "browserVersion": "156.0.4314.50",
+  "checks": [
+    "no-route fixture delivers strict CSP and no-cache entry",
+    "unrouted browser fetch sees exact cached previous main bytes",
+    "CDP observes a real HTTP cache service for previous main",
+    "same entry remains rendered after browser revalidation",
+    "retired previous JS is still available from browser HTTP cache",
+    "uncached old Worklet failure releases all tracks and contexts",
+    "unrouted old Worklet failure never uploads or submits",
+    "explicit refresh revalidates old entry into changed current HTML",
+    "changed HTML selects current main asset instead of cached previous main",
+    "unrouted Worklet scenario has no unhandled page error",
+    "unrouted upgrade after capture retires lazy old Worker safely",
+    "unrouted Worker failure never uploads or submits",
+    "unrouted Worker scenario has no unhandled page error"
+  ],
+  "checkCount": 13,
+  "cases": [
+    {
+      "case": "real HTTP cache enabled, entry revalidation, retired lazy Worklet and explicit refresh",
+      "before": {
+        "status": 200,
+        "bytes": 409114,
+        "sha256": "93c86f93c49ba00f36078e5346efc24d36827ff8a582f219afc75942f3a01c43",
+        "cacheControl": "public, max-age=31536000, immutable"
+      },
+      "after": {
+        "status": 200,
+        "bytes": 409114,
+        "sha256": "93c86f93c49ba00f36078e5346efc24d36827ff8a582f219afc75942f3a01c43",
+        "cacheControl": "public, max-age=31536000, immutable"
+      },
+      "initialEtag": "\"fa44966777d87f0834955d51653b1c01e26bf4d7731c58bbb87ece27f3b618df\"",
+      "currentEtag": "\"201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb\"",
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "contextCount": 1,
+        "contextClosed": 1,
+        "ownerClosed": 1,
+        "modules": [
+          "/fc/assets/previous-pcm-worklet-B7E4LRoP.js"
+        ],
+        "workers": [],
+        "liveWorkers": 0
+      },
+      "cacheEvents": [
+        {
+          "requestId": "24984.12",
+          "url": "https://localhost:52305/fc/assets/previous-index-DFFVdc8-.css"
+        }
+      ],
+      "network": [
+        {
+          "url": "https://localhost:52305/fc/",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/html"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-DFFVdc8-.css",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/css"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/status",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-favicon-CXuYoSfB.svg",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "image/svg+xml"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/session",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": true,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/html"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-DFFVdc8-.css",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/css"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": true,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-favicon-CXuYoSfB.svg",
+          "status": 200,
+          "fromDiskCache": true,
+          "fromPrefetchCache": false,
+          "mimeType": "image/svg+xml"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/status",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/session",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/voice/capabilities",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/voice/broadcasts",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": true,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/html"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/index-DFFVdc8-.css",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/css"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/status",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "image/svg+xml"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/session",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        }
+      ],
+      "posts": [],
+      "pageErrors": []
+    },
+    {
+      "case": "real HTTP cache enabled, upgrade between capture and Worker",
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "contextCount": 1,
+        "contextClosed": 1,
+        "ownerClosed": 1,
+        "modules": [
+          "/fc/assets/previous-pcm-worklet-B7E4LRoP.js"
+        ],
+        "workers": [
+          "https://localhost:52305/fc/assets/previous-wav-worker-LSywWbpJ.js"
+        ],
+        "liveWorkers": 0
+      },
+      "cacheEvents": [],
+      "network": [
+        {
+          "url": "https://localhost:52305/fc/",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/html"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-DFFVdc8-.css",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/css"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-index-C3GlEF2q.js",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "text/javascript"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/status",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/assets/previous-favicon-CXuYoSfB.svg",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "image/svg+xml"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/session",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/voice/capabilities",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        },
+        {
+          "url": "https://localhost:52305/fc/api/v1/voice/broadcasts",
+          "status": 200,
+          "fromDiskCache": false,
+          "fromPrefetchCache": false,
+          "mimeType": "application/json"
+        }
+      ],
+      "posts": [],
+      "pageErrors": []
+    }
+  ],
+  "scope": "Actual Windows11 headless Edge HTTP cache, isolated profile and job, exact owned certificate SPKI exception at launch, pages ignoreHTTPSErrors=false, no context/page routing or cache disabling. Static HTTPS plus synthetic server API through owned loopback SSH reverse; previous URLs renamed then actually retired. Not Rust native browser TLS, real microphone/playback, MSI or formal Win7/Win10 compatibility."
+}

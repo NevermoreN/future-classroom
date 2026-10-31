@@ -1,9 +1,30 @@
 import { describe, expect, it } from 'vitest'
 import * as voice from '../src/api/voice-protocol'
-import { ProtocolFault } from '../src/api/protocol'
+import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
 import { caps, job, wireCaps, wireUpload } from './voice-fixtures'
 const input = { commandId: '71', assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
 describe('voice wire boundary and state meaning', () => {
+  it('distinguishes new integer versions from corrupt schema fields on all voice envelopes', () => {
+    const readers: ((version: unknown) => unknown)[] = [
+      version => voice.capabilities({ ...wireCaps(), schemaVersion: version }),
+      version => voice.uploaded({ ...wireUpload(), schemaVersion: version }, '7', 16044),
+      version => voice.currentJob({ schemaVersion: version, status: 'VOICE_JOB', job: job() }, '71'),
+      version => voice.jobs({ schemaVersion: version, status: 'VOICE_JOBS', jobs: [job()] }),
+      version => voice.committed({ schemaVersion: version, status: 'COMMITTED', commandId: '71', job: job() }, input),
+      version => voice.cancelled({ schemaVersion: version, status: 'CANCEL_REQUESTED', commandId: '81', job: job({ state: 'STOPPING', currentRepeat: 1, revision: '2' }) }, '71', { commandId: '81', expectedRevision: '1' }),
+    ]
+    for (const read of readers) {
+      expect(() => read(1)).not.toThrow()
+      expect(() => read(2)).toThrow(ProtocolVersionFault)
+      for (const invalid of [undefined, '2', null, 0, -1, 1.5]) {
+        expect(() => read(invalid)).toThrow(ProtocolFault)
+        expect(() => read(invalid)).not.toThrow(ProtocolVersionFault)
+      }
+    }
+    const missing = { ...wireCaps() } as Record<string, unknown>; delete missing.schemaVersion
+    expect(() => voice.capabilities(missing)).toThrow(ProtocolFault)
+    expect(() => voice.capabilities(missing)).not.toThrow(ProtocolVersionFault)
+  })
   it('accepts tightened administrator limits and rejects contradictory or expanded capabilities', () => {
     const configured = { ...wireCaps(), maxRepeatTotal: 2, defaultRepeatTotal: 2, maxDurationMillis: 1250, maxWavBytes: 40044 }
     expect(voice.capabilities(configured)).toMatchObject({ maxRepeatTotal: 2, defaultRepeatTotal: 2, maxDurationMillis: 1250, maxWavBytes: 40044 })

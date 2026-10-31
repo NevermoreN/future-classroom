@@ -3,7 +3,17 @@ export const MAX_JSON_BYTES = 65_536
 export class ProtocolFault extends Error {
   constructor(message = '白板返回了不兼容或无效的数据，请联系管理员。') { super(message); this.name = 'ProtocolFault' }
 }
+export class ProtocolVersionFault extends ProtocolFault {
+  constructor() { super('白板与页面版本不兼容，请刷新页面；如仍不兼容请联系管理员升级。'); this.name = 'ProtocolVersionFault' }
+}
 const fail = (): never => { throw new ProtocolFault() }
+/** Validate every version's wire type before classifying an incompatible set.
+ * A malformed version is never presented as a trustworthy upgrade signal. */
+export function protocolVersions(first: unknown, ...others: unknown[]): void {
+  const versions = [first, ...others]
+  if (versions.some(value => typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1)) fail()
+  if (versions.some(value => value !== 1)) throw new ProtocolVersionFault()
+}
 type ObjectValue = Record<string, unknown>
 function object(value: unknown, fields: readonly string[]): ObjectValue {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return fail()
@@ -11,7 +21,6 @@ function object(value: unknown, fields: readonly string[]): ObjectValue {
   if (keys.length !== fields.length || keys.some(key => !fields.includes(key))) return fail()
   return value as ObjectValue
 }
-function version(value: unknown): void { if (value !== 1) fail() }
 export function decimal(value: unknown): string {
   if (typeof value !== 'string' || !/^[1-9][0-9]{0,19}$/.test(value)
     || value.length === 20 && value > '18446744073709551615') return fail()
@@ -29,14 +38,14 @@ export function secret(value: unknown): string {
 export interface PublicStatus { online: boolean }
 export function publicStatus(value: unknown): PublicStatus {
   const v = object(value, ['schemaVersion', 'apiVersion', 'uiCompatibilityVersion', 'online'])
-  version(v.schemaVersion); version(v.apiVersion); version(v.uiCompatibilityVersion)
+  protocolVersions(v.schemaVersion, v.apiVersion, v.uiCompatibilityVersion)
   if (typeof v.online !== 'boolean') return fail()
   return { online: v.online }
 }
 export interface PairingReceipt { requestId: string; pollSecret: string; retryAfterMs: number }
 export function pairingReceipt(value: unknown): PairingReceipt {
   const v = object(value, ['schemaVersion', 'status', 'requestId', 'pollSecret', 'retryAfterMs'])
-  version(v.schemaVersion)
+  protocolVersions(v.schemaVersion)
   if (v.status !== 'PENDING' || v.retryAfterMs !== 500) return fail()
   return { requestId: decimal(v.requestId), pollSecret: secret(v.pollSecret), retryAfterMs: v.retryAfterMs }
 }
@@ -45,7 +54,7 @@ export function pollResult(value: unknown): PollResult {
   if (typeof value !== 'object' || value === null || !('status' in value)) return fail()
   if (value.status === 'AUTHORIZED') { fixedStatus(value, 'AUTHORIZED'); return { status: 'AUTHORIZED' } }
   const v = object(value, ['schemaVersion', 'status', 'retryAfterMs'])
-  version(v.schemaVersion)
+  protocolVersions(v.schemaVersion)
   if (v.status !== 'PENDING' || v.retryAfterMs !== 500) return fail()
   return { status: 'PENDING', retryAfterMs: v.retryAfterMs }
 }
@@ -58,7 +67,7 @@ export interface Session {
 }
 export function session(value: unknown): Session {
   const v = object(value, ['schemaVersion', 'status', 'principal', 'currentClassId', 'assignments', 'csrf'])
-  version(v.schemaVersion)
+  protocolVersions(v.schemaVersion)
   if (v.status !== 'AUTHENTICATED') return fail()
   const p = object(v.principal, ['id', 'displayName', 'role'])
   if (p.role !== 'GLOBAL_ADMIN' && p.role !== 'TEACHER_ADMIN' && p.role !== 'USER') return fail()
@@ -79,14 +88,14 @@ export function session(value: unknown): Session {
   }
 }
 function fixedStatus(value: unknown, expected: string): void {
-  const v = object(value, ['schemaVersion', 'status']); version(v.schemaVersion)
+  const v = object(value, ['schemaVersion', 'status']); protocolVersions(v.schemaVersion)
   if (v.status !== expected) fail()
 }
 export function loggedOut(value: unknown): void { fixedStatus(value, 'LOGGED_OUT') }
 export const errorCodes = ['INVALID_REQUEST', 'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'METHOD_NOT_ALLOWED', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'RESULT_UNKNOWN', 'REVISION_CONFLICT', 'DAY_CHANGED', 'IDEMPOTENCY_CONFLICT', 'STALE_CURSOR', 'UPLOAD_EXPIRED', 'UPLOAD_NOT_READY', 'INVALID_RESOURCE', 'CAPACITY', 'VOICE_DISABLED', 'TARGET_CHANGED', 'INVALID_WAV', 'QUEUE_FULL', 'OWNER_LIMIT', 'EXPIRED'] as const
 export type ErrorCode = typeof errorCodes[number]
 export function errorCode(value: unknown): ErrorCode {
-  const v = object(value, ['schemaVersion', 'code']); version(v.schemaVersion)
+  const v = object(value, ['schemaVersion', 'code']); protocolVersions(v.schemaVersion)
   if (typeof v.code !== 'string' || !errorCodes.includes(v.code as ErrorCode)) return fail()
   return v.code as ErrorCode
 }

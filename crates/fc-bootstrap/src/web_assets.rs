@@ -6,7 +6,22 @@ use fc_protocol::web::{
     assets::{Asset, Manifest},
     WebBoundary, WebError,
 };
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    mem::{align_of, size_of},
+    sync::Arc,
+};
+
+#[cfg(windows)]
+mod loader;
+#[cfg(windows)]
+pub use loader::StaticLoadError;
+
+const ARC_HEADER_ALLOWANCE: usize = 2 * size_of::<usize>();
+fn shared_byte_allocation(bytes: usize) -> usize {
+    // Arc's two usize counters plus this [u8] payload, padded to its alignment.
+    // Allocator bookkeeping/size-class slack remains outside requested bytes.
+    (ARC_HEADER_ALLOWANCE + bytes).next_multiple_of(align_of::<usize>())
+}
 
 pub const CONTENT_SECURITY_POLICY: &str = "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
 // RFC 9110 §13.1.2 uses weak comparison and permits lists; commas inside
@@ -72,7 +87,7 @@ struct PreparedAsset {
 }
 pub struct StaticAssets {
     boundary: WebBoundary,
-    assets: BTreeMap<String, PreparedAsset>,
+    assets: Vec<PreparedAsset>,
 }
 pub struct StaticResponse {
     pub head: ResponseHead,
@@ -83,14 +98,24 @@ pub struct StaticResponse {
 pub struct StaticBody {
     bytes: Arc<[u8]>,
     offset: usize,
+    end: usize,
 }
 impl StaticBody {
+    /// Unread source bytes. Advancing this cursor does not acknowledge a send.
+    pub fn remaining_bytes(&self) -> usize {
+        self.end - self.offset
+    }
+    /// This response's cursor/Arc pointer only. The shared payload allocation is
+    /// charged once to StaticAssets, never again for each concurrent response.
+    pub fn owned_bytes(&self) -> usize {
+        size_of::<Self>()
+    }
     pub fn next_chunk(&mut self) -> Option<&[u8]> {
-        if self.offset == self.bytes.len() {
+        if self.offset == self.end {
             return None;
         }
         let start = self.offset;
-        self.offset = (start + CHUNK_BYTES).min(self.bytes.len());
+        self.offset = (start + CHUNK_BYTES).min(self.end);
         Some(&self.bytes[start..self.offset])
     }
 }
@@ -102,29 +127,62 @@ impl StaticAssets {
     ) -> Result<Self, StaticError> {
         let manifest = Manifest::parse(manifest_bytes).map_err(|_| StaticError::InvalidManifest)?;
         let boundary = WebBoundary::new(prefix).map_err(StaticError::Boundary)?;
-        let mut expected: BTreeMap<_, _> = manifest
-            .assets
-            .into_iter()
-            .map(|a| (a.path.clone(), a))
-            .collect();
-        let mut assets = BTreeMap::new();
+        let mut expected = manifest.assets;
+        let mut assets = Vec::with_capacity(expected.len());
         for (path, bytes) in payloads {
-            let metadata = expected.remove(&path).ok_or(StaticError::PayloadMismatch)?;
+            let index = expected
+                .iter()
+                .position(|asset| asset.path == path)
+                .ok_or(StaticError::PayloadMismatch)?;
+            let metadata = expected.swap_remove(index);
             if !metadata.verify(&bytes) {
                 return Err(StaticError::PayloadMismatch);
             }
-            assets.insert(
-                path,
-                PreparedAsset {
-                    metadata,
-                    bytes: Arc::from(bytes),
-                },
-            );
+            assets.push(PreparedAsset {
+                metadata,
+                bytes: Arc::from(bytes),
+            });
         }
         if !expected.is_empty() {
             return Err(StaticError::PayloadMismatch);
         }
         Ok(Self { boundary, assets })
+    }
+    /// Rebind verified bytes during trusted startup, before installing them in
+    /// a network owner. This performs only metadata allocation: it neither
+    /// reopens files nor revalidates/copies payloads. The actual build base must
+    /// match the new prefix; an ephemeral-port startup keeps the same `/fc/`
+    /// base and changes only the trusted authority. No request selects this.
+    pub fn with_prefix(mut self, prefix: &ListenPrefix) -> Result<Self, StaticError> {
+        self.boundary = WebBoundary::new(prefix).map_err(StaticError::Boundary)?;
+        Ok(self)
+    }
+    /// Requested persistent allocations: Self and its external Arc header,
+    /// actual Vec/path/boundary capacities and one header+payload per byte Arc.
+    /// Excludes allocator
+    /// rounding/metadata, transient load/hash buffers, response heads and native
+    /// TLS/provider/kernel allocations. Charge this ONCE for the shared bundle.
+    pub fn allocation_bytes(&self) -> usize {
+        size_of::<Self>()
+            + ARC_HEADER_ALLOWANCE
+            + self.boundary.heap_bytes()
+            + self.assets.capacity() * size_of::<PreparedAsset>()
+            + self
+                .assets
+                .iter()
+                .map(|asset| {
+                    asset.metadata.path.capacity() + shared_byte_allocation(asset.bytes.len())
+                })
+                .sum::<usize>()
+    }
+    pub fn asset_count(&self) -> usize {
+        self.assets.len()
+    }
+    /// Dispatch classification only; private API authorization stays on its
+    /// original shared worker and can never fall back to the HTML entry.
+    #[cfg(any(windows, test))]
+    pub(crate) fn is_api_target(&self, target: &str) -> bool {
+        self.boundary.is_api_target(target)
     }
     pub fn dispatch(&self, head: &RequestHead, body: &[u8]) -> Result<StaticResponse, StaticError> {
         let path = self
@@ -134,7 +192,11 @@ impl StaticAssets {
         if !body.is_empty() {
             return Err(StaticError::Boundary(WebError::Body));
         }
-        let asset = self.assets.get(path).ok_or(StaticError::NotFound)?;
+        let asset = self
+            .assets
+            .iter()
+            .find(|asset| asset.metadata.path == path)
+            .ok_or(StaticError::NotFound)?;
         let etag = asset.metadata.etag();
         let mut matches = head
             .headers
@@ -148,11 +210,8 @@ impl StaticAssets {
         if matches.next().is_some() {
             return Err(StaticError::Boundary(WebError::Headers));
         }
-        let bytes = if cached {
-            Arc::from([])
-        } else {
-            asset.bytes.clone()
-        };
+        let bytes = asset.bytes.clone();
+        let end = if cached { 0 } else { bytes.len() };
         let header = |name: &str, value: &str| Header {
             name: name.into(),
             value: value.as_bytes().to_vec(),
@@ -160,7 +219,7 @@ impl StaticAssets {
         Ok(StaticResponse {
             head: ResponseHead {
                 status: if cached { 304 } else { 200 },
-                content_length: bytes.len() as u64,
+                content_length: end as u64,
                 headers: vec![
                     header(
                         "Content-Type",
@@ -177,7 +236,11 @@ impl StaticAssets {
                     ),
                 ],
             },
-            body: StaticBody { bytes, offset: 0 },
+            body: StaticBody {
+                bytes,
+                offset: 0,
+                end,
+            },
         })
     }
 }

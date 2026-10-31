@@ -6,6 +6,8 @@ mod account_management_tests;
 mod autostart;
 mod calendar;
 mod content_web;
+#[cfg(test)]
+mod execution_scope_tests;
 mod materials_web;
 mod profile_content;
 mod profiles;
@@ -52,7 +54,7 @@ pub use fc_storage::business::materials::{
 use fc_storage::{
     business::{startup_state, BusinessRepository},
     login::*,
-    StorageError, StorageHandle, StorageWriter,
+    StorageError, StorageHandle, StorageWriter, TransactionExecutionFence,
 };
 pub use materials_web::{
     WebMaterialClass, WebMaterialClasses, WebMaterialScope, WebMaterialScopes,
@@ -471,6 +473,7 @@ pub struct Backend {
     writer: Option<StorageWriter<Snapshot>>,
     handle: StorageHandle<Snapshot>,
     repository: Repository,
+    request_execution_fence: Option<TransactionExecutionFence>,
     authority: AuthorityReader<IdentityState>,
     codec: CredentialRecordCodec,
     crypto: CredentialCryptoAdapter<PlatformRandom>,
@@ -479,7 +482,61 @@ pub struct Backend {
     ledger: Arc<Mutex<Ledger>>,
     control: SessionControl,
 }
+/// Worker-owned request scope. Restores the exact previous repository and memory
+/// fence on normal return and unwind; nested scopes can only tighten authority.
+pub struct BackendExecution<'a> {
+    backend: &'a mut Backend,
+    previous_repository: Option<Repository>,
+    previous_fence: Option<TransactionExecutionFence>,
+}
+impl std::ops::Deref for BackendExecution<'_> {
+    type Target = Backend;
+    fn deref(&self) -> &Self::Target {
+        self.backend
+    }
+}
+impl std::ops::DerefMut for BackendExecution<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.backend
+    }
+}
+impl Drop for BackendExecution<'_> {
+    fn drop(&mut self) {
+        if let Some(previous) = self.previous_repository.take() {
+            self.backend.repository = previous;
+        }
+        self.backend.request_execution_fence = self.previous_fence.take();
+    }
+}
 impl Backend {
+    /// Bind one shared-worker request lifetime without changing global handles
+    /// or health. The fence is memory-only, grants no actor authority, and must
+    /// retain the request's original absolute deadline. Use on the shared worker.
+    pub fn begin_execution_scope(
+        &mut self,
+        fence: TransactionExecutionFence,
+    ) -> BackendExecution<'_> {
+        let repository = self.repository.clone().with_execution_fence(fence.clone());
+        let combined: TransactionExecutionFence = match &self.request_execution_fence {
+            Some(previous) => {
+                let previous = previous.clone();
+                Arc::new(move || {
+                    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| previous()))
+                        .unwrap_or(false)
+                        && std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fence()))
+                            .unwrap_or(false)
+                })
+            }
+            None => fence,
+        };
+        let previous_repository = Some(std::mem::replace(&mut self.repository, repository));
+        let previous_fence = self.request_execution_fence.replace(combined);
+        BackendExecution {
+            backend: self,
+            previous_repository,
+            previous_fence,
+        }
+    }
     /// Irreversibly stop ordinary admission while leaving the trusted audio
     /// interrupter and writer alive for their actual physical drain. This is
     /// not a restore barrier and grants no filesystem reset capability.
@@ -598,6 +655,7 @@ impl Backend {
             writer: Some(writer),
             handle,
             repository,
+            request_execution_fence: None,
             authority,
             codec,
             crypto: CredentialCryptoAdapter::new(PlatformRandom),
@@ -611,7 +669,10 @@ impl Backend {
         self.control.clone()
     }
     pub fn web_service(&self) -> web::WebService {
-        self.web.clone()
+        match &self.request_execution_fence {
+            Some(fence) => self.web.with_execution_fence(fence.clone()),
+            None => self.web.clone(),
+        }
     }
     fn check_open(&self) -> Result<()> {
         if self.writer.is_none()
@@ -620,6 +681,11 @@ impl Backend {
         {
             Err(BackendError::Closed)
         } else {
+            if self.request_execution_fence.as_ref().is_some_and(|fence| {
+                !std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fence())).unwrap_or(false)
+            }) {
+                return Err(BackendError::Storage(StorageError::ExecutionCancelled));
+            }
             self.control
                 .0
                 .health

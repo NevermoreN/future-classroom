@@ -1,5 +1,5 @@
 export type RecorderErrorCode = 'INSECURE_CONTEXT' | 'RECORDING_UNSUPPORTED' | 'MIC_DENIED' |
-  'MIC_INTERRUPTED' | 'DURATION_OUT_OF_RANGE' | 'RAW_LIMIT' | 'INVALID_PCM' | 'RECORDING_FAILED'
+  'MIC_INTERRUPTED' | 'DURATION_OUT_OF_RANGE' | 'RAW_LIMIT' | 'INVALID_PCM' | 'RECORDING_FAILED' | 'RESOURCE_UNAVAILABLE'
 
 const messages: Record<RecorderErrorCode, string> = {
   INSECURE_CONTEXT: '录音需要可信 HTTPS 连接。',
@@ -10,6 +10,7 @@ const messages: Record<RecorderErrorCode, string> = {
   RAW_LIMIT: '录音缓存已达上限，本次录音已取消。',
   INVALID_PCM: '录音数据无效，请重新录音。',
   RECORDING_FAILED: '录音处理失败，请重新录音。',
+  RESOURCE_UNAVAILABLE: '录音页面资源无法加载或运行，可能是白板已更新或资源暂时不可用。请刷新页面后重试；仍失败请联系管理员。',
 }
 
 export class RecorderError extends Error {

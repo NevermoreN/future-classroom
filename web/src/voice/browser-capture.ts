@@ -51,7 +51,7 @@ export class BrowserCapturePort implements CapturePort {
     }
     signal.addEventListener('abort', cleanup, { once: true })
     let resumed: Promise<void>
-    try { resumed = context.resume() } catch (error) { cleanup(); throw error }
+    try { resumed = context.resume() } catch (error) { cleanup(); throw signal.aborted ? new RecorderError('MIC_INTERRUPTED') : error }
     // A cancelled permission request may never settle; do not leave resume rejection unhandled.
     void resumed.catch(() => {})
     try {
@@ -68,16 +68,26 @@ export class BrowserCapturePort implements CapturePort {
       }
       for (const track of stream.getTracks()) track.addEventListener('ended', interrupted)
       await new Promise<void>((resolve, reject) => {
+        let settled = false
+        let loadingModule = false
         const done = (error?: unknown) => {
+          if (settled) return
+          settled = true
           clearTimeout(timer); signal.removeEventListener('abort', abort)
-          if (error) reject(error); else resolve()
+          if (signal.aborted) reject(new RecorderError('MIC_INTERRUPTED'))
+          else if (error) reject(error); else resolve()
         }
         const abort = () => done(new RecorderError('MIC_INTERRUPTED'))
-        const timer = globalThis.setTimeout(() => done(new RecorderError('RECORDING_FAILED')), 10000)
+        // Keep the original total setup deadline. Waiting for resume is not a
+        // resource-load failure; only the addModule stage gets refresh guidance.
+        const timer = globalThis.setTimeout(() => done(new RecorderError(loadingModule ? 'RESOURCE_UNAVAILABLE' : 'RECORDING_FAILED')), 10000)
         signal.addEventListener('abort', abort, { once: true })
         void resumed.then(() => {
-          if (signal.aborted || closed) throw new RecorderError('MIC_INTERRUPTED')
-          return context.audioWorklet.addModule(workletUrl)
+          if (settled || signal.aborted || closed) throw new RecorderError('MIC_INTERRUPTED')
+          loadingModule = true
+          const unavailable = () => new RecorderError(signal.aborted ? 'MIC_INTERRUPTED' : 'RESOURCE_UNAVAILABLE')
+          try { return context.audioWorklet.addModule(workletUrl).catch(() => { throw unavailable() }) }
+          catch { throw unavailable() }
         }).then(() => done(), done)
       })
       if (signal.aborted || closed) throw new RecorderError('MIC_INTERRUPTED')
@@ -125,7 +135,7 @@ export class BrowserCapturePort implements CapturePort {
       return session
     } catch (error) {
       stopTracks(); cleanup()
-      throw error
+      throw signal.aborted ? new RecorderError('MIC_INTERRUPTED') : error
     }
   }
 }

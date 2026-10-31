@@ -1,0 +1,226 @@
+{
+  "status": "STAGE_PASS",
+  "scope": "Round30 static-resource integration phase only; not final workspace, full project, browser, or formal three-OS acceptance",
+  "compiledInputsUnchanged": true,
+  "normal": {
+    "path": "/tmp/fc-round30-windows-static-stage-snapshot/fc-bootstrap.exe",
+    "sha256": "63a44d1ed1999f1d9c7e49cead99550dadba3866c60f87706f498fe2aee6f87b",
+    "bytes": 12470829,
+    "test": false,
+    "target": "fc-bootstrap"
+  },
+  "windowsTests": [
+    {
+      "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+      "passed": 287,
+      "sha256": "a01527d45b75537f6f9a52d7f38eaa12fb92676d61d9c37caa9003826afb26d6"
+    },
+    {
+      "name": "fc_bootstrap-30fa512284e56867.exe",
+      "passed": 179,
+      "sha256": "505090f52b234cda0451cf429f8bb846c36275d89fa4ad67d0fe8bfadc4717ef"
+    },
+    {
+      "name": "fc_windows-b3d43bc67b5340a1.exe",
+      "passed": 146,
+      "sha256": "1267151bca23b8e6cf1809cae042456d9f17c38061e6b50106e6bf89b2f579c6"
+    }
+  ],
+  "windowsUniqueTests": 612,
+  "windowsPlatform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "host": {
+    "protocolTests": 72,
+    "staticAssetsTests": 8,
+    "scope": "targeted stage groups only; do not add previous/filtered reruns"
+  },
+  "actualTls": {
+    "httpRequests": 35,
+    "certificateNegatives": 2,
+    "staticAssets": 6,
+    "staticPayloadBytes": 446763,
+    "conditional304": 2,
+    "staticAndUnknownApiNegatives": 7,
+    "static": {
+      "status": "PASS",
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-BPWJSkef.js",
+          "bytes": 404353,
+          "sha256": "47f66cfe5a69569f16cae7ef4adc77473b653ca6d8af3c1f3c9140a30c0a497e"
+        },
+        {
+          "path": "assets/index-DFFVdc8-.css",
+          "bytes": 38836,
+          "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+        },
+        {
+          "path": "assets/pcm-worklet-B7E4LRoP.js",
+          "bytes": 1724,
+          "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+        },
+        {
+          "path": "assets/wav-worker-LSywWbpJ.js",
+          "bytes": 884,
+          "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+        },
+        {
+          "path": "index.html",
+          "bytes": 684,
+          "sha256": "3ed898513b8ba2df4f6922d3ad8cbffea06413c74aac0b90571d96ddaaf9adfd"
+        }
+      ],
+      "conditionalResponses": 2,
+      "negativePaths": 7,
+      "source": "verified ZIP manifest; public resources before pairing",
+      "browser": "NOT_RUN"
+    },
+    "business": {
+      "materialBytes": 120000,
+      "materialSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "uploadId": "14864430858727752979",
+      "commandId": "9001001",
+      "receiptSha256": "ebb022b7834099e2490be71bf8a19b75162058eaf77471f74c98e2158cd533a9",
+      "exactRetryReceipt": true,
+      "downloadBytes": 120000,
+      "downloadSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "downloadClientRetainedBodyBytes": 0,
+      "jsonCancelledReadyIds": [
+        "8612760909151350474",
+        "7046309347804696548"
+      ],
+      "subsequentBinaryBeginReusedHubSlot": true,
+      "voiceWavBytes": 16044,
+      "voiceSamples": 8000,
+      "voiceDurationMillis": 500,
+      "voicePcmAllZero": true,
+      "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"
+    },
+    "native": {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 35,
+      "responses": 35,
+      "peakRecords": 5
+    },
+    "nativeDebugLines": [
+      "TLS_BUSINESS_REPORT NetworkReport { heads: 35, admissions: 25, body_acks: 50, responses: 35, closed: 75, retired: 75, rearms: 71, stale_events: 0, active_records: 0, peak_records: 5, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1570436 }"
+    ],
+    "strictCleanTlsEof": true,
+    "cspAndContentTypeAndCacheChecked": true,
+    "browser": "NOT_RUN"
+  },
+  "startupNegative": {
+    "status": "PASS",
+    "assertions": {
+      "actualNativeExit": 1,
+      "completeStdoutNoReady": true,
+      "distinctLoaderStageInCompleteStderr": true,
+      "businessDirectoryAbsent": true,
+      "proofScope": "Source-ordered loader rejection path before unique Native.open/Setup; no kernel trace/timing claim"
+    },
+    "certificatesCreated": 0,
+    "kernelTrace": "NOT_CAPTURED",
+    "strictP0": "NOT_VALIDATED"
+  },
+  "rawEvidence": {
+    "tlsOriginalFiles": 7,
+    "startupNegativeOriginalFiles": 4,
+    "allFullBase64ByteShaAndRemoteDigestVerified": true,
+    "originalReportsUnmodified": true
+  },
+  "cleanup": {
+    "windows": {
+      "build": "26300",
+      "scratchDirectories": [],
+      "sshd": "Running",
+      "ownedProcesses": [],
+      "sshPublicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+      "ownedTasks": [],
+      "os": "Microsoft Windows 11 专业版",
+      "projectRunReadOnlySnapshot": {
+        "views": [
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry32"
+          },
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry64"
+          }
+        ]
+      },
+      "persistentKeyMode": "0o600",
+      "authentication": "PASS",
+      "publicAuthorizationUnchanged": true,
+      "projectRunUnchanged": true,
+      "status": "PASS"
+    },
+    "tls": {
+      "myAfter": {
+        "count": 4,
+        "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+      },
+      "cngKeyExists": false,
+      "httpSys": "UNTOUCHED",
+      "sshConfiguration": "UNTOUCHED",
+      "rootAbsent": true,
+      "deleteKeyFallbackUsed": false,
+      "rootTrustStore": "UNTOUCHED",
+      "certificatesRemoved": 1,
+      "firewall": "UNTOUCHED",
+      "myDigestRestored": true,
+      "status": "PASS",
+      "ownedProcessesRemaining": 0
+    },
+    "startupNegative": {
+      "httpSys": "UNTOUCHED",
+      "firewall": "UNTOUCHED",
+      "sshConfiguration": "UNTOUCHED",
+      "rootAbsent": true,
+      "rootTrustStore": "UNTOUCHED",
+      "certificatesCreated": 0,
+      "businessDirectoryAbsent": true,
+      "status": "PASS",
+      "ownedProcessesRemaining": 0
+    },
+    "allFutureClassroomTemp": {
+      "scope": "read-only all FutureClassroom-prefixed directories in original TEMP",
+      "directories": [],
+      "count": 0,
+      "status": "PASS"
+    },
+    "localBuildAndFrozenArtifacts": "Retained outside repository for continuing Round30 integration; clean at full-round completion"
+  },
+  "knownLimits": [
+    "Only explicit finite loopback diagnostic; ordinary production listener stays gated",
+    "Worklet/Worker files transferred and hashed; JavaScript not executed by this client",
+    "Verified single package only; previous-chunk upgrade retention or explicit refresh workflow still missing",
+    "Allocation ledger is requested retained bytes, excludes allocator/provider/kernel/full-process peak",
+    "Strict first TCP five-second failure remains from Round13",
+    "Real Win7/Win10, formal MSVC, Seewo/PPT/touch/DPI, installer and 72h evidence remain independent"
+  ]
+}

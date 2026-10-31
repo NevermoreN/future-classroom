@@ -1,0 +1,17 @@
+{
+  "scope": "Download stage before starting static-assets phase; not final Round30 freeze",
+  "compile": "modern-download-integration-second.json",
+  "changedInputsAfterCompile": [],
+  "scripts": {
+    "scripts/windows-tls-business-probe.py": "f929728dfda43705b19ab5c02367e645e13481fdd835ee45cd9de2480b8cd786",
+    "scripts/windows-probe.py": "a3ebf099b254525a545b41bc4526378df8367dde0b568f1e4b11ce45ca31c9f0"
+  },
+  "checks": {
+    "windowsAggregateCompile": "PASS",
+    "strictWindowsClippyAllTargets": "PASS",
+    "fmt": "PASS",
+    "architecture": "12 crates /33 edges PASS",
+    "actualTls": "20HTTP+2certNegative PASS",
+    "windowsSelectedRuntime": "RUNNING"
+  }
+}

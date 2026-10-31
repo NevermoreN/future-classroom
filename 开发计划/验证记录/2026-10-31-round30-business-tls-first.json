@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "scope": "Finite raw HTTPS API diagnostic through owned SSH loopback forward",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "NOT_TESTED",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-Business-62858142c1bd40f9946d61cc168e532c",
+  "exeSha256": "e340742968265db3e7a5c5c382319e59cacb4e0b87d9df3656af15ea7cf25885",
+  "runnerSourceSha256": "4feb6edbe914611f812777734de19e50b72c259d608b373f9c241932f05c42c6",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "events": [],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-Business-62858142c1bd40f9946d61cc168e532c",
+  "uploadedScriptSha256": {
+    "cleanup": "a464086ac98f88ed37e137e066fc1e17bad649ceedaa6c708708279580eb87d4",
+    "stop": "3a437579422117fc3b8997f564de6c2ac52e5259b39a68096f6b55b7e37d9c61",
+    "capture": "a5ab5d8436162b18088ac32c2325a19bd17d9bcf0dee61f4b44465de18a2bbab",
+    "setup": "f3c916afba7c6e0cf647e26c0492c4dd2b4e4cf43105071d04ec930b806d35e2",
+    "launch": "8bc62cc2f73c8a762d505ccb39e21691a67cb12e85ac31997924847cb3423f7c"
+  },
+  "controlScriptsParse": "PASS",
+  "fixture": {
+    "thumbprint": "04F349B994F6523FD4D6F4D8C56BE1F53A9D7FA3",
+    "keyName": "FutureClassroom-Test-TLS-Business-62858142c1bd40f9946d61cc168e532c-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "1f266377f3161437c6859e1d943c94059869ae9c00237feca12f44522c5dc4cf",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "ready": [],
+  "nativeReports": [],
+  "nativeProcessExits": [
+    {
+      "code": 1
+    }
+  ],
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "actual-native-and-ssh-exit",
+    "message": "native child/supervisor actual successful exit missing"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 39,
+      "observedBytes": 39,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "7f66caa01bcfe06db5f7b2ecdcbad3b7d947bac042ea2d244bce86f9239be6c8",
+      "base64": "VExTX0ZST05URE9PUl9QUk9DRVNTX0VYSVQgeyJjb2RlIjoxfQ0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-process.json": {
+      "bytes": 257,
+      "sha256": "9c8ba2b70272eead3af94cdcc2189bddf80cc9a60490053dcebf8776fd0beeac"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "495e00f7bf160accacf5009bfa6041577c4a80f92a9f20b55383e8795fdff302"
+    },
+    "tls.stderr": {
+      "bytes": 47,
+      "sha256": "141c372922f74f23c95399a69ec571b51b85967b55c10ec4e157225f02d248d4"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 196,
+      "sha256": "94602d1ce108efaeab5ff307ecd44cc1be8517294fd9fa376e318d947fd88a6c"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 196,
+      "sha256": "84d177e520f4b2a22449353ac0a79af989c0768563cacd1dca0f2b6793cbcb0b"
+    },
+    ".tls-fixture.json": {
+      "bytes": 391,
+      "sha256": "d4979c73c001440e621ed6201bae14148202caaaef921700898a81403418b08c"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/tls.stdout",
+        "base64": ""
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 257,
+          "sha256": "9c8ba2b70272eead3af94cdcc2189bddf80cc9a60490053dcebf8776fd0beeac"
+        },
+        "downloaded": {
+          "bytes": 257,
+          "sha256": "9c8ba2b70272eead3af94cdcc2189bddf80cc9a60490053dcebf8776fd0beeac"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtQnVzaW5lc3MtNjI4NTgxNDJjMWJkNDBmOTk0NmQ2MWNjMTY4ZTUzMmMiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLUJ1c2luZXNzLTYyODU4MTQyYzFiZDQwZjk5NDZkNjFjYzE2OGU1MzJjXFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjo0OTY4LCJzdGFydFRpY2tzIjoiNjM5MjkwMzcwODgyMDcwNTc1In0="
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "495e00f7bf160accacf5009bfa6041577c4a80f92a9f20b55383e8795fdff302"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "495e00f7bf160accacf5009bfa6041577c4a80f92a9f20b55383e8795fdff302"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRU0pDYXJCY2liNk5DVVQzOEdvb1FIekFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EazBOakkyV2hjTk1qWXhNVEF4TURrMU1USTJXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEUmU3TVVWdnh1ODZ4S3BkbDJsay9wClFITzJzRmNqZlJZcCsxdXMvV1hiaExNdzJYN3pOdVFsMlJJTDRaZ2RreTg2TEtPaEw1MFVJbzZmblNVNTIwOFlxaFUxdFY5QlNjdEUKMjd1Z3lzR3prS3JzRVd5VCtPSktMcjVMOTNTdTFvU1ZhNlRPRTYyVllCa01yelhtSkZ1OVBIVmJxR0U3MGtCU3RkcC9GSjVCSm1iQwpEUUZFbnUzOWxRenJUdTNjcjg3VmVkc3R2clZnTEtmOWpNSmdabUdFOGh3eHN0c0ZHeVZybHBHWWJxaDQraHNXOEpvdklVODVyTUVVCmFVb2dOVGxIdDlGbTNseEtDbGdnaHE2S1FDdlIzRnRRc1VNcjJoTS9mMW1PWER4ZWlGazh0cE9EbmdZUGtPL0tiRGtNV3JucjJ0Y2sKTVlQV2cwdDhpcHhDSmxMOUFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJUcmg4QzlZZHYvClZZK24vdjlJUlhMbjhZazRrekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBQ0VObXBIc0xva2JnZndER0xOYjJyQnNkcU9LeTJ6WWsKQ3d4UUxzaW5LaU1CSmtjV014cHN5b3BBaGtxck5JVDBFMnV5Ni9NNHVPV01DNUQ2UDc0MXlIV2xsSVJlaWtMWXQ4Nmk5NGcwcnk2KwplbGlKaU56a3ZQNytobG1LalV5QmZHb0ZrMmdsRno3NWdnWW16eDdUZFJoMjJHYmpSTzkwZXNtUmdqWDBNdDRDdytpT1JaMk55bDVWCllmZjhpM3ZCVjVFTHF2ZUtMTUhaZHRWTkMvb2F3cVhSdnpxOEpGbno3WUM0K3JiZ0x0blFyZ2RBa2UwY0lNSjJJams1bmN5K3NxRTcKV3lmSmUrRG9zZTlXY2RwbG1vVWNNRElNbldieVkxZzR5N2cveU9oOHBTaEZIQjNvUEhTOUU2VmQwZlMwRlcvRk5KbU5LV1YyVkphMQpXVzVNVVE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 47,
+          "sha256": "141c372922f74f23c95399a69ec571b51b85967b55c10ec4e157225f02d248d4"
+        },
+        "downloaded": {
+          "bytes": 47,
+          "sha256": "141c372922f74f23c95399a69ec571b51b85967b55c10ec4e157225f02d248d4"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/tls.stderr",
+        "base64": "RnV0dXJlQ2xhc3Nyb29tOiBUTFMgSFRUUCBtYXJrZXI6IEludmFsaWRJbnB1dAo="
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 196,
+          "sha256": "94602d1ce108efaeab5ff307ecd44cc1be8517294fd9fa376e318d947fd88a6c"
+        },
+        "downloaded": {
+          "bytes": 196,
+          "sha256": "94602d1ce108efaeab5ff307ecd44cc1be8517294fd9fa376e318d947fd88a6c"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtQnVzaW5lc3MtNjI4NTgxNDJjMWJkNDBmOTk0NmQ2MWNjMTY4ZTUzMmMiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6Mjg0MDgsInN0YXJ0VGlja3MiOiI2MzkyOTAzNzA4Nzk0ODY4NjIifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 196,
+          "sha256": "84d177e520f4b2a22449353ac0a79af989c0768563cacd1dca0f2b6793cbcb0b"
+        },
+        "downloaded": {
+          "bytes": 196,
+          "sha256": "84d177e520f4b2a22449353ac0a79af989c0768563cacd1dca0f2b6793cbcb0b"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtQnVzaW5lc3MtNjI4NTgxNDJjMWJkNDBmOTk0NmQ2MWNjMTY4ZTUzMmMiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTMwNDQsInN0YXJ0VGlja3MiOiI2MzkyOTAzNzA4NTYxNTU2MTgifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 391,
+          "sha256": "d4979c73c001440e621ed6201bae14148202caaaef921700898a81403418b08c"
+        },
+        "downloaded": {
+          "bytes": 391,
+          "sha256": "d4979c73c001440e621ed6201bae14148202caaaef921700898a81403418b08c"
+        },
+        "artifact": "/tmp/fc-round30-evidence/windows-business-tls-first-62858142c1bd40f9946d61cc168e532c-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiMDRGMzQ5Qjk5NEY2NTIzRkQ0RDZGNEQ4QzU2QkUxRjUzQTlEN0ZBMyIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLUJ1c2luZXNzLTYyODU4MTQyYzFiZDQwZjk5NDZkNjFjYzE2OGU1MzJjIiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy1CdXNpbmVzcy02Mjg1ODE0MmMxYmQ0MGY5OTQ2ZDYxY2MxNjhlNTMyYy1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1664,
+        "sha256": "978a95f6e7bb6ba7c9f009b495d1e0e7ea14b4c139560758573c029cc02f722d",
+        "base64": "eyJ0aHVtYnByaW50IjoiMDRGMzQ5Qjk5NEY2NTIzRkQ0RDZGNEQ4QzU2QkUxRjUzQTlEN0ZBMyIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtQnVzaW5lc3MtNjI4NTgxNDJjMWJkNDBmOTk0NmQ2MWNjMTY4ZTUzMmMta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFTSkNhckJjaWI2TkNVVDM4R29vUUh6QU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1EazBOakkyV2hjTk1qWXhNVEF4TURrMU1USTJXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRRFJlN01VVnZ4dTg2eEtwZGwybGsvcFxuUUhPMnNGY2pmUllwKzF1cy9XWGJoTE13Mlg3ek51UWwyUklMNFpnZGt5ODZMS09oTDUwVUlvNmZuU1U1MjA4WXFoVTF0VjlCU2N0RVxuMjd1Z3lzR3prS3JzRVd5VCtPSktMcjVMOTNTdTFvU1ZhNlRPRTYyVllCa01yelhtSkZ1OVBIVmJxR0U3MGtCU3RkcC9GSjVCSm1iQ1xuRFFGRW51MzlsUXpyVHUzY3I4N1ZlZHN0dnJWZ0xLZjlqTUpnWm1HRThod3hzdHNGR3lWcmxwR1licWg0K2hzVzhKb3ZJVTg1ck1FVVxuYVVvZ05UbEh0OUZtM2x4S0NsZ2docTZLUUN2UjNGdFFzVU1yMmhNL2YxbU9YRHhlaUZrOHRwT0RuZ1lQa08vS2JEa01Xcm5yMnRja1xuTVlQV2cwdDhpcHhDSmxMOUFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCVHJoOEM5WWR2L1xuVlkrbi92OUlSWExuOFlrNGt6QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFDRU5tcEhzTG9rYmdmd0RHTE5iMnJCc2RxT0t5MnpZa1xuQ3d4UUxzaW5LaU1CSmtjV014cHN5b3BBaGtxck5JVDBFMnV5Ni9NNHVPV01DNUQ2UDc0MXlIV2xsSVJlaWtMWXQ4Nmk5NGcwcnk2K1xuZWxpSmlOemt2UDcraGxtS2pVeUJmR29GazJnbEZ6NzVnZ1lteng3VGRSaDIyR2JqUk85MGVzbVJnalgwTXQ0Q3craU9SWjJOeWw1VlxuWWZmOGkzdkJWNUVMcXZlS0xNSFpkdFZOQy9vYXdxWFJ2enE4SkZuejdZQzQrcmJnTHRuUXJnZEFrZTBjSU1KMklqazVuY3krc3FFN1xuV3lmSmUrRG9zZTlXY2RwbG1vVWNNRElNbldieVkxZzR5N2cveU9oOHBTaEZIQjNvUEhTOUU2VmQwZlMwRlcvRk5KbU5LV1YyVkphMVxuV1c1TVVRPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 763,
+        "sha256": "3f712c6b3617c904be3a94eda5fb697f6274887f2a3927b627e17178e3153c9f",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjowLCJzaGEyNTYiOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0sIi50bHMtcHJvY2Vzcy5qc29uIjp7ImJ5dGVzIjoyNTcsInNoYTI1NiI6IjljOGJhMmI3MDI3MmVlYWQzYWY5NGNkY2MyMTg5YmRkZjgwY2M5YTYwNDkwMDUzZGNlYmY4Nzc2ZmQwYmVlYWMifSwidGxzLXB1YmxpYy5wZW0iOnsiYnl0ZXMiOjExNDEsInNoYTI1NiI6IjQ5NWUwMGY3YmYxNjBhY2NhY2Y1MDA5YmZhNjA0MTU3N2M0YTgwZjkyYTlmMjBiNTUzODNlODc5NWZkZmYzMDIifSwidGxzLnN0ZGVyciI6eyJieXRlcyI6NDcsInNoYTI1NiI6IjE0MWMzNzI5MjJmNzRmMjNjOTUzOTlhNjllYzU3MWI1MWI4NTk2N2I1NWMxMGVjNGUxNTcyMjVmMDJkMjQ4ZDQifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE5Niwic2hhMjU2IjoiOTQ2MDJkMWNlMTA4ZWZhZWFiNWZmMzA3ZWNkNDRjYzFiZTg1MTcyOTRmZDlmYTM3NmUzMThkOTQ3ZmQ4OGE2YyJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTk2LCJzaGEyNTYiOiI4NGQxNzdlNTIwZjRiMmEyMjQ0OTM1M2FjMGE3OWFmOTg5YzA3Njg1NjNjYWNkMWRjYTBmMmI2NzkzY2JjYjBiIn0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozOTEsInNoYTI1NiI6ImQ0OTc5YzczYzAwMTQ0MGU2MjFlZDYyMDFiYWUxNDE0ODIwMmNhYWFlZjkyMTcwMDg5OGE4MTQwMzQxOGIwOGMifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

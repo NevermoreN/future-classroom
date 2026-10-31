@@ -64,6 +64,8 @@ pub enum JoinError {
 pub struct PoolStats {
     pub queued: usize,
     pub queued_bytes: usize,
+    /// Physical workers executing or disposing of a received task/result. An
+    /// output successfully transferred to a ticket is no longer worker-owned.
     pub running: usize,
 }
 
@@ -162,12 +164,14 @@ struct Completion<O> {
 }
 impl<O> Completion<O> {
     fn finish(&mut self, result: Result<O, JobError>) {
-        if !self.armed || self.done.swap(true, Ordering::AcqRel) {
+        if !self.armed || self.done.load(Ordering::Acquire) {
             return;
         }
         // Exactly one terminal result fits in the one-slot reply channel. This call
-        // never blocks, even when the ticket has already been abandoned.
-        let _ = self.reply.try_send(result);
+        // never waits for channel capacity. If the receiver disappeared, disposal
+        // of the returned output still belongs to this worker, before done/wakeup.
+        drop(self.reply.try_send(result));
+        self.done.store(true, Ordering::Release);
         self.control.completed();
     }
 }
@@ -192,35 +196,53 @@ impl<T: Task> MailboxMessage for Job<T> {
 }
 impl<T: Task> Job<T> {
     fn reject(mut self, error: JobError) {
+        let running = Running::enter(self.context.control.clone());
+        drop(self.task.take());
+        drop(running);
         self.completion.finish(Err(error));
     }
     fn execute(mut self) {
+        let running = Running::enter(self.context.control.clone());
         if let Err(error) = self.context.checkpoint() {
+            drop(self.task.take());
+            drop(running);
             self.completion.finish(Err(error));
             return;
         }
         let Some(task) = self.task.take() else {
             self.context.control.fault();
+            drop(running);
             self.completion.finish(Err(JobError::Faulted));
             return;
         };
-        let running = Running(self.context.control.clone());
-        running.0.running.fetch_add(1, Ordering::AcqRel);
         let result = catch_unwind(AssertUnwindSafe(|| task.run(&self.context)));
-        drop(running);
         match result {
             Ok(output) => match self.context.checkpoint() {
+                // A successful send transfers ownership, rather than proving the
+                // output's resources closed. Failed send cleanup remains running.
                 Ok(()) => self.completion.finish(Ok(output)),
-                Err(error) => self.completion.finish(Err(error)),
+                Err(error) => {
+                    drop(output);
+                    drop(running);
+                    self.completion.finish(Err(error));
+                }
             },
-            Err(_) => {
+            Err(payload) => {
                 self.context.control.fault();
+                drop(payload);
+                drop(running);
                 self.completion.finish(Err(JobError::Panicked));
             }
         }
     }
 }
 struct Running(Arc<Control>);
+impl Running {
+    fn enter(control: Arc<Control>) -> Self {
+        control.running.fetch_add(1, Ordering::AcqRel);
+        Self(control)
+    }
+}
 impl Drop for Running {
     fn drop(&mut self) {
         self.0.running.fetch_sub(1, Ordering::AcqRel);
@@ -252,9 +274,14 @@ impl<O> JobTicket<O> {
     pub fn cancel(&self) {
         self.cancellation.cancel();
     }
+    /// Worker-owned disposal has finished or ownership was transferred to the
+    /// reply. A successful output can still own resources in this ticket.
     pub fn is_finished(&self) -> bool {
         self.done.load(Ordering::Acquire)
     }
+    /// A late cancel/stop suppresses queued positive output by dropping it on the
+    /// polling caller. Use metadata-only outputs if this caller must not dispose
+    /// of physical resources; keep those resources with an explicit worker owner.
     pub fn try_result(&mut self) -> Result<Option<O>, JobError> {
         let receive = self.receive.as_ref().ok_or(JobError::Consumed)?;
         match receive.try_recv() {

@@ -3,7 +3,7 @@
 //! Listener/TLS provisioning and browser delivery remain separate adapters.
 use crate::backend::{
     web::{
-        cookie_secret, session_cookie, PairingPoll, WebService, WebServiceError,
+        cookie_secret, session_cookie, AuthenticatedWeb, PairingPoll, WebService, WebServiceError,
         CLEAR_SESSION_COOKIE,
     },
     Backend,
@@ -25,9 +25,15 @@ mod voice;
 #[cfg(windows)]
 mod voice_files;
 #[cfg(windows)]
-pub use material_files::{MaterialDownload, PreparedWebMaterial};
+pub use material_files::{
+    MaterialDownload, MaterialTransferBinding, PreparedWebMaterial, ReceivingMaterialUpload,
+};
+#[cfg(all(windows, test))]
+pub(crate) use shared_upload::test_guard as upload_test_guard;
 #[cfg(windows)]
-pub use voice_files::PreparedWebVoiceUpload;
+pub use shared_upload::{quarantined_uploads, retry_quarantined_uploads, UploadCleanupStatus};
+#[cfg(windows)]
+pub use voice_files::{PreparedWebVoiceUpload, ReceivingWebVoiceUpload};
 
 /// Contains explicitly disclosed session headers/body. Deliberately no Debug or
 /// Clone: transport ownership must not turn credentials into routine diagnostics.
@@ -36,23 +42,165 @@ pub struct WebResponse {
     pub body: Vec<u8>,
 }
 pub struct WebApplication {
-    boundary: WebBoundary,
+    boundary: std::sync::Arc<WebBoundary>,
     service: WebService,
+    #[cfg(windows)]
+    upload_binding: std::sync::Arc<()>,
     #[cfg(windows)]
     material_files: std::sync::Arc<std::sync::Mutex<Option<material_files::MaterialFiles>>>,
     #[cfg(windows)]
-    voice_files: std::sync::Mutex<Option<std::sync::Arc<voice_files::VoiceFiles>>>,
+    voice_files: std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<voice_files::VoiceFiles>>>>,
 }
 impl WebApplication {
+    fn request_boundary_error(&self, head: &RequestHead, error: WebError) -> WebResponse {
+        if error == WebError::Method {
+            // Reuse strict target recognition only after the original boundary
+            // has rejected the method. This lookup grants no authorization.
+            return match self.boundary.allowed_methods(&head.target) {
+                Ok(methods) => response(
+                    405,
+                    responses::error(responses::ErrorCode::MethodNotAllowed),
+                    Some(Header {
+                        name: "Allow".into(),
+                        value: methods.header_value().as_bytes().to_vec(),
+                    }),
+                ),
+                Err(_) => failure(404, responses::ErrorCode::NotFound),
+            };
+        }
+        boundary_error(error)
+    }
+    #[cfg(windows)]
+    pub(crate) fn binding(&self) -> WebService {
+        self.service.clone()
+    }
+    #[cfg(windows)]
+    pub(crate) fn upload_instance_key(&self) -> std::sync::Weak<()> {
+        std::sync::Arc::downgrade(&self.upload_binding)
+    }
+    /// Routing/length hint only, never admission or an authorization lease.
+    #[cfg(windows)]
+    pub(crate) fn route_hint(&self, head: &RequestHead) -> Result<Route, WebError> {
+        self.boundary.preflight(head)
+    }
     pub fn new(prefix: &ListenPrefix, service: WebService) -> Result<Self, WebError> {
         Ok(Self {
-            boundary: WebBoundary::new(prefix)?,
+            boundary: std::sync::Arc::new(WebBoundary::new(prefix)?),
             service,
+            #[cfg(windows)]
+            upload_binding: std::sync::Arc::new(()),
             #[cfg(windows)]
             material_files: std::sync::Arc::new(std::sync::Mutex::new(None)),
             #[cfg(windows)]
-            voice_files: std::sync::Mutex::new(None),
+            voice_files: std::sync::Arc::new(std::sync::Mutex::new(None)),
         })
+    }
+    /// A short-lived view for one ordinary JSON dispatch. Stream owners use the
+    /// original application and a current context on each call; retaining this
+    /// job-bound view across jobs would incorrectly cancel their next chunk.
+    fn for_execution(&self, fence: crate::web_transfer::ExecutionFence) -> Self {
+        Self {
+            boundary: self.boundary.clone(),
+            service: self.service.with_execution_fence(fence),
+            #[cfg(windows)]
+            upload_binding: self.upload_binding.clone(),
+            #[cfg(windows)]
+            material_files: self.material_files.clone(),
+            #[cfg(windows)]
+            voice_files: self.voice_files.clone(),
+        }
+    }
+    pub fn dispatch_in_job(
+        &self,
+        backend: &mut Backend,
+        head: &RequestHead,
+        body: &[u8],
+        life: &crate::web_transfer::TransferLifetime,
+        context: &fc_runtime::worker::JobContext,
+    ) -> WebResponse {
+        if head.token != life.token() || !life.is_active() || context.checkpoint().is_err() {
+            return failure(503, responses::ErrorCode::ServiceUnavailable);
+        }
+        let fence = life.job_fence(context);
+        let app = self.for_execution(fence.clone());
+        let mut scope = backend.begin_execution_scope(fence.clone());
+        let result = app.dispatch(&mut scope, head, body);
+        if !fence() {
+            // SQL may already have committed. Suppress secrets/data but retain
+            // the original idempotent receipt/ResultUnknown reconciliation.
+            return failure(503, responses::ErrorCode::ResultUnknown);
+        }
+        result
+    }
+    /// Worker-only head admission before a transport consumes any body. The
+    /// route is a size/dispatch hint, never an authorization capability: final
+    /// dispatch and every stream owner authenticate their exact live session
+    /// again. No stage, SQL reservation or pairing mutation is created here.
+    pub fn admit_request(
+        &self,
+        backend: &Backend,
+        head: &RequestHead,
+    ) -> Result<Route, WebResponse> {
+        if !self.service.same_instance(&backend.web_service()) {
+            return Err(failure(503, responses::ErrorCode::ServiceUnavailable));
+        }
+        let route = self
+            .boundary
+            .preflight(head)
+            .map_err(|error| self.request_boundary_error(head, error))?;
+        self.authenticate_route(head, route)?;
+        Ok(route)
+    }
+    pub fn admit_request_in_job(
+        &self,
+        backend: &mut Backend,
+        head: &RequestHead,
+        life: &crate::web_transfer::TransferLifetime,
+        context: &fc_runtime::worker::JobContext,
+    ) -> Result<Route, WebResponse> {
+        if head.token != life.token() || !life.is_active() || context.checkpoint().is_err() {
+            return Err(failure(503, responses::ErrorCode::ServiceUnavailable));
+        }
+        let fence = life.job_fence(context);
+        let app = self.for_execution(fence.clone());
+        let scope = backend.begin_execution_scope(fence.clone());
+        let result = app.admit_request(&scope, head);
+        if !fence() {
+            return Err(failure(503, responses::ErrorCode::ServiceUnavailable));
+        }
+        result
+    }
+    fn authenticate_route(
+        &self,
+        head: &RequestHead,
+        route: Route,
+    ) -> Result<Option<AuthenticatedWeb>, WebResponse> {
+        let authenticated = if route.requires_session() {
+            let mut cookies = head
+                .headers
+                .iter()
+                .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
+            let header = match (cookies.next(), cookies.next()) {
+                (Some(header), None) => header,
+                (None, _) => return Err(failure(401, responses::ErrorCode::Unauthorized)),
+                _ => return Err(boundary_error(WebError::Headers)),
+            };
+            let cookie = cookie_secret(&header.value).map_err(authentication_error)?;
+            Some(
+                self.service
+                    .authenticate(&cookie)
+                    .map_err(authentication_error)?,
+            )
+        } else {
+            None
+        };
+        self.boundary
+            .check(
+                head,
+                authenticated.as_ref().map(|session| session.csrf.as_str()),
+            )
+            .map_err(|error| self.request_boundary_error(head, error))?;
+        Ok(authenticated)
     }
     pub fn dispatch(&self, backend: &mut Backend, head: &RequestHead, body: &[u8]) -> WebResponse {
         // A lease from another backend can have identical numeric fields.
@@ -62,7 +210,7 @@ impl WebApplication {
         }
         let route = match self.boundary.preflight(head) {
             Ok(route) => route,
-            Err(error) => return boundary_error(error),
+            Err(error) => return self.request_boundary_error(head, error),
         };
         // Binary bodies are accepted only through the typed stream port; the
         // ordinary JSON dispatcher must never retain a 50MiB request Vec.
@@ -81,33 +229,10 @@ impl WebApplication {
         {
             return boundary_error(WebError::Framing);
         }
-        let authenticated = if route.requires_session() {
-            let mut cookies = head
-                .headers
-                .iter()
-                .filter(|h| h.name.eq_ignore_ascii_case("cookie"));
-            let header = match (cookies.next(), cookies.next()) {
-                (Some(header), None) => header,
-                (None, _) => return failure(401, responses::ErrorCode::Unauthorized),
-                _ => return boundary_error(WebError::Headers),
-            };
-            let cookie = match cookie_secret(&header.value) {
-                Ok(cookie) => cookie,
-                Err(error) => return authentication_error(error),
-            };
-            match self.service.authenticate(&cookie) {
-                Ok(session) => Some(session),
-                Err(error) => return authentication_error(error),
-            }
-        } else {
-            None
+        let authenticated = match self.authenticate_route(head, route) {
+            Ok(session) => session,
+            Err(response) => return response,
         };
-        if let Err(error) = self.boundary.check(
-            head,
-            authenticated.as_ref().map(|session| session.csrf.as_str()),
-        ) {
-            return boundary_error(error);
-        }
         match route {
             Route::Status => response(200, responses::public_status(), None),
             Route::PairingCreate => {

@@ -102,6 +102,15 @@ pub struct LockedFile {
     publish_access: bool,
 }
 impl LockedFile {
+    /// Stable identity from this already-owned handle. Does not reopen a path,
+    /// clone the file, or change sharing/access rights.
+    pub fn identity(&self) -> Result<(u32, u64)> {
+        let i = info(&self.file)?;
+        Ok((
+            i.dwVolumeSerialNumber,
+            (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+        ))
+    }
     pub fn open(path: &Path, max: u64) -> Result<Self> {
         Self::open_mode(path, max, false, false)
     }
@@ -667,6 +676,15 @@ pub struct NewFile {
     keep: bool,
 }
 impl NewFile {
+    /// Query the uniquely held inode without opening a second handle or
+    /// weakening the original staging lock.
+    pub fn identity(&self) -> Result<(u32, u64)> {
+        let i = info(self.file.as_ref().ok_or_else(denied)?)?;
+        Ok((
+            i.dwVolumeSerialNumber,
+            (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+        ))
+    }
     pub fn file_mut(&mut self) -> &mut File {
         self.file
             .as_mut()

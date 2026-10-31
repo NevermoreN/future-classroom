@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "status": "LOCAL_STATIC_AND_CONTRACT_MODEL_PASS_POWERSHELL_AST_PENDING",
+  "yamlParser": "PyYAML 6.0.3 BaseLoader",
+  "beforeBinding": "core-msvc-exactsha-before-source.json",
+  "afterBinding": "core-msvc-exactsha-after-source.json",
+  "beforeExpectedFailure": {
+    "requiredInputAbsent": true,
+    "expectedShaWasEventShaRatherThanIndependentRequest": true,
+    "status": "CONFIRMED_FROM_ORIGINAL_SOURCE"
+  },
+  "checks": [
+    "required string source_sha",
+    "input/event independent binding",
+    "checkout exact dispatch github.sha retained",
+    "strict 40 ASCII hex with absolute anchors",
+    "expected==event==git HEAD before rustup/compiler calls",
+    "cleanup remains reachable on rejected input",
+    "compile-only, static CRT, limits and always cleanup/upload retained",
+    "no whitespace errors"
+  ],
+  "negativeAndPositiveCases": [
+    {
+      "case": "same_sha",
+      "accepted": true,
+      "expected": true,
+      "status": "PASS"
+    },
+    {
+      "case": "case_insensitive_sha",
+      "accepted": true,
+      "expected": true,
+      "status": "PASS"
+    },
+    {
+      "case": "moved_main",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "checkout_mismatch",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "short_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "long_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "newline_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "crlf_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "space_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "nonhex_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "case": "missing_sha",
+      "accepted": false,
+      "expected": false,
+      "status": "PASS"
+    }
+  ],
+  "contractModelScope": "Python validation of requested SHA contract plus assertions of the matching PowerShell guards/order; not PowerShell execution",
+  "powershellAst": {
+    "status": "PENDING_ROOT_READONLY_AST",
+    "localPwshAvailable": false,
+    "remote": "NOT_RUN"
+  },
+  "ciDispatch": "NOT_RUN",
+  "toolchainInstall": "NOT_RUN",
+  "cargo": "NOT_RUN",
+  "afterSourceSha256": {
+    ".github/workflows/windows-msvc.yml": "2f003bc9fa25534e44143f584347ddb400948816fea867ef7020338c55377e33",
+    "scripts/windows-msvc-ci.ps1": "75f37c6a6d344cf33d1df88dc236b1d56d56b926204ffb6829da44f502a18c02"
+  }
+}

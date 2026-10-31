@@ -3,15 +3,15 @@ import { BrowserCapturePort, recordingSupport } from '../src/voice/browser-captu
 import type { CaptureSink } from '../src/voice/ports'
 
 function deferred<T>() {
-  let resolve!: (value: T) => void
-  const promise = new Promise<T>(yes => { resolve = yes })
-  return { promise, resolve }
+  let resolve!: (value: T) => void, reject!: (reason: unknown) => void
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no })
+  return { promise, resolve, reject }
 }
 class Track extends EventTarget {
   readyState = 'live'
   stop = vi.fn(() => { this.readyState = 'ended' })
 }
-function environment() {
+function environment(resume: () => Promise<void> = async () => {}) {
   const contexts: Context[] = [], nodes: Node[] = []
   const tracks = [new Track(), new Track()]
   const stream = { getTracks: () => tracks, getAudioTracks: () => tracks } as unknown as MediaStream
@@ -22,7 +22,7 @@ function environment() {
     destination = {}
     module = vi.fn(async () => {})
     get audioWorklet() { return { addModule: this.module } }
-    resume = vi.fn(async () => {})
+    resume = vi.fn(resume)
     close = vi.fn(async () => { this.state = 'closed' })
     source = { connect: vi.fn(), disconnect: vi.fn() }
     mute = { gain: { value: 1 }, connect: vi.fn(), disconnect: vi.fn() }
@@ -103,13 +103,55 @@ describe('browser microphone ownership without a real microphone', () => {
   it('module setup failure closes the context and releases permission tracks', async () => {
     const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
     const open = f.port.open(f.sink, f.abort.signal); f.contexts[0]!.module.mockRejectedValueOnce(new Error('module unavailable')); permission.resolve(f.stream)
-    await expect(open).rejects.toThrow('module unavailable'); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+    await expect(open).rejects.toMatchObject({ code: 'RESOURCE_UNAVAILABLE', message: expect.stringContaining('刷新页面') }); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
   })
   it('a stalled worklet load has a bounded setup deadline and releases all granted tracks', async () => {
     vi.useFakeTimers(); const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
     const open = f.port.open(f.sink, f.abort.signal); f.contexts[0]!.module.mockReturnValueOnce(new Promise(() => {})); permission.resolve(f.stream)
-    const rejected = expect(open).rejects.toMatchObject({ code: 'RECORDING_FAILED' }); await vi.advanceTimersByTimeAsync(10000); await rejected
+    const rejected = expect(open).rejects.toMatchObject({ code: 'RESOURCE_UNAVAILABLE' }); await vi.advanceTimersByTimeAsync(10000); await rejected
     f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it('synchronous module loading failure gets refresh guidance without leaking microphone tracks', async () => {
+    const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
+    const open = f.port.open(f.sink, f.abort.signal)
+    f.contexts[0]!.module.mockImplementationOnce(() => { throw new Error('private module setup details') }); permission.resolve(f.stream)
+    await expect(open).rejects.toMatchObject({ code: 'RESOURCE_UNAVAILABLE', message: expect.stringContaining('联系管理员') })
+    expect(f.nodes).toHaveLength(0); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it('audio resume failure is not classified as a missing page resource', async () => {
+    const error = new Error('resume unavailable'), f = environment(async () => { throw error })
+    await expect(f.port.open(f.sink, f.abort.signal)).rejects.toBe(error)
+    expect(f.contexts[0]!.module).not.toHaveBeenCalled(); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it('resume timeout keeps the original setup deadline and cannot start a late resource load', async () => {
+    vi.useFakeTimers(); const resumed = deferred<void>(), f = environment(() => resumed.promise)
+    const open = f.port.open(f.sink, f.abort.signal)
+    const rejected = expect(open).rejects.toMatchObject({ code: 'RECORDING_FAILED' }); await vi.advanceTimersByTimeAsync(10000); await rejected
+    resumed.resolve(); await Promise.resolve(); await Promise.resolve()
+    expect(f.contexts[0]!.module).not.toHaveBeenCalled(); expect(f.nodes).toHaveLength(0)
+    f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
+  })
+  it('entering a stalled module load after delayed resume never renews the original setup budget', async () => {
+    vi.useFakeTimers(); const resumed = deferred<void>(), f = environment(() => resumed.promise)
+    const open = f.port.open(f.sink, f.abort.signal); f.contexts[0]!.module.mockReturnValueOnce(new Promise(() => {}))
+    const rejected = expect(open).rejects.toMatchObject({ code: 'RESOURCE_UNAVAILABLE' })
+    await vi.advanceTimersByTimeAsync(9000); resumed.resolve(); await Promise.resolve(); await Promise.resolve()
+    expect(f.contexts[0]!.module).toHaveBeenCalledOnce(); await vi.advanceTimersByTimeAsync(1000); await rejected
+    expect(f.nodes).toHaveLength(0); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it('cancellation wins over a later resource failure and cannot create an audio graph', async () => {
+    const f = environment(), permission = deferred<MediaStream>(), loaded = deferred<void>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
+    const open = f.port.open(f.sink, f.abort.signal); f.contexts[0]!.module.mockReturnValueOnce(loaded.promise); permission.resolve(f.stream)
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve()
+    expect(f.contexts[0]!.module).toHaveBeenCalledOnce()
+    f.abort.abort(); loaded.reject(new Error('late resource failure'))
+    await expect(open).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' }); await Promise.resolve(); await Promise.resolve()
+    expect(f.nodes).toHaveLength(0); expect(f.sink.pcm).not.toHaveBeenCalled(); f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it('cancellation wins over a delayed permission denial rather than suggesting a refresh', async () => {
+    const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
+    const open = f.port.open(f.sink, f.abort.signal); f.abort.abort(); permission.reject(new DOMException('denied after cancel', 'NotAllowedError'))
+    await expect(open).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' }); expect(f.contexts[0]!.module).not.toHaveBeenCalled()
   })
   it('abort during worklet load rejects immediately even when the load never settles', async () => {
     const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)

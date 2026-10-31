@@ -1,0 +1,796 @@
+{
+  "schemaVersion": 1,
+  "scope": "Completed HEAD/typed-voice-method stage only: two Host libraries, three actual Windows libraries and separate explicit candidate TLS diagnostic. Not full-workspace/final Round30 acceptance.",
+  "preservation": "Original JSON/logs/raw bytes (including hidden files and ExpectedRed) remain unchanged; original internal paths are preserved via a separate mapping.",
+  "priorIndex": {
+    "verifiedFiles": 265,
+    "sha256BeforeAppend": "ab68ac3a0931b767dd647560d6bada90fa63637c0d97d21ef61d139936b4efbc"
+  },
+  "sourceBinding": {
+    "freeze": "2026-10-31-round30-head-source-freeze.json",
+    "changedPaths": [
+      "crates/fc-protocol/src/http1/response.rs",
+      "crates/fc-protocol/src/http1/response/tests.rs",
+      "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "crates/fc-windows/src/tls_frontdoor/http_date.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "crates/fc-windows/src/tls_frontdoor/http_date/tests.rs",
+      "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "crates/fc-bootstrap/src/web_application/voice.rs",
+      "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs"
+    ],
+    "freezeFilesMatchLibraryCompileReport": true,
+    "normalCapturedFreezeFieldsMatch": true,
+    "normalOriginalCaptureOmittedCrateManifests": [
+      "crates/fc-application/Cargo.toml",
+      "crates/fc-audio/Cargo.toml",
+      "crates/fc-bootstrap/Cargo.toml",
+      "crates/fc-domain/Cargo.toml",
+      "crates/fc-materials/Cargo.toml",
+      "crates/fc-ports/Cargo.toml",
+      "crates/fc-presentation/Cargo.toml",
+      "crates/fc-protocol/Cargo.toml",
+      "crates/fc-runtime/Cargo.toml",
+      "crates/fc-security/Cargo.toml",
+      "crates/fc-storage/Cargo.toml",
+      "crates/fc-windows/Cargo.toml"
+    ],
+    "commonCompileSourcePaths": 364,
+    "bothChangedInputs": [],
+    "normalTlsRuntimeSnapshotSha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a"
+  },
+  "host": {
+    "scope": "Host only two affected library tests; not current full workspace or Windows native coverage",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "fc-protocol",
+      "-p",
+      "fc-windows",
+      "--lib",
+      "--release",
+      "--locked",
+      "--target-dir",
+      "/tmp/fc-round30-core-target",
+      "--",
+      "--test-threads=2"
+    ],
+    "exitCode": 0,
+    "exitCodeSource": "Original exec session9632 completed exit_code0",
+    "sourceFreeze": "head-source-freeze.json",
+    "sourcesMatchFreezeAfter": true,
+    "testGroups": [
+      {
+        "status": "ok",
+        "passed": 80,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 31,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "passed": 111,
+    "logSha256": "df7737cec65d2f5a0a8a5572eb787e1f0a878b9f32884f07f0487dfa42238417",
+    "status": "PASS"
+  },
+  "windowsCompile": {
+    "libraries": {
+      "elapsedSeconds": 145.13396525382996,
+      "exitCode": 0,
+      "programs": 3
+    },
+    "normal": {
+      "elapsedSeconds": 117.05041480064392,
+      "exitCode": 0,
+      "sha256": "bbfa4b3818ed4aa15abdfb879e4d2f8339f73b36730b8e8e83b6d8d926574d6a"
+    }
+  },
+  "strictClippy": {
+    "head-clippy-results.json": {
+      "status": "PASS",
+      "sourcesStillMatchFreeze": true,
+      "checks": [
+        {
+          "scope": "host-two-affected-crates",
+          "command": [
+            "cargo",
+            "clippy",
+            "-p",
+            "fc-protocol",
+            "-p",
+            "fc-windows",
+            "--all-targets",
+            "--release",
+            "--locked",
+            "--target-dir",
+            "/tmp/fc-round30-core-target",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0,
+          "exitCodeSource": "Original exec session49405 actually completed exit_code0; no rerun/inference from log",
+          "log": "/tmp/fc-round30-evidence/head-host-clippy-first.log",
+          "logSha256": "4e5b4e498d968875c4a10be0c022f1da5247b675547c7280a9844f95a94544d1"
+        },
+        {
+          "scope": "windows-full-workspace-all-targets",
+          "command": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--release",
+            "--locked",
+            "--target",
+            "i686-pc-windows-gnu",
+            "--target-dir",
+            "/tmp/fc-round30-win-target",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0,
+          "exitCodeSource": "Original exec session60077 actually completed exit_code0; no rerun/inference from log",
+          "log": "/tmp/fc-round30-evidence/head-windows-clippy-first.log",
+          "logSha256": "9fd9c5cb81e61223e888b42c15aeaff2c81828780b8c06aa5f236c14706c9a36"
+        }
+      ]
+    }
+  },
+  "finalLocalChecks": {
+    "scope": "Final local phase checks; not full project acceptance",
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "architecture",
+        "command": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "exitCode": 0,
+        "elapsedSeconds": 0.10845526703633368,
+        "log": "/tmp/fc-round30-evidence/head-final-architecture.log",
+        "logSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+      },
+      {
+        "name": "fmt",
+        "command": [
+          "cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "exitCode": 0,
+        "elapsedSeconds": 3.5358694409951568,
+        "log": "/tmp/fc-round30-evidence/head-final-fmt.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "diff",
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exitCode": 0,
+        "elapsedSeconds": 0.027124154847115278,
+        "log": "/tmp/fc-round30-evidence/head-final-diff.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "testedRustCargoSourcesStillMatch": true,
+    "testedRunnerStillMatches": true
+  },
+  "windowsRuntime": {
+    "report": "2026-10-31-round30-head-windows-runtime-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "programs": [
+      {
+        "name": "fc_protocol-4316bb63b92dda4d.exe",
+        "binarySha256": "39af5301ed07837a563d35c21a2a7e6608a7d2d522b1f865ee0045907e1d23dc",
+        "passed": 80,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_windows-b3d43bc67b5340a1.exe",
+        "binarySha256": "69b42816476bdd533c92f215da49ba0a579d1b15252fe4fe5929bf4e25d95599",
+        "passed": 156,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+        "binarySha256": "6213ffae0ded10014df9870c5c31c48bf666cb80ed409707c71e017745fd5098",
+        "passed": 290,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      }
+    ],
+    "passed": 526,
+    "failed": 0,
+    "ignored": 0,
+    "selfCheck": {
+      "exitCode": 0,
+      "output": [
+        "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+        "credential.dpapi-key-reopen: PASS",
+        "credential.sqlite-reopen-login-kdf: PASS",
+        "credential.password-rotation-old-lease: PASS",
+        "credential.recovery-one-use-rotation: PASS",
+        "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+        "isolated_test_cleanup=PASS"
+      ]
+    },
+    "native": {
+      "output": [
+        "native_lifecycle=PASS elapsed_ms=1241 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+        "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+      ],
+      "exitCode": 0,
+      "sessionId": 1
+    },
+    "allFourFrozenLocalFilesActuallyRehashed": true
+  },
+  "nativeTls": {
+    "report": "2026-10-31-round30-head-tls-fixed-first.json",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "httpResponses": 45,
+    "certificateRejections": 2,
+    "runnerSourceSha256": "75ac9d0dc39129ab397d6d559a85a1dfba6c143e161b18e0e474c69178954cea",
+    "redBlueRunnerBytesIdentical": true,
+    "canonicalUtcDateResponsesChecked": 45,
+    "headCases": [
+      {
+        "case": "static-head-method",
+        "httpStatus": 405,
+        "responseAllow": "GET",
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "static-head-host",
+        "httpStatus": 403,
+        "responseAllow": null,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-get",
+        "httpStatus": 405,
+        "responseAllow": "GET",
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-post",
+        "httpStatus": 405,
+        "responseAllow": "POST",
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-shared",
+        "httpStatus": 405,
+        "responseAllow": "GET, POST",
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-unknown",
+        "httpStatus": 404,
+        "responseAllow": null,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-host",
+        "httpStatus": 403,
+        "responseAllow": null,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      }
+    ],
+    "all405ExactAllowAssertions": {
+      "static-head-method": "GET",
+      "api-head-get": "GET",
+      "api-head-post": "POST",
+      "api-head-shared": "GET, POST",
+      "static-wrong-method": "GET",
+      "api-wrong-method-status": "GET",
+      "api-wrong-method-pairing/requests": "POST",
+      "api-wrong-method-voice/broadcasts": "GET, POST"
+    },
+    "native": {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 45,
+      "responses": 45,
+      "peakRecords": 5
+    },
+    "business": {
+      "materialBytes": 120000,
+      "materialSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "uploadId": "13443869566241467405",
+      "commandId": "9001001",
+      "receiptSha256": "3b8537c67e02b77fd74f3ec268f3e3ef7e8c3fec3fc66ee807a7ca85a3f9c00d",
+      "exactRetryReceipt": true,
+      "downloadBytes": 120000,
+      "downloadSha256": "a4b72a5eea78caee5d3cb38574f98682716508b4a818b50c6ce0c76b662bdcbd",
+      "downloadClientRetainedBodyBytes": 0,
+      "jsonCancelledReadyIds": [
+        "14303226900995370689",
+        "1987545624115771099"
+      ],
+      "subsequentBinaryBeginReusedHubSlot": true,
+      "voiceWavBytes": 16044,
+      "voiceSamples": 8000,
+      "voiceDurationMillis": 500,
+      "voicePcmAllZero": true,
+      "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"
+    },
+    "static": {
+      "status": "PASS",
+      "assets": [
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+        },
+        {
+          "path": "assets/index-C3GlEF2q.js",
+          "bytes": 409096,
+          "sha256": "3ccf93029f1de549c4eee55bf514f55e7625b1b22ca0df7eedbe2945653440e3"
+        },
+        {
+          "path": "assets/index-DFFVdc8-.css",
+          "bytes": 38836,
+          "sha256": "4ecac3be1f360a932da9dd7cb7b2a7df35a47766ef3dd70bab57a505a0714de8"
+        },
+        {
+          "path": "assets/pcm-worklet-B7E4LRoP.js",
+          "bytes": 1724,
+          "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+        },
+        {
+          "path": "assets/wav-worker-LSywWbpJ.js",
+          "bytes": 884,
+          "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+        },
+        {
+          "path": "index.html",
+          "bytes": 1232,
+          "sha256": "201aa201461b5322a8bef122cb8399303c4cec72d6e38af49acb60cb7ad3aabb"
+        }
+      ],
+      "conditionalResponses": 2,
+      "negativePaths": 7,
+      "headCases": [
+        {
+          "case": "static-head-method",
+          "httpStatus": 405,
+          "wireBodyBytes": 0,
+          "allow": "GET",
+          "status": "PASS"
+        },
+        {
+          "case": "static-head-host",
+          "httpStatus": 403,
+          "wireBodyBytes": 0,
+          "allow": null,
+          "status": "PASS"
+        },
+        {
+          "case": "api-head-get",
+          "httpStatus": 405,
+          "wireBodyBytes": 0,
+          "allow": "GET",
+          "status": "PASS"
+        },
+        {
+          "case": "api-head-post",
+          "httpStatus": 405,
+          "wireBodyBytes": 0,
+          "allow": "POST",
+          "status": "PASS"
+        },
+        {
+          "case": "api-head-shared",
+          "httpStatus": 405,
+          "wireBodyBytes": 0,
+          "allow": "GET, POST",
+          "status": "PASS"
+        },
+        {
+          "case": "api-head-unknown",
+          "httpStatus": 404,
+          "wireBodyBytes": 0,
+          "allow": null,
+          "status": "PASS"
+        },
+        {
+          "case": "api-head-host",
+          "httpStatus": 403,
+          "wireBodyBytes": 0,
+          "allow": null,
+          "status": "PASS"
+        }
+      ],
+      "source": "verified ZIP manifest; public resources before pairing",
+      "browser": "NOT_RUN"
+    },
+    "nativeDebugReportParsed": {
+      "heads": 45,
+      "admissions": 25,
+      "body_acks": 50,
+      "responses": 45,
+      "closed": 83,
+      "retired": 83,
+      "rearms": 79,
+      "stale_events": 0,
+      "active_records": 0,
+      "peak_records": 5,
+      "pending_jobs": 0,
+      "cleanup_pending": 0,
+      "retained_cleanup": 0,
+      "native_drained": true,
+      "stopping": true,
+      "owned_bytes": 1575756
+    },
+    "ownedBytesScope": "Retained application allocation accounting from the original candidate report, not observed process working-set or peak memory.",
+    "bodylessResponses": [
+      {
+        "case": "static-head-method",
+        "method": "HEAD",
+        "status": 405,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "static-head-host",
+        "method": "HEAD",
+        "status": 403,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-get",
+        "method": "HEAD",
+        "status": 405,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-post",
+        "method": "HEAD",
+        "status": 405,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-shared",
+        "method": "HEAD",
+        "status": 405,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-unknown",
+        "method": "HEAD",
+        "status": 404,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "api-head-host",
+        "method": "HEAD",
+        "status": 403,
+        "wireBodyBytes": 0,
+        "framing": "HEAD response; CL/TE omitted and zero wire body"
+      },
+      {
+        "case": "static-304-assets/index-DFFVdc8-.css",
+        "method": "GET",
+        "status": 304,
+        "wireBodyBytes": 0,
+        "framing": "status-defined empty; CL/TE omitted by diagnostic contract"
+      },
+      {
+        "case": "static-304-index.html",
+        "method": "GET",
+        "status": 304,
+        "wireBodyBytes": 0,
+        "framing": "status-defined empty; CL/TE omitted by diagnostic contract"
+      }
+    ],
+    "raw": {
+      "directory": "2026-10-31-round30-head-tls-fixed-first-5134fe295fc34d30abab2b160268991d-raw",
+      "files": 8,
+      "dotfiles": 4,
+      "base64RemoteShaAndLocalBytesVerified": true
+    }
+  },
+  "expectedBaselineRed": {
+    "report": "2026-10-31-round30-head-tls-baseline-first.json",
+    "verification": {
+      "status": "EXPECTED_BASELINE_REJECTION_PASS",
+      "originalReportSha256": "b6a5b7fbb9d5b4333023c64246ecfa2de86fd11e9fa670308cf37b3a2c011557",
+      "frozenPreviousCandidateSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+      "observedFirstFailure": {
+        "kind": "RuntimeError",
+        "phase": "actual-tls-business-clients",
+        "message": "diagnostic HEAD/204/304 contract omits Content-Length"
+      },
+      "actualNativeDrain": "NOT_VALIDATED_ON_THIS_FAILED_CLIENT_RUN",
+      "cleanup": "PASS",
+      "originalRawBytesVerified": [
+        {
+          "name": "tls.stdout",
+          "bytes": 263,
+          "sha256": "fecc07ef57a6c66d121bea2b50ce04ec874cab9de4c7598b3e69ad10ee8d5443"
+        },
+        {
+          "name": ".tls-process.json",
+          "bytes": 240,
+          "sha256": "f4e16d0266f94b71855d9cfb5aac86477cf94af3ea63e8eff9562983af0714da"
+        },
+        {
+          "name": "tls-public.pem",
+          "bytes": 1141,
+          "sha256": "4725c74ca211f406c138b401f8cc8c6700645304998a0641ef19dcdb27fa9077"
+        },
+        {
+          "name": "tls.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": ".tls-supervisor.json",
+          "bytes": 187,
+          "sha256": "f0ddd4b8a69ebde592f6d0a7fd232befa5d487baacf8bf56366c7f886a4664b8"
+        },
+        {
+          "name": ".tls-setup-process.json",
+          "bytes": 187,
+          "sha256": "dbee5d7fbbcea193f833fd7c81ed992f13da2ffcfcc3c54a7d5794c6fb39908a"
+        },
+        {
+          "name": ".tls-fixture.json",
+          "bytes": 373,
+          "sha256": "aa140911a163c894e51f987f487253fb7aad7ab307693a052800c5802e1eeae8"
+        }
+      ]
+    },
+    "originalStatus": "FAIL",
+    "originalCleanup": "PASS",
+    "oldExeSha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09",
+    "eventsObserved": 1,
+    "remainingCases": "NOT_RUN after first HEAD Content-Length rejection",
+    "actualNativeDrain": "NOT_VALIDATED; native report absent on original failed-client run",
+    "scope": "Previous frozen candidate rejected by new stricter diagnostic HEAD contract. This is expected before-fix evidence, not a failed execution of the new candidate.",
+    "headContentLengthScope": "The diagnostic contract chooses to omit Content-Length for these HEAD responses. HTTP generally permits a representative Content-Length on HEAD; the baseline CL rejection alone does not establish a general RFC violation.",
+    "raw": {
+      "directory": "2026-10-31-round30-head-tls-baseline-first-1730ab7979da4792b77fe522c1607ca7-raw",
+      "files": 8,
+      "dotfiles": 4
+    }
+  },
+  "cleanup": {
+    "finalWindowsAudit": {
+      "build": "26300",
+      "scratchDirectories": [],
+      "sshd": "Running",
+      "ownedProcesses": [],
+      "sshPublicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+      "ownedTasks": [],
+      "os": "Microsoft Windows 11 专业版",
+      "projectRunReadOnlySnapshot": {
+        "views": [
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry32"
+          },
+          {
+            "keyPresent": true,
+            "sha256": null,
+            "encodedBytes": 0,
+            "kind": null,
+            "valuePresent": false,
+            "view": "Registry64"
+          }
+        ]
+      },
+      "persistentKeyMode": "0o600",
+      "authentication": "PASS",
+      "publicAuthorizationUnchanged": true,
+      "projectRunUnchanged": true,
+      "status": "PASS"
+    },
+    "localReports": {
+      "head-local-cleanup.json": {
+        "status": "PASS",
+        "obsoleteDirectory": "/tmp/fc-round30-windows-http-semantics-snapshot",
+        "obsoleteDirectoryAbsent": true,
+        "obsoleteFiles": [
+          {
+            "name": "autostart_coordinator-97dc96264f35cfe2.exe",
+            "bytes": 5484948,
+            "sha256": "316cef2b984a5d4dc3ed6dc76d0a545da31e2119ba55b5480a57bb895fe8c019"
+          },
+          {
+            "name": "business_storage-878d46a6a29de0ae.exe",
+            "bytes": 6135349,
+            "sha256": "adbfd214d4953320012ca124ec5e0adfad7ce474945eccfcaffbc6ca6e8fcceb"
+          },
+          {
+            "name": "calendar_execution_fence-7355fabc2ed3f8f9.exe",
+            "bytes": 5574694,
+            "sha256": "f086941398db02da7f176b9028f6488bc62de636fd0b02f322079414103adf03"
+          },
+          {
+            "name": "fc-bootstrap.exe",
+            "bytes": 12477123,
+            "sha256": "3f4b68fc156856c2375b96328fd68b4645e78868f8365e89e17d746a34cd0c09"
+          },
+          {
+            "name": "fc_application-fb16268b5eff3acf.exe",
+            "bytes": 1280300,
+            "sha256": "f6c4ff1a81fe56c9914baa56925f9ffec7f7db3078b35aff00dbe19e1e924fd1"
+          },
+          {
+            "name": "fc_audio-e1b4eabc9ef1420f.exe",
+            "bytes": 1246224,
+            "sha256": "22ad84fed5331f741ed627de220455d6937ebd69cb8c581c1bd6a1753e20dd08"
+          },
+          {
+            "name": "fc_bootstrap-30fa512284e56867.exe",
+            "bytes": 11697988,
+            "sha256": "50c6fbe7e7964c03000e034054b2c90d0056cab89fa26e37b30fe044b37dab95"
+          },
+          {
+            "name": "fc_bootstrap-4203463b9d6de1f5.exe",
+            "bytes": 11644213,
+            "sha256": "df9c37ba2b7e398d682e194a4855a2a7e1053331a42777cd13e8f44761d50cba"
+          },
+          {
+            "name": "fc_domain-367747e306a1dd0e.exe",
+            "bytes": 2279668,
+            "sha256": "eff293ae193fe256bf8b3d93f2b5c8e7a0606eeabe233f01e691aed278480490"
+          },
+          {
+            "name": "fc_materials-f1a7d58c131e95d5.exe",
+            "bytes": 2352710,
+            "sha256": "cd3f8da3c97f0aa430aa0f8c5cf670dc3ca9a6b22fd1bcf79f4f3b4b89b7dcf5"
+          },
+          {
+            "name": "fc_ports-15b1ad689f79c490.exe",
+            "bytes": 1184868,
+            "sha256": "b27c5337c3a590410e0d0fb66e7f6394adc00f1be9f81c91b33567a5e0cdcc82"
+          },
+          {
+            "name": "fc_presentation-b847dfa3b68d1237.exe",
+            "bytes": 1853168,
+            "sha256": "1fe6352326c52d5b72f97745031bf6fba0d5bbf99dd289d6ca262447275b3a91"
+          },
+          {
+            "name": "fc_protocol-4316bb63b92dda4d.exe",
+            "bytes": 1956037,
+            "sha256": "b3272e412851da2f24a11357c92237018efc6d08ef19ed0278c20970446bee2b"
+          },
+          {
+            "name": "fc_runtime-a09be73363edd23a.exe",
+            "bytes": 1430273,
+            "sha256": "0529cfce16b7a36125ff8cf0568da022037c185457ee17beab24d4aea63e42a0"
+          },
+          {
+            "name": "fc_security-2889fa9301b88e80.exe",
+            "bytes": 1224276,
+            "sha256": "ada76b00129f844cc044ffc59036309e461b6134d045258372b44c8f0aae5f6e"
+          },
+          {
+            "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+            "bytes": 7559730,
+            "sha256": "4272b371a9ccfc7e4d970c6e78115f56aa2ef6627e15433f58ecf5e082fda7b9"
+          },
+          {
+            "name": "fc_windows-b3d43bc67b5340a1.exe",
+            "bytes": 3209427,
+            "sha256": "c57ba19240975215cb06e804e63fdbba83f0c4894a1ba1910e6914204f08ea1f"
+          },
+          {
+            "name": "runtime_storage-fef60aaa0dc7b0a4.exe",
+            "bytes": 4941086,
+            "sha256": "7bfa90bb37396132545270c91caf1740c1caa65d5ce7d63c7a52254dd010acc7"
+          },
+          {
+            "name": "schedule_operations-705da6e05a75b965.exe",
+            "bytes": 5733012,
+            "sha256": "690c3f316cbbc5cbc91b1c38b43d7acf1366d9b2c691383d08f8757bf9449fff"
+          },
+          {
+            "name": "tests.jsonl",
+            "bytes": 18371,
+            "sha256": "a0f4e07e2a36e759d4327638caa2a12f7e3eb668dc31731d1c8e835c387b27dc"
+          },
+          {
+            "name": "voice_limits_storage-588693116cdd8d9e.exe",
+            "bytes": 5146110,
+            "sha256": "e529b3bac7c3a76a188bd6d632153048624d7dcb35d6a6e5a9e23da288c39c9b"
+          },
+          {
+            "name": "voice_storage-9d353cd95d53ae2d.exe",
+            "bytes": 5189101,
+            "sha256": "3fb9744e839bc21516ab30a10721599a9e27e8999c394ff984a10d3b0334abcd"
+          }
+        ],
+        "removedSnapshotBytes": 99618676,
+        "webZipAbsent": true,
+        "retainedForContinuingRound30": [
+          "/tmp/fc-round30-windows-head-stage-snapshot",
+          "/tmp/fc-round30-core-target",
+          "/tmp/fc-round30-win-target",
+          "/tmp/fc-round30-web-verified-dist",
+          "/tmp/fc-round30-evidence"
+        ],
+        "persistentWindowsSshAuthorization": "retained unchanged",
+        "scope": "Owned obsolete previous20-exe snapshot and temporary web ZIP only; current4 EXEs retained for next native browser observation"
+      }
+    },
+    "obsoleteSnapshotComparison": {
+      "recordedDeletedFiles": 22,
+      "recordedDeletedBytes": 99618676,
+      "binaryEntriesMatchedPriorArchivedManifest": 21,
+      "oldNormalActuallyRehashedThisPhase": false,
+      "currentFourExesActuallyRehashed": true
+    },
+    "retainedScope": [
+      "/tmp/fc-round30-windows-head-stage-snapshot",
+      "/tmp/fc-round30-core-target",
+      "/tmp/fc-round30-win-target",
+      "/tmp/fc-round30-web-verified-dist",
+      "/tmp/fc-round30-evidence"
+    ],
+    "archiverActions": "Only copy/hash/index. Original evidence and current frozen binaries are retained; no remote process/service/trust/firewall/Run/SSH authorization/private-key mutation."
+  },
+  "remainingBoundaries": [
+    "Strict native TCP first-five-second gate has not passed; no production listener enablement is claimed.",
+    "HEAD currently returns the existing method/boundary errors; no GET-equivalent HEAD200 endpoint support was added.",
+    "The legacy HTTP.sys implementation is not covered by the new native HEAD evidence.",
+    "Windows 7/10 actual-runtime and MSVC evidence remain separate; this stage supplies actual Windows 11 only.",
+    "A real browser against the native TLS candidate remains unvalidated; these are raw TLS client observations.",
+    "No physical Seewo/visible desktop/audio playback acceptance is supplied.",
+    "Prior Chromium6/33 used API routing/cache disabled; prior WinEdge2/13 true-cache Python fixture304 and old35HTTP still used CL0. Those original historical reports are unchanged.",
+    "Original full-workspace Host848/Windows1278 evidence predates this source freeze; this stage tests only affected libraries and finite TLS, not all20 new-source executables."
+  ],
+  "priorHttpSemanticsSummary": "2026-10-31-round30-http-semantics-stage-summary.json",
+  "syntheticRawCapabilityScope": "Only historical already-retired test roots/ports and synthetic fixtures may be retained verbatim; no persistent SSH credential/private key or live control capability is archived.",
+  "excludedCandidates": []
+}
