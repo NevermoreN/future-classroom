@@ -1,0 +1,25 @@
+{
+  "name": "rust-target-cfg",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+  "arguments": [
+    "run",
+    "1.97.1-x86_64-pc-windows-msvc",
+    "rustc",
+    "--target",
+    "i686-pc-windows-msvc",
+    "-C",
+    "target-feature=+crt-static",
+    "--print",
+    "cfg"
+  ],
+  "started_utc": "2026-10-31T13:46:42.0838822Z",
+  "duration_seconds": 0.0756777,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/rust-target-cfg.stdout.log",
+  "stderr": "logs/rust-target-cfg.stderr.log",
+  "passed": true
+}

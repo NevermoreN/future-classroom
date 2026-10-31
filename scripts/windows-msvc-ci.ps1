@@ -379,7 +379,8 @@ try {
     $probe = Join-Path $RunRoot 'scratch\compiler-version.c'
     [IO.File]::WriteAllText($probe, 'int fc_compiler_probe(void) { return 0; }', $Utf8)
     Require-Step (Invoke-Logged 'cl-version-probe' $cl @('/nologo','/Bv','/MT','/c',"/Fo$(Join-Path $RunRoot 'scratch\compiler-version.obj')",$probe))
-    Require-Step (Invoke-Logged 'linker-version' $link @('/?'))
+    # Version/path/hash are already recorded in msvc-sdk.json and cl /Bv.
+    # link /? may return nonzero after help; actual Cargo links still require exit 0.
     $metadataStep = Invoke-Logged 'cargo-metadata' $cargo @('metadata','--locked','--format-version','1','--no-deps')
     Require-Step $metadataStep
     $metadata = (Read-Output $metadataStep) | ConvertFrom-Json
