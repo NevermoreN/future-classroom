@@ -1,0 +1,49 @@
+warning: method `has_execution_fence` is never used
+   --> crates/fc-bootstrap/src/backend/web.rs:177:19
+    |
+175 | impl WebService {
+    | --------------- method in this implementation
+176 |     #[cfg(windows)]
+177 |     pub(crate) fn has_execution_fence(&self) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+
+warning: methods `binding` and `upload_instance_key` are never used
+  --> crates/fc-bootstrap/src/web_application.rs:52:19
+   |
+50 | impl WebApplication {
+   | ------------------- methods in this implementation
+51 |     #[cfg(windows)]
+52 |     pub(crate) fn binding(&self) -> WebService {
+   |                   ^^^^^^^
+...
+56 |     pub(crate) fn upload_instance_key(&self) -> std::sync::Weak<()> {
+   |                   ^^^^^^^^^^^^^^^^^^^
+
+
+warning: method `has_execution_fence` is never used
+   --> crates/fc-bootstrap/src/backend/web.rs:177:19
+    |
+175 | impl WebService {
+    | --------------- method in this implementation
+176 |     #[cfg(windows)]
+177 |     pub(crate) fn has_execution_fence(&self) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+
+warning: methods `binding` and `upload_instance_key` are never used
+  --> crates/fc-bootstrap/src/web_application.rs:52:19
+   |
+50 | impl WebApplication {
+   | ------------------- methods in this implementation
+51 |     #[cfg(windows)]
+52 |     pub(crate) fn binding(&self) -> WebService {
+   |                   ^^^^^^^
+...
+56 |     pub(crate) fn upload_instance_key(&self) -> std::sync::Weak<()> {
+   |                   ^^^^^^^^^^^^^^^^^^^
+

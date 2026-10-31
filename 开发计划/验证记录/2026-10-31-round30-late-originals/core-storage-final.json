@@ -1,0 +1,44 @@
+{
+  "scope": "Round30 transaction execution fence",
+  "sources": {
+    "crates/fc-storage/src/lib.rs": "b3aedee25b92c95cef579fcd8cc4c0c288b67f8daa4143acad5c25888a9eef15",
+    "crates/fc-storage/src/business/mod.rs": "c7658ce6d10a056dbe89c9f77ed59faf9918533d98ac4e8627f0732653140bf0",
+    "crates/fc-storage/src/execution_fence_tests.rs": "c95b83014d82baa1fc88ffbc71718d0459ed9b264a923c11f9bf3b6d615adc19"
+  },
+  "target": "/tmp/fc-round30-core-target",
+  "tests": {
+    "log": "core-storage-final.log",
+    "exit_code": 0,
+    "passed": 162,
+    "failed": 0,
+    "duration_seconds": 69.33,
+    "profile": "release",
+    "test_threads": 2,
+    "source_note": "After full suite, equivalent checked_add(...).unwrap_or(MAX) replaced with saturating_add for Clippy."
+  },
+  "focused_first_run": {
+    "log": "core-storage-execution-fence-second.log",
+    "exit_code": 0,
+    "passed": 8,
+    "failed": 0
+  },
+  "clippy": {
+    "log": "core-storage-clippy-final-after.log",
+    "exit_code": 0,
+    "warnings": "deny"
+  },
+  "earlier_logs": [
+    "core-storage-execution-fence-first.log (compile E0310; fixed method S:static bound, no runtime test executed)",
+    "core-storage-clippy-final.log (manual_saturating_arithmetic; fixed equivalent saturation)"
+  ],
+  "cleanup": {
+    "sqlite_threads": "all explicitly shutdown/joined",
+    "remaining_own_fixture_directories": []
+  },
+  "boundaries": [
+    "Scopes affect try_transaction only; raw Get/Commit/Login/Recovery unchanged.",
+    "Existing errors remain typed; false/panic cancels request without publisher fault.",
+    "Cancellation during reply delivery does not imply rollback of a previously successful COMMIT.",
+    "Already executing SQLite COMMIT is not preempted."
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "scope": "Round30 shared Worker ownership ordering only",
+  "sources": {
+    "crates/fc-runtime/src/worker.rs": "e050f358dc1d6776f0998210478833daaa6fe11eb2758a45e90ba598a26043eb",
+    "crates/fc-runtime/src/worker/tests.rs": "046f193742725c4c87cbe50339f62fc210554bfcd67640fb161ef7113dc50e59"
+  },
+  "before": {
+    "log": "core-worker-output-drop-before.log",
+    "exit_code": 101,
+    "passed": 0,
+    "failed": 3,
+    "failure": "done preceded suppressed output cleanup",
+    "cleanup": "all gates released and actual pool join before assertions"
+  },
+  "after": {
+    "log": "core-runtime-final.log",
+    "exit_code": 0,
+    "passed": 33,
+    "failed": 0,
+    "worker_tests": 16,
+    "new_tests": 7,
+    "profile": "release",
+    "test_threads": 2
+  },
+  "clippy": {
+    "log": "core-runtime-clippy-final.log",
+    "exit_code": 0,
+    "warnings": "deny"
+  },
+  "limits": [
+    "Positive output successfully moved into reply still owns resources; late cancel/stop or abandoned ticket may drop it on polling/dropping caller.",
+    "No network/TLS/Windows integration claim; metadata-only outputs with fixed worker-owned stage registry required."
+  ],
+  "cleanup": {
+    "test_worker_threads": "all joined",
+    "test_files_databases_sockets": "none created",
+    "target_retained_for_parent": "/tmp/fc-round30-core-target"
+  }
+}

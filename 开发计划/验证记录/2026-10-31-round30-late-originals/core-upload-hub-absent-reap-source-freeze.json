@@ -1,0 +1,43 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "scope": "Same-App absent MaterialReady/Retained descriptor bounded reap",
+  "files": {
+    "crates/fc-bootstrap/src/web_transfer/uploads.rs": {
+      "sha256": "2ce6991205265ebdc7742ffeb34774508816241c719154c42da9af7f19b54985",
+      "bytes": 35988
+    },
+    "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs": {
+      "sha256": "932ddc06e7a88f9b03b34e17ddcd0c4c099a34dcba2be81947a31ba968f979d1",
+      "bytes": 44920
+    }
+  },
+  "checks": [
+    "direct rustfmt --edition2021 passed",
+    "owned two files git diff --check passed"
+  ],
+  "contract": [
+    "at most two metadata-only snapshots under Hub lock",
+    "App binding observation outside Hub lock",
+    "take only exact original UploadKey and recheck current stage/lifetime/App binding under exclusive Lease",
+    "new active-lifetime eligibility only material Ready/Retained with nonzero uploadId and exact App binding Absent",
+    "active Exact/Unbound/BoundElsewhere/Busy not eligible for new absent path; original inactive cleanup preserved",
+    "cleanup drops owners held in Entry and preserves failed deletion/quarantine original charge",
+    "App binding Absent/logical pending0/quarantine0 is not itself a running physical-release proof; original physical permits remain charged until actual owner Drop and final domain retirement still requires actual worker join"
+  ],
+  "regression": "authenticated_json_cancel_and_consumed_retained_are_reaped_without_cancelling_live_ready",
+  "regressionScope": [
+    "real paired SQLite fixture and shared WorkerPool JobContext",
+    "ordinary authenticated JSON upload cancellation200 with new request token, old original life still active",
+    "new begin reclaims old active MaterialReady exact descriptor and uses new serial without120s wait or force-cancel",
+    "real successful material prepare followed by held Backend Busy retires App owner while original Hub life remains active; next begin reclaims active Retained descriptor",
+    "independent live Ready path/write-lock/lifetime/deadline unchanged across both reclaims",
+    "fresh cleanup jobs, then actual worker join before final owner drain"
+  ],
+  "hubTestCount": 9,
+  "notRun": [
+    "Cargo compilation/tests/Clippy",
+    "remote Windows execution",
+    "TLS/socket activity"
+  ],
+  "otherFilesChangedByThisTask": false
+}

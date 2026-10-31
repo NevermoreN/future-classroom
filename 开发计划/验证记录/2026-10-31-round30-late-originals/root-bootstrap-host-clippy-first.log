@@ -1,0 +1,16 @@
+    Checking fc-windows v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-windows)
+    Checking fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+error: the `Err`-variant returned from this function is very large
+  --> crates/fc-bootstrap/src/web_transfer/executor.rs:54:49
+   |
+54 |     fn try_submit_http(&self, task: HttpJob) -> Result<Self::Ticket, SubmitError<HttpJob>>;
+   |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 232 bytes
+   |
+   = help: try reducing the size of `fc_runtime::worker::SubmitError<web_transfer::executor::HttpJob>`, for example by boxing large elements or replacing it with `Box<fc_runtime::worker::SubmitError<web_transfer::executor::HttpJob>>`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+   = note: `-D clippy::result-large-err` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::result_large_err)]`
+
+error: could not compile `fc-bootstrap` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `fc-bootstrap` (lib test) due to 1 previous error

@@ -1,0 +1,35 @@
+{
+  "scope": "Round30 Backend request execution RAII scope",
+  "sources": {
+    "crates/fc-bootstrap/src/backend.rs": "71fd438e30cad8d961a283d678d5edce14fc7182c33cdcfe40f7677293530b63",
+    "crates/fc-bootstrap/src/backend/execution_scope_tests.rs": "b022e24c1abb59df00612464f64a12c4cdf82db9cf2c4fd2aeb052bfd129324c"
+  },
+  "tests": {
+    "log": "core-backend-execution-scope-first.log",
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "duration_seconds": 0.44,
+    "profile": "release",
+    "test_threads": 2,
+    "source_note": "First test run preceded the later requested WebService accessor fence binding; final Clippy compiles that binding, root final suite will bind final sources."
+  },
+  "clippy": {
+    "log": "core-backend-execution-scope-clippy.log",
+    "exit_code": 0,
+    "command": "cargo clippy -p fc-bootstrap --release --lib --tests -- -D warnings"
+  },
+  "cleanup": {
+    "own_fixture_directories_remaining": [],
+    "sqlite_writers": "all explicitly closed and joined",
+    "shared_worker_pool": "actual two worker handles joined",
+    "target_retained_for_parent": "/tmp/fc-round30-core-target"
+  },
+  "API": [
+    "Backend::begin_execution_scope(&mut self, TransactionExecutionFence) -> BackendExecution",
+    "BackendExecution Deref + DerefMut restores exact old repository/fence on Drop, including nested unwind",
+    "Backend.request_execution_fence private optional field; child VoiceService accessor binds scoped clone",
+    "Backend.check_open false/panic -> Storage ExecutionCancelled, no global fault",
+    "Backend.web_service returns scoped clone when fence present"
+  ]
+}

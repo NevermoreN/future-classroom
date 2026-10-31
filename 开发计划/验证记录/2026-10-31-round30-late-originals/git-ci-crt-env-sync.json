@@ -1,0 +1,127 @@
+{
+  "scope": "Verified hosted-CI encoded-flag deletion and exact process environment restoration; PS5 checks passed, original PS7 compile and CRT gate remain failed until fresh CI result",
+  "verifiedFiles": 743,
+  "oldUnchangedPrefix": 715,
+  "commands": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "add",
+        "-f",
+        "--",
+        "scripts/windows-msvc-ci.ps1",
+        "\u5f00\u53d1\u8ba1\u5212/10-\u5b9e\u65bd\u8fdb\u5ea6\u4e0e\u9a8c\u8bc1\u8bb0\u5f55.md",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-stage-progress-index.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-accepted-jobs-terminal.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-run-tools.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-read-ci-sixth-nonbinary-ranges.py",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-originals.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-read-ci-sixth-import-diagnosis.py",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-import-diagnosis.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-windows-pwsh-availability-readonly.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-crt-core-readonly-review.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/bootstrap.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/cleanup.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/failure.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/logs/cargo-metadata.stdout.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.result.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.stderr.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.stdout.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-range-raw/result.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/product-compile.stdout.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/rust-target-cfg.stdout.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/workspace-test-compile.stdout.log",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-fix-frozen-static.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-fix-ast-restore-probe.ps1",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-flag-guard-extra.ps1",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-run-ci-crt-env-windows-probe.py",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-windows-stdin-probe.ps1",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-windows-probe.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-git-ci-original-artifact-sync.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-env-local-static-final.json",
+        "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-10-31-round30-ci-crt-environment-stage-summary.json"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--name-only",
+        "-z"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "c2NyaXB0cy93aW5kb3dzLW1zdmMtY2kucHMxAOW8gOWPkeiuoeWIki8xMC3lrp7mlr3ov5vluqbkuI7pqozor4HorrDlvZUubWQA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudi1maXgtYXN0LXJlc3RvcmUtcHJvYmUucHMxAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWNydC1lbnYtZml4LWZyb3plbi1zdGF0aWMuanNvbgDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1jcnQtZW52LWZsYWctZ3VhcmQtZXh0cmEucHMxAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWNydC1lbnYtbG9jYWwtc3RhdGljLWZpbmFsLmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudi13aW5kb3dzLXByb2JlLmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudi13aW5kb3dzLXN0ZGluLXByb2JlLnBzMQDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1jcnQtZW52aXJvbm1lbnQtc3RhZ2Utc3VtbWFyeS5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLWFjY2VwdGVkLWpvYnMtdGVybWluYWwuanNvbgDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1jcnQtY29yZS1yZWFkb25seS1yZXZpZXcuanNvbgDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1pbXBvcnQtZGlhZ25vc2lzLXJhdy9sb2dzL3Byb2R1Y3QtY29tcGlsZS5zdGRvdXQubG9nAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLWltcG9ydC1kaWFnbm9zaXMtcmF3L2xvZ3MvcnVzdC10YXJnZXQtY2ZnLnN0ZG91dC5sb2cA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy1yYXcvbG9ncy93b3Jrc3BhY2UtdGVzdC1jb21waWxlLnN0ZG91dC5sb2cA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJhbmdlLW9yaWdpbmFscy5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJhbmdlLXJhdy9ib290c3RyYXAuanNvbgDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1yYW5nZS1yYXcvY2xlYW51cC5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJhbmdlLXJhdy9mYWlsdXJlLmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvY2FyZ28tbWV0YWRhdGEuc3Rkb3V0LmxvZwDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1yYW5nZS1yYXcvbG9ncy9wZS1pbXBvcnRzLTAucmVzdWx0Lmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvcGUtaW1wb3J0cy0wLnN0ZGVyci5sb2cA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvcGUtaW1wb3J0cy0wLnN0ZG91dC5sb2cA5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L3Jlc3VsdC5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJ1bi10b29scy5qc29uAOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLWdpdC1jaS1vcmlnaW5hbC1hcnRpZmFjdC1zeW5jLmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtcmVhZC1jaS1zaXh0aC1pbXBvcnQtZGlhZ25vc2lzLnB5AOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLXJlYWQtY2ktc2l4dGgtbm9uYmluYXJ5LXJhbmdlcy5weQDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VLzIwMjYtMTAtMzEtcm91bmQzMC1ydW4tY2ktY3J0LWVudi13aW5kb3dzLXByb2JlLnB5AOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUvMjAyNi0xMC0zMS1yb3VuZDMwLXN0YWdlLXByb2dyZXNzLWluZGV4Lmpzb24A5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS8yMDI2LTEwLTMxLXJvdW5kMzAtd2luZG93cy1wd3NoLWF2YWlsYWJpbGl0eS1yZWFkb25seS5qc29uAA==",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "commit",
+        "-m",
+        "Remove encoded flag shadowing and verify actual MSVC CRT selection"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "W21haW4gYzYyMmFlYV0gUmVtb3ZlIGVuY29kZWQgZmxhZyBzaGFkb3dpbmcgYW5kIHZlcmlmeSBhY3R1YWwgTVNWQyBDUlQgc2VsZWN0aW9uCiAzMSBmaWxlcyBjaGFuZ2VkLCAyODgxIGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWNydC1lbnYtZml4LWFzdC1yZXN0b3JlLXByb2JlLnBzMSIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudi1maXgtZnJvemVuLXN0YXRpYy5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1jcnQtZW52LWZsYWctZ3VhcmQtZXh0cmEucHMxIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1jcnQtZW52LWxvY2FsLXN0YXRpYy1maW5hbC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1jcnQtZW52LXdpbmRvd3MtcHJvYmUuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudi13aW5kb3dzLXN0ZGluLXByb2JlLnBzMSIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktY3J0LWVudmlyb25tZW50LXN0YWdlLXN1bW1hcnkuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtYWNjZXB0ZWQtam9icy10ZXJtaW5hbC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1jcnQtY29yZS1yZWFkb25seS1yZXZpZXcuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy1yYXcvbG9ncy9wcm9kdWN0LWNvbXBpbGUuc3Rkb3V0LmxvZyIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy1yYXcvbG9ncy9ydXN0LXRhcmdldC1jZmcuc3Rkb3V0LmxvZyIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy1yYXcvbG9ncy93b3Jrc3BhY2UtdGVzdC1jb21waWxlLnN0ZG91dC5sb2ciCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLWltcG9ydC1kaWFnbm9zaXMuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2Utb3JpZ2luYWxzLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJhbmdlLXJhdy9ib290c3RyYXAuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2NsZWFudXAuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2ZhaWx1cmUuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvY2FyZ28tbWV0YWRhdGEuc3Rkb3V0LmxvZyIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvcGUtaW1wb3J0cy0wLnJlc3VsdC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1zaXh0aC1yYW5nZS1yYXcvbG9ncy9wZS1pbXBvcnRzLTAuc3RkZXJyLmxvZyIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcmFuZ2UtcmF3L2xvZ3MvcGUtaW1wb3J0cy0wLnN0ZG91dC5sb2ciCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXNpeHRoLXJhbmdlLXJhdy9yZXN1bHQuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktc2l4dGgtcnVuLXRvb2xzLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWdpdC1jaS1vcmlnaW5hbC1hcnRpZmFjdC1zeW5jLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLXJlYWQtY2ktc2l4dGgtaW1wb3J0LWRpYWdub3Npcy5weSIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtcmVhZC1jaS1zaXh0aC1ub25iaW5hcnktcmFuZ2VzLnB5IgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1ydW4tY2ktY3J0LWVudi13aW5kb3dzLXByb2JlLnB5IgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC13aW5kb3dzLXB3c2gtYXZhaWxhYmlsaXR5LXJlYWRvbmx5Lmpzb24iCg==",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "YzYyMmFlYTBmMTc4ZTQyZGNjNzc2YWZiZWE5NmM0YjJkZmU0M2NlOQo=",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "push",
+        "origin",
+        "main"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": "VG8gaHR0cHM6Ly9naXRodWIuY29tL05ldmVybW9yZU4vZnV0dXJlLWNsYXNzcm9vbS5naXQKICAgMjM0OTFkMS4uYzYyMmFlYSAgbWFpbiAtPiBtYWluCg=="
+    },
+    {
+      "command": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/main"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "YzYyMmFlYTBmMTc4ZTQyZGNjNzc2YWZiZWE5NmM0YjJkZmU0M2NlOQlyZWZzL2hlYWRzL21haW4K",
+      "stderrBase64": ""
+    }
+  ],
+  "head": "c622aea0f178e42dcc776afbea96c4b2dfe43ce9",
+  "remoteVerified": true
+}

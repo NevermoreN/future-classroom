@@ -1,0 +1,16 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `release` profile [optimized] target(s) in 1m 14s
+     Running unittests src/lib.rs (/tmp/fc-round30-core-target/release/deps/fc_storage-76bccdbef2cefa9e)
+
+running 8 tests
+test execution_fence_tests::cancellation_after_evaluation_suppresses_prepared_write_and_read ... ok
+test execution_fence_tests::business_repository_scope_inherits_and_only_tightens_storage_execution_fence ... ok
+test execution_fence_tests::fence_panics_before_evaluation_and_after_original_precommit_cancel_without_faulting ... ok
+test execution_fence_tests::original_precommit_runs_and_cancellation_after_sql_writes_rolls_back ... ok
+test execution_fence_tests::queued_positive_read_outcomes_are_suppressed_at_all_ticket_consumption_apis ... ok
+test execution_fence_tests::original_read_precommit_executes_and_typed_failure_survives_late_cancellation ... ok
+test execution_fence_tests::queued_request_expires_behind_real_sqlite_writer_without_evaluation_or_commit ... ok
+test execution_fence_tests::scoped_clones_cannot_replace_a_false_fence_with_true_or_change_the_base_handle ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 154 filtered out; finished in 1.08s
+

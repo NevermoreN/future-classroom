@@ -1,0 +1,77 @@
+{
+  "observedAtUtc": "2026-10-31T08:41:14Z",
+  "previousGoalTurn": "no progress on development (goal UI status question only); revalidated existing active goal without creating another",
+  "objective": "按照计划完成全部开发。",
+  "status": "development in progress; not frozen/verified final source",
+  "windowsReadOnlyBaseline": "windows-before.json",
+  "sourceCurrent": {
+    "crates/fc-bootstrap/src/web_application.rs": "6a776fdb85b2ca9645a159fa7e1ec4d1b3dd13055630c4e1b5a0283ef2e57ce4",
+    "crates/fc-bootstrap/src/web_application/tests.rs": "4694eb21a172864961905050b2d4a6c53534af92852e3f2ecd8d68577c1f32cc",
+    "crates/fc-bootstrap/src/backend/web.rs": "388a7d21c3e4602b5d18e45cfc2f3145b8dcbef5cbbee08686726093a2a60b0a",
+    "crates/fc-bootstrap/src/backend/web/tests.rs": "7f6de0084ce44133e6de2142ac8f4b65f185b58c9cbf57850fa25de8cd28c009",
+    "crates/fc-bootstrap/src/web_transfer.rs": "c98ab555692e93e33ff73c92a07b3d609686a9ec562992c6b94f559d8da78ddd",
+    "crates/fc-bootstrap/src/web_transfer/tests.rs": "6657cd17058bd9f677b9d7fcda30c7ce552829d640185f5d05382bb2bef0aef5",
+    "crates/fc-bootstrap/src/web_transfer/work.rs": "f395dcc84909c5cdcefc8acd9adfbf7e2a1f478d2df69caa2ed62b22e82bdd3c",
+    "crates/fc-bootstrap/src/web_transfer/work/tests.rs": "41fa68754ac77e6a4151260c3743bc97f311427ac11311b92b9218db1fbbcb20"
+  },
+  "observedTests": [
+    {
+      "log": "root-transfer-second.log",
+      "passed": 9,
+      "failed": 0,
+      "scope": "before additional weak cancellation test; later full Host includes it"
+    },
+    {
+      "log": "root-head-admission-first.log",
+      "passed": 1,
+      "failed": 1,
+      "cause": "incorrect new test expected 401 for existing disabled global service 503; production mapping retained"
+    },
+    {
+      "log": "root-head-admission-second.log",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "log": "root-bootstrap-host-integration-first.log",
+      "passed": 149,
+      "failed": 1,
+      "causeUnderInvestigation": "request voice fence rejected early as StaleGeneration while new test requires ExecutionCancelled"
+    },
+    {
+      "report": "modern-bootstrap-first.json",
+      "exitCode": 101,
+      "cause": "new Windows test PairingCode::parse(&str) requires String; not a Windows runtime test"
+    }
+  ],
+  "integrationStillRequired": [
+    "fixed two-slot upload Hub",
+    "actual transport async event/command adapter",
+    "application same-pool integration",
+    "final Host/Windows tests and exact source/binary binding",
+    "archive/cleanup/GitHub synchronization"
+  ],
+  "unchangedPlatformGates": [
+    "original strict first-TCP 5s failure",
+    "real Win7/10 and formal MSVC",
+    "visible Seewo/PPT/touch/DPI",
+    "formal GUI installer and 72-hour validation"
+  ],
+  "laterVerification": [
+    {
+      "log": "root-bootstrap-host-integration-second.log",
+      "passed": 150,
+      "failed": 0,
+      "scope": "bootstrap host lib, before cfgWindows Hub and TLS streaming integration"
+    },
+    {
+      "report": "windows-bootstrap-stage-first.json",
+      "passed": 247,
+      "failed": 0,
+      "platform": "Windows 11 Pro build26300 / WOW64",
+      "cleanup": "PASS",
+      "compiledLibrarySha256": "30ef621b40d16d678cb6ed43ffc312fd6ae9f49d344cdc5e01a1a78a25f99c3e",
+      "scope": "frozen runtime snapshot; excludes UploadHub/new TLS host. Current workspace has later source edits; final-source claim explicitly not made."
+    }
+  ]
+}

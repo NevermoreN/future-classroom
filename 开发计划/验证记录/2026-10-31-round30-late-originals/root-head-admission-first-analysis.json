@@ -1,0 +1,8 @@
+{
+  "status": "TEST_EXPECTATION_CORRECTED",
+  "originalFailure": "root-head-admission-first.log",
+  "actual": 503,
+  "incorrectExpected": 401,
+  "reason": "Global WebService Disabled is mapped by existing service_error to ServiceUnavailable 503. The new head-admission test wrongly expected Unauthorized 401 after globally disabling Web. The unauthenticated private-head 401 assertion remains unchanged; production mapping unchanged.",
+  "productionChangeForThisFailure": false
+}

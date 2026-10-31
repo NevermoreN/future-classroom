@@ -1,0 +1,38 @@
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Finished `release` profile [optimized] target(s) in 18.64s
+     Running unittests src/lib.rs (/tmp/fc-round30-core-target/release/deps/fc_runtime-bad4922eb9fb158e)
+
+running 3 tests
+test worker::tests::cancelled_output_drop_retains_running_slot_and_delays_terminal_result ... FAILED
+test worker::tests::stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join ... FAILED
+test worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result ... FAILED
+
+failures:
+
+---- worker::tests::cancelled_output_drop_retains_running_slot_and_delays_terminal_result stdout ----
+
+thread 'worker::tests::cancelled_output_drop_retains_running_slot_and_delays_terminal_result' (10773) panicked at crates/fc-runtime/src/worker/tests.rs:253:5:
+done preceded suppressed output cleanup
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- worker::tests::stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join stdout ----
+
+thread 'worker::tests::stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join' (10779) panicked at crates/fc-runtime/src/worker/tests.rs:253:5:
+done preceded suppressed output cleanup
+
+---- worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result stdout ----
+
+thread 'worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result' (10774) panicked at crates/fc-runtime/src/worker/tests.rs:253:5:
+done preceded suppressed output cleanup
+
+
+failures:
+    worker::tests::cancelled_output_drop_retains_running_slot_and_delays_terminal_result
+    worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result
+    worker::tests::stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.10s
+
+error: test failed, to rerun pass `-p fc-runtime --lib`

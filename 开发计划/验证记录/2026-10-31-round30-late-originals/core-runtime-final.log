@@ -1,0 +1,47 @@
+   Compiling fc-runtime v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-runtime)
+    Finished `release` profile [optimized] target(s) in 9.38s
+     Running unittests src/lib.rs (/tmp/fc-round30-core-target/release/deps/fc_runtime-bad4922eb9fb158e)
+
+running 33 tests
+test authority::tests::a_foreign_update_token_faults_both_stores_without_deadlocking ... ok
+test authority::tests::publication_failure_after_commit_faults_instead_of_serving_old_snapshot ... ok
+test authority::tests::publish_swaps_authority_before_opening_the_gate ... ok
+test authority::tests::rollback_keeps_old_data_but_never_revives_old_permits ... ok
+test authority::tests::stale_prepared_snapshot_after_commit_is_rejected_and_faults ... ok
+test authority::tests::unknown_commit_unwind_and_abandoned_update_are_fail_closed ... ok
+test cancel::tests::cancellation_never_revives_an_old_token ... ok
+test cancel::tests::overflow_cannot_revalidate_tokens ... ok
+test health::tests::expired_queued_lease_and_scope_mismatch_never_register_a_start ... ok
+test health::tests::poisoned_control_mutex_becomes_permanently_faulted ... ok
+test mailbox::tests::a_contended_producer_returns_ownership_without_waiting ... ok
+test mailbox::tests::count_and_actual_owned_capacity_are_independent_limits ... ok
+test mailbox::tests::saturated_ordinary_work_does_not_consume_stop_or_hide ... ok
+test observer::tests::only_latest_pending_and_two_live_render_versions_are_retained ... ok
+test shutdown::tests::ready_requires_all_registered_domains ... ok
+test shutdown::tests::timeout_requires_termination_and_late_native_completion_cannot_resume ... ok
+test worker::tests::cancellation_and_stop_do_not_free_running_slots_or_start_replacements ... ok
+test worker::tests::cancelled_output_drop_retains_running_slot_and_delays_terminal_result ... ok
+test worker::tests::completed_but_unobserved_output_cannot_cross_cancel_or_stop ... ok
+test worker::tests::completion_notification_and_ticket_polling_are_nonblocking_and_one_shot ... ok
+test authority::tests::start_registration_and_authority_barrier_share_one_linearization_lock ... ok
+test worker::tests::descriptor_and_notification_panics_fault_closed_without_unwinding_caller ... ok
+test worker::tests::descriptor_budget_uses_capacity_and_rejections_return_owned_secrets ... ok
+test worker::tests::late_cancel_of_successful_reply_disposes_output_on_polling_caller ... ok
+test worker::tests::pool_drop_signals_stop_and_detaches_instead_of_joining_event_loop ... ok
+test worker::tests::queued_cancel_and_expired_deadline_skip_user_code_and_post_run_cancel_discards_output ... ok
+test worker::tests::queued_cancelled_task_drop_retains_running_slot_before_negative_completion ... ok
+test worker::tests::queued_expired_task_drop_retains_running_slot_before_negative_completion ... ok
+test worker::tests::stopped_output_drop_retains_running_slot_until_cleanup_and_actual_join ... ok
+test worker::tests::stopped_queued_task_drop_retains_running_slot_before_negative_completion ... ok
+test worker::tests::task_panic_faults_entire_pool_and_suppresses_other_live_results ... ok
+test worker::tests::two_physical_workers_are_shared_by_mixed_jobs_and_eight_more_may_queue ... ok
+test worker::tests::deadline_output_drop_retains_running_slot_and_delays_terminal_result ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+   Doc-tests fc_runtime
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

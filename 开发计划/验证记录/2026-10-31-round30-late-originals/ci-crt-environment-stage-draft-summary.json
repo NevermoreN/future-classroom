@@ -1,0 +1,338 @@
+{
+  "status": "DRAFT_ONLY_WAITING_FINAL_REPAIR_EVIDENCE",
+  "scope": "No archive copies/index/progress changes. Selected original range members only, no full-ZIP verification; no Round31 report included.",
+  "failedRun": {
+    "id": 41209904161,
+    "headSha": "6bde62ccf123ce4ed397c354f56d23d2dc9ee3b9",
+    "originalStatus": "FAILED_OR_INCOMPLETE",
+    "actualCommands": [
+      {
+        "name": "workspace-test-compile",
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 744.4637924
+      },
+      {
+        "name": "product-compile",
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 0.4993679
+      },
+      {
+        "name": "clippy",
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 59.3207276
+      },
+      {
+        "name": "pe-imports-0",
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 0.0734962
+      }
+    ],
+    "failure": {
+      "message": "Direct dynamic CRT import found despite explicit crt-static; original PE report retained.",
+      "utc": "2026-10-31T14:37:52.3422119Z"
+    },
+    "cleanup": {
+      "status": "OWNED_BUILD_ROOTS_REMOVED",
+      "roots": [
+        {
+          "root": "target",
+          "removed": true
+        },
+        {
+          "root": "scratch",
+          "removed": true
+        },
+        {
+          "root": "cargo",
+          "removed": true
+        },
+        {
+          "root": "rustup",
+          "removed": true
+        }
+      ],
+      "artifact_lifetime": "Retained for always-upload; hosted VM disposal removes remaining local evidence.",
+      "scope": "Only this exact RunnerTemp run-id/attempt root; no user-machine cleanup or runtime tests."
+    },
+    "exeCountFromOriginalResult": 22,
+    "runtime": "NOT_RUN",
+    "sourceAfter": "NOT_RUN"
+  },
+  "rangeRetrieval": {
+    "firstStatus": "FAIL",
+    "firstErrorKind": "URLError",
+    "secondStatus": "FAIL",
+    "secondErrorKind": "HTTPError",
+    "secondUnderlyingReasonKind": "str",
+    "centralDirectoryMembersObserved": 99,
+    "rawMembersAvailable": 11,
+    "all11RawBytesShaCrcIndependentlyRechecked": true,
+    "scope": "Do not change either original FAIL. 99 observed entries are not99 complete archived members. Whole-ZIP digest only API/upload metadata; not verified by selected ranges."
+  },
+  "binaryMemoryOnly": {
+    "count": 3,
+    "members": [
+      {
+        "path": "tests/fc-bootstrap/verify_web_assets-79070da627d35f91.exe",
+        "bytes": 610304,
+        "sha256": "e40c82025e38d378b7afb0922519ac03998093a8676918f0ac8d5d15837c242c",
+        "zipCrc32": "98f85d89",
+        "binaryHandling": "MEMORY_ONLY_NOT_EXECUTED_NOT_SAVED",
+        "imports": [
+          "kernel32.dll",
+          "ntdll.dll",
+          "api-ms-win-core-synch-l1-2-0.dll",
+          "userenv.dll",
+          "bcryptprimitives.dll",
+          "KERNEL32.dll",
+          "VCRUNTIME140.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll"
+        ]
+      },
+      {
+        "path": "tests/fc-domain/fc_domain-a8487b286decf594.exe",
+        "bytes": 1598464,
+        "sha256": "251e1665a917dca22a7b136bf468eba2233a856f7c13c5ea27851e7e5b4bc6ec",
+        "zipCrc32": "8d1867f8",
+        "binaryHandling": "MEMORY_ONLY_NOT_EXECUTED_NOT_SAVED",
+        "imports": [
+          "bcryptprimitives.dll",
+          "api-ms-win-core-synch-l1-2-0.dll",
+          "KERNEL32.dll",
+          "ntdll.dll",
+          "USERENV.dll",
+          "VCRUNTIME140.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll"
+        ]
+      },
+      {
+        "path": "tests/fc-protocol/fc_protocol-a6a537c325d921e7.exe",
+        "bytes": 1349120,
+        "sha256": "d1b2d9e7522e3005b95c15e49fb6e48f8afa43920cbd6fc4757a22828e0428a8",
+        "zipCrc32": "22cbde48",
+        "binaryHandling": "MEMORY_ONLY_NOT_EXECUTED_NOT_SAVED",
+        "imports": [
+          "api-ms-win-core-synch-l1-2-0.dll",
+          "bcryptprimitives.dll",
+          "KERNEL32.dll",
+          "ntdll.dll",
+          "USERENV.dll",
+          "VCRUNTIME140.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll"
+        ]
+      }
+    ],
+    "scope": "Only original CRC/SHA/import metadata retained; no EXE execution, EXE/ZIP/B64 disk payload. Actual first dumpbin import log independently proves dynamic CRT despite command exit0."
+  },
+  "environmentDiagnosis": {
+    "observation": {
+      "pwshPath": null,
+      "scope": "Read-only command resolution only; no upload, process environment/user environment mutation, compiler or test execution",
+      "windowsPowerShell": "5.1.26100.9711"
+    },
+    "scope": "Read-only probe proves this Win11 has PS5.1 and no resolved pwsh; no PS7 installed or executed on this machine. Null-versus-empty Process environment behavior and Cargo encoded RUSTFLAGS precedence are mechanism analysis only until separate exact helper/PS7 evidence. Original hosted runner did not record actual environment values; do not assert unique historical cause."
+  },
+  "coreReadonlyReview": {
+    "status": "READONLY_DIAGNOSIS_CONFIRMED_DYNAMIC_CRT_CAUSE_NOT_YET_PROVEN",
+    "sourcePath": "scripts/windows-msvc-ci.ps1",
+    "sourceSha256": "94e853dbb55f40d65ff914dbe767408ffc412cc75b3650e19a0f139f54d525cd",
+    "evidence": {
+      "path": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/pe-imports-0.stdout.log",
+      "bytes": 757,
+      "sha256": "75a5c41b2be570c92d8e84e2ef69cac02faad110026a39bb1309bb0797a40ca0",
+      "scope": "Parent range-extracted ZIP member; this report does not claim full ZIP SHA verification.",
+      "program": "tests/fc-bootstrap/verify_web_assets-79070da627d35f91.exe",
+      "observedDlls": [
+        "kernel32.dll",
+        "ntdll.dll",
+        "api-ms-win-core-synch-l1-2-0.dll",
+        "userenv.dll",
+        "bcryptprimitives.dll",
+        "KERNEL32.dll",
+        "VCRUNTIME140.dll",
+        "api-ms-win-crt-math-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-locale-l1-1-0.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll"
+      ]
+    },
+    "facts": [
+      "Actual imports include VCRUNTIME140.dll and UCRT API sets; existing gate rejection is correct.",
+      "PS1 clears CARGO_ENCODED_RUSTFLAGS and sets RUSTFLAGS before VS setup; cfg proof invokes rustc directly with an explicit flag, not the actual Cargo compiler command.",
+      "All Cargo target builds explicitly use i686-pc-windows-msvc; .cargo config only has GNU rustflags, not an MSVC override.",
+      "Locked cc1.10.0 selects -MT when CARGO_CFG_TARGET_FEATURE contains crt-static for Cargo TARGET.",
+      "Bundled libsqlite3-sys0.30.1 uses ordinary cc::Build without explicit dynamic CRT override.",
+      "cc appends CFLAGS environment flags after its own defaults, so a conflicting CFLAGS/CL/_CL_ remains a candidate, not an observed fact."
+    ],
+    "bestCurrentInference": "Actual target CRT selection was not honored somewhere in the complete Cargo/link path. Because first failure is a mostly Rust example test harness, first distinguish global flag loss/override versus a surviving native-library import; do not blame SQLite without actual compiler or PE evidence.",
+    "missingEvidence": [
+      "Actual Cargo rustc invocation flags for this example and pure fc-domain/protocol test harnesses.",
+      "Whitelisted RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS and relevant target CFLAGS/CL/_CL_ immediately after VS setup and before actual Cargo launch; no full environment dump.",
+      "PE imports of a pure-domain test versus bootstrap product and C-dependent tests; can parse artifact bytes offline without running EXEs.",
+      "If Rust flags prove effective and only C-dependent programs fail, capture cc/build-script CARGO_CFG_TARGET_FEATURE and actual C compile flags or object directives to locate /MD."
+    ],
+    "safeNextStep": "Preserve current FAIL, obtain remaining raw Cargo logs, compare actual pure-domain/product imports offline. If logs omit effective arguments, next separately authorized CI should capture bounded cargo -vv and whitelisted exact flag state after VS; keep every existing CRT rejection and sourceSHA gate.",
+    "notAuthorizedOrPerformed": [
+      "No source/config edits",
+      "No Cargo/compiler/EXE execution",
+      "No remote or Git/CI write",
+      "No CRT policy relaxation"
+    ],
+    "primarySources": [
+      "https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes",
+      "https://doc.rust-lang.org/cargo/reference/config.html#buildrustflags",
+      "https://learn.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=msvc-170"
+    ],
+    "localPrimaryDependencySources": [
+      "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cc-1.10.0/src/lib.rs:2891",
+      "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cc-1.10.0/src/lib.rs:2820",
+      "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libsqlite3-sys-0.30.1/build.rs:120"
+    ]
+  },
+  "pending": {
+    "repairSourceSha": "AWAIT_ROOT_FROZEN_SOURCE",
+    "actualPowerShellValidation": "AWAIT_TERMINAL_ORIGINALS",
+    "explicitAdditionalAllowlist": "AWAIT_ROOT",
+    "newCI": "NOT_RUN_BY_THIS_TASK"
+  },
+  "preservation": {
+    "oldIndexFiles": 715,
+    "oldIndexSha256": "3ffce6ef6855491502378ba1c6117f3d701f6dd1f1d74701dc1e546aa38651b6",
+    "preparedOriginals": [
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-accepted-jobs-terminal.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-accepted-jobs-terminal.json",
+        "bytes": 2085,
+        "sha256": "f6bc825ad287d80770961254ee9a60f20d7cecaffe3bf317673c1a4274eaf398"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-run-tools.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-run-tools.json",
+        "bytes": 28426,
+        "sha256": "2cbc1a63bfe60041063196b68c83c7e4bc246bdac3a43f88d28833b483c33098"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/read-ci-sixth-nonbinary-ranges.py",
+        "archiveProposed": "2026-10-31-round30-read-ci-sixth-nonbinary-ranges.py",
+        "bytes": 4040,
+        "sha256": "acbc1f4c206e41d041c77abe90ae21d5af051639f6bb8c738c36e5addd904d26"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-originals.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-originals.json",
+        "bytes": 7153,
+        "sha256": "32e8c4a44ca288e441d1162cbb8e0c44f3ef423315dbe9faa9d7e81f5f240808"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/read-ci-sixth-import-diagnosis.py",
+        "archiveProposed": "2026-10-31-round30-read-ci-sixth-import-diagnosis.py",
+        "bytes": 5373,
+        "sha256": "c18496f07abb9461161276503a022f465c7f832aebb893ddc1f60436b9e8be2e"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-import-diagnosis.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-import-diagnosis.json",
+        "bytes": 5002,
+        "sha256": "802e57bb73b78953433fce09c2f8cb58e9eeb4677fbdcaa83ff6c02954a98fa1"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/windows-pwsh-availability-readonly.json",
+        "archiveProposed": "2026-10-31-round30-windows-pwsh-availability-readonly.json",
+        "bytes": 3746,
+        "sha256": "0d4bba0bac10c617d5778aedff5641c51f8dad9fb308e49ffb9aacf60e2bb05c"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-crt-core-readonly-review.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-crt-core-readonly-review.json",
+        "bytes": 3855,
+        "sha256": "43d1db3e2bdf8ae9c766c8d767b35711e4a76e2256ff0cab6df4cb2f1affde9c"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/bootstrap.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/bootstrap.json",
+        "bytes": 493,
+        "sha256": "fa1c8586ffa95e64e3bf0ab79396b7ab0f2b8d2544decc4a6c224a59e739a177"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/cleanup.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/cleanup.json",
+        "bytes": 530,
+        "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/failure.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/failure.json",
+        "bytes": 153,
+        "sha256": "21782ebbd7b50505fe133e7a53e8dfa3f286c4358105de2aa74ce63ba63edf7a"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/cargo-metadata.stdout.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/logs/cargo-metadata.stdout.log",
+        "bytes": 26321,
+        "sha256": "4b385b8bedfaeef54c2e7dcdeb5a3b35053bab90d1f4acb7aaedacc272427036"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/pe-imports-0.result.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.result.json",
+        "bytes": 693,
+        "sha256": "c046ddbf699740bd2e1e0bfe655a83348f6ad8dfdab06775bf397efdef2033ac"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/pe-imports-0.stderr.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/pe-imports-0.stdout.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/logs/pe-imports-0.stdout.log",
+        "bytes": 757,
+        "sha256": "75a5c41b2be570c92d8e84e2ef69cac02faad110026a39bb1309bb0797a40ca0"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-range-raw/result.json",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-range-raw/result.json",
+        "bytes": 12841,
+        "sha256": "ca09106d7edcd070918d72ff991daf9728a3133a31a2ea8aad1fa48b92e7ce2f"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-import-diagnosis-raw/logs/product-compile.stdout.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/product-compile.stdout.log",
+        "bytes": 99511,
+        "sha256": "70a1eb665809711bad886984b0bc6d04820df293881c1c2e40c1059a34e83190"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-import-diagnosis-raw/logs/rust-target-cfg.stdout.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/rust-target-cfg.stdout.log",
+        "bytes": 625,
+        "sha256": "b71a82b0c5976579904ffd5ab2aefe99c193456657819ba81082ffe3847387aa"
+      },
+      {
+        "original": "/tmp/fc-round30-evidence/ci-sixth-import-diagnosis-raw/logs/workspace-test-compile.stdout.log",
+        "archiveProposed": "2026-10-31-round30-ci-sixth-import-diagnosis-raw/logs/workspace-test-compile.stdout.log",
+        "bytes": 120614,
+        "sha256": "e72c0a6888cdde23d9d3a23ae2febbbbe739a56c2d3340fa35ce0e7be0feb9b8"
+      }
+    ],
+    "archiveCopiesPerformed": false,
+    "indexOrProgressChanged": false
+  },
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}

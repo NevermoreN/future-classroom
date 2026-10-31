@@ -1,0 +1,41 @@
+{
+  "scope": "Round30 fixed two-slot Windows upload Hub",
+  "sources": {
+    "crates/fc-bootstrap/src/web_transfer/uploads.rs": "03493416099deaa72c6692aab851ef0012b93920a0414a4cbcd05b4095cf2102",
+    "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs": "7643c8e381dff41e1bae902303417e3ecf7c8c8026267c380b37a43c824b93d2"
+  },
+  "validation": {
+    "rustfmt": "pass",
+    "git_diff_check": "pass",
+    "cargo": "not run; parent instructed no build",
+    "windows": "not run; parent owns final compile and actual run"
+  },
+  "tests_added": 5,
+  "API": {
+    "finish": "Result<UploadFinished { response, network_control: Option<TransferControl> }, UploadHubFailure>",
+    "append_ready": "Backend is &Arc<Mutex<Backend>>; slow prepare outside mutex; try_lock only for short commit",
+    "drain_after_join": "UploadHubCleanup { pending_slots, quarantined }; coordinator only after actual pool join",
+    "key_for_request": "(RequestToken, &JobContext) -> Result<Option<UploadKey>, UploadHubError>; complete token, includes Owned/Busy, fresh context even after old life cancelled",
+    "ready_material_key": "(upload_id, &JobContext) -> Result<Option<UploadKey>, UploadHubError>; Owned MaterialReady only, matching Busy returns Busy, no authorization",
+    "cleanup_request": "(RequestToken, &WebApplication, &JobContext) -> Result<(), UploadHubError>; call only after original Begin task really done"
+  },
+  "ownership": [
+    "Net UploadHub contains Weak only; public operations require current JobContext before upgrading Shared.",
+    "Fixed two entry slots; one process Owner gate; abnormal Drop saves same Shared in fixed one retained registry.",
+    "Material Ready retains original stable control/lifetime across bytes connection completion; append reauthenticates with new request and old life.",
+    "Voice physical finish returns original atomic-only control to Net before its 201 is sent.",
+    "Native stage/proof/pin never leaves Hub or current worker via reply; actual disposal precedes logical slot release.",
+    "Cleanup failure remains charged in original global two-slot quarantine.",
+    "Unknown SQL publication preserves final file for existing quota/reconciliation, never deletes it as unpublished."
+  ],
+  "nonclaims": [
+    "No connected HTTP/TLS bridge or production listener proof.",
+    "Tests have not been compiled or executed yet."
+  ],
+  "lookup_regressions_added_to_existing_cases": [
+    "Receiving has request key but no Ready key; successful finish exposes Ready; append clears both.",
+    "Unrelated full token cannot resolve same slot; cancelled old transfer remains discoverable.",
+    "Actual cancelled worker after Begin deliberately loses positive metadata; fresh task resolves original token and physically cleans file.",
+    "Actual held native lease exposes Busy request key; Ready lookup cannot claim it ready."
+  ]
+}

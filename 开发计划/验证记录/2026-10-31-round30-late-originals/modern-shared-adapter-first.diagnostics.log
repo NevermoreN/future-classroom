@@ -1,0 +1,38 @@
+warning: field `0` is never read
+   --> crates/fc-bootstrap/src/application.rs:405:10
+    |
+405 |     Http(fc_bootstrap::web_transfer::HttpCompletion),
+    |     ---- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     |
+    |     field in this variant
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+help: consider changing the field to be of unit type to suppress this warning while preserving the field numbering, or remove the field
+    |
+405 -     Http(fc_bootstrap::web_transfer::HttpCompletion),
+405 +     Http(()),
+    |
+
+
+warning: variant `Http` is never constructed
+   --> crates/fc-bootstrap/src/application.rs:479:5
+    |
+478 | enum Work {
+    |      ---- variant in this enum
+479 |     Http(fc_bootstrap::web_transfer::HttpJob),
+    |     ^^^^
+
+
+warning: struct `SharedHttpTicket` is never constructed
+  --> crates/fc-bootstrap/src/application/http_executor.rs:21:19
+   |
+21 | pub(super) struct SharedHttpTicket {
+   |                   ^^^^^^^^^^^^^^^^
+
+
+warning: function `completion` is never used
+  --> crates/fc-bootstrap/src/application/http_executor.rs:43:4
+   |
+43 | fn completion(outcome: super::Result<Outcome>) -> Result<HttpCompletion, JobError> {
+   |    ^^^^^^^^^^
+

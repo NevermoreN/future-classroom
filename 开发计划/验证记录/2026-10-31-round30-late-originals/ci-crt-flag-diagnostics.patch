@@ -1,0 +1,53 @@
+--- a/scripts/windows-msvc-ci.ps1
++++ b/scripts/windows-msvc-ci.ps1
+@@ -128,6 +128,26 @@
+         throw "Application path is not an existing absolute file: $Name"
+     }
+     return $path
++}
++
++function Write-CrtFlagState([string]$Phase) {
++    if ($Phase -notin @('before-vs', 'after-vs', 'before-cargo')) { throw 'Invalid CRT diagnostic phase.' }
++    $flags = [ordered]@{}
++    foreach ($name in @('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS')) {
++        $present = Test-Path -LiteralPath "Env:\$name"
++        $value = [Environment]::GetEnvironmentVariable($name, 'Process')
++        if ($null -ne $value -and $value.Length -gt 4096) { throw 'Compiler flag diagnostic exceeds bound.' }
++        $flags[$name] = [ordered]@{
++            present = $present; value = $value
++            length = $(if ($null -eq $value) { $null } else { $value.Length })
++        }
++    }
++    Write-NewJson (Join-Path $Logs "$Phase-crt-flags.json") ([ordered]@{
++        phase = $Phase; powershell = $PSVersionTable.PSVersion.ToString()
++        dotnet = [Environment]::Version.ToString(); flags = $flags
++        cargo_precedence = @('CARGO_ENCODED_RUSTFLAGS', 'RUSTFLAGS', 'matching target rustflags', 'build.rustflags')
++        scope = 'Two exact process variables only; presence is distinct from an empty value. No environment dump.'
++    })
+ }
+ 
+ function Get-ActiveProcessIdentity($Process, [DateTime]$Deadline) {
+@@ -358,7 +378,9 @@
+     $instances = @((Read-Output $vs) | ConvertFrom-Json)
+     if ($instances.Count -ne 1) { throw 'No unique installed Visual Studio 2022 x86/x64 toolchain.' }
+     $vsPath = [string]$instances[0].installationPath
++    Write-CrtFlagState 'before-vs'
+     & (Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1') -Arch x86 -HostArch amd64 -SkipAutomaticLocation | Out-Null
++    Write-CrtFlagState 'after-vs'
+     $cl = Resolve-Application 'cl.exe'
+     $link = Resolve-Application 'link.exe'
+     $dumpbin = Resolve-Application 'dumpbin.exe'
+@@ -391,9 +413,10 @@
+     # Independent checks retain separate first/final command evidence. No tests run.
+     Invoke-Logged 'fmt' $cargo @('fmt','--all','--','--check') 300 | Out-Null
+     Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null
+-    $tests = Invoke-Logged 'workspace-test-compile' $cargo @('test','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') 2400
+-    $binary = Invoke-Logged 'product-compile' $cargo @('build','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') 1200
+-    Invoke-Logged 'clippy' $cargo @('clippy','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') 1500 | Out-Null
++    Write-CrtFlagState 'before-cargo'
++    $tests = Invoke-Logged 'workspace-test-compile' $cargo @('test','-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') 2400
++    $binary = Invoke-Logged 'product-compile' $cargo @('build','-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') 1200
++    Invoke-Logged 'clippy' $cargo @('clippy','-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') 1500 | Out-Null
+     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+     foreach ($build in @($tests, $binary)) {
+         foreach ($line in [IO.File]::ReadLines((Join-Path $Artifact $build.stdout), $Utf8)) {
