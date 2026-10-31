@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "startedUtc": "2026-10-31T22:19:44.448600+00:00",
+  "commitProof": "a9f21026419e74457684ec93e5667cbe4af4a24d",
+  "removed": [
+    "/tmp/fc-round42-modern-programs",
+    "/tmp/fc-round43-win7-tls-expect-worktree",
+    "/tmp/fc-round43-win7-tls-expect-evidence",
+    "/tmp/fc-round42-ci-evidence"
+  ],
+  "retained": [
+    "/tmp/fc-round42-package",
+    "/tmp/fc-round42-web-assets",
+    "/tmp/fc-round41-frontdoor-deadline-worktree",
+    "/tmp/fc-round41-frontdoor-deadline-evidence",
+    "/tmp/fc-round41-build-target",
+    "/tmp/fc-round41-programs-second",
+    "/mnt/data development ZIPs",
+    "persistent SSH authorization and key",
+    "original main target and global tool caches"
+  ],
+  "processesKilled": 0,
+  "removedByFirstAttempt": [
+    "/tmp/fc-round42-modern-original.zip",
+    "/tmp/fc-round42-win7-original.zip"
+  ],
+  "completedUtc": "2026-10-31T22:19:49.069387+00:00",
+  "scope": "Exact committed byte proof preceded cleanup; original ZIPs already removed in first attempt; now modern22EXE copies, merged R43 worktree/branch and finished evidence copies removed. Active R41 roots and its R42 web/package dependencies deliberately retained. No process killed or system configuration changed."
+}

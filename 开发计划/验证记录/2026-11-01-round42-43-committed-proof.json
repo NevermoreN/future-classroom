@@ -1,0 +1,3003 @@
+{
+  "status": "PASS",
+  "recordedUtc": "2026-10-31T22:18:40.511969+00:00",
+  "commit": "a9f21026419e74457684ec93e5667cbe4af4a24d",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 3199,
+      "sha256": "10ea086a240bd7fbaf3cb41c521a4aa4cd325d8318767d5f3ed855f9b0f61a9f",
+      "gitBlob": "36de932b83a32d2d030679f868f5476912e41fd8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71",
+      "gitBlob": "0e015415fedb9da33076b99bb178ff19c9def745"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74",
+      "gitBlob": "3e74375795f605f5cb88eae517d29f51c877e31b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322",
+      "gitBlob": "773bb8505451c7847723e26afc74e235b8a75399"
+    },
+    {
+      "path": "开发计划/09-Rust构建验证与发布门槛.md",
+      "bytes": 25640,
+      "sha256": "c5d7f5ee3eed84e725d785295702b8bbb948a2699268042c346135751d6ce922",
+      "gitBlob": "fc0a06c67c23f95b7fc489337c8f3eed830d4f62"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 406099,
+      "sha256": "b4d1e049392246d8797771db8ef5544b818970e66360f10da40efb16e554c8f8",
+      "gitBlob": "1e2d7cfb65474a0dbac5ca0b6046426ec27c954a"
+    },
+    {
+      "path": "开发计划/11-Windows兼容矩阵与验收.md",
+      "bytes": 56431,
+      "sha256": "47f509e7de1a80c4ce8bbbada1289297f78a531bdfe9e29dc3679fc382c9c74f",
+      "gitBlob": "599c67869a1426ebc8acfaa41e8ca027757f61eb"
+    },
+    {
+      "path": "开发计划/15-教师语音API契约.md",
+      "bytes": 13596,
+      "sha256": "0477d286126d8fd0c735a487efe3f6755873f2d801330ad5b06d91e68278ae34",
+      "gitBlob": "10031bb973deb6a29bf9cd0bd1c06e18e435ce73"
+    },
+    {
+      "path": "开发计划/26-本地远程语音设置.md",
+      "bytes": 13859,
+      "sha256": "1b80ce1da61abeffa9908775a8a96fe4619ff5b4992c2c3a5831bbf9f0e3c98a",
+      "gitBlob": "8dcf0f4bf7726dd81faddec16f3400c91bef835c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-43-archive-first.json",
+      "bytes": 991,
+      "sha256": "defcb2203460249ce94da5b0ff7a74eaf23aa75745139915add9d175309cb5ef",
+      "gitBlob": "c155af77ca6a5bacceb291a101618b28c06df9f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-43-staged-proof-first-guard.json",
+      "bytes": 20257,
+      "sha256": "86c07f5f863d2a9e141bd605ce1aef79dc9eab4af97f38af17fbaf822af4f69e",
+      "gitBlob": "0525ddafa39c50c1488f49946bce165bfcecc4e8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-43-staged-proof.json",
+      "bytes": 88331,
+      "sha256": "90863b792aeb6c98ab37790e46c72b9088654d8a275c342f4853b0bae6881bac",
+      "gitBlob": "2ffbfd0f1c6a82689a69a0dc3dc00f8febaec77d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/.owner",
+      "bytes": 42,
+      "sha256": "0334585d9b62bb9185fa793bad0bf39c7113e297d94b91c8ecdb828623ee3d19",
+      "gitBlob": "0bf40d678511939f8fa3337994919fd5a0f6a80d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/FutureClassroom-round42-windows-msvc-dispatch.json",
+      "bytes": 21353,
+      "sha256": "3de8343e965ce1c0b724ca3271466527309d883e64ace77263ff42c7a933348f",
+      "gitBlob": "e816a605b3f0674e448ad895859d4aa613a3af14"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/FutureClassroom-round42-windows-win7-msvc-dispatch.json",
+      "bytes": 21441,
+      "sha256": "db060f5fb659b8753c0b56e855d019265215fd8ea67b46587fe4a4b4605e79c4",
+      "gitBlob": "d8cee13f89b0090709dc59244a67685904ae9147"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/INDEX.json",
+      "bytes": 81199,
+      "sha256": "8a2354b563311191c93e3ac5eeac9ed689a33711bde05cfdf3243da3182736a2",
+      "gitBlob": "19c670380fee1cff2b13de42e894bf06cf0b9bc0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/archive-candidate-manifest-first.json",
+      "bytes": 287509,
+      "sha256": "2ac2e29bccfe1584ec05a4e5beea986dc6e18469ae6ee15222e1343577225850",
+      "gitBlob": "a30da4923e5d4e03d719ee68704a6a61916d3078"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/archive-candidate-manifest-second.json",
+      "bytes": 289970,
+      "sha256": "f5e6fd152c284da64656c92a3847299e4577ef6a99388544c8b228ec326bef1e",
+      "gitBlob": "41a79f143e904badd01969bf31cf5572f7f91f70"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/archive-completed-root-first.py",
+      "bytes": 3082,
+      "sha256": "bbc64d5233301e492f121e971c1a2d290e2885087676039630828b532f93c7d4",
+      "gitBlob": "4784e8a01fe39c7415febaa7be1022c37ce00d49"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/archive-results-doc-suggestion-first.md",
+      "bytes": 7611,
+      "sha256": "8705bbe0c8985dc6b499ae04f2f0cae287278ccf9b13b424f8f8e5dab307e2ee",
+      "gitBlob": "ecac92efda2a434f703100ad31bdefbe6f306657"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/archive-results-doc-suggestion-second.md",
+      "bytes": 8098,
+      "sha256": "650ea11bb3aca1d7b0320aa9df32ae0fd44a716473ec68fbc89a8d24f1dec2ec",
+      "gitBlob": "a71f3f60cc54779a36750a7ef3bfe751a2ae0b56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/audit-windows-readonly.py",
+      "bytes": 9867,
+      "sha256": "150124289e9851a90fff3bab4b76fd11120baa4feef2179cb664eca71c5c0669",
+      "gitBlob": "e08daaf408489518b15ba2225eed19aa2a4ece11"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/dispatch-ci-once.py",
+      "bytes": 5179,
+      "sha256": "3a9c2970f015e5d4f77470ecc1f542d66e41bead9e014746d06dbb6955f46d6a",
+      "gitBlob": "e59e31ab5713622d9d129434ab23d57375acf248"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/download-modern-original.py",
+      "bytes": 3270,
+      "sha256": "3d23b46aae9cd3f9684968302216fa4a4b42f65fb64fc4c20fa3aa06a586b977",
+      "gitBlob": "e17cd28709ed24035bcd7a2f352bc02413fd1e57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/download-win7-original.py",
+      "bytes": 3260,
+      "sha256": "75ae0a63160b05f0e39408916725b1a8f9ad1e13cde170cf28e76d6d2d85472f",
+      "gitBlob": "5797babef8f5d4b3fd5098d8a39798f5bc84a04e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/live-ci-handoff-first.json",
+      "bytes": 1562,
+      "sha256": "b1073299ec27e8d0b536979e43179c959505391bb06afa663f8df5d07f6ae2fc",
+      "gitBlob": "790b99a026363701ca9dc948c541e49d108edb88"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/LICENSE",
+      "bytes": 1088,
+      "sha256": "32b48e0a752c101a54d4ea1affc589dd99d8b553c72bedba17c6e2e30d319b30",
+      "gitBlob": "61c71186c1ae732581ba17bf4037938af84d9263"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2448718,
+      "sha256": "0bf19c345f74c394a7ba30f0059db8bd1943d30d564165eefe3eb3205c2c72c9",
+      "gitBlob": "9ab88f071f2856cf840012de66a32e2393c19c73"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/artifact-sha256.json",
+      "bytes": 30689,
+      "sha256": "e4b77701026189a36b43bdaa34915a038fab15045412844b297be2e248d833ce",
+      "gitBlob": "e6aad7c7ef081ba357ac280d723e7bf000d80026"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/bootstrap.json",
+      "bytes": 493,
+      "sha256": "297ef740c474eaed69f26b66af358881e20f67a4c4da59ec94d410ce0cee3f4c",
+      "gitBlob": "846332ba0d3889cfdc9ad06f00b7475d0bd2bd05"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+      "gitBlob": "c399a4ac454445291829a3456b976f4dc8cbe4ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/executables.json",
+      "bytes": 10960,
+      "sha256": "905ec5b42e7629a2d6cf7302223f9452cd976687c92c4670060911289e93a239",
+      "gitBlob": "d24a259473e6ae87eeb2db67c5cf0dfe2595313c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/host.json",
+      "bytes": 470,
+      "sha256": "230a0c60cf2466983b42b66d432d841531c5eca26346fe3b802726e75a8823b6",
+      "gitBlob": "60772757c9f3430ef7d3a9a837362f3cd110a23a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/input-sha256.json",
+      "bytes": 1386971,
+      "sha256": "c6170d972aafdd58dbfdc3dc5aed2a5d6ec1e5767ce3d7504d3bdd20f11eee0b",
+      "gitBlob": "b41e627bdce0c437feb4ad518104805c911fce4d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/after-vs-crt-flags.json",
+      "bytes": 655,
+      "sha256": "48d388b0526a3fe341a41ffa7565f21f86e8dfd43d1117a4301936769447163e",
+      "gitBlob": "343c5f64bbc5394029162fdafc5f32aef3767f10"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/architecture.active.json",
+      "bytes": 136,
+      "sha256": "2d4cfd2f3a3f4b9e46a830821f1d79acd0697e55fe162dfab0a5cd13b8273bc5",
+      "gitBlob": "dfcc3752e3ab879bd3c6ebfa6485c2530544ff92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/architecture.result.json",
+      "bytes": 522,
+      "sha256": "bdbc0af3cb259160b28cd7864d57e9cc3f8cbc0ba98055a2737bdc46f3a48f4c",
+      "gitBlob": "c3cd115a8d803bea3edc7f0648d17fd2d53ebe56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/architecture.stdout.log",
+      "bytes": 72,
+      "sha256": "87cbea92b1a7c0033871466cdea2da1a756ba4496cc5f3b6d25f79ec64f378c6",
+      "gitBlob": "e79df3c99281d772ae1b5a7002400dc414459387"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/before-cargo-crt-flags.json",
+      "bytes": 659,
+      "sha256": "82275d03dfef55736dbff319e08b7e23bd8daa9a83a7f6f6aa71a391b4747af3",
+      "gitBlob": "39919e81a0a0efa8089aa4f228465ef1772ce732"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/before-vs-crt-flags.json",
+      "bytes": 656,
+      "sha256": "dd474024dd355423bac97d2b9393a3949c2f2fca1bafa124f8b383cf5e212203",
+      "gitBlob": "5c962acd0f09c44edaf92545c479272de8f30e01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-metadata.active.json",
+      "bytes": 120,
+      "sha256": "dc0bde69ca13fa24f36fa95b14cc50ffa093e0957d7c532f471287f0c06f2d4b",
+      "gitBlob": "d288ccebad97e97bf8a084d0ae18c64cc7a3c9a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-metadata.result.json",
+      "bytes": 561,
+      "sha256": "02295e9bc300a5abd19aa5af646ae4539c143a81ce3c8ebb6d88efbb8d4e7798",
+      "gitBlob": "d6f66b68ae542f7e93b0e6fcd3c786c9b8fda0d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-metadata.stdout.log",
+      "bytes": 26349,
+      "sha256": "d43356f4dc3414901d437210cae95c4d1f0d9030dd94b5c179cadabcdafc2b09",
+      "gitBlob": "edf103065d6269da4e95de3c0b4e17a36732a129"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-version.active.json",
+      "bytes": 120,
+      "sha256": "67628fa1de208f2fe181ddad73d95a0beabfc982533fbcc7034cf3a31ab25b57",
+      "gitBlob": "0623f3df167f9fcc265d6c495a2f59a5860d725c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-version.result.json",
+      "bytes": 507,
+      "sha256": "3ac19d2c63739ac1b255dc576ecd141aa480b825e841aaf1c586aa5ea3b76e15",
+      "gitBlob": "bafe9ebff2fbeab0a87bdd44da6f3902cadf1eff"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cargo-version.stdout.log",
+      "bytes": 328,
+      "sha256": "c6a8233f08426198bd488c0b77595ec9ef60c0a2136e24a29db40169f9db5731",
+      "gitBlob": "c4222e2862e1e20b50e53a92ad1ec16480505004"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cl-version-probe.active.json",
+      "bytes": 191,
+      "sha256": "1dcc4b1323eb585b22a226fe020872934feabafcc97685400436ac155d827b71",
+      "gitBlob": "7d99671ecb883a36dde3083a58dd51d7558e8807"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cl-version-probe.result.json",
+      "bytes": 781,
+      "sha256": "e63932b7691c610558a0b4aba6cf4b1819ef217e3cb67fd13a36a66bb2fbdd3d",
+      "gitBlob": "b56427460b775dd1051acfc1a2a9d4d120dc50c8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cl-version-probe.stderr.log",
+      "bytes": 1124,
+      "sha256": "4abd17eda59dbad0286f86d1dfe6dae2e84693133b14e8fca4ee883f0e224749",
+      "gitBlob": "b6e66facd5238fc4c419022dfb98528214f5a374"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/cl-version-probe.stdout.log",
+      "bytes": 20,
+      "sha256": "5659d789099daaf7eef45081ce59db678cbf430fd37d54ebf5e1b7d113cec605",
+      "gitBlob": "10cb36ff821b6323f8125abbad02f9a8b14fb0ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/clippy.active.json",
+      "bytes": 120,
+      "sha256": "951b266eecf2c7e3be8e2604b04164f532697e43a38d57b8ebc12a65481b2e2a",
+      "gitBlob": "db5bf04eb978e3bbd3b9f486698b5258cdaa1d2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/clippy.result.json",
+      "bytes": 640,
+      "sha256": "c3918f3b5a5b1a522f33d8628db76f7f02766fb2e780568495d786f81206eaba",
+      "gitBlob": "399ff610df8adfac336f012a51ac18cf28377596"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/clippy.stderr.log",
+      "bytes": 804086,
+      "sha256": "98f77f7e47bd1ded024aaef45a41faec5774ed3aef87b9c5220876edad254250",
+      "gitBlob": "10a658d20ae4a3350331f38c93b1d28373ecbbe7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/clippy.stdout.log",
+      "bytes": 75,
+      "sha256": "7e2ed6c6ec8d2782960220c7609bbac84c2229bf9bbb58d37d8bde08c88ddcb3",
+      "gitBlob": "4918abf2e0b920fc1d6f5ffa0adcd15269e72251"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/fmt.active.json",
+      "bytes": 120,
+      "sha256": "2d09cc2c55500f9895aa9790f960c47ec79e993dbe29d31e979219190ceb5993",
+      "gitBlob": "7090a8aae25a2dff6bfaaca8cb3e7dddc30ac1cc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/fmt.result.json",
+      "bytes": 494,
+      "sha256": "686d18dc910a84bdd63f08c276c4543086566aa214ca950f0a789e5c89c82149",
+      "gitBlob": "3cb371aa4d1b26a388fc4adb2f1ff861aaf7d71d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/install-fixed-rust.active.json",
+      "bytes": 121,
+      "sha256": "73778acaf378835055c3f64f0f7d2fdef9584c8fe94ec33142f9f5c4c2567faf",
+      "gitBlob": "6ea7b9de27ce605b5bfbbff8b55e1e2b0a3c8be2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/install-fixed-rust.result.json",
+      "bytes": 710,
+      "sha256": "207e6c6d67e51afb4901058f9e5e95240a068c5408db299da90cfb8a6fd6d31c",
+      "gitBlob": "8d457f7174e2762dad650bb75dd8c7fb8b18714b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/install-fixed-rust.stderr.log",
+      "bytes": 252,
+      "sha256": "736b79282dc0ccb865c546083641434c61e2eb4c276e30079cd5ab1f8aae518c",
+      "gitBlob": "2233d5769f33328972d2bd2e63f4aca5b3ccf7c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/install-fixed-rust.stdout.log",
+      "bytes": 123,
+      "sha256": "9a0b4d69b31c145f26e2ca9ea017a1e32b6ee72aa47c7d8568a731489a9ecef0",
+      "gitBlob": "8f1cc4e6e0e8bbdaae70aad68a9c24680a63f074"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-0.active.json",
+      "bytes": 196,
+      "sha256": "0565171391983f5f4101c2a6c7ef534b145366e98327fda5772924e28939fa9d",
+      "gitBlob": "c8fe6b571b867ae563a9ff28d26476957ed7b853"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-0.result.json",
+      "bytes": 696,
+      "sha256": "9e0ec72ad39d141b55fd4ca2abddb90b0121115cbefd53f16219b9dd7242194a",
+      "gitBlob": "94f168d8b9139ebdda29d277087fa6a24524d7fc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-0.stdout.log",
+      "bytes": 557,
+      "sha256": "c5ed31688fe4d1d6c11ca8411703f3bd6d856d3fd6ec464ff1f23b453a1348c3",
+      "gitBlob": "b17aca0cb3941369a4786c6c2f0242713685cf81"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-1.active.json",
+      "bytes": 196,
+      "sha256": "3a8181728ce444dee59fb3fc6d593816956fd2fc166a56c6da6e9eac96aab531",
+      "gitBlob": "e2fb6da013f186c6d6a7c1a4503c03774037b8ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-1.result.json",
+      "bytes": 693,
+      "sha256": "6d469ba9529c8fc2dbf3847d3e04479f0b0ee6f759740d87109cb095dcef8bec",
+      "gitBlob": "0006b369938d6056900037c9738b7223edc58d74"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-1.stdout.log",
+      "bytes": 572,
+      "sha256": "799eaeea94fd9f558e6394e17c33deb4d5f72c10cb5c381ab9a91d4595c1e6dc",
+      "gitBlob": "e66cbee133f215111c156f160496dd7ac1828a8b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-10.active.json",
+      "bytes": 196,
+      "sha256": "dd58720975c326fade6bd2d2051599dc6783636661cc59703fb19b9b43be24d0",
+      "gitBlob": "27801be51ea10b5aa0239f5b987d0109562c907c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-10.result.json",
+      "bytes": 691,
+      "sha256": "3517c9c62bc57d5e56c7746b538ab158812c987961c0894730c8dac867ac3088",
+      "gitBlob": "a21e6e35ca36cedc800a6c35fcf0fc0c653732a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-10.stdout.log",
+      "bytes": 549,
+      "sha256": "991bdf0840ea0093a9b1f93b0aa5455f8ebe6bb0063049a6f1927dfbc9ace527",
+      "gitBlob": "b0ed252769c5e30d1b471c0fda4e874602fff296"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-11.active.json",
+      "bytes": 196,
+      "sha256": "f9b4486ae0a272289141f0ff573b391fe664521c3b98769999a322fb11ea2c94",
+      "gitBlob": "2470ef0e205f12f9a8ab3cf66cf3866018f84d82"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-11.result.json",
+      "bytes": 689,
+      "sha256": "b08ba36ccb647d9d47ec83dc152e2567ec26be5953ca1f7039d01d5ddf3f49e1",
+      "gitBlob": "22b67b127a624f523e6bfb96971364d18fdb4fcc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-11.stdout.log",
+      "bytes": 547,
+      "sha256": "105c3ae786034fcdc219b06bbefb1ef681651c1090dd4dd27d5810ee5f247553",
+      "gitBlob": "8a16596f3e830aa999445aa7b123d3528313332b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-12.active.json",
+      "bytes": 196,
+      "sha256": "48795133c4bc8545e0386cd05e30f233331ec6ce45079b806e5ac83e5416258c",
+      "gitBlob": "071f107f9777c9a4cde9f88aa243eb11b0acdc5b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-12.result.json",
+      "bytes": 687,
+      "sha256": "6ee554cbee05fc89d659ac3fcb30868dfd3ae03a265eca510a0fd5c984ef7870",
+      "gitBlob": "6592d37a962647dbcde1fce7b624cae0e6bd2d3e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-12.stdout.log",
+      "bytes": 870,
+      "sha256": "4b6bc006748d4c2b613f44f89b788ac3b8b0085632d8b829187ab08a87a384dc",
+      "gitBlob": "81fd4846a41087bcc885c384285409f61a9d6a01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-13.active.json",
+      "bytes": 196,
+      "sha256": "bab701e8ae05cc5aa2f5f55b0cc56c67158cf93e1a107b6a11130653e2bf7634",
+      "gitBlob": "18a83b19b9cae5f6e221b8b36efd7d663d452c7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-13.result.json",
+      "bytes": 697,
+      "sha256": "b5ba7eb7c3e85d5ecdad9056ddc82d86c85d9cdaf69f6124880a032de6c9650f",
+      "gitBlob": "e1ebad16dc32bc0544e59b251bbf041b61d3683e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-13.stdout.log",
+      "bytes": 555,
+      "sha256": "c275df9cc9088a0f23ff78556591061f31066d50eb940742bd3f029e09604527",
+      "gitBlob": "a86ea19541516aedccc3e7852521f40ded258766"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-14.active.json",
+      "bytes": 196,
+      "sha256": "d4a74e9bfdc49cbb03e5621773a600eab0490179365da7826d1b8e2131f86226",
+      "gitBlob": "a4d1bd51e86c5b06a407c08ee48e4f8da4226694"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-14.result.json",
+      "bytes": 689,
+      "sha256": "d1b29bacd6b08d43da946d1f35b72e2f6fc734c3cc6333d93b267e79ef7e169e",
+      "gitBlob": "74232e9bc9f67aff81d75b3bee1e0d976fa1d6d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-14.stdout.log",
+      "bytes": 547,
+      "sha256": "3918198dad37d4ad922c361670536d769c52b95bc032b0f0908a8878b806c1e3",
+      "gitBlob": "f4a28b043b099da3445585a7768a1f10c98cc124"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-15.active.json",
+      "bytes": 196,
+      "sha256": "2a0b22d6d0e5f6758272c497fa8ffa5325e019428f4631a58d77242fbbe5ecb5",
+      "gitBlob": "f9e3e2e05b07542ef17d463a03be5f511688b412"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-15.result.json",
+      "bytes": 683,
+      "sha256": "c4fd9cf81ea5bb9b326f636113dad918261875fc0a4739873635b2cd6ccce16b",
+      "gitBlob": "cc40b562b224c6cba6fcc3098b1e782b741acd75"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-15.stdout.log",
+      "bytes": 541,
+      "sha256": "603319664e443820a4fde586a013269897c3f03c93a48340c3a64a481618a6fc",
+      "gitBlob": "67e96bf1efc2bb0f300e2d3689e47e2bb55f4e01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-16.active.json",
+      "bytes": 196,
+      "sha256": "301164db9c0693c8862f32d1d876d6ad331224a237fd9193ec247e6d048fc538",
+      "gitBlob": "f4e5554cf02210335eafafcf60e991604b9aa547"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-16.result.json",
+      "bytes": 687,
+      "sha256": "d2eaf42ac11dcc8c049069f14d9b499e4b17c61a141c444929584fb607239f25",
+      "gitBlob": "0971eb7be0807637b1fac088c7c4d5af682d8078"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-16.stdout.log",
+      "bytes": 545,
+      "sha256": "e06c6738543209d218f910891eea3b7a413b67eadf52c81d52a2c402482c6471",
+      "gitBlob": "25db5c9b1897db533ee876bfad59d995941f21e0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-17.active.json",
+      "bytes": 196,
+      "sha256": "dbea705ed1db8ab32c349c585df91974073dd2460727c3420ec28f05fab2f0c4",
+      "gitBlob": "9522125efd6b24483c466f4e397836822451f988"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-17.result.json",
+      "bytes": 695,
+      "sha256": "1c1978828913e13b1111d1cf540923267e04fe91755a3abc2724c98040d0b922",
+      "gitBlob": "068ca3e750296a6283d05bead3defdd8feab9cd2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-17.stdout.log",
+      "bytes": 553,
+      "sha256": "0cf76a81209779970b979176b5b2f2b3c50a5b20bf9d9fd8675f8575076a33cf",
+      "gitBlob": "01ecc501eac5167b6e6b9ca8b7fd41553bc5b68a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-18.active.json",
+      "bytes": 196,
+      "sha256": "1396ed43f4559d7399ba6c21479bf49cbc53bd6ded24ea34c66b3ea877770b06",
+      "gitBlob": "9622262a6c289bb71c978b163a2537c237bbf4d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-18.result.json",
+      "bytes": 687,
+      "sha256": "c8179af62590ffd17afdc5e0187b7fd704f19f1f25b6c69cf314a246ae8286d4",
+      "gitBlob": "84327f242383e870fd301cac4cc59c0b985acd5a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-18.stdout.log",
+      "bytes": 545,
+      "sha256": "cd1e0453d15a58527c1194aecc5fc78930988a32100ad5ef3ea7854093502eb2",
+      "gitBlob": "495ebd051400e2d8796ff4b0df62c06a1413dc2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-19.active.json",
+      "bytes": 196,
+      "sha256": "ab3ad510d8126a2450b7553c9ed10a6b58cd829928e706b65d085d2ab1db3725",
+      "gitBlob": "221e935fc98fae73bfc63f94390204001acb7f30"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-19.result.json",
+      "bytes": 683,
+      "sha256": "b209c9f403562c32df3a5e37d29d83d5c31bd7025c2f458f239c1324defb0259",
+      "gitBlob": "5aa8a3244561d76968e9cb6ea0227126623d0000"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-19.stdout.log",
+      "bytes": 541,
+      "sha256": "edd56958f160680cc59a879a823e177506a22ebeeabeba718f7b48c9900f0042",
+      "gitBlob": "8d54b989eab650e29e75eb81f463b6397e0e61f1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-2.active.json",
+      "bytes": 196,
+      "sha256": "6088514f7b631d54bea9eb2a458a1cfd936a7990a0459e2c9b57d28afe7eca57",
+      "gitBlob": "87f0ebc5de411ae0bfac132510cc619cd9e9f626"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-2.result.json",
+      "bytes": 697,
+      "sha256": "6e73c58aa96976337a64c7271a49f3a6ad693b73395c751a3eab18b554e25f52",
+      "gitBlob": "f6ff4137397622e9bbcbc06d9756c33fd82b7d7a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-2.stdout.log",
+      "bytes": 610,
+      "sha256": "3ec56c72c28c6be9e0242543a98e2ac2af05a15b25b8588e1daa0a432d69d984",
+      "gitBlob": "a2aa2e5ac598d39d67d96b17206f536a43d0d029"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-20.active.json",
+      "bytes": 196,
+      "sha256": "9142e8781751859bb4b5f29b66db04def4bf97a35a6e81cef1c85d37c914fa9b",
+      "gitBlob": "0fc6527fde72e89c97b568e91cf8b5c2f82b2a40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-20.result.json",
+      "bytes": 685,
+      "sha256": "8460efdc20daa02dac3253e8ffec2a7bc961cf2b34d912050b061b4d9725b77c",
+      "gitBlob": "68ba6ad709b8e7ba78d551ff7349f457a47e9429"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-20.stdout.log",
+      "bytes": 543,
+      "sha256": "93371711eeb1574b7379ba86b8a3e141f155e7d396272781e6fdd1d087211f4b",
+      "gitBlob": "cb4784f0fba8ce5690219d4dd39ed96491158a00"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-21.active.json",
+      "bytes": 196,
+      "sha256": "27eddedb7ef7cda0ddc232cb9ba5a81103b6dd01736cd20c9902162ab55b7c82",
+      "gitBlob": "099a1715ea547fa73c32e622777d8cfada71be49"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-21.result.json",
+      "bytes": 676,
+      "sha256": "3af13b6707eedd0379066b3c28b6f91a6e56c07eac10d287d54d4b733a4777c1",
+      "gitBlob": "784727e1b76d5b90919659dfb2b124260e88cc11"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-21.stdout.log",
+      "bytes": 910,
+      "sha256": "9e24065f8396324ff8d621f8b338d38193beef8a105201814d26c19d699ab4b3",
+      "gitBlob": "6406780e8012bf5e07e9557bf30ec68cf7e21619"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-3.active.json",
+      "bytes": 196,
+      "sha256": "72602ab318f244de91271bc00b3cd9cbd2ed2c1309731c4bad97d0a62ababb0d",
+      "gitBlob": "2fd46a7d85ae2510d8c4f827ba5723ceac0abfb4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-3.result.json",
+      "bytes": 689,
+      "sha256": "90965ce4454d548be22957fc6c816bb6042e77fc5579cf4e6a996fa813b13f6c",
+      "gitBlob": "916b1a6ae5d1e35737d57482c11d7f2db7d240e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-3.stdout.log",
+      "bytes": 550,
+      "sha256": "06c01cb7714f2ca06aafde751843d085ee8fe7e060251009cbb0c8ba0d2faa62",
+      "gitBlob": "74eb4573e27620d26dc551f28526879ca5770343"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-4.active.json",
+      "bytes": 196,
+      "sha256": "5a8997dbc3e28ece6860b90e3005d6d518e63d7b80725a54e2e25569c1a0b2ed",
+      "gitBlob": "54417f646d500a59db037e67d624762648f5985a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-4.result.json",
+      "bytes": 688,
+      "sha256": "2066bd44f126612aea3d68d9361236357a3b4aa2069a5ae564507f7b97daac72",
+      "gitBlob": "e501f47306ba139d8d7dfec95507a6df0c821248"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-4.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-4.stdout.log",
+      "bytes": 683,
+      "sha256": "284e00e04fe0590ae12f415b07f794d904783897db25dae842eb24058267415d",
+      "gitBlob": "83ac3df7213bc43d9b4d5c02473241ff3170e753"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-5.active.json",
+      "bytes": 196,
+      "sha256": "3a90d4a45646a5a0672cd0fe251d1e9057dded57311a4f04c77900f546b25177",
+      "gitBlob": "24c9a1a9e006c43ce2caedb5c2e803470df778dc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-5.result.json",
+      "bytes": 692,
+      "sha256": "0e1e198e9249b473f66e2b9a0368b95e1054376c0cab7f09136d859341880818",
+      "gitBlob": "5850e42e68a90ee50be5ee276dd5861ee3186c2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-5.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-5.stdout.log",
+      "bytes": 553,
+      "sha256": "b91d89687ec23f34db3801f23d594b9910131d22bd8b63dbb760b2d00626e785",
+      "gitBlob": "9e0263206ba9de4c1e71eda32927e5287ebe791b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-6.active.json",
+      "bytes": 196,
+      "sha256": "8fb033492636e8b81832d4c533806d1c560f2e5b35ac1b0ecb327e9a334970bd",
+      "gitBlob": "ab98a68de8c88e30097278128e4e1aa154e25c6b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-6.result.json",
+      "bytes": 694,
+      "sha256": "9dca9db739a475ff96cf8f54586974e4f25d0c197ede8191df7d6307f6f595d6",
+      "gitBlob": "a68a6383c534090b271570fc3da73dd0207d7a55"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-6.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-6.stdout.log",
+      "bytes": 608,
+      "sha256": "ca47588d9740ff99c885cc11ba09e85d8e372db109bbb124183031f6b2c0841f",
+      "gitBlob": "7087feeef9899161ed9a44b0b4b8ac4461228993"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-7.active.json",
+      "bytes": 196,
+      "sha256": "7d98ecea19f7b8d4af9156813a95059f1c2ea9ba389ec542eab1a21c99f945ed",
+      "gitBlob": "c64fe5128304b85ea577e644a13add7c015eaff2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-7.result.json",
+      "bytes": 688,
+      "sha256": "cf63e60ebbcf479d49251cda9c80c4972f426872b4b49798d44e27c0ba81ae9c",
+      "gitBlob": "8950954a982beb32ac6a51ed8329f4e7820a1b40"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-7.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-7.stdout.log",
+      "bytes": 876,
+      "sha256": "3c37fe9d96af48125c10e437fd9b1b351914fb907530a435e6830995206afd46",
+      "gitBlob": "ccba36c719d3e5239827fc75b14be2c719005be7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-8.active.json",
+      "bytes": 196,
+      "sha256": "d25fced70f7b6ab858f79ebc52f4509fc9cfff6234440a8c1bc76260c415e7b5",
+      "gitBlob": "34d4357a1988c602f3cf27a845bfd80838ed98d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-8.result.json",
+      "bytes": 691,
+      "sha256": "3e2132ae11e80bb8df9cd42db8a1e5540f3545c4841cbeced386e0e6212f9122",
+      "gitBlob": "de212c8d6a3454bd87c4c3d0a4ef753da5720fc6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-8.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-8.stdout.log",
+      "bytes": 552,
+      "sha256": "d90951238c2a5c18545393229a1494da08fec397976aa5f39ed4ac6e556bd3ad",
+      "gitBlob": "cb0a560d357b6d7e4c8baed366e8cd75c78699a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-9.active.json",
+      "bytes": 195,
+      "sha256": "d2cc2e6f5237c66b9a43d94f6189371c12bffe0088cd486043fd71ebb141bfbb",
+      "gitBlob": "498de22dff6f3a4fef0cd707bfc2e034b2df52a2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-9.result.json",
+      "bytes": 700,
+      "sha256": "e44c12086f7a848e4e423b4a29d1864660c459cf2e158c47736990178d7bad85",
+      "gitBlob": "002d02ddf30b3f866d93a9937362fb755ff36e24"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-9.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/pe-imports-9.stdout.log",
+      "bytes": 613,
+      "sha256": "a71e174bfe5338b29b338658d2725289dbe6c16b25b529a18c02c54405fc779e",
+      "gitBlob": "c493c6fdee8b14964ec2ac6ff864f36d436b90da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/product-compile.active.json",
+      "bytes": 120,
+      "sha256": "ba3e34d0be851829f620dc81f2ac5382aaa6d064f46fe09684d45aa88428fc0c",
+      "gitBlob": "79d3d0b4934d1914bdb42b142d959cdf4c35de65"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/product-compile.result.json",
+      "bytes": 681,
+      "sha256": "78ae5fb376ff80da72eb8c034f2009dca0467aa0022e149a0f2aa28032b680c8",
+      "gitBlob": "776762fdfaf7a7625e3fb4059661ba133dd207f4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/product-compile.stderr.log",
+      "bytes": 3352,
+      "sha256": "143df26a6ad4d46007c915f6f574d9995d3097a2509582fb4883ac492bbd080b",
+      "gitBlob": "f748025324e48b4dafc1f3adfa9fcbd04fadd8fa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/product-compile.stdout.log",
+      "bytes": 621275,
+      "sha256": "a2879794ac6be1eb7b58fb47cdcc91521466e6afde94b75339445521c71f5d3f",
+      "gitBlob": "59324be40ac3e381f957e6446c2678f6c8f3da01"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-target-cfg.active.json",
+      "bytes": 121,
+      "sha256": "7ff8af6ea17930a5ca0368c234344d7ee05e668057b621f656d338ff8f53c231",
+      "gitBlob": "beb2923ca36963ee35b724270693c6402cfbadc8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-target-cfg.result.json",
+      "bytes": 662,
+      "sha256": "4af519d29716de5ccf81f01a5c444f1d77984aa4efe440816fae31f3e4e4f945",
+      "gitBlob": "dbeca715045d82ea34c86d027af9082491ebbe4b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-target-cfg.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-target-cfg.stdout.log",
+      "bytes": 625,
+      "sha256": "b71a82b0c5976579904ffd5ab2aefe99c193456657819ba81082ffe3847387aa",
+      "gitBlob": "0ac7e4d17d5a7bb92dc938dc3cd55ce862233c60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-version.active.json",
+      "bytes": 121,
+      "sha256": "5e6fed923616e30ac2adcb0674e071c2951ff13b8d9ce9e9f8bb0e6aecd0059d",
+      "gitBlob": "e004b15876b47f5e057ae86c626326d3b9079a16"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-version.result.json",
+      "bytes": 545,
+      "sha256": "da8625caabfe3d9cd41a6744aad6ed920d07c5dffeb7dc517e7ab355899d1c49",
+      "gitBlob": "374863e4aeb0304d477c75c5d76afff00e822a1c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rust-version.stdout.log",
+      "bytes": 194,
+      "sha256": "7fad09dd8c16d49de37932475436003b5b1763c1015c5ce081ad7692db368ca3",
+      "gitBlob": "bf31aae7294d6d10364069b7e6a8a61c2c5f6dc8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rustup-version.active.json",
+      "bytes": 121,
+      "sha256": "a9f8abca61dbfa79a203e32821995330367880f600f989155d7989223e5ef12a",
+      "gitBlob": "972c281a06118e9bd503baa14ce16f0582d8b334"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rustup-version.result.json",
+      "bytes": 494,
+      "sha256": "b0e4c4e49003c9e97e3fc8a9d38ae8e9044c7fb866f531272f3ed1252c6219af",
+      "gitBlob": "ebf7859de1b8e35767ad9f0f9103057e9adbb8ca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rustup-version.stderr.log",
+      "bytes": 601,
+      "sha256": "0478f13aeb57c90184a9accb45f2d1d33250286c498d2858f8655e98caa9e702",
+      "gitBlob": "0e3d0be93c5d5e05a6d8ac8ab75c27ba679c1f06"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/rustup-version.stdout.log",
+      "bytes": 37,
+      "sha256": "9d0fa5abe0036a64d33be57d0945ac3cb1a44507774f93c5f70ca1a848307b40",
+      "gitBlob": "adf33ac10f27f3e77d755c789d80b67db5c03f19"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-after.active.json",
+      "bytes": 110,
+      "sha256": "fe051b75137925af87bee0c7a67c7366800af8cc78d5410af3841c1008b333f9",
+      "gitBlob": "b13329548e58d03e25863b7d71a9ced93d6c218e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-after.result.json",
+      "bytes": 541,
+      "sha256": "c055b4351498cc808f80f4202610f00be8866b97f0a19e10ea80be7e35d2ffa5",
+      "gitBlob": "4605a2805ab8985284165b07ca28e538410bfd34"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-after.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-before.active.json",
+      "bytes": 110,
+      "sha256": "622a2cf9b55affb221128e1d91b71a011586a6c443225a203f17bf0783c70f88",
+      "gitBlob": "4aa0eba779772ae56fbab26a2e8982850503df0c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-before.result.json",
+      "bytes": 544,
+      "sha256": "9a78f7e56dab05dd7bc505540ebfc6e58629d90928ed79be24510d29910df2c5",
+      "gitBlob": "00297eba2f3c2e4e421478d10b0b253fd602a575"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-input-paths.active.json",
+      "bytes": 110,
+      "sha256": "80371ec1a5e4c8d35805d18774b7ac6f632722a66ed3e42f5ba962b184fe80e7",
+      "gitBlob": "935aa39133edf08a99762eb49e302d2b7962e30b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-input-paths.result.json",
+      "bytes": 504,
+      "sha256": "1304d813a116ddd65e93405ad939e0be142cfe89c9a9a57a7bb0be8d9720edca",
+      "gitBlob": "7057576b4ad1bd5ed7a59fbdf93aca91a29f5aa3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-input-paths.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-input-paths.stdout.log",
+      "bytes": 558234,
+      "sha256": "8300d0d751d6c50cd82d698dde922f98299c3b69f2013297dd977bd91f1c248c",
+      "gitBlob": "6775ab26ef686331bc589126b81ab402044cc109"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "1122097fd748bc95f2b91833ba8b1a058998d216edd614d731214e0a5034083a",
+      "gitBlob": "f7c5534ec040a7b860673bf0de8d5607f0e66e97"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "8a056f63c69c0a8d17582259134df46b4c803a7d79b2c92e1a1dc85a274a4e11",
+      "gitBlob": "4e81c1426aa168e539b9cb58cdfeef02b2e20d3a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "04989e6897fd79a9850b4d90bed53436768b4bd6fb4238c201b3e37c690b1271",
+      "gitBlob": "e5536c7614f67db17a01d4c202c18db071fc1b3c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/visual-studio.active.json",
+      "bytes": 146,
+      "sha256": "ee0c73ca25bf60317131b821afe5cca06f19d69953531126d502104f0d3f5f86",
+      "gitBlob": "fe111c24533a13c4407976ee3e874fdd7d5e19a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/visual-studio.result.json",
+      "bytes": 683,
+      "sha256": "15ab538d7644aa8f121d28e3e4dd5663b56b66f664761bfc62d59592998a1169",
+      "gitBlob": "8baf1d8d61d734c98bd7cebf34382b557810bf70"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/visual-studio.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/visual-studio.stdout.log",
+      "bytes": 2469,
+      "sha256": "cc8305173b5f73cd5ee1ac24f411ca1841da66eb2d6ce7c7e8aa9f99832841ab",
+      "gitBlob": "f63d0733671f644951c4d513e02435e5a1d8d6e4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/workspace-test-compile.active.json",
+      "bytes": 120,
+      "sha256": "c551b2e136604853aaed269fcbdc8cb8acd4fdcf95a600d68c34df6428c76450",
+      "gitBlob": "e04c85b5bd2f23aa410fc940f5cdc68fe5f92194"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/workspace-test-compile.result.json",
+      "bytes": 695,
+      "sha256": "66b337336a96f44d91906bd9287e85a4a9c60722e6b2540e8fb71a59de3fad44",
+      "gitBlob": "4c553621836101a16346646fc7778ff9e5b2c016"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/workspace-test-compile.stderr.log",
+      "bytes": 991781,
+      "sha256": "8e2948ca59b9126040032e16a9f05672dca2fe3327b0baf00a39e9639e808477",
+      "gitBlob": "53a943907ea2b47459124022cffdc6c385bca5be"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/logs/workspace-test-compile.stdout.log",
+      "bytes": 685453,
+      "sha256": "40f5e0aa4630db5b2e8c14311f439015eb55f7b89cb373ea9a55c03bac6d0bb2",
+      "gitBlob": "7a759822cf0a5c143677a80c285f1a9f02c72766"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5",
+      "gitBlob": "338bf489bde76cee6679d6abb9dab67a74c94e47"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/result.json",
+      "bytes": 29589,
+      "sha256": "cc514b06e6f40a48cbb218c59ef7147a297507d5310ce48b4f7975eb1e7c9765",
+      "gitBlob": "d55115df6a255f84d4aafa4416e55c4a0997a636"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifact-raw/run-start.json",
+      "bytes": 635,
+      "sha256": "cc39d9748a1819dd4b1d3b24d89c51a7149fd51f19f8fa76a394e465b41773ed",
+      "gitBlob": "a6d38ab70a42d01d8f9932252503d2fcc1406cae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-artifacts-first.json",
+      "bytes": 1079,
+      "sha256": "3a5aca4ec57eed9c01ca8440d9d2d3ae400bfae5357dc614cdf35b9e54866d96",
+      "gitBlob": "edff8fe03cff4c73c618a42d3f4b793502d010e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-full-download-first.json",
+      "bytes": 917,
+      "sha256": "52b73aa3cd615d3548fcb81613ae4224624f3ac65eef0769d13d85d9de5ff4d2",
+      "gitBlob": "d85b84e161cb30f595db220b546f34d43b12e02a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-jobs-first.json",
+      "bytes": 1720,
+      "sha256": "a62745d5ff6862ca2500e2a8fef44d16d3a1f9652285aa8cfaff4f9bd30f6cf5",
+      "gitBlob": "004cc8c2a2f64a69508be7d62d2acf75e82bb404"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-jobs-second.json",
+      "bytes": 1720,
+      "sha256": "a62745d5ff6862ca2500e2a8fef44d16d3a1f9652285aa8cfaff4f9bd30f6cf5",
+      "gitBlob": "004cc8c2a2f64a69508be7d62d2acf75e82bb404"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-jobs-third.json",
+      "bytes": 1905,
+      "sha256": "e07d1ef8b2225f265787fc6963f707c70427f3c2ddac76c2578bf70d19d6b389",
+      "gitBlob": "6e172ad46d4591ac36f6b2a1286f704b1720c65f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-public-native-first.command.json",
+      "bytes": 1078,
+      "sha256": "f90d81993c100cddb7172f83f69f4f8cfd7d4281197abcc2c77cec6ac15cd3a9",
+      "gitBlob": "70b0f7a9a7fc59d9cf1ff62e3f45db7ef395c365"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-public-native-first.json",
+      "bytes": 8523,
+      "sha256": "400662ea4bb239604ef344b5394aadc08ba952cbe168cbca1da328d3bbd19fe9",
+      "gitBlob": "02b2d78baa7fb747d611be940ffa6bd9c39f72c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-public-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-public-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-runtime-first.command.json",
+      "bytes": 1191,
+      "sha256": "4e98bbbbab19b47a109bd18b5823cbeb4283747445e757cd6aee432f3f67c04c",
+      "gitBlob": "dcff92a59c5597e0d0569ddfdc42e4cbecf9b4dc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-runtime-first.json",
+      "bytes": 186011,
+      "sha256": "20672da7b63430f13438890c9d447a2284d89e782a29f2c6476439bb6034ee07",
+      "gitBlob": "5cb42f903f1b2c0a38d24917a89a541680723cd3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-runtime-first.stdout.log",
+      "bytes": 947,
+      "sha256": "023b12cf1caf31380a34cd06801e0467412e238bf63c45c6784b952f51e2d0cc",
+      "gitBlob": "08c4ddf8be20d806c74e428208306a5662739e86"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-visual-native-first.command.json",
+      "bytes": 1079,
+      "sha256": "b171615f173b98597d991219d24ed3fe95f046f37281f518601d48cee8a2f0ca",
+      "gitBlob": "43014ee926df5c0b9c7651df8ec94fcaa2b6019e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-visual-native-first.json",
+      "bytes": 9897,
+      "sha256": "962ac1030ab3a56d74d6cf53c29f1834ddc82335db1913f1b36dde254fbe2742",
+      "gitBlob": "9457abdb618834c03b5034948902584bded96a94"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-visual-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-visual-native-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "e353e8ee92163694f290722b48a7e5353675e1038af3f8b3ccf8144cfdf52e71",
+      "gitBlob": "05ce22934e3b7fe8d312a67059297137e4c96c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "e3ad7aac117e49a1923d07426ad8a9c388709223284e315b70792983f644700a",
+      "gitBlob": "ada6bd7a972f33c87d77136f913833a931b020d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "5bdda1ca4725976cd1ef3716ba3c65a8ad40802375fe930d89527e45429ae296",
+      "gitBlob": "62c6855722693f2801c46fedfb4ddefb12408b0a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "60fbd4cf9f6b4f0f37cee316a998e4bc2097ac9f3504e683c9a084f6b1df1cdf",
+      "gitBlob": "5a16e79d360c92b8e947d510b353c31974888f2e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "d48298c8c77120d46747edc73ee50933165c0f65748eccd339a0dc1c4ff92b23",
+      "gitBlob": "d03754a40924155b49b93efdd5b5712d18d3d848"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "8c124915d332e84df04bf358e813c9c89e90a50421230ad8ec008819f6e0ac8e",
+      "gitBlob": "bfe3fb0f5a64f2bd8a5e6141ecc40ab8a1e973c5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first-249851bb946d4322a06eeaaedce5524b-raw/tls.stdout",
+      "bytes": 21695,
+      "sha256": "90cb42ed7f26fc315bcb9fd2680301fca6fbd07f69c49dec840b78385cebd0ed",
+      "gitBlob": "0eee27d4aa929c39b45cf2f865652e15849002a4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.command.json",
+      "bytes": 1147,
+      "sha256": "d712ef971d3b7147bdf81e8cbdb387ba529a610c848990f030cb7e6967e36304",
+      "gitBlob": "9795665006595bda0db9c682c67a02f96f5c1c6b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json",
+      "bytes": 219519,
+      "sha256": "bc4f1c4613696d1882af4a48abfaaa40a9e94c39b76555a3938641e3915a36bf",
+      "gitBlob": "2e05d40776ffcf06034bdaff56aa99907835e2cd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/.edge-assigned.json",
+      "bytes": 195,
+      "sha256": "03c71b8e18a664332462a674ba9c81635045ccea344cd238b3acffaf632dc58b",
+      "gitBlob": "9d0b468c4db924df4c433d94ad37193ba8755acd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/.edge-outcome.json",
+      "bytes": 384,
+      "sha256": "e8c7b61ded8c21b08802e85689243d911c71b2b8a22acdc59d42105355cc0ee7",
+      "gitBlob": "7d3cd43048db385c54556a91eea5968e0c049920"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/.edge-process.json",
+      "bytes": 534,
+      "sha256": "dc404018c1ea1391446007c3fb379c77cd9c64823d2a8db7a489ee996fd1ec16",
+      "gitBlob": "9568b6d134c46bc9759edb03d624992b72b15a86"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/.edge-ready.json",
+      "bytes": 747,
+      "sha256": "fb7b3ab6798c190bddc8444f3698d26079c72b260cd9ce0e2b7df13b3dd2cb82",
+      "gitBlob": "7423f35ff421f14bb96f9b9fa1e0ff048f890646"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/.edge-supervisor.json",
+      "bytes": 190,
+      "sha256": "d7647ad28ac36b340ee3e2419e273fa85d5fecb1187818abcd8450ca8f29544a",
+      "gitBlob": "9dd94c77818f76dd707847241b249203ebcca6d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/edge-devtools.raw",
+      "bytes": 60,
+      "sha256": "ee49b2bac697cf73d6f2fe87c2523d69a56acd4951cb2b5e75cd7ec5944cc29d",
+      "gitBlob": "ad5540caaa6dbd1984278ea02501a9eea2b8a02d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/edge.stderr",
+      "bytes": 889,
+      "sha256": "d9d565b1cd59d8ecec3f5f80909ef04d1e1d530ed774bba514c737495594cad0",
+      "gitBlob": "55daa7f1d13ea4fd1d74de82d133ba06d1e86602"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner-FutureClassroom-Test-Browser-bcbf3135d4074bb593bab236df9b7aa7-raw/edge.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner.json",
+      "bytes": 17491,
+      "sha256": "2a349e9a4a8df2e1d41fe4db382e6e65637933a178f7a3d063b749586d1ee388",
+      "gitBlob": "2c60837b051eb688d4159255ab5439822f4d0235"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-edge-owner.json.control.json.stop-ddb830a738a349049afd26ae74b86014.json",
+      "bytes": 905,
+      "sha256": "3d38634b930abe8b0dca2a9170970ad20dead3a65bcd0ccab1b45ae91fe10d4c",
+      "gitBlob": "130dea080ef238e874d071b4d2dfe809631a0fff"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.json.browser-node.json",
+      "bytes": 19203,
+      "sha256": "3c85b7d6e2b7e8fe54d4ef5dbb3c2e3378d762003a82956569f577b1d9759964",
+      "gitBlob": "c8233917659b9b1feeeb68238f3813c33a4b620b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-msvc-voice-capabilities-browser-first.stdout.log",
+      "bytes": 274,
+      "sha256": "c00c26809a7bec4fc9e187a2510d77a0a4eda1c4b272ac57cf54fa257e7980a5",
+      "gitBlob": "d27a52334410f056a877e03e2633a1152c3e6b04"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-original-member-ledger-first.json",
+      "bytes": 172047,
+      "sha256": "c0f9b0366cf2f33cadc6ab6212dc6c9fa28bc693a6037d35480ba53c1e63f5e3",
+      "gitBlob": "0d7ed18fcdec4a47f921164b8ea2498cef9a301c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-programs-independent-first.json",
+      "bytes": 2834731,
+      "sha256": "f398b08ee526402da968ea793e0fe3c43ba60197ca7cc47fc919da041f6bba59",
+      "gitBlob": "96444cf3a57cd69881507386c25cd2bca9de7bb4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-run-first.json",
+      "bytes": 28362,
+      "sha256": "8a83101d4d945117c654e4350be0864ca83bb8e8da1c3351b386ce328af8f364",
+      "gitBlob": "2e3bae10fefe79a44a8ce3f5ffdce9851b29625e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-run-second.json",
+      "bytes": 28372,
+      "sha256": "bf05682a1878011197449cb432503f557739a7f3efeace07791ca28c2ad4de97",
+      "gitBlob": "d5d11df9d65868ab81e9b3b5db1a042283a818ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-runtime-independent-first.json",
+      "bytes": 5667,
+      "sha256": "3b2cf05f01e074952578f7f446b83f3b1b1c75543fceeb77201f52c966c3614b",
+      "gitBlob": "da1de3886534e2db2e3e738ecf3f7f6cd8b6ce50"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-test-metadata-first.jsonl",
+      "bytes": 20541,
+      "sha256": "6eb0a7d7d29551e852262bf167643bd79df5b62ac9a2db6b842735976535fb49",
+      "gitBlob": "7ad38ec4ae0fc3c0a834c0ea004b8f4037f4f051"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-independent-first.json",
+      "bytes": 83805,
+      "sha256": "5d93ed248495a6b3927315333cadc9afaab35d28d6a0d1aaecc5372304cb0d79",
+      "gitBlob": "b489d82c05b09b44c78a119d0ee5c8a3965b3be4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-independent-helper-first.py",
+      "bytes": 11849,
+      "sha256": "eb021810790250ec31a2e6b173d7432c305fccb3b67bb2ec734901f7deee5ea0",
+      "gitBlob": "904d36af0d950e97339994c9af09cba455e6e32c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-independent-repack-first.command.json",
+      "bytes": 1437,
+      "sha256": "2de172eede2ecda9595a8f086b70ae0d0933b4010e6bd0c2e1ea6e148a904838",
+      "gitBlob": "f68912fc08631696822d82dac9ae81bf1873902d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-independent-repack-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-independent-repack-first.stdout.log",
+      "bytes": 323,
+      "sha256": "97c02c65f0bc666e28fae0fbbc50322c4ba5f3871ca56d534f8ae4fd25a3d0cf",
+      "gitBlob": "64bb49f178edfb833093b8a1c62e847b6770e3a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-intentional-artifact-first.json",
+      "bytes": 701,
+      "sha256": "fad8c161ecb5a08b3ccd3ccfcabfb5a2f27665f241a0d4cb31dcdb90ea45f6f2",
+      "gitBlob": "8d5e99d68d2ff4ef5e117997b20edc562eda5830"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-voice-capability-first.command.json",
+      "bytes": 1046,
+      "sha256": "2979265173b155e0446535721733e952269696f64440833580541824de1dacd5",
+      "gitBlob": "4a395ea3a09ce21a7ff7b36ead1a9167c1ac0096"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-voice-capability-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/package-voice-capability-first.stdout.log",
+      "bytes": 303,
+      "sha256": "236c30015e92158051acdc3879f05e7171a99fbc1751a31d1b95f194c109642b",
+      "gitBlob": "45971af1eb0d888be61f0e49962e95e4305d9d7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/prepare-archive-candidate-first.py",
+      "bytes": 10723,
+      "sha256": "a6a2ff04beeb2e989dd4328d2eec7aba3a52164d7e65a1f0e9be8c018931a6e0",
+      "gitBlob": "a89f1aeab02333b71b040ea5fe044443a5c30855"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/prepare-archive-candidate-second.py",
+      "bytes": 11398,
+      "sha256": "c6218b91c4e461a6f5260e431fae2397ee2de82d75d14b31c50fa191dd740235",
+      "gitBlob": "66724d3ee064b0cff3e6b5233659c4515effc3b4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/prepare-modern-programs-first.py",
+      "bytes": 13903,
+      "sha256": "c013047bc31ba833e17b8615fc390106fe7645b57116b4abf04ec548ca58c320",
+      "gitBlob": "b9f3f0884e12843f9f52b7da832ea4c2f17ed8ee"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/run-recorded.py",
+      "bytes": 1288,
+      "sha256": "e872fcfc6f0a21a8d0006bc1888ea5e30e869e1067eafcbadab8c69be37cc306",
+      "gitBlob": "6371def38c1a3d948bdea0ec93f4879510f4673a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/runtime-count-extraction-first-failure.json",
+      "bytes": 439,
+      "sha256": "ac13b07f3bda4039b8bd7f668cd8a6debd8c006239f1667c45934032ed513f9a",
+      "gitBlob": "06c9b54e96d9d97be6ba9aea8613b16df60b65a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/verify-win7-original-independent-first.py",
+      "bytes": 9313,
+      "sha256": "9e01f9177b09a25719e76c1136d877a485a66acea3aac6369fbbae4c354bea3b",
+      "gitBlob": "5a6439eeeb9359e9c06ff166497d9a992af3ca3b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/verify-win7-original-independent-second.py",
+      "bytes": 10075,
+      "sha256": "0a86e41aa34c2fb93a16a78ffce77a1447d13dc9148fe65577ca6eca5eab3cb2",
+      "gitBlob": "235e6a1bf5e5fc2b4a613a9de151cc5d9e39bbcd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-first.json",
+      "bytes": 29641,
+      "sha256": "9ee6af510ad0252f7451c96eeb0c47cf1e83c3ec01d796ea28e3a87e233b8312",
+      "gitBlob": "a21dd1c650d71884b670d2744f5bd77bc1da8380"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-helper-first.py",
+      "bytes": 24914,
+      "sha256": "be534ff91d186ad519d9bdfe7067c9a99607543aa34e9885fe6314b36953b4bf",
+      "gitBlob": "62f0e763af90cca6a64327badba07e442ecc18c4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/web-assets-handoff-first.json",
+      "bytes": 2514,
+      "sha256": "0794e4061bc4d505e224974784911d5eb72fa7e67d7ab1de9006900e245741aa",
+      "gitBlob": "ebf5333e9da9abeef97bcb810164676ef0a1775d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/web-build-budget-original.json",
+      "bytes": 284,
+      "sha256": "fab05a56baaf965462851e18692c19351c3f66cf5cbd591c7389053b6057cb3d",
+      "gitBlob": "735bf149aa3b1048a3c9fc14e6e1d10f7e693a45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-diagnose-first.py",
+      "bytes": 4665,
+      "sha256": "1b851c508787651237abcb6561e280cb9359e71489816004ac7e4cc0817b2c22",
+      "gitBlob": "67ac2eba69f3db9bcf2ec4479b05790797c64cf4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/LICENSE",
+      "bytes": 1088,
+      "sha256": "32b48e0a752c101a54d4ea1affc589dd99d8b553c72bedba17c6e2e30d319b30",
+      "gitBlob": "61c71186c1ae732581ba17bf4037938af84d9263"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2448718,
+      "sha256": "0bf19c345f74c394a7ba30f0059db8bd1943d30d564165eefe3eb3205c2c72c9",
+      "gitBlob": "9ab88f071f2856cf840012de66a32e2393c19c73"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/artifact-sha256.json",
+      "bytes": 32133,
+      "sha256": "ead9a65136fb124679146646dbbf0b31222a53471daa740ea54831cd23db6be7",
+      "gitBlob": "3c640ce1fbcda0faa7bcc467a4fa94acba17c286"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/bootstrap.json",
+      "bytes": 501,
+      "sha256": "2c04e4f03fe3a65da578f22091f9f09c71e21d3bdcfac9ae148f22d825e32326",
+      "gitBlob": "1aff0a580e394beed7eb336a932f6fb68ec701a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+      "gitBlob": "c399a4ac454445291829a3456b976f4dc8cbe4ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/executables.json",
+      "bytes": 10983,
+      "sha256": "422e07223fb8322e1b2dc54a1f00136a9799f88cb0166e4b47787c1638bfc8d6",
+      "gitBlob": "47ab211eebc8737af37977c5c66489c027a28f62"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/host.json",
+      "bytes": 470,
+      "sha256": "230a0c60cf2466983b42b66d432d841531c5eca26346fe3b802726e75a8823b6",
+      "gitBlob": "60772757c9f3430ef7d3a9a837362f3cd110a23a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/input-sha256.json",
+      "bytes": 1386971,
+      "sha256": "c6170d972aafdd58dbfdc3dc5aed2a5d6ec1e5767ce3d7504d3bdd20f11eee0b",
+      "gitBlob": "b41e627bdce0c437feb4ad518104805c911fce4d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/after-vs-crt-flags.json",
+      "bytes": 727,
+      "sha256": "745cab7d3166205eac27d63eb4ad0abfcd38712f2c9506f0c89ec76661ea24f3",
+      "gitBlob": "f07dfa5e843ecb77ea7cc3dbf665750539171155"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/architecture.active.json",
+      "bytes": 136,
+      "sha256": "b7da0ed1dcc932f57030320ab45984a60504929e12c539f73e66f7f76fd51319",
+      "gitBlob": "3ea1692280d015e2cd309281a9b5a98263538bb9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/architecture.result.json",
+      "bytes": 522,
+      "sha256": "bbd14e6b6276ee33a7fce37a2c36720932d66c1f0172573bb49f4fc76935f2a4",
+      "gitBlob": "0aa3f5bf598f14bb02abf90b656b0275caaa7e94"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/architecture.stdout.log",
+      "bytes": 72,
+      "sha256": "87cbea92b1a7c0033871466cdea2da1a756ba4496cc5f3b6d25f79ec64f378c6",
+      "gitBlob": "e79df3c99281d772ae1b5a7002400dc414459387"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/before-cargo-crt-flags.json",
+      "bytes": 731,
+      "sha256": "becc46bb342c7fba3c9d08b8ddd573816e40f18d6ec9cf07ec93e1589e6de671",
+      "gitBlob": "a7eaf9c5d3fd64cb853653eb51ee7517494ccd77"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/before-vs-crt-flags.json",
+      "bytes": 728,
+      "sha256": "a7a16f342ec2cd0526c3245dbd609326e0d0f5a11a9b62e8b2411f342e68f64c",
+      "gitBlob": "e85534ffe6e3fd7d28e7fcc1a4b4f023668f0644"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-metadata.active.json",
+      "bytes": 120,
+      "sha256": "de61f5f521367d9a71751cd1647fc214177202d943d3130f16d904a422e55292",
+      "gitBlob": "f3e8714b8ad83e9d87dce88ed45c1fff85bc028b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-metadata.result.json",
+      "bytes": 561,
+      "sha256": "6245d27df6394f219f69add8951b306d5c0643effe3fdc968fc7dde368ed4978",
+      "gitBlob": "c91ab9cc8797d6a32093fea239240e066e077353"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-metadata.stdout.log",
+      "bytes": 26359,
+      "sha256": "69522230146d4368debae896f05a154b7fac0cbf7f676605b16b78377f6230e0",
+      "gitBlob": "b82646f892bd175d6ebced9069fb26088b66b077"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-version.active.json",
+      "bytes": 120,
+      "sha256": "36d037d4a341c245eea0c5126019a1041dc6faa06b6f415058fc1bcc04bffe27",
+      "gitBlob": "8048b46a4b4a09aec3893db80b4db763806d54c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-version.result.json",
+      "bytes": 507,
+      "sha256": "9faee35ef6adaef27e58fcbf7da53df11c69f0f76db4b196e5e249803210924a",
+      "gitBlob": "1380d4e706fea8055b4b8661232834ae4da2c641"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cargo-version.stdout.log",
+      "bytes": 346,
+      "sha256": "59c06167beac3ae99f676c560037b9755891268ea08aeddd20477fce7ae22540",
+      "gitBlob": "5c3c75249f9ddcc84f99d391f42d564f051b8f82"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cl-version-probe.active.json",
+      "bytes": 191,
+      "sha256": "b1269af92cb2c8eae4d40076b4e42b07671134dace9144d26576bd6bb8b22f8b",
+      "gitBlob": "d26b92704f0381aea30d4e6b6da2806cc7c1cf81"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cl-version-probe.result.json",
+      "bytes": 845,
+      "sha256": "65d54bda5811ce52cb44b952e4e01921c4a68fc61394515ecf81719922efbaa1",
+      "gitBlob": "17bf0cadf2e64fe8759d80e1c88657bc16ed9217"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cl-version-probe.stderr.log",
+      "bytes": 1124,
+      "sha256": "4abd17eda59dbad0286f86d1dfe6dae2e84693133b14e8fca4ee883f0e224749",
+      "gitBlob": "b6e66facd5238fc4c419022dfb98528214f5a374"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/cl-version-probe.stdout.log",
+      "bytes": 20,
+      "sha256": "5659d789099daaf7eef45081ce59db678cbf430fd37d54ebf5e1b7d113cec605",
+      "gitBlob": "10cb36ff821b6323f8125abbad02f9a8b14fb0ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/clippy.active.json",
+      "bytes": 119,
+      "sha256": "e4b4f524a92b4d975d7d6211c7013f1454d3c95a5d599f3079d1ab919a33dc23",
+      "gitBlob": "2a94fa451a8030d91cd8959c5d4cd9ab9c72ff56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/clippy.result.json",
+      "bytes": 674,
+      "sha256": "0b76f2a12033a67b0739233ce96bf0e0c7902db722714d880a2aeca3dde655e3",
+      "gitBlob": "be76bcd8142ac3fef8b7905a8055c569d4c9a288"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/clippy.stderr.log",
+      "bytes": 1456414,
+      "sha256": "3696590e84af9e6eb2d41e04714ad7cf0611be6e259fa3108d6dbcfd83d54326",
+      "gitBlob": "d6c15cfd0b9b53e535db9ae5c05c12ef866425bb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/clippy.stdout.log",
+      "bytes": 75,
+      "sha256": "7e2ed6c6ec8d2782960220c7609bbac84c2229bf9bbb58d37d8bde08c88ddcb3",
+      "gitBlob": "4918abf2e0b920fc1d6f5ffa0adcd15269e72251"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/fmt.active.json",
+      "bytes": 120,
+      "sha256": "0650e5fe782c3a6ddc9019e2e90a339aa20b47b1b6f32127780432199468c134",
+      "gitBlob": "a9db0cce9feadff686a16a25226868cc5c45eb32"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/fmt.result.json",
+      "bytes": 494,
+      "sha256": "b2a918a8a33741d5f38819342eed5ca4dc9bc0c412f6cef68327cff08bc4619d",
+      "gitBlob": "ca74040c4156b1648f5472397100e1c32247ce62"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/install-fixed-rust.active.json",
+      "bytes": 121,
+      "sha256": "bf7a1fa215fe235f9ca29046324163109b219656cd2b603e5fb5c234ca1e95f3",
+      "gitBlob": "823eef2a99ab1e0998e44a6581dfc370d676e136"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/install-fixed-rust.result.json",
+      "bytes": 713,
+      "sha256": "d03865ff99d0b7437e9f1b8a8a64444019d08188ad71424cebd38e62e22d77a9",
+      "gitBlob": "544583a579984d523ef3a44cf186bedd5c78b90c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/install-fixed-rust.stderr.log",
+      "bytes": 273,
+      "sha256": "d433bfe6234502eb72c145280457714ab08b4056b5db88c8feb68a71c4cb7004",
+      "gitBlob": "1eff4f7af92e9af45e6a754d19a30b32234d7c44"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/install-fixed-rust.stdout.log",
+      "bytes": 153,
+      "sha256": "c47ac27d8a2c1d200af1e8a5109d3df404883d413cf6688650408eab3ce1d3c4",
+      "gitBlob": "4454c96276fc46527acf1b1a6c02c5aeeabb12aa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-0.active.json",
+      "bytes": 196,
+      "sha256": "5388851e1951a0bf49ae8e7a00a7028e5e4fe4056ec39a23609e47757690e0b5",
+      "gitBlob": "962c09d393b59446fea2f8876643ae2924b0d7dd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-0.result.json",
+      "bytes": 697,
+      "sha256": "2768f8e59c00c6d8b78925127263193e3f44f6ea1d5cd5ed81e36adb01870d72",
+      "gitBlob": "87d42631ab77b43a0795fede314412d378297488"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-0.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-0.stdout.log",
+      "bytes": 531,
+      "sha256": "171a0eaa250d0fa7914d620b1c3f9235ddd0e330fc64b79299d6c0a56ba32c02",
+      "gitBlob": "650af10f006a7d2b5fe7f6571156966c1a9eac48"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-1.active.json",
+      "bytes": 196,
+      "sha256": "993819377c6584cd77dae4368a5cdc5660f641bb6c07cb5420ec601f29164bc5",
+      "gitBlob": "59477cfcfb8c096fca688c1374d327719267c17a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-1.result.json",
+      "bytes": 704,
+      "sha256": "d9b7c7a26f44916451fffe6459000b2e200dc0a03999b3f8e7a3f8e0aa4d3193",
+      "gitBlob": "7bb1a1453565092daca3c8d04742c4b4d83e9848"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-1.stdout.log",
+      "bytes": 572,
+      "sha256": "e388a1ac2cd5924d62a6ab62229ec97ae20ec82fbb212f052d05b82f8d8c0245",
+      "gitBlob": "a9d5935510112adc79e7336f9be651c3aae0eacb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-10.active.json",
+      "bytes": 196,
+      "sha256": "327b80348e0ca54b9e6c055fe00cec4dc6d10fcc63120042a81be927a48f979a",
+      "gitBlob": "feaed7f06c3072cc76e1dc2a4bccaa162eb9092c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-10.result.json",
+      "bytes": 696,
+      "sha256": "faf486eb1ce1a2fd553425d52f9b7e1f12cab44336290db754bc2c82e4c8adb3",
+      "gitBlob": "96c5d7da56b354e99194976728ebc5545a91f45c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-10.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-10.stdout.log",
+      "bytes": 508,
+      "sha256": "d9db6c9d5a655eed4f01eb820eb526819571d87e940a3ce8a9ea7ab04c1de020",
+      "gitBlob": "52c843b389a4d818b5700da56308d4ac2590e104"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-11.active.json",
+      "bytes": 196,
+      "sha256": "d42b75c6895b86bc7400a58d4e751ad938620c9b5ea8cb923f9f456e245312a0",
+      "gitBlob": "652a01879806f1fa055c54d4cb080dff2492d422"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-11.result.json",
+      "bytes": 692,
+      "sha256": "697e7d77a39b2bd7d1718602d6aa62cca1683a12b767a0f66cdd7c96455cafdd",
+      "gitBlob": "8307c94b0615ead89757e43de59b54b8f918af96"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-11.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-11.stdout.log",
+      "bytes": 811,
+      "sha256": "7d632a9f370f983243c93b90403d8a2c5626d2a285d6fbc137ab5aa288815f04",
+      "gitBlob": "efb739915b144bb38f1d5b9a5621fbb014a838e9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-12.active.json",
+      "bytes": 196,
+      "sha256": "9d5f52baf1d932956f1446106033e002e7897620291c92c30a1c8c2fdba0825c",
+      "gitBlob": "b5756a3b645682f367e9a9f249fbf786c9329485"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-12.result.json",
+      "bytes": 694,
+      "sha256": "d2527567471281a9e146bbea4c799368c57dbe41199fecd928564379410d1738",
+      "gitBlob": "52061ced4ee91872e32b0d3cdd12898abf26fec6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-12.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-12.stdout.log",
+      "bytes": 506,
+      "sha256": "c18ebbc2c2478d8bd3e72ea383ae0d2f65d055edc1e0ffa757b100e2d093f851",
+      "gitBlob": "678a6a9880b37f847509a6c0222bca52d6a935b1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-13.active.json",
+      "bytes": 196,
+      "sha256": "c62ce34031defeb522779a06128d3f7acd9ff3315f936aa8fd1a8c1989d867ae",
+      "gitBlob": "a265f42d5f7a98462f33e7e29d89ff461d3b0c2d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-13.result.json",
+      "bytes": 702,
+      "sha256": "ac32e5a5937d6dc092cedb7afe0c191bb9fca3568b754e8997cb47b81cb7ff99",
+      "gitBlob": "8ec8bcb74702ebe7256f0d1e8a9924cfe1804c37"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-13.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-13.stdout.log",
+      "bytes": 514,
+      "sha256": "0f075821c88a5554f081de9abfc5b4901c43e8a363f3d3d92fc13bff51a7534c",
+      "gitBlob": "0badf43e6df94b23a2c734de9875449abc7b61da"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-14.active.json",
+      "bytes": 196,
+      "sha256": "7770ff76b46c8a1fc061f3841c10b142b644aa79399b38f703c62d9ba38eaad1",
+      "gitBlob": "43cf71c42b0f3a658aca99a1698bc0e91f0585d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-14.result.json",
+      "bytes": 691,
+      "sha256": "c9a554cf1ae4f0181a26cad2b5225784fb89adf7e1bd7e763515f5ba5591b7ac",
+      "gitBlob": "e0929f1587077f5a3f4f78ebd1f6f7baf46b30c2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-14.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-14.stdout.log",
+      "bytes": 504,
+      "sha256": "fbea378e04ac7f8e4a139eb62d36adc0c85302e53dafc5752f4b0a514930f31b",
+      "gitBlob": "c5c00e4d429a51a2d1bbd034e73664e9d0e5cec3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-15.active.json",
+      "bytes": 196,
+      "sha256": "e4955e6e8be9609c624623e559c6df1382c6ec1f2bcf9940d158a90cf89e926d",
+      "gitBlob": "9bfab86894771122c7d300222cc11de1c38d3d54"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-15.result.json",
+      "bytes": 688,
+      "sha256": "ee2e13a5857d08e5a658092ec193f6acac3bc31cb1f6cb1ca3915579ec9eaf77",
+      "gitBlob": "49b2b3cf514962601860b96731065789aaa51cd8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-15.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-15.stdout.log",
+      "bytes": 500,
+      "sha256": "19adebf450b1246432e674e2d3fb419cc581d2572f100d6076cdf4928bf8c137",
+      "gitBlob": "645bbf2b109e1d629ab4c6db20c69d708787eab3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-16.active.json",
+      "bytes": 196,
+      "sha256": "10dcc0a3a9179ae39256d10824949e9ee9308c446d33e22525a65b869177c2df",
+      "gitBlob": "6a4350e031fd4c51e2bfbed923f1282cfe1d4a77"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-16.result.json",
+      "bytes": 700,
+      "sha256": "c9dfcee1af99535febb3b100b9274847946aeb9ce029e18fd139d70224376dab",
+      "gitBlob": "30e6a6d11b5f5be61f1e5ccb3357babbaab7811e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-16.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-16.stdout.log",
+      "bytes": 512,
+      "sha256": "99e035b63727b71e2e639c43c31139e17af5c6698ecb9b115a2b1ab0ce486e40",
+      "gitBlob": "13cc919fb3e6bf059a20569a587a487cd7de6b1a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-17.active.json",
+      "bytes": 196,
+      "sha256": "c89ddfaa89c7d26cc341ed5d772f3c43585e0e1db5e8f4a51ccbe90c2940b8dc",
+      "gitBlob": "8abdeebad21e78ed77bb6e37528ab31baddb8417"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-17.result.json",
+      "bytes": 688,
+      "sha256": "fe0189b392c1e042b889b2be6ab9616688500cab6e37b98e31d341c9af04451e",
+      "gitBlob": "501453c7d909d403787d369b35c11cd488c4e9db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-17.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-17.stdout.log",
+      "bytes": 500,
+      "sha256": "0eafd8486e364a6c605016f700b857268cfe1b9800b5ed069e868babbde9143b",
+      "gitBlob": "dc48a7f9eb286e29b5f5c830998401da59d0430d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-18.active.json",
+      "bytes": 196,
+      "sha256": "16976c3b0b26e7aaa4af1f7b5a457541b2f014fbdbe4cd54f760f5a2d55ea7df",
+      "gitBlob": "9cc7e8033753f013e7146b886d079ab1d154c7b9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-18.result.json",
+      "bytes": 694,
+      "sha256": "238e5d53cb615c8e94a3a77a87810ffd0e50805bd320a374db618637e002d694",
+      "gitBlob": "4bad2067cd1b793dd7ddb0e013d5b4b980e913af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-18.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-18.stdout.log",
+      "bytes": 506,
+      "sha256": "987f2783543129e3c2707343cc1e2128d270d0e4b71642c2766203091fe6dba0",
+      "gitBlob": "57600b9b585b4391d1cbfc51a4b1ce8d02794b20"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-19.active.json",
+      "bytes": 196,
+      "sha256": "03b977d46437fae9e514f372e344538fcb36a81aceb6b8b0950440f4f20bada1",
+      "gitBlob": "520c3d8d3b395be826536b7f1face1db85da329b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-19.result.json",
+      "bytes": 692,
+      "sha256": "85b2f8458fe94b4d0d7622b45a3b5fa070cef1d53896af6f5ead7cbffc59d516",
+      "gitBlob": "946833b9fc005897d7d462009d3812ac5bec560b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-19.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-19.stdout.log",
+      "bytes": 504,
+      "sha256": "2931a9aa272c4fe27e8027a43dd5b1d9367616b6a652a43e8acdb543265e578f",
+      "gitBlob": "666b42ab55571fd4641c03afcbf5d08593decafa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-2.active.json",
+      "bytes": 196,
+      "sha256": "adff0aac6ab162c6b3cafd702d09bc5ecea9662487a1f1b14698f0ef09aca027",
+      "gitBlob": "866ee53a2a895db04a113e0c2771d5a90f448e83"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-2.result.json",
+      "bytes": 693,
+      "sha256": "37eeff1b76534a615886a29300383da3c8492a5bead2506f81ae732598c267b4",
+      "gitBlob": "7b337603571702fad7b46bedc2220f718245dfab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-2.stdout.log",
+      "bytes": 624,
+      "sha256": "c65fce6fc14053004e688c530e7cd1283531d4a31a22bc503a9924de8ec1c0d6",
+      "gitBlob": "114c525ceedc679d5d518b174f761885f28af089"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-20.active.json",
+      "bytes": 196,
+      "sha256": "25e912500db8d7409bae7ebc00a0ada2ff72fee3e036436b07355ac148ff705b",
+      "gitBlob": "a030c2fd551cb7305ad79fc452ce03fbf027e899"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-20.result.json",
+      "bytes": 690,
+      "sha256": "f6056dfc76fa04e9f450389eaa2ac2fdb51fcda6424f9a56ed1c90e62cc8dc7d",
+      "gitBlob": "e14f07034c0e69c9942a063dba7288cd2ba8375f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-20.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-20.stdout.log",
+      "bytes": 502,
+      "sha256": "3e684d89d0a2a208656e0c7aa99fe939039ccb1759b52366fb6d5a054fb864af",
+      "gitBlob": "d31f53e4b5e58d47e16fad919cba4fe85bfae471"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-21.active.json",
+      "bytes": 196,
+      "sha256": "a25850c206db7a02c7be2280c3cf55a410950d4fc11edc64efc46a6361205f0c",
+      "gitBlob": "cca9961082427a0713426fcb60fa1ee204f837be"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-21.result.json",
+      "bytes": 681,
+      "sha256": "7be7edca904b399c82ffbe2484c44d06aba4b396469ff67e37a88a286ce7c999",
+      "gitBlob": "2418403639cf99e09e4e773f6d47d10037653e1d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-21.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-21.stdout.log",
+      "bytes": 851,
+      "sha256": "fb82aa81c361955a8a71f474d6c425d9f5fbc0a7e7782a5cce3295f6611f2f66",
+      "gitBlob": "ab2d2551fd50ac00c27e64c73784fd7f75c42cd0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-3.active.json",
+      "bytes": 196,
+      "sha256": "0ab8fd01714d4e590d7e58601a292680f6204e71c7aadd1891eb2ff47d8262b2",
+      "gitBlob": "d53c0938ab48112f00d9477bbb56d21167986139"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-3.result.json",
+      "bytes": 701,
+      "sha256": "a8b210817e46b7d1ebed15c99dab2a00b8882c4dc20f5b4e62f88fe0664a8bb7",
+      "gitBlob": "f963e8c194cf4a2b64906b56c250ed704d9bb7e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-3.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-3.stdout.log",
+      "bytes": 516,
+      "sha256": "ab74557e1ffc952bf9c9639c6eafaffc25973fa4d7e52614528f13e0e2cefa90",
+      "gitBlob": "b3d79cc88f75fea1110eb5937bbd35c8e676078d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-4.active.json",
+      "bytes": 196,
+      "sha256": "ce067ecb91f0397e790e76b7aceabf97e2de2df9fa03eb82a1e8273b785bec6c",
+      "gitBlob": "b55a91450db0f4f36fe47690b52f9adf0a3a74e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-4.result.json",
+      "bytes": 693,
+      "sha256": "8fa62aeaafd44b96f2b0bbb026f80a77a94833aa9788763ef4f4780c14ab6556",
+      "gitBlob": "0de0b1106c7a0b8497b091cbe221c862c33ee050"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-4.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-4.stdout.log",
+      "bytes": 817,
+      "sha256": "f9a758e93c61278c1c883a839b76224c68305f79a533b554632f35f7c0fd04d4",
+      "gitBlob": "a3003c518467fe1550155c19c29b25752334f129"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-5.active.json",
+      "bytes": 196,
+      "sha256": "e7b77866ec706186387f31b8f0b2cb7e35bbc381931dc724885ff833da92bd27",
+      "gitBlob": "73ae8bf8553b00d2a9541576530453d082b53d02"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-5.result.json",
+      "bytes": 697,
+      "sha256": "3151b5a363385ec2bd8bff8e7803e13d71c82b855e8b1464257d1651fb9dd7a4",
+      "gitBlob": "669c4c3c86c8e0f7b57a16f960469dcd70c51a99"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-5.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-5.stdout.log",
+      "bytes": 512,
+      "sha256": "0462220b3051c0d511824468cff1e3c3eebb039a8c62ef9f0e2375192ab9deee",
+      "gitBlob": "23e8e6cb7e6e576de3da7c0717707396744965ab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-6.active.json",
+      "bytes": 196,
+      "sha256": "f42d3d7f79487cc977fc1a55593677c597943b7773b99212dadf09149ab77526",
+      "gitBlob": "da6420b77775d9bf08a44f3adce8da5ec611e214"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-6.result.json",
+      "bytes": 702,
+      "sha256": "af85703b7b71acbeb74ed1c439294825e67a39ab563335d36cdff0ff66606496",
+      "gitBlob": "9afa51ce05c59b90da12b6ffc35415863246a4f7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-6.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-6.stdout.log",
+      "bytes": 569,
+      "sha256": "c9d5ad2d724529080cf547540b365a0e44234c8f41d3954d24e913ca53913a27",
+      "gitBlob": "d76868d1b4808e7a56eafa3bde6e94c8cde1b730"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-7.active.json",
+      "bytes": 196,
+      "sha256": "1d609f5fb25e70151c14915fe5bc5b637508e669db9ee6e9e68f1d68d7444809",
+      "gitBlob": "b2a85d47545e5c1ba9e3db62ffba9e88d0a1b5e2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-7.result.json",
+      "bytes": 696,
+      "sha256": "6f9a28f77cf6146599e78fb1bf7d7e745279ce596417728f6d202ce3d577e8d4",
+      "gitBlob": "1b568887f8b58b58601dbc3a1f7f2da5fe41f407"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-7.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-7.stdout.log",
+      "bytes": 511,
+      "sha256": "9987f1ea07ce8be731faf2d2e5b94640cdadb3e98f755a0652d3ce6bc8922d0c",
+      "gitBlob": "32247d14c296416599b12e04ee445cf44c0ddb85"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-8.active.json",
+      "bytes": 195,
+      "sha256": "2c63a8189185853c644a95d21049e020329da8afd41d795901c48af161f7631d",
+      "gitBlob": "76b25920607f6a7e6164d96b716227543143aa11"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-8.result.json",
+      "bytes": 694,
+      "sha256": "93c23fac597f302881878d5e3cbaf15e48576fd4923f550e8761051cd6ed42cc",
+      "gitBlob": "e0873154c2d5bad623757ee9950adb2f8c009bb6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-8.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-8.stdout.log",
+      "bytes": 509,
+      "sha256": "d7c4bdf1ff4f716ead2abdb5e6da449b0c2d3ce080cfa5dac51411a1136c6f2a",
+      "gitBlob": "c8c4453d561cd08d1fd3d641e4031400a63b026a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-9.active.json",
+      "bytes": 196,
+      "sha256": "f2faa52297b716355ff1c446a137c2b23d7c3126ed1f98481de2cf861d0fc98d",
+      "gitBlob": "7d8c5746dbf064f3bcd36b38097f1f05c28cad72"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-9.result.json",
+      "bytes": 700,
+      "sha256": "fe02ff46f3e86edc898ca2e0d92149c257730d2334206fbf8f623683c6630052",
+      "gitBlob": "3940ff7c3ef589af28d55eb15815efe80e356eb2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-9.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/pe-imports-9.stdout.log",
+      "bytes": 567,
+      "sha256": "ef99c2710f0c862dc9ff5cd1abb448895fedc0ba2fb9eedde203682308cd7040",
+      "gitBlob": "391e072f4cd4edf7304e95a58888e3abd402fd2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/product-compile.active.json",
+      "bytes": 120,
+      "sha256": "9d8a7efeaac558433b5a2c1a993170548a3816fb7436c15bbbaf564c01f09d8d",
+      "gitBlob": "7997d985b9acc503153dc893018023fe24273eba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/product-compile.result.json",
+      "bytes": 714,
+      "sha256": "b7f4131410f3d652ca6e5c7f291c765a2296ce1a387762cd611b838ce85aca61",
+      "gitBlob": "48dacd3a80e26b9a463cdf91c1a55426e2e5c91b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/product-compile.stderr.log",
+      "bytes": 828245,
+      "sha256": "d32adca6660f0917ea2e604bb3ae5097b29a7f4de3d08789c03bb97df5d51516",
+      "gitBlob": "26b6c79bb6ecd6407b1b77f03d228f54f325223b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/product-compile.stdout.log",
+      "bytes": 714523,
+      "sha256": "c5f0f577739ca69f6886dfcac5459e016bec93d7c5fae06e6e321a40272536cd",
+      "gitBlob": "4f93de3589242f32f24f6e246b96f6ad1395eb35"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-src-components.active.json",
+      "bytes": 121,
+      "sha256": "cf7635464e6aee48ddf65977f3e1e184aa9856a05466c0e552708f020d764e7b",
+      "gitBlob": "28ddd449a6be93bdb81796e3440faa790e0d8576"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-src-components.result.json",
+      "bytes": 610,
+      "sha256": "33a005b9a8dfd503dc0d37de0f80c17dad3c51711497ba1d434df83446d57305",
+      "gitBlob": "738453992758ee77e3bf62f9bbb30b577fda17ac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-src-components.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-src-components.stdout.log",
+      "bytes": 193,
+      "sha256": "e9ef5626c16e238f38d71e3b5fd4a2529df2ec2dce84b09b12d809713bfa2ac8",
+      "gitBlob": "390e665ae1f3675bdd20a4a67bf99a383cd20778"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-sysroot.active.json",
+      "bytes": 121,
+      "sha256": "690bfe3d491cdbc473f0899b413d2d797a0385449e7c317bac2cc6fd2bc5ea85",
+      "gitBlob": "950e36633397fe3384080939ba1b709536b766d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-sysroot.result.json",
+      "bytes": 577,
+      "sha256": "4f487f2543dd4efe310c2f495f6ccfbc7d0b723c2fbfee17defce8da571427ea",
+      "gitBlob": "145b6071c127ac131d6fc9865f2ff40a22081a8d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-sysroot.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-sysroot.stdout.log",
+      "bytes": 112,
+      "sha256": "6b18fd7d9921b798230411ce014b8b57f9e0d893a27236e9e65992f9b62d7b23",
+      "gitBlob": "6df262db1835a3c52621b148b9cf49ad39fd8af8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-target-cfg.active.json",
+      "bytes": 121,
+      "sha256": "96d9acacb7501dd68ada9c9bae6f3ee6b6e200bd9b9d7b0aaba135e6103958fa",
+      "gitBlob": "2bf31579227d4273b092186810f43422079f8aa1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-target-cfg.result.json",
+      "bytes": 675,
+      "sha256": "0ecbb7620489a4429490c663100a608e7b5be6d8a8fb7805964b8db186b47964",
+      "gitBlob": "a19385a0d83e722ee84aec2b579646742b8c4a48"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-target-cfg.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-target-cfg.stdout.log",
+      "bytes": 1056,
+      "sha256": "8f2febba8d154b70c5e2bc884a32156afad61b629cd4ebb0046edd0dfd392956",
+      "gitBlob": "dcc260422fb95c97b1a67806815f59cca36b07bb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-version.active.json",
+      "bytes": 121,
+      "sha256": "5ecd2858360ae041f23ec6a4b3575980daa27ccfedd1cfc0276cf81329175530",
+      "gitBlob": "61e9cef6f02107efcb5142b21254a10c43c4df7e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-version.result.json",
+      "bytes": 557,
+      "sha256": "45c2542ab8c659d5c09419876d50ec898a732377868a8cf04c97dc006a4b5e72",
+      "gitBlob": "c2f1ad8c829e06defac687cd6c7ab1b7579ca5e4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rust-version.stdout.log",
+      "bytes": 212,
+      "sha256": "100465d1cdcba9edbe56d8f0126660b5dc3562d45fb8b556603c6b105786724a",
+      "gitBlob": "9b89c27723e705f2cff8ccb03bfefa78c57aef42"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rustup-version.active.json",
+      "bytes": 121,
+      "sha256": "9eb7431c3fde937d41a5f49cbcd116f088ce8fe8222b5d531c1bfb0725c0d356",
+      "gitBlob": "609eb368d8000616759c495b84cd6651114e6c44"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rustup-version.result.json",
+      "bytes": 494,
+      "sha256": "05ecb4e33e23e1d864ab49a2517ce214b33e269535869f1ea9d106f8c3359b8f",
+      "gitBlob": "5f54a5b7fd1b83263724a0f114bebd22cf48991c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rustup-version.stderr.log",
+      "bytes": 643,
+      "sha256": "f80d14258b6bcd66b11562bdb001bd5aa2813a2ee01d61cd6d65b6a2ebec46e9",
+      "gitBlob": "c06a629ccf1a797e845e09516883785f209bdd73"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/rustup-version.stdout.log",
+      "bytes": 37,
+      "sha256": "9d0fa5abe0036a64d33be57d0945ac3cb1a44507774f93c5f70ca1a848307b40",
+      "gitBlob": "adf33ac10f27f3e77d755c789d80b67db5c03f19"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-after.active.json",
+      "bytes": 110,
+      "sha256": "8b42b961eed169e6a2da0bb7d214f5e679c653e6ad50f35387864b92b9ccdbb3",
+      "gitBlob": "c8efe3b486edbe49f4cf5cb110aeec83a8801e2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-after.result.json",
+      "bytes": 541,
+      "sha256": "f896e9b15b9b35a2d64b35a0c066d6b27d33802bfd22472f4ba13a9a1426eeb2",
+      "gitBlob": "466bdcd3bc408dad726f6795f4a806c6bc55c05e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-after.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-after.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-before.active.json",
+      "bytes": 110,
+      "sha256": "c6b6955b0667d6d53869c456e52a925fe1fca4c3893363d55dc32d520d956b58",
+      "gitBlob": "d611a6a4b3926e0caf0e7c98a782e5ccbca45aa7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-before.result.json",
+      "bytes": 544,
+      "sha256": "c71bb5ea1a36c4e373fa3df47defa1700b82f2abf337dbd0c033c1b2ab59ec17",
+      "gitBlob": "7725841fc1bdb7df2a9d623e32dee022e293f65a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-input-paths.active.json",
+      "bytes": 110,
+      "sha256": "7697cd7ce7bf675508c23803718f512692770783afa4257de9dd2eaa3b76ee4a",
+      "gitBlob": "5cfcb30044ea912b6b0f77cf03f71f2d37b30ff6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-input-paths.result.json",
+      "bytes": 504,
+      "sha256": "feb0b4db2900b7a87914aeaf01e70e21e16a860bbca17335ddb9671a81052eb6",
+      "gitBlob": "0ef9cde45eda759b15cc37886cb75e7af611a5cc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-input-paths.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-input-paths.stdout.log",
+      "bytes": 558234,
+      "sha256": "8300d0d751d6c50cd82d698dde922f98299c3b69f2013297dd977bd91f1c248c",
+      "gitBlob": "6775ab26ef686331bc589126b81ab402044cc109"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "af293e6d7d708dcf1ce4464577821382dee388255b1f0f65270a34a3c060bdfe",
+      "gitBlob": "b8f32098122044972e3c20932daab70e49e5602b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "855ac4800020d1f4593694dd29c00c34c88ae594647a41e6ec4e32cf9de1fec1",
+      "gitBlob": "1f50c5d7bad60b646073a29e98c85b63c748e64e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "04989e6897fd79a9850b4d90bed53436768b4bd6fb4238c201b3e37c690b1271",
+      "gitBlob": "e5536c7614f67db17a01d4c202c18db071fc1b3c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/visual-studio.active.json",
+      "bytes": 146,
+      "sha256": "7ee18de061127e083886b6030c8cd0e166077a4e1c0156b9dccd230a578bd38a",
+      "gitBlob": "080494e539f2e10cb012a58012fe945e383e0c2e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/visual-studio.result.json",
+      "bytes": 683,
+      "sha256": "69c207380bb1eb0e7f55e61e2467a0b922a20a9226275d3591bef257bc851e88",
+      "gitBlob": "ee6278fe4701f37c8fb9e8bc2dc31a45d38758dc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/visual-studio.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/visual-studio.stdout.log",
+      "bytes": 2469,
+      "sha256": "cc8305173b5f73cd5ee1ac24f411ca1841da66eb2d6ce7c7e8aa9f99832841ab",
+      "gitBlob": "f63d0733671f644951c4d513e02435e5a1d8d6e4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/workspace-test-compile.active.json",
+      "bytes": 120,
+      "sha256": "d3663f0910a0587a43ecb89ff76e7a5390aee9cadfa9a04161b66f6155c034bc",
+      "gitBlob": "8e86082fb351c5e090247de459db437eb03e2245"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/workspace-test-compile.result.json",
+      "bytes": 726,
+      "sha256": "16cfb4f5e5034211fc80ed3fa12e31ea336d8f4493d1f351a9a36f0c2dabdac9",
+      "gitBlob": "1194c25a6f74592fa4b2f7961bfcb336c3619fb2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/workspace-test-compile.stderr.log",
+      "bytes": 1816069,
+      "sha256": "ddfde86e9310a0c2daffd3a4ac9c93728ebfd0209f2bfd02f3335dc7c40208ec",
+      "gitBlob": "78ee2ffd66a0c33c0636af78fcee956c28c6e7ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/logs/workspace-test-compile.stdout.log",
+      "bytes": 790006,
+      "sha256": "9bda1ae897c9754281e09a00f369aad43afa5ce53a073e56f619919a07b2373f",
+      "gitBlob": "31bc38deb092cca4cad8076bb904687b8dc2b0a4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5",
+      "gitBlob": "338bf489bde76cee6679d6abb9dab67a74c94e47"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/result.json",
+      "bytes": 31298,
+      "sha256": "98ba5bfe2ded7dd2a136957b015ddb4c010e1146372d8e9958fde6d3f295748a",
+      "gitBlob": "e757ab7ffa1f826757293a9096333620bee52a7c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/run-start.json",
+      "bytes": 691,
+      "sha256": "94ad4ac6b9f7534cc6bcba9dcd871eb8d81f9f324f6310b8734b2bacf45d99ff",
+      "gitBlob": "81bf881c4be58f9d67c2d1e43e6a0818ae9cc858"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifact-raw/rust-src-provenance.json",
+      "bytes": 2529,
+      "sha256": "7219606f9b3a6945c0bfd4b53dfd1204ac69b116c5b0fcea7e4cbb1380cd8c1a",
+      "gitBlob": "195f0aff3e07925cfea6684eef4a8b0a267a23b5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-artifacts-first.json",
+      "bytes": 1084,
+      "sha256": "e7d28a4e472f329936553c1eee4a95af2bf5c1c87ece862c933df8862e882f31",
+      "gitBlob": "1794bba95822760b9c795b0467d6b9f40b54d810"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-failure-diagnosis-first.json",
+      "bytes": 256605,
+      "sha256": "e96828dc1d8d9dab0e5c57fca09d9ebfded7c56577addc973d0446871a513762",
+      "gitBlob": "74ff1d8172a99a436c1b91684455f61474ca2f4a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-full-download-first.json",
+      "bytes": 910,
+      "sha256": "2a704d3e942bc5018ac4d19b246f442608b55d23099e1d03a4194a7c745f07f2",
+      "gitBlob": "976d25385397c7de227814b9af5f0c87843882db"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-jobs-first.json",
+      "bytes": 1730,
+      "sha256": "021a77c1a3d134b9e4a0fd622ead643135a2949c496fabcad672a499fcbf510e",
+      "gitBlob": "0c9f2402da7321bce26e423e66da465f5c8ae1a4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-jobs-fourth.json",
+      "bytes": 1922,
+      "sha256": "8007bd310153a59d3b2272d6e936ac5bb06be0aa2013dab7048b1ff1910c7d24",
+      "gitBlob": "186d08660a7386320e8cb8fcfc0375809f31569c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-jobs-second.json",
+      "bytes": 1737,
+      "sha256": "fed35d10c2afda28a12af24bd1b7bacfddd9766d2260b0394a0a085d8362daeb",
+      "gitBlob": "d8bec9bf0574282601b523862dcb46b7b3a74c15"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-jobs-third.json",
+      "bytes": 1737,
+      "sha256": "fed35d10c2afda28a12af24bd1b7bacfddd9766d2260b0394a0a085d8362daeb",
+      "gitBlob": "d8bec9bf0574282601b523862dcb46b7b3a74c15"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-original-independent-first.json",
+      "bytes": 2697154,
+      "sha256": "5a9a09db37b14b5fefdc68f59a4071d3f15f78650367e9c35484f8c5dafd0617",
+      "gitBlob": "5d23958965fcd963e178e95f0ea76fdcdfca3620"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-original-independent-second.json",
+      "bytes": 2791212,
+      "sha256": "112047d965347a63ad0284605380cfca6ce82d6dddcce00f439f33f15d5f1581",
+      "gitBlob": "db2a0a3ea68eabacb650460e37b740e1e2b3a6af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-run-first.json",
+      "bytes": 28402,
+      "sha256": "ca0912f0c0a060b33d09175f063d9fb813ad6b797fc23bf49b35ef0411fae7d5",
+      "gitBlob": "c213bcbd6a9d003c425ba02a1dfb303330acf804"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-run-second.json",
+      "bytes": 28412,
+      "sha256": "6b375777bdc17d876343c0056daa235b3bfdc6d3c58b0ad6708e03b211f947ec",
+      "gitBlob": "37d9db52f287d6c6f1760eb6cbdc33c8c74ff8c2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/windows-after-first.json",
+      "bytes": 16661,
+      "sha256": "e5bb9aaaa43a369595eb6af1b89161e07656bbbbbfd74f4f8169b11f795f02dc",
+      "gitBlob": "2e8e258f5ca2dd6eec37a9c94cc4779c61f7b174"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-ci/windows-before-first.json",
+      "bytes": 16676,
+      "sha256": "f10f8a8690827faac4be42645113e347f57942b390b720b1a3fb20b4c11b6824",
+      "gitBlob": "4a8a6fdd028499eb6ded45e63a27b084ab3294d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/INDEX.json",
+      "bytes": 7593,
+      "sha256": "f7d46ed7cb008079bfb51b36f43ab958804b57772829d674cec00b42c1f1dc8a",
+      "gitBlob": "970b0d157855c0414b67a4d5ae99358d06035a98"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/main-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/main-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/main-fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/main-fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/main-integration-first.json",
+      "bytes": 1494,
+      "sha256": "244c0af3b5d2042dcc4604f805d61b8e1f4bf5fb44fc86e6ee8dc54377d3df16",
+      "gitBlob": "8fea58cbeabe12275899da57c70d854f7567bb10"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/r42-original-three-diagnostics.txt",
+      "bytes": 1509,
+      "sha256": "c8a441f2b808bd4bb07e8e6b12be77369751e4e18fb2c13db2d23c5fa831c166",
+      "gitBlob": "2baaa3a5a3912593f93213cdc0edec8a9c7eccac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/repro-owned-process-check-first.json",
+      "bytes": 337,
+      "sha256": "1c30c597ff201b5e4c7d15d88eaacd4ca0bd6f3677e8da1aef5b9b9e3a3fec64",
+      "gitBlob": "319818375a6f64de02b7e68faed7ba96d5c0a417"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/run-tls-repro-first.py",
+      "bytes": 6359,
+      "sha256": "0a7d754b3c85db44a671014f647038cf2a8be645b434cf158de45ab1dac74886",
+      "gitBlob": "4d547f5fde2cd350a5edc2ba833369642e64d8e5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-after/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71",
+      "gitBlob": "0e015415fedb9da33076b99bb178ff19c9def745"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-after/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74",
+      "gitBlob": "3e74375795f605f5cb88eae517d29f51c877e31b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-after/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322",
+      "gitBlob": "773bb8505451c7847723e26afc74e235b8a75399"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-before.json",
+      "bytes": 570,
+      "sha256": "5749dc74ff3a45dff78e2c2469b72ecbfeb79c0da866b8e429449fbcd4d2272d",
+      "gitBlob": "2e3c8f789d4f91d3a3aa5bbb1539a6c437ff41ab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-before/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 4786,
+      "sha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab",
+      "gitBlob": "1a31dd131446c9ec35eeb33827469a7cf2062d6a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-before/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 21798,
+      "sha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c",
+      "gitBlob": "93120aec7c5b4c34567defcf8821cac07c90c948"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-before/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6638,
+      "sha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e",
+      "gitBlob": "e67a49fb39a151c9da42babb1d4a58feb5ff71b6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-first.diff",
+      "bytes": 1645,
+      "sha256": "1ad852882f4c67f3153e31d3f40866bf9fe954e6493d24e0d6b8a30d2a00a9ba",
+      "gitBlob": "4b567d2169b7eaf1097cca91255ea4030b4f70a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/source-freeze-first.json",
+      "bytes": 19844,
+      "sha256": "da6930981a9f2e58bc38dbf8c4bb2da82327143779c631f5f641dd518fbf92f3",
+      "gitBlob": "44235076ce35a50cf9134bdd4a149f1a179c441f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/static-architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/static-architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/static-rustfmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/static-rustfmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/static-source-review-first.json",
+      "bytes": 6202,
+      "sha256": "b05d8e4d7d0b627c5a6bcd4f4aeec29dc79f3a67b578da339078378856b131c2",
+      "gitBlob": "080c06243eaf8fbf78a9c9d23714dbfb46c324b5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-final-Cargo_lock.txt",
+      "bytes": 160,
+      "sha256": "22c89f8f9816ccca81f93a4e26d030550bf9234b8dbd4e073d8c1264129c7672",
+      "gitBlob": "c10b2ade0af478ebc3c6921c3063ba1107d21dca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-final-Cargo_toml.txt",
+      "bytes": 108,
+      "sha256": "a9d494f71b8b4be180fb06c5d58b8012ba46c53b45562ee8a3505fd10dc4247e",
+      "gitBlob": "2f6945b0d660dd82c7c1102eb4db44eec9cb9a69"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-final-_owner.txt",
+      "bytes": 40,
+      "sha256": "ac8b493ff7b90328153d1aabb513db09bb8576333c56dcd26d98d60d20d2b225",
+      "gitBlob": "dc7b6695db90b19a2c22c28469d3174b0104a2fb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-final-lib_rs.txt",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a",
+      "gitBlob": "fe688737dcec501b283874983f8cd1e6d9cc0472"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-first.json",
+      "bytes": 7674,
+      "sha256": "73b281c46be209f92748d2a8432dc76430fa4b76689bccc01cbbe1c6cd02be9b",
+      "gitBlob": "af11374b08b4ce2e1fca7fe05186eb8a136b903f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-original-three.rs",
+      "bytes": 1044,
+      "sha256": "44393ec899e92b4988464d965755bcaa8cd1dbdf00d34d5eb4bc2fb74029703e",
+      "gitBlob": "1e5f8c83043d76d52767c8d6fab3ab4ceaa01e57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-original-three.stderr.log",
+      "bytes": 3359,
+      "sha256": "f981443c82d8aa7ecfd1bcfdadabce265c98d253832ee6bb2454107be723f90c",
+      "gitBlob": "eed3a461b4552a89c340a064854701f7ade73430"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-original-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-scoped-three.rs",
+      "bytes": 1794,
+      "sha256": "86425bcd605a7070b966e08ab9d0c8ca54ebb162e23d088e084eef854a835e12",
+      "gitBlob": "c01a9bc5be322b654c14db052eaee9586deccb22"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-scoped-three.stderr.log",
+      "bytes": 160,
+      "sha256": "838e7fcb6327824f3c42c31c8c3cec4d9f888c477eda1f27a4d92eafa1f5f30e",
+      "gitBlob": "b036d2fda6dc0eea25cfd2c8d7bacd65653651fc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-scoped-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-strict-sentinel.rs",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a",
+      "gitBlob": "fe688737dcec501b283874983f8cd1e6d9cc0472"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-strict-sentinel.stderr.log",
+      "bytes": 829,
+      "sha256": "b59f83c16da07de7a32ddb1226d86a3da2c71ac70d489951495680b09edaaf8b",
+      "gitBlob": "2de402110d82deabdc29c799d5a54941f233163c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-strict-sentinel.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-cargo.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-cargo.stdout.log",
+      "bytes": 45,
+      "sha256": "4a49f090d476d6612d41a222f70bb06dd03af6352966a544751942aeccdd6e3d",
+      "gitBlob": "bf15f0dba573dbd2de407f39d914aff6ee640a8b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-clippy.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-clippy.stdout.log",
+      "bytes": 39,
+      "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1",
+      "gitBlob": "10247a3918cae8cd575b864231fe79efc7de620a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-rustc.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round43-win7-tls/tls-repro-version-rustc.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54",
+      "gitBlob": "868bf3ac1bba06bb1b32436e629f6264c0f40bc2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round42-43-staged-proof-second.json",
+      "bytes": 144779,
+      "sha256": "665f9f08be584c1b4238d9d7e4a3869d716bd949c0207090580c53584defd65b",
+      "gitBlob": "cad781d0de1ce57d19f97589c6be60966e19986c"
+    }
+  ],
+  "fileCount": 499,
+  "scope": "Actual committed blobs equal archived originals, both INDEX files, all three scoped TLS attrs and completed-stage evidence/docs. All486 required archive members present. Does not claim R41 source or tests are committed."
+}
