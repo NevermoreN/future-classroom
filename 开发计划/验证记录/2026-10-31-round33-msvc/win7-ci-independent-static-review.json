@@ -1,0 +1,32 @@
+{
+  "status": "PASS_STATIC_REVIEW_ONLY",
+  "recordedUtc": "2026-10-31T16:00:59.742293+00:00",
+  "reviewer": "voice_limits_core",
+  "files": [
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "sha256": "91e79de38f7a90e8d7976d6551b614f8fdc790590e226980971fa0f2303bc315"
+    },
+    {
+      "path": ".github/workflows/windows-win7-msvc.yml",
+      "sha256": "cd36b5c7f3300bfc4997953553bedcd40d41e8b842741fb56d042977988f86fd"
+    }
+  ],
+  "findings": [
+    "No static blocking finding. Modern default fixed toolchain/target/install and command argument order remain equivalent.",
+    "Win7 test/build/clippy prepend -Z build-std without an explicit crate list and require the dedicated target; metadata/fmt omit unstable flags.",
+    "Fixed Rust override, rustc exact commit/host/release and actual same-toolchain selected rust-src/lock hashes are checked.",
+    "Win7 Build/Cleanup explicitly select the same baseline, separate ownership root/marker/artifact and unchanged time/log/static-CRT gates.",
+    "Pure array and PE checks still require actual PowerShell validation; full helper requires hosted PowerShell>=7.2."
+  ],
+  "notRun": [
+    "PowerShell",
+    "Cargo",
+    "MSVC",
+    "Hosted CI",
+    "Win7/Win10 runtime"
+  ],
+  "limits": [
+    "Subsystem6.1 and compile-time Win7 macros do not establish full API, SDK/CRT or OS runtime compatibility."
+  ]
+}

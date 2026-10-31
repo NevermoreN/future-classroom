@@ -259,3 +259,9 @@ Windows 7 SP1 x86、Windows 10、Windows 11继续是三个正式目标。实际W
 | 希沃实际白板 | 在目标系统/设备上的可见触控/DPI、实际设备/静音及可听/PPT共存 | 待独立验收；隐藏无声格式查询不覆盖 |
 
 历史支持结果不证明设备实时存在或人耳听到。持续TLS、严格首TCP五秒、正式MSVC构建及各系统运行、安装/自启动/升级和72小时仍按各自证据验收，不因新增查询按钮解除任何门槛。
+
+## 33. 同一Rust源码的现代MSVC实机验证与Win7候选编译
+
+Round32源码`9d42f7cc75c7d2545caa18366d4a6d047aedaa99`的现代MSVC编译与Win11运行现分层取得证据：固定`1.97.1`/`i686-pc-windows-msvc`的原CI产物完整SHA、192成员CRC、3,521项提交输入及22份PE32/静态CRT导入均核对通过；其中382份实际Rust/Cargo/构建配置与当前生产源码相同，另11份历史归档源码分列。原21个release测试程序在授权Win11 Pro build26300 x64/WOW64实际执行1,313项，0失败/0忽略，正常EXE的隐藏原生及15步默认输出历史格式查询通过；该查询没有录音或播放。实际上传和执行哈希见[Round33原始运行报告](验证记录/2026-10-31-round33-msvc/windows-msvc-full-first.json)。
+
+新增Win7专用MSVC候选workflow，固定匹配nightly/rust-src和专门target，采用build-std及独立有界证据根。实机28组/421断言仅覆盖脚本解析和三个纯函数，完整共享helper仍要求Hosted PowerShell>=7.2；新helper的现代回归CI与Win7编译需按最终同步SHA另取实际结果。Win7 SP1 x86、Win10 32/64位、原生x64/ARM64及可见希沃触控/DPI、设备音频、安装登录/升级和72小时均不由本次Win11 WOW64证据代验。首TCP严格五秒原FAIL和生产listener关闭状态保持。

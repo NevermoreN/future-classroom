@@ -89,3 +89,11 @@ Rust计划初估：P0=8–13、P1=12–19、P2=10–17、P3=14–22、P4=14–22
 只读选用当前用户MY证书；测试唯一证书/私钥的创建清单、实际客户端信任/主机名拒绝、加密请求/响应、IOCP与SSPI完成账、真实线程退出和原生释放结果分别取证。四槽Frame/IO/头缓冲与新增1MiB线程栈计入原Web增量16MiB目标，不把结构大小当SSP/LSASS/内核或完整进程内存证明。原始日志先完整流式保存并核对SHA后才删除临时域；异常保留的远端域必须后续补收与精确清理，不能沉默丢失失败证据。
 
 有限批次TLS通过不改变原严格五秒FAIL，不证明TLS close_notify、持续接纳、生产业务/浏览器可信部署或实际Win7/Win10。Windows上的假慢Driver回归只能证明持有物理Frame/IOCP及线程退出的关闭顺序，不声称真实SSPI加密可中断；超时保留的子进程明确由进程退出回收，不混为正常Closed。
+
+## 第三十三轮：分离现代与Win7候选MSVC编译
+
+现代手动流程继续使用固定`1.97.1-x86_64-pc-windows-msvc`及`i686-pc-windows-msvc`。新增独立的[Win7候选流程](../.github/workflows/windows-win7-msvc.yml)，复用[有界采集脚本](../scripts/windows-msvc-ci.ps1)的显式`Win7`基线，固定`nightly-2026-10-29-x86_64-pc-windows-msvc`与compiler commit `92ffebeceaa0a071066f233873c2438e73d70fe7`；同一次工具链安装取得rust-src，不尝试下载Tier3目标的预编译标准库。目标为`i686-win7-windows-msvc`，test/build/Clippy均使用不带crate列表的`-Z build-std`及明确target，fmt/metadata不传该构建参数。
+
+Win7的target专用linker、CC、`_WIN32_WINNT/WINVER=0x0601`、静态CRT与PE32 subsystem6.1分别检查，保留实际VS/SDK/CRT和选定rust-src/lock哈希。两个基线使用不同的run根、所有权标记、并发组和artifact名；仍按原135分钟job/105分钟构建、单命令预算、每流16MiB上限、固定双构建并发、精确进程归还与原件不覆盖规则执行。编译流程不运行任何生成EXE。
+
+实机PowerShell的28组/421断言仅证明完整源码可解析、三个纯函数的参数/PE边界和现代参数等价；完整采集脚本仍要求Hosted PowerShell 7.2及以上。新的共享采集代码和Win7候选都须以同步后的完整SHA各取得实际Hosted CI结果，不能用修改前的现代CI通过替代。即使所有编译及subsystem门槛通过，Win7 API动态路径、SDK/CRT兼容、真实SP1 x86运行、Win10与希沃设备证据仍须独立验收。

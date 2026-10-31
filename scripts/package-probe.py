@@ -20,6 +20,7 @@ VERSION = "0.1.0"
 ARTIFACT = f"FutureClassroom-{VERSION}-windows-x86-dev.zip"
 TARGET_ROLES = {
     "i686-pc-windows-gnu": "modern-GNU-development-only",
+    "i686-pc-windows-msvc": "modern-MSVC-development-only",
     "i686-win7-windows-gnu": "supplemental-GNU-not-formal-MSVC-baseline",
     "i686-win7-windows-msvc": "formal-candidate-unvalidated",
 }
