@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "scope": "Finished original CI binary downloads/extractions removed after complete original nonbinary evidence/per-file hashes/static audits and scoped modern Win11 runtime/probes/after audit preserved. Still-live R38 local Rust test/lint target and original evidence await completion/archive. Does not turn failed Win7 Clippy into successful CI or target OS runtime.",
+  "removed": [
+    {
+      "path": "/tmp/fc-round37-modern-original.zip",
+      "bytes": 40531990,
+      "sha256": "119833672c476ee9b51fd9528c7b6e996b5fb54fff333f9ef7a0046e70a2d06a"
+    },
+    {
+      "path": "/tmp/fc-round37-win7-original.zip",
+      "bytes": 41202325,
+      "sha256": "9eff3b281e7374e0484e8e8b0ff16841bdf624765e99c4f477af3ade32dc4bc1"
+    },
+    {
+      "path": "/tmp/fc-round37-modern-programs",
+      "fileCount": 22,
+      "bytes": 78259712
+    }
+  ],
+  "modernProbes": {
+    "modern-msvc-public-native-second.json": {
+      "sha256": "1ab2b742c210c306428e9e98f15c1c2e0d6a39a942ab202d62c0ffde78e04fb6",
+      "status": "PASS",
+      "cleanup": "PASS"
+    },
+    "modern-msvc-visual-native-first.json": {
+      "sha256": "01177a48e56e9c20484e7461c7e78bf78b586cccce432db134971674f608fa28",
+      "status": "PASS",
+      "cleanup": "PASS"
+    },
+    "modern-msvc-reminder-browser-first.json": {
+      "sha256": "e88a081e13a1d484252ed93125d94f4ee8891ef4e49e17849396586a51183e07",
+      "status": "PASS",
+      "cleanup": "PASS"
+    },
+    "modern-msvc-windows-after.json": {
+      "sha256": "2318ecd2eb7ec1b31e7fbe5a58a1138a10238579e7b66259d80e345906776a55",
+      "status": "PASS",
+      "cleanup": null
+    }
+  },
+  "remainingOriginalProgramFiles": 0
+}

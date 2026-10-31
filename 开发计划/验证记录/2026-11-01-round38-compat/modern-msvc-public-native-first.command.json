@@ -1,0 +1,27 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-probe.py",
+    "--exe",
+    "/tmp/fc-round37-modern-programs/fc-bootstrap.exe",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round37-ci-evidence/modern-msvc-public-native-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T20:10:44.379135+00:00",
+  "stdout": "/tmp/fc-round37-ci-evidence/modern-msvc-public-native-first.stdout.log",
+  "stderr": "/tmp/fc-round37-ci-evidence/modern-msvc-public-native-first.stderr.log",
+  "exitCode": 2,
+  "elapsedSeconds": 0.18433503690175712,
+  "completedUtc": "2026-10-31T20:10:44.563855+00:00",
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 762,
+  "stderrSha256": "74297a3f75ae89eb5ea69b6b6b4dd6eaa36504bc762adff0a67065facd92b67b"
+}

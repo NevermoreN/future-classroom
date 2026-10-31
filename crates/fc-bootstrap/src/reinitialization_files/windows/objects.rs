@@ -85,7 +85,9 @@ impl Snapshot {
                 return Err(ReinitializationFileError::RepairRequired);
             }
             let name: Vec<u16> = take(&mut input, units * 2)?
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|v| u16::from_le_bytes([v[0], v[1]]))
                 .collect();
             if name.iter().any(|v| matches!(*v, 0 | 58)) {

@@ -1,0 +1,257 @@
+--- a/crates/fc-bootstrap/src/application/profile_content_probe.rs
++++ b/crates/fc-bootstrap/src/application/profile_content_probe.rs
+@@ -150,8 +150,10 @@
+                     && frame.pixels().len() == 8
+                     && frame
+                         .pixels()
+-                        .chunks_exact(4)
+-                        .all(|pixel| pixel == [0, 255, 0, 255])
++                        .as_chunks::<4>()
++                        .0
++                        .iter()
++                        .all(|pixel| *pixel == [0, 255, 0, 255])
+             })
+     });
+ }
+--- a/crates/fc-bootstrap/src/application/profiles_preview.rs
++++ b/crates/fc-bootstrap/src/application/profiles_preview.rs
+@@ -973,7 +973,12 @@
+             Arc::new(RasterCache::new()),
+         )
+         .unwrap();
+-        assert!(image.bgra.chunks_exact(4).any(|pixel| pixel[3] > 0));
++        assert!(image
++            .bgra
++            .as_chunks::<4>()
++            .0
++            .iter()
++            .any(|pixel| pixel[3] > 0));
+         for id in [100, 101] {
+             assert!(image
+                 .nodes
+@@ -1101,10 +1106,12 @@
+             .nodes
+             .iter()
+             .any(|n| n.key.id != subject.tree.root && n.rect.width > 0. && n.rect.height > 0.));
+-        assert!(image.bgra.chunks_exact(4).any(|p| p[3] > 0));
++        assert!(image.bgra.as_chunks::<4>().0.iter().any(|p| p[3] > 0));
+         assert!(image
+             .bgra
+-            .chunks_exact(4)
++            .as_chunks::<4>()
++            .0
++            .iter()
+             .all(|p| p[..3].iter().all(|c| *c <= p[3])));
+     }
+ 
+--- a/crates/fc-bootstrap/src/profile_content_files_tests.rs
++++ b/crates/fc-bootstrap/src/profile_content_files_tests.rs
+@@ -201,8 +201,10 @@
+     assert_eq!((frame.key().width, frame.key().height), (2, 1));
+     assert!(frame
+         .pixels()
+-        .chunks_exact(4)
+-        .all(|p| p == [0, 0, 255, 255]));
++        .as_chunks::<4>()
++        .0
++        .iter()
++        .all(|p| *p == [0, 0, 255, 255]));
+     let mut forged = pages[0].clone();
+     forged.sha256 = [0; 32];
+     assert!(files
+--- a/crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs
++++ b/crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs
+@@ -85,7 +85,9 @@
+                 return Err(ReinitializationFileError::RepairRequired);
+             }
+             let name: Vec<u16> = take(&mut input, units * 2)?
+-                .chunks_exact(2)
++                .as_chunks::<2>()
++                .0
++                .iter()
+                 .map(|v| u16::from_le_bytes([v[0], v[1]]))
+                 .collect();
+             if name.iter().any(|v| matches!(*v, 0 | 58)) {
+--- a/crates/fc-materials/src/pdf_validation.rs
++++ b/crates/fc-materials/src/pdf_validation.rs
+@@ -489,7 +489,7 @@
+             }
+             let row = widths.iter().map(|n| usize::from(*n)).sum::<usize>();
+             let mut at = 0usize;
+-            for pair in indexes.chunks_exact(2) {
++            for pair in indexes.as_chunks::<2>().0.iter() {
+                 let first = pair[0];
+                 let count = pair[1];
+                 entries = entries
+--- a/crates/fc-protocol/src/recovery.rs
++++ b/crates/fc-protocol/src/recovery.rs
+@@ -100,7 +100,7 @@
+         return Err(BackupFormatError::InvalidJson);
+     }
+     let mut out = [0; 32];
+-    for (index, pair) in text.as_bytes().chunks_exact(2).enumerate() {
++    for (index, pair) in text.as_bytes().as_chunks::<2>().0.iter().enumerate() {
+         out[index] = (nibble(pair[0])? << 4) | nibble(pair[1])?;
+     }
+     Ok(out)
+--- a/crates/fc-protocol/src/web/assets.rs
++++ b/crates/fc-protocol/src/web/assets.rs
+@@ -101,7 +101,7 @@
+             let mut digest = [0; 32];
+             for (out, pair) in digest
+                 .iter_mut()
+-                .zip(asset.sha256.as_bytes().chunks_exact(2))
++                .zip(asset.sha256.as_bytes().as_chunks::<2>().0.iter())
+             {
+                 let hex = |b| match b {
+                     b'0'..=b'9' => Some(b - b'0'),
+--- a/crates/fc-security/src/recovery.rs
++++ b/crates/fc-security/src/recovery.rs
+@@ -21,10 +21,12 @@
+             return Err(SecurityError::InvalidRecoveryCode);
+         }
+         let mut bytes = Zeroizing::new([0u8; RECOVERY_BYTES]);
+-        for (dst, pair) in bytes
+-            .iter_mut()
+-            .zip(input.as_bytes()[CODE_PREFIX.len()..].chunks_exact(2))
+-        {
++        for (dst, pair) in bytes.iter_mut().zip(
++            input.as_bytes()[CODE_PREFIX.len()..]
++                .as_chunks::<2>()
++                .0
++                .iter(),
++        ) {
+             let high = hex(pair[0]).ok_or(SecurityError::InvalidRecoveryCode)?;
+             let low = hex(pair[1]).ok_or(SecurityError::InvalidRecoveryCode)?;
+             *dst = (high << 4) | low;
+--- a/crates/fc-security/src/web.rs
++++ b/crates/fc-security/src/web.rs
+@@ -49,7 +49,10 @@
+             return Err(WebSecretError::InvalidSecret);
+         }
+         let mut bytes = Zeroizing::new([0; SECRET_BYTES]);
+-        for (output, pair) in bytes.iter_mut().zip(input.as_bytes().chunks_exact(2)) {
++        for (output, pair) in bytes
++            .iter_mut()
++            .zip(input.as_bytes().as_chunks::<2>().0.iter())
++        {
+             let high = hex(pair[0]).ok_or(WebSecretError::InvalidSecret)?;
+             let low = hex(pair[1]).ok_or(WebSecretError::InvalidSecret)?;
+             *output = high << 4 | low;
+--- a/crates/fc-windows/src/desktop/backdrop.rs
++++ b/crates/fc-windows/src/desktop/backdrop.rs
+@@ -372,7 +372,9 @@
+         }
+         if !sample
+             .pixels()
+-            .chunks_exact(4)
++            .as_chunks::<4>()
++            .0
++            .iter()
+             .all(|pixel| pixel[..3] == [255, 255, 255])
+         {
+             return Err(Error::from_hresult(E_FAIL));
+--- a/crates/fc-windows/src/desktop/card_body_tests.rs
++++ b/crates/fc-windows/src/desktop/card_body_tests.rs
+@@ -324,7 +324,7 @@
+         card.body.blocks.iter().map(line_lengths).sum::<usize>(),
+         expected_units
+     );
+-    for pair in card.body.blocks.chunks_exact(2) {
++    for pair in card.body.blocks.as_chunks::<2>().0.iter() {
+         assert!(pair[0].fill.is_some() && pair[1].fill.is_none());
+         assert_eq!(pair[0].leaf, pair[1].leaf);
+     }
+--- a/crates/fc-windows/src/desktop.rs
++++ b/crates/fc-windows/src/desktop.rs
+@@ -1223,7 +1223,7 @@
+             .filter(|v| *v <= 64 * 1024 * 1024)
+             .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
+         let mut pixels = vec![0u8; bytes];
+-        for p in pixels.chunks_exact_mut(4) {
++        for p in pixels.as_chunks_mut::<4>().0.iter_mut() {
+             p.copy_from_slice(&[45, 36, 28, 255]);
+         }
+         tree::composite_groups(self, &mut pixels, work, w, h)?;
+@@ -2945,7 +2945,7 @@
+                 height,
+             };
+             let mut sample = vec![0u8; (width * height * 4.) as usize];
+-            for pixel in sample.chunks_exact_mut(4) {
++            for pixel in sample.as_chunks_mut::<4>().0.iter_mut() {
+                 pixel.copy_from_slice(&[45, 36, 28, 255]);
+             }
+             background
+--- a/crates/fc-windows/src/materials/raster.rs
++++ b/crates/fc-windows/src/materials/raster.rs
+@@ -295,7 +295,7 @@
+             }
+         }
+         check()?;
+-        for (index, pixel) in pixels.chunks_exact(4).enumerate() {
++        for (index, pixel) in pixels.as_chunks::<4>().0.iter().enumerate() {
+             if pixel[..3].iter().any(|channel| *channel > pixel[3]) {
+                 return Err(invalid());
+             }
+--- a/crates/fc-windows/src/materials/raster_tests.rs
++++ b/crates/fc-windows/src/materials/raster_tests.rs
+@@ -206,7 +206,12 @@
+         .unwrap();
+     assert_eq!((scaled.key().width, scaled.key().height), (2, 1));
+     assert_eq!(scaled.pixels().len(), 8);
+-    assert!(scaled.pixels().chunks_exact(4).all(|p| p[3] == 255));
++    assert!(scaled
++        .pixels()
++        .as_chunks::<4>()
++        .0
++        .iter()
++        .all(|p| p[3] == 255));
+     assert_eq!(cache.bytes_in_use(), 72);
+     cache.clear().unwrap();
+     assert_eq!(cache.bytes_in_use(), 72);
+--- a/crates/fc-windows/src/system/autorun.rs
++++ b/crates/fc-windows/src/system/autorun.rs
+@@ -366,7 +366,9 @@
+         return opaque();
+     }
+     let mut units: Vec<u16> = data[..bytes as usize]
+-        .chunks_exact(2)
++        .as_chunks::<2>()
++        .0
++        .iter()
+         .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+         .collect();
+     if units.pop() != Some(0) || units.contains(&0) {
+--- a/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ b/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -39,7 +39,7 @@
+             return Err(TlsError::InvalidInput);
+         }
+         let mut bytes = [0; 20];
+-        for (index, pair) in value.as_bytes().chunks_exact(2).enumerate() {
++        for (index, pair) in value.as_bytes().as_chunks::<2>().0.iter().enumerate() {
+             let digit = |b: u8| match b {
+                 b'0'..=b'9' => b - b'0',
+                 b'a'..=b'f' => b - b'a' + 10,
+--- a/crates/fc-windows/src/workbench/preview.rs
++++ b/crates/fc-windows/src/workbench/preview.rs
+@@ -83,7 +83,9 @@
+         }
+         if self
+             .bgra
+-            .chunks_exact(4)
++            .as_chunks::<4>()
++            .0
++            .iter()
+             .any(|p| p[..3].iter().any(|c| *c > p[3]))
+         {
+             return Err(Error::from_hresult(E_INVALIDARG));
+@@ -92,7 +94,7 @@
+     }
+     fn checker(&mut self) {
+         let width = usize::from(self.width);
+-        for (i, p) in self.bgra.chunks_exact_mut(4).enumerate() {
++        for (i, p) in self.bgra.as_chunks_mut::<4>().0.iter_mut().enumerate() {
+             let tone = if (i % width / 16 + i / width / 16) % 2 == 0 {
+                 224u16
+             } else {

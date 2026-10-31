@@ -201,8 +201,10 @@ fn real_ordered_image_bundle_seals_hashes_decodes_and_pins_until_commit_owner_ex
     assert_eq!((frame.key().width, frame.key().height), (2, 1));
     assert!(frame
         .pixels()
-        .chunks_exact(4)
-        .all(|p| p == [0, 0, 255, 255]));
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .all(|p| *p == [0, 0, 255, 255]));
     let mut forged = pages[0].clone();
     forged.sha256 = [0; 32];
     assert!(files

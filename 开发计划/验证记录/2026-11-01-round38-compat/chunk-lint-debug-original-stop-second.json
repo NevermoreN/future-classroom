@@ -1,0 +1,49 @@
+{
+  "status": "PASS_CANCELLED_AND_CLEANED",
+  "scope": "Cancel only original owned local debug test/Cargo after exact UID, argv, parent chain and Linux process start-time checks, rechecked immediately before signals. Python build lacks pidfd APIs; no signal sent in first attempt. No process-name kill or unrelated process selection. Preserve original partial logs as NOT_COMPLETED; same full suite follows in release under original900s cap.",
+  "processes": [
+    {
+      "pid": 28635,
+      "parentPid": 2515,
+      "startTicks": "139632076",
+      "arguments": [
+        "python3",
+        "/tmp/fc-round37-ci-evidence/chunk-lint-local-second.py"
+      ]
+    },
+    {
+      "pid": 28775,
+      "parentPid": 28635,
+      "startTicks": "139633687",
+      "arguments": [
+        "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/cargo",
+        "test",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--target-dir",
+        "/tmp/fc-round38-host-target",
+        "--",
+        "--test-threads=2"
+      ]
+    },
+    {
+      "pid": 2814,
+      "parentPid": 28775,
+      "startTicks": "139650773",
+      "arguments": [
+        "/tmp/fc-round38-host-target/debug/deps/fc_bootstrap-e5c2d97aab0c1386",
+        "--test-threads=2"
+      ]
+    }
+  ],
+  "scratch": [
+    {
+      "path": "/dev/shm/FutureClassroom-Voice-Service-2814-1793477977246109185",
+      "inode": 2292920254
+    }
+  ],
+  "originalTestOutcome": "NOT_COMPLETED_NOT_PASS",
+  "originalRecordedExitCode": -2,
+  "actualOriginalProcessesExited": true
+}

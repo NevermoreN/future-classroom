@@ -104,3 +104,19 @@ Win7的target专用linker、CC、`_WIN32_WINNT/WINVER=0x0601`、静态CRT与PE32
 93414d5的现代共享helper Hosted CI已实际成功。Win7候选原CI的workspace测试/正常程序编译及22份PE采集通过，但Clippy缺少core而失败，整体不得填成功。固定同一nightly的独立离线最小复现确认：把build-std放在外层Cargo全局参数位置不能传入Clippy内部check；改为`cargo clippy -Z build-std … -- -D warnings`后实际编译core并成功。最小复现使用GNU Tier3和core子集，仅作因果诊断，不能代替完整MSVC依赖或运行证明。
 
 共享helper只调整Win7 Clippy的参数位置，生产继续完整无子集`build-std`；Win7 test/build及现代参数不变。修正后实际Win11 PowerShell纯函数28组/421断言通过，完整新源码仍须Hosted PowerShell>=7.2执行及真实Win7另取证。连续接纳Rust增量须核对冻结源码、受影响Windows测试程序/正常程序哈希、实际Win11运行、真实Schannel四请求容量矩阵与自有资源清理；上述应用层结果不解除严格首TCP五秒、内核/SSP资源、Win7/Win10及可见希沃门槛。
+
+## 第三十七/三十八轮：原MSVC产物终态与固定nightly新诊断
+
+原 `b76ad738100a722ee5c23804a489644a93593a1f` 的[现代run41235609015](https://github.com/NevermoreN/future-classroom/actions/runs/41235609015)实际SUCCESS，artifact13056400983为40531990字节/SHA `119833672c476ee9b51fd9528c7b6e996b5fb54fff333f9ef7a0046e70a2d06a`。完整ZIP192成员CRC、170份非二进制生产者账和22份PE32/静态CRT独审PASS；[独立输入审查](验证记录/2026-11-01-round38-compat/modern-programs-independent-first.json)对5165项分别核对2862项原Git blob和2303项精确LF→CRLF检出字节，不将后者描述为raw Git blob一致。原件拟归档到上述相对目录，完成归档另记。该现代程序在授权Win11实际21EXE1399/0/0、20步公开桌面、22步配色和有限真实TLS/连续接纳/Edge REMINDER均PASS且cleanup PASS，详见[实施记录](10-实施进度与验证记录.md)；不外推到R38源码、Win7/Win10或正式发布。
+
+同源码[Win7候选run41235621154](https://github.com/NevermoreN/future-classroom/actions/runs/41235621154)整体FAIL：测试/正常程序及22PE原采集成功，严格Clippy实际因 `chunks_exact_to_as_chunks` 失败，不是旧build-std缺core或运行错误。artifact13056180652为41202325字节/SHA `9eff3b281e7374e0484e8e8b0ff16841bdf624765e99c4f477af3ade32dc4bc1`，完整201成员CRC/179份非二进制账通过，[5165项源码证明](验证记录/2026-11-01-round38-compat/win7-all-source-input-proof-second.json)具有相同2862/2303分层；CRLF导致的首次直接比较失败保留。[22份PE32/静态CRT/subsystem6.1独审](验证记录/2026-11-01-round38-compat/win7-all-pe-independent-first.json)仅PASS_STATIC_INSPECTION_ONLY，未执行这些EXE，不足以冻结Win7正式可用组合。
+
+R38仅将17文件21处常量2/4分块改为 `as_chunks(_mut)` 完整数组迭代（两处像素比较作必要解引用），再对local-first实际strict Clippy暴露的清理布尔返回及七天字段循环作两处等价style修正，总计19文件23处；保留原始失败/完整差异及前后冻结记录，不加lint allow、不更换工具链或放宽 `-D warnings`。[local-second](验证记录/2026-11-01-round38-compat/chunk-lint-local-second.json)固定nightly全workspace/all-targets Windows GNU严格Clippy PASS，后续Host debug因过慢明确取消并记录FAIL/exit -2/NOT_COMPLETED，不计作测试通过。首次pidfd准备API不可用且未发信号，第二次按UID/argv/PPid/startTicks精确确认后仅停止原自有进程并清理独有scratch，原部分日志不覆盖。
+
+截至本段，[local-third](验证记录/2026-11-01-round38-compat/chunk-lint-local-third.json)完整workspace/all-targets release测试和stable严格Clippy仍RUNNING，保持每命令原900秒、jobs2/tests2、无过滤、不减KDF；尚无Host最终PASS。新现代/Win7 Hosted CI未重派，须先完成本地验证、原件归档及自有残留清理、同步新完整SHA，再各唯一dispatch。旧ZIP/22EXE自有副本已清理，活跃target和未归档证据保留。严格首TCP原5_000_000_000ns FAIL、生产listener关闭、真实Win7/Win10/可见希沃与发布门槛均不改变；不创建Release/tag，完整目标保持active。
+
+### R38完整本地矩阵终态（追加，不覆盖原RUNNING/FAIL）
+
+[第三次](验证记录/2026-11-01-round38-compat/chunk-lint-local-third.json)最终为冷release编译超时FAIL，host-test原900秒exit124、尚未运行测试；原controller/Cargo/compiler均已实际退出，保留原日志及不变源码。[第四次独立操作](验证记录/2026-11-01-round38-compat/chunk-lint-local-fourth.json)则实际PASS：nightly完整Windows GNU严格Clippy4.05秒，显式完整release `test --no-run` 296.83秒，随后同一完整workspace/all-targets release Host测试71.82秒，stable完整release Host严格Clippy118.72秒，fmt/架构检查亦exit0。每条命令分别保持原900秒预算、jobs2/tests2；没有过滤、KDF降级或lint放行。
+
+[原stdout/stderr计数证明](验证记录/2026-11-01-round38-compat/chunk-lint-host-count-fourth.json)核对实际Running21份与21组完整summary，为915通过/0失败/0忽略/0过滤；406份sourceBefore/sourceAfter逐字节一致。该矩阵不含独立R39工作树，不替代新R38现代/Win7 MSVC CI或目标系统运行。新CI尚未dispatch/通过，完整归档和活跃构建/工作副本清理尚待实际执行；原先失败不被后续成功覆盖，原严格首TCP五秒FAIL及正式发布限制不变。

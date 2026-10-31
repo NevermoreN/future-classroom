@@ -83,7 +83,9 @@ impl LayoutPreview {
         }
         if self
             .bgra
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .any(|p| p[..3].iter().any(|c| *c > p[3]))
         {
             return Err(Error::from_hresult(E_INVALIDARG));
@@ -92,7 +94,7 @@ impl LayoutPreview {
     }
     fn checker(&mut self) {
         let width = usize::from(self.width);
-        for (i, p) in self.bgra.chunks_exact_mut(4).enumerate() {
+        for (i, p) in self.bgra.as_chunks_mut::<4>().0.iter_mut().enumerate() {
             let tone = if (i % width / 16 + i / width / 16) % 2 == 0 {
                 224u16
             } else {

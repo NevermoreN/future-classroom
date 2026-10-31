@@ -1,0 +1,30 @@
+{
+  "status": "PASS_PHYSICAL_EXIT_AND_TEST_SCRATCH_CLEANUP",
+  "atUnixSeconds": 1793479638.025472,
+  "activeOriginalBuildProcesses": [],
+  "removedScratch": {
+    "path": "/dev/shm/fc-round38-release-tests",
+    "inode": 2293068765,
+    "onlyOwnedMarkerRemained": true,
+    "absentAfter": true
+  },
+  "activeBuildCacheHandoff": [
+    {
+      "path": "/tmp/fc-round38-host-target",
+      "inode": 1146882,
+      "use": "Retained as active build cache for separately owned R39 worktree; delete only after its dependent verification finishes. No completed test process remains."
+    },
+    {
+      "path": "/tmp/fc-round38-lint-target",
+      "inode": 1148489,
+      "use": "Retained as active build cache for separately owned R39 worktree; delete only after its dependent verification finishes. No completed test process remains."
+    }
+  ],
+  "fullTemporaryCleanup": "PENDING_R39_DEPENDENT_BUILD_AND_COMMITTED_EVIDENCE_PROOF",
+  "notRemoved": [
+    "original main target",
+    "global Cargo/Rust/npm caches",
+    "persistent Windows SSH authorization/private key",
+    "intentional development packages"
+  ]
+}

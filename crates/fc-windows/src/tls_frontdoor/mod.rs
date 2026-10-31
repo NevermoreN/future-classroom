@@ -39,7 +39,7 @@ impl CertificateThumbprint {
             return Err(TlsError::InvalidInput);
         }
         let mut bytes = [0; 20];
-        for (index, pair) in value.as_bytes().chunks_exact(2).enumerate() {
+        for (index, pair) in value.as_bytes().as_chunks::<2>().0.iter().enumerate() {
             let digit = |b: u8| match b {
                 b'0'..=b'9' => b - b'0',
                 b'a'..=b'f' => b - b'a' + 10,

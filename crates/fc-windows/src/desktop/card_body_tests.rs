@@ -324,7 +324,7 @@ fn shared_body_homework_labels_and_text_use_actual_width_full_utf16_and_page_lin
         card.body.blocks.iter().map(line_lengths).sum::<usize>(),
         expected_units
     );
-    for pair in card.body.blocks.chunks_exact(2) {
+    for pair in card.body.blocks.as_chunks::<2>().0.iter() {
         assert!(pair[0].fill.is_some() && pair[1].fill.is_none());
         assert_eq!(pair[0].leaf, pair[1].leaf);
     }

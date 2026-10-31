@@ -101,7 +101,7 @@ impl Manifest {
             let mut digest = [0; 32];
             for (out, pair) in digest
                 .iter_mut()
-                .zip(asset.sha256.as_bytes().chunks_exact(2))
+                .zip(asset.sha256.as_bytes().as_chunks::<2>().0.iter())
             {
                 let hex = |b| match b {
                     b'0'..=b'9' => Some(b - b'0'),

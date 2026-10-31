@@ -372,7 +372,9 @@ impl Layer {
         }
         if !sample
             .pixels()
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .all(|pixel| pixel[..3] == [255, 255, 255])
         {
             return Err(Error::from_hresult(E_FAIL));

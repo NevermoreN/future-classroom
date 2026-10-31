@@ -489,7 +489,7 @@ fn preflight(data: &[u8], budget: &Budget<'_>) -> Result<(), ValidationError> {
             }
             let row = widths.iter().map(|n| usize::from(*n)).sum::<usize>();
             let mut at = 0usize;
-            for pair in indexes.chunks_exact(2) {
+            for pair in indexes.as_chunks::<2>().0.iter() {
                 let first = pair[0];
                 let count = pair[1];
                 entries = entries

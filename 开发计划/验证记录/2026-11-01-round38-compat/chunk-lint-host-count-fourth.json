@@ -1,0 +1,159 @@
+{
+  "status": "PASS",
+  "scope": "Independent complete stable1.97.1 Host release all-workspace/all-targets execution ledger. Not Windows runtime; R39 feature source excluded.",
+  "sourceInputs": 406,
+  "changedInputs": 0,
+  "testPrograms": 21,
+  "passed": 915,
+  "failed": 0,
+  "ignored": 0,
+  "filtered": 0,
+  "programs": [
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_application-496471dd70afe184)",
+      "passed": 25
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_audio-8fd269f7e0a78166)",
+      "passed": 22
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_bootstrap-0a9672e9745706e7)",
+      "passed": 184
+    },
+    {
+      "program": "unittests src/main.rs (/tmp/fc-round38-host-target/release/deps/fc_bootstrap-83fd785a586e3513)",
+      "passed": 0
+    },
+    {
+      "program": "tests/autostart_coordinator.rs (/tmp/fc-round38-host-target/release/deps/autostart_coordinator-6c4783af952b92db)",
+      "passed": 13
+    },
+    {
+      "program": "tests/business_storage.rs (/tmp/fc-round38-host-target/release/deps/business_storage-0f739afb18058961)",
+      "passed": 43
+    },
+    {
+      "program": "tests/calendar_execution_fence.rs (/tmp/fc-round38-host-target/release/deps/calendar_execution_fence-10a2d572a15dd873)",
+      "passed": 4
+    },
+    {
+      "program": "tests/runtime_storage.rs (/tmp/fc-round38-host-target/release/deps/runtime_storage-4691c1541845bad1)",
+      "passed": 3
+    },
+    {
+      "program": "tests/schedule_operations.rs (/tmp/fc-round38-host-target/release/deps/schedule_operations-e3dea8a910862e92)",
+      "passed": 5
+    },
+    {
+      "program": "tests/voice_limits_storage.rs (/tmp/fc-round38-host-target/release/deps/voice_limits_storage-d839c891330c085e)",
+      "passed": 4
+    },
+    {
+      "program": "tests/voice_storage.rs (/tmp/fc-round38-host-target/release/deps/voice_storage-f7159a76dfa4ad3b)",
+      "passed": 6
+    },
+    {
+      "program": "unittests examples/verify_web_assets.rs (/tmp/fc-round38-host-target/release/examples/verify_web_assets-686bf4a86fdbba4d)",
+      "passed": 0
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_domain-74d504fc50556e61)",
+      "passed": 145
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_materials-c70694769ac6ff79)",
+      "passed": 39
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_ports-02b160eb844c47f4)",
+      "passed": 8
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_presentation-90026aa7e95eec3e)",
+      "passed": 58
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_protocol-94fabff2daa536dd)",
+      "passed": 82
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_runtime-bad4922eb9fb158e)",
+      "passed": 33
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_security-90a92c5620c0eb4c)",
+      "passed": 19
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_storage-38578a2c1ae7e01f)",
+      "passed": 191
+    },
+    {
+      "program": "unittests src/lib.rs (/tmp/fc-round38-host-target/release/deps/fc_windows-01a8414be8da61f7)",
+      "passed": 31
+    }
+  ],
+  "logs": [
+    {
+      "name": "chunk-lint-local-fourth.host-test.stdout.log",
+      "bytes": 96813,
+      "sha256": "9736beafa1c1664ada277ab396b3ea6b295e013c4b6a9c8614d1d1ad4657ebac"
+    },
+    {
+      "name": "chunk-lint-local-fourth.host-test.stderr.log",
+      "bytes": 2419,
+      "sha256": "6b050787d0a0c32ee517e009039580813c3da01e90f2bcb54edb22aef6e48811"
+    }
+  ],
+  "stages": [
+    {
+      "name": "nightly-version",
+      "exitCode": 0,
+      "elapsedSeconds": 1.0848454528022557,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "stable-version",
+      "exitCode": 0,
+      "elapsedSeconds": 0.16914207208901644,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "fmt",
+      "exitCode": 0,
+      "elapsedSeconds": 4.990880210883915,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "architecture",
+      "exitCode": 0,
+      "elapsedSeconds": 0.2131279141176492,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "nightly-windows-clippy",
+      "exitCode": 0,
+      "elapsedSeconds": 4.048679271014407,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "host-compile",
+      "exitCode": 0,
+      "elapsedSeconds": 296.8324480699375,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "host-test",
+      "exitCode": 0,
+      "elapsedSeconds": 71.81815362605266,
+      "timeoutSeconds": 900
+    },
+    {
+      "name": "stable-host-clippy",
+      "exitCode": 0,
+      "elapsedSeconds": 118.71801973995753,
+      "timeoutSeconds": 900
+    }
+  ]
+}

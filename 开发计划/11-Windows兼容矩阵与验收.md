@@ -6,10 +6,10 @@
 
 | 系统目标 | 首轮程序架构 | 必须取得的证据 | 当前状态 |
 | --- | --- | --- | --- |
-| Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机/正式MSVC证据；GNU补充探针已整改并在Win11局部复测 |
+| Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | BLOCKED：无Win7实机验收；R37正式候选MSVC测试/正常程序编译及22份PE静态检查通过，但整体CI因严格Clippy失败，EXE未执行。R38修正及本地验证现状见末节 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | BLOCKED：当前未连接Win10测试设备 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | BLOCKED：当前未连接Win10测试设备 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：build26300第二十七轮完整执行19个最终测试程序1080项，现代与补充程序在同一Win11完成25步本地语音设置；第二十五轮现代与补充Win7GNU均在同一Win11完成16步显式映射、三树切换和独立程序当前账号重开。第二十六轮另取得两批八连接的真实TLS1.2候选联调（见本册末节）；真实注销登录、GUI正式打包、生产TLS/浏览器、可见希沃及安装/长稳仍NOT_RUN；完整范围及原始证据见实施记录第二十五轮 |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：R37原b76源码现代MSVC在授权build26300执行21份程序1399项、公开桌面20步、配色22步及有限真实TLS/连续接纳/隔离Edge提醒流程，均PASS且cleanup PASS。旧轮语音/迁移等记录保留；生产持续监听、真实注销登录、正式安装、可见希沃及长稳仍未验收，最新证据边界见末节和实施记录 |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -272,3 +272,23 @@ Round32源码`9d42f7cc75c7d2545caa18366d4a6d047aedaa99`的现代MSVC编译与Win
 2026-11-01，D11。93414d5的现代MSVC共享helper Hosted CI已实际成功；Win7候选整体失败，具体是Clippy未继承build-std，之前的workspace测试编译、正常EXE及22份PE采集成功。固定nightly的GNU Tier3最小复现仅证明参数传递原因；修正后的28组/421断言为授权Win11 PowerShell脚本纯检查，不能填Win7系统运行通过。
 
 HTTP候选的独立固定接纳owner、空闲重投、四原请求占满/两新连接拒绝及退休后恢复，须分别绑定新源码、实际Windows程序哈希和Schannel运行报告。旧Round33 MSVC/1313项证据不自动覆盖新Rust增量。Win7 SP1 x86、Win10 32/64位和可见希沃仍需各自实机；严格首TCP五秒原FAIL与正常产品listener关闭保持。本轮现代GNU x86在同一授权Win11 Pro build26300/WOW64已实际通过受影响177项测试及真实Schannel连续接纳55事件/51响应，清理与只读审计通过；详见实施记录第三十四轮。它不代表新Rust的MSVC编译或实际Win7/Win10/可见希沃验收，未运行项目不预填PASS。
+
+## 第三十七/三十八轮：现代MSVC实际运行与Win7候选静态边界
+
+下表为最新补证；此前各轮“待终态/无正式MSVC证据”保留其历史时点。原件拟归档到 `验证记录/2026-11-01-round38-compat/`，归档完成另记；完整输入/产物SHA及失败历程见[实施记录](10-实施进度与验证记录.md)。两份原CI均绑定 `b76ad738100a722ee5c23804a489644a93593a1f`，不自动覆盖R38修改。
+
+| 环境/验证层 | 已实际取得的结果 | 保留边界 |
+| --- | --- | --- |
+| 现代MSVC Hosted构建 | run41235609015 SUCCESS；完整ZIP192成员CRC、170份非二进制账、22份PE32/静态CRT独审PASS，见[独立程序检查](验证记录/2026-11-01-round38-compat/modern-programs-independent-first.json) | 构建不等于完整产品或所有系统通过 |
+| 原现代MSVC在授权Win11/WOW64 | [21份程序1399/0/0](验证记录/2026-11-01-round38-compat/modern-msvc-runtime-count-first.json)，同一正常EXE `dced3ece…` 的公开桌面20步、配色22步、[真实TLS/连续接纳/隔离Edge REMINDER](验证记录/2026-11-01-round38-compat/modern-msvc-reminder-browser-first.json)均PASS/cleanup PASS；[结束审计](验证记录/2026-11-01-round38-compat/modern-msvc-windows-after.json)PASS | 隐藏合成原生与隔离浏览器，不是Win10、Win7、可见希沃、实际教师/手机或校园部署验收 |
+| Win7专用MSVC候选 | run41235621154整体FAIL；测试/正常程序编译及22份PE采集成功，[PE32/静态CRT/subsystem6.1独审](验证记录/2026-11-01-round38-compat/win7-all-pe-independent-first.json)仅PASS_STATIC_INSPECTION_ONLY，完整ZIP201成员CRC/179份非二进制账通过 | 固定nightly严格Clippy因chunks_exact_to_as_chunks失败；EXE未执行，实际Win7 SP1 x86仍BLOCKED |
+| R38修正后的本地验证 | 19文件23处最小调整；[local-second](验证记录/2026-11-01-round38-compat/chunk-lint-local-second.json)固定nightly完整Windows GNU严格Clippy PASS | 同次Host debug已取消，FAIL/exit -2/NOT_COMPLETED；[local-third](验证记录/2026-11-01-round38-compat/chunk-lint-local-third.json)完整release回归仍RUNNING，不能称Host或新MSVC已通过 |
+| Win10 32/64、可见希沃及正式部署 | 未新增对应设备/现场证据 | 各自BLOCKED/NOT_RUN不变，不能以Win11代验 |
+
+两份CI的5165项源码输入均分别证明2862项Git blob原字节匹配、2303项精确LF→CRLF Windows检出匹配；保留[Win7首次直接比较失败](验证记录/2026-11-01-round38-compat/win7-all-source-input-proof-first-failure.json)，不称5165项全部原始字节一致。R38没有更换固定工具链、降低KDF或警告门槛；新现代/Win7 CI须等本地最终验证与归档清理、同步新SHA后各唯一触发。严格首TCP五秒原FAIL、生产listener关闭、实际音频/安装升级/长稳及三系统正式兼容未完成的状态保持。
+
+### R38本地验证终态补充（保留上表原RUNNING时点）
+
+[local-third](验证记录/2026-11-01-round38-compat/chunk-lint-local-third.json)最终FAIL：冷release编译在原900秒上限exit124，测试尚未实际执行，原controller/Cargo/compiler实际退出，源码不变。随后[local-fourth](验证记录/2026-11-01-round38-compat/chunk-lint-local-fourth.json)独立PASS：nightly Windows GNU严格Clippy4.05秒、完整release显式测试编译296.83秒、原完整workspace/all-targets Host测试71.82秒、stable release Host严格Clippy118.72秒，均exit0。[21份实际运行/summary计数](验证记录/2026-11-01-round38-compat/chunk-lint-host-count-fourth.json)为 **915/0/0/0（通过/失败/忽略/过滤）**；406份Rust/构建输入前后完全一致。仍为原每命令900秒、jobs2/tests2、无测试过滤及KDF降级。
+
+该新增PASS仅是R38 Host全量与GNU交叉lint证据；独立R39增量不在915项内，新R38现代MSVC/Win7 CI尚未dispatch/通过，不填补真实Win7/Win10/可见希沃栏。完整归档及活跃target/工作副本清理尚待实际完成，其他严格五秒、生产监听和正式产品门槛不变。

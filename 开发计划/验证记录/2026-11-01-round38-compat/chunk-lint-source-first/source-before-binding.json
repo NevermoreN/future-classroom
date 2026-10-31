@@ -1,0 +1,277 @@
+{
+  "base": "ac9c4e64a7eaaf3ddc7e876f9a8941eac1366078",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "beforeBytes": 22128,
+      "beforeSha256": "0613df63600cae84ad68cdbb97a803b37b420bbbae0fe910f0a6dbc04517d73f",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "beforeBytes": 41972,
+      "beforeSha256": "a4f895a554f67f935efa32d9acfad23d8fc39289c619bb49bc1fe5402806f4bf",
+      "calls": 3
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "beforeBytes": 14049,
+      "beforeSha256": "90dddaca552aa1c2e4f627ee4757142e7afed07a09a6d01f2369001200034451",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs",
+      "beforeBytes": 15647,
+      "beforeSha256": "2d69df4b16164caecdefce7a804a2a88826d9c5b2a15977c87550b06e5c33dc7",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-materials/src/pdf_validation.rs",
+      "beforeBytes": 45472,
+      "beforeSha256": "48e5f9ebe364d45efe7b015f02b34752c98062964c31a7e8649c9e7a978af93c",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-protocol/src/recovery.rs",
+      "beforeBytes": 34496,
+      "beforeSha256": "9a39a2effa800d6333bbebba9f071b550e26ef456235fd6e4f8d0c8b26f747fb",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-protocol/src/web/assets.rs",
+      "beforeBytes": 11547,
+      "beforeSha256": "5dad29687e99e8b774e35ae178f21d75765049a699cd18911a399f38064ff56c",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-security/src/recovery.rs",
+      "beforeBytes": 8396,
+      "beforeSha256": "d63a66afe1ba11f42a3e64ea4ae595a7412d8899cada4df09a0682465f73e39d",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-security/src/web.rs",
+      "beforeBytes": 13956,
+      "beforeSha256": "447fff04d2821183d06fa6575dafe5e92e620d8193c182b9a5fcaed993a90daf",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "beforeBytes": 17632,
+      "beforeSha256": "3764ddd8f59cb289f31e54a5850b4bdad87b963cd238e8c4fb54dd053673775e",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "beforeBytes": 18711,
+      "beforeSha256": "3939411439adc01897c2082a1d0c42382566f6475f6b705e5bf52d5e52545073",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "beforeBytes": 122383,
+      "beforeSha256": "23dce0cb8fbe8bddcf7eb077bc68763c4f76274af8e688b81b0602a84e55830d",
+      "calls": 2
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster.rs",
+      "beforeBytes": 11406,
+      "beforeSha256": "c6eaf20174c430e869c3036284a9256a3a64a9a504798cdaae71bc3d08b63037",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster_tests.rs",
+      "beforeBytes": 9745,
+      "beforeSha256": "47b6e860805632918e7195a59d02c5a1c5b283d89bf55abebd4e17cf766a9d0b",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "beforeBytes": 14463,
+      "beforeSha256": "2283a4188d2dbc101eeb3e9220e2fc6967c903243ffe2bab6e235b1a26b3ec5b",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "beforeBytes": 7648,
+      "beforeSha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "calls": 1
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/preview.rs",
+      "beforeBytes": 28514,
+      "beforeSha256": "de049603b262b19166a57c66c71dcf4bba864c5d4c0fca0c129d1636adb4379d",
+      "calls": 2
+    }
+  ],
+  "calls": [
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_probe.rs",
+      "beforeLine": 153,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "beforeLine": 976,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "beforeLine": 1104,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "beforeLine": 1107,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/profile_content_files_tests.rs",
+      "beforeLine": 204,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs",
+      "beforeLine": 88,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-materials/src/pdf_validation.rs",
+      "beforeLine": 492,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-protocol/src/recovery.rs",
+      "beforeLine": 103,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/assets.rs",
+      "beforeLine": 104,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-security/src/recovery.rs",
+      "beforeLine": 26,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-security/src/web.rs",
+      "beforeLine": 52,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/backdrop.rs",
+      "beforeLine": 375,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "beforeLine": 327,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "beforeLine": 1226,
+      "mutable": true,
+      "size": 4,
+      "before": ".chunks_exact_mut(4)",
+      "after": ".as_chunks_mut::<4>().0.iter_mut()"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "beforeLine": 2948,
+      "mutable": true,
+      "size": 4,
+      "before": ".chunks_exact_mut(4)",
+      "after": ".as_chunks_mut::<4>().0.iter_mut()"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster.rs",
+      "beforeLine": 298,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/raster_tests.rs",
+      "beforeLine": 209,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "beforeLine": 369,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "beforeLine": 42,
+      "mutable": false,
+      "size": 2,
+      "before": ".chunks_exact(2)",
+      "after": ".as_chunks::<2>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/preview.rs",
+      "beforeLine": 86,
+      "mutable": false,
+      "size": 4,
+      "before": ".chunks_exact(4)",
+      "after": ".as_chunks::<4>().0.iter()"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/preview.rs",
+      "beforeLine": 95,
+      "mutable": true,
+      "size": 4,
+      "before": ".chunks_exact_mut(4)",
+      "after": ".as_chunks_mut::<4>().0.iter_mut()"
+    }
+  ]
+}

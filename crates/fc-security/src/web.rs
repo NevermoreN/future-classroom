@@ -49,7 +49,10 @@ impl WebSecret {
             return Err(WebSecretError::InvalidSecret);
         }
         let mut bytes = Zeroizing::new([0; SECRET_BYTES]);
-        for (output, pair) in bytes.iter_mut().zip(input.as_bytes().chunks_exact(2)) {
+        for (output, pair) in bytes
+            .iter_mut()
+            .zip(input.as_bytes().as_chunks::<2>().0.iter())
+        {
             let high = hex(pair[0]).ok_or(WebSecretError::InvalidSecret)?;
             let low = hex(pair[1]).ok_or(WebSecretError::InvalidSecret)?;
             *output = high << 4 | low;

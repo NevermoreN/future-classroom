@@ -1,0 +1,20 @@
+{
+  "phase": "before-vs",
+  "powershell": "7.6.9",
+  "dotnet": "10.0.14",
+  "flags": {
+    "RUSTFLAGS": {
+      "present": true,
+      "value": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+      "length": 65
+    },
+    "CARGO_ENCODED_RUSTFLAGS": {
+      "present": false,
+      "value": null,
+      "length": null
+    }
+  },
+  "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01.",
+  "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+  "scope": "Two exact process variables only; no environment dump."
+}

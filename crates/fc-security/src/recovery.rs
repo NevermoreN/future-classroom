@@ -21,10 +21,12 @@ impl RecoveryCode {
             return Err(SecurityError::InvalidRecoveryCode);
         }
         let mut bytes = Zeroizing::new([0u8; RECOVERY_BYTES]);
-        for (dst, pair) in bytes
-            .iter_mut()
-            .zip(input.as_bytes()[CODE_PREFIX.len()..].chunks_exact(2))
-        {
+        for (dst, pair) in bytes.iter_mut().zip(
+            input.as_bytes()[CODE_PREFIX.len()..]
+                .as_chunks::<2>()
+                .0
+                .iter(),
+        ) {
             let high = hex(pair[0]).ok_or(SecurityError::InvalidRecoveryCode)?;
             let low = hex(pair[1]).ok_or(SecurityError::InvalidRecoveryCode)?;
             *dst = (high << 4) | low;

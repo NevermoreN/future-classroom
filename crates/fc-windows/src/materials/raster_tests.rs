@@ -206,7 +206,12 @@ fn real_wic_decodes_same_pinned_bmp_after_hash_eof_and_keeps_node_identity() {
         .unwrap();
     assert_eq!((scaled.key().width, scaled.key().height), (2, 1));
     assert_eq!(scaled.pixels().len(), 8);
-    assert!(scaled.pixels().chunks_exact(4).all(|p| p[3] == 255));
+    assert!(scaled
+        .pixels()
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .all(|p| p[3] == 255));
     assert_eq!(cache.bytes_in_use(), 72);
     cache.clear().unwrap();
     assert_eq!(cache.bytes_in_use(), 72);

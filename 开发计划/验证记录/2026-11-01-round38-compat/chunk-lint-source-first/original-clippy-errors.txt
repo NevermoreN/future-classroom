@@ -1,0 +1,24 @@
+2115: error: using `chunks_exact` with a constant chunk size
+2116:    --> crates\fc-protocol\src\recovery.rs:103:42
+2117:     |
+2118: 103 |     for (index, pair) in text.as_bytes().chunks_exact(2).enumerate() {
+2119:     |                                          ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<2>().0.iter()`
+2120:     |
+2121:     = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#chunks_exact_to_as_chunks
+2122:     = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+2123:     = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+2124: 
+2125: error: using `chunks_exact` with a constant chunk size
+2126:    --> crates\fc-protocol\src\web\assets.rs:104:46
+2125: error: using `chunks_exact` with a constant chunk size
+2126:    --> crates\fc-protocol\src\web\assets.rs:104:46
+2127:     |
+2128: 104 |                 .zip(asset.sha256.as_bytes().chunks_exact(2))
+2129:     |                                              ^^^^^^^^^^^^^^^
+2130:     |
+2131: help: consider using `as_chunks::<2>()` instead
+2132:    --> crates\fc-protocol\src\web\assets.rs:104:46
+2133:     |
+2134: 104 |                 .zip(asset.sha256.as_bytes().chunks_exact(2))
+2135:     |                                              ^^^^^^^^^^^^^^^
+2136:     = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#chunks_exact_to_as_chunks

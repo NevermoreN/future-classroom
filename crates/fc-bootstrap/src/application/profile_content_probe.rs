@@ -150,8 +150,10 @@ pub(super) fn observe_preview(preview: &profile_flow::Preview) {
                     && frame.pixels().len() == 8
                     && frame
                         .pixels()
-                        .chunks_exact(4)
-                        .all(|pixel| pixel == [0, 255, 0, 255])
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .all(|pixel| *pixel == [0, 255, 0, 255])
             })
     });
 }

@@ -973,7 +973,12 @@ mod tests {
             Arc::new(RasterCache::new()),
         )
         .unwrap();
-        assert!(image.bgra.chunks_exact(4).any(|pixel| pixel[3] > 0));
+        assert!(image
+            .bgra
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .any(|pixel| pixel[3] > 0));
         for id in [100, 101] {
             assert!(image
                 .nodes
@@ -1101,10 +1106,12 @@ mod tests {
             .nodes
             .iter()
             .any(|n| n.key.id != subject.tree.root && n.rect.width > 0. && n.rect.height > 0.));
-        assert!(image.bgra.chunks_exact(4).any(|p| p[3] > 0));
+        assert!(image.bgra.as_chunks::<4>().0.iter().any(|p| p[3] > 0));
         assert!(image
             .bgra
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .all(|p| p[..3].iter().all(|c| *c <= p[3])));
     }
 

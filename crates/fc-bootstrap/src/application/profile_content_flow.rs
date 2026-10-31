@@ -433,10 +433,7 @@ fn collect_garbage_while(
                 Err(std::sync::TryLockError::WouldBlock) => return Ok(true),
                 Err(std::sync::TryLockError::Poisoned(_)) => return Err(Failure::Stopped),
             };
-            if cleanup_result(finalized)?.is_none() {
-                return Ok(true);
-            }
-            Ok(false)
+            Ok(cleanup_result(finalized)?.is_none())
         })()?;
         pending |= retry;
         if !current() {

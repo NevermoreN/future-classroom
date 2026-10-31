@@ -1223,7 +1223,7 @@ impl DesktopRenderer {
             .filter(|v| *v <= 64 * 1024 * 1024)
             .ok_or_else(|| Error::from_hresult(E_OUTOFMEMORY))?;
         let mut pixels = vec![0u8; bytes];
-        for p in pixels.chunks_exact_mut(4) {
+        for p in pixels.as_chunks_mut::<4>().0.iter_mut() {
             p.copy_from_slice(&[45, 36, 28, 255]);
         }
         tree::composite_groups(self, &mut pixels, work, w, h)?;
@@ -2945,7 +2945,7 @@ mod tests {
                 height,
             };
             let mut sample = vec![0u8; (width * height * 4.) as usize];
-            for pixel in sample.chunks_exact_mut(4) {
+            for pixel in sample.as_chunks_mut::<4>().0.iter_mut() {
                 pixel.copy_from_slice(&[45, 36, 28, 255]);
             }
             background

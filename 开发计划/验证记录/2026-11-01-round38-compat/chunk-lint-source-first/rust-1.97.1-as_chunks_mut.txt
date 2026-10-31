@@ -1,0 +1,26 @@
+    /// }
+    /// assert_eq!(v, &[1, 1, 2, 2, 9]);
+    /// ```
+    #[stable(feature = "slice_as_chunks", since = "1.88.0")]
+    #[rustc_const_stable(feature = "slice_as_chunks", since = "1.88.0")]
+    #[inline]
+    #[track_caller]
+    #[must_use]
+    pub const fn as_chunks_mut<const N: usize>(&mut self) -> (&mut [[T; N]], &mut [T]) {
+        assert!(N != 0, "chunk size must be non-zero");
+        let len_rounded_down = self.len() / N * N;
+        // SAFETY: The rounded-down value is always the same or smaller than the
+        // original length, and thus must be in-bounds of the slice.
+        let (multiple_of_n, remainder) = unsafe { self.split_at_mut_unchecked(len_rounded_down) };
+        // SAFETY: We already panicked for zero, and ensured by construction
+        // that the length of the subslice is a multiple of N.
+        let array_slice = unsafe { multiple_of_n.as_chunks_unchecked_mut() };
+        (array_slice, remainder)
+    }
+
+    /// Splits the slice into a slice of `N`-element arrays,
+    /// starting at the end of the slice,
+    /// and a remainder slice with length strictly less than `N`.
+    ///
+    /// The remainder is meaningful in the division sense.  Given
+    /// `let (remainder, chunks) = slice.as_rchunks_mut()`, then:

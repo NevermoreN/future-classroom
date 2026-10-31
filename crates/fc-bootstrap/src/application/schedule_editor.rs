@@ -1384,8 +1384,8 @@ impl Editor {
                         "unknown" => RowKind::Rest(RestPurpose::Unknown),
                         _ => return Err("请选择作息类型".into()),
                     };
-                    for i in 0..7 {
-                        row.enabled_days[i] = yes(data, FieldId(DAY_BASE + i as u16));
+                    for (i, enabled) in row.enabled_days.iter_mut().enumerate() {
+                        *enabled = yes(data, FieldId(DAY_BASE + i as u16));
                     }
                     if row.kind != RowKind::Course {
                         row.courses = std::array::from_fn(|_| None);
