@@ -1,0 +1,249 @@
+--- before/scripts/windows-tls-business-probe.py
++++ after/scripts/windows-tls-business-probe.py
+@@ -12,6 +12,7 @@
+ """
+ import argparse
+ from collections import deque
++from datetime import datetime
+ from email.utils import format_datetime, parsedate_to_datetime
+ import hashlib
+ import importlib.util
+@@ -853,6 +854,73 @@
+     client.csrf = session["csrf"]
+ 
+ 
++def validate_voice_capabilities(value):
++    """Strict fixture response metadata, not a native-query/cache observation."""
++    keys = {"schemaVersion", "status", "identityRevision", "runtimeGeneration", "serverNow", "currentClass",
++            "enabled", "admission", "targetAuthorized", "deviceAvailability", "defaultRepeatTotal", "minRepeatTotal",
++            "maxRepeatTotal", "minDurationMillis", "maxDurationMillis", "sampleRate", "channels", "bitsPerSample",
++            "maxWavBytes", "uploadTtlSeconds"}
++    require(type(value) is dict and set(value) == keys, "voice capabilities exact disclosure shape mismatch")
++    require(type(value["schemaVersion"]) is int and value["schemaVersion"] == 1
++            and value["status"] == "VOICE_CAPABILITIES", "voice capabilities envelope mismatch")
++    for key in ("identityRevision", "runtimeGeneration"):
++        number = value[key]
++        require(type(number) is str and re.fullmatch(r"[1-9][0-9]{0,19}", number) is not None
++                and int(number) <= 18_446_744_073_709_551_615, "voice capabilities canonical positive u64 mismatch")
++    civil = value["serverNow"]
++    require(type(civil) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}", civil) is not None,
++            "voice capabilities civil time form mismatch")
++    try:
++        datetime.fromisoformat(civil)
++    except ValueError:
++        raise RuntimeError("voice capabilities civil time date/range mismatch") from None
++    target = value["currentClass"]
++    require(type(target) is dict and set(target) == {"classId", "className"} and target["classId"] == "1",
++            "voice capabilities expected current classroom missing or changed")
++    name = target["className"]
++    require(type(name) is str and 0 < len(name) <= 128 and bool(name.strip())
++            and not any(ord(c) < 32 or 127 <= ord(c) <= 159 or 0xD800 <= ord(c) <= 0xDFFF for c in name),
++            "voice capabilities classroom label invalid")
++    require(type(value["enabled"]) is bool and value["targetAuthorized"] is True
++            and value["admission"] in ("OPEN", "CLOSED")
++            and (value["enabled"] or value["admission"] == "CLOSED"),
++            "voice capabilities authorization/admission mismatch")
++    require(value["deviceAvailability"] in ("UNVERIFIED", "UNAVAILABLE"),
++            "voice capabilities must not claim positive availability")
++    for key, expected in {"minRepeatTotal": 1, "minDurationMillis": 500, "sampleRate": 16000,
++                          "channels": 1, "bitsPerSample": 16, "uploadTtlSeconds": 600}.items():
++        require(type(value[key]) is int and value[key] == expected, "voice capabilities fixed format/limit mismatch")
++    repeats, duration, size = value["maxRepeatTotal"], value["maxDurationMillis"], value["maxWavBytes"]
++    require(type(repeats) is int and 1 <= repeats <= 10 and type(duration) is int and 500 <= duration <= 60000
++            and type(size) is int and size == 44 + duration * 32
++            and type(value["defaultRepeatTotal"]) is int and value["defaultRepeatTotal"] == min(3, repeats),
++            "voice capabilities duration/repeat/WAV formula mismatch")
++    return {key: entry for key, entry in value.items() if key != "serverNow"}
++
++
++def exercise_voice_capabilities(client):
++    """Three GETs only; the unchanged full suite separately uploads silent WAV."""
++    denied = client.request("voice-capabilities-no-cookie", "GET", "voice/capabilities", expected=(401,),
++                            authenticated=False).json()
++    require(type(denied) is dict and set(denied) == {"schemaVersion", "code"}
++            and type(denied["schemaVersion"]) is int and denied["schemaVersion"] == 1
++            and denied["code"] == "UNAUTHORIZED", "voice capabilities did not reject the missing session")
++    first = validate_voice_capabilities(client.request("voice-capabilities-authenticated", "GET", "voice/capabilities",
++                                                       expected=(200,)).json())
++    repeated = validate_voice_capabilities(client.request("voice-capabilities-authenticated-repeat", "GET", "voice/capabilities",
++                                                          expected=(200,)).json())
++    require(first == repeated, "voice capabilities stable fields changed between repeated GETs")
++    return {"status": "PASS", "additionalWireRequests": 3, "unauthenticatedStatus": 401, "authenticatedStatuses": [200, 200],
++            "identityRevision": first["identityRevision"], "runtimeGeneration": first["runtimeGeneration"],
++            "currentClassId": first["currentClass"]["classId"], "targetAuthorized": first["targetAuthorized"],
++            "enabled": first["enabled"], "admission": first["admission"], "deviceAvailability": first["deviceAvailability"],
++            "limits": {key: first[key] for key in ("minRepeatTotal", "defaultRepeatTotal", "maxRepeatTotal",
++                "minDurationMillis", "maxDurationMillis", "maxWavBytes", "sampleRate", "channels", "bitsPerSample", "uploadTtlSeconds")},
++            "stableFieldsExcludingServerNow": "MATCH", "nativeQueryCount": "NOT_OBSERVED",
++            "cacheBehavior": "NOT_DETERMINED_BY_GET", "operation": "THREE_GETS_NO_RECORDING_UPLOAD_SUBMIT_OR_PLAYBACK",
++            "supportMeaning": "A historical format observation is not a reservation or a guarantee of current audibility."}
++
++
+ def validate_visual(value, key, fixture):
+     require(fixture in VISUAL_FIXTURES, "unknown visual fixture")
+     zero = fixture == "FILLED_ZERO"
+@@ -910,8 +978,9 @@
+             "nativeDesktopPixels": "NOT_OBSERVED", "wallpaperContrast": "NOT_CERTIFIED"}
+ 
+ 
+-def exercise(client, browser_observer=None, continuous=None, visual_only=False):
++def exercise(client, browser_observer=None, continuous=None, visual_only=False, voice_capabilities=False):
+     authenticate_business(client)
++    capabilities = exercise_voice_capabilities(client) if voice_capabilities else None
+     visuals = exercise_visuals(client)
+     if browser_observer is not None:
+         # Keep the original one approved session and the original client
+@@ -995,13 +1064,16 @@
+             "actual silent PCM WAV upload response mismatch")
+     client.reject_certificate("wrong-ca-rejected")
+     client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
+-    return {"subjectVisuals": visuals, "continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
++    result = {"subjectVisuals": visuals, "continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
+             "commandId": COMMAND_ID, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
+             "downloadBytes": downloaded.body_bytes, "downloadSha256": downloaded.body_hash.hexdigest(),
+             "downloadClientRetainedBodyBytes": len(downloaded.body),
+             "jsonCancelledReadyIds": cancelled_ids, "subsequentBinaryBeginReusedHubSlot": True,
+             "voiceWavBytes": len(wav), "voiceSamples": 8000, "voiceDurationMillis": 500,
+             "voicePcmAllZero": True, "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"}
++    if capabilities is not None:
++        result["voiceCapabilitiesObservation"] = capabilities
++    return result
+ 
+ 
+ def cleanup_owned(remote, directory, marker, uploaded, report_path, token, report):
+@@ -1045,6 +1117,97 @@
+                        "retainedRemoteEvidence": {"root": directory, "processStopProven": stopped,
+                        "completeLocalArtifactsProven": raw_preserved, "cleanupIncomplete": True,
+                        "nextAction": "recover complete originals then use this root's exact tls-cleanup.ps1; retain SSH authorization"}})
++
++
++def self_test_voice_capabilities():
++    """Pure payload/request model only; never creates a Client/socket/Remote."""
++    sample = {"schemaVersion": 1, "status": "VOICE_CAPABILITIES", "identityRevision": "9", "runtimeGeneration": "3",
++              "serverNow": "2026-11-01T12:00:00", "currentClass": {"classId": "1", "className": "Synthetic TLS class"},
++              "enabled": True, "admission": "OPEN", "targetAuthorized": True, "deviceAvailability": "UNVERIFIED",
++              "defaultRepeatTotal": 3, "minRepeatTotal": 1, "maxRepeatTotal": 10, "minDurationMillis": 500,
++              "maxDurationMillis": 60000, "sampleRate": 16000, "channels": 1, "bitsPerSample": 16,
++              "maxWavBytes": 1920044, "uploadTtlSeconds": 600}
++    for availability in ("UNVERIFIED", "UNAVAILABLE"):
++        require(validate_voice_capabilities(dict(sample, deviceAvailability=availability))["deviceAvailability"] == availability,
++                "capability model rejected allowed nonpositive availability")
++    short = dict(sample, maxRepeatTotal=1, defaultRepeatTotal=1, maxDurationMillis=500, maxWavBytes=16044)
++    require(validate_voice_capabilities(short)["maxWavBytes"] == 16044, "capability model rejected exact tightened limits")
++    invalid = [dict(sample, deviceAvailability=v) for v in ("AVAILABLE", "UNKNOWN", "SUPPORTED", None, True)]
++    invalid += [dict(sample, **{k: v}) for k, v in (
++        ("schemaVersion", True), ("schemaVersion", 2), ("status", "VOICE_JOB"),
++        ("identityRevision", "0"), ("identityRevision", "09"), ("identityRevision", "18446744073709551616"),
++        ("runtimeGeneration", 3), ("runtimeGeneration", "+3"),
++        ("serverNow", "2026-02-29T12:00:00"), ("serverNow", "2026-11-01T24:00:00"),
++        ("serverNow", "2026-11-01T12:00:00Z"), ("currentClass", None),
++        ("currentClass", {"classId": "2", "className": "Synthetic TLS class"}),
++        ("currentClass", {"classId": "1", "className": " "}),
++        ("currentClass", {"classId": "1", "className": "bad\ud800"}),
++        ("currentClass", {"classId": "1", "className": "Synthetic TLS class", "lease": "extra"}),
++        ("targetAuthorized", False), ("targetAuthorized", 1), ("enabled", 1), ("admission", "UNKNOWN"),
++        ("minRepeatTotal", True), ("minDurationMillis", 0), ("maxRepeatTotal", 11), ("maxRepeatTotal", 1.5),
++        ("defaultRepeatTotal", 2), ("maxDurationMillis", 499), ("maxDurationMillis", 60001),
++        ("maxDurationMillis", 500.5), ("maxWavBytes", 1920046), ("sampleRate", 48000),
++        ("channels", 2), ("bitsPerSample", 32), ("uploadTtlSeconds", 601))]
++    invalid += [dict(sample, enabled=False), dict(sample, audioPath="extra-disclosure"), {}, None, []]
++    for key in sample:
++        omitted = dict(sample)
++        del omitted[key]
++        invalid.append(omitted)
++    for value in invalid:
++        try:
++            validate_voice_capabilities(value)
++        except RuntimeError:
++            continue
++        raise RuntimeError("capability model accepted bad type/limit/positive claim/target/authorization/extra or omitted field")
++
++    class Response:
++        def __init__(self, value):
++            self.value = value
++
++        def json(self):
++            return self.value
++
++    class ModelClient:
++        def __init__(self, first, repeated, denied=None):
++            self.replies = [{"schemaVersion": 1, "code": "UNAUTHORIZED"} if denied is None else denied, first, repeated]
++            self.calls = []
++            self.cookie, self.csrf = "synthetic-model-cookie-only", "synthetic-model-csrf-only"
++
++        def request(self, case, method, route, body=b"", expected=(200,), authenticated=True):
++            self.calls.append({"case": case, "method": method, "route": route, "bodyBytes": len(body),
++                               "expected": expected, "authenticated": authenticated})
++            require(len(self.calls) <= 3, "capability sub-observation added an unexpected operation")
++            return Response(self.replies[len(self.calls) - 1])
++
++    client = ModelClient(sample, dict(sample, serverNow="2026-11-01T12:00:01"))
++    observation = exercise_voice_capabilities(client)
++    require([(c["method"], c["route"], c["bodyBytes"], c["expected"], c["authenticated"]) for c in client.calls]
++            == [("GET", "voice/capabilities", 0, (401,), False),
++                ("GET", "voice/capabilities", 0, (200,), True),
++                ("GET", "voice/capabilities", 0, (200,), True)],
++            "capability sub-observation must be exactly missing-cookie401 plus two authenticated200 GETs")
++    encoded = json.dumps(observation)
++    require(observation["additionalWireRequests"] == 3 and observation["nativeQueryCount"] == "NOT_OBSERVED"
++            and observation["cacheBehavior"] == "NOT_DETERMINED_BY_GET"
++            and not any(secret in encoded for secret in (client.cookie, client.csrf, sample["serverNow"], "Synthetic TLS class"))
++            and not any(key in observation for key in ("cookie", "csrf", "body", "responseBody")),
++            "capability summary leaked session/body or inferred native/cache counts")
++    for change in ({"identityRevision": "10"}, {"runtimeGeneration": "4"}, {"deviceAvailability": "UNAVAILABLE"},
++                   {"maxRepeatTotal": 2, "defaultRepeatTotal": 2}, {"maxDurationMillis": 1250, "maxWavBytes": 40044}):
++        try:
++            exercise_voice_capabilities(ModelClient(sample, dict(sample, **change)))
++        except RuntimeError:
++            continue
++        raise RuntimeError("repeated capability model accepted changed stable fields")
++    try:
++        exercise_voice_capabilities(ModelClient(sample, sample, {"schemaVersion": 1, "code": "FORBIDDEN"}))
++    except RuntimeError:
++        pass
++    else:
++        raise RuntimeError("missing-cookie capability model accepted non401 error contract")
++    return [f"voice capability exact complete metadata/limits/target: {len(invalid)} malformed models rejected; UNVERIFIED/UNAVAILABLE and tightened bounds accepted",
++            "voice capability model exact three GETs (no Cookie401/auth200/repeat200), stable fields except civil time; changed revision/runtime/device/limits rejected",
++            "voice capability summary omits cookie/CSRF/body and does not infer native query count, cache behavior or current audibility; no IO"]
+ 
+ 
+ def self_test():
+@@ -1324,6 +1487,7 @@
+                 continue
+             raise RuntimeError("READY silently ignored requested visual fixture")
+     checks.append("visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected")
++    checks.extend(self_test_voice_capabilities())
+     print(json.dumps({"status": "PURE_LOCAL_CHECKS_PASS", "checks": checks,
+                       "tls": "NOT_RUN", "windows": "NOT_RUN", "business": "NOT_RUN"}, indent=2))
+ 
+@@ -1340,14 +1504,17 @@
+                         help="Explicit isolated browser journey; REMINDER uses the real bottom shortcut and no subject-visual requests")
+     parser.add_argument("--continuous-accept", action="store_true", help="Also verify real idle AcceptEx repost and four admitted JSON bodies within the original client/native deadlines; not strict TCP5s evidence")
+     parser.add_argument("--visual-fixture", choices=VISUAL_FIXTURES, default="FILLED_DEFAULT", help="Exact finite isolated synthetic display fixture; no production settings")
++    parser.add_argument("--voice-capabilities", action="store_true", help="Also observe three real capability GETs after pairing; no new audio operation or native-query/cache-count inference")
+     parser.add_argument("--visual-only", action="store_true", help="Target only visual/scope/read-only contract within the original client/native budgets")
+     parser.add_argument("--self-test", action="store_true")
+     args = parser.parse_args()
+     if args.self_test:
+-        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.visual_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
++        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
+             parser.error("self-test is pure local; do not combine with remote inputs")
+         self_test()
+         return
++    if args.voice_capabilities and args.visual_only:
++        parser.error("voice-capabilities requires the full business diagnostic, not visual-only")
+     if args.visual_only and args.continuous_accept:
+         parser.error("visual-only is separate from full material/capacity acceptance")
+     if args.browser_content != "HOMEWORK" and (not args.browser or args.visual_only):
+@@ -1480,7 +1647,9 @@
+                 if args.continuous_accept:
+                     report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
+                 report["static"] = {"status": "NOT_RUN_TARGETED_VISUAL_MATRIX"} if args.visual_only else exercise_static(client, package[2])
+-                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only)
++                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only, voice_capabilities=args.voice_capabilities)
++                if args.voice_capabilities:
++                    report["voiceCapabilitiesObservation"] = report["business"].pop("voiceCapabilitiesObservation")
+                 tunnel.cancel()
+             elif line.startswith(PASS):
+                 native.append(json.loads(line[len(PASS):]))

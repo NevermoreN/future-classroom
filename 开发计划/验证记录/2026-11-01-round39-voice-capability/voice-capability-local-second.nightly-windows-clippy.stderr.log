@@ -1,0 +1,15 @@
+    Checking fc-bootstrap v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-bootstrap)
+    Checking fc-security v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-security)
+    Checking fc-storage v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-storage)
+    Checking fc-audio v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-audio)
+    Checking fc-ports v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-ports)
+warning: unused dependency `fc-ports`
+  --> crates/fc-materials/Cargo.toml:11:1
+   |
+11 | fc-ports.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::unused_dependencies` is set to `warn` by default
+help: consider removing the dependency on `fc-ports`
+warning: `fc-materials` (manifest) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 13.23s

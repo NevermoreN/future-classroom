@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Independent read-only recomputation from original completed R40 modernMSVC runner, standalone actual Edge Node report, raw Node stdout and physically retained native stdout. No network/test re-execution; not the failed full Rust matrix and not R39 feature/runtime or Win7 evidence. No Cookie/CSRF/body/control capability copied.",
+  "inputs": [
+    {
+      "path": "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first.json",
+      "bytes": 213344,
+      "sha256": "3f1dbd07e23d5f80961b16bea4b994c65c193d419d90a1b9f388ce7023dea8b7"
+    },
+    {
+      "path": "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first.json.browser-node.json",
+      "bytes": 19204,
+      "sha256": "aeeb6e324ff86149d385e3cb1c1da9bd7fb58cf05dd24d12a9fa5893388ead7f"
+    },
+    {
+      "path": "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first-6e26de21ee8c4a0791be542e1c3b01da-raw/tls.stdout",
+      "bytes": 21295,
+      "sha256": "646de50c471077d13df45969eb8c2dd61943456e5fb6d5898c9fe0d5afd0d61d"
+    }
+  ],
+  "sourceCommit": "3b3d3abbfb80240989e32bc0858234d25bc277fc",
+  "exeSha256": "d5dd4d4c07331128804ff4faf24e12dcc8336a527871b4cbef72b504d045954c",
+  "contentKind": "REMINDER",
+  "counts": {
+    "apiResponses": 9,
+    "apiOperations": {
+      "statusGets": 2,
+      "sessionGets": 2,
+      "scopeGets": 2,
+      "contentGets": 2,
+      "contentPosts": 1,
+      "visualGets": 0
+    },
+    "posts": 1,
+    "visualRequests": 0,
+    "visualReads": 0,
+    "shortcutClicks": 2,
+    "domStages": 3,
+    "domRevisions": [
+      "0",
+      "1",
+      "1"
+    ],
+    "browserObservedResponses": 17,
+    "browserWireResponses": 14,
+    "browserCacheOnlyResponses": 3,
+    "clientEvents": 65,
+    "clientHttpResponses": 61,
+    "nativeHeads": 75,
+    "nativeResponses": 75,
+    "sharedWorkers": 2,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0
+  },
+  "nativeFinalReceipt": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 75,
+    "responses": 75,
+    "peakRecords": 5
+  },
+  "checks": [
+    {
+      "name": "original runner terminal and cleanup PASS",
+      "status": "PASS"
+    },
+    {
+      "name": "exact original modern executable SHA",
+      "status": "PASS"
+    },
+    {
+      "name": "finite continuous REMINDER scope",
+      "status": "PASS"
+    },
+    {
+      "name": "input within exact evidence directory: modern-msvc-reminder-browser-first.json.browser-node.json",
+      "status": "PASS"
+    },
+    {
+      "name": "standalone Node report bytes and SHA match retained metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "standalone Node and runner embedded report identical",
+      "status": "PASS"
+    },
+    {
+      "name": "Node terminal content kind and exact marker binding",
+      "status": "PASS"
+    },
+    {
+      "name": "all observed responses physically finished and body verified",
+      "status": "PASS"
+    },
+    {
+      "name": "wire ledger excludes cached 200 but retains actual revalidation",
+      "status": "PASS"
+    },
+    {
+      "name": "observed and cache-only ledgers remain separate",
+      "status": "PASS"
+    },
+    {
+      "name": "exact one actual class-day reminder route",
+      "status": "PASS"
+    },
+    {
+      "name": "derive exact nine API operations from response records",
+      "status": "PASS"
+    },
+    {
+      "name": "API responses all real 200 no cache",
+      "status": "PASS"
+    },
+    {
+      "name": "exact one POST and no alternate write route",
+      "status": "PASS"
+    },
+    {
+      "name": "declared operations match derived exact route counts",
+      "status": "PASS"
+    },
+    {
+      "name": "no browser visual request or visual observation",
+      "status": "PASS"
+    },
+    {
+      "name": "two instrumented actual bottom shortcut clicks",
+      "status": "PASS"
+    },
+    {
+      "name": "three exact reminder DOM stages and revision sequence",
+      "status": "PASS"
+    },
+    {
+      "name": "DOM key matches actual response route and booleans",
+      "status": "PASS"
+    },
+    {
+      "name": "committed result and CSRF match with no page console errors",
+      "status": "PASS"
+    },
+    {
+      "name": "complete Node stdout retained byte hash",
+      "status": "PASS"
+    },
+    {
+      "name": "complete Node stderr retained byte hash",
+      "status": "PASS"
+    },
+    {
+      "name": "Node raw READY then RESULT exact actual report",
+      "status": "PASS"
+    },
+    {
+      "name": "input within exact evidence directory: tls.stdout",
+      "status": "PASS"
+    },
+    {
+      "name": "physical native stdout original byte hash",
+      "status": "PASS"
+    },
+    {
+      "name": "one raw native final PASS receipt matches runner",
+      "status": "PASS"
+    },
+    {
+      "name": "original shared two workers joined and all hubs drained",
+      "status": "PASS"
+    },
+    {
+      "name": "raw final accept pending socket and task owners all returned",
+      "status": "PASS"
+    },
+    {
+      "name": "65 raw client events contain exact61 HTTP responses",
+      "status": "PASS"
+    },
+    {
+      "name": "native head response conservation exact61plus14",
+      "status": "PASS"
+    },
+    {
+      "name": "original process and browser owners actual exit and cleanup",
+      "status": "PASS"
+    },
+    {
+      "name": "source report unchanged during independent review",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "Shortcut/DOM evidence is the actual frozen harness instrumented observation, cross-checked with exact network paths and save/reload; no independent retained raw CDP frame claim.",
+    "Historical failure of the first full MSVC Rust test execution remains FAIL314passed1failed; this independent finite UI/network PASS does not replace it.",
+    "Strict firstTCP5seconds remains NOT_VALIDATED/oldFAIL; production listener remains NOT_ENABLED; Win7/Win10/visibleSeewo/mobile/campusTLS/physicalsound not validated.",
+    "Final archive and overall cleanup audit are separate; only original reported physical owners/worker drain checked here."
+  ]
+}

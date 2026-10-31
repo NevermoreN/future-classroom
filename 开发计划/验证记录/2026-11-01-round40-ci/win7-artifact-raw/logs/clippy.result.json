@@ -1,0 +1,29 @@
+{
+  "name": "clippy",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+  "arguments": [
+    "clippy",
+    "-Z",
+    "build-std",
+    "-vv",
+    "--workspace",
+    "--all-targets",
+    "--release",
+    "--locked",
+    "--target",
+    "i686-win7-windows-msvc",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "started_utc": "2026-10-31T21:08:47.0389761Z",
+  "duration_seconds": 56.4316409,
+  "exit_code": 101,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/clippy.stdout.log",
+  "stderr": "logs/clippy.stderr.log",
+  "passed": false
+}

@@ -1,0 +1,30 @@
+{
+  "status": "APPLIED_PENDING_FINAL_WORKSPACE_CHECKS",
+  "scope": "Narrow previous per-static expectation to actual Clippy on Windows Win7 vendor MSVC only; does not suppress Win7 GNU or ordinary non-Clippy compiler lints. All original const initializers and TLS owners/destruction remain.",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "expectations": 2,
+      "beforeSha256": "039591c7882f2c19d381131b76ae81983142d5106b02d4c534b217db8cdabe36",
+      "afterSha256": "a5d36c298a7ab7bfbaa8f8874880ee5ad305beae8d4afc44e08815cf2f14932a"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "expectations": 1,
+      "beforeSha256": "aa53f298a566f82a0a5977036cf3a706f9af8bdd65e3ee1c21c332f942a86617",
+      "afterSha256": "ce110ee14e557f8af2041dda163e3ad356ee64f16098e83bae07257dd53c9d9f"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "expectations": 1,
+      "beforeSha256": "cfd255a88ee7d2b0d7aac25f95da0e4ff9b500d3f36ae5c5ebcf04e4dee63273",
+      "afterSha256": "e4586ba49a6e308528c1a9c5f1b35e7f7ba204c866f13e218ab2e2faea8bf7fa"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "expectations": 1,
+      "beforeSha256": "97c8dd4946819e4f89a6eab0b5e850d73a601ef016c41784222b471e1054f58d",
+      "afterSha256": "544593201e8dcea50273686cb8c67b98500d6b4310fac4c1c999fe38d26b6f6e"
+    }
+  ]
+}

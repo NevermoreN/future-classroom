@@ -112,7 +112,10 @@ impl WebTask {
         application: &WebApplication,
         backend: &Mutex<Backend>,
         context: &JobContext,
-        query: impl FnOnce() -> Result<fc_ports::audio::DefaultOutputSupport, fc_ports::audio::AudioOutputError>,
+        query: impl FnOnce() -> Result<
+            fc_ports::audio::DefaultOutputSupport,
+            fc_ports::audio::AudioOutputError,
+        >,
     ) -> WebResponse {
         // One absolute control budget, including composition-lock acquisition,
         // authentication, the synchronous query and final response checks.
@@ -122,9 +125,7 @@ impl WebTask {
             return unavailable();
         };
         let prepared = loop {
-            if Instant::now() >= deadline
-                || !self.life.is_active()
-                || context.checkpoint().is_err()
+            if Instant::now() >= deadline || !self.life.is_active() || context.checkpoint().is_err()
             {
                 return unavailable();
             }
@@ -153,7 +154,8 @@ impl WebTask {
         }
     }
 }
-fn default_output_query() -> Result<fc_ports::audio::DefaultOutputSupport, fc_ports::audio::AudioOutputError> {
+fn default_output_query(
+) -> Result<fc_ports::audio::DefaultOutputSupport, fc_ports::audio::AudioOutputError> {
     #[cfg(windows)]
     {
         fc_windows::audio::query_default_output_format()
@@ -214,7 +216,10 @@ impl WebTask {
     pub(crate) fn run_with_output_query(
         self,
         context: &JobContext,
-        query: impl FnOnce() -> Result<fc_ports::audio::DefaultOutputSupport, fc_ports::audio::AudioOutputError>,
+        query: impl FnOnce() -> Result<
+            fc_ports::audio::DefaultOutputSupport,
+            fc_ports::audio::AudioOutputError,
+        >,
     ) -> WebCompletion {
         let token = self.head.token;
         let response = |response| WebCompletion::Response { token, response };

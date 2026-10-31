@@ -1,0 +1,41 @@
+{
+  "stage": "Round39 strict Windows compile E0509 test fixture ownership correction",
+  "scope": "Only new web_application/voice_capabilities_tests.rs changed. No production, parent fixture, credential policy, timeout or assertion changes.",
+  "file": {
+    "path": "crates/fc-bootstrap/src/web_application/voice_capabilities_tests.rs",
+    "beforeBytes": 4711,
+    "beforeSha256": "3f616a57a207ad14d2c4801fb0d8e4a9622a70166868c4f8a1ecd2d6a801f545",
+    "bytes": 9560,
+    "sha256": "f9802b7148ec64c39b4a8cf1efa5deb1cad7c6b0948606524c00b0b39f1c64e3"
+  },
+  "cause": "Original test attempted moving Backend fields out of BackendFixture implementing Drop. New independently constructed SharedFixture owns Arc<Mutex<Backend>>, Arc<WebApplication>, same Time and real paired Cookie, with Directory final RAII field.",
+  "construction": "Reuses BackendFixture::open codec/storage, identical Initialize school/login/display/password constants and default600000 PBKDF2. Initializes and logs in once, creates/binds real classes1/2, enables service, runs real pairing request -> pending -> approve -> poll through original Web boundary and validates Cookie, session/CSRF plus exact service authentication. No fake account/cookie or replacement Backend.",
+  "physicalCleanup": "Normal test path retains original WorkerPool::start, request_stop and actualjoin; only then drops aliases and SharedFixture. SharedFixture::Drop explicitly Backend.close before automatic fields release and final Directory cleanup. No new pool.",
+  "checks": {
+    "rustfmt": "PASS",
+    "allOriginalWorkerQueryAndCacheAuthAssertionsThroughActualPoolJoinByteEqual": "PASS",
+    "singleInitializeLogin": "PASS",
+    "noDropFixtureDestructureOrUnsafe": "PASS",
+    "noTimeoutOr100msChange": "PASS_STATIC",
+    "newBuildOrTest": "NOT_RUN",
+    "cargoGitWindows": "NOT_RUN"
+  },
+  "unchangedParentFixtureSource": {
+    "path": "crates/fc-bootstrap/src/web_application/tests.rs",
+    "sha256": "82a044081e56a37e323f56b22eae71eaed99aa346a5a02119ab1956c315bbc31"
+  },
+  "unchangedVoiceFixtureSource": {
+    "path": "crates/fc-bootstrap/src/web_application/voice_tests.rs",
+    "sha256": "32780aba885e86cb645f0a0d7f5e494ae5f8d83da0f396a1d3a6eb5706c8db72"
+  },
+  "originalKdfConstant": {
+    "path": "crates/fc-security/src/lib.rs",
+    "constant": "PBKDF2_ITERATIONS = 600_000",
+    "modified": false
+  },
+  "beforeOriginal": "editor-worker-fixture-before-first.json",
+  "diff": {
+    "path": "editor-worker-fixture-first.diff",
+    "sha256": "62908c585ab0aac0b9c9ccbaa9f96c32e91fd64b1e170356168dd9358948e0fc"
+  }
+}

@@ -1,0 +1,91 @@
+def self_test_voice_capabilities():
+    """Pure payload/request model only; never creates a Client/socket/Remote."""
+    sample = {"schemaVersion": 1, "status": "VOICE_CAPABILITIES", "identityRevision": "9", "runtimeGeneration": "3",
+              "serverNow": "2026-11-01T12:00:00", "currentClass": {"classId": "1", "className": "Synthetic TLS class"},
+              "enabled": True, "admission": "OPEN", "targetAuthorized": True, "deviceAvailability": "UNVERIFIED",
+              "defaultRepeatTotal": 3, "minRepeatTotal": 1, "maxRepeatTotal": 10, "minDurationMillis": 500,
+              "maxDurationMillis": 60000, "sampleRate": 16000, "channels": 1, "bitsPerSample": 16,
+              "maxWavBytes": 1920044, "uploadTtlSeconds": 600}
+    for availability in ("UNVERIFIED", "UNAVAILABLE"):
+        require(validate_voice_capabilities(dict(sample, deviceAvailability=availability))["deviceAvailability"] == availability,
+                "capability model rejected allowed nonpositive availability")
+    short = dict(sample, maxRepeatTotal=1, defaultRepeatTotal=1, maxDurationMillis=500, maxWavBytes=16044)
+    require(validate_voice_capabilities(short)["maxWavBytes"] == 16044, "capability model rejected exact tightened limits")
+    invalid = [dict(sample, deviceAvailability=v) for v in ("AVAILABLE", "UNKNOWN", "SUPPORTED", None, True)]
+    invalid += [dict(sample, **{k: v}) for k, v in (
+        ("schemaVersion", True), ("schemaVersion", 2), ("status", "VOICE_JOB"),
+        ("identityRevision", "0"), ("identityRevision", "09"), ("identityRevision", "18446744073709551616"),
+        ("runtimeGeneration", 3), ("runtimeGeneration", "+3"),
+        ("serverNow", "2026-02-29T12:00:00"), ("serverNow", "2026-11-01T24:00:00"),
+        ("serverNow", "2026-11-01T12:00:00Z"), ("currentClass", None),
+        ("currentClass", {"classId": "2", "className": "Synthetic TLS class"}),
+        ("currentClass", {"classId": "1", "className": " "}),
+        ("currentClass", {"classId": "1", "className": "bad\ud800"}),
+        ("currentClass", {"classId": "1", "className": "Synthetic TLS class", "lease": "extra"}),
+        ("targetAuthorized", False), ("targetAuthorized", 1), ("enabled", 1), ("admission", "UNKNOWN"),
+        ("minRepeatTotal", True), ("minDurationMillis", 0), ("maxRepeatTotal", 11), ("maxRepeatTotal", 1.5),
+        ("defaultRepeatTotal", 2), ("maxDurationMillis", 499), ("maxDurationMillis", 60001),
+        ("maxDurationMillis", 500.5), ("maxWavBytes", 1920046), ("sampleRate", 48000),
+        ("channels", 2), ("bitsPerSample", 32), ("uploadTtlSeconds", 601))]
+    invalid += [dict(sample, enabled=False), dict(sample, audioPath="extra-disclosure"), {}, None, []]
+    for key in sample:
+        omitted = dict(sample)
+        del omitted[key]
+        invalid.append(omitted)
+    for value in invalid:
+        try:
+            validate_voice_capabilities(value)
+        except RuntimeError:
+            continue
+        raise RuntimeError("capability model accepted bad type/limit/positive claim/target/authorization/extra or omitted field")
+
+    class Response:
+        def __init__(self, value):
+            self.value = value
+
+        def json(self):
+            return self.value
+
+    class ModelClient:
+        def __init__(self, first, repeated, denied=None):
+            self.replies = [{"schemaVersion": 1, "code": "UNAUTHORIZED"} if denied is None else denied, first, repeated]
+            self.calls = []
+            self.cookie, self.csrf = "synthetic-model-cookie-only", "synthetic-model-csrf-only"
+
+        def request(self, case, method, route, body=b"", expected=(200,), authenticated=True):
+            self.calls.append({"case": case, "method": method, "route": route, "bodyBytes": len(body),
+                               "expected": expected, "authenticated": authenticated})
+            require(len(self.calls) <= 3, "capability sub-observation added an unexpected operation")
+            return Response(self.replies[len(self.calls) - 1])
+
+    client = ModelClient(sample, dict(sample, serverNow="2026-11-01T12:00:01"))
+    observation = exercise_voice_capabilities(client)
+    require([(c["method"], c["route"], c["bodyBytes"], c["expected"], c["authenticated"]) for c in client.calls]
+            == [("GET", "voice/capabilities", 0, (401,), False),
+                ("GET", "voice/capabilities", 0, (200,), True),
+                ("GET", "voice/capabilities", 0, (200,), True)],
+            "capability sub-observation must be exactly missing-cookie401 plus two authenticated200 GETs")
+    encoded = json.dumps(observation)
+    require(observation["additionalWireRequests"] == 3 and observation["nativeQueryCount"] == "NOT_OBSERVED"
+            and observation["cacheBehavior"] == "NOT_DETERMINED_BY_GET"
+            and not any(secret in encoded for secret in (client.cookie, client.csrf, sample["serverNow"], "Synthetic TLS class"))
+            and not any(key in observation for key in ("cookie", "csrf", "body", "responseBody")),
+            "capability summary leaked session/body or inferred native/cache counts")
+    for change in ({"identityRevision": "10"}, {"runtimeGeneration": "4"}, {"deviceAvailability": "UNAVAILABLE"},
+                   {"maxRepeatTotal": 2, "defaultRepeatTotal": 2}, {"maxDurationMillis": 1250, "maxWavBytes": 40044}):
+        try:
+            exercise_voice_capabilities(ModelClient(sample, dict(sample, **change)))
+        except RuntimeError:
+            continue
+        raise RuntimeError("repeated capability model accepted changed stable fields")
+    try:
+        exercise_voice_capabilities(ModelClient(sample, sample, {"schemaVersion": 1, "code": "FORBIDDEN"}))
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("missing-cookie capability model accepted non401 error contract")
+    return [f"voice capability exact complete metadata/limits/target: {len(invalid)} malformed models rejected; UNVERIFIED/UNAVAILABLE and tightened bounds accepted",
+            "voice capability model exact three GETs (no Cookie401/auth200/repeat200), stable fields except civil time; changed revision/runtime/device/limits rejected",
+            "voice capability summary omits cookie/CSRF/body and does not infer native query count, cache behavior or current audibility; no IO"]
+
+

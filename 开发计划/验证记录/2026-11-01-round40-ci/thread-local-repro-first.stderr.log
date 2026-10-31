@@ -1,0 +1,28 @@
+   Compiling compiler_builtins v0.1.160 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling std v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+   Compiling windows-link v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/windows_link)
+   Compiling rustc-std-workspace-core v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)
+   Compiling unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)
+   Compiling cfg-if v1.0.4
+   Compiling rustc-demangle v0.1.28
+   Compiling rustc-literal-escaper v0.0.8
+   Compiling rustc-std-workspace-alloc v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling std_detect v0.1.5 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)
+   Compiling hashbrown v0.17.1
+   Compiling panic_unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling panic_abort v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)
+   Compiling proc_macro v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)
+    Checking fc-threadlocal-repro v0.0.0 (/tmp/fc-round40-threadlocal-repro)
+error: initializer for `thread_local` value can be made `const`
+ --> src/lib.rs:2:1
+  |
+2 | std::thread_local! { static VALUE: Cell<bool> = const { Cell::new(false) }; }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+  = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+
+error: could not compile `fc-threadlocal-repro` (lib) due to 1 previous error

@@ -1,0 +1,1292 @@
+{
+  "schema": "fc.static-admission-audit.v1",
+  "status": "READ_ONLY_STATIC_AUDIT_COMPLETE",
+  "recorded_at_utc": "2026-10-31T21:22:32.206146+00:00",
+  "scope": {
+    "main_reference_root": "/workspace/共享/Eliora/未来教室计划",
+    "active_r39_root": "/tmp/fc-round39-voice-capability-worktree",
+    "read_only": true,
+    "source_modified": false,
+    "cargo_or_tests_or_remote_or_git_run": false,
+    "evidence_output_only": "/tmp/fc-round40-ci-evidence/static-admission-audit-first.json",
+    "method": "Read every fc-bootstrap .try_submit/.try_submit_http call site and helper/error branch; classify intentional refusal separately. Root-supplied actual failure is supporting evidence, not a new reproduction."
+  },
+  "counts": {
+    "main_positive_first_attempt_assumptions": 20,
+    "active_r39_remaining_first_attempt_assumptions": 19,
+    "existing_safe_helpers_listed": 12,
+    "deliberate_rejection_sites_excluded": 6,
+    "call_sites_scanned_per_tree": {
+      "main_reference": 54,
+      "active_r39": 57
+    }
+  },
+  "actual_failure_scope": {
+    "report": "/tmp/fc-round40-ci-evidence/modern-msvc-runtime-first.json",
+    "observed": "bootstrap315:314pass/1fail; Pool::call worker admission panic; cleanupPASS",
+    "limitation": "Actual rejected kind was not saved. Busy is a source-supported risk, not a proven unique cause. Other listed sites are not asserted to have failed."
+  },
+  "runtime_basis": [
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "line": 345,
+      "fact": "try_submit returns the same owned task in SubmitError before acceptance. Mailbox-refused job is disarmed and original task extracted."
+    },
+    {
+      "path": "crates/fc-runtime/src/mailbox.rs",
+      "line": 135,
+      "fact": "queue.try_lock WouldBlock returns Busy; Busy does not require a full queue. Prior ticket completion does not guarantee immediate next try_lock."
+    }
+  ],
+  "priorities": [
+    "A03 shared voice Step run can reuse existing run_method_step with original10s.",
+    "A04 shared WebTask run must retain true task.deadline(), including R39 original100ms.",
+    "A19 finite native material submit affects many diagnostic steps.",
+    "A02/A09/A10 and held recovery/cancellation jobs must return accepted ticket before caller releases channel; do not use blocking Pool::call."
+  ],
+  "findings": [
+    {
+      "id": "A01",
+      "path": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+      "main_line": 336,
+      "active_r39_line": 342,
+      "helper_or_case": "Pool::call (actual R40 failed helper)",
+      "original_deadline": "one 15-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Already applied by root in active R39; keep existing original-task Busy loop.",
+      "active_r39_status": "already fixed in active R39; main reference retains original"
+    },
+    {
+      "id": "A02",
+      "path": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+      "main_line": 772,
+      "active_r39_line": 781,
+      "helper_or_case": "material_stream_current_worker_cancel_rejects_write_and_disposes_actual_owner_before_join",
+      "original_deadline": "one 15-second deadline; channel waits remain 5 seconds",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Use admission-only same-Job retry returning JobTicket. Pool::call waits for completion and would block release channel.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A03",
+      "path": "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+      "main_line": 229,
+      "active_r39_line": 229,
+      "helper_or_case": "run(pool, Step)",
+      "original_deadline": "one 10-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Existing run_method_step at line 569/571 accepts the same Step and supplied original deadline; can delegate with deadline captured once.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A04",
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "main_line": 85,
+      "active_r39_line": 85,
+      "helper_or_case": "run(pool, WebTask)",
+      "original_deadline": "HttpJob/WebTask original deadline (including R39 100ms lifetime)",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Retain rejected HttpJob in a local loop; no same-type local admission helper currently present.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A05",
+      "path": "crates/fc-bootstrap/src/web_transfer/tests.rs",
+      "main_line": 71,
+      "active_r39_line": 71,
+      "helper_or_case": "per_job_ticket_retirement_does_not_cancel_stable_transfer: first Capture",
+      "original_deadline": "original life.deadline()",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Same returned Capture; local admission-only loop.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A06",
+      "path": "crates/fc-bootstrap/src/web_transfer/tests.rs",
+      "main_line": 83,
+      "active_r39_line": 83,
+      "helper_or_case": "per_job_ticket_retirement_does_not_cancel_stable_transfer: second Capture",
+      "original_deadline": "same original life.deadline()",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Same returned Capture; local admission-only loop.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A07",
+      "path": "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+      "main_line": 27,
+      "active_r39_line": 27,
+      "helper_or_case": "cancelled_positive_download_admission_stays_worker_owned_until_fresh_http_cleanup_task: Begin",
+      "original_deadline": "original DownloadTask::deadline()",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Retain exact HttpJob::Download; unrelated uploads Pool::call has different Job type.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A08",
+      "path": "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+      "main_line": 48,
+      "active_r39_line": 48,
+      "helper_or_case": "same test: fresh negative Cleanup",
+      "original_deadline": "fresh cleanup deadline is legitimately created once here: now+5s",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Retain this already-created cleanup HttpJob and original fresh deadline; do not renew per retry.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A09",
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "main_line": 999,
+      "active_r39_line": 999,
+      "helper_or_case": "cancelled_receiving_owner_keeps_slot_until_worker_cleanup_then_reuse_rejects_old_serial: held lost-Begin job",
+      "original_deadline": "one 15-second deadline; original 3-second channel waits",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Existing Pool::call at339 supplies correct retry pattern but blocks; extract/use admission-only ticket-returning equivalent for held task.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A10",
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "main_line": 1045,
+      "active_r39_line": 1045,
+      "helper_or_case": "abandoned_owner_and_worker_panic_retain_exact_domain_until_join_and_explicit_final_cleanup: held intentional-panic job",
+      "original_deadline": "one 15-second deadline; original 3-second channel waits",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same nonblocking admission equivalent; intentional panic occurs AFTER acceptance and must remain unchanged.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A11",
+      "path": "crates/fc-bootstrap/src/backend/execution_scope_tests.rs",
+      "main_line": 208,
+      "active_r39_line": 208,
+      "helper_or_case": "actual_shared_worker_cancellation_fences_backend_scope_and_restores_next_request",
+      "original_deadline": "one 10-second deadline; original started wait3s",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Retain same RequestWork containing fixture/channels; ticket-returning loop only.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A12",
+      "path": "crates/fc-bootstrap/src/reinitialization/tests.rs",
+      "main_line": 193,
+      "active_r39_line": 193,
+      "helper_or_case": "blocked_worker_cannot_be_replaced_by_a_cancelled_ticket_or_a_reset_permit",
+      "original_deadline": "one 30-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same returned Held; preserve held-owner barrier and cancel/drain assertions.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A13",
+      "path": "crates/fc-bootstrap/src/reinitialization/tests.rs",
+      "main_line": 248,
+      "active_r39_line": 248,
+      "helper_or_case": "healthy_backend_revokes_admission_before_worker_drain_and_closes_writer_before_permit",
+      "original_deadline": "one 30-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same returned Held; preserve held-owner barrier and cancel/drain assertions.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A14",
+      "path": "crates/fc-bootstrap/src/recovery/tests.rs",
+      "main_line": 85,
+      "active_r39_line": 85,
+      "helper_or_case": "invalid_deployment_still_retains_actual_worker_and_audio_until_final_settlement",
+      "original_deadline": "one 60-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same returned HeldTask; existing map_err(|_|()).unwrap loses rejection kind.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A15",
+      "path": "crates/fc-bootstrap/src/recovery/tests.rs",
+      "main_line": 125,
+      "active_r39_line": 125,
+      "helper_or_case": "cold_switch_permit_waits_for_physical_worker_audio_destructors_and_writer_close",
+      "original_deadline": "one 60-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same returned HeldTask; existing map_err(|_|()).unwrap loses rejection kind.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A16",
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+      "main_line": 171,
+      "active_r39_line": 171,
+      "helper_or_case": "cancelling_cold_restore_keeps_real_worker_and_source_pin_until_it_exits",
+      "original_deadline": "one 30-second deadline; original later15s waits unchanged",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same HeldTask with original started/release channels; ticket-returning loop.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A17",
+      "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+      "main_line": 266,
+      "active_r39_line": 266,
+      "helper_or_case": "abort_without_restore_capability_waits_for_the_real_worker_and_keeps_original_data",
+      "original_deadline": "one 30-second deadline; original later15s waits unchanged",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Same HeldTask; no change to physical worker/source pin cleanup.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A18",
+      "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+      "main_line": 147,
+      "active_r39_line": 147,
+      "helper_or_case": "http_metadata_uses_the_existing_work_pool_and_preserves_rejected_job_ownership: positive half",
+      "original_deadline": "job.deadline() from original TransferLifetime; original completion wait10s stays unchanged",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Retain exact rejected HttpJob from SharedHttpExecutor; do NOT change later explicit expired-job rejection at176.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A19",
+      "path": "crates/fc-bootstrap/src/application/material_probe.rs",
+      "main_line": 279,
+      "active_r39_line": 279,
+      "helper_or_case": "submit(handle, ProbeTask), finite hidden native diagnostic",
+      "original_deadline": "one 45-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": true,
+      "smallest_local_reuse": "Pattern available in profile_content_flow_tests::submit, but different private task type; local admission-only equivalent.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    },
+    {
+      "id": "A20",
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "main_line": 4468,
+      "active_r39_line": 4468,
+      "helper_or_case": "run_at_inner probe-only Office fixture validation startup",
+      "original_deadline": "one 30-second deadline",
+      "safe_busy_retry": true,
+      "retry_rule": "Only pre-admission Rejection::Busy, retain rejected.task and the one original absolute deadline; fail with rejection kind on every other rejection or exhausted deadline. Never replay an accepted task.",
+      "must_return_ticket_before_releasing_barrier": false,
+      "smallest_local_reuse": "Retain Work::ValidateOffice and original deadline; do not recreate fixture file or task per retry.",
+      "active_r39_status": "first-attempt assumption remains; source-level risk, not independently reproduced"
+    }
+  ],
+  "existing_correct_helpers": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "line": 339,
+      "helper": "Pool::call",
+      "behavior": "same-task Busy loop / original15s"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_assets/loader/tests.rs",
+      "line": 67,
+      "helper": "Pool::submit",
+      "behavior": "same-task Busy loop / original15s"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs",
+      "line": 34,
+      "helper": "Pool::submit",
+      "behavior": "same-task Busy loop / original15s"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+      "line": 571,
+      "helper": "run_method_step",
+      "behavior": "same Step / provided absolute deadline / actual completion"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+      "line": 969,
+      "helper": "submit_fence_owner",
+      "behavior": "same returned task / original deadline"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+      "line": 24,
+      "helper": "submit",
+      "behavior": "same returned task / original deadline"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+      "line": 248,
+      "helper": "submit_held",
+      "behavior": "job original deadline + narrower admission min(job, now+5s)"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+      "line": 70,
+      "helper": "submit_hold",
+      "behavior": "original job120s + narrower admission30s"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "line": 360,
+      "helper": "submit",
+      "behavior": "original job90s + narrower admission5s"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "line": 365,
+      "helper": "startup_call",
+      "behavior": "same Task + caller absolute deadline"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/web_device/tests.rs",
+      "line": 459,
+      "helper": "submit (R39 only)",
+      "behavior": "same returned task / original deadline"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/voice_capabilities_tests.rs",
+      "line": 180,
+      "helper": "dispatch (R39 only)",
+      "behavior": "same returned task / original real100ms deadline"
+    }
+  ],
+  "intentionally_excluded_rejections": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "main_line": 161,
+      "active_r39_line": 204,
+      "reason": "Deliberate expired original task => Rejection::Deadline."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "main_line": 218,
+      "active_r39_line": 261,
+      "reason": "Deliberate QUEUED_BYTES+1 => TooLarge."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+      "main_line": 176,
+      "active_r39_line": 176,
+      "reason": "Deliberate expired HttpJob; must preserve assertion of exact returned Box address and deadline."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+      "main_line": 144,
+      "active_r39_line": 144,
+      "reason": "Deliberately filled real queue => Busy; preserve saturation assertion."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+      "main_line": 831,
+      "active_r39_line": 831,
+      "reason": "Deliberate 51-image descriptor => TooLarge."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+      "main_line": null,
+      "active_r39_line": 136,
+      "reason": "R39-only original100ms lifetime already expired before JSON admission => Deadline; do not retry/renew."
+    }
+  ],
+  "other_production_classification": [
+    "web_transfer/network.rs:1164 already retains rejected.task in Pending on Busy with original job.deadline().",
+    "web_transfer/executor.rs:78 and application/http_executor.rs:26 are ownership-preserving adapters, not first-attempt test assertions.",
+    "application/http_business_probe.rs:575 handles no-admission Busy as a later bounded approval poll, not an expect-success helper.",
+    "Other ordinary application/controller/reinitialize_application submission calls deliver admission failure to UI/retain pending work or defer periodic work; outside non-deliberate test-helper defect scope. Probe-only Office startup at application.rs4468 is explicitly included."
+  ],
+  "minimal_change_constraints": [
+    "Busy-only pre-admission retries; task returned by error moves into next try.",
+    "Capture deadline once; preserve narrower existing admission boundary and all original JobContext/channel/completion deadlines.",
+    "On TooLarge/Stopped/Faulted/Deadline or expired original deadline fail explicitly including kind.",
+    "No new pool, worker, changed thread count, accepted-business replay, timeout renewal, weakened capacity/rejection assertions, or test assertions changed."
+  ],
+  "source_binding": {
+    "before_equals_after": true,
+    "snapshots": {
+      "main_reference": [
+        {
+          "path": "crates/fc-bootstrap/src/application/autostart_controller.rs",
+          "bytes": 5597,
+          "sha256": "bbe75aec37a5685ae9632816638549b749daad6ce2c4bdb0c674e41344fb4160",
+          "calls": [
+            {
+              "line": 38,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+          "bytes": 33494,
+          "sha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc",
+          "calls": [
+            {
+              "line": 333,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 792,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+          "bytes": 11970,
+          "sha256": "0cf5375403e42f8f614910930b0bd52114a5c12c988e2b28228ebec80582bc5e",
+          "calls": [
+            {
+              "line": 70,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 144,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/calendar_controller.rs",
+          "bytes": 9486,
+          "sha256": "c8d6cc3684377487a06ab29c8bd573bfa59126e4841049e47336d95f59035e41",
+          "calls": [
+            {
+              "line": 52,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 224,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+          "bytes": 14367,
+          "sha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b",
+          "calls": [
+            {
+              "line": 248,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+          "bytes": 60894,
+          "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d",
+          "calls": [
+            {
+              "line": 921,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 977,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 1023,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "bytes": 26252,
+          "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059",
+          "calls": [
+            {
+              "line": 365,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 575,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+          "bytes": 7720,
+          "sha256": "cabc00e64879a24bc0e7c5f4d6b5cf12358210d242017462d3e8a6b0e03b0610",
+          "calls": [
+            {
+              "line": 26,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 147,
+              "expression": ".try_submit_http("
+            },
+            {
+              "line": 176,
+              "expression": ".try_submit_http("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/material_probe.rs",
+          "bytes": 35326,
+          "sha256": "10400ccf3ff9763a1ef99f88d3b558ce1a5a41ee665351c118b3ea4b187230fe",
+          "calls": [
+            {
+              "line": 279,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+          "bytes": 50950,
+          "sha256": "46c3ba90eabf69e2b7dc78427da869f8bbcab6112e4440be1370c0d61adcea43",
+          "calls": [
+            {
+              "line": 360,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 831,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "bytes": 257477,
+          "sha256": "2cc9f3e5bebcd4c6018f93d824fe7e48a2cb16dd870c9341f5366c8865922e25",
+          "calls": [
+            {
+              "line": 2007,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 2062,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3815,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3889,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3928,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3949,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 4468,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/execution_scope_tests.rs",
+          "bytes": 7796,
+          "sha256": "b022e24c1abb59df00612464f64a12c4cdf82db9cf2c4fd2aeb052bfd129324c",
+          "calls": [
+            {
+              "line": 208,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+          "bytes": 71948,
+          "sha256": "7b34248fd328b37277ff019a04a89e746f688af3e4aa50cfdb12543b0ee55f97",
+          "calls": [
+            {
+              "line": 969,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+          "bytes": 20602,
+          "sha256": "565622e70d18a323cfca47479425fd67229919b67e2506692a3ee6ca9601dabf",
+          "calls": [
+            {
+              "line": 24,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/recovery/tests.rs",
+          "bytes": 5783,
+          "sha256": "5227d1e0a82983b0f4196ba83a2d2362d3145b46a1aa30149ad123e2532744eb",
+          "calls": [
+            {
+              "line": 85,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 125,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+          "bytes": 11359,
+          "sha256": "70caee6b03e6423bbba0c3581b0db413fc6e6f35539e91456f23efdffab9a315",
+          "calls": [
+            {
+              "line": 171,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 266,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/reinitialization/tests.rs",
+          "bytes": 11352,
+          "sha256": "8ecea096f0c2360c14939e1ccfc5fa1c752fa131d30e0e15dd75bc3160b3715f",
+          "calls": [
+            {
+              "line": 193,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 248,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+          "bytes": 23662,
+          "sha256": "dcadeffda5381ec202f077aec780048e48e16ad9ea2ab2be7ae384496f9ec5f0",
+          "calls": [
+            {
+              "line": 212,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs",
+          "bytes": 10343,
+          "sha256": "8067d7ed3f68eab72cb87deb4b66e96bdac1fd8245a908adaca4ada918e4de04",
+          "calls": [
+            {
+              "line": 34,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+          "bytes": 32785,
+          "sha256": "fb75113d5dc39fd580ddf8826568be8b305a97b905a836b1effbcb859fa01bc2",
+          "calls": [
+            {
+              "line": 336,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 772,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+          "bytes": 23133,
+          "sha256": "a56f4d378be1d88abc208091412ad4487ba9f63a36811782c60049a1953a588c",
+          "calls": [
+            {
+              "line": 229,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 571,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_assets/loader/tests.rs",
+          "bytes": 8946,
+          "sha256": "f74bd6e36947438a1ae2c643fa47ed4488836b8164888b7cbb59fcff3a8f149a",
+          "calls": [
+            {
+              "line": 67,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+          "bytes": 2757,
+          "sha256": "2ab112c243df3d8bde58d848db0acf3cd5afd430d41722d7c8131fd00bc444d5",
+          "calls": [
+            {
+              "line": 27,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 48,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+          "bytes": 3209,
+          "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4",
+          "calls": [
+            {
+              "line": 78,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "bytes": 58970,
+          "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+          "calls": [
+            {
+              "line": 1164,
+              "expression": ".try_submit_http("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/tests.rs",
+          "bytes": 6924,
+          "sha256": "6657cd17058bd9f677b9d7fcda30c7ce552829d640185f5d05382bb2bef0aef5",
+          "calls": [
+            {
+              "line": 71,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 83,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+          "bytes": 45258,
+          "sha256": "9763c1a637973bb82f32f613421b4e55439de8a88c5fa536e3de7307b7347229",
+          "calls": [
+            {
+              "line": 339,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 999,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 1045,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+          "bytes": 7402,
+          "sha256": "dfcb43dc8582677852a6ee6ef7937930f6a74ff2ba01fec44f3872b21cca3d6d",
+          "calls": [
+            {
+              "line": 85,
+              "expression": ".try_submit_http("
+            },
+            {
+              "line": 161,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 218,
+              "expression": ".try_submit("
+            }
+          ]
+        }
+      ],
+      "active_r39": [
+        {
+          "path": "crates/fc-bootstrap/src/application/autostart_controller.rs",
+          "bytes": 5597,
+          "sha256": "bbe75aec37a5685ae9632816638549b749daad6ce2c4bdb0c674e41344fb4160",
+          "calls": [
+            {
+              "line": 38,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+          "bytes": 33494,
+          "sha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc",
+          "calls": [
+            {
+              "line": 333,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 792,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/backup_shutdown_tests.rs",
+          "bytes": 11970,
+          "sha256": "0cf5375403e42f8f614910930b0bd52114a5c12c988e2b28228ebec80582bc5e",
+          "calls": [
+            {
+              "line": 70,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 144,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/calendar_controller.rs",
+          "bytes": 9486,
+          "sha256": "c8d6cc3684377487a06ab29c8bd573bfa59126e4841049e47336d95f59035e41",
+          "calls": [
+            {
+              "line": 52,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 224,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/desktop_content_tests.rs",
+          "bytes": 14367,
+          "sha256": "36045868ed3d3a01e949504e29afaea4f15d6c24242121728310c4bfbdcf8c4b",
+          "calls": [
+            {
+              "line": 248,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+          "bytes": 60894,
+          "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d",
+          "calls": [
+            {
+              "line": 921,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 977,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 1023,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "bytes": 26252,
+          "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059",
+          "calls": [
+            {
+              "line": 365,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 575,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_executor.rs",
+          "bytes": 7720,
+          "sha256": "cabc00e64879a24bc0e7c5f4d6b5cf12358210d242017462d3e8a6b0e03b0610",
+          "calls": [
+            {
+              "line": 26,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 147,
+              "expression": ".try_submit_http("
+            },
+            {
+              "line": 176,
+              "expression": ".try_submit_http("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/material_probe.rs",
+          "bytes": 35326,
+          "sha256": "10400ccf3ff9763a1ef99f88d3b558ce1a5a41ee665351c118b3ea4b187230fe",
+          "calls": [
+            {
+              "line": 279,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/profile_content_flow_tests.rs",
+          "bytes": 50950,
+          "sha256": "46c3ba90eabf69e2b7dc78427da869f8bbcab6112e4440be1370c0d61adcea43",
+          "calls": [
+            {
+              "line": 360,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 831,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "bytes": 257477,
+          "sha256": "2cc9f3e5bebcd4c6018f93d824fe7e48a2cb16dd870c9341f5366c8865922e25",
+          "calls": [
+            {
+              "line": 2007,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 2062,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3815,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3889,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3928,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 3949,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 4468,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/execution_scope_tests.rs",
+          "bytes": 7796,
+          "sha256": "b022e24c1abb59df00612464f64a12c4cdf82db9cf2c4fd2aeb052bfd129324c",
+          "calls": [
+            {
+              "line": 208,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/profile_content.rs",
+          "bytes": 71948,
+          "sha256": "7b34248fd328b37277ff019a04a89e746f688af3e4aa50cfdb12543b0ee55f97",
+          "calls": [
+            {
+              "line": 969,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/voice/management/device_check/tests.rs",
+          "bytes": 20602,
+          "sha256": "565622e70d18a323cfca47479425fd67229919b67e2506692a3ee6ca9601dabf",
+          "calls": [
+            {
+              "line": 24,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/voice/web_device/tests.rs",
+          "bytes": 35124,
+          "sha256": "5b09a623e11a0d34209e7a5c61aea45ba2d1694ce405f00abbdf63891c260148",
+          "calls": [
+            {
+              "line": 459,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/recovery/tests.rs",
+          "bytes": 5783,
+          "sha256": "5227d1e0a82983b0f4196ba83a2d2362d3145b46a1aa30149ad123e2532744eb",
+          "calls": [
+            {
+              "line": 85,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 125,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/recovery_workflow/windows/tests.rs",
+          "bytes": 11359,
+          "sha256": "70caee6b03e6423bbba0c3581b0db413fc6e6f35539e91456f23efdffab9a315",
+          "calls": [
+            {
+              "line": 171,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 266,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/reinitialization/tests.rs",
+          "bytes": 11352,
+          "sha256": "8ecea096f0c2360c14939e1ccfc5fa1c752fa131d30e0e15dd75bc3160b3715f",
+          "calls": [
+            {
+              "line": 193,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 248,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+          "bytes": 23662,
+          "sha256": "dcadeffda5381ec202f077aec780048e48e16ad9ea2ab2be7ae384496f9ec5f0",
+          "calls": [
+            {
+              "line": 212,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/material_download_stream_tests.rs",
+          "bytes": 10343,
+          "sha256": "8067d7ed3f68eab72cb87deb4b66e96bdac1fd8245a908adaca4ada918e4de04",
+          "calls": [
+            {
+              "line": 34,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+          "bytes": 33218,
+          "sha256": "f00fe2dc79ee8fead00e0c4236251c21c6950b6521c277c14ead7e67f4dec279",
+          "calls": [
+            {
+              "line": 342,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 781,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/voice_capabilities_tests.rs",
+          "bytes": 9560,
+          "sha256": "f9802b7148ec64c39b4a8cf1efa5deb1cad7c6b0948606524c00b0b39f1c64e3",
+          "calls": [
+            {
+              "line": 180,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_application/voice_files/voice_stream_tests.rs",
+          "bytes": 23133,
+          "sha256": "a56f4d378be1d88abc208091412ad4487ba9f63a36811782c60049a1953a588c",
+          "calls": [
+            {
+              "line": 229,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 571,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_assets/loader/tests.rs",
+          "bytes": 8946,
+          "sha256": "f74bd6e36947438a1ae2c643fa47ed4488836b8164888b7cbb59fcff3a8f149a",
+          "calls": [
+            {
+              "line": 67,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/download_work/tests.rs",
+          "bytes": 2757,
+          "sha256": "2ab112c243df3d8bde58d848db0acf3cd5afd430d41722d7c8131fd00bc444d5",
+          "calls": [
+            {
+              "line": 27,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 48,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/executor.rs",
+          "bytes": 3209,
+          "sha256": "f322dfc82c3471c06b546e4e0e9c0789df856970a860d5037c5ce3a2569252f4",
+          "calls": [
+            {
+              "line": 78,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+          "bytes": 58970,
+          "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+          "calls": [
+            {
+              "line": 1164,
+              "expression": ".try_submit_http("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/tests.rs",
+          "bytes": 6924,
+          "sha256": "6657cd17058bd9f677b9d7fcda30c7ce552829d640185f5d05382bb2bef0aef5",
+          "calls": [
+            {
+              "line": 71,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 83,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+          "bytes": 45258,
+          "sha256": "9763c1a637973bb82f32f613421b4e55439de8a88c5fa536e3de7307b7347229",
+          "calls": [
+            {
+              "line": 339,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 999,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 1045,
+              "expression": ".try_submit("
+            }
+          ]
+        },
+        {
+          "path": "crates/fc-bootstrap/src/web_transfer/work/tests.rs",
+          "bytes": 8855,
+          "sha256": "42faf95294d1bdfcbb9764a0ed635c75873df8fbf508fd2402248f481e212391",
+          "calls": [
+            {
+              "line": 85,
+              "expression": ".try_submit_http("
+            },
+            {
+              "line": 136,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 204,
+              "expression": ".try_submit("
+            },
+            {
+              "line": 261,
+              "expression": ".try_submit("
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -369,6 +369,7 @@ fn rust_packet_completion_does_not_reap_a_held_windows_tls_destructor() {
         }
     }
     thread_local! {
+        #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
         static HELD_TLS: std::cell::RefCell<Option<HeldTls>> = const { std::cell::RefCell::new(None) };
     }
     let issuer = TokenIssuer::new().unwrap();

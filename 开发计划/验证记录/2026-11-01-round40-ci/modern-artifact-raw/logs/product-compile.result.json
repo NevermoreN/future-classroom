@@ -1,0 +1,27 @@
+{
+  "name": "product-compile",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+  "arguments": [
+    "build",
+    "-vv",
+    "--release",
+    "--locked",
+    "--target",
+    "i686-pc-windows-msvc",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--message-format=json"
+  ],
+  "started_utc": "2026-10-31T21:06:03.9951579Z",
+  "duration_seconds": 1.8089154,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/product-compile.stdout.log",
+  "stderr": "logs/product-compile.stderr.log",
+  "passed": true
+}

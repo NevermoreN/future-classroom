@@ -1,0 +1,64 @@
+{
+  "scope": "Independent full original Host test output counts, separately scoped to exact second and third frozen sources; never Windows runtime proof.",
+  "status": "PASS",
+  "runs": [
+    {
+      "run": "second",
+      "testPrograms": 21,
+      "counts": {
+        "passed": 929,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "frozenInputs": 410,
+      "files": [
+        {
+          "name": "voice-capability-local-second.json",
+          "bytes": 142298,
+          "sha256": "a23c094a9c4d1ae4001a0b313d85a5333f82c0a9f6d29fcd5b429b2a65c261a4"
+        },
+        {
+          "name": "voice-capability-local-second.host-test.stdout.log",
+          "bytes": 98646,
+          "sha256": "4223a798f04b977c3e7ba7fab113964a06d70647d41fa9a41541bfb9edd91f8a"
+        },
+        {
+          "name": "voice-capability-local-second.host-test.stderr.log",
+          "bytes": 2419,
+          "sha256": "96f7b88874c3033c5731f1d776cdd4f5ca41270aceac4220c0fd67a7ecfa3ad9"
+        }
+      ]
+    },
+    {
+      "run": "third",
+      "testPrograms": 21,
+      "counts": {
+        "passed": 929,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "frozenInputs": 410,
+      "files": [
+        {
+          "name": "voice-capability-local-third.json",
+          "bytes": 142284,
+          "sha256": "76d9922b3d293dfc1a645658e3699bb58b07c77537e4e7943c9c687ede9213d1"
+        },
+        {
+          "name": "voice-capability-local-third.host-test.stdout.log",
+          "bytes": 98646,
+          "sha256": "061d8a1e97a7dd2e79b5feac4d033598a3e7ee490643b514e136220d7c552524"
+        },
+        {
+          "name": "voice-capability-local-third.host-test.stderr.log",
+          "bytes": 2419,
+          "sha256": "db315970d63e618ccbbcc8fe84ff1e9e8bca329d608a111d7a24de9795fed5db"
+        }
+      ]
+    }
+  ]
+}

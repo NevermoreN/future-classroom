@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "scope": "Final exact R39 Rust/build and Web source byte checks, complete original final Host counts, and exact Win7-MSVC-only minimal Clippy regression. No R39 Windows runtime claim.",
+  "rustBuildInputs": 410,
+  "rustInputFile": "voice-capability-local-fifth.json",
+  "rustInputFileSha256": "58311ed51375be14c74874d8a87b1e93355d88950199c39af1c7fa76e0b51e47",
+  "allRustInputsStillExact": true,
+  "testPrograms": 21,
+  "hostPassed": 929,
+  "hostFailed": 0,
+  "hostIgnored": 0,
+  "hostFiltered": 0,
+  "webInputs": 56,
+  "allWebInputsStillExact": true,
+  "webFiles": 19,
+  "webTestsPassed": 300,
+  "minimalMsvcOnlyCases": {
+    "scopedConst": 0,
+    "unannotatedSentinelRejected": 101
+  },
+  "actualR39WindowsFeature": "NOT_RUN",
+  "fullNewWin7MsvcWorkspace": "NOT_RUN",
+  "strictFirstTcp5sOriginalFailure": "UNCHANGED_FAIL",
+  "productionListener": "OFF"
+}

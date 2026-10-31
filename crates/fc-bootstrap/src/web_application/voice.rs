@@ -51,27 +51,31 @@ pub(super) fn dispatch(
 }
 pub(super) fn capabilities_response(c: &crate::backend::WebVoiceCapabilities) -> WebResponse {
     response(
-                200,
-                wire::capabilities(
-                    c.identity_revision,
-                    c.runtime_generation,
-                    c.now,
-                    c.current_class
-                        .as_ref()
-                        .map(|(id, name)| (*id, name.as_str())),
-                    wire::CapabilityPolicy {
-                        enabled: c.enabled,
-                        admitting: c.admitting,
-                        target_authorized: c.target_authorized,
-                        device_availability: match c.device_availability {
-                            crate::backend::WebVoiceDeviceAvailability::Unverified => wire::DeviceAvailability::Unverified,
-                            crate::backend::WebVoiceDeviceAvailability::Unavailable => wire::DeviceAvailability::Unavailable,
-                        },
-                        limits: c.limits,
-                    },
-                ),
-                None,
-            )
+        200,
+        wire::capabilities(
+            c.identity_revision,
+            c.runtime_generation,
+            c.now,
+            c.current_class
+                .as_ref()
+                .map(|(id, name)| (*id, name.as_str())),
+            wire::CapabilityPolicy {
+                enabled: c.enabled,
+                admitting: c.admitting,
+                target_authorized: c.target_authorized,
+                device_availability: match c.device_availability {
+                    crate::backend::WebVoiceDeviceAvailability::Unverified => {
+                        wire::DeviceAvailability::Unverified
+                    }
+                    crate::backend::WebVoiceDeviceAvailability::Unavailable => {
+                        wire::DeviceAvailability::Unavailable
+                    }
+                },
+                limits: c.limits,
+            },
+        ),
+        None,
+    )
 }
 fn mutation(
     service: &VoiceService,

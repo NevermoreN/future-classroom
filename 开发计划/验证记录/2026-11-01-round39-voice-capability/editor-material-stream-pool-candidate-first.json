@@ -1,0 +1,57 @@
+{
+  "stage": "Round40 read-only diagnosis and isolated candidate for test helper admission",
+  "status": "CANDIDATE_NOT_APPLIED",
+  "actualOriginal": {
+    "path": "modern-msvc-runtime-first.json",
+    "sha256": "98b340b3c0567cfd97e76f89c12f6113a1444240552dd7948507c1b3d1987d40",
+    "status": "FAIL",
+    "cleanupStatus": "PASS",
+    "summaries": [
+      "test result: FAILED. 314 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 66.34s"
+    ]
+  },
+  "actualEvidenceLimit": "The original Pool::call mapped every SubmitError to the same worker admission panic. No rejection.kind was recorded, so Busy/queue contention is a plausible source-level explanation, not a proven unique runtime cause.",
+  "source": {
+    "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+    "bytes": 32785,
+    "sha256": "fb75113d5dc39fd580ddf8826568be8b305a97b905a836b1effbcb859fa01bc2",
+    "currentSourceUnchanged": true
+  },
+  "diagnosis": [
+    "WorkerHandle::try_submit returns the original Task on every rejection and does not admit it. Busy includes mailbox queue try_lock contention as well as capacity pressure. A completed prior job does not guarantee a future try_lock succeeds without contention.",
+    "The existing one-shot helper panics on a permitted transient Busy; it also loses classification for TooLarge/Stopped/Faulted/Deadline.",
+    "Candidate boxes the FnOnce exactly once, captures one original15s absolute deadline after task construction, and only on not-yet-admitted Busy before that deadline reuses error.task and yields.",
+    "All other kinds and an expired original deadline panic with the actual kind plus exhaustion flag. Success breaks immediately and waits on its one admitted ticket; no replay of accepted work or deadline renewal."
+  ],
+  "candidate": {
+    "before": {
+      "path": "material-stream-pool-candidate-before.rs",
+      "bytes": 32785,
+      "sha256": "fb75113d5dc39fd580ddf8826568be8b305a97b905a836b1effbcb859fa01bc2"
+    },
+    "after": {
+      "path": "material-stream-pool-candidate-after.rs",
+      "bytes": 33218,
+      "sha256": "f00fe2dc79ee8fead00e0c4236251c21c6950b6521c277c14ead7e67f4dec279"
+    },
+    "patch": {
+      "path": "material-stream-pool-candidate-first.patch",
+      "bytes": 2031,
+      "sha256": "acb71757fc221d68495b0b29e27f2895766b64261857b836ebfc9f9194c03bd8"
+    }
+  },
+  "scope": "Only add Rejection import and change Pool::call admission. Production, task allocation, physical permit/file owners, all tests/assertions, WorkerPool2, Pool Drop actualjoin, ticket wait and deadlines retained. Main/R39 actual source never edited.",
+  "otherCancellableAdmission": {
+    "test": "material_stream_current_worker_cancel_rejects_write_and_disposes_actual_owner_before_join",
+    "originalApproxLine": 772,
+    "observation": "Also uses one-shot try_submit and generic cancellable worker admission panic; the preserved actual first MSVC runtime reports this test PASS. It could encounter transient Busy independently but its cause is not evidenced by this failure.",
+    "candidateChange": "NONE; its complete suffix bytes remain identical, original15s submit deadline and both5s channel timeouts unchanged. Do not broaden this narrowly evidenced correction."
+  },
+  "checks": {
+    "candidateOnlyRustfmt": "PASS",
+    "allActualSourceStillExact": "PASS",
+    "otherCancellableTestByteExact": "PASS",
+    "cargoGitWindows": "NOT_RUN",
+    "candidateTests": "NOT_RUN"
+  }
+}

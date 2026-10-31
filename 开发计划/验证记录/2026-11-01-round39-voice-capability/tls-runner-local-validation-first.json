@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "scope": "R39 pure local optional voice-capabilities TLS-runner model and existing runner self-test; no network/native execution",
+  "sourceSha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25",
+  "checks": [
+    {
+      "flags": [
+        "--self-test",
+        "--voice-capabilities"
+      ],
+      "exitCode": 2,
+      "stderrSha256": "6b674a8b732df08d929c9ea62efce7f1d76e90897eaab5bcfb987a99a1a02749"
+    },
+    {
+      "flags": [
+        "--visual-only",
+        "--voice-capabilities"
+      ],
+      "exitCode": 2,
+      "stderrSha256": "723cc917cdf818a9b1b1bbdb9ed3dcfe18b096f9f01847f2e085fd5fb0a05523"
+    }
+  ]
+}

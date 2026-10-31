@@ -1,0 +1,34 @@
+{
+  "status": "VERIFIED_LIVE_CI_WAIT",
+  "atUnixSeconds": 1793480746.5609198,
+  "runs": [
+    {
+      "kind": "modern",
+      "runId": 41240782662,
+      "sourceSha": "3b3d3abbfb80240989e32bc0858234d25bc277fc",
+      "confirmedOriginalPostCount": 1,
+      "statusAtOriginalObservation": "in_progress",
+      "artifactCountAtOriginalObservation": 0,
+      "latestRunReport": {
+        "path": "modern-run-third.json",
+        "sha256": "c2c6b16fc265ab5cce6b22d6b08f9cd8a24d2e3637bac141c4a42406a2e654f1"
+      },
+      "action": "Re-poll these same run handles; no restart or repeated POST."
+    },
+    {
+      "kind": "win7",
+      "runId": 41240791635,
+      "sourceSha": "3b3d3abbfb80240989e32bc0858234d25bc277fc",
+      "confirmedOriginalPostCount": 1,
+      "statusAtOriginalObservation": "in_progress",
+      "artifactCountAtOriginalObservation": 0,
+      "latestRunReport": {
+        "path": "win7-run-third.json",
+        "sha256": "0540ee45765f0028c83051f01f005b1b08658176b954513a6495ea9bb8db4fab"
+      },
+      "action": "Re-poll these same run handles; no restart or repeated POST."
+    }
+  ],
+  "windowsReadonlyAudit": "PASS; persistent SSH/Run unchanged; no project test activity",
+  "scope": "Only R38 corrected source is in these workflows. R39 feature source remains isolated under local verification."
+}

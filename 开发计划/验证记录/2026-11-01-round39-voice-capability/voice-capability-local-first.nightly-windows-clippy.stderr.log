@@ -1,0 +1,57 @@
+    Checking fc-domain v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-domain)
+   Compiling fc-bootstrap v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-bootstrap)
+    Checking fc-ports v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-ports)
+    Checking fc-runtime v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-runtime)
+    Checking fc-presentation v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-presentation)
+    Checking fc-protocol v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-protocol)
+    Checking fc-storage v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-storage)
+    Checking fc-windows v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-windows)
+    Checking fc-audio v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-audio)
+    Checking fc-security v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-security)
+    Checking fc-materials v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-materials)
+    Checking fc-application v0.1.0 (/tmp/fc-round39-voice-capability-worktree/crates/fc-application)
+error[E0509]: cannot move out of type `web_application::tests::BackendFixture`, which implements the `Drop` trait
+  --> crates/fc-bootstrap/src/web_application/voice_capabilities_tests.rs:74:9
+   |
+68 |         backend,
+   |         ------- data moved here
+69 |         app,
+   |         --- ...and here
+...
+72 |         clock,
+   |         ----- ...and here
+73 |         directory,
+   |         --------- ...and here
+74 |     } = f;
+   |         ^ cannot move out of here
+   |
+   = note: move occurs because these variables have types that don't implement the `Copy` trait
+help: consider borrowing the pattern binding
+   |
+68 |         ref backend,
+   |         +++
+help: consider borrowing the pattern binding
+   |
+69 |         ref app,
+   |         +++
+help: consider borrowing the pattern binding
+   |
+72 |         ref clock,
+   |         +++
+help: consider borrowing the pattern binding
+   |
+73 |         ref directory,
+   |         +++
+
+For more information about this error, try `rustc --explain E0509`.
+error: could not compile `fc-bootstrap` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+warning: unused dependency `fc-ports`
+  --> crates/fc-materials/Cargo.toml:11:1
+   |
+11 | fc-ports.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::unused_dependencies` is set to `warn` by default
+help: consider removing the dependency on `fc-ports`
+warning: `fc-materials` (manifest) generated 1 warning

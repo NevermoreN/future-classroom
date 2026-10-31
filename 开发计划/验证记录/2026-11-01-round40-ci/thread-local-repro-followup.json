@@ -1,0 +1,39 @@
+{
+  "scope": "Narrow per-static Win7-only expectation regression: original const initializer unchanged, global strict warnings remain; independent unannotated non-const initializer must still be rejected. No target runtime.",
+  "command": [
+    "cargo",
+    "+nightly-2026-10-29",
+    "clippy",
+    "-Z",
+    "build-std",
+    "--offline",
+    "--release",
+    "--target",
+    "i686-win7-windows-msvc",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "timeoutSeconds": 900,
+  "status": "PASS",
+  "cases": [
+    {
+      "name": "scoped-expect",
+      "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(target_vendor = \"win7\", expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\n",
+      "sourceSha256": "379deb239ab528fd922f36c3a4526880d73239a33337de5aa7321fbba3dc6305",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "elapsedSeconds": 0.46687559015117586
+    },
+    {
+      "name": "strict-sentinel",
+      "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(target_vendor = \"win7\", expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\nstd::thread_local! { static UNANNOTATED: Cell<bool> = Cell::new(false); }\npub fn sentinel() -> bool { UNANNOTATED.with(|value| value.get()) }\n",
+      "sourceSha256": "269ad941e8fe1ca86412de8da5325a1b76af563bd2b2b9cb092c0d3d09ac209b",
+      "exitCode": 101,
+      "expectedExitCode": 101,
+      "passed": true,
+      "elapsedSeconds": 0.16569838882423937
+    }
+  ]
+}

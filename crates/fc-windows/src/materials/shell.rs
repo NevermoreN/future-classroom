@@ -610,6 +610,7 @@ mod tests {
         }
     }
     thread_local! {
+        #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
         static HELD_TLS: std::cell::RefCell<Option<HeldTls>> = const { std::cell::RefCell::new(None) };
     }
     struct ReleaseTls(Option<SyncSender<()>>);

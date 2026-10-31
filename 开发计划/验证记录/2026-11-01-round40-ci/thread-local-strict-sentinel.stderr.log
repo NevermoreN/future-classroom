@@ -1,0 +1,12 @@
+    Checking fc-threadlocal-repro v0.0.0 (/tmp/fc-round40-threadlocal-repro)
+error: initializer for `thread_local` value can be made `const`
+ --> src/lib.rs:4:55
+  |
+4 | std::thread_local! { static UNANNOTATED: Cell<bool> = Cell::new(false); }
+  |                                                       ^^^^^^^^^^^^^^^^ help: replace with: `const { Cell::new(false) }`
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+  = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+
+error: could not compile `fc-threadlocal-repro` (lib) due to 1 previous error

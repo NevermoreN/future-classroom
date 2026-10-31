@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round40-modern-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+    "--continuous-accept",
+    "--browser",
+    "--browser-content",
+    "REMINDER",
+    "--report",
+    "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T21:14:59.660210+00:00",
+  "stdout": "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first.stdout.log",
+  "stderr": "/tmp/fc-round40-ci-evidence/modern-msvc-reminder-browser-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 68.52929865499027,
+  "completedUtc": "2026-10-31T21:16:08.189754+00:00",
+  "stdoutBytes": 264,
+  "stdoutSha256": "124906eb28789bc047ac2ee8bfd9b76169bc28b57e6452ba40ed754bd981e881",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

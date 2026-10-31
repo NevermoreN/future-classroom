@@ -1,0 +1,67 @@
+def validate_voice_capabilities(value):
+    """Strict fixture response metadata, not a native-query/cache observation."""
+    keys = {"schemaVersion", "status", "identityRevision", "runtimeGeneration", "serverNow", "currentClass",
+            "enabled", "admission", "targetAuthorized", "deviceAvailability", "defaultRepeatTotal", "minRepeatTotal",
+            "maxRepeatTotal", "minDurationMillis", "maxDurationMillis", "sampleRate", "channels", "bitsPerSample",
+            "maxWavBytes", "uploadTtlSeconds"}
+    require(type(value) is dict and set(value) == keys, "voice capabilities exact disclosure shape mismatch")
+    require(type(value["schemaVersion"]) is int and value["schemaVersion"] == 1
+            and value["status"] == "VOICE_CAPABILITIES", "voice capabilities envelope mismatch")
+    for key in ("identityRevision", "runtimeGeneration"):
+        number = value[key]
+        require(type(number) is str and re.fullmatch(r"[1-9][0-9]{0,19}", number) is not None
+                and int(number) <= 18_446_744_073_709_551_615, "voice capabilities canonical positive u64 mismatch")
+    civil = value["serverNow"]
+    require(type(civil) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}", civil) is not None,
+            "voice capabilities civil time form mismatch")
+    try:
+        datetime.fromisoformat(civil)
+    except ValueError:
+        raise RuntimeError("voice capabilities civil time date/range mismatch") from None
+    target = value["currentClass"]
+    require(type(target) is dict and set(target) == {"classId", "className"} and target["classId"] == "1",
+            "voice capabilities expected current classroom missing or changed")
+    name = target["className"]
+    require(type(name) is str and 0 < len(name) <= 128 and bool(name.strip())
+            and not any(ord(c) < 32 or 127 <= ord(c) <= 159 or 0xD800 <= ord(c) <= 0xDFFF for c in name),
+            "voice capabilities classroom label invalid")
+    require(type(value["enabled"]) is bool and value["targetAuthorized"] is True
+            and value["admission"] in ("OPEN", "CLOSED")
+            and (value["enabled"] or value["admission"] == "CLOSED"),
+            "voice capabilities authorization/admission mismatch")
+    require(value["deviceAvailability"] in ("UNVERIFIED", "UNAVAILABLE"),
+            "voice capabilities must not claim positive availability")
+    for key, expected in {"minRepeatTotal": 1, "minDurationMillis": 500, "sampleRate": 16000,
+                          "channels": 1, "bitsPerSample": 16, "uploadTtlSeconds": 600}.items():
+        require(type(value[key]) is int and value[key] == expected, "voice capabilities fixed format/limit mismatch")
+    repeats, duration, size = value["maxRepeatTotal"], value["maxDurationMillis"], value["maxWavBytes"]
+    require(type(repeats) is int and 1 <= repeats <= 10 and type(duration) is int and 500 <= duration <= 60000
+            and type(size) is int and size == 44 + duration * 32
+            and type(value["defaultRepeatTotal"]) is int and value["defaultRepeatTotal"] == min(3, repeats),
+            "voice capabilities duration/repeat/WAV formula mismatch")
+    return {key: entry for key, entry in value.items() if key != "serverNow"}
+
+
+def exercise_voice_capabilities(client):
+    """Three GETs only; the unchanged full suite separately uploads silent WAV."""
+    denied = client.request("voice-capabilities-no-cookie", "GET", "voice/capabilities", expected=(401,),
+                            authenticated=False).json()
+    require(type(denied) is dict and set(denied) == {"schemaVersion", "code"}
+            and type(denied["schemaVersion"]) is int and denied["schemaVersion"] == 1
+            and denied["code"] == "UNAUTHORIZED", "voice capabilities did not reject the missing session")
+    first = validate_voice_capabilities(client.request("voice-capabilities-authenticated", "GET", "voice/capabilities",
+                                                       expected=(200,)).json())
+    repeated = validate_voice_capabilities(client.request("voice-capabilities-authenticated-repeat", "GET", "voice/capabilities",
+                                                          expected=(200,)).json())
+    require(first == repeated, "voice capabilities stable fields changed between repeated GETs")
+    return {"status": "PASS", "additionalWireRequests": 3, "unauthenticatedStatus": 401, "authenticatedStatuses": [200, 200],
+            "identityRevision": first["identityRevision"], "runtimeGeneration": first["runtimeGeneration"],
+            "currentClassId": first["currentClass"]["classId"], "targetAuthorized": first["targetAuthorized"],
+            "enabled": first["enabled"], "admission": first["admission"], "deviceAvailability": first["deviceAvailability"],
+            "limits": {key: first[key] for key in ("minRepeatTotal", "defaultRepeatTotal", "maxRepeatTotal",
+                "minDurationMillis", "maxDurationMillis", "maxWavBytes", "sampleRate", "channels", "bitsPerSample", "uploadTtlSeconds")},
+            "stableFieldsExcludingServerNow": "MATCH", "nativeQueryCount": "NOT_OBSERVED",
+            "cacheBehavior": "NOT_DETERMINED_BY_GET", "operation": "THREE_GETS_NO_RECORDING_UPLOAD_SUBMIT_OR_PLAYBACK",
+            "supportMeaning": "A historical format observation is not a reservation or a guarantee of current audibility."}
+
+

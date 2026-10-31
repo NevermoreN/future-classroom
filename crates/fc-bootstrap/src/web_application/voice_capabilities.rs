@@ -67,18 +67,20 @@ impl PreparedVoiceCapabilities {
         self,
         query: impl FnOnce() -> Result<DefaultOutputSupport, AudioOutputError>,
     ) -> WebResponse {
-        let capabilities = match self.service.web_capabilities_with_output(
-            self.lease,
-            self.deadline,
-            query,
-        ) {
-            Ok(capabilities) => capabilities,
-            Err(error) => return voice::error(error, false),
-        };
+        let capabilities =
+            match self
+                .service
+                .web_capabilities_with_output(self.lease, self.deadline, query)
+            {
+                Ok(capabilities) => capabilities,
+                Err(error) => return voice::error(error, false),
+            };
         let result = voice::capabilities_response(&capabilities);
         // Encoding does not grant a new request interval. Recheck the exact
         // actor and coherent publication before any response can escape.
-        let current = self.service.check_web_capabilities_output(self.lease, &capabilities);
+        let current = self
+            .service
+            .check_web_capabilities_output(self.lease, &capabilities);
         if !(self.fence)() || current.is_err() {
             return failure(503, responses::ErrorCode::ServiceUnavailable);
         }

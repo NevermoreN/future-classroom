@@ -4,7 +4,7 @@ use super::*;
 use crate::web_transfer::TransferControl;
 use fc_domain::{auth::Role, identity::*, time::*};
 use fc_ports::{http::TokenIssuer, Clock, MonotonicClock};
-use fc_runtime::worker::{Task, WorkerPool};
+use fc_runtime::worker::{Rejection, Task, WorkerPool};
 use fc_security::{CredentialRecordCodec, Password};
 use std::{
     fs::OpenOptions,
@@ -333,15 +333,24 @@ impl Pool {
     fn call<T: Send + 'static>(&self, call: impl FnOnce(&JobContext) -> T + Send + 'static) -> T {
         let output = Arc::new(Mutex::new(None));
         let returned = output.clone();
-        let ticket = match self.0.as_ref().unwrap().handle().try_submit(
-            Job(Box::new(move |context| {
-                let value = call(context);
-                *returned.lock().unwrap() = Some(value);
-            })),
-            Instant::now() + Duration::from_secs(15),
-        ) {
-            Ok(ticket) => ticket,
-            Err(_) => panic!("worker admission"),
+        let mut task = Job(Box::new(move |context| {
+            let value = call(context);
+            *returned.lock().unwrap() = Some(value);
+        }));
+        let deadline = Instant::now() + Duration::from_secs(15);
+        let ticket = loop {
+            match self.0.as_ref().unwrap().handle().try_submit(task, deadline) {
+                Ok(ticket) => break ticket,
+                Err(error) if error.kind == Rejection::Busy && Instant::now() < deadline => {
+                    task = error.task;
+                    std::thread::yield_now();
+                }
+                Err(error) => panic!(
+                    "worker admission {:?}; original 15s deadline exhausted={}",
+                    error.kind,
+                    Instant::now() >= deadline
+                ),
+            }
         };
         ticket.wait().unwrap();
         let value = output.lock().unwrap().take().unwrap();

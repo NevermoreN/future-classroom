@@ -25,7 +25,9 @@ const FOREGROUND_MESSAGE: u32 = WM_APP + 42;
 thread_local! {
     // Out-of-context callbacks are delivered on the hook owner's UI thread.
     // Only an HWND value is retained; there is no cross-thread State pointer.
+    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
     static FOREGROUND_TARGET: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };
+    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
     static FOREGROUND_PENDING: Cell<bool> = const { Cell::new(false) };
 }
 const STOP: u32 = 1;

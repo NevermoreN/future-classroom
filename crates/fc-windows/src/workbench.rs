@@ -64,7 +64,10 @@ const MAX_EVENT_BYTES: usize = 4 * 1024 * 1024;
 const FIELD_ID_BASE: u16 = 2000;
 const ACTION_ID_BASE: u16 = 3000;
 static CLASSES: Mutex<usize> = Mutex::new(0);
-thread_local! { static WORKBENCHES: RefCell<Vec<HWND>> = const { RefCell::new(Vec::new()) }; }
+thread_local! {
+    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
+    static WORKBENCHES: RefCell<Vec<HWND>> = const { RefCell::new(Vec::new()) };
+}
 
 /// Used by the owning thread's message pump for native Tab/default-button
 /// navigation. Only messages targeting an explicitly visible owned workbench

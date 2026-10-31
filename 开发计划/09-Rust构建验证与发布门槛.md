@@ -120,3 +120,28 @@ R38仅将17文件21处常量2/4分块改为 `as_chunks(_mut)` 完整数组迭代
 [第三次](验证记录/2026-11-01-round38-compat/chunk-lint-local-third.json)最终为冷release编译超时FAIL，host-test原900秒exit124、尚未运行测试；原controller/Cargo/compiler均已实际退出，保留原日志及不变源码。[第四次独立操作](验证记录/2026-11-01-round38-compat/chunk-lint-local-fourth.json)则实际PASS：nightly完整Windows GNU严格Clippy4.05秒，显式完整release `test --no-run` 296.83秒，随后同一完整workspace/all-targets release Host测试71.82秒，stable完整release Host严格Clippy118.72秒，fmt/架构检查亦exit0。每条命令分别保持原900秒预算、jobs2/tests2；没有过滤、KDF降级或lint放行。
 
 [原stdout/stderr计数证明](验证记录/2026-11-01-round38-compat/chunk-lint-host-count-fourth.json)核对实际Running21份与21组完整summary，为915通过/0失败/0忽略/0过滤；406份sourceBefore/sourceAfter逐字节一致。该矩阵不含独立R39工作树，不替代新R38现代/Win7 MSVC CI或目标系统运行。新CI尚未dispatch/通过，完整归档和活跃构建/工作副本清理尚待实际执行；原先失败不被后续成功覆盖，原严格首TCP五秒FAIL及正式发布限制不变。
+
+## 第三十九/四十轮补证：严格构建通过与实际测试失败分别保留
+
+R39原 [voice-capability-local-first.json](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-first.json) 因新增测试fixture解构Drop类型的E0509实际FAIL，原件与失败源码保留；仅修fixture所有权后，[voice-capability-local-second.json](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-second.json) 全矩阵实际PASS：nightly Windows GNU严格Clippy13.41秒、完整release显式编译685.93秒、Host全量测试50.44秒、stable release严格Clippy30.07秒。原stdout21组summary与stderrRunning21份独立对应929通过/0失败/0忽略/0过滤，410份输入前后变化0；仍是原900秒/命令、jobs2/tests2，不过滤、不减KDF、不放行警告。
+
+独立R40原现代MSVC run41240782662（`3b3d3abbfb80240989e32bc0858234d25bc277fc`）实际SUCCESS，不能误记为R39 feature源码通过。[modern-full-download-first.json](验证记录/2026-11-01-round40-ci/modern-full-download-first.json) 的完整artifact13058056589为40564846字节/SHA `d1ad2500aeb9d1e76d68e87fa01d990e4200e0ffd5c7e83cbdd30dce4229a976`，192 ZIP成员CRC、191份producer ledger、170份非二进制原件及22份PE32/静态CRT独审PASS。5829项完整提交输入分为3521项原Git blob直接匹配和2308项精确LF→CRLF检出匹配，不泛称全部原字节一致。两个证据目录按计划归档位置以相对链接引用，完整归档清理终态另记。
+
+其授权Win11实际 [modern-msvc-runtime-first.json](验证记录/2026-11-01-round40-ci/modern-msvc-runtime-first.json) 则FAIL/cleanup PASS：仅首bootstrap库314通过/1失败，material_stream_tests:344的worker admission helper失败，未执行后续程序。原拒绝kind未记录，不能断言唯一Busy原因；不得将CI编译成功或同正常EXE `d5dd4d4c07331128804ff4faf24e12dcc8336a527871b4cbef72b504d045954c` 的独立20步公开桌面、22步配色及有限TLS/continuous/Edge REMINDER PASS/cleanup PASS合成该次全套1399通过。
+
+R39只将该Windows测试helper改为同Task/FnOnce、原15秒内明确未接纳Busy才重投，其它kind明确失败，不改生产池或测试断言。其 [voice-capability-local-third.json](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-third.json) 最初RUNNING与第二次结果分别记录；随后第三次自身完整矩阵实际PASS，nightly交叉lint11.48秒/release编译0.26秒/Host测试44.97秒/stable lint0.27秒，独立原21组summary/Running账为929/0/0/0，410输入变化0。以上并不证明修改后Windows库实际运行或R39 MSVC已通过。Python同源码第二次纯self-test完整原stdout/stderr/command现已持久化，16组含63负向model PASS仍仅工具验证。
+
+Win7候选原run41240791635仍live、未artifact且未重派；R39新Windows能力查询/完整实机回归、后续源码MSVC、正式Win7/Win10/希沃和完整归档清理继续待实际证据。原严格首TCP5_000_000_000ns FAIL、生产listener关闭和发布门槛保持，不创建Release/tag或把目标标记完成。
+
+Win7原run `41240791635` 现追加实际终态 **FAILURE**（job `124654072346`）；artifact `13058086743` 的服务元数据为41254371字节/SHA `43587d8992441a5602c47d49b63dcc45f59ff34b7395a2882d9ffb8b2f8f201f`。前述live为保留的历史时点；完整原件正在下载，尚不报告失败原因或完整ZIP/CRC/源码/PE检查结果，不用artifact已存在将失败CI改为通过。未重派，目标系统实际运行及其它发布门槛保持。
+
+### R40固定nightly TLS宏误报：原件核实与窄候选验证边界
+
+[精确完整ZIP下载](验证记录/2026-11-01-round40-ci/win7-full-download-first.json)及[独立原件审查](验证记录/2026-11-01-round40-ci/win7-original-independent-first.json)现已通过：201成员CRC、200 producer ledger、22份x86 PE32/subsystem6.1/静态CRT分别核对，5829项输入分3521直接Git blob/2308精确LF→CRLF检出。41条原命令中仅strict Clippy exit101，原cleanup PASS；整体FAIL及Win7 EXE未运行不得被产物存在或静态通过覆盖。
+
+[固定源码分析](验证记录/2026-11-01-round40-ci/win7-thread-local-analysis-second.json)确认五static已是显式const初始化；固定Win7 MSVC标准库OS TLS fallback宏生成非const内部函数导致Clippy误报。[原const最小复现101](验证记录/2026-11-01-round40-ci/thread-local-repro-first.json)与[单static expect0/独立未注解nonconst sentinel101](验证记录/2026-11-01-round40-ci/thread-local-repro-followup.json)分别保留，不对整个crate或其它目标allow。vendor-only候选第四轮本地PASS仅作为[原候选结果](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-fourth.json)；现在[五处条件已收窄](验证记录/2026-11-01-round40-ci/thread-local-msvc-only-fix-applied-first.json)为 `all(clippy, windows, target_vendor="win7", target_env="msvc")`，初始化器/Drop/线程退出及全局-D warnings不改。精确条件最小复验和第五完整矩阵各自另记终态，当前不声明最终Win7全workspace、MSVC或实际Win7运行PASS。
+
+[REMINDER独立32check](验证记录/2026-11-01-round40-ci/reminder-independent-first.json)核对9API/1POST/0visual/快捷2、75原生Head/响应=61raw HTTP+14browser wire，原worker2join和物理排空、Hub/quarantine0；[结束Windows只读审计](验证记录/2026-11-01-round40-ci/windows-after-first.json)PASS且测试目录/进程/任务0、SSH和Run未改。这些结果不替代失败整套或R39设备功能Windows实测；完整归档/清理、严格首TCP原FAIL、生产listener关闭及所有正式平台/发布限制仍各自保留。
+
+
+R39最终本地矩阵以[第五次原报告](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-fifth.json)及[当前字节冻结核验](验证记录/2026-11-01-round39-voice-capability/final-frozen-verification-first.json)为准：410份Rust/构建输入、Host21程序929项、Windows GNU严格Clippy及Web300项分别实际PASS。R40固定nightly重建Win7标准库的五个已const TLS误报使用每static且仅Win7 MSVC Clippy的expect；[精确小例和独立未注解哨兵](验证记录/2026-11-01-round40-ci/thread-local-repro-msvc-only.json)证明0/101，原全局-D warnings保留。仍须修正后完整Win7 MSVC CI与Windows增量运行；原CI/实测FAIL没有被覆盖。原日志、源码冻结及失败均归档到round39/round40 INDEX.json，后续提交和本地构建副本清理独立取证。

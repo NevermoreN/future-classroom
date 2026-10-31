@@ -1,0 +1,51 @@
+{
+  "stage": "Round39 optional real TLS voice capability observation source freeze",
+  "file": {
+    "path": "scripts/windows-tls-business-probe.py",
+    "beforeBytes": 99688,
+    "beforeSha256": "9beeb6f197159ab53f78731bae183bcd248d25b68005646c6a06e75cd6e526f2",
+    "bytes": 112200,
+    "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25"
+  },
+  "scope": "Only this runner changed; no API/native/React/backend/dependencies/resources changes. Functions were not executed by this agent.",
+  "flag": {
+    "option": "--voice-capabilities",
+    "incompatible": [
+      "--visual-only",
+      "--self-test"
+    ],
+    "compatible": "Existing full HOMEWORK/REMINDER, browser and continuous acceptance modes retained; old default false causes no additional GET/report field."
+  },
+  "observation": {
+    "route": "GET /fc/api/v1/voice/capabilities",
+    "additionalWireRequests": 3,
+    "sequence": [
+      "no-cookie401",
+      "authenticated200",
+      "authenticated-repeat200"
+    ],
+    "position": "Immediately after authenticate_business and before visual/browser/material business operations.",
+    "validation": "Exact20-field VOICE_CAPABILITIES shape, canonical positive u64 revisions/runtime, valid timezone-free civil time, exact currentClass shape/id1 and valid bounded label, actual targetAuthorized=true, typed enabled/admission, fixed PCM fields, integer duration/repeats/default/WAV formula. Only UNVERIFIED|UNAVAILABLE. Repeated stable fields equal excluding serverNow.",
+    "reportField": "voiceCapabilitiesObservation",
+    "privacy": "No cookie/CSRF/full response body; no native query-count, caching or audibility claim. Historical format support is not current audibility.",
+    "oldFullAudioPhase": "Unchanged pre-existing silent WAV upload-only remains separately reported; the new observation itself does only GETs and creates no audio task."
+  },
+  "checks": {
+    "pythonAstSyntax": "PASS_STATIC_ONLY",
+    "allExistingDefinitionsExceptExerciseMainSelfTestAstIdentical": "PASS",
+    "unchangedTransportAndNativeCounterValidation": "PASS",
+    "oldSilentUploadPhaseByteIdentical": "PASS",
+    "phaseOrderingStatic": "PASS",
+    "sourceWhitespace": "PASS",
+    "selfTest": "NOT_RUN_ROOT_WILL_EXECUTE",
+    "cliCases": "NOT_RUN",
+    "actualTLSWindows": "NOT_RUN",
+    "cargoGit": "NOT_RUN"
+  },
+  "newModelCounterexamples": "AVAILABLE/UNKNOWN and bad device types, extra/missing fields, wrong envelope/types/u64/civil time/currentClass/authorization/admission, malformed or contradictory limits/fixed format, unstable repeated revisions/runtime/device/limits; exact3GET/no-body/privacy summary model.",
+  "deadlinePolicy": "Original Client30s, existing browser12s/native45s and all other transport/ownership timeouts untouched; no renewal in new functions.",
+  "diff": {
+    "path": "editor-tls-runner-first.diff",
+    "sha256": "76f4b53953d91a5c113309e372bd52eb491b2106e2af6f86d71b5c5a388aaaa7"
+  }
+}

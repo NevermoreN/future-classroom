@@ -1,0 +1,424 @@
+{
+  "status": "READ_ONLY_DIAGNOSIS_CONFIRMED_BY_PARENT_EXACT_TARGET_REPRO_FINAL_CONDITION_PENDING",
+  "timestampUtc": "2026-10-31T21:26:28.697419+00:00",
+  "worktree": "/tmp/fc-round39-voice-capability-worktree",
+  "originalFailure": {
+    "path": "/tmp/fc-round40-ci-evidence/win7-artifact-raw/logs/clippy.stderr.log",
+    "bytes": 1222928,
+    "sha256": "2a139ccd43324676167cdabc96d6a59373603586b10a56eab667e94da350c070",
+    "diagnosticBlocks": [
+      "error: initializer for `thread_local` value can be made `const`\n  --> crates\\fc-windows\\src\\host.rs:25:1\n   |\n25 | / thread_local! {\n26 | |     // Out-of-context callbacks are delivered on the hook owner's UI thread.\n27 | |     // Only an HWND value is retained; there is no cross-thread State pointer.\n28 | |     static FOREGROUND_TARGET: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };\n29 | |     static FOREGROUND_PENDING: Cell<bool> = const { Cell::new(false) };\n30 | | }\n   | |_^\n   |\n   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local\n   = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`\n   = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`\n",
+      "error: initializer for `thread_local` value can be made `const`\n  --> crates\\fc-windows\\src\\host.rs:25:1\n   |\n25 | / thread_local! {\n26 | |     // Out-of-context callbacks are delivered on the hook owner's UI thread.\n27 | |     // Only an HWND value is retained; there is no cross-thread State pointer.\n28 | |     static FOREGROUND_TARGET: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };\n29 | |     static FOREGROUND_PENDING: Cell<bool> = const { Cell::new(false) };\n30 | | }\n   | |_^\n   |\n   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local\n",
+      "error: initializer for `thread_local` value can be made `const`\n  --> crates\\fc-windows\\src\\workbench.rs:67:1\n   |\n67 | thread_local! { static WORKBENCHES: RefCell<Vec<HWND>> = const { RefCell::new(Vec::new()) }; }\n   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local\n",
+      "error: initializer for `thread_local` value can be made `const`\n   --> crates\\fc-windows\\src\\tls_frontdoor\\worker\\tests.rs:371:5\n    |\n371 | /     thread_local! {\n372 | |         static HELD_TLS: std::cell::RefCell<Option<HeldTls>> = const { std::cell::RefCell::new(None) };\n373 | |     }\n    | |_____^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local\n    = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`\n    = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`\n",
+      "error: initializer for `thread_local` value can be made `const`\n   --> crates\\fc-windows\\src\\materials\\shell.rs:612:5\n    |\n612 | /     thread_local! {\n613 | |         static HELD_TLS: std::cell::RefCell<Option<HeldTls>> = const { std::cell::RefCell::new(None) };\n614 | |     }\n    | |_____^\n    |\n    = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local\n"
+    ],
+    "affectedLogicalDeclarations": 5,
+    "note": "The same three library declarations also appear in lib-test diagnostics. No Running command lines copied into this analysis."
+  },
+  "sourceBinding": {
+    "crates/fc-windows/src/host.rs": "3e162c9fe0e57f6037887cf0eddcae69facdc2c3ade5202c1bc1d794a55cf94d",
+    "crates/fc-windows/src/workbench.rs": "ed36ea8184fdeea2eafa9adb05628a2cb8c3080a0eeb5b0aaa095d687980747a",
+    "crates/fc-windows/src/tls_frontdoor/worker/tests.rs": "e6d1eb60a4bf21f66f584c4e981ac986a579e55ca2d17ef4030ba0afb75c8952",
+    "crates/fc-windows/src/materials/shell.rs": "38dbb14924529f9f4788967c0d0dab425501e481856b635250d9489c5332eb96"
+  },
+  "commands": [
+    {
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "exitCode": 0,
+      "stdout": "rustc 1.101.0-nightly (92ffebece 2026-10-28)\nbinary: rustc\ncommit-hash: 92ffebeceaa0a071066f233873c2438e73d70fe7\ncommit-date: 2026-10-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+      "stderr": "",
+      "scope": "read-only compiler identity/target cfg, no compilation"
+    },
+    {
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-Z",
+        "unstable-options",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--print",
+        "cfg"
+      ],
+      "exitCode": 0,
+      "stdout": "debug_assertions\nfmt_debug=\"full\"\noverflow_checks\npanic=\"unwind\"\nrelocation_model=\"pic\"\ntarget_abi=\"\"\ntarget_arch=\"x86\"\ntarget_endian=\"little\"\ntarget_env=\"msvc\"\ntarget_family=\"windows\"\ntarget_feature=\"fxsr\"\ntarget_feature=\"sse\"\ntarget_feature=\"sse2\"\ntarget_feature=\"x87\"\ntarget_has_atomic\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_load_store\ntarget_has_atomic_load_store=\"16\"\ntarget_has_atomic_load_store=\"32\"\ntarget_has_atomic_load_store=\"64\"\ntarget_has_atomic_load_store=\"8\"\ntarget_has_atomic_load_store=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_has_reliable_f128\ntarget_has_reliable_f16\ntarget_has_reliable_f16_math\ntarget_has_threads\ntarget_object_format=\"coff\"\ntarget_os=\"windows\"\ntarget_pointer_width=\"32\"\ntarget_vendor=\"win7\"\nub_checks\nwindows\n",
+      "stderr": "",
+      "scope": "read-only compiler identity/target cfg, no compilation"
+    },
+    {
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-Z",
+        "unstable-options",
+        "--target",
+        "i686-win7-windows-gnu",
+        "--print",
+        "cfg"
+      ],
+      "exitCode": 0,
+      "stdout": "debug_assertions\nfmt_debug=\"full\"\noverflow_checks\npanic=\"unwind\"\nrelocation_model=\"pic\"\ntarget_abi=\"\"\ntarget_arch=\"x86\"\ntarget_endian=\"little\"\ntarget_env=\"gnu\"\ntarget_family=\"windows\"\ntarget_feature=\"fxsr\"\ntarget_feature=\"sse\"\ntarget_feature=\"sse2\"\ntarget_feature=\"x87\"\ntarget_has_atomic\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_load_store\ntarget_has_atomic_load_store=\"16\"\ntarget_has_atomic_load_store=\"32\"\ntarget_has_atomic_load_store=\"64\"\ntarget_has_atomic_load_store=\"8\"\ntarget_has_atomic_load_store=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_has_reliable_f128\ntarget_has_reliable_f16\ntarget_has_reliable_f16_math\ntarget_has_threads\ntarget_object_format=\"coff\"\ntarget_os=\"windows\"\ntarget_pointer_width=\"32\"\ntarget_thread_local\ntarget_vendor=\"win7\"\nub_checks\nwindows\n",
+      "stderr": "",
+      "scope": "read-only compiler identity/target cfg, no compilation"
+    },
+    {
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-Z",
+        "unstable-options",
+        "--target",
+        "i686-pc-windows-msvc",
+        "--print",
+        "cfg"
+      ],
+      "exitCode": 0,
+      "stdout": "debug_assertions\nfmt_debug=\"full\"\noverflow_checks\npanic=\"unwind\"\nrelocation_model=\"pic\"\ntarget_abi=\"\"\ntarget_arch=\"x86\"\ntarget_endian=\"little\"\ntarget_env=\"msvc\"\ntarget_family=\"windows\"\ntarget_feature=\"fxsr\"\ntarget_feature=\"sse\"\ntarget_feature=\"sse2\"\ntarget_feature=\"x87\"\ntarget_has_atomic\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_load_store\ntarget_has_atomic_load_store=\"16\"\ntarget_has_atomic_load_store=\"32\"\ntarget_has_atomic_load_store=\"64\"\ntarget_has_atomic_load_store=\"8\"\ntarget_has_atomic_load_store=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_has_reliable_f128\ntarget_has_reliable_f16\ntarget_has_reliable_f16_math\ntarget_has_threads\ntarget_object_format=\"coff\"\ntarget_os=\"windows\"\ntarget_pointer_width=\"32\"\ntarget_thread_local\ntarget_vendor=\"pc\"\nub_checks\nwindows\n",
+      "stderr": "",
+      "scope": "read-only compiler identity/target cfg, no compilation"
+    }
+  ],
+  "localPinnedStdSource": [
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/mod.rs",
+      "relativePath": "std/src/sys/thread_local/mod.rs",
+      "bytes": 8599,
+      "sha256": "bb6780939e581070dca11c4f9714bf7e639034d5c95e91f4e9c04c07070548e0",
+      "excerpts": [
+        {
+          "firstLine": 37,
+          "lastLine": 57,
+          "text": "37:     any(\n38:         all(target_family = \"wasm\", not(target_feature = \"atomics\"), not(target_os = \"wasi\")),\n39:         target_os = \"uefi\",\n40:         target_os = \"zkvm\",\n41:         target_os = \"trusty\",\n42:         target_os = \"vexos\",\n43:     ) => {\n44:         mod no_threads;\n45:         pub use no_threads::{EagerStorage, LazyStorage, thread_local_inner};\n46:         pub(crate) use no_threads::{LocalPointer, local_pointer};\n47:     }\n48:     target_thread_local => {\n49:         mod native;\n50:         pub use native::{EagerStorage, LazyStorage, thread_local_inner};\n51:         pub(crate) use native::{LocalPointer, local_pointer};\n52:     }\n53:     _ => {\n54:         mod os;\n55:         pub(crate) use os::{LocalPointer, local_pointer};\n56:         pub use os::{Storage, thread_local_inner, value_align};\n57:     }"
+        }
+      ]
+    },
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/local.rs",
+      "relativePath": "std/src/thread/local.rs",
+      "bytes": 29906,
+      "sha256": "8ec8b844aea709576794bc22d7efc54eebb610d58de3ed13d422c87034aaeda2",
+      "excerpts": [
+        {
+          "firstLine": 287,
+          "lastLine": 304,
+          "text": "287:     // Delegate to `thread_local_inner` once attributes are fully categorized:\n288: \n289:     // process `const` declaration and recurse\n290:     ([$($align_attrs:tt)*] [$($other_attrs:tt)*]; $vis:vis static $name:ident: $t:ty = const $init:block $(; $($($rest:tt)+)?)?) => (\n291:         $($other_attrs)* $vis const $name: $crate::thread::LocalKey<$t> =\n292:             $crate::thread::local_impl::thread_local_inner!(@key $t, $($align_attrs)*, const $init);\n293: \n294:         $($($crate::thread::local_impl::thread_local_process_attrs!([] []; $($rest)+);)?)?\n295:     ),\n296: \n297:     // process non-`const` declaration and recurse\n298:     ([$($align_attrs:tt)*] [$($other_attrs:tt)*]; $vis:vis static $name:ident: $t:ty = $init:expr $(; $($($rest:tt)+)?)?) => (\n299:         $($other_attrs)* $vis const $name: $crate::thread::LocalKey<$t> =\n300:             $crate::thread::local_impl::thread_local_inner!(@key $t, $($align_attrs)*, $init);\n301: \n302:         $($($crate::thread::local_impl::thread_local_process_attrs!([] []; $($rest)+);)?)?\n303:     ),\n304: }"
+        },
+        {
+          "firstLine": 329,
+          "lastLine": 344,
+          "text": "329: /// This macro supports a special `const {}` syntax that can be used\n330: /// when the initialization expression can be evaluated as a constant.\n331: /// This can enable a more efficient thread local implementation that\n332: /// can avoid lazy initialization. For types that do not\n333: /// [need to be dropped][crate::mem::needs_drop], this can enable an\n334: /// even more efficient implementation that does not need to\n335: /// track any additional state.\n336: ///\n337: /// ```\n338: /// use std::cell::RefCell;\n339: ///\n340: /// thread_local! {\n341: ///     pub static FOO: RefCell<Vec<u32>> = const { RefCell::new(Vec::new()) };\n342: /// }\n343: ///\n344: /// FOO.with_borrow(|v| assert_eq!(v.len(), 0));"
+        }
+      ]
+    },
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/os.rs",
+      "relativePath": "std/src/sys/thread_local/os.rs",
+      "bytes": 11191,
+      "sha256": "ccac03254654ba4530316a62e876cfdc05f88e73d5c69ecf7d216155d188365b",
+      "excerpts": [
+        {
+          "firstLine": 21,
+          "lastLine": 31,
+          "text": "21:     // used to generate the `LocalKey` value for `thread_local!`.\n22:     (@key $t:ty, $($(#[$($align_attr:tt)*])+)?, $init:expr) => {{\n23:         // We intentionally have an argument-position `'static` lifetime so that elided lifetimes in `$t`\n24:         // become `'static` like they do for `const`s and `static`s, including in the other two\n25:         // `thread_local!` implementations.\n26:         #[allow(mismatched_lifetime_syntaxes)]\n27:         #[inline]\n28:         fn __rust_std_internal_init_fn(_lifetime_elision: $crate::marker::PhantomData<&'static ()>) -> $t { $init }\n29: \n30:         // NOTE: this cannot import `LocalKey` or `Storage` with a `use` because that can shadow\n31:         // user provided type or type alias with a matching name. Please update the shadowing test"
+        },
+        {
+          "firstLine": 165,
+          "lastLine": 176,
+          "text": "165:     /// provided parameters. If the TLS variable has been destroyed, a null\n166:     /// pointer is returned.\n167:     ///\n168:     /// The resulting pointer may not be used after reentrant inialialization\n169:     /// or thread destruction has occurred.\n170:     #[inline]\n171:     pub fn get(&'static self, i: Option<&mut Option<T>>, f: impl FnOnce() -> T) -> *const T {\n172:         let key = self.key.force();\n173:         let ptr = unsafe { get(key) as *mut Value<T> };\n174:         if ptr.addr() > 1 {\n175:             // SAFETY: the check ensured the pointer is safe (its destructor\n176:             // is not running) + it is coming from a trusted source (self)."
+        },
+        {
+          "firstLine": 244,
+          "lastLine": 267,
+          "text": "244:         drop(ptr);\n245:         // SAFETY: `key` is the TLS key `ptr` was stored under.\n246:         unsafe { set(key, ptr::null_mut()) };\n247:         // Make sure that the runtime cleanup will be performed\n248:         // after the next round of TLS destruction.\n249:         guard::enable();\n250:     });\n251: }\n252: \n253: #[rustc_macro_transparency = \"semiopaque\"]\n254: pub(crate) macro local_pointer {\n255:     () => {},\n256:     // A local pointer stays readable until `crate::rt::thread_cleanup` has run.\n257:     // The guard decides whether the key needs a destructor for that, which\n258:     // stores the value again for as long as the cleanup is pending.\n259:     ($vis:vis static $name:ident; $($rest:tt)*) => {\n260:         $vis static $name: $crate::sys::thread_local::LocalPointer = {\n261:             unsafe extern \"C\" fn keep(value: *mut u8) {\n262:                 if $crate::sys::thread_local::guard::cleanup_pending() {\n263:                     $name.set(value.cast());\n264:                 }\n265:             }\n266: \n267:             $crate::sys::thread_local::LocalPointer::__new("
+        }
+      ]
+    },
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/native/mod.rs",
+      "relativePath": "std/src/sys/thread_local/native/mod.rs",
+      "bytes": 6075,
+      "sha256": "45a69136d972b73f5d9fbbba4dbc3ca549a8f4996f59ce1442dc2e6b528a22d1",
+      "excerpts": [
+        {
+          "firstLine": 56,
+          "lastLine": 87,
+          "text": "56:     // Used to generate the `LocalKey` value for const-initialized thread locals.\n57:     (@key $t:ty, $(#[$align_attr:meta])*, const $init:expr) => {{\n58:         const __RUST_STD_INTERNAL_INIT: $t = $init;\n59: \n60:         unsafe {\n61:             $crate::thread::LocalKey::new(const {\n62:                 // We're okay to ignore `__rust_std_internal_init` as we never panic.\n63:                 if $crate::mem::needs_drop::<$t>() {\n64:                     |__rust_std_internal_init| {\n65:                         #[thread_local]\n66:                         $(#[$align_attr])*\n67:                         static __RUST_STD_INTERNAL_VAL: $crate::thread::local_impl::EagerStorage<$t>\n68:                             = $crate::thread::local_impl::EagerStorage::new(__RUST_STD_INTERNAL_INIT);\n69:                         __RUST_STD_INTERNAL_VAL.get()\n70:                     }\n71:                 } else {\n72:                     |__rust_std_internal_init| {\n73:                         #[thread_local]\n74:                         $(#[$align_attr])*\n75:                         static __RUST_STD_INTERNAL_VAL: $t = __RUST_STD_INTERNAL_INIT;\n76:                         &__RUST_STD_INTERNAL_VAL\n77:                     }\n78:                 }\n79:             })\n80:         }\n81:     }},\n82: \n83:     // used to generate the `LocalKey` value for `thread_local!`\n84:     (@key $t:ty, $(#[$align_attr:meta])*, $init:expr) => {{\n85:         // We intentionally have an argument-position `'static` lifetime so that elided lifetimes in `$t`\n86:         // become `'static` like they do for `const`s and `static`s, including in the other two\n87:         // `thread_local!` implementations."
+        }
+      ]
+    },
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/key/windows.rs",
+      "relativePath": "std/src/sys/thread_local/key/windows.rs",
+      "bytes": 8517,
+      "sha256": "a45f436e19701ea23224d9737c18efe4dfd9c5313b5fb1dc31291250a90ff084",
+      "excerpts": [
+        {
+          "firstLine": 1,
+          "lastLine": 24,
+          "text": "1: //! Implementation of `LazyKey` for Windows.\n2: //!\n3: //! Windows has no native support for running destructors so we manage our own\n4: //! list of destructors to keep track of how to destroy keys. We then install a\n5: //! callback later to get invoked whenever a thread exits, running all\n6: //! appropriate destructors (see the [`guard`](guard) module documentation).\n7: //!\n8: //! This will likely need to be improved over time, but this module attempts a\n9: //! \"poor man's\" destructor callback system. Once we've got a list of what to\n10: //! run, we iterate over all keys, check their values, and then run destructors\n11: //! if the values turn out to be non null (setting them to null just beforehand).\n12: //! We do this a few times in a loop to basically match Unix semantics. If we\n13: //! don't reach a fixed point after a short while then we just inevitably leak\n14: //! something.\n15: //!\n16: //! The list is implemented as an atomic single-linked list of `LazyKey`s and\n17: //! does not support unregistration. Unfortunately, this means that we cannot\n18: //! use racy initialization for creating the keys in `LazyKey`, as that could\n19: //! result in destructors being missed. Hence, we synchronize the creation of\n20: //! keys with destructors through [`INIT_ONCE`](c::INIT_ONCE) (`std`'s\n21: //! [`Once`](crate::sync::Once) cannot be used since it might use TLS itself).\n22: //! For keys without destructors, racy initialization suffices.\n23: \n24: // FIXME: investigate using a fixed-size array instead, as the maximum number"
+        },
+        {
+          "firstLine": 67,
+          "lastLine": 83,
+          "text": "67:     pub fn force(&'static self) -> Key {\n68:         if self.dtor.is_some() {\n69:             // Needs to be called on all threads where the key might have a non-null value!\n70:             // Otherwise, `run_dtors` might not be called on this thread.\n71:             guard::enable();\n72:         }\n73: \n74:         match self.key.load(Acquire).checked_sub(1) {\n75:             None => unsafe { self.init() },\n76:             Some(dec) => dec,\n77:         }\n78:     }\n79: \n80:     #[cold]\n81:     unsafe fn init(&'static self) -> Key {\n82:         if self.dtor.is_some() {\n83:             let mut pending = c::FALSE;"
+        }
+      ]
+    },
+    {
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/thread_local/guard/windows.rs",
+      "relativePath": "std/src/sys/thread_local/guard/windows.rs",
+      "bytes": 11441,
+      "sha256": "07554f19f2edd5a9c02e600cb07c09f47498838fc9e25ecee39484ab87d155e0",
+      "excerpts": [
+        {
+          "firstLine": 1,
+          "lastLine": 10,
+          "text": "1: //! Support for Windows TLS destructors.\n2: //!\n3: //! Windows has an API to provide a destructor for a FLS (fiber local storage) variable,\n4: //! which behaves similarly to a TLS variable for our purpose [1].\n5: //!\n6: //! All TLS destructors are tracked by *us*, not the Windows runtime.\n7: //! This means that we have a global list of destructors for\n8: //! each TLS key or variable that we know about.\n9: //!\n10: //! [1]: https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989"
+        },
+        {
+          "firstLine": 125,
+          "lastLine": 151,
+          "text": "125:         let (_guard, at_exit_called) = EnableGuard::new();\n126: \n127:         if at_exit_called {\n128:             // We are exiting and don't want to race with the `atexit` hook, so we won't be able to run the destructors for this thread.\n129:             return;\n130:         }\n131: \n132:         let current_key = KEY.load(Ordering::Acquire);\n133: \n134:         // If we already allocated a key, we only need to set it to a non-null value so that the destructors hook is run for this thread.\n135:         let key = if current_key != FLS_OUT_OF_INDEXES {\n136:             current_key\n137:         } else {\n138:             // Otherwise, we try to allocate a key.\n139:             let new_key = unsafe { create(Some(cleanup)) };\n140: \n141:             // Now we need to set this key to be used by everyone else.\n142:             // If we won the race, our key is the right one and we can set it to non-null value.\n143:             // If we lost, we'll use the winning key and free our losing key.\n144:             match KEY.compare_exchange(current_key, new_key, Ordering::Release, Ordering::Acquire) {\n145:                 Ok(_) => {\n146:                     // If the current DLL is unloaded, the registered `cleanup` hook will not be available later during thread exit,\n147:                     // triggering a `STATUS_ACCESS_VIOLATION`. To avoid this, we use the `atexit` hook, which is called during DLL unload\n148:                     // to manually free the FLS slot, triggering the destructors.\n149:                     //\n150:                     // However, calling `atexit` during process exit can cause a deadlock.\n151:                     // In a Rust binary, `enable` is called during the main thread startup and before any user code,"
+        }
+      ]
+    }
+  ],
+  "pinnedClippyPrimarySource": [
+    {
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/92ffebeceaa0a071066f233873c2438e73d70fe7/src/tools/clippy/clippy_lints/src/missing_const_for_thread_local.rs",
+      "bytes": 5689,
+      "sha256": "788a1ab6543344332751ca41a40a8c8033b79d7860d599a3e878ffe5f34fa316",
+      "commit": "92ffebeceaa0a071066f233873c2438e73d70fe7",
+      "excerpts": [
+        {
+          "firstLine": 95,
+          "lastLine": 139,
+          "text": "95:         && let Ok(()) = is_min_const_fn(cx, mir, msrv)\n96:     {\n97:         return true;\n98:     }\n99:     false\n100: }\n101: \n102: impl<'tcx> LateLintPass<'tcx> for MissingConstForThreadLocal {\n103:     fn check_fn(\n104:         &mut self,\n105:         cx: &LateContext<'tcx>,\n106:         fn_kind: intravisit::FnKind<'tcx>,\n107:         _: &'tcx rustc_hir::FnDecl<'tcx>,\n108:         body: &'tcx rustc_hir::Body<'tcx>,\n109:         span: rustc_span::Span,\n110:         local_defid: rustc_span::def_id::LocalDefId,\n111:     ) {\n112:         let defid = local_defid.to_def_id();\n113:         if is_thread_local_initializer(cx, fn_kind, span).unwrap_or(false)\n114:             // Some implementations of `thread_local!` include an initializer fn.\n115:             // In the case of a const initializer, the init fn is also const,\n116:             // so we can skip the lint in that case. This occurs only on some\n117:             // backends due to conditional compilation:\n118:             // https://doc.rust-lang.org/src/std/sys/common/thread_local/mod.rs.html\n119:             // for details on this issue, see:\n120:             // https://github.com/rust-lang/rust-clippy/pull/12276\n121:             && !cx.tcx.is_const_fn(defid)\n122:             && let ExprKind::Block(block, _) = body.value.kind\n123:             && let Some(unpeeled) = block.expr\n124:             && let ret_expr = peel_blocks(unpeeled)\n125:             // A common pattern around threadlocal! is to make the value unreachable\n126:             // to force an initialization before usage\n127:             // https://github.com/rust-lang/rust-clippy/issues/12637\n128:             // we ensure that this is reachable before we check in mir\n129:             && !is_unreachable(cx, ret_expr)\n130:             && initializer_can_be_made_const(cx, defid, self.msrv)\n131:             // we know that the function is const-qualifiable, so now\n132:             // we need only to get the initializer expression to span-lint it.\n133:             && let initializer_snippet = snippet(cx, ret_expr.span, \"thread_local! { ... }\")\n134:             && initializer_snippet != \"thread_local! { ... }\"\n135:             && self.msrv.meets(cx, msrvs::THREAD_LOCAL_CONST_INIT)\n136:         {\n137:             span_lint_and_sugg(\n138:                 cx,\n139:                 MISSING_CONST_FOR_THREAD_LOCAL,"
+        }
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/92ffebeceaa0a071066f233873c2438e73d70fe7/src/tools/clippy/tests/ui/missing_const_for_thread_local.rs",
+      "bytes": 2235,
+      "sha256": "a820a3c0f2a277ea9a01f950c732edfc570d52b0356efe81050ecbb6d3be0c4c",
+      "commit": "92ffebeceaa0a071066f233873c2438e73d70fe7",
+      "excerpts": [
+        {
+          "firstLine": 11,
+          "lastLine": 14,
+          "text": "11: \n12:     // don't lint\n13:     thread_local! {\n14:         static BUF_2: RefCell<String> = const { RefCell::new(String::new()) };"
+        }
+      ]
+    }
+  ],
+  "cause": {
+    "fact": "All five project initializers already use explicit const blocks. No user initializer is missing const.",
+    "targetFact": "Fixed nightly --print cfg includes target_thread_local for i686-pc-windows-msvc and i686-win7-windows-gnu, but not i686-win7-windows-msvc. Vendor alone is insufficient to scope a workaround.",
+    "macroFact": "std/sys/thread_local/mod.rs dispatches the non-native target to os.rs. Its sole @key $init:expr arm also matches const blocks and emits an ordinary fn __rust_std_internal_init_fn. thread/local.rs forwards user const correctly; the OS fallback does not preserve a const-fn distinction.",
+    "lintFact": "Pinned Clippy check_fn recognizes thread_local-generated item functions and skips only tcx.is_const_fn(defid). It then const-qualifies MIR without detecting that the original return is already an inline const. Thus the ordinary generated OS initializer is reported. The source comment assumes constant initializers generate constant functions, which is false for this pinned fallback.",
+    "classification": "Generated OS-backend false positive confirmed by actual original CI, pinned source and parent actual minimal fixed-target red/green/sentinel checks."
+  },
+  "minimalRecommendation": {
+    "strategy": "Keep every thread_local declaration, explicit const block, initializer value/type and destructor test unchanged. Parent exact-target repro confirmed per-static expect placement is honored. Final recommendation: individually reasoned cfg_attr(expect) inside thread_local immediately before each of the five affected static declarations, restricted to all(clippy,target_os=windows,target_vendor=win7,target_env=msvc). No crate/module/global allow or lint-group weakening. Current parent candidate is broader and is not the final recommended condition.",
+    "attributeCandidate": "#[cfg_attr(\n    all(clippy, target_os = \"windows\", target_vendor = \"win7\", target_env = \"msvc\"),\n    expect(\n        clippy::missing_const_for_thread_local,\n        reason = \"Pinned nightly 92ffebece OS TLS macro emits a non-const initializer fn even for this const block; retain std TLS destructor semantics\"\n    )\n)]",
+    "condition": "clippy AND target_os=windows AND target_vendor=win7 AND target_env=msvc; do not apply to Win7 GNU or modern MSVC because their pinned native backends do not emit this false positive.",
+    "whyExpect": "An upstream fix that stops the warning must produce unfulfilled_lint_expectations under -D warnings, forcing removal of the workaround instead of silently keeping an allow.",
+    "scopeLimit": "This is a narrowly documented compiler-generated false positive, not permission to suppress a real missing-const initializer elsewhere. No toolchain/std macro patch is proposed.",
+    "placementNotYetValidated": false
+  },
+  "minimalReproProposal": {
+    "executed": false,
+    "source": "use std::cell::{Cell, RefCell};\nstd::thread_local! {\n    static NO_DROP: Cell<bool> = const { Cell::new(false) };\n    static DROPPABLE: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };\n}\npub fn touch() {\n    NO_DROP.with(|value| value.set(true));\n    DROPPABLE.with(|value| value.borrow_mut().push(1));\n}\n",
+    "sourceSha256": "dadbb6f74d4ec48910a0fa01a197313ab8bf97cad4232b467a95dffb4e9df400",
+    "suggestedComparison": "Use exact nightly and build-std with the existing i686-win7-windows-msvc target to Clippy-check this dependency-free lib, first unchanged to reproduce 2 diagnostics; then with per-static conditional expect to get no diagnostics. Compare modern MSVC and Win7 GNU unchanged with strict -D warnings. Do not claim host-native results reproduce the Win7 OS fallback.",
+    "acceptance": "Retain normal strict -D warnings. Confirm exact original five source declarations and existing real held-TLS-destructor tests still compile/run on Windows; do not remove/drop/shorten their held ownership assertions.",
+    "note": "Reviewer did not execute the proposed two-type source; parent actually executed the independent exact-std Cell<bool> source recorded above. Do not claim reviewer proposal or Drop-bearing variant ran."
+  },
+  "dropGuarantees": {
+    "preserve": "The same std LocalKey/Storage remains responsible for thread-local values. OS fallback Storage::new registers destroy_value; Windows LazyKey keeps its destructor list and Windows guard arranges cleanup. Attribute-only change does not change initialization, storage, lifetime, registration or Drop execution.",
+    "actualTests": [
+      "tls_frontdoor::worker::tests::rust_packet_completion_does_not_reap_a_held_windows_tls_destructor",
+      "materials::shell held TLS destructor test (existing source, unchanged)"
+    ],
+    "doNotDo": [
+      "Replace TLS with a process-global static",
+      "Use raw TlsAlloc/FlsAlloc or LocalKey::new to avoid the macro",
+      "Delete const blocks or inject artificial runtime work to defeat const qualification",
+      "Treat Rust JoinHandle result readiness as actual Windows thread completion",
+      "Unconditionally expect this warning on native TLS targets"
+    ],
+    "reviewConclusion": "An attribute-only narrow expectation has no code-generation/initialization/destructor semantics. Original std TLS backend, Cell/RefCell ownership, Windows LazyKey/guard registration and held destructor tests remain intact. This is not a runtime test result; full original held-TLS tests must still run on the bound Windows executable."
+  },
+  "primaryReferences": [
+    {
+      "url": "https://doc.rust-lang.org/std/macro.thread_local.html",
+      "supports": "const syntax and per-static attributes are supported; Drop-bearing values remain distinct from no-Drop optimization"
+    },
+    {
+      "url": "https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-expect-attribute",
+      "supports": "narrow lint expectations are checked; unfulfilled expectations warn"
+    },
+    {
+      "url": "https://github.com/rust-lang/rust-clippy/pull/12276",
+      "supports": "Referenced directly by pinned lint source as historical handling of backend-generated constant initializer functions; GitHub fetch timed out, PR content not relied upon"
+    }
+  ],
+  "notPerformed": [
+    "Repository/source mutations by this reviewer",
+    "Cargo by this reviewer",
+    "Windows/remote by this reviewer",
+    "CI dispatch by this reviewer",
+    "Git writes",
+    "Toolchain changes",
+    "Target runtime execution of the tiny lint repro"
+  ],
+  "sourceUnchangedAfter": {
+    "reviewerMutations": false,
+    "parentConcurrentChanges": true,
+    "note": "Root applied vendor-only attributes and started build session59743 between first and second reviews. Current hashes are observational, not a final freeze or same-source runtime claim.",
+    "currentObservedSha256": {
+      "crates/fc-windows/src/host.rs": "039591c7882f2c19d381131b76ae81983142d5106b02d4c534b217db8cdabe36",
+      "crates/fc-windows/src/workbench.rs": "aa53f298a566f82a0a5977036cf3a706f9af8bdd65e3ee1c21c332f942a86617",
+      "crates/fc-windows/src/tls_frontdoor/worker/tests.rs": "cfd255a88ee7d2b0d7aac25f95da0e4ff9b500d3f36ae5c5ebcf04e4dee63273",
+      "crates/fc-windows/src/materials/shell.rs": "97c8dd4946819e4f89a6eab0b5e850d73a601ef016c41784222b471e1054f58d"
+    }
+  },
+  "preservedFirstAnalysis": {
+    "path": "/tmp/fc-round40-ci-evidence/win7-thread-local-analysis-first.json",
+    "sha256": "f9561ac2c9e4da4f9ef32f9804026d77a5b50ebf0dd78a69b1941cf2de63c249"
+  },
+  "parentExecutedRepro": {
+    "performedBy": "root agent, not this reviewer",
+    "records": [
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-first.json",
+        "bytes": 740,
+        "sha256": "ffd8a50b810da73fdc5cfef5a8ba44fbeb93fd1e3ca5b439e6a40eff57d9b5c3"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-first.py",
+        "bytes": 1749,
+        "sha256": "eb0a6c0fbdae8136177bf8debf279c1783e187cbf0e7cb7f41fc03468ba1147a"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-first.stderr.log",
+        "bytes": 2633,
+        "sha256": "6a3b747f513ff5325cb42d900d7a41b87bde3287813b391254ace6f74e374f42"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-followup.json",
+        "bytes": 1893,
+        "sha256": "df71c4d1c8bc4d362d46f9dadf21606cdcce5e50f7916038408307dc7b7c3c7e"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-repro-followup.py",
+        "bytes": 2629,
+        "sha256": "2262e36d90f2aa50c3f1cc00c5595b6a41234e5dc72e4f64844b85282375e051"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-scoped-expect.rs",
+        "bytes": 342,
+        "sha256": "379deb239ab528fd922f36c3a4526880d73239a33337de5aa7321fbba3dc6305"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-scoped-expect.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-scoped-expect.stderr.log",
+        "bytes": 139,
+        "sha256": "dffea041d8cbdd81e18e216830e1b971ea5f60139c31324f2655dfd36aa3defb"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-strict-sentinel.rs",
+        "bytes": 484,
+        "sha256": "269ad941e8fe1ca86412de8da5325a1b76af563bd2b2b9cb092c0d3d09ac209b"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-strict-sentinel.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/fc-round40-ci-evidence/thread-local-strict-sentinel.stderr.log",
+        "bytes": 748,
+        "sha256": "f52ee951ad6b8c11bab1b00458daac5b9c7ac959fd362722c95afba8db6a9356"
+      }
+    ],
+    "first": {
+      "scope": "Minimal existing-const thread_local initializer against exact fixed nightly and rebuilt Win7 std, no target execution or product changes.",
+      "command": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std",
+        "--offline",
+        "--release",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "source": "use std::cell::Cell;\nstd::thread_local! { static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\n",
+      "sourceSha256": "bd0c616fe1f902c8f04fc532225f058ca31b950eb9266ce1a47b04ce10713eda",
+      "timeoutSeconds": 900,
+      "status": "TERMINAL",
+      "exitCode": 101,
+      "elapsedSeconds": 52.58488804218359
+    },
+    "followup": {
+      "scope": "Narrow per-static Win7-only expectation regression: original const initializer unchanged, global strict warnings remain; independent unannotated non-const initializer must still be rejected. No target runtime.",
+      "command": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std",
+        "--offline",
+        "--release",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "timeoutSeconds": 900,
+      "status": "PASS",
+      "cases": [
+        {
+          "name": "scoped-expect",
+          "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(target_vendor = \"win7\", expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\n",
+          "sourceSha256": "379deb239ab528fd922f36c3a4526880d73239a33337de5aa7321fbba3dc6305",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "passed": true,
+          "elapsedSeconds": 0.46687559015117586
+        },
+        {
+          "name": "strict-sentinel",
+          "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(target_vendor = \"win7\", expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\nstd::thread_local! { static UNANNOTATED: Cell<bool> = Cell::new(false); }\npub fn sentinel() -> bool { UNANNOTATED.with(|value| value.get()) }\n",
+          "sourceSha256": "269ad941e8fe1ca86412de8da5325a1b76af563bd2b2b9cb092c0d3d09ac209b",
+          "exitCode": 101,
+          "expectedExitCode": 101,
+          "passed": true,
+          "elapsedSeconds": 0.16569838882423937
+        }
+      ]
+    },
+    "scope": "Actual fixed-nightly Clippy/build-std target checks, no Windows EXE execution. Original const fails, same const with per-static expect passes, independent unannotated sentinel still fails under unchanged -D warnings.",
+    "conditionReview": "Root proof and current five-static candidate use vendor-only. This has not been validated with the Win7 GNU toolchain. Recorded fixed-nightly target cfg shows Win7 GNU uses native TLS, so final production condition must additionally constrain target_env=msvc and target_os=windows; clippy condition is recommended. Root acknowledged it will narrow only after current build terminal."
+  }
+}

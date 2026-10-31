@@ -1,0 +1,9 @@
+{
+  "status": "APPLIED_TEST_HELPER_ONLY_PENDING_REVALIDATION",
+  "sourceBeforeSha256": "fb75113d5dc39fd580ddf8826568be8b305a97b905a836b1effbcb859fa01bc2",
+  "sourceAfterSha256": "f00fe2dc79ee8fead00e0c4236251c21c6950b6521c277c14ead7e67f4dec279",
+  "changedFile": "crates/fc-bootstrap/src/web_application/material_stream_tests.rs",
+  "reason": "R40 actual Win11 first complete-library execution314pass1fail at one-shot worker admission. Original reject kind was not recorded; Busy is a documented possible source reason, not claimed unique proven diagnosis.",
+  "semantics": "One original task/FnOnce and15-second absolute deadline; retry only not-admitted Busy; all other reasons or exhausted budget fail explicitly. No production code/assertion/pool/thread/timeout change.",
+  "priorHostScope": "R39 production feature source already complete Host929PASS; this Windows-only helper change now requires new exact-source verification and actual Windows execution."
+}

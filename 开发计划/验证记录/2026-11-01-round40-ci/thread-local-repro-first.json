@@ -1,0 +1,23 @@
+{
+  "scope": "Minimal existing-const thread_local initializer against exact fixed nightly and rebuilt Win7 std, no target execution or product changes.",
+  "command": [
+    "cargo",
+    "+nightly-2026-10-29",
+    "clippy",
+    "-Z",
+    "build-std",
+    "--offline",
+    "--release",
+    "--target",
+    "i686-win7-windows-msvc",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "source": "use std::cell::Cell;\nstd::thread_local! { static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\n",
+  "sourceSha256": "bd0c616fe1f902c8f04fc532225f058ca31b950eb9266ce1a47b04ce10713eda",
+  "timeoutSeconds": 900,
+  "status": "TERMINAL",
+  "exitCode": 101,
+  "elapsedSeconds": 52.58488804218359
+}

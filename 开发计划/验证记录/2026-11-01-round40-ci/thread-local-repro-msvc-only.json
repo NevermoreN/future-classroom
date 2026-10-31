@@ -1,0 +1,39 @@
+{
+  "scope": "Narrow per-static Win7-only expectation regression: original const initializer unchanged, global strict warnings remain; independent unannotated non-const initializer must still be rejected. No target runtime.",
+  "command": [
+    "cargo",
+    "+nightly-2026-10-29",
+    "clippy",
+    "-Z",
+    "build-std",
+    "--offline",
+    "--release",
+    "--target",
+    "i686-win7-windows-msvc",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "timeoutSeconds": 900,
+  "status": "PASS",
+  "cases": [
+    {
+      "name": "msvc-scoped-expect",
+      "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(all(clippy, target_os = \"windows\", target_vendor = \"win7\", target_env = \"msvc\"), expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\n",
+      "sourceSha256": "ebae6409b88f56dc4cc00d91b0aaf5f8cd5df6cc807718d51bb3d0433c194d4f",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "passed": true,
+      "elapsedSeconds": 1.7235604049637914
+    },
+    {
+      "name": "msvc-strict-sentinel",
+      "source": "use std::cell::Cell;\nstd::thread_local! { #[cfg_attr(all(clippy, target_os = \"windows\", target_vendor = \"win7\", target_env = \"msvc\"), expect(clippy::missing_const_for_thread_local, reason = \"fixed nightly rebuilt Win7 std wraps even const TLS initializers in a non-const function\"))] static VALUE: Cell<bool> = const { Cell::new(false) }; }\npub fn read() -> bool { VALUE.with(|value| value.get()) }\nstd::thread_local! { static UNANNOTATED: Cell<bool> = Cell::new(false); }\npub fn sentinel() -> bool { UNANNOTATED.with(|value| value.get()) }\n",
+      "sourceSha256": "08c017a4465debfd64de5361e53ec504da1be2f5ede4629e7fff5338ddb12b48",
+      "exitCode": 101,
+      "expectedExitCode": 101,
+      "passed": true,
+      "elapsedSeconds": 0.16578827309422195
+    }
+  ]
+}

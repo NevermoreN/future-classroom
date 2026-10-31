@@ -1,0 +1,16 @@
+
+> future-classroom-teacher@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v5.0.5 /tmp/fc-round39-voice-capability-worktree/web
+
+
+ Test Files  19 passed (19)
+      Tests  300 passed (300)
+   Start at  04:41:03
+   Duration  12.41s (transform 68%, tests 23%, import 7%, worker 2%)
+
+    Isolate  19 workers spawned · ~414ms startup each (spawn + environment, per file)
+             at least ~3.52s faster with isolate: false — reuses workers across files instead of one per file
+

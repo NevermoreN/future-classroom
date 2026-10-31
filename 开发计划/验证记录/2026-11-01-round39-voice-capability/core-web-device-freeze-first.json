@@ -1,0 +1,94 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_PASS_NOT_COMPILED_NOT_RUN",
+  "worktree": "/tmp/fc-round39-voice-capability-worktree",
+  "timestampUtc": "2026-10-31T20:52:11.260402+00:00",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "bytes": 99606,
+      "sha256": "aa013431cd7e10969db6f5d2693716e1b2b2d536458272e948ba7a91b9eee97a",
+      "beforeSha256": "d5b5ef2db1f77ba08bab37e793572d1b2b3001bb8818f0064f81db1a376fada0",
+      "afterCopy": "/tmp/fc-round39-voice-capability-evidence/core-web-device-first/voice.after.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/web_device.rs",
+      "bytes": 12989,
+      "sha256": "e1d3cbd6db6673d9aec6470fc399fb827b1bc1945b59f73d44f26d1e2608323e",
+      "beforeSha256": null,
+      "afterCopy": "/tmp/fc-round39-voice-capability-evidence/core-web-device-first/web_device.after.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice/web_device/tests.rs",
+      "bytes": 35124,
+      "sha256": "5b09a623e11a0d34209e7a5c61aea45ba2d1694ce405f00abbdf63891c260148",
+      "beforeSha256": null,
+      "afterCopy": "/tmp/fc-round39-voice-capability-evidence/core-web-device-first/web_device.tests.after.rs"
+    }
+  ],
+  "diff": {
+    "path": "/tmp/fc-round39-voice-capability-evidence/core-web-device-first/core-web-device-first.diff",
+    "sha256": "7b454a4785c6f9cf46b161cbe2d836f428d7bc46693e3a1f1581cd176247e152"
+  },
+  "checks": {
+    "rustfmtCheck": {
+      "exit": 0,
+      "argv": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/backend/voice.rs",
+        "crates/fc-bootstrap/src/backend/voice/web_device.rs",
+        "crates/fc-bootstrap/src/backend/voice/web_device/tests.rs"
+      ]
+    },
+    "architecture": {
+      "exit": 0,
+      "crates": 12,
+      "firstPartyEdges": 33
+    },
+    "trailingWhitespace": false
+  },
+  "api": {
+    "enum": "WebVoiceDeviceAvailability::{Unverified,Unavailable}",
+    "query": "VoiceService::web_capabilities_with_output(lease:SessionLease,deadline:Instant,query:impl FnOnce()->std::result::Result<DefaultOutputSupport,AudioOutputError>)->Result<WebVoiceCapabilities>",
+    "delivery": "VoiceService::check_web_capabilities_output(lease:SessionLease,view:&WebVoiceCapabilities)->Result<()>",
+    "legacy": "web_capabilities returns typed Unverified and performs no native query"
+  },
+  "testFilter": "backend::voice::web_device::tests::",
+  "tests": [
+    "negative_output_fact_is_shared_but_every_request_still_needs_its_exact_web_session",
+    "supported_driver_error_and_query_panic_remain_unverified_without_fault_or_sql_mutation",
+    "native_query_runs_without_backend_ledger_cache_or_writer_locks",
+    "disabled_closed_wrong_origin_and_cancelled_requests_never_query_or_reuse_negative_fact",
+    "completed_queries_cannot_cache_or_deliver_after_revocation_request_cancel_or_authority_change",
+    "both_ttl_clocks_expire_exactly_and_cache_hits_never_renew_completion",
+    "concurrent_cancelled_query_keeps_physical_flight_and_worker_until_its_actual_return",
+    "actual_original_deadline_does_not_retire_a_blocked_query_or_admit_its_late_fact",
+    "only_authorized_teacher_or_global_web_can_query_and_no_password_change_or_user_bypasses_it",
+    "final_delivery_check_rejects_expired_missing_or_changed_negative_facts_and_old_versions",
+    "withdrawing_a_cancelled_publication_does_not_wait_for_a_contended_cache_mutex",
+    "real_catalog_voice_policy_runtime_and_class_changes_never_reuse_old_cache_stamp"
+  ],
+  "testScope": "Real SQLite and exact verified sessions use existing VOICE_FIXTURE isolation; eight invalidation modes and role modes reuse one real fixture, not repeated per-mode KDF. Real WorkerPool2 used for concurrent cancellation/physical-return/original-deadline cases. No fake JobContext. Deterministically tightened cache clocks exercise TTL, not a 30-second wallclock claim.",
+  "invariants": [
+    "Single observation and single physical flight, no cached actor/lease/request/JobContext/native handle",
+    "Thirty-second TTL begins actual query completion; dual monotonic clocks; hit does not renew",
+    "All native calls outside Backend/ledger/cache/writer locks; cache metadata uses try_lock",
+    "Original absolute deadline and existing scoped execution fence AND combined; existing 100ms metadata limits unchanged",
+    "Cancel/stop/version changes suppress late publication and delivery, never release blocked physical query flight",
+    "Supported/error/panic remain Unverified; negative facts alone may be Unavailable; never Available/playback authorization",
+    "Final output check repeats exact session/version and negative TTL; does not query/renew",
+    "OutputCache inline static size bounded <=512 bytes; no new worker, pool or native output owner"
+  ],
+  "notRun": [
+    "Cargo compile",
+    "Cargo tests",
+    "Windows",
+    "Git mutation",
+    "native output query"
+  ],
+  "integrationNote": "Only these three owned source files frozen; parent owns backend.rs export and wire/encoder/final-delivery integration, and will account whole-system memory/build/actual tests."
+}

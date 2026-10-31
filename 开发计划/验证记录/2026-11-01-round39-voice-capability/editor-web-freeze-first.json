@@ -1,0 +1,43 @@
+{
+  "stage": "Round39 scoped teacher voice historical device capability UI",
+  "worktree": "/tmp/fc-round39-voice-capability-worktree",
+  "files": [
+    {
+      "path": "web/src/VoicePane.tsx",
+      "beforeBytes": 10035,
+      "beforeSha256": "c737d172f949bf1f454a1b08fc40cfad67a7d1e6c680b6fd9bc4fd8a69e8ec1d",
+      "bytes": 10110,
+      "sha256": "eae8fdd9611ab590506f7937e083130a99db6c660ada0c656c5a186810cc716d"
+    },
+    {
+      "path": "web/tests/voice-controller.test.ts",
+      "beforeBytes": 20979,
+      "beforeSha256": "c095d1318c27e386ce6801c823ca0cdaa10296c587859f78fa76d73e07bf82f7",
+      "bytes": 26401,
+      "sha256": "4fd5af3f1e8142f34aa731b22f3bf8fc3b4bbde7a9418c87bcc2ac35a45a4dce"
+    }
+  ],
+  "checks": {
+    "onlyTwoUiStringsChanged": "PASS",
+    "existingControllerRegressionsPreservedByteExact": "PASS",
+    "sourceWhitespaceAndFinalNewline": "PASS",
+    "typecheck": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "bundle": "NOT_RUN",
+    "npmCargoGitWindows": "NOT_RUN"
+  },
+  "testFilter": "historical default-output capability admission",
+  "newBehavioralCases": 5,
+  "cases": [
+    "UNAVAILABLE refuses new context and stale recording upload/submit.",
+    "Legacy AVAILABLE input and UNVERIFIED each allow a captured recording to finish against later UNVERIFIED response.",
+    "Repeated negative refresh stays blocked; later UNVERIFIED requires a new explicit recording id and never revives old result.",
+    "Actual RecorderController with controlled capture port releases via abort, clears transient recorder state, and rejects late PCM/limit/finalizer on automatic negative capability checkpoint. No WAV normalization/upload/POST."
+  ],
+  "readOnlyIntegrationConfirmed": "TeacherWorkspace supplies cancelRecorder as recorder.current?.cancel(); VoicePane gates new gestures through existing mayRecord(caps). No API/controller/protocol changes required.",
+  "evidenceLimit": "New tests use controlled transport/capture boundary, not physical microphone/driver or browser evidence. No claim that refresh immediately reruns backend query, historical support proves audibility, or backend emits AVAILABLE.",
+  "diff": {
+    "path": "editor-web-first.diff",
+    "sha256": "40254167938291391180e532ee2879741e90ecf6a963085541268ca75a92f5b6"
+  }
+}

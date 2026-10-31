@@ -1,0 +1,36 @@
+{
+  "status": "APPLIED_PENDING_WORKSPACE_VALIDATION",
+  "scope": "Five specific already-const statics only, Win7 vendor only, fixed-nightly rebuilt std macro falsepositive independently reproduced; keep -D warnings, all const initializers, standard TLS backend and destruction unchanged. Expectation must be fulfilled, so a future corrected compiler cannot silently retain this workaround.",
+  "minimalOriginal": "thread-local-repro-first.json",
+  "minimalScopedAndUnannotatedSentinel": "thread-local-repro-followup.json",
+  "sourceFiles": [
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "initializerChanges": 0,
+      "scopedExpectations": 2,
+      "beforeSha256": "3e162c9fe0e57f6037887cf0eddcae69facdc2c3ade5202c1bc1d794a55cf94d",
+      "afterSha256": "039591c7882f2c19d381131b76ae81983142d5106b02d4c534b217db8cdabe36"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "initializerChanges": 0,
+      "scopedExpectations": 1,
+      "beforeSha256": "ed36ea8184fdeea2eafa9adb05628a2cb8c3080a0eeb5b0aaa095d687980747a",
+      "afterSha256": "aa53f298a566f82a0a5977036cf3a706f9af8bdd65e3ee1c21c332f942a86617"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "initializerChanges": 0,
+      "scopedExpectations": 1,
+      "beforeSha256": "e6d1eb60a4bf21f66f584c4e981ac986a579e55ca2d17ef4030ba0afb75c8952",
+      "afterSha256": "cfd255a88ee7d2b0d7aac25f95da0e4ff9b500d3f36ae5c5ebcf04e4dee63273"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "initializerChanges": 0,
+      "scopedExpectations": 1,
+      "beforeSha256": "38dbb14924529f9f4788967c0d0dab425501e481856b635250d9489c5332eb96",
+      "afterSha256": "97c8dd4946819e4f89a6eab0b5e850d73a601ef016c41784222b471e1054f58d"
+    }
+  ]
+}
