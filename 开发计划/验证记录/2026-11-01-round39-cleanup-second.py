@@ -1,0 +1,28 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil,os
+root=Path.cwd();head=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip();h=lambda b:hashlib.sha256(b).hexdigest();first=root/'开发计划/验证记录/2026-11-01-round39-cleanup-first.json';original=json.loads(first.read_text());assert original['status']=='RUNNING' and len(original['removed'])==3
+term=root/'开发计划/验证记录/2026-11-01-round39-cleanup-first-termination.json';assert not term.exists();term.write_text(json.dumps({'status':'FAIL_GUARD','scope':'Original cleanup script exited1 after three proven copy removals, before cache deletion; original partial RUNNING report preserved.','sourceCommit':head,'errorKind':'AssertionError','guard':'Both owned Cargo targets must have CACHEDIR.TAG','cause':'Owned reused host target has .rustc_info.json/release/debug but no CACHEDIR.TAG; cache-tag presence was an invalid extra ownership assumption. No product/test outcome changed.','originalPartialSha256':h(first.read_bytes()),'firstScriptSha256':h(Path('/tmp/fc-round39-finish-cleanup.py').read_bytes()),'processTerminal':True,'removedBeforeGuard':original['removed']},indent=2)+'\n')
+r={'status':'RUNNING','sourceCommit':head,'scope':'Continue only remaining proven-owned cleanup after first guard failure, with explicit exact-path/uid/canonical-path, committed per-command target ownership and no-live-Cargo checks. Original failed cleanup and partial state preserved.','originalPartialReportSha256':h(first.read_bytes()),'originalTerminalReport':term.name,'removed':[],'preserved':original['preserved'],'webAssetsHandoff':original['webAssetsHandoff']};out=root/'开发计划/验证记录/2026-11-01-round39-cleanup-second.json';assert not out.exists()
+def save():out.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n')
+save();proof=json.loads(Path('/tmp/fc-round39-committed-proof-first.json').read_text());assert proof['status']=='PASS' and proof['sourceCommit']==head and proof['checkedCommittedFiles']==1070
+validated=json.loads((root/'开发计划/验证记录/2026-11-01-round39-voice-capability/voice-capability-local-fifth.json').read_text());assert validated['status']=='PASS' and validated['sourceBefore']==validated['sourceAfter']
+lines=subprocess.check_output(['ps','-eo','args'],text=True).splitlines();assert not any(x.startswith(('/config/.rustup/','cargo ')) and any(y in x for y in ['/tmp/fc-round38-host-target','/tmp/fc-round38-lint-target','fc-round39-voice-capability-worktree']) for x in lines)
+for name in ['fc-round38-host-target','fc-round38-lint-target']:
+ p=Path('/tmp')/name;assert p.is_dir() and not p.is_symlink() and p.resolve()==p and p.stat().st_uid==os.getuid() and (p/'.rustc_info.json').is_file() and (p/'release').is_dir()
+ commands=[x for x in validated['commands'] if str(p) in x['command']];assert commands and all(x['exitCode']==0 for x in commands)
+ count=sum(1 for x in p.rglob('*') if x.is_file());shutil.rmtree(p);r['removed'].append({'path':str(p),'kind':'owned completed Cargo build cache, explicit R38-to-R39 handoff and original command provenance verified','files':count,'hasNoLiveOwners':True,'removed':not p.exists()});save()
+work=Path('/tmp/fc-round39-voice-capability-worktree');assert not subprocess.check_output(['git','status','--porcelain'],cwd=work);assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=work,text=True).strip()==head
+ignored=subprocess.check_output(['git','ls-files','--others','--ignored','--exclude-standard'],cwd=work,text=True).splitlines();assert all(x=='web/build-budget.json' or x.startswith('web/dist/') for x in ignored)
+assets=Path('/tmp/fc-round42-web-assets');handoff=json.loads(Path('/tmp/fc-round42-ci-evidence/web-assets-handoff-first.json').read_text());assert handoff['sourceCommit']==head
+for x in handoff['assets']:
+ data=(assets/'dist'/x['path']).read_bytes();assert len(data)==x['bytes'] and h(data)==x['sha256'] and data==(work/'web/dist'/x['path']).read_bytes()
+shutil.rmtree(work/'web/dist');(work/'web/build-budget.json').unlink();subprocess.run(['git','worktree','remove',str(work)],check=True);subprocess.run(['git','branch','-d','codex/voice-capability-observation'],check=True,stdout=subprocess.DEVNULL);r['removed'].append({'path':str(work),'kind':'clean merged owned worktree and branch','removed':not work.exists()});save()
+for name,label in [('fc-round39-voice-capability-evidence','2026-11-01-round39-voice-capability'),('fc-round40-ci-evidence','2026-11-01-round40-ci')]:
+ p=Path('/tmp')/name;dest=root/'开发计划/验证记录'/label;idx=json.loads((dest/'INDEX.json').read_text());assert {x.relative_to(p).as_posix() for x in p.rglob('*') if x.is_file()}=={x['path'] for x in idx['files']}
+ for x in idx['files']:
+  data=(p/x['path']).read_bytes();assert len(data)==x['bytes'] and h(data)==x['sha256'] and data==(dest/x['path']).read_bytes()
+ shutil.rmtree(p);r['removed'].append({'path':str(p),'kind':'committed original evidence work copy','removed':not p.exists()});save()
+(root/'开发计划/验证记录/2026-11-01-round39-committed-proof.json').write_text(json.dumps(proof,indent=2)+'\n')
+for src,dst in [('fc-round39-finish-cleanup.py','2026-11-01-round39-cleanup-first.py'),('fc-round39-finish-cleanup-second.py','2026-11-01-round39-cleanup-second.py'),('fc-round39-archive-finished.py','2026-11-01-round39-archive-finished.py')]:
+ (root/'开发计划/验证记录'/dst).write_bytes((Path('/tmp')/src).read_bytes())
+r.update(status='PASS',noProcessesKilled=True,committedSourceAndOriginalsVerified=1070,persistentSshAuthorization='PRESERVED',windowsFinishAudit='committed round40-ci/windows-after-first.json PASS, 0 owned process/temp/task, SSH/Run unchanged');save();print(json.dumps({'status':r['status'],'removedRoots':len(r['removed']),'sourceCommit':head}),flush=True)

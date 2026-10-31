@@ -1,0 +1,39 @@
+{
+  "status": "RUNNING",
+  "sourceCommit": "b1acb12735154bd2a30c6fb6d20c9ce905b1d1fd",
+  "committedFilesVerified": 1070,
+  "removed": [
+    {
+      "path": "/tmp/fc-round40-modern-original.zip",
+      "kind": "exact original ZIP copy",
+      "bytes": 40564846,
+      "sha256": "d1ad2500aeb9d1e76d68e87fa01d990e4200e0ffd5c7e83cbdd30dce4229a976",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round40-win7-original.zip",
+      "kind": "exact original ZIP copy",
+      "bytes": 41254371,
+      "sha256": "43587d8992441a5602c47d49b63dcc45f59ff34b7395a2882d9ffb8b2f8f201f",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round40-modern-programs",
+      "kind": "owned exact EXE copies",
+      "files": 22,
+      "removed": true
+    }
+  ],
+  "preserved": [
+    "persistent SSH private key and authorized_keys/sshd",
+    "main original target/global Cargo/Rust/npm caches",
+    "intentional /mnt/data development ZIPs",
+    "active R41 worktree/evidence"
+  ],
+  "webAssetsHandoff": {
+    "root": "/tmp/fc-round42-web-assets",
+    "fileCount": 7,
+    "bytes": 460150,
+    "evidence": "/tmp/fc-round42-ci-evidence/web-assets-handoff-first.json"
+  }
+}

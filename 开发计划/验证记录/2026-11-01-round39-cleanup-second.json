@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "sourceCommit": "b1acb12735154bd2a30c6fb6d20c9ce905b1d1fd",
+  "scope": "Continue only remaining proven-owned cleanup after first guard failure, with explicit exact-path/uid/canonical-path, committed per-command target ownership and no-live-Cargo checks. Original failed cleanup and partial state preserved.",
+  "originalPartialReportSha256": "08094f964f7c3b15a7541799fd5eaf486e3dc2f6a97b35b3a617682fae8784e7",
+  "originalTerminalReport": "2026-11-01-round39-cleanup-first-termination.json",
+  "removed": [
+    {
+      "path": "/tmp/fc-round38-host-target",
+      "kind": "owned completed Cargo build cache, explicit R38-to-R39 handoff and original command provenance verified",
+      "files": 7745,
+      "hasNoLiveOwners": true,
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round38-lint-target",
+      "kind": "owned completed Cargo build cache, explicit R38-to-R39 handoff and original command provenance verified",
+      "files": 920,
+      "hasNoLiveOwners": true,
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round39-voice-capability-worktree",
+      "kind": "clean merged owned worktree and branch",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round39-voice-capability-evidence",
+      "kind": "committed original evidence work copy",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round40-ci-evidence",
+      "kind": "committed original evidence work copy",
+      "removed": true
+    }
+  ],
+  "preserved": [
+    "persistent SSH private key and authorized_keys/sshd",
+    "main original target/global Cargo/Rust/npm caches",
+    "intentional /mnt/data development ZIPs",
+    "active R41 worktree/evidence"
+  ],
+  "webAssetsHandoff": {
+    "root": "/tmp/fc-round42-web-assets",
+    "fileCount": 7,
+    "bytes": 460150,
+    "evidence": "/tmp/fc-round42-ci-evidence/web-assets-handoff-first.json"
+  },
+  "noProcessesKilled": true,
+  "committedSourceAndOriginalsVerified": 1070,
+  "persistentSshAuthorization": "PRESERVED",
+  "windowsFinishAudit": "committed round40-ci/windows-after-first.json PASS, 0 owned process/temp/task, SSH/Run unchanged"
+}

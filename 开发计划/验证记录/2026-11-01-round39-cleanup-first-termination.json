@@ -1,0 +1,33 @@
+{
+  "status": "FAIL_GUARD",
+  "scope": "Original cleanup script exited1 after three proven copy removals, before cache deletion; original partial RUNNING report preserved.",
+  "sourceCommit": "b1acb12735154bd2a30c6fb6d20c9ce905b1d1fd",
+  "errorKind": "AssertionError",
+  "guard": "Both owned Cargo targets must have CACHEDIR.TAG",
+  "cause": "Owned reused host target has .rustc_info.json/release/debug but no CACHEDIR.TAG; cache-tag presence was an invalid extra ownership assumption. No product/test outcome changed.",
+  "originalPartialSha256": "08094f964f7c3b15a7541799fd5eaf486e3dc2f6a97b35b3a617682fae8784e7",
+  "firstScriptSha256": "782a0535128f668a75ef019ae3fb4761f97f8d85d0f8b95008337e86dcfa5c05",
+  "processTerminal": true,
+  "removedBeforeGuard": [
+    {
+      "path": "/tmp/fc-round40-modern-original.zip",
+      "kind": "exact original ZIP copy",
+      "bytes": 40564846,
+      "sha256": "d1ad2500aeb9d1e76d68e87fa01d990e4200e0ffd5c7e83cbdd30dce4229a976",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round40-win7-original.zip",
+      "kind": "exact original ZIP copy",
+      "bytes": 41254371,
+      "sha256": "43587d8992441a5602c47d49b63dcc45f59ff34b7395a2882d9ffb8b2f8f201f",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round40-modern-programs",
+      "kind": "owned exact EXE copies",
+      "files": 22,
+      "removed": true
+    }
+  ]
+}
