@@ -130,6 +130,24 @@ function Resolve-Application([string]$Name) {
     return $path
 }
 
+function Get-ActiveProcessIdentity($Process) {
+    if ($Process.HasExited) { return $null }
+    try {
+        $processId = $Process.Id
+        $startTicks = $Process.StartTime.ToUniversalTime().Ticks
+        $module = $Process.MainModule
+        if ($null -eq $module) { throw 'Live process main module is unavailable.' }
+        $image = [string]$module.FileName
+        if ([string]::IsNullOrWhiteSpace($image)) { throw 'Live process image is unavailable.' }
+    } catch {
+        # The same process may exit between HasExited and the module query.
+        if ($Process.HasExited) { return $null }
+        throw
+    }
+    if ($Process.HasExited) { return $null }
+    return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }
+}
+
 function Invoke-Logged {
     param([string]$Name, [string]$Executable, [string[]]$Arguments, [int]$TimeoutSeconds = 120,
         [int[]]$AllowedExitCodes = @(0))
@@ -150,10 +168,8 @@ function Invoke-Logged {
     try {
         if (-not $process.Start()) { throw "Cannot start $Name" }
         $processStarted = $true
-        Write-NewJson (Join-Path $Logs "$Name.active.json") ([ordered]@{
-            pid = $process.Id; start_ticks = $process.StartTime.ToUniversalTime().Ticks
-            image = $process.MainModule.FileName
-        })
+        $identity = Get-ActiveProcessIdentity $process
+        if ($null -ne $identity) { Write-NewJson (Join-Path $Logs "$Name.active.json") $identity }
         $streams = @(
             @{ reader = $process.StandardOutput.BaseStream; file = $outFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L },
             @{ reader = $process.StandardError.BaseStream; file = $errFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L }

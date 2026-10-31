@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "scope": "Failed CI run source-sha PASS then process-observation race, followed by CI-only race fix; no new CI/build/runtime certification.",
+  "failedRun": {
+    "runId": 41205810799,
+    "jobId": 124550555500,
+    "headSha": "0f67bf51eb05e536a534f71b08145b0603cfef42",
+    "terminalOutcome": "failure",
+    "dispatchOriginalStatus": "RUN_IDENTIFIED",
+    "dispatchOriginalRunStatus": "queued",
+    "sourceShaCommandPassed": true,
+    "commands": [
+      {
+        "name": "source-sha",
+        "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+        "arguments": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "started_utc": "2026-10-31T13:30:06.0984915Z",
+        "duration_seconds": 0.0933783,
+        "exit_code": 0,
+        "parent_exited": true,
+        "timed_out_or_pipe_stalled": false,
+        "log_truncated": false,
+        "log_limit_bytes_per_stream": 16777216,
+        "stdout": "logs/source-sha.stdout.log",
+        "stderr": "logs/source-sha.stderr.log",
+        "passed": true
+      }
+    ],
+    "executableCount": 0,
+    "cleanBefore": "Started, then MainModule.FileName read raced a quick exit; only original empty stdout/stderr exist, no active/result.",
+    "cleanup": "OWNED_BUILD_ROOTS_REMOVED"
+  },
+  "artifact": {
+    "zipBytes": 4460,
+    "zipSha256": "9332eba106f2e431b7262df9e63938617ee067ff3e3d35aa9b76ec4e01e3805d",
+    "rawFiles": 12,
+    "checksumManifestRows": 11,
+    "allZipAndBase64MemberBytesVerified": true
+  },
+  "correction": {
+    "sourceSha256": "13e990098c3d2b100383ca80e5f2991df4bb96175884d46fa4391429b28ed4fb",
+    "scope": "CI-only identity race correction; original cleanup triple match and stream limits retained; Rust code unchanged",
+    "staticOriginalStatus": "LOCAL_STATIC_AND_PYTHON_STATE_MODEL_PASS",
+    "staticPowerShellRuntimeOriginal": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+    "staticReadonlyProbeOriginal": "PREPARED_NOT_RUN"
+  },
+  "actualWindowsEvidence": {
+    "powershell": "5.1.26100.9711",
+    "mockCases": 9,
+    "mockAstErrors": 0,
+    "actualOwnedProcessCases": 9,
+    "oldExitedReadFailures": 8,
+    "eightExitedChildrenExitCodes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "liveOwnedChildActualExitCode": 1,
+    "liveOwnedChildExitScope": "Expected exit1 after only closing its stdin; not misreported as exit0.",
+    "actualExited": 9,
+    "allHandlesDisposed": true,
+    "probeExitCodes": [
+      0,
+      0
+    ],
+    "scope": [
+      "READONLY_AST_AND_IN_MEMORY_FAKE_PROCESS_NO_PROCESS_LAUNCH_OR_FILE_WRITES",
+      "OWNED_HIDDEN_CMD_CHILDREN_ONLY_NO_FILES_OR_PERSISTENT_CHANGES"
+    ],
+    "stderr": "Original CLIXML bytes/base64 preserved."
+  },
+  "rootReview": {
+    "utc": "2026-10-31T13:34:31.253577+00:00",
+    "source_sha256": "13e990098c3d2b100383ca80e5f2991df4bb96175884d46fa4391429b28ed4fb",
+    "mock_probe_embedded_source_exact": true,
+    "mock_and_owned_process_helpers_exact": true,
+    "checks": [
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+        "stderr": ""
+      }
+    ],
+    "scope": "CI-only identity race correction; original cleanup triple match and stream limits retained; Rust code unchanged"
+  },
+  "originalFiles": [
+    {
+      "original": "/tmp/fc-round30-evidence/git-ci-resolution-sync.json",
+      "archived": "2026-10-31-round30-git-ci-resolution-sync.json",
+      "bytes": 11023,
+      "sha256": "af5675b9cc3ef7290d71e2dd93568000f6faf5dd7028279e89f9202568a24daf"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-third-once.py",
+      "archived": "2026-10-31-round30-ci-dispatch-third-once.py",
+      "bytes": 4658,
+      "sha256": "fafe27b20a78eb0d01ce6c96bc19464f67fea25d70b307be6d94d16e3e0cef5f"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-third.json",
+      "archived": "2026-10-31-round30-ci-dispatch-third.json",
+      "bytes": 21281,
+      "sha256": "91c05ec98976a04ce134d2bc27f9c486bb13c89d41d1d436f97ce664763fb61f"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-accepted-jobs-initial.json",
+      "archived": "2026-10-31-round30-ci-second-accepted-jobs-initial.json",
+      "bytes": 1018,
+      "sha256": "d21d6926d4294339289fa37bac281f70ac9baddb18433e518ad0455e7afb52fb"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-tools.json",
+      "archived": "2026-10-31-round30-ci-second-run-tools.json",
+      "bytes": 26323,
+      "sha256": "a92ef5066937db7579c2a31d0647d0e64022ac60649d8192082ed80768779785"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact.json",
+      "bytes": 8011,
+      "sha256": "454f2e3e583704e05a6f4cac04a3e4006a380ebdf1bfa952dfb1d35843e8311c"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-before-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-before-source.json",
+      "bytes": 36482,
+      "sha256": "529e33a1f6178427bbf94dca3f2292b30616f5a83a25c484374e96e5dea0f4b9"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-after-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-after-source.json",
+      "bytes": 37394,
+      "sha256": "29f58d422aff48da4b3da4f8ebb47adcdf6d2ed76fd5aa71fdb601a085a49689"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-static.json",
+      "archived": "2026-10-31-round30-ci-process-identity-static.json",
+      "bytes": 3315,
+      "sha256": "ed5a46c16aac72d60e362677f98a622203a6baf49e6b2337cff917668855cfa0"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-readonly-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-readonly-probe.ps1",
+      "bytes": 41950,
+      "sha256": "4f761540bbcdaf40f20e68784e9a9923ff90ccca3b5da2522d2ec41e03694f94"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-windows-mock.json",
+      "archived": "2026-10-31-round30-ci-process-identity-windows-mock.json",
+      "bytes": 3258,
+      "sha256": "0dab03778e5f247a8952b6e1727f1006e158ff72b7171e3d8f936f6e7ce3ea41"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-owned-process-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-owned-process-probe.ps1",
+      "bytes": 3913,
+      "sha256": "47594a101ea73ad3f0aa39bc56760adbc916fe026081aea5f4eba8bd83fe2809"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-windows-owned-process.json",
+      "archived": "2026-10-31-round30-ci-process-identity-windows-owned-process.json",
+      "bytes": 4838,
+      "sha256": "4b8c0cac4da5f6fe296372e2fa1012627062c2bba73ba992db03ce4328112039"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-root-review.json",
+      "archived": "2026-10-31-round30-ci-process-identity-root-review.json",
+      "bytes": 755,
+      "sha256": "3c0a3a4ef8583068b774430e1ec84d67694e6589f6f31fc26906cbfab6938619"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-observation-originals-preflight.json",
+      "archived": "2026-10-31-round30-ci-process-observation-originals-preflight.json",
+      "bytes": 7330,
+      "sha256": "b2a1f2520059eccb88ea6260bad009d1dbfac7ade925155b551cec71c6298656"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/artifact-sha256.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/artifact-sha256.json",
+      "bytes": 1656,
+      "sha256": "50fecdfdd5f5395191d71e3be58fe5ee81b9620e9252160ea92b0b8d3d566d67"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/bootstrap.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/bootstrap.json",
+      "bytes": 493,
+      "sha256": "5e6f73182018d3e1a4cab309a8ff9022655b48e61b104a6c239068711882fc39"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/cleanup.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/failure.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/failure.json",
+      "bytes": 152,
+      "sha256": "3824b263e60cd4b1f418a3c7bc7bc62eb7ad9cb225d0048eda26451863f6e575"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-sha.active.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "a289238a0897a08a849dced60dd470ce0193e2eb1397a4ffc8c16f435f57fd98"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-sha.result.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "1f487e5ebc085472bb8431423f664f9e21a2fbcb6f19f69a301725f2885b68ab"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-sha.stderr.log",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/logs/source-sha.stdout.log",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "593c51425883017442770ec367e0829eb6febed5ca43a039a30b64fb3212428a"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/result.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/result.json",
+      "bytes": 1691,
+      "sha256": "92cfc927d63a088a9bcde5a86a668b604c2ad084a203da06335ab81dd075c62a"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-second-run-artifact-raw/run-start.json",
+      "archived": "2026-10-31-round30-ci-second-run-artifact-raw/run-start.json",
+      "bytes": 567,
+      "sha256": "bb9e66f2e4e18d35c3a47d265da7e5b2373c9e6721762aabefc750e8848dd105"
+    }
+  ],
+  "safetyScan": "No concrete token/private-key or signed-download-URL patterns in exact original files or decoded source/artifact payloads. No signed URL saved.",
+  "priorIndex": {
+    "files": 481,
+    "sha256": "706852f7d05ce867829d85e8d53d058d2c63508b6f342068e7cfbeb3d93e6267"
+  },
+  "notRun": [
+    "No CI triggered after this correction at this record",
+    "No toolchain install/Rust compile reached by failed CI",
+    "No repeat Rust tests for CI-only script change",
+    "No formal three-OS or Seewo runtime acceptance"
+  ],
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}

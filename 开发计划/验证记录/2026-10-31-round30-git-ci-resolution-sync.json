@@ -1,0 +1,59 @@
+{
+  "utc": "2026-10-31T13:29:37.929461+00:00",
+  "scope": "ordinary nonforce sync of tested CI resolver correction; no Release/tag",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "commit",
+        "-m",
+        "Resolve one executable per Windows CI tool"
+      ],
+      "exitCode": 0,
+      "stdout": "[main 0f67bf5] Resolve one executable per Windows CI tool\n 24 files changed, 930 insertions(+), 7 deletions(-)\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-dispatch-second-once.py\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-dispatch-second.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/artifact-sha256.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/bootstrap.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/cleanup.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/failure.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/logs/source-sha.stderr.log\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/logs/source-sha.stdout.log\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/result.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact-raw/run-start.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-artifact.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-first-run-tools.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-after-source.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-before-source.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-diffcheck.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-readonly-probe.ps1\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-root-review.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-stage-summary.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-static.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-ci-tool-resolution-windows-readonly.json\"\n create mode 100644 \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/2026-10-31-round30-git-ci-fix-sync.json\"\n",
+      "stderr": "",
+      "stdoutBase64": "W21haW4gMGY2N2JmNV0gUmVzb2x2ZSBvbmUgZXhlY3V0YWJsZSBwZXIgV2luZG93cyBDSSB0b29sCiAyNCBmaWxlcyBjaGFuZ2VkLCA5MzAgaW5zZXJ0aW9ucygrKSwgNyBkZWxldGlvbnMoLSkKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktZGlzcGF0Y2gtc2Vjb25kLW9uY2UucHkiCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWRpc3BhdGNoLXNlY29uZC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1maXJzdC1ydW4tYXJ0aWZhY3QtcmF3L2FydGlmYWN0LXNoYTI1Ni5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1maXJzdC1ydW4tYXJ0aWZhY3QtcmF3L2Jvb3RzdHJhcC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1maXJzdC1ydW4tYXJ0aWZhY3QtcmF3L2NsZWFudXAuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktZmlyc3QtcnVuLWFydGlmYWN0LXJhdy9mYWlsdXJlLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWZpcnN0LXJ1bi1hcnRpZmFjdC1yYXcvbG9ncy9zb3VyY2Utc2hhLnN0ZGVyci5sb2ciCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWZpcnN0LXJ1bi1hcnRpZmFjdC1yYXcvbG9ncy9zb3VyY2Utc2hhLnN0ZG91dC5sb2ciCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWZpcnN0LXJ1bi1hcnRpZmFjdC1yYXcvcmVzdWx0Lmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWZpcnN0LXJ1bi1hcnRpZmFjdC1yYXcvcnVuLXN0YXJ0Lmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLWZpcnN0LXJ1bi1hcnRpZmFjdC5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS1maXJzdC1ydW4tdG9vbHMuanNvbiIKIGNyZWF0ZSBtb2RlIDEwMDY0NCAiXDM0NVwyNzRcMjAwXDM0NVwyMTdcMjIxXDM1MFwyNTZcMjQxXDM0NVwyMTBcMjIyL1wzNTFcMjUyXDIxNFwzNTBcMjU3XDIwMVwzNTBcMjU2XDI2MFwzNDVcMjc1XDIyNS8yMDI2LTEwLTMxLXJvdW5kMzAtY2ktdG9vbC1yZXNvbHV0aW9uLWFmdGVyLXNvdXJjZS5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS10b29sLXJlc29sdXRpb24tYmVmb3JlLXNvdXJjZS5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS10b29sLXJlc29sdXRpb24tZGlmZmNoZWNrLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXRvb2wtcmVzb2x1dGlvbi1yZWFkb25seS1wcm9iZS5wczEiCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXRvb2wtcmVzb2x1dGlvbi1yb290LXJldmlldy5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS10b29sLXJlc29sdXRpb24tc3RhZ2Utc3VtbWFyeS5qc29uIgogY3JlYXRlIG1vZGUgMTAwNjQ0ICJcMzQ1XDI3NFwyMDBcMzQ1XDIxN1wyMjFcMzUwXDI1NlwyNDFcMzQ1XDIxMFwyMjIvXDM1MVwyNTJcMjE0XDM1MFwyNTdcMjAxXDM1MFwyNTZcMjYwXDM0NVwyNzVcMjI1LzIwMjYtMTAtMzEtcm91bmQzMC1jaS10b29sLXJlc29sdXRpb24tc3RhdGljLmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWNpLXRvb2wtcmVzb2x1dGlvbi13aW5kb3dzLXJlYWRvbmx5Lmpzb24iCiBjcmVhdGUgbW9kZSAxMDA2NDQgIlwzNDVcMjc0XDIwMFwzNDVcMjE3XDIyMVwzNTBcMjU2XDI0MVwzNDVcMjEwXDIyMi9cMzUxXDI1MlwyMTRcMzUwXDI1N1wyMDFcMzUwXDI1NlwyNjBcMzQ1XDI3NVwyMjUvMjAyNi0xMC0zMS1yb3VuZDMwLWdpdC1jaS1maXgtc3luYy5qc29uIgo=",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "stdout": "0f67bf51eb05e536a534f71b08145b0603cfef42\n",
+      "stderr": "",
+      "stdoutBase64": "MGY2N2JmNTFlYjA1ZTUzNmE1MzRmNzFiMDgxNDViMDYwM2NmZWY0Mgo=",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "push",
+        "origin",
+        "main"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "To https://github.com/NevermoreN/future-classroom.git\n   a54a41e..0f67bf5  main -> main\n",
+      "stdoutBase64": "",
+      "stderrBase64": "VG8gaHR0cHM6Ly9naXRodWIuY29tL05ldmVybW9yZU4vZnV0dXJlLWNsYXNzcm9vbS5naXQKICAgYTU0YTQxZS4uMGY2N2JmNSAgbWFpbiAtPiBtYWluCg=="
+    },
+    {
+      "command": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/main"
+      ],
+      "exitCode": 0,
+      "stdout": "0f67bf51eb05e536a534f71b08145b0603cfef42\trefs/heads/main\n",
+      "stderr": "",
+      "stdoutBase64": "MGY2N2JmNTFlYjA1ZTUzNmE1MzRmNzFiMDgxNDViMDYwM2NmZWY0MglyZWZzL2hlYWRzL21haW4K",
+      "stderrBase64": ""
+    }
+  ],
+  "sourceSha": "0f67bf51eb05e536a534f71b08145b0603cfef42",
+  "remoteShaConfirmed": true
+}

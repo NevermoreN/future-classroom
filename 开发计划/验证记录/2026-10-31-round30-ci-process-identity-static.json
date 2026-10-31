@@ -1,0 +1,53 @@
+{
+  "status": "LOCAL_STATIC_AND_PYTHON_STATE_MODEL_PASS",
+  "powerShellRuntime": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+  "readonlyProbe": "PREPARED_NOT_RUN",
+  "sourceBeforeSha256": "241b3afe56cd31075dc400e6808615f138b5f2b6c844e9c23a87cdeb0976cd81",
+  "sourceAfterSha256": "13e990098c3d2b100383ca80e5f2991df4bb96175884d46fa4391429b28ed4fb",
+  "readonlyProbeBinding": {
+    "path": "/tmp/fc-round30-evidence/ci-process-identity-readonly-probe.ps1",
+    "bytes": 41950,
+    "sha256": "4f761540bbcdaf40f20e68784e9a9923ff90ccca3b5da2522d2ec41e03694f94"
+  },
+  "exactPatchScope": "Only helper insertion and post-Start active-journal identity block; timeout/log streams/finally/cleanup/source resolution all byte-identical.",
+  "pythonStateModelOnly": [
+    {
+      "name": "already-exited",
+      "passed": true
+    },
+    {
+      "name": "null-during-exit",
+      "passed": true
+    },
+    {
+      "name": "throw-during-exit",
+      "passed": true
+    },
+    {
+      "name": "exit-after-read",
+      "passed": true
+    },
+    {
+      "name": "live-valid",
+      "passed": true
+    },
+    {
+      "name": "live-null-rejects",
+      "passed": true
+    },
+    {
+      "name": "live-throw-rejects",
+      "passed": true
+    },
+    {
+      "name": "live-empty-rejects",
+      "passed": true
+    }
+  ],
+  "diffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "fullDiff": "--- before/windows-msvc-ci.ps1\n+++ after/windows-msvc-ci.ps1\n@@ -130,6 +130,24 @@\n     return $path\n }\n \n+function Get-ActiveProcessIdentity($Process) {\n+    if ($Process.HasExited) { return $null }\n+    try {\n+        $processId = $Process.Id\n+        $startTicks = $Process.StartTime.ToUniversalTime().Ticks\n+        $module = $Process.MainModule\n+        if ($null -eq $module) { throw 'Live process main module is unavailable.' }\n+        $image = [string]$module.FileName\n+        if ([string]::IsNullOrWhiteSpace($image)) { throw 'Live process image is unavailable.' }\n+    } catch {\n+        # The same process may exit between HasExited and the module query.\n+        if ($Process.HasExited) { return $null }\n+        throw\n+    }\n+    if ($Process.HasExited) { return $null }\n+    return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }\n+}\n+\n function Invoke-Logged {\n     param([string]$Name, [string]$Executable, [string[]]$Arguments, [int]$TimeoutSeconds = 120,\n         [int[]]$AllowedExitCodes = @(0))\n@@ -150,10 +168,8 @@\n     try {\n         if (-not $process.Start()) { throw \"Cannot start $Name\" }\n         $processStarted = $true\n-        Write-NewJson (Join-Path $Logs \"$Name.active.json\") ([ordered]@{\n-            pid = $process.Id; start_ticks = $process.StartTime.ToUniversalTime().Ticks\n-            image = $process.MainModule.FileName\n-        })\n+        $identity = Get-ActiveProcessIdentity $process\n+        if ($null -ne $identity) { Write-NewJson (Join-Path $Logs \"$Name.active.json\") $identity }\n         $streams = @(\n             @{ reader = $process.StandardOutput.BaseStream; file = $outFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L },\n             @{ reader = $process.StandardError.BaseStream; file = $errFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L }\n"
+}

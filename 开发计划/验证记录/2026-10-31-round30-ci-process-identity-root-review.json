@@ -1,0 +1,28 @@
+{
+  "utc": "2026-10-31T13:34:31.253577+00:00",
+  "source_sha256": "13e990098c3d2b100383ca80e5f2991df4bb96175884d46fa4391429b28ed4fb",
+  "mock_probe_embedded_source_exact": true,
+  "mock_and_owned_process_helpers_exact": true,
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "CI-only identity race correction; original cleanup triple match and stream limits retained; Rust code unchanged"
+}
