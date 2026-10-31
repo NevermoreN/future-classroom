@@ -17,6 +17,7 @@ struct RecordDriver {
     calls: Arc<Mutex<Calls>>,
     closed: Arc<AtomicUsize>,
     encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 impl Driver for RecordDriver {
     fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
@@ -47,6 +48,9 @@ impl Driver for RecordDriver {
                 }
                 frame.output[..len].copy_from_slice(&frame.input[2..len + 2]);
                 frame.output_len = len;
+                if let Some(hook) = &self.decrypt_hook {
+                    hook();
+                }
                 Ok(Step::Plaintext { consumed: len + 2 })
             }
             Call::Encrypt => {
@@ -84,6 +88,7 @@ impl Driver for RecordDriver {
 struct Fixture {
     host: TlsHttpHost,
     client: TcpStream,
+    posted_header_deadlines: [Instant; CONNECTION_SLOTS],
     calls: Arc<Mutex<Calls>>,
     closed: Arc<AtomicUsize>,
 }
@@ -92,6 +97,12 @@ impl Fixture {
         Self::with_encrypt_hook(None)
     }
     fn with_encrypt_hook(encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>) -> Self {
+        Self::with_hooks(encrypt_hook, None)
+    }
+    fn with_hooks(
+        encrypt_hook: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+        decrypt_hook: Option<Arc<dyn Fn() + Send + Sync>>,
+    ) -> Self {
         let mut owner = Owner::new("FutureClassroom-Test-TLS-native-stream-fixture").unwrap();
         owner.http_mode = true;
         for slot in &mut owner.resources.slots {
@@ -103,10 +114,18 @@ impl Fixture {
             calls: calls.clone(),
             closed: closed.clone(),
             encrypt_hook,
+            decrypt_hook,
         };
         let worker =
             Worker::start_with_factory(owner.generation, move || Ok(Box::new(driver))).unwrap();
         owner.start_with_worker(worker).unwrap();
+        let posted_header_deadlines = std::array::from_fn(|index| {
+            owner.resources.slots[index]
+                .stream
+                .as_ref()
+                .unwrap()
+                .deadline
+        });
         let client = TcpStream::connect_timeout(
             &SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number).into(),
             Duration::from_secs(1),
@@ -119,6 +138,7 @@ impl Fixture {
                 drain_deadline: None,
             },
             client,
+            posted_header_deadlines,
             calls,
             closed,
         }
@@ -535,6 +555,333 @@ fn real_iocp_fake_records_deadline_is_absolute_and_closed_event_precedes_retirem
     });
     assert!(retired);
     let next = f.host.rearm(token).unwrap();
+    assert_ne!(next, token);
+    f.stop();
+}
+
+#[test]
+fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_it() {
+    // Inject absolute instants into the private state transition. This is a
+    // boundary test, not evidence of a real five-second socket wait.
+    let mut stream = Stream::new();
+    let header_deadline = stream.deadline;
+    let completed_at = header_deadline - Duration::from_nanos(1);
+    assert!(stream.complete_head_at(completed_at));
+    let original = completed_at + REQUEST_BUDGET;
+    assert_eq!(stream.request_started_at(), Some(completed_at));
+    assert_eq!(stream.deadline, original);
+    assert!(!stream.expired_at(header_deadline + Duration::from_nanos(1)));
+    assert!(!stream.complete_head_at(completed_at + Duration::from_secs(1)));
+    assert_eq!(
+        stream.deadline, original,
+        "a second head cannot renew the request"
+    );
+    assert!(!stream.admission_deadline_valid(original + Duration::from_nanos(1), completed_at));
+    assert!(!stream.admission_deadline_valid(completed_at, completed_at));
+    assert!(!stream.admission_deadline_valid(original, original));
+    let shorter = completed_at + Duration::from_secs(30);
+    assert!(stream.admission_deadline_valid(shorter, completed_at));
+    stream.admit_until(shorter);
+    assert_eq!(stream.deadline, shorter);
+    assert_eq!(stream.request_started_at(), Some(completed_at));
+    assert!(stream.expired_at(shorter));
+    assert!(!stream.admission_deadline_valid(original, completed_at));
+    stream.reset();
+    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+    assert_eq!(stream.request_started_at(), None);
+    assert!(!stream.admitted);
+}
+
+#[test]
+fn a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request() {
+    for lateness in [Duration::ZERO, Duration::from_nanos(1)] {
+        let mut stream = Stream::new();
+        let deadline = stream.deadline;
+        assert!(!stream.complete_head_at(deadline + lateness));
+        assert_eq!(stream.deadline, deadline);
+        assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+        assert_eq!(stream.request_started_at(), None);
+        assert!(!stream.admitted);
+    }
+}
+
+#[test]
+fn real_iocp_complete_head_ends_header_budget_before_body_admission_and_keeps_one_start() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let (token, at) = f.head();
+    let index = token.slot();
+    let original = at + REQUEST_BUDGET;
+    let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
+    assert_eq!(
+        stream.deadline_phase,
+        DeadlinePhase::Request { admitted_at: at }
+    );
+    assert_eq!(stream.deadline, original);
+    assert!(!stream.admitted);
+    assert!(stream.flight.is_none());
+    // Scenario time is injected only into the predicate. No claim that the
+    // native fixture physically waited past the old five-second window.
+    assert!(!stream.expired_at(at + BUDGET + Duration::from_nanos(1)));
+    for _ in 0..4 {
+        assert!(f.host.poll().unwrap().is_empty());
+    }
+    assert!(f
+        .host
+        .admit_body(token, 3, original + Duration::from_nanos(1))
+        .is_err());
+    assert!(f
+        .host
+        .admit_body(token, 3, Instant::now() - Duration::from_nanos(1))
+        .is_err());
+    assert!(f.host.admit_body(token, 4, original).is_err());
+    let foreign = TokenIssuer::new().unwrap().issue(index).unwrap();
+    assert!(f.host.admit_body(foreign, 3, original).is_err());
+    assert_eq!(
+        f.host.owner.resources.slots[index]
+            .stream
+            .as_ref()
+            .unwrap()
+            .deadline,
+        original
+    );
+    // Inject a prior absolute clamp to verify admission cannot replace an
+    // already shorter deadline with an otherwise valid original+120 limit.
+    let shorter = at + Duration::from_secs(30);
+    f.host.owner.resources.slots[index]
+        .stream
+        .as_mut()
+        .unwrap()
+        .deadline = shorter;
+    assert!(f.host.admit_body(token, 3, original).is_err());
+    assert!(
+        !f.host.owner.resources.slots[index]
+            .stream
+            .as_ref()
+            .unwrap()
+            .admitted
+    );
+    f.host.admit_body(token, 3, shorter).unwrap();
+    f.input(&record(b"abc"));
+    let (body_token, sequence, offset, bytes, eof) = f.body();
+    assert_eq!(
+        (body_token, sequence, offset, bytes, eof),
+        (token, 1, 0, b"abc".to_vec(), true)
+    );
+    f.host.ack_body(token, sequence, 3).unwrap();
+    let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
+    assert_eq!(stream.request_started_at(), Some(at));
+    assert_eq!(
+        stream.deadline, shorter,
+        "body IO/ACK cannot renew the budget"
+    );
+    f.host.respond(token, response(0), b"", true).unwrap();
+    complete_response_wire(&mut f, token);
+    let next = f.host.rearm(token).unwrap();
+    assert_eq!(next.slot(), index);
+    let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
+    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+    assert_eq!(stream.request_started_at(), None);
+    assert!(!stream.admitted);
+    assert!(f.host.admit_body(token, 3, original).is_err());
+    f.stop();
+}
+
+#[test]
+fn real_iocp_wait_past_original_post_header_deadline_then_admit_without_renewing_request() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let (token, at) = f.head();
+    let index = token.slot();
+    let posted_header_deadline = f.posted_header_deadlines[index];
+    let original_request_deadline = at + REQUEST_BUDGET;
+    assert!(at < posted_header_deadline);
+    assert!(
+        !f.host.owner.resources.slots[index]
+            .stream
+            .as_ref()
+            .unwrap()
+            .admitted
+    );
+    // This deliberately exercises real elapsed time past this exact slot's
+    // former post+5s deadline. It is fake record protection, not Schannel or a
+    // server ESTABLISHED timestamp / strict first-TCP deadline proof.
+    std::thread::sleep(
+        posted_header_deadline.saturating_duration_since(Instant::now())
+            + Duration::from_millis(50),
+    );
+    assert!(Instant::now() >= posted_header_deadline);
+    for event in f.host.poll().unwrap() {
+        match event {
+            TlsHttpEvent::Closed { token: t } if t == token => {
+                panic!("complete Head remained subject to old post+5s deadline")
+            }
+            TlsHttpEvent::Body { token: t, .. } if t == token => {
+                panic!("body published before admission")
+            }
+            _ => {}
+        }
+    }
+    let slot = &f.host.owner.resources.slots[index];
+    assert!(slot.phase == Phase::Http && !slot.retired);
+    let stream = slot.stream.as_ref().unwrap();
+    assert_eq!(stream.deadline, original_request_deadline);
+    assert_eq!(stream.request_started_at(), Some(at));
+    f.host
+        .admit_body(token, 3, original_request_deadline)
+        .unwrap();
+    f.input(&record(b"abc"));
+    let (body_token, sequence, offset, bytes, eof) = f.body();
+    assert_eq!(
+        (body_token, sequence, offset, bytes, eof),
+        (token, 1, 0, b"abc".to_vec(), true)
+    );
+    f.host.ack_body(token, sequence, 3).unwrap();
+    let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
+    assert_eq!(stream.deadline, original_request_deadline);
+    assert_eq!(stream.request_started_at(), Some(at));
+    f.stop();
+}
+
+#[test]
+fn real_iocp_unadmitted_request_expiry_discards_a_queued_head_and_cannot_be_renewed() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    // Poll the real IOCP/mailbox owner without taking the queued event, so
+    // expiry must discard a Head that has never reached the caller.
+    let until = Instant::now() + Duration::from_secs(3);
+    let token = loop {
+        f.host.owner.poll().unwrap();
+        if let Some(token) = f.host.owner.resources.slots.iter().find_map(|slot| {
+            matches!(
+                slot.stream.as_ref().unwrap().event,
+                Some(TlsHttpEvent::Head { .. })
+            )
+            .then_some(slot.token)
+        }) {
+            break token;
+        }
+        assert!(Instant::now() < until, "actual native queued Head");
+        std::thread::sleep(Duration::from_millis(1));
+    };
+    let stream = f.host.owner.resources.slots[token.slot()]
+        .stream
+        .as_mut()
+        .unwrap();
+    let at = stream.request_started_at().unwrap();
+    assert_eq!(stream.deadline, at + REQUEST_BUDGET);
+    assert!(!stream.admitted);
+    assert!(!stream.expired_at(at + BUDGET + Duration::from_nanos(1)));
+    assert!(matches!(stream.event, Some(TlsHttpEvent::Head { .. })));
+    // Absolute deadline injection substitutes for a 120-second test sleep.
+    stream.deadline = Instant::now() - Duration::from_nanos(1);
+    assert!(f.host.admit_body(token, 3, at + REQUEST_BUDGET).is_err());
+    let mut closed = false;
+    f.until(|event| match event {
+        TlsHttpEvent::Head { head, .. } if head.token == token => {
+            panic!("expired queued Head escaped")
+        }
+        TlsHttpEvent::Body { token: t, .. } if t == token => {
+            panic!("unadmitted expired body escaped")
+        }
+        TlsHttpEvent::Closed { token: t } if t == token => {
+            closed = true;
+            false
+        }
+        TlsHttpEvent::Retired(t) if t == token => {
+            assert!(closed);
+            true
+        }
+        _ => false,
+    });
+    assert!(f
+        .host
+        .admit_body(token, 3, Instant::now() + REQUEST_BUDGET)
+        .is_err());
+    f.stop();
+}
+
+#[test]
+fn real_iocp_late_decrypt_cannot_publish_a_head_or_release_its_slot_before_actual_return() {
+    let _serial = SERIAL.lock().unwrap();
+    let (entered, started) = std::sync::mpsc::channel();
+    let (release, released) = std::sync::mpsc::channel();
+    let released = Mutex::new(released);
+    let hook = Arc::new(move || {
+        entered.send(()).unwrap();
+        released
+            .lock()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(3))
+            .unwrap();
+    });
+    let mut f = Fixture::with_hooks(None, Some(hook));
+    // Declared after Fixture so unwind releases the fake driver before native
+    // fixture teardown tries to join its original physical worker.
+    struct Release(Option<std::sync::mpsc::Sender<()>>);
+    impl Drop for Release {
+        fn drop(&mut self) {
+            if let Some(send) = self.0.take() {
+                let _ = send.send(());
+            }
+        }
+    }
+    let mut release = Release(Some(release));
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let until = Instant::now() + Duration::from_secs(3);
+    loop {
+        for event in f.host.poll().unwrap() {
+            assert!(!matches!(event, TlsHttpEvent::Head { .. }));
+        }
+        if started.try_recv().is_ok() {
+            break;
+        }
+        assert!(Instant::now() < until, "actual fake decrypt started");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let token = *f.calls.lock().unwrap().handshake.first().unwrap();
+    let slot = &mut f.host.owner.resources.slots[token.slot()];
+    assert!(slot.frame.is_none());
+    let stream = slot.stream.as_mut().unwrap();
+    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+    stream.deadline = Instant::now() - Duration::from_nanos(1);
+    let mut closed = false;
+    for event in f.host.poll().unwrap() {
+        match event {
+            TlsHttpEvent::Closed { token: t } if t == token => closed = true,
+            TlsHttpEvent::Head { head, .. } if head.token == token => panic!("late Head escaped"),
+            TlsHttpEvent::Retired(t) if t == token => panic!("in-flight driver was not returned"),
+            _ => {}
+        }
+    }
+    assert!(closed);
+    assert_eq!(f.host.owner.report.parsed_requests, 0);
+    assert!(f.host.rearm(token).is_err());
+    let slot = &f.host.owner.resources.slots[token.slot()];
+    assert!(slot.frame.is_none() && !slot.retired);
+    release.0.take().unwrap().send(()).unwrap();
+    f.until(|event| match event {
+        TlsHttpEvent::Head { head, .. } if head.token == token => {
+            panic!("late returned plaintext escaped")
+        }
+        TlsHttpEvent::Retired(t) if t == token => true,
+        _ => false,
+    });
+    assert_eq!(f.host.owner.report.parsed_requests, 0);
+    assert_eq!(f.host.owner.report.late_sspi_completions, 1);
+    let next = f.host.rearm(token).unwrap();
+    assert_eq!(next.slot(), token.slot());
     assert_ne!(next, token);
     f.stop();
 }

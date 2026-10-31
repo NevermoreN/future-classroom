@@ -1,0 +1,97 @@
+{
+  "status": "READONLY_INITIAL_REVIEW_NOT_FINAL_DIFF_OR_RUNTIME_VALIDATION",
+  "scope": "Main worktree only; service agent actively edited stream.rs during review. No source edit, Cargo, Windows, remote, Git or CI action performed. Frozen final diff still needs separate review.",
+  "observedFiles": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 53146,
+      "sha256": "e9b059ab65b8742d196b05cccbf4fc99ff74491f732c652dd8f98e4d5df69932"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38207,
+      "sha256": "69cf518727c7ecd85f3655a1ffa4af03fa3c9d1a39cb50cc0c7445a307ee1eae"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 42070,
+      "sha256": "7cc95c8f366b9b4856081d263865865c38fd3e597a5f4a948e97b48fa7653ddb"
+    }
+  ],
+  "conclusions": [
+    {
+      "topic": "One-time parser transition before Head publication",
+      "locations": [
+        "native.rs:646",
+        "native/stream.rs:complete_head_at",
+        "native/stream.rs:parse_http_plain Event::Head"
+      ],
+      "finding": "native complete_frame checks expiry before parsing, which alone cannot guard parse/scheduling crossing. New complete_head_at must recheck the old Header deadline after Parser.feed and use the same captured Instant both for Head.admitted_at and Request deadline=admitted_at+120s; repeated Head/phase change must refuse. Observed in-progress helper does this.",
+      "requiredCoverage": [
+        "Complete valid Head before original cutoff, defer caller body admission beyond old5s; Head/request remains valid under original120s.",
+        "Parser completion at/after old cutoff publishes no Head, closes exact slot, no positive route/body work."
+      ]
+    },
+    {
+      "topic": "Admission only narrows original120s, including30s voice",
+      "locations": [
+        "native/stream.rs:TlsHttpHost::admit_body",
+        "native/stream.rs:http_index",
+        "fc-bootstrap/src/web_transfer/network.rs:650",
+        "fc-bootstrap/src/web_transfer.rs:TransferLifetime::bounded"
+      ],
+      "finding": "Do not recompute now+120 at admit/ACK/response. New admission_deadline_valid <= current deadline preserves original epoch; caller voice life is original admitted_at+30s. Existing http_index, drive, receive, send and complete_frame use common current deadline.",
+      "requiredCoverage": [
+        "Body admitted after oldheader5s but before original120s succeeds.",
+        "Caller deadline later than current/original120s rejects; elapsed30s narrowed request cannot be widened/reopened.",
+        "Expired ACK/respond/send_response_body/set_response_fence rejects, while cancel remains possible."
+      ]
+    },
+    {
+      "topic": "Already published/queued events and late completions",
+      "locations": [
+        "native.rs:951",
+        "native.rs:643",
+        "native/stream.rs:take_http_events",
+        "native/stream.rs:parse_http_plain"
+      ],
+      "finding": "Public Host.poll expires slots before taking queued events, and close_slot clears a queued Head/Body. Test both an unconsumed Head after oldheader5s (must survive) and after newrequest120s (must disappear and Closed be delivered). A cooperative check at poll start is not a hard-real-time guarantee across an arbitrary pause between poll and event take; TransferLifetime/job fences must still reject aged event work.",
+      "requiredCoverage": [
+        "Late SSPI Plaintext after originalheader cutoff cannot establish Request phase.",
+        "Late result after narrowed request deadline returns original Frame but creates no Body/Head/ResponseReady or new positive submission.",
+        "Queued Head does not renew admitted_at at dequeue."
+      ]
+    },
+    {
+      "topic": "Logical timeout never releases physical slot",
+      "locations": [
+        "native.rs:381",
+        "native.rs:617",
+        "native.rs:993",
+        "native/stream.rs:rearm_http"
+      ],
+      "finding": "Keep pending IOCP charged after CancelIoEx/closesocket; keep unique Frame/SSPI context until actual return and same-token Retire confirmation. Expiry checks must not block negative Retire return branch, which currently precedes positive expiry handling. Rearm still requires physical socket/pending/frame/retired + delivered events, resets phase and clears response fence.",
+      "requiredCoverage": [
+        "Hold real IOCP/fakeDriver in-flight across timeout: no new serial/owner before exact return+Retired.",
+        "Stopped queued Retire is not retirement; real worker close/reap still required.",
+        "Negative cancel/drain remains callable after deadline."
+      ]
+    },
+    {
+      "topic": "Scope and response guard limits remain explicit",
+      "locations": [
+        "native/stream.rs:post_http_accept",
+        "native.rs:357",
+        "native.rs:477",
+        "native/stream.rs:respond/send_response_body",
+        "fc-bootstrap/src/web_transfer/network.rs:1447"
+      ],
+      "finding": "This slice fixes valid-Head\u2192request budgeting only. Existing post+5s/backlog renewal/strict firstTCP5s remains unresolved and production gate closed. Response authorization fence and exact original deadline remain checked before each positive chunk/WSASend; already submitted sends may only be physically settled, never retracted or treated as new authority. No new native threads/owners/queues.",
+      "requiredCoverage": [
+        "Preserve existing response-fence revocation, partial-send ACK, HEAD terminal and explicit retirement regressions.",
+        "No ACK/chunk/late SQL result gets a fresh120s or bypasses original30s job/voice execution fences."
+      ]
+    }
+  ],
+  "validation": "No tests/builds executed; conclusions from source inspection only."
+}

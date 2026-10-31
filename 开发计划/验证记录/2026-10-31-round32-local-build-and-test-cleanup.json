@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "scope": "Only exact own Round32 local build roots and frozen two-program copies, after terminal compiler, actual Windows runtimes and package creation; byte totals are logical file lengths, not physical disk reclamation. Remote processes/tasks/certificate/key cleaned and audited separately. Persistent SSH key untouched.",
+  "roots": [
+    {
+      "path": "/tmp/fc-round32-deadline-target",
+      "files": 1289,
+      "logicalBytes": 640983619,
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round32-deadline-programs",
+      "files": 2,
+      "logicalBytes": 15811998,
+      "removed": true
+    }
+  ],
+  "totalFiles": 1291,
+  "totalLogicalBytes": 656795617,
+  "frozenPrograms": [
+    {
+      "path": "/tmp/fc-round32-deadline-programs/fc_windows-8e52770e438e4768.exe",
+      "originalPath": "/tmp/fc-round32-deadline-target/i686-pc-windows-gnu/release/deps/fc_windows-8e52770e438e4768.exe",
+      "bytes": 3300259,
+      "sha256": "4bd61ad94325f115cf68f2296a0a3351ad55e010d3c346a2ba531ecd8841d133",
+      "test": true,
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    {
+      "path": "/tmp/fc-round32-deadline-programs/fc-bootstrap.exe",
+      "originalPath": "/tmp/fc-round32-deadline-target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 12511739,
+      "sha256": "b343eceec9e07f433f1f9bf2eb1707de3f786e660110a166d749c27704fb4935",
+      "test": false,
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "fc-bootstrap",
+        "src_path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/crates/fc-bootstrap/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      }
+    }
+  ],
+  "retainedDevelopmentPackage": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-request-deadline-dev.zip",
+    "bytes": 5960978,
+    "sha256": "1acdec0c1506db0484c0a4ba8e2bfa7187ab26d485285128b6dd35ad9e114c69"
+  }
+}

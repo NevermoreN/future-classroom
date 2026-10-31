@@ -1,0 +1,46 @@
+{
+  "schema": "fc-round32-scoped-header-request-deadline-change/v1",
+  "utc": "2026-10-31T15:21:04.394173+00:00",
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_TESTED",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "beforeSha256": "675b593cb2bbd9d0bd6b91e31bbb567a8b1e5b6aa771c36011021e183dd44008",
+      "afterSha256": "4ab35d0114a59aefa3353096db23a7d26c90e7898d02a73b1e9fb5622cd304fb",
+      "beforeBytes": 36374,
+      "afterBytes": 38566
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "beforeSha256": "72f198641d3157e083f4776c414c5ee660e17e52785b15df4587ec7b00df6600",
+      "afterSha256": "2134353f8802dcaeb78334a17abd0ca79b13cb52b9579d267dd5892cd72159f4",
+      "beforeBytes": 31955,
+      "afterBytes": 45493
+    }
+  ],
+  "scope": "Only stream.rs and stream/tests.rs; native.rs unchanged. Existing AcceptEx post+5 behavior retained; no production listener enablement or first TCP epoch claim.",
+  "behavior": [
+    "Strict complete-head at<headerdeadline switches once to same admitted_at+120s before publication/worker admission",
+    "Body admission only shrinks current absolute request deadline; token/exact length checks retained",
+    "Expired complete-head cannot initialize request; reset clears request phase",
+    "No SQL/native owner/IOCP/SSPI physical lifecycle relaxation"
+  ],
+  "newTests": [
+    "header_completion_transfers_one_absolute_budget_and_admission_only_tightens_it",
+    "a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request",
+    "real_iocp_complete_head_ends_header_budget_before_body_admission_and_keeps_one_start",
+    "real_iocp_unadmitted_request_expiry_discards_a_queued_head_and_cannot_be_renewed",
+    "real_iocp_late_decrypt_cannot_publish_a_head_or_release_its_slot_before_actual_return",
+    "real_iocp_wait_past_original_post_header_deadline_then_admit_without_renewing_request"
+  ],
+  "testScope": "Two private-state absolute-time boundary tests; four real socket/IOCP+existing mailbox/physical thread tests with fake RecordDriver. Exactly one new test physically waits until captured original per-slot post+5s deadline plus50ms before original-at+120 admission and body ACK. Other long expiry scenarios explicitly inject absolute times. No test was executed by this agent; no Schannel encryption, kernel ESTABLISHED origin, hard-close scheduling or three-OS compatibility claim.",
+  "validation": [
+    "scoped rustfmt",
+    "byte-level trailing-whitespace check"
+  ],
+  "cargoRun": false,
+  "testsRun": false,
+  "windowsRun": false,
+  "gitRun": false,
+  "priorFreezeRetained": "/tmp/fc-round32-deadline-evidence/service-source-freeze.json"
+}

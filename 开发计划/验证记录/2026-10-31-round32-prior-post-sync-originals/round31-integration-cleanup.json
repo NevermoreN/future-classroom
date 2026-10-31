@@ -1,0 +1,44 @@
+{
+  "scope": "Own clean feature worktree/merged branch and duplicate temporary public evidence removed after exact source/index/GitHub sync checks. All77 originals plus derived summary remain byte-identical in repository; delivery ZIP retained; persistent SSH authorization/key untouched.",
+  "initialGuardCorrection": "Initial cleanup attempt counted local generated summary as an original, giving78 instead of77; assertion stopped before any mutation. Current guard explicitly classifies77 originals plus1 derived summary and verifies all78 exact copies.",
+  "head": "c7b90fda5ecae688ab6ee70c10cb2dcb4f78cec3",
+  "archiveRows": 78,
+  "originalsExactCopied": 77,
+  "summaryExactCopied": 1,
+  "rustCargoInputsVerifiedInMain": 385,
+  "commands": [
+    {
+      "command": [
+        "git",
+        "worktree",
+        "remove",
+        "/tmp/fc-round31-device-worktree"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "-d",
+        "codex/voice-output-observation"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "RGVsZXRlZCBicmFuY2ggY29kZXgvdm9pY2Utb3V0cHV0LW9ic2VydmF0aW9uICh3YXMgYzdiOTBmZCkuCg==",
+      "stderrBase64": ""
+    }
+  ],
+  "duplicateEvidenceRemoved": {
+    "root": "/tmp/fc-round31-device-evidence",
+    "files": 84,
+    "bytes": 3633932
+  },
+  "retainedDevelopmentPackage": {
+    "path": "/mnt/data/FutureClassroom-0.1.0-voice-output-dev.zip",
+    "bytes": 5961063,
+    "sha256": "94318a24871e33ffaa530662201b7dd231e4501f96b27c719d8af873f20f4015"
+  },
+  "status": "PASS"
+}

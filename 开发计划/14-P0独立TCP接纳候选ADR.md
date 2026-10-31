@@ -67,3 +67,14 @@ TLS新增 `Shutdown` 和 `Retire`：同一SSPI线程先ApplyControlToken(SCHANNE
 ### 条件接纳候选的只读排除依据
 
 本轮复核SO_CONDITIONAL_ACCEPT/WSAAccept官方契约：该选项改变完整接纳时机，同时禁用内建SYN保护和backlog；另一页又明确，为抵御SYN攻击先完成握手的路径会使选项不起作用，即使callback仍被调用。因此仅捕获callback时间不足以证明真正ESTABLISHED的下界；文档也未给出可用于D11的半开连接硬资源界，不能以四个应用槽替代证明。没有在用户电脑启用此选项或改变原接纳路径。[选项说明](https://learn.microsoft.com/en-us/windows/win32/winsock/so-conditional-accept)、[WSAAccept限制](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaaccept)。严格首TCP五秒仍保留第十三轮5/8超限、最大超577微秒的FAIL；生产监听继续关闭。
+
+
+## 第三十二轮切片：合法 Head 完成后切换原请求期限
+
+总计划1.44 / D11，沿用P0-05、P6-11及Q09/Q25。本切片仅修正隔离`TlsHttpHost`候选的期限阶段：头解析器返回完整合法Head后，在发布事件前以唯一`admitted_at`再次检查旧header绝对期限；完成时刻必须严格早于该期限，相等或更晚即关闭，不能发布Head或开启请求阶段。检查通过立即进入`admitted_at + 120秒`的原请求绝对期限，不能继续用旧post+5秒误杀已经完整解析、但尚待业务worker准入的请求。此处时间点只是合法头完成，不表示鉴权、计费stage或正文准入已经成功。
+
+`admit_body`仍要求精确完整token、当前阶段/正文长度及原事件消费状态；提交的绝对期限必须仍有效且不晚于当前期限，只能保持或收紧。worker排队/返回时刻、显式admit、收到块/ACK或发送响应均不能重新起算120秒或恢复较早收紧前的期限；原上传等更短期限及业务权限检查保持。未准入请求到期后，原owner清除尚未交付的Head/正文事件，先逻辑关闭；IOCP完成、SSPI实际调用返回、原Frame归还和Retired交付条件继续满足后才允许原槽新serial。取消、socket关闭或过期信号均不能提前释放槽或使旧完成进入新请求。
+
+新增回归合同为两项纯状态边界与四项真实IOCP/假记录Driver场景：严格小于/等于/超过旧header期限、唯一Head起点与admit只收紧/拒绝续期；完整Head后待准入、错误token/长度/期限拒绝及复用重置；真实等待原post+5秒截止后再加50毫秒而仍按原Head+120秒准入/ACK；未取出的queued Head到期清除；假解密在途过期后不发布晚Head、不在实际归还前rearm。仅一项真实等待旧五秒窗口，其余五项的时间边界有明确注入，不把注入等同实际等待120秒。所有真实IOCP场景仍使用fake记录保护，不证明Schannel加密、服务器精确ESTABLISHED时刻或严格首TCP五秒；具体编译、执行、原始输出与清理结果待[实施记录](10-实施进度与验证记录.md)独立补证，本节不写通过结论。
+
+AcceptEx原post+5秒起点不变，未新增AcceptSlot/接纳池或SSPI线程，未解决持续接纳backlog、真正TCP建立时刻、调度/休眠/关断误差及内核/SSP资源上界。严格首TCP到完整header仍为`5_000_000_000ns`，第十三轮5/8超限的FAIL完整保留；Win7/Win10实机、持续生产TLS与校园部署仍待验收。普通生产listener继续关闭，不借请求阶段修复采纳候选或放宽原需求。

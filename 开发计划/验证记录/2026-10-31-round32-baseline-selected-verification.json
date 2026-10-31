@@ -1,0 +1,254 @@
+{
+  "status": "PASS_NARROW_SELECTED_ORIGINAL_VERIFICATION",
+  "scope": "Verify four complete nonbinary originals already CRC checked by the failed selected-member reader. The reader remains FAIL/URLError on next cleanup member, not all 192 members read; whole ZIP and binaries NOT_VERIFIED.",
+  "sourceSha": "c622aea0f178e42dcc776afbea96c4b2dfe43ce9",
+  "runId": 41212282071,
+  "readerStatus": "FAIL",
+  "readerErrorKind": "URLError",
+  "verifiedMembers": [
+    {
+      "path": "logs/before-vs-crt-flags.json",
+      "bytes": 656,
+      "sha256": "dd474024dd355423bac97d2b9393a3949c2f2fca1bafa124f8b383cf5e212203",
+      "zipCrc32": "06c34f8a"
+    },
+    {
+      "path": "logs/after-vs-crt-flags.json",
+      "bytes": 655,
+      "sha256": "48d388b0526a3fe341a41ffa7565f21f86e8dfd43d1117a4301936769447163e",
+      "zipCrc32": "88cd22e0"
+    },
+    {
+      "path": "logs/before-cargo-crt-flags.json",
+      "bytes": 659,
+      "sha256": "82275d03dfef55736dbff319e08b7e23bd8daa9a83a7f6f6aa71a391b4747af3",
+      "zipCrc32": "192719f3"
+    },
+    {
+      "path": "result.json",
+      "bytes": 29563,
+      "sha256": "72bb09b2e2c61eea8dfebbb08e1d8a80b7ae3b252f7923fc03f0fa1afe4edce6",
+      "zipCrc32": "7b8f5a41"
+    }
+  ],
+  "actualFlagPhases": [
+    {
+      "phase": "before-vs",
+      "powershell": "7.6.9",
+      "encodedAbsent": true,
+      "exactStaticRustflags": true
+    },
+    {
+      "phase": "after-vs",
+      "powershell": "7.6.9",
+      "encodedAbsent": true,
+      "exactStaticRustflags": true
+    },
+    {
+      "phase": "before-cargo",
+      "powershell": "7.6.9",
+      "encodedAbsent": true,
+      "exactStaticRustflags": true
+    }
+  ],
+  "originalStatus": "COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN",
+  "commands": [
+    {
+      "name": "source-sha",
+      "exit_code": 0,
+      "duration_seconds": 0.0865437
+    },
+    {
+      "name": "source-clean-before",
+      "exit_code": 0,
+      "duration_seconds": 0.1250545
+    },
+    {
+      "name": "source-input-paths",
+      "exit_code": 0,
+      "duration_seconds": 0.5437842
+    },
+    {
+      "name": "rustup-version",
+      "exit_code": 0,
+      "duration_seconds": 17.7853513
+    },
+    {
+      "name": "install-fixed-rust",
+      "exit_code": 0,
+      "duration_seconds": 2.7426218
+    },
+    {
+      "name": "rust-version",
+      "exit_code": 0,
+      "duration_seconds": 0.0749414
+    },
+    {
+      "name": "cargo-version",
+      "exit_code": 0,
+      "duration_seconds": 0.5288662
+    },
+    {
+      "name": "rust-target-cfg",
+      "exit_code": 0,
+      "duration_seconds": 0.0760295
+    },
+    {
+      "name": "visual-studio",
+      "exit_code": 0,
+      "duration_seconds": 0.4660817
+    },
+    {
+      "name": "cl-version-probe",
+      "exit_code": 0,
+      "duration_seconds": 1.7569779
+    },
+    {
+      "name": "cargo-metadata",
+      "exit_code": 0,
+      "duration_seconds": 0.1225083
+    },
+    {
+      "name": "fmt",
+      "exit_code": 0,
+      "duration_seconds": 3.8709595
+    },
+    {
+      "name": "architecture",
+      "exit_code": 0,
+      "duration_seconds": 0.8580218
+    },
+    {
+      "name": "workspace-test-compile",
+      "exit_code": 0,
+      "duration_seconds": 771.0669677
+    },
+    {
+      "name": "product-compile",
+      "exit_code": 0,
+      "duration_seconds": 1.7965087
+    },
+    {
+      "name": "clippy",
+      "exit_code": 0,
+      "duration_seconds": 61.0195766
+    },
+    {
+      "name": "pe-imports-0",
+      "exit_code": 0,
+      "duration_seconds": 0.0796169
+    },
+    {
+      "name": "pe-imports-1",
+      "exit_code": 0,
+      "duration_seconds": 0.0586345
+    },
+    {
+      "name": "pe-imports-2",
+      "exit_code": 0,
+      "duration_seconds": 0.0599297
+    },
+    {
+      "name": "pe-imports-3",
+      "exit_code": 0,
+      "duration_seconds": 0.0603565
+    },
+    {
+      "name": "pe-imports-4",
+      "exit_code": 0,
+      "duration_seconds": 0.0603725
+    },
+    {
+      "name": "pe-imports-5",
+      "exit_code": 0,
+      "duration_seconds": 0.0611027
+    },
+    {
+      "name": "pe-imports-6",
+      "exit_code": 0,
+      "duration_seconds": 0.0605047
+    },
+    {
+      "name": "pe-imports-7",
+      "exit_code": 0,
+      "duration_seconds": 0.0758709
+    },
+    {
+      "name": "pe-imports-8",
+      "exit_code": 0,
+      "duration_seconds": 0.075842
+    },
+    {
+      "name": "pe-imports-9",
+      "exit_code": 0,
+      "duration_seconds": 0.0607213
+    },
+    {
+      "name": "pe-imports-10",
+      "exit_code": 0,
+      "duration_seconds": 0.0759595
+    },
+    {
+      "name": "pe-imports-11",
+      "exit_code": 0,
+      "duration_seconds": 0.0760177
+    },
+    {
+      "name": "pe-imports-12",
+      "exit_code": 0,
+      "duration_seconds": 0.0604926
+    },
+    {
+      "name": "pe-imports-13",
+      "exit_code": 0,
+      "duration_seconds": 0.0674386
+    },
+    {
+      "name": "pe-imports-14",
+      "exit_code": 0,
+      "duration_seconds": 0.0769769
+    },
+    {
+      "name": "pe-imports-15",
+      "exit_code": 0,
+      "duration_seconds": 0.0768065
+    },
+    {
+      "name": "pe-imports-16",
+      "exit_code": 0,
+      "duration_seconds": 0.075383
+    },
+    {
+      "name": "pe-imports-17",
+      "exit_code": 0,
+      "duration_seconds": 0.0603312
+    },
+    {
+      "name": "pe-imports-18",
+      "exit_code": 0,
+      "duration_seconds": 0.0604276
+    },
+    {
+      "name": "pe-imports-19",
+      "exit_code": 0,
+      "duration_seconds": 0.0606658
+    },
+    {
+      "name": "pe-imports-20",
+      "exit_code": 0,
+      "duration_seconds": 0.0605296
+    },
+    {
+      "name": "pe-imports-21",
+      "exit_code": 0,
+      "duration_seconds": 0.0608189
+    },
+    {
+      "name": "source-clean-after",
+      "exit_code": 0,
+      "duration_seconds": 0.0618242
+    }
+  ],
+  "staticCrtGate": "Original overall status and terminal successful workflow attest gate; this verifier did not independently parse PE binaries or imports stdout.",
+  "runtime": "NOT_RUN"
+}

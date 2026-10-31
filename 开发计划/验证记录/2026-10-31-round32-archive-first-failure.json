@@ -1,0 +1,11 @@
+{
+  "status": "FAIL",
+  "stage": "Archive evidence guard, before any member copy",
+  "sourcePath": "/tmp/fc-round32-deadline-evidence/archive-stage.py",
+  "sourceSha256": "b8dd3d20c5edbf3ee50d08f7ccf989678797581f215daa9aa962c364614847e0",
+  "toolExitCode": 1,
+  "errorKind": "AssertionError",
+  "cause": "Literal private-key header scanner matched its own Python scanner source, which contains the marker text in a quoted byte string. No key block or private-key material was found. Original script remains unchanged; second scanner requires a full key block with encoded body.",
+  "productTestsChanged": false,
+  "originalSourcePreserved": true
+}

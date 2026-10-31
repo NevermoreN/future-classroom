@@ -30,9 +30,19 @@ struct BodyFlight {
     end: u64,
     eof: bool,
 }
+const REQUEST_BUDGET: Duration = Duration::from_secs(120);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum DeadlinePhase {
+    Header,
+    Request { admitted_at: Instant },
+}
+
 pub(super) struct Stream {
+    // Kept visible for the parent's initial AcceptEx post. That post+5s clock
+    // is still only the existing candidate clock, not an ESTABLISHED timestamp.
     pub(super) deadline: Instant,
-    admitted_at: Option<Instant>,
+    deadline_phase: DeadlinePhase,
     admitted: bool,
     expected_body: Option<u64>,
     // Captured from the original parsed request before publishing its Head.
@@ -65,7 +75,7 @@ impl Stream {
     fn new() -> Self {
         Self {
             deadline: Instant::now() + BUDGET,
-            admitted_at: None,
+            deadline_phase: DeadlinePhase::Header,
             admitted: false,
             expected_body: None,
             head_only: false,
@@ -100,7 +110,7 @@ impl Stream {
     fn reset(&mut self) {
         self.wipe_tx();
         self.deadline = Instant::now() + BUDGET;
-        self.admitted_at = None;
+        self.deadline_phase = DeadlinePhase::Header;
         self.admitted = false;
         self.expected_body = None;
         self.head_only = false;
@@ -124,6 +134,49 @@ impl Stream {
         self.record_body = 0;
         self.awaiting_response = false;
         self.response_fence = None;
+    }
+    fn expired_at(&self, now: Instant) -> bool {
+        now >= self.deadline
+    }
+    fn posted_header_at(&mut self, now: Instant) {
+        debug_assert_eq!(self.deadline_phase, DeadlinePhase::Header);
+        // Preserve the existing candidate's post+5s behavior. This does not
+        // establish the original TCP connection epoch or solve backlog timing.
+        self.deadline = now + BUDGET;
+    }
+    fn request_started_at(&self) -> Option<Instant> {
+        match self.deadline_phase {
+            DeadlinePhase::Header => None,
+            DeadlinePhase::Request { admitted_at } => Some(admitted_at),
+        }
+    }
+    /// Called only after the parser returns a complete valid head. The final
+    /// time check must be here too: parsing can cross the old header deadline.
+    fn complete_head_at(&mut self, admitted_at: Instant) -> bool {
+        if self.deadline_phase != DeadlinePhase::Header || self.expired_at(admitted_at) {
+            return false;
+        }
+        let Some(deadline) = admitted_at.checked_add(REQUEST_BUDGET) else {
+            return false;
+        };
+        self.deadline_phase = DeadlinePhase::Request { admitted_at };
+        self.deadline = deadline;
+        true
+    }
+    fn admission_deadline_valid(&self, deadline: Instant, now: Instant) -> bool {
+        self.request_started_at().is_some()
+            && !self.admitted
+            && !self.expired_at(now)
+            && deadline > now
+            && deadline <= self.deadline
+    }
+    /// The caller has checked the exact body length/state and original request
+    /// lifetime before admitting the parser. This never establishes a new epoch.
+    fn admit_until(&mut self, deadline: Instant) {
+        debug_assert!(self.request_started_at().is_some());
+        debug_assert!(!self.admitted && deadline <= self.deadline);
+        self.deadline = deadline;
+        self.admitted = true;
     }
     pub(super) fn response_allowed(&self) -> bool {
         self.response_fence.as_ref().is_none_or(|fence| {
@@ -224,22 +277,17 @@ impl TlsHttpHost {
         let index = self.owner.http_index(token)?;
         let slot = &mut self.owner.resources.slots[index];
         let stream = slot.stream.as_mut().unwrap();
-        let admitted = stream.admitted_at.ok_or("HTTP head not delivered")?;
         if slot.phase != Phase::Http
-            || stream.admitted
             || stream.expected_body != Some(exact_limit)
             || stream.event.is_some()
-            || Instant::now() >= stream.deadline
-            || absolute_deadline <= Instant::now()
-            || absolute_deadline > admitted + Duration::from_secs(120)
+            || !stream.admission_deadline_valid(absolute_deadline, Instant::now())
         {
             return Err("HTTP body admission state or absolute deadline".into());
         }
         slot.parser
             .admit_body(exact_limit)
             .map_err(|e| format!("HTTP body admission: {e:?}"))?;
-        stream.admitted = true;
-        stream.deadline = absolute_deadline;
+        stream.admit_until(absolute_deadline);
         self.owner.drive(index)
     }
     /// For uploads the coordinator may call this ONLY after the matching real
@@ -290,7 +338,7 @@ impl TlsHttpHost {
         let slot = &mut self.owner.resources.slots[index];
         let stream = slot.stream.as_mut().unwrap();
         if slot.phase != Phase::Http
-            || stream.admitted_at.is_none()
+            || stream.request_started_at().is_none()
             || slot.response_body.is_some()
             || stream.response_fence.is_some()
         {
@@ -315,7 +363,7 @@ impl TlsHttpHost {
             || stream.event.is_some()
             || stream.flight.is_some()
             || (stream.admitted && !stream.request_done)
-            || (!stream.admitted && stream.admitted_at.is_none())
+            || (!stream.admitted && stream.request_started_at().is_none())
             || (!stream.admitted && head.status < 400)
         {
             return Err("HTTP response before request retirement or while busy".into());
@@ -447,7 +495,7 @@ impl Owner {
             self.resources.slots[index]
                 .stream
                 .as_ref()
-                .is_some_and(|stream| Instant::now() >= stream.deadline)
+                .is_some_and(|stream| stream.expired_at(Instant::now()))
         } else {
             self.started.elapsed() >= BUDGET
         }
@@ -526,7 +574,7 @@ impl Owner {
                 if stream.event.is_some()
                     || stream.flight.is_some()
                     || stream.request_done
-                    || stream.admitted_at.is_some() && !stream.admitted
+                    || stream.request_started_at().is_some() && !stream.admitted
                 {
                     return Ok(());
                 }
@@ -584,8 +632,10 @@ impl Owner {
             Event::NeedHead => self.drive(index),
             Event::Head(head) => {
                 let admitted_at = Instant::now();
+                if !stream.complete_head_at(admitted_at) {
+                    return self.close_slot(index, true);
+                }
                 stream.head_only = head.method == "HEAD";
-                stream.admitted_at = Some(admitted_at);
                 stream.expected_body = Some(head.content_length.unwrap_or(0));
                 stream.event = Some(TlsHttpEvent::Head { head, admitted_at });
                 self.report.parsed_requests += 1;
@@ -899,7 +949,10 @@ impl Owner {
             }
         }
         slot.pending = Some(Operation::Accept);
-        slot.stream.as_mut().unwrap().deadline = Instant::now() + BUDGET;
+        slot.stream
+            .as_mut()
+            .unwrap()
+            .posted_header_at(Instant::now());
         self.report.submissions += 1;
         Ok(())
     }

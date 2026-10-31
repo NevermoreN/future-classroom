@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--ssh-target",
+    "future-classroom-win11",
+    "--exe",
+    "/tmp/fc-round32-deadline-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-voice-output-dev.zip",
+    "--report",
+    "/tmp/fc-round32-deadline-evidence/windows-tls-business-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T15:28:19.847410+00:00",
+  "stdout": "/tmp/fc-round32-deadline-evidence/windows-tls-business-first.stdout.log",
+  "stderr": "/tmp/fc-round32-deadline-evidence/windows-tls-business-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 57.224475068971515,
+  "completedUtc": "2026-10-31T15:29:17.072180+00:00",
+  "stdoutBytes": 262,
+  "stdoutSha256": "3b755b74e68b79fa2f5f9a42d60b0445aded0c47190c617996c1bee53a4baade",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

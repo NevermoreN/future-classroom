@@ -1,0 +1,76 @@
+{
+  "status": "FINAL_READONLY_SOURCE_REVIEW_NO_BLOCKING_FINDINGS_NOT_EXECUTED",
+  "scope": "Main worktree final six-case service freeze; no source/Cargo/Windows/remote/Git/CI action by reviewer. Parent compilation active and independent.",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38566,
+      "sha256": "4ab35d0114a59aefa3353096db23a7d26c90e7898d02a73b1e9fb5622cd304fb"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 45493,
+      "sha256": "2134353f8802dcaeb78334a17abd0ca79b13cb52b9579d267dd5892cd72159f4"
+    }
+  ],
+  "nativeUnchanged": {
+    "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+    "sha256": "e9b059ab65b8742d196b05cccbf4fc99ff74491f732c652dd8f98e4d5df69932",
+    "matchesInitialReview": true
+  },
+  "sourceChecks": {
+    "ackBodySendResponseBodyCompleteHttpStepFinishHttpChunkAndRearmByteUnchanged": true,
+    "allExistingTestFunctionsByteUnchanged": 10,
+    "sixNewTestNamesMatchFreeze": true,
+    "realWaitUsesCapturedPostDeadlineNotInjectedClock": true
+  },
+  "conclusions": [
+    {
+      "finding": "Header->Request transition is single and guarded after parser completion. Equality/late old header cutoff cannot create a request; emitted Head shares exactly the admitted_at that establishes original120s.",
+      "locations": [
+        "stream.rs:155",
+        "stream.rs:633"
+      ],
+      "coverage": "Two injected boundary tests and real IOCP transfer test; no claim of precise ESTABLISHED time."
+    },
+    {
+      "finding": "admit_body only narrows current deadline, retains exact token/body/event state validation. ACK/response/fence/rearm paths retain original behavior and cannot renew request epoch. Original30s voice budget can shorten120s.",
+      "locations": [
+        "stream.rs:166",
+        "stream.rs:275",
+        "stream.rs:495"
+      ],
+      "coverage": "Future/out-of-range/wrong-length/foreign token, prior30s clamp and ACK unchanged deadline assertions."
+    },
+    {
+      "finding": "Queued unconsumed Head expires negatively; late blocked Decrypt cannot publish Head or free its unique physical slot. cancel/IOCP/Frame/Retire lifecycle remains unchanged in native.rs.",
+      "locations": [
+        "stream/tests.rs:753",
+        "stream/tests.rs:813",
+        "native.rs:617",
+        "native.rs:951"
+      ],
+      "coverage": "Queued Head expiry asserts Closed before Retired; held worker asserts FrameNone/rearm refused until actual return and exact retirement."
+    },
+    {
+      "finding": "Sixth added test physically waits through captured original per-slot post+5 deadline+50ms, then admits/receives/ACKs same original-at+120 request. It does not overwrite the deadline or synthesize a clock.",
+      "locations": [
+        "stream/tests.rs:694",
+        "stream/tests.rs:716"
+      ],
+      "coverage": "Real elapsed post-clock wait + loopback IOCP/mailbox/fake-record driver only; not real Schannel or hard firstTCP closure proof."
+    },
+    {
+      "finding": "No strict firstTCP/backlog/OS scheduling claim is newly justified. Existing post+5/AcceptEx behavior and normal production gate remain unchanged; arbitrary pause around event delivery remains a cooperative-bound limitation.",
+      "locations": [
+        "stream.rs:141",
+        "stream.rs:949",
+        "native.rs:357"
+      ],
+      "coverage": "Runtime validation pending parent; no test/build result claimed here."
+    }
+  ],
+  "priorReview": "/tmp/fc-round32-deadline-evidence/review-notes.json",
+  "serviceFreeze": "/tmp/fc-round32-deadline-evidence/service-source-freeze-second.json",
+  "validation": "Read-only byte comparisons and source inspection only; neither Cargo nor Windows run by reviewer."
+}
