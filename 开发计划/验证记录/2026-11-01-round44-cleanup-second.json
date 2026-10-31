@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "recordedUtc": "2026-10-31T22:31:57.291012+00:00",
+  "committedProof": "fffbbe72f00e4553713761f1b43981a8dfec5ca6",
+  "removedRoot": "/tmp/fc-round44-ci-evidence",
+  "removedFiles": 59,
+  "originalEvidenceFiles": 57,
+  "originalArtifactZips": 2,
+  "allOriginalBytesMatchedBeforeDeletion": true,
+  "firstGuardPid27292NowAbsent": true,
+  "excludedCurrentOrchestrationAncestry": [
+    {
+      "pid": 27510,
+      "startTicks": 140497866,
+      "comm": "python3"
+    },
+    {
+      "pid": 27509,
+      "startTicks": 140497863,
+      "comm": "bash"
+    },
+    {
+      "pid": 2515,
+      "startTicks": 121219337,
+      "comm": "codex"
+    },
+    {
+      "pid": 2488,
+      "startTicks": 121219192,
+      "comm": "MainThread"
+    },
+    {
+      "pid": 2442,
+      "startTicks": 121214734,
+      "comm": "MainThread"
+    },
+    {
+      "pid": 2410,
+      "startTicks": 121214660,
+      "comm": "MainThread"
+    },
+    {
+      "pid": 42,
+      "startTicks": 121185315,
+      "comm": "s6-supervise"
+    },
+    {
+      "pid": 1,
+      "startTicks": 121185128,
+      "comm": "s6-svscan"
+    }
+  ],
+  "liveNonancestorRootReferences": 0,
+  "processesKilled": 0,
+  "scope": "First conservative guard performed no deletion and stopped on its now-absent orchestration process. This operation excludes only its own PID/verified parent chain, checks all other processes, and removes only exact ended R44 root after committed-byte and all-original SHA proof. Active R41/R45 work, R42 web/package dependencies, retained development ZIPs, global caches and persistent SSH remain."
+}
