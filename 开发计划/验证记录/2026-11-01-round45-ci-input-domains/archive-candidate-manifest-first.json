@@ -1,0 +1,959 @@
+{
+  "schemaVersion": 1,
+  "status": "READY_FOR_ARCHIVE_REVIEW_NOT_ARCHIVED",
+  "observedAtUtc": "2026-10-31T22:49:06.215994+00:00",
+  "scope": "Point-in-time complete R45 evidence inventory and secret-pattern scan, including actual embedded PS source. Main source unchanged; no archive copy, scratch/root cleanup, Windows, Cargo, Git or CI performed.",
+  "sourceRoot": "/tmp/fc-round45-ci-input-domains-evidence",
+  "suggestedDestination": "开发计划/验证记录/2026-11-01-round45-ci-input-domains",
+  "files": [
+    {
+      "path": "archive-doc-suggestion-first.md",
+      "bytes": 5378,
+      "sha256": "956bc5b5f0d82997d46cd6a86e50631e9d2dab6106e992a866a83cfe977a8d20"
+    },
+    {
+      "path": "checkout-history-metadata-model-final.json",
+      "bytes": 904237,
+      "sha256": "b6163801f6880ff53a2a43b65f4c791c5bd785e1fd12309be770f1c893aeb188"
+    },
+    {
+      "path": "checkout-history-metadata-model.json",
+      "bytes": 904237,
+      "sha256": "b6163801f6880ff53a2a43b65f4c791c5bd785e1fd12309be770f1c893aeb188"
+    },
+    {
+      "path": "checkout-sha256-model-final.json",
+      "bytes": 92722,
+      "sha256": "7518b3c870c86b73ba20c5ada14bc1e51e3b266a5ec4f1650815397933a23735"
+    },
+    {
+      "path": "checkout-sha256-model.json",
+      "bytes": 92722,
+      "sha256": "cf3c7195fa7743303a990ee7bd4a17ee4e7ed50dff6228ec55064b43e9aefc2e"
+    },
+    {
+      "path": "diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "git-fixture-commands-final.json",
+      "bytes": 3019,
+      "sha256": "23d846cd5f0a95d6d4b4c9500e93c47d0f23ed153353e7b08f8aa9781d767e77"
+    },
+    {
+      "path": "git-fixture-commands.json",
+      "bytes": 3019,
+      "sha256": "23d846cd5f0a95d6d4b4c9500e93c47d0f23ed153353e7b08f8aa9781d767e77"
+    },
+    {
+      "path": "head-git-tree-model-final.json",
+      "bytes": 1999246,
+      "sha256": "fbc5f210c2d6a52f4e968938af07da8e10bebec8eb10f03399db42fdec9f56a6"
+    },
+    {
+      "path": "head-git-tree-model.json",
+      "bytes": 1999246,
+      "sha256": "fbc5f210c2d6a52f4e968938af07da8e10bebec8eb10f03399db42fdec9f56a6"
+    },
+    {
+      "path": "head-tree-original-final.bin",
+      "bytes": 1029263,
+      "sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038",
+      "kind": "raw-original-Git-NUL-metadata",
+      "nulCount": 6940,
+      "normalization": "NONE"
+    },
+    {
+      "path": "head-tree-original.bin",
+      "bytes": 1029263,
+      "sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038",
+      "kind": "raw-original-Git-NUL-metadata",
+      "nulCount": 6940,
+      "normalization": "NONE"
+    },
+    {
+      "path": "implementation-first.diff",
+      "bytes": 18033,
+      "sha256": "d828861d494625aebb0472d0bf4921e8c9ca9d5fdda4020fcf0a0b0d12f6be8f"
+    },
+    {
+      "path": "input-domain-model-final.json",
+      "bytes": 4894,
+      "sha256": "a2288530fc11abd34c53e2a51eaadedad65ad893a326d7f4d539d16eaee4e40e"
+    },
+    {
+      "path": "input-domain-model-final.py",
+      "bytes": 10615,
+      "sha256": "a0a86add64a3ab695d28e1c73e43b124596d6fc51efc0f57a42312e2b7d9b7d7"
+    },
+    {
+      "path": "input-domain-model-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "input-domain-model-final.stdout.log",
+      "bytes": 191,
+      "sha256": "3642c06996820e80289debd4699a4256bbc802735a8fd8b188b84b92b4b0e2a2"
+    },
+    {
+      "path": "input-domain-model-first.json",
+      "bytes": 4894,
+      "sha256": "b1ad1fa281bb5d3156bac92c653ce14d75fcd039e268cf6f0318740fcd541c01"
+    },
+    {
+      "path": "input-domain-model.py",
+      "bytes": 10585,
+      "sha256": "5471e7b4d2907fdb27f4a41ec0872a1cd9334a4f1656c3914095a40359f0f730"
+    },
+    {
+      "path": "input-domain-powershell-fixture-first.ps1",
+      "bytes": 76817,
+      "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849"
+    },
+    {
+      "path": "prepare-archive-inventory-first.py",
+      "bytes": 10819,
+      "sha256": "60a72e0c009a3209afa549e3519610c9b4f1e8df6d6ba7622a617b318a0e0f61"
+    },
+    {
+      "path": "prepare-ps-fixture.py",
+      "bytes": 10762,
+      "sha256": "5c16a8df4837f6037c72af7aabe976e09bee78793cdadd15a6e96bd53bd623f2"
+    },
+    {
+      "path": "product-gap-readonly-first.json",
+      "bytes": 20292,
+      "sha256": "e609527f1ba79fc3685d15b3624ad9803f2280da067183e2e883f71688200b8f"
+    },
+    {
+      "path": "r44-original-inventory-diagnosis.json",
+      "bytes": 52611,
+      "sha256": "4e15ad9016a0ffa089cf4427f9fcd4f39c05892b1bfdd456e036df1d9ec8cfee"
+    },
+    {
+      "path": "root-main-integration-first.json",
+      "bytes": 596,
+      "sha256": "adb062e3c2e76da83b7814a183ea080716ea7184cdcb83ece129761018329dfc"
+    },
+    {
+      "path": "run-windows-helper-first.py",
+      "bytes": 4020,
+      "sha256": "1bdf02fefcc3ff6ee8b067b783ef51de6be3a2c9476c42785577d7c92fe777b0"
+    },
+    {
+      "path": "service-readonly-review-first.json",
+      "bytes": 18747,
+      "sha256": "893521a5e2a96e25c718522eebeb6db7820ce2ac9bd9fa932106ee15a5f149ba"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 238,
+      "sha256": "a7d150161bd4ef73078427dca1ab0ab5c2aa5377de9c63c9f3ab07d3142eae29"
+    },
+    {
+      "path": "source-freeze-first.json",
+      "bytes": 5585,
+      "sha256": "7eb968e1e32566f498bffe29af2ac3ff3ba2b47d21f5b1ee85fdbe559f887765"
+    },
+    {
+      "path": "source-static-first.json",
+      "bytes": 3331,
+      "sha256": "9bd9dc963cc95f98c2eb459a999517787958288d420bd2ec83685f4a1b06f305"
+    },
+    {
+      "path": "verify-windows-cleanup-second.py",
+      "bytes": 2757,
+      "sha256": "bd1724b1677cd26037f44a1258211e2c82e6cc34d021b9ff0f98e40159c8ca14"
+    },
+    {
+      "path": "windows-helpers-freeze-first.json",
+      "bytes": 4006,
+      "sha256": "6a6c1a4da4234cea7615f8ed3c9387daaba07e33a44b9e044d679fa95612786d"
+    },
+    {
+      "path": "windows-input-helpers-after-first.json",
+      "bytes": 4980,
+      "sha256": "95af806e65780abeb3a4f6bc953ca4d7f6a1363918379348a71d31a94f4338a9"
+    },
+    {
+      "path": "windows-input-helpers-after-first.stderr.log",
+      "bytes": 618,
+      "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+    },
+    {
+      "path": "windows-input-helpers-after-first.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+    },
+    {
+      "path": "windows-input-helpers-after-second.json",
+      "bytes": 4494,
+      "sha256": "86590b659be2623fcdc5859c427e04960d4c62eedf92fb6e7b663180d3466250"
+    },
+    {
+      "path": "windows-input-helpers-after-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-input-helpers-after-second.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+    },
+    {
+      "path": "windows-input-helpers-first.json",
+      "bytes": 17413,
+      "sha256": "297a9be5e167c1d3bb905df4f6657a90aa972393d5dd10613fc3e2a2e4c8eefd"
+    },
+    {
+      "path": "windows-input-helpers-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-input-helpers-first.stdout.log",
+      "bytes": 3245,
+      "sha256": "70f7cc8b7b47b700ed2730ce1099b530e99e88f464720252f89e191a3a0447d1"
+    },
+    {
+      "path": "windows-msvc-ci.after.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "windows-msvc-ci.before.ps1",
+      "bytes": 38498,
+      "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6"
+    }
+  ],
+  "fileCount": 44,
+  "totalBytes": 8441535,
+  "indexExcludedFromOwnLedger": true,
+  "excluded": [
+    {
+      "path": ".owner",
+      "reason": "Temporary owned directory marker, not archive evidence"
+    }
+  ],
+  "productionSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "credentialScan": {
+    "status": "NO_LITERAL_OR_DECODED_PATTERN_FINDINGS",
+    "patterns": [
+      "privateKey",
+      "githubToken",
+      "openaiToken",
+      "literalAuthorization",
+      "literalStopCapability",
+      "signedExportUrl"
+    ],
+    "findings": [],
+    "decodedOccurrenceCount": 5,
+    "uniqueDecodedPayloads": 4,
+    "decodedPayloadEvidence": [
+      {
+        "container": "input-domain-powershell-fixture-first.ps1",
+        "kind": "PowerShell single-quoted FromBase64String embedded source",
+        "decodedBytes": 49874,
+        "decodedSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+      },
+      {
+        "container": "windows-input-helpers-after-first.json",
+        "kind": "JSON base64",
+        "decodedBytes": 134,
+        "decodedSha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+      },
+      {
+        "container": "windows-input-helpers-after-first.json",
+        "kind": "JSON base64",
+        "decodedBytes": 618,
+        "decodedSha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+      },
+      {
+        "container": "windows-input-helpers-after-second.json",
+        "kind": "JSON base64",
+        "decodedBytes": 134,
+        "decodedSha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+      },
+      {
+        "container": "windows-input-helpers-first.json",
+        "kind": "JSON base64",
+        "decodedBytes": 3245,
+        "decodedSha256": "70f7cc8b7b47b700ed2730ce1099b530e99e88f464720252f89e191a3a0447d1"
+      }
+    ],
+    "scope": "All original bytes, JSON base64/encodedCommand, recursively found single-quoted PowerShell FromBase64String source were scanned. Decoded source bytes were not written or printed. Pattern hygiene is not proof against arbitrary unknown secret formats."
+  },
+  "layers": {
+    "pythonModel": {
+      "cases": 42,
+      "status": "PASS_PYTHON_MODEL_AND_LOCAL_GIT_ONLY",
+      "fixtureRemoved": true
+    },
+    "actualWindowsExtractedHelpers": {
+      "cases": 41,
+      "status": "PASS_POWERSHELL_HELPERS_ONLY",
+      "powershell": "5.1.26100.9711",
+      "fullASTErrors": 0,
+      "ciEntrypointExecuted": false,
+      "compilerExecuted": false,
+      "aggregate256MiBActualAllocation": "NOT_RUN_MODEL_PLUS_ORIGINAL_GUARD"
+    },
+    "firstAfterAudit": {
+      "status": "FAIL_PRESERVED",
+      "exitCodeCaveat": "First report reconstructed an unsaved exitCode; first parsing typo and progress-CLIXML stderr criterion retained, not independent terminal proof."
+    },
+    "secondAfterAudit": {
+      "status": "PASS",
+      "actualExitCode": 0,
+      "processAbsent": true,
+      "fixtureRootCount": 0,
+      "sshd": "Running"
+    },
+    "readonlyReview": {
+      "checks": 22,
+      "validatorAreas": 9,
+      "status": "READ_ONLY_REVIEW_NO_CONFIRMED_BLOCKER_FOUND"
+    },
+    "readonlyProductGap": {
+      "sourceBindings": 17,
+      "status": "READONLY_PRODUCT_GAP_AUDIT_COMPLETE_NOT_RUNTIME_VALIDATION",
+      "scope": "Product planning/read-only gap audit, not implementation or runtime evidence."
+    }
+  },
+  "budgetFacts": {
+    "ciInvokeLoggedDefaultSeconds": 120,
+    "ciWorkspaceTestCompileSeconds": 2400,
+    "ciProductBuildSeconds": 1200,
+    "ciClippySeconds": 1500,
+    "jobs": 2,
+    "localRustMatrixSeconds": 900,
+    "allOriginalCiCargoFlagsAndTimeoutsUnchanged": true,
+    "note": "900 belongs to parent local Rust matrix, not a universal CI command timeout."
+  },
+  "cleanupScope": {
+    "ownedLocalSparseFixtureRemoved": true,
+    "ownedWindowsFixtureRootsZero": true,
+    "ownedOriginalWindowsHelperProcessAbsent": true,
+    "sourceWorktreeRetainedForParent": true,
+    "evidenceRetained": true,
+    "rootOrScratchDeletedByThisTask": false,
+    "windowsSshAndAuthorization": "UNTOUCHED"
+  },
+  "archivePerformed": false,
+  "mainRepositoryModified": false,
+  "checks": [
+    {
+      "name": "current main exact source ed26",
+      "status": "PASS"
+    },
+    {
+      "name": "preserved frozen after source same ed26",
+      "status": "PASS"
+    },
+    {
+      "name": "42 original models source binding and pass",
+      "status": "PASS"
+    },
+    {
+      "name": "41 actual Windows extracted helpers no CI/compiler execution",
+      "status": "PASS"
+    },
+    {
+      "name": "PS actual owned fixture root removed",
+      "status": "PASS"
+    },
+    {
+      "name": "first after audit local failure retained",
+      "status": "PASS"
+    },
+    {
+      "name": "new second after audit actualexit0 same process absent roots0 sshd",
+      "status": "PASS"
+    },
+    {
+      "name": "local owned sparse fixture removed original evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "frozen helper cleanup and original first after caveat retained",
+      "status": "PASS"
+    },
+    {
+      "name": "root main integration exact ed26",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly service review exact original22checks/9validatorareas",
+      "status": "PASS"
+    },
+    {
+      "name": "readonly product gap original17distinct source bindings",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file .owner",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file archive-doc-suggestion-first.md",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected archive-doc-suggestion-first.md",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic archive-doc-suggestion-first.md",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file checkout-history-metadata-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected checkout-history-metadata-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic checkout-history-metadata-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file checkout-history-metadata-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected checkout-history-metadata-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic checkout-history-metadata-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file checkout-sha256-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected checkout-sha256-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic checkout-sha256-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file checkout-sha256-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected checkout-sha256-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic checkout-sha256-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file diff-check-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected diff-check-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic diff-check-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file diff-check-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected diff-check-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic diff-check-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file git-fixture-commands-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected git-fixture-commands-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic git-fixture-commands-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file git-fixture-commands.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected git-fixture-commands.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic git-fixture-commands.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file head-git-tree-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected head-git-tree-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic head-git-tree-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file head-git-tree-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected head-git-tree-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic head-git-tree-model.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file head-tree-original-final.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected head-tree-original-final.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic head-tree-original-final.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file head-tree-original.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected head-tree-original.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic head-tree-original.bin",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file implementation-first.diff",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected implementation-first.diff",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic implementation-first.diff",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model-final.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model-final.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model-final.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model-final.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model-final.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model-final.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model-final.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model-final.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model-final.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model-final.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-model.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-model.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-model.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file input-domain-powershell-fixture-first.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected input-domain-powershell-fixture-first.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic input-domain-powershell-fixture-first.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file prepare-archive-inventory-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected prepare-archive-inventory-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic prepare-archive-inventory-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file prepare-ps-fixture.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected prepare-ps-fixture.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic prepare-ps-fixture.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file product-gap-readonly-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected product-gap-readonly-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic product-gap-readonly-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file r44-original-inventory-diagnosis.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected r44-original-inventory-diagnosis.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic r44-original-inventory-diagnosis.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file root-main-integration-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected root-main-integration-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic root-main-integration-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file run-windows-helper-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected run-windows-helper-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic run-windows-helper-first.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file service-readonly-review-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected service-readonly-review-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic service-readonly-review-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file source-before.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected source-before.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic source-before.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file source-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected source-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic source-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file source-static-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected source-static-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic source-static-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file verify-windows-cleanup-second.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected verify-windows-cleanup-second.py",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic verify-windows-cleanup-second.py",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-helpers-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-helpers-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-helpers-freeze-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-second.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-second.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-second.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-second.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-second.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-second.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-after-second.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-after-second.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-after-second.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-first.json",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-first.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-input-helpers-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-input-helpers-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-input-helpers-first.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-msvc-ci.after.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-msvc-ci.after.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-msvc-ci.after.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "ordinary owned evidence file windows-msvc-ci.before.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no ZIP EXE private control expected windows-msvc-ci.before.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no executable magic windows-msvc-ci.before.ps1",
+      "status": "PASS"
+    },
+    {
+      "name": "no literal or decoded credential finding",
+      "status": "PASS"
+    },
+    {
+      "name": "embedded actual CI source decoded and scanned",
+      "status": "PASS"
+    },
+    {
+      "name": "both Git NUL originals retained exact identical bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "all snapshot originals remain unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "main source unchanged after archive preparation",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "This is not formal archive INDEX or exact-byte copy proof; parent must copy and independently rehash archived members.",
+    "No new full HostedPS7.2 CI/compiler/runtime validation is inferred from PS5.1 AST-extracted helper tests.",
+    "Historical Git metadata, actual SHA subset and current checkout lengths are different evidence domains; never reuse old allGit rawSHA language.",
+    "Original P0 strict5s/ordinary listeneroff/threeOS and visible device acceptance gates remain separate."
+  ]
+}

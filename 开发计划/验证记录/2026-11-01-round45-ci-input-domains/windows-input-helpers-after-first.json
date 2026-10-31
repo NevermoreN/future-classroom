@@ -1,0 +1,45 @@
+{
+  "status": "FAIL",
+  "scope": "Read-only verification after actual helper process SSH exit; no arbitrary process kill or directory removal.",
+  "command": [
+    "ssh",
+    "-T",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "future-classroom-win11",
+    "powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AE8AdQB0AHAAdQB0AEUAbgBjAG8AZABpAG4AZwA9AFsAVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAZQB4AHAAZQBjAHQAZQBkAFAAaQBkAD0AMwAxADgAMAA4ADsAJABlAHgAcABlAGMAdABlAGQAUwB0AGEAcgB0AD0ANgAzADkAMgA5ADAAOAAzADAANgA2ADYANAAzADUAMwA2ADIAOwAgACQAbwByAGkAZwBpAG4AYQBsAEEAbABpAHYAZQA9ACQAZgBhAGwAcwBlADsAJABwAD0ARwBlAHQALQBQAHIAbwBjAGUAcwBzACAALQBJAGQAIAAkAGUAeABwAGUAYwB0AGUAZABQAGkAZAAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQA7AAoAaQBmACgAJABuAHUAbABsAC0AbgBlACQAcAApAHsAdAByAHkAewAkAG8AcgBpAGcAaQBuAGEAbABBAGwAaQB2AGUAPQAoACQAcAAuAFMAdABhAHIAdABUAGkAbQBlAC4AVABvAFUAbgBpAHYAZQByAHMAYQBsAFQAaQBtAGUAKAApAC4AVABpAGMAawBzAC0AZQBxACQAZQB4AHAAZQBjAHQAZQBkAFMAdABhAHIAdAApAH0AZgBpAG4AYQBsAGwAeQB7ACQAcAAuAEQAaQBzAHAAbwBzAGUAKAApAH0AfQA7AAoAJAByAG8AbwB0AHMAPQBAACgARwBlAHQALQBDAGgAaQBsAGQASQB0AGUAbQAgAC0ATABpAHQAZQByAGEAbABQAGEAdABoACAAJABlAG4AdgA6AFQARQBNAFAAIAAtAEQAaQByAGUAYwB0AG8AcgB5ACAALQBGAGkAbAB0AGUAcgAgACcARgB1AHQAdQByAGUAQwBsAGEAcwBzAHIAbwBvAG0ALQBUAGUAcwB0AC0AQwBJAEkAbgBwAHUAdABzAC0AKgAnACAALQBGAG8AcgBjAGUAfABTAGUAbABlAGMAdAAtAE8AYgBqAGUAYwB0ACAALQBFAHgAcABhAG4AZABQAHIAbwBwAGUAcgB0AHkAIABOAGEAbQBlACkAOwAKAEAAewBvAHIAaQBnAGkAbgBhAGwAUAByAG8AYwBlAHMAcwBBAGwAaQB2AGUAPQAkAG8AcgBpAGcAaQBuAGEAbABBAGwAaQB2AGUAOwBtAGEAdABjAGgAaQBuAGcARgBpAHgAdAB1AHIAZQBSAG8AbwB0AEMAbwB1AG4AdAA9ACQAcgBvAG8AdABzAC4AQwBvAHUAbgB0ADsAbQBhAHQAYwBoAGkAbgBnAEYAaQB4AHQAdQByAGUAUgBvAG8AdABzAD0AJAByAG8AbwB0AHMAOwBzAHMAaABkAD0AKABHAGUAdAAtAFMAZQByAHYAaQBjAGUAIABzAHMAaABkACkALgBTAHQAYQB0AHUAcwAuAFQAbwBTAHQAcgBpAG4AZwAoACkAOwBwAG8AdwBlAHIAcwBoAGUAbABsAD0AJABQAFMAVgBlAHIAcwBpAG8AbgBUAGEAYgBsAGUALgBQAFMAVgBlAHIAcwBpAG8AbgAuAFQAbwBTAHQAcgBpAG4AZwAoACkAfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAAoA"
+  ],
+  "source": "$ErrorActionPreference='Stop';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$expectedPid=31808;$expectedStart=639290830666435362; $originalAlive=$false;$p=Get-Process -Id $expectedPid -ErrorAction SilentlyContinue;\nif($null-ne$p){try{$originalAlive=($p.StartTime.ToUniversalTime().Ticks-eq$expectedStart)}finally{$p.Dispose()}};\n$roots=@(Get-ChildItem -LiteralPath $env:TEMP -Directory -Filter 'FutureClassroom-Test-CIInputs-*' -Force|Select-Object -ExpandProperty Name);\n@{originalProcessAlive=$originalAlive;matchingFixtureRootCount=$roots.Count;matchingFixtureRoots=$roots;sshd=(Get-Service sshd).Status.ToString();powershell=$PSVersionTable.PSVersion.ToString()}|ConvertTo-Json -Compress\n",
+  "exitCode": 0,
+  "observed": {
+    "powershell": "5.1.26100.9711",
+    "sshd": "Running",
+    "originalProcessAlive": false,
+    "matchingFixtureRootCount": 0,
+    "matchingFixtureRoots": []
+  },
+  "originalProcessOwner": {
+    "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+    "pid": 31808,
+    "startTicks": 639290830666435362,
+    "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  "stdout": {
+    "bytes": 134,
+    "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe",
+    "base64": "eyJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJzc2hkIjoiUnVubmluZyIsIm9yaWdpbmFsUHJvY2Vzc0FsaXZlIjpmYWxzZSwibWF0Y2hpbmdGaXh0dXJlUm9vdENvdW50IjowLCJtYXRjaGluZ0ZpeHR1cmVSb290cyI6W119DQo="
+  },
+  "stderr": {
+    "bytes": 618,
+    "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423",
+    "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48T2JqIFM9InByb2dyZXNzIiBSZWZJZD0iMSI+PFROUmVmIFJlZklkPSIwIiAvPjxNUz48STY0IE49IlNvdXJjZUlkIj4xPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPuato+WcqOWHhuWkh+mmluasoeS9v+eUqOaooeWdl+OAgjwvQVY+PEFJPjA8L0FJPjxOaWwgLz48UEk+LTE8L1BJPjxQQz4tMTwvUEM+PFQ+Q29tcGxldGVkPC9UPjxTUj4tMTwvU1I+PFNEPiA8L1NEPjwvUFI+PC9NUz48L09iaj48L09ianM+"
+  },
+  "localFirstParseFailure": {
+    "error": "LookupError: unknown encoding: utf8-sig",
+    "rawFilesWereAlreadySaved": true,
+    "actualRemoteExitCodeObservedBeforeLocalParse": 0,
+    "resolution": "Decoded the same preserved original bytes with utf-8-sig; no remote retry, mutation or discarded original."
+  }
+}

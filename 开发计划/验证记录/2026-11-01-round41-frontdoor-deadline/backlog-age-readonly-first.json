@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "status": "READ_ONLY_RESEARCH_COMPLETE_NOT_RUNTIME_VALIDATION",
+  "recordedAtUtc": "2026-10-31T21:46:11.583121+00:00",
+  "scope": "Primary Microsoft Learn/current Microsoft SDK definitions plus read-only existing production/harness source. No repository writes, compilation, Windows/SSH/CI/network-client execution or tests. Only this requested research report is created. Browsing official documentation is research, not target-device execution.",
+  "strictGate": {
+    "nanoseconds": 5000000000,
+    "originalRound13": "FAIL5of8;maxOvershoot577000ns preserved",
+    "productionListener": "NOT_ENABLED",
+    "newGatePassClaim": false
+  },
+  "conclusions": [
+    "SO_CONNECT_TIME is useful coarse negative admission evidence without listener rotation or connection maps, but the cited contract does not prove a finite tight upper bound for true ESTABLISHED age; neither s+1 seconds nor0meansfresh is documented.",
+    "A completion-time age query may prevent granting an obviously aged connection another full post+5 interval; it cannot retroactively close a backlog connection before a five-second deadline already exceeded while Net was unscheduled.",
+    "TCP_ESTATS_SYN_OPTS_ROS_v0 contains no time. SIO_TCP_INFO.ConnectionTimeMs is Windows10version1703+ and cannot satisfy the Win7 baseline.",
+    "Pre-new-local-connect to causally corresponding remote-close observation can be a conservative longer per-sample interval without cross-machine clock alignment. It is conditional on actual remote connection/EOF provenance and cannot turn all current forwardObservation fields into strict transport proof automatically."
+  ],
+  "soConnectTime": {
+    "supportedFacts": {
+      "valueType": "DWORD,32-bit unsigned",
+      "option": "SOL_SOCKET/SO_CONNECT_TIME0x700C",
+      "unit": "seconds since connected, per document; integer output",
+      "minimumAvailability": "Win7/10 explicitly listed; current SDK retains API. Win11 uses the same supported Winsock API family, exact provider success still must be checked; no claim of Win7/10/11 runtime execution here.",
+      "connectionOrientedOnly": true,
+      "readVsSet": "read-only",
+      "unconnected": "AcceptEx/ConnectEx pages describe returned optval0xFFFFFFFF; generic getsockopt prose says SOCKET_ERROR. Therefore distinguish API return code from DWORD sentinel instead of reading optval on error.",
+      "integerRange": "DWORD representable0..4294967295;0xFFFFFFFF is reserved here as unconnected. Documentation does not specify large-age saturation/wrap semantics."
+    },
+    "unprovenAssumptions": [
+      "floor/ceil/nearest rounding of the underlying duration",
+      "maximum tick/refresh lag of the reported integer",
+      "atomic relationship to kernel ESTABLISHED transition vs accept completion/context update",
+      "behavior at DWORD overflow or across suspend/resume/clock anomalies",
+      "that optval0 implies age<1second",
+      "that age<=(reportedSeconds+1)seconds on all supported systems/providers"
+    ],
+    "safetyConsequence": "Do not compute a strict deadline as dequeueNow+(5-s)seconds or5-(s+1)seconds and label it proven. A finite provider measurement may characterize observed behavior only, not establish a general documented error bound.",
+    "boundedIntegrationCandidate": [
+      "Query the exact bare-owned accepted socket after actual AcceptEx completion and SO_UPDATE_ACCEPT_CONTEXT, before SSPI/ownership transfer; no lookup table, no worker/native thread, no extra socket/Frame.",
+      "Validate getsockopt return0 and returned optlen==sizeof(DWORD); treat error, sentinel or unsupported provider as unavailable age, never fresh age0. A chosen fail-closed rejection policy must be explicit and tested; no reopen/rotation/reuseaddr.",
+      "Coarse values indicating aged connection may justify immediate negative discard, with reported units and uncertainty; successful age reading must never extend the already captured post-derived header deadline.",
+      "Recheck original header alarm/deadline after the query and immediately before handoff. Once complete valid Head entered the original120-second request stage, do not let an age>=5 observation kill legitimate admitted body/response.",
+      "If close fails or cancellation/IOCP return is outstanding, keep the exact existing bare owner and prohibit replacement; metadata query is not physical close/IO completion proof."
+    ],
+    "sources": [
+      "ms-sol-socket",
+      "ms-getsockopt",
+      "ms-acceptex",
+      "ms-connectex",
+      "ms-sdk-mswsock",
+      "ms-closesocket"
+    ]
+  },
+  "estatsAndAlternatives": {
+    "synOpts": {
+      "api": "GetPerTcpConnectionEStats/TcpConnectionEstatsSynOpts",
+      "platform": "Vista+ thus Win7 baseline API",
+      "fields": [
+        "ActiveOpen",
+        "MssRcvd",
+        "MssSent"
+      ],
+      "establishedTimestamp": false,
+      "collection": "SynOpts exempt from prior collection enabling. Other groups generally require enable; do not enable stats/UAC merely to search for nonexistent time."
+    },
+    "otherGroups": "Data counters, RTT and cumulative congestion-limited durations describe transfer behavior, not a reliable per-link ESTABLISHED timestamp. Row tuple lookup additionally faces snapshot/tuple reuse races and system table allocation; do not introduce an unbounded connection map as a workaround.",
+    "ownerModuleTimestamp": "MIB_TCPROW_OWNER_MODULE.liCreateTimestamp is documented context-bind FILETIME, not ESTABLISHED. It is wall-clock metadata and not a substitute for a monotonic deadline origin.",
+    "newWindowsInfo": "TCP_INFO_v0.ConnectionTimeMs is a millisecond lifetime field requiring Win10version1703+; even then cited docs provide no strict quantization/refresh bound. A runtime-probed optional diagnostic does not become Win7 coverage or hard real-time proof.",
+    "sources": [
+      "ms-estats",
+      "ms-synopts",
+      "ms-sdk-estats",
+      "ms-estats-data",
+      "ms-tcp-info",
+      "ms-sio-tcp-info",
+      "ms-tcp-owner"
+    ]
+  },
+  "currentSourceFindings": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "lines": [
+        169,
+        193,
+        223,
+        225
+      ],
+      "fact": "post_bare_accept still captures deadline after AcceptEx success/IO_PENDING. Dequeue latency and an already-established backlog predecessor can make this origin later than remote ESTABLISHED."
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "lines": [
+        34,
+        35,
+        37
+      ],
+      "fact": "header_close_alarm subtracts HEADER_CLOSE_RESERVE from the existing hard deadline. This is scheduling/close margin, not a kernel connection birth timestamp or backlog-age correction."
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/开发计划/14-P0独立TCP接纳候选ADR.md",
+      "lines": [
+        21,
+        36,
+        87
+      ],
+      "fact": "Original577us strictFAIL and post+5/backlog deficiency already explicitly preserved. No research result changes that status."
+    }
+  ],
+  "forwardedTiming": {
+    "existingStartSites": [
+      {
+        "path": "scripts/windows-tls-business-probe.py",
+        "lines": [
+          227,
+          252,
+          274,
+          319,
+          321
+        ],
+        "observation": "Client.request uses monotonic_ns before constructing/sending a fresh local connection; EOF occurs before finally local close and final elapsed capture."
+      },
+      {
+        "path": "scripts/windows-tls-business-probe.py",
+        "lines": [
+          499,
+          513,
+          538,
+          562
+        ],
+        "observation": "PendingReceipt starts before its fresh local TCP connect; final elapsed includes intentionally held body and is not an incomplete-Head deadline test."
+      },
+      {
+        "path": "scripts/windows-tls-business-probe.py",
+        "lines": [
+          575,
+          577,
+          583,
+          595
+        ],
+        "observation": "capacity reject start is pre-local-connect, but raw SSLEOF/RST alone may also arise from forwarding failure, so provenance matters."
+      },
+      {
+        "path": "scripts/windows-tls-probe.py",
+        "lines": [
+          502,
+          509,
+          510,
+          563,
+          604,
+          606
+        ],
+        "observation": "exercise_batch uses one shared pre-barrier start earlier than every new local connect; it is a looser lower origin, not per-connection serverEST. Closing in finally precedes final time capture."
+      },
+      {
+        "path": "scripts/windows-tls-probe.py",
+        "lines": [
+          415,
+          421,
+          444,
+          446,
+          450
+        ],
+        "observation": "-L master listener is established before individual sockets; successful mux forward acknowledgement proves local forward listener, not a particular remote TCP connection."
+      }
+    ],
+    "causalArgument": {
+      "classification": "Inference from actual new OpenSSH-L connection semantics and trusted peer correlation; not an OS timing API fact",
+      "chain": "t0(client before creating new local socket) <= tWindowsEST(for that new remote connection) <= tRemoteEOF(or that server TLS close_notify emission) <= tObservedPeerEvent(client read result) <= tAfterLocalClose(finally timer)",
+      "inequality": "For the same causal remote connection and endpoint event: tObservedPeerEvent-tWindowsEST <= tObservedPeerEvent-t0 <= tAfterLocalClose-t0. No wall-clock alignment is needed because the containing interval is measured entirely by one local monotonic clock.",
+      "pass": "If the properly correlated containing interval<=5000000000ns, it gives a conservative sampled upper interval for the contained EST-to-observed-peer-event duration, including SSH/network/client scheduling overhead.",
+      "failure": "If the containing interval>5000000000ns, retain conservative observationFAIL/NOT_PROVEN, but do not infer server uniquely violated its internal closure deadline; overhead may be outside the server. No claim about arbitrary scheduling follows from any finite PASS."
+    },
+    "requiredConditions": [
+      "t0 must precede the actual local socket connect that causes a new remote direct-tcpip connection; it cannot be handshake complete, local connect return, accepted_at or reused HTTP keepalive/pooled tunnel destination.",
+      "The same local socket must causally lead to this exact owned Windows listener. An already open SSH master is acceptable; a preconnected remote destination pool is not.",
+      "Positive evidence must exclude SSH channel-open/refused/forward teardown/client timeout/local cancel/process stop as the source of EOF. Completed TLS1.2 handshake against the exact owned certificate establishes service reachability for partial-HTTP tests; no-TLS-data tests need separate bounded remote attribution.",
+      "Observe and record the recv EOF/RST/TLS result timestamp before actively closing the local socket; record localClose separately. Existing later finally elapsed is only a looser bound and never converts an exception/no-EOF into peer closure.",
+      "TLS recv returningempty with suppress_ragged_eofs=False proves close_notify, not Windows TCP FIN or socket/IOCP retirement. Raw recv0 proves local forwarded-stream EOF; corresponding remote TCP provenance still must be established. Keep these distinct.",
+      "A complete HTTPHead ends the first-head gate. Ordinary successful API response duration, body-held PendingReceipt and late application responses cannot test incomplete-Head closure.",
+      "Preserve exact per-connection sample/raw timestamps plus the original5000000000 threshold. Do not round milliseconds, omit outliers, renew client/native budget, or reinterpret proxy delay as exact kernel time."
+    ],
+    "currentEvidenceVerdict": "Existing forwardObservationNanos starts early enough for a causal upper interval in successfully reached-service cases, but current generic flags remain NOT_VALIDATED: no dedicated strict incomplete-Head assertion/end timestamp/provenance ledger for all negative paths. Do not retroactively promote old reports.",
+    "source": "openssh-local-forward"
+  },
+  "minimalNextExecutableSlice": {
+    "scope": "Separate explicitly finite header/backlog diagnostic on the existing actual Schannel candidate and owned SSHforward, original Net/IOCP+two business workers+single bare/four business slots; no normal listener enable, no SO_REUSEADDR/listener rotation, no new pool or unbounded map.",
+    "changes": [
+      "Add bounded read-only age samples only for original bare/socket tokenserial at completion; keep result/error/sentinel/optlen and pre/postquery monotonic points. Do not derive a proven age upper bound from seconds.",
+      "Add explicit preConnectNs and peerEventNs to the current finite raw client, preserving existing finally elapsed, deadline and rawEOF-kind. Full TLS then a strict incomplete HTTP head verifies service reachability without completing Head; keep exact expected cert.",
+      "Exercise a fixed small set: idle-post near edge; controlled Net dequeue delay with at most a few queued connections; capacity rejection and subsequent original-owner rearm. Every successful sample must carry exact source/event correlation; missing provenance=>NOT_PROVEN, no retry-to-green.",
+      "Retain original Head-admitted_at+120s body/response behavior in a parallel admitted request; new age checks are first-head phase only.",
+      "Use existing candidate tests to cover APIerror/sentinel/DWORD boundary/latequery/no deadline extension and preserve exact IOCP close-failure owner behavior. These model tests do not prove real connection age.",
+      "After authorized actual Win11 sampling, retain OS/provider+SO_CONNECT_TIME buckets and nanosecond client intervals; realWin7/10 separately. A maximum observed update lag is evidence of that run, never a documented universal bound."
+    ],
+    "successDefinition": "A scoped coarse-age negative hardening and explicit sampled conservative interval ledger may pass its own tests; strict overall firstTCP5s gate staysFAIL/NOT_VALIDATED unless original full definition and every required scenario are actually supported.",
+    "remainingRootObstacle": "Without a documented monotonic lower bound for each true ESTABLISHED origin, or a transport/kernel admission primitive that controls it, socket-age arithmetic plus25ms poll reserve cannot prove the full gate. Even an exact origin cannot force Net/kernel/peer execution during arbitrary suspension or scheduling delay."
+  },
+  "primarySources": [
+    {
+      "id": "ms-sol-socket",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options",
+      "supports": "SO_CONNECT_TIME is get-only DWORD connected seconds; Win7/10 support table. No rounding/update/overflow bound stated."
+    },
+    {
+      "id": "ms-getsockopt",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt",
+      "supports": "Return0 vs SOCKET_ERROR, optlen bytes, unsupported option error; unconnected discussion differs from AcceptEx sentinel description."
+    },
+    {
+      "id": "ms-acceptex",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nf-mswsock-acceptex",
+      "supports": "ReceiveDataLength0 completes on arriving connection; pending-accept connected seconds and 0xFFFFFFFF unconnected sentinel; update accept context; actual cancellation completion still matters."
+    },
+    {
+      "id": "ms-connectex",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nc-mswsock-lpfn_connectex",
+      "supports": "Connected-seconds query while pending and unconnected optval0xFFFFFFFF."
+    },
+    {
+      "id": "ms-sdk-mswsock",
+      "url": "https://raw.githubusercontent.com/microsoft/win32metadata/main/generation/WinSDK/RecompiledIdlHeaders/um/MSWSock.h",
+      "supports": "Microsoft SDK defines SO_CONNECT_TIME0x700C and SO_UPDATE_ACCEPT_CONTEXT0x700B; no age accuracy guarantee."
+    },
+    {
+      "id": "ms-estats",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/iphlpapi/nf-iphlpapi-getpertcpconnectionestats",
+      "supports": "Vista+ IPv4 tuple-based statistics; SynOpts needs no prior collection enable, other groups generally do; no per-socket establishment-time contract."
+    },
+    {
+      "id": "ms-synopts",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/tcpestats/ns-tcpestats-tcp_estats_syn_opts_ros_v0",
+      "supports": "Only ActiveOpen/MssRcvd/MssSent fields, immutable after SYN exchange. No timestamp."
+    },
+    {
+      "id": "ms-sdk-estats",
+      "url": "https://raw.githubusercontent.com/microsoft/win32metadata/main/generation/WinSDK/RecompiledIdlHeaders/shared/tcpestats.h",
+      "supports": "Microsoft SDK confirms SynOpts three fields and separate counter/RTT/cumulative-duration groups; no connection creation timestamp in SynOpts/Data structures."
+    },
+    {
+      "id": "ms-estats-data",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/tcpestats/ns-tcpestats-tcp_estats_data_rod_v0",
+      "supports": "Data transfer counters/sequence state, not connection establishment time."
+    },
+    {
+      "id": "ms-tcp-info",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/mstcpip/ns-mstcpip-tcp_info_v0",
+      "supports": "ConnectionTimeMs lifetime in milliseconds; minimum Windows10version1703, so not a Win7 fallback."
+    },
+    {
+      "id": "ms-sio-tcp-info",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winsock/sio-tcp-info",
+      "supports": "WSAIoctl socket statistics versioned operation; v0/v1 output, not a common Win7 API."
+    },
+    {
+      "id": "ms-tcp-owner",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcprow_owner_module",
+      "supports": "liCreateTimestamp is FILETIME of context bind creating TCP link, not a documented ESTABLISHED transition timestamp."
+    },
+    {
+      "id": "ms-closesocket",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket",
+      "supports": "closesocket initiates overlapped cancellation but does not promise all IO completions at return; outstanding resources must stay owned."
+    },
+    {
+      "id": "openssh-local-forward",
+      "url": "https://man.openbsd.org/ssh#L",
+      "supports": "A new local -L connection causes a new remote connection through the secure channel; master SSH transport preexistence is distinct."
+    }
+  ],
+  "sourceSnapshots": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-tls-business-probe.py",
+      "bytes": 112200,
+      "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-tls-probe.py",
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe"
+    }
+  ],
+  "notPerformed": [
+    "Repository/source/document modification",
+    "Cargo/rustc/build/test",
+    "Windows/SSH/CI/browser execution",
+    "Actual getsockopt/EStats/provider query",
+    "API rounding or update empirical measurement",
+    "Any strictP0 or OS compatibility upgrade"
+  ]
+}

@@ -442,6 +442,10 @@ where
     pub fn report(&self) -> NetworkReport {
         self.core().report
     }
+    /// Fixed metadata only; does not poll, close or release a native owner.
+    pub fn close_snapshot(&self) -> fc_windows::tls_frontdoor::TlsCloseSnapshot {
+        self.core().host.close_snapshot()
+    }
     pub fn is_idle(&self) -> bool {
         self.core().report.native_drained && self.core().records.iter().all(Option::is_none)
     }

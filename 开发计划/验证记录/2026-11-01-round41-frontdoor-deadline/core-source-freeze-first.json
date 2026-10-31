@@ -1,0 +1,119 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_CHECKS_PASS_NOT_COMPILED_NOT_RUN",
+  "timestampUtc": "2026-10-31T21:36:58.132437+00:00",
+  "worktree": "/tmp/fc-round41-frontdoor-deadline-worktree",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "beforeBytes": 7658,
+      "beforeSha256": "ec4b186638b95e4fb61b4d9a852248f4063262bc044941b70311717651834cbb",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-windows/src/tls_frontdoor/mod.rs"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "beforeBytes": 54826,
+      "beforeSha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-windows/src/tls_frontdoor/native.rs"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "beforeBytes": 11868,
+      "beforeSha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-windows/src/tls_frontdoor/native/accept.rs"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "beforeBytes": 38739,
+      "beforeSha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-windows/src/tls_frontdoor/native/stream.rs"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "beforeBytes": 63166,
+      "beforeSha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "beforeBytes": 58970,
+      "beforeSha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-bootstrap/src/web_transfer/network.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "beforeBytes": 26252,
+      "beforeSha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059",
+      "bytes": 29497,
+      "sha256": "3156f180665d34d737912d84e0848f0f1c68aa7b5edde37c0b989bde93fadc90",
+      "afterCopy": "/tmp/fc-round41-frontdoor-deadline-evidence/core-after-first/crates/fc-bootstrap/src/application/http_business_probe.rs"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/core-implementation-first.diff",
+    "bytes": 46427,
+    "sha256": "470494a618909f899a3c71b6c6b96431402517500c369de4c123f81ba5623657"
+  },
+  "scope": "Six production/diagnostic files plus stream/tests.rs. network.rs adds only a pure close_snapshot forwarding accessor. No product listener enable, deadline origin selection, listener rotation or socket reuse change.",
+  "checks": {
+    "rustfmtCheckExit": 0,
+    "architectureExit": 0,
+    "crates": 12,
+    "firstPartyEdges": 33,
+    "trailingWhitespace": false,
+    "oldStreamTestsPreserved": 25,
+    "newTests": [
+      "header_negative_alarm_is_distinct_from_hard_deadline_and_never_shortens_request_stage",
+      "real_iocp_early_header_close_reports_socket_return_without_discharge_of_receive_debt",
+      "real_iocp_bare_alarm_preserves_original_deadline_and_requires_actual_packet_before_repost",
+      "real_iocp_header_alarm_keeps_a_held_decrypt_frame_and_suppresses_its_late_head",
+      "real_iocp_first_header_reserve_keeps_original_five_second_wire_sample_strict",
+      "abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child",
+      "real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline"
+    ],
+    "nativeTestsOriginalBytesUnchanged": {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197"
+    }
+  },
+  "interfaces": {
+    "reserve": "tls_frontdoor::HEADER_CLOSE_RESERVE = Duration::from_millis(25)",
+    "native": "TlsHttpHost::close_snapshot() -> TlsCloseSnapshot",
+    "bridge": "NetCoordinator::close_snapshot() -> TlsCloseSnapshot (pure metadata only)",
+    "probeLine": "TLS_BUSINESS_CLOSE {marker,sequence,generation,reserveNs,headerBegins,headerSocketReturns,headerFailures,headers:[<=4],accept:null|latestbare}",
+    "timeFields": "hardDeadlineNs/alarmNs/beganAtNs/socketCloseBeganAtNs/socketReturnedAtNs/ioReturnedAtNs/frameReturnedAtNs/retirementConfirmedAtNs or bare completionReturnedAtNs are relative to original finite probe monotonic epoch, not ESTABLISHED. beganAt includes negative cancellation path; socketCloseBeganAt is checked close entry including SO_LINGER setup. No peer EOF/RST field is fabricated.",
+    "size": "TlsCloseSnapshot has an inline compile-time <=2048 byte bound; Report owns one fixed snapshot with latest 4 token records and 1 bare serial, counted by existing size_of::<Owner>(). No additional native descriptor/frame/context/thread/pool."
+  },
+  "invariants": [
+    "Original post+5s hard_deadline fields/capture points preserved exactly; no accepted/dequeue/handoff+5 reset",
+    "Independent earlier alarm subtracts25ms; equal alarm fails negative-close fence, including Head postparse and late AcceptEx success",
+    "Ready has no active clock; Header only gets reserve; Request/admission/body uses original exact deadline and120s origin with no reserve subtraction/renewal",
+    "SO_LINGER checked; option failure stops before closesocket, original descriptor retained and process cleanup fault sticky; normal positive poll/post refuses after fault, original stopping drain remains possible",
+    "CancelIoEx and socket return do not discharge IOCP or held Frame; actual packet/Frame/context retirement timestamps set only by existing actual completion/reap paths",
+    "No native SSPI interruption assertion; no extra replacement owner after cleanup failure",
+    "Snapshot stores latest fixed-slot metadata, not unbounded connection history; peer EOF/RST must be observed by actual client",
+    "The engineering25ms reserve is not yet measured or validated on any target; originalRound13 strictFAIL remains unchanged",
+    "Backlog ESTABLISHED age, kernel/SSP memory and complete productionlistener gates remain unresolved"
+  ],
+  "testEvidenceScope": "Seven test sources: alarm boundary + unchanged request stage; actual IOCP receive debt; bare cancellation debt; actual held fakeDecrypt Frame; one actual original5s-window peer close sample with strict5e9ns and6s failure collection; controlled SO_LINGER option failure in independent retained-owner child; actual queued AcceptEx success after alarm rejected without new budget. Fake record protection is explicitly not real Schannel. All tests remain NOT_RUN.",
+  "notPerformed": [
+    "Cargo/build/test",
+    "Windows/remote",
+    "Git commit/rebase/push",
+    "Production listener enable",
+    "OS timer/volume/trust/network settings",
+    "Plan/evidence edits outside R41 evidence"
+  ],
+  "integrationRequired": "Parent must integrate this delta onto bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc before unified validation, retaining R39 capability/Win7 expect/material changes. This worktree baseline predates those final changes and is not the final whole-tree binding."
+}

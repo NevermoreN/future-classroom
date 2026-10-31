@@ -29,6 +29,16 @@ P0-09的探针必须实际链接并运行SQLite bundled、精简libcurl/Schannel
 
 可选择缓存工具链/依赖源码以便复现，按许可处理SDK/工具链分发，不把用户凭据/整套开发环境放进白板安装包。P5-06检查净环境可复现并生成组件/许可/哈希清单，P5-03再做最终ZIP/MSI。
 
+### 当前Hosted构建的输入取证域
+
+R45修正仅将精确路径前缀 `开发计划/验证记录/` 的历史档案与实际编译输入分开；不隐藏它们的Git对象或路径数量。完整HEAD的root tree、所有跟踪路径及普通blob的mode/type/Git SHA1/原blob大小分别保存于 `input-git-tree.json`，与 `git ls-files` 精确匹配；历史域仍检查文件存在、单件大小、文件及祖先目录重解析属性，并记录检出大小，但不声称读取其内容SHA256。Git原blob大小和对象SHA1不等于Windows检出大小或SHA256，CRLF转换单独说明。
+
+除该精确前缀外的全部跟踪文件仍逐件计算实际检出SHA256，保持 `input-sha256.json` 数组形状；`input-domains.json` 使用 `future-classroom.ci-input-domains/v1` 显式列两域。所有路径合计仍最多10000，单blob及检出文件仍不超过64MiB，实际SHA输入合计仍不超过256MiB，元数据输出和这三类JSON各受原16MiB限制。构建后重新核对HEAD、路径、Git树、两域清单、普通文件SHA及干净检出，保留六份before/after清单及三个初始摘要。独立产物审查须按该schema分别证明全Git元数据和SHA子集，不能沿用旧“全部Git文件均读取内容SHA”的计数。
+
+Rust/Cargo构建输入出现显式历史域路径（含Windows分隔符）即拒绝；真正需要的fixture应进入SHA域，不能静默当档案跳过。这是当前输入政策及文字检查，不能证明任意动态build.rs I/O已经被沙箱隔离。原工具链/CRT、完整workspace/all-targets/严格Clippy、jobs2及各命令原超时参数均保持：Hosted默认120秒，测试编译2400秒、产品编译1200秒、Clippy1500秒；本地Rust矩阵每命令900秒属于另一验证范围。
+
+实现和实际验证层级见[实施记录](10-实施进度与验证记录.md)R45；Windows PowerShell5.1抽取函数通过，不替代要求PowerShell7.2及以上的Hosted主体、完整MSVC编译或目标系统运行。
+
 ## 3. 命令矩阵（后续建工程后执行）
 
 工具链占位符必须由P0固定值替换。Windows目标参数使用相同锁定features；以下不自动创建rustup target或假设Tier3标准库可下载。
@@ -151,3 +161,10 @@ R39最终本地矩阵以[第五次原报告](验证记录/2026-11-01-round39-voi
 `bc2a86f`的现代MSVC run41244281175实际SUCCESS，授权Win11完整21程序[1413/0/0/0](验证记录/2026-11-01-round42-ci/modern-runtime-independent-first.json)、公开20步、配色22步及真实TLS/连续接纳/隔离Edge提醒+能力GET分别PASS/cleanup PASS；[设备流程163项独审](验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-first.json)只证明实际401/200/200和严格20字段，原生查询次数/缓存命中未观察，不证明当前有声。两CI完整6444项输入分别为4124项Git blob及2320项精确LF→CRLF检出匹配。
 
 同源码Win7 run41244342769整体FAIL：41命令仅strict Clippy101，另三处已const TLS宏误报，22份静态PE检查不代表EXE执行。[原第二次完整独审](验证记录/2026-11-01-round42-ci/win7-original-independent-second.json)与第一次错误诊断数守卫FAIL均保留。R43仅补三处同条件窄expect，[固定nightly三原型](验证记录/2026-11-01-round43-win7-tls/tls-repro-first.json)原const101/定向0/未注解哨兵101通过；原初始化/Drop/全局-D warnings及未报错项保持，修正后完整CI待新源码。完整结果与开发包边界见[实施记录](10-实施进度与验证记录.md)R42/R43，不覆盖独立R41、严格首TCP原FAIL或正式平台/发布门槛。
+
+
+### R41最终源码与有限关闭证据
+
+七Rust/两Python文件精确集成后，410份Rust输入绑定最终第三GNU全workspace/all-targets编译与两套严格Clippy；实际授权Win1121份程序1420通过/0失败/0忽略，正常程序SHA `b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f`，另Host受影响fc-windows31项及严格Clippy通过。最终公开桌面20步、配色22步、默认HOMEWORK/连续接纳/语音GET/隔离Edge均PASS并物理清理，不能替代可见希沃或实际Win7/Win10。保留首次900秒编译、SSH解析、Edge stop共享异常及检查器原失败，详见[实施记录](10-实施进度与验证记录.md)R41最终补证。
+
+原post+5秒不变，25毫秒提前alarm及受检abortive close只构成候选整改。最终四TLS滴流/一个裸TCP有限样本最大4978421422纳秒，小于原5000000000；不解除精确ESTABLISHED/backlog/调度硬界、内核/SSP和原第十三轮FAIL。生产listener关闭，新整合源码Hosted MSVC和所有正式发布门槛继续独立验收。

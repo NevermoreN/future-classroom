@@ -1,0 +1,182 @@
+{
+  "schema": "fc.r41.header-runner-freeze.v2",
+  "status": "SOURCE_FROZEN_PURE_LOCAL_PASS_WINDOWS_NOT_RUN",
+  "recordedAtUtc": "2026-10-31T21:57:54.930660+00:00",
+  "previousFreeze": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-freeze-first.json",
+    "sha256": "b6af4bcc803b766c83aba82fa8ced52ea48ca002b754b30f77604ffd94c1b3de",
+    "unchanged": true
+  },
+  "files": [
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "beforeBytes": 153324,
+      "beforeSha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9",
+      "bytes": 155501,
+      "sha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-second.diff",
+    "bytes": 6576,
+    "sha256": "9107ed4fd8120594eb5a99f4c0efa2b5c042d9a7eff67026b2bb33d57ca9c95f"
+  },
+  "change": [
+    "Exactly five expected case names, all unique; transport tied to each case.",
+    "dripCalls must be exact int (not bool): TLS4>=2; all other TLS/raw samples0. Actual counter remains in the positive one-byte DRIP send return path; queued/unwritten fragments do not count.",
+    "Client observation and independent final-native validator share validate_header_cases; original native exact5transfers/5closes/0capacity and timing/drain invariants unchanged.",
+    "Missing/0/1/True/False drip counter and duplicate case are rejected even with otherwise passing original native counts. Positive exactly2 passes.",
+    "Existing default main/business/ownership functions AST unchanged from first freeze. No Rust/source/deadline/runtime or target changes."
+  ],
+  "actualLocalChecks": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-local-checks-second.json",
+    "bytes": 26506,
+    "sha256": "cf283a62b5437dc663c1dbb83897259f566ac1b63a3af9da71f5b4cda742c9d8",
+    "fullCurrentSelftestRuns": 1,
+    "groups": 22,
+    "allPrevious21GroupsRetained": true,
+    "cliNegativesExit2": 8,
+    "helpExit0": true,
+    "TLS": "NOT_RUN",
+    "Windows": "NOT_RUN",
+    "Cargo": "NOT_RUN",
+    "Git": "NOT_RUN"
+  },
+  "evidence": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.before-drip-validation.py",
+      "bytes": 153324,
+      "sha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.header-deadline-frozen-second.py",
+      "bytes": 155501,
+      "sha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-second.diff",
+      "bytes": 6576,
+      "sha256": "9107ed4fd8120594eb5a99f4c0efa2b5c042d9a7eff67026b2bb33d57ca9c95f"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-local-checks-second.json",
+      "bytes": 26506,
+      "sha256": "cf283a62b5437dc663c1dbb83897259f566ac1b63a3af9da71f5b4cda742c9d8"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/run-editor-header-runner-local-checks-second.py",
+      "bytes": 3397,
+      "sha256": "6899f6d9524158b9c5b060102f3a272aa3517dd96e66b17ea7f8c5ed6365ce77"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help-second.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-8.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-second-8.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-second.stdout.log",
+      "bytes": 2819,
+      "sha256": "4a40612a5f84fd7d3df821b2327a9c5e4133bd5db3a0d7216e985f4cbeb83f75"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "This corrects test scope, not product behavior. Prior first-freeze source and local outcomes preserved unchanged.",
+    "Actual Schannel/Windows result still NOT_RUN; source/model strict checks alone do not validate timing.",
+    "Original strict-five-second FAIL and production-listener NOT_ENABLED remain unchanged."
+  ]
+}

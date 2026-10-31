@@ -1,0 +1,122 @@
+def self_test_header_deadlines():
+    """Synthetic metadata/client/SSH models only; zero socket or native calls."""
+    import copy
+    from types import SimpleNamespace
+    checks = []
+    base = {"generation": 7, "slot": 0, "serial": 1, "hardDeadlineNs": 5_000_000_100,
+            "alarmNs": 4_975_000_100, "beganAtNs": 4_975_000_101, "socketCloseBeganAtNs": 4_975_000_102,
+            "socketReturnedAtNs": 4_975_000_103, "failed": False, "ioPendingAtClose": True,
+            "ioReturnedAtNs": 4_975_000_104, "framePendingAtClose": False,
+            "frameReturnedAtNs": None, "retirementConfirmedAtNs": 4_975_000_105}
+    records = [dict(base, slot=i, serial=i + 1) for i in range(4)]
+    sample = {"marker": "synthetic", "generation": 7, "sequence": 1, "reserveNs": HEADER_RESERVE_NS,
+              "headerBegins": 4, "headerSocketReturns": 4, "headerFailures": 0, "headers": records, "accept": None}
+    def reader():
+        result = CloseReader("synthetic", [])
+        result.generation = 7
+        return result
+    def feed(r, value):
+        require(r.observe(CLOSE_PROGRESS + json.dumps(value)), "close model not consumed")
+    def denied(call, label):
+        try:
+            call()
+        except (RuntimeError, ValueError, TypeError, KeyError):
+            return
+        raise RuntimeError("header pure negative model accepted: " + label)
+    actual = reader()
+    feed(actual, sample)
+    raw_record = dict(base, slot=0, serial=5, hardDeadlineNs=10_000_000_100,
+                      alarmNs=9_975_000_100, beganAtNs=9_975_000_101,
+                      socketCloseBeganAtNs=9_975_000_102, socketReturnedAtNs=9_975_000_103,
+                      ioReturnedAtNs=9_975_000_104, retirementConfirmedAtNs=9_975_000_105)
+    final = dict(sample, sequence=2, headerBegins=5, headerSocketReturns=5,
+                 headers=[raw_record] + records[1:])
+    feed(actual, final)
+    bare = {"serial": 5, "hardDeadlineNs": 100_000_000, "alarmNs": 75_000_000,
+            "beganAtNs": 75_000_005, "socketCloseBeganAtNs": 75_000_006,
+            "socketReturnedAtNs": 75_000_007, "failed": False, "completionReturnedAtNs": 75_000_001}
+    feed(reader(), dict(sample, accept=bare))  # Actual queued packet may predate close.
+    for label, mutate in (
+        ("wrong reserve", lambda v: v.update(reserveNs=24_000_000)),
+        ("wrong generation", lambda v: v.update(generation=8)),
+        ("unknown disclosure", lambda v: v.update(unknown=1)),
+        ("bool serial", lambda v: v["headers"][0].update(serial=True)),
+        ("recomputed alarm", lambda v: v["headers"][0].update(alarmNs=4_975_000_101)),
+        ("cancel as IO return", lambda v: v["headers"][0].update(ioPendingAtClose=False)),
+        ("retired before IO", lambda v: v["headers"][0].update(retirementConfirmedAtNs=4_975_000_103)),
+        ("socket before checked close", lambda v: v["headers"][0].update(socketReturnedAtNs=4_975_000_101)),
+        ("duplicate slot", lambda v: v["headers"][1].update(slot=0)),
+        ("bare bad alarm", lambda v: v.update(accept=dict(bare, alarmNs=75_000_001))),
+    ):
+        value = copy.deepcopy(sample)
+        mutate(value)
+        denied(lambda: feed(reader(), value), label)
+    for label, update in (("changed fact", {"beganAtNs": 4_975_000_102}),
+                          ("disappearing IO fact", {"ioReturnedAtNs": None})):
+        r = reader()
+        feed(r, sample)
+        value = copy.deepcopy(sample)
+        value["sequence"] = 2
+        value["headers"][0].update(update)
+        denied(lambda: feed(r, value), label)
+    r = reader()
+    feed(r, sample)
+    denied(lambda: feed(r, sample), "repeated sequence")
+    checks.append("synthetic CLOSE exact token/schema/alarm25ms/IO-Frame-retirement order and immutable-fact rejection; queued bare completion-before-close accepted")
+    tls = {"case": "model", "transport": "TLS", "beforeConnectNs": 1000,
+           "peerCloseNs": 5_000_001_000, "elapsedNs": 5_000_000_000, "peerCloseKind": "TLS_RAGGED_EOF",
+           "peerCloseObserved": True, "localCloseUsedAsPeerEvidence": False,
+           "sshMasterAliveAtPeerClose": True, "nativeLauncherAliveAtPeerClose": True,
+           "tlsVersion": "TLSv1.2", "certificateVerified": True, "handshakeCompletedNs": 1001,
+           "incompleteHeadSentNs": 1002, "completeHeadSent": False, "applicationReceivedBytes": 0,
+           "localSocketClosed": True, "status": "PASS"}
+    validate_header_sample(tls)
+    raw = dict(tls, transport="TCP", sentBytes=0, peerCloseKind="TCP_EOF")
+    validate_header_sample(raw)
+    for label, changed in (
+        ("one ns over", dict(tls, peerCloseNs=5_000_001_001, elapsedNs=5_000_000_001)),
+        ("rounded interval", dict(tls, elapsedNs=4_999_999_999)),
+        ("local close", dict(tls, localCloseUsedAsPeerEvidence=True)),
+        ("dead master", dict(tls, sshMasterAliveAtPeerClose=False)),
+        ("no peer EOF", dict(tls, peerCloseObserved=False)),
+        ("unverified TLS", dict(tls, certificateVerified=False)),
+        ("complete HTTP head", dict(tls, completeHeadSent=True)),
+        ("timeout", dict(tls, peerCloseKind="TIMEOUT")),
+        ("raw sent data", dict(raw, sentBytes=1)),
+    ):
+        denied(lambda: validate_header_sample(changed), label)
+    checks.append("synthetic pre-connect exact5e9ns accepted; +1ns/rounding/local-close/timeout/deadSSH/unverifiedTLS/raw-data rejected")
+    trace = "debug1: Local forwarding listening on 127.0.0.1 port 12345.\n" + "".join(
+        f"debug1: channel {i}: new direct-tcpip [direct-tcpip]\n"
+        f"debug2: channel {i}: open confirm rwindow 0 rmax 32768\n"
+        f"debug2: channel {i}: rcvd eof\n" for i in range(5))
+    alive = SimpleNamespace(poll=lambda: None)
+    def tunnel(text, alive_process=alive):
+        return SimpleNamespace(process=alive_process, logs=SimpleNamespace(
+            stderr=bytearray(text.encode()), overflow=SimpleNamespace(is_set=lambda: False)))
+    require(len(validate_header_forward(tunnel(trace), alive)["channels"]) == 5, "five-channel model missing")
+    for label, text in (("open failure", trace + "channel 5: open failed: connect failed: Connection refused\n"),
+                        ("no confirmation", trace.replace("open confirm ", "not-open-confirm ", 1)),
+                        ("local terminal only", trace.replace("rcvd eof", "local read<=0", 1)),
+                        ("only four channels", trace[:trace.rfind("debug1: channel 4:")])):
+        denied(lambda: validate_header_forward(tunnel(text), alive), label)
+    denied(lambda: validate_header_forward(tunnel(trace, SimpleNamespace(poll=lambda: 255)), alive), "SSH actual exit")
+    checks.append("synthetic five confirmed direct-tcpip channels with remote EOF; refused/missingconfirm/localEOF/fourchannels/deadmaster rejected (no real SSH)")
+    native = {"physicalNativeDrain": True, "sharedWorkers": 2, "workerJoin": True, "setupCleanup": True,
+              "hubPending": 0, "downloadHubPending": 0, "quarantined": 0, "approvals": 0, "heads": 0,
+              "responses": 0, "peakRecords": 4}
+    p = SimpleNamespace(latest={"acceptance": {"transfers": 5, "capacity_rejects": 0, "bound_slots": 0,
+                                               "native_pending": 0, "owned_sockets": 0}})
+    events = [dict(tls) for _ in range(4)] + [raw]
+    validate_header_native(native, events, actual, p)
+    for field, changed in (("workerJoin", False), ("physicalNativeDrain", False), ("approvals", 1),
+                           ("heads", 1), ("responses", 1), ("hubPending", 1)):
+        denied(lambda: validate_header_native(dict(native, **{field: changed}), events, actual, p), field)
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], transfers=4)})), "no actual raw transfer")
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], capacity_rejects=1)})), "capacity EOF mistaken for raw timeout")
+    checks.append("synthetic independent header-only final validator requires5actualtransfers/5close histories/zeroHTTP/zeroHubs/realDrain/2join; old business validator unchanged")
+    return checks
+
+

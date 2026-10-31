@@ -1,0 +1,387 @@
+{
+  "status": "READONLY_PRODUCT_GAP_AUDIT_COMPLETE_NOT_RUNTIME_VALIDATION",
+  "utc": "2026-10-31T22:43:07.244898+00:00",
+  "source_commit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+  "scope": "Current main normal entrypoint and D11 00/04/05 plus latest chronological implementation entries. No source/plan mutation, Cargo/npm/Windows/CI/network/Git write. Known strict-TCP, actual Win7/Win10/visible Seewo/72h gates are excluded as new product gaps, but retained as acceptance dependencies.",
+  "conclusion": "Most native settings/classroom features now have normal runtime wiring. Main first-version implementation gaps are the real HTTPS deployment/control plane, normal lifetime host composition, and install/upgrade/uninstall delivery. Finite diagnostics and package metadata do not complete those behaviors.",
+  "confirmed_missing_behaviors": [
+    {
+      "id": "HTTPS_CONFIGURATION",
+      "behavior": "A local GlobalAdmin cannot configure a normal teacher HTTPS endpoint/certificate and see trustworthy configured-vs-observed deployment state.",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4770,
+          "anchor": "web_readiness: web_editor::Readiness::Unavailable"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+          "line": 25,
+          "anchor": "pub(super) enum Readiness"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+          "line": 73,
+          "anchor": "if matches!(operation, Operation::Enable"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 30,
+          "anchor": "| CERT_STORE_READONLY_FLAG"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 78,
+          "anchor": "CertVerifyTimeValidity"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+          "line": 90,
+          "anchor": "CRYPT_ACQUIRE_SILENT_FLAG"
+        },
+        {
+          "path": "开发计划/04-开发阶段与任务步骤.md",
+          "line": 97,
+          "anchor": "| P6-01 |"
+        }
+      ],
+      "current_support": "Read-only exact thumbprint selection in CurrentUser MY verifies certificate hash/time/serverAuth/key availability for explicit diagnostic startup; CNG keys/certificates are prepared and removed by test runners, not product settings. Existing logical device/pairing management is implemented but readiness deliberately unavailable.",
+      "missing": "Typed persistent desired endpoint/hostname/prefix/certificate identity, local management page/select-and-review flow, current observed status/reconciliation and narrowly authorized project deployment effects if the selected transport actually needs them. Do not blindly implement old HTTP.sys URLACL steps for a socket transport. No automatic ROOT trust or exporting private keys."
+    },
+    {
+      "id": "NORMAL_HTTPS_LIFETIME",
+      "behavior": "Normal launch does not serve the packaged React application or teacher APIs, and the settings Enable/Begin pairing cannot reach an actual host.",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/main.rs",
+          "line": 293,
+          "anchor": "application::run(false)"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4342,
+          "anchor": "pub fn run(autostart"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4392,
+          "anchor": "let host = HiddenHost::new"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/backend/web.rs",
+          "line": 378,
+          "anchor": "/// Logical Web admission only."
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "line": 471,
+          "anchor": "let host = match TlsHttpHost::open"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "line": 456,
+          "anchor": "Job::LoadStatic {"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "line": 236,
+          "anchor": "/// Certificate selection is read-only."
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "line": 303,
+          "anchor": "S_addr: u32::from_ne_bytes([127, 0, 0, 1])"
+        }
+      ],
+      "current_support": "Real finite loopback TLS, continuous accept slot reuse within that diagnostic, static manifest validation, event-to-shared-worker/Hub bridge, pairing/HTTP/browser behavior and physical drain are implemented and partly actually verified.",
+      "missing": "A production-scoped host constructor/configuration distinct from a Test marker, a normal App-owned start/stop/reconfigure lifecycle, verified packaged asset loading, a permanent Net/Hubs owner and complete event/control/shutdown integration. Enabling logical WebService alone does not open an HTTPS listener.",
+      "dependency": "Final actual activation and any claim of campus deployment remain blocked by the original strict-TCP and native/provider resource gates. A lifetime/controller implementation can be developed and tested while fail-closed DisabledByGate remains mandatory; this does not solve P0."
+    },
+    {
+      "id": "INSTALL_UPGRADE_UNINSTALL",
+      "behavior": "No full product ZIP/MSI installation, atomic program/static upgrade or precise uninstall path exists.",
+      "evidence": [
+        {
+          "path": "scripts/package-probe.py",
+          "line": 210,
+          "anchor": "\"artifact_type\": \"development-probe\""
+        },
+        {
+          "path": "scripts/package-probe.py",
+          "line": 256,
+          "anchor": "\"complete_application\": \"NOT_IMPLEMENTED\""
+        },
+        {
+          "path": "packaging/PROBE-README.txt",
+          "line": 123,
+          "anchor": "不提供远程管理端或安装程序"
+        },
+        {
+          "path": "开发计划/04-开发阶段与任务步骤.md",
+          "line": 121,
+          "anchor": "| P5-03 |"
+        },
+        {
+          "path": "开发计划/05-测试验收与发布清理.md",
+          "line": 132,
+          "anchor": "干净Win7 SP1 x86与实际希沃，ZIP和MSI"
+        }
+      ],
+      "current_support": "ProgramData protected root/ACL, instance locks, local setup, Run intent/reconciliation, same/cross-install teaching backup/recovery and destructive repair are implemented; deterministic development-probe ZIPs and input/artifact checks exist.",
+      "missing": "Installable stable program/static resource layout and MSI source/build logic, upgrade orchestration that closes actual old owners and preserves existing data/security, executable/autostart path repair coordination, rollback/version compatibility and an uninstall flow that removes only owned executable/system entries while preserving school data by default. Backup/repair is not an executable upgrade or uninstall implementation."
+    },
+    {
+      "id": "SETTINGS_REGISTRATION_CONTRACT",
+      "behavior": "Settings extensibility contract is not represented by a production page registry.",
+      "evidence": [
+        {
+          "path": "开发计划/模块/02-设置认证权限与自启动.md",
+          "line": 41,
+          "anchor": "SettingsPageRegistry注册页面ID"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 172,
+          "anchor": "enum Screen"
+        }
+      ],
+      "current_support": "Native pages do exist and are reached through a hardcoded Screen/controller match. No claim that the missing type name alone breaks current page behavior.",
+      "missing": "The planned registered page ID/title/capability/factory lifecycle API; no SettingsPageRegistry/DraftCoordinator/ComponentRegistry symbol found in current crates. This is a lower-priority architectural completion, not evidence that display/layout editing is absent."
+    }
+  ],
+  "already_implemented_not_new_missing_features": [
+    {
+      "behavior": "Native clock/date/countdown controls, component Alpha/glass and joint subject palette/display editing",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 1475,
+          "anchor": "if self.screen == Screen::Display"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+          "line": 219,
+          "anchor": "pub(super) fn new_visuals"
+        }
+      ],
+      "limit": "Existing code and hidden/scene evidence do not prove visible touch/DPI/Seewo acceptance. No wholesale replacement of GUI settings warranted."
+    },
+    {
+      "behavior": "Public/subject profile tree drafts, native preview/selection/drag, independent text/image content, CAS/confirm/cancel",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+          "line": 91,
+          "anchor": "SavePublic {"
+        }
+      ],
+      "limit": "Precise visual/platform acceptance remains separate."
+    },
+    {
+      "behavior": "Public desktop lesson change/restore, passive timetable/clock/date, controlled material open, backup/recovery/mapping, autostart review and local voice policy/default output observation",
+      "evidence": [
+        {
+          "path": "crates/fc-bootstrap/src/application.rs",
+          "line": 4342,
+          "anchor": "pub fn run(autostart"
+        },
+        {
+          "path": "开发计划/10-实施进度与验证记录.md",
+          "line": 1576,
+          "anchor": "[真实TLS/连续接纳/隔离Edge REMINDER及设备能力GET]"
+        }
+      ],
+      "limit": "Implemented paths must not be downgraded to missing merely because early task table says NOT_RUN. NOT_RUN may be whole-task acceptance status."
+    }
+  ],
+  "outdated_or_non_authoritative_narrative": [
+    {
+      "evidence": [
+        {
+          "path": "开发计划/10-实施进度与验证记录.md",
+          "line": 202,
+          "anchor": "| P2-05 | NOT_RUN | 尚未实施该任务完整闭环"
+        }
+      ],
+      "finding": "Early aggregate P2-05 text says complete loop not implemented; later rounds and normal backup/recovery controllers provide implemented workflows. Keep whole-task acceptance open but do not count all backup behavior as absent."
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "finding": "Some descriptive features still say device capability UNVERIFIED and shared-reminder browser remains separate; current R39 can expose only valid recent negative observation as UNAVAILABLE, and chronological R37/R42 has real isolated REMINDER UI single-save/reload PASS. These old strings are not grounds to implement duplicate behavior. Broader microphone/campus/full-product gates remain valid."
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "finding": "The HTTP.sys-specific initial header wording is historical relative to the separate socket/Schannel candidate. It does not erase the strict first-TCP failure or enable a production host."
+    },
+    {
+      "evidence": [
+        {
+          "path": "scripts/package-probe.py",
+          "line": 256,
+          "anchor": "\"complete_application\": \"NOT_IMPLEMENTED\""
+        },
+        {
+          "path": "packaging/PROBE-README.txt",
+          "line": 123,
+          "anchor": "不提供远程管理端或安装程序"
+        }
+      ],
+      "finding": "Development-probe/NOT_VALIDATED/full application not delivered/no installer are still accurate overall, not merely stale labels."
+    }
+  ],
+  "next_three_development_steps": [
+    {
+      "priority": 1,
+      "deliverable": "Implement the real local HTTPS configuration and observed-readiness page with fail-closed production gating.",
+      "proposed_chain": "Native teacher connection settings -> captured Local GlobalAdmin/revision -> existing shared worker -> typed desired endpoint/certificate metadata and exact read-only certificate assessment -> persisted intent/observed result -> GUI configured/blocked/error state; no teacher Web effect endpoint.",
+      "files": [
+        "crates/fc-bootstrap/src/application/web_editor.rs",
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/backend/web.rs",
+        "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+        "new domain/ports/storage HTTPS configuration modules if persistence requires them"
+      ],
+      "acceptance": [
+        "Exact local identity/session/CAS/cancel checks and no secret/private key in DTO/log/backup",
+        "Valid/missing/expired/wrong-EKU/key-denied certificate states; config change/lock/late result must not publish false Ready",
+        "Actual configuration readback and reopen; production gate still prevents starting a listener",
+        "Only after a separately specified explicit project-owned deployment intent may any required OS configuration be changed; no silent ROOT trust or generic command runner"
+      ],
+      "dependency": "Can implement under current development authorization without deploying a listener or changing current Windows trust/firewall. Transport-specific public hostname and persistence contract must be explicitly chosen rather than copied from loopback test marker."
+    },
+    {
+      "priority": 2,
+      "deliverable": "Compose the ordinary long-lived teacher host into normal App, rather than leaving the event/business bridge behind --tls-business-probe.",
+      "proposed_chain": "main[] -> application::run_at_inner/create_app -> one original SharedPool -> verified StaticAssets + production-scoped TlsHttpHost + NetCoordinator + two Hub owners -> host/control events -> actual native stop/drain -> actual shared-worker join -> Hub drain -> Backend close.",
+      "files": [
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/application/shared_pool.rs",
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-bootstrap/src/web_transfer/executor.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-bootstrap/src/web_assets.rs"
+      ],
+      "acceptance": [
+        "No second worker/KDF pool; fixed native/HTTP/upload/download ownership budgets retained",
+        "Start/disable/reconfigure/lock/session/suspend/exit races; Cancel is not reclaim and no replacement while old physical owner remains",
+        "Bad/mismatched packaged assets reject before host opening; ordinary URI/Host/Origin and certificate hostname/prefix bound together",
+        "Actual normal-start browser/session/material/content flow and physical cleanup only once original production gates pass; before that only gated lifecycle/controller contracts may pass"
+      ],
+      "dependency": "Depends on step1; activation remains blocked by strict TCP/SSPI/kernel gate, which this audit neither changes nor asks user to relax. Must not rename finite45s diagnostic production."
+    },
+    {
+      "priority": 3,
+      "deliverable": "Create a real product install/upgrade/uninstall vertical slice with data preservation and exact owned cleanup.",
+      "proposed_chain": "Production package manifest (normal executable + exact web assets + notices/version) -> isolated install layout -> normal first run -> actual close/upgrade compatibility and rollback -> autostart path readback -> uninstall owned program/system items, leave ProgramData school data unless separately confirmed destructive repair.",
+      "files": [
+        "packaging/ (new installer/MSI definition and product layout)",
+        "scripts/ (new product packaging/installer verification, separate from package-probe.py)",
+        "crates/fc-windows/src/system/ (DataPaths and deployment boundary integration)",
+        "crates/fc-bootstrap/src/autostart.rs",
+        "crates/fc-bootstrap/src/application.rs"
+      ],
+      "acceptance": [
+        "Deterministic production payload and license/static version binding; development ZIP not relabeled installer",
+        "Fresh isolated install, same-data upgrade/reopen, rollback and interrupted-upgrade reconciliation with exact process/instance ownership",
+        "Uninstall leaves teacher originals/layout/security by default and removes only exact project-owned Run/deployment entries",
+        "Actual Win7/Win10/Win11 installer and real login tests remain independently NOT_RUN until executed; no Release/tag merely from installer compilation"
+      ],
+      "dependency": "Can implement packaging/layout/coordinator code and isolated synthetic tests within authorization. Formal release depends on full application and OS gates; visible OS dialogs/system deployment changes need concrete owned reviewable effect handling, not automatic mutation of the authorized test machine."
+    }
+  ],
+  "evidence_bindings": [
+    {
+      "path": "开发计划/00-开发导航与需求追踪.md",
+      "bytes": 16192,
+      "sha256": "7de8ab49edb90b6abd943a9b8676adaea8e1b28d9a52bebaa5446b1efa1882e0"
+    },
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 27109,
+      "sha256": "8df93f5d6b332e930eee6e18a978c1b19559cb14f253a8ae5610017150846e14"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "bytes": 39834,
+      "sha256": "e1fc342d7ddf5924f59d41753368cf706d842055c917c45f3239c3b66f836565"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 411006,
+      "sha256": "40837012cd554c1c874091857bf7c00a8c6d0506d08b8e4fa3a7421838387afd"
+    },
+    {
+      "path": "开发计划/模块/02-设置认证权限与自启动.md",
+      "bytes": 13837,
+      "sha256": "a59d799a4e2f9db4d4ec36775e71bdc4aec67de675c0c02182ee52f5828afac9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18687,
+      "sha256": "07e885089d1542d895e7c780bd2900b153061ba1d44c329aa4bdd574fea8e5b3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 257477,
+      "sha256": "2cc9f3e5bebcd4c6018f93d824fe7e48a2cb16dd870c9341f5366c8865922e25"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 22196,
+      "sha256": "4103d908c78eb4037d54c739e95a33fb9630141dcd95ec1dd57f606b0300621f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web.rs",
+      "bytes": 41749,
+      "sha256": "df3502bd6cd6e99daeda405ae252b4ccf1001ee3f5c3f0fc67ecf8739104c33d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+      "bytes": 34345,
+      "sha256": "f3934285667634cc49991f28a75ebac66e51771002a127888517b1304878b5df"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 109632,
+      "sha256": "90bd1a7392b6b3b5145415b4aef973051573b261d8379fa44e4bcd42105b061a"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/credentials.rs",
+      "bytes": 10011,
+      "sha256": "7c50bac6203b3e191815084db9e67c29d4372bb5b86870c23e00d4c7e1d4004a"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "bytes": 28978,
+      "sha256": "f1723df301d910ccdabfc5f2eedf97a9596a2ad39e196ee4411c5f9eef9a8042"
+    },
+    {
+      "path": "packaging/PROBE-README.txt",
+      "bytes": 20279,
+      "sha256": "ddb68fbbabd0a2e6d0d01638ffa20fa05171e760ceae9a04494aa853fe72d8aa"
+    }
+  ],
+  "not_run": [
+    "Cargo/build/tests",
+    "Windows/installer/HTTPS/browser execution",
+    "CI/network",
+    "Git write"
+  ],
+  "source_read_before_after_unchanged": true
+}

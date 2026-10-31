@@ -1,0 +1,30 @@
+function Publish-StopRequest([string]$Root,[string]$Capability){
+  $path=Join-Path $Root '.request-stop'
+  if([IO.File]::Exists($path)){
+    Assert (([IO.File]::ReadAllText($path))-ceq $Capability) 'different stop capability already present'
+    return
+  }
+  $pending=Join-Path $Root ('.request-stop.pending-'+[Guid]::NewGuid().ToString('N'))
+  $owned=$false
+  try{
+    $file=$null
+    try{
+      $file=[IO.File]::Open($pending,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+      $owned=$true
+      $bytes=[Text.UTF8Encoding]::new($false).GetBytes($Capability)
+      $file.Write($bytes,0,$bytes.Length)
+    }finally{if($file){$file.Dispose()}}
+    # The final name is not visible until the complete original file is closed.
+    # File.Move is non-overwriting and both names are in the same owned directory.
+    try{[IO.File]::Move($pending,$path);$owned=$false}
+    catch{
+      $cause=$_.Exception.GetBaseException();$code=$cause.HResult-band 65535
+      if(($cause-is [IO.IOException])-and ($code-in @(80,183))-and [IO.File]::Exists($path)){
+        Assert (([IO.File]::ReadAllText($path))-ceq $Capability) 'different stop capability won publication'
+      }else{throw}
+    }
+  }finally{
+    # A failed CreateNew never grants ownership of an existing candidate.
+    if($owned-and [IO.File]::Exists($pending)){[IO.File]::Delete($pending)}
+  }
+}

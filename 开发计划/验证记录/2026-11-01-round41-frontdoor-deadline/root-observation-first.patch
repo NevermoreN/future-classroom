@@ -1,0 +1,30 @@
+--- crates/fc-bootstrap/src/application/http_business_probe.rs
++++ crates/fc-bootstrap/src/application/http_business_probe.rs
+@@ -580,20 +580,25 @@
+     let mut next_approval = Instant::now();
+     let mut progress_sequence = 0u64;
+     let mut last_progress = None;
++    let mut last_close_progress = None;
+     let mut next_progress = Instant::now();
+     let mut active = (|| -> std::result::Result<(), String> {
+         while Instant::now() < until {
+             let report = net.poll()?;
+-            if last_progress != Some(report) && Instant::now() >= next_progress {
++            let close_snapshot = net.close_snapshot();
++            if (last_progress != Some(report) || last_close_progress != Some(close_snapshot))
++                && Instant::now() >= next_progress
++            {
+                 progress_sequence += 1;
+                 progress(marker, progress_epoch, progress_sequence, report)?;
+                 close_progress(
+                     marker,
+                     progress_epoch,
+                     progress_sequence,
+-                    net.close_snapshot(),
++                    close_snapshot,
+                 )?;
+                 last_progress = Some(report);
++                last_close_progress = Some(close_snapshot);
+                 next_progress = Instant::now() + Duration::from_millis(250);
+             }
+             if let Some(ticket) = approval.as_mut() {

@@ -1,0 +1,3118 @@
+{
+  "status": "PASS",
+  "recordedUtc": "2026-10-31T23:16:49.886523+00:00",
+  "mode": "staged",
+  "commit": null,
+  "requiredArchiveFiles": 497,
+  "indexes": [
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/INDEX.json",
+      "originals": 449,
+      "sha256": "90cd9cc3fcccb0937b15d7c1f8af2d5a85de1a609624e6dc764da6b829c2ee80"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/INDEX.json",
+      "originals": 46,
+      "sha256": "3488b82fbca4194c672e67c43698e398caced2e547e4d3c8ec65755aa60a4f26"
+    }
+  ],
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 3403,
+      "sha256": "723c44ecaaa7d270491e1e5c31763332d60d774c44d6388efdfe3311f87f5bde",
+      "gitBlob": "789c09c93bbe7df411f6c553b5902b892b567a1a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29624,
+      "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0",
+      "gitBlob": "4d51d3243858f4ee191e36a78c87aff54ae9028e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "gitBlob": "7e33c022140570eff6314ca22f4f993a56695aac"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384",
+      "gitBlob": "65cd15b57a20bd848f88ca29d28c4aec35fb3906"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "gitBlob": "f4a1ca4c93be5511d481c661b5a839008267db1f"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "gitBlob": "65ae1c41b5375fe55380a5b3d7d2ab5087fd9c9c"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "gitBlob": "e369a9052e9eb98878ea0aed30600ebc351027fc"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "gitBlob": "dd7442ec87af7d15e4f6531745c724ba4d812485"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "gitBlob": "d861e3ff1fe1ee6e930c170c14d783e58855f3cc"
+    },
+    {
+      "path": "scripts/windows-test-edge-owner.py",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+      "gitBlob": "1405f45085f597d0db6a6c2103e316bcd664b4a3"
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+      "gitBlob": "b9920a7ae012d0a11297c1e873a18e62c74db94d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/09-Rust\u6784\u5efa\u9a8c\u8bc1\u4e0e\u53d1\u5e03\u95e8\u69db.md",
+      "bytes": 28692,
+      "sha256": "dd7150f1bd057887d073c7f32efcf09e5879ff7eb0d29fa8d20e00b8445f10d2",
+      "gitBlob": "fb203a616b609a2cd79814016f201449d385226c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/10-\u5b9e\u65bd\u8fdb\u5ea6\u4e0e\u9a8c\u8bc1\u8bb0\u5f55.md",
+      "bytes": 421655,
+      "sha256": "f1807f930a986a9e47e4b4a63937ece23224f3cb0466b0adb88683beb7bf79ae",
+      "gitBlob": "ca8f2a3ee9a65071ce1e71e2877b0289d74145c5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/11-Windows\u517c\u5bb9\u77e9\u9635\u4e0e\u9a8c\u6536.md",
+      "bytes": 57918,
+      "sha256": "dbd0f6b8e87dde77121c80a1d838628f31cfb457ea81bfbc88fdad6596ecedb6",
+      "gitBlob": "892bf458e3ca63b37d76ed49e9761be9986fd48b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/14-P0\u72ec\u7acbTCP\u63a5\u7eb3\u5019\u9009ADR.md",
+      "bytes": 18607,
+      "sha256": "b1d199b43570a6d81de22c84fd9f945250583bff653ad51d9e4699b2b080f81d",
+      "gitBlob": "b2fa884334a09d98f5af75ea337bdfb825e7e1d0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-45-cleanup.py",
+      "bytes": 8578,
+      "sha256": "036faed50e3138db3f1614bbb6de30b431beda5a5c404df7865f3f237c46c82f",
+      "gitBlob": "47c185e212f5dba657270d921af404782e834c6b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-45-git-proof.py",
+      "bytes": 2668,
+      "sha256": "90043226c8f152c2afe31f33d280970b11d83afe58320a9553cf46ee6d3e66fe",
+      "gitBlob": "e725a8d3090d3b7578add89f019cb835fe08a20e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-archive-first.json",
+      "bytes": 510,
+      "sha256": "bf2b198f23a504d02a7356c5f6bcb0c6abf120e4818fadc928a0cbe8f9ae2a83",
+      "gitBlob": "77ad9934ed63594da890117bc042772b7cf6cea2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/INDEX.json",
+      "bytes": 88609,
+      "sha256": "90cd9cc3fcccb0937b15d7c1f8af2d5a85de1a609624e6dc764da6b829c2ee80",
+      "gitBlob": "010732ba589b01db195b88ba017b6b7f0029c716"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/archive-preparation-first.json",
+      "bytes": 448495,
+      "sha256": "c93d59d0c9333ea03227e954e448417e4662ff34bf802f6b5388a0e4fdd59d45",
+      "gitBlob": "7f9c7dc5347beedec8c643ade73dfd332042482a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/archive-preparation-first.py",
+      "bytes": 14736,
+      "sha256": "73892148b7b6ad72d87206f1b6a9a5264d4dd011e2fd645893e7a3ae875336ed",
+      "gitBlob": "95518a0fa93753447e195b7cc2c555a83f8ba381"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/atomic-stop-function.ps1.txt",
+      "bytes": 1370,
+      "sha256": "bd9b87636d72ebcb1322c8791d2944b25d8cd72722068b42e01ad265c1db77af",
+      "gitBlob": "1528333b9dc6faf9ab74e3a701f254ebf18b78dc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/audit-windows-readonly.py",
+      "bytes": 9883,
+      "sha256": "10c29f76a33f21bb95a91f458331f106d2e47410faa7bb269cf2600f5594ebb6",
+      "gitBlob": "c6812f138feb52a74c8f08ed572ac3e1789174be"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/backlog-age-readonly-first.json",
+      "bytes": 19867,
+      "sha256": "e019e7d04d2476ecb92fc9769a0fbf0cb25e01c4650e56ede45d40ad4ee0982b",
+      "gitBlob": "4c527624749ed076ab5fff770ac50c6f67133bcf"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/compile-first-timeout-owner-first.json",
+      "bytes": 381,
+      "sha256": "f68bff3715ebc98baddc8c0c9c5978cb8cb9ca66e955aac21f6e53f77b4a2245",
+      "gitBlob": "4cdead26332cbe157b3fbc035b7111b7726de1b2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/compile-owner-observation-first.json",
+      "bytes": 489,
+      "sha256": "f350a989235dd3d0b2f35f6ed66fb6ed0a5fd5f9c8987a07296fb14ad751b593",
+      "gitBlob": "73ed91ba2582f7fc3797490a8393548c86bec17e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29497,
+      "sha256": "3156f180665d34d737912d84e0848f0f1c68aa7b5edde37c0b989bde93fadc90",
+      "gitBlob": "3a4261e74d5f350e4fd32a2aefe57d4d142b066f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "gitBlob": "7e33c022140570eff6314ca22f4f993a56695aac"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384",
+      "gitBlob": "65cd15b57a20bd848f88ca29d28c4aec35fb3906"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "gitBlob": "f4a1ca4c93be5511d481c661b5a839008267db1f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "gitBlob": "65ae1c41b5375fe55380a5b3d7d2ab5087fd9c9c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "gitBlob": "e369a9052e9eb98878ea0aed30600ebc351027fc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-after-first/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "gitBlob": "dd7442ec87af7d15e4f6531745c724ba4d812485"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before.json",
+      "bytes": 1390,
+      "sha256": "f2fee2b68aa1500cf3c9b70f05095b077bed2b6b068980cc7f51893bdfe68d40",
+      "gitBlob": "76922da2b774fe76609b38d8697fa03e0590614f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059",
+      "gitBlob": "4ba426392149323d47afb4fd910a05e80066efa8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 58970,
+      "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "gitBlob": "410de097cc4657ad1b4a633c5991db8b914b739e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 7658,
+      "sha256": "ec4b186638b95e4fb61b4d9a852248f4063262bc044941b70311717651834cbb",
+      "gitBlob": "f9a19a547de768912629e3cd169d35cc8fe69133"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "gitBlob": "e60f8d80f09435d87a10825de395aa95d03fdff4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "gitBlob": "b2e017d266a2bf114d5e147a94da1df877933810"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "gitBlob": "1da04fe1cc24b0efe7eb3dad47a215685a43dd47"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 63166,
+      "sha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "gitBlob": "f43322b56dda418ef5d7395a76ac5e2fa0d65e07"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-before/crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "bytes": 15822,
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "gitBlob": "cf40fbe0bec6121b3a526a218ba983eefa847c28"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-implementation-first.diff",
+      "bytes": 46427,
+      "sha256": "470494a618909f899a3c71b6c6b96431402517500c369de4c123f81ba5623657",
+      "gitBlob": "4ef610ada15069423cfe2b3d554176258dae5ba9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/core-source-freeze-first.json",
+      "bytes": 8143,
+      "sha256": "e3ecec5c27d5484323d526b5236cff8a2048a35c84cc8e0f822664346d7e5cc4",
+      "gitBlob": "a4f8295d37dc96b1ebf324859da84bde1a434190"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/default-browser-continuous-independent-first.json",
+      "bytes": 48674,
+      "sha256": "78332c80a6ca9575f5969c72f4eeee454d1a5576738568a266fbeb7ffd0dede8",
+      "gitBlob": "659d9bff1a6c3500a176a5fb0c1f416249ac9218"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/default-browser-continuous-independent-helper-first.py",
+      "bytes": 30123,
+      "sha256": "83d89952d5b74d30d98c0fd02c71d8561b287a03459da52c4eafdfa98bd4f088",
+      "gitBlob": "a8e81ef6c1c5333ef213eff361672c24d4d6cbb0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/default-browser-final-independent-first.json",
+      "bytes": 49354,
+      "sha256": "bc8bc0cb3a1193ee00e75c072e408a25806ddea51a4fbae6d56870b6976c6a32",
+      "gitBlob": "33e7a04ba1212dc24b217365a7e15b8cec2279a9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/default-browser-final-independent-helper-first.py",
+      "bytes": 30896,
+      "sha256": "76663d4d7ae4ff05095aeb601c1691b9a71da9a0786527a0e398e5915fb0e1fd",
+      "gitBlob": "686a84d75dc5ab1587b32437ea12270e253027a6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/edge-atomic-stop-file-fixture-body-second.ps1",
+      "bytes": 9237,
+      "sha256": "ed8380f12a486a948bcbafc91a43fde31e5b4463cdf79c2616a09a825972d7a3",
+      "gitBlob": "ca343292111b4b6d7a72c2a3df03702a05ea2704"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/edge-atomic-stop-file-fixture-body.ps1",
+      "bytes": 9001,
+      "sha256": "3ec83b042b48456676174c238cff554ecb8d405219eaa23bd8f22796a529bd96",
+      "gitBlob": "4d98495156b6f2ae6cdff8bc22ab95339ab8243f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-default-browser-owner-diagnosis-first.json",
+      "bytes": 12295,
+      "sha256": "8c2a7a03b404a573acf4dd57564464301ba7f86d03b8ad8d20e1063d0e68537a",
+      "gitBlob": "8225a3e3a196010d8774fb6b26ba274e59022681"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-before.json",
+      "bytes": 896,
+      "sha256": "b03955864ad917cb7c088d20d60afc9b186774559c9cbeb6a3603d5b82302731",
+      "gitBlob": "d025aecc4f815591beed4641254c2ff32e94f80d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-first.diff",
+      "bytes": 5323,
+      "sha256": "83e040e9c8d6983ece51dfefcf505aa21b7a1e0729284aab773bb621ae6bd21f",
+      "gitBlob": "35539d5650aa97e8649bffcb9540f1899de276ab"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-freeze-first.json",
+      "bytes": 11142,
+      "sha256": "e870590baf4e79b7ec11396acc82d49220d530dc2c6ef2c703bb3c940bdbdcc3",
+      "gitBlob": "3765cf494574c541599c2615741c0ffa189a2a26"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-selftest-first.stdout.json",
+      "bytes": 265,
+      "sha256": "65aa36211b31edc36ce2b3780459f8ab514b079199aa6b57b7c7c1494738467d",
+      "gitBlob": "0e9d0b9591bdc8814da1567faeaac3580a817c7f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-first.json",
+      "bytes": 21421,
+      "sha256": "b95932f23c3f934f0fe3af1b32f804ba4d4d99f5a8e51976e1d121c53942971f",
+      "gitBlob": "6d7b1028d1221ad8bc44d863a46da72158110e2b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-first.stdout.log",
+      "bytes": 1228,
+      "sha256": "79c936ce5d4f4a8164aa839fe2da9383d8dca58e07cef239a21721967b8782ee",
+      "gitBlob": "121bffe1cbe0e8552f1f6fb4aab2ada8b32dc270"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-fixture-first.ps1",
+      "bytes": 12744,
+      "sha256": "6bcd694460c82a23389029ded81e018181707ffb2a4bd0ec7b6677a56cbaa44a",
+      "gitBlob": "b0ef14b426556d2e4c861cb8cbcdb65daca487f7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-fixture-second.ps1",
+      "bytes": 12980,
+      "sha256": "2af4fc13037458d6f861fae9ae697b9552392b02ddfdd7152f63d58b049438af",
+      "gitBlob": "3921a23009404f4e46bab0b692a096dd13f8dbf3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-second.json",
+      "bytes": 26367,
+      "sha256": "bf5ea074bdc88cb985f9cdda90476c30e000a9782ff7da1176c6386bf08d2436",
+      "gitBlob": "942f066c48340a491848d382f4072a5b4cf1785f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-edge-atomic-stop-windows-second.stdout.log",
+      "bytes": 2559,
+      "sha256": "ed3b7e4ebb0496d204b3ec74ff9d2aa561b9f7ba874414b4f58d5a6a5335aca6",
+      "gitBlob": "1d8af0a4f80aa914a6a236ffc612b0a1b6cb1c2c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-baseline-selftest-now.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-baseline-selftest-now.stdout.log",
+      "bytes": 1940,
+      "sha256": "b8f4c782a69cf9d57485a2edfa1aab7143a5bce83adfc0c4afd9982d69d04e07",
+      "gitBlob": "bfac020a387b051f1da491d57b7bdac450558944"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607",
+      "gitBlob": "42bbb728bc2752456310a6c92b6616bdee4742f8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-8.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69",
+      "gitBlob": "c11474dd8ef92dac62ed02f49320bd21edde4bd7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-8.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-help.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-cli-help.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458",
+      "gitBlob": "5062b60fc9a25a48487195e54b516a949ff84a4d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-diagnosis-first.json",
+      "bytes": 11447,
+      "sha256": "6df32934aa3c2879dbf2e01c7f0d3b3387c66b8a0dac063dc8f6f940591885aa",
+      "gitBlob": "15121de93667181056849cd0d1101dff8b13d432"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-local-checks-first.json",
+      "bytes": 31236,
+      "sha256": "9691250c29cbf4500b62af377070e7c724393f617ba6f9ad84a8081f2732037b",
+      "gitBlob": "b11bb044c3b53d23b7bfd48a07526b318aec9f8c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-channel-selftest-first.stdout.log",
+      "bytes": 3018,
+      "sha256": "123cc548e90c0049f3975eb5a6a4e3ad3f01abe62a710d094b92c3765885a976",
+      "gitBlob": "016f8b91b46dd6aa7f709e448f56684867bb86cb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-help-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-help-second.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458",
+      "gitBlob": "5062b60fc9a25a48487195e54b516a949ff84a4d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-help.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-help.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458",
+      "gitBlob": "5062b60fc9a25a48487195e54b516a949ff84a4d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607",
+      "gitBlob": "42bbb728bc2752456310a6c92b6616bdee4742f8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-negative-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-no-remote-inputs.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69",
+      "gitBlob": "c11474dd8ef92dac62ed02f49320bd21edde4bd7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-no-remote-inputs.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607",
+      "gitBlob": "42bbb728bc2752456310a6c92b6616bdee4742f8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+      "gitBlob": "431255629afee04e42a0da638128d38d4fbd89c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-8.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69",
+      "gitBlob": "c11474dd8ef92dac62ed02f49320bd21edde4bd7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-cli-second-8.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-current-selftest-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-current-selftest-final.stdout.log",
+      "bytes": 2668,
+      "sha256": "dbed2591c3b6b6d687b9359a1920c85ffc62169d5de348310f2b6d1cd95027ca",
+      "gitBlob": "82a311a5f8aab29678a30fa4f6300382fff25972"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-current-selftest-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-current-selftest-second.stdout.log",
+      "bytes": 2819,
+      "sha256": "4a40612a5f84fd7d3df821b2327a9c5e4133bd5db3a0d7216e985f4cbeb83f75",
+      "gitBlob": "fa472b79b30736a5906501d14df19afd3fcef0a9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-before.json",
+      "bytes": 394,
+      "sha256": "af83f82bed83612706fbd2cb919e92c6f149b7ace6545f3ccb33a4dbdec06d2b",
+      "gitBlob": "314b98d9f3e7414b1b6859dc8c02cea284fe36fc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-first.diff",
+      "bytes": 50859,
+      "sha256": "f4a4ba9f56f8e512c1925a8d06174c3207ed93615a6d5418514ea07a25fc6070",
+      "gitBlob": "f4a0a182fc76bee85eee05586f565a540b793d51"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-freeze-first.json",
+      "bytes": 12159,
+      "sha256": "b6af4bcc803b766c83aba82fa8ced52ea48ca002b754b30f77604ffd94c1b3de",
+      "gitBlob": "4248e095e75a3e9c5ffc3ff30d04e2a1aceb8e49"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-freeze-second.json",
+      "bytes": 8198,
+      "sha256": "09808726ae67fbd8bf45d3e3727d8482af25299370b87d7134b646ffb88b7e4c",
+      "gitBlob": "2ac331398842a7055873139ae0a989ec1e78ca51"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-freeze-third.json",
+      "bytes": 9468,
+      "sha256": "ac53bb87c4df13a89af417232b4bfc0145bc3a4045902fcf4d6b3b452b9aac9f",
+      "gitBlob": "51ca8534d9ee350222094d93e11ca4ffacfaf916"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-local-checks-first.json",
+      "bytes": 30935,
+      "sha256": "0e465b064e15ab253a331f4ac0977f1e3fc59b70733e79c9ae06f305b48622a5",
+      "gitBlob": "d1a59ce45f5721ec1f228055a2cc929fa3bbe71d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-local-checks-second.json",
+      "bytes": 26506,
+      "sha256": "cf283a62b5437dc663c1dbb83897259f566ac1b63a3af9da71f5b4cda742c9d8",
+      "gitBlob": "e586fa96f3aca6e757a420f770b4d63c7b34eeb4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-second.diff",
+      "bytes": 6576,
+      "sha256": "9107ed4fd8120594eb5a99f4c0efa2b5c042d9a7eff67026b2bb33d57ca9c95f",
+      "gitBlob": "1a85fdab4ab75b100f838cc999e99df65bd40105"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-first.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d",
+      "gitBlob": "b55d19056044538442f93b77cc37d83ffa935efc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-second.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d",
+      "gitBlob": "b55d19056044538442f93b77cc37d83ffa935efc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-selftest-third.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d",
+      "gitBlob": "b55d19056044538442f93b77cc37d83ffa935efc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-header-runner-third.diff",
+      "bytes": 11990,
+      "sha256": "481a83d392b07f53d5aa64889f1dbb0d1a7948eb498d0081d872b73b60639951",
+      "gitBlob": "3aac85006e706308f77d8b133045a2b471e79577"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/editor-review-first.json",
+      "bytes": 13412,
+      "sha256": "910ebb1a66fb7ae8c4f8dfe26a570ac6921f12c1707341278f738f35c2854cac",
+      "gitBlob": "cac296577b0addb12fd6313e01ecd3fe0e0f57f8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-channel-lifecycle-function.txt",
+      "bytes": 6576,
+      "sha256": "c016c08ed69ddb57cf0c90a6b70e4f34cf69e0a428620a6226af9e4b7e4a63ba",
+      "gitBlob": "4f8fd936168aa61d0ec7808738ad51f35dbfd6fa"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-final-independent-first.json",
+      "bytes": 110099,
+      "sha256": "14c1c8709c641ecd7f5bc447e78a25c1642a8836976b16b9e8831ebfc7f86621",
+      "gitBlob": "4236f15512fb75c14f35aef39bd595ba850604a0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-final-independent-helper-first.py",
+      "bytes": 24197,
+      "sha256": "fe7da4200a9bdfabc1154c758d75bec0eb696c161991c44ea58514c0ef4e9086",
+      "gitBlob": "09c1d456d922faaf6810cdd1667bff0b7bc2ab39"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-first.json",
+      "bytes": 94041,
+      "sha256": "61853907cadfbc1ad4581522383268541c46c3ce4748b95c6b1621fda38d4bc2",
+      "gitBlob": "a18673cc68a34b4b510f71ef186590927000c4ba"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-helper-first.py",
+      "bytes": 22223,
+      "sha256": "5dc56485001031b623353b97b1cc25cbdbc0939193304cbb862eddfe3d1c212e",
+      "gitBlob": "8fbe6400a189b01ce936e75be79d1077546a00f4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-helper-second.py",
+      "bytes": 23073,
+      "sha256": "7888af2ea7e56c20aa9a10eb4fb19172e8e3b753bc138215424529ed0eed1497",
+      "gitBlob": "194e884172fa057efcf41b963cf91b67aa5941b3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-helper-third.py",
+      "bytes": 23472,
+      "sha256": "1fa2c64ac867875c80716a1b2cd28007a606049f744f062f2d56927de0eb9d8a",
+      "gitBlob": "1a913860789da6dfa93177a2e1e74bd3817f389a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-second.json",
+      "bytes": 33282,
+      "sha256": "4668a6dbf9086b74ec64aadcec9bf9c71aab87da006758ccb9fa17a202bcc20d",
+      "gitBlob": "5189cdac891cd979833aba8fec29cf597164f429"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-deadline-independent-third.json",
+      "bytes": 109672,
+      "sha256": "cc28973fb4821eefcb08c7784a8a1d22d9f8ffb907159e8e58b4f62aaf19a829",
+      "gitBlob": "cba00556afaaccb904f0ec6f81f964fafb4789de"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-runner-block.py.txt",
+      "bytes": 25736,
+      "sha256": "100294db8614c975af060329f76d6f966bfa7c4f88071432f0e26d54edef443a",
+      "gitBlob": "25ed685c7eefe07c1bab7c7d326c99892b077730"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/header-runner-selftest.py.txt",
+      "bytes": 8221,
+      "sha256": "d586d730d8434d2ad36d224b9b8fbfb32cdf9886accaa01c334eb1ed0d58b33c",
+      "gitBlob": "78c87b1c03867e5db7b8ce6ce49e351173aac73d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/host-targeted-first.clippy.stderr.log",
+      "bytes": 1084,
+      "sha256": "7bd6e99a26d77940a6f96cf1a345d7c0e82d75576f56ffe581f4450c14171b0c",
+      "gitBlob": "26564dcfdd629743b2f77d5b3bae396b5ce2574e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/host-targeted-first.clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/host-targeted-first.json",
+      "bytes": 138940,
+      "sha256": "a45b751220b680a1c5ec8c7a9d31db2d455da434a74b7d27a0f9c80eab39c5b9",
+      "gitBlob": "b8ea75e00216382fb4b1f242022143ce731bbb5b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/host-targeted-first.tests.stderr.log",
+      "bytes": 1387,
+      "sha256": "f77f7ea04f91cd4e84acc06deff0e188ac74ba80c64c8f7038a72e41afccab55",
+      "gitBlob": "0525eef3ad85aea76517dc6845e347130561b132"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/host-targeted-first.tests.stdout.log",
+      "bytes": 3343,
+      "sha256": "13e8df6d95a010b532db0b83e1760d0a691c565a3a6d96f3759ba5da7574b592",
+      "gitBlob": "2ae013dbd713464ae543779dc5b1b7be711e6550"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/integrate-main-final.py",
+      "bytes": 2622,
+      "sha256": "4f5f8c8ce2365f9c9502b9ffb61847ac56bd622542be29e46645cbd4945cbf18",
+      "gitBlob": "fa1537efb7feaa60bfb27b508dad23e1c8a8a777"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059",
+      "gitBlob": "4ba426392149323d47afb4fd910a05e80066efa8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 58970,
+      "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "gitBlob": "410de097cc4657ad1b4a633c5991db8b914b739e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 7658,
+      "sha256": "ec4b186638b95e4fb61b4d9a852248f4063262bc044941b70311717651834cbb",
+      "gitBlob": "f9a19a547de768912629e3cd169d35cc8fe69133"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "gitBlob": "e60f8d80f09435d87a10825de395aa95d03fdff4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "gitBlob": "b2e017d266a2bf114d5e147a94da1df877933810"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "gitBlob": "1da04fe1cc24b0efe7eb3dad47a215685a43dd47"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 63166,
+      "sha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "gitBlob": "f43322b56dda418ef5d7395a76ac5e2fa0d65e07"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/scripts/windows-test-edge-owner.py",
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "gitBlob": "fb76961115fd9c0bf8e3ed3a692f9cc1d3412c81"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-before/scripts/windows-tls-business-probe.py",
+      "bytes": 112200,
+      "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25",
+      "gitBlob": "744747b0c7d7a5527ce0b271426a425fadf04331"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/main-final-integration-first.json",
+      "bytes": 3658,
+      "sha256": "36b10bbc311c9689c901917704387f1020de1afeb891e54a16042b893cd22ed5",
+      "gitBlob": "162c3b0d3cb56c550e2ccb1f52546d5f097dd5db"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/autostart_coordinator-3f86162353dcbd5b.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/autostart_coordinator-3f86162353dcbd5b.exe.objdump.stdout.log",
+      "bytes": 1640722,
+      "sha256": "7143735152d7da85b11d22eebd19be64c4033fea6730d4c44656a5e87cc9c07d",
+      "gitBlob": "1e47d281994ac720336d6451b7edc56af5955456"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/business_storage-17284d3ac1a257da.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/business_storage-17284d3ac1a257da.exe.objdump.stdout.log",
+      "bytes": 1930126,
+      "sha256": "666542449996e41f47082f9547477584ed6aaf3a9f3dfac2fbd0f7e9dc2a0c31",
+      "gitBlob": "7a50b0626e4ff6e367f85b0e2e36b13870795c1f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/calendar_execution_fence-1ec83488dbed4f30.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/calendar_execution_fence-1ec83488dbed4f30.exe.objdump.stdout.log",
+      "bytes": 1627798,
+      "sha256": "efae4b812209d55b36411c1542d8ddb88a2b24d14fd8050d9c491ed4bbe6a0a6",
+      "gitBlob": "7be3ff778f50aa78eba0fd17192daf3d8706f286"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc-bootstrap.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc-bootstrap.exe.objdump.stdout.log",
+      "bytes": 3178110,
+      "sha256": "a79b0a34f51a85ee12ff63c5dc6381055b385c1a4ceb94a8d3f16a11b69d1172",
+      "gitBlob": "3db9a9f6a441f07732ab08b7153c1b12f2888ee8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_application-fb16268b5eff3acf.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_application-fb16268b5eff3acf.exe.objdump.stdout.log",
+      "bytes": 425744,
+      "sha256": "52cdbce34a261c493e99a3d98b4fc6996ed2790c06e55bca6e01f64830176f55",
+      "gitBlob": "ae88eef5894284bc40359cc4aab0e1f911e126d6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_audio-e1b4eabc9ef1420f.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_audio-e1b4eabc9ef1420f.exe.objdump.stdout.log",
+      "bytes": 441074,
+      "sha256": "8eb23a190608969f36072daa10897685a5a05c654ae48f1a2759ce9d4846addf",
+      "gitBlob": "019e382a4b687d536b4892bdfb35616087c11d73"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_bootstrap-dd30f52d529302ea.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_bootstrap-dd30f52d529302ea.exe.objdump.stdout.log",
+      "bytes": 3291350,
+      "sha256": "09e19ff8b68069375aa2f19e2e06ef5567f5318620ed27de6ecc0fafbd0b6e4d",
+      "gitBlob": "190e9a7e8094ec857c5e84b0034a5e99ab1948de"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_bootstrap-e6c3a587f31bdfb6.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_bootstrap-e6c3a587f31bdfb6.exe.objdump.stdout.log",
+      "bytes": 4018470,
+      "sha256": "b0e665b3d85457e3afb5daf29b78df897eea25829357b61760b9d8605ab80b1e",
+      "gitBlob": "5caf67a19b0dd70081214b28bb16cf82c1d75367"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_domain-367747e306a1dd0e.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_domain-367747e306a1dd0e.exe.objdump.stdout.log",
+      "bytes": 854790,
+      "sha256": "d9c26e1e8a3087c1950c19eeedf1cb4658d26a1ff780ae92693d40c93068711c",
+      "gitBlob": "2d9e56b69fb82f8b2c920067e638c7976b4ad188"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_materials-f1a7d58c131e95d5.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_materials-f1a7d58c131e95d5.exe.objdump.stdout.log",
+      "bytes": 759101,
+      "sha256": "9365e7670a33755bda40723c11052fdfb499ab6b7b4de973d96f9b7cbc7bac6b",
+      "gitBlob": "2a58e38010cdb68a7abdfc0cd2d50680103ed150"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_ports-15b1ad689f79c490.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_ports-15b1ad689f79c490.exe.objdump.stdout.log",
+      "bytes": 408772,
+      "sha256": "2f24174d2732be493f5aec74deef8572014b30854d9c2b67ff23723b1e69423d",
+      "gitBlob": "9f3a94fc2f65d82252bed6f5794d5ded68787162"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_presentation-b847dfa3b68d1237.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_presentation-b847dfa3b68d1237.exe.objdump.stdout.log",
+      "bytes": 630473,
+      "sha256": "291830dee6c8f4500425b51912b98a11b28af75f8240400520ce5bfab9d29344",
+      "gitBlob": "fad52616f1f2b7cdf79c5e6586049ab8282086be"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_protocol-4316bb63b92dda4d.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_protocol-4316bb63b92dda4d.exe.objdump.stdout.log",
+      "bytes": 720398,
+      "sha256": "445d404f7e649e4ea522952873030ea8459f6afd5a98c7bb1242423393baaa1f",
+      "gitBlob": "c0872594e6d546f8afa65c310a699b52e0db57e0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_runtime-a09be73363edd23a.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_runtime-a09be73363edd23a.exe.objdump.stdout.log",
+      "bytes": 489600,
+      "sha256": "7f962cc2dfd4948456a382adb735db1adf7ab4d340d72c914d80ced04e827359",
+      "gitBlob": "06b61a623fa3d39667399474ddedf24d672bb488"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_security-2889fa9301b88e80.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_security-2889fa9301b88e80.exe.objdump.stdout.log",
+      "bytes": 407376,
+      "sha256": "7a1bbc969cc0a4e471c7cc7dfcb200591ea351c20099cfac241ffba111919d73",
+      "gitBlob": "e0a170567ac4f043a286b1f4a41bf6a4ab12b9d1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_storage-3ccf7e5bedbf5d94.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_storage-3ccf7e5bedbf5d94.exe.objdump.stdout.log",
+      "bytes": 2539996,
+      "sha256": "f8122db465e5d4dbcdb2aab195fcac5306f4945b6ee8ca9d75a22cfc880c211c",
+      "gitBlob": "7dbc8b87db526cdc12a23baefc5373a2286422a6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_windows-4026d62a77fcc28b.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/fc_windows-4026d62a77fcc28b.exe.objdump.stdout.log",
+      "bytes": 1402324,
+      "sha256": "1dfbaca79ca42abc2373c1dcd4eea75d17dc497614617030e92862a890bb8f0c",
+      "gitBlob": "3a7afdd73a9d029ebd427b4957420c9ea643cb19"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/objdump-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/objdump-version.stdout.log",
+      "bytes": 289,
+      "sha256": "ddbfd9b9ba42894a45a45fc085e4a33a51f9326c99053f5cbd047dfcb53cee56",
+      "gitBlob": "9f66b6f025ffb983585ef65ae65da5e2210c31ee"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/runtime_storage-6432f0544bdb6c95.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/runtime_storage-6432f0544bdb6c95.exe.objdump.stdout.log",
+      "bytes": 1514376,
+      "sha256": "a70b8abd085c0a0895a990dfbbe1a843d1bcc773f9302466df214877bc4c3327",
+      "gitBlob": "7abb7711f734f3e0d8e5235b9db4ea59770c5e49"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/schedule_operations-2019e4752789692d.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/schedule_operations-2019e4752789692d.exe.objdump.stdout.log",
+      "bytes": 1697990,
+      "sha256": "57a3a42c5d3366a9c46d9c741c82fce5b25b1e864d457dd420428a4692248849",
+      "gitBlob": "6cb361cf1c9133c15e09435f47a13f27484ae885"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/verify_web_assets-2cd688c78134cd47.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/verify_web_assets-2cd688c78134cd47.exe.objdump.stdout.log",
+      "bytes": 364630,
+      "sha256": "9b81b61a52be429a4a2a0228407f1321d7e6c1bfa6c5cad13dd4caa5cb60b541",
+      "gitBlob": "29889c8557e55180f3e4640ca3310102719a32cb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/voice_limits_storage-0b21db1adf2928be.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/voice_limits_storage-0b21db1adf2928be.exe.objdump.stdout.log",
+      "bytes": 1561579,
+      "sha256": "a936de6bf2d3e6245994af6e2ddbe6c94178dec875e0c2605229cd34355fae67",
+      "gitBlob": "0735ff8918deb4f7b5ab9ec52799b6b55300bac9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/voice_storage-fee498fb1bb1e971.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first-raw/voice_storage-fee498fb1bb1e971.exe.objdump.stdout.log",
+      "bytes": 1577119,
+      "sha256": "c10678e8a465e870ad3700f9f42a1025bea6e1c99c5b1c0a0e3ce455582707c8",
+      "gitBlob": "eada93373779156f4e0f1dd3a1abf19d19e5179c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-first.json",
+      "bytes": 330435,
+      "sha256": "f6ca41cd1322e47cf18ce1a2df504aa8cbf5fc38ee0bde03a5675dc270af70f4",
+      "gitBlob": "ab89335e5d2b57699d420390637979f43f390517"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/autostart_coordinator-3f86162353dcbd5b.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/autostart_coordinator-3f86162353dcbd5b.exe.objdump.stdout.log",
+      "bytes": 1640721,
+      "sha256": "bf0078864f37238bb6abd8bca6f3ef5141ee39483b95a3ab0dc778cc89080140",
+      "gitBlob": "c31beb6d323a321f72a9954f04d7eebc4a22fc56"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/business_storage-17284d3ac1a257da.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/business_storage-17284d3ac1a257da.exe.objdump.stdout.log",
+      "bytes": 1930125,
+      "sha256": "684caf7bb4e7b09ac29bd2c7ab7911a649ac361f1141c481069d8f5e160d2aa0",
+      "gitBlob": "dfc0b22b6d1d770a619995a43cad0ac1ed91146f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/calendar_execution_fence-1ec83488dbed4f30.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/calendar_execution_fence-1ec83488dbed4f30.exe.objdump.stdout.log",
+      "bytes": 1627797,
+      "sha256": "0a6755cc70f28a8174082efc7a4ca46ee7b7f95dd603795342a93a9333166c1d",
+      "gitBlob": "e437728e48a4d709280f7ae8a1ebba862a17f99d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc-bootstrap.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc-bootstrap.exe.objdump.stdout.log",
+      "bytes": 3178109,
+      "sha256": "1296746b9cbf25d93b4c15bcd6c5f1bddea06fdb43565bc3056c5c3a94032a67",
+      "gitBlob": "6860c7f047d75a3b4ebf10b660dc33a32128c94e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_bootstrap-dd30f52d529302ea.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_bootstrap-dd30f52d529302ea.exe.objdump.stdout.log",
+      "bytes": 3291349,
+      "sha256": "b099ff26bd55683323b233eb262b69f88b533491625e3477514f00b64e8b0504",
+      "gitBlob": "9b23ceff817fb782de5b458dc15198eb747c2945"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_bootstrap-e6c3a587f31bdfb6.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_bootstrap-e6c3a587f31bdfb6.exe.objdump.stdout.log",
+      "bytes": 4018469,
+      "sha256": "1cc8b372e655a9bbe549a311f01f8b244a977e2aa263e7486e5eff75d170c88e",
+      "gitBlob": "7141fe6f364a90e9e4f0385af004e513f41898f9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_windows-4026d62a77fcc28b.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/fc_windows-4026d62a77fcc28b.exe.objdump.stdout.log",
+      "bytes": 1402323,
+      "sha256": "0e718142b394dfd3640498687dbdd099087196995b3e10a9c64b96ff12cebad0",
+      "gitBlob": "7df3bc968e24f0723d0ef8d21bcc826d85283aa6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/runtime_storage-6432f0544bdb6c95.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/runtime_storage-6432f0544bdb6c95.exe.objdump.stdout.log",
+      "bytes": 1514375,
+      "sha256": "8c03ec415f739c9e5ac7922042077c2e34fef286243ddee3e637d0952c157392",
+      "gitBlob": "3390e1b819e274b8c8a613c16afc91a9a5cc75ef"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/schedule_operations-2019e4752789692d.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/schedule_operations-2019e4752789692d.exe.objdump.stdout.log",
+      "bytes": 1697989,
+      "sha256": "e169e5f2374a275b1f0b27074cd728c0ae5c40ca6bd8502492e47627a4b3f9e7",
+      "gitBlob": "969f8810e1f055bad87cf729c6ee7b0bba3451f5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/verify_web_assets-2cd688c78134cd47.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/verify_web_assets-2cd688c78134cd47.exe.objdump.stdout.log",
+      "bytes": 364629,
+      "sha256": "e90e29e8a62be752c05184547cac42c9622a45aa3c5559a4e2d912b7aa46c2b4",
+      "gitBlob": "d43a17c169c66d447449ae2d526b634c7b2b501d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/voice_limits_storage-0b21db1adf2928be.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/voice_limits_storage-0b21db1adf2928be.exe.objdump.stdout.log",
+      "bytes": 1561578,
+      "sha256": "f6f710c26656bf8eeef286122ba2177cfc9c8f165f8800d377241a7dff8033cc",
+      "gitBlob": "d3e24cba205abfddd76a297594e4881dd06b1a7e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/voice_storage-fee498fb1bb1e971.exe.objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third-raw/voice_storage-fee498fb1bb1e971.exe.objdump.stdout.log",
+      "bytes": 1577118,
+      "sha256": "55104918d427ef57be94738c987671b04e063420153ce4f45d0006e7513fe38b",
+      "gitBlob": "5da55fda68b8349bd327917276da2b1c45676386"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/programs-independent-third.json",
+      "bytes": 291628,
+      "sha256": "bd4ecd42dc49886e219f68217a2470d4b1100872a875fbb375917f9aba6c68ed",
+      "gitBlob": "13cfd366315dc2a0d1c733c391943f262744ca3b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/public-visual-final-independent-first.json",
+      "bytes": 3700,
+      "sha256": "f6016a90f4a0263e5f451bc0788af793689ed515854e45b94cdeed6cf6afc728",
+      "gitBlob": "63e487bfd33815a9e753944e8bf47b89a3b110b6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-archive-helper-bindings-first.json",
+      "bytes": 4849,
+      "sha256": "0d6b9b3bf2dec06fc16f7323452fb3c3637c2ed96a1f1dbd1d5a572b2431803a",
+      "gitBlob": "f1d66373bc9d88dbfccc8b001cbcc79310fc8cd6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-archive-helper-bindings-second.json",
+      "bytes": 2913,
+      "sha256": "8940cda174707452718c9183d7f9653765a4db8a71be0a1b207eb39cf7c3fa95",
+      "gitBlob": "f5853be0984d69d7801628822ddac488c985dac0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-integration-first.json",
+      "bytes": 835,
+      "sha256": "7cbd6bb3a453cf116ea8d04814ae6ff27c37ce431c66a2595ab30416f87d6daf",
+      "gitBlob": "046876ba98502463b4942bd508a9615b82b6dd5c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-integration-first.patch",
+      "bytes": 48228,
+      "sha256": "2b0c8df427db3e896d86e851ba4f5ea5ae0db608cdb2bbe470d9b9efde711f81",
+      "gitBlob": "bbffbbce7dfc53cb475a429dae4728476f8ca611"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29624,
+      "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0",
+      "gitBlob": "4d51d3243858f4ee191e36a78c87aff54ae9028e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "gitBlob": "7e33c022140570eff6314ca22f4f993a56695aac"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384",
+      "gitBlob": "65cd15b57a20bd848f88ca29d28c4aec35fb3906"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "gitBlob": "f4a1ca4c93be5511d481c661b5a839008267db1f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "gitBlob": "65ae1c41b5375fe55380a5b3d7d2ab5087fd9c9c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "gitBlob": "e369a9052e9eb98878ea0aed30600ebc351027fc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "gitBlob": "dd7442ec87af7d15e4f6531745c724ba4d812485"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/scripts/windows-test-edge-owner.py",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+      "gitBlob": "1405f45085f597d0db6a6c2103e316bcd664b4a3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third-before/scripts/windows-tls-business-probe.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+      "gitBlob": "b9920a7ae012d0a11297c1e873a18e62c74db94d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third.json",
+      "bytes": 2361,
+      "sha256": "e91da69e3f4b12803a064b1de82409440f306953f40de0398359720ab7ef71c9",
+      "gitBlob": "7029765e57303e49d17944fa592120a002ca50a7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-main-integration-third.patch",
+      "bytes": 114363,
+      "sha256": "90b0b92e8ad2c1bade3f51070c3a640c6aa9f62c1a216f78299cab0a746c2574",
+      "gitBlob": "f4a0151ee7b3df81665f6c5e1abf7747f0cbd941"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-observation-after-first.rs",
+      "bytes": 29723,
+      "sha256": "ec9608feed967966dedcd6f8c6ed8df00763b89a9d73e6fa1877906196875c13",
+      "gitBlob": "d1f8239eaea8747b950d82b9bd01f1981c5d9de5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-observation-before-first.rs",
+      "bytes": 29497,
+      "sha256": "3156f180665d34d737912d84e0848f0f1c68aa7b5edde37c0b989bde93fadc90",
+      "gitBlob": "3a4261e74d5f350e4fd32a2aefe57d4d142b066f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-observation-first.json",
+      "bytes": 424,
+      "sha256": "0874503e8a5be1ec7581d6683318d19c4d5002e7f4fac765cc6f24ca877fcd83",
+      "gitBlob": "c9d1cca0cd0841051a4d24785ae9339a7d10d5ad"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/root-observation-first.patch",
+      "bytes": 1412,
+      "sha256": "0403ec9364ab2f973f3f9f749bcf1aba038a3acd7dd5ad536dd2cbd6b37e7af3",
+      "gitBlob": "74c894681f52cb9827195b06b7d921c40d34a7b2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-editor-edge-atomic-stop-windows-first.py",
+      "bytes": 2737,
+      "sha256": "e9300ce2c086173ae144d4c3c95bb331dad54f6644e6fc7cf22cf90046c1525d",
+      "gitBlob": "7cc1a1432c2c411a5cb0b967b167713163b597db"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-editor-edge-atomic-stop-windows-second.py",
+      "bytes": 2740,
+      "sha256": "ac2e3c7fbaa73f022a4628b0a93b1a532fb0cb086e39f7f360fbea36a5c6d521",
+      "gitBlob": "da2ab02ec985a5c13f4d686faf4d3164c32047bc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-editor-header-channel-local-checks.py",
+      "bytes": 5673,
+      "sha256": "f15d252b72ae4931604bfc1489ee0cfcc33c2b289c4d4a0b872ddc93084d4b3d",
+      "gitBlob": "0a6dcdf2ab6781601d363f86e1ea3f29d590fd02"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-editor-header-runner-local-checks-second.py",
+      "bytes": 3397,
+      "sha256": "6899f6d9524158b9c5b060102f3a272aa3517dd96e66b17ea7f8c5ed6365ce77",
+      "gitBlob": "5b3fa4818a80c41dfd1580bab0a5f4df4c4cb18d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-editor-header-runner-local-checks.py",
+      "bytes": 3947,
+      "sha256": "5c5da5b3a7f4577a9966e5e6009f42eeca6116d000089ebc623cf17e09017535",
+      "gitBlob": "9d8cd532325b8834c29bc3425afac069acbb9259"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-final-windows-flow-series.py",
+      "bytes": 2384,
+      "sha256": "f1b16977f9511298e2bb27065cd65f0162b8b1b9289070115b56dd5aa6e301d9",
+      "gitBlob": "ac20a55f7236eeb41b8eceab5ce6295b3aaf866c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-host-targeted-first.py",
+      "bytes": 2812,
+      "sha256": "b325b3fbd5eec9da6fa5f3d45d0a5035c31c55617a441346987024bee11c60f7",
+      "gitBlob": "7dd484a8aae1518623c0bfb51e5f14d98bc0158a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-recorded.py",
+      "bytes": 1304,
+      "sha256": "397c64b1e3fd33e794f26812629fe8bccdcf5fa515d537e9693c9050072b2a85",
+      "gitBlob": "220621e6a25b90caae40b3750af989f8613f60bd"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-windows-integrated-first.py",
+      "bytes": 4968,
+      "sha256": "4af618d974a0c4eab626e1568a842b9bb63d58cc895848e30361b83c831c9f55",
+      "gitBlob": "eae03153f2a15f015f0244b4355cf349956c4b50"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-windows-integrated-second.py",
+      "bytes": 4974,
+      "sha256": "974d1459c9889a3da5b6dfbe19de9971aa0e5b34eeb7b99208df07f0789eadbe",
+      "gitBlob": "2164b54f44c2e30af492ad00c32caf45f783f78c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/run-windows-integrated-third.py",
+      "bytes": 4968,
+      "sha256": "87629d764b0861c0bd492ac2699afa9789407ae0c6eccf115e39c6b14c5e8deb",
+      "gitBlob": "29e62c1bfd863977573d8addc947df0f83148a14"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/verify-programs-third.py",
+      "bytes": 4291,
+      "sha256": "88345025c0ac686e11dc079e6a857717cb49a2a7d32dda1ff932dca3428f3e24",
+      "gitBlob": "e37eeff3fcd324f48e4860357a6594b9250bc2f0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/verify-windows-gnu-runtime-second.py",
+      "bytes": 2112,
+      "sha256": "bc6c4414ed948577f82c6ec7e1f3d3e8aae8151d9e17476c60c1374754e2db2c",
+      "gitBlob": "3f294e2ffa5579c8c77dc413936a4196ece72b4e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/verify-windows-gnu-runtime-third.py",
+      "bytes": 2153,
+      "sha256": "3be5854884988b9e295ef10279ba3a8b9e9e9e5965b5c29113f490b6e7a28601",
+      "gitBlob": "32b9872007454ce181cc31ce4af47f813e5212e1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "7cd71b9a5914eb50d743b7aab557f242d5cfc9a61e3c4f943d5d5c8e4bb3332e",
+      "gitBlob": "1a4aadbe967eba7bc8e53d09678f7eba50020bb2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "563618f7f42b97489fa99312b0bf476553d1b4272c46aaa92b113944f793f0a1",
+      "gitBlob": "e02d85cf710c811eba6cc8dd8291f69facdc2fd1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "fb6423645bc8910ba09b2b39b10cf0c8774b2259f244acf16177e3eb498b66dd",
+      "gitBlob": "411823e8728e9752387d8f9a03fcd89b0ff80093"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "fcab422f78427214b07c2046b494314123749a5178839f501e02afbf6b4f1f29",
+      "gitBlob": "1d2f8fd6693af11a1cae6543ba614473c65c1ead"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "577149187e61d144782678b9a9441d3c6aa5270e7339c6cb12affa7ee5da0436",
+      "gitBlob": "d70db44a312954bd533959e6e4314d86b71c1c61"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "46fac4ea8b6387a63893572401cb4f7b7dab86111441c68b3b0ce890cca0b0a9",
+      "gitBlob": "79d423cf3ee9d9c637fd15340189ec3878c2b93e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final-f676179fe7df438e801c110b4409ecd9-raw/tls.stdout",
+      "bytes": 42283,
+      "sha256": "38e912104685cc19df90cf5984debadd271db6d04edff4f4317139d0795f97b9",
+      "gitBlob": "c31bd30678e5dc04137107dc167f85589db22543"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.command.json",
+      "bytes": 1117,
+      "sha256": "00a64a5df4ce188a549ce6460559236a87f81fc6eb9530d0cd7140770fa594e4",
+      "gitBlob": "798fb9886e4ec59190c822f268e02e92c52c6b8e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json",
+      "bytes": 307967,
+      "sha256": "b230075da243b954748cd966a91a7d480b56304551d0132fa6ac2b3cc2c64f25",
+      "gitBlob": "ae1128d0dc567eea3db0b47ad4890432336f176f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/.edge-assigned.json",
+      "bytes": 195,
+      "sha256": "faa76fcff19d7f6e680f57940e6abb761c2b568c42aa06b90ffa81eb2b55f736",
+      "gitBlob": "0d884a0201164e00cde55cb1411661c1f778a939"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/.edge-outcome.json",
+      "bytes": 384,
+      "sha256": "cdd801bbd7db206026b65da55339f4b51ff41e68c312fbdef1160d5fceda23a6",
+      "gitBlob": "f1c73852af20154c73d92d333dafa5afb3050615"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/.edge-process.json",
+      "bytes": 534,
+      "sha256": "cb7da3ca070def5c7927e16b3f6094f3696bcaddb0242c2b665998485770a1b1",
+      "gitBlob": "66af72f4ac239e9ccbbd6bc0ee27fc081b44d78a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/.edge-ready.json",
+      "bytes": 747,
+      "sha256": "c0e6cf2939266104d1f0ba83e22cfd83c3154dd5da4a5f7704e08dcac060e8a2",
+      "gitBlob": "fa64fa76ae91ae0795e93ba02c5dad1fe35e4fed"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/.edge-supervisor.json",
+      "bytes": 190,
+      "sha256": "5f4b14541370877bda2c1ee433ed78c9ffe8579193ce73ed6267ba4fb6340203",
+      "gitBlob": "75022defcf84c9a157c83a7443b2ca637e5fdbfb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/edge-devtools.raw",
+      "bytes": 60,
+      "sha256": "2db0e48e21986c841713ea8230069b664d97e28dd3a594660f27de6586831baf",
+      "gitBlob": "c03143a562c5efabb20e1c71406d0f4e6dd19f7e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/edge.stderr",
+      "bytes": 889,
+      "sha256": "c6a49aad6e27aecb502854bdb93d2a91c593d79a2dda1d73f642f41a4a6a68ed",
+      "gitBlob": "d23b18b89b138e1a1e12f10bbe1f4a1ca4549eaa"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner-FutureClassroom-Test-Browser-f1c7a1f4a7eb498ba785c39b582b23c7-raw/edge.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner.json",
+      "bytes": 17656,
+      "sha256": "53619e8c1f94c186830a1964d2e86fb1282615fd0cc4436f6dadc6cf129e7535",
+      "gitBlob": "28a04ad28f10880bd67281b5fa11025d8b8dcd8d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-edge-owner.json.control.json.stop-37dbc182048947b6beeab483ce20350b.json",
+      "bytes": 905,
+      "sha256": "1a0cd5b16b50adaee6715d097bc3e45119a1f131cd134a45fd5f5749172b826b",
+      "gitBlob": "6983be606af667c24d3807452704309d79592adf"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.json.browser-node.json",
+      "bytes": 28427,
+      "sha256": "b0fa491dda6aec2a5ed63098384be43b1da3eb3bb950b0e6600d7c42a2c95635",
+      "gitBlob": "6d7e98f781b57c491bdf59ca5764b09512129978"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-final.stdout.log",
+      "bytes": 286,
+      "sha256": "a1fa6c4c9a34a59ba7692c7bb2718a7d65ab88afb036416558a5a0dc55c2d8cb",
+      "gitBlob": "45e1f28dfbce6e5461259a9ad650e1f66587fda8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "c5d60952939c083d1bdf3f3c6c4236b7341210863a79da967e2dd9f698765f73",
+      "gitBlob": "c87fd8f9a7ebfec6b836df0ced280621caa7acc4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/.tls-process.json",
+      "bytes": 239,
+      "sha256": "44c8dd2ef1e5666d529b3840b7b6396b1f5ff33b5a63d63febcbb45f354b0060",
+      "gitBlob": "97f0a74d7a0388b791d662ac0b9f3383658ad93d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "03f6179c4cf20621e3e4541e9a458b594f074b4ac617fa8934373c17e6f5b1d4",
+      "gitBlob": "d45384a9ef059fedc94a2777891a17b5b7ee6e88"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "5d5cd1ab032d3ca1335ca2e5d3d41e70fcfc77ad26d85d0e7eeaec2a0308c56f",
+      "gitBlob": "066be08b14eb3e0b8dad3a862d039c09c1047e59"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "c8e3305a8405f1b6f9704719f5c8dda5101fab0b04cd4f95a77f96e883f3efae",
+      "gitBlob": "51fdbdbc93bd793ece8c1e49f07b409bb184b21d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "92577984e2106577f539dcf03a1310f227af02c0f5fe04751df6d67db752b802",
+      "gitBlob": "47a8fa6c444c939a8feaf40e5fa47a10812d7fe0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first-38782ec7299340ecb164640f4d66ee7b-raw/tls.stdout",
+      "bytes": 41551,
+      "sha256": "b7d5122627b3e2b75578134dc9b61ec04c810be85e12f4b741303a1bf91746e8",
+      "gitBlob": "029736adae434ae4873e885426c285251ce418ea"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.command.json",
+      "bytes": 1118,
+      "sha256": "07793ee54c01d9c8e5bb728a9ce3757ed2ee4042a3ce018fff6bb2af651e3edb",
+      "gitBlob": "b658e36642537c3e39bfc0b8158fc15ebb9e49a9"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json",
+      "bytes": 305525,
+      "sha256": "12f1624b74586e37c36dfc4ba64e926815621a4443f1168b833e5fbc18701bbb",
+      "gitBlob": "020786a6723e9d7b4509cf0ad43cb7f75a10c996"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-assigned.json",
+      "bytes": 195,
+      "sha256": "c974a38a34f03432378eb8056587b7770564afa603dcdd6ddb77076a9998799d",
+      "gitBlob": "d9068ee9288f985f97e778c7410bb56e0169ba77"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-outcome.json",
+      "bytes": 651,
+      "sha256": "9953d9ec81f93cb845eb75381b7f77c995a2ba4867028c96d85a4fe110fa0fe7",
+      "gitBlob": "3adfe9b1570075fa7688ca5c9b073abede216d54"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-process.json",
+      "bytes": 534,
+      "sha256": "762ba269bef4d3cd0d880dcaf4929134503547b88977a11ce89746f64857a018",
+      "gitBlob": "18fab1aeeff9302d45b871698f626f51b3e18e6a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-ready.json",
+      "bytes": 747,
+      "sha256": "afef8143fc13047c465447bda3194f7dfe58660ef5f7c357a4a4f817d35af1bb",
+      "gitBlob": "4dc11980941d22a11d3211481c60281747b96158"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-supervisor.json",
+      "bytes": 191,
+      "sha256": "9593676de80f6381932f8166b6863407549314c96f22b50b1c126c607175387d",
+      "gitBlob": "84bf13e767e064803e4020dd3bfec7f360045dd6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge-devtools.raw",
+      "bytes": 60,
+      "sha256": "a4c1170be519cf8787e77e0a2447d014eb1c3a045bc28cc627d02e20c0113427",
+      "gitBlob": "fab2e0b7bcd607c3978cf35b10dcb77a63a4f815"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge.stderr",
+      "bytes": 885,
+      "sha256": "a739f4c082174d4afcc01fd3c96f1826c579309755adcf99e7d3bf601b2ff690",
+      "gitBlob": "f2ba779cc28c86627e25bd37747b96fd55c620e5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner.json",
+      "bytes": 18746,
+      "sha256": "59aafd181e17e7153c8046312feb66ff1a3a6a54f18bb3e3df83ff9ff9f8d2c2",
+      "gitBlob": "c595dc4c904c0fbc4a5d62003b01cc11e29dab24"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-edge-owner.json.control.json.stop-55e89bf56d8b49c2ac7747ecb6b609dd.json",
+      "bytes": 905,
+      "sha256": "ef654b24ac6c6a6866fbba3cd27b6f298504baa6bd1cb8bfab8b99b46205efe4",
+      "gitBlob": "55d956baddb91f20dda6f1cf1b74ec638efba786"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.json.browser-node.json",
+      "bytes": 28426,
+      "sha256": "0a19e6a60bee22ad6e5b9b09659c41187663318d8c8aa5761082058da6e60897",
+      "gitBlob": "bd4cf1313007142b86ead0bf3fc2a6b58dab8fad"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.stderr.log",
+      "bytes": 130,
+      "sha256": "dabcad554bb9a0ea9fb160b6d37bcfac8dd9f8d13a67a1ea1a60701a4a1b733d",
+      "gitBlob": "4e8dd02ba921e98f5831913d8b41a443dc1fc51b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "df48c13cda94a104c1c332206be734fce0e85ba1c21a1a64c05b1244d3b273db",
+      "gitBlob": "303f914b04c1da11bb14ba95f10a29efd45e99e2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "d3220fe48d567706d658f28beca92dd8691139150e20228981036ec910334930",
+      "gitBlob": "5a1f24ce3d58f7490183dc2a13f52988ee22bddc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/.tls-setup-process.json",
+      "bytes": 186,
+      "sha256": "7759b4f01c4c7dbeef391a8b321b24e5545e82f63a7543ceea5f34fc003a23a7",
+      "gitBlob": "839ff2d79769b3b2d59e9020b7f3ff3492f2731b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "49b6c74f94d9d7bd3dc54b158d311860e01fc8d2ea8839e8f7d89b054b960641",
+      "gitBlob": "29111a58360086d37669d24bb0b6fe46e79ebb98"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "99797d21c01e170c33a78237812e9a43c23e9569fc449fd7192ab7b692a07a58",
+      "gitBlob": "69f17857c949dbdc81a1d79206ad79e768cc59a7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "3cf913ccca9feda0c3908ba31d2d2aa2929a72993609f997292336bf1c0c8e40",
+      "gitBlob": "b6bfc26e9e2a0b42be2260d5b978b8682bf89fc5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second-3d5dda3d6ba340579254f52d3d364858-raw/tls.stdout",
+      "bytes": 41461,
+      "sha256": "e94ab645e6e4241f1cda8e6934d7f8fe4444abd89bd1db5238a513e12fc82dc4",
+      "gitBlob": "7d851bd954b238851b8c96bd0376c5ac8fb438c5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.command.json",
+      "bytes": 1120,
+      "sha256": "364904540981ffae4b8c646559b003ffeff50113d684d8a94353e84539fbfa68",
+      "gitBlob": "c974da309b46c58817e5b7d534ef4c2692df5bc1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json",
+      "bytes": 304737,
+      "sha256": "65205a5776a81593585e4c83c6ddad116140edb48f0a3703c0580e43044b3eb4",
+      "gitBlob": "f7b30c4c98d76dff035b4bc3d26721af0c8ccb3a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/.edge-assigned.json",
+      "bytes": 195,
+      "sha256": "5969636359d10c2cc94ac8d4b0a815a8f60fded6718e1e4b56cf70edbc8d7cb8",
+      "gitBlob": "2fa50ab1b64a21b48aaeec4302741184e4a356b1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/.edge-outcome.json",
+      "bytes": 384,
+      "sha256": "5b369b7627390e043fecbba799026bcf285e48566dc49decb2fe76c19fe61455",
+      "gitBlob": "b3540ff6aaa7a8b9cbf9dd51a954f4c23fde31b8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/.edge-process.json",
+      "bytes": 534,
+      "sha256": "715d08130e3b2788fef284ffcd9f006294026491c579b7b8ca9cf97bedd82415",
+      "gitBlob": "ec66b218cee1cbddabd6b720a81ba0274dcf1808"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/.edge-ready.json",
+      "bytes": 747,
+      "sha256": "da7c753aefefd4eef5db7cc1f47269ed7f08dcbc858c1576330e90d07e654a2a",
+      "gitBlob": "3679b5136350d522f8a6297851c486eb2ce7a830"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/.edge-supervisor.json",
+      "bytes": 191,
+      "sha256": "f2de5ac3485289355a3db15a8d5fdf28d5bb9bc990f94168b387f97b5f12ad6f",
+      "gitBlob": "532c51d7296acb2efe99021e93cf48d8022a7dc3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/edge-devtools.raw",
+      "bytes": 60,
+      "sha256": "89595e1f4ed2be12388feeceedd99f2e91bfbbc16649bdd0e2102e7e78f61bb6",
+      "gitBlob": "fb21328d998165fa2cacb1e324e26608acf4ba0e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/edge.stderr",
+      "bytes": 889,
+      "sha256": "45342b8a47459f6c37ae72ee4bb67724a82880fafc7c64e399d3db434f7bd561",
+      "gitBlob": "26e2e29da4f00179d3e39ee4b0edf0d0d8b2c9cc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-99db79a3d67a4048944335297e6be864-raw/edge.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner.json",
+      "bytes": 17666,
+      "sha256": "3a4c2e83ea897177fb3e035d869dcdeb04af23d1c74e2fc1e04d3d607330a1f1",
+      "gitBlob": "62709e953049c3bff8b27a05dfe29d773bf28d97"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-edge-owner.json.control.json.stop-f787c3a17acd467e9c2d9f4e160d165d.json",
+      "bytes": 905,
+      "sha256": "466cf56676ea1c2e1ec0ea0f145616d39d45adfe07ea8921fde5bf94681408c9",
+      "gitBlob": "be14442a8004be60e627541901f10e3d1a5b6992"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.json.browser-node.json",
+      "bytes": 28426,
+      "sha256": "17f9b2f9d105a4065c10845ee20cff4834ea5965069dee8c0b5b2855db1fac81",
+      "gitBlob": "4644078034abd3cd9abc33d60f535e3eabf959ea"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-continuous-second.stdout.log",
+      "bytes": 287,
+      "sha256": "bbf9cd3cd67ee67e79c8a7d3dc416c200efdbcb25f2f26c4bf7226ffce60ca29",
+      "gitBlob": "9226c0e749ab57f4f45b176e0685c5de606ead31"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-default-browser-control-retirement-first.json",
+      "bytes": 1027,
+      "sha256": "ca56fe9d5a686b882646568b1786790d963492d3e8d2baab2ae3a452a144b7ee",
+      "gitBlob": "59ac64ea3295d276cc7dccbadfaf0672271ef001"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-final-flow-series-first.json",
+      "bytes": 671,
+      "sha256": "605642153d8182774a316242058648eda17d061802fdb4d6e123e2be98bc5d75",
+      "gitBlob": "3498062c69c58debfbe628c1e0c25ba07fa3e983"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-counter-first-failure.json",
+      "bytes": 536,
+      "sha256": "6926e6c21e380015538c8d4702059aab44ddf6284114541ae60c4f233ce2c053",
+      "gitBlob": "5d5e1fdfd0427d12620c5b5d79deece172aca743"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-first.command.json",
+      "bytes": 1232,
+      "sha256": "3eb2f494b3e6fbcf5f79395a0f617442ce042215fdc92d7334f31429d6713238",
+      "gitBlob": "d98895752c5f721afb0630e9b3a63e2df503251a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-first.json",
+      "bytes": 187239,
+      "sha256": "6f292c537fe3c442e7aea99c772f1f2b201f655a82c836aa3bd6c47256602bfe",
+      "gitBlob": "8e06f30e9f18a1d1ea0f6f37242eda69c5b17679"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-first.stdout.log",
+      "bytes": 947,
+      "sha256": "196f4f4f04166a919844ddda3400754e3c304c206db68ef5ff9bce94f3cd8c26",
+      "gitBlob": "6da4578c18e8c8e2e2d2a610faa060d02727b9bb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-independent-second.json",
+      "bytes": 6066,
+      "sha256": "793376ff11fa0bb36afd29f427496170684d00dacf9a288801eb847e8b903933",
+      "gitBlob": "c461edd223b7a7dd1816d85c1e25e79468e38719"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-independent-third.json",
+      "bytes": 6108,
+      "sha256": "9c48e50ac3603a090e8d3db0402688e975efc7929bc187c773cbbc65063b7f88",
+      "gitBlob": "871cd0b0b8c2deb8e5aba70f8e3cbcc2c4f17f6c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.command.json",
+      "bytes": 1231,
+      "sha256": "2ab44bc4e21709107d4380aa72e891be9ba57266aacd8d08f8ef74228aa3bb82",
+      "gitBlob": "e0ea90cf801b46cc8f00170590f2d8daa03a0f7e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.json",
+      "bytes": 187238,
+      "sha256": "924c5f97bae61dfe696ac9b422e515910eb237f19b9b827aa3e3d1bd9e543d00",
+      "gitBlob": "e910eaa886c24f52d9a0ef3243b2e024a42c0d8c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-gnu-runtime-third.stdout.log",
+      "bytes": 947,
+      "sha256": "5532950fb1127bff6118d02f09b03c4f567e8d5ac4635f636408db692ca5dc56",
+      "gitBlob": "37b04acb5974eb501ce7af6594efb3515e0db244"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "9a95d80d8003ae352eec8b613f2f5f7bdc8c3f27bb176110bb78bdf1d4f4034e",
+      "gitBlob": "8c2e71115e65338bdcf0efb577b17722d8f38feb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-process.json",
+      "bytes": 239,
+      "sha256": "8c881cdc28d2cd4f29ccd9e58ada005d82a7dea1a6a1c2eec4e68d152acb5f09",
+      "gitBlob": "96df9b11a6b29f6c9312760f051dcba10d8e2b35"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "4b010a712fb28946d93489ad05d2c4d4f1dcaaef99351d158e74b9893c30efe7",
+      "gitBlob": "1018becbb858ba97960a57f2fd4e7e4192da9b60"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "d142d6818164304be4886542087faff758831376e3a2731bc50e31f084ee547e",
+      "gitBlob": "53f5aa8834e1b62a54ea926630401d5b38471178"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "dbee1251e27576150655b5a3ff7b9ed9c0b9019599e16b86e9c9d50a91605ebf",
+      "gitBlob": "81d3c068ae74dee6b4a02e5d839dcce1eafd0032"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "36f0bcb16c624f905df7f961341e0ffd7ff96a0b3b5beda2daf2b7377da4620b",
+      "gitBlob": "ca7218a7560bb63e448a6aaff523bdb4e3479b58"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls.stdout",
+      "bytes": 19165,
+      "sha256": "c39986b9f6c6fe90ab0fc1098be9798f6039b7983648aa6a00b01f03ea57a59c",
+      "gitBlob": "269e73154a16ddb48db52d490769087f35e0fdd0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first.command.json",
+      "bytes": 1044,
+      "sha256": "0aad3c6fbae0108919d0de40b2edb624c06befffcf0a1808aea596d66d365e79",
+      "gitBlob": "84a5bc2c973f83d391515b2c213a81751a604c86"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first.json",
+      "bytes": 117819,
+      "sha256": "ebd5d8e15c6bb7e7f2fb9d3cc44b64a46f1612fcf1a20006ed52d44d2e18dc52",
+      "gitBlob": "77fafe2142b98a151b0e2d431b701a949764f4d2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first.stderr.log",
+      "bytes": 119,
+      "sha256": "3a33d220e9094826c1b5efca25285545c220ffeb11369b17563fc4106dca4f33",
+      "gitBlob": "5e4f1da395efe5810507d73d112f3bfa8bbc6024"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "88d153b7650d49967c6400e2e278992319e568b14b43bf63ccdb6a102c12817d",
+      "gitBlob": "43ad404fe03c418256ed7844242c35fb4007f9cc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "2756d018b3975e6554804b3f8cc6d8a9a966b0574bb5a19e21f1852d9cc380fe",
+      "gitBlob": "fb939bbe9d3aee7393cb59837e9cf0d137518019"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "267098b7f3b0ed34fe0b1dba922095ad3b49be5185ba8c36a37bcf24a1538065",
+      "gitBlob": "a6be0caa36c47a84abb6ca20460dccec6f9c3c50"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "823a721e5e2db2e9c8cbdf0769fe04c0b14e0ed41295ab29fa3729b90bc9d39d",
+      "gitBlob": "1ba86218d824c83c823c7ed573c56a800e1a7bef"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "5b00edd0c52881c2f8fa4b5db456eb61b48224d4654e6999a653860975260660",
+      "gitBlob": "4ac76f234feab47fce3aa9fb8d556be5637a95e4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "81f71f74bdedb3acfecf29c7ab25d8fb4ad586c0e3c2f1c81467586f0083abf2",
+      "gitBlob": "def2fdf2ab27ea012ba1a661ec2fc8cad9ed99c3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second-9c9029c316fc4a0b80014045c367fb9f-raw/tls.stdout",
+      "bytes": 37276,
+      "sha256": "8db81434893594ea6474c7904d4439e23a640e47828e563be33c137dfb8020c2",
+      "gitBlob": "03b724f1bd299d355f5cc391cb6d03e7882d050c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second.command.json",
+      "bytes": 1046,
+      "sha256": "cf96159c5b8cc423dcb0effccda0156853e0c096424b18fdbbc7b6bf1cbcf9b2",
+      "gitBlob": "227402c29b8f038133c0bb1fbdd65074956949e3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second.json",
+      "bytes": 209195,
+      "sha256": "edc474425c3210b0eb022c23c1f6b8e4079aa8f3242c52d01e5e4d0898eade78",
+      "gitBlob": "21c1dce06315e727a8fc0d0089b9cabfcc3df794"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-second.stdout.log",
+      "bytes": 276,
+      "sha256": "42502c5ac44fb773e398b2ca162e4810506760f431da1ac86219db2144f9db57",
+      "gitBlob": "e086cccea11707711818a1aa386267c63ccee37c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "dda254bc0ef77993fb2a4365f8fb6b65cd664dc57f7a5c81becc707f927d134e",
+      "gitBlob": "3da524d295ba67b4aa945e591a5fd687d584e91c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/.tls-process.json",
+      "bytes": 239,
+      "sha256": "de540e075a7d8c19de8628e73862bf5866a2dca62705581f44c69c8056ba2f72",
+      "gitBlob": "c239008e6adc1dc1b729b2dea6b628b6b3f2bc52"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/.tls-setup-process.json",
+      "bytes": 186,
+      "sha256": "727c03b05e99a20b819940a57ab7bbd5867c7ff4b780307f426c3fcfa48a04c8",
+      "gitBlob": "b9ae00479a2d5803f8b23dda594dcec638829dd5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/.tls-supervisor.json",
+      "bytes": 186,
+      "sha256": "ba854a044d8c6b0af5976dc0edf0467eb0c4f3bbdbe23f34d59abd177d3505cf",
+      "gitBlob": "cbd0a2436df133f040853cd94f49067dbee30167"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "1839a821311fdccec656748bf8291bd0bccd833495b784a876592c01b7e1bae0",
+      "gitBlob": "5ef4d218f3c3f7969dd875f407082088b42c625b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "470f79c994f3c96a90d327fa29d641cab2c9e1b681bbc904b5c44715468b983f",
+      "gitBlob": "b23e909138481a18f33e93208ccd45b365e4f245"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third-ef5a192bf9c64bf294adc62c9af3502b-raw/tls.stdout",
+      "bytes": 36654,
+      "sha256": "19725fee1789a76e47267810a8360ffb6385b6ab12057f5989fdf82764f85688",
+      "gitBlob": "1cae9a4603b5c4aedf88af81c65200d748e5b5a2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third.command.json",
+      "bytes": 1042,
+      "sha256": "572d808288fa0c46a5e9b591878d692caa287ca5ce37539b286fa120171ea906",
+      "gitBlob": "95dd6f20488b45e320ca28ad6070f53e30927748"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third.json",
+      "bytes": 206653,
+      "sha256": "6956aa4b49a0bfe79bb069608c83e85d4b2f7dda46e5f1297413113cf9e68b5c",
+      "gitBlob": "73b565029f9af82172124af0ad87db6d6a5a4437"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-header-deadline-third.stdout.log",
+      "bytes": 275,
+      "sha256": "173f4df2a818081fed260aa1f8e0bc92aca8e1c3496e01dbeb1cedb856d55a04",
+      "gitBlob": "c66925686cb1a93f75554f6db1f22df3df425e67"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.compile.stderr.log",
+      "bytes": 3350,
+      "sha256": "779fb9962749957439ef822bcd53dc90385776d5833638c53c37bad449ac1608",
+      "gitBlob": "84fc2ddd200141a9497f6a685f4a081f208af5fb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.compile.stdout.log",
+      "bytes": 98744,
+      "sha256": "d10f928e05fd192321172825d00df224c514ba0643f871bd3d94fad5d29dc318",
+      "gitBlob": "5d92c549f7770f236757198cd6dfc12307d9b017"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.json",
+      "bytes": 140949,
+      "sha256": "9e89d7dd9beb56992afbfd6c513bc8d805e18c1c5b15a79fefec9e806c901623",
+      "gitBlob": "1f36c81e1d15c5e4446b4b98d351210769896eef"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.linker-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.linker-version.stdout.log",
+      "bytes": 238,
+      "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9",
+      "gitBlob": "e477ca109e3c9e8854ae8942c71dd4426b3ed444"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.nightly-clippy.stderr.log",
+      "bytes": 3724,
+      "sha256": "5205f851ad1196dcb64d350747aba43f0de54f2d6d2105a1790f9fa7223e197c",
+      "gitBlob": "db1b66d65f5a8b575c67218f37031f1e34efdae1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.nightly-clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-first.rust-version.stdout.log",
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+      "gitBlob": "e6706a0b091877c6f236dc41c007a85f481904e7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.clippy.stderr.log",
+      "bytes": 2926,
+      "sha256": "ba99ee42968b8bbc5dffb4536a7b84fda9301ae302a548da75d9cdea198e376a",
+      "gitBlob": "eaacfd2d7f1db6065c496c9242f8dca58e6b3122"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.compile.stderr.log",
+      "bytes": 251,
+      "sha256": "e67c8e209671bea36a2fbd09ba16aafef1f8de5782687f7853271ca1af99079d",
+      "gitBlob": "aa6f6f52e738b9bf7b1deb6626381fb34423b902"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.compile.stdout.log",
+      "bytes": 100246,
+      "sha256": "8549e11433236c47bb1e93380c7ae12f6ff85fe3fab17bc16f1a7d419d15532e",
+      "gitBlob": "ee6265ae888ebede7fc02523bb89a0461a101d48"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.json",
+      "bytes": 157826,
+      "sha256": "588bd5cdf93dd615bd8e7dcdd43d3f8c6c3410645be95fe5b66a4529e7557f39",
+      "gitBlob": "621874869caf887d4d8e5c35ae4c65ce680441d3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.linker-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.linker-version.stdout.log",
+      "bytes": 238,
+      "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9",
+      "gitBlob": "e477ca109e3c9e8854ae8942c71dd4426b3ed444"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.nightly-clippy.stderr.log",
+      "bytes": 373,
+      "sha256": "0ca399e34adc99fb5f19995968800ddfa68162cebfddbc560b36f1a8d607bba1",
+      "gitBlob": "c687ca758f9ca02704c4fe7960b61759ae848d51"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.nightly-clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.product.stderr.log",
+      "bytes": 62,
+      "sha256": "3997fc6790b8063b86c119e91f87ac7395ac6cf26135da637dcb229006bc32dc",
+      "gitBlob": "d72e434dff87be279d76c4dc518bc16ed75408a5"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.product.stdout.log",
+      "bytes": 83182,
+      "sha256": "0d2b8dcf1f1decdd16cf851a52449b36437431a10d0534f4b9f2d50ecb214604",
+      "gitBlob": "5c2ea52a9091d736266f6fe24c36b4f55d1157de"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-second.rust-version.stdout.log",
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+      "gitBlob": "e6706a0b091877c6f236dc41c007a85f481904e7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.clippy.stderr.log",
+      "bytes": 257,
+      "sha256": "22e6ee21df438b2430f465b7730f78b3aa50d48639ea2f0be1d21a2fafeb0096",
+      "gitBlob": "77304042301f838e045d9f48b71b7cc03e189732"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.compile.stderr.log",
+      "bytes": 257,
+      "sha256": "b3025df6a4b56efd9b53429ec924178a51e466db398ab763e193844d91cf5441",
+      "gitBlob": "859fd14c5ae70e1285bcbabd256ef0b49da97ed1"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.compile.stdout.log",
+      "bytes": 100258,
+      "sha256": "476cd4573339160acdfbabc883c5ca41185a884b8c48f5f8f7c8870c1454b92a",
+      "gitBlob": "cf6f2792623e8643c3108ebecce60b4b9af88b3c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.json",
+      "bytes": 157785,
+      "sha256": "993b165794a44cd468e01f795120ea25250ee375d825c97678bb5ade0de38f3f",
+      "gitBlob": "527ff030501fac7711014d9322dd862897a7e494"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.linker-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.linker-version.stdout.log",
+      "bytes": 238,
+      "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9",
+      "gitBlob": "e477ca109e3c9e8854ae8942c71dd4426b3ed444"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.nightly-clippy.stderr.log",
+      "bytes": 568,
+      "sha256": "fea11dd95dba55261a7357e07c73b0af850d016258cfc51c9e2881332b78b70e",
+      "gitBlob": "8ef0b52d57e743e2e753c700fc3462ef894cb749"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.nightly-clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.product.stderr.log",
+      "bytes": 62,
+      "sha256": "cecef91dc790c16b0c396934093070e9358677ccc61dcf6e2ed0976816bd6735",
+      "gitBlob": "771ada78893628d706052bc93da296163c70108e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.product.stdout.log",
+      "bytes": 83182,
+      "sha256": "2ba7ad13c86df2dfc8c66b0b9c4ccbaad24ead0dfaf14b49fe2e7121fe500c14",
+      "gitBlob": "5586cfe9879f404fe92262b1d12215b9048de7b7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-integrated-third.rust-version.stdout.log",
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+      "gitBlob": "e6706a0b091877c6f236dc41c007a85f481904e7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-public-native-final.command.json",
+      "bytes": 1056,
+      "sha256": "7c937b0f43c21184746ab982c81ab27f28ed4492cc4b0a1a63039491b833b0a2",
+      "gitBlob": "fbb0d0ff112657cf80684c909b91c893162982b4"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-public-native-final.json",
+      "bytes": 8523,
+      "sha256": "81b90893a577f751429a25496bc13725d4cc65f664246810b79dfb6758db4289",
+      "gitBlob": "0d8101b74a45f90ac167beb8bb83a7a0c9115d89"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-public-native-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-public-native-final.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-first.command.json",
+      "bytes": 1090,
+      "sha256": "c8bd426d61cd390984309e15143c29e3040be8f632fb89cb3ec05ffd8f235aaa",
+      "gitBlob": "333a1ada1f466ab035830accc562b7d0a4c1c798"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-first.json",
+      "bytes": 16740,
+      "sha256": "c445d3a860c30d28e9fb459310969fd9894b7d6617cf78b8ff503b62c6337036",
+      "gitBlob": "5dc2a6be9e7fadfe9ec95005bd82e10638605e94"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-first.stdout.log",
+      "bytes": 486,
+      "sha256": "f6e1a523b425d49c86f3907db45488492cc0862e0da566f0842c0a29eb790fdd",
+      "gitBlob": "25dcf5cee3358f4f28f07139c60ac816c2b627a8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-second.command.json",
+      "bytes": 1067,
+      "sha256": "daa9b1f725f6ffca36a3d9385e0ef5532452ff575fe59f9e8950be1aaebaf1aa",
+      "gitBlob": "daeee18cd6d7af312ef8b9ed8f3ed2a3992060a8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-second.json",
+      "bytes": 16736,
+      "sha256": "597bc29762ae81d71f88cc294875cc44b35a4b6d929d540e061ce35c4b32d090",
+      "gitBlob": "f51796be669df703f58ee3629106423e161d793e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-readonly-final-second.stdout.log",
+      "bytes": 487,
+      "sha256": "09d157afe36b17be20b7936db4b9be437c3b22cd71d70ab0eac17f916eb27b44",
+      "gitBlob": "6e1ea7824a7d7495ac86300986e58e20b531b5db"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-test-edge-owner.atomic-stop-frozen-first.py",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5",
+      "gitBlob": "1405f45085f597d0db6a6c2103e316bcd664b4a3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-test-edge-owner.before-atomic-stop.py",
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "gitBlob": "fb76961115fd9c0bf8e3ed3a692f9cc1d3412c81"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-test-metadata-second.jsonl",
+      "bytes": 17144,
+      "sha256": "f4173e2a59949efd493fbd1a62743d4b5779a661b0a518a6d2e2d5d1ec6bfe9e",
+      "gitBlob": "102a701f3d7b8149a62bbf45a37ebf94404673e0"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-test-metadata-third.jsonl",
+      "bytes": 17132,
+      "sha256": "570c188defd5d13b82b69471800b485e638707751897f75df2d6210996fb914a",
+      "gitBlob": "8c2d0bc53dab61de27d3b03e9faa70731ad66152"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.before-channel-lifecycle.py",
+      "bytes": 155501,
+      "sha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb",
+      "gitBlob": "69ab094afc5914cf6db9c9d3cf8ce515c047e8b6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.before-drip-validation.py",
+      "bytes": 153324,
+      "sha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9",
+      "gitBlob": "8fced3e630d4dbd4258fd6d465de4bb04ee2aece"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.before-header-deadline.py",
+      "bytes": 112200,
+      "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25",
+      "gitBlob": "744747b0c7d7a5527ce0b271426a425fadf04331"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.header-deadline-frozen-first.py",
+      "bytes": 153324,
+      "sha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9",
+      "gitBlob": "8fced3e630d4dbd4258fd6d465de4bb04ee2aece"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.header-deadline-frozen-second.py",
+      "bytes": 155501,
+      "sha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb",
+      "gitBlob": "69ab094afc5914cf6db9c9d3cf8ce515c047e8b6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-tls-business-probe.header-deadline-frozen-third.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+      "gitBlob": "b9920a7ae012d0a11297c1e873a18e62c74db94d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-visual-native-final.command.json",
+      "bytes": 1058,
+      "sha256": "71fdd1ee31300867532fab2e8a8cb8ff2d95b12a72e10c0a88e642609254586a",
+      "gitBlob": "f1801e230a753cae61a3a7289f16c1e1bffe01a3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-visual-native-final.json",
+      "bytes": 9896,
+      "sha256": "4e5b334256b9ac3dcd4cb458fe204a993ef4d692c3ec6393b499cde55b4de417",
+      "gitBlob": "1c3a2eb4d6f90876660e73b9f8ac0536bdba5e64"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-visual-native-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round41-frontdoor-deadline/windows-visual-native-final.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-archive-first.json",
+      "bytes": 487,
+      "sha256": "79c5cbfb2475acacdd13169d396026063c42085c9e304c842fe258db55346ffd",
+      "gitBlob": "6813a3f961d521a7b74f948e0f7f793a7d171821"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/.owner",
+      "bytes": 50,
+      "sha256": "247c21747f80b705a7035c2381c6cd5bf01ae7d2210c40a54f763fbc2b4fdc8d",
+      "gitBlob": "0f7aaac528a9904c8d6f2a8328f1f3b48276b79a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/INDEX.json",
+      "bytes": 8271,
+      "sha256": "3488b82fbca4194c672e67c43698e398caced2e547e4d3c8ec65755aa60a4f26",
+      "gitBlob": "7d6559fd1aaa4cd6d7a63c667d05ed2fb4ad4be3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/archive-candidate-manifest-first.json",
+      "bytes": 29604,
+      "sha256": "7a2832342a87f579e994a0279aa73efc4201d830ba7673e0059d577b5444d5b5",
+      "gitBlob": "3284d42f4965deef4f6ce858ff315f4c45c958c2"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/archive-doc-suggestion-first.md",
+      "bytes": 5378,
+      "sha256": "956bc5b5f0d82997d46cd6a86e50631e9d2dab6106e992a866a83cfe977a8d20",
+      "gitBlob": "129ae9e455b103bb5b67a809318e3b051b29a6a3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/checkout-history-metadata-model-final.json",
+      "bytes": 904237,
+      "sha256": "b6163801f6880ff53a2a43b65f4c791c5bd785e1fd12309be770f1c893aeb188",
+      "gitBlob": "924b06a75b941b4b892906f26d0826901c3de012"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/checkout-history-metadata-model.json",
+      "bytes": 904237,
+      "sha256": "b6163801f6880ff53a2a43b65f4c791c5bd785e1fd12309be770f1c893aeb188",
+      "gitBlob": "924b06a75b941b4b892906f26d0826901c3de012"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/checkout-sha256-model-final.json",
+      "bytes": 92722,
+      "sha256": "7518b3c870c86b73ba20c5ada14bc1e51e3b266a5ec4f1650815397933a23735",
+      "gitBlob": "94b0d006400cef532682b8c6bdac4774cacf424e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/checkout-sha256-model.json",
+      "bytes": 92722,
+      "sha256": "cf3c7195fa7743303a990ee7bd4a17ee4e7ed50dff6228ec55064b43e9aefc2e",
+      "gitBlob": "833157cf7faca9fd1107e99277f228922f59c9fa"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/git-fixture-commands-final.json",
+      "bytes": 3019,
+      "sha256": "23d846cd5f0a95d6d4b4c9500e93c47d0f23ed153353e7b08f8aa9781d767e77",
+      "gitBlob": "78a3c5bf7bcedb147ccd573ebad01d520eccff33"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/git-fixture-commands.json",
+      "bytes": 3019,
+      "sha256": "23d846cd5f0a95d6d4b4c9500e93c47d0f23ed153353e7b08f8aa9781d767e77",
+      "gitBlob": "78a3c5bf7bcedb147ccd573ebad01d520eccff33"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/head-git-tree-model-final.json",
+      "bytes": 1999246,
+      "sha256": "fbc5f210c2d6a52f4e968938af07da8e10bebec8eb10f03399db42fdec9f56a6",
+      "gitBlob": "481d2af954115f168b69bf4bf9cd65b63a0b812e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/head-git-tree-model.json",
+      "bytes": 1999246,
+      "sha256": "fbc5f210c2d6a52f4e968938af07da8e10bebec8eb10f03399db42fdec9f56a6",
+      "gitBlob": "481d2af954115f168b69bf4bf9cd65b63a0b812e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/head-tree-original-final.bin",
+      "bytes": 1029263,
+      "sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038",
+      "gitBlob": "afd80fe5de65432a62363f1023d3163ada6df512"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/head-tree-original.bin",
+      "bytes": 1029263,
+      "sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038",
+      "gitBlob": "afd80fe5de65432a62363f1023d3163ada6df512"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/implementation-first.diff",
+      "bytes": 18033,
+      "sha256": "d828861d494625aebb0472d0bf4921e8c9ca9d5fdda4020fcf0a0b0d12f6be8f",
+      "gitBlob": "60af91b61e96b71ea37d7b289d33ef86a95cefcd"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model-final.json",
+      "bytes": 4894,
+      "sha256": "a2288530fc11abd34c53e2a51eaadedad65ad893a326d7f4d539d16eaee4e40e",
+      "gitBlob": "42de17ad32c5dca27853c35e37a9af1a0c23d609"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model-final.py",
+      "bytes": 10615,
+      "sha256": "a0a86add64a3ab695d28e1c73e43b124596d6fc51efc0f57a42312e2b7d9b7d7",
+      "gitBlob": "05eaae64146c0d377a8a70e8b278c02ced0e86be"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model-final.stdout.log",
+      "bytes": 191,
+      "sha256": "3642c06996820e80289debd4699a4256bbc802735a8fd8b188b84b92b4b0e2a2",
+      "gitBlob": "75a22114694e0afe783f51ac990cee45c9db22ce"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model-first.json",
+      "bytes": 4894,
+      "sha256": "b1ad1fa281bb5d3156bac92c653ce14d75fcd039e268cf6f0318740fcd541c01",
+      "gitBlob": "383249c92fc6667bbf6282987605c3f4b84a961d"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-model.py",
+      "bytes": 10585,
+      "sha256": "5471e7b4d2907fdb27f4a41ec0872a1cd9334a4f1656c3914095a40359f0f730",
+      "gitBlob": "8af5d1c352e6d375b390dfacb120eb2dc1424ca3"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-powershell-fixture-first.ps1",
+      "bytes": 76817,
+      "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849",
+      "gitBlob": "842f1c96355a8328074085208fa3457503c55d5f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/prepare-archive-inventory-first.py",
+      "bytes": 10819,
+      "sha256": "60a72e0c009a3209afa549e3519610c9b4f1e8df6d6ba7622a617b318a0e0f61",
+      "gitBlob": "2757fe0f33d89aa1d23552377b603c318acf9aa6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/prepare-ps-fixture.py",
+      "bytes": 10762,
+      "sha256": "5c16a8df4837f6037c72af7aabe976e09bee78793cdadd15a6e96bd53bd623f2",
+      "gitBlob": "5f66783759224e46f650bd9e6e225159ee2dd9c6"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/product-gap-readonly-first.json",
+      "bytes": 20292,
+      "sha256": "e609527f1ba79fc3685d15b3624ad9803f2280da067183e2e883f71688200b8f",
+      "gitBlob": "d061d33d6381133832b869c8ce62546e41dd7c5b"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/r44-original-inventory-diagnosis.json",
+      "bytes": 52611,
+      "sha256": "4e15ad9016a0ffa089cf4427f9fcd4f39c05892b1bfdd456e036df1d9ec8cfee",
+      "gitBlob": "1ec7f2ae56481c85ed5aec4848d8d5fcbde9a461"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/root-main-integration-first.json",
+      "bytes": 596,
+      "sha256": "adb062e3c2e76da83b7814a183ea080716ea7184cdcb83ece129761018329dfc",
+      "gitBlob": "851d928014320872b5b933dcf65668dfb20dbddd"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/run-windows-helper-first.py",
+      "bytes": 4020,
+      "sha256": "1bdf02fefcc3ff6ee8b067b783ef51de6be3a2c9476c42785577d7c92fe777b0",
+      "gitBlob": "a86418aa28306ca8ea472ec3bb191e3d5e0bcd61"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/service-readonly-review-first.json",
+      "bytes": 18747,
+      "sha256": "893521a5e2a96e25c718522eebeb6db7820ce2ac9bd9fa932106ee15a5f149ba",
+      "gitBlob": "ca117b4efb4b09f23c4c8de90fc395fba8262882"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/source-before.json",
+      "bytes": 238,
+      "sha256": "a7d150161bd4ef73078427dca1ab0ab5c2aa5377de9c63c9f3ab07d3142eae29",
+      "gitBlob": "d14ced63f5757d9a4537be5e90a5e3067f0158da"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/source-freeze-first.json",
+      "bytes": 5585,
+      "sha256": "7eb968e1e32566f498bffe29af2ac3ff3ba2b47d21f5b1ee85fdbe559f887765",
+      "gitBlob": "03316ec7771b176ab06dedfd45dc89a96b498dc8"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/source-static-first.json",
+      "bytes": 3331,
+      "sha256": "9bd9dc963cc95f98c2eb459a999517787958288d420bd2ec83685f4a1b06f305",
+      "gitBlob": "4405564474fb1c47fe5d089c748257d1a46179ab"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/verify-windows-cleanup-second.py",
+      "bytes": 2757,
+      "sha256": "bd1724b1677cd26037f44a1258211e2c82e6cc34d021b9ff0f98e40159c8ca14",
+      "gitBlob": "5c39e1a94b3225d08fc26197e7f40df2a4d6056c"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-helpers-freeze-first.json",
+      "bytes": 4006,
+      "sha256": "6a6c1a4da4234cea7615f8ed3c9387daaba07e33a44b9e044d679fa95612786d",
+      "gitBlob": "c6c3816d0de25d0fa0b75224bb4503ba2e117467"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-first.json",
+      "bytes": 4980,
+      "sha256": "95af806e65780abeb3a4f6bc953ca4d7f6a1363918379348a71d31a94f4338a9",
+      "gitBlob": "47f0ad9fdc33318ea1a3aef625a652710d3e674f"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-first.stderr.log",
+      "bytes": 618,
+      "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423",
+      "gitBlob": "65d374deaea13516daa21d689d5eaecf8b030deb"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-first.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe",
+      "gitBlob": "9c066d1f1fff299bd4e5e53de7234edacd801b7e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-second.json",
+      "bytes": 4494,
+      "sha256": "86590b659be2623fcdc5859c427e04960d4c62eedf92fb6e7b663180d3466250",
+      "gitBlob": "33d5ab0b9b00fcf44fa7981030906ad216da9d23"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-after-second.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe",
+      "gitBlob": "9c066d1f1fff299bd4e5e53de7234edacd801b7e"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-first.json",
+      "bytes": 17413,
+      "sha256": "297a9be5e167c1d3bb905df4f6657a90aa972393d5dd10613fc3e2a2e4c8eefd",
+      "gitBlob": "f0ab1a4a687c93be4d621469dafb14ca8129c01a"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-input-helpers-first.stdout.log",
+      "bytes": 3245,
+      "sha256": "70f7cc8b7b47b700ed2730ce1099b530e99e88f464720252f89e191a3a0447d1",
+      "gitBlob": "ce81d833ee589e68ca0be5b2e60d8fc9787951f7"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-msvc-ci.after.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "gitBlob": "d861e3ff1fe1ee6e930c170c14d783e58855f3cc"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/windows-msvc-ci.before.ps1",
+      "bytes": 38498,
+      "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6",
+      "gitBlob": "ab085eaff682a910c66f3c2795d01cc5a7a05272"
+    }
+  ],
+  "scope": "Every INDEX member and INDEX itself is explicitly present in the staged/committed Git blobs, including ignored original logs and owner markers. Byte proof precedes removal of owned working copies."
+}

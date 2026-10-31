@@ -1,0 +1,135 @@
+[
+  {
+    "argv": [
+      "git",
+      "clone",
+      "--shared",
+      "--no-checkout",
+      "/tmp/fc-round45-ci-input-domains-worktree",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Cloning into '/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo'...\ndone.\n"
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "sparse-checkout",
+      "set",
+      "--no-cone",
+      "--",
+      "/Cargo.toml",
+      "/开发计划/验证记录/.gitattributes"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "checkout",
+      "--detach",
+      "e0d97689d6848d971bb9f751cc5f014c6a98882b"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "HEAD is now at e0d9768 docs: record committed Windows evidence and owned cleanup\n"
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": " M Cargo.toml\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": " M \"\\345\\274\\200\\345\\217\\221\\350\\256\\241\\345\\210\\222/\\351\\252\\214\\350\\257\\201\\350\\256\\260\\345\\275\\225/.gitattributes\"\n",
+    "stderr": "verbatim, is not a valid attribute name: 开发计划/验证记录/.gitattributes:1\n"
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": "?? not-tracked.txt\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "-C",
+      "/tmp/fc-round45-ci-input-domains-evidence/git-clean-fixture/repo",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

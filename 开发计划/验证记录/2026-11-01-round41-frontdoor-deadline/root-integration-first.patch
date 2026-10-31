@@ -1,0 +1,1082 @@
+diff --git a/crates/fc-bootstrap/src/application/http_business_probe.rs b/crates/fc-bootstrap/src/application/http_business_probe.rs
+index 4ba4263..3a4261e 100644
+--- a/crates/fc-bootstrap/src/application/http_business_probe.rs
++++ b/crates/fc-bootstrap/src/application/http_business_probe.rs
+@@ -434,6 +434,47 @@ fn progress(
+     output.flush().map_err(|_| "business progress flush".into())
+ }
+ 
++/// Bounded diagnostic observations only. Socket return is not peer EOF/RST,
++/// and all times refer to this probe's monotonic epoch, not TCP ESTABLISHED.
++fn close_progress(
++    marker: &str,
++    epoch: Instant,
++    sequence: u64,
++    snapshot: fc_windows::tls_frontdoor::TlsCloseSnapshot,
++) -> std::result::Result<(), String> {
++    use std::fmt::Write as _;
++    let nanos = |instant: Option<Instant>| -> std::result::Result<String, String> {
++        instant.map_or_else(
++            || Ok("null".into()),
++            |instant| {
++                instant
++                    .checked_duration_since(epoch)
++                    .map(|d| d.as_nanos().to_string())
++                    .ok_or_else(|| "business close observation predates epoch".into())
++            },
++        )
++    };
++    let mut headers = String::with_capacity(4 * 640);
++    for item in snapshot.headers.into_iter().flatten() {
++        if !headers.is_empty() {
++            headers.push(',');
++        }
++        write!(headers, "{{\"generation\":{},\"slot\":{},\"serial\":{},\"hardDeadlineNs\":{},\"alarmNs\":{},\"beganAtNs\":{},\"socketCloseBeganAtNs\":{},\"socketReturnedAtNs\":{},\"failed\":{},\"ioPendingAtClose\":{},\"ioReturnedAtNs\":{},\"framePendingAtClose\":{},\"frameReturnedAtNs\":{},\"retirementConfirmedAtNs\":{}}}", item.token.generation(), item.token.slot(), item.token.serial(), nanos(Some(item.hard_deadline))?, nanos(Some(item.alarm))?, nanos(Some(item.began_at))?, nanos(item.socket_close_began_at)?, nanos(item.socket_returned_at)?, item.failed, item.io_pending_at_close, nanos(item.io_returned_at)?, item.frame_pending_at_close, nanos(item.frame_returned_at)?, nanos(item.retirement_confirmed_at)?)
++            .map_err(|_| "business close observation encoding")?;
++    }
++    let mut accept = String::with_capacity(320);
++    if let Some(item) = snapshot.accept {
++        write!(accept, "{{\"serial\":{},\"hardDeadlineNs\":{},\"alarmNs\":{},\"beganAtNs\":{},\"socketCloseBeganAtNs\":{},\"socketReturnedAtNs\":{},\"failed\":{},\"completionReturnedAtNs\":{}}}", item.serial, nanos(Some(item.hard_deadline))?, nanos(Some(item.alarm))?, nanos(Some(item.began_at))?, nanos(item.socket_close_began_at)?, nanos(item.socket_returned_at)?, item.failed, nanos(item.completion_returned_at)?)
++            .map_err(|_| "business accept close encoding")?;
++    } else {
++        accept.push_str("null");
++    }
++    println!("TLS_BUSINESS_CLOSE {{\"marker\":\"{marker}\",\"sequence\":{sequence},\"generation\":{},\"reserveNs\":{},\"headerBegins\":{},\"headerSocketReturns\":{},\"headerFailures\":{},\"headers\":[{headers}],\"accept\":{accept}}}", snapshot.generation, fc_windows::tls_frontdoor::HEADER_CLOSE_RESERVE.as_nanos(), snapshot.header_begins, snapshot.header_socket_returns, snapshot.header_failures);
++    std::io::stdout()
++        .flush()
++        .map_err(|_| "business close observation flush".into())
++}
++
+ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
+     require(
+         marker.starts_with("FutureClassroom-Test-TLS-")
+@@ -546,6 +587,12 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
+             if last_progress != Some(report) && Instant::now() >= next_progress {
+                 progress_sequence += 1;
+                 progress(marker, progress_epoch, progress_sequence, report)?;
++                close_progress(
++                    marker,
++                    progress_epoch,
++                    progress_sequence,
++                    net.close_snapshot(),
++                )?;
+                 last_progress = Some(report);
+                 next_progress = Instant::now() + Duration::from_millis(250);
+             }
+@@ -618,7 +665,14 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
+     drop(approval);
+     let report = net.report();
+     progress_sequence += 1;
+-    let emitted = progress(marker, progress_epoch, progress_sequence, report);
++    let emitted = progress(marker, progress_epoch, progress_sequence, report).and_then(|()| {
++        close_progress(
++            marker,
++            progress_epoch,
++            progress_sequence,
++            net.close_snapshot(),
++        )
++    });
+     if active.is_ok() {
+         active = emitted;
+     }
+diff --git a/crates/fc-bootstrap/src/web_transfer/network.rs b/crates/fc-bootstrap/src/web_transfer/network.rs
+index 410de09..7e33c02 100644
+--- a/crates/fc-bootstrap/src/web_transfer/network.rs
++++ b/crates/fc-bootstrap/src/web_transfer/network.rs
+@@ -442,6 +442,10 @@ where
+     pub fn report(&self) -> NetworkReport {
+         self.core().report
+     }
++    /// Fixed metadata only; does not poll, close or release a native owner.
++    pub fn close_snapshot(&self) -> fc_windows::tls_frontdoor::TlsCloseSnapshot {
++        self.core().host.close_snapshot()
++    }
+     pub fn is_idle(&self) -> bool {
+         self.core().report.native_drained && self.core().records.iter().all(Option::is_none)
+     }
+diff --git a/crates/fc-windows/src/tls_frontdoor/mod.rs b/crates/fc-windows/src/tls_frontdoor/mod.rs
+index f9a19a5..65cd15b 100644
+--- a/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ b/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -26,6 +26,61 @@ pub struct TlsAcceptSnapshot {
+     pub owned_sockets: usize,
+ }
+ 
++/// Negative-close scheduling reserve; never added to the original post+5s
++/// deadline. This headroom needs target measurements; it is not a scheduler or
++/// TCP epoch guarantee.
++pub const HEADER_CLOSE_RESERVE: std::time::Duration = std::time::Duration::from_millis(25);
++
++/// Latest deadline close in one fixed business slot. Socket close, kernel IO
++/// return, Frame return and retirement remain separate observations. In
++/// particular, no timestamp here claims that the peer has observed EOF/RST.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct TlsHeaderClose {
++    pub token: fc_ports::http::RequestToken,
++    pub hard_deadline: std::time::Instant,
++    pub alarm: std::time::Instant,
++    /// Negative path begins before requesting exact IO cancellation.
++    pub began_at: std::time::Instant,
++    /// Entry into checked socket close (SO_LINGER setup, then closesocket),
++    /// after cancellation was requested. Not a kernel completion timestamp.
++    pub socket_close_began_at: Option<std::time::Instant>,
++    pub socket_returned_at: Option<std::time::Instant>,
++    pub failed: bool,
++    pub io_pending_at_close: bool,
++    pub io_returned_at: Option<std::time::Instant>,
++    pub frame_pending_at_close: bool,
++    pub frame_returned_at: Option<std::time::Instant>,
++    pub retirement_confirmed_at: Option<std::time::Instant>,
++}
++
++/// Latest expired bare operation, identified by its original serial. The
++/// completion timestamp is set only upon reading its actual IOCP packet.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct TlsAcceptClose {
++    pub serial: u64,
++    pub hard_deadline: std::time::Instant,
++    pub alarm: std::time::Instant,
++    pub began_at: std::time::Instant,
++    pub socket_close_began_at: Option<std::time::Instant>,
++    pub socket_returned_at: Option<std::time::Instant>,
++    pub failed: bool,
++    pub completion_returned_at: Option<std::time::Instant>,
++}
++
++/// Fixed-size, memory-only observations, overwritten by later closes in the
++/// same slot. The receiver must retain its own bounded test observations if it
++/// needs a history. Counters do not discharge any physical owner's debt.
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub struct TlsCloseSnapshot {
++    pub generation: u64,
++    pub header_begins: u64,
++    pub header_socket_returns: u64,
++    pub header_failures: u64,
++    pub headers: [Option<TlsHeaderClose>; 4],
++    pub accept: Option<TlsAcceptClose>,
++}
++const _: () = assert!(std::mem::size_of::<TlsCloseSnapshot>() <= 2048);
++
+ pub const CONNECTION_SLOTS: usize = 4;
+ pub const BUFFER_BYTES: usize = 64 * 1024;
+ pub const PLAINTEXT_BYTES: usize = 16 * 1024;
+diff --git a/crates/fc-windows/src/tls_frontdoor/native.rs b/crates/fc-windows/src/tls_frontdoor/native.rs
+index e60f8d8..f4a1ca4 100644
+--- a/crates/fc-windows/src/tls_frontdoor/native.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native.rs
+@@ -1,8 +1,9 @@
+ //! Finite loopback evidence for owned TLS execution. This is not a production
+ //! listener and does not prove the strict first-connection scheduler deadline.
+ use super::{
+-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptSnapshot, TlsError,
+-    BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
++    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptClose, TlsAcceptSnapshot,
++    TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
++    HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
+ };
+ use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
+ use fc_protocol::http1::{
+@@ -31,6 +32,11 @@ mod accept;
+ mod stream;
+ pub use stream::{TlsHttpEvent, TlsHttpHost};
+ const BUDGET: Duration = Duration::from_secs(5);
++fn header_close_alarm(hard_deadline: Instant) -> Instant {
++    hard_deadline
++        .checked_sub(HEADER_CLOSE_RESERVE)
++        .unwrap_or(hard_deadline)
++}
+ static OWNER_ACTIVE: AtomicBool = AtomicBool::new(false);
+ static OWNER_FAULTED: AtomicBool = AtomicBool::new(false);
+ 
+@@ -136,6 +142,7 @@ struct Report {
+     parsed_requests: usize,
+     shutdown_tokens_sent: usize,
+     explicit_retirements: usize,
++    close_observations: TlsCloseSnapshot,
+ }
+ struct Owner {
+     resources: ManuallyDrop<Resources>,
+@@ -165,18 +172,45 @@ fn check(result: i32, stage: &str) -> Result<(), String> {
+     }
+ }
+ fn close(socket: &mut SOCKET, abortive: bool) -> Result<(), String> {
++    close_with(
++        socket,
++        abortive,
++        |socket, abortive| {
++            // SAFETY: the original descriptor is still owned by this Net
++            // domain. Failure must not silently turn an abortive close into
++            // an unchecked graceful one.
++            unsafe {
++                if abortive {
++                    check(
++                        setsockopt(socket, SOL_SOCKET, SO_LINGER, Some(&[1, 0, 0, 0])),
++                        "SO_LINGER abortive close",
++                    )
++                } else {
++                    let _ = shutdown(socket, SD_SEND);
++                    Ok(())
++                }
++            }
++        },
++        |socket| {
++            // SAFETY: only this owner releases its exact descriptor.
++            unsafe { check(closesocket(socket), "closesocket") }
++        },
++    )
++}
++fn close_with(
++    socket: &mut SOCKET,
++    abortive: bool,
++    configure: impl FnOnce(SOCKET, bool) -> Result<(), String>,
++    release: impl FnOnce(SOCKET) -> Result<(), String>,
++) -> Result<(), String> {
+     if *socket == INVALID_SOCKET {
+         return Ok(());
+     }
+-    // SAFETY: the single owner closes its descriptor, without freeing any
+-    // associated OVERLAPPED memory or treating this as cancellation completion.
+-    unsafe {
+-        if abortive {
+-            let _ = setsockopt(*socket, SOL_SOCKET, SO_LINGER, Some(&[1, 0, 0, 0]));
+-        } else {
+-            let _ = shutdown(*socket, SD_SEND);
+-        }
+-        check(closesocket(*socket), "closesocket")?;
++    if let Err(error) = configure(*socket, abortive).and_then(|()| release(*socket)) {
++        // Retain the exact descriptor on either failure. No replacement domain
++        // may be admitted even if a later shutdown retry happens to succeed.
++        OWNER_FAULTED.store(true, Ordering::Release);
++        return Err(error);
+     }
+     *socket = INVALID_SOCKET;
+     Ok(())
+@@ -401,6 +435,35 @@ impl Owner {
+     }
+     fn close_slot(&mut self, index: usize, abortive: bool) -> Result<(), String> {
+         let expired = self.expired(index);
++        let began_at = Instant::now();
++        let slot = &self.resources.slots[index];
++        if slot.phase != Phase::Closed && slot.socket != INVALID_SOCKET && expired {
++            if let Some(hard_deadline) = slot
++                .stream
++                .as_ref()
++                .and_then(stream::Stream::header_deadline)
++            {
++                self.report.close_observations.header_begins = self
++                    .report
++                    .close_observations
++                    .header_begins
++                    .saturating_add(1);
++                self.report.close_observations.headers[index] = Some(TlsHeaderClose {
++                    token: slot.token,
++                    hard_deadline,
++                    alarm: header_close_alarm(hard_deadline),
++                    began_at,
++                    socket_close_began_at: None,
++                    socket_returned_at: None,
++                    failed: false,
++                    io_pending_at_close: slot.pending.is_some(),
++                    io_returned_at: None,
++                    frame_pending_at_close: slot.frame.is_none(),
++                    frame_returned_at: None,
++                    retirement_confirmed_at: None,
++                });
++            }
++        }
+         let listener = self.resources.listener;
+         let slot = &mut self.resources.slots[index];
+         if slot.phase != Phase::Closed && slot.socket != INVALID_SOCKET {
+@@ -440,7 +503,44 @@ impl Owner {
+                 );
+             }
+         }
+-        close(&mut slot.socket, abortive)
++        let token = slot.token;
++        let had_socket = slot.socket != INVALID_SOCKET;
++        if had_socket {
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| o.token == token)
++            {
++                observation
++                    .socket_close_began_at
++                    .get_or_insert_with(Instant::now);
++            }
++        }
++        let result = close(&mut slot.socket, abortive);
++        if had_socket {
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| o.token == token)
++            {
++                if result.is_ok() {
++                    if observation.socket_returned_at.is_none() {
++                        observation.socket_returned_at = Some(Instant::now());
++                        self.report.close_observations.header_socket_returns = self
++                            .report
++                            .close_observations
++                            .header_socket_returns
++                            .saturating_add(1);
++                    }
++                } else {
++                    observation.failed = true;
++                    self.report.close_observations.header_failures = self
++                        .report
++                        .close_observations
++                        .header_failures
++                        .saturating_add(1);
++                }
++            }
++        }
++        result
+     }
+     fn prepare_io(&mut self, index: usize) -> Result<(), String> {
+         let slot = &self.resources.slots[index];
+@@ -643,6 +743,16 @@ impl Owner {
+             }
+         }
+         self.resources.slots[index].frame = Some(frame);
++        if let Some(observation) = self.report.close_observations.headers[index]
++            .as_mut()
++            .filter(|o| {
++                o.token == self.resources.slots[index].token
++                    && o.frame_pending_at_close
++                    && o.frame_returned_at.is_none()
++            })
++        {
++            observation.frame_returned_at = Some(Instant::now());
++        }
+         if call == Call::Retire {
+             if self.stopping && result == Err(TlsError::Stopped) {
+                 // A queued retirement can be negatively returned on stop.
+@@ -657,6 +767,12 @@ impl Owner {
+                 return Err("TLS retirement before native IO returned".into());
+             }
+             slot.retired = true;
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| o.token == slot.token)
++            {
++                observation.retirement_confirmed_at = Some(Instant::now());
++            }
+             slot.wipe_retired_http();
+             if let Some(stream) = slot.stream.as_mut() {
+                 stream.retired_event = true;
+@@ -861,6 +977,16 @@ impl Owner {
+                 return Err("TLS completion key mismatch".into());
+             }
+             self.resources.slots[index].pending = None;
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| {
++                    o.token == self.resources.slots[index].token
++                        && o.io_pending_at_close
++                        && o.io_returned_at.is_none()
++                })
++            {
++                observation.io_returned_at = Some(Instant::now());
++            }
+             self.report.completions += 1;
+             if self.stopping || result.is_err() {
+                 self.close_slot(index, true)?;
+@@ -983,6 +1109,9 @@ impl Owner {
+         Ok(())
+     }
+     fn poll(&mut self) -> Result<(), String> {
++        if OWNER_FAULTED.load(Ordering::Acquire) && !self.stopping {
++            return Err("TLS native cleanup fault; only original shutdown may continue".into());
++        }
+         if self.http_mode && !self.stopping {
+             self.expire_bare_accept(Instant::now())?;
+             for index in 0..CONNECTION_SLOTS {
+@@ -1038,6 +1167,12 @@ impl Owner {
+             // No call ever bound an SSPI context to this token. Actual native
+             // IO return plus its unique frame proves this empty slot retired.
+             slot.retired = true;
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| o.token == slot.token)
++            {
++                observation.retirement_confirmed_at = Some(Instant::now());
++            }
+             slot.wipe_retired_http();
+             slot.stream.as_mut().unwrap().retired_event = true;
+             return Ok(());
+@@ -1177,6 +1312,16 @@ impl Owner {
+                     .iter()
+                     .filter(|slot| slot.frame.is_some())
+                     .count();
++                for (index, slot) in self.resources.slots.iter().enumerate() {
++                    if let Some(observation) = self.report.close_observations.headers[index]
++                        .as_mut()
++                        .filter(|o| o.token == slot.token)
++                    {
++                        observation
++                            .retirement_confirmed_at
++                            .get_or_insert_with(Instant::now);
++                    }
++                }
+                 // SAFETY: all IOCP packets and the actual SSPI thread have
+                 // terminated. Check real resource release before reporting a
+                 // completed cleanup; failures retain the bounded owner.
+diff --git a/crates/fc-windows/src/tls_frontdoor/native/accept.rs b/crates/fc-windows/src/tls_frontdoor/native/accept.rs
+index b2e017d..65ae1c4 100644
+--- a/crates/fc-windows/src/tls_frontdoor/native/accept.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/accept.rs
+@@ -73,6 +73,20 @@ impl Owner {
+         let Some(bare) = self.resources.accept.as_mut() else {
+             return Ok(());
+         };
++        let had_socket = bare.socket != INVALID_SOCKET;
++        if had_socket {
++            if let Some(observation) = self
++                .report
++                .close_observations
++                .accept
++                .as_mut()
++                .filter(|o| o.serial == bare.serial)
++            {
++                observation
++                    .socket_close_began_at
++                    .get_or_insert_with(Instant::now);
++            }
++        }
+         #[cfg(test)]
+         let result = if std::mem::take(&mut bare.fail_close_once) {
+             Err("controlled bare close failure".to_owned())
+@@ -81,6 +95,23 @@ impl Owner {
+         };
+         #[cfg(not(test))]
+         let result = close(&mut bare.socket, true);
++        if had_socket {
++            if let Some(observation) = self
++                .report
++                .close_observations
++                .accept
++                .as_mut()
++                .filter(|o| o.serial == bare.serial)
++            {
++                if result.is_ok() {
++                    observation
++                        .socket_returned_at
++                        .get_or_insert_with(Instant::now);
++                } else {
++                    observation.failed = true;
++                }
++            }
++        }
+         if let Err(error) = result {
+             // Keep this exact descriptor and allocation; never overwrite it or
+             // create a replacement even if later shutdown happens to succeed.
+@@ -106,6 +137,16 @@ impl Owner {
+             };
+             if expired {
+                 self.report.accept_idle_cancellations += 1;
++                self.report.close_observations.accept = Some(TlsAcceptClose {
++                    serial,
++                    hard_deadline: deadline,
++                    alarm: header_close_alarm(deadline),
++                    began_at: Instant::now(),
++                    socket_close_began_at: None,
++                    socket_returned_at: None,
++                    failed: false,
++                    completion_returned_at: None,
++                });
+             }
+         }
+         if bare.pending() && listener != INVALID_SOCKET {
+@@ -119,14 +160,18 @@ impl Owner {
+     }
+     pub(super) fn expire_bare_accept(&mut self, now: Instant) -> Result<(), String> {
+         if self.resources.accept.as_ref().is_some_and(
+-            |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= deadline),
++            |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= header_close_alarm(deadline)),
+         ) {
+             self.cancel_bare_accept(true)?;
+         }
+         Ok(())
+     }
+     pub(super) fn post_bare_accept(&mut self) -> Result<(), String> {
+-        if self.stopping || !self.http_mode || self.resources.listener == INVALID_SOCKET {
++        if self.stopping
++            || OWNER_FAULTED.load(Ordering::Acquire)
++            || !self.http_mode
++            || self.resources.listener == INVALID_SOCKET
++        {
+             return Err("bare AcceptEx listener stopped".into());
+         }
+         let listener = self.resources.listener;
+@@ -200,6 +245,7 @@ impl Owner {
+         }
+         let state = bare.state;
+         let deadline = bare.deadline().unwrap();
++        let completed_at = Instant::now();
+         // Serial is a local ledger, not information present in a kernel packet.
+         // Safety comes from never reusing memory until the actual packet returns.
+         match state {
+@@ -212,11 +258,38 @@ impl Owner {
+         self.report.accept_completions += 1;
+         if matches!(state, AcceptState::Closing { expired: true, .. }) {
+             self.report.accept_idle_returns += 1;
++            if let Some(observation) = self
++                .report
++                .close_observations
++                .accept
++                .as_mut()
++                .filter(|o| o.serial == bare.serial)
++            {
++                observation.completion_returned_at = Some(Instant::now());
++            }
+         }
+-        let expired = Instant::now() >= deadline
++        let expired = Instant::now() >= header_close_alarm(deadline)
+             || matches!(state, AcceptState::Closing { expired: true, .. });
+         let canceled = matches!(state, AcceptState::Closing { .. });
+         if self.stopping || expired || canceled || !succeeded {
++            if expired
++                && self
++                    .report
++                    .close_observations
++                    .accept
++                    .is_none_or(|o| o.serial != bare.serial)
++            {
++                self.report.close_observations.accept = Some(TlsAcceptClose {
++                    serial: bare.serial,
++                    hard_deadline: deadline,
++                    alarm: header_close_alarm(deadline),
++                    began_at: Instant::now(),
++                    socket_close_began_at: None,
++                    socket_returned_at: None,
++                    failed: false,
++                    completion_returned_at: Some(completed_at),
++                });
++            }
+             if self.stopping {
+                 self.report.accept_stop_discards += 1;
+             } else if expired {
+@@ -276,8 +349,18 @@ impl Owner {
+                 return Err(error);
+             }
+             // Recheck after association; no late success can gain a new clock.
+-            if Instant::now() >= deadline {
++            if Instant::now() >= header_close_alarm(deadline) {
+                 self.report.accept_expired_discards += 1;
++                self.report.close_observations.accept = Some(TlsAcceptClose {
++                    serial: self.resources.accept.as_ref().unwrap().serial,
++                    hard_deadline: deadline,
++                    alarm: header_close_alarm(deadline),
++                    began_at: Instant::now(),
++                    socket_close_began_at: None,
++                    socket_returned_at: None,
++                    failed: false,
++                    completion_returned_at: Some(completed_at),
++                });
+                 self.close_bare_socket()?;
+             } else {
+                 let socket = std::mem::replace(
+diff --git a/crates/fc-windows/src/tls_frontdoor/native/stream.rs b/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+index 1da04fe..e369a90 100644
+--- a/crates/fc-windows/src/tls_frontdoor/native/stream.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+@@ -139,6 +139,16 @@ impl Stream {
+     fn expired_at(&self, now: Instant) -> bool {
+         self.deadline_phase != DeadlinePhase::AwaitingConnection && now >= self.deadline
+     }
++    pub(super) fn header_deadline(&self) -> Option<Instant> {
++        (self.deadline_phase == DeadlinePhase::Header).then_some(self.deadline)
++    }
++    fn negative_close_due_at(&self, now: Instant) -> bool {
++        match self.deadline_phase {
++            DeadlinePhase::AwaitingConnection => false,
++            DeadlinePhase::Header => now >= header_close_alarm(self.deadline),
++            DeadlinePhase::Request { .. } => self.expired_at(now),
++        }
++    }
+     pub(super) fn waiting_for_connection(&self) -> bool {
+         self.deadline_phase == DeadlinePhase::AwaitingConnection
+     }
+@@ -160,7 +170,10 @@ impl Stream {
+     /// Called only after the parser returns a complete valid head. The final
+     /// time check must be here too: parsing can cross the old header deadline.
+     fn complete_head_at(&mut self, admitted_at: Instant) -> bool {
+-        if self.deadline_phase != DeadlinePhase::Header || self.expired_at(admitted_at) {
++        if self.deadline_phase != DeadlinePhase::Header
++            || self.expired_at(admitted_at)
++            || self.negative_close_due_at(admitted_at)
++        {
+             return false;
+         }
+         let Some(deadline) = admitted_at.checked_add(REQUEST_BUDGET) else {
+@@ -300,6 +313,13 @@ impl TlsHttpHost {
+                 + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
+         }
+     }
++    /// Latest fixed-slot observations only, not peer wire-close evidence or
++    /// proof of a precise kernel ESTABLISHED epoch. No native work or locks.
++    pub fn close_snapshot(&self) -> TlsCloseSnapshot {
++        let mut snapshot = self.owner.report.close_observations;
++        snapshot.generation = self.owner.generation;
++        snapshot
++    }
+     pub fn tokens(&self) -> [RequestToken; CONNECTION_SLOTS] {
+         std::array::from_fn(|n| self.owner.resources.slots[n].token)
+     }
+@@ -540,7 +560,7 @@ impl Owner {
+             self.resources.slots[index]
+                 .stream
+                 .as_ref()
+-                .is_some_and(|stream| stream.expired_at(Instant::now()))
++                .is_some_and(|stream| stream.negative_close_due_at(Instant::now()))
+         } else {
+             self.started.elapsed() >= BUDGET
+         }
+@@ -978,12 +998,20 @@ impl Owner {
+         {
+             return Err("TLS HTTP final native ledger mismatch".into());
+         }
+-        for slot in &mut self.resources.slots {
++        for (index, slot) in self.resources.slots.iter_mut().enumerate() {
+             if !slot.retired {
+                 slot.retired = true;
+                 slot.wipe_retired_http();
+                 slot.stream.as_mut().unwrap().retired_event = true;
+             }
++            if let Some(observation) = self.report.close_observations.headers[index]
++                .as_mut()
++                .filter(|o| o.token == slot.token)
++            {
++                observation
++                    .retirement_confirmed_at
++                    .get_or_insert_with(Instant::now);
++            }
+         }
+         self.report.slot_frames_at_drain = CONNECTION_SLOTS;
+         // SAFETY: all native packets returned and the actual OS SSPI thread
+diff --git a/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs b/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+index f43322b..dd7442e 100644
+--- a/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -88,6 +88,7 @@ impl Driver for RecordDriver {
+ struct Fixture {
+     host: TlsHttpHost,
+     client: TcpStream,
++    client_connected_at: Instant,
+     posted_header_deadlines: [Instant; CONNECTION_SLOTS],
+     calls: Arc<Mutex<Calls>>,
+     closed: Arc<AtomicUsize>,
+@@ -129,6 +130,7 @@ impl Fixture {
+             Duration::from_secs(1),
+         )
+         .unwrap();
++        let client_connected_at = Instant::now();
+         client.set_nonblocking(true).unwrap();
+         Self {
+             host: TlsHttpHost {
+@@ -136,6 +138,7 @@ impl Fixture {
+                 drain_deadline: None,
+             },
+             client,
++            client_connected_at,
+             posted_header_deadlines,
+             calls,
+             closed,
+@@ -573,7 +576,7 @@ fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_i
+     let mut stream = Stream::new();
+     stream.posted_header_at(Instant::now());
+     let header_deadline = stream.deadline;
+-    let completed_at = header_deadline - Duration::from_nanos(1);
++    let completed_at = header_close_alarm(header_deadline) - Duration::from_nanos(1);
+     assert!(stream.complete_head_at(completed_at));
+     let original = completed_at + REQUEST_BUDGET;
+     assert_eq!(stream.request_started_at(), Some(completed_at));
+@@ -1673,3 +1676,389 @@ fn bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child() {
+     assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
+     assert!(!OWNER_FAULTED.load(Ordering::Acquire));
+ }
++
++#[test]
++fn header_negative_alarm_is_distinct_from_hard_deadline_and_never_shortens_request_stage() {
++    let posted = Instant::now();
++    let hard = posted + BUDGET;
++    let alarm = hard - HEADER_CLOSE_RESERVE;
++    for instant in [alarm, alarm + Duration::from_nanos(1), hard] {
++        let mut stream = Stream::new();
++        stream.posted_header_at(posted);
++        assert_eq!(stream.deadline, hard);
++        assert!(!stream.negative_close_due_at(alarm - Duration::from_nanos(1)));
++        assert!(stream.negative_close_due_at(instant));
++        assert_eq!(stream.expired_at(instant), instant >= hard);
++        assert!(!stream.complete_head_at(instant));
++        assert_eq!(
++            stream.deadline, hard,
++            "a negative alarm cannot rewrite the hard deadline"
++        );
++        assert_eq!(stream.request_started_at(), None);
++    }
++    let mut stream = Stream::new();
++    stream.posted_header_at(posted);
++    let at = alarm - Duration::from_nanos(1);
++    assert!(stream.complete_head_at(at));
++    assert_eq!(stream.deadline, at + REQUEST_BUDGET);
++    assert!(!stream.negative_close_due_at(stream.deadline - Duration::from_nanos(1)));
++    assert!(stream.negative_close_due_at(stream.deadline));
++    let shorter = at + Duration::from_secs(30);
++    stream.admit_until(shorter);
++    assert!(!stream.negative_close_due_at(shorter - Duration::from_nanos(1)));
++    assert!(stream.negative_close_due_at(shorter));
++    stream.reset();
++    assert!(!stream.negative_close_due_at(hard + REQUEST_BUDGET));
++}
++
++fn incomplete_header_receive(f: &mut Fixture) -> RequestToken {
++    let mut wire = vec![b'H'];
++    wire.extend(record(b"GET /fc/ HTTP/1.1\r\nHost: localhost\r\n"));
++    f.input(&wire);
++    let until = Instant::now() + Duration::from_secs(3);
++    loop {
++        for event in f.host.poll().unwrap() {
++            assert!(
++                !matches!(event, TlsHttpEvent::Head { .. }),
++                "incomplete head must not publish"
++            );
++        }
++        if let Some(slot) = f
++            .host
++            .owner
++            .resources
++            .slots
++            .iter()
++            .find(|s| s.phase == Phase::Http && s.pending == Some(Operation::Receive))
++        {
++            assert_eq!(
++                slot.stream.as_ref().unwrap().deadline_phase,
++                DeadlinePhase::Header
++            );
++            return slot.token;
++        }
++        assert!(Instant::now() < until, "actual incomplete-head WSARecv");
++        std::thread::sleep(Duration::from_millis(1));
++    }
++}
++
++#[test]
++fn real_iocp_early_header_close_reports_socket_return_without_discharge_of_receive_debt() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let token = incomplete_header_receive(&mut f);
++    // Inject a short remaining header interval to exercise the alarm, not a
++    // claim that this case physically waited five seconds or established TLS.
++    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
++    f.host.owner.resources.slots[token.slot()]
++        .stream
++        .as_mut()
++        .unwrap()
++        .deadline = hard;
++    f.host.owner.close_slot(token.slot(), true).unwrap();
++    let snapshot = f.host.close_snapshot();
++    let record = snapshot.headers[token.slot()].unwrap();
++    assert_eq!(record.token, token);
++    assert_eq!(record.hard_deadline, hard);
++    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
++    assert!(record.began_at >= record.alarm);
++    assert!(record.socket_returned_at.unwrap() >= record.began_at);
++    assert!(!record.failed);
++    assert!(record.io_pending_at_close && record.io_returned_at.is_none());
++    assert!(!record.frame_pending_at_close && record.frame_returned_at.is_none());
++    assert!(record.retirement_confirmed_at.is_none());
++    assert_eq!(snapshot.header_begins, 1);
++    assert_eq!(snapshot.header_socket_returns, 1);
++    assert_eq!(snapshot.header_failures, 0);
++    assert!(f.host.owner.resources.slots[token.slot()].pending == Some(Operation::Receive));
++    assert!(f.host.rearm(token).is_err());
++    f.revoked_retirement(token);
++    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
++    assert!(record.io_returned_at.unwrap() >= record.socket_returned_at.unwrap());
++    assert!(record.retirement_confirmed_at.unwrap() >= record.io_returned_at.unwrap());
++    let next = f.host.rearm(token).unwrap();
++    assert_ne!(next, token);
++    // A later serial cannot rewrite this diagnostic history before its own
++    // deadline close. No retained observation is itself an owner/permit.
++    assert_eq!(
++        f.host.close_snapshot().headers[token.slot()].unwrap().token,
++        token
++    );
++    f.stop();
++}
++
++#[test]
++fn real_iocp_bare_alarm_preserves_original_deadline_and_requires_actual_packet_before_repost() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    // First handoff leaves the unique bare operation actually pending again.
++    let _ = incomplete_header_receive(&mut f);
++    let bare = f.host.owner.resources.accept.as_mut().unwrap();
++    let serial = bare.serial;
++    let pointer = bare.memory.operation.get();
++    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
++    bare.state = super::super::accept::AcceptState::Pending {
++        serial,
++        deadline: hard,
++    };
++    let before = f.host.acceptance_snapshot();
++    f.host.owner.expire_bare_accept(Instant::now()).unwrap();
++    let closing = f.host.close_snapshot().accept.unwrap();
++    assert_eq!(closing.serial, serial);
++    assert_eq!(closing.hard_deadline, hard);
++    assert_eq!(closing.alarm + HEADER_CLOSE_RESERVE, hard);
++    assert!(closing.socket_returned_at.unwrap() >= closing.began_at);
++    assert!(closing.completion_returned_at.is_none());
++    assert!(!closing.failed);
++    assert_eq!(f.host.acceptance_snapshot().completions, before.completions);
++    assert!(f.host.owner.resources.accept.as_ref().unwrap().pending());
++    assert!(f.host.owner.post_bare_accept().is_err());
++    let until = Instant::now() + Duration::from_secs(3);
++    while f
++        .host
++        .close_snapshot()
++        .accept
++        .unwrap()
++        .completion_returned_at
++        .is_none()
++    {
++        f.host.poll().unwrap();
++        assert!(Instant::now() < until, "actual original bare IOCP return");
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let after = f.host.close_snapshot().accept.unwrap();
++    assert!(after.completion_returned_at.unwrap() >= after.socket_returned_at.unwrap());
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert_eq!(bare.memory.operation.get(), pointer);
++    assert_eq!(bare.serial, serial + 1);
++    assert!(bare.pending());
++    let capacity = f.host.acceptance_snapshot();
++    assert!(capacity.native_pending <= 5 && capacity.owned_sockets <= 6);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_header_alarm_keeps_a_held_decrypt_frame_and_suppresses_its_late_head() {
++    let _serial = SERIAL.lock().unwrap();
++    let (entered, started) = std::sync::mpsc::channel();
++    let (send, wait) = std::sync::mpsc::channel();
++    let wait = Mutex::new(wait);
++    let hook = Arc::new(move || {
++        entered.send(()).unwrap();
++        wait.lock()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(3))
++            .unwrap();
++    });
++    let mut f = Fixture::with_hooks(None, Some(hook));
++    struct Release(Option<std::sync::mpsc::Sender<()>>);
++    impl Drop for Release {
++        fn drop(&mut self) {
++            if let Some(send) = self.0.take() {
++                let _ = send.send(());
++            }
++        }
++    }
++    let mut release = Release(Some(send));
++    let mut wire = vec![b'H'];
++    wire.extend(record(&post(3)));
++    f.input(&wire);
++    let until = Instant::now() + Duration::from_secs(3);
++    loop {
++        for event in f.host.poll().unwrap() {
++            assert!(!matches!(event, TlsHttpEvent::Head { .. }));
++        }
++        if started.try_recv().is_ok() {
++            break;
++        }
++        assert!(Instant::now() < until, "actual held fake Decrypt");
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let token = *f.calls.lock().unwrap().handshake.first().unwrap();
++    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
++    f.host.owner.resources.slots[token.slot()]
++        .stream
++        .as_mut()
++        .unwrap()
++        .deadline = hard;
++    let mut closed = false;
++    for event in f.host.poll().unwrap() {
++        match event {
++            TlsHttpEvent::Closed { token: t } if t == token => closed = true,
++            TlsHttpEvent::Head { head, .. } if head.token == token => {
++                panic!("late Head escaped alarm")
++            }
++            TlsHttpEvent::Retired(t) if t == token => panic!("held Frame falsely retired"),
++            _ => {}
++        }
++    }
++    assert!(closed);
++    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
++    assert_eq!(record.hard_deadline, hard);
++    assert!(record.frame_pending_at_close && record.frame_returned_at.is_none());
++    assert!(!record.io_pending_at_close && record.io_returned_at.is_none());
++    assert!(record.retirement_confirmed_at.is_none());
++    assert!(f.host.owner.resources.slots[token.slot()].frame.is_none());
++    assert!(f.host.rearm(token).is_err());
++    release.0.take().unwrap().send(()).unwrap();
++    f.until(|event| match event {
++        TlsHttpEvent::Head { head, .. } if head.token == token => {
++            panic!("late plaintext published")
++        }
++        TlsHttpEvent::Retired(t) if t == token => true,
++        _ => false,
++    });
++    let after = f.host.close_snapshot().headers[token.slot()].unwrap();
++    assert!(after.frame_returned_at.unwrap() >= after.socket_returned_at.unwrap());
++    assert!(after.retirement_confirmed_at.unwrap() >= after.frame_returned_at.unwrap());
++    assert_eq!(f.host.owner.report.parsed_requests, 0);
++    assert_eq!(f.host.owner.report.late_sspi_completions, 1);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_first_header_reserve_keeps_original_five_second_wire_sample_strict() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let token = incomplete_header_receive(&mut f);
++    let hard = f.host.owner.resources.slots[token.slot()]
++        .stream
++        .as_ref()
++        .unwrap()
++        .deadline;
++    let until = f.client_connected_at + Duration::from_secs(6);
++    let wire_closed_at = loop {
++        for event in f.host.poll().unwrap() {
++            assert!(!matches!(event, TlsHttpEvent::Head { .. }));
++        }
++        let mut byte = [0];
++        match f.client.read(&mut byte) {
++            Ok(0) => break Instant::now(),
++            Err(error)
++                if matches!(
++                    error.kind(),
++                    std::io::ErrorKind::ConnectionReset
++                        | std::io::ErrorKind::ConnectionAborted
++                        | std::io::ErrorKind::BrokenPipe
++                ) =>
++            {
++                break Instant::now()
++            }
++            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
++            other => panic!("unexpected incomplete-head wire result {other:?}"),
++        }
++        assert!(
++            Instant::now() < until,
++            "six seconds only collects a failure, not a passing threshold"
++        );
++        std::thread::sleep(Duration::from_millis(1));
++    };
++    let elapsed = wire_closed_at
++        .duration_since(f.client_connected_at)
++        .as_nanos();
++    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
++    assert_eq!(record.hard_deadline, hard);
++    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
++    assert!(record.socket_returned_at.unwrap() >= record.began_at);
++    // Print before the strict assertion so a genuine overshoot remains visible.
++    println!("TLS_HEADER_CLOSE_SAMPLE {{\"wireCloseNs\":{elapsed},\"thresholdNs\":5000000000,\"reserveNs\":{},\"socketReturnObserved\":true,\"peerCloseObserved\":true,\"recordProtection\":\"FAKE\",\"tcpEpoch\":\"CLIENT_CONNECT_RETURN_ONLY\"}}", HEADER_CLOSE_RESERVE.as_nanos());
++    assert!(
++        elapsed <= 5_000_000_000,
++        "strict five-second wire sample {elapsed}ns"
++    );
++    f.stop();
++}
++
++#[test]
++fn abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child() {
++    let _serial = SERIAL.lock().unwrap();
++    const CHILD: &str = "FC_TLS_LINGER_FAILURE_CHILD";
++    const NAME: &str = "tls_frontdoor::native::stream::tests::abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child";
++    const MARKER: &str = "LINGER_FAILURE_CHILD retainedOwner=true released=false replaced=false cleanupComplete=false controlledOptionFailure=true";
++    if std::env::var(CHILD).as_deref() == Ok("1") {
++        let mut f = Fixture::new();
++        let bare = f.host.owner.resources.accept.as_mut().unwrap();
++        let socket = bare.socket;
++        let pointer = bare.memory.operation.get();
++        let serial = bare.serial;
++        let result = close_with(
++            &mut bare.socket,
++            true,
++            |candidate, abortive| {
++                assert_eq!(candidate, socket);
++                assert!(abortive);
++                Err("controlled SO_LINGER abortive close failure".into())
++            },
++            |_| panic!("release cannot run after abortive-option failure"),
++        );
++        assert!(result.unwrap_err().contains("SO_LINGER"));
++        f.retain_faulted_owner_on_drop = true;
++        let bare = f.host.owner.resources.accept.as_ref().unwrap();
++        assert_eq!(bare.socket, socket);
++        assert!(bare.pending());
++        assert_eq!(bare.serial, serial);
++        assert_eq!(bare.memory.operation.get(), pointer);
++        assert!(OWNER_FAULTED.load(Ordering::Acquire));
++        assert!(Owner::new("forbidden-after-option-failure").is_err());
++        drop(f);
++        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
++        assert!(Owner::new("still-forbidden-after-option-failure").is_err());
++        println!("{MARKER}");
++        return;
++    }
++    let output = std::process::Command::new(std::env::current_exe().unwrap())
++        .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
++        .env(CHILD, "1")
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
++    assert!(!OWNER_FAULTED.load(Ordering::Acquire));
++}
++
++#[test]
++fn real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    // The actual first connection is already queued, but no packet has been
++    // dequeued by this fixture. Only the remaining interval is injected.
++    let bare = f.host.owner.resources.accept.as_mut().unwrap();
++    let serial = bare.serial;
++    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
++    bare.state = super::super::accept::AcceptState::Pending {
++        serial,
++        deadline: hard,
++    };
++    let before = f.host.acceptance_snapshot();
++    let until = Instant::now() + Duration::from_secs(3);
++    while f.host.owner.report.accept_expired_discards == 0 {
++        // Deliberately use actual completion handling without the poll's
++        // earlier alarm cancellation: late success must recheck on its own.
++        f.host.owner.poll_io().unwrap();
++        assert!(Instant::now() < until);
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let snapshot = f.host.close_snapshot();
++    let record = snapshot.accept.unwrap();
++    assert_eq!(record.serial, serial);
++    assert_eq!(record.hard_deadline, hard);
++    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
++    assert!(record.began_at >= record.alarm);
++    assert!(record.completion_returned_at.unwrap() <= record.began_at);
++    assert!(record.socket_close_began_at.unwrap() >= record.began_at);
++    assert!(record.socket_returned_at.unwrap() >= record.socket_close_began_at.unwrap());
++    assert!(!record.failed);
++    let after = f.host.acceptance_snapshot();
++    assert_eq!(after.transfers, before.transfers);
++    assert_eq!(after.ready_slots, CONNECTION_SLOTS);
++    assert_eq!(f.host.owner.report.handshake_calls, 0);
++    assert_eq!(after.posts, before.posts + 1);
++    assert!(after.native_pending <= 5 && after.owned_sockets <= 6);
++    let mut client = f.client.try_clone().unwrap();
++    rejected_client(&mut f, &mut client);
++    f.stop();
++}

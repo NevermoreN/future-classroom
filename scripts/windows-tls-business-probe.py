@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Run the explicit finite TLS/shared-worker synthetic business diagnostic.
 
-The default is a raw API client through an owned SSH forward. Optional --browser
+The default is a raw API client through an owned SSH forward. Optional --header-deadline-only samples actual TLS/raw incomplete-header closure
+within an unrounded conservative pre-connect5s bound; it does not replace the
+original strict-P0 decision or establish kernel timestamps. Optional --browser
 also observes actual isolated Windows Edge UI against the same native service.
 This is not general browser acceptance,
 production-listener enablement, native strict-5s evidence, audio playback, or
@@ -28,6 +30,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import SimpleNamespace
 import uuid
 import zipfile
 
@@ -205,6 +208,504 @@ def request_fragments(head, body):
     return chunks, first
 
 
+# This mode is an independent conservative local-forward sample, never a
+# replacement for the original strict kernel-ESTABLISHED acceptance decision.
+CLOSE_PROGRESS = "TLS_BUSINESS_CLOSE "
+HEADER_THRESHOLD_NS, HEADER_RESERVE_NS = 5_000_000_000, 25_000_000
+HEADER_CASES = tuple("header-deadline-tls-" + str(i) for i in range(1, 5)) + ("header-deadline-raw-tcp",)
+
+
+class CloseReader:
+    """Strict bounded latest-slot DTO validation; this does not release owners."""
+    def __init__(self, marker, reports):
+        self.marker, self.reports = marker, reports
+        self.generation = None
+        self.latest = None
+
+    def observe(self, line):
+        if not line.startswith(CLOSE_PROGRESS):
+            return False
+        require(len(line) <= 8192 and len(self.reports) < 512, "bounded close observations exceeded")
+        item = json.loads(line[len(CLOSE_PROGRESS):])
+        integer = lambda v: type(v) is int and 0 <= v <= (1 << 64) - 1
+        require(type(item) is dict and set(item) == {"marker", "sequence", "generation", "reserveNs",
+                "headerBegins", "headerSocketReturns", "headerFailures", "headers", "accept"}
+                and item["marker"] == self.marker and integer(item["generation"])
+                and item["generation"] == self.generation and integer(item["sequence"]) and item["sequence"] > 0
+                and type(item["reserveNs"]) is int and item["reserveNs"] == HEADER_RESERVE_NS
+                and all(integer(item[k]) for k in ("headerBegins", "headerSocketReturns", "headerFailures")),
+                "native close snapshot envelope mismatch")
+        require(item["headerSocketReturns"] <= item["headerBegins"], "native socket return counter exceeds closes")
+        require(type(item["headers"]) is list and len(item["headers"]) <= 4, "native close snapshot slot bound")
+        head_keys = {"generation", "slot", "serial", "hardDeadlineNs", "alarmNs", "beganAtNs",
+                     "socketCloseBeganAtNs", "socketReturnedAtNs", "failed", "ioPendingAtClose", "ioReturnedAtNs",
+                     "framePendingAtClose", "frameReturnedAtNs", "retirementConfirmedAtNs"}
+        accept_keys = {"serial", "hardDeadlineNs", "alarmNs", "beganAtNs", "socketCloseBeganAtNs",
+                       "socketReturnedAtNs", "failed", "completionReturnedAtNs"}
+        slots = set()
+        def validate_record(record, header):
+            require(type(record) is dict and set(record) == (head_keys if header else accept_keys),
+                    "native close observation fields mismatch")
+            time_keys = ("hardDeadlineNs", "alarmNs", "beganAtNs", "socketCloseBeganAtNs", "socketReturnedAtNs")
+            optional = {"socketCloseBeganAtNs", "socketReturnedAtNs"}
+            if header:
+                time_keys += ("ioReturnedAtNs", "frameReturnedAtNs", "retirementConfirmedAtNs")
+                optional |= {"ioReturnedAtNs", "frameReturnedAtNs", "retirementConfirmedAtNs"}
+                require(integer(record["generation"]) and record["generation"] == self.generation
+                        and type(record["slot"]) is int and 0 <= record["slot"] < 4
+                        and record["slot"] not in slots, "native close exact token/slot mismatch")
+                slots.add(record["slot"])
+                require(type(record["ioPendingAtClose"]) is bool and type(record["framePendingAtClose"]) is bool,
+                        "native close debt flags mismatch")
+            else:
+                time_keys += ("completionReturnedAtNs",)
+                optional.add("completionReturnedAtNs")
+            require(integer(record["serial"]) and record["serial"] > 0 and type(record["failed"]) is bool
+                    and all((record[k] is None and k in optional) or integer(record[k]) for k in time_keys),
+                    "native close scalar/time types mismatch")
+            require(record["hardDeadlineNs"] - record["alarmNs"] == HEADER_RESERVE_NS
+                    and record["beganAtNs"] >= record["alarmNs"], "native close alarm changed original hard deadline")
+            began, returned = record["socketCloseBeganAtNs"], record["socketReturnedAtNs"]
+            require(began is None or began >= record["beganAtNs"], "checked socket-close entry predates negative path")
+            require(returned is None or began is not None and returned >= began,
+                    "socket return missing checked close entry/order")
+            if header:
+                for flag, key in (("ioPendingAtClose", "ioReturnedAtNs"), ("framePendingAtClose", "frameReturnedAtNs")):
+                    require(record[key] is None or record[flag] and record[key] >= record["beganAtNs"]
+                            and (returned is None or record[key] >= returned), "IO/Frame return falsely discharges close debt")
+                retired = record["retirementConfirmedAtNs"]
+                require(retired is None or returned is not None and retired >= returned
+                        and all(record[k] is not None and retired >= record[k]
+                                for flag, k in (("ioPendingAtClose", "ioReturnedAtNs"),
+                                                ("framePendingAtClose", "frameReturnedAtNs")) if record[flag]),
+                        "retirement precedes actual socket/IO/Frame return")
+            # A queued bare packet may actually return BEFORE close starts;
+            # no fabricated after-close ordering is imposed on that path.
+        for record in item["headers"]:
+            validate_record(record, True)
+        if item["accept"] is not None:
+            validate_record(item["accept"], False)
+        if self.latest is not None:
+            old = self.latest
+            require(item["sequence"] > old["sequence"] and all(item[k] >= old[k]
+                    for k in ("headerBegins", "headerSocketReturns", "headerFailures")),
+                    "native close sequence/counters went backwards")
+            current = {r["slot"]: r for r in item["headers"]}
+            def evolution(prior, new, keys):
+                require(new["serial"] >= prior["serial"], "native close serial went backwards")
+                if new["serial"] != prior["serial"]:
+                    return
+                for key in keys:
+                    if key == "failed":
+                        require(not prior[key] or new[key], "native close failure flag cleared")
+                    elif prior[key] is not None:
+                        require(prior[key] == new[key], "native close record rewrote an observed fact")
+            for prior in old["headers"]:
+                require(prior["slot"] in current, "native close latest-slot history vanished")
+                evolution(prior, current[prior["slot"]], head_keys - {"serial"})
+            if old["accept"] is not None:
+                require(item["accept"] is not None, "native bare close history vanished")
+                evolution(old["accept"], item["accept"], accept_keys - {"serial"})
+        self.latest = item
+        self.reports.append(item)
+        return True
+
+
+def validate_header_sample(event):
+    """No rounding or tolerance, including local connect/SSH/handshake time."""
+    require(event.get("peerCloseObserved") is True and event.get("localCloseUsedAsPeerEvidence") is False
+            and event.get("sshMasterAliveAtPeerClose") is True and event.get("nativeLauncherAliveAtPeerClose") is True,
+            "header client lacks actual peer EOF/RST/TLS EOF")
+    case, drip_calls = event.get("case"), event.get("dripCalls")
+    require(case in HEADER_CASES and type(drip_calls) is int
+            and (drip_calls >= 2 if case == "header-deadline-tls-4" else drip_calls == 0),
+            "header case missing or fourth TLS did not perform two actual single-byte drip sends")
+    require(event.get("transport") == ("TCP" if case == "header-deadline-raw-tcp" else "TLS"),
+            "header case/transport mismatch")
+    start, end = event.get("beforeConnectNs"), event.get("peerCloseNs")
+    require(type(start) is int and type(end) is int and 0 <= start <= end
+            and event.get("elapsedNs") == end - start and end - start <= HEADER_THRESHOLD_NS,
+            "header connection exceeded original strict 5000000000ns interval")
+    require(event.get("applicationReceivedBytes") == 0, "unexpected response before first head completion")
+    require(event.get("peerCloseKind") in ("TCP_EOF", "TCP_RESET", "TCP_ABORTED", "TLS_CLEAN_EOF", "TLS_RAGGED_EOF"),
+            "header client terminal is not EOF/RST/TLS EOF")
+    if event.get("transport") == "TLS":
+        require(event.get("tlsVersion") == "TLSv1.2" and event.get("certificateVerified") is True
+                and type(event.get("handshakeCompletedNs")) is int
+                and type(event.get("incompleteHeadSentNs")) is int
+                and start <= event["handshakeCompletedNs"] <= event["incompleteHeadSentNs"] <= end
+                and event.get("applicationReceivedBytes") == 0 and event.get("completeHeadSent") is False,
+                "header sample did not complete verified TLS with an incomplete first head")
+    else:
+        require(event.get("transport") == "TCP" and event.get("sentBytes") == 0,
+                "raw TCP sample sent TLS/application data")
+
+
+def validate_header_cases(events):
+    require(len(events) == 5 and {e.get("case") for e in events} == set(HEADER_CASES),
+            "header deadline cases must be exactly five unique expected identities")
+    for event in events:
+        validate_header_sample(event)
+
+
+class HeaderDeadlineTunnel(Tunnel):
+    """Only the original -N master gets -vv; all mux/control calls stay plain."""
+    def __init__(self, remote, local_root):
+        self._plain_remote = remote
+        master_only = SimpleNamespace(host=remote.host, options=[*remote.options, "-vv"])
+        try:
+            super().__init__(master_only, local_root)
+        finally:
+            self.remote = remote
+
+    def _control(self, operation, *extra, timeout=5):
+        # Base __init__ launches its -N process before its first mux check.
+        # No original Remote options or password-bearing command is mutated.
+        self.remote = self._plain_remote
+        return super()._control(operation, *extra, timeout=timeout)
+
+
+class HeaderTracePending(RuntimeError):
+    pass
+
+
+def validate_header_forward(tunnel, launcher):
+    """Classify original -vv channel instances, not reusable channel numbers.
+
+    A mux command's local ctl EOF and a confirmed direct channel's cleanup
+    AFTER remote EOF/close are not SSH transport failures. All other errors
+    remain fail closed. This never opens a readiness or target TCP connection.
+    """
+    require(tunnel.process.poll() is None and launcher.poll() is None
+            and not tunnel.logs.overflow.is_set(), "original SSH/native process unavailable during header sample")
+    raw = bytes(tunnel.logs.stderr)
+    text = raw.decode("utf-8", "strict")
+    records, active, cleanup = [], {}, []
+    instances = 0
+    for line_number, line in enumerate(text.splitlines(), 1):
+        # Transport, authentication and channel-open failures cannot be excused
+        # by an EOF observed in some other or earlier channel instance.
+        require(not re.search(r"(?i)(open failed|connect failed|administratively prohibited|connection refused|"
+                              r"connection closed by|connection to .* closed|timed out|received disconnect|"
+                              r"disconnected from|killed by signal|terminated by signal|fatal|corrupted mac|"
+                              r"message authentication code incorrect)", line),
+                "SSH transport/channel-open failure invalidates peer-close attribution")
+        created = re.fullmatch(r"debug[123]: channel ([0-9]+): new ([^\[]+) \[.*", line)
+        if created:
+            key, kind = int(created.group(1)), created.group(2).strip()
+            require(key not in active, "SSH reused an active channel lifecycle")
+            instances += 1
+            record = {"instance": instances, "channel": key, "kind": kind, "newLine": line_number,
+                      "openConfirmedLine": None, "remoteEofLine": None, "remoteCloseLine": None,
+                      "controlEofLine": None}
+            active[key] = record
+            if kind == "direct-tcpip":
+                record["ordinal"] = len(records) + 1
+                records.append(record)
+            continue
+        channel = re.fullmatch(r"(?:debug[123]: )?channel ([0-9]+): (.*)", line)
+        detail = channel.group(2) if channel else None
+        record = active.get(int(channel.group(1))) if channel else None
+        channel_error = bool(re.search(r"(?i)(read failed|write failed|broken pipe|connection reset)", line))
+        if channel_error:
+            mux_cleanup = (record is not None and record["kind"] == "mux-control"
+                           and record["controlEofLine"] is not None and detail == "read failed")
+            # These are exact known local read-side cleanup messages. In
+            # particular a global SSH connection reset, write failure, unknown
+            # errno, or direct failure before this instance's remote terminal
+            # remains fatal even if another channel previously ended cleanly.
+            direct_cleanup = (record is not None and record["kind"] == "direct-tcpip"
+                              and record["openConfirmedLine"] is not None
+                              and (record["remoteEofLine"] is not None or record["remoteCloseLine"] is not None)
+                              and re.fullmatch(r"read failed(?: rfd [0-9]+ maxlen [0-9]+: (?:Broken pipe|Connection reset by peer))?", detail)
+                              is not None)
+            require(mux_cleanup or direct_cleanup,
+                    "SSH transport/channel failure before a proven same-instance cleanup boundary")
+            cleanup.append({"line": line_number, "channel": record["channel"], "instance": record["instance"],
+                            "kind": record["kind"], "text": line,
+                            "priorBoundaryLine": record["controlEofLine"] if mux_cleanup else
+                            record["remoteEofLine"] or record["remoteCloseLine"]})
+            continue
+        if not channel:
+            continue
+        lifecycle_fact = detail.startswith(("open confirm ", "rcvd eof", "rcvd close", "free: ", "ctl read<=0"))
+        if record is None:
+            require(not lifecycle_fact, "unpaired SSH channel lifecycle fact")
+            continue
+        if detail.startswith("ctl read<=0"):
+            require(record["kind"] == "mux-control" and re.fullmatch(r"ctl read<=0 rfd [0-9]+ len 0", detail)
+                    is not None and record["controlEofLine"] is None,
+                    "unproven/repeated mux-control EOF")
+            record["controlEofLine"] = line_number
+        elif detail.startswith("open confirm "):
+            require(record["kind"] == "direct-tcpip" and record["openConfirmedLine"] is None,
+                    "unpaired/duplicate SSH direct open confirmation")
+            record["openConfirmedLine"] = line_number
+        elif detail.startswith(("rcvd eof", "rcvd close")):
+            if record["kind"] == "direct-tcpip":
+                require(record["openConfirmedLine"] is not None, "SSH direct terminal before open confirmation")
+            field = "remoteEofLine" if detail.startswith("rcvd eof") else "remoteCloseLine"
+            require(record[field] is None, "repeated SSH channel terminal fact")
+            record[field] = line_number
+        elif detail.startswith("free: "):
+            freed_kind = detail[6:].split(":", 1)[0].split(",", 1)[0]
+            require(freed_kind.replace("-", " ") == record["kind"].replace("-", " "),
+                    "SSH freed channel kind does not match current lifecycle")
+            record["freedLine"] = line_number
+            del active[record["channel"]]
+    if not (len(records) == 5 and all(r["openConfirmedLine"] is not None
+            and r["newLine"] < r["openConfirmedLine"]
+            and any(r[k] is not None and r[k] > r["openConfirmedLine"]
+                    for k in ("remoteEofLine", "remoteCloseLine")) for r in records)):
+        raise HeaderTracePending("five actual SSH direct-tcpip open confirmations and remote EOF/close facts missing")
+    return {"status": "PASS", "masterAlive": True, "nativeLauncherAlive": True,
+            "stderrBytesObserved": len(raw), "stderrPrefixSha256": digest(raw), "channels": records,
+            "normalChannelCleanup": cleanup,
+            "rawSource": "sshTunnelRaw.stderr (complete original bytes saved by existing finally)",
+            "readiness": "Existing SSH mux forward command acknowledgement; no socket readiness probe",
+            "causalityLimit": "SSH diagnostics plus exact native group counts; not exact kernel ESTABLISHED timestamps"}
+
+
+def await_header_forward(client, progress, tunnel, launcher):
+    until = min(client.deadline, time.monotonic() + 1)
+    while True:
+        try:
+            return validate_header_forward(tunnel, launcher)
+        except HeaderTracePending:
+            require(time.monotonic() < until, "original SSH channel trace did not settle within fixed client budget")
+            progress.pump(0)
+            time.sleep(0.001)
+
+
+def exercise_header_deadlines(client, progress, close_reader, tunnel, launcher, observation):
+    """Five clients, no new threads. Nonblocking TLS handshakes/reads share30s.
+
+    Each conservative epoch is sampled BEFORE local TCP connect. The SSH
+    forward is part of that measured interval, not an inferred Windows kernel
+    establishment time. The fifth raw connection starts only after the four original TLS slots retire.
+    """
+    opened, raw_attempted = [], False
+    observation.update({"status": "FAIL", "thresholdNs": HEADER_THRESHOLD_NS,
+                   "epoch": "PER_CONNECTION_BEFORE_LOCAL_TCP_CONNECT_CALL", "maximumClients": 5,
+                   "transport": "owned SSH loopback forward to actual Schannel", "rawTcpMeaning":
+                   "Single raw TCP phase after native retirement/rearm; no TLS/data sent", "slotMapping": "NOT_PROVEN",
+                   "timingGuarantee": "Finite conservative local-forward samples only; original strictP0 decision unchanged",
+                   "audioOperation": "NONE", "authenticationOperation": "NONE", "applicationRequestsCompleted": 0})
+    def add(index, tls):
+        event = {"case": "header-deadline-tls-" + str(index) if tls else "header-deadline-raw-tcp",
+                 "status": "FAIL", "transport": "TLS" if tls else "TCP", "beforeConnectNs": time.perf_counter_ns(),
+                 "peerCloseObserved": False, "localCloseUsedAsPeerEvidence": False, "completeHeadSent": False,
+                 "applicationReceivedBytes": 0, "sentBytes": 0, "sendCalls": 0, "dripCalls": 0}
+        client.events.append(event)
+        state = {"event": event, "socket": None, "tls": tls, "handshake": not tls,
+                 "pending": b"", "pendingKind": None, "done": False, "drip": tls and index == 4, "nextDrip": None}
+        opened.append(state)
+        try:
+            connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=min(5, client.remaining()))
+            state["socket"] = connection
+            event["localConnectReturnedNs"] = time.perf_counter_ns()
+            if tls:
+                connection = client.context.wrap_socket(connection, server_hostname="localhost",
+                                                       suppress_ragged_eofs=False, do_handshake_on_connect=False)
+                state["socket"] = connection
+            connection.setblocking(False)
+        except Exception as error:
+            event["error"] = failure(error, "header-client-connect")
+            state["done"] = True
+        return state
+    def peer_closed(state, kind):
+        event = state["event"]
+        event.update(peerCloseNs=time.perf_counter_ns(), peerCloseKind=kind, peerCloseObserved=True,
+                     sshMasterAliveAtPeerClose=tunnel.process.poll() is None,
+                     nativeLauncherAliveAtPeerClose=launcher.poll() is None)
+        event["elapsedNs"] = event["peerCloseNs"] - event["beforeConnectNs"]
+        try:
+            validate_header_sample(event)
+            event["status"] = "PASS"
+        except Exception as error:
+            event["error"] = failure(error, "header-client-sample")
+        state["done"] = True
+    try:
+        for index in range(1, 5):
+            add(index, True)
+        # Six seconds is a failure-collection cutoff, never a pass tolerance.
+        # It is also bounded by the original, never-renewed Client30s deadline.
+        collect_until_ns = max(s["event"]["beforeConnectNs"] for s in opened) + 6_000_000_000
+        while any(not s["done"] for s in opened) or not raw_attempted:
+            while not progress.lines.empty():
+                progress.pump(0)
+            now_ns = time.perf_counter_ns()
+            if time.monotonic() >= client.deadline or now_ns >= collect_until_ns:
+                for state in opened:
+                    if not state["done"]:
+                        state["event"]["error"] = {"phase": "header-client-collection", "type": "TimeoutError",
+                                                   "message": "No actual peer close before fixed collection deadline; not passing evidence"}
+                        state["done"] = True
+                break
+            for state in opened:
+                if state["done"]:
+                    continue
+                connection, event = state["socket"], state["event"]
+                try:
+                    if state["tls"] and not state["handshake"]:
+                        try:
+                            connection.do_handshake()
+                        except (ssl.SSLWantReadError, ssl.SSLWantWriteError):
+                            continue
+                        require(connection.version() == "TLSv1.2"
+                                and connection.getpeercert(binary_form=True) == client.expected_der,
+                                "header TLS version/certificate identity mismatch")
+                        event.update(tlsVersion=connection.version(), certificateVerified=True,
+                                     peerDerSha256=digest(client.expected_der), handshakeCompletedNs=time.perf_counter_ns())
+                        state["handshake"] = True
+                        state["pending"] = b"GET /fc/ HTTP/1.1\r\nHost: localhost\r\nX-Synthetic-Incomplete: "
+                        state["pendingKind"] = "HEAD"
+                    if state["pending"]:
+                        try:
+                            sent = connection.send(state["pending"])
+                            require(sent > 0, "incomplete-head send made no progress")
+                            event["sentBytes"] += sent
+                            event["sendCalls"] += 1
+                            if state["pendingKind"] == "DRIP":
+                                event["dripCalls"] += 1
+                            state["pending"] = state["pending"][sent:]
+                            if not state["pending"] and "incompleteHeadSentNs" not in event:
+                                event["incompleteHeadSentNs"] = time.perf_counter_ns()
+                                state["nextDrip"] = time.perf_counter_ns() + 250_000_000
+                        except (ssl.SSLWantReadError, ssl.SSLWantWriteError, BlockingIOError):
+                            pass
+                        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, ssl.SSLEOFError) as error:
+                            # A send error alone is not the required final read.
+                            event.setdefault("sendTerminalErrors", []).append(type(error).__name__)
+                            state["pending"] = b""
+                            state["drip"] = False
+                    try:
+                        data = connection.recv(4096)
+                        if not data:
+                            peer_closed(state, "TLS_CLEAN_EOF" if state["tls"] else "TCP_EOF")
+                        else:
+                            event["applicationReceivedBytes"] += len(data)
+                            raise RuntimeError("unexpected application bytes before complete first head")
+                    except (ssl.SSLWantReadError, ssl.SSLWantWriteError, BlockingIOError):
+                        pass
+                    except ssl.SSLZeroReturnError:
+                        peer_closed(state, "TLS_CLEAN_EOF")
+                    except ssl.SSLEOFError:
+                        peer_closed(state, "TLS_RAGGED_EOF")
+                    except ConnectionResetError:
+                        peer_closed(state, "TCP_RESET")
+                    except ConnectionAbortedError:
+                        peer_closed(state, "TCP_ABORTED")
+                    if not state["done"] and state["drip"] and not state["pending"] and state["nextDrip"] is not None:
+                        if time.perf_counter_ns() >= state["nextDrip"]:
+                            require(event["dripCalls"] < 24, "bounded header drip exceeded")
+                            state["pending"] = b"a"
+                            state["pendingKind"] = "DRIP"
+                            state["nextDrip"] += 250_000_000
+                except Exception as error:
+                    event["error"] = failure(error, "header-client-transport")
+                    state["done"] = True
+            tls_states = opened[:4]
+            if not raw_attempted and all(s["done"] for s in tls_states):
+                if any(s["event"]["status"] != "PASS" for s in tls_states):
+                    observation["rawNotStartedReason"] = "TLS phase failed; no synthetic raw-phase success inferred"
+                    raw_attempted = True
+                else:
+                    latest, closed = progress.latest, close_reader.latest
+                    if (latest and closed and latest["acceptance"]["bound_slots"] == 0
+                            and latest["acceptance"]["ready_slots"] == 4
+                            and latest["acceptance"]["transfers"] == 4
+                            and latest["retired"] >= 4 and latest["rearms"] >= 4
+                            and closed["headerBegins"] == closed["headerSocketReturns"] == 4
+                            and len(closed["headers"]) == 4
+                            and all(r["retirementConfirmedAtNs"] is not None for r in closed["headers"])):
+                        observation["fourRetiredBeforeRaw"] = {"progress": latest, "close": closed,
+                                                               "observedAtNs": time.perf_counter_ns()}
+                        raw_attempted = True
+                        raw = add(5, False)
+                        # This is a new connection's fixed failure-collection
+                        # cutoff, still bounded by the original Client30s.
+                        collect_until_ns = raw["event"]["beforeConnectNs"] + 6_000_000_000
+            time.sleep(0.001)
+        observation["sequentialPhasesProven"] = (len(opened) == 5 and "fourRetiredBeforeRaw" in observation
+            and all(s["event"].get("peerCloseNs", 1 << 64) < opened[4]["event"]["beforeConnectNs"] for s in opened[:4]))
+        observation["fourTlsIntervalsOverlap"] = (all("incompleteHeadSentNs" in q["event"] and "peerCloseNs" in q["event"] for q in opened[:4])
+            and max(q["event"]["incompleteHeadSentNs"] for q in opened[:4])
+                < min(q["event"]["peerCloseNs"] for q in opened[:4]))
+        observation["status"] = "PASS" if len(opened) == 5 and all(s["event"]["status"] == "PASS" for s in opened) \
+            and observation["sequentialPhasesProven"] and observation["fourTlsIntervalsOverlap"] else "FAIL"
+        try:
+            validate_header_cases(client.events)
+        except Exception as error:
+            observation["status"] = "FAIL"
+            observation["caseOrDripValidationError"] = failure(error, "header-client-matrix")
+        observation["sshDirectTcpip"] = await_header_forward(client, progress, tunnel, launcher)
+        return observation
+    finally:
+        # Local close occurs only AFTER sampling peer terminal/failure. It is
+        # never promoted into a remote closure or successful native drain.
+        for state in opened:
+            if state["socket"] is not None:
+                event = state["event"]
+                event["localCloseBeganNs"] = time.perf_counter_ns()
+                try:
+                    state["socket"].close()
+                    event["localSocketClosed"] = True
+                    event["localCloseReturnedNs"] = time.perf_counter_ns()
+                except Exception as error:
+                    event["localSocketClosed"] = False
+                    event["localCloseError"] = failure(error, "header-client-local-close")
+                    event["status"] = observation["status"] = "FAIL"
+
+
+def validate_header_native(value, events, close_reader, progress_reader):
+    # The existing business validator is intentionally unchanged: this mode
+    # sends no complete head and therefore legitimately has no approvals.
+    require(type(value) is dict and value.get("physicalNativeDrain") is True
+            and type(value.get("sharedWorkers")) is int and value["sharedWorkers"] == 2
+            and value.get("workerJoin") is True and value.get("setupCleanup") is True
+            and all(type(value.get(k)) is int and value[k] == 0 for k in
+                    ("hubPending", "downloadHubPending", "quarantined", "approvals", "heads", "responses"))
+            and type(value.get("peakRecords")) is int and 4 <= value["peakRecords"] <= 8,
+            "header-only actual-drain/shared-pool/zero-business ledger mismatch")
+    validate_header_cases(events)
+    for event in events:
+        validate_header_sample(event)
+        require(event.get("status") == "PASS" and event.get("localSocketClosed") is True
+                and type(event.get("localCloseBeganNs")) is int and type(event.get("localCloseReturnedNs")) is int
+                and event["peerCloseNs"] <= event["localCloseBeganNs"] <= event["localCloseReturnedNs"],
+                "header client actual peer sample/local socket cleanup order failed")
+    require(close_reader.latest is not None and progress_reader.latest is not None, "native close/progress observations absent")
+    final = close_reader.latest
+    require(final["headerBegins"] == 5 and final["headerSocketReturns"] == 5
+            and final["headerFailures"] == 0 and len(final["headers"]) == 4,
+            "native five first-header closes/socket returns missing or failed")
+    for record in final["headers"]:
+        require(record["failed"] is False and record["socketReturnedAtNs"] is not None
+                and record["retirementConfirmedAtNs"] is not None
+                and (not record["ioPendingAtClose"] or record["ioReturnedAtNs"] is not None)
+                and (not record["framePendingAtClose"] or record["frameReturnedAtNs"] is not None),
+                "native latest header close lacks actual socket/IO/Frame/retirement facts")
+    unique = {}
+    for snapshot in close_reader.reports:
+        for record in snapshot["headers"]:
+            unique[interval_key(record)] = record
+    require(len(unique) == 5 and all(r["socketReturnedAtNs"] is not None
+            and r["retirementConfirmedAtNs"] is not None and not r["failed"] for r in unique.values()),
+            "bounded close history lacks five distinct actually retired tokens")
+    require(progress_reader.latest["acceptance"]["transfers"] == 5
+            and progress_reader.latest["acceptance"]["capacity_rejects"] == 0
+            and progress_reader.latest["acceptance"]["bound_slots"] == 0
+            and progress_reader.latest["acceptance"]["native_pending"] == 0
+            and progress_reader.latest["acceptance"]["owned_sockets"] == 0,
+            "native final physical socket/operation debt remains")
+    return {"status": "PASS", "groupEvidence": "First phase four verified incomplete TLS heads; original tokens actually retired/rearmed; then one raw TCP accepted. Exactly five native transfers/header closes with zero capacity rejects. Individual TLS peer-to-slot mapping NOT_PROVEN; second-phase single raw connection has a unique newly closed token.",
+            "nativeHeaderCloseBegins": final["headerBegins"], "nativeHeaderSocketReturns": final["headerSocketReturns"],
+            "nativeFiveClosedTokens": [{k: r[k] for k in ("generation", "slot", "serial")} for r in unique.values()],
+            "rawTcpCapacityRejects": progress_reader.latest["acceptance"]["capacity_rejects"],
+            "socketReturnIsPeerClose": False, "originalStrictP0": "NOT_VALIDATED", "productionListener": "NOT_ENABLED"}
+
+
 class Client:
     def __init__(self, local_port, ready, tls_context, wrong_ca, expected_der, events):
         self.local_port, self.ready = local_port, ready
@@ -352,14 +853,17 @@ class ProgressReader:
     """
     COUNTERS = ("posts", "completions", "idle_cancellations", "idle_returns", "capacity_rejects", "transfers")
 
-    def __init__(self, lines, marker, reports):
+    def __init__(self, lines, marker, reports, close_reader=None):
         self.lines, self.marker, self.reports = lines, marker, reports
+        self.close_reader = close_reader
         self.generation = None
         self.latest = None
         self.deferred = deque()
         self.deferred_bytes = 0
 
     def observe(self, line):
+        if self.close_reader is not None and self.close_reader.observe(line):
+            return True
         if not line.startswith(PROGRESS):
             return False
         require(len(line) <= 8192 and len(self.reports) < 512, "bounded native progress exceeded")
@@ -1210,6 +1714,210 @@ def self_test_voice_capabilities():
             "voice capability summary omits cookie/CSRF/body and does not infer native query count, cache behavior or current audibility; no IO"]
 
 
+def self_test_header_deadlines():
+    """Synthetic metadata/client/SSH models only; zero socket or native calls."""
+    import copy
+    from types import SimpleNamespace
+    checks = []
+    base = {"generation": 7, "slot": 0, "serial": 1, "hardDeadlineNs": 5_000_000_100,
+            "alarmNs": 4_975_000_100, "beganAtNs": 4_975_000_101, "socketCloseBeganAtNs": 4_975_000_102,
+            "socketReturnedAtNs": 4_975_000_103, "failed": False, "ioPendingAtClose": True,
+            "ioReturnedAtNs": 4_975_000_104, "framePendingAtClose": False,
+            "frameReturnedAtNs": None, "retirementConfirmedAtNs": 4_975_000_105}
+    records = [dict(base, slot=i, serial=i + 1) for i in range(4)]
+    sample = {"marker": "synthetic", "generation": 7, "sequence": 1, "reserveNs": HEADER_RESERVE_NS,
+              "headerBegins": 4, "headerSocketReturns": 4, "headerFailures": 0, "headers": records, "accept": None}
+    def reader():
+        result = CloseReader("synthetic", [])
+        result.generation = 7
+        return result
+    def feed(r, value):
+        require(r.observe(CLOSE_PROGRESS + json.dumps(value)), "close model not consumed")
+    def denied(call, label):
+        try:
+            call()
+        except (RuntimeError, ValueError, TypeError, KeyError):
+            return
+        raise RuntimeError("header pure negative model accepted: " + label)
+    actual = reader()
+    feed(actual, sample)
+    raw_record = dict(base, slot=0, serial=5, hardDeadlineNs=10_000_000_100,
+                      alarmNs=9_975_000_100, beganAtNs=9_975_000_101,
+                      socketCloseBeganAtNs=9_975_000_102, socketReturnedAtNs=9_975_000_103,
+                      ioReturnedAtNs=9_975_000_104, retirementConfirmedAtNs=9_975_000_105)
+    final = dict(sample, sequence=2, headerBegins=5, headerSocketReturns=5,
+                 headers=[raw_record] + records[1:])
+    feed(actual, final)
+    bare = {"serial": 5, "hardDeadlineNs": 100_000_000, "alarmNs": 75_000_000,
+            "beganAtNs": 75_000_005, "socketCloseBeganAtNs": 75_000_006,
+            "socketReturnedAtNs": 75_000_007, "failed": False, "completionReturnedAtNs": 75_000_001}
+    feed(reader(), dict(sample, accept=bare))  # Actual queued packet may predate close.
+    for label, mutate in (
+        ("wrong reserve", lambda v: v.update(reserveNs=24_000_000)),
+        ("wrong generation", lambda v: v.update(generation=8)),
+        ("unknown disclosure", lambda v: v.update(unknown=1)),
+        ("bool serial", lambda v: v["headers"][0].update(serial=True)),
+        ("recomputed alarm", lambda v: v["headers"][0].update(alarmNs=4_975_000_101)),
+        ("cancel as IO return", lambda v: v["headers"][0].update(ioPendingAtClose=False)),
+        ("retired before IO", lambda v: v["headers"][0].update(retirementConfirmedAtNs=4_975_000_103)),
+        ("socket before checked close", lambda v: v["headers"][0].update(socketReturnedAtNs=4_975_000_101)),
+        ("duplicate slot", lambda v: v["headers"][1].update(slot=0)),
+        ("bare bad alarm", lambda v: v.update(accept=dict(bare, alarmNs=75_000_001))),
+    ):
+        value = copy.deepcopy(sample)
+        mutate(value)
+        denied(lambda: feed(reader(), value), label)
+    for label, update in (("changed fact", {"beganAtNs": 4_975_000_102}),
+                          ("disappearing IO fact", {"ioReturnedAtNs": None})):
+        r = reader()
+        feed(r, sample)
+        value = copy.deepcopy(sample)
+        value["sequence"] = 2
+        value["headers"][0].update(update)
+        denied(lambda: feed(r, value), label)
+    r = reader()
+    feed(r, sample)
+    denied(lambda: feed(r, sample), "repeated sequence")
+    checks.append("synthetic CLOSE exact token/schema/alarm25ms/IO-Frame-retirement order and immutable-fact rejection; queued bare completion-before-close accepted")
+    tls = {"case": "header-deadline-tls-1", "dripCalls": 0, "transport": "TLS", "beforeConnectNs": 1000,
+           "peerCloseNs": 5_000_001_000, "elapsedNs": 5_000_000_000, "peerCloseKind": "TLS_RAGGED_EOF",
+           "peerCloseObserved": True, "localCloseUsedAsPeerEvidence": False,
+           "sshMasterAliveAtPeerClose": True, "nativeLauncherAliveAtPeerClose": True,
+           "tlsVersion": "TLSv1.2", "certificateVerified": True, "handshakeCompletedNs": 1001,
+           "incompleteHeadSentNs": 1002, "completeHeadSent": False, "applicationReceivedBytes": 0,
+           "localSocketClosed": True, "status": "PASS", "localCloseBeganNs": 5_000_001_001,
+           "localCloseReturnedNs": 5_000_001_002}
+    validate_header_sample(tls)
+    raw = dict(tls, case="header-deadline-raw-tcp", transport="TCP", sentBytes=0, peerCloseKind="TCP_EOF")
+    validate_header_sample(raw)
+    for label, changed in (
+        ("one ns over", dict(tls, peerCloseNs=5_000_001_001, elapsedNs=5_000_000_001)),
+        ("rounded interval", dict(tls, elapsedNs=4_999_999_999)),
+        ("local close", dict(tls, localCloseUsedAsPeerEvidence=True)),
+        ("dead master", dict(tls, sshMasterAliveAtPeerClose=False)),
+        ("no peer EOF", dict(tls, peerCloseObserved=False)),
+        ("unverified TLS", dict(tls, certificateVerified=False)),
+        ("complete HTTP head", dict(tls, completeHeadSent=True)),
+        ("timeout", dict(tls, peerCloseKind="TIMEOUT")),
+        ("raw sent data", dict(raw, sentBytes=1)),
+    ):
+        denied(lambda: validate_header_sample(changed), label)
+    checks.append("synthetic pre-connect exact5e9ns accepted; +1ns/rounding/local-close/timeout/deadSSH/unverifiedTLS/raw-data rejected")
+    trace = "debug1: Local forwarding listening on 127.0.0.1 port 12345.\n" + "".join(
+        f"debug1: channel {i}: new direct-tcpip [direct-tcpip]\n"
+        f"debug2: channel {i}: open confirm rwindow 0 rmax 32768\n"
+        f"debug2: channel {i}: rcvd eof\n" for i in range(5))
+    alive = SimpleNamespace(poll=lambda: None)
+    def tunnel(text, alive_process=alive):
+        return SimpleNamespace(process=alive_process, logs=SimpleNamespace(
+            stderr=bytearray(text.encode()), overflow=SimpleNamespace(is_set=lambda: False)))
+    require(len(validate_header_forward(tunnel(trace), alive)["channels"]) == 5, "five-channel model missing")
+    for label, text in (("open failure", trace + "channel 5: open failed: connect failed: Connection refused\n"),
+                        ("no confirmation", trace.replace("open confirm ", "not-open-confirm ", 1)),
+                        ("local terminal only", trace.replace("rcvd eof", "local read<=0", 1)),
+                        ("only four channels", trace[:trace.rfind("debug1: channel 4:")])):
+        denied(lambda: validate_header_forward(tunnel(text), alive), label)
+    denied(lambda: validate_header_forward(tunnel(trace, SimpleNamespace(poll=lambda: 255)), alive), "SSH actual exit")
+    checks.append("synthetic five confirmed direct-tcpip channels with remote EOF; refused/missingconfirm/localEOF/fourchannels/deadmaster rejected (no real SSH)")
+    def direct_trace(number, error=None, free=False):
+        value = (f"debug1: channel {number}: new direct-tcpip [direct-tcpip]\n"
+                 f"debug2: channel {number}: open confirm rwindow 0 rmax 32768\n")
+        if error:
+            value += f"debug2: channel {number}: {error}\n"
+        value += f"debug2: channel {number}: rcvd eof\n"
+        if free:
+            value += f"debug1: channel {number}: free: direct-tcpip, nchannels 2\n"
+        return value
+    mux = ("debug1: channel 9: new mux-control [mux-control]\n"
+           "debug2: channel 9: ctl read<=0 rfd 5 len 0\n"
+           "debug2: channel 9: read failed\n"
+           "debug1: channel 9: free: mux-control, nchannels 1\n")
+    cleanup_trace = mux + trace + ("debug2: channel 4: read failed rfd 5 maxlen 32768: Broken pipe\n"
+                                 "debug2: channel 4: read failed\n"
+                                 "debug2: channel 4: rcvd close\n")
+    accepted = validate_header_forward(tunnel(cleanup_trace), alive)
+    require(len(accepted["normalChannelCleanup"]) == 3 and len(accepted["channels"]) == 5,
+            "normal mux EOF/direct post-remoteEOF cleanup was rejected")
+    # Reusing the integer0 after its old instance ended must NOT retain old
+    # remote-EOF permission. Each negative still contains five otherwise valid
+    # direct records so an incidental final-count mismatch cannot hide the bug.
+    rest = "".join(direct_trace(i) for i in (2, 3, 4))
+    for label, changed in (
+        ("direct Brokenpipe before remoteEOF", direct_trace(0, "read failed rfd 5 maxlen 32768: Broken pipe")
+         + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
+        ("cross-channel EOF privilege", direct_trace(0) + direct_trace(1, "read failed") + rest),
+        ("reused-id EOF privilege", direct_trace(0, free=True) + direct_trace(0, "read failed") + rest),
+        ("mux EOF privilege leaked to reused direct-id", mux.replace("channel 9:", "channel 0:")
+         + direct_trace(0, "read failed") + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
+        ("mux readfailed before ctlEOF", mux.replace("ctl read<=0 rfd 5 len 0", "input open -> drain") + trace),
+        ("global SSH reset", trace + "Connection reset by 192.0.2.1 port 22\n"),
+        ("global Brokenpipe", trace + "ssh_dispatch_run_fatal: Broken pipe\n"),
+        ("direct unsupported read error", trace + "debug2: channel 4: read failed rfd 5 maxlen 32768: Permission denied\n"),
+        ("write failure after remoteEOF", trace + "debug2: channel 4: write failed\n"),
+        ("duplicate active lifecycle", direct_trace(0) + direct_trace(0) + rest),
+        ("unpaired openconfirm", "debug2: channel 9: open confirm rwindow 0 rmax 32768\n" + trace),
+        ("unpaired EOF", "debug2: channel 9: rcvd eof\n" + trace),
+    ):
+        denied(lambda: validate_header_forward(tunnel(changed), alive), label)
+    checks.append("SSH lifecycle models accept exact muxctlEOF cleanup and direct-confirmed-remoteEOF cleanup; reject preEOF/crosschannel/reused-id leakage, general transport errors and unpaired/duplicate facts")
+    # Exercise the subclass without spawning SSH: only the base master-launch
+    # input carries -vv; the overridden mux calls see the original Remote.
+    old_init, old_control = Tunnel.__init__, Tunnel._control
+    launched, controls = [], []
+    remote = SimpleNamespace(host="synthetic-no-network", options=["-o", "BatchMode=yes"])
+    original_options = list(remote.options)
+    def fake_init(self, master, local_root):
+        self.remote = master
+        launched.append(list(master.options))
+        self._control("check")
+        self._control("cancel", "-L", "synthetic")
+    def fake_control(self, operation, *extra, timeout=5):
+        controls.append((operation, list(self.remote.options)))
+        return SimpleNamespace(returncode=0)
+    try:
+        Tunnel.__init__, Tunnel._control = fake_init, fake_control
+        scoped = HeaderDeadlineTunnel(remote, "unused-model-only")
+        require(launched == [[*original_options, "-vv"]]
+                and controls == [("check", original_options), ("cancel", original_options)]
+                and scoped.remote is remote and remote.options == original_options,
+                "new header-only debug leaked into Remote/control commands")
+    finally:
+        Tunnel.__init__, Tunnel._control = old_init, old_control
+    checks.append("pure mocked original Tunnel construction: only-Nmaster-vv, muxcheck/cancel plain, Remote options unchanged; no process/network")
+    native = {"physicalNativeDrain": True, "sharedWorkers": 2, "workerJoin": True, "setupCleanup": True,
+              "hubPending": 0, "downloadHubPending": 0, "quarantined": 0, "approvals": 0, "heads": 0,
+              "responses": 0, "peakRecords": 4}
+    p = SimpleNamespace(latest={"acceptance": {"transfers": 5, "capacity_rejects": 0, "bound_slots": 0,
+                                               "native_pending": 0, "owned_sockets": 0}})
+    events = [dict(tls, case="header-deadline-tls-" + str(i), dripCalls=2 if i == 4 else 0)
+              for i in range(1, 5)] + [raw]
+    validate_header_native(native, events, actual, p)
+    validate_header_sample(events[3])  # Exactly two real-send counter facts suffice.
+    for value in (None, 0, 1, True, False):
+        incomplete = [dict(e) for e in events]
+        if value is None:
+            del incomplete[3]["dripCalls"]
+        else:
+            incomplete[3]["dripCalls"] = value
+        denied(lambda: validate_header_sample(incomplete[3]), "missing/insufficient/nonint actual drip counter")
+        denied(lambda: validate_header_cases(incomplete), "five-case model without two actual drips")
+        denied(lambda: validate_header_native(native, incomplete, actual, p), "native summary cannot replace missing drips")
+    duplicate = [dict(e) for e in events]
+    duplicate[1]["case"] = duplicate[0]["case"]
+    denied(lambda: validate_header_cases(duplicate), "duplicate case replaces required TLS identity")
+    denied(lambda: validate_header_native(native, duplicate, actual, p), "native exact5counts cannot replace unique client cases")
+    checks.append("five unique expected cases plus TLS4 actual dripCalls strictint>=2; missing/0/1/bool/duplicate rejected despite otherwise passing native counts")
+    for field, changed in (("workerJoin", False), ("physicalNativeDrain", False), ("approvals", 1),
+                           ("heads", 1), ("responses", 1), ("hubPending", 1)):
+        denied(lambda: validate_header_native(dict(native, **{field: changed}), events, actual, p), field)
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], transfers=4)})), "no actual raw transfer")
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], capacity_rejects=1)})), "capacity EOF mistaken for raw timeout")
+    checks.append("synthetic independent header-only final validator requires5actualtransfers/5close histories/zeroHTTP/zeroHubs/realDrain/2join; old business validator unchanged")
+    return checks
+
+
 def self_test():
     """Pure local framing/fixture checks; no sockets, subprocesses or Windows IO."""
     checks = []
@@ -1488,6 +2196,7 @@ def self_test():
             raise RuntimeError("READY silently ignored requested visual fixture")
     checks.append("visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected")
     checks.extend(self_test_voice_capabilities())
+    checks.extend(self_test_header_deadlines())
     print(json.dumps({"status": "PURE_LOCAL_CHECKS_PASS", "checks": checks,
                       "tls": "NOT_RUN", "windows": "NOT_RUN", "business": "NOT_RUN"}, indent=2))
 
@@ -1506,13 +2215,17 @@ def main():
     parser.add_argument("--visual-fixture", choices=VISUAL_FIXTURES, default="FILLED_DEFAULT", help="Exact finite isolated synthetic display fixture; no production settings")
     parser.add_argument("--voice-capabilities", action="store_true", help="Also observe three real capability GETs after pairing; no new audio operation or native-query/cache-count inference")
     parser.add_argument("--visual-only", action="store_true", help="Target only visual/scope/read-only contract within the original client/native budgets")
+    parser.add_argument("--header-deadline-only", action="store_true", help="Explicit finite four incomplete TLS heads then one raw TCP deadline sample; original5e9ns conservative pre-connect bound, not production/ESTABLISHED certification")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
+        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only or args.header_deadline_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
             parser.error("self-test is pure local; do not combine with remote inputs")
         self_test()
         return
+    if args.header_deadline_only and (args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only
+            or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK"):
+        parser.error("header-deadline-only is independent of browser/continuous/voice-capabilities/visual-only and custom fixtures")
     if args.voice_capabilities and args.visual_only:
         parser.error("voice-capabilities requires the full business diagnostic, not visual-only")
     if args.visual_only and args.continuous_accept:
@@ -1551,6 +2264,9 @@ def main():
               "visualFixture": args.visual_fixture, "visualOnly": args.visual_only,
               "browserContentKind": args.browser_content if args.browser else None,
               "events": [], "cleanup": "NOT_RUN"}
+    if args.header_deadline_only:
+        report.update(headerDeadlineOnly=True, scope="Finite actual Schannel four incomplete first heads then one raw TCP via owned SSH; no completed HTTP/auth/audio",
+                      headerDeadlineTiming="Conservative before-local-connect to actual peer terminal, unrounded <=5000000000ns; original strictP0 NOT_VALIDATED")
     remote = Remote(args.ssh_target, args.identity)
     directory = launcher = launcher_logs = tunnel = local_owner = browser_observer = None
     uploaded = set()
@@ -1616,14 +2332,21 @@ def main():
             browser_observer.prepare(fixture["publicPem"])
             report["scope"] = "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service"
         phase = "start-owned-ssh-master"
-        tunnel = Tunnel(remote, local_owner.name)
+        if args.header_deadline_only:
+            tunnel = HeaderDeadlineTunnel(remote, local_owner.name)
+        else:
+            tunnel = Tunnel(remote, local_owner.name)
         phase = "start-native-business-diagnostic"
         launcher = subprocess.Popen(remote.command_file(directory + "\\tls-launch.ps1"), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         launcher_logs = Logs(launcher)
         until = time.monotonic() + 100
         ready, native, exits = [], [], []
         progress_reports = []
-        progress_reader = ProgressReader(launcher_logs.lines, marker, progress_reports)
+        close_reports = []
+        close_reader = CloseReader(marker, close_reports) if args.header_deadline_only else None
+        progress_reader = ProgressReader(launcher_logs.lines, marker, progress_reports, close_reader)
+        if close_reader is not None:
+            report["nativeCloseObservations"] = close_reports
         report["continuousAcceptEnabled"] = args.continuous_accept
         report["nativeProgress"] = progress_reports
         report.update({"ready": ready, "nativeReports": native, "nativeProcessExits": exits})
@@ -1640,16 +2363,25 @@ def main():
                 validate_ready(item, marker, args.visual_fixture)
                 require(item["staticAssets"] == len(package[2]["assets"]), "native/package static asset count mismatch")
                 progress_reader.generation = item["generation"]
+                if close_reader is not None:
+                    close_reader.generation = item["generation"]
                 ready.append({key: value for key, value in item.items() if key != "pairingCode"})
                 phase = "actual-tls-business-clients"
                 port = tunnel.open(item["port"])
                 client = Client(port, item, tls_context, wrong_ca, expected_der, report["events"])
-                if args.continuous_accept:
-                    report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
-                report["static"] = {"status": "NOT_RUN_TARGETED_VISUAL_MATRIX"} if args.visual_only else exercise_static(client, package[2])
-                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only, voice_capabilities=args.voice_capabilities)
-                if args.voice_capabilities:
-                    report["voiceCapabilitiesObservation"] = report["business"].pop("voiceCapabilitiesObservation")
+                if args.header_deadline_only:
+                    report["clientVerification"]["closeNotify"] = "Negative sample: actual peer EOF/RST/TLS EOF before local close; no clean shutdown claim"
+                    report["static"] = {"status": "NOT_RUN_HEADER_DEADLINE_ONLY"}
+                    report["headerDeadlineObservation"] = {}
+                    exercise_header_deadlines(client, progress_reader, close_reader, tunnel, launcher, report["headerDeadlineObservation"])
+                    report["business"] = {"operation": "HEADER_DEADLINE_ONLY_NO_COMPLETE_REQUEST_AUTH_OR_AUDIO"}
+                else:
+                    if args.continuous_accept:
+                        report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
+                    report["static"] = {"status": "NOT_RUN_TARGETED_VISUAL_MATRIX"} if args.visual_only else exercise_static(client, package[2])
+                    report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only, voice_capabilities=args.voice_capabilities)
+                    if args.voice_capabilities:
+                        report["voiceCapabilitiesObservation"] = report["business"].pop("voiceCapabilitiesObservation")
                 tunnel.cancel()
             elif line.startswith(PASS):
                 native.append(json.loads(line[len(PASS):]))
@@ -1666,11 +2398,18 @@ def main():
         require(launcher.returncode == 0 and len(exits) == 1 and exits[0].get("code") == 0, "native child/supervisor actual successful exit missing")
         require(len(ready) == 1 and len(native) == 1 and report.get("business") is not None
                 and all(event["status"] == "PASS" for event in report["events"]), "business client/native summary incomplete")
-        for case in ("wrong-ca-rejected", "wrong-hostname-rejected"):
-            matching = [event for event in report["events"] if event["case"] == case]
-            require(len(matching) == 1 and matching[0].get("rejectionType") == "SSLCertVerificationError", "actual TLS negative rejection evidence missing")
-        browser_count = browser_observer.result["wireResponseCount"] if browser_observer else 0
-        validate_native(native[0], report["events"], browser_count)
+        if args.header_deadline_only:
+            require(report["headerDeadlineObservation"]["status"] == "PASS"
+                    and report["headerDeadlineObservation"]["sequentialPhasesProven"] is True
+                    and report["headerDeadlineObservation"]["fourTlsIntervalsOverlap"] is True,
+                    "header deadline clients or retirement-separated phases failed")
+            report["headerDeadlineNativeCorrelation"] = validate_header_native(native[0], report["events"], close_reader, progress_reader)
+        else:
+            for case in ("wrong-ca-rejected", "wrong-hostname-rejected"):
+                matching = [event for event in report["events"] if event["case"] == case]
+                require(len(matching) == 1 and matching[0].get("rejectionType") == "SSLCertVerificationError", "actual TLS negative rejection evidence missing")
+            browser_count = browser_observer.result["wireResponseCount"] if browser_observer else 0
+            validate_native(native[0], report["events"], browser_count)
         if browser_observer:
             report["browserAcceptance"] = "FINITE_NATIVE_CONTENT_UI_PASS"
         report.update({"native": native[0], "nativeProcessExit": exits[0], "status": "PASS"})

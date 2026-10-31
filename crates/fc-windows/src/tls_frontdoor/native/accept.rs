@@ -73,6 +73,20 @@ impl Owner {
         let Some(bare) = self.resources.accept.as_mut() else {
             return Ok(());
         };
+        let had_socket = bare.socket != INVALID_SOCKET;
+        if had_socket {
+            if let Some(observation) = self
+                .report
+                .close_observations
+                .accept
+                .as_mut()
+                .filter(|o| o.serial == bare.serial)
+            {
+                observation
+                    .socket_close_began_at
+                    .get_or_insert_with(Instant::now);
+            }
+        }
         #[cfg(test)]
         let result = if std::mem::take(&mut bare.fail_close_once) {
             Err("controlled bare close failure".to_owned())
@@ -81,6 +95,23 @@ impl Owner {
         };
         #[cfg(not(test))]
         let result = close(&mut bare.socket, true);
+        if had_socket {
+            if let Some(observation) = self
+                .report
+                .close_observations
+                .accept
+                .as_mut()
+                .filter(|o| o.serial == bare.serial)
+            {
+                if result.is_ok() {
+                    observation
+                        .socket_returned_at
+                        .get_or_insert_with(Instant::now);
+                } else {
+                    observation.failed = true;
+                }
+            }
+        }
         if let Err(error) = result {
             // Keep this exact descriptor and allocation; never overwrite it or
             // create a replacement even if later shutdown happens to succeed.
@@ -106,6 +137,16 @@ impl Owner {
             };
             if expired {
                 self.report.accept_idle_cancellations += 1;
+                self.report.close_observations.accept = Some(TlsAcceptClose {
+                    serial,
+                    hard_deadline: deadline,
+                    alarm: header_close_alarm(deadline),
+                    began_at: Instant::now(),
+                    socket_close_began_at: None,
+                    socket_returned_at: None,
+                    failed: false,
+                    completion_returned_at: None,
+                });
             }
         }
         if bare.pending() && listener != INVALID_SOCKET {
@@ -119,14 +160,18 @@ impl Owner {
     }
     pub(super) fn expire_bare_accept(&mut self, now: Instant) -> Result<(), String> {
         if self.resources.accept.as_ref().is_some_and(
-            |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= deadline),
+            |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= header_close_alarm(deadline)),
         ) {
             self.cancel_bare_accept(true)?;
         }
         Ok(())
     }
     pub(super) fn post_bare_accept(&mut self) -> Result<(), String> {
-        if self.stopping || !self.http_mode || self.resources.listener == INVALID_SOCKET {
+        if self.stopping
+            || OWNER_FAULTED.load(Ordering::Acquire)
+            || !self.http_mode
+            || self.resources.listener == INVALID_SOCKET
+        {
             return Err("bare AcceptEx listener stopped".into());
         }
         let listener = self.resources.listener;
@@ -200,6 +245,7 @@ impl Owner {
         }
         let state = bare.state;
         let deadline = bare.deadline().unwrap();
+        let completed_at = Instant::now();
         // Serial is a local ledger, not information present in a kernel packet.
         // Safety comes from never reusing memory until the actual packet returns.
         match state {
@@ -212,11 +258,38 @@ impl Owner {
         self.report.accept_completions += 1;
         if matches!(state, AcceptState::Closing { expired: true, .. }) {
             self.report.accept_idle_returns += 1;
+            if let Some(observation) = self
+                .report
+                .close_observations
+                .accept
+                .as_mut()
+                .filter(|o| o.serial == bare.serial)
+            {
+                observation.completion_returned_at = Some(Instant::now());
+            }
         }
-        let expired = Instant::now() >= deadline
+        let expired = Instant::now() >= header_close_alarm(deadline)
             || matches!(state, AcceptState::Closing { expired: true, .. });
         let canceled = matches!(state, AcceptState::Closing { .. });
         if self.stopping || expired || canceled || !succeeded {
+            if expired
+                && self
+                    .report
+                    .close_observations
+                    .accept
+                    .is_none_or(|o| o.serial != bare.serial)
+            {
+                self.report.close_observations.accept = Some(TlsAcceptClose {
+                    serial: bare.serial,
+                    hard_deadline: deadline,
+                    alarm: header_close_alarm(deadline),
+                    began_at: Instant::now(),
+                    socket_close_began_at: None,
+                    socket_returned_at: None,
+                    failed: false,
+                    completion_returned_at: Some(completed_at),
+                });
+            }
             if self.stopping {
                 self.report.accept_stop_discards += 1;
             } else if expired {
@@ -276,8 +349,18 @@ impl Owner {
                 return Err(error);
             }
             // Recheck after association; no late success can gain a new clock.
-            if Instant::now() >= deadline {
+            if Instant::now() >= header_close_alarm(deadline) {
                 self.report.accept_expired_discards += 1;
+                self.report.close_observations.accept = Some(TlsAcceptClose {
+                    serial: self.resources.accept.as_ref().unwrap().serial,
+                    hard_deadline: deadline,
+                    alarm: header_close_alarm(deadline),
+                    began_at: Instant::now(),
+                    socket_close_began_at: None,
+                    socket_returned_at: None,
+                    failed: false,
+                    completion_returned_at: Some(completed_at),
+                });
                 self.close_bare_socket()?;
             } else {
                 let socket = std::mem::replace(

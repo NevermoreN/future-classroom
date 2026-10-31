@@ -1,0 +1,284 @@
+{
+  "schema": "fc.r41.browser-owner-readonly-diagnosis.v1",
+  "status": "CONFIRMED_OWNER_EXITED_PHYSICAL_CLEANUP_PROVEN_HELPER_OPERATION_FAILED",
+  "recordedAtUtc": "2026-10-31T22:23:17.814822+00:00",
+  "originalOverallStatus": "FAIL",
+  "tlsOwnedCleanup": "PASS",
+  "browserStatus": "FAIL",
+  "browserWrapperCleanup": "FAIL",
+  "browserError": [
+    {
+      "phase": "observe-original-edge-owner-exit",
+      "kind": "RuntimeError"
+    }
+  ],
+  "actualOwnerExitCode": 1,
+  "ownerProcessRetained": false,
+  "originalOwnerStatus": "FAIL",
+  "originalOwnerCleanup": "PASS",
+  "originalOwnerError": {
+    "kind": "RuntimeError",
+    "phase": "start-original-job-supervisor",
+    "message": "original Edge supervisor failed or readiness/exit ledger missing"
+  },
+  "nativeOutcome": {
+    "elapsedMillis": 48996,
+    "originalHandlesClosed": true,
+    "originalPrimaryExited": true,
+    "stopRequestOnly": true,
+    "failure": "Exception calling \"ReadAllText\" with \"1\" argument(s): \"The process cannot access the file 'C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff\\.request-stop' because it is being used by another process.\"",
+    "ready": true,
+    "jobBoundBeforeResume": true,
+    "reason": "startup-failed",
+    "existingBrowserProcesses": "NOT_TOUCHED",
+    "originalPrimaryExitCode": 1,
+    "actualJobProcessesZero": true,
+    "marker": "FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff",
+    "maximumJobProcesses": 64
+  },
+  "actualCleanupDetails": {
+    "originalPrimaryExited": true,
+    "rootTrustStore": "UNTOUCHED",
+    "systemVolume": "UNTOUCHED",
+    "rootAbsent": true,
+    "status": "PASS",
+    "existingBrowsers": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "actualJobProcessesZero": true
+  },
+  "nodeOutcome": {
+    "status": "PASS",
+    "elapsedMillis": 941,
+    "maxMillis": 12000,
+    "contextDisposed": true,
+    "cdpDisconnected": true,
+    "observedRequestCount": 21,
+    "wireResponseCount": 18,
+    "cacheOnlyResponseCount": 3,
+    "contentPosts": 1,
+    "writeOutcome": "COMMITTED",
+    "apiOperations": {
+      "statusGets": 2,
+      "sessionGets": 2,
+      "scopeGets": 2,
+      "contentGets": 2,
+      "contentPosts": 1,
+      "visualGets": 4
+    },
+    "pageErrorCount": 0,
+    "consoleErrorCount": 0
+  },
+  "actualNativeTls": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 82,
+    "responses": 82,
+    "peakRecords": 5
+  },
+  "actualNativeExit": {
+    "code": 0
+  },
+  "originalBudgets": {
+    "observerPrepareSeconds": 60,
+    "nodeMaxMillis": 12000,
+    "clientSeconds": 30,
+    "nativeSeconds": 45,
+    "edgeSupervisorCapSeconds": 180,
+    "nativeJobStopGraceSeconds": 20,
+    "ownerExitObservationSeconds": 215,
+    "stopCommandWaitSeconds": 25,
+    "ownerWrapperSupervisorWaitSeconds": 215
+  },
+  "actualTime": {
+    "commandStartedUtc": "2026-10-31T22:18:20.859473+00:00",
+    "commandCompletedUtc": "2026-10-31T22:19:30.137174+00:00",
+    "wholeCommandElapsedSeconds": 69.27736711897887,
+    "ownerNativeElapsedMillis": 48996,
+    "nodeElapsedMillis": 941,
+    "ownerWaitTimedOut": false,
+    "reason": "Owner wait returned1 and report was read/hash-bound; error was later positive-outcome require, not TimeoutExpired."
+  },
+  "sourceCause": {
+    "ownerFile": "scripts/windows-test-edge-owner.py",
+    "writerLines": [
+      200,
+      201,
+      296,
+      297
+    ],
+    "readerLine": 268,
+    "observerLines": [
+      547,
+      548,
+      549,
+      550,
+      551,
+      552,
+      553,
+      554,
+      555,
+      556,
+      557,
+      558,
+      563,
+      573,
+      575,
+      576
+    ],
+    "explanation": "STOP New-Text creates final .request-stop with Write access/FileShare.Read then writes/closes. Supervisor Test-Path can see the final entry while writer still owns it; ReadAllText default share policy can conflict with that live Write handle. Actual outcome records sharing-violation IOException and catches it into failure before finally physically stops/reaps/closes owned Job. The generic observe-original-edge-owner-exit label is raised after successful wait and report load because it also requires owner exit0/statusPASS.",
+    "certainty": "Observed sharing violation is exact. Association with final-file publish window follows the sole controlled STOP writer and actual source; no OS handle trace was collected, so exact holder PID/interleaving is not independently instrumented.",
+    "notAValidFix": "Do not read partially written capability under relaxed sharing, skip strict comparison, treat missing read as successful stop, or promote original overallFAIL."
+  },
+  "controlFileStatOnly": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner.json.control.json",
+    "mode": "0o600",
+    "bytes": 596,
+    "contentRead": false,
+    "hashRead": false,
+    "deleted": false
+  },
+  "safeSupplementalCollection": [
+    "Preserve this first overallFAIL, original ownerFAIL/cleanupPASS and all raw originals. Add a separate follow-up physical-cleanup statement based on original owner outcome triple true, raw8bytes/SHA+base64, original wrapper actual exit1, and cleanup rootAbsent true; do not rewrite old statuses.",
+    "No new Edge/Job/owner or browser PID/name stop is needed: original owner already terminated and exact root deletion is recorded. If a fresh current-state audit is needed, root must do its separately authorized exact read-only audit, not infer live process from retained control path.",
+    "Local capability-file retirement is a separate explicit exact-file cleanup after owner marker/report/outcome/raw binding is verified. Do not read/delete it in this read-only task. Existing stop --state is only a request and cannot retroactively make this failed run PASS.",
+    "For future helper runs, publish the final stop file only after complete unique same-directory temporary write and actual close, using non-overwriting move; same-cap existing final may be idempotent, conflicting cap/realIO errors remain fail closed. Keep original180s/20s/215s budgets and C# ownership."
+  ],
+  "raw8OriginalBindings": [
+    {
+      "name": ".edge-process.json",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-process.json",
+      "bytes": 534,
+      "sha256": "762ba269bef4d3cd0d880dcaf4929134503547b88977a11ce89746f64857a018",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": ".edge-outcome.json",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-outcome.json",
+      "bytes": 651,
+      "sha256": "9953d9ec81f93cb845eb75381b7f77c995a2ba4867028c96d85a4fe110fa0fe7",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": ".edge-ready.json",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-ready.json",
+      "bytes": 747,
+      "sha256": "afef8143fc13047c465447bda3194f7dfe58660ef5f7c357a4a4f817d35af1bb",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": "edge.stderr",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge.stderr",
+      "bytes": 885,
+      "sha256": "a739f4c082174d4afcc01fd3c96f1826c579309755adcf99e7d3bf601b2ff690",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": ".edge-supervisor.json",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-supervisor.json",
+      "bytes": 191,
+      "sha256": "9593676de80f6381932f8166b6863407549314c96f22b50b1c126c607175387d",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": "edge.stdout",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": ".edge-assigned.json",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/.edge-assigned.json",
+      "bytes": 195,
+      "sha256": "c974a38a34f03432378eb8056587b7770564afa603dcdd6ddb77076a9998799d",
+      "matchesRemoteMetadataAndReportBase64": true
+    },
+    {
+      "name": "edge-devtools.raw",
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner-FutureClassroom-Test-Browser-a44f02e3d6e248e5ab6dd89108d125ff-raw/edge-devtools.raw",
+      "bytes": 60,
+      "sha256": "a4c1170be519cf8787e77e0a2447d014eb1c3a045bc28cc627d02e20c0113427",
+      "matchesRemoteMetadataAndReportBase64": true
+    }
+  ],
+  "originalOutputBindings": [
+    {
+      "source": "ownerPython",
+      "stream": "stdout",
+      "bytes": 1527,
+      "sha256": "f9396e327eea31c8b06cb13f2253cb4a1bbde8da45319a11751da184e0e6ea39",
+      "capturedComplete": true
+    },
+    {
+      "source": "ownerPython",
+      "stream": "stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capturedComplete": true
+    },
+    {
+      "source": "ownerNativeSsh",
+      "stream": "stdout",
+      "bytes": 1438,
+      "sha256": "55091bcc35aa1d4c5948d25b33dbdd99f415b0423c9eecdaf004aa68997732b5",
+      "capturedComplete": true
+    },
+    {
+      "source": "ownerNativeSsh",
+      "stream": "stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capturedComplete": true
+    }
+  ],
+  "bindings": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json",
+      "bytes": 305525,
+      "sha256": "12f1624b74586e37c36dfc4ba64e926815621a4443f1168b833e5fbc18701bbb"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json.browser-edge-owner.json",
+      "bytes": 18746,
+      "sha256": "59aafd181e17e7153c8046312feb66ff1a3a6a54f18bb3e3df83ff9ff9f8d2c2"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.command.json",
+      "bytes": 1118,
+      "sha256": "07793ee54c01d9c8e5bb728a9ce3757ed2ee4042a3ce018fff6bb2af651e3edb"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.stderr.log",
+      "bytes": 130,
+      "sha256": "dabcad554bb9a0ea9fb160b6d37bcfac8dd9f8d13a67a1ea1a60701a4a1b733d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-native-browser-observer.py",
+      "bytes": 36008,
+      "sha256": "1d242c161fe573b0b77540b0e9033666b2b37576042c3db1772dc4a5c2f11f86"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-test-edge-owner.py",
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    }
+  ],
+  "notPerformed": [
+    "No Windows/SSH/process execution",
+    "No source mutation yet",
+    "No read/hash/print of control.json contents or stop capability",
+    "No file deletion",
+    "No Cargo/Git"
+  ]
+}

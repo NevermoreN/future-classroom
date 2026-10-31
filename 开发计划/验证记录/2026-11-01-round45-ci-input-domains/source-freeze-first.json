@@ -1,0 +1,140 @@
+{
+  "status": "SOURCE_FROZEN_LOCAL_CHECKS_PASS_WINDOWS_PENDING",
+  "utc": "2026-10-31T22:36:28.137268+00:00",
+  "base": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+  "worktree": "/tmp/fc-round45-ci-input-domains-worktree",
+  "production_files": [
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "before_sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6",
+      "after_sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "bytes": 49874
+    }
+  ],
+  "files": [
+    {
+      "path": "windows-msvc-ci.before.ps1",
+      "bytes": 38498,
+      "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6"
+    },
+    {
+      "path": "windows-msvc-ci.after.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "implementation-first.diff",
+      "bytes": 18033,
+      "sha256": "d828861d494625aebb0472d0bf4921e8c9ca9d5fdda4020fcf0a0b0d12f6be8f"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 238,
+      "sha256": "a7d150161bd4ef73078427dca1ab0ab5c2aa5377de9c63c9f3ab07d3142eae29"
+    },
+    {
+      "path": "source-static-first.json",
+      "bytes": 3331,
+      "sha256": "9bd9dc963cc95f98c2eb459a999517787958288d420bd2ec83685f4a1b06f305"
+    },
+    {
+      "path": "input-domain-model.py",
+      "bytes": 10585,
+      "sha256": "5471e7b4d2907fdb27f4a41ec0872a1cd9334a4f1656c3914095a40359f0f730"
+    },
+    {
+      "path": "input-domain-model-first.json",
+      "bytes": 4894,
+      "sha256": "b1ad1fa281bb5d3156bac92c653ce14d75fcd039e268cf6f0318740fcd541c01"
+    },
+    {
+      "path": "input-domain-model-final.py",
+      "bytes": 10615,
+      "sha256": "a0a86add64a3ab695d28e1c73e43b124596d6fc51efc0f57a42312e2b7d9b7d7"
+    },
+    {
+      "path": "input-domain-model-final.json",
+      "bytes": 4894,
+      "sha256": "a2288530fc11abd34c53e2a51eaadedad65ad893a326d7f4d539d16eaee4e40e"
+    },
+    {
+      "path": "input-domain-model-final.stdout.log",
+      "bytes": 191,
+      "sha256": "3642c06996820e80289debd4699a4256bbc802735a8fd8b188b84b92b4b0e2a2"
+    },
+    {
+      "path": "input-domain-model-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "input-domain-powershell-fixture-first.ps1",
+      "bytes": 76817,
+      "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849"
+    },
+    {
+      "path": "prepare-ps-fixture.py",
+      "bytes": 10762,
+      "sha256": "5c16a8df4837f6037c72af7aabe976e09bee78793cdadd15a6e96bd53bd623f2"
+    },
+    {
+      "path": "head-tree-original-final.bin",
+      "bytes": 1029263,
+      "sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038"
+    },
+    {
+      "path": "head-git-tree-model-final.json",
+      "bytes": 1999246,
+      "sha256": "fbc5f210c2d6a52f4e968938af07da8e10bebec8eb10f03399db42fdec9f56a6"
+    },
+    {
+      "path": "checkout-sha256-model-final.json",
+      "bytes": 92722,
+      "sha256": "7518b3c870c86b73ba20c5ada14bc1e51e3b266a5ec4f1650815397933a23735"
+    },
+    {
+      "path": "checkout-history-metadata-model-final.json",
+      "bytes": 904237,
+      "sha256": "b6163801f6880ff53a2a43b65f4c791c5bd785e1fd12309be770f1c893aeb188"
+    },
+    {
+      "path": "git-fixture-commands-final.json",
+      "bytes": 3019,
+      "sha256": "23d846cd5f0a95d6d4b4c9500e93c47d0f23ed153353e7b08f8aa9781d767e77"
+    }
+  ],
+  "original_failure_binding": {
+    "path": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round44-ci/source-inventory-failure-independent-first.json",
+    "bytes": 52611,
+    "sha256": "4e15ad9016a0ffa089cf4427f9fcd4f39c05892b1bfdd456e036df1d9ec8cfee"
+  },
+  "tests": {
+    "python_model_checks": 42,
+    "actual_local_git_mutations": "clean, ordinary same-length change, historical same-length change, untracked path all observed via git status; own sparse clone removed",
+    "current_baseline_git_tree": {
+      "tracked": 6940,
+      "historical": 6390,
+      "normal": 550,
+      "git_blob_bytes": 286613906,
+      "historical_git_blob_bytes": 265890446,
+      "normal_git_blob_bytes": 20723460,
+      "metadata_bytes": 1029263,
+      "metadata_sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038"
+    },
+    "full_ps_ast": "NOT_RUN_LOCAL_PWSH_ABSENT",
+    "windows_fixture": "PREPARED_NOT_RUN_BY_SUBAGENT",
+    "cargo": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "ci": "NOT_DISPATCHED",
+    "diff_check": 0
+  },
+  "compatibility": "input-sha256.json retains actual {path,bytes,sha256} array but no longer includes historical payloads; input_schema/domain/git manifests explicitly describe changed scope. Result compile-only status and all existing build flags/timeout/CRT gates unchanged.",
+  "policy_boundary": "Exact ordinal historical prefix only. Full Git HEAD tree/root/object metadata SHA1 and original Git blob bytes before/after, not checkout SHA256. Every other tracked checkout file individually SHA256 before/after, 256MiB applies only to that actual SHA domain. All tracked files retain path/count/per-item/reparse/clean Git/exact HEAD checks. Literal historical references in Rust/Cargo input text fail closed, not arbitrary build.rs I/O sandbox.",
+  "cleanup": {
+    "owned_local_fixture_removed": true,
+    "no_cargo_cache_created": true,
+    "retained_evidence": "/tmp/fc-round45-ci-input-domains-evidence",
+    "worktree_retained_for_parent_integration": true,
+    "windows_ssh_and_authorizations": "UNTOUCHED"
+  }
+}

@@ -1,0 +1,103 @@
+--- scripts/windows-tls-business-probe.py (first freeze)
++++ scripts/windows-tls-business-probe.py (second freeze)
+@@ -212,6 +212,7 @@
+ # replacement for the original strict kernel-ESTABLISHED acceptance decision.
+ CLOSE_PROGRESS = "TLS_BUSINESS_CLOSE "
+ HEADER_THRESHOLD_NS, HEADER_RESERVE_NS = 5_000_000_000, 25_000_000
++HEADER_CASES = tuple("header-deadline-tls-" + str(i) for i in range(1, 5)) + ("header-deadline-raw-tcp",)
+ 
+ 
+ class CloseReader:
+@@ -315,6 +316,12 @@
+     require(event.get("peerCloseObserved") is True and event.get("localCloseUsedAsPeerEvidence") is False
+             and event.get("sshMasterAliveAtPeerClose") is True and event.get("nativeLauncherAliveAtPeerClose") is True,
+             "header client lacks actual peer EOF/RST/TLS EOF")
++    case, drip_calls = event.get("case"), event.get("dripCalls")
++    require(case in HEADER_CASES and type(drip_calls) is int
++            and (drip_calls >= 2 if case == "header-deadline-tls-4" else drip_calls == 0),
++            "header case missing or fourth TLS did not perform two actual single-byte drip sends")
++    require(event.get("transport") == ("TCP" if case == "header-deadline-raw-tcp" else "TLS"),
++            "header case/transport mismatch")
+     start, end = event.get("beforeConnectNs"), event.get("peerCloseNs")
+     require(type(start) is int and type(end) is int and 0 <= start <= end
+             and event.get("elapsedNs") == end - start and end - start <= HEADER_THRESHOLD_NS,
+@@ -332,6 +339,13 @@
+     else:
+         require(event.get("transport") == "TCP" and event.get("sentBytes") == 0,
+                 "raw TCP sample sent TLS/application data")
++
++
++def validate_header_cases(events):
++    require(len(events) == 5 and {e.get("case") for e in events} == set(HEADER_CASES),
++            "header deadline cases must be exactly five unique expected identities")
++    for event in events:
++        validate_header_sample(event)
+ 
+ 
+ class HeaderDeadlineTunnel(Tunnel):
+@@ -569,6 +583,11 @@
+                 < min(q["event"]["peerCloseNs"] for q in opened[:4]))
+         observation["status"] = "PASS" if len(opened) == 5 and all(s["event"]["status"] == "PASS" for s in opened) \
+             and observation["sequentialPhasesProven"] and observation["fourTlsIntervalsOverlap"] else "FAIL"
++        try:
++            validate_header_cases(client.events)
++        except Exception as error:
++            observation["status"] = "FAIL"
++            observation["caseOrDripValidationError"] = failure(error, "header-client-matrix")
+         observation["sshDirectTcpip"] = await_header_forward(client, progress, tunnel, launcher)
+         return observation
+     finally:
+@@ -598,8 +617,7 @@
+                     ("hubPending", "downloadHubPending", "quarantined", "approvals", "heads", "responses"))
+             and type(value.get("peakRecords")) is int and 4 <= value["peakRecords"] <= 8,
+             "header-only actual-drain/shared-pool/zero-business ledger mismatch")
+-    require(len(events) == 5 and sum(e.get("transport") == "TLS" for e in events) == 4
+-            and sum(e.get("transport") == "TCP" for e in events) == 1, "header-only five-client transport matrix missing")
++    validate_header_cases(events)
+     for event in events:
+         validate_header_sample(event)
+         require(event.get("status") == "PASS" and event.get("localSocketClosed") is True
+@@ -1710,7 +1728,7 @@
+     feed(r, sample)
+     denied(lambda: feed(r, sample), "repeated sequence")
+     checks.append("synthetic CLOSE exact token/schema/alarm25ms/IO-Frame-retirement order and immutable-fact rejection; queued bare completion-before-close accepted")
+-    tls = {"case": "model", "transport": "TLS", "beforeConnectNs": 1000,
++    tls = {"case": "header-deadline-tls-1", "dripCalls": 0, "transport": "TLS", "beforeConnectNs": 1000,
+            "peerCloseNs": 5_000_001_000, "elapsedNs": 5_000_000_000, "peerCloseKind": "TLS_RAGGED_EOF",
+            "peerCloseObserved": True, "localCloseUsedAsPeerEvidence": False,
+            "sshMasterAliveAtPeerClose": True, "nativeLauncherAliveAtPeerClose": True,
+@@ -1719,7 +1737,7 @@
+            "localSocketClosed": True, "status": "PASS", "localCloseBeganNs": 5_000_001_001,
+            "localCloseReturnedNs": 5_000_001_002}
+     validate_header_sample(tls)
+-    raw = dict(tls, transport="TCP", sentBytes=0, peerCloseKind="TCP_EOF")
++    raw = dict(tls, case="header-deadline-raw-tcp", transport="TCP", sentBytes=0, peerCloseKind="TCP_EOF")
+     validate_header_sample(raw)
+     for label, changed in (
+         ("one ns over", dict(tls, peerCloseNs=5_000_001_001, elapsedNs=5_000_000_001)),
+@@ -1779,8 +1797,24 @@
+               "responses": 0, "peakRecords": 4}
+     p = SimpleNamespace(latest={"acceptance": {"transfers": 5, "capacity_rejects": 0, "bound_slots": 0,
+                                                "native_pending": 0, "owned_sockets": 0}})
+-    events = [dict(tls) for _ in range(4)] + [raw]
++    events = [dict(tls, case="header-deadline-tls-" + str(i), dripCalls=2 if i == 4 else 0)
++              for i in range(1, 5)] + [raw]
+     validate_header_native(native, events, actual, p)
++    validate_header_sample(events[3])  # Exactly two real-send counter facts suffice.
++    for value in (None, 0, 1, True, False):
++        incomplete = [dict(e) for e in events]
++        if value is None:
++            del incomplete[3]["dripCalls"]
++        else:
++            incomplete[3]["dripCalls"] = value
++        denied(lambda: validate_header_sample(incomplete[3]), "missing/insufficient/nonint actual drip counter")
++        denied(lambda: validate_header_cases(incomplete), "five-case model without two actual drips")
++        denied(lambda: validate_header_native(native, incomplete, actual, p), "native summary cannot replace missing drips")
++    duplicate = [dict(e) for e in events]
++    duplicate[1]["case"] = duplicate[0]["case"]
++    denied(lambda: validate_header_cases(duplicate), "duplicate case replaces required TLS identity")
++    denied(lambda: validate_header_native(native, duplicate, actual, p), "native exact5counts cannot replace unique client cases")
++    checks.append("five unique expected cases plus TLS4 actual dripCalls strictint>=2; missing/0/1/bool/duplicate rejected despite otherwise passing native counts")
+     for field, changed in (("workerJoin", False), ("physicalNativeDrain", False), ("approvals", 1),
+                            ("heads", 1), ("responses", 1), ("hubPending", 1)):
+         denied(lambda: validate_header_native(dict(native, **{field: changed}), events, actual, p), field)

@@ -139,6 +139,16 @@ impl Stream {
     fn expired_at(&self, now: Instant) -> bool {
         self.deadline_phase != DeadlinePhase::AwaitingConnection && now >= self.deadline
     }
+    pub(super) fn header_deadline(&self) -> Option<Instant> {
+        (self.deadline_phase == DeadlinePhase::Header).then_some(self.deadline)
+    }
+    fn negative_close_due_at(&self, now: Instant) -> bool {
+        match self.deadline_phase {
+            DeadlinePhase::AwaitingConnection => false,
+            DeadlinePhase::Header => now >= header_close_alarm(self.deadline),
+            DeadlinePhase::Request { .. } => self.expired_at(now),
+        }
+    }
     pub(super) fn waiting_for_connection(&self) -> bool {
         self.deadline_phase == DeadlinePhase::AwaitingConnection
     }
@@ -160,7 +170,10 @@ impl Stream {
     /// Called only after the parser returns a complete valid head. The final
     /// time check must be here too: parsing can cross the old header deadline.
     fn complete_head_at(&mut self, admitted_at: Instant) -> bool {
-        if self.deadline_phase != DeadlinePhase::Header || self.expired_at(admitted_at) {
+        if self.deadline_phase != DeadlinePhase::Header
+            || self.expired_at(admitted_at)
+            || self.negative_close_due_at(admitted_at)
+        {
             return false;
         }
         let Some(deadline) = admitted_at.checked_add(REQUEST_BUDGET) else {
@@ -299,6 +312,13 @@ impl TlsHttpHost {
                     .count()
                 + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
         }
+    }
+    /// Latest fixed-slot observations only, not peer wire-close evidence or
+    /// proof of a precise kernel ESTABLISHED epoch. No native work or locks.
+    pub fn close_snapshot(&self) -> TlsCloseSnapshot {
+        let mut snapshot = self.owner.report.close_observations;
+        snapshot.generation = self.owner.generation;
+        snapshot
     }
     pub fn tokens(&self) -> [RequestToken; CONNECTION_SLOTS] {
         std::array::from_fn(|n| self.owner.resources.slots[n].token)
@@ -540,7 +560,7 @@ impl Owner {
             self.resources.slots[index]
                 .stream
                 .as_ref()
-                .is_some_and(|stream| stream.expired_at(Instant::now()))
+                .is_some_and(|stream| stream.negative_close_due_at(Instant::now()))
         } else {
             self.started.elapsed() >= BUDGET
         }
@@ -978,11 +998,19 @@ impl Owner {
         {
             return Err("TLS HTTP final native ledger mismatch".into());
         }
-        for slot in &mut self.resources.slots {
+        for (index, slot) in self.resources.slots.iter_mut().enumerate() {
             if !slot.retired {
                 slot.retired = true;
                 slot.wipe_retired_http();
                 slot.stream.as_mut().unwrap().retired_event = true;
+            }
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| o.token == slot.token)
+            {
+                observation
+                    .retirement_confirmed_at
+                    .get_or_insert_with(Instant::now);
             }
         }
         self.report.slot_frames_at_drain = CONNECTION_SLOTS;

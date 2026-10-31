@@ -1,0 +1,7 @@
+{
+  "status": "FAIL_LOCAL_GUARD",
+  "recordedUtc": "2026-10-31T22:16:02.975998+00:00",
+  "error": "Inline independent verifier incorrectly required every target to contain at least one test. Actual verify_web_assets binary legitimately reports zero tests. Actual 21-program original runtime status PASS/cleanup PASS unchanged.",
+  "actualZeroTestTarget": "verify_web_assets-2cd688c78134cd47.exe",
+  "followup": "verify-windows-gnu-runtime-second.py explicitly binds that sole zero-test target and checks all other counts and hashes."
+}

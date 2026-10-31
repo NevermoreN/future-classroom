@@ -88,6 +88,7 @@ impl Driver for RecordDriver {
 struct Fixture {
     host: TlsHttpHost,
     client: TcpStream,
+    client_connected_at: Instant,
     posted_header_deadlines: [Instant; CONNECTION_SLOTS],
     calls: Arc<Mutex<Calls>>,
     closed: Arc<AtomicUsize>,
@@ -129,6 +130,7 @@ impl Fixture {
             Duration::from_secs(1),
         )
         .unwrap();
+        let client_connected_at = Instant::now();
         client.set_nonblocking(true).unwrap();
         Self {
             host: TlsHttpHost {
@@ -136,6 +138,7 @@ impl Fixture {
                 drain_deadline: None,
             },
             client,
+            client_connected_at,
             posted_header_deadlines,
             calls,
             closed,
@@ -573,7 +576,7 @@ fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_i
     let mut stream = Stream::new();
     stream.posted_header_at(Instant::now());
     let header_deadline = stream.deadline;
-    let completed_at = header_deadline - Duration::from_nanos(1);
+    let completed_at = header_close_alarm(header_deadline) - Duration::from_nanos(1);
     assert!(stream.complete_head_at(completed_at));
     let original = completed_at + REQUEST_BUDGET;
     assert_eq!(stream.request_started_at(), Some(completed_at));
@@ -1672,4 +1675,390 @@ fn bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child() {
     );
     assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
     assert!(!OWNER_FAULTED.load(Ordering::Acquire));
+}
+
+#[test]
+fn header_negative_alarm_is_distinct_from_hard_deadline_and_never_shortens_request_stage() {
+    let posted = Instant::now();
+    let hard = posted + BUDGET;
+    let alarm = hard - HEADER_CLOSE_RESERVE;
+    for instant in [alarm, alarm + Duration::from_nanos(1), hard] {
+        let mut stream = Stream::new();
+        stream.posted_header_at(posted);
+        assert_eq!(stream.deadline, hard);
+        assert!(!stream.negative_close_due_at(alarm - Duration::from_nanos(1)));
+        assert!(stream.negative_close_due_at(instant));
+        assert_eq!(stream.expired_at(instant), instant >= hard);
+        assert!(!stream.complete_head_at(instant));
+        assert_eq!(
+            stream.deadline, hard,
+            "a negative alarm cannot rewrite the hard deadline"
+        );
+        assert_eq!(stream.request_started_at(), None);
+    }
+    let mut stream = Stream::new();
+    stream.posted_header_at(posted);
+    let at = alarm - Duration::from_nanos(1);
+    assert!(stream.complete_head_at(at));
+    assert_eq!(stream.deadline, at + REQUEST_BUDGET);
+    assert!(!stream.negative_close_due_at(stream.deadline - Duration::from_nanos(1)));
+    assert!(stream.negative_close_due_at(stream.deadline));
+    let shorter = at + Duration::from_secs(30);
+    stream.admit_until(shorter);
+    assert!(!stream.negative_close_due_at(shorter - Duration::from_nanos(1)));
+    assert!(stream.negative_close_due_at(shorter));
+    stream.reset();
+    assert!(!stream.negative_close_due_at(hard + REQUEST_BUDGET));
+}
+
+fn incomplete_header_receive(f: &mut Fixture) -> RequestToken {
+    let mut wire = vec![b'H'];
+    wire.extend(record(b"GET /fc/ HTTP/1.1\r\nHost: localhost\r\n"));
+    f.input(&wire);
+    let until = Instant::now() + Duration::from_secs(3);
+    loop {
+        for event in f.host.poll().unwrap() {
+            assert!(
+                !matches!(event, TlsHttpEvent::Head { .. }),
+                "incomplete head must not publish"
+            );
+        }
+        if let Some(slot) = f
+            .host
+            .owner
+            .resources
+            .slots
+            .iter()
+            .find(|s| s.phase == Phase::Http && s.pending == Some(Operation::Receive))
+        {
+            assert_eq!(
+                slot.stream.as_ref().unwrap().deadline_phase,
+                DeadlinePhase::Header
+            );
+            return slot.token;
+        }
+        assert!(Instant::now() < until, "actual incomplete-head WSARecv");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+
+#[test]
+fn real_iocp_early_header_close_reports_socket_return_without_discharge_of_receive_debt() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let token = incomplete_header_receive(&mut f);
+    // Inject a short remaining header interval to exercise the alarm, not a
+    // claim that this case physically waited five seconds or established TLS.
+    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+    f.host.owner.resources.slots[token.slot()]
+        .stream
+        .as_mut()
+        .unwrap()
+        .deadline = hard;
+    f.host.owner.close_slot(token.slot(), true).unwrap();
+    let snapshot = f.host.close_snapshot();
+    let record = snapshot.headers[token.slot()].unwrap();
+    assert_eq!(record.token, token);
+    assert_eq!(record.hard_deadline, hard);
+    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
+    assert!(record.began_at >= record.alarm);
+    assert!(record.socket_returned_at.unwrap() >= record.began_at);
+    assert!(!record.failed);
+    assert!(record.io_pending_at_close && record.io_returned_at.is_none());
+    assert!(!record.frame_pending_at_close && record.frame_returned_at.is_none());
+    assert!(record.retirement_confirmed_at.is_none());
+    assert_eq!(snapshot.header_begins, 1);
+    assert_eq!(snapshot.header_socket_returns, 1);
+    assert_eq!(snapshot.header_failures, 0);
+    assert!(f.host.owner.resources.slots[token.slot()].pending == Some(Operation::Receive));
+    assert!(f.host.rearm(token).is_err());
+    f.revoked_retirement(token);
+    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
+    assert!(record.io_returned_at.unwrap() >= record.socket_returned_at.unwrap());
+    assert!(record.retirement_confirmed_at.unwrap() >= record.io_returned_at.unwrap());
+    let next = f.host.rearm(token).unwrap();
+    assert_ne!(next, token);
+    // A later serial cannot rewrite this diagnostic history before its own
+    // deadline close. No retained observation is itself an owner/permit.
+    assert_eq!(
+        f.host.close_snapshot().headers[token.slot()].unwrap().token,
+        token
+    );
+    f.stop();
+}
+
+#[test]
+fn real_iocp_bare_alarm_preserves_original_deadline_and_requires_actual_packet_before_repost() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    // First handoff leaves the unique bare operation actually pending again.
+    let _ = incomplete_header_receive(&mut f);
+    let bare = f.host.owner.resources.accept.as_mut().unwrap();
+    let serial = bare.serial;
+    let pointer = bare.memory.operation.get();
+    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+    bare.state = super::super::accept::AcceptState::Pending {
+        serial,
+        deadline: hard,
+    };
+    let before = f.host.acceptance_snapshot();
+    f.host.owner.expire_bare_accept(Instant::now()).unwrap();
+    let closing = f.host.close_snapshot().accept.unwrap();
+    assert_eq!(closing.serial, serial);
+    assert_eq!(closing.hard_deadline, hard);
+    assert_eq!(closing.alarm + HEADER_CLOSE_RESERVE, hard);
+    assert!(closing.socket_returned_at.unwrap() >= closing.began_at);
+    assert!(closing.completion_returned_at.is_none());
+    assert!(!closing.failed);
+    assert_eq!(f.host.acceptance_snapshot().completions, before.completions);
+    assert!(f.host.owner.resources.accept.as_ref().unwrap().pending());
+    assert!(f.host.owner.post_bare_accept().is_err());
+    let until = Instant::now() + Duration::from_secs(3);
+    while f
+        .host
+        .close_snapshot()
+        .accept
+        .unwrap()
+        .completion_returned_at
+        .is_none()
+    {
+        f.host.poll().unwrap();
+        assert!(Instant::now() < until, "actual original bare IOCP return");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let after = f.host.close_snapshot().accept.unwrap();
+    assert!(after.completion_returned_at.unwrap() >= after.socket_returned_at.unwrap());
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert_eq!(bare.memory.operation.get(), pointer);
+    assert_eq!(bare.serial, serial + 1);
+    assert!(bare.pending());
+    let capacity = f.host.acceptance_snapshot();
+    assert!(capacity.native_pending <= 5 && capacity.owned_sockets <= 6);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_header_alarm_keeps_a_held_decrypt_frame_and_suppresses_its_late_head() {
+    let _serial = SERIAL.lock().unwrap();
+    let (entered, started) = std::sync::mpsc::channel();
+    let (send, wait) = std::sync::mpsc::channel();
+    let wait = Mutex::new(wait);
+    let hook = Arc::new(move || {
+        entered.send(()).unwrap();
+        wait.lock()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(3))
+            .unwrap();
+    });
+    let mut f = Fixture::with_hooks(None, Some(hook));
+    struct Release(Option<std::sync::mpsc::Sender<()>>);
+    impl Drop for Release {
+        fn drop(&mut self) {
+            if let Some(send) = self.0.take() {
+                let _ = send.send(());
+            }
+        }
+    }
+    let mut release = Release(Some(send));
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let until = Instant::now() + Duration::from_secs(3);
+    loop {
+        for event in f.host.poll().unwrap() {
+            assert!(!matches!(event, TlsHttpEvent::Head { .. }));
+        }
+        if started.try_recv().is_ok() {
+            break;
+        }
+        assert!(Instant::now() < until, "actual held fake Decrypt");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let token = *f.calls.lock().unwrap().handshake.first().unwrap();
+    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+    f.host.owner.resources.slots[token.slot()]
+        .stream
+        .as_mut()
+        .unwrap()
+        .deadline = hard;
+    let mut closed = false;
+    for event in f.host.poll().unwrap() {
+        match event {
+            TlsHttpEvent::Closed { token: t } if t == token => closed = true,
+            TlsHttpEvent::Head { head, .. } if head.token == token => {
+                panic!("late Head escaped alarm")
+            }
+            TlsHttpEvent::Retired(t) if t == token => panic!("held Frame falsely retired"),
+            _ => {}
+        }
+    }
+    assert!(closed);
+    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
+    assert_eq!(record.hard_deadline, hard);
+    assert!(record.frame_pending_at_close && record.frame_returned_at.is_none());
+    assert!(!record.io_pending_at_close && record.io_returned_at.is_none());
+    assert!(record.retirement_confirmed_at.is_none());
+    assert!(f.host.owner.resources.slots[token.slot()].frame.is_none());
+    assert!(f.host.rearm(token).is_err());
+    release.0.take().unwrap().send(()).unwrap();
+    f.until(|event| match event {
+        TlsHttpEvent::Head { head, .. } if head.token == token => {
+            panic!("late plaintext published")
+        }
+        TlsHttpEvent::Retired(t) if t == token => true,
+        _ => false,
+    });
+    let after = f.host.close_snapshot().headers[token.slot()].unwrap();
+    assert!(after.frame_returned_at.unwrap() >= after.socket_returned_at.unwrap());
+    assert!(after.retirement_confirmed_at.unwrap() >= after.frame_returned_at.unwrap());
+    assert_eq!(f.host.owner.report.parsed_requests, 0);
+    assert_eq!(f.host.owner.report.late_sspi_completions, 1);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_first_header_reserve_keeps_original_five_second_wire_sample_strict() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let token = incomplete_header_receive(&mut f);
+    let hard = f.host.owner.resources.slots[token.slot()]
+        .stream
+        .as_ref()
+        .unwrap()
+        .deadline;
+    let until = f.client_connected_at + Duration::from_secs(6);
+    let wire_closed_at = loop {
+        for event in f.host.poll().unwrap() {
+            assert!(!matches!(event, TlsHttpEvent::Head { .. }));
+        }
+        let mut byte = [0];
+        match f.client.read(&mut byte) {
+            Ok(0) => break Instant::now(),
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    std::io::ErrorKind::ConnectionReset
+                        | std::io::ErrorKind::ConnectionAborted
+                        | std::io::ErrorKind::BrokenPipe
+                ) =>
+            {
+                break Instant::now()
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+            other => panic!("unexpected incomplete-head wire result {other:?}"),
+        }
+        assert!(
+            Instant::now() < until,
+            "six seconds only collects a failure, not a passing threshold"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    };
+    let elapsed = wire_closed_at
+        .duration_since(f.client_connected_at)
+        .as_nanos();
+    let record = f.host.close_snapshot().headers[token.slot()].unwrap();
+    assert_eq!(record.hard_deadline, hard);
+    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
+    assert!(record.socket_returned_at.unwrap() >= record.began_at);
+    // Print before the strict assertion so a genuine overshoot remains visible.
+    println!("TLS_HEADER_CLOSE_SAMPLE {{\"wireCloseNs\":{elapsed},\"thresholdNs\":5000000000,\"reserveNs\":{},\"socketReturnObserved\":true,\"peerCloseObserved\":true,\"recordProtection\":\"FAKE\",\"tcpEpoch\":\"CLIENT_CONNECT_RETURN_ONLY\"}}", HEADER_CLOSE_RESERVE.as_nanos());
+    assert!(
+        elapsed <= 5_000_000_000,
+        "strict five-second wire sample {elapsed}ns"
+    );
+    f.stop();
+}
+
+#[test]
+fn abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child() {
+    let _serial = SERIAL.lock().unwrap();
+    const CHILD: &str = "FC_TLS_LINGER_FAILURE_CHILD";
+    const NAME: &str = "tls_frontdoor::native::stream::tests::abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child";
+    const MARKER: &str = "LINGER_FAILURE_CHILD retainedOwner=true released=false replaced=false cleanupComplete=false controlledOptionFailure=true";
+    if std::env::var(CHILD).as_deref() == Ok("1") {
+        let mut f = Fixture::new();
+        let bare = f.host.owner.resources.accept.as_mut().unwrap();
+        let socket = bare.socket;
+        let pointer = bare.memory.operation.get();
+        let serial = bare.serial;
+        let result = close_with(
+            &mut bare.socket,
+            true,
+            |candidate, abortive| {
+                assert_eq!(candidate, socket);
+                assert!(abortive);
+                Err("controlled SO_LINGER abortive close failure".into())
+            },
+            |_| panic!("release cannot run after abortive-option failure"),
+        );
+        assert!(result.unwrap_err().contains("SO_LINGER"));
+        f.retain_faulted_owner_on_drop = true;
+        let bare = f.host.owner.resources.accept.as_ref().unwrap();
+        assert_eq!(bare.socket, socket);
+        assert!(bare.pending());
+        assert_eq!(bare.serial, serial);
+        assert_eq!(bare.memory.operation.get(), pointer);
+        assert!(OWNER_FAULTED.load(Ordering::Acquire));
+        assert!(Owner::new("forbidden-after-option-failure").is_err());
+        drop(f);
+        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
+        assert!(Owner::new("still-forbidden-after-option-failure").is_err());
+        println!("{MARKER}");
+        return;
+    }
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
+        .env(CHILD, "1")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
+    assert!(!OWNER_FAULTED.load(Ordering::Acquire));
+}
+
+#[test]
+fn real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    // The actual first connection is already queued, but no packet has been
+    // dequeued by this fixture. Only the remaining interval is injected.
+    let bare = f.host.owner.resources.accept.as_mut().unwrap();
+    let serial = bare.serial;
+    let hard = Instant::now() + HEADER_CLOSE_RESERVE;
+    bare.state = super::super::accept::AcceptState::Pending {
+        serial,
+        deadline: hard,
+    };
+    let before = f.host.acceptance_snapshot();
+    let until = Instant::now() + Duration::from_secs(3);
+    while f.host.owner.report.accept_expired_discards == 0 {
+        // Deliberately use actual completion handling without the poll's
+        // earlier alarm cancellation: late success must recheck on its own.
+        f.host.owner.poll_io().unwrap();
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let snapshot = f.host.close_snapshot();
+    let record = snapshot.accept.unwrap();
+    assert_eq!(record.serial, serial);
+    assert_eq!(record.hard_deadline, hard);
+    assert_eq!(record.alarm + HEADER_CLOSE_RESERVE, hard);
+    assert!(record.began_at >= record.alarm);
+    assert!(record.completion_returned_at.unwrap() <= record.began_at);
+    assert!(record.socket_close_began_at.unwrap() >= record.began_at);
+    assert!(record.socket_returned_at.unwrap() >= record.socket_close_began_at.unwrap());
+    assert!(!record.failed);
+    let after = f.host.acceptance_snapshot();
+    assert_eq!(after.transfers, before.transfers);
+    assert_eq!(after.ready_slots, CONNECTION_SLOTS);
+    assert_eq!(f.host.owner.report.handshake_calls, 0);
+    assert_eq!(after.posts, before.posts + 1);
+    assert!(after.native_pending <= 5 && after.owned_sockets <= 6);
+    let mut client = f.client.try_clone().unwrap();
+    rejected_client(&mut f, &mut client);
+    f.stop();
 }

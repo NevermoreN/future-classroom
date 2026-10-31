@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "status": "READ_ONLY_REVIEW_NO_CONFIRMED_BLOCKER_FOUND",
+  "observedAtUtc": "2026-10-31T22:43:55.797023+00:00",
+  "sourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "scope": "Independent static production/diff and already existing42model/41WinPShelper evidence review only. No PowerShell/Windows/Cargo/Git mutation/CI/test execution by reviewer; not a new successful fullCI claim.",
+  "inputs": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-msvc-ci.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-msvc-ci.before.ps1",
+      "bytes": 38498,
+      "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-msvc-ci.after.ps1",
+      "bytes": 49874,
+      "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/implementation-first.diff",
+      "bytes": 18033,
+      "sha256": "d828861d494625aebb0472d0bf4921e8c9ca9d5fdda4020fcf0a0b0d12f6be8f"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/source-freeze-first.json",
+      "bytes": 5585,
+      "sha256": "7eb968e1e32566f498bffe29af2ac3ff3ba2b47d21f5b1ee85fdbe559f887765"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/source-static-first.json",
+      "bytes": 3331,
+      "sha256": "9bd9dc963cc95f98c2eb459a999517787958288d420bd2ec83685f4a1b06f305"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/input-domain-model-final.json",
+      "bytes": 4894,
+      "sha256": "a2288530fc11abd34c53e2a51eaadedad65ad893a326d7f4d539d16eaee4e40e"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-input-helpers-first.json",
+      "bytes": 17413,
+      "sha256": "297a9be5e167c1d3bb905df4f6657a90aa972393d5dd10613fc3e2a2e4c8eefd"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-helpers-freeze-first.json",
+      "bytes": 4006,
+      "sha256": "6a6c1a4da4234cea7615f8ed3c9387daaba07e33a44b9e044d679fa95612786d"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-input-helpers-after-first.json",
+      "bytes": 4980,
+      "sha256": "95af806e65780abeb3a4f6bc953ca4d7f6a1363918379348a71d31a94f4338a9"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence/windows-input-helpers-after-second.json",
+      "bytes": 4494,
+      "sha256": "86590b659be2623fcdc5859c427e04960d4c62eedf92fb6e7b663180d3466250"
+    }
+  ],
+  "checks": [
+    {
+      "name": "unchanged existing function Get-MsvcBaseline",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Get-BaselineCargoArguments",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Test-MsvcExecutableHeader",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Assert-OwnedRoot",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Write-Checksums",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Resolve-Application",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Write-CrtFlagState",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Restore-ProcessEnvironment",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Get-ActiveProcessIdentity",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Invoke-Logged",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged existing function Copy-Executable",
+      "status": "PASS"
+    },
+    {
+      "name": "original Cargo/check flags and stage timeout unchanged fmt",
+      "status": "PASS"
+    },
+    {
+      "name": "original Cargo/check flags and stage timeout unchanged architecture",
+      "status": "PASS"
+    },
+    {
+      "name": "original Cargo/check flags and stage timeout unchanged workspace-test-compile",
+      "status": "PASS"
+    },
+    {
+      "name": "original Cargo/check flags and stage timeout unchanged product-compile",
+      "status": "PASS"
+    },
+    {
+      "name": "original Cargo/check flags and stage timeout unchanged clippy",
+      "status": "PASS"
+    },
+    {
+      "name": "jobs2 original same assignment",
+      "status": "PASS"
+    },
+    {
+      "name": "original total/perfile/count plus new metadata output guard",
+      "status": "PASS"
+    },
+    {
+      "name": "exact expected source main equals frozen after",
+      "status": "PASS"
+    },
+    {
+      "name": "existing42 models are original source-bound PASS not fresh execution",
+      "status": "PASS"
+    },
+    {
+      "name": "existing41 realPS helpers actualexit0 fullAST0 no entrypoint compiler",
+      "status": "PASS"
+    },
+    {
+      "name": "existing clean second actual audit frozen separately not retrofirstupgraded",
+      "status": "PASS"
+    }
+  ],
+  "findings": [],
+  "sourceReferences": [
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 337,
+      "conclusion": "Only slash-terminated ordinal 开发计划/验证记录/ is historical; rooted/colon/backslash/control/empty-dot traversal segments reject. Near prefix remains SHA domain."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 346,
+      "conclusion": "Git tree must be NUL-complete and<=16MiB/count10000, only regular100644/100755 blobs; exact40hex object SHA1/decimal size<=64MiB; case-insensitive duplicate paths reject."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 389,
+      "conclusion": "Equal cardinality plus unique tracked names and exact ordinal tree.ContainsKey proves complete path-set partition. Actual every leaf and ancestor reparse checked, actual per-item64MiB retained. Long counters avoid old PowerShell Measure dictionary issue."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 415,
+      "conclusion": "Historical entries inspect actual current checkout length/regularness/reparse, accumulate Git bytes separately and explicitly do not GetFileHash historical content. Every remaining tracked file runs actual SHA256 with total256MiB cap."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 436,
+      "conclusion": "Domain summary explicitly differentiates SHA256 before/after from full HEAD blob mode/type/OID SHA1/size and historical checkout metadata; NOT_READ_BY_INPUT_HASHER is honest."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 532,
+      "conclusion": "Original full ls-files paths match fresh HEAD ls-tree; pinned HEAD/root-tree IDs and three before manifests are captured and raw-document SHA256 bound in host/result."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 695,
+      "conclusion": "After build independently re-observes HEAD, full tracked paths and full tree then every declared checkout hash/domain. New three after manifests are saved, clean Git requires no changes/untracked, before/after hashes/metadata/domain compare case-sensitively."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 375,
+      "conclusion": "Explicit Rust/Cargo reference guard normalizes Windows separators and rejects literal historical prefix; declaration explicitly says not hermetic against arbitrary/dynamic build.rs IO."
+    },
+    {
+      "file": "scripts/windows-msvc-ci.ps1",
+      "line": 736,
+      "conclusion": "Result input_schema and separate3digests/summary communicate changed artifact contract; legacy input-sha256 no longer covers history."
+    }
+  ],
+  "unchangedFunctions": [
+    {
+      "name": "Get-MsvcBaseline",
+      "bytes": 1814,
+      "sha256": "f5a09baeec782b86139b4d0cfb13dbe17c0eb16a0e37351b4dacce06ed893e00"
+    },
+    {
+      "name": "Get-BaselineCargoArguments",
+      "bytes": 1041,
+      "sha256": "d1718730aab99439fe1850ec2293d4c45cb6c5e4e81a97b4098bfbe86021e12e"
+    },
+    {
+      "name": "Test-MsvcExecutableHeader",
+      "bytes": 1110,
+      "sha256": "fe6871e619b30352a7f1c616a3e6fca3127dfc27bf9f548666551ddc5fa27a30"
+    },
+    {
+      "name": "Assert-OwnedRoot",
+      "bytes": 1093,
+      "sha256": "8fa9c6efbfded4f8cf7b09ff1db1e5c4d796df955192d8f8502cd92fb05c9b1d"
+    },
+    {
+      "name": "Write-Checksums",
+      "bytes": 540,
+      "sha256": "b2e10eec8a1ce187815e3add7956582165547aebf5f0ff4c921bc69870c364f1"
+    },
+    {
+      "name": "Resolve-Application",
+      "bytes": 1011,
+      "sha256": "252507c71a22dcf0a8ad1cefbdf05ef96b767419d3fe6e5faf739ce3264bba8c"
+    },
+    {
+      "name": "Write-CrtFlagState",
+      "bytes": 1726,
+      "sha256": "8f885ce1114da3e01d9e57e72a2511377a6793a0ed8784be2e2d01056c8a6a1a"
+    },
+    {
+      "name": "Restore-ProcessEnvironment",
+      "bytes": 389,
+      "sha256": "32dc255368d57148b2e4626aa1fb3b254a096cbc9384368fa5bec756059a6824"
+    },
+    {
+      "name": "Get-ActiveProcessIdentity",
+      "bytes": 1373,
+      "sha256": "6a98ade780dc1bd629c6ed4f844aae35c62c8305a400b759c6381d6a4ace37b2"
+    },
+    {
+      "name": "Invoke-Logged",
+      "bytes": 4223,
+      "sha256": "a1595b36a6e42452f295aa16a8e8eb4c0c3a7ea8498cedf35b0d3e454aba7451"
+    },
+    {
+      "name": "Copy-Executable",
+      "bytes": 1833,
+      "sha256": "088f1161fcf347c16b51ae08c8fb45c4a6d290a33e81ea46ff8d96a8b3423597"
+    }
+  ],
+  "unchangedBuildSites": [
+    {
+      "name": "fmt",
+      "unchangedSource": "Invoke-Logged 'fmt' $cargo (Get-BaselineCargoArguments 'fmt' @('--all','--','--check') $Baseline) 300 | Out-Null"
+    },
+    {
+      "name": "architecture",
+      "unchangedSource": "Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null"
+    },
+    {
+      "name": "workspace-test-compile",
+      "unchangedSource": "$tests = Invoke-Logged 'workspace-test-compile' $cargo (Get-BaselineCargoArguments 'test' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') $Baseline) 2400"
+    },
+    {
+      "name": "product-compile",
+      "unchangedSource": "$binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200"
+    },
+    {
+      "name": "clippy",
+      "unchangedSource": "Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null"
+    }
+  ],
+  "powershellOutputReview": "New List.Add/Dictionary.Add are void, HashSet.Add appears only in condition, assignments consume intermediate values. ConvertFrom-SourceGitTree returns unary-comma array; Hash-Inputs returns one OrderedDictionary holding actual arrays. No confirmed accidental pipeline scalar/array output blocker in current helpers.41 existing real helper tests source-bind these mechanics.",
+  "nonBlockingLimits": [
+    "Explicit historical prefix scan is a conservative literal-source policy, not a sandbox: concatenated/escaped dynamic paths or arbitrary build.rs IO remain outside its guarantee. Current manifest explicitly says this; no verified current compiled input reference to excluded history was identified in this review.",
+    "Full-tree and SHA subsets compare before/after, not hermetic against arbitrary transient malicious mid-build mutation. Original trust/clean-source boundary unchanged.",
+    "16MiB is output/log/metadata-document bound. ConvertToJson constructs bytes before checking MaximumBytes; this is not a new absolute PowerShell heap cap. Bounded path count/tree stdout bound remain in force.",
+    "Budget wording: this actual script Invoke-Logged default is120s; existing explicit workspace-test-compile2400/product1200/clippy1500,fmt300/architecture120 remain byte-identical.900s is the parent local verification-controller budget, not a new or universally existing CI per-command setting.",
+    "Do not mark hosted PowerShell7 entrypoint or future CI build PASS from WinPS5 AST-extracted41 helper tests. Preserve first cleanup-audit interpretation failures and later actual second audit as separately named records."
+  ],
+  "validatorMigrationChecklist": [
+    {
+      "area": "CI identity/original ZIP",
+      "checks": [
+        "Pin actual newly dispatched exact source/run/job/artifact ID/digest/bytes from official metadata; no old e0/bc2 or workflow rerun substitution.",
+        "Verify fullZIP digest/size/CRC and unique safe-member set equals producer ledger plus ledger itself; retain all originals and failed/pending snapshots. Derive new member counts; do not hardcode192/201."
+      ]
+    },
+    {
+      "area": "New required artifact files/schema/digests",
+      "checks": [
+        "Require input-sha256.json, input-git-tree.json, input-domains.json and three corresponding -after.json originals.",
+        "Result.input_schema must be future-classroom.ci-input-domains/v1; result/host source SHA and input_manifest_sha256/git_tree_manifest_sha256/input_domains_manifest_sha256 bind exact respective before-file bytes.",
+        "Require metadata output files and original Git raw stdout within16MiB; after originals also verified by producer ledger before parsing."
+      ]
+    },
+    {
+      "area": "Full Git metadata before and after",
+      "checks": [
+        "Independently git ls-tree -r -l -z pinnedSOURCE and git rev-parse pinnedSOURCE^{tree}; compare exact full unique path set, regular mode/type,40lowerhex git_blob_oid_sha1 and raw git_blob_bytes against both input-git-tree manifests.",
+        "Do not compare git_blob_bytes to checkout SHA rows or call SHA1 object ID a raw content SHA256. SHA256 of metadata document binds metadata bytes only.",
+        "Require schema future-classroom.ci-git-tree-inputs/v1, matching source_sha/root_tree_oid_sha1,<=10000, perblob<=64MiB, canonical paths/no case collisions; before/after tree/meta agree. Derive M from exact new Git commit rather than reuse6940."
+      ]
+    },
+    {
+      "area": "Complete independent partition",
+      "checks": [
+        "Recompute exact ordinal slash-terminated historical prefix independently for every fullGit path; require S=all others and H=historical. Require S intersect H empty, S union H full; each path appears once, metadata row domain matches independently derived domain.",
+        "Require input-sha256 and -after paths exactly S; require summary historical checkout_metadata paths exactly H; no aliases/missing/extra/duplicate entry.",
+        "Require all summary counts equal |S|/|H|/M and result.input_domain_summary/host references agree."
+      ]
+    },
+    {
+      "area": "Actual checkout SHA subset",
+      "checks": [
+        "For every S row require typed finite nonnegative integer bytes<=64MiB, canonical64lowerhex SHA256; actual cumulative bytes<=256MiB, exact before/after rows and totals equal.",
+        "Read pinned Git blob for each S entry and accept only exact len/SHA bytes OR prior explicit exact full LF-to-CRLF conversion when original has no CR or NUL; never loose Unicode/newline normalization.",
+        "Report direct+exactCRLF counts over S only, not M. Other Git checkout filters/transforms must fail closed for separate explicit investigation. Derive S count from exact new tree, not old550."
+      ]
+    },
+    {
+      "area": "Historical metadata honesty",
+      "checks": [
+        "Require historical content_sha256 and result historical_content_sha256 exactly NOT_READ_BY_INPUT_HASHER. Historical Git blob-byte sum independently equals H metadata sum.",
+        "Check recorded historical checkout bytes separately per-file0..64MiB and aggregate recorded sum; do NOT require equality to raw Git bytes since CRLF may differ, and do NOT claim current historical checkout content was independently SHA-read.",
+        "Historical integrity binding is pinned full Git tree/OIDs plus existing archived original INDEX/producer proof, metadata/reparse/clean guards. No new all-history rawSHA claim."
+      ]
+    },
+    {
+      "area": "Before/after clean and exact source",
+      "checks": [
+        "Require source-sha and source-sha-after stdout pinned SHA; both full ls-files outputs match tree path set; both fresh Git tree and tree-id command outputs match pinned object DB.",
+        "Require source-clean-before and source-clean-after exact empty stdout and all source commands actualexit0 with parent_exited/no timeout/no truncation.",
+        "Require before/after domain JSON semantic equality and exact subset row contents; independently recompute historical and actual byte counters."
+      ]
+    },
+    {
+      "area": "Commands/build/cleanup preservation",
+      "checks": [
+        "Derive command set and count from new manifest: six added source-observation commands mean previous fixed39/41 counts no longer apply; every required original fmt/architecture/no-run/product/strictClippy/PE command still must actually succeed.",
+        "Require baseline-specific original fixed toolchain/Win7 rust-src/build-std target handling, CRT flags, jobs2, original deadlines and original actual process retirement; no test EXE execution implied by compiled artifact.",
+        "Continue exact22EXE/SHA/PE32/staticCRT import audits and metadata associations as applicable actual outputs; Win7 subsystem6.1 remains static-only proof. Never upgrade failed CI or OS/device runtime from partial artifact checks.",
+        "Require cleanup all four exact owned roots removed, no compiler/process timeout/truncated logs; record raw original failure on any failure, never replay to mask."
+      ]
+    },
+    {
+      "area": "Documentation/count claims",
+      "checks": [
+        "Use wording: fullGit metadata M; actual nonhistorical checkout SHA256 S (direct D+exactCRLF C); historical metadata-only H. Never reuse all6940rawSHA or old full-tree direct/CRLF totals.",
+        "42 Python models are local models;41 actualWinPS5 helper tests invoke AST-extracted functions only, not full #requires7.2 GitHub CI entrypoint.256MiB aggregate is model+unchanged production guard, not actually allocated by PS fixture.",
+        "New fullCI/Windows runtime/Win7/10/Seewo/strictP0 remain separate future evidence; this reviewer did not run them."
+      ]
+    }
+  ],
+  "nextFullValidation": "Root-owned full build/strictClippy/unique new CI dispatch and artifact validation remain separate; no request to rerun or reduce thresholds.",
+  "mainSourceUnchangedAfterReview": true
+}

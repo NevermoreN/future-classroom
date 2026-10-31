@@ -26,6 +26,61 @@ pub struct TlsAcceptSnapshot {
     pub owned_sockets: usize,
 }
 
+/// Negative-close scheduling reserve; never added to the original post+5s
+/// deadline. This headroom needs target measurements; it is not a scheduler or
+/// TCP epoch guarantee.
+pub const HEADER_CLOSE_RESERVE: std::time::Duration = std::time::Duration::from_millis(25);
+
+/// Latest deadline close in one fixed business slot. Socket close, kernel IO
+/// return, Frame return and retirement remain separate observations. In
+/// particular, no timestamp here claims that the peer has observed EOF/RST.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TlsHeaderClose {
+    pub token: fc_ports::http::RequestToken,
+    pub hard_deadline: std::time::Instant,
+    pub alarm: std::time::Instant,
+    /// Negative path begins before requesting exact IO cancellation.
+    pub began_at: std::time::Instant,
+    /// Entry into checked socket close (SO_LINGER setup, then closesocket),
+    /// after cancellation was requested. Not a kernel completion timestamp.
+    pub socket_close_began_at: Option<std::time::Instant>,
+    pub socket_returned_at: Option<std::time::Instant>,
+    pub failed: bool,
+    pub io_pending_at_close: bool,
+    pub io_returned_at: Option<std::time::Instant>,
+    pub frame_pending_at_close: bool,
+    pub frame_returned_at: Option<std::time::Instant>,
+    pub retirement_confirmed_at: Option<std::time::Instant>,
+}
+
+/// Latest expired bare operation, identified by its original serial. The
+/// completion timestamp is set only upon reading its actual IOCP packet.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TlsAcceptClose {
+    pub serial: u64,
+    pub hard_deadline: std::time::Instant,
+    pub alarm: std::time::Instant,
+    pub began_at: std::time::Instant,
+    pub socket_close_began_at: Option<std::time::Instant>,
+    pub socket_returned_at: Option<std::time::Instant>,
+    pub failed: bool,
+    pub completion_returned_at: Option<std::time::Instant>,
+}
+
+/// Fixed-size, memory-only observations, overwritten by later closes in the
+/// same slot. The receiver must retain its own bounded test observations if it
+/// needs a history. Counters do not discharge any physical owner's debt.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TlsCloseSnapshot {
+    pub generation: u64,
+    pub header_begins: u64,
+    pub header_socket_returns: u64,
+    pub header_failures: u64,
+    pub headers: [Option<TlsHeaderClose>; 4],
+    pub accept: Option<TlsAcceptClose>,
+}
+const _: () = assert!(std::mem::size_of::<TlsCloseSnapshot>() <= 2048);
+
 pub const CONNECTION_SLOTS: usize = 4;
 pub const BUFFER_BYTES: usize = 64 * 1024;
 pub const PLAINTEXT_BYTES: usize = 16 * 1024;

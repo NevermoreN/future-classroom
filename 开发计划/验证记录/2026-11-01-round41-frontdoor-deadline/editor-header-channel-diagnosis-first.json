@@ -1,0 +1,336 @@
+{
+  "status": "CONFIRMED_RUNNER_FALSE_REJECTION_ORIGINAL_OVERALL_FAIL_RETAINED",
+  "atUtc": "2026-10-31T22:13:52.507010+00:00",
+  "sourceBeforeSha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb",
+  "originalReportStatus": "FAIL",
+  "originalCleanup": "PASS",
+  "actualError": {
+    "kind": "RuntimeError",
+    "phase": "actual-tls-business-clients",
+    "message": "SSH transport/channel failure invalidates conservative peer-close attribution"
+  },
+  "originalBindings": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.json",
+      "bytes": 117819,
+      "sha256": "ebd5d8e15c6bb7e7f2fb9d3cc44b64a46f1612fcf1a20006ed52d44d2e18dc52"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.command.json",
+      "bytes": 1044,
+      "sha256": "0aad3c6fbae0108919d0de40b2edb624c06befffcf0a1808aea596d66d365e79"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.stderr.log",
+      "bytes": 119,
+      "sha256": "3a33d220e9094826c1b5efca25285545c220ffeb11369b17563fc4106dca4f33"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "9a95d80d8003ae352eec8b613f2f5f7bdc8c3f27bb176110bb78bdf1d4f4034e"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-process.json",
+      "bytes": 239,
+      "sha256": "8c881cdc28d2cd4f29ccd9e58ada005d82a7dea1a6a1c2eec4e68d152acb5f09"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "4b010a712fb28946d93489ad05d2c4d4f1dcaaef99351d158e74b9893c30efe7"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "d142d6818164304be4886542087faff758831376e3a2731bc50e31f084ee547e"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "dbee1251e27576150655b5a3ff7b9ed9c0b9019599e16b86e9c9d50a91605ebf"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "36f0bcb16c624f905df7f961341e0ffd7ff96a0b3b5beda2daf2b7377da4620b"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first-706be6042b734871b221664e03d19241-raw/tls.stdout",
+      "bytes": 19165,
+      "sha256": "c39986b9f6c6fe90ab0fc1098be9798f6039b7983648aa6a00b01f03ea57a59c"
+    }
+  ],
+  "sshStderr": {
+    "bytes": 16110,
+    "sha256": "5e53afa490ee9df5fd0974de4db2cd06fc32c7b4401420fbbe17a5f0daf2e669"
+  },
+  "contexts": [
+    {
+      "line": 97,
+      "actual": "debug2: channel 1: read failed",
+      "context": [
+        {
+          "line": 93,
+          "text": "debug1: channel 1: new mux-control [mux-control] (inactive timeout: 0)"
+        },
+        {
+          "line": 94,
+          "text": "debug2: mux_master_process_hello: channel 1 client version 4"
+        },
+        {
+          "line": 95,
+          "text": "debug2: mux_master_process_alive_check: channel 1: alive check"
+        },
+        {
+          "line": 96,
+          "text": "debug2: channel 1: ctl read<=0 rfd 5 len 0"
+        },
+        {
+          "line": 97,
+          "text": "debug2: channel 1: read failed"
+        },
+        {
+          "line": 98,
+          "text": "debug2: chan_shutdown_read: channel 1: (i0 o0 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 99,
+          "text": "debug2: channel 1: input open -> drain"
+        },
+        {
+          "line": 100,
+          "text": "debug2: channel 1: ibuf empty"
+        },
+        {
+          "line": 101,
+          "text": "debug2: channel 1: input drain -> closed"
+        }
+      ]
+    },
+    {
+      "line": 127,
+      "actual": "debug2: channel 1: read failed",
+      "context": [
+        {
+          "line": 123,
+          "text": "debug1: Local forwarding listening on 127.0.0.1 port 35250."
+        },
+        {
+          "line": 124,
+          "text": "debug2: fd 6 setting O_NONBLOCK"
+        },
+        {
+          "line": 125,
+          "text": "debug1: channel 2: new port-listener [port listener] (inactive timeout: 0)"
+        },
+        {
+          "line": 126,
+          "text": "debug2: channel 1: ctl read<=0 rfd 5 len 0"
+        },
+        {
+          "line": 127,
+          "text": "debug2: channel 1: read failed"
+        },
+        {
+          "line": 128,
+          "text": "debug2: chan_shutdown_read: channel 1: (i0 o0 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 129,
+          "text": "debug2: channel 1: input open -> drain"
+        },
+        {
+          "line": 130,
+          "text": "debug2: channel 1: ibuf empty"
+        },
+        {
+          "line": 131,
+          "text": "debug2: channel 1: input drain -> closed"
+        }
+      ]
+    },
+    {
+      "line": 221,
+      "actual": "debug2: channel 1: read failed rfd 5 maxlen 32768: Broken pipe",
+      "context": [
+        {
+          "line": 217,
+          "text": "debug2: channel 1: output open -> drain"
+        },
+        {
+          "line": 218,
+          "text": "debug2: channel 1: obuf empty"
+        },
+        {
+          "line": 219,
+          "text": "debug2: chan_shutdown_write: channel 1: (i0 o1 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 220,
+          "text": "debug2: channel 1: output drain -> closed"
+        },
+        {
+          "line": 221,
+          "text": "debug2: channel 1: read failed rfd 5 maxlen 32768: Broken pipe"
+        },
+        {
+          "line": 222,
+          "text": "debug2: channel 1: read failed"
+        },
+        {
+          "line": 223,
+          "text": "debug2: chan_shutdown_read: channel 1: (i0 o3 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 224,
+          "text": "debug2: channel 1: input open -> drain"
+        },
+        {
+          "line": 225,
+          "text": "debug2: channel 1: ibuf empty"
+        }
+      ]
+    },
+    {
+      "line": 222,
+      "actual": "debug2: channel 1: read failed",
+      "context": [
+        {
+          "line": 218,
+          "text": "debug2: channel 1: obuf empty"
+        },
+        {
+          "line": 219,
+          "text": "debug2: chan_shutdown_write: channel 1: (i0 o1 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 220,
+          "text": "debug2: channel 1: output drain -> closed"
+        },
+        {
+          "line": 221,
+          "text": "debug2: channel 1: read failed rfd 5 maxlen 32768: Broken pipe"
+        },
+        {
+          "line": 222,
+          "text": "debug2: channel 1: read failed"
+        },
+        {
+          "line": 223,
+          "text": "debug2: chan_shutdown_read: channel 1: (i0 o3 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 224,
+          "text": "debug2: channel 1: input open -> drain"
+        },
+        {
+          "line": 225,
+          "text": "debug2: channel 1: ibuf empty"
+        },
+        {
+          "line": 226,
+          "text": "debug2: channel 1: send eof"
+        }
+      ]
+    },
+    {
+      "line": 241,
+      "actual": "debug2: channel 1: read failed",
+      "context": [
+        {
+          "line": 237,
+          "text": "debug2: mux_master_process_close_fwd: channel 1: request cancel local forward 127.0.0.1:35250 -> 127.0.0.1:58148"
+        },
+        {
+          "line": 238,
+          "text": "debug2: channel_cancel_lport_listener_tcpip: close channel 2"
+        },
+        {
+          "line": 239,
+          "text": "debug1: channel 2: free: port listener, nchannels 3"
+        },
+        {
+          "line": 240,
+          "text": "debug2: channel 1: ctl read<=0 rfd 5 len 0"
+        },
+        {
+          "line": 241,
+          "text": "debug2: channel 1: read failed"
+        },
+        {
+          "line": 242,
+          "text": "debug2: chan_shutdown_read: channel 1: (i0 o0 sock 5 wfd 5 efd -1 [closed])"
+        },
+        {
+          "line": 243,
+          "text": "debug2: channel 1: input open -> drain"
+        },
+        {
+          "line": 244,
+          "text": "debug2: channel 1: ibuf empty"
+        },
+        {
+          "line": 245,
+          "text": "debug2: channel 1: input drain -> closed"
+        }
+      ]
+    }
+  ],
+  "causality": [
+    "The first match97 is explicitly mux-control lifecycle93 followed by ctl read<=0 at96; normal local mux-check socket EOF is rejected by global read-failed regex. Second mux lifecycle120/126/127 repeats it before any direct client. These prior lines necessarily existed by validation.",
+    "The complete finally-preserved log additionally contains direct channel1 at214/openconfirm215/remoteEOF216 followed by Brokenpipe221/readfailed222/remoteClose229. It is normal local half-close cleanup after confirmed remote EOF; however original evidence does not capture exact validator-time stderr prefix, so221 is NOT asserted to have caused that same first rejection.",
+    "All five client samples have actual terminal before local-close and elapsed below5e9ns; TLS4 actual dripCalls19. This does not turn the original overallFAIL intoPASS.",
+    "NativeReports and nativeProcessExits are empty because runner abort triggers cleanup before normal full45s terminal. Complete normal nativeDrain was NOT_VERIFIED in this first run."
+  ],
+  "samples": [
+    {
+      "case": "header-deadline-tls-1",
+      "elapsedNs": 4760330306,
+      "dripCalls": 0,
+      "peerCloseKind": "TLS_RAGGED_EOF"
+    },
+    {
+      "case": "header-deadline-tls-2",
+      "elapsedNs": 4977875848,
+      "dripCalls": 0,
+      "peerCloseKind": "TLS_RAGGED_EOF"
+    },
+    {
+      "case": "header-deadline-tls-3",
+      "elapsedNs": 4978954843,
+      "dripCalls": 0,
+      "peerCloseKind": "TLS_RAGGED_EOF"
+    },
+    {
+      "case": "header-deadline-tls-4",
+      "elapsedNs": 4978960963,
+      "dripCalls": 19,
+      "peerCloseKind": "TLS_RAGGED_EOF"
+    },
+    {
+      "case": "header-deadline-raw-tcp",
+      "elapsedNs": 4873127535,
+      "dripCalls": 0,
+      "peerCloseKind": "TCP_EOF"
+    }
+  ],
+  "fixBoundary": "Classify exact channel lifecycle instances; allow only known mux ctl-EOF cleanup or this confirmed direct instance remote-EOF/close-before-specific-readfailure cleanup. No global transport errors allowed; channel ID reuse confers no inherited privilege.",
+  "notPerformed": [
+    "Windows",
+    "SSH/remote",
+    "Cargo",
+    "Git",
+    "original report/log mutation"
+  ]
+}

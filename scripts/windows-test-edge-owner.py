@@ -8,8 +8,9 @@ visible UI, foreground action or system/SSH configuration change is performed.
 
 Promoted from the actually exercised windows-edge-cache-owner.py prototype
 (SHA256 fa6a06d8d81869151cef54f8d12e7b0d9cea8749fcd8f17b7eb8a96533daf2e0).
-The native C# and PowerShell ownership/cleanup blocks are retained byte-for-byte.
-Only sibling-module lookup and provenance metadata change here. The installed
+The native C#, supervisor, capture and cleanup blocks remain byte-for-byte.
+STOP now publishes only a fully closed temporary file with a non-overwriting
+same-directory move; matching concurrent requests remain idempotent. The installed
 Edge SHA/version pin remains deliberate: an Edge update requires a new reviewed
 freeze and actual Windows evidence, rather than silently accepting a new binary.
 """
@@ -286,6 +287,36 @@ finally{
 if($failure-or !$ready-or !$stopped-or !$primaryExited-or !$handlesClosed){exit 1}
 '''
 STOP = r'''
+function Publish-StopRequest([string]$Root,[string]$Capability){
+  $path=Join-Path $Root '.request-stop'
+  if([IO.File]::Exists($path)){
+    Assert (([IO.File]::ReadAllText($path))-ceq $Capability) 'different stop capability already present'
+    return
+  }
+  $pending=Join-Path $Root ('.request-stop.pending-'+[Guid]::NewGuid().ToString('N'))
+  $owned=$false
+  try{
+    $file=$null
+    try{
+      $file=[IO.File]::Open($pending,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+      $owned=$true
+      $bytes=[Text.UTF8Encoding]::new($false).GetBytes($Capability)
+      $file.Write($bytes,0,$bytes.Length)
+    }finally{if($file){$file.Dispose()}}
+    # The final name is not visible until the complete original file is closed.
+    # File.Move is non-overwriting and both names are in the same owned directory.
+    try{[IO.File]::Move($pending,$path);$owned=$false}
+    catch{
+      $cause=$_.Exception.GetBaseException();$code=$cause.HResult-band 65535
+      if(($cause-is [IO.IOException])-and ($code-in @(80,183))-and [IO.File]::Exists($path)){
+        Assert (([IO.File]::ReadAllText($path))-ceq $Capability) 'different stop capability won publication'
+      }else{throw}
+    }
+  }finally{
+    # A failed CreateNew never grants ownership of an existing candidate.
+    if($owned-and [IO.File]::Exists($pending)){[IO.File]::Delete($pending)}
+  }
+}
 $root=__ROOT__;$marker=__MARKER__;$capability=__CAPABILITY__
 if(!(Test-Path -LiteralPath $root)){@{status='ROOT_ALREADY_ABSENT';physicalExit='CHECK_FINAL_RUN_REPORT'}|ConvertTo-Json -Compress;exit 0}
 Assert-Root $root $marker $env:TEMP
@@ -294,7 +325,7 @@ $sha=[Security.Cryptography.SHA256]::Create()
 try{$hash=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::ASCII.GetBytes($capability)))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
 Assert ($entry.marker-eq $marker-and $entry.capabilitySha256-ceq $hash-and $entry.exe-ceq __EDGE__) 'stop ownership/capability mismatch'
 $path=Join-Path $root '.request-stop'
-if(Test-Path -LiteralPath $path){Assert (([IO.File]::ReadAllText($path))-ceq $capability) 'different stop capability already present'}else{New-Text $path $capability}
+Publish-StopRequest $root $capability
 @{status='STOP_REQUESTED';marker=$marker;physicalExit='WAIT_FOR_ORIGINAL_SUPERVISOR_REPORT'}|ConvertTo-Json -Compress
 '''
 CAPTURE = r'''
@@ -505,6 +536,11 @@ def main():
                 "no-breakaway kill-on-close suspended assignment contract missing")
         require("StopAndWait(20000)" in SUPERVISE and "actualJobProcessesZero" in CLEANUP, "actual zero cleanup contract missing")
         require("Stop-Process" not in STOP and "Get-Process" not in STOP, "stop CLI may not sweep/kill PIDs")
+        require("[IO.File]::Move($pending,$path)" in STOP and "[IO.FileMode]::CreateNew" in STOP
+                and STOP.index("$file.Dispose()") < STOP.index("[IO.File]::Move($pending,$path)")
+                and "$code-in @(80,183)" in STOP and "if($owned-and [IO.File]::Exists($pending))" in STOP
+                and "Publish-StopRequest $root $capability" in STOP and "New-Text $path $capability" not in STOP,
+                "closed non-overwriting owned stop publication contract missing")
         print(json.dumps({"status": "PURE_STATIC_CHECKS_PASS", "windows": "NOT_RUN", "csharpCompile": "NOT_RUN", "sourceSha256": digest(Path(__file__).read_bytes()), "testedPrototypeSha256": TESTED_PROTOTYPE_SHA256}))
         return
     if args.mode == "stop":
@@ -536,7 +572,7 @@ def main():
               "scope": "Authorized isolated Win11 headless Edge cache browser; actual browser assertions belong to separate CDP harness",
               "sourceSha256": digest(Path(__file__).read_bytes()), "nativeHelperSha256": digest(CSHARP.encode()),
               "testedPrototypeSha256": TESTED_PROTOTYPE_SHA256,
-              "promotionScope": "Sibling helper import and provenance only; native ownership blocks unchanged",
+              "promotionScope": "C# and supervisor/capture/cleanup unchanged; STOP publishes closed temporary files by non-overwriting same-directory move",
               "edgeExe": EDGE, "edgeExpectedSha256": EDGE_SHA, "edgeExpectedVersion": EDGE_VERSION,
               "spkiSha256Base64": args.spki, "profile": "NEW_OWNED_ONLY", "deadlineSeconds": 180,
               "nativeStopGraceSeconds": 20, "muteAudio": True, "existingBrowsers": "UNTOUCHED",

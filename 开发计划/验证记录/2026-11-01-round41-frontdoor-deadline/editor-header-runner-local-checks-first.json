@@ -1,0 +1,347 @@
+{
+  "status": "PASS_PURE_LOCAL_NOT_WINDOWS",
+  "scope": "Pure host Python validators/CLI/mocked SSH only; no Windows, sockets, Cargo or Git. Old original source self-test reexecuted now, not attributed to a historical run.",
+  "recordedAtUtc": "2026-10-31T21:52:05.318642+00:00",
+  "binding": {
+    "beforeSha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25",
+    "afterSha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9"
+  },
+  "cases": [
+    {
+      "name": "editor-header-baseline-selftest-now",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "-c",
+        "from pathlib import Path;ns={'__name__':'archived_baseline_local','__file__':'/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py'};exec(compile(Path('/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.before-header-deadline.py').read_bytes(),'/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py','exec'),ns);ns['self_test']()"
+      ],
+      "actualExitCode": 0,
+      "expectedExitCode": 0,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-baseline-selftest-now.stdout.log",
+          "bytes": 1940,
+          "sha256": "b8f4c782a69cf9d57485a2edfa1aab7143a5bce83adfc0c4afd9982d69d04e07",
+          "base64": "ewogICJzdGF0dXMiOiAiUFVSRV9MT0NBTF9DSEVDS1NfUEFTUyIsCiAgImNoZWNrcyI6IFsKICAgICJzeW50aGV0aWMgcHJlc2VydmVkIHNlcTIwLzIyLzI1IHRyYW5zZmVyczQxLzQ0LzQ3IHJlZ3Jlc3Npb247IGFsbDI0IGludGVydmFsIG9yZGVycyBhY2NlcHRlZCwgZXh0cmEvbWlzc2luZyB0cmFuc2ZlcnMgYW5kIG11dGF0ZWQgb3JpZ2luYWwgaW50ZXJ2YWxzIHJlamVjdGVkOyBubyBJTyIsCiAgICAic3ludGhldGljIHByb2dyZXNzIGlkZW50aXR5L2ludGVydmFsIGJvdW5kczsgdW5yZWxhdGVkIGxpZmVjeWNsZSBsaW5lcyBwcmVzZXJ2ZWQ7IG9ubHkgRU9GL1JTVCBjYXBhY2l0eSBjbGFzc2VzIGFjY2VwdGVkIChubyByZWFsIElPKSIsCiAgICAiZnJhZ21lbnRlZC9leGFjdC1DTCByZXNwb25zZSBmcmFtaW5nIiwKICAgICJzdXJwbHVzL3RydW5jYXRpb24vZHVwbGljYXRlLUNML1RFL2hlYWQtYm9keSBsaW1pdHMvZm9sZGluZyByZWplY3RlZCIsCiAgICAiMjA0LzMwNCBvbWl0IENML1RFIGFuZCBjb3VudC9oYXNoIHplcm8gd2lyZSBib2R5OyBDTDAvYm9keS9kdXBsaWNhdGUtaGVhZGVyL1RFIHJlamVjdGVkIiwKICAgICJIRUFEIDIwMC80MDMvNDA0LzQwNSByZXF1aXJlIG9taXR0ZWQgQ0wvVEUgYW5kIHplcm8gd2lyZSBib2R5OyBvcmRpbmFyeSBHRVQgcmVtYWlucyBzdHJpY3QiLAogICAgIjIwMCBzdGlsbCByZXF1aXJlcyBjYW5vbmljYWwgdW5pcXVlIENMLCBKU09ONjRLaUIvc3RhdGljNU1pQi9kb3dubG9hZDUwTWlCIGNhcHMgdW5jaGFuZ2VkIiwKICAgICJiaW5hcnkgc3RyZWFtaW5nIGhhc2gvY291bnQgd2l0aG91dCByZXRhaW5lZCBib2R5OyB0cnVuY2F0aW9uL3N1cnBsdXMvNTBNaUIgY2FwIHJlamVjdGVkIiwKICAgICJaSVAgbWFuaWZlc3QgYW5kIGFsbCBwYXlsb2FkIGhhc2hlcyB2ZXJpZmllZDsgY29ycnVwdC92ZXJzaW9uL3BhdGgvY291bnQvc2l6ZSBpbnB1dHMgcmVqZWN0ZWQiLAogICAgIjgwMDAtc2FtcGxlLzUwMG1zIHNpbGVudCBQQ00gZml4dHVyZSBtZWV0cyBkb21haW4gbWluaW11bS9ieXRlLWxlbmd0aCBib3VuZHMiLAogICAgIjEyMDAwMC1ieXRlIHJlcXVlc3QgZnJhZ21lbnRhdGlvbiBhbmQgaGVhZC9ib2R5IGNvYWxlc2NpbmciLAogICAgIlJFQURZIGlkZW50aXR5IGFuZCBhY3R1YWwtZHJhaW4gZmluYWwgbGVkZ2VyIHJlcXVpcmVkOyBpbmRlcGVuZGVudCBicm93c2VyIHdpcmUtY291bnQgZmxvb3IsIGV4Y2x1ZGluZyBjYWNoZSBoaXRzIiwKICAgICJ2aXN1YWwgZXhhY3Qgc2luZ2xlLXNjb3BlIGRpc2Nsb3N1cmU6IGRlZmF1bHQzLzIwLCBpbmRlcGVuZGVudDBmaWxsKzcwLzgwY29tcG9uZW50LCBvdXRsaW5lIHJldGFpbnMgc3RvcmVkMy8yMDsgZXh0cmEvcmF3L3ZlcnNpb24vc2NvcGUvdHlwZSBhbmQgd3JvbmcgZml4dHVyZSByZWplY3RlZCIsCiAgICAidm9pY2UgY2FwYWJpbGl0eSBleGFjdCBjb21wbGV0ZSBtZXRhZGF0YS9saW1pdHMvdGFyZ2V0OiA2MyBtYWxmb3JtZWQgbW9kZWxzIHJlamVjdGVkOyBVTlZFUklGSUVEL1VOQVZBSUxBQkxFIGFuZCB0aWdodGVuZWQgYm91bmRzIGFjY2VwdGVkIiwKICAgICJ2b2ljZSBjYXBhYmlsaXR5IG1vZGVsIGV4YWN0IHRocmVlIEdFVHMgKG5vIENvb2tpZTQwMS9hdXRoMjAwL3JlcGVhdDIwMCksIHN0YWJsZSBmaWVsZHMgZXhjZXB0IGNpdmlsIHRpbWU7IGNoYW5nZWQgcmV2aXNpb24vcnVudGltZS9kZXZpY2UvbGltaXRzIHJlamVjdGVkIiwKICAgICJ2b2ljZSBjYXBhYmlsaXR5IHN1bW1hcnkgb21pdHMgY29va2llL0NTUkYvYm9keSBhbmQgZG9lcyBub3QgaW5mZXIgbmF0aXZlIHF1ZXJ5IGNvdW50LCBjYWNoZSBiZWhhdmlvciBvciBjdXJyZW50IGF1ZGliaWxpdHk7IG5vIElPIgogIF0sCiAgInRscyI6ICJOT1RfUlVOIiwKICAid2luZG93cyI6ICJOT1RfUlVOIiwKICAiYnVzaW5lc3MiOiAiTk9UX1JVTiIKfQo="
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-baseline-selftest-now.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        }
+      }
+    },
+    {
+      "name": "editor-header-current-selftest-final",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--self-test"
+      ],
+      "actualExitCode": 0,
+      "expectedExitCode": 0,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-final.stdout.log",
+          "bytes": 2668,
+          "sha256": "dbed2591c3b6b6d687b9359a1920c85ffc62169d5de348310f2b6d1cd95027ca",
+          "base64": "ewogICJzdGF0dXMiOiAiUFVSRV9MT0NBTF9DSEVDS1NfUEFTUyIsCiAgImNoZWNrcyI6IFsKICAgICJzeW50aGV0aWMgcHJlc2VydmVkIHNlcTIwLzIyLzI1IHRyYW5zZmVyczQxLzQ0LzQ3IHJlZ3Jlc3Npb247IGFsbDI0IGludGVydmFsIG9yZGVycyBhY2NlcHRlZCwgZXh0cmEvbWlzc2luZyB0cmFuc2ZlcnMgYW5kIG11dGF0ZWQgb3JpZ2luYWwgaW50ZXJ2YWxzIHJlamVjdGVkOyBubyBJTyIsCiAgICAic3ludGhldGljIHByb2dyZXNzIGlkZW50aXR5L2ludGVydmFsIGJvdW5kczsgdW5yZWxhdGVkIGxpZmVjeWNsZSBsaW5lcyBwcmVzZXJ2ZWQ7IG9ubHkgRU9GL1JTVCBjYXBhY2l0eSBjbGFzc2VzIGFjY2VwdGVkIChubyByZWFsIElPKSIsCiAgICAiZnJhZ21lbnRlZC9leGFjdC1DTCByZXNwb25zZSBmcmFtaW5nIiwKICAgICJzdXJwbHVzL3RydW5jYXRpb24vZHVwbGljYXRlLUNML1RFL2hlYWQtYm9keSBsaW1pdHMvZm9sZGluZyByZWplY3RlZCIsCiAgICAiMjA0LzMwNCBvbWl0IENML1RFIGFuZCBjb3VudC9oYXNoIHplcm8gd2lyZSBib2R5OyBDTDAvYm9keS9kdXBsaWNhdGUtaGVhZGVyL1RFIHJlamVjdGVkIiwKICAgICJIRUFEIDIwMC80MDMvNDA0LzQwNSByZXF1aXJlIG9taXR0ZWQgQ0wvVEUgYW5kIHplcm8gd2lyZSBib2R5OyBvcmRpbmFyeSBHRVQgcmVtYWlucyBzdHJpY3QiLAogICAgIjIwMCBzdGlsbCByZXF1aXJlcyBjYW5vbmljYWwgdW5pcXVlIENMLCBKU09ONjRLaUIvc3RhdGljNU1pQi9kb3dubG9hZDUwTWlCIGNhcHMgdW5jaGFuZ2VkIiwKICAgICJiaW5hcnkgc3RyZWFtaW5nIGhhc2gvY291bnQgd2l0aG91dCByZXRhaW5lZCBib2R5OyB0cnVuY2F0aW9uL3N1cnBsdXMvNTBNaUIgY2FwIHJlamVjdGVkIiwKICAgICJaSVAgbWFuaWZlc3QgYW5kIGFsbCBwYXlsb2FkIGhhc2hlcyB2ZXJpZmllZDsgY29ycnVwdC92ZXJzaW9uL3BhdGgvY291bnQvc2l6ZSBpbnB1dHMgcmVqZWN0ZWQiLAogICAgIjgwMDAtc2FtcGxlLzUwMG1zIHNpbGVudCBQQ00gZml4dHVyZSBtZWV0cyBkb21haW4gbWluaW11bS9ieXRlLWxlbmd0aCBib3VuZHMiLAogICAgIjEyMDAwMC1ieXRlIHJlcXVlc3QgZnJhZ21lbnRhdGlvbiBhbmQgaGVhZC9ib2R5IGNvYWxlc2NpbmciLAogICAgIlJFQURZIGlkZW50aXR5IGFuZCBhY3R1YWwtZHJhaW4gZmluYWwgbGVkZ2VyIHJlcXVpcmVkOyBpbmRlcGVuZGVudCBicm93c2VyIHdpcmUtY291bnQgZmxvb3IsIGV4Y2x1ZGluZyBjYWNoZSBoaXRzIiwKICAgICJ2aXN1YWwgZXhhY3Qgc2luZ2xlLXNjb3BlIGRpc2Nsb3N1cmU6IGRlZmF1bHQzLzIwLCBpbmRlcGVuZGVudDBmaWxsKzcwLzgwY29tcG9uZW50LCBvdXRsaW5lIHJldGFpbnMgc3RvcmVkMy8yMDsgZXh0cmEvcmF3L3ZlcnNpb24vc2NvcGUvdHlwZSBhbmQgd3JvbmcgZml4dHVyZSByZWplY3RlZCIsCiAgICAidm9pY2UgY2FwYWJpbGl0eSBleGFjdCBjb21wbGV0ZSBtZXRhZGF0YS9saW1pdHMvdGFyZ2V0OiA2MyBtYWxmb3JtZWQgbW9kZWxzIHJlamVjdGVkOyBVTlZFUklGSUVEL1VOQVZBSUxBQkxFIGFuZCB0aWdodGVuZWQgYm91bmRzIGFjY2VwdGVkIiwKICAgICJ2b2ljZSBjYXBhYmlsaXR5IG1vZGVsIGV4YWN0IHRocmVlIEdFVHMgKG5vIENvb2tpZTQwMS9hdXRoMjAwL3JlcGVhdDIwMCksIHN0YWJsZSBmaWVsZHMgZXhjZXB0IGNpdmlsIHRpbWU7IGNoYW5nZWQgcmV2aXNpb24vcnVudGltZS9kZXZpY2UvbGltaXRzIHJlamVjdGVkIiwKICAgICJ2b2ljZSBjYXBhYmlsaXR5IHN1bW1hcnkgb21pdHMgY29va2llL0NTUkYvYm9keSBhbmQgZG9lcyBub3QgaW5mZXIgbmF0aXZlIHF1ZXJ5IGNvdW50LCBjYWNoZSBiZWhhdmlvciBvciBjdXJyZW50IGF1ZGliaWxpdHk7IG5vIElPIiwKICAgICJzeW50aGV0aWMgQ0xPU0UgZXhhY3QgdG9rZW4vc2NoZW1hL2FsYXJtMjVtcy9JTy1GcmFtZS1yZXRpcmVtZW50IG9yZGVyIGFuZCBpbW11dGFibGUtZmFjdCByZWplY3Rpb247IHF1ZXVlZCBiYXJlIGNvbXBsZXRpb24tYmVmb3JlLWNsb3NlIGFjY2VwdGVkIiwKICAgICJzeW50aGV0aWMgcHJlLWNvbm5lY3QgZXhhY3Q1ZTlucyBhY2NlcHRlZDsgKzFucy9yb3VuZGluZy9sb2NhbC1jbG9zZS90aW1lb3V0L2RlYWRTU0gvdW52ZXJpZmllZFRMUy9yYXctZGF0YSByZWplY3RlZCIsCiAgICAic3ludGhldGljIGZpdmUgY29uZmlybWVkIGRpcmVjdC10Y3BpcCBjaGFubmVscyB3aXRoIHJlbW90ZSBFT0Y7IHJlZnVzZWQvbWlzc2luZ2NvbmZpcm0vbG9jYWxFT0YvZm91cmNoYW5uZWxzL2RlYWRtYXN0ZXIgcmVqZWN0ZWQgKG5vIHJlYWwgU1NIKSIsCiAgICAicHVyZSBtb2NrZWQgb3JpZ2luYWwgVHVubmVsIGNvbnN0cnVjdGlvbjogb25seS1ObWFzdGVyLXZ2LCBtdXhjaGVjay9jYW5jZWwgcGxhaW4sIFJlbW90ZSBvcHRpb25zIHVuY2hhbmdlZDsgbm8gcHJvY2Vzcy9uZXR3b3JrIiwKICAgICJzeW50aGV0aWMgaW5kZXBlbmRlbnQgaGVhZGVyLW9ubHkgZmluYWwgdmFsaWRhdG9yIHJlcXVpcmVzNWFjdHVhbHRyYW5zZmVycy81Y2xvc2UgaGlzdG9yaWVzL3plcm9IVFRQL3plcm9IdWJzL3JlYWxEcmFpbi8yam9pbjsgb2xkIGJ1c2luZXNzIHZhbGlkYXRvciB1bmNoYW5nZWQiCiAgXSwKICAidGxzIjogIk5PVF9SVU4iLAogICJ3aW5kb3dzIjogIk5PVF9SVU4iLAogICJidXNpbmVzcyI6ICJOT1RfUlVOIgp9Cg=="
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-final.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-1",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--self-test"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-1.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-1.stderr.log",
+          "bytes": 748,
+          "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBzZWxmLXRlc3QgaXMgcHVyZSBsb2NhbDsgZG8gbm90IGNvbWJpbmUgd2l0aCByZW1vdGUgaW5wdXRzCg=="
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-2",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--browser"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-2.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-2.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-3",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--continuous-accept"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-3.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-3.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-4",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--voice-capabilities"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-4.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-4.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-5",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--visual-only"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-5.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-5.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-6",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--visual-fixture",
+        "OUTLINED"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-6.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-6.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-negative-7",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only",
+        "--browser-content",
+        "REMINDER"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-7.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-7.stderr.log",
+          "bytes": 798,
+          "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiBoZWFkZXItZGVhZGxpbmUtb25seSBpcyBpbmRlcGVuZGVudCBvZiBicm93c2VyL2NvbnRpbnVvdXMvdm9pY2UtY2FwYWJpbGl0aWVzL3Zpc3VhbC1vbmx5IGFuZCBjdXN0b20gZml4dHVyZXMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-no-remote-inputs",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--header-deadline-only"
+      ],
+      "actualExitCode": 2,
+      "expectedExitCode": 2,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-no-remote-inputs.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-no-remote-inputs.stderr.log",
+          "bytes": 753,
+          "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0Kd2luZG93cy10bHMtYnVzaW5lc3MtcHJvYmUucHk6IGVycm9yOiAtLWV4ZSwgLS1yZXBvcnQgYW5kIC0td2ViLWJ1bmRsZSByZXF1aXJlZCBmb3IgYWN0dWFsIGRpYWdub3N0aWMK"
+        }
+      }
+    },
+    {
+      "name": "editor-header-cli-help",
+      "arguments": [
+        "/config/.python/python/bin/python3",
+        "-B",
+        "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-tls-business-probe.py",
+        "--help"
+      ],
+      "actualExitCode": 0,
+      "expectedExitCode": 0,
+      "streams": {
+        "stdout": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help.stdout.log",
+          "bytes": 3156,
+          "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458",
+          "base64": "dXNhZ2U6IHdpbmRvd3MtdGxzLWJ1c2luZXNzLXByb2JlLnB5IFstaF0gWy0tc3NoLXRhcmdldCBTU0hfVEFSR0VUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taWRlbnRpdHkgSURFTlRJVFldIFstLWV4ZSBFWEVdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1yZXBvcnQgUkVQT1JUXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0td2ViLWJ1bmRsZSBXRUJfQlVORExFXSBbLS1icm93c2VyXQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0tYnJvd3Nlci1jb250ZW50IHtIT01FV09SSyxSRU1JTkRFUn1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS1jb250aW51b3VzLWFjY2VwdF0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFstLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH1dCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBbLS12b2ljZS1jYXBhYmlsaXRpZXNdIFstLXZpc3VhbC1vbmx5XQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgWy0taGVhZGVyLWRlYWRsaW5lLW9ubHldIFstLXNlbGYtdGVzdF0KClJ1biB0aGUgZXhwbGljaXQgZmluaXRlIFRMUy9zaGFyZWQtd29ya2VyIHN5bnRoZXRpYyBidXNpbmVzcyBkaWFnbm9zdGljLiBUaGUKZGVmYXVsdCBpcyBhIHJhdyBBUEkgY2xpZW50IHRocm91Z2ggYW4gb3duZWQgU1NIIGZvcndhcmQuIE9wdGlvbmFsIC0taGVhZGVyLQpkZWFkbGluZS1vbmx5IHNhbXBsZXMgYWN0dWFsIFRMUy9yYXcgaW5jb21wbGV0ZS1oZWFkZXIgY2xvc3VyZSB3aXRoaW4gYW4KdW5yb3VuZGVkIGNvbnNlcnZhdGl2ZSBwcmUtY29ubmVjdDVzIGJvdW5kOyBpdCBkb2VzIG5vdCByZXBsYWNlIHRoZSBvcmlnaW5hbApzdHJpY3QtUDAgZGVjaXNpb24gb3IgZXN0YWJsaXNoIGtlcm5lbCB0aW1lc3RhbXBzLiBPcHRpb25hbCAtLWJyb3dzZXIgYWxzbwpvYnNlcnZlcyBhY3R1YWwgaXNvbGF0ZWQgV2luZG93cyBFZGdlIFVJIGFnYWluc3QgdGhlIHNhbWUgbmF0aXZlIHNlcnZpY2UuIFRoaXMKaXMgbm90IGdlbmVyYWwgYnJvd3NlciBhY2NlcHRhbmNlLCBwcm9kdWN0aW9uLWxpc3RlbmVyIGVuYWJsZW1lbnQsIG5hdGl2ZQpzdHJpY3QtNXMgZXZpZGVuY2UsIGF1ZGlvIHBsYXliYWNrLCBvciBXaW5kb3dzIDcvMTAgY29tcGF0aWJpbGl0eSBldmlkZW5jZS4KUHJvamVjdCBjb2RlIHJ1bnMgb25seSBmcm9tIHRoZSBzdXBwbGllZCBkaWFnbm9zdGljIEVYRTsgLS1icm93c2VyIHVzZXMgdGhlCnNlcGFyYXRlbHkgb3duZWQgaW5zdGFsbGVkIEVkZ2UgcHJvY2Vzcy4gVGhlIGRpc3Bvc2FibGUgcHVibGljIGNlcnRpZmljYXRlIGlzCnRydXN0ZWQgaW4gdGhpcyBQeXRob24gY29udGV4dCBvbmx5OyBpdHMgcHJpdmF0ZSBrZXkgbmV2ZXIgbGVhdmVzIFdpbmRvd3MgYW5kCm5vIHN5c3RlbSB0cnVzdC9uZXR3b3JrIHNldHRpbmcgaXMgY2hhbmdlZC4KCm9wdGlvbnM6CiAgLWgsIC0taGVscCAgICAgICAgICAgIHNob3cgdGhpcyBoZWxwIG1lc3NhZ2UgYW5kIGV4aXQKICAtLXNzaC10YXJnZXQgU1NIX1RBUkdFVAogIC0taWRlbnRpdHkgSURFTlRJVFkKICAtLWV4ZSBFWEUKICAtLXJlcG9ydCBSRVBPUlQKICAtLXdlYi1idW5kbGUgV0VCX0JVTkRMRQogICAgICAgICAgICAgICAgICAgICAgICBFeGlzdGluZyBkZXZlbG9wbWVudCBaSVA7IG9ubHkgdmVyaWZpZWQgd2ViIG1hbmlmZXN0CiAgICAgICAgICAgICAgICAgICAgICAgIHBheWxvYWRzIGFyZSB1cGxvYWRlZAogIC0tYnJvd3NlciAgICAgICAgICAgICBBbHNvIHZlcmlmeSBpc29sYXRlZCBXaW5kb3dzIEVkZ2UgVUkgYWdhaW5zdCB0aGlzIHNhbWUKICAgICAgICAgICAgICAgICAgICAgICAgZmluaXRlIG5hdGl2ZSBzZXJ2aWNlCiAgLS1icm93c2VyLWNvbnRlbnQge0hPTUVXT1JLLFJFTUlOREVSfQogICAgICAgICAgICAgICAgICAgICAgICBFeHBsaWNpdCBpc29sYXRlZCBicm93c2VyIGpvdXJuZXk7IFJFTUlOREVSIHVzZXMgdGhlCiAgICAgICAgICAgICAgICAgICAgICAgIHJlYWwgYm90dG9tIHNob3J0Y3V0IGFuZCBubyBzdWJqZWN0LXZpc3VhbCByZXF1ZXN0cwogIC0tY29udGludW91cy1hY2NlcHQgICBBbHNvIHZlcmlmeSByZWFsIGlkbGUgQWNjZXB0RXggcmVwb3N0IGFuZCBmb3VyCiAgICAgICAgICAgICAgICAgICAgICAgIGFkbWl0dGVkIEpTT04gYm9kaWVzIHdpdGhpbiB0aGUgb3JpZ2luYWwgY2xpZW50L25hdGl2ZQogICAgICAgICAgICAgICAgICAgICAgICBkZWFkbGluZXM7IG5vdCBzdHJpY3QgVENQNXMgZXZpZGVuY2UKICAtLXZpc3VhbC1maXh0dXJlIHtGSUxMRURfREVGQVVMVCxGSUxMRURfWkVSTyxPVVRMSU5FRH0KICAgICAgICAgICAgICAgICAgICAgICAgRXhhY3QgZmluaXRlIGlzb2xhdGVkIHN5bnRoZXRpYyBkaXNwbGF5IGZpeHR1cmU7IG5vCiAgICAgICAgICAgICAgICAgICAgICAgIHByb2R1Y3Rpb24gc2V0dGluZ3MKICAtLXZvaWNlLWNhcGFiaWxpdGllcyAgQWxzbyBvYnNlcnZlIHRocmVlIHJlYWwgY2FwYWJpbGl0eSBHRVRzIGFmdGVyIHBhaXJpbmc7CiAgICAgICAgICAgICAgICAgICAgICAgIG5vIG5ldyBhdWRpbyBvcGVyYXRpb24gb3IgbmF0aXZlLXF1ZXJ5L2NhY2hlLWNvdW50CiAgICAgICAgICAgICAgICAgICAgICAgIGluZmVyZW5jZQogIC0tdmlzdWFsLW9ubHkgICAgICAgICBUYXJnZXQgb25seSB2aXN1YWwvc2NvcGUvcmVhZC1vbmx5IGNvbnRyYWN0IHdpdGhpbiB0aGUKICAgICAgICAgICAgICAgICAgICAgICAgb3JpZ2luYWwgY2xpZW50L25hdGl2ZSBidWRnZXRzCiAgLS1oZWFkZXItZGVhZGxpbmUtb25seQogICAgICAgICAgICAgICAgICAgICAgICBFeHBsaWNpdCBmaW5pdGUgZm91ciBpbmNvbXBsZXRlIFRMUyBoZWFkcyB0aGVuIG9uZSByYXcKICAgICAgICAgICAgICAgICAgICAgICAgVENQIGRlYWRsaW5lIHNhbXBsZTsgb3JpZ2luYWw1ZTlucyBjb25zZXJ2YXRpdmUgcHJlLQogICAgICAgICAgICAgICAgICAgICAgICBjb25uZWN0IGJvdW5kLCBub3QgcHJvZHVjdGlvbi9FU1RBQkxJU0hFRAogICAgICAgICAgICAgICAgICAgICAgICBjZXJ0aWZpY2F0aW9uCiAgLS1zZWxmLXRlc3QK"
+        },
+        "stderr": {
+          "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "base64": ""
+        }
+      }
+    }
+  ],
+  "oldSelftestGroups": 16,
+  "newSelftestGroups": 21,
+  "allOriginalSelftestGroupsStillPass": true,
+  "existingDefinitionsChanged": [
+    "ProgressReader",
+    "self_test",
+    "main"
+  ],
+  "unchangedExistingDefinitions": [
+    "HttpResponse",
+    "validate_ready",
+    "validate_native",
+    "json_bytes",
+    "request_fragments",
+    "Client",
+    "interval_key",
+    "intervals",
+    "unchanged_intervals",
+    "four_original_bodies_admitted",
+    "capacity_transport_rejection",
+    "exercise_idle_accept",
+    "PendingReceipt",
+    "reject_full_capacity",
+    "exercise_capacity_accept",
+    "silent_wav",
+    "require",
+    "static_mime",
+    "read_web_package",
+    "upload_web_package",
+    "exercise_head",
+    "exercise_static",
+    "authenticate_business",
+    "validate_voice_capabilities",
+    "exercise_voice_capabilities",
+    "validate_visual",
+    "exercise_visuals",
+    "exercise",
+    "cleanup_owned",
+    "self_test_voice_capabilities"
+  ],
+  "newDefinitions": [
+    "CloseReader",
+    "validate_header_sample",
+    "HeaderDeadlineTunnel",
+    "HeaderTracePending",
+    "validate_header_forward",
+    "await_header_forward",
+    "exercise_header_deadlines",
+    "validate_header_native",
+    "self_test_header_deadlines"
+  ],
+  "pureCliNegativeCases": 8
+}

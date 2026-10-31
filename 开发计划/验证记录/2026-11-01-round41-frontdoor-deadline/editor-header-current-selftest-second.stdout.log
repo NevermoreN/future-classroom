@@ -1,0 +1,30 @@
+{
+  "status": "PURE_LOCAL_CHECKS_PASS",
+  "checks": [
+    "synthetic preserved seq20/22/25 transfers41/44/47 regression; all24 interval orders accepted, extra/missing transfers and mutated original intervals rejected; no IO",
+    "synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)",
+    "fragmented/exact-CL response framing",
+    "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+    "204/304 omit CL/TE and count/hash zero wire body; CL0/body/duplicate-header/TE rejected",
+    "HEAD 200/403/404/405 require omitted CL/TE and zero wire body; ordinary GET remains strict",
+    "200 still requires canonical unique CL, JSON64KiB/static5MiB/download50MiB caps unchanged",
+    "binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected",
+    "ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected",
+    "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+    "120000-byte request fragmentation and head/body coalescing",
+    "READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits",
+    "visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected",
+    "voice capability exact complete metadata/limits/target: 63 malformed models rejected; UNVERIFIED/UNAVAILABLE and tightened bounds accepted",
+    "voice capability model exact three GETs (no Cookie401/auth200/repeat200), stable fields except civil time; changed revision/runtime/device/limits rejected",
+    "voice capability summary omits cookie/CSRF/body and does not infer native query count, cache behavior or current audibility; no IO",
+    "synthetic CLOSE exact token/schema/alarm25ms/IO-Frame-retirement order and immutable-fact rejection; queued bare completion-before-close accepted",
+    "synthetic pre-connect exact5e9ns accepted; +1ns/rounding/local-close/timeout/deadSSH/unverifiedTLS/raw-data rejected",
+    "synthetic five confirmed direct-tcpip channels with remote EOF; refused/missingconfirm/localEOF/fourchannels/deadmaster rejected (no real SSH)",
+    "pure mocked original Tunnel construction: only-Nmaster-vv, muxcheck/cancel plain, Remote options unchanged; no process/network",
+    "five unique expected cases plus TLS4 actual dripCalls strictint>=2; missing/0/1/bool/duplicate rejected despite otherwise passing native counts",
+    "synthetic independent header-only final validator requires5actualtransfers/5close histories/zeroHTTP/zeroHubs/realDrain/2join; old business validator unchanged"
+  ],
+  "tls": "NOT_RUN",
+  "windows": "NOT_RUN",
+  "business": "NOT_RUN"
+}

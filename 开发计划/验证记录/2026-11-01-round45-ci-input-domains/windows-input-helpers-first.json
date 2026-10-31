@@ -1,0 +1,257 @@
+{
+  "status": "PASS",
+  "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+  "fixture": {
+    "path": "/tmp/fc-round45-ci-input-domains-evidence/input-domain-powershell-fixture-first.ps1",
+    "bytes": 76817,
+    "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849"
+  },
+  "command": [
+    "ssh",
+    "-T",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "future-classroom-win11",
+    "powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand CgAkAEUAcgByAG8AcgBBAGMAdABpAG8AbgBQAHIAZQBmAGUAcgBlAG4AYwBlAD0AJwBTAHQAbwBwACcAOwAgACQAUAByAG8AZwByAGUAcwBzAFAAcgBlAGYAZQByAGUAbgBjAGUAPQAnAFMAaQBsAGUAbgB0AGwAeQBDAG8AbgB0AGkAbgB1AGUAJwA7AAoAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJABPAHUAdABwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnADsACgAkAG4AbwBuAGMAZQA9ACcAcgA0ADUALQBpAG4AcAB1AHQALQBoAGUAbABwAGUAcgBzAC0ANgBhAGIANwA2AGUANAA2ADMAMwA5ADkANAAzAGUAOQA5ADAANgAwAGIAMgBmADQAZQAxADMANAAyAGIANAAxACcAOwAkAHMAZQBsAGYAPQBbAEQAaQBhAGcAbgBvAHMAdABpAGMAcwAuAFAAcgBvAGMAZQBzAHMAXQA6ADoARwBlAHQAQwB1AHIAcgBlAG4AdABQAHIAbwBjAGUAcwBzACgAKQA7AAoAJABpAGQAZQBuAHQAaQB0AHkAPQBAAHsAbgBvAG4AYwBlAD0AJABuAG8AbgBjAGUAOwBwAGkAZAA9ACQAUABJAEQAOwBzAHQAYQByAHQAVABpAGMAawBzAD0AJABzAGUAbABmAC4AUwB0AGEAcgB0AFQAaQBtAGUALgBUAG8AVQBuAGkAdgBlAHIAcwBhAGwAVABpAG0AZQAoACkALgBUAGkAYwBrAHMAOwBpAG0AYQBnAGUAPQAkAHMAZQBsAGYALgBNAGEAaQBuAE0AbwBkAHUAbABlAC4ARgBpAGwAZQBOAGEAbQBlAH0AOwAKAFsAQwBvAG4AcwBvAGwAZQBdADoAOgBXAHIAaQB0AGUATABpAG4AZQAoACcATwBXAE4ARQBSACAAJwArACgAJABpAGQAZQBuAHQAaQB0AHkAfABDAG8AbgB2AGUAcgB0AFQAbwAtAEoAcwBvAG4AIAAtAEMAbwBtAHAAcgBlAHMAcwApACkAOwAkAHMAZQBsAGYALgBEAGkAcwBwAG8AcwBlACgAKQA7AAoAJABvAGsAPQAkAGYAYQBsAHMAZQA7AAoAdAByAHkAIAB7ACQAcwBvAHUAcgBjAGUAPQBbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApADsAIAAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoACQAcwBvAHUAcgBjAGUAKQApADsAIAAkAG8AawA9ACQAdAByAHUAZQB9ACAAYwBhAHQAYwBoACAAewBbAEMAbwBuAHMAbwBsAGUAXQA6ADoARQByAHIAbwByAC4AVwByAGkAdABlAEwAaQBuAGUAKAAkAF8ALgBUAG8AUwB0AHIAaQBuAGcAKAApACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoARQByAHIAbwByAC4AVwByAGkAdABlAEwAaQBuAGUAKAAkAF8ALgBTAGMAcgBpAHAAdABTAHQAYQBjAGsAVAByAGEAYwBlACkAfQAKAGYAaQBuAGEAbABsAHkAIAB7AFsAQwBvAG4AcwBvAGwAZQBdADoAOgBXAHIAaQB0AGUATABpAG4AZQAoACcARQBYAEkAVAAgACcAKwAoAEAAewBuAG8AbgBjAGUAPQAkAG4AbwBuAGMAZQA7AHAAaQBkAD0AJABQAEkARAA7AGMAbwBtAHAAbABlAHQAZQBkAD0AJAB0AHIAdQBlADsAZgBpAHgAdAB1AHIAZQBTAHUAYwBjAGUAZQBkAGUAZAA9ACQAbwBrAH0AfABDAG8AbgB2AGUAcgB0AFQAbwAtAEoAcwBvAG4AIAAtAEMAbwBtAHAAcgBlAHMAcwApACkAfQA7AAoAaQBmACgAJABvAGsAKQB7AGUAeABpAHQAIAAwAH0AZQBsAHMAZQB7AGUAeABpAHQAIAAxAH0ACgA="
+  ],
+  "wrapper": "\n$ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue';\n[Console]::InputEncoding=[Text.UTF8Encoding]::new($false);[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;\n$nonce='r45-input-helpers-6ab76e46339943e99060b2f4e1342b41';$self=[Diagnostics.Process]::GetCurrentProcess();\n$identity=@{nonce=$nonce;pid=$PID;startTicks=$self.StartTime.ToUniversalTime().Ticks;image=$self.MainModule.FileName};\n[Console]::WriteLine('OWNER '+($identity|ConvertTo-Json -Compress));$self.Dispose();\n$ok=$false;\ntry {$source=[Console]::In.ReadToEnd(); & ([ScriptBlock]::Create($source)); $ok=$true} catch {[Console]::Error.WriteLine($_.ToString());[Console]::Error.WriteLine($_.ScriptStackTrace)}\nfinally {[Console]::WriteLine('EXIT '+(@{nonce=$nonce;pid=$PID;completed=$true;fixtureSucceeded=$ok}|ConvertTo-Json -Compress))};\nif($ok){exit 0}else{exit 1}\n",
+  "stdin": {
+    "bytes": 76817,
+    "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849"
+  },
+  "timeoutSeconds": 60,
+  "startedUtc": "2026-10-31T22:37:46.428856+00:00",
+  "ciEntrypointExecuted": false,
+  "compilerExecuted": false,
+  "exitCode": 0,
+  "durationSeconds": 1.3661559701431543,
+  "stdout": {
+    "bytes": 3245,
+    "sha256": "70f7cc8b7b47b700ed2730ce1099b530e99e88f464720252f89e191a3a0447d1",
+    "base64": "T1dORVIgeyJub25jZSI6InI0NS1pbnB1dC1oZWxwZXJzLTZhYjc2ZTQ2MzM5OTQzZTk5MDYwYjJmNGUxMzQyYjQxIiwicGlkIjozMTgwOCwic3RhcnRUaWNrcyI6NjM5MjkwODMwNjY2NDM1MzYyLCJpbWFnZSI6IkM6XFxXaW5kb3dzXFxTeXN0ZW0zMlxcV2luZG93c1Bvd2VyU2hlbGxcXHYxLjBcXHBvd2Vyc2hlbGwuZXhlIn0NCnsic3RhdHVzIjoiUEFTU19QT1dFUlNIRUxMX0hFTFBFUlNfT05MWSIsInBvd2Vyc2hlbGwiOiI1LjEuMjYxMDAuOTcxMSIsInNvdXJjZV9zaGEyNTYiOiJlZDI2Yzk5MzIzMjVkMzc3YmJiZjRlYWY2M2FhZDI5ZDc1ZmMwY2M4YWQ3NzU2MWIxMTIxZjMzODkwMjRjNDE4IiwiZnVsbF9zb3VyY2VfYXN0X2Vycm9ycyI6MCwiZXh0cmFjdGVkX2Z1bmN0aW9ucyI6W3sibmFtZSI6IkdldC1Tb3VyY2VJbnB1dERvbWFpbiIsImNoYXJhY3RlcnMiOjQ5OX0seyJuYW1lIjoiQ29udmVydEZyb20tU291cmNlR2l0VHJlZSIsImNoYXJhY3RlcnMiOjE3MTB9LHsibmFtZSI6IkFzc2VydC1Ob0hpc3RvcmljYWxCdWlsZFJlZmVyZW5jZSIsImNoYXJhY3RlcnMiOjkzNH0seyJuYW1lIjoiSGFzaC1JbnB1dHMiLCJjaGFyYWN0ZXJzIjozMDUwfSx7Im5hbWUiOiJOZXctU291cmNlRG9tYWluU3VtbWFyeSIsImNoYXJhY3RlcnMiOjE2NDR9LHsibmFtZSI6IldyaXRlLU5ld0pzb24iLCJjaGFyYWN0ZXJzIjo0NTh9XSwiY2hlY2tzIjpbeyJuYW1lIjoiZXhhY3QgcHJlZml4IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJuZWFyIHByZWZpeCBzdGF5cyBTSEEyNTY6IOW8gOWPkeiuoeWIki/pqozor4HorrDlvZUiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im5lYXIgcHJlZml4IHN0YXlzIFNIQTI1Njog5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS3ml6cvYSIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibmVhciBwcmVmaXggc3RheXMgU0hBMjU2OiDlvIDlj5HorqHliJIv6aqM6K+B6K6w5b2VeC9hIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJuZWFyIHByZWZpeCBzdGF5cyBTSEEyNTY6IGEv5byA5Y+R6K6h5YiSL+mqjOivgeiusOW9lS94IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25jYW5vbmljYWw6ICIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibm9uY2Fub25pY2FsOiAuLi94IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25jYW5vbmljYWw6IGEvLi4veCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibm9uY2Fub25pY2FsOiBhLy94IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25jYW5vbmljYWw6IGEvLi94IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25jYW5vbmljYWw6IC94IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25jYW5vbmljYWw6IEM6L3giLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im5vbmNhbm9uaWNhbDogYVxceCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibm9uY2Fub25pY2FsOiBhP3giLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im5vbmNhbm9uaWNhbDogYVx0eCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibWV0YWRhdGEgbW9kZS90eXBlL29pZC9zaXplIHByZXNlcnZlZCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibWlzc2luZyBmaW5hbCBOVUwiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6InN5bWxpbmsgbW9kZSIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiZ2l0bGluayIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiYmFkIFNIQTEiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImJsb2IgaW5kaXZpZHVhbCBsaW1pdCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiY2FzZSBjb2xsaXNpb24iLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImR1cGxpY2F0ZSBwYXRoIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiIxMDAwMSBtZXRhZGF0YSBwYXRocyIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibWV0YWRhdGEgc3Rkb3V0IGJvdW5kIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJoaXN0b3J5IGlzIG5vdCBjb250ZW50LXJlYWQgb3IgaGFzaGVkLCBub3JtYWwgZmlsZSBoYXNoZWQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6InN1bW1hcnkgaG9uZXN0bHkgc2VwYXJhdGVzIGJpbmRpbmcgdHlwZXMiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6InNhbWUtbGVuZ3RoIG9yZGluYXJ5IGNvbnRlbnQgY2hhbmdlcyBTSEEyNTYiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6InRyYWNrZWQvSEVBRCBjb3VudCBtaXNtYXRjaCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoidW5rbm93biB0cmFja2VkIHBhdGgiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImR1cGxpY2F0ZSB0cmFja2VkIHBhdGgiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6InRyYWNrZWQgY291bnQgYm91bmQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImV4cGxpY2l0IGhpc3RvcmljYWwgUnVzdCByZWZlcmVuY2UgcmVqZWN0ZWQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImV4cGxpY2l0IGhpc3RvcmljYWwgUnVzdCByZWZlcmVuY2UgcmVqZWN0ZWQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImV4cGxpY2l0IGhpc3RvcmljYWwgUnVzdCByZWZlcmVuY2UgcmVqZWN0ZWQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6IkNhcmdvIHJlZmVyZW5jZSByZWplY3RlZCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiQ2FyZ28gY29uZmlnIHJlZmVyZW5jZSByZWplY3RlZCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibm9ybWFsIGZpeHR1cmUgaW5jbHVkZSByZXRhaW5lZCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiaGlzdG9yaWNhbCBjaGVja291dCBpbmRpdmlkdWFsIGJvdW5kIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJyZWd1bGFyIGxlYWYgdW5kZXIganVuY3Rpb24gcmVqZWN0ZWQiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im1hbmlmZXN0IHdyaXRlIGJvdW5kZWQgYmVmb3JlIENyZWF0ZU5ldyIsInBhc3NlZCI6dHJ1ZX1dLCJjaV9lbnRyeXBvaW50X2V4ZWN1dGVkIjpmYWxzZSwiY29tcGlsZXJfZXhlY3V0ZWQiOmZhbHNlLCJydW50aW1lX29yX2NpX2NvbXBpbGUiOiJOT1RfUlVOIiwibGFyZ2VfYWdncmVnYXRlX2xpbWl0IjoiUHl0aG9uIG1vZGVsICsgb3JpZ2luYWwgY29uc3RhbnQvc3RhdGljIGNoZWNrOyBubyAyNTZNaUIgYWxsb2NhdGlvbiBpbiBQUyBmaXh0dXJlIiwicm9vdF9yZW1vdmVkIjp0cnVlfQ0KRVhJVCB7Im5vbmNlIjoicjQ1LWlucHV0LWhlbHBlcnMtNmFiNzZlNDYzMzk5NDNlOTkwNjBiMmY0ZTEzNDJiNDEiLCJmaXh0dXJlU3VjY2VlZGVkIjp0cnVlLCJwaWQiOjMxODA4LCJjb21wbGV0ZWQiOnRydWV9DQo=",
+    "utf8": "OWNER {\"nonce\":\"r45-input-helpers-6ab76e46339943e99060b2f4e1342b41\",\"pid\":31808,\"startTicks\":639290830666435362,\"image\":\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"}\r\n{\"status\":\"PASS_POWERSHELL_HELPERS_ONLY\",\"powershell\":\"5.1.26100.9711\",\"source_sha256\":\"ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418\",\"full_source_ast_errors\":0,\"extracted_functions\":[{\"name\":\"Get-SourceInputDomain\",\"characters\":499},{\"name\":\"ConvertFrom-SourceGitTree\",\"characters\":1710},{\"name\":\"Assert-NoHistoricalBuildReference\",\"characters\":934},{\"name\":\"Hash-Inputs\",\"characters\":3050},{\"name\":\"New-SourceDomainSummary\",\"characters\":1644},{\"name\":\"Write-NewJson\",\"characters\":458}],\"checks\":[{\"name\":\"exact prefix\",\"passed\":true},{\"name\":\"near prefix stays SHA256: 开发计划/验证记录\",\"passed\":true},{\"name\":\"near prefix stays SHA256: 开发计划/验证记录-旧/a\",\"passed\":true},{\"name\":\"near prefix stays SHA256: 开发计划/验证记录x/a\",\"passed\":true},{\"name\":\"near prefix stays SHA256: a/开发计划/验证记录/x\",\"passed\":true},{\"name\":\"noncanonical: \",\"passed\":true},{\"name\":\"noncanonical: ../x\",\"passed\":true},{\"name\":\"noncanonical: a/../x\",\"passed\":true},{\"name\":\"noncanonical: a//x\",\"passed\":true},{\"name\":\"noncanonical: a/./x\",\"passed\":true},{\"name\":\"noncanonical: /x\",\"passed\":true},{\"name\":\"noncanonical: C:/x\",\"passed\":true},{\"name\":\"noncanonical: a\\\\x\",\"passed\":true},{\"name\":\"noncanonical: a?x\",\"passed\":true},{\"name\":\"noncanonical: a\\tx\",\"passed\":true},{\"name\":\"metadata mode/type/oid/size preserved\",\"passed\":true},{\"name\":\"missing final NUL\",\"passed\":true},{\"name\":\"symlink mode\",\"passed\":true},{\"name\":\"gitlink\",\"passed\":true},{\"name\":\"bad SHA1\",\"passed\":true},{\"name\":\"blob individual limit\",\"passed\":true},{\"name\":\"case collision\",\"passed\":true},{\"name\":\"duplicate path\",\"passed\":true},{\"name\":\"10001 metadata paths\",\"passed\":true},{\"name\":\"metadata stdout bound\",\"passed\":true},{\"name\":\"history is not content-read or hashed, normal file hashed\",\"passed\":true},{\"name\":\"summary honestly separates binding types\",\"passed\":true},{\"name\":\"same-length ordinary content changes SHA256\",\"passed\":true},{\"name\":\"tracked/HEAD count mismatch\",\"passed\":true},{\"name\":\"unknown tracked path\",\"passed\":true},{\"name\":\"duplicate tracked path\",\"passed\":true},{\"name\":\"tracked count bound\",\"passed\":true},{\"name\":\"explicit historical Rust reference rejected\",\"passed\":true},{\"name\":\"explicit historical Rust reference rejected\",\"passed\":true},{\"name\":\"explicit historical Rust reference rejected\",\"passed\":true},{\"name\":\"Cargo reference rejected\",\"passed\":true},{\"name\":\"Cargo config reference rejected\",\"passed\":true},{\"name\":\"normal fixture include retained\",\"passed\":true},{\"name\":\"historical checkout individual bound\",\"passed\":true},{\"name\":\"regular leaf under junction rejected\",\"passed\":true},{\"name\":\"manifest write bounded before CreateNew\",\"passed\":true}],\"ci_entrypoint_executed\":false,\"compiler_executed\":false,\"runtime_or_ci_compile\":\"NOT_RUN\",\"large_aggregate_limit\":\"Python model + original constant/static check; no 256MiB allocation in PS fixture\",\"root_removed\":true}\r\nEXIT {\"nonce\":\"r45-input-helpers-6ab76e46339943e99060b2f4e1342b41\",\"fixtureSucceeded\":true,\"pid\":31808,\"completed\":true}\r\n"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base64": "",
+    "utf8": ""
+  },
+  "processOwner": {
+    "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+    "pid": 31808,
+    "startTicks": 639290830666435362,
+    "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  "remoteExitRecord": {
+    "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+    "fixtureSucceeded": true,
+    "pid": 31808,
+    "completed": true
+  },
+  "result": {
+    "status": "PASS_POWERSHELL_HELPERS_ONLY",
+    "powershell": "5.1.26100.9711",
+    "source_sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+    "full_source_ast_errors": 0,
+    "extracted_functions": [
+      {
+        "name": "Get-SourceInputDomain",
+        "characters": 499
+      },
+      {
+        "name": "ConvertFrom-SourceGitTree",
+        "characters": 1710
+      },
+      {
+        "name": "Assert-NoHistoricalBuildReference",
+        "characters": 934
+      },
+      {
+        "name": "Hash-Inputs",
+        "characters": 3050
+      },
+      {
+        "name": "New-SourceDomainSummary",
+        "characters": 1644
+      },
+      {
+        "name": "Write-NewJson",
+        "characters": 458
+      }
+    ],
+    "checks": [
+      {
+        "name": "exact prefix",
+        "passed": true
+      },
+      {
+        "name": "near prefix stays SHA256: 开发计划/验证记录",
+        "passed": true
+      },
+      {
+        "name": "near prefix stays SHA256: 开发计划/验证记录-旧/a",
+        "passed": true
+      },
+      {
+        "name": "near prefix stays SHA256: 开发计划/验证记录x/a",
+        "passed": true
+      },
+      {
+        "name": "near prefix stays SHA256: a/开发计划/验证记录/x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: ",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: ../x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a/../x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a//x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a/./x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: /x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: C:/x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a\\x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a?x",
+        "passed": true
+      },
+      {
+        "name": "noncanonical: a\tx",
+        "passed": true
+      },
+      {
+        "name": "metadata mode/type/oid/size preserved",
+        "passed": true
+      },
+      {
+        "name": "missing final NUL",
+        "passed": true
+      },
+      {
+        "name": "symlink mode",
+        "passed": true
+      },
+      {
+        "name": "gitlink",
+        "passed": true
+      },
+      {
+        "name": "bad SHA1",
+        "passed": true
+      },
+      {
+        "name": "blob individual limit",
+        "passed": true
+      },
+      {
+        "name": "case collision",
+        "passed": true
+      },
+      {
+        "name": "duplicate path",
+        "passed": true
+      },
+      {
+        "name": "10001 metadata paths",
+        "passed": true
+      },
+      {
+        "name": "metadata stdout bound",
+        "passed": true
+      },
+      {
+        "name": "history is not content-read or hashed, normal file hashed",
+        "passed": true
+      },
+      {
+        "name": "summary honestly separates binding types",
+        "passed": true
+      },
+      {
+        "name": "same-length ordinary content changes SHA256",
+        "passed": true
+      },
+      {
+        "name": "tracked/HEAD count mismatch",
+        "passed": true
+      },
+      {
+        "name": "unknown tracked path",
+        "passed": true
+      },
+      {
+        "name": "duplicate tracked path",
+        "passed": true
+      },
+      {
+        "name": "tracked count bound",
+        "passed": true
+      },
+      {
+        "name": "explicit historical Rust reference rejected",
+        "passed": true
+      },
+      {
+        "name": "explicit historical Rust reference rejected",
+        "passed": true
+      },
+      {
+        "name": "explicit historical Rust reference rejected",
+        "passed": true
+      },
+      {
+        "name": "Cargo reference rejected",
+        "passed": true
+      },
+      {
+        "name": "Cargo config reference rejected",
+        "passed": true
+      },
+      {
+        "name": "normal fixture include retained",
+        "passed": true
+      },
+      {
+        "name": "historical checkout individual bound",
+        "passed": true
+      },
+      {
+        "name": "regular leaf under junction rejected",
+        "passed": true
+      },
+      {
+        "name": "manifest write bounded before CreateNew",
+        "passed": true
+      }
+    ],
+    "ci_entrypoint_executed": false,
+    "compiler_executed": false,
+    "runtime_or_ci_compile": "NOT_RUN",
+    "large_aggregate_limit": "Python model + original constant/static check; no 256MiB allocation in PS fixture",
+    "root_removed": true
+  }
+}

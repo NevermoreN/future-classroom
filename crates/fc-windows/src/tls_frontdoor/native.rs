@@ -1,8 +1,9 @@
 //! Finite loopback evidence for owned TLS execution. This is not a production
 //! listener and does not prove the strict first-connection scheduler deadline.
 use super::{
-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptSnapshot, TlsError,
-    BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
+    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptClose, TlsAcceptSnapshot,
+    TlsCloseSnapshot, TlsError, TlsHeaderClose, BUFFER_BYTES, CONNECTION_SLOTS,
+    HEADER_CLOSE_RESERVE, PLAINTEXT_BYTES,
 };
 use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
 use fc_protocol::http1::{
@@ -31,6 +32,11 @@ mod accept;
 mod stream;
 pub use stream::{TlsHttpEvent, TlsHttpHost};
 const BUDGET: Duration = Duration::from_secs(5);
+fn header_close_alarm(hard_deadline: Instant) -> Instant {
+    hard_deadline
+        .checked_sub(HEADER_CLOSE_RESERVE)
+        .unwrap_or(hard_deadline)
+}
 static OWNER_ACTIVE: AtomicBool = AtomicBool::new(false);
 static OWNER_FAULTED: AtomicBool = AtomicBool::new(false);
 
@@ -136,6 +142,7 @@ struct Report {
     parsed_requests: usize,
     shutdown_tokens_sent: usize,
     explicit_retirements: usize,
+    close_observations: TlsCloseSnapshot,
 }
 struct Owner {
     resources: ManuallyDrop<Resources>,
@@ -165,18 +172,45 @@ fn check(result: i32, stage: &str) -> Result<(), String> {
     }
 }
 fn close(socket: &mut SOCKET, abortive: bool) -> Result<(), String> {
+    close_with(
+        socket,
+        abortive,
+        |socket, abortive| {
+            // SAFETY: the original descriptor is still owned by this Net
+            // domain. Failure must not silently turn an abortive close into
+            // an unchecked graceful one.
+            unsafe {
+                if abortive {
+                    check(
+                        setsockopt(socket, SOL_SOCKET, SO_LINGER, Some(&[1, 0, 0, 0])),
+                        "SO_LINGER abortive close",
+                    )
+                } else {
+                    let _ = shutdown(socket, SD_SEND);
+                    Ok(())
+                }
+            }
+        },
+        |socket| {
+            // SAFETY: only this owner releases its exact descriptor.
+            unsafe { check(closesocket(socket), "closesocket") }
+        },
+    )
+}
+fn close_with(
+    socket: &mut SOCKET,
+    abortive: bool,
+    configure: impl FnOnce(SOCKET, bool) -> Result<(), String>,
+    release: impl FnOnce(SOCKET) -> Result<(), String>,
+) -> Result<(), String> {
     if *socket == INVALID_SOCKET {
         return Ok(());
     }
-    // SAFETY: the single owner closes its descriptor, without freeing any
-    // associated OVERLAPPED memory or treating this as cancellation completion.
-    unsafe {
-        if abortive {
-            let _ = setsockopt(*socket, SOL_SOCKET, SO_LINGER, Some(&[1, 0, 0, 0]));
-        } else {
-            let _ = shutdown(*socket, SD_SEND);
-        }
-        check(closesocket(*socket), "closesocket")?;
+    if let Err(error) = configure(*socket, abortive).and_then(|()| release(*socket)) {
+        // Retain the exact descriptor on either failure. No replacement domain
+        // may be admitted even if a later shutdown retry happens to succeed.
+        OWNER_FAULTED.store(true, Ordering::Release);
+        return Err(error);
     }
     *socket = INVALID_SOCKET;
     Ok(())
@@ -401,6 +435,35 @@ impl Owner {
     }
     fn close_slot(&mut self, index: usize, abortive: bool) -> Result<(), String> {
         let expired = self.expired(index);
+        let began_at = Instant::now();
+        let slot = &self.resources.slots[index];
+        if slot.phase != Phase::Closed && slot.socket != INVALID_SOCKET && expired {
+            if let Some(hard_deadline) = slot
+                .stream
+                .as_ref()
+                .and_then(stream::Stream::header_deadline)
+            {
+                self.report.close_observations.header_begins = self
+                    .report
+                    .close_observations
+                    .header_begins
+                    .saturating_add(1);
+                self.report.close_observations.headers[index] = Some(TlsHeaderClose {
+                    token: slot.token,
+                    hard_deadline,
+                    alarm: header_close_alarm(hard_deadline),
+                    began_at,
+                    socket_close_began_at: None,
+                    socket_returned_at: None,
+                    failed: false,
+                    io_pending_at_close: slot.pending.is_some(),
+                    io_returned_at: None,
+                    frame_pending_at_close: slot.frame.is_none(),
+                    frame_returned_at: None,
+                    retirement_confirmed_at: None,
+                });
+            }
+        }
         let listener = self.resources.listener;
         let slot = &mut self.resources.slots[index];
         if slot.phase != Phase::Closed && slot.socket != INVALID_SOCKET {
@@ -440,7 +503,44 @@ impl Owner {
                 );
             }
         }
-        close(&mut slot.socket, abortive)
+        let token = slot.token;
+        let had_socket = slot.socket != INVALID_SOCKET;
+        if had_socket {
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| o.token == token)
+            {
+                observation
+                    .socket_close_began_at
+                    .get_or_insert_with(Instant::now);
+            }
+        }
+        let result = close(&mut slot.socket, abortive);
+        if had_socket {
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| o.token == token)
+            {
+                if result.is_ok() {
+                    if observation.socket_returned_at.is_none() {
+                        observation.socket_returned_at = Some(Instant::now());
+                        self.report.close_observations.header_socket_returns = self
+                            .report
+                            .close_observations
+                            .header_socket_returns
+                            .saturating_add(1);
+                    }
+                } else {
+                    observation.failed = true;
+                    self.report.close_observations.header_failures = self
+                        .report
+                        .close_observations
+                        .header_failures
+                        .saturating_add(1);
+                }
+            }
+        }
+        result
     }
     fn prepare_io(&mut self, index: usize) -> Result<(), String> {
         let slot = &self.resources.slots[index];
@@ -643,6 +743,16 @@ impl Owner {
             }
         }
         self.resources.slots[index].frame = Some(frame);
+        if let Some(observation) = self.report.close_observations.headers[index]
+            .as_mut()
+            .filter(|o| {
+                o.token == self.resources.slots[index].token
+                    && o.frame_pending_at_close
+                    && o.frame_returned_at.is_none()
+            })
+        {
+            observation.frame_returned_at = Some(Instant::now());
+        }
         if call == Call::Retire {
             if self.stopping && result == Err(TlsError::Stopped) {
                 // A queued retirement can be negatively returned on stop.
@@ -657,6 +767,12 @@ impl Owner {
                 return Err("TLS retirement before native IO returned".into());
             }
             slot.retired = true;
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| o.token == slot.token)
+            {
+                observation.retirement_confirmed_at = Some(Instant::now());
+            }
             slot.wipe_retired_http();
             if let Some(stream) = slot.stream.as_mut() {
                 stream.retired_event = true;
@@ -861,6 +977,16 @@ impl Owner {
                 return Err("TLS completion key mismatch".into());
             }
             self.resources.slots[index].pending = None;
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| {
+                    o.token == self.resources.slots[index].token
+                        && o.io_pending_at_close
+                        && o.io_returned_at.is_none()
+                })
+            {
+                observation.io_returned_at = Some(Instant::now());
+            }
             self.report.completions += 1;
             if self.stopping || result.is_err() {
                 self.close_slot(index, true)?;
@@ -983,6 +1109,9 @@ impl Owner {
         Ok(())
     }
     fn poll(&mut self) -> Result<(), String> {
+        if OWNER_FAULTED.load(Ordering::Acquire) && !self.stopping {
+            return Err("TLS native cleanup fault; only original shutdown may continue".into());
+        }
         if self.http_mode && !self.stopping {
             self.expire_bare_accept(Instant::now())?;
             for index in 0..CONNECTION_SLOTS {
@@ -1038,6 +1167,12 @@ impl Owner {
             // No call ever bound an SSPI context to this token. Actual native
             // IO return plus its unique frame proves this empty slot retired.
             slot.retired = true;
+            if let Some(observation) = self.report.close_observations.headers[index]
+                .as_mut()
+                .filter(|o| o.token == slot.token)
+            {
+                observation.retirement_confirmed_at = Some(Instant::now());
+            }
             slot.wipe_retired_http();
             slot.stream.as_mut().unwrap().retired_event = true;
             return Ok(());
@@ -1177,6 +1312,16 @@ impl Owner {
                     .iter()
                     .filter(|slot| slot.frame.is_some())
                     .count();
+                for (index, slot) in self.resources.slots.iter().enumerate() {
+                    if let Some(observation) = self.report.close_observations.headers[index]
+                        .as_mut()
+                        .filter(|o| o.token == slot.token)
+                    {
+                        observation
+                            .retirement_confirmed_at
+                            .get_or_insert_with(Instant::now);
+                    }
+                }
                 // SAFETY: all IOCP packets and the actual SSPI thread have
                 // terminated. Check real resource release before reporting a
                 // completed cleanup; failures retain the bounded owner.

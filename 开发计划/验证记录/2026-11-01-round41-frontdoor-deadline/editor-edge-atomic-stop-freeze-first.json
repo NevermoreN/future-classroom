@@ -1,0 +1,234 @@
+{
+  "schema": "fc.r41.edge-atomic-stop-freeze.v1",
+  "status": "SOURCE_FROZEN_STATIC_AND_ACTUAL_WINDOWS_SYNTHETIC_FILE_TESTS_PASS",
+  "atUtc": "2026-10-31T22:29:34.829065+00:00",
+  "files": [
+    {
+      "path": "scripts/windows-test-edge-owner.py",
+      "beforeBytes": 51071,
+      "beforeSha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-first.diff",
+    "bytes": 5323,
+    "sha256": "83e040e9c8d6983ece51dfefcf505aa21b7a1e0729284aab773bb621ae6bd21f"
+  },
+  "nativeBlocks": [
+    {
+      "name": "CSHARP",
+      "bytes": 12642,
+      "sha256": "b700a971ac39524b6696ac2850b555e248618806ea85782b26354b2dd20882e9",
+      "unchanged": true
+    },
+    {
+      "name": "COMMON",
+      "bytes": 1247,
+      "sha256": "410860a1c3319cfbadb4d7f7426133d9454ac5cdfdf907b671d125a068cf696a",
+      "unchanged": true
+    },
+    {
+      "name": "SUPERVISE",
+      "bytes": 6520,
+      "sha256": "309e6804b22000d36bf9005bbe47f0118b2989ead195688863b60e31207349ab",
+      "unchanged": true
+    },
+    {
+      "name": "CAPTURE",
+      "bytes": 813,
+      "sha256": "ac52f9cdac8880066283188ecfe8dfeaae213cc987c7508b2eff896f2f5764d8",
+      "unchanged": true
+    },
+    {
+      "name": "CLEANUP",
+      "bytes": 955,
+      "sha256": "06c5c1f4905958b91872b0ef48d9108f01720c6e4e19cdeaf5d1331ce03db439",
+      "unchanged": true
+    }
+  ],
+  "scope": [
+    "Only STOP publication changed: unique same-owned-directory temp CreateNew/write/actual Dispose before final File.Move; never overwrite existing final.",
+    "If initial final exists, exact complete capability must match. If Move races, only base IOException Win32file-exists80/already-exists183 plus actual final File.Exists may perform exact-content same-cap idempotent success. Other IO/cap mismatch fails.",
+    "Only successfully CreateNew-owned exact temp may be deleted in finally. No glob deletion, no retry, new worker/thread or deadline.",
+    "Original marker/capability SHA/Edge identity checks still precede publication. Original C# and COMMON/SUPERVISE/CAPTURE/CLEANUP byte-identical;180s/20s/215s retained.",
+    "Provenance wording now states STOP changed and names only genuinely unchanged blocks; no generic claim all native PowerShell blocks retained."
+  ],
+  "localSelftest": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-selftest-first.stdout.json",
+    "sha256": "65aa36211b31edc36ce2b3780459f8ab514b079199aa6b57b7c7c1494738467d",
+    "actualExitCode": 0,
+    "fullCurrentSourceRuns": 1,
+    "sourceSha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5"
+  },
+  "actualWindows": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-second.json",
+    "sha256": "bf5ea074bdc88cb985f9cdda90476c30e000a9782ff7da1176c6386bf08d2436",
+    "exitCode": 0,
+    "astErrors": 0,
+    "powerShellVersion": "5.1.26100.9711",
+    "elapsedSeconds": 1.4427520378958434,
+    "checks": [
+      "normal complete publication and same-cap idempotency preserve final timestamp",
+      "different existing capability rejected; original final unchanged",
+      "publisher never removes another pending file",
+      "directory destination and missing parent fail; exact owned pending removed",
+      "two real separate PowerShell processes concurrently publish same capability using unchanged function; both exit0",
+      "instrumented half-write32 invisible at final; after closed-write Move collision same-cap succeeds and different-cap exits1; final unchanged; own pending cleaned"
+    ],
+    "children": [
+      {
+        "case": "concurrent same-cap unmodified function",
+        "exitCode": 0,
+        "expectedExitCode": 0,
+        "actualExited": true
+      },
+      {
+        "case": "concurrent same-cap unmodified function",
+        "exitCode": 0,
+        "expectedExitCode": 0,
+        "actualExited": true
+      },
+      {
+        "case": "controlled half-write raced different=False",
+        "exitCode": 0,
+        "expectedExitCode": 0,
+        "actualExited": true
+      },
+      {
+        "case": "controlled half-write raced different=True",
+        "exitCode": 1,
+        "expectedExitCode": 1,
+        "actualExited": true
+      }
+    ],
+    "started": 4,
+    "actualExited": 4,
+    "disposed": 4,
+    "uniqueTempRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-StopPublish-d0ac1e289b0a4d2ca5f469d817d81cd7",
+    "rootRemoved": true,
+    "scope": "Only synthetic file publication. Two concurrent real child PowerShell processes use unmodified exact publication function. Two additional fixture copies instrument only its one Write to expose a32B partial temp and force final-name collision; no production test hook.",
+    "limits": [
+      "No Edge/browser/TLS/Cargo/testEXE execution or old control/capability read.",
+      "Half-write barrier is test-only injected after source Write split/flush; this is explicitly not an unchanged uninstrumented product run.",
+      "Expected different-cap raced child exit1 is a successful rejection assertion, not an exit0 claim. All4 physically exited and disposed."
+    ]
+  },
+  "preservedFailedFixture": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-first.json",
+    "sha256": "b95932f23c3f934f0fe3af1b32f804ba4d4d99f5a8e51976e1d121c53942971f",
+    "actualExitCode": 1,
+    "failure": "exact single-write fixture hook",
+    "cause": "Fixture searched full COMMON+Publish source for single matching Write; COMMON New-Text also contains it. Second fixture scopes instrumentation to Publish function; product source unchanged between attempts.",
+    "passedBeforeFixtureFailure": [
+      "normal complete publication and same-cap idempotency preserve final timestamp",
+      "different existing capability rejected; original final unchanged",
+      "publisher never removes another pending file",
+      "directory destination and missing parent fail; exact owned pending removed",
+      "two real separate PowerShell processes concurrently publish same capability using unchanged function; both exit0"
+    ],
+    "started": 2,
+    "actualExited": 2,
+    "disposed": 2,
+    "uniqueTempRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-StopPublish-8216bb8b1a61400f983508dfe8e66372",
+    "rootRemoved": true
+  },
+  "originalBrowserFail": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-default-browser-continuous-first.json",
+    "status": "FAIL_UNCHANGED",
+    "diagnosis": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-default-browser-owner-diagnosis-first.json",
+    "scope": "Physical owner cleanup was already proven; original sharing-violation operational failure remains FAIL. Root independently retired old local control without contents read; this agent did not touch it."
+  },
+  "windowsWindowReleased": true,
+  "releaseScope": "Both synthetic test roots actually removed;2first+4second owned children actualexit/dispose; original SSH command sessions terminal. Parent notified before this local freeze.",
+  "evidence": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-before.json",
+      "bytes": 896,
+      "sha256": "b03955864ad917cb7c088d20d60afc9b186774559c9cbeb6a3603d5b82302731"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-first.diff",
+      "bytes": 5323,
+      "sha256": "83e040e9c8d6983ece51dfefcf505aa21b7a1e0729284aab773bb621ae6bd21f"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-selftest-first.stdout.json",
+      "bytes": 265,
+      "sha256": "65aa36211b31edc36ce2b3780459f8ab514b079199aa6b57b7c7c1494738467d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-first.json",
+      "bytes": 21421,
+      "sha256": "b95932f23c3f934f0fe3af1b32f804ba4d4d99f5a8e51976e1d121c53942971f"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-first.stdout.log",
+      "bytes": 1228,
+      "sha256": "79c936ce5d4f4a8164aa839fe2da9383d8dca58e07cef239a21721967b8782ee"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-fixture-first.ps1",
+      "bytes": 12744,
+      "sha256": "6bcd694460c82a23389029ded81e018181707ffb2a4bd0ec7b6677a56cbaa44a"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-fixture-second.ps1",
+      "bytes": 12980,
+      "sha256": "2af4fc13037458d6f861fae9ae697b9552392b02ddfdd7152f63d58b049438af"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-second.json",
+      "bytes": 26367,
+      "sha256": "bf5ea074bdc88cb985f9cdda90476c30e000a9782ff7da1176c6386bf08d2436"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-edge-atomic-stop-windows-second.stdout.log",
+      "bytes": 2559,
+      "sha256": "ed3b7e4ebb0496d204b3ec74ff9d2aa561b9f7ba874414b4f58d5a6a5335aca6"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-test-edge-owner.before-atomic-stop.py",
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-test-edge-owner.atomic-stop-frozen-first.py",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/run-editor-edge-atomic-stop-windows-first.py",
+      "bytes": 2737,
+      "sha256": "e9300ce2c086173ae144d4c3c95bb331dad54f6644e6fc7cf22cf90046c1525d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/run-editor-edge-atomic-stop-windows-second.py",
+      "bytes": 2740,
+      "sha256": "ac2e3c7fbaa73f022a4628b0a93b1a532fb0cb086e39f7f360fbea36a5c6d521"
+    }
+  ],
+  "notPerformed": [
+    "No Git/Cargo/CI",
+    "No Edge/TLS/real app execution",
+    "No read/hash/print of old control file or its stop capability",
+    "No changes to persistent SSH authorization/system trust/settings",
+    "No reassignment of original runtime FAIL asPASS"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "utc": "2026-10-31T22:38:38.431532+00:00",
+  "scope": "Read-only verification after actual frozen helper execution; no process termination/directory mutation/system changes.",
+  "command": [
+    "ssh",
+    "-T",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=10",
+    "future-classroom-win11",
+    "powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand JABFAHIAcgBvAHIAQQBjAHQAaQBvAG4AUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwB0AG8AcAAnADsAJABQAHIAbwBnAHIAZQBzAHMAUAByAGUAZgBlAHIAZQBuAGMAZQA9ACcAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQAnADsAWwBDAG8AbgBzAG8AbABlAF0AOgA6AE8AdQB0AHAAdQB0AEUAbgBjAG8AZABpAG4AZwA9AFsAVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAZQB4AHAAZQBjAHQAZQBkAFAAaQBkAD0AMwAxADgAMAA4ADsAJABlAHgAcABlAGMAdABlAGQAUwB0AGEAcgB0AD0ANgAzADkAMgA5ADAAOAAzADAANgA2ADYANAAzADUAMwA2ADIAOwAgACQAbwByAGkAZwBpAG4AYQBsAEEAbABpAHYAZQA9ACQAZgBhAGwAcwBlADsAJABwAD0ARwBlAHQALQBQAHIAbwBjAGUAcwBzACAALQBJAGQAIAAkAGUAeABwAGUAYwB0AGUAZABQAGkAZAAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQA7AAoAaQBmACgAJABuAHUAbABsAC0AbgBlACQAcAApAHsAdAByAHkAewAkAG8AcgBpAGcAaQBuAGEAbABBAGwAaQB2AGUAPQAoACQAcAAuAFMAdABhAHIAdABUAGkAbQBlAC4AVABvAFUAbgBpAHYAZQByAHMAYQBsAFQAaQBtAGUAKAApAC4AVABpAGMAawBzAC0AZQBxACQAZQB4AHAAZQBjAHQAZQBkAFMAdABhAHIAdAApAH0AZgBpAG4AYQBsAGwAeQB7ACQAcAAuAEQAaQBzAHAAbwBzAGUAKAApAH0AfQA7AAoAJAByAG8AbwB0AHMAPQBAACgARwBlAHQALQBDAGgAaQBsAGQASQB0AGUAbQAgAC0ATABpAHQAZQByAGEAbABQAGEAdABoACAAJABlAG4AdgA6AFQARQBNAFAAIAAtAEQAaQByAGUAYwB0AG8AcgB5ACAALQBGAGkAbAB0AGUAcgAgACcARgB1AHQAdQByAGUAQwBsAGEAcwBzAHIAbwBvAG0ALQBUAGUAcwB0AC0AQwBJAEkAbgBwAHUAdABzAC0AKgAnACAALQBGAG8AcgBjAGUAfABTAGUAbABlAGMAdAAtAE8AYgBqAGUAYwB0ACAALQBFAHgAcABhAG4AZABQAHIAbwBwAGUAcgB0AHkAIABOAGEAbQBlACkAOwAKAEAAewBvAHIAaQBnAGkAbgBhAGwAUAByAG8AYwBlAHMAcwBBAGwAaQB2AGUAPQAkAG8AcgBpAGcAaQBuAGEAbABBAGwAaQB2AGUAOwBtAGEAdABjAGgAaQBuAGcARgBpAHgAdAB1AHIAZQBSAG8AbwB0AEMAbwB1AG4AdAA9ACQAcgBvAG8AdABzAC4AQwBvAHUAbgB0ADsAbQBhAHQAYwBoAGkAbgBnAEYAaQB4AHQAdQByAGUAUgBvAG8AdABzAD0AJAByAG8AbwB0AHMAOwBzAHMAaABkAD0AKABHAGUAdAAtAFMAZQByAHYAaQBjAGUAIABzAHMAaABkACkALgBTAHQAYQB0AHUAcwAuAFQAbwBTAHQAcgBpAG4AZwAoACkAOwBwAG8AdwBlAHIAcwBoAGUAbABsAD0AJABQAFMAVgBlAHIAcwBpAG8AbgBUAGEAYgBsAGUALgBQAFMAVgBlAHIAcwBpAG8AbgAuAFQAbwBTAHQAcgBpAG4AZwAoACkAfQB8AEMAbwBuAHYAZQByAHQAVABvAC0ASgBzAG8AbgAgAC0AQwBvAG0AcAByAGUAcwBzAAoA"
+  ],
+  "source": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$expectedPid=31808;$expectedStart=639290830666435362; $originalAlive=$false;$p=Get-Process -Id $expectedPid -ErrorAction SilentlyContinue;\nif($null-ne$p){try{$originalAlive=($p.StartTime.ToUniversalTime().Ticks-eq$expectedStart)}finally{$p.Dispose()}};\n$roots=@(Get-ChildItem -LiteralPath $env:TEMP -Directory -Filter 'FutureClassroom-Test-CIInputs-*' -Force|Select-Object -ExpandProperty Name);\n@{originalProcessAlive=$originalAlive;matchingFixtureRootCount=$roots.Count;matchingFixtureRoots=$roots;sshd=(Get-Service sshd).Status.ToString();powershell=$PSVersionTable.PSVersion.ToString()}|ConvertTo-Json -Compress\n",
+  "exitCode": 0,
+  "observed": {
+    "powershell": "5.1.26100.9711",
+    "sshd": "Running",
+    "originalProcessAlive": false,
+    "matchingFixtureRootCount": 0,
+    "matchingFixtureRoots": []
+  },
+  "originalProcessOwner": {
+    "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+    "pid": 31808,
+    "startTicks": 639290830666435362,
+    "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  "previousAuditNote": "First post-audit raw JSON already showed process absent, roots0, sshd Running. First local parser used invalid encoding alias then a strict stderr-empty criterion mistook PS module progress CLIXML for failure. Those originals remain. First post-audit exit code was not saved at subprocess point; its later report field exitCode0 was reconstructed, not independent evidence. This fresh audit records actual returncode directly.",
+  "stdout": {
+    "bytes": 134,
+    "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe",
+    "base64": "eyJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJzc2hkIjoiUnVubmluZyIsIm9yaWdpbmFsUHJvY2Vzc0FsaXZlIjpmYWxzZSwibWF0Y2hpbmdGaXh0dXJlUm9vdENvdW50IjowLCJtYXRjaGluZ0ZpeHR1cmVSb290cyI6W119DQo="
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base64": ""
+  }
+}

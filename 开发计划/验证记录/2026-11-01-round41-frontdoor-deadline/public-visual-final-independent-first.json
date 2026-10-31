@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "atUtc": "2026-10-31T23:06:36.334969+00:00",
+  "exeSha256": "b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f",
+  "checks": [
+    {
+      "report": "windows-public-native-final.json",
+      "steps": 20,
+      "indicesExact": true,
+      "stepNames": [
+        "setup-administrator-fixture",
+        "create-bound-class-and-subjects",
+        "seed-current-lesson",
+        "management-lock-removes-session",
+        "hidden-desktop-rendered",
+        "native-public-button-without-session",
+        "public-catalog-only",
+        "cancel-without-change",
+        "new-native-public-entry",
+        "unassigned-review-without-write",
+        "local-account-lock-keeps-public-flow",
+        "explicit-public-change-closes",
+        "changed-desktop-rendered",
+        "old-scene-entry-rejected",
+        "new-native-restore-entry",
+        "explicit-public-restore-closes",
+        "restored-desktop-rendered",
+        "public-close-hides-chooser",
+        "physical-shared-workers-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exitCode": 0,
+      "cleanup": "PASS"
+    },
+    {
+      "report": "windows-visual-native-final.json",
+      "steps": 22,
+      "indicesExact": true,
+      "stepNames": [
+        "setup-global-admin",
+        "create-subject",
+        "open-joint-display",
+        "loaded-original-rgb",
+        "invalid-rgb-no-write",
+        "native-joint-draft-preview",
+        "lock-keeps-partial-draft",
+        "relogin-restores-draft",
+        "cancel-review-no-write",
+        "cancel-reloads-both",
+        "native-joint-save",
+        "readback-both-saved",
+        "native-palette-draft",
+        "rename-subject-preserves-color",
+        "stale-palette-save-rejected",
+        "cancel-reload-after-conflict",
+        "first-app-physical-shutdown",
+        "second-app-real-reopen",
+        "relogin-reopened-deployment",
+        "reopened-joint-state",
+        "second-app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exitCode": 0,
+      "cleanup": "PASS"
+    }
+  ],
+  "rawFiles": [
+    {
+      "path": "windows-public-native-final.json",
+      "bytes": 8523,
+      "sha256": "81b90893a577f751429a25496bc13725d4cc65f664246810b79dfb6758db4289"
+    },
+    {
+      "path": "windows-public-native-final.command.json",
+      "bytes": 1056,
+      "sha256": "7c937b0f43c21184746ab982c81ab27f28ed4492cc4b0a1a63039491b833b0a2"
+    },
+    {
+      "path": "windows-public-native-final.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "windows-public-native-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-visual-native-final.json",
+      "bytes": 9896,
+      "sha256": "4e5b334256b9ac3dcd4cb458fe204a993ef4d692c3ec6393b499cde55b4de417"
+    },
+    {
+      "path": "windows-visual-native-final.command.json",
+      "bytes": 1058,
+      "sha256": "71fdd1ee31300867532fab2e8a8cb8ff2d95b12a72e10c0a88e642609254586a"
+    },
+    {
+      "path": "windows-visual-native-final.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+    },
+    {
+      "path": "windows-visual-native-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Actual hidden synthetic desktop/native settings regression only. Public entry has no account; fixture setup legitimately used an administrator. Visible Seewo/PPT/touch/DPI and real OS session behavior remain independent."
+}

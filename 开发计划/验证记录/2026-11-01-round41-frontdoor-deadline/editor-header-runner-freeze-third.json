@@ -1,0 +1,200 @@
+{
+  "schema": "fc.r41.header-runner-freeze.v3",
+  "status": "SOURCE_FROZEN_PURE_LOCAL_PASS_ACTUAL_WINDOWS_NOT_RERUN",
+  "recordedAtUtc": "2026-10-31T22:16:20.895061+00:00",
+  "files": [
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "beforeBytes": 155501,
+      "beforeSha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-third.diff",
+    "bytes": 11990,
+    "sha256": "481a83d392b07f53d5aa64889f1dbb0d1a7948eb498d0081d872b73b60639951"
+  },
+  "originalFailure": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.json",
+    "originalStatus": "FAIL",
+    "originalCleanup": "PASS",
+    "unchangedBytesSha": true,
+    "completeNormalNativeDrain": "NOT_VERIFIED",
+    "diagnosis": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-diagnosis-first.json",
+    "rootCause": "Global read-failed regex rejected known mux-control ctl-EOF completion at original stderr97/127 before direct clients. Finally-preserved raw direct Brokenpipe221 may be later local-close cleanup; its presence at original validation time was not captured and is not asserted."
+  },
+  "correction": [
+    "Only validate_header_forward and its pure selftest models changed; all other function/class AST and strict timing/drip/exact native/cleanup validators unchanged.",
+    "Track current channel lifecycle type+instance including frees; integer reuse starts a new unprivileged instance. Reject active duplicates/unpaired meaningful facts.",
+    "Allow exact generic mux-control read failed only after that instance ctl read<=0 rfdN len0.",
+    "Allow exact direct read failed or known read failed rfdN maxlenN Brokenpipe/Connection reset by peer only after same-instance direct open-confirm and remoteEOF/close. Other channel/global errors remain fatal.",
+    "Five actual direct-tcpip instances/open-confirm/remote terminals, live original master/native process, exact5native transfers/closes/drain all remain required.",
+    "No accepted original FAIL is upgraded; parser-only offline replay of saved first-run bytes is explicitly a model with mocked liveness, not a new TLS or retrospective native PASS."
+  ],
+  "actualLocalValidation": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-local-checks-first.json",
+    "sha256": "9691250c29cbf4500b62af377070e7c724393f617ba6f9ad84a8081f2732037b",
+    "fullCurrentSelftestRuns": 1,
+    "selftestGroups": 23,
+    "allPrevious22Retained": true,
+    "cliNegativeExit2": 8,
+    "helpExit0": true,
+    "offlineReplay": "Old parser rejects normal control EOF; new parser classifies four exact cleanup messages through saved line232; original full raw/source/command logs preserved.",
+    "negatives": [
+      "EOF-before-Brokenpipe ordering",
+      "cross-channel EOF privilege",
+      "reused integer channel privilege",
+      "mux→direct reuse privilege",
+      "mux lacking ctl EOF",
+      "global SSH reset/fatalBrokenpipe",
+      "unsupported errno",
+      "writeerror afterEOF",
+      "duplicate active lifecycle",
+      "unpaired confirm/EOF"
+    ],
+    "Windows": "NOT_RUN_BY_AGENT",
+    "Cargo": "NOT_RUN",
+    "Git": "NOT_RUN"
+  },
+  "evidence": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.before-channel-lifecycle.py",
+      "bytes": 155501,
+      "sha256": "7b38fc18e347affe82d5bd825229b136c72a0e16138a03d63f80a054f35586bb"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.header-deadline-frozen-third.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-third.diff",
+      "bytes": 11990,
+      "sha256": "481a83d392b07f53d5aa64889f1dbb0d1a7948eb498d0081d872b73b60639951"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-local-checks-first.json",
+      "bytes": 31236,
+      "sha256": "9691250c29cbf4500b62af377070e7c724393f617ba6f9ad84a8081f2732037b"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-diagnosis-first.json",
+      "bytes": 11447,
+      "sha256": "6df32934aa3c2879dbf2e01c7f0d3b3387c66b8a0dac063dc8f6f940591885aa"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/run-editor-header-channel-local-checks.py",
+      "bytes": 5673,
+      "sha256": "f15d252b72ae4931604bfc1489ee0cfcc33c2b289c4d4a0b872ddc93084d4b3d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-8.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-8.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-help.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-cli-help.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-channel-selftest-first.stdout.log",
+      "bytes": 3018,
+      "sha256": "123cc548e90c0049f3975eb5a6a4e3ad3f01abe62a710d094b92c3765885a976"
+    }
+  ],
+  "unchangedAcceptance": [
+    "5e9ns exact per-connection threshold, no rounding/grace",
+    "TLS4 actual drip exactint>=2 and unique5case identities",
+    "original30s Client/45s Native/12s Browser",
+    "default full business path and existing ownership/shutdown flow",
+    "strictP0 NOT_VALIDATED/old strictFAIL/production NOT_ENABLED/Win7Win10Seewo unresolved"
+  ]
+}

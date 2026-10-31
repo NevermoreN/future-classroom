@@ -112,8 +112,9 @@ $Artifact = Join-Path $RunRoot 'artifact'
 $Logs = Join-Path $Artifact 'logs'
 $Steps = [Collections.Generic.List[object]]::new()
 
-function Write-NewJson([string]$Path, $Value) {
+function Write-NewJson([string]$Path, $Value, [long]$MaximumBytes = 0) {
     $bytes = $Utf8.GetBytes(($Value | ConvertTo-Json -Depth 30) + "`n")
+    if ($MaximumBytes -gt 0 -and $bytes.LongLength -gt $MaximumBytes) { throw 'Source manifest JSON exceeds its byte bound.' }
     $file = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)
     try { $file.Write($bytes, 0, $bytes.Length) } finally { $file.Dispose() }
 }
@@ -331,22 +332,126 @@ function Invoke-Logged {
 }
 function Require-Step($Step) { if (-not $Step.passed) { throw "Prerequisite failed: $($Step.name); original logs retained." } }
 function Read-Output($Step) { [IO.File]::ReadAllText((Join-Path $Artifact $Step.stdout), $Utf8) }
-function Hash-Inputs([string[]]$Paths) {
+# Historical evidence is Git-bound data, not a second copy of current build
+# inputs. The exact slash-terminated prefix is the ONLY excluded byte domain.
+function Get-SourceInputDomain([string]$Relative) {
+    if ([string]::IsNullOrEmpty($Relative) -or [IO.Path]::IsPathRooted($Relative) -or
+        $Relative -match '[\\:\x00-\x1f]') { throw 'Non-canonical relative Git input.' }
+    foreach ($part in $Relative.Split('/')) {
+        if ($part -in @('', '.', '..')) { throw 'Non-canonical Git path segment.' }
+    }
+    if ($Relative.StartsWith('开发计划/验证记录/', [StringComparison]::Ordinal)) { return 'historical_git_archive' }
+    return 'sha256_input'
+}
+function ConvertFrom-SourceGitTree([string]$Raw) {
+    # Invoke-Logged also preserves the original prefix and fails on truncation.
+    if ($Raw.Length -eq 0 -or $Utf8.GetByteCount($Raw) -gt $LogLimit -or
+        $Raw[$Raw.Length - 1] -ne [char]0) { throw 'Git tree metadata empty, truncated or over bound.' }
+    $records = $Raw.Split([char[]]@([char]0), 10002, [StringSplitOptions]::None)
+    if ($records.Length - 1 -gt 10000) { throw 'Source file inventory exceeds bound.' }
     $entries = [Collections.Generic.List[object]]::new()
-    $total = 0L
-    if ($Paths.Count -gt 10000) { throw 'Source file inventory exceeds bound.' }
-    foreach ($relative in ($Paths | Sort-Object -CaseSensitive)) {
-        if ([IO.Path]::IsPathRooted($relative)) { throw 'Non-relative Git input.' }
-        $path = [IO.Path]::GetFullPath((Join-Path $SourceRoot $relative))
-        if (-not $path.StartsWith($SourceRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Input escapes source root.' }
-        $file = Get-Item -LiteralPath $path
-        $total += $file.Length
-        if ($file.Length -gt 64MB -or $total -gt 256MB -or
-            ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Source inventory size/reparse bound exceeded.' }
-        $entries.Add([ordered]@{ path = $relative.Replace('\', '/'); bytes = $file.Length;
-            sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() })
+    $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    for ($number = 0; $number -lt $records.Length - 1; $number++) {
+        $record = $records[$number]
+        $tab = $record.IndexOf([char]9)
+        if ($tab -lt 0) { throw 'Malformed Git tree metadata record.' }
+        $header = $record.Substring(0, $tab)
+        $relative = $record.Substring($tab + 1)
+        if ($header -cnotmatch '\A(100644|100755) blob ([0-9a-f]{40}) +([0-9]+)\z') {
+            throw 'Git inputs must be regular blobs with a mode, object id and byte size.'
+        }
+        $mode = $Matches[1]; $objectId = $Matches[2]; $sizeText = $Matches[3]
+        $size = 0L
+        if (-not [long]::TryParse($sizeText, [ref]$size) -or $size -gt 64MB) { throw 'Git blob exceeds per-file bound.' }
+        $domain = Get-SourceInputDomain $relative
+        if (-not $names.Add($relative)) { throw 'Duplicate/case-colliding Git input path.' }
+        $entries.Add([ordered]@{
+            path = $relative; mode = $mode; type = 'blob'
+            git_blob_oid_sha1 = $objectId; git_blob_bytes = $size; domain = $domain
+        })
     }
     return ,$entries.ToArray()
+}
+function Assert-NoHistoricalBuildReference([string]$Relative, [string]$Path) {
+    # Conservative explicit-path policy, not a sandbox for arbitrary build.rs IO.
+    # Inspect only Rust/Cargo configuration inputs, not prose or this CI script.
+    $name = [IO.Path]::GetFileName($Relative)
+    if (-not ($Relative.EndsWith('.rs', [StringComparison]::OrdinalIgnoreCase) -or
+        $name -ieq 'Cargo.toml' -or $name -ieq 'rust-toolchain.toml' -or
+        $Relative.StartsWith('.cargo/', [StringComparison]::Ordinal))) { return }
+    $text = [IO.File]::ReadAllText($Path, $Utf8)
+    # Both Rust escaped backslashes and ordinary Windows separators normalize.
+    $normalized = [regex]::Replace($text.Replace([char]92, [char]47), '/+', '/')
+    if ($normalized.IndexOf('开发计划/验证记录/', [StringComparison]::Ordinal) -ge 0) {
+        throw 'Explicit build input references historical archive; move it into the SHA256 input domain first.'
+    }
+}
+function Hash-Inputs([string[]]$Paths, [object[]]$GitEntries) {
+    if ($Paths.Count -gt 10000 -or $GitEntries.Count -gt 10000 -or $Paths.Count -ne $GitEntries.Count) {
+        throw 'Source file inventory count/tree mismatch.'
+    }
+    $tree = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    foreach ($entry in $GitEntries) { $tree.Add([string]$entry.path, $entry) }
+    $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $entries = [Collections.Generic.List[object]]::new()
+    $history = [Collections.Generic.List[object]]::new()
+    $total = 0L; $historyCheckout = 0L; $historyBlob = 0L
+    foreach ($relative in ($Paths | Sort-Object -CaseSensitive)) {
+        $domain = Get-SourceInputDomain $relative
+        if (-not $names.Add($relative) -or -not $tree.ContainsKey($relative)) { throw 'Tracked paths differ from HEAD tree.' }
+        $path = [IO.Path]::GetFullPath((Join-Path $SourceRoot $relative))
+        if (-not $path.StartsWith($SourceRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Input escapes source root.' }
+        $file = Get-Item -LiteralPath $path -Force
+        if ($file -isnot [IO.FileInfo] -or $file.Length -gt 64MB -or
+            ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Source inventory size/reparse bound exceeded.' }
+        # A regular leaf under a reparse directory must not bypass the guard.
+        $parent = $file.Directory
+        while ($null -ne $parent) {
+            if (($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Source parent is a reparse point.' }
+            if ([string]::Equals($parent.FullName, $SourceRoot, [StringComparison]::OrdinalIgnoreCase)) { break }
+            $parent = $parent.Parent
+        }
+        if ($null -eq $parent) { throw 'Input ancestor escaped source root.' }
+        if ($domain -eq 'historical_git_archive') {
+            # FileInfo/reparse checks above are retained. No Get-FileHash/read
+            # of historical payload occurs here; Git status may independently
+            # read it while checking that the checkout is clean.
+            $historyCheckout += $file.Length
+            $historyBlob += [long]$tree[$relative].git_blob_bytes
+            $history.Add([ordered]@{ path = $relative; checkout_bytes = $file.Length })
+        } else {
+            $total += $file.Length
+            if ($total -gt 256MB) { throw 'SHA256 input inventory exceeds total byte bound.' }
+            Assert-NoHistoricalBuildReference $relative $path
+            $entries.Add([ordered]@{ path = $relative; bytes = $file.Length
+                sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() })
+        }
+    }
+    return [ordered]@{
+        sha256_files = $entries.ToArray(); sha256_checkout_bytes = $total
+        historical_checkout = $history.ToArray(); historical_checkout_bytes = $historyCheckout
+        historical_git_blob_bytes = $historyBlob
+    }
+}
+function New-SourceDomainSummary($Inventory, [string]$HeadSha, [string]$TreeId) {
+    return [ordered]@{
+        schema = 'future-classroom.ci-input-domains/v1'; source_sha = $HeadSha; root_tree_oid_sha1 = $TreeId
+        tracked_file_count = $Inventory.sha256_files.Count + $Inventory.historical_checkout.Count
+        explicit_build_reference_policy = 'Rust/Cargo input text may not explicitly reference the historical prefix, including Windows separators. This guard is not hermetic and cannot prove absence of arbitrary dynamic build.rs IO.'
+        limits = [ordered]@{ paths = 10000; per_file_bytes = 64MB; sha256_input_total_bytes = 256MB; metadata_output_bytes = $LogLimit }
+        sha256_input = [ordered]@{
+            manifest = 'input-sha256.json'; file_count = $Inventory.sha256_files.Count
+            checkout_bytes_hashed = $Inventory.sha256_checkout_bytes
+            scope = 'Every tracked file outside the exact historical prefix; actual checkout SHA256 before and after.'
+        }
+        historical_git_archive = [ordered]@{
+            exact_prefix = '开发计划/验证记录/'; file_count = $Inventory.historical_checkout.Count
+            git_blob_bytes = $Inventory.historical_git_blob_bytes; checkout_metadata_bytes = $Inventory.historical_checkout_bytes
+            git_manifest = 'input-git-tree.json'; checkout_metadata = $Inventory.historical_checkout
+            content_sha256 = 'NOT_READ_BY_INPUT_HASHER'
+            scope = 'HEAD tree/blob mode/type/object SHA1/size binding; current file metadata/reparse and clean Git guards. Git blob sizes/ids are not checkout SHA256; CRLF may change checkout bytes.'
+        }
+    }
 }
 function File-Fact([string]$Path) {
     $file = Get-Item -LiteralPath $Path
@@ -392,6 +497,9 @@ $failure = $null
 $executables = [Collections.Generic.List[object]]::new()
 $script:PayloadBytes = 0L
 $inputDigest = $null
+$gitTreeDigest = $null
+$inputDomainsDigest = $null
+$inputDomainSummary = $null
 Write-NewJson (Join-Path $Artifact 'run-start.json') ([ordered]@{
     status = 'STARTED_NOT_VALIDATED'; utc = [DateTime]::UtcNow.ToString('o'); expected_source_sha = $ExpectedSourceSha
     dispatch_source_sha = $env:GITHUB_SHA
@@ -423,10 +531,25 @@ try {
     if ((Read-Output $clean).Length -ne 0) { throw 'Source is not a clean checkout.' }
     $tracked = Invoke-Logged 'source-input-paths' $git @('ls-files','-z')
     Require-Step $tracked
-    $paths = (Read-Output $tracked).Split([char]0, [StringSplitOptions]::RemoveEmptyEntries)
-    $inputs = Hash-Inputs $paths
-    Write-NewJson (Join-Path $Artifact 'input-sha256.json') $inputs
+    $paths = (Read-Output $tracked).Split([char[]]@([char]0), 10001, [StringSplitOptions]::RemoveEmptyEntries)
+    $treeStep = Invoke-Logged 'source-git-tree-before' $git @('ls-tree','-r','-z','-l','--full-tree','HEAD')
+    Require-Step $treeStep
+    $gitEntries = ConvertFrom-SourceGitTree (Read-Output $treeStep)
+    $treeIdStep = Invoke-Logged 'source-git-tree-id-before' $git @('rev-parse','HEAD^{tree}')
+    Require-Step $treeIdStep
+    $treeId = (Read-Output $treeIdStep).Trim()
+    if ($treeId -cnotmatch '\A[0-9a-f]{40}\z') { throw 'Invalid HEAD root tree object id.' }
+    $inventory = Hash-Inputs $paths $gitEntries
+    $inputs = $inventory.sha256_files
+    $gitManifest = [ordered]@{ schema = 'future-classroom.ci-git-tree-inputs/v1'
+        source_sha = $ExpectedSourceSha; root_tree_oid_sha1 = $treeId; files = $gitEntries }
+    $inputDomainSummary = New-SourceDomainSummary $inventory $ExpectedSourceSha $treeId
+    Write-NewJson (Join-Path $Artifact 'input-sha256.json') $inputs $LogLimit
+    Write-NewJson (Join-Path $Artifact 'input-git-tree.json') $gitManifest $LogLimit
+    Write-NewJson (Join-Path $Artifact 'input-domains.json') $inputDomainSummary $LogLimit
     $inputDigest = (Get-FileHash -LiteralPath (Join-Path $Artifact 'input-sha256.json')).Hash.ToLowerInvariant()
+    $gitTreeDigest = (Get-FileHash -LiteralPath (Join-Path $Artifact 'input-git-tree.json')).Hash.ToLowerInvariant()
+    $inputDomainsDigest = (Get-FileHash -LiteralPath (Join-Path $Artifact 'input-domains.json')).Hash.ToLowerInvariant()
     if ((Get-Content -LiteralPath (Join-Path $SourceRoot 'rust-toolchain.toml') -Raw) -notmatch 'channel\s*=\s*"1\.97\.1"') {
         throw 'Repository toolchain does not match fixed CI Rust 1.97.1.'
     }
@@ -436,6 +559,7 @@ try {
         powershell = $PSVersionTable.PSVersion.ToString(); image = $env:ImageOS; image_version = $env:ImageVersion
         runner_environment = $env:RUNNER_ENVIRONMENT; compiler_host = 'x86_64-pc-windows-msvc'
         source_sha = $ExpectedSourceSha; input_manifest_sha256 = $inputDigest
+        git_tree_manifest_sha256 = $gitTreeDigest; input_domains_manifest_sha256 = $inputDomainsDigest
     })
     foreach ($name in @('target','scratch','cargo','rustup')) { New-Item -ItemType Directory -Path (Join-Path $RunRoot $name) | Out-Null }
     $env:RUSTUP_HOME = Join-Path $RunRoot 'rustup'; $env:CARGO_HOME = Join-Path $RunRoot 'cargo'
@@ -569,11 +693,32 @@ try {
     foreach ($notice in @('LICENSE','packaging/THIRD-PARTY-NOTICES.txt')) {
         Copy-Item -LiteralPath (Join-Path $SourceRoot $notice) -Destination (Join-Path $Artifact ([IO.Path]::GetFileName($notice)))
     }
-    $after = Hash-Inputs $paths
-    if (($inputs | ConvertTo-Json -Depth 10 -Compress) -cne ($after | ConvertTo-Json -Depth 10 -Compress)) { throw 'Build changed hashed source inputs.' }
+    $shaAfter = Invoke-Logged 'source-sha-after' $git @('rev-parse','HEAD')
+    Require-Step $shaAfter
+    if ((Read-Output $shaAfter).Trim() -ine $ExpectedSourceSha -or $env:GITHUB_SHA -ine $ExpectedSourceSha) { throw 'Build changed the exact checked-out/dispatch source SHA.' }
+    $trackedAfter = Invoke-Logged 'source-input-paths-after' $git @('ls-files','-z')
+    Require-Step $trackedAfter
+    $pathsAfter = (Read-Output $trackedAfter).Split([char[]]@([char]0), 10001, [StringSplitOptions]::RemoveEmptyEntries)
+    $treeAfterStep = Invoke-Logged 'source-git-tree-after' $git @('ls-tree','-r','-z','-l','--full-tree','HEAD')
+    Require-Step $treeAfterStep
+    $gitEntriesAfter = ConvertFrom-SourceGitTree (Read-Output $treeAfterStep)
+    $treeIdAfterStep = Invoke-Logged 'source-git-tree-id-after' $git @('rev-parse','HEAD^{tree}')
+    Require-Step $treeIdAfterStep
+    $treeIdAfter = (Read-Output $treeIdAfterStep).Trim()
+    if ($treeIdAfter -cnotmatch '\A[0-9a-f]{40}\z') { throw 'Invalid final HEAD root tree object id.' }
+    $inventoryAfter = Hash-Inputs $pathsAfter $gitEntriesAfter
+    $gitManifestAfter = [ordered]@{ schema = 'future-classroom.ci-git-tree-inputs/v1'
+        source_sha = $ExpectedSourceSha; root_tree_oid_sha1 = $treeIdAfter; files = $gitEntriesAfter }
+    $domainsAfter = New-SourceDomainSummary $inventoryAfter $ExpectedSourceSha $treeIdAfter
+    Write-NewJson (Join-Path $Artifact 'input-sha256-after.json') $inventoryAfter.sha256_files $LogLimit
+    Write-NewJson (Join-Path $Artifact 'input-git-tree-after.json') $gitManifestAfter $LogLimit
+    Write-NewJson (Join-Path $Artifact 'input-domains-after.json') $domainsAfter $LogLimit
     $cleanAfter = Invoke-Logged 'source-clean-after' $git @('status','--porcelain','--untracked-files=all')
     Require-Step $cleanAfter
     if ((Read-Output $cleanAfter).Length -ne 0) { throw 'Build left changes inside source checkout.' }
+    if (($inputs | ConvertTo-Json -Depth 10 -Compress) -cne ($inventoryAfter.sha256_files | ConvertTo-Json -Depth 10 -Compress)) { throw 'Build changed hashed source inputs.' }
+    if (($gitManifest | ConvertTo-Json -Depth 10 -Compress) -cne ($gitManifestAfter | ConvertTo-Json -Depth 10 -Compress) -or
+        ($inputDomainSummary | ConvertTo-Json -Depth 10 -Compress) -cne ($domainsAfter | ConvertTo-Json -Depth 10 -Compress)) { throw 'Build changed Git metadata or input domain binding.' }
 } catch {
     $failure = $_.Exception.Message
     Write-NewJson (Join-Path $Artifact 'failure.json') ([ordered]@{ message = $failure; utc = [DateTime]::UtcNow.ToString('o') })
@@ -586,6 +731,17 @@ Write-NewJson (Join-Path $Artifact 'result.json') ([ordered]@{
     status = $(if ($passed) { 'COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN' } else { 'FAILED_OR_INCOMPLETE' })
     source_sha = $ExpectedSourceSha; input_manifest_sha256 = $inputDigest; toolchain = $Toolchain; target = $Target; baseline = $Baseline
     dispatch_source_sha = $env:GITHUB_SHA
+    input_schema = 'future-classroom.ci-input-domains/v1'
+    git_tree_manifest_sha256 = $gitTreeDigest; input_domains_manifest_sha256 = $inputDomainsDigest
+    input_domain_summary = $(if ($null -eq $inputDomainSummary) { $null } else { [ordered]@{
+        manifest = 'input-domains.json'; tracked_file_count = $inputDomainSummary.tracked_file_count
+        sha256_file_count = $inputDomainSummary.sha256_input.file_count
+        sha256_checkout_bytes_hashed = $inputDomainSummary.sha256_input.checkout_bytes_hashed
+        historical_file_count = $inputDomainSummary.historical_git_archive.file_count
+        historical_git_blob_bytes = $inputDomainSummary.historical_git_archive.git_blob_bytes
+        historical_checkout_metadata_bytes = $inputDomainSummary.historical_git_archive.checkout_metadata_bytes
+        historical_content_sha256 = 'NOT_READ_BY_INPUT_HASHER'
+    } })
     commands = $Steps.ToArray(); executable_count = $executables.Count
     windows7 = 'NOT_RUN'; windows10 = 'NOT_RUN'; windows11 = 'NOT_RUN'; seewo_device = 'NOT_RUN'
     purpose = $(if ($Baseline -eq 'Win7') { 'Win7 MSVC candidate COMPILE_ONLY with rebuilt std/test and PE32 subsystem6.1; not Win7 API, SDK/CRT compatibility or runtime certification.' } else { 'Modern formal MSVC build evidence and portable test executables, not a product installer or runtime certification.' })

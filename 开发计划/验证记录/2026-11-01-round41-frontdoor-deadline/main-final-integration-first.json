@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "scope": "Exact nine reviewed R41 files integrated into main. All 410 Rust build inputs match the final third GNU compilation and actual b1f Win11 runtime. Separate R45 CI input-domain source preserved. This is source identity, not an additional runtime claim.",
+  "filesBefore": {
+    "crates/fc-bootstrap/src/application/http_business_probe.rs": {
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059"
+    },
+    "crates/fc-bootstrap/src/web_transfer/network.rs": {
+      "bytes": 58970,
+      "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987"
+    },
+    "crates/fc-windows/src/tls_frontdoor/mod.rs": {
+      "bytes": 7658,
+      "sha256": "ec4b186638b95e4fb61b4d9a852248f4063262bc044941b70311717651834cbb"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native.rs": {
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/accept.rs": {
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream.rs": {
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs": {
+      "bytes": 63166,
+      "sha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d"
+    },
+    "scripts/windows-test-edge-owner.py": {
+      "bytes": 51071,
+      "sha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755"
+    },
+    "scripts/windows-tls-business-probe.py": {
+      "bytes": 112200,
+      "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25"
+    }
+  },
+  "filesAfter": {
+    "crates/fc-bootstrap/src/application/http_business_probe.rs": {
+      "bytes": 29624,
+      "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0"
+    },
+    "crates/fc-bootstrap/src/web_transfer/network.rs": {
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915"
+    },
+    "crates/fc-windows/src/tls_frontdoor/mod.rs": {
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native.rs": {
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/accept.rs": {
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream.rs": {
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs": {
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3"
+    },
+    "scripts/windows-test-edge-owner.py": {
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5"
+    },
+    "scripts/windows-tls-business-probe.py": {
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208"
+    }
+  },
+  "rustInputs": 410,
+  "sourceBuildReport": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-integrated-third.json",
+    "sha256": "993b165794a44cd468e01f795120ea25250ee375d825c97678bb5ade0de38f3f"
+  },
+  "gitHead": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3"
+}

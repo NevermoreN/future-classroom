@@ -1,0 +1,231 @@
+{
+  "schema": "fc.r41.header-runner-freeze.v1",
+  "status": "SOURCE_FROZEN_PURE_LOCAL_CHECKS_PASS_WINDOWS_NOT_RUN",
+  "recordedAtUtc": "2026-10-31T21:53:01.988515+00:00",
+  "files": [
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytesBefore": 112200,
+      "sha256Before": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25",
+      "bytes": 153324,
+      "sha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9",
+      "beforeOriginal": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.before-header-deadline.py",
+      "frozenAfter": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.header-deadline-frozen-first.py"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-first.diff",
+    "bytes": 50859,
+    "sha256": "f4a4ba9f56f8e512c1925a8d06174c3207ed93615a6d5418514ea07a25fc6070"
+  },
+  "actualLocalValidation": {
+    "report": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-local-checks-first.json",
+    "sha256": "0e465b064e15ab253a331f4ac0977f1e3fc59b70733e79c9ae06f305b48622a5",
+    "oldSelftestGroups": 16,
+    "newSelftestGroups": 21,
+    "allOldGroupsPass": true,
+    "cliNegativeCases": 8,
+    "helpExit": 0,
+    "windows": "NOT_RUN",
+    "tls": "NOT_RUN",
+    "cargo": "NOT_RUN",
+    "git": "NOT_RUN"
+  },
+  "scope": [
+    "Only one allowed Python runner source modified; no Rust/Windows/helper/source archive or build asset changes.",
+    "--header-deadline-only defaults false; mutually exclusive with self-test/browser/continuous-accept/voice-capabilities/visual-only/nondefault fixtures.",
+    "Old Client/exercise/validate_native and all other30 old function/class bodies AST-identical; only ProgressReader optional close reader, self_test additions and main conditional wiring changed.",
+    "Reuse original Tunnel and all original setup/certificate/process/cleanup/capture ownership. HeaderDeadlineTunnel overrides only -N master argument source; mux/control calls use original Remote, never mutating it or adding debug to encoded secret commands.",
+    "Existing mux forward success acknowledges listener; original Tunnel.open has no readiness socket connection. Only five target clients are created.",
+    "Four concurrent verified TLS1.2 handshakes with incomplete first heads (one bounded250ms drip), actual read EOF/RST/TLS EOF; then original native4retired/rearmed/Ready barrier; then single raw TCP with no TLS/data.",
+    "Per-connection perf_counter_ns before TCP connect and after actual terminal read, strictly unrounded elapsed<=5000000000ns. Sample precedes explicit localCloseBeganNs/returnedNs. Original master/native launcher must still be alive.",
+    "Six-second per-connection cutoff collects failure only; it is never a pass allowance. Original Client30s/native45s/browser12s and launcher/cleanup budgets not changed.",
+    "SSH-vv five direct-tcpip creation/open-confirm/remoteEOF-or-close facts required; refusal/channel/transport diagnostics or inability to prove five causes FAIL. One-second bounded trace settle uses original Client deadline and never changes measured t_end.",
+    "CLOSE parser enforces exact fields/tokens/fixed4slot bounds, alarm=hard-25ms, separate socket/actualIO/Frame/retirement order, immutable observed facts and monotonic counters. Queued bare completion may correctly precede close start.",
+    "New-only final validator requires exactly5native transfers/5header close starts+returns/0capacityreject/5distinct physically retired tokens, zero completeHTTP/auth approvals, physical native drain, same2workers actualjoin and allHubs/quarantine0.",
+    "Original default full HTTP/cert-negative/upload-only/optionalbrowser paths and validator remain; new mode does no completed API request, pairing/session approval, upload/record/playback."
+  ],
+  "remainingLimits": [
+    "Actual target EXE not supplied; all actual TLS/Windows outcomes remain NOT_RUN. Local21groups are pure or mocked, not IOCP/Schannel evidence.",
+    "No claim of precise kernel ESTABLISHED timestamps or individual TLS-peer-to-slot identity. Group causality relies on actual5SSHchannels+native5transfers/closes plus separately retired4+1 phases.",
+    "Original Round13 strict-five-second FAIL is not overwritten; originalStrictP0 NOT_VALIDATED, production listener NOT_ENABLED, Win7/Win10/Seewo runtime NOT_VALIDATED.",
+    "Platform25ms reserve and full persistent production behavior remain separate target evidence questions."
+  ],
+  "sourceChecks": {
+    "astParse": true,
+    "trailingWhitespace": [],
+    "sourceAfterLocalChecksUnchanged": true
+  },
+  "evidence": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-baseline-selftest-now.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-baseline-selftest-now.stdout.log",
+      "bytes": 1940,
+      "sha256": "b8f4c782a69cf9d57485a2edfa1aab7143a5bce83adfc0c4afd9982d69d04e07"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-help.stdout.log",
+      "bytes": 3156,
+      "sha256": "66cfb7c5264f70c99957a9fbdf525521da8c84658bc717ee72799c779e354458"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-1.stderr.log",
+      "bytes": 748,
+      "sha256": "89c61a0d47be9a932c8d2e0584050c89f6cc67e93dd1cab57520160ae392c607"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-1.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-2.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-2.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-3.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-3.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-4.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-4.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-5.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-5.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-6.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-6.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-7.stderr.log",
+      "bytes": 798,
+      "sha256": "4977be9fbf2666cebebb79965322a1817c1cfb4733498a158090cf856aeecbf1"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-negative-7.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-no-remote-inputs.stderr.log",
+      "bytes": 753,
+      "sha256": "a2d57bb75fc62996833ac7853b43ab7fa888ee878032bdf754335148ee894e69"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-cli-no-remote-inputs.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-current-selftest-final.stdout.log",
+      "bytes": 2668,
+      "sha256": "dbed2591c3b6b6d687b9359a1920c85ffc62169d5de348310f2b6d1cd95027ca"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-before.json",
+      "bytes": 394,
+      "sha256": "af83f82bed83612706fbd2cb919e92c6f149b7ace6545f3ccb33a4dbdec06d2b"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-first.diff",
+      "bytes": 50859,
+      "sha256": "f4a4ba9f56f8e512c1925a8d06174c3207ed93615a6d5418514ea07a25fc6070"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-local-checks-first.json",
+      "bytes": 30935,
+      "sha256": "0e465b064e15ab253a331f4ac0977f1e3fc59b70733e79c9ae06f305b48622a5"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-first.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-second.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/editor-header-runner-selftest-third.stdout.json",
+      "bytes": 2534,
+      "sha256": "55cf671c59529480ae89b2d847cc346a4ba128631b594557c910ab6132b87f5d"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/run-editor-header-runner-local-checks.py",
+      "bytes": 3947,
+      "sha256": "5c5da5b3a7f4577a9966e5e6009f42eeca6116d000089ebc623cf17e09017535"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.before-header-deadline.py",
+      "bytes": 112200,
+      "sha256": "f79fae0c138d257e5f0b76ee50d303a18aaeba2b321d15560d78018815b95c25"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-tls-business-probe.header-deadline-frozen-first.py",
+      "bytes": 153324,
+      "sha256": "01ccf01919aa4e852973bbf236b27bbfa466ad17f55eb173a7c0fd645240f4a9"
+    }
+  ]
+}

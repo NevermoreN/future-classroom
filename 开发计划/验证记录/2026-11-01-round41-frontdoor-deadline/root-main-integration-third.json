@@ -1,0 +1,55 @@
+{
+  "status": "PASS_SOURCE_INTEGRATED_FINAL_BUILD_REQUIRED",
+  "recordedUtc": "2026-10-31T22:33:56.173976+00:00",
+  "oldBase": "bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc",
+  "newBase": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+  "patchSha256": "90b0b92e8ad2c1bade3f51070c3a640c6aa9f62c1a216f78299cab0a746c2574",
+  "ownFiles": [
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29624,
+      "sha256": "7f2eb911219bfe0f93a383ad0aced42b897168453f43d7d80f062004aa72dad0"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3"
+    },
+    {
+      "path": "scripts/windows-test-edge-owner.py",
+      "bytes": 52930,
+      "sha256": "e0930f19dc6fabf490774b2bd354605fb285d195dbaae32fdffd1e41f4f775f5"
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 162254,
+      "sha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208"
+    }
+  ],
+  "scope": "Only9 owned tracked modifications restored after exact-byte copies/patch; fast-forwarded main including three Win7-only scoped attrs and archived docs; reapplied exact patch with check and verified all9 own bytes unchanged. Old3ac binary remains bound to old410 inputs, not final merged sources. No stash/force reset/user edits discarded; final rebuild required."
+}

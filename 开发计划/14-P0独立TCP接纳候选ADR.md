@@ -79,6 +79,14 @@ TLS新增 `Shutdown` 和 `Retire`：同一SSPI线程先ApplyControlToken(SCHANNE
 
 AcceptEx原post+5秒起点不变，未新增AcceptSlot/接纳池或SSPI线程，未解决持续接纳backlog、真正TCP建立时刻、调度/休眠/关断误差及内核/SSP资源上界。严格首TCP到完整header仍为`5_000_000_000ns`，第十三轮5/8超限的FAIL完整保留；Win7/Win10实机、持续生产TLS与校园部署仍待验收。普通生产listener继续关闭，不借请求阶段修复采纳候选或放宽原需求。
 
+## R41：提前关闭的有限整改与观测
+
+保留原 `post + 5秒` hard deadline，在它之前25毫秒进入负向关闭；不把期限改成接纳后重新5秒。裸AcceptEx和未完成首Head都在该alarm拒绝迟到成功；完整Head后的原120秒请求期限不变。abortive close必须检查SO_LINGER设置和closesocket，失败保留原描述符并永久闭锁新准入，仅原shutdown可继续。四个业务槽、四份Frame、五份原生IO、六个socket及原两个业务worker保持。
+
+新增固定大小关闭快照分别记录负向开始、socket调用/返回、实际IOCP、实际Frame归还与精确退休；socket返回和取消请求不代表物理债务已清，更不代表对端看见关闭。真实IOCP回归包括在途假Decrypt持有Frame、已排队AcceptEx成功晚到拒绝及linger失败保留。假Driver证据不能改称真实SSPI可中断。
+
+最终整合源码的普通GNU程序 `b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f` 在授权Win11完成四个真实TLS不完整Head（第四个持续滴流）及实际退休重投后的一个裸TCP样本。五个客户端从各自本地connect调用前至对端关闭的观测分别为4775304997、4977312447、4978421422、4978384471、4912755215纳秒，均低于原5000000000纳秒；本地close发生在观测之后。它们是经自有SSH转发的有限保守样本，不证明服务器内核ESTABLISHED精确起点、客户端与槽的一一对应、任意调度下硬上界、backlog或内核/SSP资源上界。原第十三轮FAIL保留，生产listener仍关闭；本轮完整源码、原始失败和最终运行证据见[实施记录](10-实施进度与验证记录.md)R41补证。
+
 
 ## 第三十四轮：四业务槽加唯一独立接纳owner
 

@@ -1,0 +1,10 @@
+from pathlib import Path
+import json,hashlib,re,datetime
+root=Path('/tmp/fc-round41-frontdoor-deadline-evidence');p=root/'windows-gnu-runtime-first.json';r=json.loads(p.read_text());a=json.loads((root/'programs-independent-first.json').read_text());d=root/'windows-gnu-runtime-independent-second.json';assert not d.exists(); assert r['status']=='PASS' and r['cleanup']=='PASS';assert r['exeSha256']==a['normalExecutable']['sha256'];facts={Path(f['path']).name:f for f in a['binaryFacts'] if f['test']};assert len(facts)==len(r['tests'])==21
+out=[];totals=[0]*5
+for t in r['tests']:
+ assert t['exitCode']==0 and isinstance(t['output'],list); fact=facts[t['name']]; assert t['binarySha256']==fact['sha256'];local=Path(fact['path']);assert hashlib.sha256(local.read_bytes()).hexdigest()==fact['sha256']
+ ss=[re.fullmatch(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out; finished in .+',s) for s in t['output']];ss=[m for m in ss if m];assert len(ss)==1;count=list(map(int,ss[0].groups())); assert count[1:]==[0,0,0,0]
+ if count[0]==0:assert t['name'].startswith('verify_web_assets-')
+ totals=[x+y for x,y in zip(totals,count)];out.append({'name':t['name'],'sha256':t['binarySha256'],'passed':count[0],'failed':0,'ignored':0,'measured':0,'filtered':0})
+res={'status':'PASS','scope':'Actual R41 GNU 21 test EXEs on authorized Win11; exact binaries bound to earlier independent program/source audit. Excludes R43 attributes and modern MSVC R42. Real TLS header-only result separate; original first runner failure retained. A zero-test verify_web_assets target is explicitly retained, not silently excluded.','recordedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'originalReport':{'path':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()},'normalSha256':r['exeSha256'],'programs':out,'counts':dict(zip(['passed','failed','ignored','measured','filtered'],totals)),'cleanup':r['cleanup']};d.write_text(json.dumps(res,indent=2)+'\n');print(json.dumps({'status':res['status'],'counts':res['counts'],'programs':len(out)}))

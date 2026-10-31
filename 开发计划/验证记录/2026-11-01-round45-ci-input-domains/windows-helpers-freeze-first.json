@@ -1,0 +1,97 @@
+{
+  "status": "PASS_FROZEN_POWERSHELL_HELPERS_WINDOWS_CLEANUP_VERIFIED",
+  "utc": "2026-10-31T22:39:01.350838+00:00",
+  "source_sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "source_freeze_first_sha256": "7eb968e1e32566f498bffe29af2ac3ff3ba2b47d21f5b1ee85fdbe559f887765",
+  "production_source_unchanged_since_freeze": true,
+  "actual_windows": {
+    "powershell": "5.1.26100.9711",
+    "full_source_ast_errors": 0,
+    "helper_count": 6,
+    "passed_checks": 41,
+    "exit_code": 0,
+    "duration_seconds": 1.3661559701431543,
+    "run_budget_seconds": 60,
+    "process_owner": {
+      "nonce": "r45-input-helpers-6ab76e46339943e99060b2f4e1342b41",
+      "pid": 31808,
+      "startTicks": 639290830666435362,
+      "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    },
+    "actual_ssh_process_exit": true
+  },
+  "cleanup": {
+    "status": "PASS",
+    "after_audit_exit": 0,
+    "original_owned_process_alive": false,
+    "matching_fixture_roots": 0,
+    "sshd": "Running",
+    "windows_window_released_to_parent": true
+  },
+  "local_evidence_errors_preserved": "The first cleanup audit succeeded in producing absence/root0 JSON but local Python decoder used unsupported utf8-sig. Saved bytes were then decoded with utf-8-sig; a strict stderr-empty criterion incorrectly treated only progress CLIXML as failure. The first report also reconstructed an unsaved exit code; do not treat it as independently captured. A fresh read-only audit explicitly suppressed progress and saved actual exit0/PASS with original bytes. No source/test assertion was changed.",
+  "evidence": [
+    {
+      "path": "run-windows-helper-first.py",
+      "bytes": 4020,
+      "sha256": "1bdf02fefcc3ff6ee8b067b783ef51de6be3a2c9476c42785577d7c92fe777b0"
+    },
+    {
+      "path": "windows-input-helpers-first.json",
+      "bytes": 17413,
+      "sha256": "297a9be5e167c1d3bb905df4f6657a90aa972393d5dd10613fc3e2a2e4c8eefd"
+    },
+    {
+      "path": "windows-input-helpers-first.stdout.log",
+      "bytes": 3245,
+      "sha256": "70f7cc8b7b47b700ed2730ce1099b530e99e88f464720252f89e191a3a0447d1"
+    },
+    {
+      "path": "windows-input-helpers-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "windows-input-helpers-after-first.json",
+      "bytes": 4980,
+      "sha256": "95af806e65780abeb3a4f6bc953ca4d7f6a1363918379348a71d31a94f4338a9"
+    },
+    {
+      "path": "windows-input-helpers-after-first.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+    },
+    {
+      "path": "windows-input-helpers-after-first.stderr.log",
+      "bytes": 618,
+      "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+    },
+    {
+      "path": "verify-windows-cleanup-second.py",
+      "bytes": 2757,
+      "sha256": "bd1724b1677cd26037f44a1258211e2c82e6cc34d021b9ff0f98e40159c8ca14"
+    },
+    {
+      "path": "windows-input-helpers-after-second.json",
+      "bytes": 4494,
+      "sha256": "86590b659be2623fcdc5859c427e04960d4c62eedf92fb6e7b663180d3466250"
+    },
+    {
+      "path": "windows-input-helpers-after-second.stdout.log",
+      "bytes": 134,
+      "sha256": "bacf5bbc78dabf3093f6950f762d21d0ab6ce9c1ef911c9e875f22ffaef68ffe"
+    },
+    {
+      "path": "windows-input-helpers-after-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "not_run": [
+    "CI entrypoint",
+    "Rust/C/Cargo build",
+    "product/test executable",
+    "Git write or CI dispatch",
+    "PowerShell 7 hosted runner full CI"
+  ],
+  "scope": "41 real helper cases including metadata/path/count/individual/reparse/hash read isolation/CRLF separation/changed same-sized input/explicit references/JSON bound. 256MiB aggregate boundary remains Python model plus original static guard, not an allocation test in the Windows fixture."
+}

@@ -1,0 +1,206 @@
+{
+  "status": "PASS_PYTHON_MODEL_AND_LOCAL_GIT_ONLY",
+  "powershell": "NOT_RUN_NO_LOCAL_PWSH",
+  "source_sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "base": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+  "checks": [
+    {
+      "name": "exact historical prefix",
+      "passed": true
+    },
+    {
+      "name": "near prefix stays SHA256 开发计划/验证记录-旧/old.rs",
+      "passed": true
+    },
+    {
+      "name": "near prefix stays SHA256 开发计划/验证记录",
+      "passed": true
+    },
+    {
+      "name": "near prefix stays SHA256 开发计划/验证记录x/a",
+      "passed": true
+    },
+    {
+      "name": "near prefix stays SHA256 a/开发计划/验证记录/x",
+      "passed": true
+    },
+    {
+      "name": "near prefix stays SHA256 Development/a.rs",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path ''",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path '/x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'C:/x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path '../x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a/../x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a//x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a/./x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a\\\\x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a\\x00x'",
+      "passed": true
+    },
+    {
+      "name": "noncanonical path 'a\\tx'",
+      "passed": true
+    },
+    {
+      "name": "regular metadata retains blob size distinct from checkout",
+      "passed": true
+    },
+    {
+      "name": "missing final NUL",
+      "passed": true
+    },
+    {
+      "name": "symlink",
+      "passed": true
+    },
+    {
+      "name": "gitlink",
+      "passed": true
+    },
+    {
+      "name": "bad oid",
+      "passed": true
+    },
+    {
+      "name": "oversize blob",
+      "passed": true
+    },
+    {
+      "name": "case collision",
+      "passed": true
+    },
+    {
+      "name": "duplicate",
+      "passed": true
+    },
+    {
+      "name": "10001 records",
+      "passed": true
+    },
+    {
+      "name": "metadata 16MiB overflow",
+      "passed": true
+    },
+    {
+      "name": "exact 256MiB SHA256 input allowed",
+      "passed": true
+    },
+    {
+      "name": "256MiB+1 actual input rejected",
+      "passed": true
+    },
+    {
+      "name": "historical aggregate isolated while per-item bound retained",
+      "passed": true
+    },
+    {
+      "name": "near historical prefix does not escape actual byte limit",
+      "passed": true
+    },
+    {
+      "name": "historical individual oversize rejected",
+      "passed": true
+    },
+    {
+      "name": "historical reparse rejected",
+      "passed": true
+    },
+    {
+      "name": "explicit reference Rust forward",
+      "passed": true
+    },
+    {
+      "name": "explicit reference Rust escaped backslash",
+      "passed": true
+    },
+    {
+      "name": "explicit reference Cargo build path",
+      "passed": true
+    },
+    {
+      "name": "explicit reference Cargo config",
+      "passed": true
+    },
+    {
+      "name": "normal include unaffected",
+      "passed": true
+    },
+    {
+      "name": "ordinary prose may discuss history",
+      "passed": true
+    },
+    {
+      "name": "actual owned sparse Git checkout clean",
+      "passed": true
+    },
+    {
+      "name": "actual ordinary same-size content mutation dirty",
+      "passed": true
+    },
+    {
+      "name": "actual history same-size mutation dirty",
+      "passed": true
+    },
+    {
+      "name": "actual untracked file dirty",
+      "passed": true
+    }
+  ],
+  "actual_head": {
+    "tracked": 6940,
+    "historical": 6390,
+    "normal": 550,
+    "git_blob_bytes": 286613906,
+    "historical_git_blob_bytes": 265890446,
+    "normal_git_blob_bytes": 20723460,
+    "metadata_bytes": 1029263,
+    "metadata_sha256": "7c143dd45d66eb5fb8484a158537bf9caef1bcb369631ab3526cd1ff51582038"
+  },
+  "current_checkout": {
+    "sha256_files": 550,
+    "sha256_bytes": 20734836,
+    "historical_metadata_files": 6390,
+    "historical_metadata_bytes": 265890446,
+    "dirty_expected": [
+      "scripts/windows-msvc-ci.ps1"
+    ],
+    "note": "Current PS1 intentionally differs from base; this is not a clean CI run. SHA256 hashes only ordinary current checkout files, never historical payloads."
+  },
+  "cleanup": {
+    "owned_sparse_fixture_removed": true
+  },
+  "limits": {
+    "paths": 10000,
+    "per_file_bytes": 67108864,
+    "sha256_total_bytes": 268435456,
+    "metadata_output_bytes": 16777216
+  },
+  "scope": "Python model is not PowerShell execution. Local actual Git mutation tests prove porcelain catches owned changes, not execution of CI wrapper. Explicit path scan is a conservative policy, not arbitrary build.rs IO isolation."
+}

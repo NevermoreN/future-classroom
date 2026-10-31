@@ -1,0 +1,171 @@
+--- scripts/windows-tls-business-probe.py (second freeze)
++++ scripts/windows-tls-business-probe.py (third freeze)
+@@ -370,39 +370,89 @@
+ 
+ 
+ def validate_header_forward(tunnel, launcher):
+-    """Read original -vv SSH master bytes, never open a readiness TCP socket."""
++    """Classify original -vv channel instances, not reusable channel numbers.
++
++    A mux command's local ctl EOF and a confirmed direct channel's cleanup
++    AFTER remote EOF/close are not SSH transport failures. All other errors
++    remain fail closed. This never opens a readiness or target TCP connection.
++    """
+     require(tunnel.process.poll() is None and launcher.poll() is None
+             and not tunnel.logs.overflow.is_set(), "original SSH/native process unavailable during header sample")
+     raw = bytes(tunnel.logs.stderr)
+     text = raw.decode("utf-8", "strict")
+-    require(not re.search(r"(?i)(open failed|connect failed|administratively prohibited|connection refused|"
+-                          r"connection reset|connection closed by|broken pipe|timed out|read failed|write failed)", text),
+-            "SSH transport/channel failure invalidates conservative peer-close attribution")
+-    records, active = [], {}
++    records, active, cleanup = [], {}, []
++    instances = 0
+     for line_number, line in enumerate(text.splitlines(), 1):
+-        created = re.search(r"channel ([0-9]+): new direct-tcpip\b", line)
++        # Transport, authentication and channel-open failures cannot be excused
++        # by an EOF observed in some other or earlier channel instance.
++        require(not re.search(r"(?i)(open failed|connect failed|administratively prohibited|connection refused|"
++                              r"connection closed by|connection to .* closed|timed out|received disconnect|"
++                              r"disconnected from|killed by signal|terminated by signal|fatal|corrupted mac|"
++                              r"message authentication code incorrect)", line),
++                "SSH transport/channel-open failure invalidates peer-close attribution")
++        created = re.fullmatch(r"debug[123]: channel ([0-9]+): new ([^\[]+) \[.*", line)
+         if created:
+-            key = int(created.group(1))
+-            require(key not in active, "SSH reused an active direct-tcpip identity")
+-            record = {"ordinal": len(records) + 1, "channel": key, "newLine": line_number,
+-                      "openConfirmedLine": None, "remoteEofLine": None, "remoteCloseLine": None}
+-            records.append(record)
++            key, kind = int(created.group(1)), created.group(2).strip()
++            require(key not in active, "SSH reused an active channel lifecycle")
++            instances += 1
++            record = {"instance": instances, "channel": key, "kind": kind, "newLine": line_number,
++                      "openConfirmedLine": None, "remoteEofLine": None, "remoteCloseLine": None,
++                      "controlEofLine": None}
+             active[key] = record
++            if kind == "direct-tcpip":
++                record["ordinal"] = len(records) + 1
++                records.append(record)
+             continue
+-        channel = re.search(r"channel ([0-9]+): (.*)", line)
+-        if not channel or int(channel.group(1)) not in active:
++        channel = re.fullmatch(r"(?:debug[123]: )?channel ([0-9]+): (.*)", line)
++        detail = channel.group(2) if channel else None
++        record = active.get(int(channel.group(1))) if channel else None
++        channel_error = bool(re.search(r"(?i)(read failed|write failed|broken pipe|connection reset)", line))
++        if channel_error:
++            mux_cleanup = (record is not None and record["kind"] == "mux-control"
++                           and record["controlEofLine"] is not None and detail == "read failed")
++            # These are exact known local read-side cleanup messages. In
++            # particular a global SSH connection reset, write failure, unknown
++            # errno, or direct failure before this instance's remote terminal
++            # remains fatal even if another channel previously ended cleanly.
++            direct_cleanup = (record is not None and record["kind"] == "direct-tcpip"
++                              and record["openConfirmedLine"] is not None
++                              and (record["remoteEofLine"] is not None or record["remoteCloseLine"] is not None)
++                              and re.fullmatch(r"read failed(?: rfd [0-9]+ maxlen [0-9]+: (?:Broken pipe|Connection reset by peer))?", detail)
++                              is not None)
++            require(mux_cleanup or direct_cleanup,
++                    "SSH transport/channel failure before a proven same-instance cleanup boundary")
++            cleanup.append({"line": line_number, "channel": record["channel"], "instance": record["instance"],
++                            "kind": record["kind"], "text": line,
++                            "priorBoundaryLine": record["controlEofLine"] if mux_cleanup else
++                            record["remoteEofLine"] or record["remoteCloseLine"]})
+             continue
+-        key, detail = int(channel.group(1)), channel.group(2)
+-        record = active[key]
+-        if detail.startswith("open confirm "):
+-            require(record["openConfirmedLine"] is None, "duplicate SSH open confirmation")
++        if not channel:
++            continue
++        lifecycle_fact = detail.startswith(("open confirm ", "rcvd eof", "rcvd close", "free: ", "ctl read<=0"))
++        if record is None:
++            require(not lifecycle_fact, "unpaired SSH channel lifecycle fact")
++            continue
++        if detail.startswith("ctl read<=0"):
++            require(record["kind"] == "mux-control" and re.fullmatch(r"ctl read<=0 rfd [0-9]+ len 0", detail)
++                    is not None and record["controlEofLine"] is None,
++                    "unproven/repeated mux-control EOF")
++            record["controlEofLine"] = line_number
++        elif detail.startswith("open confirm "):
++            require(record["kind"] == "direct-tcpip" and record["openConfirmedLine"] is None,
++                    "unpaired/duplicate SSH direct open confirmation")
+             record["openConfirmedLine"] = line_number
+-        elif detail.startswith("rcvd eof"):
+-            record["remoteEofLine"] = line_number
+-        elif detail.startswith("rcvd close"):
+-            record["remoteCloseLine"] = line_number
+-        elif detail.startswith("free: direct-tcpip"):
+-            del active[key]
++        elif detail.startswith(("rcvd eof", "rcvd close")):
++            if record["kind"] == "direct-tcpip":
++                require(record["openConfirmedLine"] is not None, "SSH direct terminal before open confirmation")
++            field = "remoteEofLine" if detail.startswith("rcvd eof") else "remoteCloseLine"
++            require(record[field] is None, "repeated SSH channel terminal fact")
++            record[field] = line_number
++        elif detail.startswith("free: "):
++            freed_kind = detail[6:].split(":", 1)[0].split(",", 1)[0]
++            require(freed_kind.replace("-", " ") == record["kind"].replace("-", " "),
++                    "SSH freed channel kind does not match current lifecycle")
++            record["freedLine"] = line_number
++            del active[record["channel"]]
+     if not (len(records) == 5 and all(r["openConfirmedLine"] is not None
+             and r["newLine"] < r["openConfirmedLine"]
+             and any(r[k] is not None and r[k] > r["openConfirmedLine"]
+@@ -410,6 +460,7 @@
+         raise HeaderTracePending("five actual SSH direct-tcpip open confirmations and remote EOF/close facts missing")
+     return {"status": "PASS", "masterAlive": True, "nativeLauncherAlive": True,
+             "stderrBytesObserved": len(raw), "stderrPrefixSha256": digest(raw), "channels": records,
++            "normalChannelCleanup": cleanup,
+             "rawSource": "sshTunnelRaw.stderr (complete original bytes saved by existing finally)",
+             "readiness": "Existing SSH mux forward command acknowledgement; no socket readiness probe",
+             "causalityLimit": "SSH diagnostics plus exact native group counts; not exact kernel ESTABLISHED timestamps"}
+@@ -1768,6 +1819,47 @@
+         denied(lambda: validate_header_forward(tunnel(text), alive), label)
+     denied(lambda: validate_header_forward(tunnel(trace, SimpleNamespace(poll=lambda: 255)), alive), "SSH actual exit")
+     checks.append("synthetic five confirmed direct-tcpip channels with remote EOF; refused/missingconfirm/localEOF/fourchannels/deadmaster rejected (no real SSH)")
++    def direct_trace(number, error=None, free=False):
++        value = (f"debug1: channel {number}: new direct-tcpip [direct-tcpip]\n"
++                 f"debug2: channel {number}: open confirm rwindow 0 rmax 32768\n")
++        if error:
++            value += f"debug2: channel {number}: {error}\n"
++        value += f"debug2: channel {number}: rcvd eof\n"
++        if free:
++            value += f"debug1: channel {number}: free: direct-tcpip, nchannels 2\n"
++        return value
++    mux = ("debug1: channel 9: new mux-control [mux-control]\n"
++           "debug2: channel 9: ctl read<=0 rfd 5 len 0\n"
++           "debug2: channel 9: read failed\n"
++           "debug1: channel 9: free: mux-control, nchannels 1\n")
++    cleanup_trace = mux + trace + ("debug2: channel 4: read failed rfd 5 maxlen 32768: Broken pipe\n"
++                                 "debug2: channel 4: read failed\n"
++                                 "debug2: channel 4: rcvd close\n")
++    accepted = validate_header_forward(tunnel(cleanup_trace), alive)
++    require(len(accepted["normalChannelCleanup"]) == 3 and len(accepted["channels"]) == 5,
++            "normal mux EOF/direct post-remoteEOF cleanup was rejected")
++    # Reusing the integer0 after its old instance ended must NOT retain old
++    # remote-EOF permission. Each negative still contains five otherwise valid
++    # direct records so an incidental final-count mismatch cannot hide the bug.
++    rest = "".join(direct_trace(i) for i in (2, 3, 4))
++    for label, changed in (
++        ("direct Brokenpipe before remoteEOF", direct_trace(0, "read failed rfd 5 maxlen 32768: Broken pipe")
++         + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
++        ("cross-channel EOF privilege", direct_trace(0) + direct_trace(1, "read failed") + rest),
++        ("reused-id EOF privilege", direct_trace(0, free=True) + direct_trace(0, "read failed") + rest),
++        ("mux EOF privilege leaked to reused direct-id", mux.replace("channel 9:", "channel 0:")
++         + direct_trace(0, "read failed") + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
++        ("mux readfailed before ctlEOF", mux.replace("ctl read<=0 rfd 5 len 0", "input open -> drain") + trace),
++        ("global SSH reset", trace + "Connection reset by 192.0.2.1 port 22\n"),
++        ("global Brokenpipe", trace + "ssh_dispatch_run_fatal: Broken pipe\n"),
++        ("direct unsupported read error", trace + "debug2: channel 4: read failed rfd 5 maxlen 32768: Permission denied\n"),
++        ("write failure after remoteEOF", trace + "debug2: channel 4: write failed\n"),
++        ("duplicate active lifecycle", direct_trace(0) + direct_trace(0) + rest),
++        ("unpaired openconfirm", "debug2: channel 9: open confirm rwindow 0 rmax 32768\n" + trace),
++        ("unpaired EOF", "debug2: channel 9: rcvd eof\n" + trace),
++    ):
++        denied(lambda: validate_header_forward(tunnel(changed), alive), label)
++    checks.append("SSH lifecycle models accept exact muxctlEOF cleanup and direct-confirmed-remoteEOF cleanup; reject preEOF/crosschannel/reused-id leakage, general transport errors and unpaired/duplicate facts")
+     # Exercise the subclass without spawning SSH: only the base master-launch
+     # input carries -vv; the overridden mux calls see the original Remote.
+     old_init, old_control = Tunnel.__init__, Tunnel._control

@@ -1,0 +1,55 @@
+{
+  "status": "PASS_LOCAL_STATIC_ONLY",
+  "base": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+  "file": "scripts/windows-msvc-ci.ps1",
+  "before": {
+    "bytes": 38498,
+    "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6"
+  },
+  "after": {
+    "bytes": 49874,
+    "sha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+  },
+  "diff": {
+    "bytes": 18033,
+    "sha256": "d828861d494625aebb0472d0bf4921e8c9ca9d5fdda4020fcf0a0b0d12f6be8f"
+  },
+  "diff_check_exit": 0,
+  "worktree_status": " M scripts/windows-msvc-ci.ps1\n",
+  "unchanged_bounded_build_command_sites": [
+    "$env:CARGO_BUILD_JOBS = '2'; $env:CARGO_TERM_COLOR = 'never'",
+    "Invoke-Logged 'fmt' $cargo (Get-BaselineCargoArguments 'fmt' @('--all','--','--check') $Baseline) 300 | Out-Null",
+    "Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null",
+    "$tests = Invoke-Logged 'workspace-test-compile' $cargo (Get-BaselineCargoArguments 'test' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') $Baseline) 2400",
+    "$binary = Invoke-Logged 'product-compile' $cargo (Get-BaselineCargoArguments 'build' @('-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') $Baseline) 1200",
+    "Invoke-Logged 'clippy' $cargo (Get-BaselineCargoArguments 'clippy' @('-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') $Baseline) 1500 | Out-Null"
+  ],
+  "guard_constants": {
+    "path_count": 10000,
+    "file_bytes": 67108864,
+    "actual_sha256_input_bytes": 268435456,
+    "metadata_stdout_and_each_source_manifest_bytes": 16777216
+  },
+  "classification": "Exact ordinal 开发计划/验证记录/ only; all remaining tracked files actual SHA256 before/after. Full HEAD regular blob mode/type/OID SHA1/Git object bytes metadata covers both domains and is compared after. Historical checkout lengths/reparse and clean Git remain separately checked.",
+  "new_artifacts": [
+    "input-git-tree.json",
+    "input-domains.json",
+    "input-sha256-after.json",
+    "input-git-tree-after.json",
+    "input-domains-after.json"
+  ],
+  "changed_semantics": "input-sha256.json now covers every nonhistorical tracked checkout file, not historical payloads. Existing consumers must read input_schema/domain metadata and must not claim all historical raw SHA256 was read.",
+  "limits": "No claim of arbitrary dynamic build.rs IO isolation. Literal historical references in Rust/Cargo configuration fail closed. No P0 deadline/production listener or feature code changed.",
+  "powershell_fixture": {
+    "path": "/tmp/fc-round45-ci-input-domains-evidence/input-domain-powershell-fixture-first.ps1",
+    "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849",
+    "embedded_full_source_matches": true,
+    "actual_execution": "NOT_RUN_BY_SUBAGENT",
+    "entrypoint_not_dot_sourced": true
+  },
+  "powershell_ast": "NOT_RUN_LOCAL_PWSH_NOT_INSTALLED",
+  "cargo": "NOT_RUN",
+  "windows": "NOT_RUN",
+  "ci": "NOT_DISPATCHED",
+  "original_failure": "开发计划/验证记录/2026-11-01-round44-ci/source-inventory-failure-independent-first.json (parent main; e0 worktree does not include later archived document)"
+}

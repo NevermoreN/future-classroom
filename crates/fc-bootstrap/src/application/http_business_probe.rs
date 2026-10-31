@@ -434,6 +434,47 @@ fn progress(
     output.flush().map_err(|_| "business progress flush".into())
 }
 
+/// Bounded diagnostic observations only. Socket return is not peer EOF/RST,
+/// and all times refer to this probe's monotonic epoch, not TCP ESTABLISHED.
+fn close_progress(
+    marker: &str,
+    epoch: Instant,
+    sequence: u64,
+    snapshot: fc_windows::tls_frontdoor::TlsCloseSnapshot,
+) -> std::result::Result<(), String> {
+    use std::fmt::Write as _;
+    let nanos = |instant: Option<Instant>| -> std::result::Result<String, String> {
+        instant.map_or_else(
+            || Ok("null".into()),
+            |instant| {
+                instant
+                    .checked_duration_since(epoch)
+                    .map(|d| d.as_nanos().to_string())
+                    .ok_or_else(|| "business close observation predates epoch".into())
+            },
+        )
+    };
+    let mut headers = String::with_capacity(4 * 640);
+    for item in snapshot.headers.into_iter().flatten() {
+        if !headers.is_empty() {
+            headers.push(',');
+        }
+        write!(headers, "{{\"generation\":{},\"slot\":{},\"serial\":{},\"hardDeadlineNs\":{},\"alarmNs\":{},\"beganAtNs\":{},\"socketCloseBeganAtNs\":{},\"socketReturnedAtNs\":{},\"failed\":{},\"ioPendingAtClose\":{},\"ioReturnedAtNs\":{},\"framePendingAtClose\":{},\"frameReturnedAtNs\":{},\"retirementConfirmedAtNs\":{}}}", item.token.generation(), item.token.slot(), item.token.serial(), nanos(Some(item.hard_deadline))?, nanos(Some(item.alarm))?, nanos(Some(item.began_at))?, nanos(item.socket_close_began_at)?, nanos(item.socket_returned_at)?, item.failed, item.io_pending_at_close, nanos(item.io_returned_at)?, item.frame_pending_at_close, nanos(item.frame_returned_at)?, nanos(item.retirement_confirmed_at)?)
+            .map_err(|_| "business close observation encoding")?;
+    }
+    let mut accept = String::with_capacity(320);
+    if let Some(item) = snapshot.accept {
+        write!(accept, "{{\"serial\":{},\"hardDeadlineNs\":{},\"alarmNs\":{},\"beganAtNs\":{},\"socketCloseBeganAtNs\":{},\"socketReturnedAtNs\":{},\"failed\":{},\"completionReturnedAtNs\":{}}}", item.serial, nanos(Some(item.hard_deadline))?, nanos(Some(item.alarm))?, nanos(Some(item.began_at))?, nanos(item.socket_close_began_at)?, nanos(item.socket_returned_at)?, item.failed, nanos(item.completion_returned_at)?)
+            .map_err(|_| "business accept close encoding")?;
+    } else {
+        accept.push_str("null");
+    }
+    println!("TLS_BUSINESS_CLOSE {{\"marker\":\"{marker}\",\"sequence\":{sequence},\"generation\":{},\"reserveNs\":{},\"headerBegins\":{},\"headerSocketReturns\":{},\"headerFailures\":{},\"headers\":[{headers}],\"accept\":{accept}}}", snapshot.generation, fc_windows::tls_frontdoor::HEADER_CLOSE_RESERVE.as_nanos(), snapshot.header_begins, snapshot.header_socket_returns, snapshot.header_failures);
+    std::io::stdout()
+        .flush()
+        .map_err(|_| "business close observation flush".into())
+}
+
 pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
     require(
         marker.starts_with("FutureClassroom-Test-TLS-")
@@ -539,14 +580,20 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
     let mut next_approval = Instant::now();
     let mut progress_sequence = 0u64;
     let mut last_progress = None;
+    let mut last_close_progress = None;
     let mut next_progress = Instant::now();
     let mut active = (|| -> std::result::Result<(), String> {
         while Instant::now() < until {
             let report = net.poll()?;
-            if last_progress != Some(report) && Instant::now() >= next_progress {
+            let close_snapshot = net.close_snapshot();
+            if (last_progress != Some(report) || last_close_progress != Some(close_snapshot))
+                && Instant::now() >= next_progress
+            {
                 progress_sequence += 1;
                 progress(marker, progress_epoch, progress_sequence, report)?;
+                close_progress(marker, progress_epoch, progress_sequence, close_snapshot)?;
                 last_progress = Some(report);
+                last_close_progress = Some(close_snapshot);
                 next_progress = Instant::now() + Duration::from_millis(250);
             }
             if let Some(ticket) = approval.as_mut() {
@@ -618,7 +665,14 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
     drop(approval);
     let report = net.report();
     progress_sequence += 1;
-    let emitted = progress(marker, progress_epoch, progress_sequence, report);
+    let emitted = progress(marker, progress_epoch, progress_sequence, report).and_then(|()| {
+        close_progress(
+            marker,
+            progress_epoch,
+            progress_sequence,
+            net.close_snapshot(),
+        )
+    });
     if active.is_ok() {
         active = emitted;
     }

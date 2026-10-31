@@ -1,0 +1,352 @@
+{
+  "schema": "fc.r41.editor-readonly-review.v1",
+  "status": "NO_BLOCKING_DEFECT_FOUND_STATIC_ONLY",
+  "recordedAtUtc": "2026-10-31T21:39:03.422394+00:00",
+  "worktree": "/tmp/fc-round41-frontdoor-deadline-worktree",
+  "freeze": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/core-source-freeze-first.json",
+    "bytes": 8143,
+    "sha256": "e3ecec5c27d5484323d526b5236cff8a2048a35c84cc8e0f822664346d7e5cc4"
+  },
+  "patch": {
+    "path": "/tmp/fc-round41-frontdoor-deadline-evidence/core-implementation-first.diff",
+    "bytes": 46427,
+    "sha256": "470494a618909f899a3c71b6c6b96431402517500c369de4c123f81ba5623657"
+  },
+  "sourceBindings": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10151,
+      "sha256": "61dd03becca3db6a8d834f583513836810179a0a68693b9d826f70839313e384",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 60788,
+      "sha256": "69eaea99c73a0874135131358ecaf30936cd5502c36bcba4e0be21b479e72abe",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 15030,
+      "sha256": "f64bfaaa1800ab605a5afc3f5dc9cacf17e9c75da2572d3b75a5fcca92d3f35f",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 39983,
+      "sha256": "47829d0fe74dd2a64af48fbb710bdee4b4af62131936e74a5ea3850cd5ddbb04",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 79649,
+      "sha256": "8406246c2bf96f4545e411670e83c120f7b12f017c7ada182b4090dda37f5cb3",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 59177,
+      "sha256": "02ae7eb6886bd1e415bcf5aba04cae12116195c5c509554ddde0c2b2a4073915",
+      "matchesFreezeAndAfterCopy": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 29497,
+      "sha256": "3156f180665d34d737912d84e0848f0f1c68aa7b5edde37c0b989bde93fadc90",
+      "matchesFreezeAndAfterCopy": true
+    }
+  ],
+  "sourceStillMatchesFreezeAfterReview": true,
+  "blockingFindings": [],
+  "checks": [
+    {
+      "topic": "Alarm scope and deadline origin",
+      "conclusion": "No blocking defect found: only Header/bare negative closure subtracts25ms. AwaitingConnection has no active deadline. Existing exact post-derived hard deadline capture remains AFTER successful/IO_PENDING AcceptEx; handoff copies it. No accepted/dequeue/handoff+5 reset.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            35
+          ],
+          "anchor": "fn header_close_alarm"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            225
+          ],
+          "anchor": "let deadline = Instant::now() + BUDGET;"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            372
+          ],
+          "anchor": "bind_header_deadline(deadline)"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            145
+          ],
+          "anchor": "fn negative_close_due_at"
+        }
+      ]
+    },
+    {
+      "topic": "Head/request/admission/body budget",
+      "conclusion": "complete_head_at checks both hard expiry and negative alarm BEFORE entering Request. One admitted_at+REQUEST_BUDGET epoch remains; Request uses exact deadline with no reserve subtraction. admission_deadline_valid requires <=old deadline; admit_until only tightens. Final parse-time check prevents a parse crossing alarm from publishing Head.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            172
+          ],
+          "anchor": "fn complete_head_at"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            186
+          ],
+          "anchor": "fn admission_deadline_valid"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            195
+          ],
+          "anchor": "fn admit_until"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            703
+          ],
+          "anchor": "if !stream.complete_head_at(admitted_at)"
+        }
+      ]
+    },
+    {
+      "topic": "SO_LINGER/closesocket failure ownership",
+      "conclusion": "close_with executes configure then release, leaves original SOCKET unchanged and stores OWNER_FAULTED on either Err. SO_LINGER failure cannot silently fall through to graceful close. close_slot retains operation/Frame debt; bare close error additionally sets bare.failed. New positive Owner/poll/post are gated; original stop may attempt exact shutdown. No source clears sticky fault to declare replacement safe.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            200
+          ],
+          "anchor": "fn close_with"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            209
+          ],
+          "anchor": "configure(*socket, abortive).and_then"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            1112
+          ],
+          "anchor": "if OWNER_FAULTED.load(Ordering::Acquire) && !self.stopping"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            118
+          ],
+          "anchor": "bare.failed = true;"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            62
+          ],
+          "anchor": "&& !self.failed"
+        }
+      ]
+    },
+    {
+      "topic": "IOCP debt/time binding",
+      "conclusion": "slot pending=None and io_returned_at occur only after actual GetQueuedCompletionStatus operation pointer/key/pending identity validation. CancelIoEx never clears pending. bare completion_returned_at only in complete_bare_accept reached from actual packet dispatch; serial/Closing/expired checks preserve late rejection. Retire/rearm still require actual packet and unique Frame/context return.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            928
+          ],
+          "anchor": "fn poll_io"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            979
+          ],
+          "anchor": "self.resources.slots[index].pending = None;"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            233
+          ],
+          "anchor": "pub(super) fn complete_bare_accept"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+          "lines": [
+            256
+          ],
+          "anchor": "bare.state = AcceptState::Idle;"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            928
+          ],
+          "anchor": "fn rearm_http"
+        }
+      ]
+    },
+    {
+      "topic": "Frame/context retirement observations",
+      "conclusion": "frame_returned_at is stamped when exact full-token Box<Frame> is returned through complete_frame, not on close or cancellation. retirement_confirmed_at follows explicit Step::Retired/no-context physical retirement, or final IO/frame ledgers plus actual worker reap. Snapshot does not act as owner/permit or replace native drain gates.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            710
+          ],
+          "anchor": "fn complete_frame"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            754
+          ],
+          "anchor": "observation.frame_returned_at = Some(Instant::now());"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            1157
+          ],
+          "anchor": "fn retire_closed_slot"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+          "lines": [
+            1270
+          ],
+          "anchor": "fn finish"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            969
+          ],
+          "anchor": "fn poll_http_drain"
+        }
+      ]
+    },
+    {
+      "topic": "Diagnostic truthfulness/bounds",
+      "conclusion": "TlsCloseSnapshot has fixed4 full-token records+one bare serial with <=2048 compiletime bound and metadata getter. Socket return means successful closesocket return, not peer EOF/RST/TCB destruction. close_progress converts actual Instant values against an epoch captured before startup; rejects predating time rather than normalizing it. Values are latest-per-slot/serial, not a complete unbounded history.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "lines": [
+            74
+          ],
+          "anchor": "pub struct TlsCloseSnapshot"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+          "lines": [
+            82
+          ],
+          "anchor": "size_of::<TlsCloseSnapshot>() <= 2048"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+          "lines": [
+            318
+          ],
+          "anchor": "pub fn close_snapshot"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "lines": [
+            439
+          ],
+          "anchor": "fn close_progress"
+        },
+        {
+          "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+          "lines": [
+            488
+          ],
+          "anchor": "let progress_epoch = Instant::now();"
+        }
+      ]
+    },
+    {
+      "topic": "Tests and acceptance threshold",
+      "conclusion": "Seven new source tests separate time injection from actual IOCP/fake record completion. Wire sample keeps <=5_000_000_000ns, labels FAKE and CLIENT_CONNECT_RETURN_ONLY; six seconds only collects failure. Existing completed-head case is moved earlier to new alarm-1ns, a tighter positive boundary, not a relaxed hard threshold. Controlled option-error child keeps sticky owner retention; ordinary Fixture drain remains strict. All tests are source only/NOT_RUN in this review.",
+      "source": [
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1681
+          ],
+          "anchor": "fn header_negative_alarm_is_distinct"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1920
+          ],
+          "anchor": "fn real_iocp_first_header_reserve_keeps"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1966
+          ],
+          "anchor": "elapsed <= 5_000_000_000"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1964
+          ],
+          "anchor": "CLIENT_CONNECT_RETURN_ONLY"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1973
+          ],
+          "anchor": "fn abortive_option_failure_preserves"
+        },
+        {
+          "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+          "lines": [
+            1952
+          ],
+          "anchor": "six seconds only collects a failure"
+        }
+      ]
+    }
+  ],
+  "evidenceLimits": [
+    "No Cargo/rustfmt/test/Windows/remote/Git command or source mutation performed.",
+    "25ms engineering reserve is not measured scheduler headroom or a strict first TCP ESTABLISHED→Header proof. Original strict-five-second FAIL and ordinary production-listener gate remain unresolved.",
+    "Injected timing cases and pure boundary source do not claim actual elapsed5s evidence. One wall-clock wire case is fake record protection and connect-return epoch only; it cannot replace real Schannel/OS evidence.",
+    "The isolated freeze baseline predates bc2a86f integration; seven-file source/patch review does not claim final integrated source/test binding.",
+    "Observations are latest fixed-slot records; a downstream client must retain bounded samples if it needs phase history, and must independently observe peer EOF/RST."
+  ],
+  "performed": "Read-only complete7file diff/source and original lifecycle/test surrounding code; freeze and after-copy bytes/SHA verified; only this /tmp JSON written."
+}

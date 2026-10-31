@@ -1,0 +1,26 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round41-programs-second/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round42-package/FutureClassroom-0.1.0-voice-capability-dev.zip",
+    "--header-deadline-only",
+    "--report",
+    "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.json"
+  ],
+  "cwd": "/tmp/fc-round41-frontdoor-deadline-worktree",
+  "startedUtc": "2026-10-31T22:07:16.912491+00:00",
+  "stdout": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.stdout.log",
+  "stderr": "/tmp/fc-round41-frontdoor-deadline-evidence/windows-header-deadline-first.stderr.log",
+  "exitCode": 1,
+  "elapsedSeconds": 23.821883894968778,
+  "completedUtc": "2026-10-31T22:07:40.734590+00:00",
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 119,
+  "stderrSha256": "3a33d220e9094826c1b5efca25285545c220ffeb11369b17563fc4106dca4f33"
+}

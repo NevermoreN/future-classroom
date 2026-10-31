@@ -1,0 +1,2475 @@
+#!/usr/bin/env python3
+"""Run the explicit finite TLS/shared-worker synthetic business diagnostic.
+
+The default is a raw API client through an owned SSH forward. Optional --header-deadline-only samples actual TLS/raw incomplete-header closure
+within an unrounded conservative pre-connect5s bound; it does not replace the
+original strict-P0 decision or establish kernel timestamps. Optional --browser
+also observes actual isolated Windows Edge UI against the same native service.
+This is not general browser acceptance,
+production-listener enablement, native strict-5s evidence, audio playback, or
+Windows 7/10 compatibility evidence. Project code runs only from the supplied
+diagnostic EXE; --browser uses the separately owned installed Edge process.
+The disposable public certificate is trusted in this Python context only; its
+private key never leaves Windows and no system trust/network setting is changed.
+"""
+import argparse
+from collections import deque
+from datetime import datetime
+from email.utils import format_datetime, parsedate_to_datetime
+import hashlib
+import importlib.util
+import io
+import json
+from pathlib import Path
+import queue
+import re
+import socket
+import ssl
+import struct
+import subprocess
+import sys
+import tempfile
+import time
+from types import SimpleNamespace
+import uuid
+import zipfile
+
+sys.dont_write_bytecode = True
+_source = Path(__file__).with_name("windows-tls-probe.py")
+_spec = importlib.util.spec_from_file_location("fc_tls_business_ownership", _source)
+_tls = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_tls)
+
+# Reuse the exact tested certificate/key/process ownership and full raw-artifact
+# preservation templates, rather than creating a second cleanup implementation.
+COMMON, SETUP, CAPTURE, CLEANUP = _tls.COMMON, _tls.SETUP, _tls.CAPTURE, _tls.CLEANUP
+if _tls.LAUNCH.count("--tls-lifecycle-probe") != 1 or _tls.STOP.count("--tls-lifecycle-probe") != 1:
+    raise RuntimeError("original diagnostic control template changed; review exact flag ownership")
+LAUNCH = _tls.LAUNCH.replace("--tls-lifecycle-probe", "--tls-business-probe")
+STOP = _tls.STOP.replace("--tls-lifecycle-probe", "--tls-business-probe")
+Remote, Tunnel, Logs = _tls.Remote, _tls.Tunnel, _tls.Logs
+digest, failure, script, ps_literal = _tls.digest, _tls.failure, _tls.script, _tls.ps_literal
+READY, PASS = "TLS_BUSINESS_READY ", "TLS_BUSINESS_PASS "
+PROGRESS = "TLS_BUSINESS_PROGRESS "
+EXIT_PREFIXES = (_tls.EXIT, "TLS_BUSINESS_PROCESS_EXIT ")
+HEAD_LIMIT, BODY_LIMIT, FRAGMENT = 16 * 1024, 64 * 1024, 16 * 1024
+DOWNLOAD_LIMIT = 50 * 1024 * 1024
+STATIC_LIMIT = 5 * 1024 * 1024
+CSP = ("default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; "
+       "img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; "
+       "frame-ancestors 'none'; form-action 'self'")
+MATERIAL_BYTES, COMMAND_ID = 120000, "9001001"
+
+
+class HttpResponse:
+    """Bounded parser for this diagnostic server's response contract.
+
+    This is not a general HTTP parser: our HEAD responses and 204/304 omit Content-Length and
+    Transfer-Encoding, have no repeated headers and exactly zero wire-body bytes.
+    Other responses
+    require one canonical decimal Content-Length and no Transfer-Encoding.
+    The caller separately requires actual clean TLS EOF, including HEAD/204/304.
+    """
+    def __init__(self, binary=False, body_limit=None, head_only=False):
+        self.pending = bytearray()
+        self.status = None
+        self.headers = {}
+        self.body = bytearray()
+        self.length = None
+        self.head_bytes = 0
+        self.binary = binary
+        self.head_only = head_only
+        self.body_limit = body_limit if body_limit is not None else (DOWNLOAD_LIMIT if binary else BODY_LIMIT)
+        self.body_bytes = 0
+        self.body_hash = hashlib.sha256()
+
+    def feed(self, data):
+        if self.status is None:
+            self.pending.extend(data)
+            offset = self.pending.find(b"\r\n\r\n")
+            if offset < 0:
+                if len(self.pending) > HEAD_LIMIT:
+                    raise RuntimeError("HTTP response head exceeded 16KiB")
+                return
+            self.head_bytes = offset + 4
+            if self.head_bytes > HEAD_LIMIT:
+                raise RuntimeError("HTTP response head exceeded 16KiB")
+            head, remainder = bytes(self.pending[:offset]), bytes(self.pending[offset + 4:])
+            self.pending.clear()
+            lines = head.split(b"\r\n")
+            if not re.fullmatch(rb"HTTP/1\.1 [1-5][0-9]{2}(?: [\x20-\x7e]*)?", lines[0]):
+                raise RuntimeError("invalid HTTP/1.1 status line")
+            if len(lines) > 65:
+                raise RuntimeError("response header count exceeded bound")
+            self.status = int(lines[0][9:12])
+            for line in lines[1:]:
+                if b":" not in line or line[:1] in (b" ", b"\t"):
+                    raise RuntimeError("invalid or folded response header")
+                name, value = line.split(b":", 1)
+                if not re.fullmatch(rb"[!#$%&'*+.^_`|~0-9A-Za-z-]+", name):
+                    raise RuntimeError("invalid response header name")
+                if any(byte < 32 and byte != 9 or byte == 127 for byte in value):
+                    raise RuntimeError("invalid response header value")
+                self.headers.setdefault(name.decode("ascii").lower(), []).append(value.strip().decode("ascii"))
+            lengths = self.headers.get("content-length", [])
+            if "transfer-encoding" in self.headers:
+                raise RuntimeError("diagnostic HTTP responses forbid Transfer-Encoding")
+            if self.head_only or self.status in (204, 304):
+                if lengths:
+                    raise RuntimeError("diagnostic HEAD/204/304 contract omits Content-Length")
+                if any(len(values) != 1 for values in self.headers.values()):
+                    raise RuntimeError("diagnostic HEAD/204/304 contract forbids duplicate headers")
+                self.length = 0
+            else:
+                if len(lengths) != 1 or not re.fullmatch(r"0|[1-9][0-9]*", lengths[0]):
+                    raise RuntimeError("HTTP response needs one canonical Content-Length")
+                if len(lengths[0]) > len(str(self.body_limit)):
+                    raise RuntimeError("HTTP response body exceeded its bounded limit")
+                self.length = int(lengths[0])
+                if self.length > self.body_limit:
+                    raise RuntimeError("HTTP response body exceeded its bounded limit")
+            data = remainder
+        self.body_bytes += len(data)
+        if self.body_bytes > self.length:
+            raise RuntimeError("HTTP response has bytes beyond its exact wire-body length")
+        self.body_hash.update(data)
+        if not self.binary:
+            self.body.extend(data)
+
+    def finish(self):
+        if self.status is None or self.body_bytes != self.length:
+            raise RuntimeError("HTTP response truncated before its exact wire-body length")
+        return self
+
+    def unique(self, name):
+        values = self.headers.get(name.lower(), [])
+        if len(values) != 1:
+            raise RuntimeError("required unique response header missing/duplicated: " + name)
+        return values[0]
+
+    def json(self):
+        if self.binary:
+            raise RuntimeError("streamed binary body has no retained JSON representation")
+        value = json.loads(bytes(self.body).decode("utf-8", "strict"))
+        if not isinstance(value, dict) or value.get("schemaVersion") != 1:
+            raise RuntimeError("response JSON object/schema contract failed")
+        return value
+
+
+VISUAL_FIXTURES = ("FILLED_DEFAULT", "FILLED_ZERO", "OUTLINED")
+
+
+def validate_ready(item, marker, visual_fixture="FILLED_DEFAULT"):
+    if (not isinstance(item, dict) or type(item.get("port")) is not int or not 1 <= item["port"] <= 65535
+            or item.get("marker") != marker or type(item.get("generation")) is not int or item["generation"] <= 0
+            or item.get("origin") != "https://localhost:" + str(item["port"])
+            or item.get("visualFixture") != visual_fixture
+            or item.get("basePath") != "/fc/" or item.get("classId") != "1"
+            or item.get("subjectId") != "1" or item.get("loginName") != "probe"
+            or type(item.get("staticAssets")) is not int or not 1 <= item["staticAssets"] <= 64
+            or not isinstance(item.get("pairingCode"), str) or not re.fullmatch(r"[0-9]{8}", item["pairingCode"])):
+        raise RuntimeError("native business READY identity/origin/synthetic-fixture contract failed")
+
+
+def validate_native(value, events, browser_wire_responses=0):
+    # CDP wire observations are independent of this raw HTTP client's events.
+    # Cache hits do not prove native requests and must never inflate this floor.
+    require(type(browser_wire_responses) is int and browser_wire_responses >= 0,
+            "independent browser wire-response count invalid")
+    http_count = sum("httpStatus" in event for event in events) + browser_wire_responses
+    if (not isinstance(value, dict) or value.get("physicalNativeDrain") is not True
+            or value.get("sharedWorkers") != 2 or type(value.get("sharedWorkers")) is not int
+            or value.get("workerJoin") is not True or value.get("setupCleanup") is not True
+            or type(value.get("hubPending")) is not int or value["hubPending"] != 0
+            or type(value.get("downloadHubPending")) is not int or value["downloadHubPending"] != 0
+            or type(value.get("quarantined")) is not int or value["quarantined"] != 0
+            or type(value.get("approvals")) is not int or value["approvals"] < 1
+            or type(value.get("heads")) is not int or value["heads"] < http_count
+            or type(value.get("responses")) is not int or not http_count <= value["responses"] <= value["heads"]
+            or type(value.get("peakRecords")) is not int or not 1 <= value["peakRecords"] <= 8):
+        raise RuntimeError("native business actual-drain/shared-pool/Hub/cleanup ledger contract failed")
+
+
+def json_bytes(value):
+    return json.dumps(value, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+
+
+def request_fragments(head, body):
+    if len(head) > HEAD_LIMIT or len(head) < 40 or not head.endswith(b"\r\n\r\n"):
+        raise RuntimeError("invalid locally generated request head")
+    # The final header byte and the first already-arrived body bytes share one
+    # sendall. These are client send calls, not a claim about kernel packet/read
+    # boundaries; every body fragment remains below the receiver's 64KiB ACK cap.
+    first = min(4096, len(body))
+    chunks = [head[:7], head[7:39], head[39:-1], head[-1:] + body[:first]]
+    chunks.extend(body[offset:offset + FRAGMENT] for offset in range(first, len(body), FRAGMENT))
+    if any(not chunk or len(chunk) > FRAGMENT for chunk in chunks):
+        raise RuntimeError("local request fragmentation bound failed")
+    return chunks, first
+
+
+# This mode is an independent conservative local-forward sample, never a
+# replacement for the original strict kernel-ESTABLISHED acceptance decision.
+CLOSE_PROGRESS = "TLS_BUSINESS_CLOSE "
+HEADER_THRESHOLD_NS, HEADER_RESERVE_NS = 5_000_000_000, 25_000_000
+HEADER_CASES = tuple("header-deadline-tls-" + str(i) for i in range(1, 5)) + ("header-deadline-raw-tcp",)
+
+
+class CloseReader:
+    """Strict bounded latest-slot DTO validation; this does not release owners."""
+    def __init__(self, marker, reports):
+        self.marker, self.reports = marker, reports
+        self.generation = None
+        self.latest = None
+
+    def observe(self, line):
+        if not line.startswith(CLOSE_PROGRESS):
+            return False
+        require(len(line) <= 8192 and len(self.reports) < 512, "bounded close observations exceeded")
+        item = json.loads(line[len(CLOSE_PROGRESS):])
+        integer = lambda v: type(v) is int and 0 <= v <= (1 << 64) - 1
+        require(type(item) is dict and set(item) == {"marker", "sequence", "generation", "reserveNs",
+                "headerBegins", "headerSocketReturns", "headerFailures", "headers", "accept"}
+                and item["marker"] == self.marker and integer(item["generation"])
+                and item["generation"] == self.generation and integer(item["sequence"]) and item["sequence"] > 0
+                and type(item["reserveNs"]) is int and item["reserveNs"] == HEADER_RESERVE_NS
+                and all(integer(item[k]) for k in ("headerBegins", "headerSocketReturns", "headerFailures")),
+                "native close snapshot envelope mismatch")
+        require(item["headerSocketReturns"] <= item["headerBegins"], "native socket return counter exceeds closes")
+        require(type(item["headers"]) is list and len(item["headers"]) <= 4, "native close snapshot slot bound")
+        head_keys = {"generation", "slot", "serial", "hardDeadlineNs", "alarmNs", "beganAtNs",
+                     "socketCloseBeganAtNs", "socketReturnedAtNs", "failed", "ioPendingAtClose", "ioReturnedAtNs",
+                     "framePendingAtClose", "frameReturnedAtNs", "retirementConfirmedAtNs"}
+        accept_keys = {"serial", "hardDeadlineNs", "alarmNs", "beganAtNs", "socketCloseBeganAtNs",
+                       "socketReturnedAtNs", "failed", "completionReturnedAtNs"}
+        slots = set()
+        def validate_record(record, header):
+            require(type(record) is dict and set(record) == (head_keys if header else accept_keys),
+                    "native close observation fields mismatch")
+            time_keys = ("hardDeadlineNs", "alarmNs", "beganAtNs", "socketCloseBeganAtNs", "socketReturnedAtNs")
+            optional = {"socketCloseBeganAtNs", "socketReturnedAtNs"}
+            if header:
+                time_keys += ("ioReturnedAtNs", "frameReturnedAtNs", "retirementConfirmedAtNs")
+                optional |= {"ioReturnedAtNs", "frameReturnedAtNs", "retirementConfirmedAtNs"}
+                require(integer(record["generation"]) and record["generation"] == self.generation
+                        and type(record["slot"]) is int and 0 <= record["slot"] < 4
+                        and record["slot"] not in slots, "native close exact token/slot mismatch")
+                slots.add(record["slot"])
+                require(type(record["ioPendingAtClose"]) is bool and type(record["framePendingAtClose"]) is bool,
+                        "native close debt flags mismatch")
+            else:
+                time_keys += ("completionReturnedAtNs",)
+                optional.add("completionReturnedAtNs")
+            require(integer(record["serial"]) and record["serial"] > 0 and type(record["failed"]) is bool
+                    and all((record[k] is None and k in optional) or integer(record[k]) for k in time_keys),
+                    "native close scalar/time types mismatch")
+            require(record["hardDeadlineNs"] - record["alarmNs"] == HEADER_RESERVE_NS
+                    and record["beganAtNs"] >= record["alarmNs"], "native close alarm changed original hard deadline")
+            began, returned = record["socketCloseBeganAtNs"], record["socketReturnedAtNs"]
+            require(began is None or began >= record["beganAtNs"], "checked socket-close entry predates negative path")
+            require(returned is None or began is not None and returned >= began,
+                    "socket return missing checked close entry/order")
+            if header:
+                for flag, key in (("ioPendingAtClose", "ioReturnedAtNs"), ("framePendingAtClose", "frameReturnedAtNs")):
+                    require(record[key] is None or record[flag] and record[key] >= record["beganAtNs"]
+                            and (returned is None or record[key] >= returned), "IO/Frame return falsely discharges close debt")
+                retired = record["retirementConfirmedAtNs"]
+                require(retired is None or returned is not None and retired >= returned
+                        and all(record[k] is not None and retired >= record[k]
+                                for flag, k in (("ioPendingAtClose", "ioReturnedAtNs"),
+                                                ("framePendingAtClose", "frameReturnedAtNs")) if record[flag]),
+                        "retirement precedes actual socket/IO/Frame return")
+            # A queued bare packet may actually return BEFORE close starts;
+            # no fabricated after-close ordering is imposed on that path.
+        for record in item["headers"]:
+            validate_record(record, True)
+        if item["accept"] is not None:
+            validate_record(item["accept"], False)
+        if self.latest is not None:
+            old = self.latest
+            require(item["sequence"] > old["sequence"] and all(item[k] >= old[k]
+                    for k in ("headerBegins", "headerSocketReturns", "headerFailures")),
+                    "native close sequence/counters went backwards")
+            current = {r["slot"]: r for r in item["headers"]}
+            def evolution(prior, new, keys):
+                require(new["serial"] >= prior["serial"], "native close serial went backwards")
+                if new["serial"] != prior["serial"]:
+                    return
+                for key in keys:
+                    if key == "failed":
+                        require(not prior[key] or new[key], "native close failure flag cleared")
+                    elif prior[key] is not None:
+                        require(prior[key] == new[key], "native close record rewrote an observed fact")
+            for prior in old["headers"]:
+                require(prior["slot"] in current, "native close latest-slot history vanished")
+                evolution(prior, current[prior["slot"]], head_keys - {"serial"})
+            if old["accept"] is not None:
+                require(item["accept"] is not None, "native bare close history vanished")
+                evolution(old["accept"], item["accept"], accept_keys - {"serial"})
+        self.latest = item
+        self.reports.append(item)
+        return True
+
+
+def validate_header_sample(event):
+    """No rounding or tolerance, including local connect/SSH/handshake time."""
+    require(event.get("peerCloseObserved") is True and event.get("localCloseUsedAsPeerEvidence") is False
+            and event.get("sshMasterAliveAtPeerClose") is True and event.get("nativeLauncherAliveAtPeerClose") is True,
+            "header client lacks actual peer EOF/RST/TLS EOF")
+    case, drip_calls = event.get("case"), event.get("dripCalls")
+    require(case in HEADER_CASES and type(drip_calls) is int
+            and (drip_calls >= 2 if case == "header-deadline-tls-4" else drip_calls == 0),
+            "header case missing or fourth TLS did not perform two actual single-byte drip sends")
+    require(event.get("transport") == ("TCP" if case == "header-deadline-raw-tcp" else "TLS"),
+            "header case/transport mismatch")
+    start, end = event.get("beforeConnectNs"), event.get("peerCloseNs")
+    require(type(start) is int and type(end) is int and 0 <= start <= end
+            and event.get("elapsedNs") == end - start and end - start <= HEADER_THRESHOLD_NS,
+            "header connection exceeded original strict 5000000000ns interval")
+    require(event.get("applicationReceivedBytes") == 0, "unexpected response before first head completion")
+    require(event.get("peerCloseKind") in ("TCP_EOF", "TCP_RESET", "TCP_ABORTED", "TLS_CLEAN_EOF", "TLS_RAGGED_EOF"),
+            "header client terminal is not EOF/RST/TLS EOF")
+    if event.get("transport") == "TLS":
+        require(event.get("tlsVersion") == "TLSv1.2" and event.get("certificateVerified") is True
+                and type(event.get("handshakeCompletedNs")) is int
+                and type(event.get("incompleteHeadSentNs")) is int
+                and start <= event["handshakeCompletedNs"] <= event["incompleteHeadSentNs"] <= end
+                and event.get("applicationReceivedBytes") == 0 and event.get("completeHeadSent") is False,
+                "header sample did not complete verified TLS with an incomplete first head")
+    else:
+        require(event.get("transport") == "TCP" and event.get("sentBytes") == 0,
+                "raw TCP sample sent TLS/application data")
+
+
+def validate_header_cases(events):
+    require(len(events) == 5 and {e.get("case") for e in events} == set(HEADER_CASES),
+            "header deadline cases must be exactly five unique expected identities")
+    for event in events:
+        validate_header_sample(event)
+
+
+class HeaderDeadlineTunnel(Tunnel):
+    """Only the original -N master gets -vv; all mux/control calls stay plain."""
+    def __init__(self, remote, local_root):
+        self._plain_remote = remote
+        master_only = SimpleNamespace(host=remote.host, options=[*remote.options, "-vv"])
+        try:
+            super().__init__(master_only, local_root)
+        finally:
+            self.remote = remote
+
+    def _control(self, operation, *extra, timeout=5):
+        # Base __init__ launches its -N process before its first mux check.
+        # No original Remote options or password-bearing command is mutated.
+        self.remote = self._plain_remote
+        return super()._control(operation, *extra, timeout=timeout)
+
+
+class HeaderTracePending(RuntimeError):
+    pass
+
+
+def validate_header_forward(tunnel, launcher):
+    """Classify original -vv channel instances, not reusable channel numbers.
+
+    A mux command's local ctl EOF and a confirmed direct channel's cleanup
+    AFTER remote EOF/close are not SSH transport failures. All other errors
+    remain fail closed. This never opens a readiness or target TCP connection.
+    """
+    require(tunnel.process.poll() is None and launcher.poll() is None
+            and not tunnel.logs.overflow.is_set(), "original SSH/native process unavailable during header sample")
+    raw = bytes(tunnel.logs.stderr)
+    text = raw.decode("utf-8", "strict")
+    records, active, cleanup = [], {}, []
+    instances = 0
+    for line_number, line in enumerate(text.splitlines(), 1):
+        # Transport, authentication and channel-open failures cannot be excused
+        # by an EOF observed in some other or earlier channel instance.
+        require(not re.search(r"(?i)(open failed|connect failed|administratively prohibited|connection refused|"
+                              r"connection closed by|connection to .* closed|timed out|received disconnect|"
+                              r"disconnected from|killed by signal|terminated by signal|fatal|corrupted mac|"
+                              r"message authentication code incorrect)", line),
+                "SSH transport/channel-open failure invalidates peer-close attribution")
+        created = re.fullmatch(r"debug[123]: channel ([0-9]+): new ([^\[]+) \[.*", line)
+        if created:
+            key, kind = int(created.group(1)), created.group(2).strip()
+            require(key not in active, "SSH reused an active channel lifecycle")
+            instances += 1
+            record = {"instance": instances, "channel": key, "kind": kind, "newLine": line_number,
+                      "openConfirmedLine": None, "remoteEofLine": None, "remoteCloseLine": None,
+                      "controlEofLine": None}
+            active[key] = record
+            if kind == "direct-tcpip":
+                record["ordinal"] = len(records) + 1
+                records.append(record)
+            continue
+        channel = re.fullmatch(r"(?:debug[123]: )?channel ([0-9]+): (.*)", line)
+        detail = channel.group(2) if channel else None
+        record = active.get(int(channel.group(1))) if channel else None
+        channel_error = bool(re.search(r"(?i)(read failed|write failed|broken pipe|connection reset)", line))
+        if channel_error:
+            mux_cleanup = (record is not None and record["kind"] == "mux-control"
+                           and record["controlEofLine"] is not None and detail == "read failed")
+            # These are exact known local read-side cleanup messages. In
+            # particular a global SSH connection reset, write failure, unknown
+            # errno, or direct failure before this instance's remote terminal
+            # remains fatal even if another channel previously ended cleanly.
+            direct_cleanup = (record is not None and record["kind"] == "direct-tcpip"
+                              and record["openConfirmedLine"] is not None
+                              and (record["remoteEofLine"] is not None or record["remoteCloseLine"] is not None)
+                              and re.fullmatch(r"read failed(?: rfd [0-9]+ maxlen [0-9]+: (?:Broken pipe|Connection reset by peer))?", detail)
+                              is not None)
+            require(mux_cleanup or direct_cleanup,
+                    "SSH transport/channel failure before a proven same-instance cleanup boundary")
+            cleanup.append({"line": line_number, "channel": record["channel"], "instance": record["instance"],
+                            "kind": record["kind"], "text": line,
+                            "priorBoundaryLine": record["controlEofLine"] if mux_cleanup else
+                            record["remoteEofLine"] or record["remoteCloseLine"]})
+            continue
+        if not channel:
+            continue
+        lifecycle_fact = detail.startswith(("open confirm ", "rcvd eof", "rcvd close", "free: ", "ctl read<=0"))
+        if record is None:
+            require(not lifecycle_fact, "unpaired SSH channel lifecycle fact")
+            continue
+        if detail.startswith("ctl read<=0"):
+            require(record["kind"] == "mux-control" and re.fullmatch(r"ctl read<=0 rfd [0-9]+ len 0", detail)
+                    is not None and record["controlEofLine"] is None,
+                    "unproven/repeated mux-control EOF")
+            record["controlEofLine"] = line_number
+        elif detail.startswith("open confirm "):
+            require(record["kind"] == "direct-tcpip" and record["openConfirmedLine"] is None,
+                    "unpaired/duplicate SSH direct open confirmation")
+            record["openConfirmedLine"] = line_number
+        elif detail.startswith(("rcvd eof", "rcvd close")):
+            if record["kind"] == "direct-tcpip":
+                require(record["openConfirmedLine"] is not None, "SSH direct terminal before open confirmation")
+            field = "remoteEofLine" if detail.startswith("rcvd eof") else "remoteCloseLine"
+            require(record[field] is None, "repeated SSH channel terminal fact")
+            record[field] = line_number
+        elif detail.startswith("free: "):
+            freed_kind = detail[6:].split(":", 1)[0].split(",", 1)[0]
+            require(freed_kind.replace("-", " ") == record["kind"].replace("-", " "),
+                    "SSH freed channel kind does not match current lifecycle")
+            record["freedLine"] = line_number
+            del active[record["channel"]]
+    if not (len(records) == 5 and all(r["openConfirmedLine"] is not None
+            and r["newLine"] < r["openConfirmedLine"]
+            and any(r[k] is not None and r[k] > r["openConfirmedLine"]
+                    for k in ("remoteEofLine", "remoteCloseLine")) for r in records)):
+        raise HeaderTracePending("five actual SSH direct-tcpip open confirmations and remote EOF/close facts missing")
+    return {"status": "PASS", "masterAlive": True, "nativeLauncherAlive": True,
+            "stderrBytesObserved": len(raw), "stderrPrefixSha256": digest(raw), "channels": records,
+            "normalChannelCleanup": cleanup,
+            "rawSource": "sshTunnelRaw.stderr (complete original bytes saved by existing finally)",
+            "readiness": "Existing SSH mux forward command acknowledgement; no socket readiness probe",
+            "causalityLimit": "SSH diagnostics plus exact native group counts; not exact kernel ESTABLISHED timestamps"}
+
+
+def await_header_forward(client, progress, tunnel, launcher):
+    until = min(client.deadline, time.monotonic() + 1)
+    while True:
+        try:
+            return validate_header_forward(tunnel, launcher)
+        except HeaderTracePending:
+            require(time.monotonic() < until, "original SSH channel trace did not settle within fixed client budget")
+            progress.pump(0)
+            time.sleep(0.001)
+
+
+def exercise_header_deadlines(client, progress, close_reader, tunnel, launcher, observation):
+    """Five clients, no new threads. Nonblocking TLS handshakes/reads share30s.
+
+    Each conservative epoch is sampled BEFORE local TCP connect. The SSH
+    forward is part of that measured interval, not an inferred Windows kernel
+    establishment time. The fifth raw connection starts only after the four original TLS slots retire.
+    """
+    opened, raw_attempted = [], False
+    observation.update({"status": "FAIL", "thresholdNs": HEADER_THRESHOLD_NS,
+                   "epoch": "PER_CONNECTION_BEFORE_LOCAL_TCP_CONNECT_CALL", "maximumClients": 5,
+                   "transport": "owned SSH loopback forward to actual Schannel", "rawTcpMeaning":
+                   "Single raw TCP phase after native retirement/rearm; no TLS/data sent", "slotMapping": "NOT_PROVEN",
+                   "timingGuarantee": "Finite conservative local-forward samples only; original strictP0 decision unchanged",
+                   "audioOperation": "NONE", "authenticationOperation": "NONE", "applicationRequestsCompleted": 0})
+    def add(index, tls):
+        event = {"case": "header-deadline-tls-" + str(index) if tls else "header-deadline-raw-tcp",
+                 "status": "FAIL", "transport": "TLS" if tls else "TCP", "beforeConnectNs": time.perf_counter_ns(),
+                 "peerCloseObserved": False, "localCloseUsedAsPeerEvidence": False, "completeHeadSent": False,
+                 "applicationReceivedBytes": 0, "sentBytes": 0, "sendCalls": 0, "dripCalls": 0}
+        client.events.append(event)
+        state = {"event": event, "socket": None, "tls": tls, "handshake": not tls,
+                 "pending": b"", "pendingKind": None, "done": False, "drip": tls and index == 4, "nextDrip": None}
+        opened.append(state)
+        try:
+            connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=min(5, client.remaining()))
+            state["socket"] = connection
+            event["localConnectReturnedNs"] = time.perf_counter_ns()
+            if tls:
+                connection = client.context.wrap_socket(connection, server_hostname="localhost",
+                                                       suppress_ragged_eofs=False, do_handshake_on_connect=False)
+                state["socket"] = connection
+            connection.setblocking(False)
+        except Exception as error:
+            event["error"] = failure(error, "header-client-connect")
+            state["done"] = True
+        return state
+    def peer_closed(state, kind):
+        event = state["event"]
+        event.update(peerCloseNs=time.perf_counter_ns(), peerCloseKind=kind, peerCloseObserved=True,
+                     sshMasterAliveAtPeerClose=tunnel.process.poll() is None,
+                     nativeLauncherAliveAtPeerClose=launcher.poll() is None)
+        event["elapsedNs"] = event["peerCloseNs"] - event["beforeConnectNs"]
+        try:
+            validate_header_sample(event)
+            event["status"] = "PASS"
+        except Exception as error:
+            event["error"] = failure(error, "header-client-sample")
+        state["done"] = True
+    try:
+        for index in range(1, 5):
+            add(index, True)
+        # Six seconds is a failure-collection cutoff, never a pass tolerance.
+        # It is also bounded by the original, never-renewed Client30s deadline.
+        collect_until_ns = max(s["event"]["beforeConnectNs"] for s in opened) + 6_000_000_000
+        while any(not s["done"] for s in opened) or not raw_attempted:
+            while not progress.lines.empty():
+                progress.pump(0)
+            now_ns = time.perf_counter_ns()
+            if time.monotonic() >= client.deadline or now_ns >= collect_until_ns:
+                for state in opened:
+                    if not state["done"]:
+                        state["event"]["error"] = {"phase": "header-client-collection", "type": "TimeoutError",
+                                                   "message": "No actual peer close before fixed collection deadline; not passing evidence"}
+                        state["done"] = True
+                break
+            for state in opened:
+                if state["done"]:
+                    continue
+                connection, event = state["socket"], state["event"]
+                try:
+                    if state["tls"] and not state["handshake"]:
+                        try:
+                            connection.do_handshake()
+                        except (ssl.SSLWantReadError, ssl.SSLWantWriteError):
+                            continue
+                        require(connection.version() == "TLSv1.2"
+                                and connection.getpeercert(binary_form=True) == client.expected_der,
+                                "header TLS version/certificate identity mismatch")
+                        event.update(tlsVersion=connection.version(), certificateVerified=True,
+                                     peerDerSha256=digest(client.expected_der), handshakeCompletedNs=time.perf_counter_ns())
+                        state["handshake"] = True
+                        state["pending"] = b"GET /fc/ HTTP/1.1\r\nHost: localhost\r\nX-Synthetic-Incomplete: "
+                        state["pendingKind"] = "HEAD"
+                    if state["pending"]:
+                        try:
+                            sent = connection.send(state["pending"])
+                            require(sent > 0, "incomplete-head send made no progress")
+                            event["sentBytes"] += sent
+                            event["sendCalls"] += 1
+                            if state["pendingKind"] == "DRIP":
+                                event["dripCalls"] += 1
+                            state["pending"] = state["pending"][sent:]
+                            if not state["pending"] and "incompleteHeadSentNs" not in event:
+                                event["incompleteHeadSentNs"] = time.perf_counter_ns()
+                                state["nextDrip"] = time.perf_counter_ns() + 250_000_000
+                        except (ssl.SSLWantReadError, ssl.SSLWantWriteError, BlockingIOError):
+                            pass
+                        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, ssl.SSLEOFError) as error:
+                            # A send error alone is not the required final read.
+                            event.setdefault("sendTerminalErrors", []).append(type(error).__name__)
+                            state["pending"] = b""
+                            state["drip"] = False
+                    try:
+                        data = connection.recv(4096)
+                        if not data:
+                            peer_closed(state, "TLS_CLEAN_EOF" if state["tls"] else "TCP_EOF")
+                        else:
+                            event["applicationReceivedBytes"] += len(data)
+                            raise RuntimeError("unexpected application bytes before complete first head")
+                    except (ssl.SSLWantReadError, ssl.SSLWantWriteError, BlockingIOError):
+                        pass
+                    except ssl.SSLZeroReturnError:
+                        peer_closed(state, "TLS_CLEAN_EOF")
+                    except ssl.SSLEOFError:
+                        peer_closed(state, "TLS_RAGGED_EOF")
+                    except ConnectionResetError:
+                        peer_closed(state, "TCP_RESET")
+                    except ConnectionAbortedError:
+                        peer_closed(state, "TCP_ABORTED")
+                    if not state["done"] and state["drip"] and not state["pending"] and state["nextDrip"] is not None:
+                        if time.perf_counter_ns() >= state["nextDrip"]:
+                            require(event["dripCalls"] < 24, "bounded header drip exceeded")
+                            state["pending"] = b"a"
+                            state["pendingKind"] = "DRIP"
+                            state["nextDrip"] += 250_000_000
+                except Exception as error:
+                    event["error"] = failure(error, "header-client-transport")
+                    state["done"] = True
+            tls_states = opened[:4]
+            if not raw_attempted and all(s["done"] for s in tls_states):
+                if any(s["event"]["status"] != "PASS" for s in tls_states):
+                    observation["rawNotStartedReason"] = "TLS phase failed; no synthetic raw-phase success inferred"
+                    raw_attempted = True
+                else:
+                    latest, closed = progress.latest, close_reader.latest
+                    if (latest and closed and latest["acceptance"]["bound_slots"] == 0
+                            and latest["acceptance"]["ready_slots"] == 4
+                            and latest["acceptance"]["transfers"] == 4
+                            and latest["retired"] >= 4 and latest["rearms"] >= 4
+                            and closed["headerBegins"] == closed["headerSocketReturns"] == 4
+                            and len(closed["headers"]) == 4
+                            and all(r["retirementConfirmedAtNs"] is not None for r in closed["headers"])):
+                        observation["fourRetiredBeforeRaw"] = {"progress": latest, "close": closed,
+                                                               "observedAtNs": time.perf_counter_ns()}
+                        raw_attempted = True
+                        raw = add(5, False)
+                        # This is a new connection's fixed failure-collection
+                        # cutoff, still bounded by the original Client30s.
+                        collect_until_ns = raw["event"]["beforeConnectNs"] + 6_000_000_000
+            time.sleep(0.001)
+        observation["sequentialPhasesProven"] = (len(opened) == 5 and "fourRetiredBeforeRaw" in observation
+            and all(s["event"].get("peerCloseNs", 1 << 64) < opened[4]["event"]["beforeConnectNs"] for s in opened[:4]))
+        observation["fourTlsIntervalsOverlap"] = (all("incompleteHeadSentNs" in q["event"] and "peerCloseNs" in q["event"] for q in opened[:4])
+            and max(q["event"]["incompleteHeadSentNs"] for q in opened[:4])
+                < min(q["event"]["peerCloseNs"] for q in opened[:4]))
+        observation["status"] = "PASS" if len(opened) == 5 and all(s["event"]["status"] == "PASS" for s in opened) \
+            and observation["sequentialPhasesProven"] and observation["fourTlsIntervalsOverlap"] else "FAIL"
+        try:
+            validate_header_cases(client.events)
+        except Exception as error:
+            observation["status"] = "FAIL"
+            observation["caseOrDripValidationError"] = failure(error, "header-client-matrix")
+        observation["sshDirectTcpip"] = await_header_forward(client, progress, tunnel, launcher)
+        return observation
+    finally:
+        # Local close occurs only AFTER sampling peer terminal/failure. It is
+        # never promoted into a remote closure or successful native drain.
+        for state in opened:
+            if state["socket"] is not None:
+                event = state["event"]
+                event["localCloseBeganNs"] = time.perf_counter_ns()
+                try:
+                    state["socket"].close()
+                    event["localSocketClosed"] = True
+                    event["localCloseReturnedNs"] = time.perf_counter_ns()
+                except Exception as error:
+                    event["localSocketClosed"] = False
+                    event["localCloseError"] = failure(error, "header-client-local-close")
+                    event["status"] = observation["status"] = "FAIL"
+
+
+def validate_header_native(value, events, close_reader, progress_reader):
+    # The existing business validator is intentionally unchanged: this mode
+    # sends no complete head and therefore legitimately has no approvals.
+    require(type(value) is dict and value.get("physicalNativeDrain") is True
+            and type(value.get("sharedWorkers")) is int and value["sharedWorkers"] == 2
+            and value.get("workerJoin") is True and value.get("setupCleanup") is True
+            and all(type(value.get(k)) is int and value[k] == 0 for k in
+                    ("hubPending", "downloadHubPending", "quarantined", "approvals", "heads", "responses"))
+            and type(value.get("peakRecords")) is int and 4 <= value["peakRecords"] <= 8,
+            "header-only actual-drain/shared-pool/zero-business ledger mismatch")
+    validate_header_cases(events)
+    for event in events:
+        validate_header_sample(event)
+        require(event.get("status") == "PASS" and event.get("localSocketClosed") is True
+                and type(event.get("localCloseBeganNs")) is int and type(event.get("localCloseReturnedNs")) is int
+                and event["peerCloseNs"] <= event["localCloseBeganNs"] <= event["localCloseReturnedNs"],
+                "header client actual peer sample/local socket cleanup order failed")
+    require(close_reader.latest is not None and progress_reader.latest is not None, "native close/progress observations absent")
+    final = close_reader.latest
+    require(final["headerBegins"] == 5 and final["headerSocketReturns"] == 5
+            and final["headerFailures"] == 0 and len(final["headers"]) == 4,
+            "native five first-header closes/socket returns missing or failed")
+    for record in final["headers"]:
+        require(record["failed"] is False and record["socketReturnedAtNs"] is not None
+                and record["retirementConfirmedAtNs"] is not None
+                and (not record["ioPendingAtClose"] or record["ioReturnedAtNs"] is not None)
+                and (not record["framePendingAtClose"] or record["frameReturnedAtNs"] is not None),
+                "native latest header close lacks actual socket/IO/Frame/retirement facts")
+    unique = {}
+    for snapshot in close_reader.reports:
+        for record in snapshot["headers"]:
+            unique[interval_key(record)] = record
+    require(len(unique) == 5 and all(r["socketReturnedAtNs"] is not None
+            and r["retirementConfirmedAtNs"] is not None and not r["failed"] for r in unique.values()),
+            "bounded close history lacks five distinct actually retired tokens")
+    require(progress_reader.latest["acceptance"]["transfers"] == 5
+            and progress_reader.latest["acceptance"]["capacity_rejects"] == 0
+            and progress_reader.latest["acceptance"]["bound_slots"] == 0
+            and progress_reader.latest["acceptance"]["native_pending"] == 0
+            and progress_reader.latest["acceptance"]["owned_sockets"] == 0,
+            "native final physical socket/operation debt remains")
+    return {"status": "PASS", "groupEvidence": "First phase four verified incomplete TLS heads; original tokens actually retired/rearmed; then one raw TCP accepted. Exactly five native transfers/header closes with zero capacity rejects. Individual TLS peer-to-slot mapping NOT_PROVEN; second-phase single raw connection has a unique newly closed token.",
+            "nativeHeaderCloseBegins": final["headerBegins"], "nativeHeaderSocketReturns": final["headerSocketReturns"],
+            "nativeFiveClosedTokens": [{k: r[k] for k in ("generation", "slot", "serial")} for r in unique.values()],
+            "rawTcpCapacityRejects": progress_reader.latest["acceptance"]["capacity_rejects"],
+            "socketReturnIsPeerClose": False, "originalStrictP0": "NOT_VALIDATED", "productionListener": "NOT_ENABLED"}
+
+
+class Client:
+    def __init__(self, local_port, ready, tls_context, wrong_ca, expected_der, events):
+        self.local_port, self.ready = local_port, ready
+        self.context, self.wrong_ca, self.expected_der = tls_context, wrong_ca, expected_der
+        self.events = events
+        self.deadline = time.monotonic() + 30
+        self.cookie = self.csrf = None
+
+    def remaining(self):
+        remaining = min(8, self.deadline - time.monotonic())
+        if remaining <= 0:
+            raise RuntimeError("finite client business observation budget expired")
+        return remaining
+
+    def request(self, case, method, route, body=b"", expected=(200,), content_type="application/json", origin=None,
+                binary=False, authenticated=True, static=False, response_type=None, extra_headers=(), request_host=None):
+        event = {"case": case, "status": "FAIL", "method": method, "route": route,
+                 "requestBodyBytes": len(body), "requestBodySha256": digest(body)}
+        self.events.append(event)
+        started = time.monotonic_ns()
+        connection = None
+        try:
+            authority = "localhost:" + str(self.ready["port"])
+            wire_host = authority if request_host is None else request_host
+            require(isinstance(wire_host, str) and len(wire_host) <= 253
+                    and re.fullmatch(r"[A-Za-z0-9.:-]+", wire_host), "invalid diagnostic HTTP Host")
+            event["requestHost"] = wire_host
+            target = self.ready['basePath'] + ("" if static else "api/v1/") + route
+            headers = [f"{method} {target} HTTP/1.1", f"Host: {wire_host}",
+                       "Connection: close", "Origin: " + (origin if origin is not None else self.ready["origin"])]
+            for name, value in extra_headers:
+                require(re.fullmatch(r"[A-Za-z0-9-]+", name) and all(32 <= ord(c) < 127 for c in value),
+                        "invalid locally generated extra header")
+                headers.append(name + ": " + value)
+            if self.cookie and authenticated:
+                headers.append("Cookie: " + self.cookie)
+            if method == "POST":
+                headers += ["Content-Type: " + content_type, "Content-Length: " + str(len(body))]
+                if self.csrf and authenticated:
+                    headers.append("X-FC-CSRF: " + self.csrf)
+            elif body:
+                raise RuntimeError("local non-POST request unexpectedly contains body")
+            head = ("\r\n".join(headers) + "\r\n\r\n").encode("ascii")
+            chunks, first = request_fragments(head, body)
+            connection = socket.create_connection(("127.0.0.1", self.local_port), timeout=self.remaining())
+            connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            connection.settimeout(self.remaining())
+            connection = self.context.wrap_socket(connection, server_hostname="localhost", suppress_ragged_eofs=False)
+            if connection.version() != "TLSv1.2" or connection.getpeercert(binary_form=True) != self.expected_der:
+                raise RuntimeError("actual TLS version/exact disposable certificate mismatch")
+            event.update({"tlsVersion": connection.version(), "peerDerSha256": digest(connection.getpeercert(binary_form=True)),
+                          "serverHostname": "localhost", "hostAuthority": authority,
+                          "clientSendCalls": len(chunks), "maxSendCallBytes": max(map(len, chunks)),
+                          "coalescedHeaderTailBodyBytes": first})
+            for index, chunk in enumerate(chunks):
+                connection.settimeout(self.remaining())
+                connection.sendall(chunk)
+                if index < 3:
+                    time.sleep(0.005)
+            response = HttpResponse(binary=binary, body_limit=STATIC_LIMIT if static and binary else None,
+                                    head_only=method == "HEAD")
+            wire_hash = hashlib.sha256()
+            total = 0
+            while True:
+                connection.settimeout(self.remaining())
+                data = connection.recv(FRAGMENT)
+                if not data:
+                    # With suppress_ragged_eofs=False this is verified clean
+                    # TLS close_notify; bare TCP EOF raises SSLEOFError instead.
+                    break
+                total += len(data)
+                if total > HEAD_LIMIT + response.body_limit:
+                    raise RuntimeError("HTTP response wire bound exceeded")
+                wire_hash.update(data)
+                response.feed(data)
+            response.finish()
+            date = response.unique("date")
+            parsed_date = parsedate_to_datetime(date)
+            require(format_datetime(parsed_date, usegmt=True) == date,
+                    "response Date is not a unique canonical IMF-fixdate")
+            event.update({"httpStatus": response.status, "responseWireBytes": total,
+                          "responseWireSha256": wire_hash.hexdigest(), "responseBodyBytes": response.body_bytes,
+                          "responseBodySha256": response.body_hash.hexdigest(), "responseDate": date,
+                          "closeNotify": "PASS: actual clean TLS EOF"})
+            if response.status not in expected:
+                raise RuntimeError(f"{case}: expected HTTP {expected}, received {response.status}")
+            if response.status == 405:
+                event["responseAllow"] = response.unique("allow")
+            if binary:
+                require(response.unique("content-type") == (response_type or "application/octet-stream")
+                        and response.unique("x-content-type-options") == "nosniff",
+                        "stream response content/privacy headers mismatch")
+                if static:
+                    require(response.unique("content-security-policy") == CSP
+                            and response.unique("referrer-policy") == "no-referrer"
+                            and response.unique("permissions-policy") == "camera=(), geolocation=(), microphone=(self)",
+                            "static response security headers mismatch")
+                else:
+                    require(response.unique("cache-control") == "no-store", "download cache privacy mismatch")
+                event["binaryClientRetainedBodyBytes"] = len(response.body)
+            elif method != "HEAD" and response.status not in (204, 304):
+                response.json()
+            event["responseFraming"] = ("HEAD response; CL/TE omitted and zero wire body"
+                                        if method == "HEAD" else "status-defined empty; CL/TE omitted by diagnostic contract"
+                                        if response.status in (204, 304) else "unique canonical Content-Length")
+            event["status"] = "PASS"
+            return response
+        except Exception as error:
+            event["error"] = failure(error, "client/" + case)
+            raise
+        finally:
+            if connection:
+                connection.close()
+            event["forwardObservationNanos"] = time.monotonic_ns() - started
+
+    def reject_certificate(self, case, wrong_hostname=False):
+        event = {"case": case, "status": "FAIL", "serverHostname": "wrong.invalid" if wrong_hostname else "localhost",
+                 "trustSource": "only owned public PEM" if wrong_hostname else "default client roots, fixture not added"}
+        self.events.append(event)
+        connection = None
+        try:
+            connection = socket.create_connection(("127.0.0.1", self.local_port), timeout=self.remaining())
+            connection.settimeout(self.remaining())
+            context = self.context if wrong_hostname else self.wrong_ca
+            try:
+                connection = context.wrap_socket(connection, server_hostname=event["serverHostname"], suppress_ragged_eofs=False)
+            except ssl.SSLCertVerificationError as error:
+                event.update({"status": "PASS", "rejectionType": "SSLCertVerificationError",
+                              "verifyCode": error.verify_code, "verifyMessage": error.verify_message})
+                return
+            raise RuntimeError("invalid certificate/hostname unexpectedly passed actual TLS verification")
+        except Exception as error:
+            event["error"] = failure(error, "client/" + case)
+            raise
+        finally:
+            if connection:
+                connection.close()
+
+
+class ProgressReader:
+    """Consume only safe progress; preserve every unrelated lifecycle line.
+
+    Uses the launcher's existing pipe-reader threads, never another thread.
+    All waits share the original Client deadline and fixed per-wait limits.
+    """
+    COUNTERS = ("posts", "completions", "idle_cancellations", "idle_returns", "capacity_rejects", "transfers")
+
+    def __init__(self, lines, marker, reports, close_reader=None):
+        self.lines, self.marker, self.reports = lines, marker, reports
+        self.close_reader = close_reader
+        self.generation = None
+        self.latest = None
+        self.deferred = deque()
+        self.deferred_bytes = 0
+
+    def observe(self, line):
+        if self.close_reader is not None and self.close_reader.observe(line):
+            return True
+        if not line.startswith(PROGRESS):
+            return False
+        require(len(line) <= 8192 and len(self.reports) < 512, "bounded native progress exceeded")
+        item = json.loads(line[len(PROGRESS):])
+        integer = lambda value: type(value) is int and 0 <= value <= (1 << 64) - 1
+        require(isinstance(item, dict) and set(item) == {"marker", "generation", "sequence", "acceptance",
+                    "jsonBodyRecords", "retired", "rearms", "pendingJobs", "requests"}
+                and item.get("marker") == self.marker
+                and integer(item.get("generation")) and item["generation"] == self.generation
+                and integer(item.get("sequence")) and item["sequence"] > 0, "native progress identity mismatch")
+        a = item.get("acceptance")
+        require(isinstance(a, dict) and set(a) == set(self.COUNTERS) | {"generation", "ready_slots", "bound_slots",
+                    "native_pending", "owned_sockets"}
+                and integer(a.get("generation")) and a.get("generation") == self.generation
+                and all(integer(a.get(key)) for key in self.COUNTERS)
+                and all(type(a.get(key)) is int and 0 <= a[key] <= limit for key, limit in
+                        (("ready_slots", 4), ("bound_slots", 4), ("native_pending", 5), ("owned_sockets", 6))),
+                "native acceptance counter/resource shape mismatch")
+        require(all(integer(item.get(key)) for key in ("retired", "rearms", "pendingJobs", "jsonBodyRecords")),
+                "native progress aggregate invalid")
+        requests = item.get("requests")
+        require(isinstance(requests, list) and len(requests) <= 4
+                and len(requests) == item["jsonBodyRecords"], "native JSON-body observation bound mismatch")
+        keys = set()
+        for request in requests:
+            require(isinstance(request, dict) and set(request) ==
+                    {"generation", "slot", "serial", "admittedAtNs", "deadlineNs"}
+                    and all(integer(value) for value in request.values())
+                    and request["generation"] == self.generation and request["slot"] < 4
+                    and request["serial"] > 0 and request["admittedAtNs"] < request["deadlineNs"]
+                    and request["deadlineNs"] - request["admittedAtNs"] == 120_000_000_000,
+                    "native original request interval mismatch")
+            key = interval_key(request)
+            require(key not in keys, "duplicate native original token")
+            keys.add(key)
+        if self.latest is not None:
+            require(item["sequence"] > self.latest["sequence"]
+                    and all(a[key] >= self.latest["acceptance"][key] for key in self.COUNTERS)
+                    and item["retired"] >= self.latest["retired"] and item["rearms"] >= self.latest["rearms"],
+                    "native progress went backwards")
+        self.latest = item
+        self.reports.append(item)
+        return True
+
+    def get(self, timeout):
+        if self.deferred:
+            line = self.deferred.popleft()
+            self.deferred_bytes -= len(line.encode("utf-8"))
+            return line
+        until = time.monotonic() + timeout
+        while True:
+            line = self.lines.get(timeout=max(0, until - time.monotonic()))
+            if not self.observe(line):
+                return line
+
+    def pump(self, timeout):
+        try:
+            line = self.lines.get(timeout=timeout)
+        except queue.Empty:
+            return
+        if not self.observe(line):
+            size = len(line.encode("utf-8"))
+            require(len(self.deferred) < 256 and self.deferred_bytes + size <= 256 * 1024,
+                    "bounded deferred native lifecycle lines exceeded")
+            self.deferred.append(line)
+            self.deferred_bytes += size
+
+    def wait(self, client, predicate, description, budget=3):
+        until = min(client.deadline, time.monotonic() + budget)
+        while True:
+            # Read already queued changes before consulting an older snapshot.
+            while not self.lines.empty():
+                self.pump(0)
+            remaining = until - time.monotonic()
+            require(remaining > 0, "native progress barrier expired: " + description)
+            if self.latest is not None and predicate(self.latest):
+                return self.latest
+            self.pump(min(0.05, remaining))
+
+
+def interval_key(interval):
+    return interval["generation"], interval["slot"], interval["serial"]
+
+
+def intervals(item):
+    return {interval_key(entry): entry for entry in item["requests"]}
+
+
+def unchanged_intervals(item, original):
+    return intervals(item) == original
+
+
+def four_original_bodies_admitted(item, original, first_admitted_transfers):
+    # Progress is throttled: a prior vacant snapshot can predate successful HTTP
+    # operations already completed by the client. Anchor only at the first exact
+    # partial admission; the remaining three must cause exactly three transfers.
+    return (len(original) == 4 and item["jsonBodyRecords"] == 4
+            and len(item["requests"]) == 4 and len(intervals(item)) == 4
+            and item["acceptance"]["bound_slots"] == 4
+            and item["acceptance"]["transfers"] == first_admitted_transfers + 3
+            and item["pendingJobs"] == 0 and unchanged_intervals(item, original))
+
+
+def capacity_transport_rejection(error):
+    # No timeout, refusal, generic TLS/certificate failure or alert is evidence
+    # that this native capacity owner accepted then closed this exact socket.
+    return isinstance(error, (ConnectionResetError, ssl.SSLEOFError, ssl.SSLZeroReturnError))
+
+
+def exercise_idle_accept(client, progress):
+    started = time.monotonic()
+    require(client.deadline - started >= 6, "insufficient original client budget for idle acceptance stage")
+    baseline = progress.wait(client, lambda p: p["acceptance"]["posts"] > 0,
+                             "initial bare accept post", budget=1)
+    idle_until = started + 5.05
+    while time.monotonic() < idle_until:
+        progress.pump(max(0, min(0.05, idle_until - time.monotonic())))
+    observed = progress.wait(client, lambda p:
+        p["acceptance"]["idle_returns"] > baseline["acceptance"]["idle_returns"]
+        and p["acceptance"]["posts"] > baseline["acceptance"]["posts"]
+        and p["acceptance"]["native_pending"] >= 1, "idle return and genuine repost", budget=2)
+    elapsed = time.monotonic() - started
+    require(elapsed >= 5.05, "idle client interval shorter than 5.05 seconds")
+    status = client.request("continuous-idle-repost-status", "GET", "status").json()
+    require(status.get("online") is True and status.get("apiVersion") == 1,
+            "fresh request after idle accept return failed")
+    client.events[-1]["idleNoClientSeconds"] = elapsed
+    return {"noClientSeconds": elapsed, "baselineSequence": baseline["sequence"],
+            "repostedSequence": observed["sequence"], "idleReturns": observed["acceptance"]["idle_returns"],
+            "scope": "Application AcceptEx idle return/repost; not kernel ESTABLISHED or strict TCP5s evidence"}
+
+
+class PendingReceipt:
+    """One real authenticated exact-receipt POST with just its last byte held."""
+    def __init__(self, client, index, body):
+        self.client, self.connection, self.tail = client, None, body[-1:]
+        self.started = time.monotonic_ns()
+        self.event = {"case": f"continuous-original-{index}-exact-receipt", "status": "FAIL", "method": "POST",
+                      "route": "materials/folders/1/1/append", "requestBodyBytes": len(body),
+                      "requestBodySha256": digest(body)}
+        client.events.append(self.event)
+        try:
+            require(body.endswith(b"}") and len(body) > 1 and client.cookie and client.csrf,
+                    "partial receipt fixture not authenticated/canonical")
+            authority = "localhost:" + str(client.ready["port"])
+            target = client.ready["basePath"] + "api/v1/materials/folders/1/1/append"
+            head = (f"POST {target} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\n"
+                    f"Origin: {client.ready['origin']}\r\nCookie: {client.cookie}\r\n"
+                    f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
+                    f"X-FC-CSRF: {client.csrf}\r\n\r\n").encode("ascii")
+            connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=client.remaining())
+            self.connection = connection
+            connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            connection.settimeout(client.remaining())
+            self.connection = client.context.wrap_socket(connection, server_hostname="localhost", suppress_ragged_eofs=False)
+            connection = self.connection
+            require(connection.version() == "TLSv1.2" and connection.getpeercert(binary_form=True) == client.expected_der,
+                    "partial request TLS certificate/version mismatch")
+            self.event.update({"tlsVersion": connection.version(), "peerDerSha256": digest(client.expected_der),
+                               "serverHostname": "localhost", "hostAuthority": authority})
+            connection.settimeout(client.remaining())
+            connection.sendall(head + body[:-1])
+        except Exception as error:
+            self.event["error"] = failure(error, "client/" + self.event["case"])
+            self.close()
+            raise
+
+    def finish(self, expected_receipt):
+        try:
+            connection = self.connection
+            connection.settimeout(self.client.remaining())
+            connection.sendall(self.tail)
+            response, wire_hash, total = HttpResponse(), hashlib.sha256(), 0
+            while True:
+                connection.settimeout(self.client.remaining())
+                data = connection.recv(FRAGMENT)
+                if not data:
+                    break  # suppress_ragged_eofs=False: actual TLS close_notify
+                total += len(data)
+                require(total <= HEAD_LIMIT + BODY_LIMIT, "pending receipt response wire bound exceeded")
+                wire_hash.update(data)
+                response.feed(data)
+            response.finish()
+            date = response.unique("date")
+            require(format_datetime(parsedate_to_datetime(date), usegmt=True) == date,
+                    "pending receipt Date is not canonical IMF-fixdate")
+            response.json()
+            require(response.status in (200, 201) and response.body == expected_receipt,
+                    "original pending POST did not return the identical durable receipt")
+            require(time.monotonic() < self.client.deadline, "original client deadline expired before receipt completion")
+            self.event.update({"status": "PASS", "httpStatus": response.status, "responseWireBytes": total,
+                               "responseWireSha256": wire_hash.hexdigest(), "responseBodyBytes": response.body_bytes,
+                               "responseBodySha256": response.body_hash.hexdigest(), "responseDate": date,
+                               "responseFraming": "unique canonical Content-Length",
+                               "closeNotify": "PASS: actual clean TLS EOF", "exactOriginalReceipt": True})
+        except Exception as error:
+            self.event["error"] = failure(error, "client/" + self.event["case"])
+            raise
+        finally:
+            self.event["forwardObservationNanos"] = time.monotonic_ns() - self.started
+            self.close()
+
+    def close(self):
+        if self.connection is not None:
+            self.connection.close()
+            self.connection = None
+
+
+def reject_full_capacity(client, index):
+    event = {"case": f"continuous-capacity-reject-{index}", "status": "FAIL", "tcpConnected": False}
+    client.events.append(event)
+    connection = None
+    started = time.monotonic_ns()
+    try:
+        connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=client.remaining())
+        event["tcpConnected"] = True
+        connection.settimeout(min(2, client.remaining()))
+        connection = client.context.wrap_socket(connection, server_hostname="localhost", suppress_ragged_eofs=False,
+                                               do_handshake_on_connect=False)
+        try:
+            connection.do_handshake()
+        except Exception as error:
+            require(capacity_transport_rejection(error), "capacity did not produce actual EOF/RST/SSLEOF")
+            event.update({"status": "PASS", "transportRejection": type(error).__name__})
+            return
+        raise RuntimeError("full business capacity unexpectedly completed TLS handshake")
+    except Exception as error:
+        event["error"] = failure(error, "client/" + event["case"])
+        raise
+    finally:
+        if connection is not None:
+            connection.close()
+        event["forwardObservationNanos"] = time.monotonic_ns() - started
+
+
+def exercise_capacity_accept(client, progress, body, receipt):
+    require(client.deadline - time.monotonic() >= 5, "insufficient original client budget for four-body capacity stage")
+    progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
+                           and p["acceptance"]["bound_slots"] == 0 and p["acceptance"]["ready_slots"] == 4,
+                           "prior business requests physically retired/rearmed")
+    pending, original = [], {}
+    first_admitted_transfers = None
+    try:
+        for index in range(1, 5):
+            pending.append(PendingReceipt(client, index, body))
+            observed = progress.wait(client, lambda p: p["jsonBodyRecords"] == index
+                and all(intervals(p).get(key) == value for key, value in original.items()),
+                f"original JSON body admission {index}")
+            require(len(intervals(observed)) == index, "JSON-body admission token was reused")
+            new_key = next(key for key in intervals(observed) if key not in original)
+            original = intervals(observed)
+            pending[-1].event["originalInterval"] = original[new_key]
+            if index == 1:
+                first_admitted_transfers = observed["acceptance"]["transfers"]
+        admitted = progress.wait(client, lambda p: four_original_bodies_admitted(p, original, first_admitted_transfers),
+                                 "four original admitted bodies, no queued worker work")
+        for index in (1, 2):
+            reject_full_capacity(client, index)
+        rejected = progress.wait(client, lambda p:
+            p["acceptance"]["capacity_rejects"] == admitted["acceptance"]["capacity_rejects"] + 2
+            and p["acceptance"]["bound_slots"] == 4 and unchanged_intervals(p, original),
+            "two native exact capacity closes without changing four intervals")
+        pending[0].finish(receipt)
+        first_key = interval_key(pending[0].event["originalInterval"])
+        remaining = {key: value for key, value in original.items() if key != first_key}
+        retired = progress.wait(client, lambda p: p["retired"] > rejected["retired"]
+            and p["rearms"] > rejected["rearms"] and p["acceptance"]["ready_slots"] >= 1
+            and p["acceptance"]["bound_slots"] == 3
+            and unchanged_intervals(p, remaining), "first original physically Retired and rearmed")
+        require(client.request("continuous-after-retire-status", "GET", "status").json().get("online") is True,
+                "new request after exact original retirement failed")
+        recovered = progress.wait(client, lambda p: p["retired"] > retired["retired"]
+            and p["rearms"] > retired["rearms"] and p["acceptance"]["bound_slots"] == 3
+            and unchanged_intervals(p, remaining), "other original intervals unchanged after recovery GET")
+        for item in pending[1:]:
+            item.finish(receipt)
+        return {"admittedSequence": admitted["sequence"], "capacityClosedSequence": rejected["sequence"],
+                "retiredRearmedSequence": retired["sequence"], "recoveredSequence": recovered["sequence"],
+                "originalIntervals": list(original.values()), "capacityCloses": 2,
+                "sameOriginalReceipts": 4, "binaryUploadPermitsUsedByStage": 0,
+                "scope": "Real Schannel JSON-body admission/capacity/retirement; no kernel TCP timestamp claim"}
+    finally:
+        for item in pending:
+            item.close()
+
+
+def silent_wav():
+    # Domain minimum: 8000 frames / 500ms, never a playback/broadcast command.
+    pcm = bytes(8000 * 2)
+    return (b"RIFF" + struct.pack("<I", 36 + len(pcm)) + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, 16000, 32000, 2, 16)
+            + b"data" + struct.pack("<I", len(pcm)) + pcm)
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def static_mime(path):
+    if path == "index.html":
+        return "text/html; charset=utf-8"
+    return {"js": "text/javascript; charset=utf-8", "css": "text/css; charset=utf-8",
+            "svg": "image/svg+xml", "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+            "webp": "image/webp"}.get(path.rsplit(".", 1)[-1])
+
+
+def read_web_package(source):
+    """Read only bounded manifest entries; never extract request-controlled paths."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            require(key not in result, "duplicate package manifest field")
+            result[key] = value
+        return result
+    with zipfile.ZipFile(source) as archive:
+        names = archive.namelist()
+        require(names.count("web/fc-assets.json") == 1, "missing/duplicate web manifest in supplied ZIP")
+        info = archive.getinfo("web/fc-assets.json")
+        require(0 < info.file_size <= BODY_LIMIT, "web manifest exceeded 64KiB")
+        manifest_bytes = archive.read(info)
+        manifest = json.loads(manifest_bytes.decode("utf-8", "strict"), object_pairs_hook=unique_object)
+        require(isinstance(manifest, dict)
+                and set(manifest) == {"schemaVersion", "apiVersion", "uiCompatibilityVersion", "assets"}
+                and all(type(manifest[k]) is int and manifest[k] == 1
+                        for k in ("schemaVersion", "apiVersion", "uiCompatibilityVersion")),
+                "web manifest version/fields mismatch")
+        assets = manifest["assets"]
+        require(isinstance(assets, list) and 1 <= len(assets) <= 64, "web manifest entry count invalid")
+        payloads, seen, total = [], set(), 0
+        for asset in assets:
+            require(isinstance(asset, dict) and set(asset) == {"path", "sizeBytes", "sha256"},
+                    "web asset fields mismatch")
+            path = asset["path"]
+            require(isinstance(path, str) and (path == "index.html" or re.fullmatch(r"assets/[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", path))
+                    and static_mime(path) is not None and path.lower() not in seen,
+                    "web asset path invalid/duplicated")
+            if path.startswith("assets/"):
+                stem = path[7:].split(".", 1)[0].upper()
+                require(not re.fullmatch(r"CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9]", stem), "Windows reserved asset name")
+            seen.add(path.lower())
+            size, sha = asset["sizeBytes"], asset["sha256"]
+            require(type(size) is int and 0 < size <= STATIC_LIMIT and isinstance(sha, str)
+                    and re.fullmatch(r"[0-9a-f]{64}", sha), "web asset size/digest invalid")
+            total += size
+            require(total <= STATIC_LIMIT, "web bundle exceeded 5MiB")
+            member = "web/" + path
+            require(names.count(member) == 1, "missing/duplicate ZIP asset")
+            info = archive.getinfo(member)
+            require(info.file_size == size and not info.is_dir(), "ZIP asset size mismatch")
+            data = archive.read(info)
+            require(len(data) == size and digest(data) == sha, "ZIP asset digest mismatch")
+            payloads.append((path, data))
+        require("index.html" in seen, "web entry document missing")
+    return manifest_bytes, payloads, {"manifestSha256": digest(manifest_bytes), "payloadBytes": total, "assets": assets}
+
+
+def upload_web_package(remote, local_root, directory, marker, package):
+    manifest, payloads, summary = package
+    owned_root = Path(local_root) / "web-package"
+    owned_root.mkdir()
+    remote.powershell("$root=" + ps_literal(directory)
+        + ";if(([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-ne " + ps_literal(marker)
+        + "){throw 'static package owner mismatch'};$pkg=Join-Path $root 'web-package';"
+        + "if(Test-Path -LiteralPath $pkg){throw 'static package already exists'};"
+        + "New-Item -ItemType Directory -Path $pkg|Out-Null;"
+        + "New-Item -ItemType Directory -Path (Join-Path $pkg 'assets')|Out-Null;'STATIC_PACKAGE_ROOT_CREATED'")
+    expected = {}
+    for path, data in [("fc-assets.json", manifest)] + payloads:
+        source = owned_root / path
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_bytes(data)
+        remote.upload(source, directory + "\\web-package" + ("\\assets" if path.startswith("assets/") else ""))
+        expected[path] = {"bytes": len(data), "sha256": digest(data)}
+    paths = ",".join(ps_literal(path) for path in expected)
+    rows = json.loads(remote.powershell("$pkg=Join-Path " + ps_literal(directory) + " 'web-package';@(@(" + paths
+        + ")|ForEach-Object{$f=Join-Path $pkg $_;@{path=$_;bytes=(Get-Item -LiteralPath $f).Length;"
+        + "sha256=(Get-FileHash -LiteralPath $f -Algorithm SHA256).Hash.ToLowerInvariant()}})|ConvertTo-Json -Compress"))
+    require(isinstance(rows, list) and len(rows) == len(expected), "uploaded static package inventory mismatch")
+    actual = {row["path"]: {"bytes": row["bytes"], "sha256": row["sha256"]} for row in rows}
+    require(actual == expected, "uploaded static package changed bytes/digest")
+    return dict(summary, uploadedFiles=rows, uploadVerification="PASS")
+
+
+def exercise_head(client):
+    """Every current HEAD target is rejected; its error still has no wire body."""
+    cases = [
+        ("static-head-method", "index.html", True, None, 405, "GET"),
+        ("static-head-host", "index.html", True, "wrong.invalid", 403, None),
+        ("api-head-get", "status", False, None, 405, "GET"),
+        ("api-head-post", "pairing/requests", False, None, 405, "POST"),
+        ("api-head-shared", "voice/broadcasts", False, None, 405, "GET, POST"),
+        ("api-head-unknown", "not-a-route", False, None, 404, None),
+        ("api-head-host", "status", False, "wrong.invalid", 403, None),
+    ]
+    results = []
+    for case, route, static, host, status, allowed in cases:
+        rejected = client.request(case, "HEAD", route, static=static, expected=(status,),
+                                  authenticated=False, request_host=host)
+        require(rejected.length == rejected.body_bytes == 0 and not rejected.body
+                and rejected.body_hash.hexdigest() == digest(b"")
+                and "content-length" not in rejected.headers and "transfer-encoding" not in rejected.headers,
+                "HEAD response contained a body/framing field: " + case)
+        if allowed is not None:
+            require(rejected.unique("allow") == allowed, "HEAD 405 Allow mismatch: " + case)
+        else:
+            require("allow" not in rejected.headers, "non-405 HEAD unexpectedly supplied Allow: " + case)
+        results.append({"case": case, "httpStatus": rejected.status, "wireBodyBytes": rejected.body_bytes,
+                        "allow": allowed, "status": "PASS"})
+    return results
+
+
+def exercise_static(client, package):
+    require(client.cookie is None, "static public test must precede pairing")
+    heads = exercise_head(client)
+    tested = []
+    for asset in package["assets"]:
+        path = asset["path"]
+        route = "" if path == "index.html" else path
+        response = client.request("static-" + path, "GET", route, static=True, binary=True,
+                                  authenticated=False, response_type=static_mime(path))
+        cache = "no-cache" if path == "index.html" else "public, max-age=31536000, immutable"
+        require(response.body_bytes == asset["sizeBytes"] and response.body_hash.hexdigest() == asset["sha256"]
+                and response.unique("etag") == '"' + asset["sha256"] + '"'
+                and response.unique("cache-control") == cache and not response.body,
+                "static payload/cache/hash mismatch: " + path)
+        tested.append({"path": path, "bytes": response.body_bytes, "sha256": response.body_hash.hexdigest()})
+        if path == "index.html" or path.endswith(".css"):
+            cached = client.request("static-304-" + path, "GET", path, expected=(304,), static=True,
+                                    binary=True, authenticated=False, response_type=static_mime(path),
+                                    extra_headers=(("If-None-Match", 'W/' + response.unique("etag") + ', "miss"'),))
+            require(cached.body_bytes == 0 and cached.length == 0
+                    and "content-length" not in cached.headers and "transfer-encoding" not in cached.headers
+                    and cached.unique("etag") == response.unique("etag")
+                    and cached.unique("cache-control") == cache, "static conditional response mismatch")
+    for case, method, route, expected, headers, origin in [
+        ("static-missing", "GET", "assets/missing.js", 404, (), None),
+        ("static-traversal", "GET", "assets/../index.html", 404, (), None),
+        ("static-query-not-fallback", "GET", "index.html?unknown=1", 404, (), None),
+        ("static-bad-origin", "GET", "index.html", 403, (), "https://wrong.invalid"),
+        ("static-cross-site", "GET", "index.html", 403, (("Sec-Fetch-Site", "cross-site"),), None),
+        ("unknown-api-not-html", "GET", "api/v1/not-a-route", 404, (), None),
+        ("static-wrong-method", "POST", "index.html", 405, (), None),
+    ]:
+        rejected = client.request(case, method, route, static=True, expected=(expected,), authenticated=False,
+                                  extra_headers=headers, origin=origin)
+        if expected == 405:
+            require(rejected.unique("allow") == "GET", "static 405 Allow mismatch")
+    return {"status": "PASS", "assets": tested, "conditionalResponses": 2, "negativePaths": 7, "headCases": heads,
+            "source": "verified ZIP manifest; public resources before pairing", "browser": "NOT_RUN"}
+
+
+def authenticate_business(client):
+    for route, allowed in [("status", "GET"), ("pairing/requests", "POST"),
+                           ("voice/broadcasts", "GET, POST")]:
+        rejected = client.request("api-wrong-method-" + route, "DELETE", route, expected=(405,),
+                                  authenticated=False)
+        require(rejected.unique("allow") == allowed and rejected.json().get("code") == "METHOD_NOT_ALLOWED",
+                "API 405 Allow mismatch: " + route)
+    status = client.request("public-status", "GET", "status").json()
+    require(status.get("online") is True and status.get("apiVersion") == 1, "public status payload mismatch")
+    require(client.request("unauthorized-session", "GET", "session", expected=(401,)).json().get("code") == "UNAUTHORIZED",
+            "private session was not rejected as unauthorized")
+    pairing = json_bytes({"schemaVersion": 1, "code": client.ready["pairingCode"],
+                          "loginName": client.ready["loginName"], "deviceName": "Synthetic TLS business probe"})
+    require(client.request("bad-origin-pairing", "POST", "pairing/requests", pairing, expected=(403,),
+                           origin="https://wrong.invalid").json().get("code") == "FORBIDDEN", "bad Origin not forbidden")
+    requested = client.request("pairing-request", "POST", "pairing/requests", pairing, expected=(202,)).json()
+    request_id, poll_secret = requested.get("requestId"), requested.get("pollSecret")
+    require(requested.get("status") == "PENDING" and isinstance(request_id, str)
+            and re.fullmatch(r"[1-9][0-9]{0,19}", request_id) and isinstance(poll_secret, str)
+            and re.fullmatch(r"[0-9a-fA-F]{64}", poll_secret), "pairing receipt contract failed")
+    poll_body = json_bytes({"schemaVersion": 1, "pollSecret": poll_secret})
+    authorized = None
+    for index in range(8):
+        # Respect the API's 500ms minimum; never hammer/retry an upload/write.
+        time.sleep(0.65)
+        polled = client.request("pairing-poll-" + str(index + 1), "POST", f"pairing/requests/{request_id}/poll",
+                                poll_body, expected=(200, 202))
+        if polled.status == 200:
+            authorized = polled
+            break
+        require(polled.json().get("status") == "PENDING", "unexpected pending pairing status")
+    require(authorized is not None and authorized.json().get("status") == "AUTHORIZED", "synthetic local approval not observed")
+    cookie = authorized.unique("set-cookie")
+    require(re.fullmatch(r"__Host-FutureClassroom=[0-9a-fA-F]{64}; Path=/; Secure; HttpOnly; SameSite=Strict", cookie),
+            "host-only secure session cookie contract failed")
+    client.cookie = cookie.split(";", 1)[0]
+    session = client.request("authenticated-session", "GET", "session").json()
+    require(session.get("status") == "AUTHENTICATED" and isinstance(session.get("csrf"), str)
+            and re.fullmatch(r"[0-9a-fA-F]{64}", session["csrf"]), "authenticated session/CSRF payload mismatch")
+    client.csrf = session["csrf"]
+
+
+def validate_voice_capabilities(value):
+    """Strict fixture response metadata, not a native-query/cache observation."""
+    keys = {"schemaVersion", "status", "identityRevision", "runtimeGeneration", "serverNow", "currentClass",
+            "enabled", "admission", "targetAuthorized", "deviceAvailability", "defaultRepeatTotal", "minRepeatTotal",
+            "maxRepeatTotal", "minDurationMillis", "maxDurationMillis", "sampleRate", "channels", "bitsPerSample",
+            "maxWavBytes", "uploadTtlSeconds"}
+    require(type(value) is dict and set(value) == keys, "voice capabilities exact disclosure shape mismatch")
+    require(type(value["schemaVersion"]) is int and value["schemaVersion"] == 1
+            and value["status"] == "VOICE_CAPABILITIES", "voice capabilities envelope mismatch")
+    for key in ("identityRevision", "runtimeGeneration"):
+        number = value[key]
+        require(type(number) is str and re.fullmatch(r"[1-9][0-9]{0,19}", number) is not None
+                and int(number) <= 18_446_744_073_709_551_615, "voice capabilities canonical positive u64 mismatch")
+    civil = value["serverNow"]
+    require(type(civil) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}", civil) is not None,
+            "voice capabilities civil time form mismatch")
+    try:
+        datetime.fromisoformat(civil)
+    except ValueError:
+        raise RuntimeError("voice capabilities civil time date/range mismatch") from None
+    target = value["currentClass"]
+    require(type(target) is dict and set(target) == {"classId", "className"} and target["classId"] == "1",
+            "voice capabilities expected current classroom missing or changed")
+    name = target["className"]
+    require(type(name) is str and 0 < len(name) <= 128 and bool(name.strip())
+            and not any(ord(c) < 32 or 127 <= ord(c) <= 159 or 0xD800 <= ord(c) <= 0xDFFF for c in name),
+            "voice capabilities classroom label invalid")
+    require(type(value["enabled"]) is bool and value["targetAuthorized"] is True
+            and value["admission"] in ("OPEN", "CLOSED")
+            and (value["enabled"] or value["admission"] == "CLOSED"),
+            "voice capabilities authorization/admission mismatch")
+    require(value["deviceAvailability"] in ("UNVERIFIED", "UNAVAILABLE"),
+            "voice capabilities must not claim positive availability")
+    for key, expected in {"minRepeatTotal": 1, "minDurationMillis": 500, "sampleRate": 16000,
+                          "channels": 1, "bitsPerSample": 16, "uploadTtlSeconds": 600}.items():
+        require(type(value[key]) is int and value[key] == expected, "voice capabilities fixed format/limit mismatch")
+    repeats, duration, size = value["maxRepeatTotal"], value["maxDurationMillis"], value["maxWavBytes"]
+    require(type(repeats) is int and 1 <= repeats <= 10 and type(duration) is int and 500 <= duration <= 60000
+            and type(size) is int and size == 44 + duration * 32
+            and type(value["defaultRepeatTotal"]) is int and value["defaultRepeatTotal"] == min(3, repeats),
+            "voice capabilities duration/repeat/WAV formula mismatch")
+    return {key: entry for key, entry in value.items() if key != "serverNow"}
+
+
+def exercise_voice_capabilities(client):
+    """Three GETs only; the unchanged full suite separately uploads silent WAV."""
+    denied = client.request("voice-capabilities-no-cookie", "GET", "voice/capabilities", expected=(401,),
+                            authenticated=False).json()
+    require(type(denied) is dict and set(denied) == {"schemaVersion", "code"}
+            and type(denied["schemaVersion"]) is int and denied["schemaVersion"] == 1
+            and denied["code"] == "UNAUTHORIZED", "voice capabilities did not reject the missing session")
+    first = validate_voice_capabilities(client.request("voice-capabilities-authenticated", "GET", "voice/capabilities",
+                                                       expected=(200,)).json())
+    repeated = validate_voice_capabilities(client.request("voice-capabilities-authenticated-repeat", "GET", "voice/capabilities",
+                                                          expected=(200,)).json())
+    require(first == repeated, "voice capabilities stable fields changed between repeated GETs")
+    return {"status": "PASS", "additionalWireRequests": 3, "unauthenticatedStatus": 401, "authenticatedStatuses": [200, 200],
+            "identityRevision": first["identityRevision"], "runtimeGeneration": first["runtimeGeneration"],
+            "currentClassId": first["currentClass"]["classId"], "targetAuthorized": first["targetAuthorized"],
+            "enabled": first["enabled"], "admission": first["admission"], "deviceAvailability": first["deviceAvailability"],
+            "limits": {key: first[key] for key in ("minRepeatTotal", "defaultRepeatTotal", "maxRepeatTotal",
+                "minDurationMillis", "maxDurationMillis", "maxWavBytes", "sampleRate", "channels", "bitsPerSample", "uploadTtlSeconds")},
+            "stableFieldsExcludingServerNow": "MATCH", "nativeQueryCount": "NOT_OBSERVED",
+            "cacheBehavior": "NOT_DETERMINED_BY_GET", "operation": "THREE_GETS_NO_RECORDING_UPLOAD_SUBMIT_OR_PLAYBACK",
+            "supportMeaning": "A historical format observation is not a reservation or a guarantee of current audibility."}
+
+
+def validate_visual(value, key, fixture):
+    require(fixture in VISUAL_FIXTURES, "unknown visual fixture")
+    zero = fixture == "FILLED_ZERO"
+    expected = {"schemaVersion": 1, "status": "SUBJECT_VISUAL", "key": key,
+                "subjectId": "1", "subjectName": "Synthetic TLS subject", "subjectRevision": "1",
+                "displayRevision": "0" if fixture == "FILLED_DEFAULT" else "1", "rulesVersion": 1,
+                "effectiveRgb": "#88A6C4", "mode": "OUTLINED" if fixture == "OUTLINED" else "FILLED",
+                "homeworkFillPercent": 0 if zero else 3, "courseFillPercent": 0 if zero else 20,
+                "homeworkComponentOpacityPercent": 70 if zero else 100,
+                "courseComponentOpacityPercent": 80 if zero else 100,
+                "homeworkVisible": True, "courseVisible": True}
+    require(type(value) is dict and value == expected
+            and all(type(value[k]) is type(v) for k, v in expected.items()),
+            "single-subject visual exact derived RGB/mode/independent alpha/version/disclosure contract failed")
+    return expected
+
+
+def exercise_visuals(client):
+    scopes = client.request("visual-owned-scopes", "GET", "content/homework/scopes/0").json()
+    require(scopes.get("status") == "SCOPES" and scopes.get("total") == 1
+            and scopes.get("nextOffset") is None and len(scopes.get("items", [])) == 1,
+            "visual fixture owned scope missing")
+    scope = scopes["items"][0]
+    require(scope.get("classId") == "1" and scope.get("subjectId") == "1"
+            and scope.get("ownerTeacherId") == "1" and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", scopes.get("today", "")),
+            "visual fixture scope identity mismatch")
+    key = {"kind": "HOMEWORK", "classId": "1", "subjectId": "1", "ownerTeacherId": "1", "date": scopes["today"]}
+    content_route = "content/homework/1/1/1/" + scopes["today"]
+    route = content_route + "/visual"
+    before = client.request("visual-content-before", "GET", content_route).json()
+    response = client.request("visual-read", "GET", route)
+    value = response.json()
+    validate_visual(value, key, client.ready["visualFixture"])
+    require(client.request("visual-no-session", "GET", route, expected=(401,), authenticated=False).json().get("code") == "UNAUTHORIZED",
+            "visual preview disclosed without exact authenticated session")
+    outside = "content/homework/2/1/1/" + scopes["today"] + "/visual"
+    require(client.request("visual-other-class", "GET", outside, expected=(403,)).json().get("code") == "FORBIDDEN",
+            "visual preview disclosed outside exact teaching class")
+    for method in ("POST", "DELETE"):
+        rejected = client.request("visual-write-method-" + method, method, route, expected=(405,))
+        require(rejected.unique("allow") == "GET" and rejected.json().get("code") == "METHOD_NOT_ALLOWED",
+                "visual preview accepted a write method")
+    mixed = json_bytes({"schemaVersion": 1, "commandId": "9001099", "expectedRevision": before["revision"],
+                        "text": "Synthetic rejected visual write", "effectiveRgb": "#FFFFFF"})
+    require(client.request("visual-fields-cannot-write-content", "POST", content_route, mixed, expected=(400,)).json().get("code") == "INVALID_REQUEST",
+            "content write schema accepted visual management input")
+    after = client.request("visual-content-after", "GET", content_route).json()
+    require(all(before[k] == after[k] for k in ("key", "revision", "text")),
+            "readonly preview/rejected visual writes mutated teacher content")
+    reread = client.request("visual-explicit-reread", "GET", route)
+    require(reread.body == response.body, "readonly refresh changed palette/display without a management commit")
+    return {"status": "PASS", "fixture": client.ready["visualFixture"], "preview": value,
+            "previewSha256": digest(response.body), "contentRevisionBefore": before["revision"],
+            "contentRevisionAfter": after["revision"], "readOnly": True,
+            "nativeDesktopPixels": "NOT_OBSERVED", "wallpaperContrast": "NOT_CERTIFIED"}
+
+
+def exercise(client, browser_observer=None, continuous=None, visual_only=False, voice_capabilities=False):
+    authenticate_business(client)
+    capabilities = exercise_voice_capabilities(client) if voice_capabilities else None
+    visuals = exercise_visuals(client)
+    if browser_observer is not None:
+        # Keep the original one approved session and the original client
+        # deadline. The page itself must read session/CSRF through the API.
+        browser_observer.run(client)
+    if visual_only:
+        client.reject_certificate("wrong-ca-rejected")
+        client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
+        return {"subjectVisuals": visuals, "scope": "TARGETED_VISUAL_MATRIX_NO_MATERIAL_OR_AUDIO_OPERATIONS"}
+    material = (b"Synthetic TLS business probe material.\n" * 4000)[:MATERIAL_BYTES]
+    require(len(material) == MATERIAL_BYTES, "synthetic material length changed")
+    created = client.request("material-create", "POST", "materials/uploads/1/1",
+                             json_bytes({"schemaVersion": 1, "displayName": "tls-business.txt", "bytes": len(material)}),
+                             expected=(201,)).json()
+    upload_id = created.get("uploadId")
+    require(created.get("status") == "UPLOAD_READY" and isinstance(upload_id, str)
+            and re.fullmatch(r"[1-9][0-9]{0,19}", upload_id), "material reservation payload mismatch")
+    uploaded = client.request("material-binary-stream", "POST", f"materials/uploads/{upload_id}/bytes", material,
+                              content_type="application/octet-stream").json()
+    require(uploaded.get("status") == "UPLOADED" and uploaded.get("uploadId") == upload_id
+            and uploaded.get("bytes") == len(material), "actual binary material completion mismatch")
+    cancelled_ids = []
+    # Keep A Ready while B fills the second slot. JSON cancel removes B from
+    # the application; C must reap B's absent Hub entry, keep A live, and reuse
+    # the second slot. The later successful append/download still proves A.
+    for cycle in (1, 2):
+        created = client.request(f"cancel-cycle-{cycle}-create", "POST", "materials/uploads/1/1",
+                                 json_bytes({"schemaVersion": 1, "displayName": f"cancel-{cycle}.txt",
+                                             "bytes": len(material)}), expected=(201,)).json()
+        cancelled_id = created.get("uploadId")
+        require(isinstance(cancelled_id, str) and re.fullmatch(r"[1-9][0-9]{0,19}", cancelled_id),
+                "cancel cycle upload ID missing")
+        require(cancelled_id != upload_id and cancelled_id not in cancelled_ids,
+                "cancel cycle unexpectedly aliased an original upload")
+        uploaded = client.request(f"cancel-cycle-{cycle}-binary", "POST",
+                                  f"materials/uploads/{cancelled_id}/bytes", material,
+                                  content_type="application/octet-stream").json()
+        require(uploaded.get("status") == "UPLOADED" and uploaded.get("uploadId") == cancelled_id,
+                "cancel cycle failed to reuse a physical/Hub upload slot")
+        cancelled = client.request(f"cancel-cycle-{cycle}-json-cancel", "POST",
+                                   f"materials/uploads/{cancelled_id}/cancel",
+                                   json_bytes({"schemaVersion": 1})).json()
+        require(cancelled.get("status") == "UPLOAD_CANCELLED" and cancelled.get("uploadId") == cancelled_id,
+                "actual JSON upload cancellation response mismatch")
+        cancelled_ids.append(cancelled_id)
+    append_body = json_bytes({"schemaVersion": 1, "commandId": COMMAND_ID, "uploadId": upload_id, "allowedClassIds": ["1"]})
+    first = client.request("material-append", "POST", "materials/folders/1/1/append", append_body, expected=(200, 201))
+    committed = first.json()
+    record = committed.get("record", {})
+    require(committed.get("status") == "COMMITTED" and committed.get("commandId") == COMMAND_ID
+            and committed.get("scope") == {"ownerTeacherId": "1", "subjectId": "1"}
+            and record.get("bytes") == len(material) and record.get("sha256") == digest(material)
+            and record.get("allowedClassIds") == ["1"] and record.get("kind") == "TXT"
+            and record.get("resourceVersionId") == upload_id and record.get("status") == "PUBLISHED",
+            "actual durable material receipt/content hash mismatch")
+    retry = client.request("material-append-exact-retry", "POST", "materials/folders/1/1/append", append_body, expected=(200, 201))
+    require(retry.body == first.body, "exact append retry did not return the identical committed receipt")
+    changed = json_bytes({"schemaVersion": 1, "commandId": COMMAND_ID, "uploadId": upload_id, "allowedClassIds": ["2"]})
+    conflict = client.request("material-append-changed-classes", "POST", "materials/folders/1/1/append", changed, expected=(409,)).json()
+    require(conflict.get("code") == "IDEMPOTENCY_CONFLICT", "changed append did not return idempotency conflict")
+    capacity = exercise_capacity_accept(client, continuous, append_body, first.body) if continuous else None
+    material_id = record.get("materialId")
+    require(isinstance(material_id, str) and re.fullmatch(r"[1-9][0-9]{0,19}", material_id),
+            "committed download material identifier missing")
+    download_route = f"materials/download/1/1/{material_id}/{upload_id}"
+    require(client.request("unauthorized-material-download", "GET", download_route, expected=(401,),
+                           authenticated=False).json().get("code") == "UNAUTHORIZED",
+            "private binary download was not rejected without its exact session")
+    downloaded = client.request("material-binary-download", "GET", download_route, binary=True)
+    require(downloaded.body_bytes == len(material) and downloaded.body_hash.hexdigest() == digest(material)
+            and downloaded.unique("x-fc-sha256") == digest(material)
+            and downloaded.unique("content-disposition") == "attachment; filename*=UTF-8''tls-business.txt"
+            and not downloaded.body,
+            "actual bounded binary download content/hash/disposition mismatch")
+    wav = silent_wav()
+    voice = client.request("silent-voice-upload-only", "POST", "voice/uploads?classId=1", wav, expected=(201,),
+                           content_type="audio/wav").json()
+    require(voice.get("status") == "VOICE_UPLOADED" and voice.get("classId") == "1"
+            and voice.get("bytes") == len(wav) and voice.get("durationMillis") == 500
+            and isinstance(voice.get("assetId"), str) and re.fullmatch(r"[1-9][0-9]{0,19}", voice["assetId"]),
+            "actual silent PCM WAV upload response mismatch")
+    client.reject_certificate("wrong-ca-rejected")
+    client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
+    result = {"subjectVisuals": visuals, "continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
+            "commandId": COMMAND_ID, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
+            "downloadBytes": downloaded.body_bytes, "downloadSha256": downloaded.body_hash.hexdigest(),
+            "downloadClientRetainedBodyBytes": len(downloaded.body),
+            "jsonCancelledReadyIds": cancelled_ids, "subsequentBinaryBeginReusedHubSlot": True,
+            "voiceWavBytes": len(wav), "voiceSamples": 8000, "voiceDurationMillis": 500,
+            "voicePcmAllZero": True, "voiceOperation": "UPLOAD_ONLY_NO_BROADCAST_OR_PLAYBACK"}
+    if capabilities is not None:
+        result["voiceCapabilitiesObservation"] = capabilities
+    return result
+
+
+def cleanup_owned(remote, directory, marker, uploaded, report_path, token, report):
+    """Same stop -> capture/hash/download -> certificate/key/root order as old runner."""
+    stopped = False
+    try:
+        if "stop" in uploaded:
+            report["ownedProcessCleanup"] = json.loads(remote.run_file(directory + "\\tls-stop.ps1", timeout=25))
+            stopped = report["ownedProcessCleanup"].get("status") == "PASS"
+        else:
+            stopped = "setup" not in uploaded
+    except Exception as error:
+        report["processCleanupError"] = failure(error, "stop-owned-native-and-supervisor-processes")
+        report["status"] = "FAIL"
+    raw_preserved = "setup" not in uploaded
+    try:
+        if "capture" in uploaded:
+            require(stopped, "physical process stop unproven; original logs may still change")
+            metadata = json.loads(remote.run_file(directory + "\\tls-capture.ps1", timeout=30))
+            report["remoteRawEvidence"] = metadata
+            _tls.preserve_raw(remote, directory, report_path, token, metadata, report)
+            raw_preserved = True
+    except Exception as error:
+        report["remoteCaptureError"] = failure(error, "preserve-complete-original-artifacts")
+        report["status"] = "FAIL"
+    try:
+        require(stopped, "owned process stop unproven; preserving certificate/key/root")
+        require(raw_preserved, "original evidence preservation unproven; retaining remote root")
+        if "cleanup" in uploaded:
+            report["cleanupDetails"] = json.loads(remote.run_file(directory + "\\tls-cleanup.ps1", timeout=30))
+        else:
+            outcome = remote.powershell("$root=" + ps_literal(directory)
+                + ";if(([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-ne " + ps_literal(marker)
+                + "){throw 'TLS early cleanup marker mismatch'};Remove-Item -LiteralPath $root -Recurse -Force;"
+                + "if(Test-Path -LiteralPath $root){throw 'TLS early root remains'};'TLS_EARLY_CLEANUP_PASS'", timeout=15)
+            report["cleanupDetails"] = {"status": "PASS" if outcome == "TLS_EARLY_CLEANUP_PASS" else "FAIL",
+                                        "scope": "pre-fixture upload failure; no key/process created"}
+        report["cleanup"] = report["cleanupDetails"]["status"]
+    except Exception as error:
+        report.update({"cleanup": "FAIL", "status": "FAIL", "cleanupError": failure(error, "cleanup-owned-fixture"),
+                       "retainedRemoteEvidence": {"root": directory, "processStopProven": stopped,
+                       "completeLocalArtifactsProven": raw_preserved, "cleanupIncomplete": True,
+                       "nextAction": "recover complete originals then use this root's exact tls-cleanup.ps1; retain SSH authorization"}})
+
+
+def self_test_voice_capabilities():
+    """Pure payload/request model only; never creates a Client/socket/Remote."""
+    sample = {"schemaVersion": 1, "status": "VOICE_CAPABILITIES", "identityRevision": "9", "runtimeGeneration": "3",
+              "serverNow": "2026-11-01T12:00:00", "currentClass": {"classId": "1", "className": "Synthetic TLS class"},
+              "enabled": True, "admission": "OPEN", "targetAuthorized": True, "deviceAvailability": "UNVERIFIED",
+              "defaultRepeatTotal": 3, "minRepeatTotal": 1, "maxRepeatTotal": 10, "minDurationMillis": 500,
+              "maxDurationMillis": 60000, "sampleRate": 16000, "channels": 1, "bitsPerSample": 16,
+              "maxWavBytes": 1920044, "uploadTtlSeconds": 600}
+    for availability in ("UNVERIFIED", "UNAVAILABLE"):
+        require(validate_voice_capabilities(dict(sample, deviceAvailability=availability))["deviceAvailability"] == availability,
+                "capability model rejected allowed nonpositive availability")
+    short = dict(sample, maxRepeatTotal=1, defaultRepeatTotal=1, maxDurationMillis=500, maxWavBytes=16044)
+    require(validate_voice_capabilities(short)["maxWavBytes"] == 16044, "capability model rejected exact tightened limits")
+    invalid = [dict(sample, deviceAvailability=v) for v in ("AVAILABLE", "UNKNOWN", "SUPPORTED", None, True)]
+    invalid += [dict(sample, **{k: v}) for k, v in (
+        ("schemaVersion", True), ("schemaVersion", 2), ("status", "VOICE_JOB"),
+        ("identityRevision", "0"), ("identityRevision", "09"), ("identityRevision", "18446744073709551616"),
+        ("runtimeGeneration", 3), ("runtimeGeneration", "+3"),
+        ("serverNow", "2026-02-29T12:00:00"), ("serverNow", "2026-11-01T24:00:00"),
+        ("serverNow", "2026-11-01T12:00:00Z"), ("currentClass", None),
+        ("currentClass", {"classId": "2", "className": "Synthetic TLS class"}),
+        ("currentClass", {"classId": "1", "className": " "}),
+        ("currentClass", {"classId": "1", "className": "bad\ud800"}),
+        ("currentClass", {"classId": "1", "className": "Synthetic TLS class", "lease": "extra"}),
+        ("targetAuthorized", False), ("targetAuthorized", 1), ("enabled", 1), ("admission", "UNKNOWN"),
+        ("minRepeatTotal", True), ("minDurationMillis", 0), ("maxRepeatTotal", 11), ("maxRepeatTotal", 1.5),
+        ("defaultRepeatTotal", 2), ("maxDurationMillis", 499), ("maxDurationMillis", 60001),
+        ("maxDurationMillis", 500.5), ("maxWavBytes", 1920046), ("sampleRate", 48000),
+        ("channels", 2), ("bitsPerSample", 32), ("uploadTtlSeconds", 601))]
+    invalid += [dict(sample, enabled=False), dict(sample, audioPath="extra-disclosure"), {}, None, []]
+    for key in sample:
+        omitted = dict(sample)
+        del omitted[key]
+        invalid.append(omitted)
+    for value in invalid:
+        try:
+            validate_voice_capabilities(value)
+        except RuntimeError:
+            continue
+        raise RuntimeError("capability model accepted bad type/limit/positive claim/target/authorization/extra or omitted field")
+
+    class Response:
+        def __init__(self, value):
+            self.value = value
+
+        def json(self):
+            return self.value
+
+    class ModelClient:
+        def __init__(self, first, repeated, denied=None):
+            self.replies = [{"schemaVersion": 1, "code": "UNAUTHORIZED"} if denied is None else denied, first, repeated]
+            self.calls = []
+            self.cookie, self.csrf = "synthetic-model-cookie-only", "synthetic-model-csrf-only"
+
+        def request(self, case, method, route, body=b"", expected=(200,), authenticated=True):
+            self.calls.append({"case": case, "method": method, "route": route, "bodyBytes": len(body),
+                               "expected": expected, "authenticated": authenticated})
+            require(len(self.calls) <= 3, "capability sub-observation added an unexpected operation")
+            return Response(self.replies[len(self.calls) - 1])
+
+    client = ModelClient(sample, dict(sample, serverNow="2026-11-01T12:00:01"))
+    observation = exercise_voice_capabilities(client)
+    require([(c["method"], c["route"], c["bodyBytes"], c["expected"], c["authenticated"]) for c in client.calls]
+            == [("GET", "voice/capabilities", 0, (401,), False),
+                ("GET", "voice/capabilities", 0, (200,), True),
+                ("GET", "voice/capabilities", 0, (200,), True)],
+            "capability sub-observation must be exactly missing-cookie401 plus two authenticated200 GETs")
+    encoded = json.dumps(observation)
+    require(observation["additionalWireRequests"] == 3 and observation["nativeQueryCount"] == "NOT_OBSERVED"
+            and observation["cacheBehavior"] == "NOT_DETERMINED_BY_GET"
+            and not any(secret in encoded for secret in (client.cookie, client.csrf, sample["serverNow"], "Synthetic TLS class"))
+            and not any(key in observation for key in ("cookie", "csrf", "body", "responseBody")),
+            "capability summary leaked session/body or inferred native/cache counts")
+    for change in ({"identityRevision": "10"}, {"runtimeGeneration": "4"}, {"deviceAvailability": "UNAVAILABLE"},
+                   {"maxRepeatTotal": 2, "defaultRepeatTotal": 2}, {"maxDurationMillis": 1250, "maxWavBytes": 40044}):
+        try:
+            exercise_voice_capabilities(ModelClient(sample, dict(sample, **change)))
+        except RuntimeError:
+            continue
+        raise RuntimeError("repeated capability model accepted changed stable fields")
+    try:
+        exercise_voice_capabilities(ModelClient(sample, sample, {"schemaVersion": 1, "code": "FORBIDDEN"}))
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("missing-cookie capability model accepted non401 error contract")
+    return [f"voice capability exact complete metadata/limits/target: {len(invalid)} malformed models rejected; UNVERIFIED/UNAVAILABLE and tightened bounds accepted",
+            "voice capability model exact three GETs (no Cookie401/auth200/repeat200), stable fields except civil time; changed revision/runtime/device/limits rejected",
+            "voice capability summary omits cookie/CSRF/body and does not infer native query count, cache behavior or current audibility; no IO"]
+
+
+def self_test_header_deadlines():
+    """Synthetic metadata/client/SSH models only; zero socket or native calls."""
+    import copy
+    from types import SimpleNamespace
+    checks = []
+    base = {"generation": 7, "slot": 0, "serial": 1, "hardDeadlineNs": 5_000_000_100,
+            "alarmNs": 4_975_000_100, "beganAtNs": 4_975_000_101, "socketCloseBeganAtNs": 4_975_000_102,
+            "socketReturnedAtNs": 4_975_000_103, "failed": False, "ioPendingAtClose": True,
+            "ioReturnedAtNs": 4_975_000_104, "framePendingAtClose": False,
+            "frameReturnedAtNs": None, "retirementConfirmedAtNs": 4_975_000_105}
+    records = [dict(base, slot=i, serial=i + 1) for i in range(4)]
+    sample = {"marker": "synthetic", "generation": 7, "sequence": 1, "reserveNs": HEADER_RESERVE_NS,
+              "headerBegins": 4, "headerSocketReturns": 4, "headerFailures": 0, "headers": records, "accept": None}
+    def reader():
+        result = CloseReader("synthetic", [])
+        result.generation = 7
+        return result
+    def feed(r, value):
+        require(r.observe(CLOSE_PROGRESS + json.dumps(value)), "close model not consumed")
+    def denied(call, label):
+        try:
+            call()
+        except (RuntimeError, ValueError, TypeError, KeyError):
+            return
+        raise RuntimeError("header pure negative model accepted: " + label)
+    actual = reader()
+    feed(actual, sample)
+    raw_record = dict(base, slot=0, serial=5, hardDeadlineNs=10_000_000_100,
+                      alarmNs=9_975_000_100, beganAtNs=9_975_000_101,
+                      socketCloseBeganAtNs=9_975_000_102, socketReturnedAtNs=9_975_000_103,
+                      ioReturnedAtNs=9_975_000_104, retirementConfirmedAtNs=9_975_000_105)
+    final = dict(sample, sequence=2, headerBegins=5, headerSocketReturns=5,
+                 headers=[raw_record] + records[1:])
+    feed(actual, final)
+    bare = {"serial": 5, "hardDeadlineNs": 100_000_000, "alarmNs": 75_000_000,
+            "beganAtNs": 75_000_005, "socketCloseBeganAtNs": 75_000_006,
+            "socketReturnedAtNs": 75_000_007, "failed": False, "completionReturnedAtNs": 75_000_001}
+    feed(reader(), dict(sample, accept=bare))  # Actual queued packet may predate close.
+    for label, mutate in (
+        ("wrong reserve", lambda v: v.update(reserveNs=24_000_000)),
+        ("wrong generation", lambda v: v.update(generation=8)),
+        ("unknown disclosure", lambda v: v.update(unknown=1)),
+        ("bool serial", lambda v: v["headers"][0].update(serial=True)),
+        ("recomputed alarm", lambda v: v["headers"][0].update(alarmNs=4_975_000_101)),
+        ("cancel as IO return", lambda v: v["headers"][0].update(ioPendingAtClose=False)),
+        ("retired before IO", lambda v: v["headers"][0].update(retirementConfirmedAtNs=4_975_000_103)),
+        ("socket before checked close", lambda v: v["headers"][0].update(socketReturnedAtNs=4_975_000_101)),
+        ("duplicate slot", lambda v: v["headers"][1].update(slot=0)),
+        ("bare bad alarm", lambda v: v.update(accept=dict(bare, alarmNs=75_000_001))),
+    ):
+        value = copy.deepcopy(sample)
+        mutate(value)
+        denied(lambda: feed(reader(), value), label)
+    for label, update in (("changed fact", {"beganAtNs": 4_975_000_102}),
+                          ("disappearing IO fact", {"ioReturnedAtNs": None})):
+        r = reader()
+        feed(r, sample)
+        value = copy.deepcopy(sample)
+        value["sequence"] = 2
+        value["headers"][0].update(update)
+        denied(lambda: feed(r, value), label)
+    r = reader()
+    feed(r, sample)
+    denied(lambda: feed(r, sample), "repeated sequence")
+    checks.append("synthetic CLOSE exact token/schema/alarm25ms/IO-Frame-retirement order and immutable-fact rejection; queued bare completion-before-close accepted")
+    tls = {"case": "header-deadline-tls-1", "dripCalls": 0, "transport": "TLS", "beforeConnectNs": 1000,
+           "peerCloseNs": 5_000_001_000, "elapsedNs": 5_000_000_000, "peerCloseKind": "TLS_RAGGED_EOF",
+           "peerCloseObserved": True, "localCloseUsedAsPeerEvidence": False,
+           "sshMasterAliveAtPeerClose": True, "nativeLauncherAliveAtPeerClose": True,
+           "tlsVersion": "TLSv1.2", "certificateVerified": True, "handshakeCompletedNs": 1001,
+           "incompleteHeadSentNs": 1002, "completeHeadSent": False, "applicationReceivedBytes": 0,
+           "localSocketClosed": True, "status": "PASS", "localCloseBeganNs": 5_000_001_001,
+           "localCloseReturnedNs": 5_000_001_002}
+    validate_header_sample(tls)
+    raw = dict(tls, case="header-deadline-raw-tcp", transport="TCP", sentBytes=0, peerCloseKind="TCP_EOF")
+    validate_header_sample(raw)
+    for label, changed in (
+        ("one ns over", dict(tls, peerCloseNs=5_000_001_001, elapsedNs=5_000_000_001)),
+        ("rounded interval", dict(tls, elapsedNs=4_999_999_999)),
+        ("local close", dict(tls, localCloseUsedAsPeerEvidence=True)),
+        ("dead master", dict(tls, sshMasterAliveAtPeerClose=False)),
+        ("no peer EOF", dict(tls, peerCloseObserved=False)),
+        ("unverified TLS", dict(tls, certificateVerified=False)),
+        ("complete HTTP head", dict(tls, completeHeadSent=True)),
+        ("timeout", dict(tls, peerCloseKind="TIMEOUT")),
+        ("raw sent data", dict(raw, sentBytes=1)),
+    ):
+        denied(lambda: validate_header_sample(changed), label)
+    checks.append("synthetic pre-connect exact5e9ns accepted; +1ns/rounding/local-close/timeout/deadSSH/unverifiedTLS/raw-data rejected")
+    trace = "debug1: Local forwarding listening on 127.0.0.1 port 12345.\n" + "".join(
+        f"debug1: channel {i}: new direct-tcpip [direct-tcpip]\n"
+        f"debug2: channel {i}: open confirm rwindow 0 rmax 32768\n"
+        f"debug2: channel {i}: rcvd eof\n" for i in range(5))
+    alive = SimpleNamespace(poll=lambda: None)
+    def tunnel(text, alive_process=alive):
+        return SimpleNamespace(process=alive_process, logs=SimpleNamespace(
+            stderr=bytearray(text.encode()), overflow=SimpleNamespace(is_set=lambda: False)))
+    require(len(validate_header_forward(tunnel(trace), alive)["channels"]) == 5, "five-channel model missing")
+    for label, text in (("open failure", trace + "channel 5: open failed: connect failed: Connection refused\n"),
+                        ("no confirmation", trace.replace("open confirm ", "not-open-confirm ", 1)),
+                        ("local terminal only", trace.replace("rcvd eof", "local read<=0", 1)),
+                        ("only four channels", trace[:trace.rfind("debug1: channel 4:")])):
+        denied(lambda: validate_header_forward(tunnel(text), alive), label)
+    denied(lambda: validate_header_forward(tunnel(trace, SimpleNamespace(poll=lambda: 255)), alive), "SSH actual exit")
+    checks.append("synthetic five confirmed direct-tcpip channels with remote EOF; refused/missingconfirm/localEOF/fourchannels/deadmaster rejected (no real SSH)")
+    def direct_trace(number, error=None, free=False):
+        value = (f"debug1: channel {number}: new direct-tcpip [direct-tcpip]\n"
+                 f"debug2: channel {number}: open confirm rwindow 0 rmax 32768\n")
+        if error:
+            value += f"debug2: channel {number}: {error}\n"
+        value += f"debug2: channel {number}: rcvd eof\n"
+        if free:
+            value += f"debug1: channel {number}: free: direct-tcpip, nchannels 2\n"
+        return value
+    mux = ("debug1: channel 9: new mux-control [mux-control]\n"
+           "debug2: channel 9: ctl read<=0 rfd 5 len 0\n"
+           "debug2: channel 9: read failed\n"
+           "debug1: channel 9: free: mux-control, nchannels 1\n")
+    cleanup_trace = mux + trace + ("debug2: channel 4: read failed rfd 5 maxlen 32768: Broken pipe\n"
+                                 "debug2: channel 4: read failed\n"
+                                 "debug2: channel 4: rcvd close\n")
+    accepted = validate_header_forward(tunnel(cleanup_trace), alive)
+    require(len(accepted["normalChannelCleanup"]) == 3 and len(accepted["channels"]) == 5,
+            "normal mux EOF/direct post-remoteEOF cleanup was rejected")
+    # Reusing the integer0 after its old instance ended must NOT retain old
+    # remote-EOF permission. Each negative still contains five otherwise valid
+    # direct records so an incidental final-count mismatch cannot hide the bug.
+    rest = "".join(direct_trace(i) for i in (2, 3, 4))
+    for label, changed in (
+        ("direct Brokenpipe before remoteEOF", direct_trace(0, "read failed rfd 5 maxlen 32768: Broken pipe")
+         + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
+        ("cross-channel EOF privilege", direct_trace(0) + direct_trace(1, "read failed") + rest),
+        ("reused-id EOF privilege", direct_trace(0, free=True) + direct_trace(0, "read failed") + rest),
+        ("mux EOF privilege leaked to reused direct-id", mux.replace("channel 9:", "channel 0:")
+         + direct_trace(0, "read failed") + "".join(direct_trace(i) for i in (1, 2, 3, 4))),
+        ("mux readfailed before ctlEOF", mux.replace("ctl read<=0 rfd 5 len 0", "input open -> drain") + trace),
+        ("global SSH reset", trace + "Connection reset by 192.0.2.1 port 22\n"),
+        ("global Brokenpipe", trace + "ssh_dispatch_run_fatal: Broken pipe\n"),
+        ("direct unsupported read error", trace + "debug2: channel 4: read failed rfd 5 maxlen 32768: Permission denied\n"),
+        ("write failure after remoteEOF", trace + "debug2: channel 4: write failed\n"),
+        ("duplicate active lifecycle", direct_trace(0) + direct_trace(0) + rest),
+        ("unpaired openconfirm", "debug2: channel 9: open confirm rwindow 0 rmax 32768\n" + trace),
+        ("unpaired EOF", "debug2: channel 9: rcvd eof\n" + trace),
+    ):
+        denied(lambda: validate_header_forward(tunnel(changed), alive), label)
+    checks.append("SSH lifecycle models accept exact muxctlEOF cleanup and direct-confirmed-remoteEOF cleanup; reject preEOF/crosschannel/reused-id leakage, general transport errors and unpaired/duplicate facts")
+    # Exercise the subclass without spawning SSH: only the base master-launch
+    # input carries -vv; the overridden mux calls see the original Remote.
+    old_init, old_control = Tunnel.__init__, Tunnel._control
+    launched, controls = [], []
+    remote = SimpleNamespace(host="synthetic-no-network", options=["-o", "BatchMode=yes"])
+    original_options = list(remote.options)
+    def fake_init(self, master, local_root):
+        self.remote = master
+        launched.append(list(master.options))
+        self._control("check")
+        self._control("cancel", "-L", "synthetic")
+    def fake_control(self, operation, *extra, timeout=5):
+        controls.append((operation, list(self.remote.options)))
+        return SimpleNamespace(returncode=0)
+    try:
+        Tunnel.__init__, Tunnel._control = fake_init, fake_control
+        scoped = HeaderDeadlineTunnel(remote, "unused-model-only")
+        require(launched == [[*original_options, "-vv"]]
+                and controls == [("check", original_options), ("cancel", original_options)]
+                and scoped.remote is remote and remote.options == original_options,
+                "new header-only debug leaked into Remote/control commands")
+    finally:
+        Tunnel.__init__, Tunnel._control = old_init, old_control
+    checks.append("pure mocked original Tunnel construction: only-Nmaster-vv, muxcheck/cancel plain, Remote options unchanged; no process/network")
+    native = {"physicalNativeDrain": True, "sharedWorkers": 2, "workerJoin": True, "setupCleanup": True,
+              "hubPending": 0, "downloadHubPending": 0, "quarantined": 0, "approvals": 0, "heads": 0,
+              "responses": 0, "peakRecords": 4}
+    p = SimpleNamespace(latest={"acceptance": {"transfers": 5, "capacity_rejects": 0, "bound_slots": 0,
+                                               "native_pending": 0, "owned_sockets": 0}})
+    events = [dict(tls, case="header-deadline-tls-" + str(i), dripCalls=2 if i == 4 else 0)
+              for i in range(1, 5)] + [raw]
+    validate_header_native(native, events, actual, p)
+    validate_header_sample(events[3])  # Exactly two real-send counter facts suffice.
+    for value in (None, 0, 1, True, False):
+        incomplete = [dict(e) for e in events]
+        if value is None:
+            del incomplete[3]["dripCalls"]
+        else:
+            incomplete[3]["dripCalls"] = value
+        denied(lambda: validate_header_sample(incomplete[3]), "missing/insufficient/nonint actual drip counter")
+        denied(lambda: validate_header_cases(incomplete), "five-case model without two actual drips")
+        denied(lambda: validate_header_native(native, incomplete, actual, p), "native summary cannot replace missing drips")
+    duplicate = [dict(e) for e in events]
+    duplicate[1]["case"] = duplicate[0]["case"]
+    denied(lambda: validate_header_cases(duplicate), "duplicate case replaces required TLS identity")
+    denied(lambda: validate_header_native(native, duplicate, actual, p), "native exact5counts cannot replace unique client cases")
+    checks.append("five unique expected cases plus TLS4 actual dripCalls strictint>=2; missing/0/1/bool/duplicate rejected despite otherwise passing native counts")
+    for field, changed in (("workerJoin", False), ("physicalNativeDrain", False), ("approvals", 1),
+                           ("heads", 1), ("responses", 1), ("hubPending", 1)):
+        denied(lambda: validate_header_native(dict(native, **{field: changed}), events, actual, p), field)
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], transfers=4)})), "no actual raw transfer")
+    denied(lambda: validate_header_native(native, events, actual, SimpleNamespace(
+        latest={"acceptance": dict(p.latest["acceptance"], capacity_rejects=1)})), "capacity EOF mistaken for raw timeout")
+    checks.append("synthetic independent header-only final validator requires5actualtransfers/5close histories/zeroHTTP/zeroHubs/realDrain/2join; old business validator unchanged")
+    return checks
+
+
+def self_test():
+    """Pure local framing/fixture checks; no sockets, subprocesses or Windows IO."""
+    checks = []
+    progress_queue, progress_log = queue.Queue(), []
+    reader = ProgressReader(progress_queue, "synthetic", progress_log)
+    reader.generation = 7
+    original = {"generation": 7, "slot": 0, "serial": 3, "admittedAtNs": 123,
+                "deadlineNs": 120_000_000_123}
+    sample = {"marker": "synthetic", "generation": 7, "sequence": 1,
+              "acceptance": {"generation": 7, "posts": 2, "completions": 1,
+                  "idle_cancellations": 0, "idle_returns": 0, "capacity_rejects": 0, "transfers": 1,
+                  "ready_slots": 3, "bound_slots": 1, "native_pending": 2, "owned_sockets": 3},
+              "jsonBodyRecords": 1, "retired": 0, "rearms": 0, "pendingJobs": 0, "requests": [original]}
+    progress_queue.put(PROGRESS + json.dumps(sample))
+    lifecycle = [PASS + "{}", EXIT_PREFIXES[0] + "{}", READY + "{}"]
+    for line in lifecycle:
+        progress_queue.put(line)
+    for _ in range(4):
+        reader.pump(0)
+    require(reader.latest == sample and [reader.get(0) for _ in lifecycle] == lifecycle
+            and len(progress_log) == 1 and reader.deferred_bytes == 0,
+            "progress reader lost/reordered unrelated lifecycle lines")
+    for changed in (dict(original, serial=4), dict(original, admittedAtNs=124), dict(original, deadlineNs=120_000_000_124)):
+        require(not unchanged_intervals(dict(sample, requests=[changed]), intervals(sample)),
+                "original request binding accepted changed token/admission/deadline")
+    for changed in (dict(sample, sequence=1), dict(sample, marker="foreign"),
+                    dict(sample, generation=8), dict(sample, sequence=2, requests=[dict(original, deadlineNs=123)]),
+                    dict(sample, sequence=2, acceptance=dict(sample["acceptance"], owned_sockets=7))):
+        try:
+            reader.observe(PROGRESS + json.dumps(changed))
+        except RuntimeError:
+            continue
+        raise RuntimeError("progress reader accepted stale/foreign/unbounded data")
+    # Replay the preserved MSVC failure's causal gap: seq20 showed vacant/41;
+    # two already completed HTTP operations were not separately emitted during
+    # the 250ms throttle. First exact partial is seq22/44, four bodies seq25/47.
+    from itertools import permutations
+    four = [dict(original, slot=i, serial=3 + i, admittedAtNs=123 + i, deadlineNs=120_000_000_123 + i) for i in range(4)]
+    old_vacant = dict(sample, sequence=20, jsonBodyRecords=0, requests=[],
+                      acceptance=dict(sample["acceptance"], transfers=41, bound_slots=0, ready_slots=4))
+    first_admitted = dict(sample, sequence=22, jsonBodyRecords=1, requests=[four[0]],
+                          acceptance=dict(sample["acceptance"], transfers=44))
+    all_admitted = dict(sample, sequence=25, jsonBodyRecords=4, requests=[four[i] for i in (1, 2, 3, 0)],
+                        acceptance=dict(sample["acceptance"], transfers=47, bound_slots=4, ready_slots=0, native_pending=5, owned_sockets=6))
+    originals = intervals(all_admitted)
+    require(all_admitted["acceptance"]["transfers"] != old_vacant["acceptance"]["transfers"] + 4,
+            "preserved stale vacancy regression no longer exercises old false rejection")
+    anchor = first_admitted["acceptance"]["transfers"]
+    for order in permutations(four):
+        require(four_original_bodies_admitted(dict(all_admitted, requests=list(order)), originals, anchor),
+                "first-admitted anchor rejected unchanged unordered four-body intervals")
+    mutations = [dict(all_admitted, acceptance=dict(all_admitted["acceptance"], transfers=n)) for n in (46, 48)]
+    mutations += [dict(all_admitted, requests=[four[0], four[1], four[1], four[3]]),
+                  dict(all_admitted, jsonBodyRecords=3), dict(all_admitted, pendingJobs=1)]
+    for field in ("generation", "serial", "admittedAtNs", "deadlineNs"):
+        mutations.append(dict(all_admitted, requests=[dict(four[0], **{field: four[0][field] + 1}), *four[1:]]))
+    for mutation in mutations:
+        require(not four_original_bodies_admitted(mutation, originals, anchor),
+                "causal four-body barrier accepted extra/missing transfer, duplicate token or changed original interval")
+    checks.append("synthetic preserved seq20/22/25 transfers41/44/47 regression; all24 interval orders accepted, extra/missing transfers and mutated original intervals rejected; no IO")
+    # Busy timing, refused TCP and certificate failures cannot masquerade as capacity rejection.
+    for error in (TimeoutError(), ConnectionRefusedError(), ssl.SSLCertVerificationError(1, "synthetic"),
+                  ssl.SSLError(1, "synthetic"), BrokenPipeError()):
+        require(not capacity_transport_rejection(error), "unproven transport failure accepted as capacity close")
+    for error in (ConnectionResetError(), ssl.SSLEOFError(8, "synthetic"), ssl.SSLZeroReturnError(6, "synthetic")):
+        require(capacity_transport_rejection(error), "exact EOF/RST transport class not recognized")
+    checks.append("synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)")
+    wire = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: application/json\r\n\r\n{}"
+    for step in (1, 7, len(wire)):
+        parsed = HttpResponse()
+        for offset in range(0, len(wire), step):
+            parsed.feed(wire[offset:offset + step])
+        require(parsed.finish().status == 200 and parsed.body == b"{}", "pure fragmented framing check failed")
+    checks.append("fragmented/exact-CL response framing")
+    rejected = [wire + b"extra", wire[:-1], wire.replace(b"Content-Length: 2", b"Content-Length: 2\r\nContent-Length: 2"),
+                wire.replace(b"Content-Length: 2\r\n", b""),
+                wire.replace(b"Content-Length: 2", b"Content-Length: 02"),
+                wire.replace(b"Content-Length: 2", b"Content-Length: +2"),
+                wire.replace(b"Content-Length: 2", b"Content-Length: 2, 2"),
+                wire.replace(b"Content-Length: 2", b"Transfer-Encoding: chunked\r\nContent-Length: 2"),
+                wire.replace(b"Content-Length: 2", b"Content-Length: 65537"),
+                b"HTTP/1.1 200 OK\r\n" + b"X" * HEAD_LIMIT, wire.replace(b"Content-Type:", b" Content-Type:")]
+    for invalid in rejected:
+        try:
+            parsed = HttpResponse()
+            parsed.feed(invalid)
+            parsed.finish()
+        except (RuntimeError, UnicodeDecodeError):
+            continue
+        raise RuntimeError("pure parser accepted invalid/oversize/truncated framing")
+    checks.append("surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected")
+    for status in (204, 304):
+        empty_wire = (f"HTTP/1.1 {status} Empty\r\nETag: \"synthetic\"\r\n\r\n").encode("ascii")
+        for step in (1, 7, len(empty_wire)):
+            parsed = HttpResponse(binary=True)
+            for offset in range(0, len(empty_wire), step):
+                parsed.feed(empty_wire[offset:offset + step])
+            parsed.finish()
+            require(parsed.status == status and parsed.length == 0 and parsed.body_bytes == 0
+                    and not parsed.body and parsed.body_hash.hexdigest() == digest(b"")
+                    and "content-length" not in parsed.headers and "transfer-encoding" not in parsed.headers,
+                    "diagnostic empty-status omitted-CL/wire-zero contract failed")
+        invalid_empty = [
+            empty_wire + b"x",
+            empty_wire.replace(b"ETag:", b"ETag: \"duplicate\"\r\nETag:"),
+            empty_wire.replace(b"ETag:", b"Content-Length: 0\r\nETag:"),
+            empty_wire.replace(b"ETag:", b"Content-Length: 1\r\nETag:") + b"x",
+            empty_wire.replace(b"ETag:", b"Content-Length: 0\r\ncOnTeNt-LeNgTh: 0\r\nETag:"),
+            empty_wire.replace(b"ETag:", b"Transfer-Encoding: chunked\r\nETag:"),
+            empty_wire.replace(b"ETag:", b"Transfer-Encoding: identity\r\nContent-Length: 0\r\nETag:"),
+        ]
+        for invalid in invalid_empty:
+            for step in (1, len(invalid)):
+                try:
+                    parsed = HttpResponse(binary=True)
+                    for offset in range(0, len(invalid), step):
+                        parsed.feed(invalid[offset:offset + step])
+                    parsed.finish()
+                except (RuntimeError, UnicodeDecodeError):
+                    continue
+                raise RuntimeError("diagnostic empty-status parser accepted CL/body/duplicate-header/TE")
+    checks.append("204/304 omit CL/TE and count/hash zero wire body; CL0/body/duplicate-header/TE rejected")
+    for status in (200, 403, 404, 405):
+        head_wire = (f"HTTP/1.1 {status} Head\r\nDate: Sat, 31 Oct 2026 00:00:00 GMT\r\n\r\n").encode("ascii")
+        for step in (1, 7, len(head_wire)):
+            parsed = HttpResponse(head_only=True)
+            for offset in range(0, len(head_wire), step):
+                parsed.feed(head_wire[offset:offset + step])
+            parsed.finish()
+            require(parsed.status == status and parsed.length == parsed.body_bytes == 0
+                    and not parsed.body and parsed.body_hash.hexdigest() == digest(b""),
+                    "HEAD diagnostic parser failed status-independent zero wire body")
+        invalid_heads = [head_wire + b"x", head_wire.replace(b"Date:", b"Content-Length: 0\r\nDate:"),
+                         head_wire.replace(b"Date:", b"Content-Length: 2\r\nDate:"),
+                         head_wire.replace(b"Date:", b"Transfer-Encoding: chunked\r\nDate:"),
+                         head_wire.replace(b"Date:", b"Date: duplicate\r\nDate:")]
+        for invalid in invalid_heads:
+            for step in (1, len(invalid)):
+                try:
+                    parsed = HttpResponse(head_only=True)
+                    for offset in range(0, len(invalid), step):
+                        parsed.feed(invalid[offset:offset + step])
+                    parsed.finish()
+                except RuntimeError:
+                    continue
+                raise RuntimeError("HEAD diagnostic parser accepted CL/TE/duplicate fields/body")
+        try:
+            parsed = HttpResponse()
+            parsed.feed(head_wire)
+            parsed.finish()
+        except RuntimeError:
+            pass
+        else:
+            raise RuntimeError("HEAD parser mode leaked into ordinary GET response framing")
+    checks.append("HEAD 200/403/404/405 require omitted CL/TE and zero wire body; ordinary GET remains strict")
+    # The zero-body rule never bypasses the original static 5MiB bound for 200.
+    try:
+        parsed = HttpResponse(binary=True, body_limit=STATIC_LIMIT)
+        parsed.feed(b"HTTP/1.1 200 OK\r\nContent-Length: " + str(STATIC_LIMIT + 1).encode("ascii") + b"\r\n\r\n")
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError("static 200 body bound exceeded without rejection")
+    checks.append("200 still requires canonical unique CL, JSON64KiB/static5MiB/download50MiB caps unchanged")
+    binary_body = b"synthetic streamed download\n" * 5000
+    binary_head = (b"HTTP/1.1 200 OK\r\nContent-Length: " + str(len(binary_body)).encode("ascii")
+                   + b"\r\nContent-Type: application/octet-stream\r\n\r\n")
+    parsed = HttpResponse(binary=True)
+    parsed.feed(binary_head)
+    for offset in range(0, len(binary_body), FRAGMENT):
+        parsed.feed(binary_body[offset:offset + FRAGMENT])
+        require(not parsed.body and not parsed.pending, "binary client retained a full response body")
+    parsed.finish()
+    require(parsed.body_bytes == len(binary_body) and parsed.body_hash.hexdigest() == digest(binary_body),
+            "streamed binary hash/count mismatch")
+    for invalid in (binary_head + binary_body[:-1], binary_head + binary_body + b"x",
+                    binary_head.replace(str(len(binary_body)).encode("ascii"), str(DOWNLOAD_LIMIT + 1).encode("ascii"))):
+        try:
+            parsed = HttpResponse(binary=True)
+            parsed.feed(invalid)
+            parsed.finish()
+        except RuntimeError:
+            continue
+        raise RuntimeError("binary stream accepted truncation/surplus/oversize")
+    checks.append("binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected")
+    fixture_assets = [{"path": path, "sizeBytes": 3, "sha256": digest(b"abc")}
+                      for path in ("index.html", "assets/app-abcdeF12.js")]
+    def fixture_zip(assets, payload=b"abc", version=1):
+        source = io.BytesIO()
+        manifest = {"schemaVersion": version, "apiVersion": 1, "uiCompatibilityVersion": 1, "assets": assets}
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("web/fc-assets.json", json_bytes(manifest))
+            archive.writestr("web/index.html", payload)
+            archive.writestr("web/assets/app-abcdeF12.js", payload)
+        source.seek(0)
+        return source
+    _, loaded, summary = read_web_package(fixture_zip(fixture_assets))
+    require(len(loaded) == 2 and summary["payloadBytes"] == 6, "pure manifest/payload verification failed")
+    invalid_packages = [fixture_zip(fixture_assets, payload=b"bad"), fixture_zip(fixture_assets, version=2),
+                        fixture_zip(fixture_assets[1:]), fixture_zip(fixture_assets + [fixture_assets[0]]),
+                        fixture_zip([dict(fixture_assets[0], path="../index.html")]),
+                        fixture_zip([dict(fixture_assets[0], sizeBytes=STATIC_LIMIT + 1)]),
+                        fixture_zip([dict(fixture_assets[0], sizeBytes=True)]),
+                        fixture_zip([dict(fixture_assets[0], path="assets/CON.js")])]
+    for source in invalid_packages:
+        try:
+            read_web_package(source)
+        except RuntimeError:
+            continue
+        raise RuntimeError("pure package accepted corrupt/version/missing/duplicate/traversal/size/reserved-name input")
+    checks.append("ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected")
+    wav = silent_wav()
+    require(len(wav) == 16044 and wav[:4] == b"RIFF" and wav[8:16] == b"WAVEfmt "
+            and struct.unpack("<IHHIIHH", wav[16:36]) == (16, 1, 1, 16000, 32000, 2, 16)
+            and wav[36:40] == b"data" and struct.unpack("<I", wav[40:44])[0] == 16000 and not any(wav[44:]),
+            "pure silent WAV shape check failed")
+    frames = (len(wav) - 44) // 2
+    require(8000 <= frames <= 960000 and len(wav) == 44 + frames * 2 and frames * 1000 // 16000 == 500,
+            "pure fixture failed VoicePcmMetadata domain duration/length bounds")
+    checks.append("8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds")
+    body = bytes(MATERIAL_BYTES)
+    head = b"POST /fc/api/v1/materials/uploads/1/bytes HTTP/1.1\r\nHost: localhost:12345\r\n\r\n"
+    fragments, first = request_fragments(head, body)
+    require(b"".join(fragments) == head + body and first == 4096 and max(map(len, fragments)) <= FRAGMENT,
+            "pure fragment/coalescing reconstruction failed")
+    checks.append("120000-byte request fragmentation and head/body coalescing")
+    ready = {"port": 12345, "generation": 1, "marker": "synthetic", "origin": "https://localhost:12345",
+             "basePath": "/fc/", "classId": "1", "subjectId": "1", "loginName": "probe", "pairingCode": "12345678",
+             "staticAssets": 6, "visualFixture": "FILLED_DEFAULT"}
+    validate_ready(ready, "synthetic")
+    final = {"physicalNativeDrain": True, "sharedWorkers": 2, "workerJoin": True, "hubPending": 0,
+             "downloadHubPending": 0,
+             "quarantined": 0, "setupCleanup": True, "approvals": 1, "heads": 12, "responses": 12, "peakRecords": 2}
+    validate_native(final, [{"httpStatus": 200}] * 12)
+    validate_native(final, [{"httpStatus": 200}] * 3, browser_wire_responses=9)
+    for invalid_count in (True, -1, "9", 13):
+        try:
+            validate_native(final, [], browser_wire_responses=invalid_count)
+        except RuntimeError:
+            continue
+        raise RuntimeError("native ledger accepted invalid/uncovered browser wire count")
+    for key in ("physicalNativeDrain", "workerJoin", "setupCleanup"):
+        try:
+            validate_native(dict(final, **{key: False}), [{"httpStatus": 200}] * 12)
+        except RuntimeError:
+            continue
+        raise RuntimeError("pure final ledger accepted missing actual cleanup/join")
+    checks.append("READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits")
+    key = {"kind": "HOMEWORK", "classId": "1", "subjectId": "1", "ownerTeacherId": "1", "date": "2026-11-01"}
+    for fixture in VISUAL_FIXTURES:
+        zero = fixture == "FILLED_ZERO"
+        visual = {"schemaVersion": 1, "status": "SUBJECT_VISUAL", "key": key,
+                  "subjectId": "1", "subjectName": "Synthetic TLS subject", "subjectRevision": "1",
+                  "displayRevision": "0" if fixture == "FILLED_DEFAULT" else "1", "rulesVersion": 1,
+                  "effectiveRgb": "#88A6C4", "mode": "OUTLINED" if fixture == "OUTLINED" else "FILLED",
+                  "homeworkFillPercent": 0 if zero else 3, "courseFillPercent": 0 if zero else 20,
+                  "homeworkComponentOpacityPercent": 70 if zero else 100,
+                  "courseComponentOpacityPercent": 80 if zero else 100,
+                  "homeworkVisible": True, "courseVisible": True}
+        validate_visual(visual, key, fixture)
+        for invalid in (dict(visual, palette=[]), dict(visual, effectiveRgb="#020304"),
+                        dict(visual, homeworkVisible=1), dict(visual, subjectRevision="2"),
+                        dict(visual, homeworkComponentOpacityPercent=0), dict(visual, key=dict(key, classId="2"))):
+            try:
+                validate_visual(invalid, key, fixture)
+            except RuntimeError:
+                continue
+            raise RuntimeError("visual disclosure validator accepted extra palette/raw RGB/wrong version/scope/alpha/type")
+        for wrong in VISUAL_FIXTURES:
+            if wrong == fixture:
+                continue
+            try:
+                validate_ready(dict(ready, visualFixture=wrong), "synthetic", fixture)
+            except RuntimeError:
+                continue
+            raise RuntimeError("READY silently ignored requested visual fixture")
+    checks.append("visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected")
+    checks.extend(self_test_voice_capabilities())
+    checks.extend(self_test_header_deadlines())
+    print(json.dumps({"status": "PURE_LOCAL_CHECKS_PASS", "checks": checks,
+                      "tls": "NOT_RUN", "windows": "NOT_RUN", "business": "NOT_RUN"}, indent=2))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--ssh-target", default="future-classroom-win11")
+    parser.add_argument("--identity", type=Path)
+    parser.add_argument("--exe", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument("--web-bundle", type=Path, help="Existing development ZIP; only verified web manifest payloads are uploaded")
+    parser.add_argument("--browser", action="store_true", help="Also verify isolated Windows Edge UI against this same finite native service")
+    parser.add_argument("--browser-content", choices=("HOMEWORK", "REMINDER"), default="HOMEWORK",
+                        help="Explicit isolated browser journey; REMINDER uses the real bottom shortcut and no subject-visual requests")
+    parser.add_argument("--continuous-accept", action="store_true", help="Also verify real idle AcceptEx repost and four admitted JSON bodies within the original client/native deadlines; not strict TCP5s evidence")
+    parser.add_argument("--visual-fixture", choices=VISUAL_FIXTURES, default="FILLED_DEFAULT", help="Exact finite isolated synthetic display fixture; no production settings")
+    parser.add_argument("--voice-capabilities", action="store_true", help="Also observe three real capability GETs after pairing; no new audio operation or native-query/cache-count inference")
+    parser.add_argument("--visual-only", action="store_true", help="Target only visual/scope/read-only contract within the original client/native budgets")
+    parser.add_argument("--header-deadline-only", action="store_true", help="Explicit finite four incomplete TLS heads then one raw TCP deadline sample; original5e9ns conservative pre-connect bound, not production/ESTABLISHED certification")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only or args.header_deadline_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
+            parser.error("self-test is pure local; do not combine with remote inputs")
+        self_test()
+        return
+    if args.header_deadline_only and (args.browser or args.continuous_accept or args.voice_capabilities or args.visual_only
+            or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK"):
+        parser.error("header-deadline-only is independent of browser/continuous/voice-capabilities/visual-only and custom fixtures")
+    if args.voice_capabilities and args.visual_only:
+        parser.error("voice-capabilities requires the full business diagnostic, not visual-only")
+    if args.visual_only and args.continuous_accept:
+        parser.error("visual-only is separate from full material/capacity acceptance")
+    if args.browser_content != "HOMEWORK" and (not args.browser or args.visual_only):
+        parser.error("--browser-content REMINDER requires --browser and the full business diagnostic")
+    if not args.exe or not args.report or not args.web_bundle:
+        parser.error("--exe, --report and --web-bundle required for actual diagnostic")
+    if not re.fullmatch(r"[A-Za-z0-9_.@:-]+", args.ssh_target) or args.ssh_target.startswith("-"):
+        parser.error("ssh-target must be an SSH alias/user@host without whitespace/options")
+    if not args.exe.is_file() or args.exe.suffix.lower() != ".exe" or (args.identity and not args.identity.is_file()):
+        parser.error("exe and optional private identity must exist")
+    if args.exe.stat().st_size > 128 * 1024 * 1024:
+        parser.error("supplied executable exceeded 128MiB bound")
+    executable = args.exe.read_bytes()
+    pe = int.from_bytes(executable[60:64], "little") if len(executable) >= 64 else 0
+    if executable[:2] != b"MZ" or executable[pe:pe + 6] != b"PE\0\0\x4c\x01":
+        parser.error("supplied executable must be a real Windows x86 PE")
+    if args.report.exists():
+        parser.error("report already exists; preserve original first/final evidence separately")
+    if not args.web_bundle.is_file() or args.web_bundle.stat().st_size > 128 * 1024 * 1024:
+        parser.error("web-bundle must be an existing ZIP no larger than 128MiB")
+    package = read_web_package(args.web_bundle)
+    token = uuid.uuid4().hex
+    # The shared native capability accepts exactly this prefix plus 32 hex
+    # digits. Business scope belongs in the report, not the capability grammar.
+    marker = "FutureClassroom-Test-TLS-" + token
+    report = {"schemaVersion": 1, "status": "FAIL", "scope": "Finite raw HTTPS API diagnostic through owned SSH loopback forward",
+              "strictP0": "NOT_VALIDATED", "productionListener": "NOT_ENABLED", "browserAcceptance": "NOT_TESTED",
+              "win7": "NOT_VALIDATED", "win10": "NOT_VALIDATED", "physicalPlayback": "NOT_EXERCISED",
+              "forwardTimingIsNativeDeadlineEvidence": False, "marker": marker, "exeSha256": digest(executable),
+              "runnerSourceSha256": digest(Path(__file__).read_bytes()), "ownershipHelperSourceSha256": digest(_source.read_bytes()),
+              "webBundleSha256": digest(args.web_bundle.read_bytes()),
+              "remoteScriptsSha256": digest((COMMON + SETUP + LAUNCH + STOP + CAPTURE + CLEANUP).encode("utf-8")),
+              "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+              "visualFixture": args.visual_fixture, "visualOnly": args.visual_only,
+              "browserContentKind": args.browser_content if args.browser else None,
+              "events": [], "cleanup": "NOT_RUN"}
+    if args.header_deadline_only:
+        report.update(headerDeadlineOnly=True, scope="Finite actual Schannel four incomplete first heads then one raw TCP via owned SSH; no completed HTTP/auth/audio",
+                      headerDeadlineTiming="Conservative before-local-connect to actual peer terminal, unrounded <=5000000000ns; original strictP0 NOT_VALIDATED")
+    remote = Remote(args.ssh_target, args.identity)
+    directory = launcher = launcher_logs = tunnel = local_owner = browser_observer = None
+    uploaded = set()
+    phase = "create-owned-root"
+    try:
+        directory = remote.powershell("$root=Join-Path $env:TEMP " + ps_literal(marker)
+            + ";New-Item -ItemType Directory -Path $root|Out-Null;[IO.File]::WriteAllText((Join-Path $root '.tls-probe-root'),"
+            + ps_literal(marker) + ");$root")
+        report["remoteRoot"] = directory
+        local_owner = tempfile.TemporaryDirectory(prefix="fc-tls-business-probe-")
+        phase = "upload-verified-public-web-package"
+        report["staticPackage"] = upload_web_package(remote, local_owner.name, directory, marker, package)
+        phase = "upload-owned-control-scripts"
+        report["uploadedScriptSha256"] = {}
+        for name, template in (("cleanup", CLEANUP), ("stop", STOP), ("capture", CAPTURE), ("setup", SETUP)):
+            source = Path(local_owner.name) / ("tls-" + name + ".ps1")
+            source.write_text(COMMON + script(template, directory, marker, args.exe.name), encoding="utf-8-sig")
+            report["uploadedScriptSha256"][name] = digest(source.read_bytes())
+            remote.upload(source, directory)
+            uploaded.add(name)
+        parsed = remote.powershell("$files=Get-ChildItem -LiteralPath " + ps_literal(directory)
+            + " -Filter 'tls-*.ps1';foreach($file in $files){$tokens=$null;$errors=$null;"
+            + "[Management.Automation.Language.Parser]::ParseFile($file.FullName,[ref]$tokens,[ref]$errors)|Out-Null;"
+            + "if($errors.Count-ne 0){throw (($errors|ForEach-Object{$_.Message})-join '; ')}};'TLS_CONTROL_SCRIPTS_PARSE_PASS'", timeout=15)
+        require(parsed == "TLS_CONTROL_SCRIPTS_PARSE_PASS", "control script parse result missing")
+        report["controlScriptsParse"] = "PASS"
+        phase = "upload-owned-bounded-visual-fixture"
+        applied = remote.powershell("$root=" + ps_literal(directory)
+            + ";if(([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-ne " + ps_literal(marker)
+            + "){throw 'visual fixture root mismatch'};[IO.File]::WriteAllText((Join-Path $root '.subject-visual-fixture'),"
+            + ps_literal(args.visual_fixture) + ",[Text.ASCIIEncoding]::new());"
+            + "[IO.File]::ReadAllText((Join-Path $root '.subject-visual-fixture'))")
+        require(applied == args.visual_fixture, "owned visual fixture upload/readback mismatch")
+        report["visualFixtureInput"] = {"bytes": len(applied), "sha256": digest(applied.encode("ascii")), "readBack": "PASS"}
+        phase = "create-owned-certificate-and-cng-key"
+        fixture = json.loads(remote.run_file(directory + "\\tls-setup.ps1", timeout=45))
+        report["fixture"] = {key: value for key, value in fixture.items() if key != "publicPem"}
+        source = Path(local_owner.name) / "tls-launch.ps1"
+        source.write_text(COMMON + script(LAUNCH, directory, marker, args.exe.name, fixture["thumbprint"]), encoding="utf-8-sig")
+        report["uploadedScriptSha256"]["launch"] = digest(source.read_bytes())
+        remote.upload(source, directory)
+        phase = "upload-and-verify-owned-executable"
+        remote.upload(args.exe, directory)
+        uploaded_digest = remote.powershell("(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path "
+            + ps_literal(directory) + " " + ps_literal(args.exe.name) + ")).Hash.ToLowerInvariant()")
+        require(uploaded_digest == report["exeSha256"] == digest(args.exe.read_bytes()), "executable changed after identity freeze")
+        pem = Path(local_owner.name) / "tls-public.pem"
+        pem.write_text(fixture["publicPem"], encoding="ascii")
+        expected_der = ssl.PEM_cert_to_DER_cert(fixture["publicPem"])
+        tls_context, wrong_ca = _tls.context(pem), _tls.untrusted_context(expected_der)
+        report["clientVerification"] = {"checkHostname": True, "verifyMode": "CERT_REQUIRED", "tls": "TLSv1.2",
+            "publicCertificateSha256": digest(expected_der), "trustSource": "only owned public PEM; no system trust mutation",
+            "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False", "openssl": ssl.OPENSSL_VERSION}
+        if args.browser:
+            phase = "prepare-isolated-windows-edge-before-native-deadline"
+            observer_source = Path(__file__).with_name("windows-native-browser-observer.py")
+            observer_spec = importlib.util.spec_from_file_location("fc_native_browser_observer", observer_source)
+            observer_module = importlib.util.module_from_spec(observer_spec)
+            observer_spec.loader.exec_module(observer_module)
+            browser_observer = observer_module.BrowserObserver(
+                remote, local_owner.name, args.report, marker, json.loads(package[0]), CSP,
+                args.identity, args.ssh_target, content_kind=args.browser_content)
+            browser_observer.prepare(fixture["publicPem"])
+            report["scope"] = "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service"
+        phase = "start-owned-ssh-master"
+        if args.header_deadline_only:
+            tunnel = HeaderDeadlineTunnel(remote, local_owner.name)
+        else:
+            tunnel = Tunnel(remote, local_owner.name)
+        phase = "start-native-business-diagnostic"
+        launcher = subprocess.Popen(remote.command_file(directory + "\\tls-launch.ps1"), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        launcher_logs = Logs(launcher)
+        until = time.monotonic() + 100
+        ready, native, exits = [], [], []
+        progress_reports = []
+        close_reports = []
+        close_reader = CloseReader(marker, close_reports) if args.header_deadline_only else None
+        progress_reader = ProgressReader(launcher_logs.lines, marker, progress_reports, close_reader)
+        if close_reader is not None:
+            report["nativeCloseObservations"] = close_reports
+        report["continuousAcceptEnabled"] = args.continuous_accept
+        report["nativeProgress"] = progress_reports
+        report.update({"ready": ready, "nativeReports": native, "nativeProcessExits": exits})
+        while time.monotonic() < until:
+            try:
+                line = progress_reader.get(timeout=0.1)
+            except queue.Empty:
+                if launcher.poll() is not None and not any(thread.is_alive() for thread in launcher_logs.threads):
+                    break
+                continue
+            if line.startswith(READY):
+                require(not ready, "duplicate business READY domain; no implicit new generation")
+                item = json.loads(line[len(READY):])
+                validate_ready(item, marker, args.visual_fixture)
+                require(item["staticAssets"] == len(package[2]["assets"]), "native/package static asset count mismatch")
+                progress_reader.generation = item["generation"]
+                if close_reader is not None:
+                    close_reader.generation = item["generation"]
+                ready.append({key: value for key, value in item.items() if key != "pairingCode"})
+                phase = "actual-tls-business-clients"
+                port = tunnel.open(item["port"])
+                client = Client(port, item, tls_context, wrong_ca, expected_der, report["events"])
+                if args.header_deadline_only:
+                    report["clientVerification"]["closeNotify"] = "Negative sample: actual peer EOF/RST/TLS EOF before local close; no clean shutdown claim"
+                    report["static"] = {"status": "NOT_RUN_HEADER_DEADLINE_ONLY"}
+                    report["headerDeadlineObservation"] = {}
+                    exercise_header_deadlines(client, progress_reader, close_reader, tunnel, launcher, report["headerDeadlineObservation"])
+                    report["business"] = {"operation": "HEADER_DEADLINE_ONLY_NO_COMPLETE_REQUEST_AUTH_OR_AUDIO"}
+                else:
+                    if args.continuous_accept:
+                        report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
+                    report["static"] = {"status": "NOT_RUN_TARGETED_VISUAL_MATRIX"} if args.visual_only else exercise_static(client, package[2])
+                    report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only, voice_capabilities=args.voice_capabilities)
+                    if args.voice_capabilities:
+                        report["voiceCapabilitiesObservation"] = report["business"].pop("voiceCapabilitiesObservation")
+                tunnel.cancel()
+            elif line.startswith(PASS):
+                native.append(json.loads(line[len(PASS):]))
+            elif any(line.startswith(prefix) for prefix in EXIT_PREFIXES):
+                prefix = next(prefix for prefix in EXIT_PREFIXES if line.startswith(prefix))
+                exits.append(json.loads(line[len(prefix):]))
+            elif line.startswith("TLS_BUSINESS_REPORT "):
+                report.setdefault("nativeDebugLines", []).append(line)
+            else:
+                report.setdefault("otherNativeLines", []).append(line)
+        phase = "actual-native-and-ssh-exit"
+        launcher.wait(timeout=max(0.01, until - time.monotonic()))
+        launcher_logs.join()
+        require(launcher.returncode == 0 and len(exits) == 1 and exits[0].get("code") == 0, "native child/supervisor actual successful exit missing")
+        require(len(ready) == 1 and len(native) == 1 and report.get("business") is not None
+                and all(event["status"] == "PASS" for event in report["events"]), "business client/native summary incomplete")
+        if args.header_deadline_only:
+            require(report["headerDeadlineObservation"]["status"] == "PASS"
+                    and report["headerDeadlineObservation"]["sequentialPhasesProven"] is True
+                    and report["headerDeadlineObservation"]["fourTlsIntervalsOverlap"] is True,
+                    "header deadline clients or retirement-separated phases failed")
+            report["headerDeadlineNativeCorrelation"] = validate_header_native(native[0], report["events"], close_reader, progress_reader)
+        else:
+            for case in ("wrong-ca-rejected", "wrong-hostname-rejected"):
+                matching = [event for event in report["events"] if event["case"] == case]
+                require(len(matching) == 1 and matching[0].get("rejectionType") == "SSLCertVerificationError", "actual TLS negative rejection evidence missing")
+            browser_count = browser_observer.result["wireResponseCount"] if browser_observer else 0
+            validate_native(native[0], report["events"], browser_count)
+        if browser_observer:
+            report["browserAcceptance"] = "FINITE_NATIVE_CONTENT_UI_PASS"
+        report.update({"native": native[0], "nativeProcessExit": exits[0], "status": "PASS"})
+    except Exception as error:
+        report["error"] = failure(error, phase)
+    finally:
+        if launcher:
+            try:
+                if launcher.poll() is None:
+                    launcher.terminate()
+                    try:
+                        launcher.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        launcher.kill()
+                        launcher.wait(timeout=5)
+            except Exception as error:
+                # Continue the independent exact remote STOP/capture/cleanup
+                # path even if the local SSH launcher could not be reaped here.
+                report["localLauncherCleanupError"] = failure(error, "stop-owned-local-ssh-launcher")
+                report["status"] = "FAIL"
+            if launcher_logs:
+                try:
+                    launcher_logs.join()
+                except Exception as error:
+                    report["launcherDrainError"] = failure(error, "drain-owned-ssh-pipes")
+                    report["status"] = "FAIL"
+                report["sshLauncherRaw"] = launcher_logs.report()
+        if tunnel:
+            try:
+                tunnel.close()
+                report["ownedTunnelCleanup"] = "PASS"
+            except Exception as error:
+                report["tunnelCleanupError"] = failure(error, "stop-owned-ssh-tunnel")
+                report["status"] = "FAIL"
+            report["sshTunnelRaw"] = tunnel.logs.report()
+        if browser_observer:
+            try:
+                browser_observer.close()
+            except Exception as error:
+                report["browserCleanupError"] = failure(error, "close-original-browser-context-forward-job")
+                report["status"] = "FAIL"
+            report["browser"] = browser_observer.report
+        if local_owner:
+            try:
+                local_owner.cleanup()
+            except Exception as error:
+                report["localCleanupError"] = failure(error, "cleanup-owned-local-public-cert/control-socket")
+                report["status"] = "FAIL"
+        if directory:
+            cleanup_owned(remote, directory, marker, uploaded, args.report, token, report)
+        report["clientEventsSha256"] = digest(json.dumps(report["events"], sort_keys=True, separators=(",", ":")).encode("utf-8"))
+        report["remoteControlRunsRaw"] = remote.script_runs
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        with args.report.open("x", encoding="utf-8") as output:
+            output.write(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+    if report["status"] != "PASS" or report["cleanup"] != "PASS":
+        raise SystemExit("TLS business diagnostic failed; inspect " + str(args.report))
+    print("TLS_BUSINESS_RUNNER_PASS " + json.dumps({"report": str(args.report), "exeSha256": report["exeSha256"],
+          "cleanup": report["cleanup"], "strictP0": "NOT_VALIDATED", "physicalPlayback": "NOT_EXERCISED"}, separators=(",", ":")))
+
+
+if __name__ == "__main__":
+    main()

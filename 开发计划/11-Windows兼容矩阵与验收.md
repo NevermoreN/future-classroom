@@ -331,3 +331,8 @@ R39最终[本地第五次](验证记录/2026-11-01-round39-voice-capability/voic
 | R43三处定向expect | [固定nightly最小原型](验证记录/2026-11-01-round43-win7-tls/tls-repro-first.json)原const101/定向0/独立未注解哨兵101；fmt/架构及精确集成通过 | 修正后的完整MSVC CI待新源码验证，不用小程序替代 |
 
 Windows10及11仍为首版必需兼容范围，两者分别取证；用户保留的测试SSH授权不撤销。原严格首TCP五秒FAIL、生产listener关闭、Win7/Win10实机、可见希沃/触控/DPI、物理音频及部署/长稳门槛保持，详见[实施记录](10-实施进度与验证记录.md)R42/R43。
+
+R44两条 `e0d9768` Hosted构建均在编译前因源码清单size/reparse联合守卫FAIL，测试EXE数0；[独立诊断](验证记录/2026-11-01-round44-ci/source-inventory-failure-independent-first.json)证明Git内容总量超过原256MiB，但不推断首Windows触发路径。R45保留原路径/单件/实际SHA总量及命令预算，改为完整Git元数据与非历史实际SHA两域；[实际Win11 PowerShell5.1六函数41项](验证记录/2026-11-01-round45-ci-input-domains/windows-helpers-freeze-first.json)通过且夹具清理。它不等于要求PowerShell7.2的Hosted主体、修正后MSVC编译或Win7/Win10运行；新完整源码CI结果仍须另取。详见[当前输入取证合同](09-Rust构建验证与发布门槛.md)与实施记录R44/R45。
+
+
+R41最终第三GNU源码在同一授权Win11再次实际通过21程序1420项、公开桌面20步、配色22步及完整默认HOMEWORK/连续接纳/语音能力/隔离Edge；均绑定普通程序SHA `b1f25364f488d6e8ffdb45ef53d5e99ff7fa717e3a226dd9ddf75d48bf7dee6f`，所有原worker、IOCP/Frame、浏览器owner及自有资源分别核对物理终态。四TLS不完整Head与一裸TCP样本均低于原五秒门槛，只记有限SSH转发观测；原严格整体FAIL和生产listener关闭不变。此为GNU补充验证，不是现代MSVC新源码结果，更不代表Win7/Win10/可见希沃/触控/DPI正式验收；原SSH授权保留。详见[实施记录](10-实施进度与验证记录.md)R41最终补证。

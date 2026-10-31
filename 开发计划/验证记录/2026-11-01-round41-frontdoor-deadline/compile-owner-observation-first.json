@@ -1,0 +1,27 @@
+{
+  "status": "VERIFIED_LIVE",
+  "sourceReportStatus": "RUNNING",
+  "sameBuildSession": 70186,
+  "ownerProcesses": [
+    {
+      "pid": 7072,
+      "parentPid": 5243,
+      "elapsed": "04:04",
+      "kind": "cargo"
+    },
+    {
+      "pid": 9378,
+      "parentPid": 7072,
+      "elapsed": "00:40",
+      "kind": "rustc"
+    },
+    {
+      "pid": 9479,
+      "parentPid": 7072,
+      "elapsed": "00:16",
+      "kind": "rustc"
+    }
+  ],
+  "stage": "compile",
+  "noRestartOrSignals": true
+}

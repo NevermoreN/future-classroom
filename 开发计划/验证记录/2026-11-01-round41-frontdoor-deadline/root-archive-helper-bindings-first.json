@@ -1,0 +1,95 @@
+{
+  "status": "PASS",
+  "scope": "All five external helper references resolve to exact unchanged Git source; no key/control/native executable copied. This supplemental report is added after the independent preparation snapshot and is explicitly included in the final INDEX.",
+  "files": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-native-browser-observer.py",
+      "referencedBy": [
+        "editor-default-browser-owner-diagnosis-first.json",
+        "editor-default-browser-owner-diagnosis-first.json/bindings/5/path"
+      ],
+      "referenceCount": 2,
+      "bytes": 36008,
+      "sha256": "1d242c161fe573b0b77540b0e9033666b2b37576042c3db1772dc4a5c2f11f86",
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/windows-native-browser-observer.py",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "ed6f3887365bf6fd6cb62c0421860ceea0e786b3"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-probe.py",
+      "referencedBy": [
+        "windows-readonly-final-second.json",
+        "windows-readonly-final-second.json/remoteAdapterSource/path"
+      ],
+      "referenceCount": 2,
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/windows-probe.py",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "2760799f06993350c80d4ec04754e24073bb8a73"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/audit-pe.py",
+      "referencedBy": [
+        "programs-independent-first.json",
+        "programs-independent-first.json/peInspector/auditor/path"
+      ],
+      "referenceCount": 2,
+      "bytes": 5367,
+      "sha256": "a64eec6cbc04da1ab03ec6c2de42bddf2fab891f63ded7076cf00d486e8ef1d5",
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/audit-pe.py",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "6ba663c6650a810592e41a86ca6314744a5d37cd"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+      "referencedBy": [
+        "windows-readonly-final-first.json",
+        "windows-readonly-final-first.json/remoteAdapterSource/path"
+      ],
+      "referenceCount": 2,
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/windows-probe.py",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "2760799f06993350c80d4ec04754e24073bb8a73"
+    },
+    {
+      "path": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-tls-probe.py",
+      "referencedBy": [
+        "backlog-age-readonly-first.json",
+        "backlog-age-readonly-first.json/sourceSnapshots/1/path"
+      ],
+      "referenceCount": 2,
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/windows-tls-probe.py",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "4276703ae8a25a9a50b8b6e52a65ecc5a8161036"
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree/scripts/windows-native-browser-harness.mjs",
+      "bytes": 71760,
+      "sha256": "64f679b292fac18cb3935f66c880a23c2a703026679f22e563b2421da72b6b4d",
+      "referencedBy": [
+        "windows-default-browser-continuous-final.json/browser/sourceSha256/nodeHarness"
+      ],
+      "classification": "EXTERNAL_SOURCE_HELPER_OR_METADATA_NEEDS_EXPLICIT_COPY_DECISION",
+      "referenceForm": "Sibling-relative Node harness name, then SHA-bound by original browser report; not visible to absolute-path-only extractor",
+      "decision": "ALREADY_RETAINED_EXACT_GIT_SOURCE_NO_DUPLICATE_COPY",
+      "canonicalPath": "scripts/windows-native-browser-harness.mjs",
+      "gitCommit": "ab5c403fa4f2cd90a19e3be52d7307ea408465d3",
+      "gitBlob": "4b703f51adf6b4f6efe94aac4df0275256f4ce6a"
+    }
+  ]
+}
