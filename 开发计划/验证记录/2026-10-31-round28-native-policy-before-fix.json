@@ -1,0 +1,33 @@
+{
+  "scope": "actual Win11; desired native policy retirement regression before production native fix; no output device",
+  "binarySha256": "32db1c965bc2a39a1336a04f7841a6822f7f678c507174b4a422239b24179800",
+  "cleanup": "PASS",
+  "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-RustProbe-c9d7edf81c1749cf8f7cf3c6b0b9c0f0",
+  "actual": {
+    "output": [
+      "",
+      "running 2 tests",
+      "test voice_runtime::native::policy_tests::later_independent_stop_cannot_be_reopened_by_old_native_policy_retirement ... ok",
+      "test voice_runtime::native::policy_tests::reviewed_policy_commit_allows_exact_old_native_domain_to_retire_without_fault ... FAILED",
+      "",
+      "failures:",
+      "",
+      "---- voice_runtime::native::policy_tests::reviewed_policy_commit_allows_exact_old_native_domain_to_retire_without_fault stdout ----",
+      "",
+      "thread 'voice_runtime::native::policy_tests::reviewed_policy_commit_allows_exact_old_native_domain_to_retire_without_fault' (25624) panicked at crates/fc-bootstrap/src/voice_runtime/native_policy_tests.rs:121:5:",
+      "assertion `left == right` failed: a committed reviewed policy must not strand its old native domain",
+      "  left: Err(Storage)",
+      " right: Ok(())",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    voice_runtime::native::policy_tests::reviewed_policy_commit_allows_exact_old_native_domain_to_retire_without_fault",
+      "",
+      "test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 189 filtered out; finished in 0.15s",
+      ""
+    ],
+    "exitCode": 101,
+    "binarySha256": "32db1c965bc2a39a1336a04f7841a6822f7f678c507174b4a422239b24179800"
+  }
+}

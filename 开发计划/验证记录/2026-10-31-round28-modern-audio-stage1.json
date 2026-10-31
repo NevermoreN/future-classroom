@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "038fca872051f6372d883da1fa48d57edea3f9681c68c17e8ca5936058dd1f69"
+    }
+  ],
+  "exeSha256": "038fca872051f6372d883da1fa48d57edea3f9681c68c17e8ca5936058dd1f69",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "webVoiceExitCode": 0,
+    "audioOutput": [
+      "AUDIO_SILENT_PASS WinMmProbeReport { natural_completions: 1, canceled_completions: 0, submitted_pcm_bytes: 65536, pcm_allocation_bytes: 49152, source_cleanup: true }",
+      "VOICE_PIPELINE_STAGE deployment",
+      "VOICE_PIPELINE_STAGE backend-open",
+      "VOICE_PIPELINE_STAGE initialize",
+      "VOICE_PIPELINE_STAGE local-login",
+      "VOICE_PIPELINE_STAGE create-class",
+      "VOICE_PIPELINE_STAGE bind-class",
+      "VOICE_PIPELINE_STAGE web-login",
+      "VOICE_PIPELINE_STAGE direct-reserve",
+      "VOICE_PIPELINE_STAGE direct-publish",
+      "VOICE_PIPELINE_STAGE direct-submit",
+      "VOICE_PIPELINE_STAGE direct-status",
+      "VOICE_PIPELINE_STAGE direct-cleanup",
+      "VOICE_PIPELINE_STAGE direct-reserve",
+      "VOICE_PIPELINE_STAGE direct-publish",
+      "VOICE_PIPELINE_STAGE direct-submit",
+      "VOICE_PIPELINE_STAGE direct-status",
+      "VOICE_PIPELINE_STAGE direct-cleanup",
+      "VOICE_PIPELINE_STAGE runtime-create",
+      "VOICE_PIPELINE_STAGE runtime-startup-fence",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-submit",
+      "VOICE_PIPELINE_STAGE runtime-first-job",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-submit",
+      "VOICE_PIPELINE_STAGE runtime-await-emergency",
+      "VOICE_PIPELINE_STAGE runtime-emergency-fence",
+      "VOICE_PIPELINE_STAGE runtime-policy-local-login",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-submit",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-policy-await-playing",
+      "VOICE_PIPELINE_STAGE runtime-policy-reviewed-save",
+      "VOICE_PIPELINE_STAGE runtime-policy-physical-release",
+      "VOICE_PIPELINE_STAGE runtime-reserve",
+      "VOICE_PIPELINE_STAGE runtime-publish",
+      "VOICE_PIPELINE_STAGE runtime-submit",
+      "VOICE_PIPELINE_STAGE runtime-fresh-job",
+      "VOICE_POLICY_RUNTIME_PASS actual_zero_pcm_playing_reviewed_limits_save_queued_and_pending_upload_retirement_original_release_generation_no_false_completion_fresh_explicit_job=PASS",
+      "VOICE_PIPELINE_STAGE runtime-shutdown",
+      "VOICE_RUNTIME_PASS on_demand_local_lock_independent_two_repeats_emergency_all_pending_fresh_explicit_job_shutdown_before_writer threads=6 stop_generation=3 ack_generation=3",
+      "VOICE_PIPELINE_STAGE final-cleanup",
+      "VOICE_PIPELINE_STAGE backend-close",
+      "VOICE_PIPELINE_PASS canonical_zero_pcm_prepare_exact_web_lease_sqlite_fifo_two_natural_repeats_cancel_generation_native_release_body_cleanup=PASS"
+    ],
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1001 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "sessionId": 1,
+    "webVoiceOutput": [
+      "WEB_MATERIALS_PASS real_DPAPI_SQLite_controlled_files_TXT_Office_WIC_PDFhelper_50MiB_upload_download_64KiB_chunks_CSRF_CAS_delete_receipt_delete_invalidates_stream=PASS synthetic_request_metadata=true listener_TLS_browser=NOT_RUN network_Read_deadline=NOT_VALIDATED",
+      "WEB_VOICE_PASS real_DPAPI_SQLite_exact_Web_target_CSRF_canonical_WAV_upload_native_zero_PCM_three_repeats_query_cancel_driver_return=PASS synthetic_request_metadata=true actual_microphone=NOT_RUN listener_TLS_browser=NOT_RUN",
+      "WEB_CONTENT_PASS real_DPAPI_SQLite_exact_Web_lease_scopes_CSRF_save_read_clear_CAS_idempotency_query_reminder_desktop_facts=PASS synthetic_request_metadata=true wire_TLS_browser_listener=NOT_RUN",
+      "WEB_PAIRING_PASS CNG_DPAPI_SQLite_exact_local_approval_original_poll_secret_Secure_HttpOnly_CSRF_local_lock_independent_durable_logout_restart_cleanup=PASS wire_TLS_browser_listener=NOT_RUN"
+    ],
+    "audioExitCode": 0,
+    "exitCode": 0
+  },
+  "audioStatus": "PASS",
+  "voicePolicyRuntimeStatus": "PASS",
+  "webVoiceStatus": "PASS",
+  "status": "PASS"
+}

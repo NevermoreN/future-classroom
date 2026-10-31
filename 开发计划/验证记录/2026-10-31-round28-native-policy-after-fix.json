@@ -1,0 +1,27 @@
+{
+  "scope": "actual Win11 real SQLite/native runtime desired regression; synthetic isolated deployment, no output device",
+  "filter": "voice_runtime::native::policy_tests",
+  "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-RustProbe-2bc25dcaaf704440b4fa2257381e8f15",
+  "binarySha256": "3d2073d25b39b8650924bcfb717b3ec324962cd16f0bea624fe95b44a29b3fc9",
+  "cleanup": "PASS",
+  "actual": {
+    "output": [
+      "",
+      "running 9 tests",
+      "test voice_runtime::native::policy_tests::disabled_committed_policy_retires_old_domain_and_keeps_admission_closed ... ok",
+      "test voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop ... ok",
+      "test voice_runtime::native::policy_tests::failed_reviewed_policy_authorizes_only_negative_retirement_and_never_resume ... ok",
+      "test voice_runtime::native::policy_tests::independent_stop_gap_between_policies_never_extends_old_retirement_permission ... ok",
+      "test voice_runtime::native::policy_tests::later_independent_stop_cannot_be_reopened_by_old_native_policy_retirement ... ok",
+      "test voice_runtime::native::policy_tests::pending_policy_stops_native_domain_without_sql_or_retiring_before_commit ... ok",
+      "test voice_runtime::native::policy_tests::reviewed_policy_commit_allows_exact_old_native_domain_to_retire_without_fault ... ok",
+      "test voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement ... ok",
+      "test voice_runtime::native::policy_tests::two_contiguous_committed_policies_use_one_bounded_old_domain_handoff ... ok",
+      "",
+      "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 199 filtered out; finished in 0.73s",
+      ""
+    ],
+    "exitCode": 0,
+    "binarySha256": "3d2073d25b39b8650924bcfb717b3ec324962cd16f0bea624fe95b44a29b3fc9"
+  }
+}

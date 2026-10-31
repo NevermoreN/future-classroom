@@ -1,0 +1,52 @@
+{
+  "scope": "read-only preflight; actual deletion only after all active processes terminal and byte-exact evidence archive verification",
+  "ownedRoots": [
+    {
+      "path": "/tmp/fc-round28-evidence",
+      "regularFiles": 159,
+      "logicalBytes": 2245226
+    },
+    {
+      "path": "/tmp/fc-round28-host",
+      "regularFiles": 843,
+      "logicalBytes": 281772121
+    },
+    {
+      "path": "/tmp/fc-round28-host-clippy",
+      "regularFiles": 956,
+      "logicalBytes": 463607814
+    },
+    {
+      "path": "/tmp/fc-round28-repack",
+      "regularFiles": 1,
+      "logicalBytes": 5716827
+    },
+    {
+      "path": "/tmp/fc-round28-web",
+      "regularFiles": 6490,
+      "logicalBytes": 186071575
+    },
+    {
+      "path": "/tmp/fc-round28-win",
+      "regularFiles": 888,
+      "logicalBytes": 571705112
+    },
+    {
+      "path": "/tmp/fc-round28-win-clippy",
+      "regularFiles": 878,
+      "logicalBytes": 768378331
+    },
+    {
+      "path": "/tmp/fc-round28-win7",
+      "regularFiles": 1080,
+      "logicalBytes": 414760515
+    }
+  ],
+  "preserve": [
+    "all existing developer outputs in /mnt/data",
+    "persistent Windows SSH service and all public authorization",
+    "repository-external persistent private key",
+    "pre-existing repository target/dist/node_modules",
+    "global shared caches except separately proven own empty aborted npx directory"
+  ]
+}

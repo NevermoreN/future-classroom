@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "scope": "orchestration mistakes, no product test result inferred",
+  "items": [
+    {
+      "command": "npm exec from repository root instead of isolated Web scratch",
+      "terminalExit": 130,
+      "correction": "interrupted original live handle before installation; used existing pinned scratch Vitest binary",
+      "log": "web-minimum-before-fix.log"
+    },
+    {
+      "command": "scratch precondition mistakenly required absence of its installed node_modules",
+      "terminalExit": 1,
+      "correction": "removed incorrect precondition; no test was executed"
+    },
+    {
+      "command": "copy guessed voice-pcm.test.ts filename",
+      "terminalExit": 1,
+      "correction": "rg discovered actual voice-recorder-pcm.test.ts; final copy used actual path; npm was never started"
+    }
+  ]
+}

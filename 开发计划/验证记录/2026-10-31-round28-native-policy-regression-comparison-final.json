@@ -1,0 +1,31 @@
+{
+  "scope": "all original desired assertions retained; final nine are a superset, never claim all nine were present in early before binaries",
+  "afterReport": "native-policy-after-fix.json",
+  "afterBinarySha256": "3d2073d25b39b8650924bcfb717b3ec324962cd16f0bea624fe95b44a29b3fc9",
+  "finalNativeTests": 9,
+  "before": [
+    {
+      "report": "native-policy-before-fix.json",
+      "tests": 2,
+      "passed": 1,
+      "failed": 1,
+      "failure": "committed reviewed policy old NativeDomain resume Err(Storage)"
+    },
+    {
+      "report": "native-failed-retirement-before-fix.json",
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "failure": "real supervisor Failed cleanup self-wake loop; bounded independent shutdown and cleanup succeeded"
+    },
+    {
+      "report": "native-fresh-window-before-fix.json",
+      "tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "failure": "old halted idle domain strands fresh Queued job, Draining instead of Idle"
+    }
+  ],
+  "testFileAfterSha256": "707cb61dd84a78a6980be1c322be9a636276e16d1cab33a8b4515a7cad914351",
+  "freshWindowExactWholeTestFileUnchanged": true
+}

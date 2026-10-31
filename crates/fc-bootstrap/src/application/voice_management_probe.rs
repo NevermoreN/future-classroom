@@ -2,10 +2,11 @@
 //! synthetic deployment. This probe submits no audio asset or playback job.
 use super::*;
 use fc_bootstrap::backend::VoiceManagementSnapshot;
+use fc_domain::voice::VoiceLimits;
 use voice_editor as v;
 
 type Check<T> = std::result::Result<T, String>;
-pub(super) const STEPS: usize = 25;
+pub(super) const STEPS: usize = 36;
 const LOGIN_NAME: &str = "synthetic-voice-settings-admin";
 const PASSWORD_VALUE: &str = "Synthetic voice settings 2026!";
 const ORDER: [&str; STEPS] = [
@@ -21,16 +22,27 @@ const ORDER: [&str; STEPS] = [
     "native-lock-discards-review",
     "native-relogin",
     "native-reopen-saved-disabled",
+    "native-limits-edit-review-no-write",
+    "native-limits-unchecked-confirm-rejected",
+    "native-limits-cancel-keeps-unsaved-draft",
+    "native-limits-confirm-custom-persisted",
     "first-app-physical-shutdown",
     "second-app-real-database-reopen",
     "native-relogin-after-database-reopen",
     "native-reopen-persisted-disabled",
+    "native-limits-persisted-after-database-reopen",
     "native-confirm-enable-persisted",
     "native-disable-review-captured",
     "external-concurrent-cas-disable",
     "native-stale-review-rejected",
     "native-refresh-current-config",
     "native-confirm-enable-after-refresh",
+    "native-limits-capture-review",
+    "external-concurrent-limits-cas",
+    "native-limits-stale-review-rejected",
+    "native-limits-refresh-preserves-draft",
+    "native-limits-confirm-after-refresh",
+    "native-limits-restore-defaults",
     "native-close-settings",
     "second-app-physical-shutdown",
     "isolated-deployment-cleanup",
@@ -135,15 +147,14 @@ fn same_saved(before: &VoiceManagementSnapshot, after: &VoiceManagementSnapshot)
     require(
         before.identity_revision == after.identity_revision
             && before.revision == after.revision
-            && before.enabled == after.enabled,
+            && before.enabled == after.enabled
+            && before.limits == after.limits,
         "review, rejection or cancel must not change persisted configuration",
     )?;
     no_jobs(after)
 }
 fn has_review(app: &App) -> bool {
-    app.voice_editor
-        .as_ref()
-        .is_some_and(|editor| editor.has_unsaved_changes())
+    app.voice_editor.is_some() && app.view().fields.iter().any(|field| field.id == v::ACK)
 }
 fn review(app: &mut App, enabled: bool, deadline: Instant) -> Check<()> {
     submit(
@@ -161,13 +172,60 @@ fn review(app: &mut App, enabled: bool, deadline: Instant) -> Check<()> {
         "review defaults unacknowledged",
     )
 }
+fn limits_review(app: &mut App, values: &[&str; 4], deadline: Instant) -> Check<()> {
+    submit(
+        app,
+        v::SAVE_LIMITS,
+        &[
+            (v::DURATION_SECONDS, values[0]),
+            (v::PENDING_JOBS, values[1]),
+            (v::PENDING_PER_OWNER, values[2]),
+            (v::REPEAT_TOTAL, values[3]),
+        ],
+        deadline,
+    )?;
+    require(
+        has_review(app)
+            && app
+                .view()
+                .fields
+                .iter()
+                .any(|field| field.id == v::ACK && field.value == "0"),
+        "limits consent defaults unacknowledged",
+    )
+}
+fn custom_limits() -> VoiceLimits {
+    VoiceLimits {
+        max_duration_millis: 1250,
+        max_pending_jobs: 3,
+        max_pending_per_owner: 1,
+        max_repeat_total: 2,
+    }
+}
+fn limits_changed(
+    app: &App,
+    before: &VoiceManagementSnapshot,
+    limits: VoiceLimits,
+) -> Check<VoiceManagementSnapshot> {
+    let after = saved(app)?;
+    require(
+        after.revision != before.revision
+            && after.limits == limits
+            && after.enabled == before.enabled
+            && !has_review(app),
+        "actual persisted limits changed without switching configuration",
+    )?;
+    no_jobs(&after)?;
+    Ok(after)
+}
 fn confirm(app: &mut App, deadline: Instant) -> Check<()> {
     submit(app, v::CONFIRM, &[(v::ACK, "1")], deadline)
 }
 fn changed(
-    app: &App,
+    app: &mut App,
     previous: &VoiceManagementSnapshot,
     enabled: bool,
+    deadline: Instant,
 ) -> Check<VoiceManagementSnapshot> {
     let actual = saved(app)?;
     require(
@@ -175,7 +233,34 @@ fn changed(
         "confirmed native change has a new real persisted revision",
     )?;
     no_jobs(&actual)?;
-    shown(app, &actual)?;
+    if let Err(render_error) = shown(app, &actual) {
+        let view = app.view();
+        let guarded_refresh = app.status == "语音状态已更新，请重新读取后核对。"
+            && !has_review(app)
+            && [v::ENABLE, v::DISABLE, v::SAVE_LIMITS].iter().all(|id| {
+                view.actions
+                    .iter()
+                    .any(|action| action.id == *id && !action.enabled)
+            });
+        // A diagnostic of this one failed observation, never a retry of a write.
+        // Do not print school/account data, audio, paths or opaque credentials.
+        let status: String = app.status.chars().take(128).collect();
+        println!("VOICE_SETTINGS_NATIVE_REFRESH_OBSERVATION status={status:?} rendered_enabled={} rendered_disabled={} saved_enabled={} saved_voice_revision={} saved_identity_revision={} saved_publication_revision={} saved_runtime_generation={} guarded_refresh={guarded_refresh}",
+            view.description.contains("远程语音配置：开启"),
+            view.description.contains("远程语音配置：关闭"),
+            actual.enabled, actual.revision.get(), actual.identity_revision.get(),
+            actual.publication_revision.get(), actual.runtime_generation);
+        if !guarded_refresh {
+            return Err(render_error);
+        }
+        // Exactly one explicit native read is authorized by the canonical stale
+        // state. A rendering error or a still-enabled mutation must still fail.
+        // The original persisted change and its revision are never replayed.
+        submit(app, v::REFRESH, &[], deadline)?;
+        let refreshed = saved(app)?;
+        same_saved(&actual, &refreshed)?;
+        shown(app, &actual)?;
+    }
     require(
         !has_review(app),
         "successful change clears captured consent",
@@ -302,7 +387,7 @@ fn first_app(
     mark(steps, "native-cancel-no-write")?;
     review(app, false, deadline)?;
     confirm(app, deadline)?;
-    let disabled = changed(app, &initial, false)?;
+    let disabled = changed(app, &initial, false, deadline)?;
     mark(steps, "native-confirm-disable-persisted")?;
     submit(app, v::REFRESH, &[], deadline)?;
     same_saved(&disabled, &saved(app)?)?;
@@ -324,7 +409,40 @@ fn first_app(
     shown(app, &disabled)?;
     require(!has_review(app), "local relogin cannot restore old consent")?;
     mark(steps, "native-reopen-saved-disabled")?;
-    Ok(disabled.revision)
+    let before_limits = saved(app)?;
+    limits_review(app, &["1.250", "3", "1", "2"], deadline)?;
+    same_saved(&before_limits, &saved(app)?)?;
+    mark(steps, "native-limits-edit-review-no-write")?;
+    submit(app, v::CONFIRM, &[], deadline)?;
+    require(
+        has_review(app) && !app.status.is_empty(),
+        "unchecked limits confirmation rejected",
+    )?;
+    same_saved(&before_limits, &saved(app)?)?;
+    mark(steps, "native-limits-unchecked-confirm-rejected")?;
+    submit(app, v::CANCEL, &[], deadline)?;
+    require(
+        !has_review(app)
+            && app
+                .voice_editor
+                .as_ref()
+                .is_some_and(|editor| editor.has_unsaved_changes()),
+        "limits cancellation keeps unsaved draft without consent",
+    )?;
+    same_saved(&before_limits, &saved(app)?)?;
+    require(
+        app.view()
+            .fields
+            .iter()
+            .any(|field| field.id == v::DURATION_SECONDS && field.value == "1.25"),
+        "native draft retained exact milliseconds",
+    )?;
+    mark(steps, "native-limits-cancel-keeps-unsaved-draft")?;
+    limits_review(app, &["1.25", "3", "1", "2"], deadline)?;
+    confirm(app, deadline)?;
+    let custom = limits_changed(app, &before_limits, custom_limits())?;
+    mark(steps, "native-limits-confirm-custom-persisted")?;
+    Ok(custom.revision)
 }
 
 fn second_app(
@@ -351,9 +469,14 @@ fn second_app(
     no_jobs(&reopened)?;
     shown(app, &reopened)?;
     mark(steps, "native-reopen-persisted-disabled")?;
+    require(
+        reopened.limits == custom_limits(),
+        "custom limits survived actual SQLite close and new Backend open",
+    )?;
+    mark(steps, "native-limits-persisted-after-database-reopen")?;
     review(app, true, deadline)?;
     confirm(app, deadline)?;
-    let enabled = changed(app, &reopened, true)?;
+    let enabled = changed(app, &reopened, true, deadline)?;
     mark(steps, "native-confirm-enable-persisted")?;
     review(app, false, deadline)?;
     same_saved(&enabled, &saved(app)?)?;
@@ -399,8 +522,74 @@ fn second_app(
     mark(steps, "native-refresh-current-config")?;
     review(app, true, deadline)?;
     confirm(app, deadline)?;
-    changed(app, &concurrent, true)?;
+    changed(app, &concurrent, true, deadline)?;
     mark(steps, "native-confirm-enable-after-refresh")?;
+    let before_limits = saved(app)?;
+    let target_limits = VoiceLimits {
+        max_duration_millis: 2500,
+        max_pending_jobs: 4,
+        max_pending_per_owner: 2,
+        max_repeat_total: 3,
+    };
+    limits_review(app, &["2.5", "4", "2", "3"], deadline)?;
+    same_saved(&before_limits, &saved(app)?)?;
+    mark(steps, "native-limits-capture-review")?;
+    let external_limits = VoiceLimits {
+        max_duration_millis: 2000,
+        max_pending_jobs: 2,
+        max_pending_per_owner: 1,
+        max_repeat_total: 4,
+    };
+    checked(
+        app.voice_service
+            .as_ref()
+            .ok_or("voice-settings-probe: service absent")?
+            .set_limits_reviewed(
+                app.lease.ok_or("voice-settings-probe: lease absent")?,
+                external_limits,
+                before_limits.revision,
+                before_limits.identity_revision,
+                before_limits.runtime_generation,
+            ),
+        "external same-service limits compare-and-swap",
+    )?;
+    let external = saved(app)?;
+    require(
+        external.limits == external_limits && external.revision != before_limits.revision,
+        "external limits CAS committed",
+    )?;
+    mark(steps, "external-concurrent-limits-cas")?;
+    confirm(app, deadline)?;
+    same_saved(&external, &saved(app)?)?;
+    require(
+        !has_review(app) && !app.status.is_empty(),
+        "stale limits confirmation rejected",
+    )?;
+    mark(steps, "native-limits-stale-review-rejected")?;
+    submit(app, v::REFRESH, &[], deadline)?;
+    same_saved(&external, &saved(app)?)?;
+    require(
+        app.view()
+            .fields
+            .iter()
+            .any(|field| field.id == v::DURATION_SECONDS && field.value == "2.5"),
+        "refresh retained unsaved limits draft",
+    )?;
+    mark(steps, "native-limits-refresh-preserves-draft")?;
+    limits_review(app, &["2.5", "4", "2", "3"], deadline)?;
+    confirm(app, deadline)?;
+    let configured = limits_changed(app, &external, target_limits)?;
+    mark(steps, "native-limits-confirm-after-refresh")?;
+    limits_review(app, &["60", "4", "2", "10"], deadline)?;
+    confirm(app, deadline)?;
+    limits_changed(app, &configured, VoiceLimits::default())?;
+    require(
+        !app.voice_editor
+            .as_ref()
+            .is_some_and(|editor| editor.has_unsaved_changes()),
+        "restored defaults have no lingering draft",
+    )?;
+    mark(steps, "native-limits-restore-defaults")?;
     submit(app, v::CLOSE, &[], deadline)?;
     require(
         app.screen == Screen::Home && app.voice_editor.is_none(),
@@ -490,7 +679,7 @@ pub(super) fn run() -> Check<()> {
     mark(&mut steps, "isolated-deployment-cleanup")?;
     require(steps == STEPS, "complete fixed native workflow")?;
     println!(
-        "VOICE_SETTINGS_NATIVE_PASS steps={steps} shared_workers=2 database_reopen=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms={}",
+        "VOICE_SETTINGS_NATIVE_PASS steps={steps} shared_workers=2 database_reopen=PASS limits_reopen=PASS limits_stale_cas=PASS limits_defaults_restored=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms={}",
         started.elapsed().as_millis()
     );
     Ok(())

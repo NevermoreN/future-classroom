@@ -1,0 +1,31 @@
+{
+  "scope": "actual Win11 real SQLite/native runtime desired regression; synthetic isolated deployment, no output device",
+  "filter": "voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop",
+  "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-RustProbe-7ef826f5d76c44a68ad834bad26f3fec",
+  "binarySha256": "c6e9444d39651f64e4f61dc4d46a1f8068415d15c62773dcb1417acb8d3afcef",
+  "cleanup": "PASS",
+  "actual": {
+    "output": [
+      "",
+      "running 1 test",
+      "test voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop ... FAILED",
+      "",
+      "failures:",
+      "",
+      "---- voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop stdout ----",
+      "",
+      "thread 'voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop' (37704) panicked at crates/fc-bootstrap/src/voice_runtime/native_policy_tests.rs:396:5:",
+      "Failed policy caused the real audio supervisor to wake itself forever instead of retiring",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    voice_runtime::native::policy_tests::failed_policy_supervisor_retires_physical_thread_without_self_wake_loop",
+      "",
+      "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 203 filtered out; finished in 2.15s",
+      ""
+    ],
+    "exitCode": 101,
+    "binarySha256": "c6e9444d39651f64e4f61dc4d46a1f8068415d15c62773dcb1417acb8d3afcef"
+  }
+}

@@ -4,6 +4,14 @@ import { ProtocolFault } from '../src/api/protocol'
 import { caps, job, wireCaps, wireUpload } from './voice-fixtures'
 const input = { commandId: '71', assetId: '45', expectedAssetRevision: '2', classId: '7', repeatTotal: 3 }
 describe('voice wire boundary and state meaning', () => {
+  it('accepts tightened administrator limits and rejects contradictory or expanded capabilities', () => {
+    const configured = { ...wireCaps(), maxRepeatTotal: 2, defaultRepeatTotal: 2, maxDurationMillis: 1250, maxWavBytes: 40044 }
+    expect(voice.capabilities(configured)).toMatchObject({ maxRepeatTotal: 2, defaultRepeatTotal: 2, maxDurationMillis: 1250, maxWavBytes: 40044 })
+    for (const patch of [{ maxRepeatTotal: 0 }, { maxRepeatTotal: 11 }, { maxRepeatTotal: 1.5 }, { defaultRepeatTotal: 3 }, { maxDurationMillis: 499 }, { maxDurationMillis: 60001 }, { maxDurationMillis: 1250.5 }, { maxWavBytes: 40046 }, { minDurationMillis: 0 }, { minRepeatTotal: 0 }]) expect(() => voice.capabilities({ ...configured, ...patch })).toThrow(ProtocolFault)
+    const short = voice.capabilities({ ...configured, maxRepeatTotal: 1, defaultRepeatTotal: 1, maxDurationMillis: 500, maxWavBytes: 16044 })
+    expect(short.maxDurationMillis).toBe(500)
+    expect(voice.sameTarget(voice.capabilities(configured), short)).toBe(false)
+  })
   it('retains u64 identifiers without numeric coercion and requires exact capabilities', () => {
     const wire = wireCaps(); wire.identityRevision = '18446744073709551615'; wire.currentClass!.classId = '18446744073709551615'
     expect(voice.capabilities(wire).currentClass?.classId).toBe('18446744073709551615')

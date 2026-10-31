@@ -49,6 +49,38 @@ function environment(mode = 'success') {
 }
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers() })
 describe('bounded offline resampling and disposable encoding worker', () => {
+  it('normalizes the floor-quantized 500ms cap through recorder and real normalizer at odd source rates', async () => {
+    for (const rate of [11025, 44101, 95999]) {
+      const f = environment(), frames = Math.floor(rate / 2)
+      let sink!: CaptureSink
+      const onWav = vi.fn(), onError = vi.fn()
+      const controller = new RecorderController({ onWav, onError, normalizer: f.normalizer,
+        capturePort: { open: async next => {
+          sink = next
+          return { sampleRate: rate, start: async () => {}, stop: async () => {}, abort: () => {} }
+        } } })
+      try {
+        await controller.start(`minimum-quantized-${rate}`, 500)
+        sink.pcm(new Float32Array(frames).fill(0.25), rate)
+        await controller.finish(`minimum-quantized-${rate}`)
+        expect(onError).not.toHaveBeenCalled()
+        expect(onWav).toHaveBeenCalledOnce()
+        const result = onWav.mock.calls[0]![0] as { frames: number; sampleRate: number; wav: Blob }
+        expect(result.frames).toBe(8000); expect(result.sampleRate).toBe(16000)
+        expect(result.wav.size).toBe(16044); expect(result.wav.type).toBe('audio/wav')
+        expect(f.contexts[0]!.frames).toBe(8000)
+        expect(f.contexts[0]!.createBuffer).toHaveBeenCalledWith(1, frames, rate)
+        expect(f.workers[0]!.terminate).toHaveBeenCalledOnce()
+      } finally { controller.dispose() }
+    }
+  })
+  it('rejects one whole source frame below the floor-quantized minimum before resampling or encoding', async () => {
+    for (const rate of [8000, 11025, 44100, 44101, 95999, 96000]) {
+      const f = environment()
+      await expect(f.normalizer.normalize([new Float32Array(Math.floor(rate / 2) - 1)], rate, f.abort.signal)).rejects.toThrow('DURATION_OUT_OF_RANGE')
+      expect(f.contexts).toHaveLength(0); expect(f.workers).toHaveLength(0)
+    }
+  })
   it('uses actual source rate, one offline channel and exact 16k output frames before worker encoding', async () => {
     const f = environment(), chunks = [new Float32Array(11025).fill(1), new Float32Array(11025).fill(-1)]
     const result = await f.normalizer.normalize(chunks, 44100, f.abort.signal), context = f.contexts[0]!

@@ -45,16 +45,27 @@ VOICE_SETTINGS_STEPS = (
     'native-lock-discards-review',
     'native-relogin',
     'native-reopen-saved-disabled',
+    'native-limits-edit-review-no-write',
+    'native-limits-unchecked-confirm-rejected',
+    'native-limits-cancel-keeps-unsaved-draft',
+    'native-limits-confirm-custom-persisted',
     'first-app-physical-shutdown',
     'second-app-real-database-reopen',
     'native-relogin-after-database-reopen',
     'native-reopen-persisted-disabled',
+    'native-limits-persisted-after-database-reopen',
     'native-confirm-enable-persisted',
     'native-disable-review-captured',
     'external-concurrent-cas-disable',
     'native-stale-review-rejected',
     'native-refresh-current-config',
     'native-confirm-enable-after-refresh',
+    'native-limits-capture-review',
+    'external-concurrent-limits-cas',
+    'native-limits-stale-review-rejected',
+    'native-limits-refresh-preserves-draft',
+    'native-limits-confirm-after-refresh',
+    'native-limits-restore-defaults',
     'native-close-settings',
     'second-app-physical-shutdown',
     'isolated-deployment-cleanup',
@@ -67,9 +78,9 @@ def validate_voice_settings_output(exit_code, output):
     steps = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_STEP")]
     expected = [f"VOICE_SETTINGS_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_SETTINGS_STEPS)]
     if steps != expected:
-        raise RuntimeError("voice settings exact25 ordered step indices/names missing, malformed or repeated")
+        raise RuntimeError("voice settings exact36 ordered step indices/names missing, malformed or repeated")
     summaries = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_PASS")]
-    pattern = r"VOICE_SETTINGS_NATIVE_PASS steps=25 shared_workers=2 database_reopen=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)"
+    pattern = r"VOICE_SETTINGS_NATIVE_PASS steps=36 shared_workers=2 database_reopen=PASS limits_reopen=PASS limits_stale_cas=PASS limits_defaults_restored=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)"
     if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
         raise RuntimeError("voice settings exact final scope/cleanup completion marker missing or malformed")
     return {"steps": len(steps), "stepNames": list(VOICE_SETTINGS_STEPS), "elapsedMs": int(summary.group(1))}
@@ -449,7 +460,7 @@ def main():
             report["voiceSettingsNativeStepNames"] = result["stepNames"]
             report["voiceSettingsElapsedMs"] = result["elapsedMs"]
             report["voiceSettingsNativeStatus"] = "PASS"
-            report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin policy, lock, revision conflict and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
+            report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin limits policy, unconfirmed/cancel/draft/lock, revision conflict, limits restore and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):
@@ -478,6 +489,11 @@ def main():
             report["audioStatus"] = "NOT_RUN" if any("AUDIO_SILENT_NOT_RUN" in line or "VOICE_PIPELINE_NOT_RUN" in line for line in audio) else "PASS"
             if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio) and any("VOICE_RUNTIME_PASS" in line for line in audio)):
                 raise RuntimeError("silent audio result missing")
+            if report["audioStatus"] == "PASS":
+                policy_marker = "VOICE_POLICY_RUNTIME_PASS actual_zero_pcm_playing_reviewed_limits_save_queued_and_pending_upload_retirement_original_release_generation_no_false_completion_fresh_explicit_job=PASS"
+                if policy_marker not in audio:
+                    raise RuntimeError("reviewed voice policy runtime result missing")
+                report["voicePolicyRuntimeStatus"] = "PASS"
         if args.web_voice:
             voice_output = report["native"].get("webVoiceOutput", [])
             if report["native"].get("webVoiceExitCode") != 0:

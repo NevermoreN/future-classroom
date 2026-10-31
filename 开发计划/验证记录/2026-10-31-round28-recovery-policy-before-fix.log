@@ -1,0 +1,82 @@
+   Compiling version_check v0.9.5
+   Compiling proc-macro2 v1.0.107
+   Compiling generic-array v0.14.7
+   Compiling zerocopy v0.8.63
+   Compiling ahash v0.8.12
+   Compiling unicode-ident v1.0.27
+   Compiling find-msvc-tools v0.1.15
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling shlex v2.0.1
+   Compiling cc v1.10.0
+   Compiling vcpkg v0.2.15
+   Compiling pkg-config v0.3.34
+   Compiling once_cell v1.21.4
+   Compiling serde_core v1.0.228
+   Compiling libsqlite3-sys v0.30.1
+   Compiling syn v2.0.119
+   Compiling hashbrown v0.14.5
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling serde_json v1.0.145
+   Compiling serde v1.0.228
+   Compiling digest v0.10.7
+   Compiling hashlink v0.9.1
+   Compiling serde_derive v1.0.228
+   Compiling bitflags v2.13.2
+   Compiling fallible-iterator v0.3.0
+   Compiling itoa v1.0.18
+   Compiling ryu v1.0.23
+   Compiling memchr v2.8.3
+   Compiling fc-domain v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-domain)
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling cpufeatures v0.2.17
+   Compiling smallvec v1.16.4
+   Compiling sha2 v0.10.9
+   Compiling fc-ports v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-ports)
+   Compiling rusqlite v0.32.1
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `release` profile [optimized] target(s) in 3m 03s
+     Running unittests src/lib.rs (/tmp/fc-round28-host/release/deps/fc_storage-76bccdbef2cefa9e)
+
+running 7 tests
+test business::voice_codec::tests::complete_legacy_shape_defaults_but_bad_new_policy_never_does ... ok
+test business::voice_codec::tests::full_audit_with_twenty_digit_ids_four_active_and_max_pending_assets_fits_document ... ok
+test business::voice_codec::tests::tightened_policy_keeps_old_full_audits_and_active_ownership_valid ... ok
+test business::voice_codec::tests::damaged_time_and_active_state_in_compact_audit_fail_closed ... ok
+test recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors ... FAILED
+test recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_keeps_current_target_disabled_and_tight_limits ... FAILED
+test recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_uses_target_defaults_when_no_local_voice_document_exists ... FAILED
+
+failures:
+
+---- recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors stdout ----
+
+thread 'recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors' (28702) panicked at crates/fc-storage/src/recovery_tests.rs:966:5:
+an older teaching backup cannot reenable target voice
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_keeps_current_target_disabled_and_tight_limits stdout ----
+
+thread 'recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_keeps_current_target_disabled_and_tight_limits' (28703) panicked at crates/fc-storage/src/recovery_voice_policy_tests.rs:124:9:
+assertion `left == right` failed: preview.sqlite3: source switch is not target policy
+  left: true
+ right: false
+
+---- recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_uses_target_defaults_when_no_local_voice_document_exists stdout ----
+
+thread 'recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_uses_target_defaults_when_no_local_voice_document_exists' (28714) panicked at crates/fc-storage/src/recovery_voice_policy_tests.rs:124:9:
+assertion `left == right` failed: preview.sqlite3: source switch is not target policy
+  left: false
+ right: true
+
+
+failures:
+    recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors
+    recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_keeps_current_target_disabled_and_tight_limits
+    recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_uses_target_defaults_when_no_local_voice_document_exists
+
+test result: FAILED. 4 passed; 3 failed; 0 ignored; 0 measured; 147 filtered out; finished in 6.12s
+
+error: test failed, to rerun pass `-p fc-storage --lib`

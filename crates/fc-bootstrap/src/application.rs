@@ -1998,6 +1998,15 @@ impl App {
                         }
                     }
                 }
+                if self.screen == Screen::Voice && self.pending.is_none() {
+                    if let (Some(editor), Ok(data)) =
+                        (&mut self.voice_editor, self.window.draft_nonsecret())
+                    {
+                        if let Err(message) = editor.capture(data) {
+                            self.status = message;
+                        }
+                    }
+                }
             }
             Event::LayoutSelect {
                 generation,

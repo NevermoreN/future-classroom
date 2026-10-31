@@ -27,6 +27,7 @@ use std::{
     sync::Arc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+const PASSWORD: &str = "Synthetic voice probe password 2026!";
 thread_local! {
     static PHASE: Cell<&'static str> = const { Cell::new("startup") };
 }
@@ -130,7 +131,6 @@ fn run_owned() -> Result<(), String> {
         clock.clone(),
         clock.clone(),
     ))?;
-    const PASSWORD: &str = "Synthetic voice probe password 2026!";
     phase("initialize");
     drop(check(backend.initialize(
         Initialize {
@@ -449,6 +449,89 @@ fn normal_runtime_probe(
             ));
         }
     }
+    // A reviewed policy save must also retire a domain that is already inside
+    // real WinMM playback. Prepare both pending bodies before reviewing, and
+    // verify stop requests retain the original native owner until actual drain.
+    phase("runtime-policy-local-login");
+    let local = check(backend.login("probe", check(Password::new(PASSWORD.into()))?))?;
+    let policy_active_asset = prepare_asset(backend)?;
+    let policy_queued_asset = prepare_asset(backend)?;
+    let policy_active = submit(backend, policy_active_asset, 205, 10)?;
+    let policy_queued = submit(backend, policy_queued_asset, 206, 3)?;
+    let unused_ready = prepare_asset(backend)?;
+    let unused_reserved = check(backend.voice_reserve(web, class))?;
+    phase("runtime-policy-await-playing");
+    let deadline = Instant::now() + Duration::from_secs(12);
+    let playing = loop {
+        poll(&runtime)?;
+        let current = check(service.status(web, policy_active.id))?;
+        if current.state == VoiceState::Playing {
+            break current;
+        }
+        if current.state.terminal() || Instant::now() >= deadline {
+            return Err("policy probe did not reach real native Playing".into());
+        }
+        std::thread::sleep(Duration::from_millis(5));
+    };
+    let review = check(service.management_snapshot(local))?;
+    phase("runtime-policy-reviewed-save");
+    let policy = VoiceLimits {
+        max_duration_millis: 1000,
+        max_pending_jobs: 2,
+        max_pending_per_owner: 1,
+        max_repeat_total: 2,
+    };
+    let saved = check(service.set_limits_reviewed(
+        local,
+        policy,
+        review.revision,
+        review.identity_revision,
+        review.runtime_generation,
+    ))?;
+    if saved.limits != policy || !saved.enabled {
+        return Err("reviewed policy changed wrong limits or enable setting".into());
+    }
+    for id in [unused_ready.id, unused_reserved.id] {
+        if !saved
+            .assets
+            .iter()
+            .any(|asset| asset.id == id && asset.state == VoiceAssetState::DeletePending)
+        {
+            return Err("reviewed policy did not retire original pending upload".into());
+        }
+    }
+    let retiring = saved
+        .jobs
+        .iter()
+        .find(|job| job.id == playing.id)
+        .ok_or("policy lost original playing job")?;
+    if retiring.state != VoiceState::Stopping
+        || retiring.release_generation != Some(playing.generation)
+        || retiring.repeat_total != 10
+    {
+        return Err("policy did not retain the exact old native release generation".into());
+    }
+    phase("runtime-policy-physical-release");
+    idle(&runtime)?;
+    for (id, repeats, completed) in [
+        (policy_active.id, 10, playing.completed_repeats),
+        (policy_queued.id, 3, 0),
+    ] {
+        let job = check(service.status(web, id))?;
+        if job.state != VoiceState::Failed
+            || job.repeat_total != repeats
+            || job.completed_repeats != completed
+            || job.release_generation.is_some()
+        {
+            return Err(format!(
+                "policy falsely completed, replayed or retained old owner: {:?}",
+                job.state
+            ));
+        }
+    }
+    if !service.is_admitting() {
+        return Err("committed policy did not reopen exact drained generation".into());
+    }
     // A new explicit submission can wake a new physical thread after clean stop;
     // neither an old task nor a retained driver is reopened automatically.
     let fresh_asset = prepare_asset(backend)?;
@@ -470,6 +553,7 @@ fn normal_runtime_probe(
         std::thread::sleep(Duration::from_millis(5));
     }
     idle(&runtime)?;
+    println!("VOICE_POLICY_RUNTIME_PASS actual_zero_pcm_playing_reviewed_limits_save_queued_and_pending_upload_retirement_original_release_generation_no_false_completion_fresh_explicit_job=PASS");
     runtime.shutdown();
     phase("runtime-shutdown");
     let deadline = Instant::now() + Duration::from_secs(5);

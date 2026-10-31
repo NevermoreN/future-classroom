@@ -117,6 +117,11 @@ enum Operation {
         expected: Revision,
     },
     EmergencyStop,
+    SetLimits {
+        limits: VoiceLimits,
+        actor: ActorContext,
+        expected: Revision,
+    },
     SetEnabled {
         enabled: bool,
         actor: ActorContext,
@@ -137,11 +142,17 @@ impl Operation {
                     ..
                 })
                 | Self::SetEnabled { enabled: true, .. }
+                | Self::SetLimits { .. }
         )
     }
 }
 impl<S: Send + 'static> BusinessRepository<S> {
     fn voice_operation(&self, op: Operation) -> Result<Value, VoiceRepositoryError> {
+        let driver_guard =
+            matches!(&op, Operation::Driver(_)).then(|| self.voice_driver_guard.clone());
+        if !driver_allowed(driver_guard.as_ref()) {
+            return Err(VoiceRepositoryError::Domain(VoiceError::StaleGeneration));
+        }
         let active =
             self.voice_timeout
                 .as_ref()
@@ -154,6 +165,9 @@ impl<S: Send + 'static> BusinessRepository<S> {
                     }) as Arc<dyn Fn() -> bool + Send + Sync>
                 });
         if active.as_ref().is_some_and(|check| !check()) {
+            if !driver_allowed(driver_guard.as_ref()) {
+                return Err(VoiceRepositoryError::Domain(VoiceError::StaleGeneration));
+            }
             return Err(VoiceRepositoryError::Faulted);
         }
         let ticket = self
@@ -164,6 +178,7 @@ impl<S: Send + 'static> BusinessRepository<S> {
                 session: self.session.clone(),
                 factory: self.factory.clone(),
                 active,
+                driver_guard,
             })
             .map_err(error)?;
         let bytes = match &self.voice_timeout {
@@ -205,6 +220,21 @@ impl<S: Send + 'static> BusinessRepository<S> {
     /// route this capability through an authenticated teacher HTTP request.
     pub fn emergency_stop_voice(&self) -> Result<VoiceSnapshot, VoiceRepositoryError> {
         dto::read_snapshot(&self.voice_operation(Operation::EmergencyStop)?).map_err(error)
+    }
+    /// Local global administrator policy mutation. The exact session guard is
+    /// evaluated on the sole writer and immediately before COMMIT.
+    pub fn set_voice_limits(
+        &self,
+        limits: VoiceLimits,
+        expected: Revision,
+        actor: &ActorContext,
+    ) -> Result<VoiceSnapshot, VoiceRepositoryError> {
+        dto::read_snapshot(&self.voice_operation(Operation::SetLimits {
+            limits,
+            expected,
+            actor: actor.clone(),
+        })?)
+        .map_err(error)
     }
     pub fn set_voice_enabled(
         &self,
@@ -290,6 +320,12 @@ struct VoiceTask<S> {
     session: SessionGuard,
     factory: Factory<S>,
     active: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
+    driver_guard: Option<VoiceDriverGuard>,
+}
+fn driver_allowed(guard: Option<&VoiceDriverGuard>) -> bool {
+    guard.is_none_or(|check| {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| check())).unwrap_or(false)
+    })
 }
 /// Fixed-size per-account limiter persists independently of reclaimable bodies.
 /// Installation account bounds cap this table at MAX_ACCOUNTS documents.
@@ -417,6 +453,41 @@ fn receipt(id: CommandId, fingerprint: Vec<u8>, job: &VoiceJob) -> Result<Mutati
         )?,
     })
 }
+/// Policy changes retire uploads and request stop without fabricating a
+/// physical Released receipt or rewriting historical repeat counts.
+fn retire_accepted(s: &mut VoiceSnapshot, now: i64) -> Result<(), StorageError> {
+    for asset in &mut s.assets {
+        if matches!(
+            asset.state,
+            VoiceAssetState::Reserved | VoiceAssetState::Ready
+        ) {
+            asset.state = VoiceAssetState::DeletePending;
+            asset.revision = asset
+                .revision
+                .next()
+                .map_err(|_| StorageError::InvalidCommand)?;
+        }
+    }
+    let jobs: Vec<_> = s
+        .jobs
+        .iter()
+        .filter(|j| !j.state.terminal() && j.state != VoiceState::Stopping)
+        .map(|j| (j.id, j.revision, j.generation))
+        .collect();
+    for (job_id, expected_revision, generation) in jobs {
+        s.drive(
+            &VoiceDriverUpdate {
+                job_id,
+                expected_revision,
+                generation,
+                action: VoiceDriverAction::Fail(VoiceFailure::Disabled),
+            },
+            now.max(s.observed_at.unwrap_or(now)),
+        )
+        .map_err(err)?;
+    }
+    Ok(())
+}
 impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
     fn allocation_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
@@ -425,7 +496,13 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
         self: Box<Self>,
         d: &dyn TransactionDocuments,
     ) -> Result<TransactionDecision<S>, StorageError> {
+        if !driver_allowed(self.driver_guard.as_ref()) {
+            return Err(err(VoiceError::StaleGeneration));
+        }
         if self.active.as_ref().is_some_and(|check| !check()) {
+            if !driver_allowed(self.driver_guard.as_ref()) {
+                return Err(err(VoiceError::StaleGeneration));
+            }
             return Err(StorageError::Indeterminate);
         }
         let identity = load_identity(d)?;
@@ -449,12 +526,14 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
             prune(&mut s, now, &mut mutations)?;
         }
         let mut pre_actor: Option<(ActorContext, Option<ClassId>)> = None;
+        let mut pre_management = false;
         let snapshot_outcome = matches!(
             self.op,
             Operation::Recover
                 | Operation::Maintain
                 | Operation::EmergencyStop
                 | Operation::SetEnabled { .. }
+                | Operation::SetLimits { .. }
         );
         let outcome = match self.op {
             Operation::Reserve {
@@ -683,6 +762,34 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 }
                 dto::snapshot(&s)
             }
+            Operation::SetLimits {
+                limits,
+                actor,
+                expected,
+            } => {
+                (self.session)(&identity, &actor)?;
+                if actor.origin != TrustedOrigin::Local {
+                    return Err(err(VoiceError::Permission(PermissionError::LocalOnly)));
+                }
+                identity
+                    .authorize_management(&actor, self.clock.now())
+                    .map_err(StorageError::Identity)?;
+                limits.validate().map_err(err)?;
+                if s.revision != expected {
+                    return Err(err(VoiceError::RevisionConflict));
+                }
+                // Even a repeated value is an explicit reviewed stop boundary.
+                // Preserve the persisted enable switch and old release token.
+                retire_accepted(&mut s, now)?;
+                s.limits = limits;
+                s.revision = s
+                    .revision
+                    .next()
+                    .map_err(|_| StorageError::InvalidCommand)?;
+                pre_actor = Some((actor, None));
+                pre_management = true;
+                dto::snapshot(&s)
+            }
             Operation::SetEnabled {
                 enabled,
                 actor,
@@ -699,36 +806,7 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 // Disabling retires all accepted uploads and cancels every job,
                 // retaining old device ownership until exact release receipts.
                 if !enabled {
-                    for asset in &mut s.assets {
-                        if matches!(
-                            asset.state,
-                            VoiceAssetState::Reserved | VoiceAssetState::Ready
-                        ) {
-                            asset.state = VoiceAssetState::DeletePending;
-                            asset.revision = asset
-                                .revision
-                                .next()
-                                .map_err(|_| StorageError::InvalidCommand)?;
-                        }
-                    }
-                    let jobs: Vec<_> = s
-                        .jobs
-                        .iter()
-                        .filter(|j| !j.state.terminal() && j.state != VoiceState::Stopping)
-                        .map(|j| (j.id, j.revision, j.generation))
-                        .collect();
-                    for (job_id, expected_revision, generation) in jobs {
-                        s.drive(
-                            &VoiceDriverUpdate {
-                                job_id,
-                                expected_revision,
-                                generation,
-                                action: VoiceDriverAction::Fail(VoiceFailure::Disabled),
-                            },
-                            now.max(s.observed_at.unwrap_or(now)),
-                        )
-                        .map_err(err)?;
-                    }
+                    retire_accepted(&mut s, now)?;
                 }
                 s.revision = s
                     .revision
@@ -766,6 +844,14 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
             let identity = identity.clone();
             Box::new(move || {
                 session(&identity, &actor)?;
+                if pre_management {
+                    if actor.origin != TrustedOrigin::Local {
+                        return Err(err(VoiceError::Permission(PermissionError::LocalOnly)));
+                    }
+                    identity
+                        .authorize_management(&actor, clock.now())
+                        .map_err(StorageError::Identity)?;
+                }
                 if let Some(class) = class {
                     authorize_submit(&identity, &actor, class, clock.now()).map_err(err)?;
                 } else {
@@ -778,15 +864,25 @@ impl<S: Send + 'static> TransactionTask<S> for VoiceTask<S> {
                 Ok(())
             }) as Box<dyn FnOnce() -> Result<(), StorageError> + Send>
         });
-        let precommit = match self.active {
-            Some(active) => Some(Box::new(move || {
-                if !active() {
+        let precommit = match (self.active, self.driver_guard) {
+            (None, None) => precommit,
+            (active, driver_guard) => Some(Box::new(move || {
+                if !driver_allowed(driver_guard.as_ref()) {
+                    return Err(err(VoiceError::StaleGeneration));
+                }
+                if active.as_ref().is_some_and(|check| !check()) {
+                    if !driver_allowed(driver_guard.as_ref()) {
+                        return Err(err(VoiceError::StaleGeneration));
+                    }
                     return Err(StorageError::Indeterminate);
                 }
-                precommit.map_or(Ok(()), |check| check())
+                precommit.map_or(Ok(()), |check| check())?;
+                if !driver_allowed(driver_guard.as_ref()) {
+                    return Err(err(VoiceError::StaleGeneration));
+                }
+                Ok(())
             })
                 as Box<dyn FnOnce() -> Result<(), StorageError> + Send>),
-            None => precommit,
         };
         let outcome = if snapshot_outcome {
             dto::snapshot(&s)

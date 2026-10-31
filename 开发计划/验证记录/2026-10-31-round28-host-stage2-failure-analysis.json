@@ -1,0 +1,20 @@
+{
+  "scope": "actual first full run stopped at bootstrap lib128pass/2fail; not a completed workspace success",
+  "terminalExit": 101,
+  "failures": [
+    {
+      "case": "changed_limits_cancel_queued_and_playing_jobs_without_claiming_the_old_device_released",
+      "actual": 1,
+      "expected": 3,
+      "correction": "explicitly construct original repeat3 then assert original3; keep historical3 above new2 assertion"
+    },
+    {
+      "case": "saved_limits_reach_current_caps_retire_old_upload_epoch_and_survive_database_reopen",
+      "actual": 1920044,
+      "expected": 32044,
+      "correction": "keep production conservative fixed MAX_WAV_BYTES reservation accounting; assert it plus separate current capability32044"
+    }
+  ],
+  "productionFilesChanged": [],
+  "finalInputSha256": "30cf3cfa8c9cd936960f5cbca34bcddda166e87aaa266816a42bfc32d7d7ac2a"
+}

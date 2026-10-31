@@ -1,0 +1,15 @@
+   Compiling fc-storage v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-storage)
+    Finished `release` profile [optimized] target(s) in 1m 11s
+     Running unittests src/lib.rs (/tmp/fc-round28-host/release/deps/fc_storage-76bccdbef2cefa9e)
+
+running 7 tests
+test business::voice_codec::tests::complete_legacy_shape_defaults_but_bad_new_policy_never_does ... ok
+test business::voice_codec::tests::full_audit_with_twenty_digit_ids_four_active_and_max_pending_assets_fits_document ... ok
+test business::voice_codec::tests::damaged_time_and_active_state_in_compact_audit_fail_closed ... ok
+test business::voice_codec::tests::tightened_policy_keeps_old_full_audits_and_active_ownership_valid ... ok
+test recovery::tests::ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floors ... ok
+test recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_keeps_current_target_disabled_and_tight_limits ... ok
+test recovery::tests::recovery_voice_policy_tests::mapped_voice_restore_uses_target_defaults_when_no_local_voice_document_exists ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 147 filtered out; finished in 5.51s
+

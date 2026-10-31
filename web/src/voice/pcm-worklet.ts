@@ -1,7 +1,8 @@
-import { checkedSampleRate, mixMono } from './pcm'
+import { checkedMaxDurationMillis, checkedSampleRate, mixMono } from './pcm'
 
 declare const sampleRate: number
 declare class AudioWorkletProcessor {
+  constructor(options?: AudioWorkletNodeOptions)
   readonly port: MessagePort
 }
 declare function registerProcessor(name: string, processor: typeof AudioWorkletProcessor): void
@@ -11,13 +12,19 @@ class CaptureProcessor extends AudioWorkletProcessor {
   private total = 0
   private used = 0
   private buffer = new Float32Array(4096)
-  private readonly limit = checkedSampleRate(sampleRate) * 60
-  constructor() {
-    super()
+  private readonly limit: number
+  private limited = false
+  private finished = false
+  constructor(options?: AudioWorkletNodeOptions) {
+    super(options)
+    const supplied = options?.processorOptions?.maxDurationMillis
+    const maxDurationMillis = checkedMaxDurationMillis(supplied === undefined ? 60000 : supplied)
+    this.limit = Math.floor(checkedSampleRate(sampleRate) * maxDurationMillis / 1000)
     this.port.onmessage = event => {
-      if (event.data?.type === 'start') this.active = true
+      if (event.data?.type === 'start' && !this.limited && !this.finished) this.active = true
       if (event.data?.type === 'finish') {
         this.active = false
+        this.finished = true
         this.flush()
         this.port.postMessage({ type: 'stopped' })
       }
@@ -44,6 +51,7 @@ class CaptureProcessor extends AudioWorkletProcessor {
       }
       if (this.total === this.limit) {
         this.active = false
+        this.limited = true
         this.flush()
         this.port.postMessage({ type: 'limit' })
       }

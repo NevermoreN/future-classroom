@@ -1,0 +1,18 @@
+{
+  "scope": "source binding for actual before-fix regressions; expected precondition failures, no retries to hide failures",
+  "nativeFailed": {
+    "report": "native-failed-retirement-before-fix.json",
+    "expectedExitCode": 101,
+    "binarySha256": "c6e9444d39651f64e4f61dc4d46a1f8068415d15c62773dcb1417acb8d3afcef"
+  },
+  "nativeFreshWindow": {
+    "report": "native-fresh-window-before-fix.json",
+    "expectedExitCode": 101,
+    "binarySha256": "ff1c4ddf502fa8e2b28aa3fa20220dfe4c639628d8e7c9718d64ba0d6b2705c8"
+  },
+  "browserMinimum": {
+    "report": "web-minimum-before-fix-scratch.json",
+    "expectedExitCode": 1
+  },
+  "fixes": "bounded successful Failed cleanup once per serial; single native-domain participation fence; half-source-sample-only minimum quantization"
+}

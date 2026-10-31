@@ -23,9 +23,12 @@ pub(super) fn dispatch(
                     c.current_class
                         .as_ref()
                         .map(|(id, name)| (*id, name.as_str())),
-                    c.enabled,
-                    c.admitting,
-                    c.target_authorized,
+                    wire::CapabilityPolicy {
+                        enabled: c.enabled,
+                        admitting: c.admitting,
+                        target_authorized: c.target_authorized,
+                        limits: c.limits,
+                    },
                 ),
                 None,
             ),

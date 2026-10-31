@@ -8,6 +8,8 @@ use fc_ports::{MaterialRepository, ProfileContentRepository, ProfileRepository};
 use std::sync::atomic::AtomicU64;
 #[path = "migration_tests.rs"]
 mod migration_tests;
+#[path = "recovery_voice_policy_tests.rs"]
+mod recovery_voice_policy_tests;
 static NEXT: AtomicU64 = AtomicU64::new(0);
 struct Temp(PathBuf);
 impl Temp {
@@ -930,7 +932,19 @@ fn ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floor
         .iter()
         .all(|j| !j.to_string().contains("queued")));
     drop(ordinary);
-    let current = r.emergency_stop_voice().unwrap();
+    let stopped = r.emergency_stop_voice().unwrap();
+    let limits = VoiceLimits {
+        max_duration_millis: 1_000,
+        max_pending_jobs: 1,
+        max_pending_per_owner: 1,
+        max_repeat_total: 1,
+    };
+    let changed = r
+        .set_voice_limits(limits, stopped.revision, &actor())
+        .unwrap();
+    let current = r
+        .set_voice_enabled(false, changed.revision, &actor())
+        .unwrap();
     let revision = w.handle().try_revision().unwrap().wait().unwrap();
     let barrier = r
         .try_advance_recovery_barrier(revision, &actor(), fence())
@@ -949,6 +963,14 @@ fn ordinary_voice_is_replay_inert_and_restore_keeps_current_voice_sequence_floor
     w.shutdown().unwrap();
     let (cw, restored) = open(&t.path("candidate.sqlite3"));
     let s = restored.voice_inventory().unwrap();
+    assert!(
+        !s.enabled,
+        "an older teaching backup cannot reenable target voice"
+    );
+    assert_eq!(
+        s.limits, limits,
+        "current target policy cannot be widened by restore"
+    );
     assert!(s.assets.is_empty());
     assert!(s
         .jobs

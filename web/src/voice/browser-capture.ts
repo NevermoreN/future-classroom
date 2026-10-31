@@ -1,5 +1,5 @@
 import workletUrl from './pcm-worklet.ts?worker&url'
-import { checkedSampleRate } from './pcm'
+import { checkedMaxDurationMillis, checkedSampleRate } from './pcm'
 import { RecorderError, type CapturePort, type CaptureSession, type CaptureSink } from './ports'
 
 export function recordingSupport(): { supported: boolean; reason: string } {
@@ -15,7 +15,11 @@ export function recordingSupport(): { supported: boolean; reason: string } {
 }
 
 export class BrowserCapturePort implements CapturePort {
-  async open(sink: CaptureSink, signal: AbortSignal): Promise<CaptureSession> {
+  async open(sink: CaptureSink, signal: AbortSignal, maxDurationMillis = 60000): Promise<CaptureSession> {
+    // Capture one validated policy before allocating a context or requesting a
+    // microphone. Permission latency cannot replace this recording's limit.
+    try { checkedMaxDurationMillis(maxDurationMillis) }
+    catch { throw new RecorderError('DURATION_OUT_OF_RANGE') }
     if (typeof location === 'undefined' || location.protocol !== 'https:' || !globalThis.isSecureContext) {
       throw new RecorderError('INSECURE_CONTEXT')
     }
@@ -81,6 +85,7 @@ export class BrowserCapturePort implements CapturePort {
       node = new AudioWorkletNode(context, 'fc-bounded-mono-capture', {
         numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1],
         channelCountMode: 'max', channelInterpretation: 'discrete',
+        processorOptions: { maxDurationMillis },
       })
       mute = context.createGain(); mute.gain.value = 0
       node.port.onmessage = event => {

@@ -82,7 +82,7 @@ describe('browser microphone ownership without a real microphone', () => {
     const f = environment(), session = await f.port.open(f.sink, f.abort.signal), context = f.contexts[0]!, node = f.nodes[0]!
     expect(session.sampleRate).toBe(44100); expect(context.source.connect).not.toHaveBeenCalled()
     expect(f.getUserMedia.mock.calls[0]![0]).toEqual({ audio: { channelCount: { ideal: 1 } }, video: false })
-    expect(node.options).toMatchObject({ channelCountMode: 'max', channelInterpretation: 'discrete' })
+    expect(node.options).toMatchObject({ channelCountMode: 'max', channelInterpretation: 'discrete', processorOptions: { maxDurationMillis: 60000 } })
     await session.start(); expect(context.source.connect).toHaveBeenCalledOnce(); expect(context.mute.gain.value).toBe(0)
     const chunk = new Float32Array(128); node.port.onmessage?.({ data: { type: 'pcm', chunk, sampleRate: 44100 } })
     expect(f.sink.pcm).toHaveBeenCalledWith(chunk, 44100); session.abort(); session.abort()
@@ -127,5 +127,36 @@ describe('browser microphone ownership without a real microphone', () => {
     f.nodes[0]!.port.postMessage.mockImplementation(() => {})
     const stop = session.stop(); f.abort.abort(); await expect(stop).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })
     f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled()); expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it.each([500, 1250, 60000])('passes the captured %i ms policy to the actual worklet node constructor', async maxDurationMillis => {
+    const f = environment(), session = await f.port.open(f.sink, f.abort.signal, maxDurationMillis)
+    expect(f.nodes).toHaveLength(1)
+    expect(f.nodes[0]!.options).toMatchObject({ processorOptions: { maxDurationMillis } })
+    expect(f.getUserMedia).toHaveBeenCalledOnce()
+    await session.start(); await session.stop()
+    f.tracks.forEach(track => expect(track.stop).toHaveBeenCalled())
+    expect(f.contexts[0]!.close).toHaveBeenCalledOnce()
+  })
+  it.each([0, 499, 60001, 500.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1, '500', null, true, {}])(
+    'rejects invalid duration %s before constructing a context or requesting microphone permission', async invalid => {
+      const f = environment()
+      await expect(f.port.open(f.sink, f.abort.signal, invalid as number)).rejects.toMatchObject({ code: 'DURATION_OUT_OF_RANGE' })
+      expect(f.contexts).toHaveLength(0); expect(f.nodes).toHaveLength(0)
+      expect(f.getUserMedia).not.toHaveBeenCalled(); expect(f.sink.pcm).not.toHaveBeenCalled()
+    },
+  )
+  it('keeps the original short policy across delayed permission and releases every late aborted track', async () => {
+    const f = environment(), permission = deferred<MediaStream>(); f.getUserMedia.mockReturnValueOnce(permission.promise)
+    let policy = 1250
+    const open = f.port.open(f.sink, f.abort.signal, policy)
+    policy = 60000; permission.resolve(f.stream)
+    const session = await open
+    expect(policy).toBe(60000)
+    expect(f.nodes[0]!.options).toMatchObject({ processorOptions: { maxDurationMillis: 1250 } })
+    session.abort()
+    const late = environment(), latePermission = deferred<MediaStream>(); late.getUserMedia.mockReturnValueOnce(latePermission.promise)
+    const cancelled = late.port.open(late.sink, late.abort.signal, 500); late.abort.abort(); latePermission.resolve(late.stream)
+    await expect(cancelled).rejects.toMatchObject({ code: 'MIC_INTERRUPTED' })
+    expect(late.nodes).toHaveLength(0); late.tracks.forEach(track => expect(track.stop).toHaveBeenCalled())
   })
 })

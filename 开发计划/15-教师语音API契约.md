@@ -48,3 +48,9 @@ CANCEL_REQUESTED表示停止命令持久化，STOPPING仍等待驱动归还；�
 Worklet及Worker均为同源平铺assets/*.js，由构建清单逐文件核验；CSP仅增加`worker-src 'self'`，没有blob脚本或外部脚本放行。开发自签HTTPS、拦截API、合成MediaStream与ignoreHTTPSErrors测试都属于synthetic，不能算校园可信证书/硬件麦克风/生产HTTPS宿主通过。实际教师手机权限、麦克风、校园TLS、Win7/Win10与可听PPT共存矩阵保持各自未验收状态。
 
 同步Read端口只接受已到达的受控File/Cursor等有限字节。前后单调超时检查不能物理中断任意阻塞网络Read；真实完成事件到计费stage、物理上传worker/取消完成与120秒期限仍待正常网络调度集成，不能据受控字节测试扩张为网络期限PASS。
+
+## 第二十八轮：本机配置的有界能力值
+
+上例为默认值，响应字段形状和版本保持1。当前maxDurationMillis为500–60000的整数，maxRepeatTotal为1–10整数；defaultRepeatTotal严格min(3,maxRepeatTotal)，maxWavBytes严格44+32×maxDurationMillis；其余格式、minDurationMillis500、minRepeatTotal1与上传TTL600不变。配置保存推进运行代次并退休旧上传/任务，旧网页录音不跨代次重新授权。网页采集、Worklet、归一化和上传前均绑定开始时的时长限制；次数选项显示当前上限，配置变化取消未发送录音。旧任务和审计的已锁定次数仍按原1–10读取，不随新上限改写。
+
+队列当前限制只在原hard4/2以内收紧；未提交上传两个预约及最大1920044字节预计费保持原独立资源上限。发布和提交都验证新时长，submit验证新次数和队列；没有新增Web修改全局设置端点或设备/系统音量控制权。完整验证与独立设备策略门槛见实施记录第二十八轮。

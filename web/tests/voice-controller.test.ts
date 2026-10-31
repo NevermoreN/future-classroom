@@ -2,11 +2,27 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { VoiceController, mayRecord, type VoiceState } from '../src/api/voice-controller'
 import { ApiError, NetworkFault } from '../src/api/client'
 import type { VoiceJob, VoiceUploaded } from '../src/api/voice-protocol'
-import { api, caps, csrf, deferred, job, recording, upload } from './voice-fixtures'
+import { api, caps, csrf, deferred, job, recording, upload, wav } from './voice-fixtures'
 function fixture() { const transport = api(), states: VoiceState[] = [], revoked = vi.fn(), cancelRecorder = vi.fn(), ids = vi.fn().mockReturnValueOnce('71').mockReturnValueOnce('81').mockReturnValue('91'); const controller = new VoiceController(transport, csrf, state => states.push(state), revoked, cancelRecorder, ids); return { api: transport, controller, states, revoked, cancelRecorder, ids, state: () => controller.snapshot() } }
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 describe('voice recording and durable task lifecycle', () => {
+  it('uses configured repeat and duration bounds before upload without changing an accepted task', async () => {
+    const f = fixture(); f.api.voiceCapabilities.mockResolvedValue(caps({ maxRepeatTotal: 2, defaultRepeatTotal: 2, maxDurationMillis: 1250, maxWavBytes: 40044 }))
+    await f.controller.open(); expect(f.state().repeatTotal).toBe(2)
+    f.controller.setRepeat(3); expect(f.state().repeatTotal).toBe(2)
+    const context = f.controller.beginRecording('configured')!; expect(context.capabilities.maxDurationMillis).toBe(1250)
+    await f.controller.recorded({ ...recording('configured'), frames: 20001, wav: wav(20001) })
+    expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.api.submitVoice).not.toHaveBeenCalled()
+    f.controller.dispose()
+  })
+  it('cancels an unsent recording when limits change even if a malformed server forgets to advance the epoch', async () => {
+    const f = fixture(); await f.controller.open(); const context = f.controller.beginRecording('old-policy')!
+    f.api.voiceCapabilities.mockResolvedValue(caps({ maxRepeatTotal: 1, defaultRepeatTotal: 1, maxDurationMillis: 500, maxWavBytes: 16044 }))
+    await f.controller.refresh(); expect(f.cancelRecorder).toHaveBeenCalled(); expect(f.state().context).toBeNull(); expect(context.repeatTotal).toBe(3)
+    await f.controller.recorded(recording('old-policy')); expect(f.api.uploadVoice).not.toHaveBeenCalled(); expect(f.state().repeatTotal).toBe(1)
+    f.controller.dispose()
+  })
   it('locks original target and repeat count, never submits at upload acknowledgement alone, finalizes once', async () => {
     const f = fixture(), pending = deferred<VoiceUploaded>(); await f.controller.open(); f.controller.setRepeat(7); const context = f.controller.beginRecording('recording-one')!
     f.controller.setRepeat(1); expect(context.repeatTotal).toBe(7)

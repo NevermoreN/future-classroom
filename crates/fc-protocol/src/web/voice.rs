@@ -33,15 +33,23 @@ struct Capabilities<'a> {
     max_wav_bytes: u64,
     upload_ttl_seconds: u16,
 }
+pub struct CapabilityPolicy {
+    pub enabled: bool,
+    pub admitting: bool,
+    pub target_authorized: bool,
+    pub limits: VoiceLimits,
+}
 pub fn capabilities(
     identity: Revision,
     runtime_generation: u64,
     now: LocalDateTime,
     class: Option<(ClassId, &str)>,
-    enabled: bool,
-    admitting: bool,
-    target_authorized: bool,
+    policy: CapabilityPolicy,
 ) -> Result<Vec<u8>, ProtocolError> {
+    policy
+        .limits
+        .validate()
+        .map_err(|_| ProtocolError::InvalidCommand)?;
     super::responses::encode(&Capabilities {
         schema_version: SCHEMA_VERSION,
         status: "VOICE_CAPABILITIES",
@@ -52,19 +60,19 @@ pub fn capabilities(
             class_id: class_id.get().to_string(),
             class_name,
         }),
-        enabled,
-        admission: if admitting { "OPEN" } else { "CLOSED" },
-        target_authorized,
+        enabled: policy.enabled,
+        admission: if policy.admitting { "OPEN" } else { "CLOSED" },
+        target_authorized: policy.target_authorized,
         device_availability: "UNVERIFIED",
-        default_repeat_total: DEFAULT_REPEAT_TOTAL,
+        default_repeat_total: policy.limits.default_repeat_total(),
         min_repeat_total: 1,
-        max_repeat_total: 10,
+        max_repeat_total: policy.limits.max_repeat_total,
         min_duration_millis: 500,
-        max_duration_millis: 60000,
+        max_duration_millis: policy.limits.max_duration_millis,
         sample_rate: 16000,
         channels: 1,
         bits_per_sample: 16,
-        max_wav_bytes: MAX_WAV_BYTES,
+        max_wav_bytes: policy.limits.max_wav_bytes(),
         upload_ttl_seconds: UPLOAD_TTL_SECONDS as u16,
     })
 }
@@ -248,13 +256,70 @@ pub fn uploaded(asset: &VoiceAsset) -> Result<Vec<u8>, ProtocolError> {
 mod tests {
     use super::*;
     #[test]
+    fn configured_capabilities_publish_consistent_tighter_bounds_and_reject_invalid_policy() {
+        let now = LocalDateTime::new(LocalDate::new(2026, 10, 31).unwrap(), 36000).unwrap();
+        let limits = VoiceLimits {
+            max_duration_millis: 1250,
+            max_pending_jobs: 3,
+            max_pending_per_owner: 1,
+            max_repeat_total: 2,
+        };
+        let bytes = capabilities(
+            Revision::new(2),
+            7,
+            now,
+            None,
+            CapabilityPolicy {
+                enabled: true,
+                admitting: false,
+                target_authorized: false,
+                limits,
+            },
+        )
+        .unwrap();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(value["maxDurationMillis"], 1250);
+        assert_eq!(value["maxWavBytes"], 40044);
+        assert_eq!(value["maxRepeatTotal"], 2);
+        assert_eq!(value["defaultRepeatTotal"], 2);
+        assert_eq!(value["deviceAvailability"], "UNVERIFIED");
+        assert!(capabilities(
+            Revision::new(2),
+            7,
+            now,
+            None,
+            CapabilityPolicy {
+                enabled: true,
+                admitting: true,
+                target_authorized: false,
+                limits: VoiceLimits {
+                    max_pending_per_owner: 4,
+                    ..limits
+                }
+            }
+        )
+        .is_err());
+    }
+    #[test]
     fn civil_roundtrip_boundaries_and_no_device_claim() {
         for (year, month, day) in [(1, 1, 1), (2000, 2, 29), (2026, 12, 31), (9999, 12, 31)] {
             let now = LocalDateTime::new(LocalDate::new(year, month, day).unwrap(), 86399).unwrap();
             assert_eq!(civil_datetime(civil_seconds(now)).unwrap(), now);
         }
         let now = LocalDateTime::new(LocalDate::new(2026, 10, 30).unwrap(), 36000).unwrap();
-        let b = capabilities(Revision::new(1), 2, now, None, false, false, false).unwrap();
+        let b = capabilities(
+            Revision::new(1),
+            2,
+            now,
+            None,
+            CapabilityPolicy {
+                enabled: false,
+                admitting: false,
+                target_authorized: false,
+                limits: VoiceLimits::default(),
+            },
+        )
+        .unwrap();
         let s = std::str::from_utf8(&b).unwrap();
         assert!(s.contains("\"deviceAvailability\":\"UNVERIFIED\""));
         assert!(s.contains("\"currentClass\":null"));

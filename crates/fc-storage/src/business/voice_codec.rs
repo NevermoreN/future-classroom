@@ -277,23 +277,57 @@ fn read_stored_job(v: &Value) -> Result<VoiceJob, StorageError> {
         })?,
     })
 }
-pub(super) fn snapshot(s: &VoiceSnapshot) -> Value {
-    json!({"format":1,"revision":s.revision.get(),"enabled":s.enabled,"sequence":s.next_sequence,"generation":s.next_generation,"observed":s.observed_at,"assets":s.assets.iter().map(asset).collect::<Vec<_>>(),"jobs":s.jobs.iter().map(stored_job).collect::<Vec<_>>()})
+fn limits(l: VoiceLimits) -> Value {
+    json!({"max_duration_millis":l.max_duration_millis,"max_pending_jobs":l.max_pending_jobs,"max_pending_per_owner":l.max_pending_per_owner,"max_repeat_total":l.max_repeat_total})
 }
-pub(super) fn read_snapshot(v: &Value) -> Result<VoiceSnapshot, StorageError> {
+fn read_limits(v: &Value) -> Result<VoiceLimits, StorageError> {
     object_fields(
         v,
         &[
-            "format",
-            "revision",
-            "enabled",
-            "sequence",
-            "generation",
-            "observed",
-            "assets",
-            "jobs",
+            "max_duration_millis",
+            "max_pending_jobs",
+            "max_pending_per_owner",
+            "max_repeat_total",
         ],
     )?;
+    let l = VoiceLimits {
+        max_duration_millis: u32::try_from(number(v, "max_duration_millis")?)
+            .map_err(|_| StorageError::Database)?,
+        max_pending_jobs: u8::try_from(number(v, "max_pending_jobs")?)
+            .map_err(|_| StorageError::Database)?,
+        max_pending_per_owner: u8::try_from(number(v, "max_pending_per_owner")?)
+            .map_err(|_| StorageError::Database)?,
+        max_repeat_total: u8::try_from(number(v, "max_repeat_total")?)
+            .map_err(|_| StorageError::Database)?,
+    };
+    l.validate().map_err(|_| StorageError::Database)?;
+    Ok(l)
+}
+pub(super) fn snapshot(s: &VoiceSnapshot) -> Value {
+    json!({"format":1,"revision":s.revision.get(),"enabled":s.enabled,"limits":limits(s.limits),"sequence":s.next_sequence,"generation":s.next_generation,"observed":s.observed_at,"assets":s.assets.iter().map(asset).collect::<Vec<_>>(),"jobs":s.jobs.iter().map(stored_job).collect::<Vec<_>>()})
+}
+pub(super) fn read_snapshot(v: &Value) -> Result<VoiceSnapshot, StorageError> {
+    // Only the complete original v1 shape is a legacy record. A present but
+    // malformed/null/partial limits object must never fall back to defaults.
+    let fields = [
+        "format",
+        "revision",
+        "enabled",
+        "sequence",
+        "generation",
+        "observed",
+        "assets",
+        "jobs",
+    ];
+    let policy = if let Some(value) = v.get("limits") {
+        let mut fields = fields.to_vec();
+        fields.push("limits");
+        object_fields(v, &fields)?;
+        read_limits(value)?
+    } else {
+        object_fields(v, &fields)?;
+        VoiceLimits::default()
+    };
     if number(v, "format")? != 1
         || array(v, "assets")?.len() > MAX_VOICE_ASSETS
         || array(v, "jobs")?.len() > MAX_VOICE_JOBS
@@ -303,6 +337,7 @@ pub(super) fn read_snapshot(v: &Value) -> Result<VoiceSnapshot, StorageError> {
     let s = VoiceSnapshot {
         revision: Revision::new(number(v, "revision")?),
         enabled: v["enabled"].as_bool().ok_or(StorageError::Database)?,
+        limits: policy,
         next_sequence: number(v, "sequence")?,
         next_generation: number(v, "generation")?,
         observed_at: optional(&v["observed"], i64_value)?,
@@ -444,5 +479,64 @@ mod tests {
         let mut v = snapshot(&s);
         v["jobs"][100]["release"] = json!(1);
         assert_eq!(read_snapshot(&v), Err(StorageError::Database));
+    }
+    #[test]
+    fn complete_legacy_shape_defaults_but_bad_new_policy_never_does() {
+        let original = VoiceSnapshot::default();
+        let mut legacy = snapshot(&original);
+        legacy.as_object_mut().unwrap().remove("limits");
+        assert_eq!(read_snapshot(&legacy).unwrap(), original);
+        let mut missing_old_field = legacy.clone();
+        missing_old_field
+            .as_object_mut()
+            .unwrap()
+            .remove("observed");
+        assert_eq!(
+            read_snapshot(&missing_old_field),
+            Err(StorageError::Database)
+        );
+        let mut unknown_old_field = legacy.clone();
+        unknown_old_field["legacy_extra"] = json!(true);
+        assert_eq!(
+            read_snapshot(&unknown_old_field),
+            Err(StorageError::Database)
+        );
+        for invalid in [
+            Value::Null,
+            json!({}),
+            json!(1),
+            json!({"max_duration_millis":500,"max_pending_jobs":1,"max_pending_per_owner":1}),
+            json!({"max_duration_millis":500,"max_pending_jobs":1,"max_pending_per_owner":1,"max_repeat_total":1,"extra":1}),
+            json!({"max_duration_millis":499,"max_pending_jobs":1,"max_pending_per_owner":1,"max_repeat_total":1}),
+            json!({"max_duration_millis":500,"max_pending_jobs":1,"max_pending_per_owner":2,"max_repeat_total":1}),
+            json!({"max_duration_millis":500,"max_pending_jobs":1,"max_pending_per_owner":1,"max_repeat_total":256}),
+            json!({"max_duration_millis":500.0,"max_pending_jobs":1,"max_pending_per_owner":1,"max_repeat_total":1}),
+            json!({"max_duration_millis":-1,"max_pending_jobs":1,"max_pending_per_owner":1,"max_repeat_total":1}),
+        ] {
+            let mut next = legacy.clone();
+            next["limits"] = invalid;
+            assert_eq!(read_snapshot(&next), Err(StorageError::Database));
+        }
+        let mut strict = original;
+        strict.limits = VoiceLimits {
+            max_duration_millis: 501,
+            max_pending_jobs: 1,
+            max_pending_per_owner: 1,
+            max_repeat_total: 2,
+        };
+        assert_eq!(read_snapshot(&snapshot(&strict)).unwrap(), strict);
+    }
+    #[test]
+    fn tightened_policy_keeps_old_full_audits_and_active_ownership_valid() {
+        let mut s = maximal_snapshot();
+        s.limits = VoiceLimits {
+            max_duration_millis: 500,
+            max_pending_jobs: 1,
+            max_pending_per_owner: 1,
+            max_repeat_total: 1,
+        };
+        s.validate().unwrap();
+        assert_eq!(read_snapshot(&snapshot(&s)).unwrap(), s);
+        assert!(codec::bytes(&snapshot(&s)).unwrap().len() < 48 * 1024);
     }
 }

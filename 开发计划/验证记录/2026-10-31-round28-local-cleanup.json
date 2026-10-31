@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "scope": "after all own running tool handles terminal; all indexed source/archive bytes verified before deleting only8 own roots",
+  "removed": [
+    {
+      "path": "/tmp/fc-round28-evidence",
+      "regularFiles": 168,
+      "logicalBytes": 2421706
+    },
+    {
+      "path": "/tmp/fc-round28-host",
+      "regularFiles": 843,
+      "logicalBytes": 281772121
+    },
+    {
+      "path": "/tmp/fc-round28-host-clippy",
+      "regularFiles": 956,
+      "logicalBytes": 463607814
+    },
+    {
+      "path": "/tmp/fc-round28-repack",
+      "regularFiles": 1,
+      "logicalBytes": 5716827
+    },
+    {
+      "path": "/tmp/fc-round28-web",
+      "regularFiles": 6490,
+      "logicalBytes": 186071575
+    },
+    {
+      "path": "/tmp/fc-round28-win",
+      "regularFiles": 888,
+      "logicalBytes": 571705112
+    },
+    {
+      "path": "/tmp/fc-round28-win-clippy",
+      "regularFiles": 878,
+      "logicalBytes": 768378331
+    },
+    {
+      "path": "/tmp/fc-round28-win7",
+      "regularFiles": 1080,
+      "logicalBytes": 414760515
+    }
+  ],
+  "removedRootCount": 8,
+  "regularFiles": 11304,
+  "logicalBytes": 2694434001,
+  "remainingOwnRound28TempEntries": 0,
+  "sourceInputsAfter": {
+    "files": 421,
+    "sha256": "30cf3cfa8c9cd936960f5cbca34bcddda166e87aaa266816a42bfc32d7d7ac2a",
+    "allUnchanged": true
+  },
+  "persistentKeyMode": "0o600",
+  "preserved": [
+    "new and old developer ZIP outputs",
+    "all persistent SSH authorization and service",
+    "repository-external private key",
+    "pre-existing repository node_modules and other caches",
+    "global shared caches"
+  ]
+}

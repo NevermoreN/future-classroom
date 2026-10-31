@@ -25,16 +25,21 @@ export interface VoiceCapabilities {
   currentClass: { classId: string; className: string } | null
   enabled: boolean; admission: 'OPEN' | 'CLOSED'; targetAuthorized: boolean
   deviceAvailability: 'UNVERIFIED' | 'AVAILABLE' | 'UNAVAILABLE'
+  defaultRepeatTotal: number; minRepeatTotal: 1; maxRepeatTotal: number
+  minDurationMillis: 500; maxDurationMillis: number; maxWavBytes: number
 }
 export function capabilities(value: unknown): VoiceCapabilities {
   const v = envelope(value, 'VOICE_CAPABILITIES', ['identityRevision', 'runtimeGeneration', 'serverNow', 'currentClass', 'enabled', 'admission', 'targetAuthorized', 'deviceAvailability', 'defaultRepeatTotal', 'minRepeatTotal', 'maxRepeatTotal', 'minDurationMillis', 'maxDurationMillis', 'sampleRate', 'channels', 'bitsPerSample', 'maxWavBytes', 'uploadTtlSeconds'])
-  for (const [key, expected] of Object.entries({ defaultRepeatTotal: 3, minRepeatTotal: 1, maxRepeatTotal: 10, minDurationMillis: 500, maxDurationMillis: 60000, sampleRate: 16000, channels: 1, bitsPerSample: 16, maxWavBytes: 1920044, uploadTtlSeconds: 600 })) if (v[key] !== expected) fail()
+  for (const [key, expected] of Object.entries({ minRepeatTotal: 1, minDurationMillis: 500, sampleRate: 16000, channels: 1, bitsPerSample: 16, uploadTtlSeconds: 600 })) if (v[key] !== expected) fail()
+  const maxRepeatTotal = integer(v.maxRepeatTotal, 1, 10), maxDurationMillis = integer(v.maxDurationMillis, 500, 60000)
+  const defaultRepeatTotal = integer(v.defaultRepeatTotal, 1, maxRepeatTotal), maxWavBytes = integer(v.maxWavBytes, 16044, 1920044)
+  if (defaultRepeatTotal !== Math.min(3, maxRepeatTotal) || maxWavBytes !== 44 + maxDurationMillis * 32) fail()
   if (v.admission !== 'OPEN' && v.admission !== 'CLOSED' || !['UNVERIFIED', 'AVAILABLE', 'UNAVAILABLE'].includes(String(v.deviceAvailability))) return fail()
   let currentClass: VoiceCapabilities['currentClass'] = null
   if (v.currentClass !== null) { const c = object(v.currentClass, ['classId', 'className']); currentClass = { classId: decimal(c.classId), className: label(c.className) } }
   const targetAuthorized = bool(v.targetAuthorized)
   if (targetAuthorized && !currentClass) return fail()
-  return { identityRevision: decimal(v.identityRevision), runtimeGeneration: decimal(v.runtimeGeneration), serverNow: civilTime(v.serverNow), currentClass, enabled: bool(v.enabled), admission: v.admission, targetAuthorized, deviceAvailability: v.deviceAvailability as VoiceCapabilities['deviceAvailability'] }
+  return { identityRevision: decimal(v.identityRevision), runtimeGeneration: decimal(v.runtimeGeneration), serverNow: civilTime(v.serverNow), currentClass, enabled: bool(v.enabled), admission: v.admission, targetAuthorized, deviceAvailability: v.deviceAvailability as VoiceCapabilities['deviceAvailability'], defaultRepeatTotal, minRepeatTotal: 1, maxRepeatTotal, minDurationMillis: 500, maxDurationMillis, maxWavBytes }
 }
 export interface VoiceUploaded { assetId: string; assetRevision: string; classId: string; bytes: number; durationMillis: number; expiresAt: string }
 export function uploaded(value: unknown, classId: string, bytes: number): VoiceUploaded {
@@ -83,5 +88,5 @@ export function cancelled(value: unknown, id: string, input: VoiceCancel) {
   return j
 }
 export function sameTarget(a: VoiceCapabilities, b: VoiceCapabilities) {
-  return a.currentClass?.classId === b.currentClass?.classId && a.identityRevision === b.identityRevision && a.runtimeGeneration === b.runtimeGeneration
+  return a.currentClass?.classId === b.currentClass?.classId && a.identityRevision === b.identityRevision && a.runtimeGeneration === b.runtimeGeneration && a.maxRepeatTotal === b.maxRepeatTotal && a.maxDurationMillis === b.maxDurationMillis
 }

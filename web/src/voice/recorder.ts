@@ -1,6 +1,6 @@
 import { BrowserCapturePort, recordingSupport } from './browser-capture'
 import { BrowserWavNormalizer } from './normalize'
-import { checkedSampleRate, MAX_RAW_BYTES, outputFrames } from './pcm'
+import { checkedMaxDurationMillis, checkedSampleRate, MAX_RAW_BYTES, outputFrames } from './pcm'
 import { RecorderError, type CapturePort, type CaptureSession, type NormalizedWav,
   type RecorderClock, type WavNormalizer } from './ports'
 
@@ -30,6 +30,8 @@ interface Recording {
   rate: number
   timer: unknown
   finalized: boolean
+  maxDurationMillis: number
+  wallGraceStarted: boolean
 }
 const idle = (): RecorderState => ({ phase: 'idle', recordingId: null, elapsedMillis: 0, cancelGesture: false })
 
@@ -61,15 +63,17 @@ export class RecorderController {
     this.options.onState?.(this.state)
   }
   private live(recording: Recording) { return this.current === recording && !recording.signal.signal.aborted && !this.disposed }
-  async start(recordingId: string): Promise<void> {
+  async start(recordingId: string, maxDurationMillis = 60000): Promise<void> {
     if (this.disposed || this.current) return
+    try { checkedMaxDurationMillis(maxDurationMillis) }
+    catch { this.options.onError?.(new RecorderError('DURATION_OUT_OF_RANGE')); return }
     // Bounded, never evicted: even a very late duplicate gesture cannot reuse a finalized id.
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(recordingId) || this.usedIds.has(recordingId) || this.usedIds.size >= 1024) {
       this.options.onError?.(new RecorderError('RECORDING_UNSUPPORTED')); return
     }
     this.usedIds.add(recordingId)
     const recording: Recording = { id: recordingId, signal: new AbortController(), capture: undefined,
-      chunks: [], frames: 0, rate: 0, timer: undefined, finalized: false }
+      chunks: [], frames: 0, rate: 0, timer: undefined, finalized: false, maxDurationMillis, wallGraceStarted: false }
     this.current = recording
     this.publish({ phase: 'requesting', recordingId, elapsedMillis: 0, cancelGesture: false })
     try {
@@ -77,22 +81,37 @@ export class RecorderController {
         pcm: (chunk, rate) => this.receive(recording, chunk, rate),
         interrupted: () => this.fail(recording, new RecorderError('MIC_INTERRUPTED')),
         limit: () => { if (this.live(recording)) void this.finish(recording.id) },
-      }, recording.signal.signal)
+      }, recording.signal.signal, recording.maxDurationMillis)
       if (!this.live(recording)) { capture.abort(); return }
       recording.capture = capture
       recording.rate = checkedSampleRate(capture.sampleRate)
       this.publish({ phase: 'recording' })
       if (!this.live(recording)) return
-      recording.timer = this.clock.setTimeout(() => { if (this.live(recording)) void this.finish(recording.id) }, 60000)
+      recording.timer = this.clock.setTimeout(() => this.wallDeadline(recording), recording.maxDurationMillis)
       await capture.start()
     } catch (error) { this.fail(recording, error) }
+  }
+  private wallDeadline(recording: Recording) {
+    if (!this.live(recording) || recording.finalized) return
+    const atCap = () => recording.frames === Math.floor(recording.rate * recording.maxDurationMillis / 1000)
+    if (this.value.cancelGesture || atCap()) { void this.finish(recording.id); return }
+    // The main-thread wall clock can beat the render quantum or its final PCM
+    // message. The worklet keeps the exact sample cap during this single grace.
+    // Stalled capture is cancelled; partial audio is never padded or sent here.
+    if (recording.wallGraceStarted) return
+    recording.wallGraceStarted = true
+    recording.timer = this.clock.setTimeout(() => {
+      if (!this.live(recording) || recording.finalized) return
+      if (this.value.cancelGesture || atCap()) { void this.finish(recording.id); return }
+      this.fail(recording, new RecorderError('RECORDING_FAILED'))
+    }, 250)
   }
   private receive(recording: Recording, chunk: Float32Array, rate: number) {
     if (!this.live(recording) || !['recording', 'finalizing'].includes(this.value.phase)) return
     try {
       if (!(chunk instanceof Float32Array) || rate !== recording.rate || !chunk.length) throw new RecorderError('INVALID_PCM')
       const next = recording.frames + chunk.length
-      if (next * 4 > MAX_RAW_BYTES || next > rate * 60 || recording.chunks.length >= 8192) throw new RecorderError('RAW_LIMIT')
+      if (next * 4 > MAX_RAW_BYTES || next > Math.floor(rate * recording.maxDurationMillis / 1000) || recording.chunks.length >= 8192) throw new RecorderError('RAW_LIMIT')
       for (const sample of chunk) if (!Number.isFinite(sample)) throw new RecorderError('INVALID_PCM')
       recording.chunks.push(chunk); recording.frames = next
       this.publish({ elapsedMillis: Math.floor(next * 1000 / rate) })
@@ -114,6 +133,7 @@ export class RecorderController {
       if (!this.live(recording)) return
       recording.capture = undefined
       const expected = outputFrames(recording.frames, recording.rate)
+      if (expected > recording.maxDurationMillis * 16) throw new RecorderError('DURATION_OUT_OF_RANGE')
       const normalized = await this.normalizer.normalize(recording.chunks, recording.rate, recording.signal.signal)
       if (!this.live(recording)) return
       if (normalized.frames !== expected || normalized.sampleRate !== 16000 || normalized.wav.size !== 44 + expected * 2 ||

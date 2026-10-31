@@ -2,6 +2,23 @@ use super::super::tests as fixtures;
 use super::*;
 use fc_domain::identity::{AssignmentScope, NewAccount, Rgb};
 
+fn assert_limits_denied(service: &VoiceService, lease: SessionLease) {
+    let before = service.inventory().unwrap();
+    let identity = service.inner.authority.snapshot().unwrap().data.revision;
+    let epoch = service.generation();
+    assert!(service
+        .set_limits_reviewed(
+            lease,
+            VoiceLimits::default(),
+            before.revision,
+            identity,
+            epoch
+        )
+        .is_err());
+    assert_eq!(service.inventory().unwrap(), before);
+    assert_eq!(service.generation(), epoch);
+}
+
 fn issue_account(
     backend: &Backend,
     principal: u64,
@@ -143,9 +160,11 @@ fn management_rejects_web_stale_revoked_expired_and_lock_or_faulted_local_leases
     assert!(service.management_snapshot(replacement).is_err());
     let expired = issue_account(&backend.0.lock().unwrap(), 1, TrustedOrigin::Local, true);
     assert!(service.management_snapshot(expired).is_err());
+    assert_limits_denied(&service, expired);
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     service.inner.control.lock_local();
     assert!(service.management_snapshot(local).is_err());
+    assert_limits_denied(&service, local);
     let local = fixtures::issue(&backend.0.lock().unwrap(), TrustedOrigin::Local);
     service.inner.control.health_gate().fault();
     assert!(service.management_snapshot(local).is_err());
@@ -178,6 +197,7 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
     let candidate = issue_account(&backend, 2, TrustedOrigin::Local, false);
     let service = backend.voice_service();
     assert!(service.management_snapshot(candidate).is_err());
+    assert_limits_denied(&service, candidate);
     backend
         .change_password(
             candidate,
@@ -238,6 +258,7 @@ fn management_requires_global_admin_and_completed_initial_password_change() {
                 .must_change_password
         );
         assert!(service.management_snapshot(limited).is_err());
+        assert_limits_denied(&service, limited);
         assert!(service
             .set_enabled(limited, false, service.inventory().unwrap().revision)
             .is_err());

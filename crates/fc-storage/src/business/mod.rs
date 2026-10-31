@@ -86,6 +86,8 @@ pub type AutostartExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 /// Memory-only worker ownership fence for calendar writes. It grants no actor
 /// or durable policy authority; false/panic is an ordinary cancellation.
 pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+/// Bounded memory-only policy handoff fence for native driver transactions.
+pub type VoiceDriverGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 type Factory<S> = Arc<dyn Fn(&IdentityState, Revision) -> Result<S, StorageError> + Send + Sync>;
 pub type MaterialSceneGuard = Arc<
     dyn Fn(&fc_domain::materials::MaterialSource, SceneGeneration) -> Result<(), StorageError>
@@ -105,6 +107,7 @@ pub struct BusinessRepository<S> {
     calendar_execution: CalendarExecutionGuard,
     autostart_execution: AutostartExecutionGuard,
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
+    voice_driver_guard: VoiceDriverGuard,
     initial_installation_identity: Option<[u8; 32]>,
 }
 impl<S> Clone for BusinessRepository<S> {
@@ -120,6 +123,7 @@ impl<S> Clone for BusinessRepository<S> {
             calendar_execution: self.calendar_execution.clone(),
             autostart_execution: self.autostart_execution.clone(),
             voice_timeout: self.voice_timeout.clone(),
+            voice_driver_guard: self.voice_driver_guard.clone(),
             initial_installation_identity: self.initial_installation_identity,
         }
     }
@@ -141,12 +145,17 @@ impl<S: Send + 'static> BusinessRepository<S> {
             calendar_execution: Arc::new(|| true),
             autostart_execution: Arc::new(|| true),
             voice_timeout: None,
+            voice_driver_guard: Arc::new(|| true),
             initial_installation_identity: None,
         }
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
         self.session = guard;
+        self
+    }
+    pub fn with_voice_driver_guard(mut self, guard: VoiceDriverGuard) -> Self {
+        self.voice_driver_guard = guard;
         self
     }
     /// Bind a CSPRNG installation identifier to the same initial credential

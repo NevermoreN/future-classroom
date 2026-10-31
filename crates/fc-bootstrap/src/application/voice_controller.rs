@@ -10,6 +10,12 @@ pub(super) enum Operation {
         expected_runtime: u64,
         enabled: bool,
     },
+    SetLimits {
+        expected: Revision,
+        expected_identity: Revision,
+        expected_runtime: u64,
+        limits: fc_domain::voice::VoiceLimits,
+    },
 }
 
 pub(super) fn run(
@@ -23,20 +29,36 @@ pub(super) fn run(
     // nor a captured revision, and no automatic retry replays a change.
     service.management_snapshot(lease)?;
     context.checkpoint().map_err(|_| Failure::Stopped)?;
-    if let Operation::SetEnabled {
-        expected,
-        expected_identity,
-        expected_runtime,
-        enabled,
-    } = operation
-    {
-        service.set_enabled_reviewed(
-            lease,
-            enabled,
+    match operation {
+        Operation::Refresh => {}
+        Operation::SetEnabled {
             expected,
             expected_identity,
             expected_runtime,
-        )?;
+            enabled,
+        } => {
+            service.set_enabled_reviewed(
+                lease,
+                enabled,
+                expected,
+                expected_identity,
+                expected_runtime,
+            )?;
+        }
+        Operation::SetLimits {
+            expected,
+            expected_identity,
+            expected_runtime,
+            limits,
+        } => {
+            service.set_limits_reviewed(
+                lease,
+                limits,
+                expected,
+                expected_identity,
+                expected_runtime,
+            )?;
+        }
     }
     let loaded = service.management_snapshot(lease)?;
     context.checkpoint().map_err(|_| Failure::Stopped)?;
@@ -133,6 +155,19 @@ impl App {
                     enabled,
                 });
             }
+            Ok(voice_editor::Command::SetLimits {
+                expected,
+                expected_identity,
+                expected_runtime,
+                limits,
+            }) => {
+                return self.submit_voice_management(Operation::SetLimits {
+                    expected,
+                    expected_identity,
+                    expected_runtime,
+                    limits,
+                });
+            }
             Err(message) => self.status = message,
         }
         self.render()
@@ -159,6 +194,21 @@ impl App {
             .voice_service
             .as_ref()
             .is_some_and(|service| service.generation() == loaded.runtime_generation);
+        if self.offscreen_probe {
+            let status = self
+                .control
+                .as_ref()
+                .map(|control| control.health_gate().status());
+            let runtime = self.voice_service.as_ref().map(VoiceService::generation);
+            println!(
+                "VOICE_SETTINGS_FRESH fresh={fresh} loaded_publication={} current_publication={:?} health={:?} loaded_runtime={} current_runtime={runtime:?} loaded_enabled={}",
+                loaded.publication_revision.get(),
+                status.as_ref().map(|status| status.revision.get()),
+                status.as_ref().map(|status| status.health),
+                loaded.runtime_generation,
+                loaded.enabled,
+            );
+        }
         if !fresh {
             if let Some(editor) = self.voice_editor.as_mut() {
                 editor.invalidate();

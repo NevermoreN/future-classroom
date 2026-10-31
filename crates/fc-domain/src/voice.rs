@@ -13,6 +13,48 @@ pub const UPLOAD_TTL_SECONDS: i64 = 600;
 pub const LATEST_START_SECONDS: i64 = 300;
 pub const AUDIT_TTL_SECONDS: i64 = 86_400;
 pub const DEFAULT_REPEAT_TOTAL: u8 = 3;
+/// Persisted local admission policy. These values can only tighten the fixed
+/// audio/resource bounds; old audits and outstanding device ownership continue
+/// to be validated against the hard bounds rather than a newer policy.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct VoiceLimits {
+    pub max_duration_millis: u32,
+    pub max_pending_jobs: u8,
+    pub max_pending_per_owner: u8,
+    pub max_repeat_total: u8,
+}
+impl Default for VoiceLimits {
+    fn default() -> Self {
+        Self {
+            max_duration_millis: 60_000,
+            max_pending_jobs: 4,
+            max_pending_per_owner: 2,
+            max_repeat_total: 10,
+        }
+    }
+}
+impl VoiceLimits {
+    pub fn validate(&self) -> Result<(), VoiceError> {
+        if !(500..=60_000).contains(&self.max_duration_millis)
+            || !(1..=4).contains(&self.max_pending_jobs)
+            || !(1..=2.min(self.max_pending_jobs)).contains(&self.max_pending_per_owner)
+            || !(1..=10).contains(&self.max_repeat_total)
+        {
+            Err(VoiceError::InvalidState)
+        } else {
+            Ok(())
+        }
+    }
+    pub fn max_frame_count(&self) -> u32 {
+        self.max_duration_millis * 16
+    }
+    pub fn max_wav_bytes(&self) -> u64 {
+        44 + 2 * u64::from(self.max_frame_count())
+    }
+    pub fn default_repeat_total(&self) -> u8 {
+        DEFAULT_REPEAT_TOTAL.min(self.max_repeat_total)
+    }
+}
 macro_rules! voice_ids {
     ($($name:ident),+) => {$ (
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -156,6 +198,7 @@ pub struct VoiceJob {
 pub struct VoiceSnapshot {
     pub revision: Revision,
     pub enabled: bool,
+    pub limits: VoiceLimits,
     pub next_sequence: u64,
     pub next_generation: u64,
     /// Never moves backwards, so rollback cannot renew an expired upload/job.
@@ -168,6 +211,7 @@ impl Default for VoiceSnapshot {
         Self {
             revision: Revision::default(),
             enabled: true,
+            limits: VoiceLimits::default(),
             next_sequence: 0,
             next_generation: 0,
             observed_at: None,
@@ -265,6 +309,7 @@ impl VoiceSnapshot {
         })
     }
     pub fn validate(&self) -> Result<(), VoiceError> {
+        self.limits.validate()?;
         if self.assets.len() > MAX_VOICE_ASSETS
             || self.jobs.len() > MAX_VOICE_JOBS
             || self.charged_bytes()? > MAX_VOICE_BYTES
@@ -479,6 +524,7 @@ impl VoiceSnapshot {
         class_id: ClassId,
         now: i64,
     ) -> Result<VoiceAsset, VoiceError> {
+        self.limits.validate()?;
         if !self.enabled {
             return Err(VoiceError::Disabled);
         }
@@ -551,7 +597,11 @@ impl VoiceSnapshot {
         pcm: VoicePcmMetadata,
         now: i64,
     ) -> Result<VoiceAsset, VoiceError> {
+        self.limits.validate()?;
         pcm.validate()?;
+        if pcm.frame_count > self.limits.max_frame_count() {
+            return Err(VoiceError::InvalidWav);
+        }
         let n = self
             .assets
             .iter()
@@ -584,16 +634,19 @@ impl VoiceSnapshot {
         actor: &ActorContext,
         now: i64,
     ) -> Result<VoiceJob, VoiceError> {
+        self.limits.validate()?;
         if !self.enabled {
             return Err(VoiceError::Disabled);
         }
-        if !(1..=10).contains(&total) {
+        if !(1..=self.limits.max_repeat_total).contains(&total) {
             return Err(VoiceError::RepeatOutOfRange);
         }
         if self.jobs.iter().any(|j| j.command_id == command) {
             return Err(VoiceError::InvalidState);
         }
-        if self.jobs.iter().filter(|j| !j.state.terminal()).count() >= 4 {
+        if self.jobs.iter().filter(|j| !j.state.terminal()).count()
+            >= usize::from(self.limits.max_pending_jobs)
+        {
             return Err(VoiceError::QueueFull);
         }
         if self
@@ -601,7 +654,7 @@ impl VoiceSnapshot {
             .iter()
             .filter(|j| !j.state.terminal() && j.owner == actor.principal_id)
             .count()
-            >= 2
+            >= usize::from(self.limits.max_pending_per_owner)
         {
             return Err(VoiceError::OwnerLimit);
         }
@@ -622,6 +675,11 @@ impl VoiceSnapshot {
         }
         if a.state != VoiceAssetState::Ready {
             return Err(VoiceError::InvalidState);
+        }
+        let pcm = a.pcm.as_ref().ok_or(VoiceError::InvalidState)?;
+        pcm.validate()?;
+        if pcm.frame_count > self.limits.max_frame_count() {
+            return Err(VoiceError::InvalidWav);
         }
         if now >= a.expires_at {
             return Err(VoiceError::Expired);
@@ -1248,5 +1306,144 @@ mod tests {
             Err(VoiceError::RevisionConflict)
         );
         s.validate().unwrap();
+    }
+    #[test]
+    fn configured_limits_validate_exact_ranges_and_derive_canonical_bounds() {
+        let default = VoiceLimits::default();
+        assert_eq!(default.max_frame_count(), 960_000);
+        assert_eq!(default.max_wav_bytes(), MAX_WAV_BYTES);
+        assert_eq!(default.default_repeat_total(), 3);
+        let small = VoiceLimits {
+            max_duration_millis: 500,
+            max_pending_jobs: 1,
+            max_pending_per_owner: 1,
+            max_repeat_total: 1,
+        };
+        small.validate().unwrap();
+        assert_eq!(small.max_frame_count(), 8_000);
+        assert_eq!(small.max_wav_bytes(), 16_044);
+        assert_eq!(small.default_repeat_total(), 1);
+        for invalid in [
+            VoiceLimits {
+                max_duration_millis: 499,
+                ..default
+            },
+            VoiceLimits {
+                max_duration_millis: 60_001,
+                ..default
+            },
+            VoiceLimits {
+                max_pending_jobs: 0,
+                ..default
+            },
+            VoiceLimits {
+                max_pending_jobs: 5,
+                ..default
+            },
+            VoiceLimits {
+                max_pending_per_owner: 0,
+                ..default
+            },
+            VoiceLimits {
+                max_pending_per_owner: 3,
+                ..default
+            },
+            VoiceLimits {
+                max_pending_jobs: 1,
+                max_pending_per_owner: 2,
+                ..default
+            },
+            VoiceLimits {
+                max_repeat_total: 0,
+                ..default
+            },
+            VoiceLimits {
+                max_repeat_total: 11,
+                ..default
+            },
+        ] {
+            assert_eq!(invalid.validate(), Err(VoiceError::InvalidState));
+        }
+    }
+    #[test]
+    fn configured_duration_and_repeat_enforced_at_publish_and_existing_ready_submit() {
+        let mut s = VoiceSnapshot::default();
+        let a = actor(1);
+        let id = VoiceAssetId::new(1).unwrap();
+        let reserved = s.reserve(id, &a, ClassId::new(1).unwrap(), 1).unwrap();
+        let long = VoicePcmMetadata {
+            byte_length: 32_044,
+            frame_count: 16_000,
+            ..pcm()
+        };
+        s.limits.max_duration_millis = 500;
+        let before = s.clone();
+        assert_eq!(
+            s.publish(id, reserved.revision, long.clone(), 1),
+            Err(VoiceError::InvalidWav)
+        );
+        assert_eq!(s, before);
+        s.limits.max_duration_millis = 1000;
+        let ready = s.publish(id, reserved.revision, long, 1).unwrap();
+        s.limits.max_duration_millis = 500;
+        assert_eq!(
+            s.submit(CommandId::new(1).unwrap(), id, ready.revision, 1, &a, 1),
+            Err(VoiceError::InvalidWav)
+        );
+        s.limits.max_duration_millis = 1000;
+        s.limits.max_repeat_total = 1;
+        assert_eq!(
+            s.submit(CommandId::new(1).unwrap(), id, ready.revision, 2, &a, 1),
+            Err(VoiceError::RepeatOutOfRange)
+        );
+        assert_eq!(
+            s.submit(CommandId::new(1).unwrap(), id, ready.revision, 1, &a, 1)
+                .unwrap()
+                .repeat_total,
+            1
+        );
+    }
+    #[test]
+    fn configured_queue_and_owner_caps_do_not_reinterpret_old_jobs_as_corrupt() {
+        let mut s = VoiceSnapshot::default();
+        job(&mut s, 1, 10);
+        job(&mut s, 2, 10);
+        s.limits = VoiceLimits {
+            max_duration_millis: 500,
+            max_pending_jobs: 1,
+            max_pending_per_owner: 1,
+            max_repeat_total: 1,
+        };
+        // New policy is admission-only; existing nonterminal evidence remains
+        // valid until exact physical stop/release receipts retire it.
+        s.validate().unwrap();
+        let a = actor(3);
+        let id = VoiceAssetId::new(3).unwrap();
+        let reserved = s.reserve(id, &a, ClassId::new(1).unwrap(), 1).unwrap();
+        let ready = s.publish(id, reserved.revision, pcm(), 1).unwrap();
+        assert_eq!(
+            s.submit(CommandId::new(3).unwrap(), id, ready.revision, 1, &a, 1),
+            Err(VoiceError::QueueFull)
+        );
+        s.limits.max_pending_jobs = 4;
+        let own = actor(1);
+        let id = VoiceAssetId::new(4).unwrap();
+        let reserved = s.reserve(id, &own, ClassId::new(1).unwrap(), 1).unwrap();
+        let ready = s.publish(id, reserved.revision, pcm(), 1).unwrap();
+        assert_eq!(
+            s.submit(CommandId::new(4).unwrap(), id, ready.revision, 1, &own, 1),
+            Err(VoiceError::OwnerLimit)
+        );
+        let id = VoiceAssetId::new(5).unwrap();
+        s.reserve(id, &own, ClassId::new(1).unwrap(), 1).unwrap();
+        assert_eq!(
+            s.reserve(
+                VoiceAssetId::new(6).unwrap(),
+                &own,
+                ClassId::new(1).unwrap(),
+                1
+            ),
+            Err(VoiceError::OwnerLimit)
+        );
     }
 }

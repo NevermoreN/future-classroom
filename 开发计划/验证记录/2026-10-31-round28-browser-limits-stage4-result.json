@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "checkCount": 19,
+  "checks": [
+    "configured repeat selector contains exactly1and2 with default2",
+    "configured1250ms is visibly explained",
+    "390px mobile page has no horizontal overflow",
+    "bottom shared reminder remains available",
+    "real Worker WAV is within captured configured bound",
+    "canonical fixed header length and PCM format agree with actual bytes",
+    "automatic limit submitted exactly once attempt1",
+    "captured repeat2 survives actual Worker upload attempt1",
+    "real Worker WAV is within captured configured bound",
+    "canonical fixed header length and PCM format agree with actual bytes",
+    "automatic limit submitted exactly once attempt2",
+    "captured repeat2 survives actual Worker upload attempt2",
+    "320px mobile page has no horizontal overflow",
+    "real browser worklet/worker had no page errors",
+    "observed changed policy cancels unsent real recording",
+    "changed repeat ceiling is visible after cancellation",
+    "policy cancellation has no page errors",
+    "contradictory policy cannot enable recording",
+    "invalid policy never requests even synthetic microphone"
+  ],
+  "results": [
+    {
+      "case": "configured actual browser zero-source capture, auto-finish and next explicit click",
+      "uploads": [
+        {
+          "bytes": 40044,
+          "frames": 20000
+        },
+        {
+          "bytes": 40044,
+          "frames": 20000
+        }
+      ],
+      "commands": 2,
+      "microphone": {
+        "starts": 2,
+        "active": 0,
+        "stopped": 2,
+        "moduleErrors": [],
+        "modules": [
+          "/fc/assets/pcm-worklet-B7E4LRoP.js",
+          "/fc/assets/pcm-worklet-B7E4LRoP.js"
+        ]
+      },
+      "pageErrors": []
+    },
+    {
+      "case": "policy epoch/duration/repeat change while recording",
+      "uploads": 0,
+      "commands": 0,
+      "microphone": {
+        "starts": 1,
+        "active": 0,
+        "stopped": 1,
+        "moduleErrors": [],
+        "modules": [
+          "/fc/assets/pcm-worklet-B7E4LRoP.js"
+        ]
+      },
+      "pageErrors": []
+    },
+    {
+      "case": "malformed configured capabilities fail closed",
+      "pageErrors": []
+    }
+  ],
+  "scope": "actual Chromium DOM and real bundled Worklet/OfflineAudio/Worker on zero-source synthetic MediaStream; own Linux static self-signed HTTPS fixture with ignoreHTTPSErrors=true and intercepted API routes; no trusted production TLS/listener/hardware microphone/Win7/Win10/Seewo claim"
+}

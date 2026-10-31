@@ -3,6 +3,12 @@ export const OUTPUT_RATE = 16000 as const
 export const MIN_FRAMES = 8000
 export const MAX_FRAMES = 960000
 
+/** Administrator limits only tighten the fixed canonical PCM format bounds. */
+export function checkedMaxDurationMillis(value: number): number {
+  if (!Number.isSafeInteger(value) || value < 500 || value > 60000) throw new Error('DURATION_OUT_OF_RANGE')
+  return value
+}
+
 export function checkedSampleRate(rate: number): number {
   // Higher device rates exceed the bounded capture/normalization working set.
   if (!Number.isInteger(rate) || rate < 8000 || rate > 96000) throw new Error('RECORDING_UNSUPPORTED')
@@ -11,10 +17,14 @@ export function checkedSampleRate(rate: number): number {
 
 export function outputFrames(frames: number, rate: number): number {
   checkedSampleRate(rate)
-  if (!Number.isSafeInteger(frames) || frames < rate / 2 || frames > rate * 60 || frames * 4 > MAX_RAW_BYTES) {
+  // The worklet caps an exact 500ms policy at floor(rate / 2) source frames.
+  // Odd rates therefore miss the mathematical boundary by half of one source
+  // sample. Accept only that discrete boundary; a whole frame less still fails.
+  const minimumSourceFrames = Math.floor(rate / 2)
+  if (!Number.isSafeInteger(frames) || frames < minimumSourceFrames || frames > rate * 60 || frames * 4 > MAX_RAW_BYTES) {
     throw new Error('DURATION_OUT_OF_RANGE')
   }
-  const result = Math.round(frames * OUTPUT_RATE / rate)
+  const result = frames === minimumSourceFrames ? MIN_FRAMES : Math.round(frames * OUTPUT_RATE / rate)
   if (result < MIN_FRAMES || result > MAX_FRAMES) throw new Error('DURATION_OUT_OF_RANGE')
   return result
 }

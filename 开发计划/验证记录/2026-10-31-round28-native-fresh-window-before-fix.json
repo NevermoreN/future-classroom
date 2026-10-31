@@ -1,0 +1,33 @@
+{
+  "scope": "actual Win11 real SQLite/native runtime desired regression; synthetic isolated deployment, no output device",
+  "filter": "voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement",
+  "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-RustProbe-6b89f5362dd14e00a2d85b93eee57bd3",
+  "binarySha256": "ff1c4ddf502fa8e2b28aa3fa20220dfe4c639628d8e7c9718d64ba0d6b2705c8",
+  "cleanup": "PASS",
+  "actual": {
+    "output": [
+      "",
+      "running 1 test",
+      "test voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement ... FAILED",
+      "",
+      "failures:",
+      "",
+      "---- voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement stdout ----",
+      "",
+      "thread 'voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement' (33992) panicked at crates/fc-bootstrap/src/voice_runtime/native_policy_tests.rs:508:5:",
+      "assertion `left == right` failed: old policy-stopped domain stranded a new explicit queue instead of retiring",
+      "  left: Ok(Draining)",
+      " right: Ok(Idle)",
+      "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+      "",
+      "",
+      "failures:",
+      "    voice_runtime::native::policy_tests::reviewed_idle_domain_never_strands_fresh_explicit_job_before_old_retirement",
+      "",
+      "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 204 filtered out; finished in 0.20s",
+      ""
+    ],
+    "exitCode": 101,
+    "binarySha256": "ff1c4ddf502fa8e2b28aa3fa20220dfe4c639628d8e7c9718d64ba0d6b2705c8"
+  }
+}

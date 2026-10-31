@@ -28,6 +28,75 @@ function fixture(rate = 48000) {
 }
 
 describe('press recording privacy, exact finalization and cancellation', () => {
+  it('waits one bounded grace when the 500ms wall timer beats the final quantum and sends the exact cap once', async () => {
+    const f = fixture(16000)
+    await f.controller.start('wall-before-quantum', 500)
+    f.pcm(4096); f.timers[0]!()
+    expect(f.session.stop).not.toHaveBeenCalled()
+    expect(f.onError).not.toHaveBeenCalled(); expect(f.onWav).not.toHaveBeenCalled()
+    expect(f.clock.setTimeout.mock.calls.map(call => call[1])).toEqual([500, 250])
+    f.pcm(3904); f.sink().limit()
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve()
+    expect(f.session.stop).toHaveBeenCalledOnce()
+    expect(f.onError).not.toHaveBeenCalled(); expect(f.onWav).toHaveBeenCalledOnce()
+    expect(f.onWav.mock.calls[0]![0]).toMatchObject({ frames: 8000, recordingId: 'wall-before-quantum' })
+    f.timers[1]!(); f.timers[0]!(); f.sink().limit()
+    await Promise.resolve()
+    expect(f.onWav).toHaveBeenCalledOnce(); expect(f.onError).not.toHaveBeenCalled()
+    expect(f.clock.setTimeout).toHaveBeenCalledTimes(2)
+  })
+  it('cancels a permanently missing worklet cap after one 250ms grace without sending partial PCM', async () => {
+    const f = fixture(16000)
+    await f.controller.start('wall-stalled-worklet', 500)
+    f.pcm(4096); f.timers[0]!()
+    expect(f.session.stop).not.toHaveBeenCalled(); expect(f.session.abort).not.toHaveBeenCalled()
+    expect(f.clock.setTimeout.mock.calls.map(call => call[1])).toEqual([500, 250])
+    f.timers[1]!()
+    expect(f.session.abort).toHaveBeenCalledOnce(); expect(f.signal().aborted).toBe(true)
+    expect(f.onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'RECORDING_FAILED' }))
+    expect(f.controller.state.phase).toBe('idle')
+    expect(f.normalize).not.toHaveBeenCalled(); expect(f.onWav).not.toHaveBeenCalled()
+    f.sink().limit(); f.pcm(3904); f.timers[0]!(); f.timers[1]!()
+    expect(f.onWav).not.toHaveBeenCalled(); expect(f.onError).toHaveBeenCalledOnce()
+    expect(f.clock.setTimeout).toHaveBeenCalledTimes(2)
+  })
+  it('does not arm wall grace after cancellation, explicit finalization or a cancel gesture', async () => {
+    for (const action of ['cancel', 'finish', 'gesture']) {
+      const f = fixture(16000)
+      await f.controller.start(`wall-after-${action}`, 500)
+      f.pcm(4096)
+      if (action === 'cancel') f.controller.cancel()
+      else if (action === 'finish') await f.controller.finish(`wall-after-${action}`)
+      else f.controller.setCancelGesture(true)
+      f.timers[0]!()
+      await Promise.resolve()
+      expect(f.clock.setTimeout).toHaveBeenCalledOnce()
+      expect(f.controller.state.phase).toBe('idle'); expect(f.onWav).not.toHaveBeenCalled()
+      if (action === 'gesture') {
+        expect(f.session.abort).toHaveBeenCalledOnce(); expect(f.onError).not.toHaveBeenCalled()
+      }
+    }
+  })
+  it('captures configured duration before permission, applies its timer and sends exactly its allowed frames', async () => {
+    const f = fixture(16000)
+    await f.controller.start('configured', 1250)
+    expect(f.capturePort.open.mock.calls[0]![2]).toBe(1250)
+    expect(f.clock.setTimeout.mock.calls[0]![1]).toBe(1250)
+    f.pcm(20000); f.timers[0]!()
+    await Promise.resolve(); await Promise.resolve()
+    expect(f.onWav).toHaveBeenCalledOnce()
+    expect(f.onWav.mock.calls[0]![0]).toMatchObject({ frames: 20000, recordingId: 'configured' })
+    await f.controller.finish('configured'); expect(f.onWav).toHaveBeenCalledOnce()
+    await f.controller.start('next-default'); expect(f.capturePort.open.mock.calls[1]![2]).toBe(60000)
+  })
+  it('rejects invalid configured durations before permission and rejects a single frame above the captured limit', async () => {
+    for (const limit of [0, 499, 60001, 1250.5, NaN, Infinity]) {
+      const f = fixture(); await f.controller.start('invalid-limit', limit)
+      expect(f.capturePort.open).not.toHaveBeenCalled(); expect(f.onError.mock.calls[0]![0].code).toBe('DURATION_OUT_OF_RANGE')
+    }
+    const f = fixture(16000); await f.controller.start('overflow', 1250); f.pcm(20001)
+    expect(f.session.abort).toHaveBeenCalled(); expect(f.normalize).not.toHaveBeenCalled(); expect(f.onWav).not.toHaveBeenCalled()
+  })
   it('constructs without permission, reports copied state and sends only after explicit release', async () => {
     const f = fixture(); expect(f.capturePort.open).not.toHaveBeenCalled()
     await f.controller.start('first'); expect(f.controller.state.phase).toBe('recording')

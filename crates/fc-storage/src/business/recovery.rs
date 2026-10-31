@@ -1204,6 +1204,11 @@ pub(crate) fn merge_allocator_floors(
         .transpose()?;
     if imported_voice.is_some() || old_voice.revision.get() > 0 {
         let mut s = imported_voice.unwrap_or_default();
+        // A teaching backup restores inert history, never the target's local
+        // permission to receive audio or its current limits. An absent target
+        // document means the target's Default policy, not the source policy.
+        s.enabled = old_voice.enabled;
+        s.limits = old_voice.limits;
         s.revision = r;
         s.next_sequence = s
             .next_sequence

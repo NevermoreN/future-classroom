@@ -1,0 +1,21 @@
+{
+  "scope": "read-only next-step investigation; no Round29 code written and no acceptance claim",
+  "candidate": "local default output policy and observable device facts",
+  "planFacts": [
+    "global/local management owns device policy",
+    "default output with WAVE_FORMAT_QUERY",
+    "no output means unavailable; never modify system volume",
+    "device removal/change interrupts and never auto-replays"
+  ],
+  "currentGaps": [
+    "native management snapshot/editor has no device fact or policy view",
+    "query/open use WAVE_MAPPER and runtime monitor",
+    "Web deviceAvailability stays UNVERIFIED"
+  ],
+  "notSpecified": [
+    "fixed named-speaker selection",
+    "switching eConsole/eMultimedia",
+    "automatic fallback"
+  ],
+  "constraint": "Do not invent a configurable option with no effect; keep actual device observation separate from audibility, physical release, three-OS and Seewo acceptance."
+}

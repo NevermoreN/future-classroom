@@ -10,6 +10,7 @@ pub struct VoiceManagementSnapshot {
     pub publication_revision: Revision,
     pub identity_revision: Revision,
     pub revision: Revision,
+    pub limits: VoiceLimits,
     /// Persisted setting, which can differ from fail-closed runtime admission.
     pub enabled: bool,
     /// Effective logical admission, never a claim that native audio has stopped.
@@ -20,6 +21,12 @@ pub struct VoiceManagementSnapshot {
     pub queued_jobs: usize,
     /// Only the durable Playing state; excludes Starting and Stopping.
     pub playing_jobs: usize,
+}
+
+#[derive(Clone, Copy)]
+enum PolicyChange {
+    Enabled(bool),
+    Limits(VoiceLimits),
 }
 
 impl VoiceService {
@@ -33,6 +40,42 @@ impl VoiceService {
         expected_identity: Revision,
         expected_runtime: u64,
     ) -> Result<VoiceSnapshot> {
+        self.change_policy_reviewed(
+            lease,
+            PolicyChange::Enabled(enabled),
+            expected_voice,
+            expected_identity,
+            expected_runtime,
+        )
+    }
+
+    /// Saving limits retires previous recordings and jobs even when enabled is
+    /// unchanged. It grants no Web configuration permission or replay action.
+    pub fn set_limits_reviewed(
+        &self,
+        lease: SessionLease,
+        limits: VoiceLimits,
+        expected_voice: Revision,
+        expected_identity: Revision,
+        expected_runtime: u64,
+    ) -> Result<VoiceSnapshot> {
+        self.change_policy_reviewed(
+            lease,
+            PolicyChange::Limits(limits),
+            expected_voice,
+            expected_identity,
+            expected_runtime,
+        )
+    }
+
+    fn change_policy_reviewed(
+        &self,
+        lease: SessionLease,
+        change: PolicyChange,
+        expected_voice: Revision,
+        expected_identity: Revision,
+        expected_runtime: u64,
+    ) -> Result<VoiceSnapshot> {
         let local_generation = self.inner.control.generation();
         let state = self
             .inner
@@ -40,6 +83,11 @@ impl VoiceService {
             .snapshot()
             .map_err(|_| BackendError::Closed)?;
         let actor = self.management_actor(lease, local_generation, &state)?;
+        if let PolicyChange::Limits(limits) = &change {
+            limits
+                .validate()
+                .map_err(|error| BackendError::Voice(VoiceRepositoryError::Domain(error)))?;
+        }
         if state.data.revision != expected_identity {
             return Err(BackendError::Voice(VoiceRepositoryError::Domain(
                 VoiceError::RevisionConflict,
@@ -59,34 +107,42 @@ impl VoiceService {
         if self.management_actor(lease, local_generation, &state)? != actor {
             return Err(denied());
         }
-        let epoch = if enabled {
+        let boundary = !matches!(change, PolicyChange::Enabled(true));
+        let epoch = if boundary {
+            expected_runtime
+                .checked_add(1)
+                .ok_or(BackendError::Overflow)?
+        } else {
+            expected_runtime
+        };
+        // Publish bounded Pending before the CAS/wake so an already running
+        // domain cannot settle old driver writes ahead of this policy ticket.
+        let mut handoff = self.begin_policy_change(expected_runtime, epoch, boundary)?;
+        if !boundary {
             if self.inner.runtime_state.load(Ordering::Acquire) != word {
                 return Err(BackendError::Voice(VoiceRepositoryError::Domain(
                     VoiceError::StaleGeneration,
                 )));
             }
-            expected_runtime
+            handoff.claim();
         } else {
-            let next = expected_runtime
-                .checked_add(1)
-                .ok_or(BackendError::Overflow)?;
             self.inner
                 .runtime_state
-                .compare_exchange(word, next << 1, Ordering::AcqRel, Ordering::Acquire)
+                .compare_exchange(word, epoch << 1, Ordering::AcqRel, Ordering::Acquire)
                 .map_err(|_| {
                     BackendError::Voice(VoiceRepositoryError::Domain(VoiceError::StaleGeneration))
                 })?;
+            handoff.claim();
             self.inner.enabled.store(false, Ordering::Release);
             // The independent driver must start stopping before the writer can
             // block or reject persistence. Never adopt a later stop's epoch.
             self.wake();
-            if next >= (u64::MAX >> 1) {
+            if epoch >= (u64::MAX >> 1) {
                 // Exhaustion permanently closes admission instead of leaving
                 // the penultimate epoch running or wrapping to an old review.
                 return Err(BackendError::Overflow);
             }
-            next
-        };
+        }
         let repository =
             self.repository_mode(epoch, None, false)
                 .with_session_guard(self.exact_session_guard(
@@ -94,12 +150,24 @@ impl VoiceService {
                     local_generation,
                     Some((expected_identity, epoch)),
                 ));
-        let persisted =
-            self.conclude(repository.set_voice_enabled(enabled, expected_voice, &actor));
-        if persisted.is_err() {
-            self.wake();
-        }
-        let snapshot = persisted?;
+        let persisted = match change {
+            PolicyChange::Enabled(enabled) => {
+                repository.set_voice_enabled(enabled, expected_voice, &actor)
+            }
+            PolicyChange::Limits(limits) => {
+                repository.set_voice_limits(limits, expected_voice, &actor)
+            }
+        };
+        let snapshot = match persisted {
+            Ok(snapshot) => snapshot,
+            Err(error) => {
+                // The known policy endpoint is already closed. Do not use
+                // conclude() to advance/adopt a different stop on uncertainty.
+                handoff.failed();
+                self.wake();
+                return Err(BackendError::Voice(error));
+            }
+        };
         #[cfg(test)]
         self.after_committed();
         if self.generation() != epoch {
@@ -109,19 +177,32 @@ impl VoiceService {
                 VoiceError::StaleGeneration,
             )));
         }
-        self.inner
-            .enabled
-            .store(snapshot.enabled, Ordering::Release);
         for job in &snapshot.jobs {
             self.update(job)?;
         }
-        if enabled && snapshot.jobs.iter().all(|job| job.state.terminal()) && !self.is_admitting() {
+        if let Err(error) = handoff.committed(snapshot.enabled) {
+            handoff.failed();
+            self.wake();
+            return Err(error);
+        }
+        self.inner
+            .enabled
+            .store(snapshot.enabled, Ordering::Release);
+        if snapshot.enabled
+            && snapshot.jobs.iter().all(|job| job.state.terminal())
+            && !self.has_native_domain()
+            && !self.is_admitting()
+        {
             // resume_after_stop uses CAS against this exact epoch, including
             // after its writer fence; a later stop can never be reopened here.
             if let Err(error) = self.resume_after_stop(epoch) {
-                self.inner.enabled.store(false, Ordering::Release);
-                self.wake();
-                return Err(error);
+                // The exact old native participant may have won this same
+                // epoch's safe resume CAS after the committed receipt.
+                if !self.current(epoch) {
+                    self.inner.enabled.store(false, Ordering::Release);
+                    self.wake();
+                    return Err(error);
+                }
             }
         }
         if self.generation() != epoch {
@@ -192,6 +273,7 @@ impl VoiceService {
             publication_revision: snapshot.revision,
             identity_revision: snapshot.data.revision,
             revision: inventory.revision,
+            limits: inventory.limits,
             enabled: inventory.enabled,
             admitting: inventory.enabled && enabled && runtime & 1 == 1,
             runtime_generation: runtime >> 1,

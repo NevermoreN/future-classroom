@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { CircleAlert, Clock3, LoaderCircle, Mic, RefreshCw, Square, Volume2, X } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
@@ -11,13 +11,20 @@ const labels: Record<VoiceStatus, string> = { QUEUED: '已排队', STARTING: '�
 export default function VoicePane({ state, controller, recorder, recording }: { state: VoiceState; controller: VoiceController | undefined; recorder: RecorderController | undefined; recording: RecorderState }) {
   const gesture = useRef<{ id: string; pointerId: number | null; y: number; key: string | null } | null>(null)
   const caps = state.capabilities, support = recordingSupport()
+  const maxSeconds = (state.context?.capabilities.maxDurationMillis ?? caps?.maxDurationMillis ?? 60000) / 1000
+  useEffect(() => {
+    // Automatic sample/time limits also finish the click-to-record alternative,
+    // which has no later pointerup to release its original gesture.
+    if (recording.phase === 'idle' && state.phase !== 'recording') gesture.current = null
+  }, [recording.phase, state.phase])
   const recordingBusy = recording.phase !== 'idle', canBegin = support.supported && mayRecord(caps) && !state.busy && state.phase === 'idle' && !state.pending
   function start(pointerId: number | null, y = 0, key: string | null = null) {
     if (!canBegin || !controller || !recorder || gesture.current) return
     let id: string
     try { id = newCommandId() } catch { return }
-    if (!controller.beginRecording(id)) return
-    gesture.current = { id, pointerId, y, key }; void recorder.start(id)
+    const context = controller.beginRecording(id)
+    if (!context) return
+    gesture.current = { id, pointerId, y, key }; void recorder.start(id, context.capabilities.maxDurationMillis)
   }
   function finish() { const active = gesture.current; gesture.current = null; const id = active?.id ?? recording.recordingId; if (id) void recorder?.finish(id) }
   function cancel() { gesture.current = null; recorder?.cancel(); controller?.cancelUnsent() }
@@ -28,7 +35,7 @@ export default function VoicePane({ state, controller, recorder, recording }: { 
     <div className="voice-columns">
       <Card className="voice-recorder"><CardHeader><p className="eyebrow">教师主动发起 · 独立语音通知</p><CardTitle role="heading" aria-level={2}>{caps?.currentClass?.className ?? '尚未取得白板班级'}</CardTitle><CardDescription>核对班级后录音。发送后按已锁定次数顺序播放，不改变系统音量。</CardDescription></CardHeader><CardContent>
         <div className="voice-target-status"><span>{!caps ? '正在核对服务' : !caps.currentClass ? '白板尚未绑定班级' : !caps.targetAuthorized ? '你没有向该班级提交语音的权限' : !caps.enabled ? '白板已关闭远程语音' : caps.admission === 'CLOSED' ? '白板当前暂停接纳语音' : caps.deviceAvailability === 'UNAVAILABLE' ? '白板输出设备不可用' : caps.deviceAvailability === 'UNVERIFIED' ? '输出设备将在实际播放时核验' : '输出格式已核验，设备状态可能变化'}</span></div>
-        <label className="voice-repeat" htmlFor="voice-repeat">总播放次数<select id="voice-repeat" value={state.repeatTotal} disabled={recordingBusy || state.phase !== 'idle' || state.busy || !!state.pending} onChange={e => controller?.setRepeat(Number(e.target.value))}>{Array.from({ length: 10 }, (_, i) => <option value={i + 1} key={i + 1}>{i + 1} 遍{i === 2 ? '（默认）' : ''}</option>)}</select></label>
+        <label className="voice-repeat" htmlFor="voice-repeat">总播放次数<select id="voice-repeat" value={state.repeatTotal} disabled={recordingBusy || state.phase !== 'idle' || state.busy || !!state.pending} onChange={e => controller?.setRepeat(Number(e.target.value))}>{Array.from({ length: caps?.maxRepeatTotal ?? 10 }, (_, i) => <option value={i + 1} key={i + 1}>{i + 1} 遍{i + 1 === (caps?.defaultRepeatTotal ?? 3) ? '（默认）' : ''}</option>)}</select></label>
         <p className="voice-explanation">包含首次，每遍间隔 1 秒。录音开始后锁定目标及次数；修改下次设置不会改变已排队任务。</p>
         <button type="button" className={`voice-hold ${recording.phase === 'recording' ? 'is-recording' : ''} ${recording.cancelGesture ? 'is-cancelling' : ''}`} disabled={!canBegin && !recordingBusy || recording.phase === 'finalizing'} aria-label="按住说话，松开发送" aria-describedby="voice-recording-help" onContextMenu={e => e.preventDefault()}
           onPointerDown={e => { if (e.button !== 0 || !e.isPrimary) return; e.preventDefault(); start(e.pointerId, e.clientY); if (gesture.current) { try { e.currentTarget.setPointerCapture(e.pointerId) } catch { cancel() } } }}
@@ -37,9 +44,9 @@ export default function VoicePane({ state, controller, recorder, recording }: { 
           onPointerCancel={cancel} onLostPointerCapture={() => { if (gesture.current?.pointerId !== null && gesture.current) cancel() }}
           onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); cancel() } else if ([' ', 'Enter'].includes(e.key)) { e.preventDefault(); if (!e.repeat) start(null, 0, e.key) } }}
           onKeyUp={e => { if (gesture.current?.key === e.key) { e.preventDefault(); finish() } }} onBlur={() => { if (gesture.current) cancel() }}>
-          {recording.phase === 'requesting' || recording.phase === 'finalizing' ? <LoaderCircle size={31} className="spinner" /> : recording.cancelGesture ? <X size={31} /> : <Mic size={31} />}<strong>{recordingLabel}</strong><span>{(recording.elapsedMillis / 1000).toFixed(1)} / 60 秒</span>
+          {recording.phase === 'requesting' || recording.phase === 'finalizing' ? <LoaderCircle size={31} className="spinner" /> : recording.cancelGesture ? <X size={31} /> : <Mic size={31} />}<strong>{recordingLabel}</strong><span>{(recording.elapsedMillis / 1000).toFixed(1)} / {maxSeconds} 秒</span>
         </button>
-        <p id="voice-recording-help" className="voice-explanation">0.5–60 秒。按住空格或 Enter 也可录音；Esc 取消。达到 60 秒按当前手势发送或丢弃，随后松手不会重复发送。</p>
+        <p id="voice-recording-help" className="voice-explanation">白板当前允许 0.5–{maxSeconds} 秒。按住空格或 Enter 也可录音；Esc 取消。达到 {maxSeconds} 秒按当前手势发送或丢弃，随后松手不会重复发送。</p>
         <div className="voice-alternative"><Button variant="outline" disabled={!canBegin && !['requesting', 'recording'].includes(recording.phase)} onClick={() => { if (recording.phase === 'idle') start(null); else finish() }}>{recording.phase === 'idle' ? <Mic /> : <Square />}{recording.phase === 'idle' ? '点击开始录音' : '结束并发送'}</Button><Button variant="ghost" disabled={!recordingBusy && state.phase !== 'uploading'} onClick={cancel}><X />取消录音</Button></div>
         {!support.supported && <p className="content-notice attention" role="status"><CircleAlert size={17} />{support.reason}</p>}
         <p className="voice-privacy">仅采集当前教师设备麦克风。切换目标、隐藏或离开页面会取消未发送录音并释放麦克风。没有云端转码或语音识别。</p>

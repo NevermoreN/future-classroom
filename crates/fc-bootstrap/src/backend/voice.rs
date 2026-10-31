@@ -5,7 +5,13 @@ use fc_domain::voice::*;
 use fc_ports::{audio::AudioAuthorization, voice::*};
 use fc_runtime::health::{GateError, Health, HealthGate};
 use std::collections::BTreeMap;
+#[cfg(test)]
+mod limits_tests;
 mod management;
+mod policy_handoff;
+pub use policy_handoff::{VoicePolicyHandoff, VoicePolicyPhase};
+mod native_participation;
+pub use native_participation::VoiceNativeParticipation;
 #[cfg(test)]
 mod upload_authorization_tests;
 pub use management::VoiceManagementSnapshot;
@@ -56,6 +62,10 @@ struct Inner {
     // One atomic state prevents a stale stop acknowledgement reopening a newer
     // stop generation: high bits epoch, low bit admission, terminal epoch closed.
     runtime_state: AtomicU64,
+    // One bounded metadata receipt. Never held across a writer wait or waker.
+    policy: Mutex<policy_handoff::PolicySlot>,
+    // Domain participation only. OS-thread/TLS exit is proved by the runtime.
+    native_participating: AtomicBool,
     enabled: AtomicBool,
     waker: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
     #[cfg(test)]
@@ -104,7 +114,9 @@ fn denied() -> BackendError {
 }
 /// Browser capability metadata, containing no device/native claim.
 pub struct WebVoiceCapabilities {
+    pub publication_revision: Revision,
     pub identity_revision: Revision,
+    pub limits: VoiceLimits,
     pub runtime_generation: u64,
     pub now: LocalDateTime,
     pub current_class: Option<(ClassId, String)>,
@@ -134,6 +146,8 @@ impl VoiceService {
                 monotonic,
                 sessions: Mutex::new(VoiceSessions::default()),
                 runtime_state: AtomicU64::new(3),
+                policy: Mutex::new(policy_handoff::PolicySlot::default()),
+                native_participating: AtomicBool::new(false),
                 enabled: AtomicBool::new(true),
                 waker: Mutex::new(None),
                 #[cfg(test)]
@@ -365,6 +379,10 @@ impl VoiceService {
                     && (!require_admission || word & 1 == 1)
             }),
         );
+        let driver_service = self.clone();
+        repository = repository.with_voice_driver_guard(Arc::new(move || {
+            driver_service.policy_drivers_allowed().unwrap_or(false)
+        }));
         if let Some(lease) = lease {
             repository = repository.with_session_guard(self.exact_session_guard(
                 lease,
@@ -587,6 +605,8 @@ impl VoiceService {
             .snapshot()
             .map_err(|_| BackendError::Closed)?;
         let actor = self.actor_from_state(lease, &snapshot.data)?;
+        let runtime = self.inner.runtime_state.load(Ordering::Acquire);
+        let enabled = self.inner.enabled.load(Ordering::Acquire);
         let inventory = self.inventory()?;
         let now = self.inner.clock.now();
         let class = snapshot
@@ -610,17 +630,20 @@ impl VoiceService {
         if status.health != Health::Healthy
             || status.revision != snapshot.revision
             || status.auth_epoch != snapshot.auth_epoch
+            || self.inner.runtime_state.load(Ordering::Acquire) != runtime
+            || self.inner.enabled.load(Ordering::Acquire) != enabled
         {
             return Err(BackendError::Storage(StorageError::Busy));
         }
-        let runtime = self.inner.runtime_state.load(Ordering::Acquire);
         Ok(WebVoiceCapabilities {
+            publication_revision: snapshot.revision,
             identity_revision: snapshot.data.revision,
+            limits: inventory.limits,
             runtime_generation: runtime >> 1,
             now,
             current_class: class,
             enabled: inventory.enabled,
-            admitting: runtime & 1 == 1,
+            admitting: inventory.enabled && enabled && runtime & 1 == 1,
             target_authorized: authorized,
         })
     }
@@ -918,6 +941,11 @@ impl VoiceService {
     }
     fn drive_epoch(&self, update: VoiceDriverUpdate, epoch: u64) -> Result<VoiceJob> {
         self.check_open()?;
+        if !self.policy_drivers_allowed()? {
+            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
+                VoiceError::StaleGeneration,
+            )));
+        }
         let positive = matches!(
             update.action,
             VoiceDriverAction::Start
@@ -1136,6 +1164,12 @@ impl VoiceService {
         let snapshot = self.inventory()?;
         if snapshot.jobs.iter().any(|j| !j.state.terminal())
             || expected_generation >= (u64::MAX >> 1)
+        {
+            return Err(denied());
+        }
+        if self
+            .policy_handoff(expected_generation)?
+            .is_some_and(|receipt| receipt.phase != VoicePolicyPhase::Committed || !receipt.enabled)
         {
             return Err(denied());
         }

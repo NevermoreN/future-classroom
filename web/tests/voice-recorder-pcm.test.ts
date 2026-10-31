@@ -15,6 +15,17 @@ describe('canonical recording PCM, mono mix and exact WAV framing', () => {
     expect(outputFrames(rate / 2, rate)).toBe(8000); expect(outputFrames(rate * 60, rate)).toBe(960000)
     expect(() => outputFrames(rate / 2 - 1, rate)).toThrow('DURATION_OUT_OF_RANGE'); expect(() => outputFrames(rate * 60 + 1, rate)).toThrow('DURATION_OUT_OF_RANGE')
   })
+  it.each([8001, 11025, 44101, 95999])('allows only the discrete minimum source boundary at odd %i Hz', rate => {
+    const minimum = Math.floor(rate / 2)
+    expect(rate / 2 - minimum).toBeGreaterThan(0)
+    expect(rate / 2 - minimum).toBeLessThan(1)
+    expect(outputFrames(minimum, rate)).toBe(8000)
+    expect(outputFrames(minimum + 1, rate)).toBeGreaterThanOrEqual(8000)
+    expect(() => outputFrames(minimum - 1, rate)).toThrow('DURATION_OUT_OF_RANGE')
+    expect(() => outputFrames(minimum - 0.5, rate)).toThrow('DURATION_OUT_OF_RANGE')
+    expect(outputFrames(rate * 60, rate)).toBe(960000)
+    expect(() => outputFrames(rate * 60 + 1, rate)).toThrow('DURATION_OUT_OF_RANGE')
+  })
   it.each([7999, 960001])('rejects invalid output frame count %i', frames => { expect(() => encodeWav(new Float32Array(frames))).toThrow('DURATION_OUT_OF_RANGE') })
   it.each([8000, 960000])('writes exactly one 44-byte PCM16LE mono header at %i frames', frames => {
     const samples = new Float32Array(frames); samples.set([-2, -1, -0.5, 0, 0.5, 1, 2])

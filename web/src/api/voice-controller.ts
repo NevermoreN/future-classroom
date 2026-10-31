@@ -30,7 +30,7 @@ export class VoiceController {
   private current(id: number) { return !this.disposed && this.sequence === id }
   private unauthorized(e: unknown) { if (!(e instanceof ApiError) || e.status !== 401 && e.status !== 403) return false; this.dispose(); this.revoked(); return true }
   hasRiskyDraft() { return !!this.state.context || !!this.state.pending || this.state.busy }
-  setRepeat(value: number) { if (this.state.phase === 'idle' && !this.state.busy && Number.isInteger(value) && value >= 1 && value <= 10) this.publish({ repeatTotal: value }) }
+  setRepeat(value: number) { if (this.state.phase === 'idle' && !this.state.busy && Number.isInteger(value) && value >= 1 && value <= (this.state.capabilities?.maxRepeatTotal ?? 10)) this.publish({ repeatTotal: value }) }
   private checkUpdate(next: VoiceJob, previous: VoiceJob) {
     if (next.jobId !== previous.jobId || next.commandId !== previous.commandId || next.classId !== previous.classId || next.repeatTotal !== previous.repeatTotal || BigInt(next.revision) < BigInt(previous.revision) || next.completedRepeats < previous.completedRepeats || terminal(previous) && JSON.stringify(next) !== JSON.stringify(previous) || next.revision === previous.revision && JSON.stringify(next) !== JSON.stringify(previous)) throw new ProtocolFault()
   }
@@ -46,10 +46,11 @@ export class VoiceController {
   }
   private acceptCapabilities(capabilities: VoiceCapabilities) {
     const context = this.state.context
+    const repeatTotal = this.state.repeatTotal <= capabilities.maxRepeatTotal ? this.state.repeatTotal : capabilities.defaultRepeatTotal
     if (context && (!sameTarget(context.capabilities, capabilities) || !mayRecord(capabilities))) {
-      this.cancelRecorder(); this.publish({ capabilities, context: null, phase: 'blocked', notice: '白板班级、授权或播放状态已变化，本次未发送录音已取消。请重新核对。' }); return false
+      this.cancelRecorder(); this.publish({ capabilities, repeatTotal, context: null, phase: 'blocked', notice: '白板班级、授权或播放限制已变化，本次未发送录音已取消。请重新核对。' }); return false
     }
-    this.publish({ capabilities }); return true
+    this.publish({ capabilities, repeatTotal }); return true
   }
   async open() { if (this.disposed) return; this.active = true; await this.refresh(); this.schedule() }
   async refresh() {
@@ -76,7 +77,7 @@ export class VoiceController {
   async recorded(result: { recordingId: string; wav: Blob; frames: number; sampleRate: 16000 }) {
     const context = this.state.context
     if (!context || context.recordingId !== result.recordingId || this.state.phase !== 'recording' || this.disposed) return
-    if (!Number.isSafeInteger(result.frames) || result.frames < 8000 || result.frames > 960000 || result.wav.type !== 'audio/wav' || result.wav.size !== 44 + result.frames * 2 || result.sampleRate !== 16000) { this.cancelUnsent('录音格式或时长无效，未上传或提交。'); return }
+    if (!Number.isSafeInteger(result.frames) || result.frames < 8000 || result.frames > context.capabilities.maxDurationMillis * 16 || result.wav.type !== 'audio/wav' || result.wav.size !== 44 + result.frames * 2 || result.wav.size > context.capabilities.maxWavBytes || result.sampleRate !== 16000 || context.repeatTotal > context.capabilities.maxRepeatTotal) { this.cancelUnsent('录音格式或时长超过白板允许范围，未上传或提交。'); return }
     const { id, signal } = this.begin(); this.publish({ busy: true, phase: 'uploading', notice: '正在核对白板目标并上传录音，尚未排队。' })
     let input: VoiceSubmit | undefined
     try {

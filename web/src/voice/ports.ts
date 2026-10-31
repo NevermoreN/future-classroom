@@ -6,7 +6,7 @@ const messages: Record<RecorderErrorCode, string> = {
   RECORDING_UNSUPPORTED: '当前浏览器不支持录音，请使用已验证浏览器。',
   MIC_DENIED: '未获得麦克风权限，请允许后重新按住录音。',
   MIC_INTERRUPTED: '麦克风或页面已中断，本次录音已取消。',
-  DURATION_OUT_OF_RANGE: '录音需要 0.5 至 60 秒，请重新录音。',
+  DURATION_OUT_OF_RANGE: '录音时长超出白板允许范围，请核对当前上限后重新录音。',
   RAW_LIMIT: '录音缓存已达上限，本次录音已取消。',
   INVALID_PCM: '录音数据无效，请重新录音。',
   RECORDING_FAILED: '录音处理失败，请重新录音。',
@@ -30,7 +30,7 @@ export interface CaptureSession {
   abort(): void
 }
 export interface CapturePort {
-  open(sink: CaptureSink, signal: AbortSignal): Promise<CaptureSession>
+  open(sink: CaptureSink, signal: AbortSignal, maxDurationMillis?: number): Promise<CaptureSession>
 }
 export interface NormalizedWav { wav: Blob; frames: number; sampleRate: 16000 }
 export interface WavNormalizer {
