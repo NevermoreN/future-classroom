@@ -1,0 +1,40 @@
+{
+  "scope": "Local CI helper and actual PS5 source/environment verification only. Fresh hosted PS7 compile and full PE/static CRT gate remain pending.",
+  "sourceSha256": "f7e6a6f28c5e000f0f57a979a2e49c5f093764f28e652dac35f0ba2f7ab7c9b7",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "",
+      "stderrBase64": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutBase64": "QXJjaGl0ZWN0dXJlIE9LOiAxMiBjcmF0ZXMsIDMzIGZpcnN0LXBhcnR5IGVkZ2VzOyBEMTEgYm91bmRhcmllcyBob2xkLgo=",
+      "stderrBase64": ""
+    }
+  ],
+  "actualWindowsPS5": {
+    "parserErrors": 0,
+    "restoreCases": 3,
+    "guardCases": 8,
+    "presentEmptyBehavior": "NOT_SUPPORTED_BY_THIS_RUNTIME_REQUIRE_POWERSHELL_7_5_CI",
+    "processFlagsRestored": true
+  },
+  "officialMechanism": {
+    "microsoft": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.5",
+    "cargo": "https://doc.rust-lang.org/cargo/reference/config.html#buildrustflags",
+    "checkedUtcDate": "2026-10-31",
+    "paraphrase": "PowerShell7.5 SetEnvironmentVariable with null leaves an existing empty process variable; Env provider null deletes. Cargo uses encoded flags before plain RUSTFLAGS, even when encoded is empty. The prior explicit rustc cfg check did not prove Cargo flags.",
+    "originalRunnerValues": "NOT_SAMPLED; mechanism matches actual pure-Rust CRT imports, but fresh actual compiler flag evidence is still required."
+  },
+  "status": "PASS_LOCAL_AND_PS5_ONLY"
+}

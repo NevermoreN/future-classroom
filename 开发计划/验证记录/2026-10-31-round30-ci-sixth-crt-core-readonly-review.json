@@ -1,0 +1,58 @@
+{
+  "status": "READONLY_DIAGNOSIS_CONFIRMED_DYNAMIC_CRT_CAUSE_NOT_YET_PROVEN",
+  "sourcePath": "scripts/windows-msvc-ci.ps1",
+  "sourceSha256": "94e853dbb55f40d65ff914dbe767408ffc412cc75b3650e19a0f139f54d525cd",
+  "evidence": {
+    "path": "/tmp/fc-round30-evidence/ci-sixth-range-raw/logs/pe-imports-0.stdout.log",
+    "bytes": 757,
+    "sha256": "75a5c41b2be570c92d8e84e2ef69cac02faad110026a39bb1309bb0797a40ca0",
+    "scope": "Parent range-extracted ZIP member; this report does not claim full ZIP SHA verification.",
+    "program": "tests/fc-bootstrap/verify_web_assets-79070da627d35f91.exe",
+    "observedDlls": [
+      "kernel32.dll",
+      "ntdll.dll",
+      "api-ms-win-core-synch-l1-2-0.dll",
+      "userenv.dll",
+      "bcryptprimitives.dll",
+      "KERNEL32.dll",
+      "VCRUNTIME140.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-locale-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll"
+    ]
+  },
+  "facts": [
+    "Actual imports include VCRUNTIME140.dll and UCRT API sets; existing gate rejection is correct.",
+    "PS1 clears CARGO_ENCODED_RUSTFLAGS and sets RUSTFLAGS before VS setup; cfg proof invokes rustc directly with an explicit flag, not the actual Cargo compiler command.",
+    "All Cargo target builds explicitly use i686-pc-windows-msvc; .cargo config only has GNU rustflags, not an MSVC override.",
+    "Locked cc1.10.0 selects -MT when CARGO_CFG_TARGET_FEATURE contains crt-static for Cargo TARGET.",
+    "Bundled libsqlite3-sys0.30.1 uses ordinary cc::Build without explicit dynamic CRT override.",
+    "cc appends CFLAGS environment flags after its own defaults, so a conflicting CFLAGS/CL/_CL_ remains a candidate, not an observed fact."
+  ],
+  "bestCurrentInference": "Actual target CRT selection was not honored somewhere in the complete Cargo/link path. Because first failure is a mostly Rust example test harness, first distinguish global flag loss/override versus a surviving native-library import; do not blame SQLite without actual compiler or PE evidence.",
+  "missingEvidence": [
+    "Actual Cargo rustc invocation flags for this example and pure fc-domain/protocol test harnesses.",
+    "Whitelisted RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS and relevant target CFLAGS/CL/_CL_ immediately after VS setup and before actual Cargo launch; no full environment dump.",
+    "PE imports of a pure-domain test versus bootstrap product and C-dependent tests; can parse artifact bytes offline without running EXEs.",
+    "If Rust flags prove effective and only C-dependent programs fail, capture cc/build-script CARGO_CFG_TARGET_FEATURE and actual C compile flags or object directives to locate /MD."
+  ],
+  "safeNextStep": "Preserve current FAIL, obtain remaining raw Cargo logs, compare actual pure-domain/product imports offline. If logs omit effective arguments, next separately authorized CI should capture bounded cargo -vv and whitelisted exact flag state after VS; keep every existing CRT rejection and sourceSHA gate.",
+  "notAuthorizedOrPerformed": [
+    "No source/config edits",
+    "No Cargo/compiler/EXE execution",
+    "No remote or Git/CI write",
+    "No CRT policy relaxation"
+  ],
+  "primarySources": [
+    "https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes",
+    "https://doc.rust-lang.org/cargo/reference/config.html#buildrustflags",
+    "https://learn.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=msvc-170"
+  ],
+  "localPrimaryDependencySources": [
+    "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cc-1.10.0/src/lib.rs:2891",
+    "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cc-1.10.0/src/lib.rs:2820",
+    "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libsqlite3-sys-0.30.1/build.rs:120"
+  ]
+}

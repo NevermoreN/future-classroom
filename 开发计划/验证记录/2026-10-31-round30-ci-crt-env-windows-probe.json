@@ -1,0 +1,221 @@
+{
+  "scope": "Actual authorized Windows PS5.1 source AST plus process-only environment helpers. No CI, PS7, Rust/compiler/test EXE, persistent environment, file or registry mutation.",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "future-classroom-win11",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwAkAHAAcgBvAGIAZQA9AFsAQwBvAG4AcwBvAGwAZQBdADoAOgBJAG4ALgBSAGUAYQBkAFQAbwBFAG4AZAAoACkAOwAmACAAKABbAFMAYwByAGkAcAB0AEIAbABvAGMAawBdADoAOgBDAHIAZQBhAHQAZQAoACQAcAByAG8AYgBlACkAKQA7AA=="
+  ],
+  "stdinSource": {
+    "path": "/tmp/fc-round30-evidence/ci-crt-env-windows-stdin-probe.ps1",
+    "bytes": 47874,
+    "sha256": "ee04a47aa67ab4c82e2b36a2a4639e228266541cd71819cb65fa7ada44204186"
+  },
+  "exitCode": 0,
+  "stdout": {
+    "bytes": 4544,
+    "sha256": "9fd07d63abaabb9325f80a3ce4ba93c9bd1bfe5cc341561e34a5d4ad002fc6ff",
+    "base64": "eyJzdGF0dXMiOiJQQVNTIiwic291cmNlU2hhMjU2IjoiZjdlNmE2ZjI4YzVlMDAwZjBmNTdhOTc5YTJlNDljNWYwOTM3NjRmMjhlNjUyZGFjMzVmMGJhMmY3YWI3YzliNyIsInBhcnNlckVycm9ycyI6MCwicG93ZXJzaGVsbCI6IjUuMS4yNjEwMC45NzExIiwiZG90bmV0IjoiNC4wLjMwMzE5LjQyMDAwIiwiY2FzZUNvdW50IjozLCJjYXNlcyI6W3sibmFtZSI6Im9yaWdpbmFsLWFic2VuY2UtcmVzdG9yZWQtdGhyb3VnaC1wcm92aWRlci1yZW1vdmUiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im9yaWdpbmFsLXZhbHVlLXJlc3RvcmVkLXRocm91Z2gtcHJvdmlkZXItc2V0IiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJwcm92aWRlci1udWxsLWFjdHVhbGx5LXJlbW92ZXMiLCJwYXNzZWQiOnRydWV9XSwicHJlc2VudEVtcHR5U3VwcG9ydGVkIjpmYWxzZSwiZW1wdHlSZXN0b3JhdGlvbiI6Ik5PVF9TVVBQT1JURURfQllfVEhJU19SVU5USU1FX1JFUVVJUkVfUE9XRVJTSEVMTF83XzVfQ0kiLCJzY29wZSI6IkVYQUNUX0hFTFBFUl9PTkxZX1VOSVFVRV9QUk9DRVNTX0VOVklST05NRU5UX1JFU1RPUkVEX05PX0VYRV9PUl9GSUxFU19PUl9DSSJ9DQp7ImNhc2VDb3VudCI6OCwicHJvY2Vzc0ZsYWdzUmVzdG9yZWQiOnRydWUsInJlY29yZHMiOlt7InBoYXNlIjoiYmVmb3JlLXZzIiwicG93ZXJzaGVsbCI6IjUuMS4yNjEwMC45NzExIiwiZG90bmV0IjoiNC4wLjMwMzE5LjQyMDAwIiwiZmxhZ3MiOnsiUlVTVEZMQUdTIjp7InByZXNlbnQiOnRydWUsInZhbHVlIjoiLUMgdGFyZ2V0LWZlYXR1cmU9K2NydC1zdGF0aWMiLCJsZW5ndGgiOjI5fSwiQ0FSR09fRU5DT0RFRF9SVVNURkxBR1MiOnsicHJlc2VudCI6ZmFsc2UsInZhbHVlIjpudWxsLCJsZW5ndGgiOm51bGx9fSwicmVxdWlyZW1lbnQiOiJFbmNvZGVkIHZhcmlhYmxlIGFic2VudDsgUlVTVEZMQUdTIGV4YWN0bHkgLUMgdGFyZ2V0LWZlYXR1cmU9K2NydC1zdGF0aWMuIiwiZXhwbGFuYXRpb24iOiJDYXJnbyBwcmVmZXJzIGVuY29kZWQgZmxhZ3MsIGluY2x1ZGluZyBhbiBlbXB0eSB2YWx1ZS4gUG93ZXJTaGVsbCA3LjUgQVBJIG51bGwgbGVhdmVzIGFuIGVtcHR5IHZhcmlhYmxlOyB1c2UgdGhlIEVudiBwcm92aWRlciB0byByZW1vdmUgaXQuIiwic2NvcGUiOiJUd28gZXhhY3QgcHJvY2VzcyB2YXJpYWJsZXMgb25seTsgbm8gZW52aXJvbm1lbnQgZHVtcC4ifSx7InBoYXNlIjoiYWZ0ZXItdnMiLCJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJkb3RuZXQiOiI0LjAuMzAzMTkuNDIwMDAiLCJmbGFncyI6eyJSVVNURkxBR1MiOnsicHJlc2VudCI6dHJ1ZSwidmFsdWUiOiItQyB0YXJnZXQtZmVhdHVyZT0rY3J0LXN0YXRpYyIsImxlbmd0aCI6Mjl9LCJDQVJHT19FTkNPREVEX1JVU1RGTEFHUyI6eyJwcmVzZW50IjpmYWxzZSwidmFsdWUiOm51bGwsImxlbmd0aCI6bnVsbH19LCJyZXF1aXJlbWVudCI6IkVuY29kZWQgdmFyaWFibGUgYWJzZW50OyBSVVNURkxBR1MgZXhhY3RseSAtQyB0YXJnZXQtZmVhdHVyZT0rY3J0LXN0YXRpYy4iLCJleHBsYW5hdGlvbiI6IkNhcmdvIHByZWZlcnMgZW5jb2RlZCBmbGFncywgaW5jbHVkaW5nIGFuIGVtcHR5IHZhbHVlLiBQb3dlclNoZWxsIDcuNSBBUEkgbnVsbCBsZWF2ZXMgYW4gZW1wdHkgdmFyaWFibGU7IHVzZSB0aGUgRW52IHByb3ZpZGVyIHRvIHJlbW92ZSBpdC4iLCJzY29wZSI6IlR3byBleGFjdCBwcm9jZXNzIHZhcmlhYmxlcyBvbmx5OyBubyBlbnZpcm9ubWVudCBkdW1wLiJ9LHsicGhhc2UiOiJiZWZvcmUtY2FyZ28iLCJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJkb3RuZXQiOiI0LjAuMzAzMTkuNDIwMDAiLCJmbGFncyI6eyJSVVNURkxBR1MiOnsicHJlc2VudCI6dHJ1ZSwidmFsdWUiOiItQyB0YXJnZXQtZmVhdHVyZT0rY3J0LXN0YXRpYyIsImxlbmd0aCI6Mjl9LCJDQVJHT19FTkNPREVEX1JVU1RGTEFHUyI6eyJwcmVzZW50IjpmYWxzZSwidmFsdWUiOm51bGwsImxlbmd0aCI6bnVsbH19LCJyZXF1aXJlbWVudCI6IkVuY29kZWQgdmFyaWFibGUgYWJzZW50OyBSVVNURkxBR1MgZXhhY3RseSAtQyB0YXJnZXQtZmVhdHVyZT0rY3J0LXN0YXRpYy4iLCJleHBsYW5hdGlvbiI6IkNhcmdvIHByZWZlcnMgZW5jb2RlZCBmbGFncywgaW5jbHVkaW5nIGFuIGVtcHR5IHZhbHVlLiBQb3dlclNoZWxsIDcuNSBBUEkgbnVsbCBsZWF2ZXMgYW4gZW1wdHkgdmFyaWFibGU7IHVzZSB0aGUgRW52IHByb3ZpZGVyIHRvIHJlbW92ZSBpdC4iLCJzY29wZSI6IlR3byBleGFjdCBwcm9jZXNzIHZhcmlhYmxlcyBvbmx5OyBubyBlbnZpcm9ubWVudCBkdW1wLiJ9LHsicGhhc2UiOiJiZWZvcmUtY2FyZ28iLCJwb3dlcnNoZWxsIjoiNS4xLjI2MTAwLjk3MTEiLCJkb3RuZXQiOiI0LjAuMzAzMTkuNDIwMDAiLCJmbGFncyI6eyJSVVNURkxBR1MiOnsicHJlc2VudCI6dHJ1ZSwidmFsdWUiOiItQyB0YXJnZXQtZmVhdHVyZT0rY3J0LXN0YXRpYyIsImxlbmd0aCI6Mjl9LCJDQVJHT19FTkNPREVEX1JVU1RGTEFHUyI6eyJwcmVzZW50Ijp0cnVlLCJ2YWx1ZSI6Ii0tY2ZnXHUwMDFmc3ludGhldGljX3NoYWRvdyIsImxlbmd0aCI6MjJ9fSwicmVxdWlyZW1lbnQiOiJFbmNvZGVkIHZhcmlhYmxlIGFic2VudDsgUlVTVEZMQUdTIGV4YWN0bHkgLUMgdGFyZ2V0LWZlYXR1cmU9K2NydC1zdGF0aWMuIiwiZXhwbGFuYXRpb24iOiJDYXJnbyBwcmVmZXJzIGVuY29kZWQgZmxhZ3MsIGluY2x1ZGluZyBhbiBlbXB0eSB2YWx1ZS4gUG93ZXJTaGVsbCA3LjUgQVBJIG51bGwgbGVhdmVzIGFuIGVtcHR5IHZhcmlhYmxlOyB1c2UgdGhlIEVudiBwcm92aWRlciB0byByZW1vdmUgaXQuIiwic2NvcGUiOiJUd28gZXhhY3QgcHJvY2VzcyB2YXJpYWJsZXMgb25seTsgbm8gZW52aXJvbm1lbnQgZHVtcC4ifSx7InBoYXNlIjoiYmVmb3JlLWNhcmdvIiwicG93ZXJzaGVsbCI6IjUuMS4yNjEwMC45NzExIiwiZG90bmV0IjoiNC4wLjMwMzE5LjQyMDAwIiwiZmxhZ3MiOnsiUlVTVEZMQUdTIjp7InByZXNlbnQiOnRydWUsInZhbHVlIjoiLUMgdGFyZ2V0LWZlYXR1cmU9LWNydC1zdGF0aWMiLCJsZW5ndGgiOjI5fSwiQ0FSR09fRU5DT0RFRF9SVVNURkxBR1MiOnsicHJlc2VudCI6ZmFsc2UsInZhbHVlIjpudWxsLCJsZW5ndGgiOm51bGx9fSwicmVxdWlyZW1lbnQiOiJFbmNvZGVkIHZhcmlhYmxlIGFic2VudDsgUlVTVEZMQUdTIGV4YWN0bHkgLUMgdGFyZ2V0LWZlYXR1cmU9K2NydC1zdGF0aWMuIiwiZXhwbGFuYXRpb24iOiJDYXJnbyBwcmVmZXJzIGVuY29kZWQgZmxhZ3MsIGluY2x1ZGluZyBhbiBlbXB0eSB2YWx1ZS4gUG93ZXJTaGVsbCA3LjUgQVBJIG51bGwgbGVhdmVzIGFuIGVtcHR5IHZhcmlhYmxlOyB1c2UgdGhlIEVudiBwcm92aWRlciB0byByZW1vdmUgaXQuIiwic2NvcGUiOiJUd28gZXhhY3QgcHJvY2VzcyB2YXJpYWJsZXMgb25seTsgbm8gZW52aXJvbm1lbnQgZHVtcC4ifSx7InBoYXNlIjoiYmVmb3JlLWNhcmdvIiwicG93ZXJzaGVsbCI6IjUuMS4yNjEwMC45NzExIiwiZG90bmV0IjoiNC4wLjMwMzE5LjQyMDAwIiwiZmxhZ3MiOnsiUlVTVEZMQUdTIjp7InByZXNlbnQiOmZhbHNlLCJ2YWx1ZSI6bnVsbCwibGVuZ3RoIjpudWxsfSwiQ0FSR09fRU5DT0RFRF9SVVNURkxBR1MiOnsicHJlc2VudCI6ZmFsc2UsInZhbHVlIjpudWxsLCJsZW5ndGgiOm51bGx9fSwicmVxdWlyZW1lbnQiOiJFbmNvZGVkIHZhcmlhYmxlIGFic2VudDsgUlVTVEZMQUdTIGV4YWN0bHkgLUMgdGFyZ2V0LWZlYXR1cmU9K2NydC1zdGF0aWMuIiwiZXhwbGFuYXRpb24iOiJDYXJnbyBwcmVmZXJzIGVuY29kZWQgZmxhZ3MsIGluY2x1ZGluZyBhbiBlbXB0eSB2YWx1ZS4gUG93ZXJTaGVsbCA3LjUgQVBJIG51bGwgbGVhdmVzIGFuIGVtcHR5IHZhcmlhYmxlOyB1c2UgdGhlIEVudiBwcm92aWRlciB0byByZW1vdmUgaXQuIiwic2NvcGUiOiJUd28gZXhhY3QgcHJvY2VzcyB2YXJpYWJsZXMgb25seTsgbm8gZW52aXJvbm1lbnQgZHVtcC4ifV0sImNhc2VzIjpbeyJuYW1lIjoiY2Fub25pY2FsLWJlZm9yZS12cyIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoiY2Fub25pY2FsLWFmdGVyLXZzIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJjYW5vbmljYWwtYmVmb3JlLWNhcmdvIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJub25lbXB0eS1lbmNvZGVkLXNoYWRvd3MtcnVzdGZsYWdzIiwicGFzc2VkIjp0cnVlfSx7Im5hbWUiOiJleHBsaWNpdC1keW5hbWljLWNydCIsInBhc3NlZCI6dHJ1ZX0seyJuYW1lIjoibWlzc2luZy1ydXN0ZmxhZ3MiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6Im92ZXJsb25nLWZsYWctYmVmb3JlLWV2aWRlbmNlLWNvcHkiLCJwYXNzZWQiOnRydWV9LHsibmFtZSI6ImludmFsaWQtZXZpZGVuY2UtcGhhc2UiLCJwYXNzZWQiOnRydWV9XSwiZmlsZXNXcml0dGVuIjowLCJzdGF0dXMiOiJQQVNTIiwiZXh0ZXJuYWxFeGVjdXRhYmxlcyI6MCwic2NvcGUiOiJBY3R1YWwgZXh0cmFjdGVkIGhlbHBlcjsgbW9ja2VkIEpTT04gc2luayBpbiBtZW1vcnkgb25seS4gTm8gUFM3IGVtcHR5LXZhcmlhYmxlIHJlcHJvZHVjdGlvbiBjbGFpbWVkLiJ9DQo=",
+    "scope": "COMPLETE"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "base64": "",
+    "scope": "COMPLETE"
+  },
+  "observations": [
+    {
+      "status": "PASS",
+      "sourceSha256": "f7e6a6f28c5e000f0f57a979a2e49c5f093764f28e652dac35f0ba2f7ab7c9b7",
+      "parserErrors": 0,
+      "powershell": "5.1.26100.9711",
+      "dotnet": "4.0.30319.42000",
+      "caseCount": 3,
+      "cases": [
+        {
+          "name": "original-absence-restored-through-provider-remove",
+          "passed": true
+        },
+        {
+          "name": "original-value-restored-through-provider-set",
+          "passed": true
+        },
+        {
+          "name": "provider-null-actually-removes",
+          "passed": true
+        }
+      ],
+      "presentEmptySupported": false,
+      "emptyRestoration": "NOT_SUPPORTED_BY_THIS_RUNTIME_REQUIRE_POWERSHELL_7_5_CI",
+      "scope": "EXACT_HELPER_ONLY_UNIQUE_PROCESS_ENVIRONMENT_RESTORED_NO_EXE_OR_FILES_OR_CI"
+    },
+    {
+      "caseCount": 8,
+      "processFlagsRestored": true,
+      "records": [
+        {
+          "phase": "before-vs",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": true,
+              "value": "-C target-feature=+crt-static",
+              "length": 29
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        },
+        {
+          "phase": "after-vs",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": true,
+              "value": "-C target-feature=+crt-static",
+              "length": 29
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        },
+        {
+          "phase": "before-cargo",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": true,
+              "value": "-C target-feature=+crt-static",
+              "length": 29
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        },
+        {
+          "phase": "before-cargo",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": true,
+              "value": "-C target-feature=+crt-static",
+              "length": 29
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": true,
+              "value": "--cfg\u001fsynthetic_shadow",
+              "length": 22
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        },
+        {
+          "phase": "before-cargo",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": true,
+              "value": "-C target-feature=-crt-static",
+              "length": 29
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        },
+        {
+          "phase": "before-cargo",
+          "powershell": "5.1.26100.9711",
+          "dotnet": "4.0.30319.42000",
+          "flags": {
+            "RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            },
+            "CARGO_ENCODED_RUSTFLAGS": {
+              "present": false,
+              "value": null,
+              "length": null
+            }
+          },
+          "requirement": "Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.",
+          "explanation": "Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.",
+          "scope": "Two exact process variables only; no environment dump."
+        }
+      ],
+      "cases": [
+        {
+          "name": "canonical-before-vs",
+          "passed": true
+        },
+        {
+          "name": "canonical-after-vs",
+          "passed": true
+        },
+        {
+          "name": "canonical-before-cargo",
+          "passed": true
+        },
+        {
+          "name": "nonempty-encoded-shadows-rustflags",
+          "passed": true
+        },
+        {
+          "name": "explicit-dynamic-crt",
+          "passed": true
+        },
+        {
+          "name": "missing-rustflags",
+          "passed": true
+        },
+        {
+          "name": "overlong-flag-before-evidence-copy",
+          "passed": true
+        },
+        {
+          "name": "invalid-evidence-phase",
+          "passed": true
+        }
+      ],
+      "filesWritten": 0,
+      "status": "PASS",
+      "externalExecutables": 0,
+      "scope": "Actual extracted helper; mocked JSON sink in memory only. No PS7 empty-variable reproduction claimed."
+    }
+  ]
+}

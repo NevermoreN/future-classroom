@@ -130,6 +130,42 @@ function Resolve-Application([string]$Name) {
     return $path
 }
 
+function Write-CrtFlagState([string]$Phase) {
+    if ($Phase -notin @('before-vs', 'after-vs', 'before-cargo')) { throw 'Invalid CRT flag phase.' }
+    $flags = [ordered]@{}
+    foreach ($name in @('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS')) {
+        $value = [Environment]::GetEnvironmentVariable($name, 'Process')
+        if ($null -ne $value -and $value.Length -gt 4096) { throw 'Compiler flag evidence exceeds bound.' }
+        $flags[$name] = [ordered]@{
+            present = (Test-Path -LiteralPath "Env:\$name"); value = $value
+            length = $(if ($null -eq $value) { $null } else { $value.Length })
+        }
+    }
+    Write-NewJson (Join-Path $Logs "$Phase-crt-flags.json") ([ordered]@{
+        phase = $Phase; powershell = $PSVersionTable.PSVersion.ToString()
+        dotnet = [Environment]::Version.ToString(); flags = $flags
+        requirement = 'Encoded variable absent; RUSTFLAGS exactly -C target-feature=+crt-static.'
+        explanation = 'Cargo prefers encoded flags, including an empty value. PowerShell 7.5 API null leaves an empty variable; use the Env provider to remove it.'
+        scope = 'Two exact process variables only; no environment dump.'
+    })
+    if ($flags['CARGO_ENCODED_RUSTFLAGS'].present -or
+        $null -ne $flags['CARGO_ENCODED_RUSTFLAGS'].value -or
+        $flags['RUSTFLAGS'].value -cne '-C target-feature=+crt-static') {
+        throw 'Actual process compiler flags differ from the required static CRT selection; original flag evidence retained.'
+    }
+}
+
+function Restore-ProcessEnvironment($Saved) {
+    foreach ($name in $Saved.Keys) {
+        if ($Saved[$name].present) {
+            # The provider preserves an original empty value on PowerShell 7.5+.
+            Set-Item -LiteralPath "Env:\$name" -Value $Saved[$name].value
+        } else {
+            Remove-Item -LiteralPath "Env:\$name" -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 function Get-ActiveProcessIdentity($Process, [DateTime]$Deadline) {
     if ($Process.HasExited) { return $null }
     try {
@@ -287,7 +323,10 @@ function Copy-Executable($Message, [string]$Role, [string]$PackageName, [string]
 $savedEnvironment = @{}
 foreach ($name in @('RUSTUP_HOME','CARGO_HOME','RUSTUP_TOOLCHAIN','CARGO_TARGET_DIR','CARGO_BUILD_JOBS','CARGO_TERM_COLOR',
     'CARGO_ENCODED_RUSTFLAGS','RUSTFLAGS','CARGO_TARGET_I686_PC_WINDOWS_MSVC_LINKER','CC_i686_pc_windows_msvc','TEMP','TMP')) {
-    $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+    $savedEnvironment[$name] = @{
+        present = (Test-Path -LiteralPath "Env:\$name")
+        value = [Environment]::GetEnvironmentVariable($name, 'Process')
+    }
 }
 $failure = $null
 $executables = [Collections.Generic.List[object]]::new()
@@ -342,7 +381,9 @@ try {
     $env:RUSTUP_HOME = Join-Path $RunRoot 'rustup'; $env:CARGO_HOME = Join-Path $RunRoot 'cargo'
     $env:RUSTUP_TOOLCHAIN = $Toolchain; $env:CARGO_TARGET_DIR = Join-Path $RunRoot 'target'
     $env:CARGO_BUILD_JOBS = '2'; $env:CARGO_TERM_COLOR = 'never'
-    [Environment]::SetEnvironmentVariable('CARGO_ENCODED_RUSTFLAGS', $null, 'Process')
+    # The API null setter leaves an empty value in PowerShell 7.5, which Cargo
+    # would prefer over RUSTFLAGS. Provider null truly removes the variable.
+    $env:CARGO_ENCODED_RUSTFLAGS = $null
     $env:RUSTFLAGS = '-C target-feature=+crt-static'
     $env:TEMP = Join-Path $RunRoot 'scratch'; $env:TMP = $env:TEMP
     Require-Step (Invoke-Logged 'rustup-version' $rustup @('--version'))
@@ -358,7 +399,9 @@ try {
     $instances = @((Read-Output $vs) | ConvertFrom-Json)
     if ($instances.Count -ne 1) { throw 'No unique installed Visual Studio 2022 x86/x64 toolchain.' }
     $vsPath = [string]$instances[0].installationPath
+    Write-CrtFlagState 'before-vs'
     & (Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1') -Arch x86 -HostArch amd64 -SkipAutomaticLocation | Out-Null
+    Write-CrtFlagState 'after-vs'
     $cl = Resolve-Application 'cl.exe'
     $link = Resolve-Application 'link.exe'
     $dumpbin = Resolve-Application 'dumpbin.exe'
@@ -391,9 +434,10 @@ try {
     # Independent checks retain separate first/final command evidence. No tests run.
     Invoke-Logged 'fmt' $cargo @('fmt','--all','--','--check') 300 | Out-Null
     Invoke-Logged 'architecture' $python @('scripts/check-architecture.py') 120 | Out-Null
-    $tests = Invoke-Logged 'workspace-test-compile' $cargo @('test','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') 2400
-    $binary = Invoke-Logged 'product-compile' $cargo @('build','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') 1200
-    Invoke-Logged 'clippy' $cargo @('clippy','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') 1500 | Out-Null
+    Write-CrtFlagState 'before-cargo'
+    $tests = Invoke-Logged 'workspace-test-compile' $cargo @('test','-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--no-run','--message-format=json') 2400
+    $binary = Invoke-Logged 'product-compile' $cargo @('build','-vv','--release','--locked','--target',$Target,'-p','fc-bootstrap','--bin','fc-bootstrap','--message-format=json') 1200
+    Invoke-Logged 'clippy' $cargo @('clippy','-vv','--workspace','--all-targets','--release','--locked','--target',$Target,'--','-D','warnings') 1500 | Out-Null
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($build in @($tests, $binary)) {
         foreach ($line in [IO.File]::ReadLines((Join-Path $Artifact $build.stdout), $Utf8)) {
@@ -442,7 +486,7 @@ try {
     Write-NewJson (Join-Path $Artifact 'failure.json') ([ordered]@{ message = $failure; utc = [DateTime]::UtcNow.ToString('o') })
     Write-Host "Compilation evidence failed: $failure"
 } finally {
-    foreach ($name in $savedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name], 'Process') }
+    Restore-ProcessEnvironment $savedEnvironment
 }
 $passed = ($null -eq $failure -and $Steps.Count -gt 0 -and @($Steps | Where-Object { -not $_.passed }).Count -eq 0)
 Write-NewJson (Join-Path $Artifact 'result.json') ([ordered]@{
