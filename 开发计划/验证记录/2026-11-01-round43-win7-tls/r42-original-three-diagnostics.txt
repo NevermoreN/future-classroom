@@ -1,0 +1,36 @@
+error: initializer for `thread_local` value can be made `const`
+  --> crates\fc-bootstrap\src\reinitialization\tests\tls.rs:17:1
+   |
+17 | / thread_local! {
+18 | |     static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+19 | | }
+   | |_^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+   = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+
+
+error: initializer for `thread_local` value can be made `const`
+  --> crates\fc-bootstrap\src\voice_runtime\tls_exit_tests.rs:45:1
+   |
+45 | / thread_local! {
+46 | |     static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+47 | | }
+   | |_^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+
+
+error: initializer for `thread_local` value can be made `const`
+  --> crates\fc-bootstrap\src\voice_pipeline_probe.rs:31:1
+   |
+31 | / thread_local! {
+32 | |     static PHASE: Cell<&'static str> = const { Cell::new("startup") };
+33 | | }
+   | |_^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+   = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+

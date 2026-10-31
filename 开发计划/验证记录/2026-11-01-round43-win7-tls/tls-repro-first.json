@@ -1,0 +1,231 @@
+{
+  "status": "PASS_EXACT_NIGHTLY_WIN7_CLIPPY_RED_GREEN_SENTINEL_NO_RUNTIME",
+  "scope": "Dependency-free three const-TLS prototypes; exact fixed-nightly Win7 build-std strict Clippy, no EXE/native execution or whole-workspace build",
+  "ownerRoot": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b",
+  "ownerMarker": "future-classroom-owned-r43-tls-repro/v1\n",
+  "jobs": 2,
+  "totalBudgetSeconds": 900,
+  "cases": [
+    {
+      "name": "original-three",
+      "command": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std",
+        "--offline",
+        "--release",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "source": {
+        "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.rs",
+        "bytes": 1044,
+        "sha256": "44393ec899e92b4988464d965755bcaa8cd1dbdf00d34d5eb4bc2fb74029703e"
+      },
+      "expectedExitCode": 101,
+      "expectedMissingConstCount": 3,
+      "timeoutSeconds": 898.6193173259962,
+      "exitCode": 101,
+      "elapsedSeconds": 58.661330117844045,
+      "missingConstCount": 3,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stderr.log",
+          "bytes": 3359,
+          "sha256": "f981443c82d8aa7ecfd1bcfdadabce265c98d253832ee6bb2454107be723f90c"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "scoped-three",
+      "command": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std",
+        "--offline",
+        "--release",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "source": {
+        "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.rs",
+        "bytes": 1794,
+        "sha256": "86425bcd605a7070b966e08ab9d0c8ca54ebb162e23d088e084eef854a835e12"
+      },
+      "expectedExitCode": 0,
+      "expectedMissingConstCount": 0,
+      "timeoutSeconds": 839.9571348330937,
+      "exitCode": 0,
+      "elapsedSeconds": 0.41931097698397934,
+      "missingConstCount": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stderr.log",
+          "bytes": 160,
+          "sha256": "838e7fcb6327824f3c42c31c8c3cec4d9f888c477eda1f27a4d92eafa1f5f30e"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "strict-sentinel",
+      "command": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std",
+        "--offline",
+        "--release",
+        "--target",
+        "i686-win7-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "source": {
+        "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.rs",
+        "bytes": 1957,
+        "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+      },
+      "expectedExitCode": 101,
+      "expectedMissingConstCount": 1,
+      "timeoutSeconds": 839.5363715861458,
+      "exitCode": 101,
+      "elapsedSeconds": 0.31927359011024237,
+      "missingConstCount": 1,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stderr.log",
+          "bytes": 829,
+          "sha256": "b59f83c16da07de7a32ddb1226d86a3da2c71ac70d489951495680b09edaaf8b"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "versions": [
+    {
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-rustc.stdout.log",
+          "bytes": 214,
+          "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-rustc.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "-V"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-cargo.stdout.log",
+          "bytes": 45,
+          "sha256": "4a49f090d476d6612d41a222f70bb06dd03af6352966a544751942aeccdd6e3d"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-cargo.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-V"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-clippy.stdout.log",
+          "bytes": 39,
+          "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-clippy.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "cleanup": {
+    "status": "PASS",
+    "root": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b",
+    "existsAfter": false,
+    "scope": "Only exact owned marker-bound scratch, including target; no product files/global compiler/cache/SSH changes"
+  },
+  "startedUtc": "2026-10-31T22:09:13.104958+00:00",
+  "scratchInputs": [
+    {
+      "originalPath": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b/.owner",
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-_owner.txt",
+      "bytes": 40,
+      "sha256": "ac8b493ff7b90328153d1aabb513db09bb8576333c56dcd26d98d60d20d2b225"
+    },
+    {
+      "originalPath": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b/Cargo.toml",
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-Cargo_toml.txt",
+      "bytes": 108,
+      "sha256": "a9d494f71b8b4be180fb06c5d58b8012ba46c53b45562ee8a3505fd10dc4247e"
+    },
+    {
+      "originalPath": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b/Cargo.lock",
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-Cargo_lock.txt",
+      "bytes": 160,
+      "sha256": "22c89f8f9816ccca81f93a4e26d030550bf9234b8dbd4e073d8c1264129c7672"
+    },
+    {
+      "originalPath": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b/src/lib.rs",
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-lib_rs.txt",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+    }
+  ],
+  "elapsedSeconds": 60.81807601894252,
+  "completedUtc": "2026-10-31T22:10:13.923061+00:00"
+}

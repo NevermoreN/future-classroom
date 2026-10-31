@@ -145,3 +145,9 @@ Win7原run `41240791635` 现追加实际终态 **FAILURE**（job `124654072346`�
 
 
 R39最终本地矩阵以[第五次原报告](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-fifth.json)及[当前字节冻结核验](验证记录/2026-11-01-round39-voice-capability/final-frozen-verification-first.json)为准：410份Rust/构建输入、Host21程序929项、Windows GNU严格Clippy及Web300项分别实际PASS。R40固定nightly重建Win7标准库的五个已const TLS误报使用每static且仅Win7 MSVC Clippy的expect；[精确小例和独立未注解哨兵](验证记录/2026-11-01-round40-ci/thread-local-repro-msvc-only.json)证明0/101，原全局-D warnings保留。仍须修正后完整Win7 MSVC CI与Windows增量运行；原CI/实测FAIL没有被覆盖。原日志、源码冻结及失败均归档到round39/round40 INDEX.json，后续提交和本地构建副本清理独立取证。
+
+## R42/R43最新独立补证
+
+`bc2a86f`的现代MSVC run41244281175实际SUCCESS，授权Win11完整21程序[1413/0/0/0](验证记录/2026-11-01-round42-ci/modern-runtime-independent-first.json)、公开20步、配色22步及真实TLS/连续接纳/隔离Edge提醒+能力GET分别PASS/cleanup PASS；[设备流程163项独审](验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-first.json)只证明实际401/200/200和严格20字段，原生查询次数/缓存命中未观察，不证明当前有声。两CI完整6444项输入分别为4124项Git blob及2320项精确LF→CRLF检出匹配。
+
+同源码Win7 run41244342769整体FAIL：41命令仅strict Clippy101，另三处已const TLS宏误报，22份静态PE检查不代表EXE执行。[原第二次完整独审](验证记录/2026-11-01-round42-ci/win7-original-independent-second.json)与第一次错误诊断数守卫FAIL均保留。R43仅补三处同条件窄expect，[固定nightly三原型](验证记录/2026-11-01-round43-win7-tls/tls-repro-first.json)原const101/定向0/未注解哨兵101通过；原初始化/Drop/全局-D warnings及未报错项保持，修正后完整CI待新源码。完整结果与开发包边界见[实施记录](10-实施进度与验证记录.md)R42/R43，不覆盖独立R41、严格首TCP原FAIL或正式平台/发布门槛。

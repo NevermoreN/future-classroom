@@ -320,3 +320,14 @@ Win7候选原41240791635仍live且未取得artifact，未重新dispatch；实际
 
 
 R39最终[本地第五次](验证记录/2026-11-01-round39-voice-capability/voice-capability-local-fifth.json)与[冻结核验](验证记录/2026-11-01-round39-voice-capability/final-frozen-verification-first.json)实际PASS：Host929项，Windows GNU全workspace严格Clippy，410份Rust/构建源码不变；这仍非Windows执行。R40精确Win7-MSVC-only的[最小误报整改验证](验证记录/2026-11-01-round40-ci/thread-local-repro-msvc-only.json)为定向const0/独立未注解nonconst101；完整Win7修正后CI、R39新程序实际Win11设备能力增量尚未运行。原3b3 MSVC库314/1 FAIL以及同程序公开20步/配色22步/REMINDER有限PASS分别保留；真实Win7/Win10、可见希沃、音频及生产门槛不升格。
+
+## R42/R43最新平台证据
+
+| 范围 | 实际结果 | 验收边界 |
+| --- | --- | --- |
+| `bc2a86f`现代MSVC Hosted CI | run41244281175 SUCCESS；22份PE32/CUI、完整6444输入与原件账通过 | 不含独立R41首连接候选 |
+| 同一现代MSVC程序在授权Win11 Pro build26300/WOW64 | [21程序1413通过/0失败/0忽略/0过滤](验证记录/2026-11-01-round42-ci/modern-runtime-independent-first.json)，公开20步/配色22步及[真实TLS/连续/隔离Edge提醒+能力GET](验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-first.json)各自PASS/cleanup PASS | 隐藏合成原生及隔离浏览器，未录音/播放；不证明Win10或可见希沃 |
+| `bc2a86f`Win7专用MSVC CI | run41244342769 FAILURE；仅strict Clippy因另三处已const TLS宏误报exit101；[22PE及完整原件独审](验证记录/2026-11-01-round42-ci/win7-original-independent-second.json)通过 | 没有执行这些Win7 EXE，实际Win7仍未验收 |
+| R43三处定向expect | [固定nightly最小原型](验证记录/2026-11-01-round43-win7-tls/tls-repro-first.json)原const101/定向0/独立未注解哨兵101；fmt/架构及精确集成通过 | 修正后的完整MSVC CI待新源码验证，不用小程序替代 |
+
+Windows10及11仍为首版必需兼容范围，两者分别取证；用户保留的测试SSH授权不撤销。原严格首TCP五秒FAIL、生产listener关闭、Win7/Win10实机、可见希沃/触控/DPI、物理音频及部署/长稳门槛保持，详见[实施记录](10-实施进度与验证记录.md)R42/R43。

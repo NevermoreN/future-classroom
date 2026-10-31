@@ -1,0 +1,47 @@
+{
+  "status": "PASS_EXACT_THREE_SCOPED_ATTRIBUTES_MAIN_MATCH_FROZEN",
+  "base": "bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc",
+  "startedUtc": "2026-10-31T22:12:45.507003+00:00",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74"
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": "main-fmt-first.stdout.log",
+      "stderr": "main-fmt-first.stderr.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdout": "main-architecture-first.stdout.log",
+      "stderr": "main-architecture-first.stderr.log"
+    }
+  ],
+  "finishedUtc": "2026-10-31T22:12:50.612945+00:00",
+  "scope": "Exact integration plus fmt/architecture. Fixed-nightly three-prototype original101/scoped0/sentinel101 proof remains separate. No new main workspace compile, CI or platform execution claimed."
+}

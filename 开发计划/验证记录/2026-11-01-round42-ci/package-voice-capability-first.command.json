@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/package-probe.py",
+    "--exe",
+    "/tmp/fc-round42-modern-programs/fc-bootstrap.exe",
+    "--output",
+    "/tmp/fc-round42-package/FutureClassroom-0.1.0-voice-capability-dev.zip",
+    "--target",
+    "i686-pc-windows-msvc",
+    "--toolchain",
+    "1.97.1-x86_64-pc-windows-msvc",
+    "--web-dist",
+    "/tmp/fc-round42-web-assets/dist"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T21:54:47.493043+00:00",
+  "stdout": "/tmp/fc-round42-ci-evidence/package-voice-capability-first.stdout.log",
+  "stderr": "/tmp/fc-round42-ci-evidence/package-voice-capability-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 3.0745530370622873,
+  "completedUtc": "2026-10-31T21:54:50.582417+00:00",
+  "stdoutBytes": 303,
+  "stdoutSha256": "236c30015e92158051acdc3879f05e7171a99fbc1751a31d1b95f194c109642b",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

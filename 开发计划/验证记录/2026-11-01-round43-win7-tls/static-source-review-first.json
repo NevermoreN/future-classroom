@@ -1,0 +1,174 @@
+{
+  "status": "PASS_ATTRIBUTES_ONLY_EXACT_SOURCE_REVIEW",
+  "recordedUtc": "2026-10-31T22:09:39.263171+00:00",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "beforeBytes": 4786,
+      "beforeSha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/reinitialization/tests/tls.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "beforeBytes": 6638,
+      "beforeSha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "beforeBytes": 21798,
+      "beforeSha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_pipeline_probe.rs"
+    }
+  ],
+  "checks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+        "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+        "crates/fc-bootstrap/src/voice_pipeline_probe.rs"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stdout.log",
+          "bytes": 71,
+          "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "tlsInventory": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "line": 19,
+      "name": "EXIT",
+      "type": "RefCell<Option<TlsExit>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "line": 33,
+      "name": "PHASE",
+      "type": "Cell<&'static str>",
+      "initializer": "const { Cell::new(\"startup\") }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "line": 47,
+      "name": "EXIT",
+      "type": "RefCell<Option<TlsExit>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "line": 345,
+      "name": "RETAINED_CORE",
+      "type": "RefCell<Option<Box<dyn Any>>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": false
+    },
+    {
+      "path": "crates/fc-windows/src/audio/tests.rs",
+      "line": 23,
+      "name": "FAKE",
+      "type": "RefCell<Rc<RefCell<FakeState>>>",
+      "initializer": "RefCell::new(Rc::new(RefCell::new(FakeState::default())))",
+      "hasScopedExpectation": false
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "line": 29,
+      "name": "FOREGROUND_TARGET",
+      "type": "Cell<HWND>",
+      "initializer": "const { Cell::new(HWND(std::ptr::null_mut())) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "line": 31,
+      "name": "FOREGROUND_PENDING",
+      "type": "Cell<bool>",
+      "initializer": "const { Cell::new(false) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "line": 614,
+      "name": "HELD_TLS",
+      "type": "std::cell::RefCell<Option<HeldTls>>",
+      "initializer": "const { std::cell::RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "line": 373,
+      "name": "HELD_TLS",
+      "type": "std::cell::RefCell<Option<HeldTls>>",
+      "initializer": "const { std::cell::RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "line": 69,
+      "name": "WORKBENCHES",
+      "type": "RefCell<Vec<HWND>>",
+      "initializer": "const { RefCell::new(Vec::new()) }",
+      "hasScopedExpectation": true
+    }
+  ],
+  "inventoryCount": 10,
+  "newScopedAttributes": 3,
+  "existingScopedAttributes": 5,
+  "untouchedUnannotated": [
+    "audio/tests.rs FAKE: Rc allocation is non-const",
+    "web_transfer/network.rs RETAINED_CORE: original exact-target CI emitted no diagnostic; no expectation added"
+  ],
+  "noRuntimeChangeProof": "Deleting precisely the single added attribute line from each after file reproduces original before bytes exactly; const init, type, Drop logic and test assertions are byte-for-byte preserved.",
+  "runtime": "NOT_RUN",
+  "workspaceBuild": "NOT_RUN"
+}

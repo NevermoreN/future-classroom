@@ -68,3 +68,5 @@ Worklet及Worker均为同源平铺assets/*.js，由构建清单逐文件核验�
 上例为默认值，响应字段形状和版本保持1。当前maxDurationMillis为500–60000的整数，maxRepeatTotal为1–10整数；defaultRepeatTotal严格min(3,maxRepeatTotal)，maxWavBytes严格44+32×maxDurationMillis；其余格式、minDurationMillis500、minRepeatTotal1与上传TTL600不变。配置保存推进运行代次并退休旧上传/任务，旧网页录音不跨代次重新授权。网页采集、Worklet、归一化和上传前均绑定开始时的时长限制；次数选项显示当前上限，配置变化取消未发送录音。旧任务和审计的已锁定次数仍按原1–10读取，不随新上限改写。
 
 队列当前限制只在原hard4/2以内收紧；未提交上传两个预约及最大1920044字节预计费保持原独立资源上限。发布和提交都验证新时长，submit验证新次数和队列；没有新增Web修改全局设置端点或设备/系统音量控制权。完整验证与独立设备策略门槛见实施记录第二十八轮。
+
+R42使用确切R39现代MSVC程序在授权Win11完成[真实TLS能力GET补证](验证记录/2026-11-01-round42-ci/voice-capabilities-browser-independent-first.json)：401/200/200、20字段、实际UNVERIFIED及原有限请求/浏览器预算均保持；不记录响应正文、凭据或声音，独立检查按原runner合同及正文SHA绑定，不由相同SHA推断查询次数/缓存命中。原双worker及native物理排空、Hub/隔离队列0、cleanup PASS；[完整21程序1413项](验证记录/2026-11-01-round42-ci/modern-runtime-independent-first.json)另行通过。具体边界见[实施记录](10-实施进度与验证记录.md)R42，不将这些有限证据视为实际可听或普通生产监听通过。

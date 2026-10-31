@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/package-probe.py",
+    "--exe",
+    "/tmp/fc-round42-modern-programs/fc-bootstrap.exe",
+    "--output",
+    "/tmp/fc-round42-independent-repack-uhaqaatv/FutureClassroom-0.1.0-voice-capability-dev.zip",
+    "--target",
+    "i686-pc-windows-msvc",
+    "--toolchain",
+    "1.97.1-x86_64-pc-windows-msvc",
+    "--web-dist",
+    "/tmp/fc-round42-web-assets/dist"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T21:57:26.514167+00:00",
+  "stdout": "/tmp/fc-round42-ci-evidence/package-independent-repack-first.stdout.log",
+  "stderr": "/tmp/fc-round42-ci-evidence/package-independent-repack-first.stderr.log",
+  "budgetSeconds": 60,
+  "ownedDirectory": "/tmp/fc-round42-independent-repack-uhaqaatv",
+  "completedUtc": "2026-10-31T21:57:29.617253+00:00",
+  "elapsedSeconds": 3.102935856906697,
+  "exitCode": 0,
+  "stdoutEvidence": {
+    "path": "/tmp/fc-round42-ci-evidence/package-independent-repack-first.stdout.log",
+    "bytes": 323,
+    "sha256": "97c02c65f0bc666e28fae0fbbc50322c4ba5f3871ca56d534f8ae4fd25a3d0cf"
+  },
+  "stderrEvidence": {
+    "path": "/tmp/fc-round42-ci-evidence/package-independent-repack-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

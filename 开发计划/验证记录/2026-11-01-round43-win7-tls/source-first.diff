@@ -1,0 +1,30 @@
+--- crates/fc-bootstrap/src/reinitialization/tests/tls.rs (before)
++++ crates/fc-bootstrap/src/reinitialization/tests/tls.rs (after)
+@@ -15,6 +15,7 @@
+     }
+ }
+ thread_local! {
++    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
+     static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+ }
+ struct Factory {
+--- crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs (before)
++++ crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs (after)
+@@ -43,6 +43,7 @@
+     }
+ }
+ thread_local! {
++    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
+     static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+ }
+ struct ReleaseOnDrop(Arc<ExitGate>);
+--- crates/fc-bootstrap/src/voice_pipeline_probe.rs (before)
++++ crates/fc-bootstrap/src/voice_pipeline_probe.rs (after)
+@@ -29,6 +29,7 @@
+ };
+ const PASSWORD: &str = "Synthetic voice probe password 2026!";
+ thread_local! {
++    #[cfg_attr(all(clippy, target_os = "windows", target_vendor = "win7", target_env = "msvc"), expect(clippy::missing_const_for_thread_local, reason = "nightly-2026-10-29 rebuilt Win7 std wraps this const initializer in a non-const function"))]
+     static PHASE: Cell<&'static str> = const { Cell::new("startup") };
+ }
+ fn phase(value: &'static str) {

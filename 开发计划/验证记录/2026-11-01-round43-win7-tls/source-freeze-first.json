@@ -1,0 +1,515 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_AND_EXACT_NIGHTLY_REPRO_PASS_RUNTIME_NOT_RUN",
+  "recordedUtc": "2026-10-31T22:10:44.238929+00:00",
+  "worktree": "/tmp/fc-round43-win7-tls-expect-worktree",
+  "gitBase": "bc2a86fb4413dcb3e8acf6b0d4bb2dfe601c22dc",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "beforeBytes": 4786,
+      "beforeSha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/reinitialization/tests/tls.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "beforeBytes": 6638,
+      "beforeSha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "beforeBytes": 21798,
+      "beforeSha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74",
+      "attributeOnlyExactBytes": true,
+      "afterCopy": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_pipeline_probe.rs"
+    }
+  ],
+  "changes": "Only3 per-static cfg_attr expect annotations using exactly the same condition/reason as existing5; source byte-identical after removing the one annotation line per file. No initializer, TLS type, Drop, assertion, deadline or version change.",
+  "guard": "all(clippy,target_os=\"windows\",target_vendor=\"win7\",target_env=\"msvc\")",
+  "fullTlsInventory": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "line": 19,
+      "name": "EXIT",
+      "type": "RefCell<Option<TlsExit>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "line": 33,
+      "name": "PHASE",
+      "type": "Cell<&'static str>",
+      "initializer": "const { Cell::new(\"startup\") }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "line": 47,
+      "name": "EXIT",
+      "type": "RefCell<Option<TlsExit>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "line": 345,
+      "name": "RETAINED_CORE",
+      "type": "RefCell<Option<Box<dyn Any>>>",
+      "initializer": "const { RefCell::new(None) }",
+      "hasScopedExpectation": false
+    },
+    {
+      "path": "crates/fc-windows/src/audio/tests.rs",
+      "line": 23,
+      "name": "FAKE",
+      "type": "RefCell<Rc<RefCell<FakeState>>>",
+      "initializer": "RefCell::new(Rc::new(RefCell::new(FakeState::default())))",
+      "hasScopedExpectation": false
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "line": 29,
+      "name": "FOREGROUND_TARGET",
+      "type": "Cell<HWND>",
+      "initializer": "const { Cell::new(HWND(std::ptr::null_mut())) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "line": 31,
+      "name": "FOREGROUND_PENDING",
+      "type": "Cell<bool>",
+      "initializer": "const { Cell::new(false) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/materials/shell.rs",
+      "line": 614,
+      "name": "HELD_TLS",
+      "type": "std::cell::RefCell<Option<HeldTls>>",
+      "initializer": "const { std::cell::RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "line": 373,
+      "name": "HELD_TLS",
+      "type": "std::cell::RefCell<Option<HeldTls>>",
+      "initializer": "const { std::cell::RefCell::new(None) }",
+      "hasScopedExpectation": true
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "line": 69,
+      "name": "WORKBENCHES",
+      "type": "RefCell<Vec<HWND>>",
+      "initializer": "const { RefCell::new(Vec::new()) }",
+      "hasScopedExpectation": true
+    }
+  ],
+  "existingFiveUnchanged": true,
+  "untouchedUndiagnosed": [
+    "web_transfer/network.rs RETAINED_CORE",
+    "audio/tests.rs FAKE non-const Rc"
+  ],
+  "originalFailure": {
+    "path": "/tmp/fc-round42-ci-evidence/win7-artifact-raw/logs/clippy.stderr.log",
+    "bytes": 1456414,
+    "sha256": "3696590e84af9e6eb2d41e04714ad7cf0611be6e259fa3108d6dbcfd83d54326",
+    "excerptPath": "/tmp/fc-round43-win7-tls-expect-evidence/r42-original-three-diagnostics.txt",
+    "diagnosticCount": 3
+  },
+  "staticChecks": [
+    {
+      "name": "rustfmt",
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+        "crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+        "crates/fc-bootstrap/src/voice_pipeline_probe.rs"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "originals": [
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stdout.log",
+          "bytes": 71,
+          "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+        },
+        {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "actualMinimalRepro": {
+    "report": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-first.json",
+    "sha256": "73b281c46be209f92748d2a8432dc76430fa4b76689bccc01cbbe1c6cd02be9b",
+    "toolchain": "nightly-2026-10-29",
+    "target": "i686-win7-windows-msvc",
+    "buildStd": true,
+    "offline": true,
+    "jobs": 2,
+    "oneAbsoluteBudgetSeconds": 900,
+    "elapsedSeconds": 60.81807601894252,
+    "cases": [
+      {
+        "name": "original-three",
+        "command": [
+          "cargo",
+          "+nightly-2026-10-29",
+          "clippy",
+          "-Z",
+          "build-std",
+          "--offline",
+          "--release",
+          "--target",
+          "i686-win7-windows-msvc",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "source": {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.rs",
+          "bytes": 1044,
+          "sha256": "44393ec899e92b4988464d965755bcaa8cd1dbdf00d34d5eb4bc2fb74029703e"
+        },
+        "expectedExitCode": 101,
+        "expectedMissingConstCount": 3,
+        "timeoutSeconds": 898.6193173259962,
+        "exitCode": 101,
+        "elapsedSeconds": 58.661330117844045,
+        "missingConstCount": 3,
+        "originals": [
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stderr.log",
+            "bytes": 3359,
+            "sha256": "f981443c82d8aa7ecfd1bcfdadabce265c98d253832ee6bb2454107be723f90c"
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "scoped-three",
+        "command": [
+          "cargo",
+          "+nightly-2026-10-29",
+          "clippy",
+          "-Z",
+          "build-std",
+          "--offline",
+          "--release",
+          "--target",
+          "i686-win7-windows-msvc",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "source": {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.rs",
+          "bytes": 1794,
+          "sha256": "86425bcd605a7070b966e08ab9d0c8ca54ebb162e23d088e084eef854a835e12"
+        },
+        "expectedExitCode": 0,
+        "expectedMissingConstCount": 0,
+        "timeoutSeconds": 839.9571348330937,
+        "exitCode": 0,
+        "elapsedSeconds": 0.41931097698397934,
+        "missingConstCount": 0,
+        "originals": [
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stderr.log",
+            "bytes": 160,
+            "sha256": "838e7fcb6327824f3c42c31c8c3cec4d9f888c477eda1f27a4d92eafa1f5f30e"
+          }
+        ],
+        "passed": true
+      },
+      {
+        "name": "strict-sentinel",
+        "command": [
+          "cargo",
+          "+nightly-2026-10-29",
+          "clippy",
+          "-Z",
+          "build-std",
+          "--offline",
+          "--release",
+          "--target",
+          "i686-win7-windows-msvc",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "source": {
+          "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.rs",
+          "bytes": 1957,
+          "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+        },
+        "expectedExitCode": 101,
+        "expectedMissingConstCount": 1,
+        "timeoutSeconds": 839.5363715861458,
+        "exitCode": 101,
+        "elapsedSeconds": 0.31927359011024237,
+        "missingConstCount": 1,
+        "originals": [
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stderr.log",
+            "bytes": 829,
+            "sha256": "b59f83c16da07de7a32ddb1226d86a3da2c71ac70d489951495680b09edaaf8b"
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "scope": "No whole-workspace compilation or target executable execution. EXIT prototypes preserve RefCell<Option<Drop type>> and PHASE Cell<static str> shapes; prototype Drop uses an atomic marker rather than executing the real blocking destructor. Actual product Drop bodies and tests are untouched.",
+    "cleanup": {
+      "status": "PASS",
+      "root": "/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b",
+      "existsAfter": false,
+      "scope": "Only exact owned marker-bound scratch, including target; no product files/global compiler/cache/SSH changes"
+    },
+    "processCheck": "/tmp/fc-round43-win7-tls-expect-evidence/repro-owned-process-check-first.json"
+  },
+  "evidence": [
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/r42-original-three-diagnostics.txt",
+      "bytes": 1509,
+      "sha256": "c8a441f2b808bd4bb07e8e6b12be77369751e4e18fb2c13db2d23c5fa831c166"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/repro-owned-process-check-first.json",
+      "bytes": 337,
+      "sha256": "1c30c597ff201b5e4c7d15d88eaacd4ca0bd6f3677e8da1aef5b9b9e3a3fec64"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/run-tls-repro-first.py",
+      "bytes": 6359,
+      "sha256": "0a7d754b3c85db44a671014f647038cf2a8be645b434cf158de45ab1dac74886"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-after/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-before/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 4786,
+      "sha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-before/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 21798,
+      "sha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-before/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6638,
+      "sha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-before.json",
+      "bytes": 570,
+      "sha256": "5749dc74ff3a45dff78e2c2469b72ecbfeb79c0da866b8e429449fbcd4d2272d"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/source-first.diff",
+      "bytes": 1645,
+      "sha256": "1ad852882f4c67f3153e31d3f40866bf9fe954e6493d24e0d6b8a30d2a00a9ba"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-rustfmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/static-source-review-first.json",
+      "bytes": 6202,
+      "sha256": "b05d8e4d7d0b627c5a6bcd4f4aeec29dc79f3a67b578da339078378856b131c2"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-Cargo_lock.txt",
+      "bytes": 160,
+      "sha256": "22c89f8f9816ccca81f93a4e26d030550bf9234b8dbd4e073d8c1264129c7672"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-Cargo_toml.txt",
+      "bytes": 108,
+      "sha256": "a9d494f71b8b4be180fb06c5d58b8012ba46c53b45562ee8a3505fd10dc4247e"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-_owner.txt",
+      "bytes": 40,
+      "sha256": "ac8b493ff7b90328153d1aabb513db09bb8576333c56dcd26d98d60d20d2b225"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-final-lib_rs.txt",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-first.json",
+      "bytes": 7674,
+      "sha256": "73b281c46be209f92748d2a8432dc76430fa4b76689bccc01cbbe1c6cd02be9b"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.rs",
+      "bytes": 1044,
+      "sha256": "44393ec899e92b4988464d965755bcaa8cd1dbdf00d34d5eb4bc2fb74029703e"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stderr.log",
+      "bytes": 3359,
+      "sha256": "f981443c82d8aa7ecfd1bcfdadabce265c98d253832ee6bb2454107be723f90c"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-original-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.rs",
+      "bytes": 1794,
+      "sha256": "86425bcd605a7070b966e08ab9d0c8ca54ebb162e23d088e084eef854a835e12"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stderr.log",
+      "bytes": 160,
+      "sha256": "838e7fcb6327824f3c42c31c8c3cec4d9f888c477eda1f27a4d92eafa1f5f30e"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-scoped-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.rs",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stderr.log",
+      "bytes": 829,
+      "sha256": "b59f83c16da07de7a32ddb1226d86a3da2c71ac70d489951495680b09edaaf8b"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-strict-sentinel.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-cargo.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-cargo.stdout.log",
+      "bytes": 45,
+      "sha256": "4a49f090d476d6612d41a222f70bb06dd03af6352966a544751942aeccdd6e3d"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-clippy.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-clippy.stdout.log",
+      "bytes": 39,
+      "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-rustc.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round43-win7-tls-expect-evidence/tls-repro-version-rustc.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    }
+  ],
+  "notPerformed": [
+    "Full-workspace Cargo",
+    "Windows/EXE/native execution",
+    "Git mutation/commit/rebase/push",
+    "CI/remote dispatch",
+    "R41 source changes",
+    "Global lint suppression/toolchain changes"
+  ],
+  "integration": "Parent integrates these3 attributes with independently validated R41. Existing R42 fullcompile success is not evidence of this new source runtime; actual fixed-target full CI and original TLS destructor runtime tests remain separate validation."
+}

@@ -1,0 +1,12 @@
+    Checking fc-r43-tls-repro v0.0.0 (/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b)
+error: initializer for `thread_local` value can be made `const`
+  --> src/lib.rs:30:66
+   |
+30 | std::thread_local! { static UNANNOTATED: std::cell::Cell<bool> = std::cell::Cell::new(false); }
+   |                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `const { std::cell::Cell::new(false) }`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+   = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+
+error: could not compile `fc-r43-tls-repro` (lib) due to 1 previous error

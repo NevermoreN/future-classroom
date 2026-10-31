@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round42-modern-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round42-package/FutureClassroom-0.1.0-voice-capability-dev.zip",
+    "--continuous-accept",
+    "--browser",
+    "--browser-content",
+    "REMINDER",
+    "--voice-capabilities",
+    "--report",
+    "/tmp/fc-round42-ci-evidence/modern-msvc-voice-capabilities-browser-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T21:58:33.754549+00:00",
+  "stdout": "/tmp/fc-round42-ci-evidence/modern-msvc-voice-capabilities-browser-first.stdout.log",
+  "stderr": "/tmp/fc-round42-ci-evidence/modern-msvc-voice-capabilities-browser-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 67.43558729300275,
+  "completedUtc": "2026-10-31T21:59:41.225739+00:00",
+  "stdoutBytes": 274,
+  "stdoutSha256": "c00c26809a7bec4fc9e187a2510d77a0a4eda1c4b272ac57cf54fa257e7980a5",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

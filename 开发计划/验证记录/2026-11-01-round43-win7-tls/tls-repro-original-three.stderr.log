@@ -1,0 +1,50 @@
+   Compiling compiler_builtins v0.1.160 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling std v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+   Compiling windows-link v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/windows_link)
+   Compiling rustc-std-workspace-core v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)
+   Compiling unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)
+   Compiling cfg-if v1.0.4
+   Compiling rustc-demangle v0.1.28
+   Compiling rustc-literal-escaper v0.0.8
+   Compiling rustc-std-workspace-alloc v1.99.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling std_detect v0.1.5 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)
+   Compiling hashbrown v0.17.1
+   Compiling panic_abort v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)
+   Compiling panic_unwind v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling proc_macro v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)
+    Checking fc-r43-tls-repro v0.0.0 (/tmp/fc-round43-tls-repro-a7718c58ac5841e3a9e01e9c2237385b)
+error: initializer for `thread_local` value can be made `const`
+ --> src/lib.rs:5:5
+  |
+5 | /     std::thread_local! {
+6 | |         static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+7 | |     }
+  | |_____^
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+  = note: `-D clippy::missing-const-for-thread-local` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(clippy::missing_const_for_thread_local)]`
+
+error: initializer for `thread_local` value can be made `const`
+  --> src/lib.rs:14:5
+   |
+14 | /     std::thread_local! {
+15 | |         static EXIT: RefCell<Option<TlsExit>> = const { RefCell::new(None) };
+16 | |     }
+   | |_____^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+
+error: initializer for `thread_local` value can be made `const`
+  --> src/lib.rs:21:5
+   |
+21 | /     std::thread_local! {
+22 | |         static PHASE: Cell<&'static str> = const { Cell::new("startup") };
+23 | |     }
+   | |_____^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/main/index.html#missing_const_for_thread_local
+
+error: could not compile `fc-r43-tls-repro` (lib) due to 3 previous errors

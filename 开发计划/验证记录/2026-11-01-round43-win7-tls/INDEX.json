@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Complete current finished original evidence bytes. Original CI/product/local-guard failures and historical live records are retained; static Win7 checks do not imply execution. CI binary ZIP/EXE files audited separately and not committed. Synthetic public TLS certificate allowed; no private key. R41 prototype remains separate.",
+  "sourceRoot": "/tmp/fc-round43-win7-tls-expect-evidence",
+  "files": [
+    {
+      "path": "main-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "main-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "main-fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "main-fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "main-integration-first.json",
+      "bytes": 1494,
+      "sha256": "244c0af3b5d2042dcc4604f805d61b8e1f4bf5fb44fc86e6ee8dc54377d3df16"
+    },
+    {
+      "path": "r42-original-three-diagnostics.txt",
+      "bytes": 1509,
+      "sha256": "c8a441f2b808bd4bb07e8e6b12be77369751e4e18fb2c13db2d23c5fa831c166"
+    },
+    {
+      "path": "repro-owned-process-check-first.json",
+      "bytes": 337,
+      "sha256": "1c30c597ff201b5e4c7d15d88eaacd4ca0bd6f3677e8da1aef5b9b9e3a3fec64"
+    },
+    {
+      "path": "run-tls-repro-first.py",
+      "bytes": 6359,
+      "sha256": "0a7d754b3c85db44a671014f647038cf2a8be645b434cf158de45ab1dac74886"
+    },
+    {
+      "path": "source-after/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 5032,
+      "sha256": "287c5a0ea742ae2a41a655c189a4d22d72f86ba06c3fd613be9c4b785a4abb71"
+    },
+    {
+      "path": "source-after/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 22044,
+      "sha256": "169e43f9d96985889259e77faaa0eb25809c53874af1688d582a0a5f6a2bce74"
+    },
+    {
+      "path": "source-after/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6884,
+      "sha256": "76a1c26ac9a94674f82ed8a5d0b25e256074171ae5ad3e53e5ed1fe5d9504322"
+    },
+    {
+      "path": "source-before/crates/fc-bootstrap/src/reinitialization/tests/tls.rs",
+      "bytes": 4786,
+      "sha256": "b9f2fb8f05c8b040b41c2ad74c528d2e6fcc1984347c943d90115fbc72da5aab"
+    },
+    {
+      "path": "source-before/crates/fc-bootstrap/src/voice_pipeline_probe.rs",
+      "bytes": 21798,
+      "sha256": "d6da58dd1b011c6603ca3f09c924dc4293002572f7e7223548e311b65ee5330c"
+    },
+    {
+      "path": "source-before/crates/fc-bootstrap/src/voice_runtime/tls_exit_tests.rs",
+      "bytes": 6638,
+      "sha256": "181fe7a8847e52d1f71e03e2a20202de00f2efbf55104dd4fb70e8086471a12e"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 570,
+      "sha256": "5749dc74ff3a45dff78e2c2469b72ecbfeb79c0da866b8e429449fbcd4d2272d"
+    },
+    {
+      "path": "source-first.diff",
+      "bytes": 1645,
+      "sha256": "1ad852882f4c67f3153e31d3f40866bf9fe954e6493d24e0d6b8a30d2a00a9ba"
+    },
+    {
+      "path": "source-freeze-first.json",
+      "bytes": 19844,
+      "sha256": "da6930981a9f2e58bc38dbf8c4bb2da82327143779c631f5f641dd518fbf92f3"
+    },
+    {
+      "path": "static-architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "static-architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "static-rustfmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "static-rustfmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "static-source-review-first.json",
+      "bytes": 6202,
+      "sha256": "b05d8e4d7d0b627c5a6bcd4f4aeec29dc79f3a67b578da339078378856b131c2"
+    },
+    {
+      "path": "tls-repro-final-Cargo_lock.txt",
+      "bytes": 160,
+      "sha256": "22c89f8f9816ccca81f93a4e26d030550bf9234b8dbd4e073d8c1264129c7672"
+    },
+    {
+      "path": "tls-repro-final-Cargo_toml.txt",
+      "bytes": 108,
+      "sha256": "a9d494f71b8b4be180fb06c5d58b8012ba46c53b45562ee8a3505fd10dc4247e"
+    },
+    {
+      "path": "tls-repro-final-_owner.txt",
+      "bytes": 40,
+      "sha256": "ac8b493ff7b90328153d1aabb513db09bb8576333c56dcd26d98d60d20d2b225"
+    },
+    {
+      "path": "tls-repro-final-lib_rs.txt",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+    },
+    {
+      "path": "tls-repro-first.json",
+      "bytes": 7674,
+      "sha256": "73b281c46be209f92748d2a8432dc76430fa4b76689bccc01cbbe1c6cd02be9b"
+    },
+    {
+      "path": "tls-repro-original-three.rs",
+      "bytes": 1044,
+      "sha256": "44393ec899e92b4988464d965755bcaa8cd1dbdf00d34d5eb4bc2fb74029703e"
+    },
+    {
+      "path": "tls-repro-original-three.stderr.log",
+      "bytes": 3359,
+      "sha256": "f981443c82d8aa7ecfd1bcfdadabce265c98d253832ee6bb2454107be723f90c"
+    },
+    {
+      "path": "tls-repro-original-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-scoped-three.rs",
+      "bytes": 1794,
+      "sha256": "86425bcd605a7070b966e08ab9d0c8ca54ebb162e23d088e084eef854a835e12"
+    },
+    {
+      "path": "tls-repro-scoped-three.stderr.log",
+      "bytes": 160,
+      "sha256": "838e7fcb6327824f3c42c31c8c3cec4d9f888c477eda1f27a4d92eafa1f5f30e"
+    },
+    {
+      "path": "tls-repro-scoped-three.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-strict-sentinel.rs",
+      "bytes": 1957,
+      "sha256": "74c15d3ad5bfd1c67a4aa7841d4ba7ef607517453a95f4d499ecc4eafe1acf8a"
+    },
+    {
+      "path": "tls-repro-strict-sentinel.stderr.log",
+      "bytes": 829,
+      "sha256": "b59f83c16da07de7a32ddb1226d86a3da2c71ac70d489951495680b09edaaf8b"
+    },
+    {
+      "path": "tls-repro-strict-sentinel.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-version-cargo.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-version-cargo.stdout.log",
+      "bytes": 45,
+      "sha256": "4a49f090d476d6612d41a222f70bb06dd03af6352966a544751942aeccdd6e3d"
+    },
+    {
+      "path": "tls-repro-version-clippy.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-version-clippy.stdout.log",
+      "bytes": 39,
+      "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+    },
+    {
+      "path": "tls-repro-version-rustc.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tls-repro-version-rustc.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    }
+  ],
+  "originalFileCount": 42,
+  "originalBytes": 124664
+}
