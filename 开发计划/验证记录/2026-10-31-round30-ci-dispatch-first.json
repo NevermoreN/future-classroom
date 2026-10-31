@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "Single manual modern i686 MSVC compile-only dispatch; no product/test EXE execution or formal three-OS runtime claim",
+  "sourceSha": "279ff50e6e69f92fd0774ee88b743839c3b85a3e",
+  "ref": "main",
+  "workflowPath": ".github/workflows/windows-msvc.yml",
+  "apiVersion": "2026-03-10",
+  "calls": [
+    {
+      "method": "GET",
+      "route": "/git/ref/heads/main",
+      "httpStatus": 200,
+      "response": {
+        "bytes": 352,
+        "sha256": "7c85859d62efa473c9c974d16ed6c7ed0b4b5662e01472a33c9f941a522d3d94",
+        "base64": "eyJyZWYiOiJyZWZzL2hlYWRzL21haW4iLCJub2RlX2lkIjoiUkVGX2t3RE9WY0ZmUjY5eVpXWnpMMmhsWVdSekwyMWhhVzQiLCJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL05ldmVybW9yZU4vZnV0dXJlLWNsYXNzcm9vbS9naXQvcmVmcy9oZWFkcy9tYWluIiwib2JqZWN0Ijp7InNoYSI6IjI3OWZmNTBlNmU2OWY5MmZkMDc3NGVlODhiNzQzODM5YzNiODVhM2UiLCJ0eXBlIjoiY29tbWl0IiwidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9OZXZlcm1vcmVOL2Z1dHVyZS1jbGFzc3Jvb20vZ2l0L2NvbW1pdHMvMjc5ZmY1MGU2ZTY5ZjkyZmQwNzc0ZWU4OGI3NDM4MzljM2I4NWEzZSJ9fQ=="
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/actions/workflows/windows-msvc.yml",
+      "httpStatus": 200,
+      "response": {
+        "bytes": 556,
+        "sha256": "adc31c22771bbab44be302f5f8231d0c7d560f829ccc75033cf6c18906061878",
+        "base64": "eyJpZCI6NDAyNzQ3MzQ4LCJub2RlX2lkIjoiV19rd0RPVmNGZlI4NFlBV19VIiwibmFtZSI6Ii5naXRodWIvd29ya2Zsb3dzL3dpbmRvd3MtbXN2Yy55bWwiLCJwYXRoIjoiLmdpdGh1Yi93b3JrZmxvd3Mvd2luZG93cy1tc3ZjLnltbCIsInN0YXRlIjoiYWN0aXZlIiwiY3JlYXRlZF9hdCI6IjIwMjYtMTAtMzFUMjE6MTE6MjQuMDAwKzA4OjAwIiwidXBkYXRlZF9hdCI6IjIwMjYtMTAtMzFUMjE6MTE6MjUuMDAwKzA4OjAwIiwidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9OZXZlcm1vcmVOL2Z1dHVyZS1jbGFzc3Jvb20vYWN0aW9ucy93b3JrZmxvd3MvNDAyNzQ3MzQ4IiwiaHRtbF91cmwiOiJodHRwczovL2dpdGh1Yi5jb20vTmV2ZXJtb3JlTi9mdXR1cmUtY2xhc3Nyb29tL2Jsb2IvbWFpbi8uZ2l0aHViL3dvcmtmbG93cy93aW5kb3dzLW1zdmMueW1sIiwiYmFkZ2VfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL05ldmVybW9yZU4vZnV0dXJlLWNsYXNzcm9vbS93b3JrZmxvd3MvLmdpdGh1Yi93b3JrZmxvd3Mvd2luZG93cy1tc3ZjLnltbC9iYWRnZS5zdmcifQ=="
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/actions/workflows/windows-msvc.yml/runs?event=workflow_dispatch&branch=main&head_sha=279ff50e6e69f92fd0774ee88b743839c3b85a3e&per_page=20",
+      "httpStatus": 200,
+      "response": {
+        "bytes": 36,
+        "sha256": "a2790a384d7d281e7395679000c35d27768d89dbd7052f725b8f4688beb59915",
+        "base64": "eyJ0b3RhbF9jb3VudCI6MCwid29ya2Zsb3dfcnVucyI6W119"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/actions/workflows/windows-msvc.yml/dispatches",
+      "body": {
+        "ref": "main",
+        "inputs": {
+          "source_sha": "279ff50e6e69f92fd0774ee88b743839c3b85a3e"
+        }
+      },
+      "httpStatus": 422,
+      "response": {
+        "bytes": 285,
+        "sha256": "5e5b900fa37570aa56673f2843888ff5d592258f246120bbb995e8238780dc29",
+        "base64": "eyJtZXNzYWdlIjoiSW52YWxpZCBBcmd1bWVudCAtIGZhaWxlZCB0byBwYXJzZSB3b3JrZmxvdzogKExpbmU6IDI5LCBDb2w6IDI1KTogVW5yZWNvZ25pemVkIG5hbWVkLXZhbHVlOiAncnVubmVyJy4gTG9jYXRlZCBhdCBwb3NpdGlvbiAxIHdpdGhpbiBleHByZXNzaW9uOiBydW5uZXIudGVtcCIsImRvY3VtZW50YXRpb25fdXJsIjoiaHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vcmVzdC9hY3Rpb25zL3dvcmtmbG93cyNjcmVhdGUtYS13b3JrZmxvdy1kaXNwYXRjaC1ldmVudCIsInN0YXR1cyI6IjQyMiJ9"
+      }
+    }
+  ],
+  "status": "DISPATCH_REQUEST_ABOUT_TO_SEND",
+  "createdUtc": "2026-10-31T13:12:55.488353+00:00",
+  "baselineRunIds": [],
+  "errorKind": "AssertionError",
+  "observationError": "Inspect original report; do not repeat POST"
+}

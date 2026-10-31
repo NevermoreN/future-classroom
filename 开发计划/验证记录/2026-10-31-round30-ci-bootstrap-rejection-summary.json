@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "First actual GitHub dispatch rejected before any job; CI-only context fix, no Rust/Cargo or packaged payload changes",
+  "firstSyncedCommit": "279ff50e6e69f92fd0774ee88b743839c3b85a3e",
+  "remoteCommitVerified": true,
+  "firstDispatchHttpStatus": 422,
+  "firstDispatchConclusion": "WORKFLOW_PARSE_REJECTED_NO_COMPILATION_STARTED",
+  "actualMessage": "Unrecognized named-value runner at jobs.compile-i686.env",
+  "fix": "Compute exact owned path from RUNNER_TEMP in first hosted PowerShell step and export via GITHUB_ENV; keep source_sha guard",
+  "localContextRegression": {
+    "oldUnsupported": [
+      "runner"
+    ],
+    "newUnsupported": []
+  },
+  "realWindowsAst": "PASS_READ_ONLY",
+  "msvcCompilation": "NOT_YET_RUN",
+  "nextAction": "Commit and non-force sync CI-only correction; dispatch once with new exact source_sha",
+  "archivedOriginals": [
+    {
+      "path": "2026-10-31-round30-git-commit.json",
+      "bytes": 117471,
+      "sha256": "19304b28767ee096e153ff99088c94e4f4bbc9edc79e38e54999e4411ecd57d4"
+    },
+    {
+      "path": "2026-10-31-round30-git-push.json",
+      "bytes": 678,
+      "sha256": "0534e086a95f7257e1c39ff06b4c54bec5500a2e74a3bd4b1a1b44b5af4125af"
+    },
+    {
+      "path": "2026-10-31-round30-ci-dispatch-first.json",
+      "bytes": 3534,
+      "sha256": "39b876a355e946485ae75f8530f479af75cd070de6e21945993d564b18146079"
+    },
+    {
+      "path": "2026-10-31-round30-ci-dispatch-once.py",
+      "bytes": 4658,
+      "sha256": "6ffbc72fdbd060bb5aaafd5318c2f203a6a87c3653b88a8293a8d24d37c88aab"
+    },
+    {
+      "path": "2026-10-31-round30-ci-runner-context-fix.json",
+      "bytes": 17748,
+      "sha256": "27b3cf02543f856fd5e904c5edf9c37c126e1855787f641910a73ab2405c11ad"
+    }
+  ],
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}
