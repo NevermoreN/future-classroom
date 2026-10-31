@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "atUtc": "2026-10-31T23:17:55.354040+00:00",
+  "commit": "bcd51dacb5ba69a184546e5180569a8fd1b3ebad",
+  "actions": [
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-worktree",
+      "branch": "codex/frontdoor-deadline-close",
+      "removed": true,
+      "basis": "Registered exact worktree/branch; all dirty bytes already in committed source; no untracked files"
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-worktree",
+      "branch": "codex/ci-input-domains",
+      "removed": true,
+      "basis": "Registered exact worktree/branch; all dirty bytes already in committed source; no untracked files"
+    },
+    {
+      "path": "/tmp/fc-round41-programs-second",
+      "files": 22,
+      "bytes": 103676815,
+      "basis": "All22 original compiler artifact bytes match committed build report",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round41-programs-third",
+      "files": 22,
+      "bytes": 103676815,
+      "basis": "All22 original compiler artifact bytes match committed build report",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round41-build-target",
+      "files": 2781,
+      "bytes": 988639967,
+      "basis": "Exact owned build marker, original build runners, terminal tests/lints and no live reference; reproducible cache",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round42-web-assets",
+      "files": 8,
+      "bytes": 460191,
+      "basis": "All7 dist bytes equal retained exact development ZIP entries; owned marker",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round42-package",
+      "files": 2,
+      "bytes": 5203742,
+      "basis": "Owned exact ZIP equals intentionally retained /mnt/data copy",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round45-ci-input-domains-evidence",
+      "files": 46,
+      "bytes": 8471189,
+      "basis": "All original bytes and owner marker match committed archive index",
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round41-frontdoor-deadline-evidence",
+      "files": 449,
+      "bytes": 63692494,
+      "basis": "All original bytes match committed archive index; original absence of marker stated",
+      "removed": true
+    }
+  ],
+  "scope": "Exact committed originals and unchanged integrated sources precede removal. No process signals, Windows actions, SSH access or global cache removal. R47 and R46 remain active.",
+  "r41EvidenceOwnerMarker": "NOT_PRESENT; complete original index and recorded sourceRoot used",
+  "processReferences": [],
+  "excludedOwnAncestorPids": [
+    1,
+    42,
+    2410,
+    2442,
+    2488,
+    2515,
+    17508
+  ],
+  "retainedDevelopmentZipSha256": "5e280a84e726f0366db3e0ea1bd704158e26ac1b3fdb4e542f397b48fc1706c0"
+}
