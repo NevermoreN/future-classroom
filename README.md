@@ -36,11 +36,11 @@ cargo run -p fc-bootstrap --locked -- --self-check
 
 登录自启动已接入本机主管理员工作台：分开展示期望与实际状态，开启、关闭或移动路径修复均需明确核对；变更意图和实际结果持久留痕，启动时只读取并核对中断状态。实现范围与未完成验收见[自启动契约](开发计划/22-自启动与系统变更核对.md)。`--autostart-probe` 使用合成数据库、隐藏窗口及本轮独立临时注册表项，不改真实登录启动项。
 
-第二十二轮新增[完整普通备份与受控恢复服务](开发计划/23-完整备份与受控恢复.md)：新鲜教学数据投影排除凭据、完整材料与内容媒体流、安装绑定、当前权限/密码/限速保持及有日志的三目录切换。第二十三轮接通原生导出/另存、完整预检和影响复核、后台取消清理及独立物理关闭/恢复进度；跨安装映射、重初始化和三系统完整验收仍需继续，P2-05尚未完成。
+第二十二轮新增[完整普通备份与受控恢复服务](开发计划/23-完整备份与受控恢复.md)：新鲜教学数据投影排除凭据、完整材料与内容媒体流、安装绑定、当前权限/密码/限速保持及有日志的三目录切换。第二十三轮接通原生导出/另存、完整预检和影响复核、后台取消清理及独立物理关闭/恢复进度；第二十四轮推进[无恢复码重新初始化向导](开发计划/24-无恢复码重新初始化.md)，验证范围见实施记录。跨安装映射和三系统完整验收仍需继续，P2-05尚未完成。
 
 ## Windows 开发探针
 
-直接运行新构建的 `fc-bootstrap.exe` 打开工作台；`--autostart` 保持锁定并隐藏窗口。首次运行会在本机 ProgramData 的项目专属目录准备保护ACL、部署标记、数据库和当前用户DPAPI密钥，需自行设置应用主管理员口令。缺失或损坏的既有数据不会重新开放首次注册。应用角色和Windows账号权限彼此独立。
+直接运行新构建的 `fc-bootstrap.exe` 打开工作台；`--autostart` 保持锁定并隐藏窗口。首次运行会在本机 ProgramData 的项目专属目录准备保护ACL、部署标记、数据库和当前用户DPAPI密钥，需自行设置应用主管理员口令。缺失或损坏的既有数据不会重新开放首次注册。无恢复码且决定放弃全部本机资料时，可在登录/恢复/修复页进入清除向导，原程序正常关闭后独立启动；也可在原程序关闭后运行 `--repair`。须两项明确确认清除，完成后重启正常程序设置新学校和主管理员；部署内导出备份一并清除，部署外另存副本和Windows设置不被修改。应用角色和Windows账号权限彼此独立。
 
 ```powershell
 .\fc-bootstrap.exe --self-check
@@ -48,6 +48,7 @@ cargo run -p fc-bootstrap --locked -- --self-check
 .\fc-bootstrap.exe --host-probe 2
 .\fc-bootstrap.exe --application-probe
 .\fc-bootstrap.exe --autostart-probe
+.\fc-bootstrap.exe --reinitialization-probe
 .\fc-bootstrap.exe --materials-probe
 .\fc-bootstrap.exe --audio-silent-probe
 .\fc-bootstrap.exe --native-probe 30

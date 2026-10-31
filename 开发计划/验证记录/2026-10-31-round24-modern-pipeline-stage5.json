@@ -1,0 +1,58 @@
+[
+  {
+    "label": "modern-build-final",
+    "command": [
+      "cargo",
+      "build",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--release",
+      "--locked",
+      "-p",
+      "fc-bootstrap",
+      "--message-format=json"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 162.075,
+    "stdout": "modern-build-artifacts-final.jsonl",
+    "log": "modern-build-final.log"
+  },
+  {
+    "label": "windows-tests-build-final",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--release",
+      "--locked",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 238.772,
+    "stdout": "windows-test-artifacts-final.jsonl",
+    "log": "windows-tests-build-final.log"
+  },
+  {
+    "label": "windows-clippy-final",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--target",
+      "i686-pc-windows-gnu",
+      "--release",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 15.448,
+    "stdout": null,
+    "log": "windows-clippy-final.log"
+  }
+]

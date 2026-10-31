@@ -45,6 +45,7 @@ def main():
     parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
     parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
     parser.add_argument("--recovery", action="store_true", help="isolated hidden native ordinary backup/save/preflight/review/cold restore and independent process reopen; no visible picker")
+    parser.add_argument("--reinitialization", action="store_true", help="isolated hidden native no-code reset, cancellation, explicit acknowledgements and independent executable fresh setup; synthetic deployment only")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
@@ -59,6 +60,8 @@ def main():
         parser.error("test timeout seconds must be in 1..900")
     if args.recovery and (args.application or args.calendar or args.autostart):
         parser.error("run the dedicated recovery workflow separately to preserve its independent ownership and budget")
+    if args.reinitialization and (args.application or args.calendar or args.autostart or args.recovery):
+        parser.error("run the dedicated reinitialization workflow separately to preserve its independent ownership and budget")
     if args.autostart and (args.application or args.calendar):
         parser.error("run the dedicated autostart workflow separately to preserve independent budgets")
     if args.calendar and args.application:
@@ -227,6 +230,14 @@ def main():
             anchor = matched[0]
             body = body.replace(anchor, command + "@{recoveryExitCode=$recoveryCode;recoveryOutput=$recoveryOutput;" + anchor[2:])
 
+        if args.reinitialization:
+            command = "$resetOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --reinitialization-probe 2>&1|ForEach-Object{\"$_\"});$resetCode=$LASTEXITCODE;"
+            anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("reinitialization report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{reinitializationExitCode=$resetCode;reinitializationOutput=$resetOutput;" + anchor[2:])
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -236,11 +247,11 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery:
+        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
-        if args.recovery:
+        if args.recovery or args.reinitialization:
             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -287,6 +298,15 @@ def main():
             report["recoveryNativeStatus"] = "PASS"
             report["recoveryNativeSteps"] = len(steps)
             report["recoveryScope"] = "Hidden native controls and real DPAPI/SQLite/current-security/cold switching/independent executable reopen; picker return capabilities simulated under isolated marker; visible dialogs and hardware power loss NOT_RUN"
+        if args.reinitialization:
+            output = report["native"].get("reinitializationOutput", [])
+            if report["native"].get("reinitializationExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native reinitialization workflow failed")
+            children = [line.split("stage=", 1)[1].split()[0] for line in output if isinstance(line, str) and line.startswith("REINITIALIZATION_CHILD_PASS stage=")]
+            if children != ["cancel", "commit", "reopen"] or not any(isinstance(line, str) and line.startswith("reinitialization_native=PASS child_processes=3 ") for line in output):
+                raise RuntimeError("reinitialization exact independent-child results or completion marker missing")
+            report["reinitializationNativeStatus"] = "PASS"
+            report["reinitializationScope"] = "Synthetic hidden native controls, cancel exact bytes, explicit full reset, new process DPAPI and school/admin initialization, old backup installation rejection; foreground and real Run untouched; hardware power loss NOT_RUN"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):

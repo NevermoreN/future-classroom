@@ -1,0 +1,23 @@
+[
+  {
+    "label": "win7-build-final",
+    "command": [
+      "cargo",
+      "+nightly-2026-10-29",
+      "build",
+      "-Z",
+      "build-std=std,panic_unwind",
+      "--target",
+      "i686-win7-windows-gnu",
+      "--release",
+      "-p",
+      "fc-bootstrap",
+      "--locked",
+      "--message-format=json"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 72.304,
+    "stdout": "win7-build-artifacts-final.jsonl",
+    "log": "win7-build-final.log"
+  }
+]

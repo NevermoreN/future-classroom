@@ -263,6 +263,70 @@ impl PinnedDirectory {
             _parents: parents,
         })
     }
+    /// Stable identity of this still-pinned directory, not a pathname proof.
+    pub fn identity(&self) -> Result<(u32, u64)> {
+        let i = info(&self._directory)?;
+        Ok((
+            i.dwVolumeSerialNumber,
+            (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+        ))
+    }
+}
+
+/// Raw owned-object inspection for destructive reinitialization. This preserves
+/// the ordinary LockedFile nonempty-input contract: only this separate pin
+/// accepts an empty regular file. It decodes neither SQLite nor DPAPI bytes.
+pub struct OwnedObjectPin {
+    file: File,
+    _parents: Vec<File>,
+    identity: (u32, u64),
+}
+impl OwnedObjectPin {
+    pub fn directory(path: &Path) -> Result<Self> {
+        Self::open(path, true)
+    }
+    pub fn file_allow_empty(path: &Path) -> Result<Self> {
+        Self::open(path, false)
+    }
+    fn open(path: &Path, directory: bool) -> Result<Self> {
+        let parents = pins(path)?;
+        let file = OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ.0 | if directory { FILE_SHARE_WRITE.0 } else { 0 })
+            .custom_flags(
+                FILE_FLAG_OPEN_REPARSE_POINT.0
+                    | if directory {
+                        FILE_FLAG_BACKUP_SEMANTICS.0
+                    } else {
+                        FILE_FLAG_SEQUENTIAL_SCAN.0
+                    },
+            )
+            .open(path)?;
+        let i = info(&file)?;
+        if i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || (i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 != 0) != directory
+            || !directory && i.nNumberOfLinks != 1
+        {
+            return Err(denied());
+        }
+        Ok(Self {
+            file,
+            _parents: parents,
+            identity: (
+                i.dwVolumeSerialNumber,
+                (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+            ),
+        })
+    }
+    pub fn identity(&self) -> (u32, u64) {
+        self.identity
+    }
+    pub fn file(&self) -> &File {
+        &self.file
+    }
+    pub fn file_mut(&mut self) -> &mut File {
+        &mut self.file
+    }
 }
 
 /// Private deployment tree. New subdirectories inherit its protected DACL.
@@ -310,6 +374,39 @@ impl ControlledFiles {
             .open(source)?;
         let i = info(&directory)?;
         if i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 == 0
+        {
+            return Err(denied());
+        }
+        rename_handle(&directory, target)
+    }
+    /// Reinitialization: acquire the exact source with DELETE rights, compare
+    /// its journaled identity, and rename this same handle without replacement.
+    /// Inspection pins may be released before this call; a pathname replacement
+    /// cannot cause a different directory object to be moved under the receipt.
+    pub fn rename_directory_expected(
+        &self,
+        source: &Path,
+        target: &Path,
+        expected: (u32, u64),
+    ) -> Result<()> {
+        self.check(source)?;
+        self.check(target)?;
+        let _source_parents = pins(source)?;
+        let _target_parents = pins(target)?;
+        let directory = OpenOptions::new()
+            .read(true)
+            .access_mode(GENERIC_READ.0 | DELETE.0)
+            .share_mode(FILE_SHARE_READ.0 | FILE_SHARE_WRITE.0)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS.0 | FILE_FLAG_OPEN_REPARSE_POINT.0)
+            .open(source)?;
+        let i = info(&directory)?;
+        let identity = (
+            i.dwVolumeSerialNumber,
+            (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+        );
+        if identity != expected
+            || i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
             || i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 == 0
         {
             return Err(denied());
@@ -460,6 +557,65 @@ impl ControlledFiles {
     }
     pub fn remove(&self, path: &Path) -> Result<bool> {
         self.remove_when(path, |_| true)
+    }
+    /// Delete only the journaled object, with an optional last byte check against
+    /// this same exclusive read+DELETE handle. Missing means a previous cleanup
+    /// already removed it. Directories are removed only if the kernel finds them
+    /// empty; this API never enumerates or follows a new descendant.
+    pub fn remove_object_expected(
+        &self,
+        path: &Path,
+        directory: bool,
+        expected: (u32, u64),
+        eligible: impl FnOnce(&mut File) -> bool,
+    ) -> Result<bool> {
+        self.check(path)?;
+        let _parents = pins(path)?;
+        let mut file = match OpenOptions::new()
+            .read(true)
+            .access_mode(GENERIC_READ.0 | DELETE.0)
+            .share_mode(0)
+            .custom_flags(
+                FILE_FLAG_OPEN_REPARSE_POINT.0
+                    | if directory {
+                        FILE_FLAG_BACKUP_SEMANTICS.0
+                    } else {
+                        0
+                    },
+            )
+            .open(path)
+        {
+            Ok(file) => file,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+            Err(e) => return Err(e.into()),
+        };
+        let i = info(&file)?;
+        let identity = (
+            i.dwVolumeSerialNumber,
+            (u64::from(i.nFileIndexHigh) << 32) | u64::from(i.nFileIndexLow),
+        );
+        if identity != expected
+            || i.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT.0 != 0
+            || (i.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY.0 != 0) != directory
+            || !directory && i.nNumberOfLinks != 1
+        {
+            return Err(denied());
+        }
+        if !eligible(&mut file) {
+            return Ok(false);
+        }
+        let disposition = FILE_DISPOSITION_INFO { DeleteFile: true };
+        // SAFETY: same exact checked inode has exclusive DELETE ownership. The
+        // directory disposition refuses nonempty directories without traversal.
+        unsafe {
+            SetFileInformationByHandle(
+                handle(&file),
+                FileDispositionInfo,
+                &disposition as *const _ as _,
+                std::mem::size_of_val(&disposition) as u32,
+            )?;
+        }
+        Ok(true)
     }
     /// Predicate runs against the exact exclusively pinned file immediately before
     /// disposition. A writer cannot refresh its age between this check and deletion.

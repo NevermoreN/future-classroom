@@ -9,6 +9,8 @@ mod credential_probe;
 #[cfg(windows)]
 mod material_helper;
 #[cfg(windows)]
+mod reinitialize_application;
+#[cfg(windows)]
 mod voice_pipeline_probe;
 #[cfg(windows)]
 mod web_pairing_probe;
@@ -33,6 +35,37 @@ fn main() -> ExitCode {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.as_slice() {
+        [flag] if flag == "--reinitialization-probe" => {
+            #[cfg(windows)]
+            {
+                application::reinitialization_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("native reinitialization probe requires Windows".into())
+            }
+        }
+        [flag, root, nonce, stage] if flag == "--reinitialization-probe-stage" => {
+            #[cfg(windows)]
+            {
+                application::reinitialization_probe_stage(std::path::Path::new(root), nonce, stage)
+            }
+            #[cfg(not(windows))]
+            {
+                let _ = (root, nonce, stage);
+                Err("native reinitialization child probe requires Windows".into())
+            }
+        }
+        [flag] if flag == "--repair" => {
+            #[cfg(windows)]
+            {
+                reinitialize_application::run()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("本机资料重新初始化向导需要 Windows".into())
+            }
+        }
         [flag, root, nonce] if flag == "--recovery-probe-reopen" => {
             #[cfg(windows)]
             {

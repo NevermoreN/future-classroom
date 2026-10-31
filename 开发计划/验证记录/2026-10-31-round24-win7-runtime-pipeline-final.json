@@ -1,0 +1,85 @@
+[
+  {
+    "label": "win7-reinitialization-on-win11-final",
+    "exitCode": 0,
+    "elapsedSeconds": 18.156,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-win7/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/win7-reinitialization-on-win11-final.json",
+      "--reinitialization"
+    ]
+  },
+  {
+    "label": "win7-application-on-win11-final",
+    "exitCode": 0,
+    "elapsedSeconds": 195.662,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-win7/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/win7-application-on-win11-final.json",
+      "--application",
+      "--materials",
+      "--audio-silent",
+      "--system-host"
+    ]
+  },
+  {
+    "label": "win7-recovery-on-win11-final",
+    "exitCode": 0,
+    "elapsedSeconds": 9.318,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-win7/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/win7-recovery-on-win11-final.json",
+      "--recovery"
+    ]
+  },
+  {
+    "label": "win7-autostart-on-win11-final",
+    "exitCode": 0,
+    "elapsedSeconds": 7.5,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-win7/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/win7-autostart-on-win11-final.json",
+      "--autostart"
+    ]
+  }
+]

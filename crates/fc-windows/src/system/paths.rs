@@ -71,6 +71,114 @@ impl DataPaths {
         check_local_ancestors(&self.root)?;
         verify_acl(&self.root, &Descriptor::for_user(&current_user_sid()?)?)
     }
+    /// Verify or create only the fixed instance-lock parent before acquiring the
+    /// lock. A pre-existing junction or mismatching ACL is never followed/fixed.
+    pub fn prepare_instance_runtime(&self) -> Result<()> {
+        self.verify_root_for_current_user()?;
+        let _root = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        self.verify_root_for_current_user()?;
+        let runtime = self.runtime();
+        check_local_ancestors(&runtime)?;
+        ensure_directory(&runtime, &Descriptor::for_user(&current_user_sid()?)?)
+    }
+    /// Fixed destructive-reinitialization journal namespace. No live data
+    /// directory is created or repaired by this operation.
+    pub fn prepare_reinitialization_namespace(&self) -> Result<()> {
+        self.verify_root_for_current_user()?;
+        let _root = crate::materials::files::PinnedDirectory::open(&self.root)?;
+        self.verify_root_for_current_user()?;
+        let expected = Descriptor::for_user(&current_user_sid()?)?;
+        ensure_reinitialization_directory(&self.root.join("reinitialization"), &expected)
+    }
+    /// Create one fresh protected operation, before its owner receipt is written.
+    /// An existing operation is never adopted, including a nonce collision.
+    pub fn prepare_reinitialization_operation(&self, operation: &Path) -> Result<()> {
+        self.verify_reinitialization_path(operation, false)?;
+        self.prepare_reinitialization_namespace()?;
+        let _namespace =
+            crate::materials::files::PinnedDirectory::open(&self.root.join("reinitialization"))?;
+        check_local_ancestors(operation)?;
+        let expected = Descriptor::for_user(&current_user_sid()?)?;
+        let attributes = SECURITY_ATTRIBUTES {
+            nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+            lpSecurityDescriptor: expected.0 .0,
+            bInheritHandle: false.into(),
+        };
+        // SAFETY: fresh fixed-shape operation and live owned descriptor. Unlike
+        // ensure_directory, AlreadyExists is an error before any contents exist.
+        let native_name = reinitialization_native_name(operation)?;
+        unsafe {
+            CreateDirectoryW(&native_name, Some(&attributes))?;
+        }
+        verify_acl_named(operation, &expected, &native_name)
+    }
+    /// Create only a fresh reset candidate's fixed empty teaching namespaces.
+    /// The caller has already created the protected operation and persisted its
+    /// owner receipt; old credentials/database are never opened here.
+    pub fn prepare_reinitialization_candidate(&self, candidate: &Path) -> Result<()> {
+        self.verify_reinitialization_path(candidate, true)?;
+        self.verify_root_for_current_user()?;
+        let expected = Descriptor::for_user(&current_user_sid()?)?;
+        let operation = candidate
+            .parent()
+            .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+        let _operation = crate::materials::files::PinnedDirectory::open(operation)?;
+        self.verify_root_for_current_user()?;
+        verify_acl_named(
+            &self.root.join("reinitialization"),
+            &expected,
+            &reinitialization_native_name(&self.root.join("reinitialization"))?,
+        )?;
+        verify_acl_named(
+            operation,
+            &expected,
+            &reinitialization_native_name(operation)?,
+        )?;
+        check_local_ancestors(candidate)?;
+        ensure_reinitialization_directory(candidate, &expected)?;
+        let _candidate = crate::materials::files::PinnedDirectory::open(candidate)?;
+        ensure_reinitialization_directory(&operation.join("old"), &expected)?;
+        ensure_reinitialization_directory(&operation.join("manifests"), &expected)?;
+        // Keep synchronized with bootstrap's versioned reset-owned tree set.
+        for name in [
+            "state",
+            "config",
+            "teachers",
+            "profile-content",
+            "voice",
+            "staging",
+            "launch-copies",
+            "web-material-staging",
+            "exports",
+            "open-copies",
+            "quarantine",
+            "cache",
+            "recovery",
+        ] {
+            ensure_reinitialization_directory(&candidate.join(name), &expected)?;
+        }
+        Ok(())
+    }
+    fn verify_reinitialization_path(&self, path: &Path, candidate: bool) -> Result<()> {
+        let relative = path
+            .strip_prefix(&self.root)
+            .map_err(|_| Error::from_hresult(E_INVALIDARG))?;
+        let parts: Vec<_> = relative.components().collect();
+        if parts.len() != if candidate { 3 } else { 2 }
+            || parts[0].as_os_str() != "reinitialization"
+            || candidate && parts[2].as_os_str() != "new"
+            || parts[1].as_os_str().to_str().is_none_or(|s| {
+                s.len() != 35
+                    || !s.starts_with("op-")
+                    || !s[3..]
+                        .bytes()
+                        .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            })
+        {
+            return Err(Error::from_hresult(E_INVALIDARG));
+        }
+        Ok(())
+    }
     /// Trusted recovery composition only. The candidate is a fixed `new` child
     /// of one opaque operation below this deployment's `recovery` namespace.
     /// Protected ACLs are installed at creation, including the three trees that
@@ -270,6 +378,49 @@ fn no_reparse_directory(path: &Path) -> Result<()> {
     }
     Ok(())
 }
+/// Reset-only Win7 extended path. Resolve the already checked parent first;
+/// blindly prefixing an input could change DOS dot/space alias semantics.
+fn reinitialization_native_name(path: &Path) -> Result<HSTRING> {
+    check_local_ancestors(path)?;
+    let parent = path
+        .parent()
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    let leaf = path
+        .file_name()
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    let mut canonical = parent.canonicalize()?;
+    if !matches!(canonical.components().next(), Some(std::path::Component::Prefix(prefix)) if matches!(prefix.kind(), std::path::Prefix::VerbatimDisk(_)))
+    {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    canonical.push(leaf);
+    use std::os::windows::ffi::OsStrExt;
+    if canonical.as_os_str().encode_wide().count() >= 32767 {
+        return Err(Error::from_hresult(E_INVALIDARG));
+    }
+    Ok(HSTRING::from(canonical.as_os_str()))
+}
+fn ensure_reinitialization_directory(path: &Path, expected: &Descriptor) -> Result<()> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| Error::from_hresult(E_INVALIDARG))?;
+    let _parent = crate::materials::files::PinnedDirectory::open(parent)?;
+    let native_name = reinitialization_native_name(path)?;
+    let attributes = SECURITY_ATTRIBUTES {
+        nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+        lpSecurityDescriptor: expected.0 .0,
+        bInheritHandle: false.into(),
+    };
+    // SAFETY: the pinned local parent is canonicalized to an extended DOS path;
+    // owned descriptor and string remain valid for the synchronous Win7 API.
+    if let Err(error) = unsafe { CreateDirectoryW(&native_name, Some(&attributes)) } {
+        if error.code() != ERROR_ALREADY_EXISTS.to_hresult() {
+            return Err(error);
+        }
+    }
+    let _directory = crate::materials::files::PinnedDirectory::open(path)?;
+    verify_acl_named(path, expected, &native_name)
+}
 fn ensure_directory(path: &Path, expected: &Descriptor) -> Result<()> {
     let path_string = HSTRING::from(path.as_os_str());
     let attributes = SECURITY_ATTRIBUTES {
@@ -288,15 +439,17 @@ fn ensure_directory(path: &Path, expected: &Descriptor) -> Result<()> {
     verify_acl(path, expected)
 }
 fn verify_acl(path: &Path, expected: &Descriptor) -> Result<()> {
+    verify_acl_named(path, expected, &HSTRING::from(path.as_os_str()))
+}
+fn verify_acl_named(path: &Path, expected: &Descriptor, name: &HSTRING) -> Result<()> {
     no_reparse_directory(path)?;
-    let name = HSTRING::from(path.as_os_str());
     let mut actual = Descriptor(PSECURITY_DESCRIPTOR::default());
     let mut owner = PSID::default();
     // SAFETY: synchronous query; OS returns a valid LocalAlloc descriptor with
     // internal ACL/SID pointers owned by `actual` until all comparisons finish.
     unsafe {
         GetNamedSecurityInfoW(
-            &name,
+            name,
             SE_FILE_OBJECT,
             DACL_SECURITY_INFORMATION | OWNER_SECURITY_INFORMATION,
             Some(&mut owner),

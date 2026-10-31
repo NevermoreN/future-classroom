@@ -16,8 +16,14 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
 常驻桌面已接入一致事实快照及原生卡片，在系统桌面前台显示课表、作业、时钟等；
 外部应用、管理窗口和无效会话时隐藏，分页仅小按钮接收点击，其余区域穿透。
 本阶段整份课表（含历史）上限64KiB，超限拒绝，不截断。学校/公共校历分别保存；
-公共候选资料下载及来源核验尚未实现，不宣称公共假期已自动核验。
-关闭工作台锁定本地会话；正常退出须由主管理员授权。缺失数据不会重新开放首次注册。
+公共校历候选与明确采用已接入；来源留痕不等于自动核实政府通知正文，真实学校比对仍需验收。
+关闭工作台锁定本地会话；普通正常退出须由主管理员授权。缺失数据不会重新开放首次注册。
+无恢复码且决定放弃本机全部资料时，登录/恢复/修复页可进入独立清除向导；
+原程序先实际关闭，也可在原程序关闭后运行 --repair。向导须分别确认全部资料丢失和全新设置，
+确认前可取消；取消会关闭本次向导，正常重启仍须原账号认证。
+确认清除包括学校、全部账号/凭据/恢复码、资料、图片、语音及部署目录内的导出备份。
+已另存到部署目录外的副本、Windows自动启动/网络/SSH及其他应用不被修改。
+完成后须重新启动正常程序，设置新学校和新的主管理员；不提供解锁或读取旧资料的入口。
 
 在 PowerShell 中解压后运行：
   .\fc-bootstrap.exe --version
@@ -25,6 +31,7 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --system-probe
   .\fc-bootstrap.exe --host-probe 2
   .\fc-bootstrap.exe --application-probe
+  .\fc-bootstrap.exe --reinitialization-probe
   .\fc-bootstrap.exe --materials-probe
   .\fc-bootstrap.exe --audio-silent-probe
   .\fc-bootstrap.exe --web-pairing-probe
@@ -37,6 +44,8 @@ Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开
 --host-probe <seconds> 接受1至30秒，验证自身隐藏窗口、托盘和会话通知生命周期。
 --application-probe 使用隐藏原生控件及隔离临时数据执行真实账号/科目/教师/作业、课表/双表/校历/锁定草稿闭环，
 并在同一固定双worker池校验合成Office文件，不写正式ProgramData或自启动。
+--reinitialization-probe 只使用自有临时合成部署，在独立当前程序子进程中验证取消、双确认、
+完整清除与正常重启的全新设置；不操作当前用户的正式ProgramData部署。
 它还验证显示设置保存重读、锁定草稿、临时换课/恢复/CAS拒绝、退出保护及真实事实到原生离屏场景；
 新增39步公共布局联合CAS、精确科目配置保存/停用及原生预览选择/拖动流程；不截图用户桌面。
 另有52步独立文字/分页图片和65步作息角色交换/活动拆合/确认取消/锁定恢复/真实CAS读回，均使用自有隐藏窗口及临时数据。

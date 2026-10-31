@@ -6,8 +6,21 @@ mod autostart_probe;
 mod backup_controller;
 mod backup_editor;
 mod backup_probe;
+mod reinitialize_probe;
+pub fn reinitialization_probe() -> std::result::Result<(), String> {
+    reinitialize_probe::run()
+}
+pub fn reinitialization_probe_stage(
+    root: &Path,
+    nonce: &str,
+    stage: &str,
+) -> std::result::Result<(), String> {
+    reinitialize_probe::child(root, nonce, stage)
+}
 #[cfg(test)]
 mod backup_shutdown_tests;
+#[cfg(test)]
+mod reinitialize_entry_tests;
 pub fn recovery_probe() -> std::result::Result<(), String> {
     backup_probe::run()
 }
@@ -114,6 +127,7 @@ const TO_BACKUP: ActionId = ActionId(26);
 const TO_WEB: ActionId = ActionId(23);
 const TO_PROFILES: ActionId = ActionId(24);
 const TO_AUTOSTART: ActionId = ActionId(25);
+const TO_REINITIALIZE: ActionId = ActionId(27);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -583,6 +597,11 @@ impl Task for Work {
                 // The first frame is already visible. Recovery owns the same
                 // worker deadline/cancellation and precedes full child creation,
                 // SQLite, ordinary GC, audio and every network capability.
+                fc_bootstrap::reinitialization_files::ReinitializationFiles::new(&paths)
+                    .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
+                    .map_err(|_| {
+                        Failure::Deployment("资料重新初始化状态需要修复；现有文件已保留。")
+                    })?;
                 fc_bootstrap::recovery_files::RecoveryFiles::new(&paths)
                     .and_then(|files| files.reconcile_startup(&|| context.checkpoint().is_ok()))
                     .map_err(|_| Failure::Deployment("备份恢复状态需要修复；原数据已保留。"))?;
@@ -1152,6 +1171,7 @@ struct App {
     writer_closed: bool,
     shutdown_deadline: Option<Instant>,
     terminate_required: bool,
+    reinitialize_requested: bool,
     schedule: Option<ScheduleEditor>,
     calendar: Option<calendar_editor::Editor>,
     autostart: Option<autostart_editor::Editor>,
@@ -1193,6 +1213,19 @@ struct App {
     content_gc: Arc<Mutex<profile_content_flow::GcCursor>>,
 }
 impl App {
+    fn shutdown_complete(&self) -> bool {
+        self.stopping
+            && (self.backup.irreversible() || self.backend.is_none() || self.writer_closed)
+            && self.backup.exit_ready()
+            && self.pool.is_finished()
+            && self.shell.is_finished()
+            && self.audio.as_ref().is_none_or(|audio| {
+                audio
+                    .status()
+                    .is_ok_and(|s| s.phase == RuntimePhase::Closed && !s.physical_thread_running)
+            })
+            && !self.terminate_required
+    }
     fn view(&self) -> View {
         let status = match (self.status.is_empty(), self.desktop_notice.is_empty()) {
             (true, _) => self.desktop_notice.clone(),
@@ -1397,7 +1430,11 @@ impl App {
                     plain(LOGIN, "登录名", String::new()),
                     secret(PASSWORD, "口令"),
                 ];
-                view.actions = vec![action(LOG_IN, "登录"), action(TO_RECOVERY, "使用恢复码")];
+                view.actions = vec![
+                    action(LOG_IN, "登录"),
+                    action(TO_RECOVERY, "使用恢复码"),
+                    action(TO_REINITIALIZE, "无恢复码：进入全部资料清除向导"),
+                ];
             }
             Screen::Recovery => {
                 view.title = "使用恢复码重设口令".into();
@@ -1409,7 +1446,11 @@ impl App {
                     secret(NEW_PASSWORD, "新口令"),
                     secret(CONFIRM, "再次输入新口令"),
                 ];
-                view.actions = vec![action(SAVE, "恢复账号"), action(BACK, "返回登录")];
+                view.actions = vec![
+                    action(SAVE, "恢复账号"),
+                    action(BACK, "返回登录"),
+                    action(TO_REINITIALIZE, "无恢复码：进入全部资料清除向导"),
+                ];
             }
             Screen::Code => {
                 view.title = "请保存恢复码".into();
@@ -1617,6 +1658,7 @@ impl App {
             Screen::Repair => {
                 view.title = "未来教室需要修复".into();
                 view.description="数据暂不可用。请保留现有文件，使用原部署Windows账号或受控备份修复；不会重新开放首次管理员注册。".into();
+                view.actions = vec![action(TO_REINITIALIZE, "放弃全部本机资料：进入清除向导")];
             }
         }
         view
@@ -1998,6 +2040,20 @@ impl App {
                 }
                 if self.pending.is_some() || self.autostart_job.is_some() || self.stopping {
                     return Ok(());
+                }
+                if action == TO_REINITIALIZE {
+                    if matches!(
+                        self.screen,
+                        Screen::Login | Screen::Recovery | Screen::Repair
+                    ) {
+                        // No destructive authority is granted here. Close the
+                        // original process normally, including the writer and
+                        // actual workers, before a fresh process may acquire
+                        // its instance lock and show the two acknowledgements.
+                        self.reinitialize_requested = true;
+                        self.begin_shutdown();
+                    }
+                    return self.render();
                 }
                 if action == TO_PROFILES {
                     if self.screen == Screen::Display {
@@ -3803,6 +3859,28 @@ pub fn run(autostart: bool) -> std::result::Result<(), String> {
     run_at(paths, autostart, false)
 }
 fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result<(), String> {
+    let can_launch_production_repair = !probe
+        && DataPaths::program_data().is_ok_and(|production| production.root() == paths.root());
+    if run_at_inner(paths, autostart, probe)? {
+        if !can_launch_production_repair {
+            return Err("隔离工作台不得启动正式资料清除向导".into());
+        }
+        // All owners, including InstanceGuard, have left the inner scope.
+        // Never launch a second process merely on a logical shutdown request.
+        std::process::Command::new(
+            std::env::current_exe().map_err(|_| "无法定位资料清除向导程序")?,
+        )
+        .arg("--repair")
+        .spawn()
+        .map_err(|_| "原程序已正常关闭；无法打开资料清除向导，请重新运行程序并重试")?;
+    }
+    Ok(())
+}
+fn run_at_inner(
+    paths: DataPaths,
+    autostart: bool,
+    probe: bool,
+) -> std::result::Result<bool, String> {
     // A torn cold switch may have deliberately moved state/teachers away. Do
     // not create empty replacements before checking its durable journal.
     if paths
@@ -3819,6 +3897,11 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             .and_then(|deployment| deployment.read_back())
             .map_err(|_| "无法创建受控部署目录".to_owned())?;
     }
+    paths
+        .prepare_instance_runtime()
+        .map_err(|_| "实例运行目录权限不符合要求，需要修复".to_owned())?;
+    let _runtime = fc_windows::materials::files::PinnedDirectory::open(&paths.runtime())
+        .map_err(|_| "实例运行目录不是受控本地目录".to_owned())?;
     let _instance = InstanceGuard::acquire(paths.root())
         .map_err(|_| "未来教室已运行，或数据目录被其他会话占用".to_owned())?;
     let host = HiddenHost::new(!probe).map_err(|_| "无法创建托盘宿主".to_owned())?;
@@ -4098,25 +4181,14 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
             eprintln!("未来教室关闭超时，停止当前进程并保留数据供启动核对。");
             std::process::exit(2);
         }
-        if app.stopping
-            && (app.backup.irreversible() || app.backend.is_none() || app.writer_closed)
-            && app.backup.exit_ready()
-            && app.pool.is_finished()
-            && app.shell.is_finished()
-            && app.audio.as_ref().is_none_or(|audio| {
-                audio
-                    .status()
-                    .is_ok_and(|s| s.phase == RuntimePhase::Closed && !s.physical_thread_running)
-            })
-            && !app.terminate_required
-        {
+        if app.shutdown_complete() {
             stop.stop();
         }
         Ok(())
     });
     // Native pump has ended. Normal authorized exit already closed SQLite on its
     // worker. Do not join a still-running domain from this UI owner.
-    if result.is_err() {
+    if result.is_err() || !app.shutdown_complete() {
         if let Some(control) = &app.control {
             control.fault();
         }
@@ -4125,6 +4197,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
         eprintln!("未来教室宿主故障，终止当前进程；保留数据库供下次启动核对。");
         std::process::exit(2);
     }
+    let reinitialize_requested = app.reinitialize_requested;
     app.pool.request_stop();
     if app.pool.is_finished() {
         app.pool
@@ -4148,7 +4221,7 @@ fn run_at(paths: DataPaths, autostart: bool, probe: bool) -> std::result::Result
     {
         return Err(format!("原生工作台闭环未结束：stage={stage}"));
     }
-    Ok(())
+    Ok(reinitialize_requested)
 }
 fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App, String> {
     let window = Window::new().map_err(|_| "无法创建工作台".to_owned())?;
@@ -4181,6 +4254,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         writer_closed: false,
         shutdown_deadline: None,
         terminate_required: false,
+        reinitialize_requested: false,
         schedule: None,
         calendar: None,
         autostart: None,

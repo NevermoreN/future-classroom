@@ -38,7 +38,7 @@ fn mark(steps: &mut usize, label: &str) {
     println!("RECOVERY_NATIVE_STEP index={} name={label}", *steps);
     *steps += 1;
 }
-fn open_native_backup(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn open_native_backup(app: &mut App, deadline: Instant) -> Check<()> {
     if app.screen == Screen::Home {
         submit(app, TO_DISPLAY, &[], deadline)?;
     }
@@ -58,7 +58,7 @@ fn tick(app: &mut App, deadline: Instant) -> Check<()> {
         "healthy application/coordinator",
     )
 }
-fn pump(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn pump(app: &mut App, deadline: Instant) -> Check<()> {
     loop {
         tick(app, deadline)?;
         let retiring = app
@@ -76,7 +76,7 @@ fn pump(app: &mut App, deadline: Instant) -> Check<()> {
         std::thread::sleep(Duration::from_millis(5));
     }
 }
-fn submit(
+pub(super) fn submit(
     app: &mut App,
     action: ActionId,
     overrides: &[(FieldId, &str)],
@@ -521,7 +521,7 @@ fn exercise(
     mark(steps, "native-result-acknowledged-before-exit");
     Ok(old_lease)
 }
-fn ordinary_shutdown(app: &mut App, deadline: Instant) -> Check<()> {
+pub(super) fn ordinary_shutdown(app: &mut App, deadline: Instant) -> Check<()> {
     app.begin_shutdown();
     while !app.pool.is_finished() || !app.backup.retirement_complete() {
         tick(app, deadline)?;
@@ -531,11 +531,11 @@ fn ordinary_shutdown(app: &mut App, deadline: Instant) -> Check<()> {
     // the caller after moving it out of the App.
     Ok(())
 }
-fn join_app(app: App) -> Check<()> {
+pub(super) fn join_app(app: App) -> Check<()> {
     let App { pool, .. } = app;
     checked(pool.join(), "join closed App shared workers")
 }
-fn capture_child_output(
+pub(super) fn capture_child_output(
     mut input: impl Read + Send + 'static,
 ) -> std::thread::JoinHandle<std::io::Result<(Vec<u8>, bool)>> {
     std::thread::spawn(move || {

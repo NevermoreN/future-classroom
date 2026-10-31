@@ -477,6 +477,24 @@ pub struct Backend {
     control: SessionControl,
 }
 impl Backend {
+    /// Irreversibly stop ordinary admission while leaving the trusted audio
+    /// interrupter and writer alive for their actual physical drain. This is
+    /// not a restore barrier and grants no filesystem reset capability.
+    pub(crate) fn close_reinitialization_admission(&self) -> Result<()> {
+        self.control.0.recovering.store(true, Ordering::Release);
+        self.control.lock_local();
+        self.web.close();
+        self.voice.invalidate_runtime();
+        let mut ledger = self.ledger.lock().map_err(|_| {
+            self.control.fault();
+            BackendError::Closed
+        })?;
+        ledger
+            .sessions
+            .apply_events(&[IdentityEvent::AllAuthorizationRevoked]);
+        ledger.local = None;
+        Ok(())
+    }
     /// Caller already owns the deployment instance lock and has restored the codec
     /// key through the deployment account's protected key store.
     pub fn open(
@@ -486,6 +504,9 @@ impl Backend {
         monotonic: Arc<dyn MonotonicClock + Send + Sync>,
     ) -> Result<Self> {
         let database_path = path.as_ref().to_owned();
+        #[cfg(windows)]
+        crate::reinitialization::record_backend_open(&database_path)
+            .map_err(|_| BackendError::Closed)?;
         let facts = startup_state(path.as_ref())?;
         let initialized = facts.identity.installation.is_some();
         let (mut publisher, reader) =

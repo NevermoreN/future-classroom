@@ -1,0 +1,89 @@
+[
+  {
+    "label": "modern-reinitialization-final",
+    "exitCode": 0,
+    "elapsedSeconds": 104.696,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-windows/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/modern-reinitialization-final.json",
+      "--reinitialization",
+      "--test-metadata",
+      "/tmp/fc-round24-evidence/windows-tests-changed-final.jsonl",
+      "--test-timeout-seconds",
+      "900"
+    ]
+  },
+  {
+    "label": "modern-application-final",
+    "exitCode": 0,
+    "elapsedSeconds": 198.085,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-windows/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/modern-application-final.json",
+      "--application",
+      "--materials",
+      "--audio-silent",
+      "--system-host"
+    ]
+  },
+  {
+    "label": "modern-recovery-final",
+    "exitCode": 0,
+    "elapsedSeconds": 9.079,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-windows/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/modern-recovery-final.json",
+      "--recovery"
+    ]
+  },
+  {
+    "label": "modern-autostart-final",
+    "exitCode": 0,
+    "elapsedSeconds": 7.618,
+    "command": [
+      "python3",
+      "scripts/windows-probe.py",
+      "--host",
+      "elior@192.168.10.212",
+      "--identity",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "--exe",
+      "/tmp/fc-round24-windows/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "--native-seconds",
+      "1",
+      "--report",
+      "/tmp/fc-round24-evidence/modern-autostart-final.json",
+      "--autostart"
+    ]
+  }
+]

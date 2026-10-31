@@ -1,0 +1,144 @@
+{
+  "sourceInputSha256": "3cd4ef8a04527d44d9d67b4cb4fe443fd0798b14589e370b4992229a8b61a679",
+  "fileCount": 382,
+  "hostPassed": 693,
+  "windowsPassed": 1001,
+  "windowsPrograms": 19,
+  "artifacts": {
+    "modern": {
+      "sourceInputSha256": "3cd4ef8a04527d44d9d67b4cb4fe443fd0798b14589e370b4992229a8b61a679",
+      "exe": "/tmp/fc-round24-windows/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "target": "i686-pc-windows-gnu",
+      "bytes": 11276661,
+      "sha256": "30e2be1341f983da8aa6fbe6db2decc3fbf744e1b4edc2da57fe21db4a743b96",
+      "scope": "GNU development artifact; actual runtime OS documented independently; not formal MSVC/compatibility certification"
+    },
+    "win7": {
+      "sourceInputSha256": "3cd4ef8a04527d44d9d67b4cb4fe443fd0798b14589e370b4992229a8b61a679",
+      "exe": "/tmp/fc-round24-win7/i686-win7-windows-gnu/release/fc-bootstrap.exe",
+      "target": "i686-win7-windows-gnu",
+      "bytes": 11355648,
+      "sha256": "ee57198655030d31a285e88f34c6592db5f9c7736dd8833406800fbd6d9c9f15",
+      "scope": "GNU development artifact; actual runtime OS documented independently; not formal MSVC/compatibility certification"
+    }
+  },
+  "runtimeReports": [
+    {
+      "report": "modern-reinitialization-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "30e2be1341f983da8aa6fbe6db2decc3fbf744e1b4edc2da57fe21db4a743b96",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "modern-application-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "30e2be1341f983da8aa6fbe6db2decc3fbf744e1b4edc2da57fe21db4a743b96",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "modern-recovery-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "30e2be1341f983da8aa6fbe6db2decc3fbf744e1b4edc2da57fe21db4a743b96",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "modern-autostart-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "30e2be1341f983da8aa6fbe6db2decc3fbf744e1b4edc2da57fe21db4a743b96",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "win7-reinitialization-on-win11-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "ee57198655030d31a285e88f34c6592db5f9c7736dd8833406800fbd6d9c9f15",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "win7-application-on-win11-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "ee57198655030d31a285e88f34c6592db5f9c7736dd8833406800fbd6d9c9f15",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "win7-recovery-on-win11-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "ee57198655030d31a285e88f34c6592db5f9c7736dd8833406800fbd6d9c9f15",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    },
+    {
+      "report": "win7-autostart-on-win11-final.json",
+      "status": "PASS",
+      "cleanup": "PASS",
+      "exeSha256": "ee57198655030d31a285e88f34c6592db5f9c7736dd8833406800fbd6d9c9f15",
+      "actualPlatform": {
+        "caption": "Microsoft Windows 11 \u4e13\u4e1a\u7248",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      }
+    }
+  ],
+  "package": {
+    "scope": "NOT_VALIDATED CUI development ZIP; original SHA-bound modern executable; CRC and every declared member SHA checked; independent same-filename repack byte-identical",
+    "path": "/mnt/data/FutureClassroom-0.1.0-reinitialization-dev.zip",
+    "bytes": 5430364,
+    "sha256": "43e027d9912be00344b7c5ddf0d6cd0b7235cc7d213e20a48d107e1d20f0cfe0",
+    "memberCount": 13,
+    "independentRepackIdentical": true,
+    "status": "NOT_VALIDATED",
+    "sourceInputSha256": "3cd4ef8a04527d44d9d67b4cb4fe443fd0798b14589e370b4992229a8b61a679"
+  },
+  "goalStatus": "active",
+  "notRun": [
+    "real Win7 SP1 x86",
+    "real Win10 x86/x64",
+    "formal MSVC",
+    "visible Seewo/PPT/touch/DPI",
+    "real logoff/autostart",
+    "hardware power loss",
+    "production TLS/listener and strict P0",
+    "installer/upgrade/uninstall/72h"
+  ]
+}

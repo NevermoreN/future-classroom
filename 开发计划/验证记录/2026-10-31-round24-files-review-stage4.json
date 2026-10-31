@@ -1,0 +1,99 @@
+{
+  "scope": "round24 explicit destructive reinitialization filesystem service",
+  "source_files": [
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files.rs",
+      "sha256": "bc5c051fea0817e73ebac17d9ba58b0fc76ce00b6168472dadd1d1a625fcd4f9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/journal/tests.rs",
+      "sha256": "6537fe25730a43cb55e043233af01f4a844f8a507c20e24481eff6b5db6e1731"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/journal.rs",
+      "sha256": "b21c750ab30b3bdef7045a9b6b5ddee54fb4fb02692408d819b3fbf709177cf9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/objects.rs",
+      "sha256": "2d69df4b16164caecdefce7a804a2a88826d9c5b2a15977c87550b06e5c33dc7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows/tests.rs",
+      "sha256": "c0d1e17fab5b16731936ccd24e0d2ed095e83a9c6da1afe23fab84aad59ece25"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialization_files/windows.rs",
+      "sha256": "d21a72e545b3c60f81abfc699295b08d9f1c9de2393783846bce0ccf7853d550"
+    },
+    {
+      "path": "crates/fc-windows/src/system/paths.rs",
+      "sha256": "9a6749b254c593defcee01f9c66809b2a6949a900f17ee59c9f3d64b13a638a3"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "a4e6907da1e6de9c71b5fa1c11d7200fad10ee1426a72bc982d7ccf864910427"
+    }
+  ],
+  "verification": {
+    "windows_unit_tests_added": 20,
+    "built_by_subagent": false,
+    "remote_executed_by_subagent": false,
+    "format": "rustfmt edition2021 skip_children only owned files",
+    "diff_check": "passed"
+  },
+  "api": [
+    "ReinitializationFiles::new/review/prepare/reconcile_startup",
+    "ResetReview::root/sequence/present_tree_count",
+    "PreparedReinitialization::root/sequence/discard/commit_cold",
+    "ResetCommitReceipt {sequence,operation_id}",
+    "ResetStartup {discarded_unarmed,rolled_back,installed}"
+  ],
+  "fixed_trees": [
+    "state",
+    "config",
+    "teachers",
+    "profile-content",
+    "voice",
+    "staging",
+    "launch-copies",
+    "web-material-staging",
+    "exports",
+    "open-copies",
+    "quarantine",
+    "cache",
+    "recovery"
+  ],
+  "preserved": [
+    "deployment root",
+    "runtime including instance.lock and probe sentinel",
+    "SSH service/public authorization/private test key",
+    "Windows Run registration",
+    "externally saved backup copies"
+  ],
+  "protocol": [
+    "review directory scope only, no SQLite/DPAPI byte access while live",
+    "prepare isolated owner/new/old/manifests; no recursive Drop cleanup",
+    "consume unique cold drain permit then capture final original identities and raw byte hashes including empty files",
+    "journal binds exact old/new stamps and per-object cleanup manifests",
+    "each nonreplacing rename checks source identity against same DELETE handle",
+    "no commit receipt until exact old/new sets are reverified after all renames",
+    "startup restores whole old set before commit, completes new+safe old cleanup after commit",
+    "cleanup permits missing previously deleted objects; forbids unlisted/replaced/changed remaining objects; same exclusive handle final-byte check and DELETE",
+    "cleanup-complete survives until all other metadata gone; missing/corrupt manifests forbid deleting remaining old objects",
+    "no reset namespace or only valid namespace owner marker does not impose reset scope on ordinary startup"
+  ],
+  "limits": {
+    "objects_per_tree": 100000,
+    "entries_per_directory": 32768,
+    "depth": 64,
+    "relative_path_utf16_units": 16000,
+    "combined_old_manifests_bytes": 33554432,
+    "enumeration_path_allocation_bytes_per_call": 33554432,
+    "raw_stream_block_bytes": 32768
+  },
+  "limitations": [
+    "cooperative cancellation and context deadline; no hard preemption of native IO",
+    "controlled process interruption journal semantics, not proof of hardware power-loss durability",
+    "final Windows compile/Clippy/native execution pending parent; actual Win7/Win10 gates separate"
+  ]
+}

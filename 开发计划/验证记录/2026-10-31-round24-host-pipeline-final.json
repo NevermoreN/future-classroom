@@ -1,0 +1,63 @@
+[
+  {
+    "label": "host-tests-final",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--release",
+      "--locked",
+      "--",
+      "--test-threads=2"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 403.447,
+    "stdout": null,
+    "log": "host-tests-final.log"
+  },
+  {
+    "label": "host-no-run-final",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--release",
+      "--locked",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.12,
+    "stdout": "host-test-artifacts-final.jsonl",
+    "log": "host-no-run-final.log"
+  },
+  {
+    "label": "host-clippy-final",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--release",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 4.097,
+    "stdout": null,
+    "log": "host-clippy-final.log"
+  },
+  {
+    "label": "host-self-check-final",
+    "command": [
+      "/tmp/fc-round24-host/release/fc-bootstrap",
+      "--self-check"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.136,
+    "stdout": null,
+    "log": "host-self-check-final.log"
+  }
+]
