@@ -1,0 +1,104 @@
+--- a/crates/fc-storage/src/business/subject_visual.rs
++++ b/crates/fc-storage/src/business/subject_visual.rs
+@@ -190,6 +190,15 @@
+         key: HomeworkKey,
+         actor: &ActorContext,
+     ) -> Result<SubjectVisualPreviewSource, SubjectVisualRepositoryError> {
++        // A visual-only GET observes the same durable day floor as other Web
++        // content reads. The following query still reads colour and display in
++        // one writer transaction with this repository's exact session/fence.
++        self.observe_content_day(actor)
++            .map_err(|error| match error {
++                RepositoryError::Domain(error) => SubjectVisualRepositoryError::Content(error),
++                RepositoryError::Unavailable => SubjectVisualRepositoryError::Unavailable,
++                RepositoryError::Faulted => SubjectVisualRepositoryError::Faulted,
++            })?;
+         let result = self
+             .handle
+             .try_transaction(ReadPreview {
+--- a/crates/fc-storage/src/business/subject_visual/tests.rs
++++ b/crates/fc-storage/src/business/subject_visual/tests.rs
+@@ -889,3 +889,83 @@
+         ))
+     );
+ }
++#[test]
++fn visual_only_new_day_is_durable_against_wall_rollback_and_physical_reopen() {
++    let mut f = Fixture::new();
++    let teacher = actor(2, TrustedOrigin::Web);
++    let initial = f.read();
++    let first = f
++        .repository(teacher.clone())
++        .subject_visual_preview(homework(2, 1), &teacher)
++        .unwrap();
++    let first_revision = f.revision();
++    assert_eq!(first.subject, initial.palette.subjects[0]);
++    assert_eq!(first.display, initial.display);
++    f.repository(teacher.clone())
++        .subject_visual_preview(homework(2, 1), &teacher)
++        .unwrap();
++    assert_eq!(
++        f.revision(),
++        first_revision,
++        "same-day preview must not repeatedly publish a floor"
++    );
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(date(2), 3600).unwrap();
++    let second = f
++        .repository(teacher.clone())
++        .subject_visual_preview(homework(2, 2), &teacher)
++        .unwrap();
++    assert_eq!(second, first);
++    let later_revision = f.revision();
++    assert_eq!(later_revision, first_revision.next().unwrap());
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(date(1), 7200).unwrap();
++    assert_eq!(
++        f.repository(teacher.clone())
++            .subject_visual_preview(homework(2, 1), &teacher),
++        Err(SubjectVisualRepositoryError::Content(
++            ContentError::WrongDate
++        ))
++    );
++    assert_eq!(f.revision(), later_revision);
++    f.reopen(); // actual writer exit, SQLite close and a fresh writer on the same deployment
++    assert_eq!(
++        f.repository(teacher.clone())
++            .subject_visual_preview(homework(2, 1), &teacher),
++        Err(SubjectVisualRepositoryError::Content(
++            ContentError::WrongDate
++        ))
++    );
++    assert_eq!(f.revision(), later_revision);
++    let floor = f
++        .handle()
++        .try_get("business/desktop/max-observed-day/v1".into())
++        .unwrap()
++        .wait()
++        .unwrap()
++        .unwrap();
++    assert_eq!(
++        codec::read_date(&codec::value(&floor.value).unwrap()["date"]).unwrap(),
++        date(2)
++    );
++    assert!(
++        f.handle()
++            .try_get(content_key(&ContentKey::Homework(homework(2, 2))))
++            .unwrap()
++            .wait()
++            .unwrap()
++            .is_none(),
++        "no content read/save was needed to advance this floor"
++    );
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(date(2), 7200).unwrap();
++    assert_eq!(
++        f.repository(teacher.clone())
++            .subject_visual_preview(homework(2, 2), &teacher)
++            .unwrap(),
++        second
++    );
++    assert_eq!(f.revision(), later_revision);
++    assert_eq!(
++        f.read(),
++        initial,
++        "date observations never modify the palette or display document"
++    );
++}

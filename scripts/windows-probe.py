@@ -91,6 +91,92 @@ VOICE_OUTPUT_STEPS = (
 )
 
 
+PUBLIC_DESKTOP_STEPS = (
+    'setup-administrator-fixture',
+    'create-bound-class-and-subjects',
+    'seed-current-lesson',
+    'management-lock-removes-session',
+    'hidden-desktop-rendered',
+    'native-public-button-without-session',
+    'public-catalog-only',
+    'cancel-without-change',
+    'new-native-public-entry',
+    'unassigned-review-without-write',
+    'local-account-lock-keeps-public-flow',
+    'explicit-public-change-closes',
+    'changed-desktop-rendered',
+    'old-scene-entry-rejected',
+    'new-native-restore-entry',
+    'explicit-public-restore-closes',
+    'restored-desktop-rendered',
+    'public-close-hides-chooser',
+    'physical-shared-workers-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+def validate_public_desktop_output(exit_code, output):
+    """Finite hidden public-action transcript; no foreground/device acceptance."""
+    if type(exit_code) is not int or exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native public desktop workflow failed")
+    steps = [line for line in output if line.startswith("PUBLIC_DESKTOP_NATIVE_STEP")]
+    expected = [f"PUBLIC_DESKTOP_NATIVE_STEP index={index} name={name}" for index, name in enumerate(PUBLIC_DESKTOP_STEPS)]
+    if steps != expected:
+        raise RuntimeError("public desktop exact20 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("PUBLIC_DESKTOP_NATIVE_PASS")]
+    pattern = (r"PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("public desktop exact final public/change/restore/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(1))
+    if not 0 < elapsed_ms <= 120_000 or output.index(summaries[0]) <= output.index(expected[-1]):
+        raise RuntimeError("public desktop final marker must follow all20 steps inside its original120s budget")
+    return {"steps": len(steps), "stepNames": list(PUBLIC_DESKTOP_STEPS), "elapsedMs": elapsed_ms}
+
+
+SUBJECT_VISUAL_STEPS = (
+    'setup-global-admin',
+    'create-subject',
+    'open-joint-display',
+    'loaded-original-rgb',
+    'invalid-rgb-no-write',
+    'native-joint-draft-preview',
+    'lock-keeps-partial-draft',
+    'relogin-restores-draft',
+    'cancel-review-no-write',
+    'cancel-reloads-both',
+    'native-joint-save',
+    'readback-both-saved',
+    'native-palette-draft',
+    'rename-subject-preserves-color',
+    'stale-palette-save-rejected',
+    'cancel-reload-after-conflict',
+    'first-app-physical-shutdown',
+    'second-app-real-reopen',
+    'relogin-reopened-deployment',
+    'reopened-joint-state',
+    'second-app-physical-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+def validate_subject_visual_output(exit_code, output):
+    """Validate this finite native diagnostic transcript; not device acceptance."""
+    if type(exit_code) is not int or exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native subject visual workflow failed")
+    steps = [line for line in output if line.startswith("SUBJECT_VISUAL_NATIVE_STEP")]
+    expected = [f"SUBJECT_VISUAL_NATIVE_STEP index={index} name={name}" for index, name in enumerate(SUBJECT_VISUAL_STEPS)]
+    if steps != expected:
+        raise RuntimeError("subject visual exact22 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("SUBJECT_VISUAL_NATIVE_PASS")]
+    pattern = (r"SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("subject visual exact final joint/reopen/preview/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(1))
+    if not 0 < elapsed_ms <= 120_000 or output.index(summaries[0]) <= output.index(expected[-1]):
+        raise RuntimeError("subject visual final marker must follow all22 steps inside its original120s budget")
+    return {"steps": len(steps), "stepNames": list(SUBJECT_VISUAL_STEPS), "elapsedMs": elapsed_ms}
+
+
 def validate_voice_output_output(exit_code, output):
     if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
         raise RuntimeError("isolated native output query workflow failed")
@@ -205,6 +291,8 @@ def main():
     parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
     parser.add_argument("--voice-settings", action="store_true", help="isolated hidden native local-admin voice policy confirmation, lock, CAS and durable reopen; no recording/playback")
+    parser.add_argument("--public-desktop", action="store_true", help="isolated hidden native public lesson change/restore without an account; real controls/SQLite/shared workers, no foreground changes")
+    parser.add_argument("--subject-visuals", action="store_true", help="isolated hidden native joint school colours/display draft, real synthetic D2D, lock/CAS and SQLite reopen; no visible colour dialog")
     parser.add_argument("--voice-output", action="store_true", help="isolated hidden native default-output format query, draft/refresh/expiry/lock; no recording or playback")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
@@ -217,6 +305,10 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
+    if args.public_desktop and any((args.subject_visuals, args.voice_output, args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated public desktop workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.subject_visuals and any((args.voice_output, args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated subject visual workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.voice_output and any((args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
         parser.error("run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.voice_settings and any((args.voice_output, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
@@ -429,6 +521,22 @@ def main():
                 raise RuntimeError("output query report insertion point is ambiguous")
             anchor = matched[0]
             body = body.replace(anchor, command + "@{voiceOutputExitCode=$voiceOutputCode;voiceOutputOutput=$voiceOutputOutput;" + anchor[2:])
+        if args.subject_visuals:
+            command = "$subjectVisualOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --subject-visuals-probe 2>&1|ForEach-Object{\"$_\"});$subjectVisualCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("subject visual report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{subjectVisualExitCode=$subjectVisualCode;subjectVisualOutput=$subjectVisualOutput;" + anchor[2:])
+        if args.public_desktop:
+            command = "$publicDesktopOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --public-desktop-probe 2>&1|ForEach-Object{\"$_\"});$publicDesktopCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("public desktop report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{publicDesktopExitCode=$publicDesktopCode;publicDesktopOutput=$publicDesktopOutput;" + anchor[2:])
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -442,7 +550,12 @@ def main():
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
         if args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings or args.voice_output else 50).lstrip("\ufeff"))
+        if args.subject_visuals or args.public_desktop:
+            # Original native probe <=30s plus this feature's absolute120s;
+            # one bounded180s task observation includes startup/result overhead.
+            # No existing diagnostic's240/300s observation budget is changed.
+            launch = launch.replace("AddSeconds(40)", "AddSeconds(180)")
+        report["native"] = json.loads(remote.powershell(launch, timeout=190 if args.subject_visuals or args.public_desktop else 310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings or args.voice_output else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -506,6 +619,20 @@ def main():
             report["migrationSubprocessNonce"] = result["subprocessNonce"]
             report["migrationElapsedMs"] = result["elapsedMs"]
             report["migrationScope"] = "Synthetic hidden native explicit class/subject/principal mapping, strict foreign-installation gate, actual cold three-tree restore and independent executable target login/mapped content; source package and target key unchanged; picker return capabilities isolated; visible dialogs and hardware power loss NOT_RUN"
+        if args.public_desktop:
+            result = validate_public_desktop_output(report["native"].get("publicDesktopExitCode"), report["native"].get("publicDesktopOutput"))
+            report["publicDesktopNativeStatus"] = "PASS"
+            report["publicDesktopNativeSteps"] = result["steps"]
+            report["publicDesktopNativeStepNames"] = result["stepNames"]
+            report["publicDesktopElapsedMs"] = result["elapsedMs"]
+            report["publicDesktopScope"] = "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+        if args.subject_visuals:
+            result = validate_subject_visual_output(report["native"].get("subjectVisualExitCode"), report["native"].get("subjectVisualOutput"))
+            report["subjectVisualNativeStatus"] = "PASS"
+            report["subjectVisualNativeSteps"] = result["steps"]
+            report["subjectVisualNativeStepNames"] = result["stepNames"]
+            report["subjectVisualElapsedMs"] = result["elapsedMs"]
+            report["subjectVisualScope"] = "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
         if args.voice_settings:
             result = validate_voice_settings_output(report["native"].get("voiceSettingsExitCode"), report["native"].get("voiceSettingsOutput"))
             report["voiceSettingsNativeSteps"] = result["steps"]

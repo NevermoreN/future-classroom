@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_NOT_BUILT_OR_TESTED",
+  "utc": "2026-10-31T17:31:21.472296+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "sha256": "4fe3fe067731cf54808f4709d0cc36a9feadeacb13b5a446b0869d15c0bbb565",
+      "bytes": 106331,
+      "new": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/subject_visuals.rs",
+      "sha256": "8f14cb95e6fd73e051913802fcebb1b454428953dca091ed2f41652d16acb114",
+      "bytes": 6628,
+      "new": true
+    },
+    {
+      "path": "crates/fc-protocol/src/web.rs",
+      "sha256": "ee7245cd3ebc37ea8fe26da2ff4c60bf1a49c3efd7177ea138d37ab49752b0b8",
+      "bytes": 38605,
+      "new": false
+    },
+    {
+      "path": "crates/fc-protocol/src/web/subject_visual.rs",
+      "sha256": "3ce7fd75f8fa96e8fc56b284150e40635faa3c4efe5236599b155e32f775064e",
+      "bytes": 5385,
+      "new": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "sha256": "450812c312f316a6542538334c97c4601b77d758cfea79ae34509815f888998c",
+      "bytes": 16903,
+      "new": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content.rs",
+      "sha256": "2bd00d2b3bbec60906656919cf152787cb75120b7a125ce09ec0085a8cfdcde1",
+      "bytes": 9083,
+      "new": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content/tests.rs",
+      "sha256": "5dcc3da54d39993381f69ac4e8a56c8c1d3a25efe0b22e2bc218899dee2225fe",
+      "bytes": 15612,
+      "new": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content/subject_visual_tests.rs",
+      "sha256": "fba52d2243e078b36acc5a85a038ed93b8165aa017c997330abddd7a36fa396f",
+      "bytes": 11643,
+      "new": true
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "sha256": "2d8f99c44d3240728681a7e44c58fc912e8a37f4ce8e53797241616d4231f5e0",
+      "bytes": 8930,
+      "new": false
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "sha256": "32b4f5f59da0ef7eb35412c38831699c43e8cf72ffc42c7bd3b815fa344e5485",
+      "bytes": 18197,
+      "new": false
+    },
+    {
+      "path": "web/src/api/subject-visual-protocol.ts",
+      "sha256": "e93034a2711d35236c70de0641320c94ca2820e3c604e76ee693113ac2f1b5ad",
+      "bytes": 3639,
+      "new": true
+    },
+    {
+      "path": "web/src/api/subject-visual-controller.ts",
+      "sha256": "ca21901ea25d4c227230d57463424f9c5df2872361ce35f01636d8fc92915eac",
+      "bytes": 1952,
+      "new": true
+    },
+    {
+      "path": "web/src/SubjectVisualPreview.tsx",
+      "sha256": "9ac996390438293757396159e6a33fa6c075351b7b3284e77836dc644dfa74bd",
+      "bytes": 4417,
+      "new": true
+    },
+    {
+      "path": "web/tests/subject-visual.test.ts",
+      "sha256": "2b176a7c03a76985b8b5e1ab87fa1d343300119d0079ee65d32308fc7021adad",
+      "bytes": 6200,
+      "new": true
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round35-visuals-evidence/service-web.patch",
+    "sha256": "14b9d058f2e11c023ffc68f64ba7d30a594e6ed14735cee9183217fe9d4cc65e"
+  },
+  "before": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/crates__fc-bootstrap__src__backend.rs",
+      "sha256": "a7b4c58e79dae9c35727fd345eb81e5dcc1b243ba5d19557f4b5c8c25f3e065d"
+    },
+    {
+      "path": "crates/fc-protocol/src/web.rs",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/crates__fc-protocol__src__web.rs",
+      "sha256": "51cc243aa1f09422099708bac414e48e9c1e6df8008d6cb79714b5a1850b00d9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application.rs",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/crates__fc-bootstrap__src__web_application.rs",
+      "sha256": "36b529cfd29f5236ddcde2c2be840140e740cd853a9dac82bbf483a5975ec26f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content.rs",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/crates__fc-bootstrap__src__web_application__content.rs",
+      "sha256": "f600cff9e93ffd81175be45c8efb5aed37fee04a28b8ef69682fddafe0f9d245"
+    },
+    {
+      "path": "web/src/api/client.ts",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/web__src__api__client.ts",
+      "sha256": "e03ab32bea9765e19d67cc73f2781086a67facd2d9eb295db62505e1535a717b"
+    },
+    {
+      "path": "web/src/TeacherWorkspace.tsx",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/web__src__TeacherWorkspace.tsx",
+      "sha256": "1a8743d4dee03a136e295b7f7699cfde016eff6e2beac597f64af89712e87b55"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/content/tests.rs",
+      "before": "/tmp/fc-round35-visuals-evidence/service-before/crates__fc-bootstrap__src__web_application__content__tests.rs",
+      "sha256": "9d2149897ccd4965253ac370b507aa27f6038969a9d4aed00bf68ccd1a002bc6",
+      "provenance": "Readonly untouched main after worktree edit, not initial capture"
+    }
+  ],
+  "checks": {
+    "scopedRustfmtCheck": "PASS",
+    "trailingWhitespace": "PASS",
+    "cargo": "NOT_RUN",
+    "npm": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "git": "NOT_RUN"
+  },
+  "testSources": {
+    "realSqliteHttpPort": 4,
+    "protocol": 2,
+    "web": 5,
+    "execution": "NOT_RUN"
+  },
+  "api": {
+    "managementRead": "Backend::read_subject_visuals(SessionLease)->SubjectVisualState",
+    "managementSave": "Backend::save_subject_visuals(SessionLease,PaletteRevision,Revision,Vec<SubjectColor>,DisplaySettings)->SubjectVisualState",
+    "web": "GET content/homework/{class}/{subject}/{owner}/{date}/visual",
+    "webOnlyOneSubject": true,
+    "fullPaletteOrLayoutOnWeb": false,
+    "contentMutationSchemaChanged": false
+  },
+  "fences": [
+    "Current local GlobalAdmin/no-must-change for all palette management; guard before/at writer/precommit/after",
+    "CatalogChanged synchronization after joint save, no new lease or authorization revocation",
+    "Web current-day exact owned teaching scope; same writer reads subject+display; fresh permission and execution checks before response",
+    "Frontend abort+sequence+source/api/refresh/render-key binding rejects old response; same-scope explicit rereads refresh; no polling",
+    "Filled0 has no border; fill and whole component alpha separate; operations remain outside alpha; sample shallow backdrop explicit, not current actual desktop visibility"
+  ],
+  "remaining": [
+    "Root unified Host/Web/Windows builds and strict lint",
+    "Real finite TLS+isolated browser fixtures and visual assertions",
+    "Native local joint save workflow via original workers",
+    "Original production TCP5s gate, production listener, three target OS and human listening remain separate"
+  ]
+}

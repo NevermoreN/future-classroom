@@ -1,0 +1,87 @@
+{
+  "status": "TEST_FIX_SOURCE_FROZEN_STATIC_PASS_RUNTIME_NOT_RUN",
+  "recordedAt": "2026-10-31T19:23:46.342996+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "file": "crates/fc-storage/src/business/desktop_lesson/tests.rs",
+  "before": {
+    "sha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e",
+    "bytes": 28925,
+    "path": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-fix-first/desktop-lesson-tests.before.rs"
+  },
+  "after": {
+    "sha256": "7c1efca9a37f8809b17a5d7425346a07aae8d6fc333aeca553c7667687c77a09",
+    "bytes": 30628,
+    "path": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-fix-first/desktop-lesson-tests.after.rs"
+  },
+  "previouslyFrozenCandidateByteIdentical": true,
+  "previousCandidatePath": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-proposal-first/desktop-lesson-tests.candidate.rs",
+  "diff": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-fix-first/minimal.diff",
+    "sha256": "f362dbf6ccb97e74a8f75c292fb6e228cb7ab1410b1c3403f558154b295eb3c2"
+  },
+  "originalCause": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-readonly-cause-first.json",
+    "sha256": "041262ad4cd0c65306b2c70c04c4e61cc2a3785733971400c2aca1f4cd9bb223"
+  },
+  "originalRuntimeFailure": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-core-before-seventh.json",
+    "sha256": "28fa2f21a542a4a9b87c543ce9e2a7f9a623da6a1fa0148ec0687c0cc12d4c55",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "binary": "fc_storage-3ccf7e5bedbf5d94.exe",
+    "binarySha256": "39acea5a7a340a0a70fe9b4f665ef51619cee185d29d13a8468772e165cecafa",
+    "exitCode": 101,
+    "originalFailureLines": [
+      "thread 'business::desktop_lesson::tests::mapped_format_three_audit_remains_inert_and_preserves_complete_history' (2496) panicked at crates/fc-storage/src/business/desktop_lesson/tests.rs:791:5:",
+      "assertion failed: !restored.history.is_empty()",
+      "test result: FAILED. 190 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.07s"
+    ]
+  },
+  "scope": "Only final mapped-format3 test changed; every byte before that test remains identical. Production source unchanged and read-only cause source bindings rechecked.",
+  "assertions": [
+    "Actual LocalDesktop initiator checked before original deliberate projection stripping.",
+    "Original witnessed history must be nonempty with strictly positive intervals.",
+    "Actual exported format3 SQLite history must equal complete saved history, with inert live fields.",
+    "Actual mapped format3 SQLite history must equal complete projected source history, with inert live fields.",
+    "Final candidate live history explicitly empty/current/override/base_trust absent per original recovery contract.",
+    "Independent retained audit must contain nonempty complete history item-for-item equal to both actual mapped and source projection history, with no live permission.",
+    "Existing startup validation, target neutral state and receipt exclusion preserved."
+  ],
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-storage/src/business/desktop_lesson/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-storage/src/business/desktop_lesson/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "notExecuted": [
+    "Cargo",
+    "npm",
+    "Windows/SSH",
+    "test executable",
+    "Git writes/commit/push",
+    "CI"
+  ],
+  "nextValidation": "Parent eighth unified compile/strict lint and actual Windows tests. No runtime PASS is asserted by this freeze."
+}

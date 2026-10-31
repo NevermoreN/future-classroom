@@ -1,0 +1,57 @@
+API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
+                  "contentGets": 2, "contentPosts": 1, "visualGets": 4}
+VISUAL_FIELDS = frozenset(("subjectRevision", "displayRevision", "rulesVersion", "effectiveRgb", "mode",
+                          "homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent",
+                          "courseComponentOpacityPercent", "homeworkVisible", "courseVisible"))
+
+
+def validate_visual_observations(value):
+    observations = value.get("visualObservations")
+    require(type(value.get("visualReads")) is int and value["visualReads"] == API_OPERATIONS["visualGets"]
+            and isinstance(observations, list) and len(observations) == API_OPERATIONS["visualGets"], "NODE_VISUAL_COUNT")
+    stages = ("initial", "draft-refresh", "after-save", "after-reload")
+    def number(n):
+        return type(n) in (int, float) and math.isfinite(n)
+    for index, observed in enumerate(observations):
+        require(isinstance(observed, dict) and set(observed) == {"stage", "readNumber", "responseBodySha256", "visual", "dom", "draftPreserved"}
+                and observed["stage"] == stages[index] and type(observed["readNumber"]) is int
+                and observed["readNumber"] == index + 1 and observed["draftPreserved"] is True
+                and isinstance(observed["responseBodySha256"], str)
+                and re.fullmatch(r"[0-9a-f]{64}", observed["responseBodySha256"]), "NODE_VISUAL_STAGE")
+        visual, dom = observed["visual"], observed["dom"]
+        require(isinstance(visual, dict) and set(visual) == VISUAL_FIELDS
+                and all(isinstance(visual.get(k), str) and re.fullmatch(r"(?:0|[1-9][0-9]{0,19})", visual[k])
+                        and int(visual[k]) <= (1 << 64) - 1 for k in ("subjectRevision", "displayRevision"))
+                and visual["subjectRevision"] != "0" and type(visual["rulesVersion"]) is int and visual["rulesVersion"] == 1
+                and isinstance(visual["effectiveRgb"], str) and re.fullmatch(r"#[0-9A-F]{6}", visual["effectiveRgb"])
+                and visual["mode"] in ("FILLED", "OUTLINED")
+                and all(type(visual[k]) is int and 0 <= visual[k] <= 100 for k in
+                        ("homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent", "courseComponentOpacityPercent"))
+                and all(type(visual[k]) is bool for k in ("homeworkVisible", "courseVisible")), "NODE_VISUAL_VALUES")
+        require(isinstance(dom, dict) and set(dom) == {"subjectRevision", "displayRevision", "rulesVersion", "homework", "course",
+                    "refreshOpacity", "helpOpacity", "draftMatches", "bottomReminderAvailable"}
+                and dom["subjectRevision"] == visual["subjectRevision"] and dom["displayRevision"] == visual["displayRevision"]
+                and dom["rulesVersion"] == "1" and dom["draftMatches"] is True and dom["bottomReminderAvailable"] is True
+                and all(number(dom[k]) and dom[k] == 1 for k in ("refreshOpacity", "helpOpacity")), "NODE_VISUAL_DOM")
+        for kind in ("homework", "course"):
+            pill = dom[kind]
+            require(isinstance(pill, dict) and set(pill) == {"mode", "fillPercent", "effectiveRgb", "visible", "componentOpacity",
+                    "pillOpacity", "effectiveOpacity", "backgroundColor", "borderWidth", "borderStyle", "textAlign", "textMatches", "textColorUnchanged"}
+                    and pill["mode"] == visual["mode"] and pill["fillPercent"] == str(visual[kind + "FillPercent"])
+                    and pill["effectiveRgb"] == visual["effectiveRgb"] and pill["visible"] == str(visual[kind + "Visible"]).lower()
+                    and all(number(pill[k]) for k in ("componentOpacity", "pillOpacity", "effectiveOpacity", "borderWidth"))
+                    and pill["componentOpacity"] == visual[kind + "ComponentOpacityPercent"] / 100
+                    and abs(pill["effectiveOpacity"] - pill["componentOpacity"]) < 0.000001 and pill["pillOpacity"] == 1
+                    and pill["textAlign"] == "center" and pill["textMatches"] is True and pill["textColorUnchanged"] is True,
+                    "NODE_VISUAL_PILL")
+            color = re.fullmatch(r"rgba?\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(?:,\s*(\d+(?:\.\d+)?))?\s*\)", str(pill["backgroundColor"]))
+            require(color is not None, "NODE_VISUAL_COMPUTED_COLOR")
+            rgba = [float(n) for n in color.groups()[:3]] + [float(color[4]) if color[4] is not None else 1.0]
+            alpha = visual[kind + "FillPercent"] / 100 if visual["mode"] == "FILLED" else 0
+            rgb = [int(visual["effectiveRgb"][i:i + 2], 16) for i in (1, 3, 5)]
+            require(all(0 <= n <= 255 for n in rgba[:3]) and 0 <= rgba[3] <= 1
+                    and abs(rgba[3] - alpha) < 0.000001 and (alpha == 0 or rgba[:3] == rgb)
+                    and pill["borderWidth"] == (0 if visual["mode"] == "FILLED" else 1)
+                    and pill["borderStyle"] == ("none" if visual["mode"] == "FILLED" else "solid"), "NODE_VISUAL_COMPUTED_STYLE")
+
+

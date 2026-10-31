@@ -25,6 +25,35 @@ pub(super) fn dispatch(
             Ok(page) => response(200, scope_bytes(&page), None),
             Err(error) => backend_error(error, false),
         },
+        Route::SubjectVisual { key } => {
+            let fc_domain::content::ContentKey::Homework(key) = key.into_domain() else {
+                return failure(400, responses::ErrorCode::InvalidRequest);
+            };
+            match backend.web_subject_visual_preview(lease, key) {
+                Ok(p) => response(
+                    200,
+                    fc_protocol::web::subject_visual::preview(
+                        fc_protocol::web::subject_visual::Preview {
+                            key: &p.key,
+                            subject_name: &p.subject_name,
+                            subject_revision: p.subject_revision,
+                            display_revision: p.display_revision,
+                            effective_rgb: p.effective_rgb,
+                            filled: p.filled,
+                            homework_fill_percent: p.homework_fill_percent,
+                            course_fill_percent: p.course_fill_percent,
+                            homework_component_opacity_percent: p
+                                .homework_component_opacity_percent,
+                            course_component_opacity_percent: p.course_component_opacity_percent,
+                            homework_visible: p.homework_visible,
+                            course_visible: p.course_visible,
+                        },
+                    ),
+                    None,
+                ),
+                Err(error) => backend_error(error, false),
+            }
+        }
         Route::ContentRead { key } => match backend.web_content_read(lease, key.into_domain()) {
             Ok(document) => response(200, document_bytes(&document), None),
             Err(error) => backend_error(error, false),
@@ -136,6 +165,22 @@ fn scope_bytes(page: &WebContentScopes) -> Result<Vec<u8>, ProtocolError> {
 }
 fn backend_error(error: BackendError, mutating: bool) -> WebResponse {
     match error {
+        BackendError::SubjectVisual(
+            fc_ports::subject_visual::SubjectVisualRepositoryError::Content(error),
+        ) => backend_error(
+            BackendError::Content(RepositoryError::Domain(error)),
+            mutating,
+        ),
+        BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(
+            fc_domain::identity::IdentityError::Permission(_),
+        )) => failure(403, responses::ErrorCode::Forbidden),
+        BackendError::SubjectVisual(
+            fc_ports::subject_visual::SubjectVisualRepositoryError::Domain(
+                fc_domain::subject_visual::SubjectVisualError::Identity(
+                    fc_domain::identity::IdentityError::Permission(_),
+                ),
+            ),
+        ) => failure(403, responses::ErrorCode::Forbidden),
         BackendError::Content(RepositoryError::Domain(error)) => match error {
             ContentError::Permission(_) => failure(403, responses::ErrorCode::Forbidden),
             ContentError::WrongDate => failure(409, responses::ErrorCode::DayChanged),

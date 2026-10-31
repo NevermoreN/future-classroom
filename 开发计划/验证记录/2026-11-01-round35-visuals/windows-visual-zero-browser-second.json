@@ -1,0 +1,2536 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "FINITE_NATIVE_CONTENT_UI_PASS",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+  "exeSha256": "fdbd2b5326b1054175583f3bf8fcb1133e84b5a9f3f2db32eb0fd4b5669c0cda",
+  "runnerSourceSha256": "0757d52fc926944c040d368900243afd18ad9ac5286313b857a50ad7fa638ba1",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "webBundleSha256": "bb159a86155985a5526ab428569d56146bb7f9cec44bc68180c342df314b1183",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "visualFixture": "FILLED_ZERO",
+  "visualOnly": true,
+  "events": [
+    {
+      "case": "api-wrong-method-status",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 72,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "737882580fdc0a6af7f1f91dc0347a9ef124fba1c3ba1a9a7765c84e8a54a37c",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 92276309
+    },
+    {
+      "case": "api-wrong-method-pairing/requests",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "pairing/requests",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 261,
+      "responseWireSha256": "1d1f6ed3844ff6a613063e3effda7b39020bffbc4efcda4011331f3ec047e8b9",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 106611123
+    },
+    {
+      "case": "api-wrong-method-voice/broadcasts",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "voice/broadcasts",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 266,
+      "responseWireSha256": "aa9a6df8dda9317efbfe960fe46e7e52f1bc43b469040c5623f77fa3443076d1",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET, POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 80342606
+    },
+    {
+      "case": "public-status",
+      "status": "PASS",
+      "method": "GET",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 69,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 260,
+      "responseWireSha256": "925804e8bff07fab638d8503e1addad04106a3e947fd009d38d114c55b12d9eb",
+      "responseBodyBytes": 75,
+      "responseBodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 98766708
+    },
+    {
+      "case": "unauthorized-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 70,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 236,
+      "responseWireSha256": "9787d48537cf755a0ec674b0b70f316e56aecb7c07b6f0117807367d930e984a",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 82122700
+    },
+    {
+      "case": "bad-origin-pairing",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "c62ebd2ad2ec6b4cdcb6cbf56efd498e381eceabd9b2c4bb39d983f97e9e37c0",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 131,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 403,
+      "responseWireBytes": 230,
+      "responseWireSha256": "c834ccd656754ab49ed541ea8ee9da1720919560f765a29c750ed2a930975df3",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 121905016
+    },
+    {
+      "case": "pairing-request",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "c62ebd2ad2ec6b4cdcb6cbf56efd498e381eceabd9b2c4bb39d983f97e9e37c0",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 133,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 202,
+      "responseWireBytes": 345,
+      "responseWireSha256": "a91b9d03a5714e1f91667b95763f3539be07c108ec9c35cdf1b295253a480c51",
+      "responseBodyBytes": 153,
+      "responseBodySha256": "29646214e439abbb0634a46062136f0e382ab154efd638134cb251c29e228b9a",
+      "responseDate": "Sat, 31 Oct 2026 18:27:29 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 82777466
+    },
+    {
+      "case": "pairing-poll-1",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests/2/poll",
+      "requestBodyBytes": 99,
+      "requestBodySha256": "e4fe5b34c114fcd509736cd87a647642cabb76b7f3075449cc659b62843df979",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 139,
+      "coalescedHeaderTailBodyBytes": 99,
+      "httpStatus": 200,
+      "responseWireBytes": 370,
+      "responseWireSha256": "1013959301301958b734574c237b31bd70c82a76767bfcd91a61330fdbb6ced8",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "02151c8ea64179d2d4c57898e15e5a53992a0f321cc4c7666c320c84a7acca0f",
+      "responseDate": "Sat, 31 Oct 2026 18:27:30 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 88822177
+    },
+    {
+      "case": "authenticated-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 167,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 462,
+      "responseWireSha256": "68a945148b27aacedc7db2d331ca44066821eee5297bec480dc6b9fc9268dec8",
+      "responseBodyBytes": 276,
+      "responseBodySha256": "f0a5a1f5788de37a8c24fabfa229c3466b10991492acac30850a58a083b88e6e",
+      "responseDate": "Sat, 31 Oct 2026 18:27:30 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 87245592
+    },
+    {
+      "case": "visual-owned-scopes",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/scopes/0",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 185,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 508,
+      "responseWireSha256": "975944d30411ef450e782af1d8560f9ff39006f820e829b3bc9226b341c069cd",
+      "responseBodyBytes": 322,
+      "responseBodySha256": "c456a406f9523f4b8f62baae6e9f1510bb4322ca930d16bee00db67da9bb7caa",
+      "responseDate": "Sat, 31 Oct 2026 18:27:30 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 81723233
+    },
+    {
+      "case": "visual-content-before",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 193,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 471,
+      "responseWireSha256": "b53dd46e50d52981f384e0234c582fe81d045e4fe1d42b22cd7e25fd31051896",
+      "responseBodyBytes": 285,
+      "responseBodySha256": "325e57d5acbb68fce3d048fc4913969bc0ef6c00e72f8c6b5376d4dd76ecb2d7",
+      "responseDate": "Sat, 31 Oct 2026 18:27:30 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 86502651
+    },
+    {
+      "case": "visual-read",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 646,
+      "responseWireSha256": "5fc4540f4dbe005f93814c94060665463b086c3248cef90e6a43a9252355a267",
+      "responseBodyBytes": 460,
+      "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 98057109
+    },
+    {
+      "case": "visual-no-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 103,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 236,
+      "responseWireSha256": "0a67edcb901309e2112ea5eb501eee8f6eaf4f3436e9aaadd9034d79dc72f797",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 74111727
+    },
+    {
+      "case": "visual-other-class",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/2/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 230,
+      "responseWireSha256": "1a5c64ce50348ce9a8d795dbaa4efcfd26a5475fa3c6c6336c510305495de2cd",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 96327898
+    },
+    {
+      "case": "visual-write-method-POST",
+      "status": "PASS",
+      "method": "POST",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 329,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "f88c09e78a1b97eeb449a6017ee5e83dd51d6febdebe60ff8f537d29adb22b4a",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 77971318
+    },
+    {
+      "case": "visual-write-method-DELETE",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 203,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "f88c09e78a1b97eeb449a6017ee5e83dd51d6febdebe60ff8f537d29adb22b4a",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 83991036
+    },
+    {
+      "case": "visual-fields-cannot-write-content",
+      "status": "PASS",
+      "method": "POST",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 130,
+      "requestBodySha256": "4390e4902ca5bb1715af644963aa5fc496c100afabdd7e25ab9f3abf10c50ed5",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 324,
+      "coalescedHeaderTailBodyBytes": 130,
+      "httpStatus": 400,
+      "responseWireBytes": 238,
+      "responseWireSha256": "f6572426175f7ffc42aea15c26c470fab7eb27645628af96928d49f63af8689f",
+      "responseBodyBytes": 44,
+      "responseBodySha256": "1d3789fa0a83ab27cdbfb0246976ce0851d489d45ca44cce94175914c320adac",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 79480459
+    },
+    {
+      "case": "visual-content-after",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 193,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 471,
+      "responseWireSha256": "a445989b60d993658012b14dad0491b74767465193b7bab9160bdfd398d07b08",
+      "responseBodyBytes": 285,
+      "responseBodySha256": "34f21c7f64b8806e04c2c9b6b379b211c838e4489c74b1f2fb388c582c6ff077",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 85061691
+    },
+    {
+      "case": "visual-explicit-reread",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:49798",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:49798",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 646,
+      "responseWireSha256": "5fc4540f4dbe005f93814c94060665463b086c3248cef90e6a43a9252355a267",
+      "responseBodyBytes": 460,
+      "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+      "responseDate": "Sat, 31 Oct 2026 18:27:31 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 89395981
+    },
+    {
+      "case": "wrong-ca-rejected",
+      "status": "PASS",
+      "serverHostname": "localhost",
+      "trustSource": "default client roots, fixture not added",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 18,
+      "verifyMessage": "self-signed certificate"
+    },
+    {
+      "case": "wrong-hostname-rejected",
+      "status": "PASS",
+      "serverHostname": "wrong.invalid",
+      "trustSource": "only owned public PEM",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 62,
+      "verifyMessage": "Hostname mismatch, certificate is not valid for 'wrong.invalid'."
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+  "staticPackage": {
+    "manifestSha256": "db788235dc3c95698a95fce2afb1cdbcb03b4d0bebc84ffaf45e072a97712436",
+    "payloadBytes": 459002,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-DWNPyYJh.js",
+        "sizeBytes": 415326,
+        "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c"
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sizeBytes": 39554,
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "db788235dc3c95698a95fce2afb1cdbcb03b4d0bebc84ffaf45e072a97712436",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-DWNPyYJh.js",
+        "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+        "bytes": 415326
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+        "bytes": 39554
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "uploadedScriptSha256": {
+    "cleanup": "8a67e2bb9fce4308dc3aa72a1d00c7e4132db6702fe1200f1270b5238b696125",
+    "stop": "8e08418cbc35d6c6d524abc0e79c3b4bbf245cbe01534c3478e70ca5f4e5a195",
+    "capture": "7334701f727d594b1aea18babaf0f8eb5adfb0dc2c8be6d54635ffba7653f273",
+    "setup": "db789b30054d4964ffc4387bf2268f46285ec48f9cbe636003e22065848b1545",
+    "launch": "ba06dd3fe8eaa44897d067806e0a0f357313918971846cdb2009054d75306153"
+  },
+  "controlScriptsParse": "PASS",
+  "visualFixtureInput": {
+    "bytes": 11,
+    "sha256": "935bb04d8b70d959a1c163278d3c05e2d3685a7ccc2f34cd25c2063bef1de43f",
+    "readBack": "PASS"
+  },
+  "fixture": {
+    "thumbprint": "713CB7462B6CC0D1D14EAB553246DC36BFBDDB6A",
+    "keyName": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "e8029072f0cc7c0f7c8b54b26c87dd97efd9749ad032ca13780d8a4e88c1f257",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "continuousAcceptEnabled": false,
+  "nativeProgress": [
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 1,
+      "acceptance": {
+        "generation": 1,
+        "posts": 1,
+        "completions": 0,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 0,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 0,
+      "rearms": 0,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 2,
+      "acceptance": {
+        "generation": 1,
+        "posts": 4,
+        "completions": 3,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 3,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 2,
+      "rearms": 2,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 3,
+      "acceptance": {
+        "generation": 1,
+        "posts": 7,
+        "completions": 6,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 6,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 5,
+      "rearms": 5,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 4,
+      "acceptance": {
+        "generation": 1,
+        "posts": 8,
+        "completions": 7,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 7,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 7,
+      "rearms": 7,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 5,
+      "acceptance": {
+        "generation": 1,
+        "posts": 9,
+        "completions": 8,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 8,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 7,
+      "rearms": 7,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 6,
+      "acceptance": {
+        "generation": 1,
+        "posts": 11,
+        "completions": 10,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 10,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 10,
+      "rearms": 10,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 7,
+      "acceptance": {
+        "generation": 1,
+        "posts": 14,
+        "completions": 13,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 13,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 13,
+      "rearms": 13,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 8,
+      "acceptance": {
+        "generation": 1,
+        "posts": 17,
+        "completions": 16,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 16,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 16,
+      "rearms": 16,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 9,
+      "acceptance": {
+        "generation": 1,
+        "posts": 20,
+        "completions": 19,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 19,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 19,
+      "rearms": 19,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 10,
+      "acceptance": {
+        "generation": 1,
+        "posts": 26,
+        "completions": 25,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 25,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 25,
+      "rearms": 25,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 11,
+      "acceptance": {
+        "generation": 1,
+        "posts": 27,
+        "completions": 26,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 26,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 26,
+      "rearms": 26,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 12,
+      "acceptance": {
+        "generation": 1,
+        "posts": 30,
+        "completions": 29,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 29,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 29,
+      "rearms": 29,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 13,
+      "acceptance": {
+        "generation": 1,
+        "posts": 35,
+        "completions": 34,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 34,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 34,
+      "rearms": 34,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 14,
+      "acceptance": {
+        "generation": 1,
+        "posts": 38,
+        "completions": 37,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 37,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 1,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 36,
+      "rearms": 36,
+      "pendingJobs": 1,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 15,
+      "acceptance": {
+        "generation": 1,
+        "posts": 38,
+        "completions": 37,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 37,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 37,
+      "rearms": 37,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 16,
+      "acceptance": {
+        "generation": 1,
+        "posts": 40,
+        "completions": 39,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 17,
+      "acceptance": {
+        "generation": 1,
+        "posts": 41,
+        "completions": 40,
+        "idle_cancellations": 1,
+        "idle_returns": 1,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 18,
+      "acceptance": {
+        "generation": 1,
+        "posts": 42,
+        "completions": 41,
+        "idle_cancellations": 2,
+        "idle_returns": 2,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 19,
+      "acceptance": {
+        "generation": 1,
+        "posts": 43,
+        "completions": 42,
+        "idle_cancellations": 3,
+        "idle_returns": 3,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 20,
+      "acceptance": {
+        "generation": 1,
+        "posts": 44,
+        "completions": 43,
+        "idle_cancellations": 4,
+        "idle_returns": 4,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 21,
+      "acceptance": {
+        "generation": 1,
+        "posts": 45,
+        "completions": 44,
+        "idle_cancellations": 5,
+        "idle_returns": 5,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 22,
+      "acceptance": {
+        "generation": 1,
+        "posts": 46,
+        "completions": 45,
+        "idle_cancellations": 6,
+        "idle_returns": 6,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 23,
+      "acceptance": {
+        "generation": 1,
+        "posts": 47,
+        "completions": 46,
+        "idle_cancellations": 7,
+        "idle_returns": 7,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 24,
+      "acceptance": {
+        "generation": 1,
+        "posts": 48,
+        "completions": 47,
+        "idle_cancellations": 8,
+        "idle_returns": 8,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "generation": 1,
+      "sequence": 25,
+      "acceptance": {
+        "generation": 1,
+        "posts": 48,
+        "completions": 48,
+        "idle_cancellations": 8,
+        "idle_returns": 8,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 0,
+        "bound_slots": 0,
+        "native_pending": 0,
+        "owned_sockets": 0
+      },
+      "jsonBodyRecords": 0,
+      "retired": 43,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    }
+  ],
+  "ready": [
+    {
+      "port": 49798,
+      "generation": 1,
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "origin": "https://localhost:49798",
+      "basePath": "/fc/",
+      "classId": "1",
+      "subjectId": "1",
+      "loginName": "probe",
+      "staticAssets": 6,
+      "visualFixture": "FILLED_ZERO"
+    }
+  ],
+  "nativeReports": [
+    {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 37,
+      "responses": 37,
+      "peakRecords": 4
+    }
+  ],
+  "nativeProcessExits": [
+    {
+      "code": 0
+    }
+  ],
+  "static": {
+    "status": "NOT_RUN_TARGETED_VISUAL_MATRIX"
+  },
+  "business": {
+    "subjectVisuals": {
+      "status": "PASS",
+      "fixture": "FILLED_ZERO",
+      "preview": {
+        "schemaVersion": 1,
+        "status": "SUBJECT_VISUAL",
+        "key": {
+          "kind": "HOMEWORK",
+          "classId": "1",
+          "subjectId": "1",
+          "ownerTeacherId": "1",
+          "date": "2026-11-01"
+        },
+        "subjectId": "1",
+        "subjectName": "Synthetic TLS subject",
+        "subjectRevision": "1",
+        "displayRevision": "1",
+        "rulesVersion": 1,
+        "effectiveRgb": "#88A6C4",
+        "mode": "FILLED",
+        "homeworkFillPercent": 0,
+        "courseFillPercent": 0,
+        "homeworkComponentOpacityPercent": 70,
+        "courseComponentOpacityPercent": 80,
+        "homeworkVisible": true,
+        "courseVisible": true
+      },
+      "previewSha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+      "contentRevisionBefore": "0",
+      "contentRevisionAfter": "0",
+      "readOnly": true,
+      "nativeDesktopPixels": "NOT_OBSERVED",
+      "wallpaperContrast": "NOT_CERTIFIED"
+    },
+    "scope": "TARGETED_VISUAL_MATRIX_NO_MATERIAL_OR_AUDIO_OPERATIONS"
+  },
+  "nativeDebugLines": [
+    "TLS_BUSINESS_REPORT NetworkReport { acceptance: TlsAcceptSnapshot { generation: 1, posts: 48, completions: 48, idle_cancellations: 8, idle_returns: 8, capacity_rejects: 0, transfers: 39, ready_slots: 0, bound_slots: 0, native_pending: 0, owned_sockets: 0 }, json_body_records: 0, json_body_intervals: [None, None, None, None, None, None, None, None], heads: 37, admissions: 29, body_acks: 29, responses: 37, closed: 43, retired: 43, rearms: 39, stale_events: 0, active_records: 0, peak_records: 4, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1583440 }"
+  ],
+  "native": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 37,
+    "responses": 37,
+    "peakRecords": 4
+  },
+  "nativeProcessExit": {
+    "code": 0
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 11156,
+      "observedBytes": 11156,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "1b5485280d190b37d2f141bb7a218fffc0816cbd1c918f6984eb5a39a9c037cc",
+      "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NDk3OTgsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsInBhaXJpbmdDb2RlIjoiODQwNjYzNDUiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo0OTc5OCIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2LCJ2aXN1YWxGaXh0dXJlIjoiRklMTEVEX1pFUk8ifQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjEsImNvbXBsZXRpb25zIjowLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjowLCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjowLCJyZWFybXMiOjAsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NCwiY29tcGxldGlvbnMiOjMsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjMsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjIsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjIsInJlYXJtcyI6MiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjozLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo3LCJjb21wbGV0aW9ucyI6NiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6NiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6NSwicmVhcm1zIjo1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjQsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjgsImNvbXBsZXRpb25zIjo3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjo3LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo3LCJyZWFybXMiOjcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6OSwiY29tcGxldGlvbnMiOjgsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjgsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjIsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjcsInJlYXJtcyI6NywicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo2LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxMSwiY29tcGxldGlvbnMiOjEwLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxMCwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTAsInJlYXJtcyI6MTAsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NywiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MTQsImNvbXBsZXRpb25zIjoxMywiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MTMsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjEzLCJyZWFybXMiOjEzLCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjgsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjE3LCJjb21wbGV0aW9ucyI6MTYsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjE2LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoxNiwicmVhcm1zIjoxNiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo5LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoyMCwiY29tcGxldGlvbnMiOjE5LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTksInJlYXJtcyI6MTksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTAsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjI2LCJjb21wbGV0aW9ucyI6MjUsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjI1LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyNSwicmVhcm1zIjoyNSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxMSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MjcsImNvbXBsZXRpb25zIjoyNiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MjYsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjI2LCJyZWFybXMiOjI2LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEyLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozMCwiY29tcGxldGlvbnMiOjI5LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoyOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MjksInJlYXJtcyI6MjksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTMsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjM1LCJjb21wbGV0aW9ucyI6MzQsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM0LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozNCwicmVhcm1zIjozNCwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxNCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MzgsImNvbXBsZXRpb25zIjozNywiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzcsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM2LCJyZWFybXMiOjM2LCJwZW5kaW5nSm9icyI6MSwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE1LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozOCwiY29tcGxldGlvbnMiOjM3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozNywicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzcsInJlYXJtcyI6MzcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTYsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQwLCJjb21wbGV0aW9ucyI6MzksImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxNywiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDEsImNvbXBsZXRpb25zIjo0MCwiaWRsZV9jYW5jZWxsYXRpb25zIjoxLCJpZGxlX3JldHVybnMiOjEsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE4LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0MiwiY29tcGxldGlvbnMiOjQxLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjIsImlkbGVfcmV0dXJucyI6MiwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTksImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQzLCJjb21wbGV0aW9ucyI6NDIsImlkbGVfY2FuY2VsbGF0aW9ucyI6MywiaWRsZV9yZXR1cm5zIjozLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyMCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDQsImNvbXBsZXRpb25zIjo0MywiaWRsZV9jYW5jZWxsYXRpb25zIjo0LCJpZGxlX3JldHVybnMiOjQsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIxLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0NSwiY29tcGxldGlvbnMiOjQ0LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjUsImlkbGVfcmV0dXJucyI6NSwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjIsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ2LCJjb21wbGV0aW9ucyI6NDUsImlkbGVfY2FuY2VsbGF0aW9ucyI6NiwiaWRsZV9yZXR1cm5zIjo2LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyMywiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDcsImNvbXBsZXRpb25zIjo0NiwiaWRsZV9jYW5jZWxsYXRpb25zIjo3LCJpZGxlX3JldHVybnMiOjcsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjI0LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0OCwiY29tcGxldGlvbnMiOjQ3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjgsImlkbGVfcmV0dXJucyI6OCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjUsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ4LCJjb21wbGV0aW9ucyI6NDgsImlkbGVfY2FuY2VsbGF0aW9ucyI6OCwiaWRsZV9yZXR1cm5zIjo4LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6MCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjowLCJvd25lZF9zb2NrZXRzIjowfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo0MywicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19SRVBPUlQgTmV0d29ya1JlcG9ydCB7IGFjY2VwdGFuY2U6IFRsc0FjY2VwdFNuYXBzaG90IHsgZ2VuZXJhdGlvbjogMSwgcG9zdHM6IDQ4LCBjb21wbGV0aW9uczogNDgsIGlkbGVfY2FuY2VsbGF0aW9uczogOCwgaWRsZV9yZXR1cm5zOiA4LCBjYXBhY2l0eV9yZWplY3RzOiAwLCB0cmFuc2ZlcnM6IDM5LCByZWFkeV9zbG90czogMCwgYm91bmRfc2xvdHM6IDAsIG5hdGl2ZV9wZW5kaW5nOiAwLCBvd25lZF9zb2NrZXRzOiAwIH0sIGpzb25fYm9keV9yZWNvcmRzOiAwLCBqc29uX2JvZHlfaW50ZXJ2YWxzOiBbTm9uZSwgTm9uZSwgTm9uZSwgTm9uZSwgTm9uZSwgTm9uZSwgTm9uZSwgTm9uZV0sIGhlYWRzOiAzNywgYWRtaXNzaW9uczogMjksIGJvZHlfYWNrczogMjksIHJlc3BvbnNlczogMzcsIGNsb3NlZDogNDMsIHJldGlyZWQ6IDQzLCByZWFybXM6IDM5LCBzdGFsZV9ldmVudHM6IDAsIGFjdGl2ZV9yZWNvcmRzOiAwLCBwZWFrX3JlY29yZHM6IDQsIHBlbmRpbmdfam9iczogMCwgY2xlYW51cF9wZW5kaW5nOiAwLCByZXRhaW5lZF9jbGVhbnVwOiAwLCBuYXRpdmVfZHJhaW5lZDogdHJ1ZSwgc3RvcHBpbmc6IHRydWUsIG93bmVkX2J5dGVzOiAxNTgzNDQwIH0NClRMU19CVVNJTkVTU19QQVNTIHsicGh5c2ljYWxOYXRpdmVEcmFpbiI6dHJ1ZSwic2hhcmVkV29ya2VycyI6Miwid29ya2VySm9pbiI6dHJ1ZSwiaHViUGVuZGluZyI6MCwiZG93bmxvYWRIdWJQZW5kaW5nIjowLCJxdWFyYW50aW5lZCI6MCwic2V0dXBDbGVhbnVwIjp0cnVlLCJhcHByb3ZhbHMiOjEsImhlYWRzIjozNywicmVzcG9uc2VzIjozNywicGVha1JlY29yZHMiOjR9DQpUTFNfRlJPTlRET09SX1BST0NFU1NfRVhJVCB7ImNvZGUiOjB9DQo="
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "browser": {
+    "status": "PASS",
+    "cleanup": "PASS",
+    "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+    "credentialScope": "Cookie/CSRF private stdin only; no raw CDP frames",
+    "edgeSessionCapSeconds": 180,
+    "ownerExitObservationSeconds": 215,
+    "errors": [],
+    "sourceSha256": {
+      "observer": "eb17bd4569c22b34a7b1b1fc66b541334c26db46b1cb9df61428e309a570be05",
+      "edgeOwner": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "nodeHarness": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70",
+      "tlsOwnershipHelpers": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    "spkiSha256Base64": "HJGTJfTYIjoHBtedO056adr+VlupyUvCdwj5pVesnpc=",
+    "ownerReportPath": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second.json.browser-edge-owner.json",
+    "nodeReportPath": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second.json.browser-node.json",
+    "edgeReady": {
+      "pid": 22768,
+      "headless": true,
+      "muteAudio": true,
+      "jobName": "Local\\FutureClassroom-Test-Browser-5da24b8d42b34f3ca1c06bcb98634509-fba468e7de564385a9c1543b72c8c4b2",
+      "profile": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-5da24b8d42b34f3ca1c06bcb98634509\\profile",
+      "readyOriginalBytes": 60,
+      "boundLoopback": true,
+      "productVersion": "156.0.4314.50",
+      "readyOriginalSha256": "89b8749a01c2a5cb4f685a99852e1a1f28aed8acd2264bc2bb9bca66d822a364",
+      "webSocketPath": "/devtools/browser/aaa98c66-55b7-4d97-bac5-5846f1010cce",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "fileVersion": "156.0.4314.50",
+      "port": 60645,
+      "startTicks": "639290680464618071",
+      "marker": "FutureClassroom-Test-Browser-5da24b8d42b34f3ca1c06bcb98634509",
+      "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-5da24b8d42b34f3ca1c06bcb98634509",
+      "controlFile": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second.json.browser-edge-owner.json.control.json"
+    },
+    "nodeReady": {
+      "type": "READY",
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "browserVersion": "Edg/156.0.4314.50",
+      "scope": "Exclusive CDP context prepared; no Native navigation or new pairing yet"
+    },
+    "nodeActualExitCode": 0,
+    "nodeRaw": {
+      "stdout": {
+        "bytes": 473,
+        "observedBytes": 473,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e1de9e01014b7744fe26a5b44cf3a170cb8079efe69a8b6ff546c2b242d832b8",
+        "base64": "eyJ0eXBlIjoiUkVBRFkiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJicm93c2VyVmVyc2lvbiI6IkVkZy8xNTYuMC40MzE0LjUwIiwic2NvcGUiOiJFeGNsdXNpdmUgQ0RQIGNvbnRleHQgcHJlcGFyZWQ7IG5vIE5hdGl2ZSBuYXZpZ2F0aW9uIG9yIG5ldyBwYWlyaW5nIHlldCJ9CnsidHlwZSI6IlJFU1VMVCIsInN0YXR1cyI6IlBBU1MiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJ3aXJlUmVzcG9uc2VDb3VudCI6MTgsImNvbnRlbnRQb3N0cyI6MSwiY29udGV4dERpc3Bvc2VkIjp0cnVlLCJyZXBvcnQiOiIvdG1wL2ZjLXJvdW5kMzUtdmlzdWFscy1ldmlkZW5jZS93aW5kb3dzLXZpc3VhbC16ZXJvLWJyb3dzZXItc2Vjb25kLmpzb24uYnJvd3Nlci1ub2RlLmpzb24ifQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "nodeReport": {
+      "path": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second.json.browser-node.json",
+      "bytes": 28332,
+      "sha256": "e88ae18f695e181477273303e358d33421cdf0434165cc761b5a2bf75eedbd0f"
+    },
+    "result": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "marker": "FutureClassroom-Test-TLS-72c2bb3a320e4c48af9a62ba3baf1675",
+      "scope": "Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.",
+      "assetManifestCanonicalSha256": "a7f7b05c37b08d6f9277979c2aa0f775a0cbd82e71e6254bfaadacacd15ce70f",
+      "expectedCspSha256": "f8cbf41d10dd40e8f22fe51fc0ec04c21157b15342f2c1f994a368277a17274d",
+      "credentialScope": "stdin memory only; Cookie/CSRF/Set-Cookie/response bodies and raw CDP frames omitted",
+      "browserPhysicalCleanup": "SEPARATE_ORIGINAL_WINDOWS_JOB_OWNER_REQUIRED",
+      "assets": [
+        {
+          "path": "index.html",
+          "bytes": 1232,
+          "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DrrJeLm9.css",
+          "bytes": 39554,
+          "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DWNPyYJh.js",
+          "bytes": 415326,
+          "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+          "verified": true
+        },
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DWNPyYJh.js",
+          "bytes": 415326,
+          "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DrrJeLm9.css",
+          "bytes": 39554,
+          "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+          "verified": true
+        },
+        {
+          "path": "index.html",
+          "bytes": 1232,
+          "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+          "verified": true
+        },
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+          "verified": true
+        }
+      ],
+      "checks": [
+        "Native HTML/JS/CSS exact manifest identities and CSP",
+        "Original approved HttpOnly cookie; actual session CSRF matched twice",
+        "One synthetic authorized scope and original empty content",
+        "Exactly one UI content POST with original CSRF/date/revision",
+        "Committed receipt and post-reload durable content match",
+        "Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately",
+        "Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha",
+        "Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview"
+      ],
+      "browserVersion": "Edg/156.0.4314.50",
+      "generation": 1,
+      "origin": "https://localhost:49798",
+      "maxMillis": 12000,
+      "syntheticTextSha256": "2e7f05c1bf4faebb5c99a391d850169a457643c21ec7ab8795dd33ad260217ca",
+      "elapsedMillis": 1311,
+      "contextDisposed": true,
+      "cdpDisconnected": true,
+      "network": [
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "POST",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 304,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": true,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": true,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": true,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        }
+      ],
+      "wireResponses": [
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "POST",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 304,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:49798/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        }
+      ],
+      "wireResponseCount": 18,
+      "observedRequestCount": 21,
+      "observedResponseCount": 21,
+      "cacheOnlyResponseCount": 3,
+      "apiResponses": 13,
+      "apiOperations": {
+        "statusGets": 2,
+        "sessionGets": 2,
+        "scopeGets": 2,
+        "contentGets": 2,
+        "contentPosts": 1,
+        "visualGets": 4
+      },
+      "visualReads": 4,
+      "visualObservations": [
+        {
+          "stage": "initial",
+          "readNumber": 1,
+          "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "FILLED",
+            "homeworkFillPercent": 0,
+            "courseFillPercent": 0,
+            "homeworkComponentOpacityPercent": 70,
+            "courseComponentOpacityPercent": 80,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.7,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.7,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.8,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.8,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "draft-refresh",
+          "readNumber": 2,
+          "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "FILLED",
+            "homeworkFillPercent": 0,
+            "courseFillPercent": 0,
+            "homeworkComponentOpacityPercent": 70,
+            "courseComponentOpacityPercent": 80,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.7,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.7,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.8,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.8,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "after-save",
+          "readNumber": 3,
+          "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "FILLED",
+            "homeworkFillPercent": 0,
+            "courseFillPercent": 0,
+            "homeworkComponentOpacityPercent": 70,
+            "courseComponentOpacityPercent": 80,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.7,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.7,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.8,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.8,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "after-reload",
+          "readNumber": 4,
+          "responseBodySha256": "617339aa873db8060747ccb78a170f0c2d327122540c0e60a5760d7ecedf16e3",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "FILLED",
+            "homeworkFillPercent": 0,
+            "courseFillPercent": 0,
+            "homeworkComponentOpacityPercent": 70,
+            "courseComponentOpacityPercent": 80,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.7,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.7,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "FILLED",
+              "fillPercent": "0",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 0.8,
+              "pillOpacity": 1,
+              "effectiveOpacity": 0.8,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 0,
+              "borderStyle": "none",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        }
+      ],
+      "contentPosts": 1,
+      "sessionCsrfMatched": true,
+      "writeOutcome": "COMMITTED",
+      "contentRevision": "1",
+      "commandId": "1940861887670231324",
+      "pageErrorCount": 0,
+      "consoleErrorCount": 0,
+      "sourceSha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70"
+    },
+    "wireResponseCount": 18,
+    "cdpTunnelRaw": {
+      "stdout": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerStopRequest": {
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 373,
+        "sha256": "6b8379463ae4aed705aa85a0a2d4fedcb9ad643d79b431d399a2cf7d15bf74a1",
+        "base64": "RURHRV9DQUNIRV9TVE9QX1JFUVVFU1QgeyJyZXN1bHQiOiAie1wibWFya2VyXCI6XCJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTVkYTI0YjhkNDJiMzRmM2NhMWMwNmJjYjk4NjM0NTA5XCIsXCJzdGF0dXNcIjpcIlNUT1BfUkVRVUVTVEVEXCIsXCJwaHlzaWNhbEV4aXRcIjpcIldBSVRfRk9SX09SSUdJTkFMX1NVUEVSVklTT1JfUkVQT1JUXCJ9IiwgInJhd1JlcG9ydCI6ICIvdG1wL2ZjLXJvdW5kMzUtdmlzdWFscy1ldmlkZW5jZS93aW5kb3dzLXZpc3VhbC16ZXJvLWJyb3dzZXItc2Vjb25kLmpzb24uYnJvd3Nlci1lZGdlLW93bmVyLmpzb24uY29udHJvbC5qc29uLnN0b3AtNTE5N2NiZTlkODNmNDUzMmJhYmU5MjEyOWViZWY1MDEuanNvbiJ9Cg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerActualExitCode": 0,
+    "ownerReport": {
+      "path": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second.json.browser-edge-owner.json",
+      "bytes": 17441,
+      "sha256": "4f2c7f4f5a13d2e5e22727ff766acc37d21212696372b243fe40ad295cf757ad"
+    },
+    "ownerPhysicalCleanup": "PASS",
+    "ownerSupervisorRaw": {
+      "stdout": {
+        "bytes": 1476,
+        "observedBytes": 1476,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "d710edf580abb63ff18811e135cf6cffe571aa8bff6993cdd8741722f32d3548",
+        "base64": "RURHRV9DQUNIRV9DT05UUk9MIHsiY29udHJvbEZpbGUiOiAiL3RtcC9mYy1yb3VuZDM1LXZpc3VhbHMtZXZpZGVuY2Uvd2luZG93cy12aXN1YWwtemVyby1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uLmNvbnRyb2wuanNvbiIsICJtYXJrZXIiOiAiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci01ZGEyNGI4ZDQyYjM0ZjNjYTFjMDZiY2I5ODYzNDUwOSJ9CkVER0VfQ0FDSEVfUkVBRFkgeyJwaWQiOiAyMjc2OCwgImhlYWRsZXNzIjogdHJ1ZSwgIm11dGVBdWRpbyI6IHRydWUsICJqb2JOYW1lIjogIkxvY2FsXFxGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTVkYTI0YjhkNDJiMzRmM2NhMWMwNmJjYjk4NjM0NTA5LWZiYTQ2OGU3ZGU1NjQzODVhOWMxNTQzYjcyYzhjNGIyIiwgInByb2ZpbGUiOiAiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItNWRhMjRiOGQ0MmIzNGYzY2ExYzA2YmNiOTg2MzQ1MDlcXHByb2ZpbGUiLCAicmVhZHlPcmlnaW5hbEJ5dGVzIjogNjAsICJib3VuZExvb3BiYWNrIjogdHJ1ZSwgInByb2R1Y3RWZXJzaW9uIjogIjE1Ni4wLjQzMTQuNTAiLCAicmVhZHlPcmlnaW5hbFNoYTI1NiI6ICI4OWI4NzQ5YTAxYzJhNWNiNGY2ODVhOTk4NTJlMWExZjI4YWVkOGFjZDIyNjRiYzJiYjliY2E2NmQ4MjJhMzY0IiwgIndlYlNvY2tldFBhdGgiOiAiL2RldnRvb2xzL2Jyb3dzZXIvYWFhOThjNjYtNTViNy00ZDk3LWJhYzUtNTg0NmYxMDEwY2NlIiwgImV4ZSI6ICJDOlxcUHJvZ3JhbSBGaWxlcyAoeDg2KVxcTWljcm9zb2Z0XFxFZGdlXFxBcHBsaWNhdGlvblxcbXNlZGdlLmV4ZSIsICJmaWxlVmVyc2lvbiI6ICIxNTYuMC40MzE0LjUwIiwgInBvcnQiOiA2MDY0NSwgInN0YXJ0VGlja3MiOiAiNjM5MjkwNjgwNDY0NjE4MDcxIiwgIm1hcmtlciI6ICJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTVkYTI0YjhkNDJiMzRmM2NhMWMwNmJjYjk4NjM0NTA5IiwgInJlbW90ZVJvb3QiOiAiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItNWRhMjRiOGQ0MmIzNGYzY2ExYzA2YmNiOTg2MzQ1MDkiLCAiY29udHJvbEZpbGUiOiAiL3RtcC9mYy1yb3VuZDM1LXZpc3VhbHMtZXZpZGVuY2Uvd2luZG93cy12aXN1YWwtemVyby1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uLmNvbnRyb2wuanNvbiJ9CkVER0VfQ0FDSEVfT1dORVJfUkVTVUxUIHsic3RhdHVzIjoiUEFTUyIsImNsZWFudXAiOiJQQVNTIiwicmVwb3J0IjoiL3RtcC9mYy1yb3VuZDM1LXZpc3VhbHMtZXZpZGVuY2Uvd2luZG93cy12aXN1YWwtemVyby1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uIiwiY2FjaGVBc3NlcnRpb25zIjoiU0VFX1NFUEFSQVRFX0NEUF9IQVJORVNTIn0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerProcessRetained": false
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 11089,
+      "sha256": "a57a0d39bcb42a20ebf9ae98427f8eaa57e40ab9c27cc2acfaa1e62cf651274c"
+    },
+    ".tls-process.json": {
+      "bytes": 239,
+      "sha256": "641d0b748503896447fb0547f64e6300ebd6f78d27ea61c5ce95874b89eee81d"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "463adc8fd9ab9ab71da3358476484728a05b979f9d0d97794948f6f1f79eaada"
+    },
+    "tls.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "c9a121e341760b77575f9491a8f425519f50f0f476f21e83578d6914b5935593"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "4a44b004f31f41c9368670bedeb4c120df1ea5b01291696503d232e40847ebcb"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "7c034201a609f03e2cac302c77745a434a1efe6a132621f2d62c399932214f34"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 11089,
+          "sha256": "a57a0d39bcb42a20ebf9ae98427f8eaa57e40ab9c27cc2acfaa1e62cf651274c"
+        },
+        "downloaded": {
+          "bytes": 11089,
+          "sha256": "a57a0d39bcb42a20ebf9ae98427f8eaa57e40ab9c27cc2acfaa1e62cf651274c"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/tls.stdout",
+        "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NDk3OTgsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsInBhaXJpbmdDb2RlIjoiODQwNjYzNDUiLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo0OTc5OCIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2LCJ2aXN1YWxGaXh0dXJlIjoiRklMTEVEX1pFUk8ifQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MSwiY29tcGxldGlvbnMiOjAsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjAsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjAsInJlYXJtcyI6MCwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQsImNvbXBsZXRpb25zIjozLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozLCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoyLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyLCJyZWFybXMiOjIsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjozLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo3LCJjb21wbGV0aW9ucyI6NiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6NiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6NSwicmVhcm1zIjo1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6OCwiY29tcGxldGlvbnMiOjcsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjcsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjcsInJlYXJtcyI6NywicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjUsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjksImNvbXBsZXRpb25zIjo4LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjo4LCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoyLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo3LCJyZWFybXMiOjcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo2LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxMSwiY29tcGxldGlvbnMiOjEwLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxMCwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTAsInJlYXJtcyI6MTAsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo3LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxNCwiY29tcGxldGlvbnMiOjEzLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxMywicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTMsInJlYXJtcyI6MTMsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo4LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxNywiY29tcGxldGlvbnMiOjE2LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxNiwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTYsInJlYXJtcyI6MTYsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo5LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoyMCwiY29tcGxldGlvbnMiOjE5LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTksInJlYXJtcyI6MTksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxMCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MjYsImNvbXBsZXRpb25zIjoyNSwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MjUsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjI1LCJyZWFybXMiOjI1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTEsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjI3LCJjb21wbGV0aW9ucyI6MjYsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjI2LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyNiwicmVhcm1zIjoyNiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEyLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozMCwiY29tcGxldGlvbnMiOjI5LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoyOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MjksInJlYXJtcyI6MjksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxMywiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MzUsImNvbXBsZXRpb25zIjozNCwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzQsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM0LCJyZWFybXMiOjM0LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTQsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjM4LCJjb21wbGV0aW9ucyI6MzcsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM3LCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozNiwicmVhcm1zIjozNiwicGVuZGluZ0pvYnMiOjEsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE1LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozOCwiY29tcGxldGlvbnMiOjM3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozNywicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzcsInJlYXJtcyI6MzcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxNiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDAsImNvbXBsZXRpb25zIjozOSwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTcsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQxLCJjb21wbGV0aW9ucyI6NDAsImlkbGVfY2FuY2VsbGF0aW9ucyI6MSwiaWRsZV9yZXR1cm5zIjoxLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE4LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0MiwiY29tcGxldGlvbnMiOjQxLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjIsImlkbGVfcmV0dXJucyI6MiwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxOSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDMsImNvbXBsZXRpb25zIjo0MiwiaWRsZV9jYW5jZWxsYXRpb25zIjozLCJpZGxlX3JldHVybnMiOjMsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjAsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ0LCJjb21wbGV0aW9ucyI6NDMsImlkbGVfY2FuY2VsbGF0aW9ucyI6NCwiaWRsZV9yZXR1cm5zIjo0LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIxLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0NSwiY29tcGxldGlvbnMiOjQ0LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjUsImlkbGVfcmV0dXJucyI6NSwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyMiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDYsImNvbXBsZXRpb25zIjo0NSwiaWRsZV9jYW5jZWxsYXRpb25zIjo2LCJpZGxlX3JldHVybnMiOjYsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjMsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ3LCJjb21wbGV0aW9ucyI6NDYsImlkbGVfY2FuY2VsbGF0aW9ucyI6NywiaWRsZV9yZXR1cm5zIjo3LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjI0LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0OCwiY29tcGxldGlvbnMiOjQ3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjgsImlkbGVfcmV0dXJucyI6OCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NSIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyNSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDgsImNvbXBsZXRpb25zIjo0OCwiaWRsZV9jYW5jZWxsYXRpb25zIjo4LCJpZGxlX3JldHVybnMiOjgsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjowLCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjAsIm93bmVkX3NvY2tldHMiOjB9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjQzLCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUkVQT1JUIE5ldHdvcmtSZXBvcnQgeyBhY2NlcHRhbmNlOiBUbHNBY2NlcHRTbmFwc2hvdCB7IGdlbmVyYXRpb246IDEsIHBvc3RzOiA0OCwgY29tcGxldGlvbnM6IDQ4LCBpZGxlX2NhbmNlbGxhdGlvbnM6IDgsIGlkbGVfcmV0dXJuczogOCwgY2FwYWNpdHlfcmVqZWN0czogMCwgdHJhbnNmZXJzOiAzOSwgcmVhZHlfc2xvdHM6IDAsIGJvdW5kX3Nsb3RzOiAwLCBuYXRpdmVfcGVuZGluZzogMCwgb3duZWRfc29ja2V0czogMCB9LCBqc29uX2JvZHlfcmVjb3JkczogMCwganNvbl9ib2R5X2ludGVydmFsczogW05vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmVdLCBoZWFkczogMzcsIGFkbWlzc2lvbnM6IDI5LCBib2R5X2Fja3M6IDI5LCByZXNwb25zZXM6IDM3LCBjbG9zZWQ6IDQzLCByZXRpcmVkOiA0MywgcmVhcm1zOiAzOSwgc3RhbGVfZXZlbnRzOiAwLCBhY3RpdmVfcmVjb3JkczogMCwgcGVha19yZWNvcmRzOiA0LCBwZW5kaW5nX2pvYnM6IDAsIGNsZWFudXBfcGVuZGluZzogMCwgcmV0YWluZWRfY2xlYW51cDogMCwgbmF0aXZlX2RyYWluZWQ6IHRydWUsIHN0b3BwaW5nOiB0cnVlLCBvd25lZF9ieXRlczogMTU4MzQ0MCB9ClRMU19CVVNJTkVTU19QQVNTIHsicGh5c2ljYWxOYXRpdmVEcmFpbiI6dHJ1ZSwic2hhcmVkV29ya2VycyI6Miwid29ya2VySm9pbiI6dHJ1ZSwiaHViUGVuZGluZyI6MCwiZG93bmxvYWRIdWJQZW5kaW5nIjowLCJxdWFyYW50aW5lZCI6MCwic2V0dXBDbGVhbnVwIjp0cnVlLCJhcHByb3ZhbHMiOjEsImhlYWRzIjozNywicmVzcG9uc2VzIjozNywicGVha1JlY29yZHMiOjR9Cg=="
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 239,
+          "sha256": "641d0b748503896447fb0547f64e6300ebd6f78d27ea61c5ce95874b89eee81d"
+        },
+        "downloaded": {
+          "bytes": 239,
+          "sha256": "641d0b748503896447fb0547f64e6300ebd6f78d27ea61c5ce95874b89eee81d"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1XFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjo2NzQ4LCJzdGFydFRpY2tzIjoiNjM5MjkwNjgwNDkwNzE5NzI3In0="
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "463adc8fd9ab9ab71da3358476484728a05b979f9d0d97794948f6f1f79eaada"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "463adc8fd9ab9ab71da3358476484728a05b979f9d0d97794948f6f1f79eaada"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRY3paVlJmNFBhb2xFLzl2cUgvWXlaakFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1UZ3lNakl4V2hjTk1qWXhNVEF4TVRneU56SXhXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFEWUw3am55Z0JSdnE3YS93ZEw5RlJICnpwUXcvTHFYQnpLMUpVVmxpUjYzNW5jcXZYZHh1MGFVVHZxTVRwbWNvQ3ZhRDFCME1FNlJLa1hnL2lnOE5EaVJYV3JMdElMdWgzS0wKbGlZVDlEMXVnS3drZEVqZHRpSDVBUlJGMzgrWGpOd0NiMzFBQjh5ZkN2T0FGWlBCbGQ5RkxrRXdxMDBzL1dDbitMUEozeGJBVlVoNApKRldLMlRDVUdKbGc4ZzlYNzR5WTdqQURXOEZ4RXY0aXovN0s4MFpiYkgxM1NveGNpU3NxQVJpTU5OQjBJZUJ4blFIbVpqclM4QllsCkZGYjM0VHZnNjRhMHRwM1FUd1NZZFdSZS96ZVZEUVhVRjhiMEFQVU1veHdvanhaMEdyVEdSWjYrNm9lSU1EOWpUQlc5N1g0bmMwMlIKWW90MzBpSGw5Q1ljSGhscEFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJUNjFpdjFaa2lNCnlaT1lBbGVSR3UxeHZlWGJxakFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBcUJ0bGYvbHk0cmRvWnZFckxZd3BETFFPZ1JoVXY5b3AKVTNSSFY4QlFmekdnNlNCTTRzS3g5REwxcnBtZ0M0Mk5sWUdjNWphbW1rejlXZnNwZjNyZkl4YWYvak52VVR6RUNKTGZRZWhwdXVWRwpYSTRkUHFGUXdRbGorekxhekNtOU55S0wzdS9rUTBoKy95bFprWFpsUmFXLzJDaFVWMWlleTFKSlVHQVdWRUU1MmhQOGV6b2hmUisrCnlaSWdQMDVoTzRaeThtcVNWaXpPK25JQnNleVR2MW1WaDZZVFFkNE9CdkxQeGZXT3RuNHM5RWp5V2U4RGwwZWppY2xOSzg0RmJLbTAKOVh2T0N1Z0RvN0RuOVo4MDlHTnI5am5KbVBqSFd6M0NKcXNReWxzYUU1NGVWd2taWU9xVUNRaDk4V2NSNklLdEFKdmowaUhHdlk3VgpEVzZ6SXc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/tls.stderr",
+        "base64": ""
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "c9a121e341760b77575f9491a8f425519f50f0f476f21e83578d6914b5935593"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "c9a121e341760b77575f9491a8f425519f50f0f476f21e83578d6914b5935593"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6Mzg2NTYsInN0YXJ0VGlja3MiOiI2MzkyOTA2ODA0ODc2NTk4NjQifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "4a44b004f31f41c9368670bedeb4c120df1ea5b01291696503d232e40847ebcb"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "4a44b004f31f41c9368670bedeb4c120df1ea5b01291696503d232e40847ebcb"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTgwOTIsInN0YXJ0VGlja3MiOiI2MzkyOTA2ODA0MTIwNzAwNTYifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "7c034201a609f03e2cac302c77745a434a1efe6a132621f2d62c399932214f34"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "7c034201a609f03e2cac302c77745a434a1efe6a132621f2d62c399932214f34"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-zero-browser-second-72c2bb3a320e4c48af9a62ba3baf1675-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzEzQ0I3NDYyQjZDQzBEMUQxNEVBQjU1MzI0NkRDMzZCRkJEREI2QSIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTcyYzJiYjNhMzIwZTRjNDhhZjlhNjJiYTNiYWYxNjc1IiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy03MmMyYmIzYTMyMGU0YzQ4YWY5YTYyYmEzYmFmMTY3NS1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "d24b050289904fa4a23452288a2cd9019e387d1af7e3091237b722fed2910e2e",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "96122540345cc9f852be5f2780c96890501ba0bf7343fc54741189ef8baafcbc",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzEzQ0I3NDYyQjZDQzBEMUQxNEVBQjU1MzI0NkRDMzZCRkJEREI2QSIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtNzJjMmJiM2EzMjBlNGM0OGFmOWE2MmJhM2JhZjE2NzUta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFjelpWUmY0UGFvbEUvOXZxSC9ZeVpqQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1UZ3lNakl4V2hjTk1qWXhNVEF4TVRneU56SXhXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRRFlMN2pueWdCUnZxN2Evd2RMOUZSSFxuenBRdy9McVhCeksxSlVWbGlSNjM1bmNxdlhkeHUwYVVUdnFNVHBtY29DdmFEMUIwTUU2UktrWGcvaWc4TkRpUlhXckx0SUx1aDNLTFxubGlZVDlEMXVnS3drZEVqZHRpSDVBUlJGMzgrWGpOd0NiMzFBQjh5ZkN2T0FGWlBCbGQ5RkxrRXdxMDBzL1dDbitMUEozeGJBVlVoNFxuSkZXSzJUQ1VHSmxnOGc5WDc0eVk3akFEVzhGeEV2NGl6LzdLODBaYmJIMTNTb3hjaVNzcUFSaU1OTkIwSWVCeG5RSG1aanJTOEJZbFxuRkZiMzRUdmc2NGEwdHAzUVR3U1lkV1JlL3plVkRRWFVGOGIwQVBVTW94d29qeFowR3JUR1JaNis2b2VJTUQ5alRCVzk3WDRuYzAyUlxuWW90MzBpSGw5Q1ljSGhscEFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCVDYxaXYxWmtpTVxueVpPWUFsZVJHdTF4dmVYYnFqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFxQnRsZi9seTRyZG9adkVyTFl3cERMUU9nUmhVdjlvcFxuVTNSSFY4QlFmekdnNlNCTTRzS3g5REwxcnBtZ0M0Mk5sWUdjNWphbW1rejlXZnNwZjNyZkl4YWYvak52VVR6RUNKTGZRZWhwdXVWR1xuWEk0ZFBxRlF3UWxqK3pMYXpDbTlOeUtMM3Uva1EwaCsveWxaa1habFJhVy8yQ2hVVjFpZXkxSkpVR0FXVkVFNTJoUDhlem9oZlIrK1xueVpJZ1AwNWhPNFp5OG1xU1Zpek8rbklCc2V5VHYxbVZoNllUUWQ0T0J2TFB4ZldPdG40czlFanlXZThEbDBlamljbE5LODRGYkttMFxuOVh2T0N1Z0RvN0RuOVo4MDlHTnI5am5KbVBqSFd6M0NKcXNReWxzYUU1NGVWd2taWU9xVUNRaDk4V2NSNklLdEFKdmowaUhHdlk3VlxuRFc2ekl3PT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 766,
+        "sha256": "27d0e6a1febd3bcaf6bf0b79971cf7c445497bcaaffcb7e189a7e69f75d198cc",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoxMTA4OSwic2hhMjU2IjoiYTU3YTBkMzliY2I0MmEyMGViZjlhZTk4NDI3ZjhlYWE1N2U0MGFiOWMyN2NjMmFjZmFhMWU2MmNmNjUxMjc0YyJ9LCIudGxzLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MjM5LCJzaGEyNTYiOiI2NDFkMGI3NDg1MDM4OTY0NDdmYjA1NDdmNjRlNjMwMGViZDZmNzhkMjdlYTYxYzVjZTk1ODc0Yjg5ZWVlODFkIn0sInRscy1wdWJsaWMucGVtIjp7ImJ5dGVzIjoxMTQxLCJzaGEyNTYiOiI0NjNhZGM4ZmQ5YWI5YWI3MWRhMzM1ODQ3NjQ4NDcyOGEwNWI5NzlmOWQwZDk3Nzk0OTQ4ZjZmMWY3OWVhYWRhIn0sInRscy5zdGRlcnIiOnsiYnl0ZXMiOjAsInNoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiYzlhMTIxZTM0MTc2MGI3NzU3NWY5NDkxYThmNDI1NTE5ZjUwZjBmNDc2ZjIxZTgzNTc4ZDY5MTRiNTkzNTU5MyJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTg3LCJzaGEyNTYiOiI0YTQ0YjAwNGYzMWY0MWM5MzY4NjcwYmVkZWI0YzEyMGRmMWVhNWIwMTI5MTY5NjUwM2QyMzJlNDA4NDdlYmNiIn0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozNzMsInNoYTI1NiI6IjdjMDM0MjAxYTYwOWYwM2UyY2FjMzAyYzc3NzQ1YTQzNGExZWZlNmExMzI2MjFmMmQ2MmMzOTk5MzIyMTRmMzQifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

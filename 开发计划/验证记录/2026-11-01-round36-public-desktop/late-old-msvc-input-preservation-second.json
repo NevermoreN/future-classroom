@@ -1,0 +1,23 @@
+{
+  "scope": "Exact helper inputs used for old83fe MSVC reprobe preserved before temporary cleanup. No Round36 source/runtime claim.",
+  "files": [
+    {
+      "originalPath": "/tmp/fc-round35-msvc-reprobe/windows-probe.py",
+      "preservedPath": "retained-old-msvc-runner/windows-probe.py",
+      "sha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af"
+    },
+    {
+      "originalPath": "/tmp/fc-round35-msvc-reprobe/windows-tls-business-probe.py",
+      "preservedPath": "retained-old-msvc-runner/windows-tls-business-probe.py",
+      "sha256": "f5811201cd3c038c771acdaa2ef4f4c912230cffaa456c26311c2b08f25d19a2"
+    },
+    {
+      "originalPath": "/tmp/fc-round35-msvc-reprobe/windows-tls-probe.py",
+      "preservedPath": "retained-old-msvc-runner/windows-tls-probe.py",
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    }
+  ],
+  "metadataAlreadyPreserved": "/tmp/fc-round35-visuals-worktree/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round35-msvc/metadata.jsonl",
+  "metadataSha256": "af8051ec64e6ef404f2d70358dc558354e0683bcd1f7ad00621d1b5e991f4a18",
+  "preparationFailure": "Initial helper-copy command successfully copied all3 files, then failed an incorrect assumed metadata path under programs. Actual command.json identifies evidence/metadata.jsonl, already archived byte-exact. No runtime call or original deletion occurred."
+}

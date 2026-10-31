@@ -1,0 +1,46 @@
+{
+  "scope": "Round36 actorless trusted local desktop lesson Backend only",
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_TESTED",
+  "worktree": "/tmp/fc-round36-public-desktop-worktree",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 106693,
+      "sha256": "64a129c6044e3867c45f83a67616c50e26a3ce640896b19b53d8f43779ba64a9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "bytes": 11989,
+      "sha256": "45fad2f78db348f2533d144fed49a15e4c10b73d05ca96b092f2a7eadec71f84"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "bytes": 16488,
+      "sha256": "a1e7b8d48816382f45cc8b1ad1ef37a530baa77c6b8c42bd12aad65850971282"
+    }
+  ],
+  "patchSha256": "de082476940a75a35ceaf93651bd3866b30561d7c00af17d527a69235741aec1",
+  "testsAdded": 9,
+  "localChecks": [
+    "Scoped rustfmt edition2021 skip_children returned exit0",
+    "No trailing whitespace in owned three files"
+  ],
+  "notExecuted": [
+    "Cargo compilation",
+    "Host tests",
+    "Clippy",
+    "Windows execution",
+    "Remote/Git/network"
+  ],
+  "contracts": [
+    "No SessionLease/fake identity/Web entry; managed lesson APIs unchanged",
+    "Trusted rendered scene exact publication and generation checked at mint; sceneack consumed once",
+    "Single exact cancellable owner, 120s or earlier original scene/lesson end, Instant/trusted monotonic/wall checks",
+    "Current Backend request execution scope AND original flow guard retained in sole writer evaluation/precommit",
+    "Public entry/delivery Healthy only; private sole-writer phase permits own AuthorityUpdating but rejects Faulted/closed/recovery",
+    "No old global publication requirement after own COMMIT; identity/schedule/context/full lesson binding never rebased",
+    "Application local lock independent; owner must cancel on OS lock/foreground leave/Appstop",
+    "Cancellation after actual COMMIT suppresses delivery and does not claim rollback"
+  ],
+  "testFilter": "public_desktop_"
+}

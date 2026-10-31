@@ -102,7 +102,7 @@ pub(super) fn source(
         .material_source(i, s, class, now)
         .map_err(StorageError::Material)
 }
-fn error(e: StorageError) -> LessonRepositoryError {
+pub(super) fn error(e: StorageError) -> LessonRepositoryError {
     match e {
         StorageError::Lesson(e) => LessonRepositoryError::Domain(e),
         StorageError::Identity(e) => LessonRepositoryError::Domain(LessonContextError::Identity(e)),
@@ -302,12 +302,10 @@ impl<S: Send> TransactionTask<S> for Task<S> {
                     LessonAction::Replace(target) => {
                         if !original.active_override.as_ref().is_some_and(|o| {
                             o.id.get() == r.command_id.get()
-                                && o.actor_id
-                                    == self
-                                        .actor
-                                        .as_ref()
-                                        .map(|a| a.principal_id)
-                                        .unwrap_or(o.actor_id)
+                                && self.actor.as_ref().is_some_and(|actor| {
+                                    o.initiator
+                                        == LessonInitiator::Authenticated(actor.principal_id)
+                                })
                                 && &o.target == target
                                 && o.key == r.lesson
                         }) {

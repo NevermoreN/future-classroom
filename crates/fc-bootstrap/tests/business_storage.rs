@@ -4101,7 +4101,7 @@ fn baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart(
         .unwrap();
     assert!(std::str::from_utf8(&row.value)
         .unwrap()
-        .contains("\"format\":2"));
+        .contains("\"format\":3"));
     drop(repo);
     drop(writer);
     // There was no observation between 08:00 and 09:05, and no stored current lesson.
@@ -4475,7 +4475,7 @@ fn baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_p
         .unwrap();
     assert!(std::str::from_utf8(&row.value)
         .unwrap()
-        .contains("\"format\":2"));
+        .contains("\"format\":3"));
 }
 
 #[test]

@@ -105,7 +105,7 @@ impl Control {
     fn completed(&self) {
         let _ = self
             .completions
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                 Some(n.saturating_add(1))
             });
         // A completion hook must only post a non-blocking wakeup. Never run UI,

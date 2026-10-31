@@ -332,6 +332,7 @@ impl WebApplication {
                 materials::dispatch(self, backend, session.lease(), route, body)
             }
             Route::ContentScopes { .. }
+            | Route::SubjectVisual { .. }
             | Route::ContentRead { .. }
             | Route::ContentSave { .. }
             | Route::ContentCommand { .. } => {

@@ -189,7 +189,7 @@ impl BodySender {
         total: u64,
     ) -> Result<Self, ResponseError> {
         let sender = NEXT_SENDER
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
                 next.checked_add(1)
             })
             .map_err(|_| ResponseError::Exhausted)?

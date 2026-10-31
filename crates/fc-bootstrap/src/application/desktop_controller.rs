@@ -1,7 +1,7 @@
 //! UI-thread resident desktop orchestration. SQLite runs only through the shared
 //! Work pool; the UI never takes Backend's mutex or refreshes a manager lease.
 use super::{fatal, profile_content_flow, Outcome, Work};
-use fc_bootstrap::backend::{Backend, SessionControl};
+use fc_bootstrap::backend::{Backend, DesktopLessonStamp, SessionControl};
 use fc_bootstrap::profile_content_cache::TextFrame;
 use fc_domain::{
     desktop::{ComponentKind, DesktopFacts},
@@ -324,7 +324,7 @@ pub(super) struct Controller {
     requested: Option<Request>,
     control: Option<SessionControl>,
     material_events: Vec<DesktopEvent>,
-    lesson_event: bool,
+    lesson_event: Option<DesktopLessonStamp>,
     refresh_at: Option<LocalDateTime>,
     history: BatchHistory,
     next_fetch: Instant,
@@ -467,7 +467,7 @@ impl Controller {
             requested: None,
             control: None,
             material_events: Vec::new(),
-            lesson_event: false,
+            lesson_event: None,
             refresh_at: None,
             history: BatchHistory::default(),
             next_fetch: Instant::now(),
@@ -525,9 +525,10 @@ impl Controller {
         self.needs_scene = true;
         if let Some(control) = &self.control {
             control.clear_material_scene();
+            control.clear_desktop_lesson_scene();
         }
         self.material_events.clear();
-        self.lesson_event = false;
+        self.lesson_event = None;
         self.renderer.hide();
         self.probe_presented = false;
     }
@@ -557,11 +558,22 @@ impl Controller {
     pub(super) fn probe_scene(&self) -> Option<&SceneSnapshot> {
         self.scene.as_ref()
     }
+    pub(super) fn probe_lesson_stamp(&self) -> Option<DesktopLessonStamp> {
+        self.probe.then(|| self.lesson_stamp()).flatten()
+    }
+    pub(super) fn probe_lesson_click(&self) -> Result<(), String> {
+        if !self.probe || !self.probe_presented {
+            return Err("Hidden desktop lesson probe is not ready".into());
+        }
+        self.renderer
+            .probe_lesson_control()
+            .map_err(|_| "Hidden native lesson button unavailable".into())
+    }
     pub(super) fn probe_metrics(&self) -> DesktopMetrics {
         self.renderer.diagnostics()
     }
-    pub(super) fn take_lesson_event(&mut self) -> bool {
-        std::mem::take(&mut self.lesson_event)
+    pub(super) fn take_lesson_event(&mut self) -> Option<DesktopLessonStamp> {
+        self.lesson_event.take()
     }
     pub(super) fn take_material_events(&mut self) -> Vec<DesktopEvent> {
         std::mem::take(&mut self.material_events)
@@ -575,11 +587,46 @@ impl Controller {
         self.notice.failed(message);
         self.next_render = Instant::now() + RETRY;
     }
+    fn lesson_stamp(&self) -> Option<DesktopLessonStamp> {
+        let scene = self.scene.as_ref()?;
+        let facts = self.facts.as_ref()?;
+        let current = facts.lesson_context.current.as_ref()?;
+        if scene.source_revision != facts.global_revision
+            || !scene.lesson_control.as_ref().is_some_and(|c| c.can_change)
+        {
+            return None;
+        }
+        Some(DesktopLessonStamp {
+            generation: scene.generation,
+            source_revision: scene.source_revision,
+            captured_at: scene.captured_at,
+            valid_until: scene
+                .valid_until
+                .unwrap_or(current.effective_until)
+                .min(current.effective_until),
+            binding: fc_ports::DesktopLessonBinding {
+                expected_revision: facts.lesson_context.revision,
+                expected_identity_revision: facts.identity.revision,
+                expected_schedule_revision: facts.schedule.revision,
+                lesson: current.key.clone(),
+            },
+        })
+    }
     fn rendered(&mut self, outcome: PresentOutcome) {
         let visible = matches!(
             outcome,
             PresentOutcome::Published | PresentOutcome::Unchanged
         ) || self.probe && outcome == PresentOutcome::Offscreen;
+        if let Some(control) = &self.control {
+            if !visible
+                || !self
+                    .lesson_stamp()
+                    .is_some_and(|stamp| control.publish_desktop_lesson_scene(stamp))
+            {
+                control.clear_desktop_lesson_scene();
+                self.lesson_event = None;
+            }
+        }
         if let Some(control) = &self.control {
             let published = visible
                 && self.scene.as_ref().is_some_and(|scene| {
@@ -1040,7 +1087,7 @@ impl Controller {
                 // transaction; hide native input without cancelling that writer.
                 self.renderer.hide();
                 self.material_events.clear();
-                self.lesson_event = false;
+                self.lesson_event = None;
                 self.probe_presented = false;
                 return Ok(());
             }
@@ -1178,8 +1225,12 @@ impl Controller {
         };
         let outcome = match self.renderer.present(scene, now, &guard) {
             Ok(outcome) => outcome,
-            Err(_) => {
-                self.render_unavailable("桌面图形发布暂不可用，已隐藏并稍后重试。");
+            Err(error) => {
+                if fc_windows::desktop::is_read_only_capacity_error(&error) {
+                    self.render_unavailable("课表、时钟或日期内容无法在当前尺寸完整显示；请由管理员调整布局或显示区域。桌面只读内容不提供点击翻页。");
+                } else {
+                    self.render_unavailable("桌面图形发布暂不可用，已隐藏并稍后重试。");
+                }
                 return Ok(());
             }
         };
@@ -1213,7 +1264,7 @@ impl Controller {
                         && scene.valid_at(now)
                         && scene.lesson_control.as_ref().is_some_and(|c| c.can_change)
                     {
-                        self.lesson_event = true;
+                        self.lesson_event = self.lesson_stamp();
                     }
                 }
                 DesktopEvent::MaterialOpen { .. } => {

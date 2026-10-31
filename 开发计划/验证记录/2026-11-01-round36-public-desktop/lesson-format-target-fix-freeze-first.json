@@ -1,0 +1,144 @@
+{
+  "status": "TEST_EXPECTATION_FIX_SOURCE_FROZEN_STATIC_PASS_RUNTIME_NOT_RUN",
+  "recordedAt": "2026-10-31T19:05:50.568960+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "file": "crates/fc-bootstrap/tests/business_storage.rs",
+  "before": {
+    "bytes": 162118,
+    "sha256": "4ec5751b1fa0e8c7994b2047cbe30ae62658721b0106057d0e02169c9a0a8609",
+    "path": "/tmp/fc-round36-public-desktop-evidence/lesson-format-target-fix-first/business-storage.before.rs"
+  },
+  "after": {
+    "bytes": 162118,
+    "sha256": "1b6fd6313ec09eb99ab633092ab3fb26929a384f4a323119e5b12b9de7ebeb69",
+    "path": "/tmp/fc-round36-public-desktop-evidence/lesson-format-target-fix-first/business-storage.after.rs"
+  },
+  "diff": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/lesson-format-target-fix-first/minimal.diff",
+    "sha256": "013e14c3a682ff183f9c6139bd53dc57d11eb8445c8f6dc4240331acfe1c6fb8"
+  },
+  "originalFailure": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-runtime-second.json",
+    "sha256": "951841fab9d5175013ba3f66ce260072d55776b2bc38a303f1ef14742e5927fc",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "testBinary": "business_storage-17284d3ac1a257da.exe",
+    "binarySha256": "66dc14e124e4a6f617abd568c4df8e24dc56e6d388d852dcd6bcadaa67eb08ea",
+    "exitCode": 101,
+    "preservedUnchanged": true
+  },
+  "exactChange": "Only two post-write .contains(\"\\\"format\\\":2\") expectations become3. Full source bytes otherwise identical, including after rustfmt.",
+  "reviewedTests": [
+    {
+      "name": "baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart",
+      "preserved": [
+        "Preclass observation creates real base_trust and no current/history.",
+        "Physical SQLite writer/repository shutdown and startup reopen before unobserved elapsed lesson.",
+        "RetainedBreak source teacher2 with PersistedLesson evidence and original base_trust.",
+        "Correct08:20–09:00 historical interval; repeat read no revision/write per tick.",
+        "Second physical reopen retains exact material source."
+      ],
+      "change": "Only fresh current-format write assertion2→3."
+    },
+    {
+      "name": "baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof",
+      "preserved": [
+        "Exact legacy format1 input injected through real committed SQLite row, not changed to3.",
+        "Physical reopen after injection and advance original clock to09:05.",
+        "Old observed_at never invents retained teacher/history; materials_sourceNone/historyempty.",
+        "Fresh base_trust starts at current observed time rather than legacy08:00."
+      ],
+      "change": "Only resulting migrated write assertion2→3."
+    }
+  ],
+  "compatibilityInspection": {
+    "codec": "read_snapshot accepts strict formats1/2/3, maps old actor to Authenticated principal and never invents base_trust for1. Current snapshot writer deliberately emits3 with honest initiator.",
+    "formatTwoSqliteRegression": "legacy_read_is_not_rewritten_until_mutation_and_reopen_has_no_implicit_capability keeps real format2 fixture, unchanged read bytes/revision, normal mutation writes3, physical reopen and default-deny capability checks.",
+    "codecRoundtripRegression": "strict_format_three_roundtrips_both_honest_initiators_and_old_formats_keep_admin retains legacy for format in[1,2] input loop.",
+    "boundReadOnlyReferences": [
+      {
+        "path": "crates/fc-storage/src/business/lesson_codec.rs",
+        "sha256": "be314435eaab7978501e519cbed65581ba54acb36fbb6b0816ee927ce8754d6d"
+      },
+      {
+        "path": "crates/fc-storage/src/business/desktop_lesson/tests.rs",
+        "sha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e"
+      }
+    ]
+  },
+  "nonEvidenceSourceScans": [
+    {
+      "argv": [
+        "rg",
+        "-n",
+        "-F",
+        "\\\"format\\\":2",
+        "crates",
+        "--glob",
+        "*.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "crates/fc-protocol/src/recovery.rs:613:            text.replace(\"\\\"format\\\":1\", \"\\\"format\\\":2\"),\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "rg",
+        "-n",
+        "assert[^\\n]*format[^\\n]*2|format[^\\n]*2[^\\n]*(migrat|write|persist)|migrat[^\\n]*format.?2",
+        "crates",
+        "--glob",
+        "*.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "crates/fc-storage/src/business/profiles/tests.rs:977:    assert_eq!(current[\"format\"], json!(2));\ncrates/fc-storage/src/business/tests/profile_content.rs:689:    assert_eq!(encoded[\"format\"], json!(2));\ncrates/fc-bootstrap/src/application/web_editor/tests.rs:150:    assert!(!format!(\"{view:?}\").contains(\"01234567\"));\n",
+      "stderr": ""
+    }
+  ],
+  "otherFormatTwoAssertions": "Remaining assert_eq format2 expectations are profiles/profile_content own formats, unrelated to lesson-context3; recovery string replacement is malformed-input rejection. All unchanged.",
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/tests/business_storage.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-bootstrap/tests/business_storage.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "unchanged": [
+    "All legacy input/decoding compatibility fixtures",
+    "Production codec and any production source",
+    "Every baseline/history/date/teacher/CAS assertion",
+    "Original failure report",
+    "Worker/mailbox/Hub",
+    "Cargo/dependencies"
+  ],
+  "notExecuted": [
+    "Cargo",
+    "npm",
+    "Windows/SSH",
+    "test executable",
+    "Git writes/commit/push",
+    "CI"
+  ],
+  "nextValidation": "Parent unified recompile/strict lint and actual Windows integrated suite; this source fix is not a runtime PASS."
+}

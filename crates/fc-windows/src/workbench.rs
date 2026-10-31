@@ -1,5 +1,7 @@
 //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
 use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View};
+#[path = "workbench/color_picker.rs"]
+mod color_picker;
 #[path = "workbench/preview.rs"]
 mod preview;
 #[path = "workbench/widgets.rs"]
@@ -29,6 +31,33 @@ use windows::{
         UI::{Controls::*, Input::KeyboardAndMouse::*, WindowsAndMessaging::*},
     },
 };
+
+/// The native host samples this same policy on foreground-message dispatch.
+/// This is a read-only UI-thread observation, never a worker/SQL predicate.
+pub(crate) fn lesson_foreground_allowed() -> bool {
+    if !crate::native::input_desktop_available() {
+        return false;
+    }
+    if crate::native::desktop_foreground() == fc_presentation::Foreground::Desktop {
+        return true;
+    }
+    unsafe {
+        let foreground = GetForegroundWindow();
+        if foreground.is_invalid() {
+            return false;
+        }
+        let mut pid = 0;
+        GetWindowThreadProcessId(foreground, Some(&mut pid));
+        lesson_foreground_process_allowed(
+            pid,
+            windows::Win32::System::Threading::GetCurrentProcessId(),
+        )
+    }
+}
+
+fn lesson_foreground_process_allowed(observed_pid: u32, current_pid: u32) -> bool {
+    observed_pid != 0 && observed_pid == current_pid
+}
 
 const MAX_SUBMITS: usize = 8;
 const MAX_EVENT_BYTES: usize = 4 * 1024 * 1024;
@@ -1126,6 +1155,12 @@ impl Window {
     }
     /// Owned modal picker. The workbench cannot enqueue edits behind an unowned
     /// dialog; independent hidden-host controls still revoke WTS/power immediately.
+    pub fn select_color(
+        &self,
+        initial: fc_domain::identity::Rgb,
+    ) -> Result<Option<fc_domain::identity::Rgb>> {
+        color_picker::choose(self.hwnd, initial)
+    }
     pub fn select_material(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
         crate::materials::chooser::select(Some(self.hwnd))
     }
@@ -1150,21 +1185,7 @@ impl Window {
     /// Read-only policy for the explicitly opened temporary-lesson editor.
     /// Unknown or external foregrounds never retain its pending write intent.
     pub fn lesson_foreground_allowed(&self) -> bool {
-        if !crate::native::input_desktop_available() {
-            return false;
-        }
-        if crate::native::desktop_foreground() == fc_presentation::Foreground::Desktop {
-            return true;
-        }
-        unsafe {
-            let foreground = GetForegroundWindow();
-            if foreground.is_invalid() {
-                return false;
-            }
-            let mut pid = 0;
-            GetWindowThreadProcessId(foreground, Some(&mut pid));
-            pid != 0 && pid == windows::Win32::System::Threading::GetCurrentProcessId()
-        }
+        lesson_foreground_allowed()
     }
     /// Explicit isolated diagnostic only. This method refuses a visible window,
     /// fills only its own existing native Edit controls and invokes the same
@@ -2650,5 +2671,18 @@ mod tests {
         let after = counts();
         assert!(after.0 <= before.0 + 2, "GDI {before:?}->{after:?}");
         assert!(after.1 <= before.1 + 2, "USER {before:?}->{after:?}");
+    }
+}
+
+#[cfg(test)]
+mod public_foreground_policy_tests {
+    use super::*;
+    #[test]
+    fn foreground_policy_accepts_only_observed_own_process_and_rejects_unknown_or_external() {
+        let own = unsafe { windows::Win32::System::Threading::GetCurrentProcessId() };
+        assert_ne!(own, 0);
+        assert!(lesson_foreground_process_allowed(own, own));
+        assert!(!lesson_foreground_process_allowed(0, own));
+        assert!(!lesson_foreground_process_allowed(own.wrapping_add(1), own));
     }
 }

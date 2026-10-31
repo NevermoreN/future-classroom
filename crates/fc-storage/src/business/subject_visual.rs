@@ -1,0 +1,511 @@
+//! Atomic palette/display updates on the existing writer and existing documents.
+use super::*;
+use fc_domain::{desktop::DisplaySettings, subject_visual::*};
+use fc_ports::{
+    SubjectVisualPreviewSource, SubjectVisualRepository, SubjectVisualRepositoryError,
+    SubjectVisualRequest, SubjectVisualState,
+};
+
+fn error(error: StorageError) -> SubjectVisualRepositoryError {
+    match error {
+        StorageError::SubjectVisual(e) => SubjectVisualRepositoryError::Domain(e),
+        StorageError::Identity(e) => {
+            SubjectVisualRepositoryError::Domain(SubjectVisualError::Identity(e))
+        }
+        StorageError::Display(e) => SubjectVisualRepositoryError::Display(e),
+        StorageError::Content(e) => SubjectVisualRepositoryError::Content(e),
+        StorageError::CommandIdReused => SubjectVisualRepositoryError::IdempotencyConflict,
+        StorageError::DocumentTooLarge => SubjectVisualRepositoryError::DocumentTooLarge,
+        StorageError::PublicationFailed { .. }
+        | StorageError::Indeterminate
+        | StorageError::AuthorityUnavailable
+        | StorageError::WorkerPanicked => SubjectVisualRepositoryError::Faulted,
+        _ => SubjectVisualRepositoryError::Unavailable,
+    }
+}
+fn authorize(
+    identity: &IdentityState,
+    actor: &ActorContext,
+    clock: &dyn Clock,
+    session: &SessionGuard,
+) -> Result<(), StorageError> {
+    session(identity, actor)?;
+    if actor.origin != TrustedOrigin::Local {
+        return Err(StorageError::SubjectVisual(SubjectVisualError::Identity(
+            IdentityError::Permission(PermissionError::LocalOnly),
+        )));
+    }
+    identity
+        .authorize_management(actor, clock.now())
+        .map_err(|e| StorageError::SubjectVisual(SubjectVisualError::Identity(e)))
+}
+fn subject(subject: &SchoolSubject) -> Value {
+    json!({"id":subject.id.get(),"school":subject.school_id.get(),"name":subject.name,
+        "enabled":subject.enabled,"color":[subject.color.red,subject.color.green,subject.color.blue],
+        "revision":subject.revision.get()})
+}
+fn read_subject(v: &Value) -> Result<SchoolSubject, StorageError> {
+    codec::object_fields(v, &["id", "school", "name", "enabled", "color", "revision"])?;
+    let rgb = codec::array(v, "color")?;
+    if rgb.len() != 3 {
+        return Err(StorageError::Database);
+    }
+    let channel = |n: usize| {
+        u8::try_from(rgb[n].as_u64().ok_or(StorageError::Database)?)
+            .map_err(|_| StorageError::Database)
+    };
+    let subject = SchoolSubject {
+        id: SubjectId::new(codec::number(v, "id")?).map_err(|_| StorageError::Database)?,
+        school_id: SchoolId::new(codec::number(v, "school")?)
+            .map_err(|_| StorageError::Database)?,
+        name: codec::text(v, "name")?,
+        enabled: codec::boolean(v, "enabled")?,
+        color: Rgb {
+            red: channel(0)?,
+            green: channel(1)?,
+            blue: channel(2)?,
+        },
+        revision: Revision::new(codec::number(v, "revision")?),
+    };
+    if subject.revision.get() == 0 || normalized_name(&subject.name, 64).is_err() {
+        return Err(StorageError::Database);
+    }
+    Ok(subject)
+}
+fn revision(value: &PaletteRevision) -> Value {
+    json!(value
+        .entries()
+        .iter()
+        .map(|(id, rev)| [id.get(), rev.get()])
+        .collect::<Vec<_>>())
+}
+fn read_revision(value: &Value) -> Result<PaletteRevision, StorageError> {
+    let values = value.as_array().ok_or(StorageError::Database)?;
+    if values.len() > MAX_SUBJECTS {
+        return Err(StorageError::Database);
+    }
+    let entries = values
+        .iter()
+        .map(|entry| {
+            let pair = entry.as_array().ok_or(StorageError::Database)?;
+            if pair.len() != 2 {
+                return Err(StorageError::Database);
+            }
+            Ok((
+                SubjectId::new(pair[0].as_u64().ok_or(StorageError::Database)?)
+                    .map_err(|_| StorageError::Database)?,
+                Revision::new(pair[1].as_u64().ok_or(StorageError::Database)?),
+            ))
+        })
+        .collect::<Result<_, StorageError>>()?;
+    PaletteRevision::new(entries).map_err(|_| StorageError::Database)
+}
+fn state_value(palette: &SubjectVisualPalette, display: &DisplaySettings) -> Value {
+    json!({"format":1,"palette":{"revision":revision(&palette.revision),
+        "subjects":palette.subjects.iter().map(subject).collect::<Vec<_>>()},
+        "display":display_codec::settings(display)})
+}
+fn read_state(value: &Value) -> Result<SubjectVisualState, StorageError> {
+    codec::object_fields(value, &["format", "palette", "display"])?;
+    if codec::number(value, "format")? != 1 {
+        return Err(StorageError::Database);
+    }
+    let palette = &value["palette"];
+    codec::object_fields(palette, &["revision", "subjects"])?;
+    let rows = codec::array(palette, "subjects")?;
+    if rows.len() > MAX_SUBJECTS {
+        return Err(StorageError::Database);
+    }
+    let subjects = rows
+        .iter()
+        .map(read_subject)
+        .collect::<Result<Vec<_>, _>>()?;
+    let revision = read_revision(&palette["revision"])?;
+    if subjects.windows(2).any(|rows| rows[0].id >= rows[1].id)
+        || PaletteRevision::from_subjects(&subjects).map_err(|_| StorageError::Database)?
+            != revision
+        || subjects
+            .first()
+            .is_some_and(|first| subjects.iter().any(|s| s.school_id != first.school_id))
+    {
+        return Err(StorageError::Database);
+    }
+    Ok(SubjectVisualState {
+        palette: SubjectVisualPalette { revision, subjects },
+        display: display_codec::read_settings(&value["display"])?,
+    })
+}
+fn preview_value(source: &SubjectVisualPreviewSource) -> Value {
+    json!({"format":1,"subject":subject(&source.subject),"display":display_codec::settings(&source.display)})
+}
+fn read_preview(value: &Value) -> Result<SubjectVisualPreviewSource, StorageError> {
+    codec::object_fields(value, &["format", "subject", "display"])?;
+    if codec::number(value, "format")? != 1 {
+        return Err(StorageError::Database);
+    }
+    Ok(SubjectVisualPreviewSource {
+        subject: read_subject(&value["subject"])?,
+        display: display_codec::read_settings(&value["display"])?,
+    })
+}
+impl<S: Send + 'static> SubjectVisualRepository for BusinessRepository<S> {
+    fn subject_visuals(
+        &self,
+        actor: &ActorContext,
+    ) -> Result<SubjectVisualState, SubjectVisualRepositoryError> {
+        let result = self
+            .handle
+            .try_transaction(ReadVisuals {
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(error)?
+            .wait()
+            .map_err(error)?;
+        read_state(&codec::value(&result).map_err(error)?).map_err(error)
+    }
+    fn execute_subject_visuals(
+        &mut self,
+        request: SubjectVisualRequest,
+        actor: &ActorContext,
+        _clock: &dyn Clock,
+    ) -> Result<SubjectVisualState, SubjectVisualRepositoryError> {
+        let result = self
+            .handle
+            .try_transaction(SaveVisuals {
+                request,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+                factory: self.factory.clone(),
+            })
+            .map_err(error)?
+            .wait()
+            .map_err(error)?;
+        read_state(&codec::value(&result).map_err(error)?).map_err(error)
+    }
+    fn subject_visual_preview(
+        &self,
+        key: HomeworkKey,
+        actor: &ActorContext,
+    ) -> Result<SubjectVisualPreviewSource, SubjectVisualRepositoryError> {
+        // A visual-only GET observes the same durable day floor as other Web
+        // content reads. The following query still reads colour and display in
+        // one writer transaction with this repository's exact session/fence.
+        self.observe_content_day(actor)
+            .map_err(|error| match error {
+                RepositoryError::Domain(error) => SubjectVisualRepositoryError::Content(error),
+                RepositoryError::Unavailable => SubjectVisualRepositoryError::Unavailable,
+                RepositoryError::Faulted => SubjectVisualRepositoryError::Faulted,
+            })?;
+        let result = self
+            .handle
+            .try_transaction(ReadPreview {
+                key,
+                actor: actor.clone(),
+                clock: self.clock.clone(),
+                session: self.session.clone(),
+            })
+            .map_err(error)?
+            .wait()
+            .map_err(error)?;
+        read_preview(&codec::value(&result).map_err(error)?).map_err(error)
+    }
+}
+struct ReadVisuals {
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+impl<S> TransactionTask<S> for ReadVisuals {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let identity = load_identity(d)?;
+        authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)?;
+        let palette =
+            SubjectVisualPalette::from_identity(&identity).map_err(StorageError::SubjectVisual)?;
+        let display = display::load(d, &identity)?;
+        let outcome = display::encode(&state_value(&palette, &display), MAX_VALUE_BYTES)?;
+        authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)?;
+        Ok(TransactionDecision {
+            outcome,
+            commit: None,
+            precommit: Some(Box::new(move || {
+                authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)
+            })),
+        })
+    }
+}
+struct SaveVisuals<S> {
+    request: SubjectVisualRequest,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+    factory: Factory<S>,
+}
+impl<S: Send + 'static> TransactionTask<S> for SaveVisuals<S> {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+            .saturating_add(self.request.expected_palette_revision.allocation_bytes())
+            .saturating_add(
+                self.request
+                    .colors
+                    .capacity()
+                    .saturating_mul(std::mem::size_of::<SubjectColor>()),
+            )
+            .saturating_add(
+                self.request
+                    .display
+                    .allocation_bytes()
+                    .unwrap_or(usize::MAX),
+            )
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let identity = load_identity(d)?;
+        authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)?;
+        self.request
+            .display
+            .validate()
+            .map_err(StorageError::Display)?;
+        if self.request.colors.len() > MAX_SUBJECTS {
+            return Err(StorageError::SubjectVisual(
+                SubjectVisualError::InvalidPalette,
+            ));
+        }
+        let mut colors = self.request.colors.clone();
+        colors.sort_unstable_by_key(|color| color.subject_id);
+        if colors
+            .windows(2)
+            .any(|rows| rows[0].subject_id == rows[1].subject_id)
+        {
+            return Err(StorageError::SubjectVisual(
+                SubjectVisualError::InvalidPalette,
+            ));
+        }
+        let mut hash = Sha256::new();
+        hash.update(b"future-classroom/subject-visual/v1\0");
+        hash.update(codec::bytes(&codec::actor(&self.actor))?);
+        hash.update(display::encode(&json!({"palette":revision(&self.request.expected_palette_revision),
+            "display_revision":self.request.expected_display_revision.get(),
+            "colors":colors.iter().map(|c|json!({"id":c.subject_id.get(),"rgb":[c.color.red,c.color.green,c.color.blue]})).collect::<Vec<_>>(),
+            "display":display_codec::settings(&self.request.display)}), MAX_VALUE_BYTES)?);
+        let fingerprint = hash.finalize().to_vec();
+        let receipt_key = format!(
+            "business/receipt/subject-visual/{}",
+            self.request.command_id.get()
+        );
+        let result_key = format!(
+            "business/result/subject-visual/{}",
+            self.request.command_id.get()
+        );
+        if let Some(row) = d.get(&receipt_key)? {
+            let receipt = codec::value(&row.value)?;
+            codec::object_fields(&receipt, &["fingerprint", "result_digest"])?;
+            let original: [u8; 32] = serde_json::from_value(receipt["fingerprint"].clone())
+                .map_err(|_| StorageError::Database)?;
+            if original.as_slice() != fingerprint {
+                return Err(StorageError::CommandIdReused);
+            }
+            let result = d.get(&result_key)?.ok_or(StorageError::Database)?;
+            let digest: [u8; 32] = serde_json::from_value(receipt["result_digest"].clone())
+                .map_err(|_| StorageError::Database)?;
+            if digest.as_slice() != Sha256::digest(&result.value).as_slice() {
+                return Err(StorageError::Database);
+            }
+            let saved = read_state(&codec::value(&result.value)?)?;
+            validate_replay(&self.request, &colors, &saved)?;
+            authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)?;
+            return Ok(TransactionDecision {
+                outcome: result.value,
+                commit: None,
+                precommit: Some(Box::new(move || {
+                    authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)
+                })),
+            });
+        }
+        let palette =
+            SubjectVisualPalette::from_identity(&identity).map_err(StorageError::SubjectVisual)?;
+        let next_identity = palette
+            .transition(
+                &colors,
+                &self.request.expected_palette_revision,
+                &identity,
+                &self.actor,
+                self.clock.now(),
+            )
+            .map_err(StorageError::SubjectVisual)?;
+        let current_display = display::load(d, &identity)?;
+        let next_display = current_display
+            .transition(
+                self.request.display.clone(),
+                self.request.expected_display_revision,
+                &identity,
+                &self.actor,
+                self.clock.now(),
+            )
+            .map_err(StorageError::Display)?;
+        let next_palette = SubjectVisualPalette::from_identity(&next_identity)
+            .map_err(StorageError::SubjectVisual)?;
+        let outcome = display::encode(&state_value(&next_palette, &next_display), MAX_VALUE_BYTES)?;
+        let receipt = display::encode(
+            &json!({"fingerprint":fingerprint,
+            "result_digest":Sha256::digest(&outcome).to_vec()}),
+            MAX_VALUE_BYTES,
+        )?;
+        let mut mutations = vec![
+            display::mutation(&next_display)?,
+            Mutation::Put {
+                key: receipt_key,
+                value: receipt,
+            },
+            Mutation::Put {
+                key: result_key,
+                value: outcome.clone(),
+            },
+        ];
+        if next_identity != identity {
+            mutations.push(Mutation::Put {
+                key: IDENTITY.into(),
+                value: display::encode(&codec::identity(&next_identity), MAX_VALUE_BYTES)?,
+            });
+        }
+        let snapshot = (self.factory)(
+            &next_identity,
+            d.revision()?
+                .next()
+                .map_err(|_| StorageError::InvalidCommand)?,
+        )?;
+        Ok(TransactionDecision {
+            outcome,
+            commit: Some((mutations, snapshot)),
+            precommit: Some(Box::new(move || {
+                authorize(&identity, &self.actor, self.clock.as_ref(), &self.session)?;
+                palette
+                    .transition(
+                        &colors,
+                        &self.request.expected_palette_revision,
+                        &identity,
+                        &self.actor,
+                        self.clock.now(),
+                    )
+                    .map_err(StorageError::SubjectVisual)?;
+                current_display
+                    .transition(
+                        self.request.display,
+                        self.request.expected_display_revision,
+                        &identity,
+                        &self.actor,
+                        self.clock.now(),
+                    )
+                    .map_err(StorageError::Display)?;
+                Ok(())
+            })),
+        })
+    }
+}
+fn validate_replay(
+    request: &SubjectVisualRequest,
+    colors: &[SubjectColor],
+    saved: &SubjectVisualState,
+) -> Result<(), StorageError> {
+    let expected_display = request
+        .expected_display_revision
+        .next()
+        .map_err(|_| StorageError::Database)?;
+    let mut requested_display = request.display.clone();
+    requested_display.revision = expected_display;
+    if saved.display != requested_display
+        || saved.palette.subjects.len() != colors.len()
+        || saved.palette.subjects.len() != request.expected_palette_revision.entries().len()
+    {
+        return Err(StorageError::Database);
+    }
+    for ((subject, color), (id, revision)) in saved
+        .palette
+        .subjects
+        .iter()
+        .zip(colors)
+        .zip(request.expected_palette_revision.entries())
+    {
+        if subject.id != *id
+            || subject.id != color.subject_id
+            || subject.color != color.color
+            || (subject.revision != *revision && Some(subject.revision) != revision.next().ok())
+        {
+            return Err(StorageError::Database);
+        }
+    }
+    Ok(())
+}
+struct ReadPreview {
+    key: HomeworkKey,
+    actor: ActorContext,
+    clock: Arc<dyn Clock + Send + Sync>,
+    session: SessionGuard,
+}
+fn authorize_preview(
+    identity: &IdentityState,
+    key: &ContentKey,
+    actor: &ActorContext,
+    now: fc_domain::time::LocalDateTime,
+    session: &SessionGuard,
+) -> Result<(), StorageError> {
+    session(identity, actor)?;
+    let authority = authority(identity, actor)?;
+    content_web::validate_web_target(identity, key, actor)?;
+    content_web::authorize_key(key, &authority, actor, now)
+}
+impl<S> TransactionTask<S> for ReadPreview {
+    fn allocation_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+    }
+    fn evaluate(
+        self: Box<Self>,
+        d: &dyn TransactionDocuments,
+    ) -> Result<TransactionDecision<S>, StorageError> {
+        let identity = load_identity(d)?;
+        let now = self.clock.now();
+        let key = ContentKey::Homework(self.key.clone());
+        authorize_preview(&identity, &key, &self.actor, now, &self.session)?;
+        content_web::require_current_day(d, &identity, &key, now)?;
+        let source = SubjectVisualPreviewSource {
+            subject: identity
+                .subjects
+                .iter()
+                .find(|subject| subject.id == self.key.subject_id)
+                .ok_or(StorageError::Content(ContentError::Permission(
+                    PermissionError::OutsideTeachingScope,
+                )))?
+                .clone(),
+            display: display::load(d, &identity)?,
+        };
+        let outcome = display::encode(&preview_value(&source), MAX_VALUE_BYTES)?;
+        let final_now = self.clock.now();
+        authorize_preview(&identity, &key, &self.actor, final_now, &self.session)?;
+        content_web::require_current_day(d, &identity, &key, final_now)?;
+        Ok(TransactionDecision {
+            outcome,
+            commit: None,
+            precommit: Some(Box::new(move || {
+                let final_now = self.clock.now();
+                authorize_preview(&identity, &key, &self.actor, final_now, &self.session)?;
+                if final_now.date != now.date {
+                    return Err(StorageError::Content(ContentError::WrongDate));
+                }
+                Ok(())
+            })),
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests;

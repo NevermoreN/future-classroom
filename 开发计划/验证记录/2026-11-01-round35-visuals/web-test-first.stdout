@@ -1,0 +1,16 @@
+
+> future-classroom-teacher@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v5.0.5 /tmp/fc-round35-visuals-worktree/web
+
+
+ Test Files  19 passed (19)
+      Tests  295 passed (295)
+   Start at  01:35:57
+   Duration  2.87s (tests 45%, transform 34%, import 17%, worker 4%)
+
+    Isolate  19 workers spawned · ~132ms startup each (spawn + environment, per file)
+             at least ~1.12s faster with isolate: false — reuses workers across files instead of one per file
+

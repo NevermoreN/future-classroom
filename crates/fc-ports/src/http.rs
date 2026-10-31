@@ -125,7 +125,7 @@ impl TokenIssuer {
     pub fn new() -> Result<Self, HttpError> {
         use std::sync::atomic::Ordering;
         let generation = NEXT_TRANSPORT_GENERATION
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                 n.checked_add(1).filter(|v| *v <= usize::MAX as u64)
             })
             .map_err(|_| HttpError::InvalidGeneration)?

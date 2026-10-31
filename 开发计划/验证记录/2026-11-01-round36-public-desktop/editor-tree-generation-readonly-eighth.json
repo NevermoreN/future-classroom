@@ -1,0 +1,28 @@
+{
+  "stage": "Round36 readonly diagnosis of targeted seventh native failure",
+  "status": "CANDIDATE_NOT_APPLIED",
+  "source": {
+    "path": "crates/fc-windows/src/desktop/tree.rs",
+    "bytes": 71945,
+    "sha256": "0dde0428b0ca13306473145b89368a2ba2d4512875cef1b634b6dc89e86c59af"
+  },
+  "actualOriginal": {
+    "path": "windows-native-library-seventh.json",
+    "sha256": "e5ad0fc01567034486966f5ddae4d266f1ccfbcd19ce97ecd8017af302f115da"
+  },
+  "preciseFailureLocation": "Actual original log tree.rs:1875:45 is renderer.probe_lesson_control().unwrap(), not the second present().unwrap(). The second present already returned Ok.",
+  "cause": [
+    "First tree render stores last_scene=1, last_revision=5, source tree and original_cards.",
+    "The test mutates only scene.lesson_control while preserving generation/source revision/tree/cards/tone/unverified.",
+    "tree::present changed predicate compares those stored facts but deliberately relies on immutable scene generation for separately synthesized lesson strip, so changed=false.",
+    "No special LessonControl card/input is constructed; actual native probe_input cannot find a LessonManage target and returns E_INVALIDARG.",
+    "The five widget/card matching and first real tree rendering checks now pass. PoisonError remains downstream failure of original assertion, not independent mutex defect."
+  ],
+  "minimalCandidate": "Assign SceneGeneration::new(2) immediately before adding the independent lesson strip. Existing second guard uses s.generation; real tree rebuild constructs special control and actual button assertions are preserved. No production cache semantics change.",
+  "patch": {
+    "path": "editor-tree-generation-candidate-eighth.diff",
+    "sha256": "b1c1f2feb762a2d60243d331268813d432e4db976814ddfd8827ba978f3cb6f9"
+  },
+  "sourceUnchangedDuringPreparation": true,
+  "execution": "NOT_RUN; all source untouched while eighth Cargo is live"
+}

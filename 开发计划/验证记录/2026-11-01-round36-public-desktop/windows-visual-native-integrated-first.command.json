@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round36-public-desktop-native-first/fc-bootstrap.exe",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--subject-visuals",
+    "--report",
+    "/tmp/fc-round36-public-desktop-evidence/windows-visual-native-integrated-first.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T18:46:00.464286+00:00",
+  "stdout": "/tmp/fc-round36-public-desktop-evidence/windows-visual-native-integrated-first.stdout.log",
+  "stderr": "/tmp/fc-round36-public-desktop-evidence/windows-visual-native-integrated-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 12.207606699084863,
+  "completedUtc": "2026-10-31T18:46:12.672268+00:00",
+  "stdoutBytes": 93,
+  "stdoutSha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_LOCAL_CHECKS_ONLY",
+  "utc": "2026-10-31T17:40:04.546172+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "files": [
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "before": "/tmp/fc-round35-visuals-evidence/browser-before/windows-native-browser-observer.py",
+      "sha256": "d6a87b21e1dc85746b3ea9c0ad38f260e965080e17d289ea597d3e24229edd91",
+      "afterSha256": "eb17bd4569c22b34a7b1b1fc66b541334c26db46b1cb9df61428e309a570be05",
+      "afterBytes": 32978
+    },
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "before": "/tmp/fc-round35-visuals-evidence/browser-before/windows-native-browser-harness.mjs",
+      "sha256": "6db58138366e67ba3b785541d975b5a24372ca2ab38ebda2182ddc76e26e907e",
+      "afterSha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70",
+      "afterBytes": 58908
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round35-visuals-evidence/browser-visual.patch",
+    "sha256": "7cb2bb81aa211e4d5fdbcd44bffa0e1383754f92f97f2c5ac20d1cc404c0e2e8"
+  },
+  "checks": {
+    "nodeSyntax": "PASS",
+    "pythonAst": "PASS",
+    "trailingWhitespace": "PASS",
+    "nodeSelfTest": {
+      "type": "SELF_TEST",
+      "status": "PASS",
+      "builtinWebSocket": "function",
+      "checks": [
+        "synthetic scoped visual payload/DOM CSS alpha and border checks; exact 13-operation workflow (not browser evidence)",
+        "strict INIT/RUN and finite budget",
+        "pairing/logout/foreign target rejection",
+        "cached response excluded; raw304 wire status counted",
+        "Cookie/CSRF/Set-Cookie omitted from summaries",
+        "actual loopback WebSocket CDP correlation and deadline",
+        "unknown/failed/owned context disposal and expired positive command rejection",
+        "verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block"
+      ],
+      "windowsBrowser": "NOT_RUN",
+      "sourceSha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70"
+    },
+    "observerSyntheticReportCheck": {
+      "status": "PURE_LOCAL_MODEL_CHECKS_PASS",
+      "scope": "Pure synthetic report validation only: no browser, sockets, subprocess or remote.",
+      "checks": [
+        "synthetic exact 13-operation ledger and Filled0/20 CSS accepted; not IO/browser evidence",
+        "synthetic Outlined transparent background and independent whole opacity accepted",
+        "missing visual: rejected NODE_VISUAL_COUNT",
+        "forged ninth-only total: rejected NODE_WIRE_LEDGER_MISMATCH",
+        "bool operation count: rejected NODE_EXACT_API_OPERATION_LEDGER",
+        "cache disguised as wire: rejected NODE_WIRE_LEDGER_MISMATCH",
+        "different visual scope: rejected NODE_EXACT_API_OPERATION_LEDGER",
+        "zero fill acquired border: rejected NODE_VISUAL_COMPUTED_STYLE",
+        "text faded with fill: rejected NODE_VISUAL_PILL",
+        "controls faded: rejected NODE_VISUAL_DOM",
+        "draft changed: rejected NODE_VISUAL_DOM",
+        "stage reordered: rejected NODE_VISUAL_STAGE"
+      ],
+      "observerSourceSha256": "eb17bd4569c22b34a7b1b1fc66b541334c26db46b1cb9df61428e309a570be05",
+      "mockSourceSha256": "a04476053187edac1be7ec9a8b4640891b14a984a56c9b0f371333f62aa8e74c",
+      "python": "3.12.1 (main, Jan  8 2024, 05:57:25) [Clang 17.0.6 ]",
+      "windows": "NOT_RUN",
+      "browser": "NOT_RUN",
+      "tls": "NOT_RUN"
+    },
+    "rawEvidence": [
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-harness-selftest-first.stdout.log",
+        "sha256": "f754c293445423e998f97c3e749259760b622fe03211e9d7ae0634250f84c54b",
+        "bytes": 726
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-harness-selftest-first.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-harness-selftest-frozen.stdout.log",
+        "sha256": "9ceb161099bed46558fdac3865f6c5e9f3a792459f4c3cec56c4c975986d75b7",
+        "bytes": 726
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-harness-selftest-frozen.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-observer-pure-first.stdout.log",
+        "sha256": "f6a9db1998069e928ce6acda42fe08f04b1958f5deea903aa13735a1c02c1208",
+        "bytes": 1262
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-observer-pure-first.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-observer-pure-frozen.stdout.log",
+        "sha256": "f6a9db1998069e928ce6acda42fe08f04b1958f5deea903aa13735a1c02c1208",
+        "bytes": 1262
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/browser-observer-pure-frozen.stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "/tmp/fc-round35-visuals-evidence/observer-visual-pure-check.py",
+        "sha256": "a04476053187edac1be7ec9a8b4640891b14a984a56c9b0f371333f62aa8e74c",
+        "bytes": 6267
+      }
+    ]
+  },
+  "apiOperations": {
+    "statusGets": 2,
+    "sessionGets": 2,
+    "scopeGets": 2,
+    "contentGets": 2,
+    "contentPosts": 1,
+    "visualGets": 4
+  },
+  "apiResponses": 13,
+  "originalStrictAssertions": "All original status/session/scope/CSRF/onePOST/COMMITTED/reload/CSP/asset/no-cache/context/physicalowner checks retained; exact count now derived from six fixed operation groups",
+  "visualStages": [
+    "initial",
+    "draft-refresh",
+    "after-save",
+    "after-reload"
+  ],
+  "actualAssertionsAdded": [
+    "Each exactHomework visual GET has true200 ExtraInfo/no cache and matching original key; no fullpalette route allowed",
+    "Same-derived RGB and independent subject/display/rules versions compared with readonly DOM",
+    "Real computed background RGBA/border0 Filled includingzero/Outlineborder1/wholeopacity; text not faded with fill",
+    "Refresh and help ancestoropacity1 outside componentalpha; original reminder action remains",
+    "Explicit UI refresh sends one readonly GET, preserves dirty draft and leaves original save/command counts unchanged",
+    "Save/reload response causal barrier prevents abandoning unfinished preview; original one synthetic POST remains"
+  ],
+  "runtimeBoundary": {
+    "windowsBrowser": "NOT_RUN_BY_AGENT",
+    "remote": "NOT_RUN",
+    "cargoNpmGit": "NOT_RUN",
+    "nodeSelfTestLoopback": "Existing builtin WebSocket/CDP peer regression only; no browser/TLS claim",
+    "budget": "Original maxMillis<=12000, originalclient30/native45 unchanged",
+    "productionGate": "NOT_ENABLED; strict original TCP5s NOT_VALIDATED"
+  },
+  "remaining": "Root unified source-bound actual finiteTLS+isolatedEdge run and physicalcleanup evidence"
+}

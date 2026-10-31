@@ -246,7 +246,7 @@ impl VoiceService {
         let old = self
             .inner
             .runtime_state
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
                 Some(((word >> 1).saturating_add(1).min(u64::MAX >> 1)) << 1)
             })
             .unwrap_or(u64::MAX - 1);

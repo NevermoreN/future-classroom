@@ -92,6 +92,61 @@ function validateRun(value, init) {
   return value;
 }
 
+// Exact workflow: original nine API operations plus four explicit/causal
+// single-subject preview GETs. Static cache hits never contribute to this ledger.
+const API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
+  contentGets: 2, contentPosts: 1, visualGets: 4 });
+const VISUAL_STAGES = ['initial', 'draft-refresh', 'after-save', 'after-reload'];
+const VISUAL_FIELDS = ['subjectRevision', 'displayRevision', 'rulesVersion', 'effectiveRgb', 'mode',
+  'homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent',
+  'homeworkVisible', 'courseVisible'];
+function visualPayload(value, scope) {
+  shape(value, ['schemaVersion', 'status', 'key', 'subjectId', 'subjectName', ...VISUAL_FIELDS], 'VISUAL_SHAPE');
+  check(scope && value.schemaVersion === 1 && value.status === 'SUBJECT_VISUAL' && value.rulesVersion === 1
+    && value.subjectId === scope.subjectId && value.subjectName === 'Synthetic TLS subject'
+    && decimal(value.subjectRevision) && decimal(value.displayRevision, true)
+    && /^#[0-9A-F]{6}$/.test(value.effectiveRgb) && ['FILLED', 'OUTLINED'].includes(value.mode)
+    && ['homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent']
+      .every(k => Number.isInteger(value[k]) && value[k] >= 0 && value[k] <= 100)
+    && typeof value.homeworkVisible === 'boolean' && typeof value.courseVisible === 'boolean', 'VISUAL_FIELDS');
+  shape(value.key, ['kind', 'classId', 'subjectId', 'ownerTeacherId', 'date'], 'VISUAL_KEY_SHAPE');
+  check(value.key.kind === 'HOMEWORK' && value.key.classId === scope.classId
+    && value.key.subjectId === scope.subjectId && value.key.ownerTeacherId === scope.ownerTeacherId
+    && value.key.date === scope.today, 'VISUAL_SCOPE_CHANGED');
+  return Object.fromEntries(VISUAL_FIELDS.map(k => [k, value[k]]));
+}
+function cssRgba(value) {
+  const match = typeof value === 'string' && /^rgba?\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(?:,\s*(\d+(?:\.\d+)?))?\s*\)$/.exec(value);
+  check(match, 'VISUAL_COMPUTED_COLOR');
+  const result = match.slice(1, 4).map(Number); result.push(match[4] === undefined ? 1 : Number(match[4]));
+  check(result.slice(0, 3).every(n => Number.isFinite(n) && n >= 0 && n <= 255)
+    && Number.isFinite(result[3]) && result[3] >= 0 && result[3] <= 1, 'VISUAL_COMPUTED_COLOR');
+  return result;
+}
+function checkVisualDom(dom, visual) {
+  shape(dom, ['subjectRevision', 'displayRevision', 'rulesVersion', 'homework', 'course',
+    'refreshOpacity', 'helpOpacity', 'draftMatches', 'bottomReminderAvailable'], 'VISUAL_DOM_SHAPE');
+  check(dom.subjectRevision === visual.subjectRevision && dom.displayRevision === visual.displayRevision
+    && dom.rulesVersion === '1' && dom.refreshOpacity === 1 && dom.helpOpacity === 1
+    && dom.draftMatches === true && dom.bottomReminderAvailable === true, 'VISUAL_DOM_IDENTITY_OR_DRAFT');
+  for (const kind of ['homework', 'course']) {
+    const pill = dom[kind];
+    shape(pill, ['mode', 'fillPercent', 'effectiveRgb', 'visible', 'componentOpacity', 'pillOpacity', 'effectiveOpacity',
+      'backgroundColor', 'borderWidth', 'borderStyle', 'textAlign', 'textMatches', 'textColorUnchanged'], 'VISUAL_PILL_SHAPE');
+    const fill = visual[kind + 'FillPercent'], component = visual[kind + 'ComponentOpacityPercent'] / 100;
+    const rgba = cssRgba(pill.backgroundColor), alpha = visual.mode === 'FILLED' ? fill / 100 : 0;
+    const rgb = [1, 3, 5].map(offset => parseInt(visual.effectiveRgb.slice(offset, offset + 2), 16));
+    check(pill.mode === visual.mode && pill.fillPercent === String(fill) && pill.effectiveRgb === visual.effectiveRgb
+      && pill.visible === String(visual[kind + 'Visible']) && pill.componentOpacity === component
+      && pill.pillOpacity === 1 && Math.abs(pill.effectiveOpacity - component) < 0.000001
+      && Math.abs(rgba[3] - alpha) < 0.000001 && (alpha === 0 || rgb.every((v, i) => v === rgba[i]))
+      && pill.borderWidth === (visual.mode === 'FILLED' ? 0 : 1)
+      && pill.borderStyle === (visual.mode === 'FILLED' ? 'none' : 'solid')
+      && pill.textAlign === 'center' && pill.textMatches === true && pill.textColorUnchanged === true, 'VISUAL_COMPUTED_STYLE');
+  }
+  return true;
+}
+
 class Inbox {
   constructor(stream) {
     this.stream = stream; this.buffer = ''; this.queue = []; this.waiter = null; this.received = 0;
@@ -193,8 +248,9 @@ class Harness {
     this.requests = new Map(); this.earlyExtra = new Map(); this.bodies = new Set(); this.scope = null; this.initial = null; this.committed = null;
     this.reloaded = null; this.post = null; this.saveClicks = 0; this.sessionCount = 0; this.statusCount = 0;
     this.pageErrors = 0; this.consoleErrors = 0; this.scopeReads = 0; this.contentReads = 0;
+    this.visualReads = 0; this.visualPayloads = []; this.visualObservations = [];
     this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker,
-      scope: 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save and reload. No pairing, microphone, playback, foreground or OS trust changes.',
+      scope: 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.',
       assetManifestCanonicalSha256: hash(JSON.stringify(init.assetManifest)), expectedCspSha256: hash(init.expectedCsp),
       credentialScope: 'stdin memory only; Cookie/CSRF/Set-Cookie/response bodies and raw CDP frames omitted',
       browserPhysicalCleanup: 'SEPARATE_ORIGINAL_WINDOWS_JOB_OWNER_REQUIRED', assets: [], checks: [] };
@@ -227,6 +283,7 @@ class Harness {
     if (method === 'GET' && (path === '/fc/' || this.init.assetManifest.assets.some(a => '/fc/' + a.path === path))) return { kind: 'asset', path };
     if (method === 'GET' && ['/fc/api/v1/status', '/fc/api/v1/session', '/fc/api/v1/content/homework/scopes/0'].includes(path)) return { kind: 'api', path };
     if (['GET', 'POST'].includes(method) && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(path)) return { kind: 'content', path };
+    if (method === 'GET' && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}\/visual$/.test(path)) return { kind: 'visual', path };
     return null;
   }
   event(method, params, session) {
@@ -322,7 +379,12 @@ class Harness {
       check(bytes.length <= 65536, 'API_BODY_BUDGET');
       let value; try { value = JSON.parse(new TextDecoder('utf8', { fatal: true }).decode(bytes)); }
       catch { throw new Fault('API_JSON'); }
-      if (record.path.endsWith('/status')) {
+      if (record.kind === 'visual') {
+        check(record.method === 'GET' && record.path === this.contentPath() + '/visual', 'VISUAL_TARGET_CHANGED');
+        const visual = visualPayload(value, this.scope);
+        check(++this.visualReads <= API_OPERATIONS.visualGets, 'EXTRA_VISUAL_READ');
+        this.visualPayloads.push({ visual, responseBodySha256: hash(bytes) });
+      } else if (record.path.endsWith('/status')) {
         check(value.schemaVersion === 1 && value.apiVersion === 1 && value.uiCompatibilityVersion === 1 && value.online === true, 'STATUS_PAYLOAD');
         this.statusCount++;
       } else if (record.path.endsWith('/session')) {
@@ -370,6 +432,7 @@ class Harness {
     return `(() => { const kind=${JSON.stringify(kind)}; let all;
       if(kind==='home') all=[...document.querySelectorAll('button')].filter(e=>e.textContent.trim()==='管理今日作业');
       else if(kind==='scope') all=[...document.querySelectorAll('.scope-options button.scope-option')];
+      else if(kind==='visualRefresh') all=[...document.querySelectorAll('[data-testid="subject-visual-refresh"]')];
       else if(kind==='save') all=[...document.querySelectorAll('.editor-actions button')].filter(e=>e.textContent.trim()==='保存当天内容');
       else all=[...document.querySelectorAll('textarea#content-text')];
       if(all.length!==1) return {ready:false,count:all.length}; const e=all[0];
@@ -392,6 +455,38 @@ class Harness {
     await this.untilTrue(async () => this.contentReads >= (this.committed ? 2 : 1));
     await this.untilTrue(async () => await this.evaluate(`(() => {const e=document.querySelector('#content-text');return !!e&&!e.disabled&&!e.readOnly&&e.getAttribute('aria-invalid')==='false';})()`));
   }
+  async checkVisual(stage, readNumber, expectedDraft) {
+    await this.untilTrue(async () => this.visualReads >= readNumber);
+    check(this.visualReads === readNumber, 'VISUAL_READ_SEQUENCE');
+    const payload = this.visualPayloads[readNumber - 1];
+    let dom;
+    await this.untilTrue(async () => {
+      dom = await this.evaluate(`(() => {
+        const root=document.querySelector('[data-testid="subject-visual-preview"]');
+        const version=root?.querySelector('[data-testid="subject-visual-version"]'), refresh=root?.querySelector('[data-testid="subject-visual-refresh"]');
+        if(!version||!refresh||refresh.disabled)return null;
+        const product=e=>{if(!e)return null;let n=e,result=1,depth=0;while(n&&depth++<32){result*=Number(getComputedStyle(n).opacity);n=n.parentElement;}return n?null:result;};
+        const read=kind=>{
+          const component=root.querySelector('[data-testid="'+kind+'-visual-component"]'), pill=root.querySelector('[data-testid="'+kind+'-visual-pill"]');
+          if(!component||!pill)return null; const cs=getComputedStyle(component), ps=getComputedStyle(pill);
+          return {mode:pill.dataset.previewMode,fillPercent:pill.dataset.fillPercent,effectiveRgb:pill.dataset.effectiveRgb,visible:component.dataset.componentVisible,
+            componentOpacity:Number(cs.opacity),pillOpacity:Number(ps.opacity),effectiveOpacity:product(pill),backgroundColor:ps.backgroundColor,
+            borderWidth:parseFloat(ps.borderTopWidth),borderStyle:ps.borderTopStyle,textAlign:ps.textAlign,
+            textMatches:pill.textContent==='Synthetic TLS subject',textColorUnchanged:ps.color===getComputedStyle(component.parentElement).color};
+        };
+        const homework=read('homework'),course=read('course');if(!homework||!course)return null;
+        return {subjectRevision:version.dataset.subjectRevision,displayRevision:version.dataset.displayRevision,rulesVersion:version.dataset.rulesVersion,
+          homework,course,refreshOpacity:product(refresh),helpOpacity:product(root.querySelector(':scope > p.editor-help')),
+          draftMatches:document.querySelector('#content-text')?.value===${JSON.stringify(expectedDraft)},
+          bottomReminderAvailable:document.querySelector('.bottom-reminder-action button')?.textContent.trim()==='管理今日提醒'};
+      })()`);
+      return dom !== null;
+    });
+    checkVisualDom(dom, payload.visual);
+    check(this.visualObservations.length === readNumber - 1 && stage === VISUAL_STAGES[readNumber - 1], 'VISUAL_STAGE_SEQUENCE');
+    this.visualObservations.push({ stage, readNumber, responseBodySha256: payload.responseBodySha256,
+      visual: payload.visual, dom, draftPreserved: dom.draftMatches });
+  }
   async execute(run, receivedAt) {
     this.run = run; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
     this.report.generation = run.generation; this.report.origin = run.origin; this.report.maxMillis = run.maxMillis;
@@ -407,22 +502,32 @@ class Harness {
     check(!navigation.errorText, 'NATIVE_NAVIGATION_FAILED');
     await this.untilTrue(async () => this.statusCount === 1 && this.sessionCount === 1);
     this.phase = 'read-original-content'; await this.openContent();
+    this.phase = 'visual-original'; await this.checkVisual('initial', 1, '');
     this.phase = 'enter-synthetic-text'; await this.click('text');
     await this.command('Input.insertText', { text: this.text });
     await this.untilTrue(async () => await this.evaluate(`document.querySelector('#content-text')?.value===${JSON.stringify(this.text)}`));
+    this.phase = 'visual-refresh-with-draft';
+    check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_MUST_NOT_WRITE');
+    await this.click('visualRefresh'); await this.checkVisual('draft-refresh', 2, this.text);
+    check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_CHANGED_WRITE_STATE');
     this.phase = 'save-once'; this.saveClicks++;
     await this.click('save');
     await this.untilTrue(async () => this.committed !== null);
     await this.untilTrue(async () => await this.evaluate(`(() => {const n=document.querySelector('.content-editor .content-notice');return n?.textContent.trim()===${JSON.stringify(SAVED)}&&!document.querySelector('.command-receipt');})()`));
+    this.phase = 'visual-after-save'; await this.checkVisual('after-save', 3, this.text);
     this.phase = 'reload-and-read-durable-content'; await this.command('Page.reload');
     await this.untilTrue(async () => this.statusCount === 2 && this.sessionCount === 2);
     await this.openContent();
     await this.untilTrue(async () => this.reloaded !== null && await this.evaluate(`document.querySelector('#content-text')?.value===${JSON.stringify(this.text)}`));
+    this.phase = 'visual-after-reload'; await this.checkVisual('after-reload', 4, this.text);
     this.phase = 'settle-observed-responses';
     await this.untilTrue(async () => this.responsesSettled());
     const api = [...this.requests.values()].filter(r => r.kind !== 'asset');
-    check(api.length === 9 && this.sessionCount === 2 && this.statusCount === 2 && this.scopeReads === 2
-      && this.contentReads === 2 && api.filter(r => r.method === 'POST').length === 1, 'API_OPERATION_COUNT');
+    check(api.length === Object.values(API_OPERATIONS).reduce((a, b) => a + b, 0)
+      && this.sessionCount === API_OPERATIONS.sessionGets && this.statusCount === API_OPERATIONS.statusGets
+      && this.scopeReads === API_OPERATIONS.scopeGets && this.contentReads === API_OPERATIONS.contentGets
+      && this.visualReads === API_OPERATIONS.visualGets && this.visualObservations.length === API_OPERATIONS.visualGets
+      && api.filter(r => r.method === 'POST').length === API_OPERATIONS.contentPosts, 'API_OPERATION_COUNT');
     check(api.every(r => r.extraStatus === 200 && !r.servedFromCache && !r.fromDiskCache
       && !r.fromServiceWorker && !r.fromPrefetchCache), 'API_NOT_PROVEN_NATIVE_NO_STORE');
     check(this.report.assets.some(a => a.path === 'index.html') && this.report.assets.some(a => a.path.endsWith('.css'))
@@ -430,7 +535,8 @@ class Harness {
     check(this.pageErrors === 0 && this.consoleErrors === 0, 'BROWSER_ERROR_COUNT');
     this.report.checks = ['Native HTML/JS/CSS exact manifest identities and CSP', 'Original approved HttpOnly cookie; actual session CSRF matched twice',
       'One synthetic authorized scope and original empty content', 'Exactly one UI content POST with original CSRF/date/revision',
-      'Committed receipt and post-reload durable content match', 'Nine real no-store API responses; cache hits counted separately'];
+      'Committed receipt and post-reload durable content match', 'Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately',
+      'Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha', 'Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview'];
     this.report.elapsedMillis = Math.round(performance.now() - began); this.report.status = 'PASS';
     this.phase = 'complete';
   }
@@ -473,6 +579,9 @@ class Harness {
     this.report.observedResponseCount = records.filter(r => r.status !== null).length;
     this.report.cacheOnlyResponseCount = records.filter(r => !wire(r) && (r.servedFromCache || r.fromDiskCache)).length;
     this.report.apiResponses = records.filter(r => r.url.includes('/api/v1/')).length;
+    this.report.apiOperations = { statusGets: this.statusCount, sessionGets: this.sessionCount, scopeGets: this.scopeReads,
+      contentGets: this.contentReads, contentPosts: records.filter(r => r.method === 'POST').length, visualGets: this.visualReads };
+    this.report.visualReads = this.visualReads; this.report.visualObservations = this.visualObservations;
     this.report.contentPosts = records.filter(r => r.method === 'POST').length;
     this.report.sessionCsrfMatched = this.sessionCount === 2;
     this.report.writeOutcome = this.committed ? 'COMMITTED' : this.post ? 'UNKNOWN' : 'NOT_OBSERVED';
@@ -548,6 +657,32 @@ async function selfTest() {
   assert.equal(h.classify(run.origin + '/fc/api/v1/pairing/requests', 'POST'), null);
   assert.equal(h.classify(run.origin + '/fc/api/v1/session/logout', 'POST'), null);
   assert.equal(h.classify('https://wrong.invalid/fc/', 'GET'), null);
+  const visualPath = run.origin + '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual';
+  assert.equal(h.classify(visualPath, 'GET').kind, 'visual');
+  assert.equal(h.classify(visualPath, 'POST'), null);
+  assert.equal(h.classify(run.origin + '/fc/api/v1/subject-visuals', 'GET'), null);
+  assert.equal(Object.values(API_OPERATIONS).reduce((a,b)=>a+b,0), 13);
+  const scope = { classId: '1', subjectId: '1', ownerTeacherId: '1', today: '2026-11-01' };
+  const dto = { schemaVersion:1,status:'SUBJECT_VISUAL',key:{kind:'HOMEWORK',classId:'1',subjectId:'1',ownerTeacherId:'1',date:scope.today},
+    subjectId:'1',subjectName:'Synthetic TLS subject',subjectRevision:'2',displayRevision:'4',rulesVersion:1,effectiveRgb:'#C98282',mode:'FILLED',
+    homeworkFillPercent:0,courseFillPercent:20,homeworkComponentOpacityPercent:50,courseComponentOpacityPercent:100,homeworkVisible:true,courseVisible:false };
+  const visual = visualPayload(dto, scope);
+  const pill = kind => ({mode:'FILLED',fillPercent:String(visual[kind+'FillPercent']),effectiveRgb:visual.effectiveRgb,visible:String(visual[kind+'Visible']),
+    componentOpacity:visual[kind+'ComponentOpacityPercent']/100,pillOpacity:1,effectiveOpacity:visual[kind+'ComponentOpacityPercent']/100,
+    backgroundColor:kind==='homework'?'rgba(201, 130, 130, 0)':'rgba(201, 130, 130, 0.2)',borderWidth:0,borderStyle:'none',textAlign:'center',textMatches:true,textColorUnchanged:true});
+  const dom = {subjectRevision:'2',displayRevision:'4',rulesVersion:'1',homework:pill('homework'),course:pill('course'),refreshOpacity:1,helpOpacity:1,draftMatches:true,bottomReminderAvailable:true};
+  assert.equal(checkVisualDom(dom, visual),true);
+  assert.throws(()=>visualPayload({...dto,palette:[]},scope),Fault);
+  assert.throws(()=>visualPayload({...dto,key:{...dto.key,ownerTeacherId:'9'}},scope),Fault);
+  assert.throws(()=>visualPayload({...dto,effectiveRgb:'url(https://x)'},scope),Fault);
+  assert.throws(()=>checkVisualDom({...dom,homework:{...dom.homework,borderWidth:1,borderStyle:'solid'}},visual),Fault);
+  assert.throws(()=>checkVisualDom({...dom,homework:{...dom.homework,pillOpacity:0}},visual),Fault);
+  assert.throws(()=>checkVisualDom({...dom,refreshOpacity:0.5},visual),Fault);
+  assert.throws(()=>checkVisualDom({...dom,draftMatches:false},visual),Fault);
+  const outlined = visualPayload({...dto,mode:'OUTLINED'},scope);
+  const outlinePill = kind => ({...dom[kind],mode:'OUTLINED',backgroundColor:'rgba(0, 0, 0, 0)',borderWidth:1,borderStyle:'solid'});
+  assert.equal(checkVisualDom({...dom,homework:outlinePill('homework'),course:outlinePill('course')},outlined),true);
+
   h.event('Network.requestWillBeSent', { requestId: 'cached', request: { method: 'GET', url: run.origin + '/fc/assets/index-AbCd1234.js' } }, 'owned');
   h.event('Network.requestServedFromCache', { requestId: 'cached' }, 'owned');
   h.event('Network.responseReceived', { requestId: 'cached', response: { url: run.origin + '/fc/assets/index-AbCd1234.js', status: 200,
@@ -596,7 +731,7 @@ async function selfTest() {
   assert.equal(await owned.dispose(), true); assert.equal(calls, 1); assert.equal(owned.report.contextDisposed, true);
   await socketSelfTest();
   writeSync(1, JSON.stringify({ type: 'SELF_TEST', status: 'PASS', builtinWebSocket: typeof WebSocket,
-    checks: ['strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
+    checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact 13-operation workflow (not browser evidence)', 'strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
       'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block'],
     windowsBrowser: 'NOT_RUN', sourceSha256: hash(readFileSync(fileURLToPath(import.meta.url))) }) + '\n');
 }

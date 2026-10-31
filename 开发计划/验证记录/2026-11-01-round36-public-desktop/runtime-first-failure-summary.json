@@ -1,0 +1,14 @@
+{
+  "status": "FAIL",
+  "cleanup": "PASS",
+  "testsExecuted": 1,
+  "firstExecutable": "fc_bootstrap-e6c3a587f31bdfb6.exe",
+  "result": [
+    "test result: FAILED. 313 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 67.06s"
+  ],
+  "failedNames": [
+    "test web_transfer::uploads::tests::material_hub_keeps_ready_across_ticket_drop_and_appends_with_new_authenticated_request ... FAILED",
+    "test web_transfer::uploads::tests::same_token_with_different_control_cell_is_rejected_before_stage_admission ... FAILED"
+  ],
+  "productionProductUnchanged": "Native20/native22/TLS+browser immutable product64e05 already passed. Test-only helper fix pending."
+}

@@ -1,0 +1,2536 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service",
+  "strictP0": "NOT_VALIDATED",
+  "productionListener": "NOT_ENABLED",
+  "browserAcceptance": "FINITE_NATIVE_CONTENT_UI_PASS",
+  "win7": "NOT_VALIDATED",
+  "win10": "NOT_VALIDATED",
+  "physicalPlayback": "NOT_EXERCISED",
+  "forwardTimingIsNativeDeadlineEvidence": false,
+  "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+  "exeSha256": "fdbd2b5326b1054175583f3bf8fcb1133e84b5a9f3f2db32eb0fd4b5669c0cda",
+  "runnerSourceSha256": "0757d52fc926944c040d368900243afd18ad9ac5286313b857a50ad7fa638ba1",
+  "ownershipHelperSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "webBundleSha256": "bb159a86155985a5526ab428569d56146bb7f9cec44bc68180c342df314b1183",
+  "remoteScriptsSha256": "d0fe26050d627fdefa81c3b792b708762ddebb1d1f188aa05d22cca26d938e65",
+  "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+  "visualFixture": "OUTLINED",
+  "visualOnly": true,
+  "events": [
+    {
+      "case": "api-wrong-method-status",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 72,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "9cc39b4cfbef32b15769c1115747ba20eb493456bec30adc3481615a7aae232f",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 85591043
+    },
+    {
+      "case": "api-wrong-method-pairing/requests",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "pairing/requests",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 261,
+      "responseWireSha256": "984b76d8642e1658195c2ce846ef76466f2bac9d6b2e7b4dfe824448c3e2094f",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 85891896
+    },
+    {
+      "case": "api-wrong-method-voice/broadcasts",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "voice/broadcasts",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 82,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 266,
+      "responseWireSha256": "fe056409188bfc501fa9f9c3f9c95402298945b8bd051de5a6c89565ffbb4b66",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET, POST",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 76398152
+    },
+    {
+      "case": "public-status",
+      "status": "PASS",
+      "method": "GET",
+      "route": "status",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 69,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 260,
+      "responseWireSha256": "b748c92f62d5656331d9587b0583ee8d7599323d36e9a2b2e6989ab9582a21d9",
+      "responseBodyBytes": 75,
+      "responseBodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 110601539
+    },
+    {
+      "case": "unauthorized-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 70,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 236,
+      "responseWireSha256": "039d55f4beeae4af3baff2f9459fef6487c542c99948ec47a191d57d8633f3a2",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 83334159
+    },
+    {
+      "case": "bad-origin-pairing",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "0f1f7769d6077c1a902e4e60907d8222988a89dfba9316f41fe016c07aaf9d06",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 131,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 403,
+      "responseWireBytes": 230,
+      "responseWireSha256": "1d5cbecd0692c60255ab67e38be3419342b6d9115e8bbff0d396a27c991dc037",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 82867470
+    },
+    {
+      "case": "pairing-request",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests",
+      "requestBodyBytes": 101,
+      "requestBodySha256": "0f1f7769d6077c1a902e4e60907d8222988a89dfba9316f41fe016c07aaf9d06",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 133,
+      "coalescedHeaderTailBodyBytes": 101,
+      "httpStatus": 202,
+      "responseWireBytes": 345,
+      "responseWireSha256": "f4a1272c0aa1441340ee7a251b0e1e3e27f09d523c092fd4a5cf0111878017be",
+      "responseBodyBytes": 153,
+      "responseBodySha256": "78e3f06a0ef367389bebb173e4a2382c5600f5b9e6e9e3aeb709ce22552b4b44",
+      "responseDate": "Sat, 31 Oct 2026 18:26:04 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 80175679
+    },
+    {
+      "case": "pairing-poll-1",
+      "status": "PASS",
+      "method": "POST",
+      "route": "pairing/requests/2/poll",
+      "requestBodyBytes": 99,
+      "requestBodySha256": "4b0acd0b34654c75b6cc706b528d17f1d04eef7677eb4792bce0f836c4c30e7b",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 139,
+      "coalescedHeaderTailBodyBytes": 99,
+      "httpStatus": 200,
+      "responseWireBytes": 370,
+      "responseWireSha256": "361f9f3708d8593427ab10bddbe4bc4775599fa8207daa9076f71e32dd794065",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "02151c8ea64179d2d4c57898e15e5a53992a0f321cc4c7666c320c84a7acca0f",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 89096038
+    },
+    {
+      "case": "authenticated-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "session",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 167,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 462,
+      "responseWireSha256": "53f2d28de2edf981f70dc8890498890f8f8537f5536b567aa64a8018087bdca5",
+      "responseBodyBytes": 276,
+      "responseBodySha256": "3df430e94bbbfe7b71101f4f37510e35f31efbc653999c973e975121f21b3abc",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 100419707
+    },
+    {
+      "case": "visual-owned-scopes",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/scopes/0",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 185,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 508,
+      "responseWireSha256": "a0403320b53f5df0db0d8a5ade1f9901bfc0ac91d15e3b19a93ce394fdd9f33d",
+      "responseBodyBytes": 322,
+      "responseBodySha256": "c456a406f9523f4b8f62baae6e9f1510bb4322ca930d16bee00db67da9bb7caa",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 116414828
+    },
+    {
+      "case": "visual-content-before",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 193,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 471,
+      "responseWireSha256": "34aabc34992a05c1789ed4b8b18830ec144b45455372b44abc21ee384de0b4b0",
+      "responseBodyBytes": 285,
+      "responseBodySha256": "9ee73a0bc559c04102f0060126e08af0743f4f2b031b9e9e0bfdcada17f488d6",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 85617284
+    },
+    {
+      "case": "visual-read",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 651,
+      "responseWireSha256": "28796d4ad0e5390cea0f53257d611e5e991ed60bf6b6cd09d6e02b38be772417",
+      "responseBodyBytes": 465,
+      "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 77970157
+    },
+    {
+      "case": "visual-no-session",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 103,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 401,
+      "responseWireBytes": 236,
+      "responseWireSha256": "e9a6958006fbcb136750b608484047d97c3dc9ab9dfacfefffa8078e37efd84d",
+      "responseBodyBytes": 41,
+      "responseBodySha256": "8b51bdfb3630cf9b042db98a5b282dbe4d69fe3de1aba7ef9374d7e4c9e1d9bc",
+      "responseDate": "Sat, 31 Oct 2026 18:26:05 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 77801361
+    },
+    {
+      "case": "visual-other-class",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/2/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 403,
+      "responseWireBytes": 230,
+      "responseWireSha256": "c13a88a2ea24aede202ea07b70e211b292a2ef4ed3cf6788758342d337251af0",
+      "responseBodyBytes": 38,
+      "responseBodySha256": "4c6d78f1689ee614f1fe4614b07379567f22fd96ac8a236d49cb96275930240e",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 91399673
+    },
+    {
+      "case": "visual-write-method-POST",
+      "status": "PASS",
+      "method": "POST",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 329,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "51fe2de90eaad5cf893595439bd1d5fb95e872dafaa852b909ed56edf1f9d541",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 79760311
+    },
+    {
+      "case": "visual-write-method-DELETE",
+      "status": "PASS",
+      "method": "DELETE",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 203,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 405,
+      "responseWireBytes": 260,
+      "responseWireSha256": "51fe2de90eaad5cf893595439bd1d5fb95e872dafaa852b909ed56edf1f9d541",
+      "responseBodyBytes": 47,
+      "responseBodySha256": "82e4a01e5ecae56a28e28706c38030d9f2ba1020df2bbbbd39743e640d8743a2",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseAllow": "GET",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 115411177
+    },
+    {
+      "case": "visual-fields-cannot-write-content",
+      "status": "PASS",
+      "method": "POST",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 130,
+      "requestBodySha256": "4390e4902ca5bb1715af644963aa5fc496c100afabdd7e25ab9f3abf10c50ed5",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 324,
+      "coalescedHeaderTailBodyBytes": 130,
+      "httpStatus": 400,
+      "responseWireBytes": 238,
+      "responseWireSha256": "61be6670e0a905241469f818e96fff59a76ba1f1b0fdd938f3be58b91a989212",
+      "responseBodyBytes": 44,
+      "responseBodySha256": "1d3789fa0a83ab27cdbfb0246976ce0851d489d45ca44cce94175914c320adac",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 141517288
+    },
+    {
+      "case": "visual-content-after",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 193,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 471,
+      "responseWireSha256": "86d8890a85fbc6658fbacf490c794a1906c4d89d2d940f6965b019c97f0b783b",
+      "responseBodyBytes": 285,
+      "responseBodySha256": "d1c3cb338e7c8522328a3ca88efbf6d678bb40a5fea82eed7e31a9fddbc4dd5e",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 91861182
+    },
+    {
+      "case": "visual-explicit-reread",
+      "status": "PASS",
+      "method": "GET",
+      "route": "content/homework/1/1/1/2026-11-01/visual",
+      "requestBodyBytes": 0,
+      "requestBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "requestHost": "localhost:60830",
+      "tlsVersion": "TLSv1.2",
+      "peerDerSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+      "serverHostname": "localhost",
+      "hostAuthority": "localhost:60830",
+      "clientSendCalls": 4,
+      "maxSendCallBytes": 200,
+      "coalescedHeaderTailBodyBytes": 0,
+      "httpStatus": 200,
+      "responseWireBytes": 651,
+      "responseWireSha256": "f9ce74dcd3e7942065cd16510bb8c5cc60704acd550ea526d53b9c64f7a3d467",
+      "responseBodyBytes": 465,
+      "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+      "responseDate": "Sat, 31 Oct 2026 18:26:06 GMT",
+      "closeNotify": "PASS: actual clean TLS EOF",
+      "responseFraming": "unique canonical Content-Length",
+      "forwardObservationNanos": 97896252
+    },
+    {
+      "case": "wrong-ca-rejected",
+      "status": "PASS",
+      "serverHostname": "localhost",
+      "trustSource": "default client roots, fixture not added",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 18,
+      "verifyMessage": "self-signed certificate"
+    },
+    {
+      "case": "wrong-hostname-rejected",
+      "status": "PASS",
+      "serverHostname": "wrong.invalid",
+      "trustSource": "only owned public PEM",
+      "rejectionType": "SSLCertVerificationError",
+      "verifyCode": 62,
+      "verifyMessage": "Hostname mismatch, certificate is not valid for 'wrong.invalid'."
+    }
+  ],
+  "cleanup": "PASS",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+  "staticPackage": {
+    "manifestSha256": "db788235dc3c95698a95fce2afb1cdbcb03b4d0bebc84ffaf45e072a97712436",
+    "payloadBytes": 459002,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-DWNPyYJh.js",
+        "sizeBytes": 415326,
+        "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c"
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sizeBytes": 39554,
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "db788235dc3c95698a95fce2afb1cdbcb03b4d0bebc84ffaf45e072a97712436",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-DWNPyYJh.js",
+        "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+        "bytes": 415326
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+        "bytes": 39554
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "uploadedScriptSha256": {
+    "cleanup": "509801db0663d87dfb304c147641fcbca8eb199b96c30959634b732828b61722",
+    "stop": "c575d5738fea4d56ec3485cf0d4b09c9dc1550b957f1a9dd7c9f4a4ba3a6b1bf",
+    "capture": "c0769f1617ef9ea7d57c5e56165b5249f1ac8558f831fd288f1c6a8af523da68",
+    "setup": "a28b769ee29cc42888d37265de0509defae0c498ad8c330d438b2184b82c1c61",
+    "launch": "3266f0def92ebcd89f443f3a5308635cc2fb45c489b4ff46916bb941c3e68b3b"
+  },
+  "controlScriptsParse": "PASS",
+  "visualFixtureInput": {
+    "bytes": 8,
+    "sha256": "8d6f2dd1afac86b300520f9570012da28514078dc92df2911289000fcb5a30a6",
+    "readBack": "PASS"
+  },
+  "fixture": {
+    "thumbprint": "EF7A77534BABA1EFE134836C76F3C43A5AC18B76",
+    "keyName": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "tls": "TLSv1.2",
+    "publicCertificateSha256": "855ee52eed7bf2e7d30ddb0d6d54753406c72a7dcee1173aaa5547fd79cb518f",
+    "trustSource": "only owned public PEM; no system trust mutation",
+    "closeNotify": "required actual clean TLS EOF with suppress_ragged_eofs=False",
+    "openssl": "OpenSSL 3.0.12 24 Oct 2023"
+  },
+  "continuousAcceptEnabled": false,
+  "nativeProgress": [
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 1,
+      "acceptance": {
+        "generation": 1,
+        "posts": 1,
+        "completions": 0,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 0,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 0,
+      "rearms": 0,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 2,
+      "acceptance": {
+        "generation": 1,
+        "posts": 4,
+        "completions": 3,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 3,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 1,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 2,
+      "rearms": 2,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 3,
+      "acceptance": {
+        "generation": 1,
+        "posts": 7,
+        "completions": 6,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 6,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 5,
+      "rearms": 5,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 4,
+      "acceptance": {
+        "generation": 1,
+        "posts": 8,
+        "completions": 7,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 7,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 7,
+      "rearms": 7,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 5,
+      "acceptance": {
+        "generation": 1,
+        "posts": 9,
+        "completions": 8,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 8,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 1,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 7,
+      "rearms": 7,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 6,
+      "acceptance": {
+        "generation": 1,
+        "posts": 11,
+        "completions": 10,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 10,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 9,
+      "rearms": 9,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 7,
+      "acceptance": {
+        "generation": 1,
+        "posts": 14,
+        "completions": 13,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 13,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 12,
+      "rearms": 12,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 8,
+      "acceptance": {
+        "generation": 1,
+        "posts": 17,
+        "completions": 16,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 16,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 15,
+      "rearms": 15,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 9,
+      "acceptance": {
+        "generation": 1,
+        "posts": 19,
+        "completions": 18,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 18,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 1,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 17,
+      "rearms": 17,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 10,
+      "acceptance": {
+        "generation": 1,
+        "posts": 23,
+        "completions": 22,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 22,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 1,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 21,
+      "rearms": 21,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 11,
+      "acceptance": {
+        "generation": 1,
+        "posts": 27,
+        "completions": 26,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 26,
+        "ready_slots": 3,
+        "bound_slots": 1,
+        "native_pending": 2,
+        "owned_sockets": 3
+      },
+      "jsonBodyRecords": 0,
+      "retired": 25,
+      "rearms": 25,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 12,
+      "acceptance": {
+        "generation": 1,
+        "posts": 29,
+        "completions": 28,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 28,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 28,
+      "rearms": 28,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 13,
+      "acceptance": {
+        "generation": 1,
+        "posts": 33,
+        "completions": 32,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 32,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 32,
+      "rearms": 32,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 14,
+      "acceptance": {
+        "generation": 1,
+        "posts": 36,
+        "completions": 35,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 35,
+        "ready_slots": 3,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 34,
+      "rearms": 34,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 15,
+      "acceptance": {
+        "generation": 1,
+        "posts": 38,
+        "completions": 37,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 37,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 37,
+      "rearms": 37,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 16,
+      "acceptance": {
+        "generation": 1,
+        "posts": 40,
+        "completions": 39,
+        "idle_cancellations": 0,
+        "idle_returns": 0,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 17,
+      "acceptance": {
+        "generation": 1,
+        "posts": 41,
+        "completions": 40,
+        "idle_cancellations": 1,
+        "idle_returns": 1,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 18,
+      "acceptance": {
+        "generation": 1,
+        "posts": 42,
+        "completions": 41,
+        "idle_cancellations": 2,
+        "idle_returns": 2,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 19,
+      "acceptance": {
+        "generation": 1,
+        "posts": 43,
+        "completions": 42,
+        "idle_cancellations": 3,
+        "idle_returns": 3,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 20,
+      "acceptance": {
+        "generation": 1,
+        "posts": 44,
+        "completions": 43,
+        "idle_cancellations": 4,
+        "idle_returns": 4,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 21,
+      "acceptance": {
+        "generation": 1,
+        "posts": 45,
+        "completions": 44,
+        "idle_cancellations": 5,
+        "idle_returns": 5,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 22,
+      "acceptance": {
+        "generation": 1,
+        "posts": 46,
+        "completions": 45,
+        "idle_cancellations": 6,
+        "idle_returns": 6,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 23,
+      "acceptance": {
+        "generation": 1,
+        "posts": 47,
+        "completions": 46,
+        "idle_cancellations": 7,
+        "idle_returns": 7,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 24,
+      "acceptance": {
+        "generation": 1,
+        "posts": 48,
+        "completions": 47,
+        "idle_cancellations": 8,
+        "idle_returns": 8,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 4,
+        "bound_slots": 0,
+        "native_pending": 1,
+        "owned_sockets": 2
+      },
+      "jsonBodyRecords": 0,
+      "retired": 39,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    },
+    {
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "generation": 1,
+      "sequence": 25,
+      "acceptance": {
+        "generation": 1,
+        "posts": 48,
+        "completions": 48,
+        "idle_cancellations": 8,
+        "idle_returns": 8,
+        "capacity_rejects": 0,
+        "transfers": 39,
+        "ready_slots": 0,
+        "bound_slots": 0,
+        "native_pending": 0,
+        "owned_sockets": 0
+      },
+      "jsonBodyRecords": 0,
+      "retired": 43,
+      "rearms": 39,
+      "pendingJobs": 0,
+      "requests": []
+    }
+  ],
+  "ready": [
+    {
+      "port": 60830,
+      "generation": 1,
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "origin": "https://localhost:60830",
+      "basePath": "/fc/",
+      "classId": "1",
+      "subjectId": "1",
+      "loginName": "probe",
+      "staticAssets": 6,
+      "visualFixture": "OUTLINED"
+    }
+  ],
+  "nativeReports": [
+    {
+      "physicalNativeDrain": true,
+      "sharedWorkers": 2,
+      "workerJoin": true,
+      "hubPending": 0,
+      "downloadHubPending": 0,
+      "quarantined": 0,
+      "setupCleanup": true,
+      "approvals": 1,
+      "heads": 37,
+      "responses": 37,
+      "peakRecords": 4
+    }
+  ],
+  "nativeProcessExits": [
+    {
+      "code": 0
+    }
+  ],
+  "static": {
+    "status": "NOT_RUN_TARGETED_VISUAL_MATRIX"
+  },
+  "business": {
+    "subjectVisuals": {
+      "status": "PASS",
+      "fixture": "OUTLINED",
+      "preview": {
+        "schemaVersion": 1,
+        "status": "SUBJECT_VISUAL",
+        "key": {
+          "kind": "HOMEWORK",
+          "classId": "1",
+          "subjectId": "1",
+          "ownerTeacherId": "1",
+          "date": "2026-11-01"
+        },
+        "subjectId": "1",
+        "subjectName": "Synthetic TLS subject",
+        "subjectRevision": "1",
+        "displayRevision": "1",
+        "rulesVersion": 1,
+        "effectiveRgb": "#88A6C4",
+        "mode": "OUTLINED",
+        "homeworkFillPercent": 3,
+        "courseFillPercent": 20,
+        "homeworkComponentOpacityPercent": 100,
+        "courseComponentOpacityPercent": 100,
+        "homeworkVisible": true,
+        "courseVisible": true
+      },
+      "previewSha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+      "contentRevisionBefore": "0",
+      "contentRevisionAfter": "0",
+      "readOnly": true,
+      "nativeDesktopPixels": "NOT_OBSERVED",
+      "wallpaperContrast": "NOT_CERTIFIED"
+    },
+    "scope": "TARGETED_VISUAL_MATRIX_NO_MATERIAL_OR_AUDIO_OPERATIONS"
+  },
+  "nativeDebugLines": [
+    "TLS_BUSINESS_REPORT NetworkReport { acceptance: TlsAcceptSnapshot { generation: 1, posts: 48, completions: 48, idle_cancellations: 8, idle_returns: 8, capacity_rejects: 0, transfers: 39, ready_slots: 0, bound_slots: 0, native_pending: 0, owned_sockets: 0 }, json_body_records: 0, json_body_intervals: [None, None, None, None, None, None, None, None], heads: 37, admissions: 29, body_acks: 29, responses: 37, closed: 43, retired: 43, rearms: 39, stale_events: 0, active_records: 0, peak_records: 4, pending_jobs: 0, cleanup_pending: 0, retained_cleanup: 0, native_drained: true, stopping: true, owned_bytes: 1583440 }"
+  ],
+  "native": {
+    "physicalNativeDrain": true,
+    "sharedWorkers": 2,
+    "workerJoin": true,
+    "hubPending": 0,
+    "downloadHubPending": 0,
+    "quarantined": 0,
+    "setupCleanup": true,
+    "approvals": 1,
+    "heads": 37,
+    "responses": 37,
+    "peakRecords": 4
+  },
+  "nativeProcessExit": {
+    "code": 0
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 11151,
+      "observedBytes": 11151,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "2abe216b1805d14ffac016b6d0d5f345146b46f338c9cc33560453e8cf6acd4b",
+      "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjA4MzAsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsInBhaXJpbmdDb2RlIjoiNTE4NTk3MzciLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2MDgzMCIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2LCJ2aXN1YWxGaXh0dXJlIjoiT1VUTElORUQifQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjEsImNvbXBsZXRpb25zIjowLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjowLCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjowLCJyZWFybXMiOjAsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NCwiY29tcGxldGlvbnMiOjMsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjMsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjIsInJlYXJtcyI6MiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjozLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo3LCJjb21wbGV0aW9ucyI6NiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6NiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6NSwicmVhcm1zIjo1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjQsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjgsImNvbXBsZXRpb25zIjo3LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjo3LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo3LCJyZWFybXMiOjcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6OSwiY29tcGxldGlvbnMiOjgsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjgsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjcsInJlYXJtcyI6NywicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo2LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxMSwiY29tcGxldGlvbnMiOjEwLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxMCwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6OSwicmVhcm1zIjo5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjcsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjE0LCJjb21wbGV0aW9ucyI6MTMsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjEzLCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoyLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoxMiwicmVhcm1zIjoxMiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo4LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxNywiY29tcGxldGlvbnMiOjE2LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxNiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MTUsInJlYXJtcyI6MTUsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6OSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MTksImNvbXBsZXRpb25zIjoxOCwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MTgsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjE3LCJyZWFybXMiOjE3LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEwLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoyMywiY29tcGxldGlvbnMiOjIyLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoyMiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MjEsInJlYXJtcyI6MjEsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTEsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjI3LCJjb21wbGV0aW9ucyI6MjYsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjI2LCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoyLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyNSwicmVhcm1zIjoyNSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxMiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MjksImNvbXBsZXRpb25zIjoyOCwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MjgsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjI4LCJyZWFybXMiOjI4LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjEzLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozMywiY29tcGxldGlvbnMiOjMyLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozMiwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzIsInJlYXJtcyI6MzIsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTQsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjM2LCJjb21wbGV0aW9ucyI6MzUsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM1LCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozNCwicmVhcm1zIjozNCwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxNSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MzgsImNvbXBsZXRpb25zIjozNywiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzcsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM3LCJyZWFybXMiOjM3LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE2LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0MCwiY29tcGxldGlvbnMiOjM5LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTcsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQxLCJjb21wbGV0aW9ucyI6NDAsImlkbGVfY2FuY2VsbGF0aW9ucyI6MSwiaWRsZV9yZXR1cm5zIjoxLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxOCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDIsImNvbXBsZXRpb25zIjo0MSwiaWRsZV9jYW5jZWxsYXRpb25zIjoyLCJpZGxlX3JldHVybnMiOjIsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE5LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0MywiY29tcGxldGlvbnMiOjQyLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjMsImlkbGVfcmV0dXJucyI6MywiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjAsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ0LCJjb21wbGV0aW9ucyI6NDMsImlkbGVfY2FuY2VsbGF0aW9ucyI6NCwiaWRsZV9yZXR1cm5zIjo0LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyMSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDUsImNvbXBsZXRpb25zIjo0NCwiaWRsZV9jYW5jZWxsYXRpb25zIjo1LCJpZGxlX3JldHVybnMiOjUsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIyLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0NiwiY29tcGxldGlvbnMiOjQ1LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjYsImlkbGVfcmV0dXJucyI6NiwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjMsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ3LCJjb21wbGV0aW9ucyI6NDYsImlkbGVfY2FuY2VsbGF0aW9ucyI6NywiaWRsZV9yZXR1cm5zIjo3LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0NClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyNCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDgsImNvbXBsZXRpb25zIjo0NywiaWRsZV9jYW5jZWxsYXRpb25zIjo4LCJpZGxlX3JldHVybnMiOjgsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQ0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjI1LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0OCwiY29tcGxldGlvbnMiOjQ4LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjgsImlkbGVfcmV0dXJucyI6OCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjAsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MCwib3duZWRfc29ja2V0cyI6MH0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6NDMsInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119DQpUTFNfQlVTSU5FU1NfUkVQT1JUIE5ldHdvcmtSZXBvcnQgeyBhY2NlcHRhbmNlOiBUbHNBY2NlcHRTbmFwc2hvdCB7IGdlbmVyYXRpb246IDEsIHBvc3RzOiA0OCwgY29tcGxldGlvbnM6IDQ4LCBpZGxlX2NhbmNlbGxhdGlvbnM6IDgsIGlkbGVfcmV0dXJuczogOCwgY2FwYWNpdHlfcmVqZWN0czogMCwgdHJhbnNmZXJzOiAzOSwgcmVhZHlfc2xvdHM6IDAsIGJvdW5kX3Nsb3RzOiAwLCBuYXRpdmVfcGVuZGluZzogMCwgb3duZWRfc29ja2V0czogMCB9LCBqc29uX2JvZHlfcmVjb3JkczogMCwganNvbl9ib2R5X2ludGVydmFsczogW05vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmUsIE5vbmVdLCBoZWFkczogMzcsIGFkbWlzc2lvbnM6IDI5LCBib2R5X2Fja3M6IDI5LCByZXNwb25zZXM6IDM3LCBjbG9zZWQ6IDQzLCByZXRpcmVkOiA0MywgcmVhcm1zOiAzOSwgc3RhbGVfZXZlbnRzOiAwLCBhY3RpdmVfcmVjb3JkczogMCwgcGVha19yZWNvcmRzOiA0LCBwZW5kaW5nX2pvYnM6IDAsIGNsZWFudXBfcGVuZGluZzogMCwgcmV0YWluZWRfY2xlYW51cDogMCwgbmF0aXZlX2RyYWluZWQ6IHRydWUsIHN0b3BwaW5nOiB0cnVlLCBvd25lZF9ieXRlczogMTU4MzQ0MCB9DQpUTFNfQlVTSU5FU1NfUEFTUyB7InBoeXNpY2FsTmF0aXZlRHJhaW4iOnRydWUsInNoYXJlZFdvcmtlcnMiOjIsIndvcmtlckpvaW4iOnRydWUsImh1YlBlbmRpbmciOjAsImRvd25sb2FkSHViUGVuZGluZyI6MCwicXVhcmFudGluZWQiOjAsInNldHVwQ2xlYW51cCI6dHJ1ZSwiYXBwcm92YWxzIjoxLCJoZWFkcyI6MzcsInJlc3BvbnNlcyI6MzcsInBlYWtSZWNvcmRzIjo0fQ0KVExTX0ZST05URE9PUl9QUk9DRVNTX0VYSVQgeyJjb2RlIjowfQ0K"
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "ownedTunnelCleanup": "PASS",
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "browser": {
+    "status": "PASS",
+    "cleanup": "PASS",
+    "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+    "credentialScope": "Cookie/CSRF private stdin only; no raw CDP frames",
+    "edgeSessionCapSeconds": 180,
+    "ownerExitObservationSeconds": 215,
+    "errors": [],
+    "sourceSha256": {
+      "observer": "eb17bd4569c22b34a7b1b1fc66b541334c26db46b1cb9df61428e309a570be05",
+      "edgeOwner": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+      "nodeHarness": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70",
+      "tlsOwnershipHelpers": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    "spkiSha256Base64": "3Aam8zIJAxPfDB3VmoQbaPRAtlNiaVXYMM37u6qQeAc=",
+    "ownerReportPath": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second.json.browser-edge-owner.json",
+    "nodeReportPath": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second.json.browser-node.json",
+    "edgeReady": {
+      "pid": 31724,
+      "headless": true,
+      "muteAudio": true,
+      "jobName": "Local\\FutureClassroom-Test-Browser-656cba538c0540ecbeb30d90e258c470-8f62af57a1af4818b80dacf7432093c7",
+      "profile": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-656cba538c0540ecbeb30d90e258c470\\profile",
+      "readyOriginalBytes": 60,
+      "boundLoopback": true,
+      "productVersion": "156.0.4314.50",
+      "readyOriginalSha256": "263627c1ded93dd52fe8b03681fb217c554db9d4c79ccad31302e86ded01f1f8",
+      "webSocketPath": "/devtools/browser/7bb702e4-5e1f-4531-b2f2-78dcc7f94e55",
+      "exe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "fileVersion": "156.0.4314.50",
+      "port": 52445,
+      "startTicks": "639290679610571019",
+      "marker": "FutureClassroom-Test-Browser-656cba538c0540ecbeb30d90e258c470",
+      "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-656cba538c0540ecbeb30d90e258c470",
+      "controlFile": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second.json.browser-edge-owner.json.control.json"
+    },
+    "nodeReady": {
+      "type": "READY",
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "browserVersion": "Edg/156.0.4314.50",
+      "scope": "Exclusive CDP context prepared; no Native navigation or new pairing yet"
+    },
+    "nodeActualExitCode": 0,
+    "nodeRaw": {
+      "stdout": {
+        "bytes": 477,
+        "observedBytes": 477,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "8ddb6280f74c386c28d31f79dcf0fb42332c20fbc0a8325c42696c13678a3efc",
+        "base64": "eyJ0eXBlIjoiUkVBRFkiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJicm93c2VyVmVyc2lvbiI6IkVkZy8xNTYuMC40MzE0LjUwIiwic2NvcGUiOiJFeGNsdXNpdmUgQ0RQIGNvbnRleHQgcHJlcGFyZWQ7IG5vIE5hdGl2ZSBuYXZpZ2F0aW9uIG9yIG5ldyBwYWlyaW5nIHlldCJ9CnsidHlwZSI6IlJFU1VMVCIsInN0YXR1cyI6IlBBU1MiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJ3aXJlUmVzcG9uc2VDb3VudCI6MTgsImNvbnRlbnRQb3N0cyI6MSwiY29udGV4dERpc3Bvc2VkIjp0cnVlLCJyZXBvcnQiOiIvdG1wL2ZjLXJvdW5kMzUtdmlzdWFscy1ldmlkZW5jZS93aW5kb3dzLXZpc3VhbC1vdXRsaW5lZC1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItbm9kZS5qc29uIn0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "nodeReport": {
+      "path": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second.json.browser-node.json",
+      "bytes": 28347,
+      "sha256": "e68212d6334bcb10d75ffeb20f431bd62a6471938d7443c793355a03ac0cc751"
+    },
+    "result": {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "marker": "FutureClassroom-Test-TLS-12507b0cfb1e4fa58dfd3717d7a04f94",
+      "scope": "Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.",
+      "assetManifestCanonicalSha256": "a7f7b05c37b08d6f9277979c2aa0f775a0cbd82e71e6254bfaadacacd15ce70f",
+      "expectedCspSha256": "f8cbf41d10dd40e8f22fe51fc0ec04c21157b15342f2c1f994a368277a17274d",
+      "credentialScope": "stdin memory only; Cookie/CSRF/Set-Cookie/response bodies and raw CDP frames omitted",
+      "browserPhysicalCleanup": "SEPARATE_ORIGINAL_WINDOWS_JOB_OWNER_REQUIRED",
+      "assets": [
+        {
+          "path": "index.html",
+          "bytes": 1232,
+          "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DrrJeLm9.css",
+          "bytes": 39554,
+          "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DWNPyYJh.js",
+          "bytes": 415326,
+          "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+          "verified": true
+        },
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DWNPyYJh.js",
+          "bytes": 415326,
+          "sha256": "966979b416930cfac157988ca4f9d6d201580ae123007e679b6d5df86bc2571c",
+          "verified": true
+        },
+        {
+          "path": "assets/index-DrrJeLm9.css",
+          "bytes": 39554,
+          "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+          "verified": true
+        },
+        {
+          "path": "index.html",
+          "bytes": 1232,
+          "sha256": "8c10dd7cc1e0560ba62db606abefd000de10a1cefb8f8cedff153ec8280a0dfd",
+          "verified": true
+        },
+        {
+          "path": "assets/favicon-CXuYoSfB.svg",
+          "bytes": 282,
+          "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+          "verified": true
+        }
+      ],
+      "checks": [
+        "Native HTML/JS/CSS exact manifest identities and CSP",
+        "Original approved HttpOnly cookie; actual session CSRF matched twice",
+        "One synthetic authorized scope and original empty content",
+        "Exactly one UI content POST with original CSRF/date/revision",
+        "Committed receipt and post-reload durable content match",
+        "Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately",
+        "Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha",
+        "Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview"
+      ],
+      "browserVersion": "Edg/156.0.4314.50",
+      "generation": 1,
+      "origin": "https://localhost:60830",
+      "maxMillis": 12000,
+      "syntheticTextSha256": "e7ff6fdf4dec4e60b88b65e861c601ae8ddb89646ad20a990a26b48004354f16",
+      "elapsedMillis": 1284,
+      "contextDisposed": true,
+      "cdpDisconnected": true,
+      "network": [
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "POST",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 304,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": true,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": true,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": true,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": null,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        }
+      ],
+      "wireResponses": [
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DWNPyYJh.js",
+          "status": 200,
+          "mime": "text/javascript",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/index-DrrJeLm9.css",
+          "status": 200,
+          "mime": "text/css",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/assets/favicon-CXuYoSfB.svg",
+          "status": 200,
+          "mime": "image/svg+xml",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "POST",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/",
+          "status": 200,
+          "mime": "text/html",
+          "csp": "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; media-src blob:; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 304,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/status",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/session",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/scopes/0",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        },
+        {
+          "method": "GET",
+          "url": "https://localhost:60830/fc/api/v1/content/homework/1/1/1/2026-11-01/visual",
+          "status": 200,
+          "mime": "application/json",
+          "servedFromCache": false,
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "fromPrefetchCache": false,
+          "wireStatus": 200,
+          "finished": true,
+          "bodyVerified": true
+        }
+      ],
+      "wireResponseCount": 18,
+      "observedRequestCount": 21,
+      "observedResponseCount": 21,
+      "cacheOnlyResponseCount": 3,
+      "apiResponses": 13,
+      "apiOperations": {
+        "statusGets": 2,
+        "sessionGets": 2,
+        "scopeGets": 2,
+        "contentGets": 2,
+        "contentPosts": 1,
+        "visualGets": 4
+      },
+      "visualReads": 4,
+      "visualObservations": [
+        {
+          "stage": "initial",
+          "readNumber": 1,
+          "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "OUTLINED",
+            "homeworkFillPercent": 3,
+            "courseFillPercent": 20,
+            "homeworkComponentOpacityPercent": 100,
+            "courseComponentOpacityPercent": 100,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "OUTLINED",
+              "fillPercent": "3",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "OUTLINED",
+              "fillPercent": "20",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "draft-refresh",
+          "readNumber": 2,
+          "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "OUTLINED",
+            "homeworkFillPercent": 3,
+            "courseFillPercent": 20,
+            "homeworkComponentOpacityPercent": 100,
+            "courseComponentOpacityPercent": 100,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "OUTLINED",
+              "fillPercent": "3",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "OUTLINED",
+              "fillPercent": "20",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "after-save",
+          "readNumber": 3,
+          "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "OUTLINED",
+            "homeworkFillPercent": 3,
+            "courseFillPercent": 20,
+            "homeworkComponentOpacityPercent": 100,
+            "courseComponentOpacityPercent": 100,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "OUTLINED",
+              "fillPercent": "3",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "OUTLINED",
+              "fillPercent": "20",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        },
+        {
+          "stage": "after-reload",
+          "readNumber": 4,
+          "responseBodySha256": "fe41c92aba775c23bbc5430557a15190373d050a3f4180e622bf98c8ae0d9a25",
+          "visual": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": 1,
+            "effectiveRgb": "#88A6C4",
+            "mode": "OUTLINED",
+            "homeworkFillPercent": 3,
+            "courseFillPercent": 20,
+            "homeworkComponentOpacityPercent": 100,
+            "courseComponentOpacityPercent": 100,
+            "homeworkVisible": true,
+            "courseVisible": true
+          },
+          "dom": {
+            "subjectRevision": "1",
+            "displayRevision": "1",
+            "rulesVersion": "1",
+            "homework": {
+              "mode": "OUTLINED",
+              "fillPercent": "3",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "course": {
+              "mode": "OUTLINED",
+              "fillPercent": "20",
+              "effectiveRgb": "#88A6C4",
+              "visible": "true",
+              "componentOpacity": 1,
+              "pillOpacity": 1,
+              "effectiveOpacity": 1,
+              "backgroundColor": "rgba(136, 166, 196, 0)",
+              "borderWidth": 1,
+              "borderStyle": "solid",
+              "textAlign": "center",
+              "textMatches": true,
+              "textColorUnchanged": true
+            },
+            "refreshOpacity": 1,
+            "helpOpacity": 1,
+            "draftMatches": true,
+            "bottomReminderAvailable": true
+          },
+          "draftPreserved": true
+        }
+      ],
+      "contentPosts": 1,
+      "sessionCsrfMatched": true,
+      "writeOutcome": "COMMITTED",
+      "contentRevision": "1",
+      "commandId": "854709397311566294",
+      "pageErrorCount": 0,
+      "consoleErrorCount": 0,
+      "sourceSha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70"
+    },
+    "wireResponseCount": 18,
+    "cdpTunnelRaw": {
+      "stdout": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerStopRequest": {
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 377,
+        "sha256": "6670e7ce6144cea715af534558106994b2a865842b869aaa6b466f266ad93af7",
+        "base64": "RURHRV9DQUNIRV9TVE9QX1JFUVVFU1QgeyJyZXN1bHQiOiAie1wibWFya2VyXCI6XCJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTY1NmNiYTUzOGMwNTQwZWNiZWIzMGQ5MGUyNThjNDcwXCIsXCJzdGF0dXNcIjpcIlNUT1BfUkVRVUVTVEVEXCIsXCJwaHlzaWNhbEV4aXRcIjpcIldBSVRfRk9SX09SSUdJTkFMX1NVUEVSVklTT1JfUkVQT1JUXCJ9IiwgInJhd1JlcG9ydCI6ICIvdG1wL2ZjLXJvdW5kMzUtdmlzdWFscy1ldmlkZW5jZS93aW5kb3dzLXZpc3VhbC1vdXRsaW5lZC1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uLmNvbnRyb2wuanNvbi5zdG9wLThiMjI1ZDYyNzBjNDQxYjk5MzU3MmYwN2Y4OGNjMGFlLmpzb24ifQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerActualExitCode": 0,
+    "ownerReport": {
+      "path": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second.json.browser-edge-owner.json",
+      "bytes": 17481,
+      "sha256": "787676aa921b0f0f67fe44f23e530477d167a0ef288593719d607d9a11768f95"
+    },
+    "ownerPhysicalCleanup": "PASS",
+    "ownerSupervisorRaw": {
+      "stdout": {
+        "bytes": 1488,
+        "observedBytes": 1488,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "565948789e0ade25ae31b40b9314d702185a561ab4112c345c0d79b9940e613b",
+        "base64": "RURHRV9DQUNIRV9DT05UUk9MIHsiY29udHJvbEZpbGUiOiAiL3RtcC9mYy1yb3VuZDM1LXZpc3VhbHMtZXZpZGVuY2Uvd2luZG93cy12aXN1YWwtb3V0bGluZWQtYnJvd3Nlci1zZWNvbmQuanNvbi5icm93c2VyLWVkZ2Utb3duZXIuanNvbi5jb250cm9sLmpzb24iLCAibWFya2VyIjogIkZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItNjU2Y2JhNTM4YzA1NDBlY2JlYjMwZDkwZTI1OGM0NzAifQpFREdFX0NBQ0hFX1JFQURZIHsicGlkIjogMzE3MjQsICJoZWFkbGVzcyI6IHRydWUsICJtdXRlQXVkaW8iOiB0cnVlLCAiam9iTmFtZSI6ICJMb2NhbFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci02NTZjYmE1MzhjMDU0MGVjYmViMzBkOTBlMjU4YzQ3MC04ZjYyYWY1N2ExYWY0ODE4YjgwZGFjZjc0MzIwOTNjNyIsICJwcm9maWxlIjogIkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTY1NmNiYTUzOGMwNTQwZWNiZWIzMGQ5MGUyNThjNDcwXFxwcm9maWxlIiwgInJlYWR5T3JpZ2luYWxCeXRlcyI6IDYwLCAiYm91bmRMb29wYmFjayI6IHRydWUsICJwcm9kdWN0VmVyc2lvbiI6ICIxNTYuMC40MzE0LjUwIiwgInJlYWR5T3JpZ2luYWxTaGEyNTYiOiAiMjYzNjI3YzFkZWQ5M2RkNTJmZThiMDM2ODFmYjIxN2M1NTRkYjlkNGM3OWNjYWQzMTMwMmU4NmRlZDAxZjFmOCIsICJ3ZWJTb2NrZXRQYXRoIjogIi9kZXZ0b29scy9icm93c2VyLzdiYjcwMmU0LTVlMWYtNDUzMS1iMmYyLTc4ZGNjN2Y5NGU1NSIsICJleGUiOiAiQzpcXFByb2dyYW0gRmlsZXMgKHg4NilcXE1pY3Jvc29mdFxcRWRnZVxcQXBwbGljYXRpb25cXG1zZWRnZS5leGUiLCAiZmlsZVZlcnNpb24iOiAiMTU2LjAuNDMxNC41MCIsICJwb3J0IjogNTI0NDUsICJzdGFydFRpY2tzIjogIjYzOTI5MDY3OTYxMDU3MTAxOSIsICJtYXJrZXIiOiAiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci02NTZjYmE1MzhjMDU0MGVjYmViMzBkOTBlMjU4YzQ3MCIsICJyZW1vdGVSb290IjogIkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTY1NmNiYTUzOGMwNTQwZWNiZWIzMGQ5MGUyNThjNDcwIiwgImNvbnRyb2xGaWxlIjogIi90bXAvZmMtcm91bmQzNS12aXN1YWxzLWV2aWRlbmNlL3dpbmRvd3MtdmlzdWFsLW91dGxpbmVkLWJyb3dzZXItc2Vjb25kLmpzb24uYnJvd3Nlci1lZGdlLW93bmVyLmpzb24uY29udHJvbC5qc29uIn0KRURHRV9DQUNIRV9PV05FUl9SRVNVTFQgeyJzdGF0dXMiOiJQQVNTIiwiY2xlYW51cCI6IlBBU1MiLCJyZXBvcnQiOiIvdG1wL2ZjLXJvdW5kMzUtdmlzdWFscy1ldmlkZW5jZS93aW5kb3dzLXZpc3VhbC1vdXRsaW5lZC1icm93c2VyLXNlY29uZC5qc29uLmJyb3dzZXItZWRnZS1vd25lci5qc29uIiwiY2FjaGVBc3NlcnRpb25zIjoiU0VFX1NFUEFSQVRFX0NEUF9IQVJORVNTIn0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "observedBytes": 0,
+        "captureScope": "COMPLETE",
+        "sha256Scope": "captured bytes only",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    "ownerProcessRetained": false
+  },
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 0
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 11084,
+      "sha256": "ea29ae428cfda64cc1ac3092c6c99294bbf1953e34a6fa7431a767542fcf3a96"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "da0c22118bc614d3fd7720447e4ba3ebbf8bc28b808fb80bc0c1bfafddfc93fa"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "edf635b6ee5473b6c50d09d973b014afa1e5963e605ea05afe2583d055598795"
+    },
+    "tls.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "05a8cbd541156d84a4183c70e271293f2e3f4b2354c2ab7f38099871aeba1b26"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 187,
+      "sha256": "6b2dca27d47c0c7e44aa86bebd701db0c88858a2b3c56f9ae2265ccb2b8167e6"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "3d477c1f866014590aa7ca89cd3fab59f9281073847df52068226d39878286b0"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 11084,
+          "sha256": "ea29ae428cfda64cc1ac3092c6c99294bbf1953e34a6fa7431a767542fcf3a96"
+        },
+        "downloaded": {
+          "bytes": 11084,
+          "sha256": "ea29ae428cfda64cc1ac3092c6c99294bbf1953e34a6fa7431a767542fcf3a96"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/tls.stdout",
+        "base64": "VExTX0JVU0lORVNTX1JFQURZIHsicG9ydCI6NjA4MzAsImdlbmVyYXRpb24iOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsInBhaXJpbmdDb2RlIjoiNTE4NTk3MzciLCJvcmlnaW4iOiJodHRwczovL2xvY2FsaG9zdDo2MDgzMCIsImJhc2VQYXRoIjoiL2ZjLyIsImNsYXNzSWQiOiIxIiwic3ViamVjdElkIjoiMSIsImxvZ2luTmFtZSI6InByb2JlIiwic3RhdGljQXNzZXRzIjo2LCJ2aXN1YWxGaXh0dXJlIjoiT1VUTElORUQifQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MSwiY29tcGxldGlvbnMiOjAsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjAsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjAsInJlYXJtcyI6MCwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQsImNvbXBsZXRpb25zIjozLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozLCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyLCJyZWFybXMiOjIsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjozLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo3LCJjb21wbGV0aW9ucyI6NiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6NiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6NSwicmVhcm1zIjo1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6OCwiY29tcGxldGlvbnMiOjcsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjcsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjcsInJlYXJtcyI6NywicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjUsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjksImNvbXBsZXRpb25zIjo4LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjo4LCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo3LCJyZWFybXMiOjcsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjo2LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoxMSwiY29tcGxldGlvbnMiOjEwLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoxMCwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6OSwicmVhcm1zIjo5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6NywiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MTQsImNvbXBsZXRpb25zIjoxMywiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MTMsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjIsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjEyLCJyZWFybXMiOjEyLCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6OCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MTcsImNvbXBsZXRpb25zIjoxNiwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MTYsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjIsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjE1LCJyZWFybXMiOjE1LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6OSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MTksImNvbXBsZXRpb25zIjoxOCwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MTgsInJlYWR5X3Nsb3RzIjozLCJib3VuZF9zbG90cyI6MSwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjN9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjE3LCJyZWFybXMiOjE3LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTAsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjIzLCJjb21wbGV0aW9ucyI6MjIsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjIyLCJyZWFkeV9zbG90cyI6MywiYm91bmRfc2xvdHMiOjEsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjozfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjoyMSwicmVhcm1zIjoyMSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjExLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjoyNywiY29tcGxldGlvbnMiOjI2LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjoyNiwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjoxLCJuYXRpdmVfcGVuZGluZyI6Miwib3duZWRfc29ja2V0cyI6M30sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MjUsInJlYXJtcyI6MjUsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxMiwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MjksImNvbXBsZXRpb25zIjoyOCwiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MjgsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjI4LCJyZWFybXMiOjI4LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTMsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjMzLCJjb21wbGV0aW9ucyI6MzIsImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjMyLCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozMiwicmVhcm1zIjozMiwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE0LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjozNiwiY29tcGxldGlvbnMiOjM1LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjAsImlkbGVfcmV0dXJucyI6MCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozNSwicmVhZHlfc2xvdHMiOjMsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzQsInJlYXJtcyI6MzQsInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxNSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6MzgsImNvbXBsZXRpb25zIjozNywiaWRsZV9jYW5jZWxsYXRpb25zIjowLCJpZGxlX3JldHVybnMiOjAsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzcsInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM3LCJyZWFybXMiOjM3LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTYsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQwLCJjb21wbGV0aW9ucyI6MzksImlkbGVfY2FuY2VsbGF0aW9ucyI6MCwiaWRsZV9yZXR1cm5zIjowLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjE3LCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0MSwiY29tcGxldGlvbnMiOjQwLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjEsImlkbGVfcmV0dXJucyI6MSwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoxOCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDIsImNvbXBsZXRpb25zIjo0MSwiaWRsZV9jYW5jZWxsYXRpb25zIjoyLCJpZGxlX3JldHVybnMiOjIsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MTksImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQzLCJjb21wbGV0aW9ucyI6NDIsImlkbGVfY2FuY2VsbGF0aW9ucyI6MywiaWRsZV9yZXR1cm5zIjozLCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIwLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0NCwiY29tcGxldGlvbnMiOjQzLCJpZGxlX2NhbmNlbGxhdGlvbnMiOjQsImlkbGVfcmV0dXJucyI6NCwiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyMSwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDUsImNvbXBsZXRpb25zIjo0NCwiaWRsZV9jYW5jZWxsYXRpb25zIjo1LCJpZGxlX3JldHVybnMiOjUsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjIsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ2LCJjb21wbGV0aW9ucyI6NDUsImlkbGVfY2FuY2VsbGF0aW9ucyI6NiwiaWRsZV9yZXR1cm5zIjo2LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6NCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjoxLCJvd25lZF9zb2NrZXRzIjoyfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjozOSwicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1BST0dSRVNTIHsibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiZ2VuZXJhdGlvbiI6MSwic2VxdWVuY2UiOjIzLCJhY2NlcHRhbmNlIjp7ImdlbmVyYXRpb24iOjEsInBvc3RzIjo0NywiY29tcGxldGlvbnMiOjQ2LCJpZGxlX2NhbmNlbGxhdGlvbnMiOjcsImlkbGVfcmV0dXJucyI6NywiY2FwYWNpdHlfcmVqZWN0cyI6MCwidHJhbnNmZXJzIjozOSwicmVhZHlfc2xvdHMiOjQsImJvdW5kX3Nsb3RzIjowLCJuYXRpdmVfcGVuZGluZyI6MSwib3duZWRfc29ja2V0cyI6Mn0sImpzb25Cb2R5UmVjb3JkcyI6MCwicmV0aXJlZCI6MzksInJlYXJtcyI6MzksInBlbmRpbmdKb2JzIjowLCJyZXF1ZXN0cyI6W119ClRMU19CVVNJTkVTU19QUk9HUkVTUyB7Im1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NCIsImdlbmVyYXRpb24iOjEsInNlcXVlbmNlIjoyNCwiYWNjZXB0YW5jZSI6eyJnZW5lcmF0aW9uIjoxLCJwb3N0cyI6NDgsImNvbXBsZXRpb25zIjo0NywiaWRsZV9jYW5jZWxsYXRpb25zIjo4LCJpZGxlX3JldHVybnMiOjgsImNhcGFjaXR5X3JlamVjdHMiOjAsInRyYW5zZmVycyI6MzksInJlYWR5X3Nsb3RzIjo0LCJib3VuZF9zbG90cyI6MCwibmF0aXZlX3BlbmRpbmciOjEsIm93bmVkX3NvY2tldHMiOjJ9LCJqc29uQm9keVJlY29yZHMiOjAsInJldGlyZWQiOjM5LCJyZWFybXMiOjM5LCJwZW5kaW5nSm9icyI6MCwicmVxdWVzdHMiOltdfQpUTFNfQlVTSU5FU1NfUFJPR1JFU1MgeyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJnZW5lcmF0aW9uIjoxLCJzZXF1ZW5jZSI6MjUsImFjY2VwdGFuY2UiOnsiZ2VuZXJhdGlvbiI6MSwicG9zdHMiOjQ4LCJjb21wbGV0aW9ucyI6NDgsImlkbGVfY2FuY2VsbGF0aW9ucyI6OCwiaWRsZV9yZXR1cm5zIjo4LCJjYXBhY2l0eV9yZWplY3RzIjowLCJ0cmFuc2ZlcnMiOjM5LCJyZWFkeV9zbG90cyI6MCwiYm91bmRfc2xvdHMiOjAsIm5hdGl2ZV9wZW5kaW5nIjowLCJvd25lZF9zb2NrZXRzIjowfSwianNvbkJvZHlSZWNvcmRzIjowLCJyZXRpcmVkIjo0MywicmVhcm1zIjozOSwicGVuZGluZ0pvYnMiOjAsInJlcXVlc3RzIjpbXX0KVExTX0JVU0lORVNTX1JFUE9SVCBOZXR3b3JrUmVwb3J0IHsgYWNjZXB0YW5jZTogVGxzQWNjZXB0U25hcHNob3QgeyBnZW5lcmF0aW9uOiAxLCBwb3N0czogNDgsIGNvbXBsZXRpb25zOiA0OCwgaWRsZV9jYW5jZWxsYXRpb25zOiA4LCBpZGxlX3JldHVybnM6IDgsIGNhcGFjaXR5X3JlamVjdHM6IDAsIHRyYW5zZmVyczogMzksIHJlYWR5X3Nsb3RzOiAwLCBib3VuZF9zbG90czogMCwgbmF0aXZlX3BlbmRpbmc6IDAsIG93bmVkX3NvY2tldHM6IDAgfSwganNvbl9ib2R5X3JlY29yZHM6IDAsIGpzb25fYm9keV9pbnRlcnZhbHM6IFtOb25lLCBOb25lLCBOb25lLCBOb25lLCBOb25lLCBOb25lLCBOb25lLCBOb25lXSwgaGVhZHM6IDM3LCBhZG1pc3Npb25zOiAyOSwgYm9keV9hY2tzOiAyOSwgcmVzcG9uc2VzOiAzNywgY2xvc2VkOiA0MywgcmV0aXJlZDogNDMsIHJlYXJtczogMzksIHN0YWxlX2V2ZW50czogMCwgYWN0aXZlX3JlY29yZHM6IDAsIHBlYWtfcmVjb3JkczogNCwgcGVuZGluZ19qb2JzOiAwLCBjbGVhbnVwX3BlbmRpbmc6IDAsIHJldGFpbmVkX2NsZWFudXA6IDAsIG5hdGl2ZV9kcmFpbmVkOiB0cnVlLCBzdG9wcGluZzogdHJ1ZSwgb3duZWRfYnl0ZXM6IDE1ODM0NDAgfQpUTFNfQlVTSU5FU1NfUEFTUyB7InBoeXNpY2FsTmF0aXZlRHJhaW4iOnRydWUsInNoYXJlZFdvcmtlcnMiOjIsIndvcmtlckpvaW4iOnRydWUsImh1YlBlbmRpbmciOjAsImRvd25sb2FkSHViUGVuZGluZyI6MCwicXVhcmFudGluZWQiOjAsInNldHVwQ2xlYW51cCI6dHJ1ZSwiYXBwcm92YWxzIjoxLCJoZWFkcyI6MzcsInJlc3BvbnNlcyI6MzcsInBlYWtSZWNvcmRzIjo0fQo="
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "da0c22118bc614d3fd7720447e4ba3ebbf8bc28b808fb80bc0c1bfafddfc93fa"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "da0c22118bc614d3fd7720447e4ba3ebbf8bc28b808fb80bc0c1bfafddfc93fa"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0XFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjozNTE3Miwic3RhcnRUaWNrcyI6IjYzOTI5MDY3OTYzODYyNzU5MSJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "edf635b6ee5473b6c50d09d973b014afa1e5963e605ea05afe2583d055598795"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "edf635b6ee5473b6c50d09d973b014afa1e5963e605ea05afe2583d055598795"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRTWFVM2F4ZGhTSnREcTJ6L1IvRnduREFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1UZ3lNRFUxV2hjTk1qWXhNVEF4TVRneU5UVTFXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDWVQvcHdSYVVMRGt4L0d3VVZobXpHCnFyNVc3UDVMTXpBUFJBd1RLeExwVGdzY0tEY24vMVhsY0tpalB2ZGJFbHZGTEtyL05OeW1OWE12a0ZWN1V6Ti8ra3haRmhMcEN4NnoKMldCZTRPOFE2djIzbHl4QTRYVHA0NUlJemRnTFBQQkxyc28yMUhlb0RMT3V3bEpHOFNFWjVwdjlRakR1RklRYWwzZE5BYkxObWxuYwpNRG1pc3ZpdUlXaDdaZDNadis3NFFTeHhXeUxmZ3M0TGlzUzA1ZXh5T0ozM0FyNHhaVjNsZWdteGREWFQrZ3AxL1FqS2tZZXo1eEQwCmdGWUY4dVZWTW5qTUMybU8zd0ZwTkpHMFdnODFCR2ZLUXVzTlo3emVWK3FDb0pubjJaWFpDVlhoTnVPTHU0NmwrSjEzVmlaMTkwM1YKNUlqMy9BZzJGelVvYzZJUkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJSU2p2SmlKOFN0CmZWU3ZEUnNjT3hqKzMwZnlzakFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBYlg1QjhHWWNUWUwzUm9pY0xsVWtvU2x6UURmYys5UkIKVUc3SGZmSjR1OE8rdXRXZHhScUV0MHEreXYzM2ZoVFZpbWxqK05zbEswSS9aSnNveUQ1cGFmUUVXeFdCTFFwNkFEUjJTWFBPYUdsMAppSi9LZzRoOTZHeEI4ZkdkV3JQRXUzeitDYmxBc3IwN2oya1BOUG5rd2l6dzkwdVhXVVByeUh3TzZ6N2xKL1U4SUUzWWt1VHQ5Ui80CmwvRlpURnNOV0t1enIvTTd6WUM5Rmd3ODlacWtqYmRWV2lVZEYwNFlTM2UyWW1xTExCQzAzVy9FSThXeHhSTGI4b3pPZTAvMlN1TUkKME1Fd1ZtUXRZT2puVkR3bnppU3AzZ0hCSkxyOTk4QWttUitwZkV5cXo0VlBmOEVDajAvaE9RWVIwdE1pb1BYZDR2dVZRRWxmb0VsSgpJempFYmc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "downloaded": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/tls.stderr",
+        "base64": ""
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "05a8cbd541156d84a4183c70e271293f2e3f4b2354c2ab7f38099871aeba1b26"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "05a8cbd541156d84a4183c70e271293f2e3f4b2354c2ab7f38099871aeba1b26"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTMzNjQsInN0YXJ0VGlja3MiOiI2MzkyOTA2Nzk2MzU5NTI3NTIifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "6b2dca27d47c0c7e44aa86bebd701db0c88858a2b3c56f9ae2265ccb2b8167e6"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "6b2dca27d47c0c7e44aa86bebd701db0c88858a2b3c56f9ae2265ccb2b8167e6"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTgxNDQsInN0YXJ0VGlja3MiOiI2MzkyOTA2Nzk1NTE2MzAxOTgifQ=="
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "3d477c1f866014590aa7ca89cd3fab59f9281073847df52068226d39878286b0"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "3d477c1f866014590aa7ca89cd3fab59f9281073847df52068226d39878286b0"
+        },
+        "artifact": "/tmp/fc-round35-visuals-evidence/windows-visual-outlined-browser-second-12507b0cfb1e4fa58dfd3717d7a04f94-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiRUY3QTc3NTM0QkFCQTFFRkUxMzQ4MzZDNzZGM0M0M0E1QUMxOEI3NiIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLTEyNTA3YjBjZmIxZTRmYTU4ZGZkMzcxN2Q3YTA0Zjk0IiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy0xMjUwN2IwY2ZiMWU0ZmE1OGRmZDM3MTdkN2EwNGY5NC1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "clientEventsSha256": "04063e87b2c044ca0e69d58d8aa8d7dfe021d009304b093e23501e29aba86056",
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "40dccb8ea00165f22d7c69901dacaedd90cad5373739e6dd6d53e0167d60d0e7",
+        "base64": "eyJ0aHVtYnByaW50IjoiRUY3QTc3NTM0QkFCQTFFRkUxMzQ4MzZDNzZGM0M0M0E1QUMxOEI3NiIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtMTI1MDdiMGNmYjFlNGZhNThkZmQzNzE3ZDdhMDRmOTQta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFNYVUzYXhkaFNKdERxMnovUi9Gd25EQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TURNeE1UZ3lNRFUxV2hjTk1qWXhNVEF4TVRneU5UVTFXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQ1lUL3B3UmFVTERreC9Hd1VWaG16R1xucXI1VzdQNUxNekFQUkF3VEt4THBUZ3NjS0Rjbi8xWGxjS2lqUHZkYkVsdkZMS3IvTk55bU5YTXZrRlY3VXpOLytreFpGaExwQ3g2elxuMldCZTRPOFE2djIzbHl4QTRYVHA0NUlJemRnTFBQQkxyc28yMUhlb0RMT3V3bEpHOFNFWjVwdjlRakR1RklRYWwzZE5BYkxObWxuY1xuTURtaXN2aXVJV2g3WmQzWnYrNzRRU3h4V3lMZmdzNExpc1MwNWV4eU9KMzNBcjR4WlYzbGVnbXhkRFhUK2dwMS9RaktrWWV6NXhEMFxuZ0ZZRjh1VlZNbmpNQzJtTzN3RnBOSkcwV2c4MUJHZktRdXNOWjd6ZVYrcUNvSm5uMlpYWkNWWGhOdU9MdTQ2bCtKMTNWaVoxOTAzVlxuNUlqMy9BZzJGelVvYzZJUkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCUlNqdkppSjhTdFxuZlZTdkRSc2NPeGorMzBmeXNqQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFiWDVCOEdZY1RZTDNSb2ljTGxVa29TbHpRRGZjKzlSQlxuVUc3SGZmSjR1OE8rdXRXZHhScUV0MHEreXYzM2ZoVFZpbWxqK05zbEswSS9aSnNveUQ1cGFmUUVXeFdCTFFwNkFEUjJTWFBPYUdsMFxuaUovS2c0aDk2R3hCOGZHZFdyUEV1M3orQ2JsQXNyMDdqMmtQTlBua3dpenc5MHVYV1VQcnlId082ejdsSi9VOElFM1lrdVR0OVIvNFxubC9GWlRGc05XS3V6ci9NN3pZQzlGZ3c4OVpxa2piZFZXaVVkRjA0WVMzZTJZbXFMTEJDMDNXL0VJOFd4eFJMYjhvek9lMC8yU3VNSVxuME1Fd1ZtUXRZT2puVkR3bnppU3AzZ0hCSkxyOTk4QWttUitwZkV5cXo0VlBmOEVDajAvaE9RWVIwdE1pb1BYZDR2dVZRRWxmb0VsSlxuSXpqRWJnPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "53af853d103fe4958b2bdf1ffb1afe8ffafe11de85c35a9d735fc38f0cb2ea42",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjB9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 766,
+        "sha256": "d0784fa9e3565e6ed4fe3a28089e70c54212115f271fcc3af0ad2ed9617f3f31",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoxMTA4NCwic2hhMjU2IjoiZWEyOWFlNDI4Y2ZkYTY0Y2MxYWMzMDkyYzZjOTkyOTRiYmYxOTUzZTM0YTZmYTc0MzFhNzY3NTQyZmNmM2E5NiJ9LCIudGxzLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MjQwLCJzaGEyNTYiOiJkYTBjMjIxMThiYzYxNGQzZmQ3NzIwNDQ3ZTRiYTNlYmJmOGJjMjhiODA4ZmI4MGJjMGMxYmZhZmRkZmM5M2ZhIn0sInRscy1wdWJsaWMucGVtIjp7ImJ5dGVzIjoxMTQxLCJzaGEyNTYiOiJlZGY2MzViNmVlNTQ3M2I2YzUwZDA5ZDk3M2IwMTRhZmExZTU5NjNlNjA1ZWEwNWFmZTI1ODNkMDU1NTk4Nzk1In0sInRscy5zdGRlcnIiOnsiYnl0ZXMiOjAsInNoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiMDVhOGNiZDU0MTE1NmQ4NGE0MTgzYzcwZTI3MTI5M2YyZTNmNGIyMzU0YzJhYjdmMzgwOTk4NzFhZWJhMWIyNiJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTg3LCJzaGEyNTYiOiI2YjJkY2EyN2Q0N2MwYzdlNDRhYTg2YmViZDcwMWRiMGM4ODg1OGEyYjNjNTZmOWFlMjI2NWNjYjJiODE2N2U2In0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozNzMsInNoYTI1NiI6IjNkNDc3YzFmODY2MDE0NTkwYWE3Y2E4OWNkM2ZhYjU5ZjkyODEwNzM4NDdkZjUyMDY4MjI2ZDM5ODc4Mjg2YjAifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

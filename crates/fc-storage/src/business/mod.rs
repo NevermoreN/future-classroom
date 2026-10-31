@@ -10,6 +10,7 @@ mod content_web;
 #[path = "tests/content_web.rs"]
 mod content_web_tests;
 mod desktop;
+mod desktop_lesson;
 mod display;
 mod display_codec;
 mod lesson;
@@ -27,6 +28,7 @@ mod profiles_codec;
 pub(crate) mod recovery;
 mod schedule;
 mod schedule_codec;
+mod subject_visual;
 pub mod voice;
 mod voice_codec;
 use crate::*;
@@ -88,6 +90,9 @@ pub type AutostartExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 /// Bounded memory-only policy handoff fence for native driver transactions.
 pub type VoiceDriverGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+/// A short memory-only native-flow capability. Never grants account authority.
+/// False/panic cancels; no SQL, native waiting or new lease is allowed inside.
+pub type DesktopLessonGuard = Arc<dyn Fn() -> bool + Send + Sync>;
 type Factory<S> = Arc<dyn Fn(&IdentityState, Revision) -> Result<S, StorageError> + Send + Sync>;
 pub type MaterialSceneGuard = Arc<
     dyn Fn(&fc_domain::materials::MaterialSource, SceneGeneration) -> Result<(), StorageError>
@@ -104,6 +109,7 @@ pub struct BusinessRepository<S> {
     material_scene: MaterialSceneGuard,
     profile_content_scene: profile_content::ProfileContentSceneGuard,
     lesson_observations: lesson::Observations,
+    desktop_lesson_guard: Option<DesktopLessonGuard>,
     calendar_execution: CalendarExecutionGuard,
     autostart_execution: AutostartExecutionGuard,
     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
@@ -120,6 +126,7 @@ impl<S> Clone for BusinessRepository<S> {
             material_scene: self.material_scene.clone(),
             profile_content_scene: self.profile_content_scene.clone(),
             lesson_observations: self.lesson_observations.clone(),
+            desktop_lesson_guard: self.desktop_lesson_guard.clone(),
             calendar_execution: self.calendar_execution.clone(),
             autostart_execution: self.autostart_execution.clone(),
             voice_timeout: self.voice_timeout.clone(),
@@ -148,12 +155,22 @@ impl<S: Send + 'static> BusinessRepository<S> {
             material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
             profile_content_scene: Arc::new(|_, _, _, _| Err(StorageError::AuthorityUnavailable)),
             lesson_observations: Arc::new(std::sync::Mutex::new(None)),
+            desktop_lesson_guard: None,
             calendar_execution: Arc::new(|| true),
             autostart_execution: Arc::new(|| true),
             voice_timeout: None,
             voice_driver_guard: Arc::new(|| true),
             initial_installation_identity: None,
         }
+    }
+    /// Scoped native desktop capability. An unbound repository denies access;
+    /// rebinding an existing capability can only tighten it.
+    pub fn with_desktop_lesson_guard(mut self, guard: DesktopLessonGuard) -> Self {
+        self.desktop_lesson_guard = Some(match self.desktop_lesson_guard.take() {
+            Some(previous) => Arc::new(move || previous() && guard()),
+            None => guard,
+        });
+        self
     }
     /// Authenticated operations fail closed until composition binds their exact lease.
     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {

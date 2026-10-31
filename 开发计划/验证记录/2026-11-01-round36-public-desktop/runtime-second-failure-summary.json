@@ -1,0 +1,22 @@
+{
+  "status": "FAIL",
+  "cleanup": "PASS",
+  "testsExecuted": 2,
+  "summaries": [
+    {
+      "name": "calendar_execution_fence-1ec83488dbed4f30.exe",
+      "exitCode": 0,
+      "results": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.70s"
+      ]
+    },
+    {
+      "name": "business_storage-17284d3ac1a257da.exe",
+      "exitCode": 101,
+      "results": [
+        "test result: FAILED. 41 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.82s"
+      ]
+    }
+  ],
+  "scope": "Second run reached old integration tests in different compiler metadata order, stopped before corrected upload helper was executed. Two obsolete write-target format2 assertions need exact expected format3. Legacy inputs/reopen/verification remain unchanged."
+}

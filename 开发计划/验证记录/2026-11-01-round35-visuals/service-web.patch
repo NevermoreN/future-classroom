@@ -1,0 +1,1058 @@
+--- a/crates/fc-bootstrap/src/backend.rs
++++ b/crates/fc-bootstrap/src/backend.rs
+@@ -12,6 +12,7 @@
+ mod profile_content;
+ mod profiles;
+ mod recovery;
++mod subject_visuals;
+ pub use recovery::{
+     ConfirmedRestore, MigrationInspection, OrdinaryBackupAccess, PreparedRecoveryDatabase,
+     RestoreConfirmation, RestorePreview,
+@@ -71,6 +72,7 @@
+     },
+     time::{Duration, Instant},
+ };
++pub use subject_visuals::WebSubjectVisualPreview;
+ pub use voice::{
+     VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceGuard, VoiceManagementSnapshot,
+     VoiceNativeParticipation, VoicePlaybackAuthorization, VoicePolicyHandoff, VoicePolicyPhase,
+@@ -95,6 +97,7 @@
+     Autostart(fc_ports::autostart::AutostartRepositoryError),
+     Lesson(LessonRepositoryError),
+     Display(DisplayRepositoryError),
++    SubjectVisual(fc_ports::subject_visual::SubjectVisualRepositoryError),
+     Profile(fc_ports::ProfileRepositoryError),
+     ProfileContent(fc_ports::ProfileContentRepositoryError),
+     Material(MaterialRepositoryError),
+@@ -105,6 +108,11 @@
+     CorruptCredential,
+     InvalidInput,
+     Overflow,
++}
++impl From<fc_ports::subject_visual::SubjectVisualRepositoryError> for BackendError {
++    fn from(error: fc_ports::subject_visual::SubjectVisualRepositoryError) -> Self {
++        Self::SubjectVisual(error)
++    }
+ }
+ impl From<fc_ports::voice::VoiceRepositoryError> for BackendError {
+     fn from(e: fc_ports::voice::VoiceRepositoryError) -> Self {
+--- /dev/null
++++ b/crates/fc-bootstrap/src/backend/subject_visuals.rs
+@@ -0,0 +1,168 @@
++//! Worker-only joint palette/display management and single-subject Web preview.
++//! Preview is a disclosure, never a layout or palette-management capability.
++use super::*;
++use fc_domain::{
++    desktop::ComponentKind,
++    subject_visual::{PaletteRevision, SubjectColor},
++};
++use fc_ports::subject_visual::{
++    SubjectVisualRepository, SubjectVisualRepositoryError, SubjectVisualRequest, SubjectVisualState,
++};
++
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct WebSubjectVisualPreview {
++    pub key: HomeworkKey,
++    pub subject_name: String,
++    pub subject_revision: Revision,
++    pub display_revision: Revision,
++    pub effective_rgb: Rgb,
++    pub filled: bool,
++    pub homework_fill_percent: u8,
++    pub course_fill_percent: u8,
++    pub homework_component_opacity_percent: u8,
++    pub course_component_opacity_percent: u8,
++    pub homework_visible: bool,
++    pub course_visible: bool,
++}
++fn permission(error: PermissionError) -> BackendError {
++    BackendError::Identity(IdentityRepositoryError::Domain(IdentityError::Permission(
++        error,
++    )))
++}
++impl Backend {
++    fn visual_manager(&self, lease: SessionLease) -> Result<(ActorContext, u64)> {
++        if lease.origin() != TrustedOrigin::Local {
++            return Err(permission(PermissionError::LocalOnly));
++        }
++        let state = self.state()?;
++        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
++        state
++            .authority(actor.principal_id)
++            .map_err(|e| BackendError::Identity(IdentityRepositoryError::Domain(e)))?
++            .authorize_global_local(&actor, self.clock.now())
++            .map_err(permission)?;
++        self.control.check(lease, generation)?;
++        Ok((actor, generation))
++    }
++    pub fn read_subject_visuals(&self, lease: SessionLease) -> Result<SubjectVisualState> {
++        let (actor, generation) = self.visual_manager(lease)?;
++        let result = self
++            .guarded(lease, generation, SessionPurpose::Manage)
++            .subject_visuals(&actor)?;
++        self.visual_manager(lease)?;
++        self.control.check(lease, generation)?;
++        Ok(result)
++    }
++    pub fn save_subject_visuals(
++        &mut self,
++        lease: SessionLease,
++        expected_palette_revision: PaletteRevision,
++        expected_display_revision: Revision,
++        colors: Vec<SubjectColor>,
++        display: DisplaySettings,
++    ) -> Result<SubjectVisualState> {
++        let (actor, generation) = self.visual_manager(lease)?;
++        let request = SubjectVisualRequest {
++            command_id: self.command_id()?,
++            expected_palette_revision,
++            expected_display_revision,
++            colors,
++            display,
++        };
++        let result = self
++            .guarded(lease, generation, SessionPurpose::Manage)
++            .execute_subject_visuals(request, &actor, self.clock.as_ref())?;
++        // The writer already published updated identity. Synchronize the real
++        // ledger with that state; colors do not mint/revoke authorization.
++        let next = self.state()?;
++        self.apply(&IdentityTransition {
++            next,
++            events: vec![IdentityEvent::CatalogChanged],
++        })?;
++        self.visual_manager(lease)?;
++        self.control.check(lease, generation)?;
++        Ok(result)
++    }
++    fn visual_web_actor(
++        &self,
++        lease: SessionLease,
++        key: &HomeworkKey,
++    ) -> Result<(ActorContext, u64)> {
++        if lease.origin() != TrustedOrigin::Web {
++            return Err(permission(PermissionError::WebOnly));
++        }
++        let state = self.state()?;
++        let (actor, generation) = self.actor(&state, lease, SessionPurpose::Manage)?;
++        let now = self.clock.now();
++        if key.actual_date != now.date {
++            return Err(BackendError::Content(RepositoryError::Domain(
++                ContentError::WrongDate,
++            )));
++        }
++        state
++            .authority(actor.principal_id)
++            .map_err(|e| BackendError::Identity(IdentityRepositoryError::Domain(e)))?
++            .authorize_owned_content(
++                &actor,
++                now,
++                key.class_id,
++                key.subject_id,
++                key.owner_teacher_id,
++            )
++            .map_err(permission)?;
++        if !state.is_teacher(key.owner_teacher_id, key.class_id, key.subject_id) {
++            return Err(permission(PermissionError::OutsideTeachingScope));
++        }
++        self.control.check(lease, generation)?;
++        Ok((actor, generation))
++    }
++    /// Same writer transaction reads live identity/color and display settings.
++    /// Only the exact authorized day's subject is returned, never the palette.
++    pub fn web_subject_visual_preview(
++        &self,
++        lease: SessionLease,
++        key: HomeworkKey,
++    ) -> Result<WebSubjectVisualPreview> {
++        let (actor, generation) = self.visual_web_actor(lease, &key)?;
++        let source = self
++            .guarded(lease, generation, SessionPurpose::Manage)
++            .subject_visual_preview(key.clone(), &actor)?;
++        let unavailable = || BackendError::SubjectVisual(SubjectVisualRepositoryError::Unavailable);
++        if source.subject.id != key.subject_id
++            || !source.subject.enabled
++            || source.display.validate().is_err()
++        {
++            return Err(unavailable());
++        }
++        let homework = source
++            .display
++            .components
++            .iter()
++            .find(|c| c.kind == ComponentKind::Homework)
++            .ok_or_else(unavailable)?;
++        let course = source
++            .display
++            .components
++            .iter()
++            .find(|c| c.kind == ComponentKind::Schedule)
++            .ok_or_else(unavailable)?;
++        let result = WebSubjectVisualPreview {
++            key: key.clone(),
++            subject_name: source.subject.name,
++            subject_revision: source.subject.revision,
++            display_revision: source.display.revision,
++            effective_rgb: fc_presentation::scene::soft_subject_color(source.subject.color),
++            filled: source.display.subject_fill,
++            homework_fill_percent: source.display.homework_fill_percent,
++            course_fill_percent: source.display.course_fill_percent,
++            homework_component_opacity_percent: homework.opacity_percent,
++            course_component_opacity_percent: course.opacity_percent,
++            homework_visible: homework.visible,
++            course_visible: course.visible,
++        };
++        self.visual_web_actor(lease, &key)?;
++        self.control.check(lease, generation)?;
++        self.check_open()?;
++        Ok(result)
++    }
++}
+--- a/crates/fc-protocol/src/web.rs
++++ b/crates/fc-protocol/src/web.rs
+@@ -11,6 +11,7 @@
+ pub mod materials;
+ pub mod pairing;
+ pub mod responses;
++pub mod subject_visual;
+ pub mod voice;
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+@@ -52,6 +53,7 @@
+     SessionLogout,
+     ContentScopes { kind: content::Kind, offset: usize },
+     ContentRead { key: content::Key },
++    SubjectVisual { key: content::Key },
+     ContentSave { key: content::Key },
+     ContentCommand { command_id: CommandId },
+     Materials { route: materials::MaterialRoute },
+@@ -211,6 +213,14 @@
+                     Route::ContentScopes {
+                         kind: content::Kind::Reminder,
+                         offset: content::route_offset(offset).ok_or(WebError::NotFound)?,
++                    }
++                } else if let Some(key) = path
++                    .strip_prefix("content/homework/")
++                    .and_then(|p| p.strip_suffix("/visual"))
++                {
++                    Route::SubjectVisual {
++                        key: content::route_key(content::Kind::Homework, key)
++                            .ok_or(WebError::NotFound)?,
+                     }
+                 } else if let Some(key) = path.strip_prefix("content/homework/") {
+                     let key = content::route_key(content::Kind::Homework, key)
+@@ -966,4 +976,27 @@
+         );
+         assert_eq!(b.route("POST", "/fc/api/v1/session"), Err(WebError::Method));
+     }
+-}
++    #[test]
++    fn subject_visual_route_is_exact_homework_read_only_not_a_palette_or_reminder_route() {
++        let b = boundary();
++        let path = "/fc/api/v1/content/homework/1/2/3/2026-10-30/visual";
++        assert!(matches!(
++            b.route("GET", path),
++            Ok(Route::SubjectVisual {
++                key: content::Key::Homework { .. }
++            })
++        ));
++        assert_eq!(b.allowed_methods(path), Ok(AllowedMethods::Get));
++        for method in ["POST", "HEAD", "DELETE"] {
++            assert_eq!(b.route(method, path), Err(WebError::Method));
++        }
++        for path in [
++            "/fc/api/v1/content/homework/01/2/3/2026-10-30/visual",
++            "/fc/api/v1/content/homework/1/2/3/2026-10-30/visual/",
++            "/fc/api/v1/content/reminders/1/2026-10-30/visual",
++            "/fc/api/v1/subject-visuals",
++        ] {
++            assert_eq!(b.route("GET", path), Err(WebError::NotFound));
++        }
++    }
++}
+--- /dev/null
++++ b/crates/fc-protocol/src/web/subject_visual.rs
+@@ -0,0 +1,146 @@
++//! Bounded single-subject preview disclosure, with no management request DTO.
++use super::content;
++use crate::{ProtocolError, SCHEMA_VERSION};
++use fc_domain::{content::HomeworkKey, identity::Rgb, ids::Revision};
++use serde::Serialize;
++
++/// Initial shared soft-subject-color formula. Changing its meaning requires a
++/// new rules version; the browser consumes the derived RGB without re-softening.
++pub const RULES_VERSION: u16 = 1;
++pub struct Preview<'a> {
++    pub key: &'a HomeworkKey,
++    pub subject_name: &'a str,
++    pub subject_revision: Revision,
++    pub display_revision: Revision,
++    pub effective_rgb: Rgb,
++    pub filled: bool,
++    pub homework_fill_percent: u8,
++    pub course_fill_percent: u8,
++    pub homework_component_opacity_percent: u8,
++    pub course_component_opacity_percent: u8,
++    pub homework_visible: bool,
++    pub course_visible: bool,
++}
++#[derive(Serialize)]
++#[serde(rename_all = "camelCase")]
++struct Key {
++    kind: &'static str,
++    class_id: String,
++    subject_id: String,
++    owner_teacher_id: String,
++    date: String,
++}
++#[derive(Serialize)]
++#[serde(rename_all = "camelCase")]
++struct Wire<'a> {
++    schema_version: u16,
++    status: &'static str,
++    key: Key,
++    subject_id: String,
++    subject_name: &'a str,
++    subject_revision: String,
++    display_revision: String,
++    rules_version: u16,
++    effective_rgb: String,
++    mode: &'static str,
++    homework_fill_percent: u8,
++    course_fill_percent: u8,
++    homework_component_opacity_percent: u8,
++    course_component_opacity_percent: u8,
++    homework_visible: bool,
++    course_visible: bool,
++}
++pub fn preview(p: Preview<'_>) -> Result<Vec<u8>, ProtocolError> {
++    if p.subject_name.trim().is_empty()
++        || p.subject_name.chars().count() > 64
++        || p.subject_name.chars().any(|c| c.is_control())
++        || p.subject_revision.get() == 0
++        || [
++            p.homework_fill_percent,
++            p.course_fill_percent,
++            p.homework_component_opacity_percent,
++            p.course_component_opacity_percent,
++        ]
++        .into_iter()
++        .any(|p| p > 100)
++    {
++        return Err(ProtocolError::InvalidCommand);
++    }
++    let rgb = p.effective_rgb;
++    let result = serde_json::to_vec(&Wire {
++        schema_version: SCHEMA_VERSION,
++        status: "SUBJECT_VISUAL",
++        key: Key {
++            kind: "HOMEWORK",
++            class_id: p.key.class_id.get().to_string(),
++            subject_id: p.key.subject_id.get().to_string(),
++            owner_teacher_id: p.key.owner_teacher_id.get().to_string(),
++            date: content::date(p.key.actual_date),
++        },
++        subject_id: p.key.subject_id.get().to_string(),
++        subject_name: p.subject_name,
++        subject_revision: p.subject_revision.get().to_string(),
++        display_revision: p.display_revision.get().to_string(),
++        rules_version: RULES_VERSION,
++        effective_rgb: format!("#{:02X}{:02X}{:02X}", rgb.red, rgb.green, rgb.blue),
++        mode: if p.filled { "FILLED" } else { "OUTLINED" },
++        homework_fill_percent: p.homework_fill_percent,
++        course_fill_percent: p.course_fill_percent,
++        homework_component_opacity_percent: p.homework_component_opacity_percent,
++        course_component_opacity_percent: p.course_component_opacity_percent,
++        homework_visible: p.homework_visible,
++        course_visible: p.course_visible,
++    })
++    .map_err(|_| ProtocolError::InvalidCommand)?;
++    if result.len() > crate::MAX_JSON_BYTES {
++        return Err(ProtocolError::TooLarge);
++    }
++    Ok(result)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use fc_domain::{ids::*, time::LocalDate};
++    #[test]
++    fn exact_single_subject_wire_keeps_independent_revisions_and_zero_filled_mode() {
++        let key = HomeworkKey {
++            class_id: ClassId::new(1).unwrap(),
++            subject_id: SubjectId::new(2).unwrap(),
++            owner_teacher_id: PrincipalId::new(3).unwrap(),
++            actual_date: LocalDate::new(2026, 11, 1).unwrap(),
++        };
++        let make = |filled, opacity| Preview {
++            key: &key,
++            subject_name: "数学",
++            subject_revision: Revision::new(u64::MAX),
++            display_revision: Revision::new(4),
++            effective_rgb: Rgb {
++                red: 170,
++                green: 187,
++                blue: 204,
++            },
++            filled,
++            homework_fill_percent: 0,
++            course_fill_percent: 20,
++            homework_component_opacity_percent: opacity,
++            course_component_opacity_percent: 100,
++            homework_visible: true,
++            course_visible: false,
++        };
++        let value: serde_json::Value =
++            serde_json::from_slice(&preview(make(true, 50)).unwrap()).unwrap();
++        assert_eq!(value["subjectRevision"], u64::MAX.to_string());
++        assert_eq!(value["displayRevision"], "4");
++        assert_eq!(value["mode"], "FILLED");
++        assert_eq!(value["homeworkFillPercent"], 0);
++        assert_eq!(value["effectiveRgb"], "#AABBCC");
++        assert!(value.get("palette").is_none());
++        assert!(value.get("layout").is_none());
++        assert!(preview(make(false, 101)).is_err());
++        let outlined: serde_json::Value =
++            serde_json::from_slice(&preview(make(false, 100)).unwrap()).unwrap();
++        assert_eq!(outlined["mode"], "OUTLINED");
++        assert_eq!(outlined["effectiveRgb"], value["effectiveRgb"]);
++    }
++}
+--- a/crates/fc-bootstrap/src/web_application.rs
++++ b/crates/fc-bootstrap/src/web_application.rs
+@@ -332,6 +332,7 @@
+                 materials::dispatch(self, backend, session.lease(), route, body)
+             }
+             Route::ContentScopes { .. }
++            | Route::SubjectVisual { .. }
+             | Route::ContentRead { .. }
+             | Route::ContentSave { .. }
+             | Route::ContentCommand { .. } => {
+--- a/crates/fc-bootstrap/src/web_application/content.rs
++++ b/crates/fc-bootstrap/src/web_application/content.rs
+@@ -25,6 +25,35 @@
+             Ok(page) => response(200, scope_bytes(&page), None),
+             Err(error) => backend_error(error, false),
+         },
++        Route::SubjectVisual { key } => {
++            let fc_domain::content::ContentKey::Homework(key) = key.into_domain() else {
++                return failure(400, responses::ErrorCode::InvalidRequest);
++            };
++            match backend.web_subject_visual_preview(lease, key) {
++                Ok(p) => response(
++                    200,
++                    fc_protocol::web::subject_visual::preview(
++                        fc_protocol::web::subject_visual::Preview {
++                            key: &p.key,
++                            subject_name: &p.subject_name,
++                            subject_revision: p.subject_revision,
++                            display_revision: p.display_revision,
++                            effective_rgb: p.effective_rgb,
++                            filled: p.filled,
++                            homework_fill_percent: p.homework_fill_percent,
++                            course_fill_percent: p.course_fill_percent,
++                            homework_component_opacity_percent: p
++                                .homework_component_opacity_percent,
++                            course_component_opacity_percent: p.course_component_opacity_percent,
++                            homework_visible: p.homework_visible,
++                            course_visible: p.course_visible,
++                        },
++                    ),
++                    None,
++                ),
++                Err(error) => backend_error(error, false),
++            }
++        }
+         Route::ContentRead { key } => match backend.web_content_read(lease, key.into_domain()) {
+             Ok(document) => response(200, document_bytes(&document), None),
+             Err(error) => backend_error(error, false),
+@@ -136,6 +165,22 @@
+ }
+ fn backend_error(error: BackendError, mutating: bool) -> WebResponse {
+     match error {
++        BackendError::SubjectVisual(
++            fc_ports::subject_visual::SubjectVisualRepositoryError::Content(error),
++        ) => backend_error(
++            BackendError::Content(RepositoryError::Domain(error)),
++            mutating,
++        ),
++        BackendError::Identity(fc_ports::IdentityRepositoryError::Domain(
++            fc_domain::identity::IdentityError::Permission(_),
++        )) => failure(403, responses::ErrorCode::Forbidden),
++        BackendError::SubjectVisual(
++            fc_ports::subject_visual::SubjectVisualRepositoryError::Domain(
++                fc_domain::subject_visual::SubjectVisualError::Identity(
++                    fc_domain::identity::IdentityError::Permission(_),
++                ),
++            ),
++        ) => failure(403, responses::ErrorCode::Forbidden),
+         BackendError::Content(RepositoryError::Domain(error)) => match error {
+             ContentError::Permission(_) => failure(403, responses::ErrorCode::Forbidden),
+             ContentError::WrongDate => failure(409, responses::ErrorCode::DayChanged),
+--- a/crates/fc-bootstrap/src/web_application/content/tests.rs
++++ b/crates/fc-bootstrap/src/web_application/content/tests.rs
+@@ -402,3 +402,6 @@
+         "DAY_CHANGED",
+     );
+ }
++
++#[path = "subject_visual_tests.rs"]
++mod subject_visual_tests;
+--- /dev/null
++++ b/crates/fc-bootstrap/src/web_application/content/subject_visual_tests.rs
+@@ -0,0 +1,318 @@
++//! Real writer/HTTP-port tests; synthetic TLS metadata is not live TLS evidence.
++use super::*;
++use fc_application::identity::SessionError;
++use fc_domain::{
++    desktop::ComponentKind,
++    subject_visual::{SubjectColor, SubjectVisualError},
++};
++use fc_ports::subject_visual::{SubjectVisualRepositoryError, SubjectVisualState};
++fn colors(state: &SubjectVisualState) -> Vec<SubjectColor> {
++    state
++        .palette
++        .subjects
++        .iter()
++        .map(|s| SubjectColor {
++            subject_id: s.id,
++            color: s.color,
++        })
++        .collect()
++}
++fn preview_key() -> fc_domain::content::HomeworkKey {
++    fc_domain::content::HomeworkKey {
++        class_id: ClassId::new(1).unwrap(),
++        subject_id: SubjectId::new(1).unwrap(),
++        owner_teacher_id: PrincipalId::new(1).unwrap(),
++        actual_date: fc_domain::time::LocalDate::new(2026, 10, 30).unwrap(),
++    }
++}
++#[test]
++fn subject_visual_joint_save_keeps_exact_lease_and_web_preview_discloses_only_one_derived_subject()
++{
++    let mut f = BackendFixture::new();
++    f.catalog(2);
++    let cookie = f.pair("visual-browser", false);
++    let web = f
++        .service
++        .authenticate(&cookie_secret(&cookie).unwrap())
++        .unwrap()
++        .lease();
++    assert!(f.backend.read_subject_visuals(web).is_err());
++    let old = f.backend.read_subject_visuals(f.admin).unwrap();
++    let mut changed = colors(&old);
++    changed[0].color = Rgb {
++        red: 255,
++        green: 0,
++        blue: 0,
++    };
++    let mut display = old.display.clone();
++    display.homework_fill_percent = 0;
++    let homework = display
++        .components
++        .iter_mut()
++        .find(|c| c.kind == ComponentKind::Homework)
++        .unwrap();
++    homework.opacity_percent = 50;
++    homework.visible = false;
++    let saved = f
++        .backend
++        .save_subject_visuals(
++            f.admin,
++            old.palette.revision.clone(),
++            old.display.revision,
++            changed,
++            display,
++        )
++        .unwrap();
++    assert_eq!(
++        saved.palette.subjects[0].revision,
++        old.palette.subjects[0].revision.next().unwrap()
++    );
++    assert_eq!(saved.palette.subjects[1], old.palette.subjects[1]);
++    assert_eq!(saved.palette.subjects[0].name, old.palette.subjects[0].name);
++    assert_eq!(f.backend.role(f.admin).unwrap(), Role::GlobalAdmin); // no replacement lease
++    assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), saved);
++    let response = f.get_content(&cookie, "content/homework/1/1/1/2026-10-30/visual");
++    let body = ok(&response);
++    for expected in [
++        "\"status\":\"SUBJECT_VISUAL\"",
++        "\"effectiveRgb\":\"#C98282\"",
++        "\"mode\":\"FILLED\"",
++        "\"homeworkFillPercent\":0",
++        "\"homeworkComponentOpacityPercent\":50",
++        "\"homeworkVisible\":false",
++    ] {
++        assert!(body.contains(expected), "{body}");
++    }
++    for forbidden in [
++        "Synthetic subject 2",
++        "palette",
++        "layout",
++        "#FF0000",
++        "authEpoch",
++    ] {
++        assert!(!body.contains(forbidden));
++    }
++    // A rejected joint CAS must not restore colors or partially change display.
++    let stale = f.backend.save_subject_visuals(
++        f.admin,
++        old.palette.revision.clone(),
++        saved.display.revision,
++        colors(&old),
++        saved.display.clone(),
++    );
++    assert!(matches!(
++        stale,
++        Err(crate::backend::BackendError::SubjectVisual(
++            SubjectVisualRepositoryError::Domain(SubjectVisualError::RevisionConflict { .. })
++        ))
++    ));
++    assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), saved);
++    let stale_display = f.backend.save_subject_visuals(
++        f.admin,
++        saved.palette.revision.clone(),
++        old.display.revision,
++        colors(&saved),
++        saved.display.clone(),
++    );
++    assert!(matches!(
++        stale_display,
++        Err(crate::backend::BackendError::SubjectVisual(
++            SubjectVisualRepositoryError::Display(
++                fc_domain::desktop::DisplayError::RevisionConflict { .. }
++            )
++        ))
++    ));
++    assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), saved);
++}
++#[test]
++fn subject_visual_get_is_read_only_and_original_content_schema_still_rejects_visual_fields() {
++    let mut f = BackendFixture::new();
++    f.catalog(1);
++    let cookie = f.pair("read-only-visual", false);
++    let csrf = f.csrf(&cookie);
++    let route = "content/homework/1/1/1/2026-10-30/visual";
++    for method in ["POST", "HEAD", "DELETE"] {
++        let response = f.dispatch(&head(method, route, 0, Some(&cookie), Some(&csrf)), b"");
++        assert_eq!(response.head.status, 405);
++        assert!(response
++            .head
++            .headers
++            .iter()
++            .any(|h| h.name.eq_ignore_ascii_case("allow") && h.value == b"GET"));
++    }
++    error(
++        f.get_content(&cookie, "content/reminders/1/2026-10-30/visual"),
++        404,
++        "NOT_FOUND",
++    );
++    error(
++        f.get_content(&cookie, "content/homework/2/1/1/2026-10-30/visual"),
++        403,
++        "FORBIDDEN",
++    );
++    error(
++        f.dispatch(&head("GET", route, 0, None, None), b""),
++        401,
++        "UNAUTHORIZED",
++    );
++    let before = f.backend.read_subject_visuals(f.admin).unwrap();
++    let mixed = r##"{"schemaVersion":1,"commandId":"76001","expectedRevision":"0","text":"not saved","effectiveRgb":"#FFFFFF"}"##;
++    error(
++        f.save_content(&cookie, &csrf, "content/homework/1/1/1/2026-10-30", mixed),
++        400,
++        "INVALID_REQUEST",
++    );
++    assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), before);
++}
++#[test]
++fn subject_visual_cancel_lock_and_day_floor_cannot_return_old_scope_as_current() {
++    let mut f = BackendFixture::new();
++    f.catalog(1);
++    let cookie = f.pair("guarded-visual", false);
++    let web = f
++        .service
++        .authenticate(&cookie_secret(&cookie).unwrap())
++        .unwrap()
++        .lease();
++    let before = f.backend.read_subject_visuals(f.admin).unwrap();
++    {
++        let scope = f.backend.begin_execution_scope(Arc::new(|| false));
++        assert!(matches!(
++            scope.web_subject_visual_preview(web, preview_key()),
++            Err(crate::backend::BackendError::Storage(
++                fc_storage::StorageError::ExecutionCancelled
++            ))
++        ));
++        assert!(matches!(
++            scope.read_subject_visuals(f.admin),
++            Err(crate::backend::BackendError::Storage(
++                fc_storage::StorageError::ExecutionCancelled
++            ))
++        ));
++    }
++    assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), before);
++    f.backend.session_control().lock_local();
++    assert!(f.backend.read_subject_visuals(f.admin).is_err());
++    let route = "content/homework/1/1/1/2026-10-30/visual";
++    assert!(ok(&f.get_content(&cookie, route)).contains("SUBJECT_VISUAL")); // local lock preserves exact Web lease
++    f.clock.1.store(86_401, Ordering::Release);
++    f.clock.0.fetch_add(1000, Ordering::AcqRel);
++    error(f.get_content(&cookie, route), 409, "DAY_CHANGED");
++    assert!(
++        ok(&f.get_content(&cookie, "content/homework/1/1/1/2026-10-31/visual"))
++            .contains("SUBJECT_VISUAL")
++    );
++    f.clock.1.store(36_001, Ordering::Release);
++    f.clock.0.fetch_add(1000, Ordering::AcqRel);
++    error(f.get_content(&cookie, route), 409, "DAY_CHANGED");
++}
++
++#[test]
++fn subject_visual_management_denies_initial_teacher_user_and_preview_remains_owned() {
++    use crate::backend::BackendError;
++    use fc_domain::auth::PermissionError;
++    use fc_ports::IdentityRepositoryError;
++    for role in [Role::TeacherAdmin, Role::User] {
++        let mut f = BackendFixture::new();
++        f.catalog(1);
++        let before = f.backend.read_subject_visuals(f.admin).unwrap();
++        let original = "Synthetic-Visual-Initial-Password-2026";
++        let changed = "Synthetic-Visual-Changed-Password-2026";
++        drop(
++            f.backend
++                .create_account(
++                    f.admin,
++                    NewAccount {
++                        id: PrincipalId::new(2).unwrap(),
++                        login_name: "visual-user".into(),
++                        display_name: "Synthetic visual user".into(),
++                        role,
++                        scopes: if role == Role::TeacherAdmin {
++                            vec![AssignmentScope {
++                                class_id: ClassId::new(1).unwrap(),
++                                subject_id: SubjectId::new(1).unwrap(),
++                            }]
++                        } else {
++                            vec![]
++                        },
++                    },
++                    Password::new(original.into()).unwrap(),
++                )
++                .unwrap(),
++        );
++        let initial = f
++            .backend
++            .login("visual-user", Password::new(original.into()).unwrap())
++            .unwrap();
++        assert!(matches!(
++            f.backend.read_subject_visuals(initial),
++            Err(BackendError::Session(SessionError::PasswordChangeRequired))
++        ));
++        f.backend
++            .change_password(
++                initial,
++                Password::new(original.into()).unwrap(),
++                Password::new(changed.into()).unwrap(),
++            )
++            .unwrap();
++        let user = f
++            .backend
++            .login("visual-user", Password::new(changed.into()).unwrap())
++            .unwrap();
++        assert!(matches!(
++            f.backend.read_subject_visuals(user),
++            Err(BackendError::Identity(IdentityRepositoryError::Domain(
++                fc_domain::identity::IdentityError::Permission(PermissionError::RoleDenied)
++            )))
++        ));
++        assert!(matches!(
++            f.backend.save_subject_visuals(
++                user,
++                before.palette.revision.clone(),
++                before.display.revision,
++                colors(&before),
++                before.display.clone()
++            ),
++            Err(BackendError::Identity(IdentityRepositoryError::Domain(
++                fc_domain::identity::IdentityError::Permission(PermissionError::RoleDenied)
++            )))
++        ));
++        f.admin = f
++            .backend
++            .login("admin", Password::new(PASSWORD.into()).unwrap())
++            .unwrap();
++        assert_eq!(f.backend.read_subject_visuals(f.admin).unwrap(), before);
++        if role == Role::TeacherAdmin {
++            let cookie = f.pair_login("visual-user", "teacher-visual-only", false);
++            assert!(
++                ok(&f.get_content(&cookie, "content/homework/1/1/2/2026-10-30/visual"))
++                    .contains("SUBJECT_VISUAL")
++            );
++            error(
++                f.get_content(&cookie, "content/homework/1/1/1/2026-10-30/visual"),
++                403,
++                "FORBIDDEN",
++            );
++            f.backend
++                .identity(
++                    f.admin,
++                    IdentityCommand::UpdateAccount {
++                        id: PrincipalId::new(2).unwrap(),
++                        display_name: "Synthetic visual user".into(),
++                        role,
++                        enabled: false,
++                        scopes: vec![AssignmentScope {
++                            class_id: ClassId::new(1).unwrap(),
++                            subject_id: SubjectId::new(1).unwrap(),
++                        }],
++                    },
++                )
++                .unwrap();
++            error(
++                f.get_content(&cookie, "content/homework/1/1/2/2026-10-30/visual"),
++                401,
++                "UNAUTHORIZED",
++            );
++        }
++    }
++}
+--- a/web/src/api/client.ts
++++ b/web/src/api/client.ts
+@@ -1,3 +1,4 @@
++import { subjectVisual, type HomeworkTarget } from "./subject-visual-protocol"
+ import { bodyText, commandResult, committed, content, contentPath, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopePage } from './content-protocol'
+ import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
+ export class ApiError extends Error {
+@@ -123,6 +124,11 @@
+     if (r.status !== 200) throw new ProtocolFault()
+     return committed(r.value, input.commandId, key, input.expectedRevision, input.text)
+   }
++  async subjectVisual(target: HomeworkTarget, signal: AbortSignal) {
++    const r = await this.request(contentPath(target) + '/visual', signal)
++    if (r.status !== 200) throw new ProtocolFault()
++    return subjectVisual(r.value, target)
++  }
+   async commandResult(commandId: string, signal: AbortSignal) {
+     const id = decimal(commandId), r = await this.request(`content/commands/${id}`, signal)
+     if (r.status !== 200) throw new ProtocolFault()
+--- a/web/src/TeacherWorkspace.tsx
++++ b/web/src/TeacherWorkspace.tsx
+@@ -1,3 +1,5 @@
++import SubjectVisualPreview from "./SubjectVisualPreview"
++import type { SubjectVisualApi } from "./api/subject-visual-protocol"
+ import { useEffect, useRef, useState } from 'react'
+ import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleAlert, ClipboardList, FolderOpen, GraduationCap, History, LoaderCircle, LockKeyhole, LogOut, Radio, RefreshCw, Save, ShieldCheck, Trash2 } from 'lucide-react'
+ import { Button } from '@/components/ui/button'
+@@ -14,12 +16,13 @@
+ import type { Role, Session } from './api/protocol'
+ const roles: Record<Role, string> = { GLOBAL_ADMIN: '全局主管理员', TEACHER_ADMIN: '教师管理员', USER: '普通用户' }
+ const empty: ContentState = { kind: 'HOMEWORK', page: null, editor: null, busy: false, pageBlocked: false, notice: '', previousOffset: null }
+-function Editor({ editor: e, busy, controller }: { editor: EditorState; busy: boolean; controller: ContentController | undefined }) {
++function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: EditorState; busy: boolean; controller: ContentController | undefined; api: SubjectVisualApi; onRevoked: () => void }) {
+   const bytes = new TextEncoder().encode(e.draft).byteLength
+   const editable = !busy && !e.expired && ['ready', 'conflict', 'merge'].includes(e.phase)
+   const canSave = !busy && !e.expired && e.phase === 'ready' && draftValid(e.draft)
+   return <Card className="content-editor"><CardHeader><div className="editor-heading"><div><p className="eyebrow">{e.loaded.key.kind === 'HOMEWORK' ? '老师本人当天作业' : '班级共同当天提醒'}</p><CardTitle role="heading" aria-level={2}>{e.scope.className}{e.scope.kind === 'HOMEWORK' ? ` · ${e.scope.subjectName}` : ' · 今日提醒'}</CardTitle>{e.scope.kind === 'HOMEWORK' && <CardDescription>内容所属老师：{e.scope.ownerDisplayName}</CardDescription>}</div><span className={`editor-badge ${e.expired ? 'expired' : ''}`}>{e.expired ? '旧草稿已过期' : `修订 ${e.loaded.revision}`}</span></div><p className="server-date">白板日期 {e.loaded.today}<span>有效至 {e.loaded.expiresAt.replace('T', ' ')}</span></p></CardHeader><CardContent>
+     <div aria-live="polite" aria-atomic="true">{e.notice && <p className={`content-notice ${['unknown', 'conflict', 'expired', 'scope-changed'].includes(e.phase) || e.expired ? 'attention' : ''}`}><CircleAlert size={17} />{e.notice}</p>}</div>
++    {e.loaded.key.kind === 'HOMEWORK' && <SubjectVisualPreview api={api} target={e.loaded.key} source={e.latest ?? e.loaded} expired={e.expired} onRevoked={onRevoked} />}
+     <label className="editor-label" htmlFor="content-text">{e.phase === 'merge' ? '你的草稿（保留，尚未提交）' : '正文（纯文本）'}<span>{bytes.toLocaleString()} / 16,384 字节</span></label>
+     <textarea id="content-text" className={`content-textarea ${bytes > 16384 ? 'invalid' : ''}`} rows={10} maxLength={16384} value={e.draft} onChange={event => controller?.edit(event.target.value)} readOnly={!editable} aria-describedby="content-text-help" aria-invalid={!draftValid(e.draft)} placeholder={e.scope.kind === 'HOMEWORK' ? '填写这位老师今天布置的作业…' : '填写这个班级今天的共同提醒…'} />
+     <p id="content-text-help" className="editor-help">以白板日期为准；仅支持纯文本和正常换行。保存表示持久化成功，不代表内容此刻正在白板上显示。</p>
+@@ -78,7 +81,7 @@
+       {state.notice && <p className="content-notice attention" role="status"><CircleAlert size={17} />{state.notice}</p>}
+       {state.busy && !scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在读取白板授权范围…</p>}
+       {scopes && scopes.kind === page && <Card className="scope-picker"><CardHeader><div className="scope-picker-heading"><div><CardTitle role="heading" aria-level={2}>{page === 'HOMEWORK' ? '选择实际作业范围' : '选择共同提醒班级'}</CardTitle><CardDescription>{scopes.total === 0 ? '当前没有可管理的有效范围。' : `第 ${scopes.offset + 1}–${scopes.offset + scopes.items.length} 项，共 ${scopes.total} 项（每页最多 20 项）`}</CardDescription></div></div></CardHeader><CardContent><div className="scope-options">{scopes.items.map(item => <button type="button" className={`scope-option ${state.editor && state.editor.scope.classId === item.classId && (item.kind !== 'HOMEWORK' || state.editor.scope.kind === 'HOMEWORK' && state.editor.scope.subjectId === item.subjectId && state.editor.scope.ownerTeacherId === item.ownerTeacherId) ? 'selected' : ''}`} key={item.kind === 'HOMEWORK' ? `${item.classId}/${item.subjectId}/${item.ownerTeacherId}` : item.classId} disabled={state.busy || state.pageBlocked} onClick={() => select(item)}><strong>{item.className}</strong>{item.kind === 'HOMEWORK' && <><span>{item.subjectName}</span><small>{item.ownerDisplayName}</small></>}<ChevronRight size={15} /></button>)}</div><div className="scope-pagination"><Button variant="outline" disabled={state.busy || state.pageBlocked || state.previousOffset === null} onClick={() => reload(state.previousOffset!)}><ArrowLeft />上一页</Button><Button variant="outline" disabled={state.busy || state.pageBlocked || scopes.nextOffset === null} onClick={() => reload(scopes.nextOffset!)}>下一页<ArrowRight /></Button></div></CardContent></Card>}
+-      {state.editor && <Editor editor={state.editor} busy={state.busy} controller={owner.current} />}
++      {state.editor && <Editor editor={state.editor} busy={state.busy} controller={owner.current} api={api} onRevoked={onRevoked} />}
+       {state.busy && scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在向白板核对…</p>}
+     </>}
+     <div className="logout-row"><LockKeyhole size={16} /><p>注销会使这个账号的全部渠道授权失效。</p><Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onLogout() } }}><LogOut />注销账号</Button></div>
+--- /dev/null
++++ b/web/src/api/subject-visual-protocol.ts
+@@ -0,0 +1,39 @@
++import { key, revision, sameKey, type ContentKey } from './content-protocol'
++import { decimal, ProtocolFault, protocolVersions, unicodeText } from './protocol'
++export type HomeworkTarget = Extract<ContentKey, { kind: 'HOMEWORK' }>
++export interface SubjectVisualPreview {
++  key: HomeworkTarget; subjectId: string; subjectName: string; subjectRevision: string; displayRevision: string
++  rulesVersion: 1; effectiveRgb: string; mode: 'FILLED' | 'OUTLINED'
++  homeworkFillPercent: number; courseFillPercent: number
++  homeworkComponentOpacityPercent: number; courseComponentOpacityPercent: number
++  homeworkVisible: boolean; courseVisible: boolean
++}
++export interface SubjectVisualApi { subjectVisual(target: HomeworkTarget, signal: AbortSignal): Promise<SubjectVisualPreview> }
++const fields = ['schemaVersion', 'status', 'key', 'subjectId', 'subjectName', 'subjectRevision', 'displayRevision', 'rulesVersion', 'effectiveRgb', 'mode', 'homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent', 'homeworkVisible', 'courseVisible']
++export function subjectVisual(value: unknown, target: HomeworkTarget): SubjectVisualPreview {
++  if (typeof value !== 'object' || !value || Array.isArray(value) || Object.keys(value).length !== fields.length || Object.keys(value).some(k => !fields.includes(k))) throw new ProtocolFault()
++  const v = value as Record<string, unknown>
++  protocolVersions(v.schemaVersion, v.rulesVersion)
++  const bound = key(v.key)
++  if (v.status !== 'SUBJECT_VISUAL' || bound.kind !== 'HOMEWORK' || !sameKey(bound, target)
++    || decimal(v.subjectId) !== bound.subjectId || typeof v.subjectName !== 'string' || !v.subjectName.trim()
++    || [...v.subjectName].length > 64 || /[\u0000-\u001f\u007f-\u009f]/u.test(v.subjectName)
++    || typeof v.effectiveRgb !== 'string' || !/^#[0-9A-F]{6}$/.test(v.effectiveRgb)
++    || !['FILLED', 'OUTLINED'].includes(v.mode as string)
++    || ['homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent'].some(k => !Number.isInteger(v[k]) || (v[k] as number) < 0 || (v[k] as number) > 100)
++    || typeof v.homeworkVisible !== 'boolean' || typeof v.courseVisible !== 'boolean') throw new ProtocolFault()
++  return { key: bound, subjectId: decimal(v.subjectId), subjectName: unicodeText(v.subjectName), subjectRevision: decimal(v.subjectRevision), displayRevision: revision(v.displayRevision), rulesVersion: 1,
++    effectiveRgb: v.effectiveRgb, mode: v.mode as 'FILLED' | 'OUTLINED', homeworkFillPercent: v.homeworkFillPercent as number, courseFillPercent: v.courseFillPercent as number,
++    homeworkComponentOpacityPercent: v.homeworkComponentOpacityPercent as number, courseComponentOpacityPercent: v.courseComponentOpacityPercent as number,
++    homeworkVisible: v.homeworkVisible, courseVisible: v.courseVisible }
++}
++/** Fill and whole-component alpha are independent. 0% fill remains FILLED;
++ * text does not inherit the fill alpha. Only canonical derived RGB is accepted. */
++export function previewStyle(preview: SubjectVisualPreview, kind: 'homework' | 'course') {
++  const fill = kind === 'homework' ? preview.homeworkFillPercent : preview.courseFillPercent
++  const component = kind === 'homework' ? preview.homeworkComponentOpacityPercent : preview.courseComponentOpacityPercent
++  const rgb = [1, 3, 5].map(offset => parseInt(preview.effectiveRgb.slice(offset, offset + 2), 16)).join(', ')
++  return { componentOpacity: component / 100,
++    backgroundColor: `rgba(${rgb}, ${preview.mode === 'FILLED' ? fill / 100 : 0})`,
++    border: preview.mode === 'FILLED' ? 'none' : '1px solid currentColor' }
++}
+--- /dev/null
++++ b/web/src/api/subject-visual-controller.ts
+@@ -0,0 +1,29 @@
++import { ApiError, isAborted } from './client'
++import { contentPath, sameKey } from './content-protocol'
++import { ProtocolFault } from './protocol'
++import type { HomeworkTarget, SubjectVisualApi, SubjectVisualPreview } from './subject-visual-protocol'
++export interface SubjectVisualState { path: string; phase: 'loading' | 'ready' | 'failed'; preview: SubjectVisualPreview | null; notice: string }
++/** One explicit preview read; no polling, palette write, content write or draft. */
++export class SubjectVisualController {
++  private operation: AbortController | undefined
++  private sequence = 0
++  private disposed = false
++  constructor(private api: SubjectVisualApi, private changed: (s: SubjectVisualState) => void, private revoked: () => void) {}
++  async load(target: HomeworkTarget) {
++    if (this.disposed) return
++    this.operation?.abort(); const controller = new AbortController(); this.operation = controller; const sequence = ++this.sequence
++    const path = contentPath(target)
++    this.changed({ path, phase: 'loading', preview: null, notice: '' })
++    try {
++      const preview = await this.api.subjectVisual(target, controller.signal)
++      if (this.disposed || controller.signal.aborted || sequence !== this.sequence) return
++      if (!sameKey(preview.key, target) || preview.subjectId !== target.subjectId) throw new ProtocolFault()
++      this.changed({ path, phase: 'ready', preview, notice: '' })
++    } catch (error) {
++      if (this.disposed || controller.signal.aborted || sequence !== this.sequence || isAborted(error)) return
++      this.changed({ path, phase: 'failed', preview: null, notice: error instanceof ProtocolFault ? error.message : '无法读取学校配色预览。正文草稿不受影响，可主动重新读取。' })
++      if (error instanceof ApiError && [401, 403].includes(error.status)) { this.dispose(); this.revoked() }
++    }
++  }
++  dispose() { this.disposed = true; this.operation?.abort(); this.sequence++ }
++}
+--- /dev/null
++++ b/web/src/SubjectVisualPreview.tsx
+@@ -0,0 +1,41 @@
++import { useEffect, useRef, useState } from 'react'
++import { RefreshCw } from 'lucide-react'
++import { Button } from './components/ui/button'
++import { contentPath, type ContentDocument } from './api/content-protocol'
++import { SubjectVisualController, type SubjectVisualState } from './api/subject-visual-controller'
++import { previewStyle, type HomeworkTarget, type SubjectVisualApi } from './api/subject-visual-protocol'
++export default function SubjectVisualPreview({ api, target, source, expired, onRevoked }: { api: SubjectVisualApi; target: HomeworkTarget; source: ContentDocument; expired: boolean; onRevoked: () => void }) {
++  const [state, setState] = useState<{ view: SubjectVisualState; source: ContentDocument; refresh: number; api: SubjectVisualApi } | null>(null), [refresh, setRefresh] = useState(0)
++  const revoke = useRef(onRevoked); revoke.current = onRevoked
++  const path = contentPath(target)
++  useEffect(() => {
++    if (expired) return
++    const controller = new SubjectVisualController(api, view => setState({ view, source, refresh, api }), () => revoke.current())
++    void controller.load(target)
++    return () => controller.dispose()
++    // Explicit content reloads change source even when the exact key is unchanged.
++    // Text typing preserves source and never starts a preview read.
++  }, [api, path, target, source, refresh, expired])
++  const current = !expired && state !== null && state.source === source && state.refresh === refresh && state.api === api && state.view.path === path ? state.view : null, preview = current?.preview
++  return <section className="my-4 rounded-xl border p-4" aria-label="学校科目配色只读预览" data-testid="subject-visual-preview">
++    <div className="flex items-center justify-between gap-3"><h3 className="font-semibold">学校科目配色 · 只读预览</h3><Button data-testid="subject-visual-refresh" variant="outline" disabled={expired || current?.phase === 'loading'} onClick={() => setRefresh(n => n + 1)}><RefreshCw />重新读取配色</Button></div>
++    <p className="editor-help">学校基础展示样例；颜色和外观由本地主管理员维护。不代表当前布局或已经上屏，正文草稿不会改变。</p>
++    {expired ? <p role="status">原日期已过期，请重新读取当天范围。</p> : current?.notice ? <p role="status">{current.notice}</p> : !preview ? <p role="status">正在读取同版科目与显示设置…</p> : <>
++      <p className="editor-help" data-testid="subject-visual-version" data-subject-revision={preview.subjectRevision} data-display-revision={preview.displayRevision} data-rules-version={preview.rulesVersion}>科目修订 {preview.subjectRevision} · 显示修订 {preview.displayRevision} · 颜色规则 {preview.rulesVersion} · {preview.mode === 'FILLED' ? '填色无边框' : '透明底柔和描边'}</p>
++      {(['homework', 'course'] as const).map(kind => {
++        const style = previewStyle(preview, kind), fill = kind === 'homework' ? preview.homeworkFillPercent : preview.courseFillPercent
++        const opacity = kind === 'homework' ? preview.homeworkComponentOpacityPercent : preview.courseComponentOpacityPercent
++        const visible = kind === 'homework' ? preview.homeworkVisible : preview.courseVisible
++        return <div className="my-3" key={kind}>
++          <p className="editor-help">{kind === 'homework' ? '作业科目标记' : '课程胶囊'}：填充 {fill}% · 组件整体 {opacity}% · 配置{visible ? '显示' : '隐藏'}（0%完全透明，100%不透明）</p>
++          <div className="rounded-lg bg-white p-3 text-slate-950">
++            <div style={{ opacity: style.componentOpacity }} data-testid={`${kind}-visual-component`} data-preview-component={kind} data-component-visible={visible}>
++              <span className="inline-block min-w-28 rounded-full px-4 py-2 text-center" data-testid={`${kind}-visual-pill`} data-preview-mode={preview.mode} data-fill-percent={fill} data-effective-rgb={preview.effectiveRgb} style={{ backgroundColor: style.backgroundColor, border: style.border }}>{preview.subjectName}</span>
++            </div>
++          </div>
++        </div>
++      })}
++      <p className="editor-help">样例使用浅色背景核对配色。填充透明度只影响底色，文字保持清晰；组件整体透明度只作用于样例，不影响操作按钮和说明。隐藏组件仍提供外观样例供核对。</p>
++    </>}
++  </section>
++}
+--- /dev/null
++++ b/web/tests/subject-visual.test.ts
+@@ -0,0 +1,65 @@
++import { describe, expect, it, vi } from 'vitest'
++import { ApiError, HttpApi } from '../src/api/client'
++import { ProtocolFault, ProtocolVersionFault } from '../src/api/protocol'
++import { SubjectVisualController, type SubjectVisualState } from '../src/api/subject-visual-controller'
++import { subjectVisual, previewStyle, type HomeworkTarget, type SubjectVisualPreview } from '../src/api/subject-visual-protocol'
++const target: HomeworkTarget = { kind: 'HOMEWORK', classId: '1', subjectId: '2', ownerTeacherId: '3', date: '2026-11-01' }
++function wire() { return { schemaVersion: 1, status: 'SUBJECT_VISUAL', key: { ...target }, subjectId: '2', subjectName: '数学', subjectRevision: '18446744073709551615', displayRevision: '4', rulesVersion: 1, effectiveRgb: '#C98282', mode: 'FILLED', homeworkFillPercent: 0, courseFillPercent: 20, homeworkComponentOpacityPercent: 50, courseComponentOpacityPercent: 100, homeworkVisible: true, courseVisible: false } }
++function deferred<T>() { let resolve!: (v: T) => void, reject!: (error: unknown) => void; const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no }); return { promise, resolve, reject } }
++describe('school subject visual read-only preview', () => {
++  it('binds exact homework scope and keeps independent 64-bit revisions; rejects CSS, versions, extra authority and mixed modes', () => {
++    expect(subjectVisual(wire(), target).subjectRevision).toBe('18446744073709551615')
++    for (const patch of [{ subjectId: '3' }, { key: { ...target, ownerTeacherId: '4' } }, { key: { ...target, date: '2026-11-02' } }, { mode: 'FILLED;url(x)' }, { effectiveRgb: 'red' }, { effectiveRgb: '#c98282' }, { effectiveRgb: 'url(https://x)' }, { homeworkFillPercent: 101 }, { courseComponentOpacityPercent: NaN }, { homeworkVisible: 'true' }, { subjectRevision: '0' }, { displayRevision: '04' }, { palette: [] }]) {
++      expect(() => subjectVisual({ ...wire(), ...patch }, target)).toThrow(ProtocolFault)
++    }
++    for (const name of ['schemaVersion', 'rulesVersion']) {
++      expect(() => subjectVisual({ ...wire(), [name]: 2 }, target)).toThrow(ProtocolVersionFault)
++      expect(() => subjectVisual({ ...wire(), [name]: '2' }, target)).not.toThrow(ProtocolVersionFault)
++      expect(() => subjectVisual({ ...wire(), [name]: '2' }, target)).toThrow(ProtocolFault)
++    }
++  })
++  it('keeps zero fill FILLED without border, separates whole alpha, and restores stored RGB when toggling mode', () => {
++    const preview = subjectVisual(wire(), target)
++    expect(previewStyle(preview, 'homework')).toEqual({ componentOpacity: 0.5, backgroundColor: 'rgba(201, 130, 130, 0)', border: 'none' })
++    expect(previewStyle(preview, 'course')).toEqual({ componentOpacity: 1, backgroundColor: 'rgba(201, 130, 130, 0.2)', border: 'none' })
++    const outlined = subjectVisual({ ...wire(), mode: 'OUTLINED' }, target)
++    expect(previewStyle(outlined, 'course')).toEqual({ componentOpacity: 1, backgroundColor: 'rgba(201, 130, 130, 0)', border: '1px solid currentColor' })
++    expect(outlined.effectiveRgb).toBe(preview.effectiveRgb)
++    const invisible = subjectVisual({ ...wire(), homeworkComponentOpacityPercent: 0, homeworkFillPercent: 100 }, target)
++    expect(previewStyle(invisible, 'homework')).toEqual({ componentOpacity: 0, backgroundColor: 'rgba(201, 130, 130, 1)', border: 'none' })
++  })
++  it('rereads unchanged exact scope without keeping an old receipt; aborts and rejects late scope results', async () => {
++    const first = deferred<SubjectVisualPreview>(), second = deferred<SubjectVisualPreview>(), third = deferred<SubjectVisualPreview>()
++    const api = { subjectVisual: vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise).mockReturnValueOnce(third.promise) }, states: SubjectVisualState[] = [], revoked = vi.fn()
++    const owner = new SubjectVisualController(api, state => states.push(state), revoked)
++    const a = owner.load(target), b = owner.load(target)
++    expect(api.subjectVisual.mock.calls[0]![1].aborted).toBe(true)
++    expect(states.at(-1)!.preview).toBeNull()
++    second.resolve(subjectVisual(wire(), target)); await b
++    first.resolve(subjectVisual({ ...wire(), displayRevision: '1' }, target)); await a
++    expect(states.at(-1)!.preview?.displayRevision).toBe('4')
++    const other = { ...target, subjectId: '9' }, c = owner.load(other)
++    expect(states.at(-1)!.preview).toBeNull()
++    owner.dispose(); third.resolve(subjectVisual({ ...wire(), subjectId: '9', key: other }, other)); await c
++    expect(states.at(-1)!.phase).toBe('loading'); expect(revoked).not.toHaveBeenCalled()
++  })
++  it('clears preview on denied current read and never publishes or acts on a late denial after disposal', async () => {
++    const pending = deferred<SubjectVisualPreview>(), states: SubjectVisualState[] = [], revoked = vi.fn()
++    const api = { subjectVisual: vi.fn().mockRejectedValueOnce(new ApiError(403, 'FORBIDDEN')).mockReturnValueOnce(pending.promise) }
++    const owner = new SubjectVisualController(api, s => states.push(s), revoked)
++    await owner.load(target)
++    expect(states.at(-1)?.preview).toBeNull(); expect(states.at(-1)?.phase).toBe('failed'); expect(revoked).toHaveBeenCalledTimes(1)
++    const other = new SubjectVisualController(api, s => states.push(s), revoked), result = other.load(target)
++    other.dispose(); pending.reject(new ApiError(401, 'UNAUTHORIZED')); await result
++    expect(revoked).toHaveBeenCalledTimes(1)
++  })
++  it('uses only same-origin GET for the exact key without a mutation payload', async () => {
++    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(wire()), { headers: { 'Content-Type': 'application/json' } }))
++    const api = new HttpApi(new URL('https://board.school/fc/api/v1/'), fetcher)
++    expect((await api.subjectVisual(target, new AbortController().signal)).subjectId).toBe('2')
++    const [url, init] = fetcher.mock.calls[0]!
++    expect(String(url)).toBe('https://board.school/fc/api/v1/content/homework/1/2/3/2026-11-01/visual')
++    expect(init?.method).toBe('GET'); expect(init?.credentials).toBe('same-origin'); expect(init?.body).toBeUndefined()
++    expect(new Headers(init?.headers).has('X-FC-CSRF')).toBe(false)
++  })
++})

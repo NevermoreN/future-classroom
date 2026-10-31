@@ -30,7 +30,7 @@ impl CancellationSource {
     pub fn cancel(&self) -> u64 {
         let previous = self
             .0
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                 Some(n.saturating_add(1))
             })
             .unwrap_or_else(|n| n);

@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "cleanup": "PASS",
+  "marker": "FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9",
+  "scope": "Authorized isolated Win11 headless Edge cache browser; actual browser assertions belong to separate CDP harness",
+  "sourceSha256": "4689cd7aa7e0a46da103e459e692aa67d70041b06c1f20a432c5b92a153b9755",
+  "nativeHelperSha256": "b700a971ac39524b6696ac2850b555e248618806ea85782b26354b2dd20882e9",
+  "testedPrototypeSha256": "fa6a06d8d81869151cef54f8d12e7b0d9cea8749fcd8f17b7eb8a96533daf2e0",
+  "promotionScope": "Sibling helper import and provenance only; native ownership blocks unchanged",
+  "edgeExe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "edgeExpectedSha256": "f87d927bed3597f19c70af67bc786dd22e4eca3b5c7cc050336a016bb42f7fda",
+  "edgeExpectedVersion": "156.0.4314.50",
+  "spkiSha256Base64": "B05IZExJAp4sPd19s+u1UEq6O3YlYYkeax8fAf8ejFc=",
+  "profile": "NEW_OWNED_ONLY",
+  "deadlineSeconds": 180,
+  "nativeStopGraceSeconds": 20,
+  "muteAudio": true,
+  "existingBrowsers": "UNTOUCHED",
+  "microphone": "NOT_REQUESTED",
+  "rootTrustStore": "UNTOUCHED",
+  "sshConfiguration": "UNTOUCHED",
+  "cacheAssertions": "NOT_RUN_BY_THIS_OWNER",
+  "uploadedScriptSha256": {
+    "supervise": "b8b9fd32b3c595c97370d8cf6e87549b9a43bc0e15f3d02428efcda441e86b8e",
+    "stop": "d36249a8e98097e5a4036211946d4dc6c611bdd6a9f925510526f4d6424175c0",
+    "capture": "221013641b0852cb05c69a95618ced01d942de8320e8d86ad53767b4ffa73c4f",
+    "cleanup": "4bc496b05163ab3b8b7d475fc46e80562449a6690eec4e13046b8abcd53ce335"
+  },
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9",
+  "controlFile": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner.json.control.json",
+  "controlScriptsParse": "PASS",
+  "ready": {
+    "pid": 12248,
+    "headless": true,
+    "muteAudio": true,
+    "jobName": "Local\\FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-c9167dbc1fc8492a96ba7eddc614f8fb",
+    "profile": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9\\profile",
+    "readyOriginalBytes": 60,
+    "boundLoopback": true,
+    "productVersion": "156.0.4314.50",
+    "readyOriginalSha256": "685ba7b91c3b25bc4a85adb08a7f5edd0fb9dc33afd20ba6b99a136517dd6ca1",
+    "webSocketPath": "/devtools/browser/7d2801e6-9aa5-4db0-8176-a6d086f35b11",
+    "exe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "fileVersion": "156.0.4314.50",
+    "port": 51426,
+    "startTicks": "639290714877137939",
+    "marker": "FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9"
+  },
+  "nativeOutcome": {
+    "elapsedMillis": 50739,
+    "originalHandlesClosed": true,
+    "originalPrimaryExited": true,
+    "stopRequestOnly": true,
+    "failure": null,
+    "ready": true,
+    "jobBoundBeforeResume": true,
+    "reason": "capability-stop",
+    "existingBrowserProcesses": "NOT_TOUCHED",
+    "originalPrimaryExitCode": 1,
+    "actualJobProcessesZero": true,
+    "marker": "FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9",
+    "maximumJobProcesses": 64
+  },
+  "sshSupervisorRaw": {
+    "stdout": {
+      "bytes": 1171,
+      "observedBytes": 1171,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "cd00349e5045892ea02f457aa2f3b6c8e7973d79910d71bd11115ad618cf6076",
+      "base64": "RURHRV9DQUNIRV9SRUFEWSB7InBpZCI6MTIyNDgsImhlYWRsZXNzIjp0cnVlLCJtdXRlQXVkaW8iOnRydWUsImpvYk5hbWUiOiJMb2NhbFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci0xNmQzNWI3ZjI3MmU0MjcyOTkwOWY3NThkNmRlYWRjOS1jOTE2N2RiYzFmYzg0OTJhOTZiYTdlZGRjNjE0ZjhmYiIsInByb2ZpbGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci0xNmQzNWI3ZjI3MmU0MjcyOTkwOWY3NThkNmRlYWRjOVxccHJvZmlsZSIsInJlYWR5T3JpZ2luYWxCeXRlcyI6NjAsImJvdW5kTG9vcGJhY2siOnRydWUsInByb2R1Y3RWZXJzaW9uIjoiMTU2LjAuNDMxNC41MCIsInJlYWR5T3JpZ2luYWxTaGEyNTYiOiI2ODViYTdiOTFjM2IyNWJjNGE4NWFkYjA4YTdmNWVkZDBmYjlkYzMzYWZkMjBiYTZiOTlhMTM2NTE3ZGQ2Y2ExIiwid2ViU29ja2V0UGF0aCI6Ii9kZXZ0b29scy9icm93c2VyLzdkMjgwMWU2LTlhYTUtNGRiMC04MTc2LWE2ZDA4NmYzNWIxMSIsImV4ZSI6IkM6XFxQcm9ncmFtIEZpbGVzICh4ODYpXFxNaWNyb3NvZnRcXEVkZ2VcXEFwcGxpY2F0aW9uXFxtc2VkZ2UuZXhlIiwiZmlsZVZlcnNpb24iOiIxNTYuMC40MzE0LjUwIiwicG9ydCI6NTE0MjYsInN0YXJ0VGlja3MiOiI2MzkyOTA3MTQ4NzcxMzc5MzkiLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5In0NCkVER0VfQ0FDSEVfU1RPUFBFRCB7ImVsYXBzZWRNaWxsaXMiOjUwNzM5LCJvcmlnaW5hbEhhbmRsZXNDbG9zZWQiOnRydWUsIm9yaWdpbmFsUHJpbWFyeUV4aXRlZCI6dHJ1ZSwic3RvcFJlcXVlc3RPbmx5Ijp0cnVlLCJmYWlsdXJlIjpudWxsLCJyZWFkeSI6dHJ1ZSwiam9iQm91bmRCZWZvcmVSZXN1bWUiOnRydWUsInJlYXNvbiI6ImNhcGFiaWxpdHktc3RvcCIsImV4aXN0aW5nQnJvd3NlclByb2Nlc3NlcyI6Ik5PVF9UT1VDSEVEIiwib3JpZ2luYWxQcmltYXJ5RXhpdENvZGUiOjEsImFjdHVhbEpvYlByb2Nlc3Nlc1plcm8iOnRydWUsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItMTZkMzViN2YyNzJlNDI3Mjk5MDlmNzU4ZDZkZWFkYzkiLCJtYXhpbXVtSm9iUHJvY2Vzc2VzIjo2NH0NCg=="
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "remoteRawEvidence": {
+    ".edge-process.json": {
+      "bytes": 534,
+      "sha256": "91cbf0398db27ffc2e984c1d2c641fab750b88eaacc027e4e9f5cbb80631f917"
+    },
+    ".edge-outcome.json": {
+      "bytes": 384,
+      "sha256": "3baa56c323e41ed685228798aaa523f0eafa00e0b7f794e988297e8618c8802f"
+    },
+    ".edge-ready.json": {
+      "bytes": 747,
+      "sha256": "22ba5d43e03ebbed6b59dd0cb5f3f93d190b3f016d97b26b2473d1802093cff8"
+    },
+    "edge.stderr": {
+      "bytes": 1157,
+      "sha256": "30aadf3f6b0c6a818a11be70a40926a9cb35531897118f488bf8f05c8508c0d7"
+    },
+    ".edge-supervisor.json": {
+      "bytes": 191,
+      "sha256": "4c1703f19b4b7a1732d89b6a877a5db9a8ad1a5df54ea4ea9824c5b98bbf7446"
+    },
+    "edge.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".edge-assigned.json": {
+      "bytes": 195,
+      "sha256": "9dabd75a4584068198ff3b46fe28c3afab3ff1898ab61b676ae2c2682638b2f1"
+    },
+    "edge-devtools.raw": {
+      "bytes": 60,
+      "sha256": "685ba7b91c3b25bc4a85adb08a7f5edd0fb9dc33afd20ba6b99a136517dd6ca1"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw",
+    "files": {
+      ".edge-process.json": {
+        "status": "PASS",
+        "bytes": 534,
+        "sha256": "91cbf0398db27ffc2e984c1d2c641fab750b88eaacc027e4e9f5cbb80631f917",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/.edge-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5IiwicHJvZmlsZSI6IkM6XFxVc2Vyc1xcRWxpb3JcXEFwcERhdGFcXExvY2FsXFxUZW1wXFxGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5XFxwcm9maWxlIiwicGlkIjoxMjI0OCwic3RhcnRUaWNrcyI6IjYzOTI5MDcxNDg3NzEzNzkzOSIsImV4ZSI6IkM6XFxQcm9ncmFtIEZpbGVzICh4ODYpXFxNaWNyb3NvZnRcXEVkZ2VcXEFwcGxpY2F0aW9uXFxtc2VkZ2UuZXhlIiwiZXhlU2hhMjU2IjoiZjg3ZDkyN2JlZDM1OTdmMTljNzBhZjY3YmM3ODZkZDIyZTRlY2EzYjVjN2NjMDUwMzM2YTAxNmJiNDJmN2ZkYSIsImpvYk5hbWUiOiJMb2NhbFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci0xNmQzNWI3ZjI3MmU0MjcyOTkwOWY3NThkNmRlYWRjOS1jOTE2N2RiYzFmYzg0OTJhOTZiYTdlZGRjNjE0ZjhmYiIsImNyZWF0ZWRTdXNwZW5kZWQiOnRydWV9"
+      },
+      ".edge-outcome.json": {
+        "status": "PASS",
+        "bytes": 384,
+        "sha256": "3baa56c323e41ed685228798aaa523f0eafa00e0b7f794e988297e8618c8802f",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/.edge-outcome.json",
+        "base64": "eyJlbGFwc2VkTWlsbGlzIjo1MDczOSwib3JpZ2luYWxIYW5kbGVzQ2xvc2VkIjp0cnVlLCJvcmlnaW5hbFByaW1hcnlFeGl0ZWQiOnRydWUsInN0b3BSZXF1ZXN0T25seSI6dHJ1ZSwiZmFpbHVyZSI6bnVsbCwicmVhZHkiOnRydWUsImpvYkJvdW5kQmVmb3JlUmVzdW1lIjp0cnVlLCJyZWFzb24iOiJjYXBhYmlsaXR5LXN0b3AiLCJleGlzdGluZ0Jyb3dzZXJQcm9jZXNzZXMiOiJOT1RfVE9VQ0hFRCIsIm9yaWdpbmFsUHJpbWFyeUV4aXRDb2RlIjoxLCJhY3R1YWxKb2JQcm9jZXNzZXNaZXJvIjp0cnVlLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5IiwibWF4aW11bUpvYlByb2Nlc3NlcyI6NjR9"
+      },
+      ".edge-ready.json": {
+        "status": "PASS",
+        "bytes": 747,
+        "sha256": "22ba5d43e03ebbed6b59dd0cb5f3f93d190b3f016d97b26b2473d1802093cff8",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/.edge-ready.json",
+        "base64": "eyJwaWQiOjEyMjQ4LCJoZWFkbGVzcyI6dHJ1ZSwibXV0ZUF1ZGlvIjp0cnVlLCJqb2JOYW1lIjoiTG9jYWxcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItMTZkMzViN2YyNzJlNDI3Mjk5MDlmNzU4ZDZkZWFkYzktYzkxNjdkYmMxZmM4NDkyYTk2YmE3ZWRkYzYxNGY4ZmIiLCJwcm9maWxlIjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXBcXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItMTZkMzViN2YyNzJlNDI3Mjk5MDlmNzU4ZDZkZWFkYzlcXHByb2ZpbGUiLCJyZWFkeU9yaWdpbmFsQnl0ZXMiOjYwLCJib3VuZExvb3BiYWNrIjp0cnVlLCJwcm9kdWN0VmVyc2lvbiI6IjE1Ni4wLjQzMTQuNTAiLCJyZWFkeU9yaWdpbmFsU2hhMjU2IjoiNjg1YmE3YjkxYzNiMjViYzRhODVhZGIwOGE3ZjVlZGQwZmI5ZGMzM2FmZDIwYmE2Yjk5YTEzNjUxN2RkNmNhMSIsIndlYlNvY2tldFBhdGgiOiIvZGV2dG9vbHMvYnJvd3Nlci83ZDI4MDFlNi05YWE1LTRkYjAtODE3Ni1hNmQwODZmMzViMTEiLCJleGUiOiJDOlxcUHJvZ3JhbSBGaWxlcyAoeDg2KVxcTWljcm9zb2Z0XFxFZGdlXFxBcHBsaWNhdGlvblxcbXNlZGdlLmV4ZSIsImZpbGVWZXJzaW9uIjoiMTU2LjAuNDMxNC41MCIsInBvcnQiOjUxNDI2LCJzdGFydFRpY2tzIjoiNjM5MjkwNzE0ODc3MTM3OTM5IiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtQnJvd3Nlci0xNmQzNWI3ZjI3MmU0MjcyOTkwOWY3NThkNmRlYWRjOSJ9"
+      },
+      "edge.stderr": {
+        "status": "PASS",
+        "bytes": 1157,
+        "sha256": "30aadf3f6b0c6a818a11be70a40926a9cb35531897118f488bf8f05c8508c0d7",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/edge.stderr",
+        "base64": "DQpEZXZUb29scyBsaXN0ZW5pbmcgb24gd3M6Ly8xMjcuMC4wLjE6NTE0MjYvZGV2dG9vbHMvYnJvd3Nlci83ZDI4MDFlNi05YWE1LTRkYjAtODE3Ni1hNmQwODZmMzViMTENClsxMjI0ODozODE4ODoxMTAxLzAzMjQ0OC4wOTg6RVJST1I6Y2hyb21lXGJyb3dzZXJcaW1wb3J0ZXJcZWRnZV9jaGluYV9icm93c2Vyc1xlZGdlX3FxYnJvd3Nlcl9pbXBvcnRlcl91dGlsc193aW4uY2M6MTY1XSBRUUJyb3dzZXIgdXNlciBkYXRhIHBhdGggbm90IGZvdW5kLg0KWzEyMjQ4OjM0NjQ4OjExMDEvMDMyNDQ4LjE5ODpFUlJPUjpncHVcaXBjXGNsaWVudFxjb21tYW5kX2J1ZmZlcl9wcm94eV9pbXBsLmNjOjQ3Nl0gR1BVIHN0YXRlIGludmFsaWQgYWZ0ZXIgV2FpdEZvckdldE9mZnNldEluUmFuZ2UuDQpbMTIyNDg6MzQ2NDg6MTEwMS8wMzI0NDguMTk4OkVSUk9SOmdwdVxpcGNcY2xpZW50XGNvbW1hbmRfYnVmZmVyX3Byb3h5X2ltcGwuY2M6NDc2XSBHUFUgc3RhdGUgaW52YWxpZCBhZnRlciBXYWl0Rm9yR2V0T2Zmc2V0SW5SYW5nZS4NClsxMjI0ODozNDY0ODoxMTAxLzAzMjQ0OC4xOTg6RVJST1I6Y29udGVudFxicm93c2VyXGdwdVxncHVfcHJvY2Vzc19ob3N0LmNjOjExMDRdIEdQVSBwcm9jZXNzIGV4aXRlZCB1bmV4cGVjdGVkbHk6IGV4aXRfY29kZT0zNA0KWzEyMjQ4OjM0NDQ4OjExMDEvMDMyNDUwLjA1MDpFUlJPUjpjaHJvbWVcYnJvd3NlclxpbXBvcnRlclxlZGdlX2NoaW5hX2Jyb3dzZXJzXGVkZ2VfcXFicm93c2VyX2ltcG9ydGVyX3V0aWxzX3dpbi5jYzoxNjVdIFFRQnJvd3NlciB1c2VyIGRhdGEgcGF0aCBub3QgZm91bmQuDQpbMTIyNDg6MTkwMDQ6MTEwMS8wMzI0NTAuMzgzOkVSUk9SOmNocm9tZVxicm93c2VyXGVkZ2VfYWFkY1x1c2VyX2FnZV91dGlsc193aW4uY2M6MTYzXSBjb3VsZG4ndCBnZXQgdXNlcjIuDQpbMTIyNDg6MTkwMDQ6MTEwMS8wMzI0NTAuMzgzOkVSUk9SOmNocm9tZVxicm93c2VyXGVkZ2VfYWFkY1x1c2VyX2FnZV91dGlsc193aW4uY2M6MzEwXSBjb3VsZG4ndCBnZXQgd2luZG93cyB1c2VyIGFnZSBncm91cC4NClsxMjI0ODoxOTAwNDoxMTAxLzAzMjQ1MC4zODM6RVJST1I6Y2hyb21lXGJyb3dzZXJcZWRnZV9hYWRjXHVzZXJfYWdlX3V0aWxzX3dpbi5jYzoxNTZdIGNhbGxiYWNrIHdhc24ndCBjYWxsZWQuDQo="
+      },
+      ".edge-supervisor.json": {
+        "status": "PASS",
+        "bytes": 191,
+        "sha256": "4c1703f19b4b7a1732d89b6a877a5db9a8ad1a5df54ea4ea9824c5b98bbf7446",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/.edge-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5IiwiZXhlIjoiQzpcXFdpbmRvd3NcXFN5c3RlbTMyXFxXaW5kb3dzUG93ZXJTaGVsbFxcdjEuMFxccG93ZXJzaGVsbC5leGUiLCJwaWQiOjMzODA0LCJzdGFydFRpY2tzIjoiNjM5MjkwNzE0ODcyNDUyMjE5In0="
+      },
+      "edge.stdout": {
+        "status": "PASS",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/edge.stdout",
+        "base64": ""
+      },
+      ".edge-assigned.json": {
+        "status": "PASS",
+        "bytes": 195,
+        "sha256": "9dabd75a4584068198ff3b46fe28c3afab3ff1898ab61b676ae2c2682638b2f1",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/.edge-assigned.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1Ccm93c2VyLTE2ZDM1YjdmMjcyZTQyNzI5OTA5Zjc1OGQ2ZGVhZGM5IiwicGlkIjoxMjI0OCwic3RhcnRUaWNrcyI6IjYzOTI5MDcxNDg3NzEzNzkzOSIsImFzc2lnbmVkQmVmb3JlUmVzdW1lIjp0cnVlLCJicmVha2F3YXlBbGxvd2VkIjpmYWxzZSwia2lsbE9uSm9iQ2xvc2UiOnRydWV9"
+      },
+      "edge-devtools.raw": {
+        "status": "PASS",
+        "bytes": 60,
+        "sha256": "685ba7b91c3b25bc4a85adb08a7f5edd0fb9dc33afd20ba6b99a136517dd6ca1",
+        "artifact": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json.browser-edge-owner-FutureClassroom-Test-Browser-16d35b7f272e42729909f758d6deadc9-raw/edge-devtools.raw",
+        "base64": "NTE0MjYKL2RldnRvb2xzL2Jyb3dzZXIvN2QyODAxZTYtOWFhNS00ZGIwLTgxNzYtYTZkMDg2ZjM1YjEx"
+      }
+    }
+  },
+  "cleanupDetails": {
+    "originalPrimaryExited": true,
+    "rootTrustStore": "UNTOUCHED",
+    "systemVolume": "UNTOUCHED",
+    "rootAbsent": true,
+    "status": "PASS",
+    "existingBrowsers": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "actualJobProcessesZero": true
+  },
+  "remoteControlRunsRaw": [
+    {
+      "kind": "inline-owner-control",
+      "scriptUtf16Sha256": "2f2669412818c2f9b03b0d9bdf73d9327eeee55e9776f82b634b4ced5142e0bd",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 97,
+        "sha256": "508c08c94d13905f93b8a6a2e593ad9c2c738688a1422e3373df19b65d777efa",
+        "base64": "QzpcVXNlcnNcRWxpb3JcQXBwRGF0YVxMb2NhbFxUZW1wXEZ1dHVyZUNsYXNzcm9vbS1UZXN0LUJyb3dzZXItMTZkMzViN2YyNzJlNDI3Mjk5MDlmNzU4ZDZkZWFkYzkNCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "kind": "inline-owner-control",
+      "scriptUtf16Sha256": "10355d81b16a32b9a7e6420936f92fffc3728b503f6262830b5a86e51c739bfa",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 25,
+        "sha256": "2e1070120844d944fa80cb744ac9e00e431338caab7102827469afb7b3399821",
+        "base64": "RURHRV9DT05UUk9MX1BBUlNFX1BBU1MNCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "edge-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 876,
+        "sha256": "c24711a56c645b59a71cdfe669e4b94dd64293962c22d629ce181b2dc9a32a9d",
+        "base64": "eyIuZWRnZS1wcm9jZXNzLmpzb24iOnsiYnl0ZXMiOjUzNCwic2hhMjU2IjoiOTFjYmYwMzk4ZGIyN2ZmYzJlOTg0YzFkMmM2NDFmYWI3NTBiODhlYWFjYzAyN2U0ZTlmNWNiYjgwNjMxZjkxNyJ9LCIuZWRnZS1vdXRjb21lLmpzb24iOnsiYnl0ZXMiOjM4NCwic2hhMjU2IjoiM2JhYTU2YzMyM2U0MWVkNjg1MjI4Nzk4YWFhNTIzZjBlYWZhMDBlMGI3Zjc5NGU5ODgyOTdlODYxOGM4ODAyZiJ9LCIuZWRnZS1yZWFkeS5qc29uIjp7ImJ5dGVzIjo3NDcsInNoYTI1NiI6IjIyYmE1ZDQzZTAzZWJiZWQ2YjU5ZGQwY2I1ZjNmOTNkMTkwYjNmMDE2ZDk3YjI2YjI0NzNkMTgwMjA5M2NmZjgifSwiZWRnZS5zdGRlcnIiOnsiYnl0ZXMiOjExNTcsInNoYTI1NiI6IjMwYWFkZjNmNmIwYzZhODE4YTExYmU3MGE0MDkyNmE5Y2IzNTUzMTg5NzExOGY0ODhiZjhmMDVjODUwOGMwZDcifSwiLmVkZ2Utc3VwZXJ2aXNvci5qc29uIjp7ImJ5dGVzIjoxOTEsInNoYTI1NiI6IjRjMTcwM2YxOWI0YjdhMTczMmQ4OWI2YTg3N2E1ZGI5YThhZDFhNWRmNTRlYTRlYTk4MjRjNWI5OGJiZjc0NDYifSwiZWRnZS5zdGRvdXQiOnsiYnl0ZXMiOjAsInNoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifSwiLmVkZ2UtYXNzaWduZWQuanNvbiI6eyJieXRlcyI6MTk1LCJzaGEyNTYiOiI5ZGFiZDc1YTQ1ODQwNjgxOThmZjNiNDZmZTI4YzNhZmFiM2ZmMTg5OGFiNjFiNjc2YWUyYzI2ODI2MzhiMmYxIn0sImVkZ2UtZGV2dG9vbHMucmF3Ijp7ImJ5dGVzIjo2MCwic2hhMjU2IjoiNjg1YmE3YjkxYzNiMjViYzRhODVhZGIwOGE3ZjVlZGQwZmI5ZGMzM2FmZDIwYmE2Yjk5YTEzNjUxN2RkNmNhMSJ9fQ0K"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "edge-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 214,
+        "sha256": "4a917bb3ce4dd24429739f4857916384ec31170b2a0521cbd50147027d71b05e",
+        "base64": "eyJvcmlnaW5hbFByaW1hcnlFeGl0ZWQiOnRydWUsInJvb3RUcnVzdFN0b3JlIjoiVU5UT1VDSEVEIiwic3lzdGVtVm9sdW1lIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwic3RhdHVzIjoiUEFTUyIsImV4aXN0aW5nQnJvd3NlcnMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwiYWN0dWFsSm9iUHJvY2Vzc2VzWmVybyI6dHJ1ZX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

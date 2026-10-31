@@ -1,0 +1,46 @@
+--- unchanged-main/scripts/windows-tls-business-probe.py
++++ external-msvc-reprobe/windows-tls-business-probe.py
+@@ -447,6 +447,17 @@
+     return intervals(item) == original
+ 
+ 
++def four_original_bodies_admitted(item, original, first_admitted_transfers):
++    # Progress is throttled: a prior vacant snapshot can predate successful HTTP
++    # operations already completed by the client. Anchor only at the first exact
++    # partial admission; the remaining three must cause exactly three transfers.
++    return (len(original) == 4 and item["jsonBodyRecords"] == 4
++            and len(item["requests"]) == 4 and len(intervals(item)) == 4
++            and item["acceptance"]["bound_slots"] == 4
++            and item["acceptance"]["transfers"] == first_admitted_transfers + 3
++            and item["pendingJobs"] == 0 and unchanged_intervals(item, original))
++
++
+ def capacity_transport_rejection(error):
+     # No timeout, refusal, generic TLS/certificate failure or alert is evidence
+     # that this native capacity owner accepted then closed this exact socket.
+@@ -581,10 +592,11 @@
+ 
+ def exercise_capacity_accept(client, progress, body, receipt):
+     require(client.deadline - time.monotonic() >= 5, "insufficient original client budget for four-body capacity stage")
+-    vacant = progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
++    progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
+                            and p["acceptance"]["bound_slots"] == 0 and p["acceptance"]["ready_slots"] == 4,
+                            "prior business requests physically retired/rearmed")
+     pending, original = [], {}
++    first_admitted_transfers = None
+     try:
+         for index in range(1, 5):
+             pending.append(PendingReceipt(client, index, body))
+@@ -595,9 +607,9 @@
+             new_key = next(key for key in intervals(observed) if key not in original)
+             original = intervals(observed)
+             pending[-1].event["originalInterval"] = original[new_key]
+-        admitted = progress.wait(client, lambda p: p["acceptance"]["bound_slots"] == 4
+-                                 and p["acceptance"]["transfers"] == vacant["acceptance"]["transfers"] + 4
+-                                 and p["pendingJobs"] == 0 and unchanged_intervals(p, original),
++            if index == 1:
++                first_admitted_transfers = observed["acceptance"]["transfers"]
++        admitted = progress.wait(client, lambda p: four_original_bodies_admitted(p, original, first_admitted_transfers),
+                                  "four original admitted bodies, no queued worker work")
+         for index in (1, 2):
+             reject_full_capacity(client, index)

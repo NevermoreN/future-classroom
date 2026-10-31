@@ -1,0 +1,74 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_PASS_RUNTIME_FIX_NOT_YET_RUN",
+  "recordedAt": "2026-10-31T18:01:13.071831+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "files": [
+    {
+      "path": "crates/fc-storage/src/business/subject_visual.rs",
+      "beforeSha256": "577167301402c5b068f078cde6023cb1267dc71a9585a1d562c3258b7cf3887e",
+      "beforeBytes": 19579,
+      "afterSha256": "7645ff6a7a5498378a794fc63c8ba52866811c4a5671dd09b0861723634b8d25",
+      "afterBytes": 20185
+    },
+    {
+      "path": "crates/fc-storage/src/business/subject_visual/tests.rs",
+      "beforeSha256": "0e5f10d621bb819535169b7897b1053f0a0baba1100757f520a8e2eacb4e25c8",
+      "beforeBytes": 30886,
+      "afterSha256": "0034906257e4f80827012f55b9c0796f3dca310fbbda4eade94116940d03433d",
+      "afterBytes": 33627
+    }
+  ],
+  "originalWindowsFailure": {
+    "path": "/tmp/fc-round35-visuals-evidence/windows-visual-runtime-first.json",
+    "sha256": "831d23aa32a662865b27e6935b4c83be2cd44a2617518b2e20348227bb795dbe",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "case": "subject_visual_cancel_lock_and_day_floor_cannot_return_old_scope_as_current",
+    "failure": "wall-clock rollback visual GET expected409 but returned200"
+  },
+  "change": "Only new subject_visual_preview calls the original observe_content_day(actor) before the coherent colour/display query, forwarding Domain(ContentError),Unavailable,Faulted without demotion. Original observer retains exact session/execution fence and persisted shared date floor. No new document/sidecar/clock floor.",
+  "newStorageRegression": "business::subject_visual::tests::visual_only_new_day_is_durable_against_wall_rollback_and_physical_reopen",
+  "regressionScope": "Only visual GETs advance original floor; same-day no repeated publication; new-day observation survives actual writer shutdown/SQLite reopen; wall rollback rejected both before/after reopen; returning to durable day succeeds; no content record or palette/display mutation.",
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-storage/src/business/subject_visual.rs",
+        "crates/fc-storage/src/business/subject_visual/tests.rs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "round36SourceUntouched": {
+    "path": "/tmp/fc-round36-public-desktop-worktree/crates/fc-storage/src/business/subject_visual.rs",
+    "sha256": "577167301402c5b068f078cde6023cb1267dc71a9585a1d562c3258b7cf3887e"
+  },
+  "notRun": [
+    "Cargo",
+    "Clippy",
+    "Windows",
+    "remote",
+    "Git",
+    "CI"
+  ]
+}

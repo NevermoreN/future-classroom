@@ -1,0 +1,107 @@
+{
+  "status": "SOURCE_FROZEN_THIRD_NOT_RECOMPILED_BY_THIS_AGENT",
+  "recordedUtc": "2026-10-31T17:46:32.722550+00:00",
+  "previousFreezePreserved": {
+    "path": "/tmp/fc-round35-visuals-evidence/editor-source-freeze-second.json",
+    "sha256": "4abbadbe73606c1072a209249215572beb84932a15856278e615ba445ab52632"
+  },
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 247223,
+      "sha256": "834c69c23ba89f90f711b371c892792359e9ebc5c73110192995097d43db25ee",
+      "previousSha256": "62d1d1a61e82de405bac0382f912f07417757ed9edc93c4ee85ad4e6003f1816",
+      "changedFromSecondFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+      "bytes": 34345,
+      "sha256": "f3934285667634cc49991f28a75ebac66e51771002a127888517b1304878b5df",
+      "previousSha256": "cba7a532ba18a017bd8e0b48fec5a3689cc7034fb2b7938821fa116a16f2f900",
+      "changedFromSecondFreeze": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 41972,
+      "sha256": "a4f895a554f67f935efa32d9acfad23d8fc39289c619bb49bc1fe5402806f4bf",
+      "previousSha256": "a4f895a554f67f935efa32d9acfad23d8fc39289c619bb49bc1fe5402806f4bf",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18377,
+      "sha256": "d9c68833fc587b72d98c14e25575ab7597e886a58ad23fd8f7aa06a74d2e7516",
+      "previousSha256": "d9c68833fc587b72d98c14e25575ab7597e886a58ad23fd8f7aa06a74d2e7516",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 102452,
+      "sha256": "db290145130fb8e5e0f7a6c80ba3be19f874c7361908df1283aca0d369e49a00",
+      "previousSha256": "db290145130fb8e5e0f7a6c80ba3be19f874c7361908df1283aca0d369e49a00",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1485,
+      "sha256": "2b229d54cc06da8107a9344b3ec215efa6ffb00294881305b2303886f21abe43",
+      "previousSha256": "2b229d54cc06da8107a9344b3ec215efa6ffb00294881305b2303886f21abe43",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 109632,
+      "sha256": "90bd1a7392b6b3b5145415b4aef973051573b261d8379fa44e4bcd42105b061a",
+      "previousSha256": "90bd1a7392b6b3b5145415b4aef973051573b261d8379fa44e4bcd42105b061a",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor/visuals.rs",
+      "bytes": 8510,
+      "sha256": "60ef4fa641e073a4b0ff0e64560a48f871fa1b95ce2b1edabcb1fdaca34a5d8b",
+      "previousSha256": "60ef4fa641e073a4b0ff0e64560a48f871fa1b95ce2b1edabcb1fdaca34a5d8b",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor/visual_tests.rs",
+      "bytes": 8515,
+      "sha256": "d8465933e6e4d4aae3d27c6ee91352a208a82477e42e58728cff2f4bfd8dcb19",
+      "previousSha256": "d8465933e6e4d4aae3d27c6ee91352a208a82477e42e58728cff2f4bfd8dcb19",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_flow.rs",
+      "bytes": 2666,
+      "sha256": "8a2b35d23cebd3a1732458cfbf5b22b4030f44ff0da23d3e8c55e2914b84d4ff",
+      "previousSha256": "8a2b35d23cebd3a1732458cfbf5b22b4030f44ff0da23d3e8c55e2914b84d4ff",
+      "changedFromSecondFreeze": false
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/subject_visual_probe.rs",
+      "bytes": 11153,
+      "sha256": "170c930d7e25d089d3781b3c8c9da4323d05d4dd9898564d4e6fa5bb9a481665",
+      "previousSha256": "ad95dab296310d9206c58e0ae605382eb636d72ea6a5b0023054b18761ff46c1",
+      "changedFromSecondFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2641,
+      "sha256": "83a70f2fb31863a794f24f454ba458a9988f2049fd1ba3f0403af2f77f98219c",
+      "previousSha256": "83a70f2fb31863a794f24f454ba458a9988f2049fd1ba3f0403af2f77f98219c",
+      "changedFromSecondFreeze": false
+    }
+  ],
+  "changes": [
+    "E0282: explicitly type reopened as Check<()> so its error is String",
+    "E0609: use actual App.offscreen_probe (initialized by create_app probe argument) and retain modal prohibition",
+    "unused import: PALETTE_SUBJECT reexport is cfg(test), its only parent-module users are editor tests"
+  ],
+  "diff": {
+    "path": "/tmp/fc-round35-visuals-evidence/editor-compile-correction-third.diff",
+    "bytes": 1488,
+    "sha256": "d587744feb6373da2a4824691ec23b219ce509defd44792c5a0f5e80e72df6cb"
+  },
+  "rustfmtExit": 0,
+  "scope": "Round35 only; no Round36 code or additional behavior change",
+  "compile": "ROOT_TO_RETRY; NOT_RUN_BY_THIS_AGENT"
+}

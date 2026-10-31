@@ -1,6 +1,17 @@
-//! Non-secret global display draft. Saving publishes one independent revision.
+//! One non-secret global display and subject-colour draft; saves bind both versions.
 use super::*;
-use fc_domain::{desktop::*, time::LocalDate};
+use fc_domain::{
+    desktop::*,
+    subject_visual::{PaletteRevision, SubjectColor, SubjectVisualPalette},
+    time::LocalDate,
+};
+use fc_ports::SubjectVisualState;
+mod visuals;
+#[cfg(test)]
+pub(super) use visuals::PALETTE_SUBJECT;
+pub(super) use visuals::{OPAQUE_RGB, PICK_COLOR, SWITCH_SUBJECT, VISUALS, VISUAL_PREVIEW};
+#[cfg(test)]
+mod visual_tests;
 pub(super) const CLOCK: FieldId = FieldId(200);
 pub(super) const SECONDS: FieldId = FieldId(201);
 pub(super) const RECESS: FieldId = FieldId(202);
@@ -34,6 +45,7 @@ const KEEP: ActionId = ActionId(208);
 enum Page {
     Main,
     Components,
+    SubjectVisuals,
     Preview,
     Discard,
 }
@@ -41,7 +53,16 @@ pub(super) enum Command {
     Stay,
     Close,
     Reload,
+    PickColor {
+        subject_id: SubjectId,
+        initial: Rgb,
+    },
+    VisualPreview {
+        subject_id: SubjectId,
+    },
     Save {
+        expected_palette: PaletteRevision,
+        colors: Vec<SubjectColor>,
         expected: Revision,
         settings: DisplaySettings,
     },
@@ -49,6 +70,10 @@ pub(super) enum Command {
 pub(super) struct Editor {
     pub(super) settings: DisplaySettings,
     original: DisplaySettings,
+    palette: SubjectVisualPalette,
+    original_colors: Vec<SubjectColor>,
+    selected_subject: Option<SubjectId>,
+    joint_visuals: bool,
     owner: PrincipalId,
     expected: Revision,
     page: Page,
@@ -175,8 +200,39 @@ pub(super) fn problem(error: &DisplayError) -> String {
     }
 }
 impl Editor {
+    // Embedded public-layout style editor retains its original layout/display
+    // transaction; it must never acquire a separate school palette write path.
     pub(super) fn new(settings: DisplaySettings, owner: PrincipalId) -> Self {
+        let mut editor = Self::new_visuals(
+            SubjectVisualState {
+                palette: SubjectVisualPalette {
+                    revision: PaletteRevision::new(vec![]).unwrap(),
+                    subjects: vec![],
+                },
+                display: settings,
+            },
+            owner,
+        );
+        editor.joint_visuals = false;
+        editor
+    }
+    pub(super) fn new_visuals(state: SubjectVisualState, owner: PrincipalId) -> Self {
+        let settings = state.display;
+        let selected_subject = state.palette.subjects.first().map(|s| s.id);
+        let original_colors = state
+            .palette
+            .subjects
+            .iter()
+            .map(|s| SubjectColor {
+                subject_id: s.id,
+                color: s.color,
+            })
+            .collect();
         Self {
+            palette: state.palette,
+            selected_subject,
+            joint_visuals: true,
+            original_colors,
             expected: settings.revision,
             original: settings.clone(),
             settings,
@@ -197,11 +253,16 @@ impl Editor {
         self.suspended = None;
     }
     pub(super) fn has_unsaved_changes(&self) -> bool {
-        self.settings != self.original || self.suspended.is_some()
+        self.settings != self.original
+            || self.colors() != self.original_colors
+            || self.suspended.is_some()
     }
     pub(super) fn capture(&mut self, data: FormData) {
         self.suspended = None;
-        if matches!(self.page, Page::Main | Page::Components) {
+        if matches!(
+            self.page,
+            Page::Main | Page::Components | Page::SubjectVisuals
+        ) {
             let view = self.view("", false);
             let mut pending = FormData::new();
             let mut changed = false;
@@ -314,6 +375,7 @@ impl Editor {
                     action(CANCEL, "取消全部修改"),
                 ];
             }
+            Page::SubjectVisuals => self.visuals_view(&mut v),
             Page::Components => {
                 v.title = "逐组件显示与自适应约束".into();
                 v.description.push_str("\n0%组件保留布局占位，但不绘制、不接受点击；关闭“显示组件”才移除布局。最小/最大约束不得越过工作区，过紧约束会显示诊断。");
@@ -390,12 +452,16 @@ impl Editor {
             Page::Discard => {
                 v.title = "取消显示设置修改".into();
                 v.description =
-                    "确认后丢弃本地显示设置草稿并重新读取已保存版，不修改数据库。".into();
+                    "确认后丢弃全部显示与科目配色草稿并重新读取已保存版，不修改数据库。".into();
                 v.actions = vec![
                     action(CONFIRM_CANCEL, "确认丢弃并重读"),
                     action(KEEP, "保留草稿"),
                 ];
             }
+        }
+        if self.page == Page::Main && self.joint_visuals {
+            v.actions
+                .insert(2, action(VISUALS, "应用并编辑科目颜色与显示"));
         }
         v.actions.push(action(LOCK, "锁定并保留草稿"));
         if let Some(data) = &self.suspended {
@@ -412,9 +478,27 @@ impl Editor {
         action: ActionId,
         data: FormData,
     ) -> std::result::Result<Command, String> {
+        if !self.joint_visuals
+            && matches!(
+                action,
+                VISUALS | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW
+            )
+        {
+            return Err("科目配色请从工作台的桌面显示设置进入。".into());
+        }
+        let data = if self.visual_page() {
+            visuals::checked_form(data)?
+        } else {
+            data
+        };
         // Navigation must preserve unparsed non-secret text. A discard prompt is
         // not confirmation, and closing the main page is explicitly "keep draft".
-        if action == CANCEL && matches!(self.page, Page::Main | Page::Components) {
+        if action == CANCEL
+            && matches!(
+                self.page,
+                Page::Main | Page::Components | Page::SubjectVisuals
+            )
+        {
             self.capture(data);
             self.discard_return = self.page;
             self.page = Page::Discard;
@@ -432,9 +516,13 @@ impl Editor {
             return Err("请先确认取消全部修改。".into());
         }
         let original = self.settings.clone();
+        let palette = self.palette.clone();
+        let selected = self.selected_subject;
         let result = self.apply(action, &data);
         if result.is_err() {
             self.settings = original;
+            self.palette = palette;
+            self.selected_subject = selected;
             self.capture(data);
         } else {
             self.suspended = None;
@@ -443,16 +531,42 @@ impl Editor {
     }
     fn apply(&mut self, action: ActionId, data: &FormData) -> std::result::Result<Command, String> {
         match action {
-            APPLY | SAVE_ALL | COMPONENTS | PREVIEW | SWITCH_COMPONENT => {
+            APPLY | SAVE_ALL | COMPONENTS | PREVIEW | SWITCH_COMPONENT | VISUALS
+            | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW => {
                 match self.page {
                     Page::Main => self.apply_main(data)?,
                     Page::Components => self.apply_component(data)?,
+                    Page::SubjectVisuals => self.apply_visuals(data, action == SWITCH_SUBJECT)?,
                     _ => return Err("当前页面不能应用显示设置。".into()),
                 }
                 if action == SAVE_ALL {
                     return Ok(Command::Save {
+                        expected_palette: self.palette.revision.clone(),
+                        colors: self.colors(),
                         expected: self.expected,
                         settings: self.settings.clone(),
+                    });
+                }
+                if action == VISUALS {
+                    self.page = Page::SubjectVisuals;
+                }
+                if action == PICK_COLOR {
+                    let subject_id = self.selected_subject.ok_or("请先创建学校科目。")?;
+                    let initial = self
+                        .palette
+                        .subjects
+                        .iter()
+                        .find(|s| s.id == subject_id)
+                        .ok_or("科目已变化。")?
+                        .color;
+                    return Ok(Command::PickColor {
+                        subject_id,
+                        initial,
+                    });
+                }
+                if action == VISUAL_PREVIEW {
+                    return Ok(Command::VisualPreview {
+                        subject_id: self.selected_subject.ok_or("请先选择科目。")?,
                     });
                 }
                 if action == COMPONENTS {
@@ -473,6 +587,9 @@ impl Editor {
             EDIT_BACK => {
                 if self.page == Page::Components {
                     self.apply_component(data)?;
+                }
+                if self.page == Page::SubjectVisuals {
+                    self.apply_visuals(data, false)?;
                 }
                 self.page = Page::Main;
             }
@@ -582,7 +699,10 @@ mod tests {
         assert_eq!(value(&e, REFLECTION), "101");
         let mut data = form(&e);
         set(&mut data, REFLECTION, "50");
-        let Command::Save { expected, settings } = e.handle(SAVE_ALL, data).unwrap() else {
+        let Command::Save {
+            expected, settings, ..
+        } = e.handle(SAVE_ALL, data).unwrap()
+        else {
             panic!("explicit save must own the final draft")
         };
         assert_eq!(expected, original.revision);
@@ -655,7 +775,10 @@ mod tests {
         let mut data = form(&e);
         set(&mut data, COURSE_ALPHA, "25");
         let command = e.handle(SAVE_ALL, data).unwrap();
-        let Command::Save { expected, settings } = command else {
+        let Command::Save {
+            expected, settings, ..
+        } = command
+        else {
             panic!("save expected")
         };
         assert_eq!(expected, Revision::new(7));
@@ -736,7 +859,13 @@ mod schema_tests {
     #[test]
     fn every_display_page_is_a_bounded_native_schema() {
         let mut e = Editor::new(DisplaySettings::default(), PrincipalId::new(1).unwrap());
-        for page in [Page::Main, Page::Components, Page::Preview, Page::Discard] {
+        for page in [
+            Page::Main,
+            Page::Components,
+            Page::SubjectVisuals,
+            Page::Preview,
+            Page::Discard,
+        ] {
             e.page = page;
             e.view("", false).validate().unwrap();
         }

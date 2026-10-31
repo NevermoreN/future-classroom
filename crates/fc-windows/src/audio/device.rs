@@ -167,7 +167,7 @@ unsafe extern "system" fn client_add_ref(this: *mut std::ffi::c_void) -> u32 {
     let client = unsafe { &*this.cast::<Client>() };
     match client
         .references
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
             count.checked_add(1)
         }) {
         Ok(previous) => previous + 1,

@@ -1,0 +1,249 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_PASS_COMPILE_AND_RUNTIME_NOT_RUN",
+  "recordedAt": "2026-10-31T17:38:17.040421+00:00",
+  "sourceRunId": 41223127643,
+  "sourceJobId": 124601640991,
+  "artifactId": 13051341013,
+  "sourceSha": "83fe847f1a5b1787bdf2390c1294ae4e740e6e75",
+  "rawFailure": {
+    "path": "/tmp/fc-round35-msvc-evidence/win7-selected-raw-third/logs/clippy.stderr.log",
+    "bytes": 130874,
+    "sha256": "98dc2ab46a70b203fca4783daf6f70921268126099ef57be21efe9368bafb738",
+    "lines": [
+      299,
+      300,
+      302,
+      305,
+      310
+    ],
+    "error": "Atomic::fetch_update deprecated since1.99; -D warnings implies -D deprecated",
+    "actualClippyExit": 101,
+    "actualBuildStdArgumentsCorrect": true
+  },
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "beforeBytes": 106331,
+      "beforeSha256": "4fe3fe067731cf54808f4709d0cc36a9feadeacb13b5a446b0869d15c0bbb565",
+      "afterBytes": 106329,
+      "afterSha256": "693236ba85cd694a06451ab86ff9d67d658669756d71ffbc916039e1aa52d777",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/voice.rs",
+      "beforeBytes": 98854,
+      "beforeSha256": "2e58e5c29c3dad19e528654fe5b91c9a2ec7ab3f55410e9737084640daa10c1f",
+      "afterBytes": 98852,
+      "afterSha256": "d5b5ef2db1f77ba08bab37e793572d1b2b3001bb8818f0064f81db1a376fada0",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime.rs",
+      "beforeBytes": 18682,
+      "beforeSha256": "86a643b57a82f967ad0a465db60a3f3bc0a480daf5a431907e01f27ad3f09983",
+      "afterBytes": 18680,
+      "afterSha256": "936819f09c25ec99880348425b6cd05e395cface15a5896eefc342d9808dc1e9",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/voice_runtime/tests.rs",
+      "beforeBytes": 12402,
+      "beforeSha256": "980b202a504f5660e8148cab37dded83e1bafabc8257a5f0334d863181d5ce2b",
+      "afterBytes": 12400,
+      "afterSha256": "3e278f854c254bcaa35c69d183256ca9d2eef2de7485b9a9c123b373baa94162",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "beforeBytes": 5036,
+      "beforeSha256": "7577675d9be344a35a1a9f2c8dd1e896be94ca8c64dc44e7bb8fdc49b90e7d1e",
+      "afterBytes": 5034,
+      "afterSha256": "548c51d66f4c905d35d4c3c9de308970a07ebed372c962b8b14b4ba28ac7e7a4",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+      "beforeBytes": 17963,
+      "beforeSha256": "02f539c1532d4004acb709a148774988bcc97f11e5d8dcd8756988e53be6b404",
+      "afterBytes": 17961,
+      "afterSha256": "85c3a9433544dae418a29a023596127882cded7fe37644e310c47dff7f603313",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "beforeBytes": 35988,
+      "beforeSha256": "c546cb5c4f07002ff940ffb5aae59744e69d84e857422dfb90747551e4979517",
+      "afterBytes": 35986,
+      "afterSha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-bootstrap/tests/schedule_operations.rs",
+      "beforeBytes": 26372,
+      "beforeSha256": "2242f27288271f4c7ff71f9ce6b37c8a1b401efaa80b67f56b5c8230c4616039",
+      "afterBytes": 26370,
+      "afterSha256": "0f697ab4df6d594832dfb0c331734ed540af7f28a4db61341cbef370678db2b6",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-ports/src/http.rs",
+      "beforeBytes": 13329,
+      "beforeSha256": "e0b6f0bfa38a04316182159150db14d468ce0b665eba78d4fbb1d710ce70e966",
+      "afterBytes": 13327,
+      "afterSha256": "059fa91aa0217c43610914268e9305e32ef6b4eb93929004512bd4083d9b8b32",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-protocol/src/http1/response.rs",
+      "beforeBytes": 10614,
+      "beforeSha256": "5d4bf42a459000098a4ffe5912e2d1d3b422187f8e50fdb4728d25eab236b52a",
+      "afterBytes": 10612,
+      "afterSha256": "a1d4bdb374cb881abb3da4d55da476961cf0efca82c045916653ef217f3642a6",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-runtime/src/cancel.rs",
+      "beforeBytes": 2034,
+      "beforeSha256": "786ad31bb2257318268252259ea959d78aef08e6fa06e990c6c2e6e317eff390",
+      "afterBytes": 2032,
+      "afterSha256": "fa374417867bfd48aec7690b182de89ed6faf02df72f69e73a41e04e4861739a",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "beforeBytes": 20117,
+      "beforeSha256": "e050f358dc1d6776f0998210478833daaa6fe11eb2758a45e90ba598a26043eb",
+      "afterBytes": 20115,
+      "afterSha256": "67a772de735a1ac232dc80bb22440a6abd532f8fff97be32864bf405f5435ed5",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-storage/src/business/materials_outcome_tests.rs",
+      "beforeBytes": 19623,
+      "beforeSha256": "e424317c29218bfcc644d0040084a2c3be32f73a8b37c0eaa61f264cc87a94a0",
+      "afterBytes": 19621,
+      "afterSha256": "624ee548c5dc838b0b6be2e53b57a54c19b4dd76c389701188ee3b239df4881d",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-storage/src/business/tests/content_web.rs",
+      "beforeBytes": 25155,
+      "beforeSha256": "8a8e7ef264edc5320fa3fcff88ef2dfe0e8d01b544dfa11de0eede003b41e9a2",
+      "afterBytes": 25153,
+      "afterSha256": "b521e40ea26f2aff346f006b18fe93acead87ffa11cf6f5b1ca13f919c5c36c7",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "beforeBytes": 69248,
+      "beforeSha256": "fa53fff18139709a51f4b4628195bca6556b17881b8b56f32f8f999566ea5812",
+      "afterBytes": 69246,
+      "afterSha256": "de8af4f0ec84d7f1c3ce934b7c39b3519c4f3576bfa921d56eedd0da601a8d89",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-storage/src/login.rs",
+      "beforeBytes": 19712,
+      "beforeSha256": "8b4ccd7ab9fe12b783a27975ba1ddab4faec4b0af0c61f93c7cb266a9a06a25b",
+      "afterBytes": 19710,
+      "afterSha256": "9e9702f037aa6eb335551141ac048940c92db6989b7e969f7c643a0b35c3cf02",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "beforeBytes": 17428,
+      "beforeSha256": "91bb2a0583e3828a8a9c79fb943a9f588bfd5f1d15092969cefc49682bef9f04",
+      "afterBytes": 17426,
+      "afterSha256": "ce50f26ae63c7931953fc922a51164accee5060d1bf7c5cef83afe3969355e33",
+      "exactMethodRenameCount": 1
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "beforeBytes": 30065,
+      "beforeSha256": "a66ad6672d756e0c918607c571f5070ad505e150908dbd6996fd62ecb78309ae",
+      "afterBytes": 30063,
+      "afterSha256": "800c898e9b7d11eb9823dca075d6ebe2e8bc99dee0f6606d2ace334f9a3a9936",
+      "exactMethodRenameCount": 1
+    }
+  ],
+  "changedCallCount": 18,
+  "semantics": "Only method-name tokens changed. Both exact local official rust-src implementations define fetch_update as a direct call to try_update with identical orderings/closure/Result. try_update is #[stable(since=\"1.95.0\")].",
+  "primarySourceFacts": [
+    {
+      "toolchain": "1.97.1-x86_64-unknown-linux-gnu",
+      "path": "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs",
+      "sha256": "9419e324d7b63d0e7a37f591930ae7171e625feaef8deb4a2787c49cc205b282"
+    },
+    {
+      "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/sync/atomic.rs",
+      "sha256": "a4086dea6b286144226dec5e7b5f2ce444d8606303f73ffc1aab3838c09a1b1c"
+    }
+  ],
+  "onlinePrimaryLookup": "Official doc URLs returned404/access unavailable; no online source asserted. Exact installed official rust-src inspected instead.",
+  "checks": [
+    {
+      "name": "rustfmt",
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/backend.rs",
+        "crates/fc-bootstrap/src/backend/voice.rs",
+        "crates/fc-bootstrap/src/voice_runtime.rs",
+        "crates/fc-bootstrap/src/voice_runtime/tests.rs",
+        "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+        "crates/fc-bootstrap/src/web_transfer/downloads.rs",
+        "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+        "crates/fc-bootstrap/tests/schedule_operations.rs",
+        "crates/fc-ports/src/http.rs",
+        "crates/fc-protocol/src/http1/response.rs",
+        "crates/fc-runtime/src/cancel.rs",
+        "crates/fc-runtime/src/worker.rs",
+        "crates/fc-storage/src/business/materials_outcome_tests.rs",
+        "crates/fc-storage/src/business/tests/content_web.rs",
+        "crates/fc-storage/src/lib.rs",
+        "crates/fc-storage/src/login.rs",
+        "crates/fc-windows/src/audio/device.rs",
+        "crates/fc-windows/src/tls_frontdoor/schannel.rs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "architecture",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "diffcheck",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "untouched": [
+    "scripts/windows-msvc-ci.ps1",
+    "domain/subject_visual",
+    "all new subject-visual agent files"
+  ],
+  "notRun": [
+    "Cargo",
+    "rustc compilation",
+    "Clippy",
+    "EXE",
+    "Windows",
+    "remote",
+    "Git commit/push",
+    "CI dispatch"
+  ]
+}

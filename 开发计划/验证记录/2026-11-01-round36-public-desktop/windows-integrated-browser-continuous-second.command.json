@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round36-public-desktop-native-second/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round35-visuals-web-fixture-second.zip",
+    "--continuous-accept",
+    "--browser",
+    "--report",
+    "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T19:24:35.665514+00:00",
+  "stdout": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.stdout.log",
+  "stderr": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-browser-continuous-second.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 75.28428179095499,
+  "completedUtc": "2026-10-31T19:25:50.950183+00:00",
+  "stdoutBytes": 286,
+  "stdoutSha256": "2da4228d9c720437916334a57ad52a25125feb4707d8429a3d16abcc1d0864b5",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

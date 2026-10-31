@@ -1,0 +1,143 @@
+{
+  "sourceSha": "83fe847f1a5b1787bdf2390c1294ae4e740e6e75",
+  "scope": "Initial new-round read-only observation of the same two existing manually dispatched CI runs; not a redispatch or successful compile/runtime claim.",
+  "jobs": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 124601504147,
+              "name": "compile-i686",
+              "status": "in_progress",
+              "conclusion": null,
+              "run_id": 41223081037,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Create this run's bounded evidence directory",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Compile MSVC workspace and collect original evidence",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 4
+                },
+                {
+                  "name": "Clean only this ephemeral run's build and tool roots",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 5
+                },
+                {
+                  "name": "Upload original logs, metadata and compiled test executables",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 6
+                },
+                {
+                  "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 12
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 124601640991,
+              "name": "compile-win7-i686",
+              "status": "in_progress",
+              "conclusion": null,
+              "run_id": 41223127643,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Create this run's bounded evidence directory",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Compile Win7 MSVC candidate with rebuilt std/test; never execute",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 4
+                },
+                {
+                  "name": "Clean only this ephemeral run's build and tool roots",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 5
+                },
+                {
+                  "name": "Upload original logs, metadata and compiled test executables",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 6
+                },
+                {
+                  "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 12
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  ],
+  "createdUtc": "2026-10-31T17:23:17.928145+00:00"
+}

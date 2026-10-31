@@ -1,0 +1,55 @@
+//! Actual SQLite, sole-writer publication and exact fixture-channel regressions.
+use super::*;
+use fc_domain::{recovery::MigrationMapping, time::{LocalDate,LocalDateTime}};
+use fc_ports::{AuthorityPublisher, DisplayRepository, DisplayRequest};
+use std::sync::{atomic::{AtomicU64,Ordering},Mutex};
+static NEXT:AtomicU64=AtomicU64::new(0);
+fn principal(id:u64)->PrincipalId { PrincipalId::new(id).unwrap() }
+fn date(day:u8)->LocalDate {LocalDate::new(2026,11,day).unwrap()}
+fn now()->LocalDateTime {LocalDateTime::new(date(1),3600).unwrap()}
+fn actor(id:u64,origin:TrustedOrigin)->ActorContext { ActorContext{principal_id:principal(id),school_id:SchoolId::new(1).unwrap(),auth_epoch:AuthEpoch::new(1),expires_at:LocalDateTime::new(date(5),0).unwrap(),origin} }
+struct Time(Mutex<LocalDateTime>);
+impl Clock for Time {fn now(&self)->LocalDateTime{*self.0.lock().unwrap()}}
+#[derive(Clone)]
+struct Snapshot{identity:IdentityState,revision:Revision}
+struct Publisher {active:Arc<AtomicBool>,revoke:Arc<AtomicBool>,clock:Arc<Time>,midnight:Arc<AtomicBool>,published:Arc<Mutex<Vec<Snapshot>>>}
+impl AuthorityPublisher for Publisher {
+    type Snapshot=Snapshot;type Update=();type Error=();
+    fn snapshot_revision(&self,s:&Snapshot)->Revision{s.revision}
+    fn begin_update(&mut self)->Result<(),()>{if self.revoke.swap(false,Ordering::AcqRel){self.active.store(false,Ordering::Release);}if self.midnight.swap(false,Ordering::AcqRel){*self.clock.0.lock().unwrap()=LocalDateTime::new(date(2),0).unwrap();}Ok(())}
+    fn publish(&mut self,_:(),s:Snapshot)->Result<(),()>{self.published.lock().unwrap().push(s);Ok(())}
+    fn rollback(&mut self,_:())->Result<(),()>{Ok(())}
+    fn fault(&mut self){}
+}
+struct Fixture{writer:Option<StorageWriter<Snapshot>>,clock:Arc<Time>,active:Arc<AtomicBool>,revoke:Arc<AtomicBool>,midnight:Arc<AtomicBool>,published:Arc<Mutex<Vec<Snapshot>>>,root:PathBuf}
+impl Fixture {
+    fn new()->Self{
+        let root=std::env::temp_dir().join(format!("FutureClassroom-SubjectVisual-{}-{}-{}",std::process::id(),std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(),NEXT.fetch_add(1,Ordering::Relaxed)));
+        std::fs::create_dir(&root).unwrap();
+        let mut f=Self{writer:None,clock:Arc::new(Time(Mutex::new(now()))),active:Arc::new(AtomicBool::new(true)),revoke:Arc::new(AtomicBool::new(false)),midnight:Arc::new(AtomicBool::new(false)),published:Arc::new(Mutex::new(vec![])),root};f.open();
+        let state=state();let mut mutations=vec![Mutation::Put{key:IDENTITY.into(),value:codec::bytes(&codec::identity(&state)).unwrap()}];
+        for id in 1..=4 {for kind in ["password","recovery"] {mutations.push(Mutation::Put{key:credential_key(principal(id),kind,1),value:vec![id as u8]});}}
+        f.commit(mutations);f
+    }
+    fn open(&mut self){self.writer=Some(StorageWriter::open(self.root.join("state.sqlite3"),8,Publisher{active:self.active.clone(),revoke:self.revoke.clone(),clock:self.clock.clone(),midnight:self.midnight.clone(),published:self.published.clone()}).unwrap());}
+    fn reopen(&mut self){self.writer.take().unwrap().shutdown().unwrap();self.open();}
+    fn handle(&self)->StorageHandle<Snapshot>{self.writer.as_ref().unwrap().handle()}
+    fn repository(&self,captured:ActorContext)->BusinessRepository<Snapshot>{
+        let active=self.active.clone();let clock=self.clock.clone();
+        BusinessRepository::new(self.handle(),self.clock.clone(),Arc::new(|identity,revision|Ok(Snapshot{identity:identity.clone(),revision})))
+        .with_session_guard(Arc::new(move|state,current|{
+            if current!=&captured || !active.load(Ordering::Acquire){return Err(StorageError::SubjectVisual(SubjectVisualError::Identity(IdentityError::Permission(PermissionError::StaleAuthorization))));}
+            state.authority(current.principal_id).map_err(StorageError::Identity)?.validate_actor(current,clock.now()).map_err(|e|StorageError::SubjectVisual(SubjectVisualError::Identity(IdentityError::Permission(e))))
+        }))
+    }
+    fn revision(&self)->Revision{self.handle().try_revision().unwrap().wait().unwrap()}
+    fn identity(&self)->IdentityState{self.repository(actor(1,TrustedOrigin::Local)).load_identity().unwrap()}
+    fn commit(&self,mutations:Vec<Mutation>){let revision=self.revision();let identity=mutations.iter().find_map(|m|if let Mutation::Put{key,value}=m{(key==IDENTITY).then(||codec::read_identity(&codec::value(value).unwrap()).unwrap())}else{None}).unwrap_or_else(||self.identity());self.handle().try_commit(CommitCommand::new(format!("fixture-{}",revision.get()),revision,mutations).unwrap(),Snapshot{identity,revision:revision.next().unwrap()}).unwrap().wait().unwrap();}
+    fn replace_identity(&self,state:&IdentityState){self.commit(vec![Mutation::Put{key:IDENTITY.into(),value:codec::bytes(&codec::identity(state)).unwrap()}]);}
+    fn read(&self)->SubjectVisualState{self.repository(actor(1,TrustedOrigin::Local)).subject_visuals(&actor(1,TrustedOrigin::Local)).unwrap()}
+    fn save(&self,id:u64,base:&SubjectVisualState,red:u8)->Result<SubjectVisualState,SubjectVisualRepositoryError>{let mut r=self.repository(actor(1,TrustedOrigin::Local));r.execute_subject_visuals(request(id,base,red),&actor(1,TrustedOrigin::Local),self.clock.as_ref())}
+    fn legacy_subject(&self,id:u64,name:&str,color:Rgb,expected:Option<Revision>){let mut r=self.repository(actor(1,TrustedOrigin::Local));let current=r.load_identity().unwrap();r.execute_identity(IdentityRequest{command_id:CommandId::new(1000+self.revision().get()).unwrap(),expected_revision:current.revision,command:IdentityCommand::PutSubject{id:SubjectId::new(id).unwrap(),name:name.into(),enabled:true,color,expected_revision:expected}},Some(&actor(1,TrustedOrigin::Local))).unwrap();}
+}
+impl Drop for Fixture{fn drop(&mut self){if let Some(writer)=self.writer.take(){writer.shutdown().expect("subject visual writer actual join");}std::fs::remove_dir_all(&self.root).expect("subject visual owned fixture cleanup");}}
+fn request(id:u64,base:&SubjectVisualState,red:u8)->SubjectVisualRequest{let mut colors:Vec<_>=base.palette.subjects.iter().map(|s|SubjectColor{subject_id:s.id,color:s.color}).collect();colors[0].color.red=red;let mut display=base.display.clone();display.subject_fill=!display.subject_fill;SubjectVisualRequest{command_id:CommandId::new(id).unwrap(),expected_palette_revision:base.palette.revision.clone(),expected_display_revision:base.display.revision,colors,display}}
+fn homework(owner:u64,day:u8)->HomeworkKey{HomeworkKey{class_id:ClassId::new(1).unwrap(),subject_id:SubjectId::new(1).unwrap(),owner_teacher_id:principal(owner),actual_date:date(day)}}

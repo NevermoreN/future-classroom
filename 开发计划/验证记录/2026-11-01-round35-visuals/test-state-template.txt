@@ -1,0 +1,59 @@
+fn state() -> IdentityState {
+    let school = SchoolId::new(1).unwrap();
+    IdentityState {
+        revision: Revision::new(1),
+        installation: Some(Installation {
+            school_id: school,
+            school_name: "测试学校".into(),
+            current_class: Some(ClassId::new(1).unwrap()),
+        }),
+        accounts: (1..=4)
+            .map(|id| UserAccount {
+                principal: Principal {
+                    id: principal(id),
+                    school_id: school,
+                    role: match id {
+                        1 => Role::GlobalAdmin,
+                        4 => Role::User,
+                        _ => Role::TeacherAdmin,
+                    },
+                    enabled: true,
+                    auth_epoch: AuthEpoch::new(1),
+                },
+                login_name: format!("user{id}"),
+                display_name: format!("账号{id}"),
+                must_change_password: false,
+                credential_version: 1,
+                recovery_version: 1,
+            })
+            .collect(),
+        classes: vec![SchoolClass {
+            id: ClassId::new(1).unwrap(),
+            school_id: school,
+            name: "一班".into(),
+            enabled: true,
+        }],
+        subjects: vec![SchoolSubject {
+            id: SubjectId::new(1).unwrap(),
+            school_id: school,
+            name: "语文".into(),
+            enabled: true,
+            color: Rgb {
+                red: 20,
+                green: 40,
+                blue: 60,
+            },
+            revision: Revision::new(1),
+        }],
+        assignments: [2, 3]
+            .into_iter()
+            .map(|id| TeachingAssignment {
+                teacher_id: principal(id),
+                class_id: ClassId::new(1).unwrap(),
+                subject_id: SubjectId::new(1).unwrap(),
+                enabled: true,
+            })
+            .collect(),
+        default_teachers: vec![],
+    }
+}

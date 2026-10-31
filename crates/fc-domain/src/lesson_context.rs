@@ -38,12 +38,18 @@ pub struct EffectiveLessonInterval {
     pub context: EffectiveLessonContext,
     pub ended_at: LocalDateTime,
 }
+/// Honest command origin; a public desktop click is not an authenticated account.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LessonInitiator {
+    Authenticated(PrincipalId),
+    LocalDesktop,
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LessonOverrideContext {
     pub id: OverrideId,
     pub key: LessonInstanceKey,
     pub target: CourseCell,
-    pub actor_id: PrincipalId,
+    pub initiator: LessonInitiator,
     pub created_at: LocalDateTime,
 }
 /// A continuous baseline witnessed by the single business writer.
@@ -434,6 +440,67 @@ impl LessonContextSnapshot {
         identity
             .authorize_management(actor, now)
             .map_err(LessonContextError::Identity)?;
+        self.apply_with_initiator(
+            expected,
+            key,
+            action,
+            id,
+            identity,
+            LessonInitiator::Authenticated(actor.principal_id),
+            now,
+        )
+    }
+    /// Trusted native desktop composition only. This pure transition grants no
+    /// account/session authority; the repository must bind a live desktop guard.
+    #[allow(clippy::too_many_arguments)]
+    pub fn apply_local_desktop(
+        &self,
+        expected: Revision,
+        key: &LessonInstanceKey,
+        action: LessonAction,
+        id: OverrideId,
+        identity: &IdentityState,
+        now: LocalDateTime,
+    ) -> Result<Self, LessonContextError> {
+        identity.validate().map_err(LessonContextError::Identity)?;
+        if identity.installation.as_ref().and_then(|i| i.current_class) != Some(key.class_id)
+            || !identity
+                .classes
+                .iter()
+                .any(|c| c.id == key.class_id && c.enabled)
+        {
+            return Err(LessonContextError::LessonContextChanged);
+        }
+        self.apply_with_initiator(
+            expected,
+            key,
+            action,
+            id,
+            identity,
+            LessonInitiator::LocalDesktop,
+            now,
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn apply_with_initiator(
+        &self,
+        expected: Revision,
+        key: &LessonInstanceKey,
+        action: LessonAction,
+        id: OverrideId,
+        identity: &IdentityState,
+        initiator: LessonInitiator,
+        now: LocalDateTime,
+    ) -> Result<Self, LessonContextError> {
+        if self.blocked_until.is_some()
+            || self.observed_at.is_some_and(|at| now < at)
+            || self
+                .current
+                .as_ref()
+                .is_some_and(|c| now < c.effective_from)
+        {
+            return Err(LessonContextError::LessonContextChanged);
+        }
         if expected != self.revision {
             return Err(LessonContextError::RevisionConflict {
                 current: self.revision,
@@ -475,7 +542,7 @@ impl LessonContextSnapshot {
                 id,
                 key: key.clone(),
                 target,
-                actor_id: actor.principal_id,
+                initiator,
                 created_at: now,
             }),
             LessonAction::Restore => None,

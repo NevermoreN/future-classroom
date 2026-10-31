@@ -1,0 +1,33 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round36-public-desktop-programs-sixth/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round36-public-desktop-evidence/windows-core-metadata-before-seventh.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--report",
+    "/tmp/fc-round36-public-desktop-evidence/windows-core-before-seventh.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T19:15:40.364819+00:00",
+  "stdout": "/tmp/fc-round36-public-desktop-evidence/windows-core-before-seventh.stdout.log",
+  "stderr": "/tmp/fc-round36-public-desktop-evidence/windows-core-before-seventh.stderr.log",
+  "exitCode": 1,
+  "elapsedSeconds": 22.49782637390308,
+  "completedUtc": "2026-10-31T19:16:02.862995+00:00",
+  "stdoutBytes": 128,
+  "stdoutSha256": "b5f18c10bb43a0ed0e5b77df0ee9fe7eedb14a554d12c27f33826c9c03763387",
+  "stderrBytes": 347,
+  "stderrSha256": "7b114712b6250f8f1c18cb878c638f8ad63350a6304389921525312f23dedb8b"
+}

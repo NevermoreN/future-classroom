@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "Frozen Round35 frontend source npm install, all frontend tests/typecheck/production asset budgets; no Windows runtime proof",
+  "commands": [
+    {
+      "name": "install",
+      "arguments": [
+        "npm",
+        "ci",
+        "--cache",
+        "/tmp/fc-round35-visuals-node-cache",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.979689690982923,
+      "stdout": "/tmp/fc-round35-visuals-evidence/web-install-first.stdout",
+      "stderr": "/tmp/fc-round35-visuals-evidence/web-install-first.stderr"
+    },
+    {
+      "name": "test",
+      "arguments": [
+        "npm",
+        "test",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.5716552049852908,
+      "stdout": "/tmp/fc-round35-visuals-evidence/web-test-first.stdout",
+      "stderr": "/tmp/fc-round35-visuals-evidence/web-test-first.stderr"
+    },
+    {
+      "name": "build",
+      "arguments": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.38046495616436,
+      "stdout": "/tmp/fc-round35-visuals-evidence/web-build-first.stdout",
+      "stderr": "/tmp/fc-round35-visuals-evidence/web-build-first.stderr"
+    }
+  ],
+  "status": "PASS"
+}

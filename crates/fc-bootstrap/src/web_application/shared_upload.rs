@@ -14,7 +14,7 @@ pub(super) struct PhysicalUploadPermit {
 impl PhysicalUploadPermit {
     pub(super) fn take() -> Option<Self> {
         let previous = PHYSICAL_UPLOADS
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |mask| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |mask| {
                 if mask == FULL {
                     None
                 } else {

@@ -64,7 +64,7 @@ impl RuntimeFactory for Factory {
         let _ = self
             .0
             .state
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |w| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |w| {
                 Some(((w >> 1) + 1) << 1)
             });
     }

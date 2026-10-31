@@ -1,0 +1,72 @@
+--- a/crates/fc-storage/src/business/desktop_lesson/tests.rs
++++ b/crates/fc-storage/src/business/desktop_lesson/tests.rs
+@@ -741,12 +741,35 @@
+     let s = source.managed();
+     s.ensure_recovery_installation([7; 32]).unwrap();
+     *source.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 31 * 60).unwrap();
+-    source.change(1, source.binding(), replacement()).unwrap();
++    let saved = source.change(1, source.binding(), replacement()).unwrap();
++    assert_eq!(
++        saved.context.active_override.as_ref().unwrap().initiator,
++        LessonInitiator::LocalDesktop
++    );
++    assert!(!saved.context.history.is_empty());
++    assert!(saved
++        .context
++        .history
++        .iter()
++        .all(|h| h.ended_at > h.context.effective_from));
+     let backup = source.root.join("ordinary.sqlite3");
+     s.try_export_ordinary(backup.clone(), &admin(), Arc::new(|| true))
+         .unwrap()
+         .wait()
+         .unwrap();
++    let read_context = |db: &Connection, key: &str| {
++        let row = TransactionView(db).get(key).unwrap().unwrap();
++        let value = codec::value(&row.value).unwrap();
++        assert_eq!(value["format"], 3);
++        lesson_codec::read_snapshot(&value).unwrap()
++    };
++    let ordinary = Connection::open(&backup).unwrap();
++    let projected = read_context(&ordinary, "business/lesson-context/v1");
++    assert!(projected.current.is_none());
++    assert!(projected.active_override.is_none());
++    assert!(projected.base_trust.is_none());
++    assert_eq!(projected.history, saved.context.history);
++    drop(ordinary);
+     let target = Fixture::new();
+     *target.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 31 * 60).unwrap();
+     let t = target.managed();
+@@ -777,6 +800,13 @@
+     .unwrap()
+     .wait()
+     .unwrap();
++    let mapped_db = Connection::open(&mapped).unwrap();
++    let mapped_context = read_context(&mapped_db, "business/lesson-context/v1");
++    assert_eq!(mapped_context.history, projected.history);
++    assert!(mapped_context.current.is_none());
++    assert!(mapped_context.active_override.is_none());
++    assert!(mapped_context.base_trust.is_none());
++    drop(mapped_db);
+     let candidate = target.root.join("candidate.sqlite3");
+     t.try_preflight_ordinary_restore(mapped, candidate.clone(), &admin(), Arc::new(|| true))
+         .unwrap()
+@@ -788,7 +818,17 @@
+     assert!(restored.current.is_none());
+     assert!(restored.active_override.is_none());
+     assert!(restored.base_trust.is_none());
+-    assert!(!restored.history.is_empty());
++    assert!(
++        restored.history.is_empty(),
++        "live lesson is deliberately reset"
++    );
++    let audit = read_context(&db, "business/recovery/lesson-audit/v1");
++    assert!(audit.current.is_none());
++    assert!(audit.active_override.is_none());
++    assert!(audit.base_trust.is_none());
++    assert!(!audit.history.is_empty());
++    assert_eq!(audit.history, mapped_context.history);
++    assert_eq!(audit.history, projected.history);
+     assert!(TransactionView(&db)
+         .get("business/receipt/desktop-lesson/1")
+         .unwrap()

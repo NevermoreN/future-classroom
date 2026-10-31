@@ -1,0 +1,91 @@
+{
+  "stage": "Round36 UI/native third freeze with narrow foreground observed-dispatch fence",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 257514,
+      "sha256": "b7b39cef972a2a9c839a253003ebdeb892ba1fc2b5ef9489d9f4499e6622631a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 60894,
+      "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+      "bytes": 10965,
+      "sha256": "b683ce934340c04fa54f45501f8b0a4e992e117f7f19e353b325ca95aa496809"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+      "bytes": 6307,
+      "sha256": "49fcd0928ada2aadc37eecd6a186cdfd0dc15cdb9c42b39e29b479e33f0f647b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_desktop_probe.rs",
+      "bytes": 14234,
+      "sha256": "baeedef26632ac292710fd054dae8c3412e1d7dc3f953c3f07e6fac8eef78648"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18687,
+      "sha256": "07e885089d1542d895e7c780bd2900b153061ba1d44c329aa4bdd574fea8e5b3"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122383,
+      "sha256": "23dce0cb8fbe8bddcf7eb077bc68763c4f76274af8e688b81b0602a84e55830d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 71115,
+      "sha256": "e5cd54fc77ad6b4527d08318a6b01dfb5822bee5da28d57a1a88db5805c5355e"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18711,
+      "sha256": "3939411439adc01897c2082a1d0c42382566f6475f6b705e5bf52d5e52545073"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/public_inputs_tests.rs",
+      "bytes": 4499,
+      "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc"
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "bytes": 26794,
+      "sha256": "3e162c9fe0e57f6037887cf0eddcae69facdc2c3ade5202c1bc1d794a55cf94d"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 103334,
+      "sha256": "ed36ea8184fdeea2eafa9adb05628a2cb8c3080a0eeb5b0aaa095d687980747a"
+    }
+  ],
+  "scope": "Only independent R36 worktree; Rust not compiled/executed by this agent",
+  "checks": {
+    "rustfmt": "PASS",
+    "scopedGitDiffCheck": "PASS"
+  },
+  "newTests": {
+    "publicEditorPure": 5,
+    "hiddenNativeInputAndCompleteCapacity": 3,
+    "foregroundPolicyAndSynchronousNegativeDispatch": 2,
+    "execution": "NOT_RUN"
+  },
+  "foregroundFence": {
+    "sampling": "Same pre-existing desktop-or-own-pid policy, read only inside native FOREGROUND_MESSAGE dispatch. Negative-only hint synchronously cancels original epoch before main application pump.",
+    "sqlWindowsCalls": false,
+    "newThreads": false,
+    "hookTlsExpansion": false,
+    "eventDeliveryLatency": "Original OS event-to-message-dispatch delay remains; no zero-latency assertion or real foreground mutation test."
+  },
+  "preservedEvidence": [
+    "editor-before.json",
+    "editor-freeze-first.json",
+    "editor-freeze-second.json",
+    "editor-foreground-before.json"
+  ],
+  "probeStepCount": 20,
+  "actualExecution": "NOT_RUN"
+}

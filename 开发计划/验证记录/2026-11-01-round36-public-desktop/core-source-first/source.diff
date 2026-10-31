@@ -1,0 +1,2049 @@
+--- a/crates/fc-domain/src/lesson_context.rs
++++ b/crates/fc-domain/src/lesson_context.rs
+@@ -38,12 +38,18 @@
+     pub context: EffectiveLessonContext,
+     pub ended_at: LocalDateTime,
+ }
++/// Honest command origin; a public desktop click is not an authenticated account.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum LessonInitiator {
++    Authenticated(PrincipalId),
++    LocalDesktop,
++}
+ #[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct LessonOverrideContext {
+     pub id: OverrideId,
+     pub key: LessonInstanceKey,
+     pub target: CourseCell,
+-    pub actor_id: PrincipalId,
++    pub initiator: LessonInitiator,
+     pub created_at: LocalDateTime,
+ }
+ /// A continuous baseline witnessed by the single business writer.
+@@ -434,6 +440,67 @@
+         identity
+             .authorize_management(actor, now)
+             .map_err(LessonContextError::Identity)?;
++        self.apply_with_initiator(
++            expected,
++            key,
++            action,
++            id,
++            identity,
++            LessonInitiator::Authenticated(actor.principal_id),
++            now,
++        )
++    }
++    /// Trusted native desktop composition only. This pure transition grants no
++    /// account/session authority; the repository must bind a live desktop guard.
++    #[allow(clippy::too_many_arguments)]
++    pub fn apply_local_desktop(
++        &self,
++        expected: Revision,
++        key: &LessonInstanceKey,
++        action: LessonAction,
++        id: OverrideId,
++        identity: &IdentityState,
++        now: LocalDateTime,
++    ) -> Result<Self, LessonContextError> {
++        identity.validate().map_err(LessonContextError::Identity)?;
++        if identity.installation.as_ref().and_then(|i| i.current_class) != Some(key.class_id)
++            || !identity
++                .classes
++                .iter()
++                .any(|c| c.id == key.class_id && c.enabled)
++        {
++            return Err(LessonContextError::LessonContextChanged);
++        }
++        self.apply_with_initiator(
++            expected,
++            key,
++            action,
++            id,
++            identity,
++            LessonInitiator::LocalDesktop,
++            now,
++        )
++    }
++    #[allow(clippy::too_many_arguments)]
++    fn apply_with_initiator(
++        &self,
++        expected: Revision,
++        key: &LessonInstanceKey,
++        action: LessonAction,
++        id: OverrideId,
++        identity: &IdentityState,
++        initiator: LessonInitiator,
++        now: LocalDateTime,
++    ) -> Result<Self, LessonContextError> {
++        if self.blocked_until.is_some()
++            || self.observed_at.is_some_and(|at| now < at)
++            || self
++                .current
++                .as_ref()
++                .is_some_and(|c| now < c.effective_from)
++        {
++            return Err(LessonContextError::LessonContextChanged);
++        }
+         if expected != self.revision {
+             return Err(LessonContextError::RevisionConflict {
+                 current: self.revision,
+@@ -475,7 +542,7 @@
+                 id,
+                 key: key.clone(),
+                 target,
+-                actor_id: actor.principal_id,
++                initiator,
+                 created_at: now,
+             }),
+             LessonAction::Restore => None,
+--- a/crates/fc-domain/src/lesson_context/tests.rs
++++ b/crates/fc-domain/src/lesson_context/tests.rs
+@@ -80,3 +80,5 @@
+         );
+     }
+ }
++
++mod public_desktop;
+--- a/crates/fc-domain/src/lesson_context/tests/public_desktop.rs
++++ b/crates/fc-domain/src/lesson_context/tests/public_desktop.rs
+@@ -0,0 +1,281 @@
++use super::*;
++use crate::{auth::*, identity::*};
++fn principal(id: u64) -> PrincipalId {
++    PrincipalId::new(id).unwrap()
++}
++fn state() -> IdentityState {
++    let school = SchoolId::new(1).unwrap();
++    IdentityState {
++        revision: Revision::new(1),
++        installation: Some(Installation {
++            school_id: school,
++            school_name: "测试学校".into(),
++            current_class: Some(ClassId::new(1).unwrap()),
++        }),
++        accounts: (1..=4)
++            .map(|id| UserAccount {
++                principal: Principal {
++                    id: principal(id),
++                    school_id: school,
++                    role: match id {
++                        1 => Role::GlobalAdmin,
++                        4 => Role::User,
++                        _ => Role::TeacherAdmin,
++                    },
++                    enabled: true,
++                    auth_epoch: AuthEpoch::new(1),
++                },
++                login_name: format!("user{id}"),
++                display_name: format!("账号{id}"),
++                must_change_password: false,
++                credential_version: 1,
++                recovery_version: 1,
++            })
++            .collect(),
++        classes: vec![SchoolClass {
++            id: ClassId::new(1).unwrap(),
++            school_id: school,
++            name: "一班".into(),
++            enabled: true,
++        }],
++        subjects: vec![SchoolSubject {
++            id: SubjectId::new(1).unwrap(),
++            school_id: school,
++            name: "语文".into(),
++            enabled: true,
++            color: Rgb {
++                red: 20,
++                green: 40,
++                blue: 60,
++            },
++            revision: Revision::new(1),
++        }],
++        assignments: [2, 3]
++            .into_iter()
++            .map(|id| TeachingAssignment {
++                teacher_id: principal(id),
++                class_id: ClassId::new(1).unwrap(),
++                subject_id: SubjectId::new(1).unwrap(),
++                enabled: true,
++            })
++            .collect(),
++        default_teachers: vec![],
++    }
++}
++#[test]
++fn actorless_desktop_uses_honest_origin_and_same_key_history_restore_rules() {
++    let mut identity = state();
++    identity.revision = Revision::new(5);
++    let mut extra = identity.subjects[0].clone();
++    extra.id = SubjectId::new(2).unwrap();
++    extra.name = "数学".into();
++    identity.subjects.push(extra);
++    let original = evidence();
++    let key = original.current.as_ref().unwrap().key.clone();
++    let action = LessonAction::Replace(CourseCell {
++        subject_id: SubjectId::new(2).unwrap(),
++        teacher: TeacherBinding::Unassigned,
++    });
++    let saved = original
++        .apply_local_desktop(
++            original.revision,
++            &key,
++            action,
++            OverrideId::new(9).unwrap(),
++            &identity,
++            at(8 * 3600 + 31 * 60),
++        )
++        .unwrap();
++    assert_eq!(
++        saved.active_override.as_ref().unwrap().initiator,
++        LessonInitiator::LocalDesktop
++    );
++    assert_eq!(saved.current.as_ref().unwrap().key, key);
++    assert_eq!(
++        saved.current.as_ref().unwrap().effective_until,
++        original.current.as_ref().unwrap().effective_until
++    );
++    assert_eq!(saved.history.len(), original.history.len() + 1);
++    let restored = saved
++        .apply_local_desktop(
++            saved.revision,
++            &key,
++            LessonAction::Restore,
++            OverrideId::new(10).unwrap(),
++            &identity,
++            at(8 * 3600 + 32 * 60),
++        )
++        .unwrap();
++    assert!(restored.active_override.is_none());
++    assert_eq!(
++        restored.current.as_ref().unwrap().effective,
++        original.current.as_ref().unwrap().base
++    );
++    assert!(saved
++        .apply_local_desktop(
++            original.revision,
++            &key,
++            LessonAction::Restore,
++            OverrideId::new(11).unwrap(),
++            &identity,
++            at(8 * 3600 + 32 * 60)
++        )
++        .is_err());
++    assert!(saved
++        .apply_local_desktop(
++            saved.revision,
++            &key,
++            LessonAction::Restore,
++            OverrideId::new(11).unwrap(),
++            &identity,
++            at(9 * 3600)
++        )
++        .is_err());
++    let mut other = identity.clone();
++    other.installation.as_mut().unwrap().current_class = None;
++    assert!(saved
++        .apply_local_desktop(
++            saved.revision,
++            &key,
++            LessonAction::Restore,
++            OverrideId::new(11).unwrap(),
++            &other,
++            at(8 * 3600 + 32 * 60)
++        )
++        .is_err());
++}
++#[test]
++fn management_keeps_exact_local_admin_authority_and_authenticated_audit() {
++    let mut identity = state();
++    identity.revision = Revision::new(5);
++    let original = evidence();
++    let key = original.current.as_ref().unwrap().key.clone();
++    let admin = ActorContext {
++        principal_id: principal(1),
++        school_id: SchoolId::new(1).unwrap(),
++        auth_epoch: AuthEpoch::new(1),
++        expires_at: at(10 * 3600),
++        origin: TrustedOrigin::Local,
++    };
++    let target = original.current.as_ref().unwrap().base.clone();
++    let action = LessonAction::Replace(target);
++    let saved = original
++        .apply(
++            original.revision,
++            &key,
++            action.clone(),
++            OverrideId::new(9).unwrap(),
++            &identity,
++            &admin,
++            at(8 * 3600 + 31 * 60),
++        )
++        .unwrap();
++    assert_eq!(
++        saved.active_override.unwrap().initiator,
++        LessonInitiator::Authenticated(principal(1))
++    );
++    let mut teacher = admin.clone();
++    teacher.principal_id = principal(2);
++    assert!(original
++        .apply(
++            original.revision,
++            &key,
++            action.clone(),
++            OverrideId::new(9).unwrap(),
++            &identity,
++            &teacher,
++            at(8 * 3600 + 31 * 60)
++        )
++        .is_err());
++    let mut web = admin.clone();
++    web.origin = TrustedOrigin::Web;
++    assert!(original
++        .apply(
++            original.revision,
++            &key,
++            action.clone(),
++            OverrideId::new(9).unwrap(),
++            &identity,
++            &web,
++            at(8 * 3600 + 31 * 60)
++        )
++        .is_err());
++    identity.accounts[0].must_change_password = true;
++    assert!(original
++        .apply(
++            original.revision,
++            &key,
++            action.clone(),
++            OverrideId::new(9).unwrap(),
++            &identity,
++            &admin,
++            at(8 * 3600 + 31 * 60)
++        )
++        .is_err());
++    assert!(original
++        .apply_local_desktop(
++            original.revision,
++            &key,
++            action,
++            OverrideId::new(9).unwrap(),
++            &identity,
++            at(8 * 3600 + 31 * 60)
++        )
++        .is_ok());
++}
++#[test]
++fn desktop_cannot_invent_teacher_or_default_target_or_cross_clock_barriers() {
++    let mut identity = state();
++    identity.revision = Revision::new(5);
++    let original = evidence();
++    let key = original.current.as_ref().unwrap().key.clone();
++    for target in [
++        CourseCell {
++            subject_id: SubjectId::new(1).unwrap(),
++            teacher: TeacherBinding::Explicit(principal(4)),
++        },
++        CourseCell {
++            subject_id: SubjectId::new(1).unwrap(),
++            teacher: TeacherBinding::Default,
++        },
++        CourseCell {
++            subject_id: SubjectId::new(99).unwrap(),
++            teacher: TeacherBinding::Unassigned,
++        },
++    ] {
++        assert_eq!(
++            original.apply_local_desktop(
++                original.revision,
++                &key,
++                LessonAction::Replace(target),
++                OverrideId::new(9).unwrap(),
++                &identity,
++                at(8 * 3600 + 31 * 60)
++            ),
++            Err(LessonContextError::InvalidTarget)
++        );
++    }
++    let action = LessonAction::Replace(original.current.as_ref().unwrap().base.clone());
++    assert!(original
++        .apply_local_desktop(
++            original.revision,
++            &key,
++            action.clone(),
++            OverrideId::new(9).unwrap(),
++            &identity,
++            at(8 * 3600 + 29 * 60)
++        )
++        .is_err());
++    let mut wrong = key.clone();
++    wrong.version.rules_revision = Revision::new(2);
++    assert!(original
++        .apply_local_desktop(
++            original.revision,
++            &wrong,
++            action,
++            OverrideId::new(9).unwrap(),
++            &identity,
++            at(8 * 3600 + 31 * 60)
++        )
++        .is_err());
++}
+--- a/crates/fc-ports/src/lib.rs
++++ b/crates/fc-ports/src/lib.rs
+@@ -619,3 +619,6 @@
+ 
+ pub mod subject_visual;
+ pub use subject_visual::*;
++
++pub mod desktop_lesson;
++pub use desktop_lesson::*;
+--- a/crates/fc-ports/src/desktop_lesson.rs
++++ b/crates/fc-ports/src/desktop_lesson.rs
+@@ -0,0 +1,47 @@
++//! Actorless trusted native desktop lesson actions. No Web/settings capability.
++use crate::LessonRepositoryError;
++use fc_domain::{
++    identity::SchoolSubject,
++    ids::{CommandId, PrincipalId, Revision, SubjectId},
++    lesson_context::{LessonAction, LessonContextSnapshot},
++    schedule::LessonInstanceKey,
++};
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DesktopLessonBinding {
++    pub expected_revision: Revision,
++    pub expected_identity_revision: Revision,
++    pub expected_schedule_revision: Revision,
++    pub lesson: LessonInstanceKey,
++}
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DesktopLessonRequest {
++    pub command_id: CommandId,
++    pub binding: DesktopLessonBinding,
++    pub action: LessonAction,
++}
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DesktopLessonTeacher {
++    pub id: PrincipalId,
++    pub display_name: String,
++    pub subject_ids: Vec<SubjectId>,
++}
++/// Only the current bound classroom's enabled subject/teacher choices. No login
++/// names, roles, credentials, auth epochs or mutable account objects are exposed.
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DesktopLessonSource {
++    pub context: LessonContextSnapshot,
++    pub catalog_revision: Revision,
++    pub schedule_revision: Revision,
++    pub subjects: Vec<SchoolSubject>,
++    pub teachers: Vec<DesktopLessonTeacher>,
++}
++pub trait DesktopLessonRepository {
++    fn desktop_lesson(
++        &self,
++        binding: DesktopLessonBinding,
++    ) -> Result<DesktopLessonSource, LessonRepositoryError>;
++    fn execute_desktop_lesson(
++        &mut self,
++        request: DesktopLessonRequest,
++    ) -> Result<DesktopLessonSource, LessonRepositoryError>;
++}
+--- a/crates/fc-storage/src/business/mod.rs
++++ b/crates/fc-storage/src/business/mod.rs
+@@ -10,6 +10,7 @@
+ #[path = "tests/content_web.rs"]
+ mod content_web_tests;
+ mod desktop;
++mod desktop_lesson;
+ mod display;
+ mod display_codec;
+ mod lesson;
+@@ -89,6 +90,9 @@
+ pub type CalendarExecutionGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+ /// Bounded memory-only policy handoff fence for native driver transactions.
+ pub type VoiceDriverGuard = Arc<dyn Fn() -> bool + Send + Sync>;
++/// A short memory-only native-flow capability. Never grants account authority.
++/// False/panic cancels; no SQL, native waiting or new lease is allowed inside.
++pub type DesktopLessonGuard = Arc<dyn Fn() -> bool + Send + Sync>;
+ type Factory<S> = Arc<dyn Fn(&IdentityState, Revision) -> Result<S, StorageError> + Send + Sync>;
+ pub type MaterialSceneGuard = Arc<
+     dyn Fn(&fc_domain::materials::MaterialSource, SceneGeneration) -> Result<(), StorageError>
+@@ -105,6 +109,7 @@
+     material_scene: MaterialSceneGuard,
+     profile_content_scene: profile_content::ProfileContentSceneGuard,
+     lesson_observations: lesson::Observations,
++    desktop_lesson_guard: Option<DesktopLessonGuard>,
+     calendar_execution: CalendarExecutionGuard,
+     autostart_execution: AutostartExecutionGuard,
+     voice_timeout: Option<(std::time::Duration, Arc<dyn Fn() -> bool + Send + Sync>)>,
+@@ -121,6 +126,7 @@
+             material_scene: self.material_scene.clone(),
+             profile_content_scene: self.profile_content_scene.clone(),
+             lesson_observations: self.lesson_observations.clone(),
++            desktop_lesson_guard: self.desktop_lesson_guard.clone(),
+             calendar_execution: self.calendar_execution.clone(),
+             autostart_execution: self.autostart_execution.clone(),
+             voice_timeout: self.voice_timeout.clone(),
+@@ -149,12 +155,22 @@
+             material_scene: Arc::new(|_, _| Err(StorageError::AuthorityUnavailable)),
+             profile_content_scene: Arc::new(|_, _, _, _| Err(StorageError::AuthorityUnavailable)),
+             lesson_observations: Arc::new(std::sync::Mutex::new(None)),
++            desktop_lesson_guard: None,
+             calendar_execution: Arc::new(|| true),
+             autostart_execution: Arc::new(|| true),
+             voice_timeout: None,
+             voice_driver_guard: Arc::new(|| true),
+             initial_installation_identity: None,
+         }
++    }
++    /// Scoped native desktop capability. An unbound repository denies access;
++    /// rebinding an existing capability can only tighten it.
++    pub fn with_desktop_lesson_guard(mut self, guard: DesktopLessonGuard) -> Self {
++        self.desktop_lesson_guard = Some(match self.desktop_lesson_guard.take() {
++            Some(previous) => Arc::new(move || previous() && guard()),
++            None => guard,
++        });
++        self
+     }
+     /// Authenticated operations fail closed until composition binds their exact lease.
+     pub fn with_session_guard(mut self, guard: SessionGuard) -> Self {
+--- a/crates/fc-storage/src/business/lesson.rs
++++ b/crates/fc-storage/src/business/lesson.rs
+@@ -102,7 +102,7 @@
+         .material_source(i, s, class, now)
+         .map_err(StorageError::Material)
+ }
+-fn error(e: StorageError) -> LessonRepositoryError {
++pub(super) fn error(e: StorageError) -> LessonRepositoryError {
+     match e {
+         StorageError::Lesson(e) => LessonRepositoryError::Domain(e),
+         StorageError::Identity(e) => LessonRepositoryError::Domain(LessonContextError::Identity(e)),
+@@ -302,12 +302,10 @@
+                     LessonAction::Replace(target) => {
+                         if !original.active_override.as_ref().is_some_and(|o| {
+                             o.id.get() == r.command_id.get()
+-                                && o.actor_id
+-                                    == self
+-                                        .actor
+-                                        .as_ref()
+-                                        .map(|a| a.principal_id)
+-                                        .unwrap_or(o.actor_id)
++                                && self.actor.as_ref().is_some_and(|actor| {
++                                    o.initiator
++                                        == LessonInitiator::Authenticated(actor.principal_id)
++                                })
+                                 && &o.target == target
+                                 && o.key == r.lesson
+                         }) {
+--- a/crates/fc-storage/src/business/lesson_codec.rs
++++ b/crates/fc-storage/src/business/lesson_codec.rs
+@@ -37,8 +37,31 @@
+         effective_until: read_time(&v["until"])?,
+     })
+ }
++fn initiator(source: LessonInitiator) -> Value {
++    match source {
++        LessonInitiator::Authenticated(id) => json!({"kind":"authenticated","principal":id.get()}),
++        LessonInitiator::LocalDesktop => json!({"kind":"local-desktop"}),
++    }
++}
++fn read_initiator(v: &Value) -> Result<LessonInitiator, StorageError> {
++    match v["kind"].as_str() {
++        Some("authenticated") => {
++            object_fields(v, &["kind", "principal"])?;
++            Ok(LessonInitiator::Authenticated(id(
++                v,
++                "principal",
++                PrincipalId::new,
++            )?))
++        }
++        Some("local-desktop") => {
++            object_fields(v, &["kind"])?;
++            Ok(LessonInitiator::LocalDesktop)
++        }
++        _ => Err(StorageError::Database),
++    }
++}
+ pub(super) fn snapshot(s: &LessonContextSnapshot) -> Value {
+-    json!({"format":2,"revision":s.revision.get(),"identity_revision":s.identity_revision.get(),"observed_at":s.observed_at.map(time),"class":s.class_id.map(|c|c.get()),"blocked_until":s.blocked_until.map(time),"current":s.current.as_ref().map(context),"override":s.active_override.as_ref().map(|o|json!({"id":o.id.get(),"key":materials_codec::lesson(&o.key),"target":cell(&o.target),"actor":o.actor_id.get(),"created":time(o.created_at)})),"history":s.history.iter().map(|h|json!({"context":context(&h.context),"ended":time(h.ended_at)})).collect::<Vec<_>>(),"base_trust":s.base_trust.as_ref().map(|p|json!({"schedule_revision":p.schedule_revision.get(),"identity_revision":p.identity_revision.get(),"class":p.class_id.get(),"since":time(p.trusted_since)}))})
++    json!({"format":3,"revision":s.revision.get(),"identity_revision":s.identity_revision.get(),"observed_at":s.observed_at.map(time),"class":s.class_id.map(|c|c.get()),"blocked_until":s.blocked_until.map(time),"current":s.current.as_ref().map(context),"override":s.active_override.as_ref().map(|o|json!({"id":o.id.get(),"key":materials_codec::lesson(&o.key),"target":cell(&o.target),"initiator":initiator(o.initiator),"created":time(o.created_at)})),"history":s.history.iter().map(|h|json!({"context":context(&h.context),"ended":time(h.ended_at)})).collect::<Vec<_>>(),"base_trust":s.base_trust.as_ref().map(|p|json!({"schedule_revision":p.schedule_revision.get(),"identity_revision":p.identity_revision.get(),"class":p.class_id.get(),"since":time(p.trusted_since)}))})
+ }
+ pub(super) fn read_snapshot(v: &Value) -> Result<LessonContextSnapshot, StorageError> {
+     let format = number(v, "format")?;
+@@ -53,7 +76,7 @@
+         "override",
+         "history",
+     ];
+-    if format == 2 {
++    if format == 2 || format == 3 {
+         fields.push("base_trust");
+     } else if format != 1 {
+         return Err(StorageError::Database);
+@@ -90,12 +113,20 @@
+             None
+         } else {
+             let o = &v["override"];
+-            object_fields(o, &["id", "key", "target", "actor", "created"])?;
++            if format == 3 {
++                object_fields(o, &["id", "key", "target", "initiator", "created"])?;
++            } else {
++                object_fields(o, &["id", "key", "target", "actor", "created"])?;
++            }
+             Some(LessonOverrideContext {
+                 id: id(o, "id", OverrideId::new)?,
+                 key: materials_codec::read_lesson(&o["key"])?,
+                 target: read_cell(&o["target"])?,
+-                actor_id: id(o, "actor", PrincipalId::new)?,
++                initiator: if format == 3 {
++                    read_initiator(&o["initiator"])?
++                } else {
++                    LessonInitiator::Authenticated(id(o, "actor", PrincipalId::new)?)
++                },
+                 created_at: read_time(&o["created"])?,
+             })
+         },
+@@ -176,7 +207,7 @@
+         let decoded = read_snapshot(&legacy).unwrap();
+         assert!(decoded.base_trust.is_none());
+         assert_eq!(decoded.observed_at, Some(now));
+-        assert_eq!(snapshot(&decoded)["format"], 2);
++        assert_eq!(snapshot(&decoded)["format"], 3);
+         let mut smuggled = encoded.clone();
+         smuggled["format"] = json!(1);
+         assert!(read_snapshot(&smuggled).is_err());
+@@ -200,3 +231,120 @@
+         assert!(read_snapshot(&missing).is_err());
+     }
+ }
++
++#[cfg(test)]
++mod initiator_tests {
++    use super::*;
++    fn example(initiator: LessonInitiator) -> LessonContextSnapshot {
++        use fc_domain::time::*;
++        let date = LocalDate::new(2026, 10, 30).unwrap();
++        let at = LocalDateTime::new(date, 8 * 3600 + 30 * 60).unwrap();
++        let key = LessonInstanceKey {
++            actual_date: date,
++            class_id: ClassId::new(1).unwrap(),
++            range: MinuteRange::new(Minute::new(480).unwrap(), Minute::new(540).unwrap()).unwrap(),
++            version: ResolvedScheduleVersion {
++                actual_semester_id: SemesterId::new(1).unwrap(),
++                actual_revision: Revision::new(1),
++                source_semester_id: SemesterId::new(1).unwrap(),
++                source_revision: Revision::new(1),
++                calendar_mode: CalendarMode::School,
++                calendar_mode_revision: Revision::new(1),
++                applied_calendar_revision: Revision::new(1),
++                makeup_mapping_revision: Revision::new(1),
++                source_table_id: TableId::new(1).unwrap(),
++                source_row_id: RowId::new(1).unwrap(),
++                rules_revision: Revision::new(1),
++            },
++        };
++        let cell = CourseCell {
++            subject_id: SubjectId::new(1).unwrap(),
++            teacher: TeacherBinding::Unassigned,
++        };
++        LessonContextSnapshot {
++            revision: Revision::new(3),
++            identity_revision: Revision::new(5),
++            observed_at: Some(at),
++            class_id: Some(key.class_id),
++            current: Some(EffectiveLessonContext {
++                key: key.clone(),
++                base: cell.clone(),
++                effective: cell.clone(),
++                teacher_id: None,
++                effective_from: at,
++                effective_until: LocalDateTime::new(date, 9 * 3600).unwrap(),
++            }),
++            active_override: Some(LessonOverrideContext {
++                id: OverrideId::new(9).unwrap(),
++                key,
++                target: cell,
++                initiator,
++                created_at: at,
++            }),
++            ..Default::default()
++        }
++    }
++    #[test]
++    fn strict_format_three_roundtrips_both_honest_initiators_and_old_formats_keep_admin() {
++        for initiator in [
++            LessonInitiator::Authenticated(PrincipalId::new(7).unwrap()),
++            LessonInitiator::LocalDesktop,
++        ] {
++            let s = example(initiator);
++            s.validate().unwrap();
++            let encoded = snapshot(&s);
++            assert_eq!(encoded["format"], 3);
++            assert_eq!(read_snapshot(&encoded).unwrap(), s);
++            assert!(encoded["override"].get("actor").is_none());
++        }
++        for format in [1, 2] {
++            let mut legacy = snapshot(&example(LessonInitiator::Authenticated(
++                PrincipalId::new(7).unwrap(),
++            )));
++            legacy["format"] = json!(format);
++            let object = legacy["override"].as_object_mut().unwrap();
++            object.remove("initiator");
++            object.insert("actor".into(), json!(7));
++            if format == 1 {
++                legacy.as_object_mut().unwrap().remove("base_trust");
++            }
++            assert_eq!(
++                read_snapshot(&legacy)
++                    .unwrap()
++                    .active_override
++                    .unwrap()
++                    .initiator,
++                LessonInitiator::Authenticated(PrincipalId::new(7).unwrap())
++            );
++        }
++    }
++    #[test]
++    fn malformed_mixed_or_guessed_initiators_never_become_desktop_authority() {
++        let good = snapshot(&example(LessonInitiator::LocalDesktop));
++        for source in [
++            Value::Null,
++            json!({}),
++            json!({"kind":"unknown"}),
++            json!({"kind":"authenticated"}),
++            json!({"kind":"authenticated","principal":0}),
++            json!({"kind":"local-desktop","principal":7}),
++            json!({"kind":"local-desktop","extra":true}),
++        ] {
++            let mut bad = good.clone();
++            bad["override"]["initiator"] = source;
++            assert!(read_snapshot(&bad).is_err());
++        }
++        let mut mixed = good.clone();
++        mixed["override"]["actor"] = json!(7);
++        assert!(read_snapshot(&mixed).is_err());
++        let mut missing = good.clone();
++        missing["override"]
++            .as_object_mut()
++            .unwrap()
++            .remove("initiator");
++        assert!(read_snapshot(&missing).is_err());
++        let mut legacy = good.clone();
++        legacy["format"] = json!(2);
++        assert!(read_snapshot(&legacy).is_err());
++    }
++}
+--- a/crates/fc-storage/src/business/desktop_lesson.rs
++++ b/crates/fc-storage/src/business/desktop_lesson.rs
+@@ -0,0 +1,512 @@
++//! Actorless native desktop commands on the existing bounded writer. A scoped
++//! memory capability is required; an absent actor is never treated as authority.
++use super::*;
++use fc_domain::{lesson_context::*, schedule_document::ScheduleDocument};
++use fc_ports::{
++    DesktopLessonBinding, DesktopLessonRepository, DesktopLessonRequest, DesktopLessonSource,
++    DesktopLessonTeacher, LessonRepositoryError,
++};
++
++fn check_guard(guard: &Option<DesktopLessonGuard>) -> Result<(), StorageError> {
++    if guard
++        .as_ref()
++        .is_some_and(|guard| catch_unwind(AssertUnwindSafe(|| guard())).unwrap_or(false))
++    {
++        Ok(())
++    } else {
++        Err(StorageError::ExecutionCancelled)
++    }
++}
++fn changed() -> StorageError {
++    StorageError::Lesson(LessonContextError::LessonContextChanged)
++}
++fn metadata(
++    identity: &IdentityState,
++    schedule: &ScheduleDocument,
++    binding: &DesktopLessonBinding,
++    now: fc_domain::time::LocalDateTime,
++) -> Result<(), StorageError> {
++    if identity.revision != binding.expected_identity_revision
++        || schedule.revision != binding.expected_schedule_revision
++        || identity.installation.as_ref().and_then(|i| i.current_class)
++            != Some(binding.lesson.class_id)
++        || !identity
++            .classes
++            .iter()
++            .any(|c| c.id == binding.lesson.class_id && c.enabled)
++        || binding.lesson.actual_date != now.date
++        || !binding.lesson.range.contains_second(now.second_of_day())
++    {
++        return Err(changed());
++    }
++    Ok(())
++}
++fn current(
++    context: &LessonContextSnapshot,
++    binding: &DesktopLessonBinding,
++    exact_revision: bool,
++) -> Result<(), StorageError> {
++    if context.blocked_until.is_some()
++        || !context
++            .current
++            .as_ref()
++            .is_some_and(|c| c.key == binding.lesson)
++    {
++        return Err(changed());
++    }
++    if exact_revision && context.revision != binding.expected_revision {
++        return Err(StorageError::Lesson(LessonContextError::RevisionConflict {
++            current: context.revision,
++        }));
++    }
++    Ok(())
++}
++fn source(
++    identity: &IdentityState,
++    schedule: &ScheduleDocument,
++    context: LessonContextSnapshot,
++) -> DesktopLessonSource {
++    let class = context.class_id;
++    let mut subjects: Vec<_> = identity
++        .subjects
++        .iter()
++        .filter(|s| s.enabled)
++        .cloned()
++        .collect();
++    subjects.sort_unstable_by_key(|s| s.id);
++    let mut teachers: Vec<_> = identity
++        .accounts
++        .iter()
++        .filter(|account| account.principal.enabled && account.principal.role != Role::User)
++        .filter_map(|account| {
++            // Same eligibility as is_teacher, scanning only actual assignments
++            // rather than the account × subject × assignment Cartesian product.
++            let mut ids: Vec<_> = identity
++                .assignments
++                .iter()
++                .filter(|assignment| {
++                    assignment.enabled
++                        && assignment.teacher_id == account.principal.id
++                        && Some(assignment.class_id) == class
++                        && subjects
++                            .binary_search_by_key(&assignment.subject_id, |s| s.id)
++                            .is_ok()
++                })
++                .map(|assignment| assignment.subject_id)
++                .collect();
++            ids.sort_unstable();
++            ids.dedup();
++            (!ids.is_empty()).then(|| DesktopLessonTeacher {
++                id: account.principal.id,
++                display_name: account.display_name.clone(),
++                subject_ids: ids,
++            })
++        })
++        .collect();
++    teachers.sort_unstable_by_key(|t| t.id);
++    DesktopLessonSource {
++        context,
++        catalog_revision: identity.revision,
++        schedule_revision: schedule.revision,
++        subjects,
++        teachers,
++    }
++}
++fn subject_value(s: &SchoolSubject) -> Value {
++    json!({"id":s.id.get(),"school":s.school_id.get(),"name":s.name,"enabled":s.enabled,
++        "rgb":[s.color.red,s.color.green,s.color.blue],"revision":s.revision.get()})
++}
++fn value(s: &DesktopLessonSource) -> Value {
++    json!({"format":1,"context":lesson_codec::snapshot(&s.context),"catalog_revision":s.catalog_revision.get(),
++        "schedule_revision":s.schedule_revision.get(),"subjects":s.subjects.iter().map(subject_value).collect::<Vec<_>>(),
++        "teachers":s.teachers.iter().map(|t|json!({"id":t.id.get(),"display_name":t.display_name,"subjects":t.subject_ids.iter().map(|id|id.get()).collect::<Vec<_>>()})).collect::<Vec<_>>()})
++}
++fn read(value: &Value) -> Result<DesktopLessonSource, StorageError> {
++    codec::object_fields(
++        value,
++        &[
++            "format",
++            "context",
++            "catalog_revision",
++            "schedule_revision",
++            "subjects",
++            "teachers",
++        ],
++    )?;
++    if codec::number(value, "format")? != 1 {
++        return Err(StorageError::Database);
++    }
++    let rows = codec::array(value, "subjects")?;
++    if rows.len() > MAX_SUBJECTS {
++        return Err(StorageError::Database);
++    }
++    let subjects = rows
++        .iter()
++        .map(|s| {
++            codec::object_fields(s, &["id", "school", "name", "enabled", "rgb", "revision"])?;
++            let rgb = codec::array(s, "rgb")?;
++            if rgb.len() != 3 {
++                return Err(StorageError::Database);
++            }
++            let channel = |n: usize| {
++                u8::try_from(rgb[n].as_u64().ok_or(StorageError::Database)?)
++                    .map_err(|_| StorageError::Database)
++            };
++            let subject = SchoolSubject {
++                id: SubjectId::new(codec::number(s, "id")?).map_err(|_| StorageError::Database)?,
++                school_id: SchoolId::new(codec::number(s, "school")?)
++                    .map_err(|_| StorageError::Database)?,
++                name: codec::text(s, "name")?,
++                enabled: codec::boolean(s, "enabled")?,
++                color: Rgb {
++                    red: channel(0)?,
++                    green: channel(1)?,
++                    blue: channel(2)?,
++                },
++                revision: Revision::new(codec::number(s, "revision")?),
++            };
++            if !subject.enabled
++                || subject.revision.get() == 0
++                || normalized_name(&subject.name, 64).is_err()
++            {
++                return Err(StorageError::Database);
++            }
++            Ok(subject)
++        })
++        .collect::<Result<Vec<_>, StorageError>>()?;
++    if subjects.windows(2).any(|s| s[0].id >= s[1].id)
++        || subjects
++            .first()
++            .is_some_and(|first| subjects.iter().any(|s| s.school_id != first.school_id))
++    {
++        return Err(StorageError::Database);
++    }
++    let rows = codec::array(value, "teachers")?;
++    if rows.len() > MAX_ACCOUNTS {
++        return Err(StorageError::Database);
++    }
++    let teachers = rows
++        .iter()
++        .map(|t| {
++            codec::object_fields(t, &["id", "display_name", "subjects"])?;
++            let ids = codec::array(t, "subjects")?;
++            if ids.is_empty() || ids.len() > MAX_SUBJECTS {
++                return Err(StorageError::Database);
++            }
++            let subject_ids = ids
++                .iter()
++                .map(|id| {
++                    SubjectId::new(id.as_u64().ok_or(StorageError::Database)?)
++                        .map_err(|_| StorageError::Database)
++                })
++                .collect::<Result<Vec<_>, _>>()?;
++            if subject_ids.windows(2).any(|s| s[0] >= s[1])
++                || subject_ids
++                    .iter()
++                    .any(|id| !subjects.iter().any(|s| s.id == *id))
++            {
++                return Err(StorageError::Database);
++            }
++            let display_name = codec::text(t, "display_name")?;
++            normalized_name(&display_name, 128).map_err(|_| StorageError::Database)?;
++            Ok(DesktopLessonTeacher {
++                id: PrincipalId::new(codec::number(t, "id")?)
++                    .map_err(|_| StorageError::Database)?,
++                display_name,
++                subject_ids,
++            })
++        })
++        .collect::<Result<Vec<_>, StorageError>>()?;
++    if teachers.windows(2).any(|t| t[0].id >= t[1].id) {
++        return Err(StorageError::Database);
++    }
++    let result = DesktopLessonSource {
++        context: lesson_codec::read_snapshot(&value["context"])?,
++        catalog_revision: Revision::new(codec::number(value, "catalog_revision")?),
++        schedule_revision: Revision::new(codec::number(value, "schedule_revision")?),
++        subjects,
++        teachers,
++    };
++    if result.catalog_revision.get() == 0
++        || result.context.identity_revision != result.catalog_revision
++    {
++        return Err(StorageError::Database);
++    }
++    Ok(result)
++}
++impl<S: Send + 'static> DesktopLessonRepository for BusinessRepository<S> {
++    fn desktop_lesson(
++        &self,
++        binding: DesktopLessonBinding,
++    ) -> Result<DesktopLessonSource, LessonRepositoryError> {
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        let bytes = self
++            .handle
++            .try_transaction(Task {
++                binding,
++                request: None,
++                guard: self.desktop_lesson_guard.clone(),
++                observations: self.lesson_observations.clone(),
++                clock: self.clock.clone(),
++                factory: self.factory.clone(),
++            })
++            .and_then(|t| t.wait())
++            .map_err(lesson::error)?;
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        let source = read(&codec::value(&bytes).map_err(lesson::error)?).map_err(lesson::error)?;
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        Ok(source)
++    }
++    fn execute_desktop_lesson(
++        &mut self,
++        request: DesktopLessonRequest,
++    ) -> Result<DesktopLessonSource, LessonRepositoryError> {
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        let bytes = self
++            .handle
++            .try_transaction(Task {
++                binding: request.binding.clone(),
++                request: Some(request),
++                guard: self.desktop_lesson_guard.clone(),
++                observations: self.lesson_observations.clone(),
++                clock: self.clock.clone(),
++                factory: self.factory.clone(),
++            })
++            .and_then(|t| t.wait())
++            .map_err(lesson::error)?;
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        let source = read(&codec::value(&bytes).map_err(lesson::error)?).map_err(lesson::error)?;
++        check_guard(&self.desktop_lesson_guard).map_err(lesson::error)?;
++        Ok(source)
++    }
++}
++struct Task<S> {
++    binding: DesktopLessonBinding,
++    request: Option<DesktopLessonRequest>,
++    guard: Option<DesktopLessonGuard>,
++    observations: lesson::Observations,
++    clock: Arc<dyn Clock + Send + Sync>,
++    factory: Factory<S>,
++}
++impl<S: Send + 'static> TransactionTask<S> for Task<S> {
++    fn allocation_bytes(&self) -> usize {
++        std::mem::size_of::<Self>()
++    }
++    fn evaluate(
++        self: Box<Self>,
++        d: &dyn TransactionDocuments,
++    ) -> Result<TransactionDecision<S>, StorageError> {
++        check_guard(&self.guard)?;
++        let identity = load_identity(d)?;
++        let schedule = schedule::load(d, &identity)?;
++        let now = self.clock.now();
++        metadata(&identity, &schedule, &self.binding, now)?;
++        let memory_floor = lesson::witnessed(&self.observations, now)?;
++        let date_floor = desktop::read_watermark(d, &identity)?
++            .filter(|day| *day > now.date)
++            .map(|day| {
++                fc_domain::time::LocalDateTime::new(day, 0).map_err(|_| StorageError::Database)
++            })
++            .transpose()?;
++        let (observed, observation) = lesson::observe_with_floor(
++            d,
++            &identity,
++            &schedule,
++            now,
++            memory_floor.into_iter().chain(date_floor).max(),
++        )?;
++        current(&observed, &self.binding, self.request.is_none())?;
++        let mut context = observed.clone();
++        let mut mutations = vec![];
++        if let Some(request) = &self.request {
++            let fingerprint = fingerprint(request)?;
++            let receipt_key = format!(
++                "business/receipt/desktop-lesson/{}",
++                request.command_id.get()
++            );
++            if let Some(stored) = d.get(&receipt_key)? {
++                let receipt = codec::value(&stored.value)?;
++                codec::object_fields(&receipt, &["fingerprint", "result", "digest"])?;
++                let old: [u8; 32] = serde_json::from_value(receipt["fingerprint"].clone())
++                    .map_err(|_| StorageError::Database)?;
++                if old != fingerprint {
++                    return Err(StorageError::CommandIdReused);
++                }
++                let result = display::encode(&receipt["result"], MAX_VALUE_BYTES)?;
++                let digest: [u8; 32] = serde_json::from_value(receipt["digest"].clone())
++                    .map_err(|_| StorageError::Database)?;
++                if digest.as_slice() != Sha256::digest(&result).as_slice() {
++                    return Err(StorageError::Database);
++                }
++                context = lesson_codec::read_snapshot(&receipt["result"])?;
++                validate_replay(&context, request)?;
++                let outcome = display::encode(
++                    &value(&source(&identity, &schedule, context)),
++                    MAX_VALUE_BYTES,
++                )?;
++                check_guard(&self.guard)?;
++                let binding = self.binding;
++                let guard = self.guard;
++                let clock = self.clock;
++                let observations = self.observations;
++                return Ok(TransactionDecision {
++                    outcome,
++                    commit: None,
++                    precommit: Some(Box::new(move || {
++                        recheck(
++                            &identity,
++                            &schedule,
++                            &observed,
++                            &binding,
++                            &guard,
++                            &clock,
++                            &observations,
++                        )?;
++                        Ok(())
++                    })),
++                });
++            }
++            context = observed
++                .apply_local_desktop(
++                    request.binding.expected_revision,
++                    &request.binding.lesson,
++                    request.action.clone(),
++                    OverrideId::new(request.command_id.get())
++                        .map_err(|_| StorageError::InvalidCommand)?,
++                    &identity,
++                    now,
++                )
++                .map_err(StorageError::Lesson)?;
++            let result = lesson_codec::snapshot(&context);
++            let bytes = display::encode(&result, MAX_VALUE_BYTES)?;
++            mutations.push(Mutation::Put{key:receipt_key,value:display::encode(&json!({"fingerprint":fingerprint,"result":result,"digest":Sha256::digest(&bytes).to_vec()}),MAX_VALUE_BYTES)?});
++        }
++        if observation.is_some() || self.request.is_some() {
++            mutations.push(lesson::mutation(&context)?);
++        }
++        let outcome = display::encode(
++            &value(&source(&identity, &schedule, context)),
++            MAX_VALUE_BYTES,
++        )?;
++        check_guard(&self.guard)?;
++        let commit = if mutations.is_empty() {
++            None
++        } else {
++            Some((
++                mutations,
++                (self.factory)(
++                    &identity,
++                    d.revision()?
++                        .next()
++                        .map_err(|_| StorageError::InvalidCommand)?,
++                )?,
++            ))
++        };
++        let binding = self.binding;
++        let request = self.request;
++        let guard = self.guard;
++        let clock = self.clock;
++        let observations = self.observations;
++        Ok(TransactionDecision {
++            outcome,
++            commit,
++            precommit: Some(Box::new(move || {
++                let fresh = recheck(
++                    &identity,
++                    &schedule,
++                    &observed,
++                    &binding,
++                    &guard,
++                    &clock,
++                    &observations,
++                )?;
++                if let Some(request) = request {
++                    fresh
++                        .apply_local_desktop(
++                            request.binding.expected_revision,
++                            &request.binding.lesson,
++                            request.action,
++                            OverrideId::new(request.command_id.get())
++                                .map_err(|_| StorageError::InvalidCommand)?,
++                            &identity,
++                            clock.now(),
++                        )
++                        .map_err(StorageError::Lesson)?;
++                } else {
++                    current(&fresh, &binding, true)?;
++                }
++                check_guard(&guard)
++            })),
++        })
++    }
++}
++fn fingerprint(request: &DesktopLessonRequest) -> Result<[u8; 32], StorageError> {
++    let mut hash = Sha256::new();
++    hash.update(b"future-classroom/local-desktop-lesson/v1\0");
++    hash.update(display::encode(&json!({"origin":"local-desktop","expected":request.binding.expected_revision.get(),"catalog":request.binding.expected_identity_revision.get(),"schedule":request.binding.expected_schedule_revision.get(),"lesson":materials_codec::lesson(&request.binding.lesson),"action":lesson_codec::action(&request.action)}),MAX_VALUE_BYTES)?);
++    Ok(hash.finalize().into())
++}
++fn validate_replay(
++    context: &LessonContextSnapshot,
++    request: &DesktopLessonRequest,
++) -> Result<(), StorageError> {
++    if context.revision
++        != request
++            .binding
++            .expected_revision
++            .next()
++            .map_err(|_| StorageError::Database)?
++        || context.identity_revision != request.binding.expected_identity_revision
++        || !context
++            .current
++            .as_ref()
++            .is_some_and(|c| c.key == request.binding.lesson)
++    {
++        return Err(StorageError::Database);
++    }
++    match &request.action {
++        LessonAction::Replace(target)
++            if !context.active_override.as_ref().is_some_and(|o| {
++                o.id.get() == request.command_id.get()
++                    && o.key == request.binding.lesson
++                    && &o.target == target
++                    && o.initiator == LessonInitiator::LocalDesktop
++            }) =>
++        {
++            Err(StorageError::Database)
++        }
++        LessonAction::Restore if context.active_override.is_some() => Err(StorageError::Database),
++        _ => Ok(()),
++    }
++}
++fn recheck(
++    identity: &IdentityState,
++    schedule: &ScheduleDocument,
++    observed: &LessonContextSnapshot,
++    binding: &DesktopLessonBinding,
++    guard: &Option<DesktopLessonGuard>,
++    clock: &Arc<dyn Clock + Send + Sync>,
++    observations: &lesson::Observations,
++) -> Result<LessonContextSnapshot, StorageError> {
++    check_guard(guard)?;
++    let now = clock.now();
++    metadata(identity, schedule, binding, now)?;
++    let floor = lesson::witnessed(observations, now)?;
++    let fresh = observed
++        .observe_with_floor(identity, schedule, now, floor)
++        .map_err(StorageError::Lesson)?;
++    if fresh.current != observed.current
++        || fresh.active_override != observed.active_override
++        || fresh.blocked_until != observed.blocked_until
++        || fresh.history != observed.history
++        || fresh.base_trust != observed.base_trust
++    {
++        return Err(changed());
++    }
++    current(&fresh, binding, false)?;
++    check_guard(guard)?;
++    Ok(fresh)
++}
++
++#[cfg(test)]
++mod tests;
+--- a/crates/fc-storage/src/business/desktop_lesson/tests.rs
++++ b/crates/fc-storage/src/business/desktop_lesson/tests.rs
+@@ -0,0 +1,797 @@
++//! Real SQLite/writer regressions: public desktop capability is not a session.
++use super::*;
++use fc_domain::{auth::*, schedule::*, schedule_document::SemesterPlan, time::*};
++use fc_ports::{AuthorityPublisher, LessonRepository};
++use std::sync::{atomic::AtomicU64, Mutex};
++static NEXT: AtomicU64 = AtomicU64::new(0);
++fn principal(id: u64) -> PrincipalId {
++    PrincipalId::new(id).unwrap()
++}
++fn now() -> LocalDateTime {
++    LocalDateTime::new(LocalDate::new(2026, 11, 1).unwrap(), 8 * 3600 + 30 * 60).unwrap()
++}
++fn admin() -> ActorContext {
++    ActorContext {
++        principal_id: principal(1),
++        school_id: SchoolId::new(1).unwrap(),
++        auth_epoch: AuthEpoch::new(1),
++        expires_at: LocalDateTime::new(LocalDate::new(2026, 11, 5).unwrap(), 0).unwrap(),
++        origin: TrustedOrigin::Local,
++    }
++}
++struct Time(Mutex<LocalDateTime>);
++impl Clock for Time {
++    fn now(&self) -> LocalDateTime {
++        *self.0.lock().unwrap()
++    }
++}
++struct Publisher {
++    active: Arc<AtomicBool>,
++    revoke: Arc<AtomicBool>,
++    clock: Arc<Time>,
++    expire: Arc<AtomicBool>,
++    published: Arc<AtomicUsize>,
++}
++impl AuthorityPublisher for Publisher {
++    type Snapshot = Revision;
++    type Update = ();
++    type Error = ();
++    fn snapshot_revision(&self, s: &Revision) -> Revision {
++        *s
++    }
++    fn begin_update(&mut self) -> Result<(), ()> {
++        if self.revoke.swap(false, Ordering::AcqRel) {
++            self.active.store(false, Ordering::Release);
++        }
++        if self.expire.swap(false, Ordering::AcqRel) {
++            *self.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 9 * 3600).unwrap();
++        }
++        Ok(())
++    }
++    fn publish(&mut self, _: (), _: Revision) -> Result<(), ()> {
++        self.published.fetch_add(1, Ordering::AcqRel);
++        Ok(())
++    }
++    fn rollback(&mut self, _: ()) -> Result<(), ()> {
++        Ok(())
++    }
++    fn fault(&mut self) {}
++}
++struct Fixture {
++    writer: Option<StorageWriter<Revision>>,
++    root: PathBuf,
++    active: Arc<AtomicBool>,
++    revoke: Arc<AtomicBool>,
++    expire: Arc<AtomicBool>,
++    clock: Arc<Time>,
++    published: Arc<AtomicUsize>,
++}
++impl Fixture {
++    fn new() -> Self {
++        let root = std::env::temp_dir().join(format!(
++            "FutureClassroom-PublicDesktopLesson-{}-{}-{}",
++            std::process::id(),
++            std::time::SystemTime::now()
++                .duration_since(std::time::UNIX_EPOCH)
++                .unwrap()
++                .as_nanos(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        std::fs::create_dir(&root).unwrap();
++        let mut f = Self {
++            writer: None,
++            root,
++            active: Arc::new(AtomicBool::new(true)),
++            revoke: Arc::new(AtomicBool::new(false)),
++            expire: Arc::new(AtomicBool::new(false)),
++            clock: Arc::new(Time(Mutex::new(now()))),
++            published: Arc::new(AtomicUsize::new(0)),
++        };
++        f.open();
++        let mut identity = state();
++        let mut second = identity.subjects[0].clone();
++        second.id = SubjectId::new(2).unwrap();
++        second.name = "数学".into();
++        identity.subjects.push(second);
++        let draft = ScheduleDocument {
++            semesters: vec![SemesterPlan::new(
++                Semester {
++                    id: SemesterId::new(1).unwrap(),
++                    class_id: ClassId::new(1).unwrap(),
++                    revision: Revision::default(),
++                    enabled: true,
++                    start: LocalDate::new(2026, 10, 1).unwrap(),
++                    end: LocalDate::new(2026, 11, 30).unwrap(),
++                    first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
++                    tables: vec![WeekTable {
++                        id: TableId::new(1).unwrap(),
++                        role: TableRole::Single,
++                        rows: vec![TimetableRow {
++                            id: RowId::new(1).unwrap(),
++                            logical_key: LogicalRowKey::new(1).unwrap(),
++                            group: DayGroup::Morning,
++                            kind: RowKind::Course,
++                            range: MinuteRange::new(
++                                Minute::new(480).unwrap(),
++                                Minute::new(540).unwrap(),
++                            )
++                            .unwrap(),
++                            enabled_days: [true; 7],
++                            courses: std::array::from_fn(|_| {
++                                Some(CourseCell {
++                                    subject_id: SubjectId::new(1).unwrap(),
++                                    teacher: TeacherBinding::Explicit(principal(2)),
++                                })
++                            }),
++                        }],
++                    }],
++                },
++                "Synthetic classroom timetable".into(),
++            )],
++            ..Default::default()
++        };
++        let schedule = ScheduleDocument::default()
++            .transition(&draft, Revision::default(), &identity, &admin(), now())
++            .unwrap();
++        let context = LessonContextSnapshot::default()
++            .observe(&identity, &schedule, now())
++            .unwrap();
++        assert!(context.current.is_some());
++        let mut mutations = vec![
++            Mutation::Put {
++                key: IDENTITY.into(),
++                value: codec::bytes(&codec::identity(&identity)).unwrap(),
++            },
++            Mutation::Put {
++                key: "business/schedule/v1".into(),
++                value: schedule::encode(&schedule_codec::document(&schedule)).unwrap(),
++            },
++            lesson::mutation(&context).unwrap(),
++        ];
++        for id in 1..=4 {
++            for kind in ["password", "recovery"] {
++                mutations.push(Mutation::Put {
++                    key: credential_key(principal(id), kind, 1),
++                    value: vec![id as u8],
++                });
++            }
++        }
++        f.commit(mutations);
++        f
++    }
++    fn open(&mut self) {
++        self.writer = Some(
++            StorageWriter::open(
++                self.root.join("state.sqlite3"),
++                8,
++                Publisher {
++                    active: self.active.clone(),
++                    revoke: self.revoke.clone(),
++                    clock: self.clock.clone(),
++                    expire: self.expire.clone(),
++                    published: self.published.clone(),
++                },
++            )
++            .unwrap(),
++        );
++    }
++    fn reopen(&mut self) {
++        self.writer.take().unwrap().shutdown().unwrap();
++        startup_state(self.root.join("state.sqlite3")).unwrap();
++        self.open();
++    }
++    fn handle(&self) -> StorageHandle<Revision> {
++        self.writer.as_ref().unwrap().handle()
++    }
++    fn revision(&self) -> Revision {
++        self.handle().try_revision().unwrap().wait().unwrap()
++    }
++    fn base(&self) -> BusinessRepository<Revision> {
++        BusinessRepository::new(
++            self.handle(),
++            self.clock.clone(),
++            Arc::new(|_, revision| Ok(revision)),
++        )
++    }
++    fn repository(&self) -> BusinessRepository<Revision> {
++        let active = self.active.clone();
++        self.base()
++            .with_desktop_lesson_guard(Arc::new(move || active.load(Ordering::Acquire)))
++    }
++    fn managed(&self) -> BusinessRepository<Revision> {
++        let clock = self.clock.clone();
++        self.base().with_session_guard(Arc::new(move |i, a| {
++            i.authorize_management(a, clock.now())
++                .map_err(StorageError::Identity)
++        }))
++    }
++    fn get(&self, key: &str) -> Document {
++        self.handle()
++            .try_get(key.into())
++            .unwrap()
++            .wait()
++            .unwrap()
++            .unwrap()
++    }
++    fn commit(&self, mutations: Vec<Mutation>) {
++        let revision = self.revision();
++        self.handle()
++            .try_commit(
++                CommitCommand::new(format!("fixture{}", revision.get()), revision, mutations)
++                    .unwrap(),
++                revision.next().unwrap(),
++            )
++            .unwrap()
++            .wait()
++            .unwrap();
++    }
++    fn identity(&self) -> IdentityState {
++        codec::read_identity(&codec::value(&self.get(IDENTITY).value).unwrap()).unwrap()
++    }
++    fn schedule(&self) -> ScheduleDocument {
++        schedule::read_document(&self.get("business/schedule/v1").value).unwrap()
++    }
++    fn context(&self) -> LessonContextSnapshot {
++        lesson_codec::read_snapshot(
++            &codec::value(&self.get("business/lesson-context/v1").value).unwrap(),
++        )
++        .unwrap()
++    }
++    fn binding(&self) -> DesktopLessonBinding {
++        DesktopLessonBinding {
++            expected_revision: self.context().revision,
++            expected_identity_revision: self.identity().revision,
++            expected_schedule_revision: self.schedule().revision,
++            lesson: self.context().current.unwrap().key,
++        }
++    }
++    fn change(
++        &self,
++        id: u64,
++        binding: DesktopLessonBinding,
++        action: LessonAction,
++    ) -> Result<DesktopLessonSource, LessonRepositoryError> {
++        self.repository()
++            .execute_desktop_lesson(DesktopLessonRequest {
++                command_id: CommandId::new(id).unwrap(),
++                binding,
++                action,
++            })
++    }
++}
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        if let Some(writer) = self.writer.take() {
++            writer
++                .shutdown()
++                .expect("desktop lesson actual writer join");
++        }
++        std::fs::remove_dir_all(&self.root).expect("desktop lesson fixture cleanup");
++    }
++}
++fn replacement() -> LessonAction {
++    LessonAction::Replace(CourseCell {
++        subject_id: SubjectId::new(2).unwrap(),
++        teacher: TeacherBinding::Unassigned,
++    })
++}
++fn state() -> IdentityState {
++    let school = SchoolId::new(1).unwrap();
++    IdentityState {
++        revision: Revision::new(1),
++        installation: Some(Installation {
++            school_id: school,
++            school_name: "测试学校".into(),
++            current_class: Some(ClassId::new(1).unwrap()),
++        }),
++        accounts: (1..=4)
++            .map(|id| UserAccount {
++                principal: Principal {
++                    id: principal(id),
++                    school_id: school,
++                    role: match id {
++                        1 => Role::GlobalAdmin,
++                        4 => Role::User,
++                        _ => Role::TeacherAdmin,
++                    },
++                    enabled: true,
++                    auth_epoch: AuthEpoch::new(1),
++                },
++                login_name: format!("user{id}"),
++                display_name: format!("账号{id}"),
++                must_change_password: false,
++                credential_version: 1,
++                recovery_version: 1,
++            })
++            .collect(),
++        classes: vec![SchoolClass {
++            id: ClassId::new(1).unwrap(),
++            school_id: school,
++            name: "一班".into(),
++            enabled: true,
++        }],
++        subjects: vec![SchoolSubject {
++            id: SubjectId::new(1).unwrap(),
++            school_id: school,
++            name: "语文".into(),
++            enabled: true,
++            color: Rgb {
++                red: 20,
++                green: 40,
++                blue: 60,
++            },
++            revision: Revision::new(1),
++        }],
++        assignments: [2, 3]
++            .into_iter()
++            .map(|id| TeachingAssignment {
++                teacher_id: principal(id),
++                class_id: ClassId::new(1).unwrap(),
++                subject_id: SubjectId::new(1).unwrap(),
++                enabled: true,
++            })
++            .collect(),
++        default_teachers: vec![],
++    }
++}
++#[test]
++fn public_commands_need_no_account_session_and_preserve_only_this_lesson() {
++    let f = Fixture::new();
++    let before = f.identity();
++    let schedule = f.schedule();
++    let original = f.binding();
++    assert!(f.base().desktop_lesson(original.clone()).is_err());
++    let mut repository = f.repository().with_session_guard(Arc::new(|_, _| {
++        panic!("public desktop must never ask for a session")
++    }));
++    let source = repository.desktop_lesson(original.clone()).unwrap();
++    assert_eq!(source.catalog_revision, before.revision);
++    assert_eq!(source.teachers.len(), 2);
++    assert!(source
++        .teachers
++        .iter()
++        .all(|t| t.subject_ids == [SubjectId::new(1).unwrap()]));
++    let saved = repository
++        .execute_desktop_lesson(DesktopLessonRequest {
++            command_id: CommandId::new(1).unwrap(),
++            binding: original,
++            action: replacement(),
++        })
++        .unwrap();
++    assert_eq!(
++        saved.context.active_override.as_ref().unwrap().initiator,
++        LessonInitiator::LocalDesktop
++    );
++    assert_eq!(
++        saved.context.current.as_ref().unwrap().key,
++        f.context().current.unwrap().key
++    );
++    assert_eq!(f.identity(), before);
++    assert_eq!(f.schedule(), schedule);
++    let restored = f.change(2, f.binding(), LessonAction::Restore).unwrap();
++    assert!(restored.context.active_override.is_none());
++    assert_eq!(
++        restored.context.current.as_ref().unwrap().effective,
++        restored.context.current.as_ref().unwrap().base
++    );
++}
++#[test]
++fn desktop_receipts_are_idempotent_and_never_impersonate_managed_receipts() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    let saved = f.change(1, binding.clone(), replacement()).unwrap();
++    let revision = f.revision();
++    assert_eq!(f.change(1, binding.clone(), replacement()).unwrap(), saved);
++    assert_eq!(f.revision(), revision);
++    assert_eq!(
++        f.change(1, binding, LessonAction::Restore),
++        Err(LessonRepositoryError::IdempotencyConflict)
++    );
++    assert!(f
++        .handle()
++        .try_get("business/receipt/lesson/1".into())
++        .unwrap()
++        .wait()
++        .unwrap()
++        .is_none());
++    let record = codec::value(&f.get("business/receipt/desktop-lesson/1").value).unwrap();
++    assert_eq!(
++        record["result"]["override"]["initiator"],
++        json!({"kind":"local-desktop"})
++    );
++    assert!(record["result"]["override"].get("actor").is_none());
++    let admin_request = fc_ports::LessonRequest {
++        command_id: CommandId::new(10).unwrap(),
++        expected_revision: f.context().revision,
++        lesson: f.binding().lesson,
++        action: LessonAction::Restore,
++    };
++    assert!(f
++        .repository()
++        .execute_lesson(admin_request, &admin(), f.clock.as_ref())
++        .is_err());
++}
++#[test]
++fn exact_catalog_schedule_lesson_key_and_class_cas_never_rebinds_a_stale_click() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    let before = f.revision();
++    for case in 0..7 {
++        let mut bad = binding.clone();
++        match case {
++            0 => bad.expected_identity_revision = Revision::new(99),
++            1 => bad.expected_schedule_revision = Revision::new(99),
++            2 => bad.expected_revision = Revision::new(99),
++            3 => bad.lesson.class_id = ClassId::new(99).unwrap(),
++            4 => bad.lesson.actual_date = LocalDate::new(2026, 11, 2).unwrap(),
++            5 => bad.lesson.version.rules_revision = Revision::new(99),
++            _ => {
++                bad.lesson.range =
++                    MinuteRange::new(Minute::new(480).unwrap(), Minute::new(541).unwrap()).unwrap()
++            }
++        }
++        assert!(f.repository().desktop_lesson(bad.clone()).is_err());
++        assert!(f.change(1, bad, replacement()).is_err());
++    }
++    assert_eq!(f.revision(), before);
++    assert!(f.context().active_override.is_none());
++    let mut identity = f.identity();
++    identity.revision = identity.revision.next().unwrap();
++    identity.installation.as_mut().unwrap().current_class = None;
++    f.commit(vec![Mutation::Put {
++        key: IDENTITY.into(),
++        value: codec::bytes(&codec::identity(&identity)).unwrap(),
++    }]);
++    assert!(f.change(1, binding, replacement()).is_err());
++}
++#[test]
++fn scope_targets_and_end_of_lesson_or_rollback_cannot_be_extended() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    let before = f.revision();
++    for cell in [
++        CourseCell {
++            subject_id: SubjectId::new(1).unwrap(),
++            teacher: TeacherBinding::Explicit(principal(4)),
++        },
++        CourseCell {
++            subject_id: SubjectId::new(2).unwrap(),
++            teacher: TeacherBinding::Default,
++        },
++        CourseCell {
++            subject_id: SubjectId::new(999).unwrap(),
++            teacher: TeacherBinding::Unassigned,
++        },
++    ] {
++        assert!(f
++            .change(1, binding.clone(), LessonAction::Replace(cell))
++            .is_err());
++    }
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 9 * 3600).unwrap();
++    assert!(f.change(1, binding.clone(), replacement()).is_err());
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 29 * 60).unwrap();
++    assert!(f.change(1, binding, replacement()).is_err());
++    assert_eq!(f.revision(), before);
++}
++#[test]
++fn default_deny_panic_cancel_and_combined_guards_do_not_grant_or_fault() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    let before = f.revision();
++    assert_eq!(
++        f.base().desktop_lesson(binding.clone()),
++        Err(LessonRepositoryError::Unavailable)
++    );
++    assert_eq!(
++        f.base()
++            .with_desktop_lesson_guard(Arc::new(|| panic!("synthetic guard")))
++            .desktop_lesson(binding.clone()),
++        Err(LessonRepositoryError::Unavailable)
++    );
++    let r = f
++        .base()
++        .with_desktop_lesson_guard(Arc::new(|| false))
++        .with_desktop_lesson_guard(Arc::new(|| true));
++    assert_eq!(
++        r.desktop_lesson(binding.clone()),
++        Err(LessonRepositoryError::Unavailable)
++    );
++    f.active.store(false, Ordering::Release);
++    assert!(f.change(1, binding.clone(), replacement()).is_err());
++    assert_eq!(f.revision(), before);
++    f.active.store(true, Ordering::Release);
++    assert!(f.change(2, binding, replacement()).is_ok());
++}
++#[test]
++fn guard_revocation_and_course_expiry_at_precommit_roll_back_without_publication() {
++    for expire in [false, true] {
++        let f = Fixture::new();
++        let binding = f.binding();
++        let before = f.revision();
++        let published = f.published.load(Ordering::Acquire);
++        if expire {
++            f.expire.store(true, Ordering::Release);
++        } else {
++            f.revoke.store(true, Ordering::Release);
++        }
++        assert!(f.change(1, binding, replacement()).is_err());
++        assert_eq!(f.revision(), before);
++        assert!(f.context().active_override.is_none());
++        assert_eq!(f.published.load(Ordering::Acquire), published);
++        assert!(f
++            .handle()
++            .try_get("business/receipt/desktop-lesson/1".into())
++            .unwrap()
++            .wait()
++            .unwrap()
++            .is_none());
++    }
++}
++#[test]
++fn queued_public_task_cancellation_keeps_sql_state_and_receipt_unchanged() {
++    struct Held {
++        entered: mpsc::Sender<()>,
++        release: mpsc::Receiver<()>,
++    }
++    impl<S> TransactionTask<S> for Held {
++        fn allocation_bytes(&self) -> usize {
++            std::mem::size_of::<Self>()
++        }
++        fn evaluate(
++            self: Box<Self>,
++            _: &dyn TransactionDocuments,
++        ) -> Result<TransactionDecision<S>, StorageError> {
++            self.entered.send(()).unwrap();
++            self.release.recv_timeout(Duration::from_secs(5)).unwrap();
++            Ok(TransactionDecision {
++                outcome: vec![],
++                commit: None,
++                precommit: None,
++            })
++        }
++    }
++    let f = Fixture::new();
++    let binding = f.binding();
++    let before = f.revision();
++    let publications = f.published.load(Ordering::Acquire);
++    let (entered, arrived) = mpsc::channel();
++    let (release, wait) = mpsc::channel();
++    let held = f
++        .handle()
++        .try_transaction(Held {
++            entered,
++            release: wait,
++        })
++        .unwrap();
++    arrived.recv_timeout(Duration::from_secs(5)).unwrap();
++    let r = f.repository();
++    let request = DesktopLessonRequest {
++        command_id: CommandId::new(1).unwrap(),
++        binding: binding.clone(),
++        action: replacement(),
++    };
++    let ticket = r
++        .handle
++        .try_transaction(Task {
++            binding,
++            request: Some(request),
++            guard: r.desktop_lesson_guard.clone(),
++            observations: r.lesson_observations.clone(),
++            clock: r.clock.clone(),
++            factory: r.factory.clone(),
++        })
++        .unwrap();
++    f.active.store(false, Ordering::Release);
++    release.send(()).unwrap();
++    held.wait().unwrap();
++    assert_eq!(ticket.wait(), Err(StorageError::ExecutionCancelled));
++    assert_eq!(f.revision(), before);
++    assert!(f.context().active_override.is_none());
++    assert_eq!(f.published.load(Ordering::Acquire), publications);
++    assert!(f
++        .handle()
++        .try_get("business/receipt/desktop-lesson/1".into())
++        .unwrap()
++        .wait()
++        .unwrap()
++        .is_none());
++}
++#[test]
++fn scoped_execution_fence_still_cancels_before_commit_and_base_remains_healthy() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    let before = f.revision();
++    let flag = Arc::new(AtomicBool::new(true));
++    let observed = flag.clone();
++    let mut r = f
++        .repository()
++        .with_execution_fence(Arc::new(move || observed.load(Ordering::Acquire)));
++    r.factory = Arc::new(move |_, revision| {
++        flag.store(false, Ordering::Release);
++        Ok(revision)
++    });
++    assert_eq!(
++        r.execute_desktop_lesson(DesktopLessonRequest {
++            command_id: CommandId::new(1).unwrap(),
++            binding: binding.clone(),
++            action: replacement()
++        }),
++        Err(LessonRepositoryError::Unavailable)
++    );
++    assert_eq!(f.revision(), before);
++    assert!(f.context().active_override.is_none());
++    assert!(f.change(2, binding, replacement()).is_ok());
++}
++#[test]
++fn legacy_read_is_not_rewritten_until_mutation_and_reopen_has_no_implicit_capability() {
++    let mut f = Fixture::new();
++    let mut old = lesson_codec::snapshot(&f.context());
++    old["format"] = json!(2);
++    f.commit(vec![Mutation::Put {
++        key: "business/lesson-context/v1".into(),
++        value: codec::bytes(&old).unwrap(),
++    }]);
++    let before = f.revision();
++    let stored = f.get("business/lesson-context/v1");
++    f.repository().desktop_lesson(f.binding()).unwrap();
++    assert_eq!(f.revision(), before);
++    assert_eq!(f.get("business/lesson-context/v1"), stored);
++    let saved = f.change(1, f.binding(), replacement()).unwrap();
++    assert_eq!(
++        codec::value(&f.get("business/lesson-context/v1").value).unwrap()["format"],
++        3
++    );
++    f.reopen();
++    assert!(f.base().desktop_lesson(f.binding()).is_err());
++    assert_eq!(
++        f.repository().desktop_lesson(f.binding()).unwrap().context,
++        saved.context
++    );
++}
++#[test]
++fn persistent_day_floor_and_directory_invalidation_reject_without_partial_writes() {
++    let f = Fixture::new();
++    let binding = f.binding();
++    f.commit(vec![Mutation::Put {
++        key: "business/desktop/max-observed-day/v1".into(),
++        value: codec::bytes(
++            &json!({"format":1,"date":codec::date(LocalDate::new(2026,11,2).unwrap())}),
++        )
++        .unwrap(),
++    }]);
++    let before = f.revision();
++    assert!(f.change(1, binding, replacement()).is_err());
++    assert_eq!(f.revision(), before);
++    assert!(f.context().active_override.is_none());
++}
++#[test]
++fn projected_backup_and_restore_never_revive_live_desktop_override_or_capability() {
++    let f = Fixture::new();
++    let r = f.managed();
++    r.ensure_recovery_installation([7; 32]).unwrap();
++    *f.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 31 * 60).unwrap();
++    let saved = f.change(1, f.binding(), replacement()).unwrap();
++    assert!(saved.context.active_override.is_some());
++    let backup = f.root.join("ordinary.sqlite3");
++    r.try_export_ordinary(backup.clone(), &admin(), Arc::new(|| true))
++        .unwrap()
++        .wait()
++        .unwrap();
++    let ordinary = Connection::open(&backup).unwrap();
++    let row = TransactionView(&ordinary)
++        .get("business/lesson-context/v1")
++        .unwrap()
++        .unwrap();
++    let projected = lesson_codec::read_snapshot(&codec::value(&row.value).unwrap()).unwrap();
++    assert!(projected.current.is_none());
++    assert!(projected.active_override.is_none());
++    assert!(!projected.history.is_empty());
++    assert!(TransactionView(&ordinary)
++        .get("business/receipt/desktop-lesson/1")
++        .unwrap()
++        .is_none());
++    drop(ordinary);
++    let candidate = f.root.join("preview.sqlite3");
++    r.try_preflight_ordinary_restore(backup, candidate.clone(), &admin(), Arc::new(|| true))
++        .unwrap()
++        .wait()
++        .unwrap();
++    let restored = startup_state(&candidate).unwrap();
++    let db = open_connection(&candidate).unwrap();
++    let context = lesson::load(&TransactionView(&db)).unwrap();
++    assert!(context.active_override.is_none());
++    assert!(context.base_trust.is_none());
++    assert!(restored
++        .identity
++        .accounts
++        .iter()
++        .all(|a| a.principal.auth_epoch.get() > 1));
++    assert_eq!(f.context().active_override, saved.context.active_override);
++}
++#[test]
++fn public_source_is_bounded_and_contains_no_authentication_fields() {
++    let f = Fixture::new();
++    let source = f.repository().desktop_lesson(f.binding()).unwrap();
++    let encoded = value(&source);
++    let bytes = display::encode(&encoded, MAX_VALUE_BYTES).unwrap();
++    assert!(bytes.len() < MAX_VALUE_BYTES);
++    let text = String::from_utf8(bytes).unwrap();
++    for field in ["login", "password", "credential", "auth_epoch", "role"] {
++        assert!(!text.contains(field), "unexpected auth field {field}");
++    }
++    assert_eq!(read(&encoded).unwrap(), source);
++    let mut bad = encoded.clone();
++    bad["teachers"][0]["login"] = json!("synthetic");
++    assert!(read(&bad).is_err());
++    let mut bad = encoded.clone();
++    bad["subjects"][0]["rgb"] = json!([256, 0, 0]);
++    assert!(read(&bad).is_err());
++    assert_eq!(
++        display::encode(
++            &json!({"large":"x".repeat(MAX_VALUE_BYTES)}),
++            MAX_VALUE_BYTES
++        ),
++        Err(StorageError::DocumentTooLarge)
++    );
++}
++#[test]
++fn mapped_format_three_audit_remains_inert_and_preserves_complete_history() {
++    use fc_domain::recovery::MigrationMapping;
++    let source = Fixture::new();
++    let s = source.managed();
++    s.ensure_recovery_installation([7; 32]).unwrap();
++    *source.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 31 * 60).unwrap();
++    source.change(1, source.binding(), replacement()).unwrap();
++    let backup = source.root.join("ordinary.sqlite3");
++    s.try_export_ordinary(backup.clone(), &admin(), Arc::new(|| true))
++        .unwrap()
++        .wait()
++        .unwrap();
++    let target = Fixture::new();
++    *target.clock.0.lock().unwrap() = LocalDateTime::new(now().date, 8 * 3600 + 31 * 60).unwrap();
++    let t = target.managed();
++    t.ensure_recovery_installation([9; 32]).unwrap();
++    let inspected = t
++        .try_inspect_migration_source(backup.clone(), &admin(), Arc::new(|| true))
++        .unwrap()
++        .wait()
++        .unwrap();
++    let mapping = MigrationMapping {
++        source_school_id: SchoolId::new(1).unwrap(),
++        target_school_id: SchoolId::new(1).unwrap(),
++        classes: vec![(ClassId::new(1).unwrap(), ClassId::new(1).unwrap())],
++        subjects: (1..=2)
++            .map(|id| (SubjectId::new(id).unwrap(), SubjectId::new(id).unwrap()))
++            .collect(),
++        principals: (1..=4).map(|id| (principal(id), principal(id))).collect(),
++    };
++    let mapped = target.root.join("mapped.sqlite3");
++    t.try_map_ordinary(
++        backup,
++        mapped.clone(),
++        inspected,
++        mapping,
++        &admin(),
++        Arc::new(|| true),
++    )
++    .unwrap()
++    .wait()
++    .unwrap();
++    let candidate = target.root.join("candidate.sqlite3");
++    t.try_preflight_ordinary_restore(mapped, candidate.clone(), &admin(), Arc::new(|| true))
++        .unwrap()
++        .wait()
++        .unwrap();
++    startup_state(&candidate).unwrap();
++    let db = open_connection(&candidate).unwrap();
++    let restored = lesson::load(&TransactionView(&db)).unwrap();
++    assert!(restored.current.is_none());
++    assert!(restored.active_override.is_none());
++    assert!(restored.base_trust.is_none());
++    assert!(!restored.history.is_empty());
++    assert!(TransactionView(&db)
++        .get("business/receipt/desktop-lesson/1")
++        .unwrap()
++        .is_none());
++    assert!(target.context().active_override.is_none());
++}

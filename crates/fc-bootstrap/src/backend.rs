@@ -6,12 +6,15 @@ mod account_management_tests;
 mod autostart;
 mod calendar;
 mod content_web;
+mod desktop_lesson;
+pub use desktop_lesson::{DesktopLessonFlow, DesktopLessonGuard, DesktopLessonStamp};
 #[cfg(test)]
 mod execution_scope_tests;
 mod materials_web;
 mod profile_content;
 mod profiles;
 mod recovery;
+mod subject_visuals;
 pub use recovery::{
     ConfirmedRestore, MigrationInspection, OrdinaryBackupAccess, PreparedRecoveryDatabase,
     RestoreConfirmation, RestorePreview,
@@ -71,6 +74,7 @@ use std::{
     },
     time::{Duration, Instant},
 };
+pub use subject_visuals::WebSubjectVisualPreview;
 pub use voice::{
     VoiceDeviceCheckResult, VoiceDeviceObservation, VoiceGuard, VoiceManagementSnapshot,
     VoiceNativeParticipation, VoicePlaybackAuthorization, VoicePolicyHandoff, VoicePolicyPhase,
@@ -95,6 +99,7 @@ pub enum BackendError {
     Autostart(fc_ports::autostart::AutostartRepositoryError),
     Lesson(LessonRepositoryError),
     Display(DisplayRepositoryError),
+    SubjectVisual(fc_ports::subject_visual::SubjectVisualRepositoryError),
     Profile(fc_ports::ProfileRepositoryError),
     ProfileContent(fc_ports::ProfileContentRepositoryError),
     Material(MaterialRepositoryError),
@@ -105,6 +110,11 @@ pub enum BackendError {
     CorruptCredential,
     InvalidInput,
     Overflow,
+}
+impl From<fc_ports::subject_visual::SubjectVisualRepositoryError> for BackendError {
+    fn from(error: fc_ports::subject_visual::SubjectVisualRepositoryError) -> Self {
+        Self::SubjectVisual(error)
+    }
 }
 impl From<fc_ports::voice::VoiceRepositoryError> for BackendError {
     fn from(e: fc_ports::voice::VoiceRepositoryError) -> Self {
@@ -192,6 +202,7 @@ struct Control {
     input_last: AtomicU64,
     material_scene: Mutex<Option<PublishedMaterialScene>>,
     profile_content_scene: Mutex<profile_content::PublishedProfileContentScene>,
+    desktop_lesson: desktop_lesson::DesktopLessonControl,
 }
 #[derive(Clone)]
 struct PublishedMaterialScene {
@@ -314,7 +325,7 @@ impl SessionControl {
         if self
             .0
             .generation
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
             .is_err()
         {
             self.0.closed.store(true, Ordering::Release);
@@ -618,6 +629,10 @@ impl Backend {
             input_last: AtomicU64::new(0),
             material_scene: Mutex::new(None),
             profile_content_scene: Mutex::new(Default::default()),
+            desktop_lesson: desktop_lesson::DesktopLessonControl::new(
+                clock.clone(),
+                monotonic.clone(),
+            ),
         }));
         let scene_control = control.clone();
         let repository =
@@ -1756,6 +1771,7 @@ fn next_day(now: LocalDateTime) -> Result<LocalDateTime> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    include!("backend/desktop_lesson_tests.rs");
     use std::{
         path::PathBuf,
         time::{SystemTime, UNIX_EPOCH},

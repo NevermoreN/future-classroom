@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "scripts/package-probe.py",
+    "--exe",
+    "/tmp/fc-round35-visuals-programs/fc-bootstrap.exe",
+    "--output",
+    "/mnt/data/FutureClassroom-0.1.0-subject-visual-dev.zip",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--toolchain",
+    "1.97.1",
+    "--web-dist",
+    "web/dist"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T17:57:15.182911+00:00",
+  "stdout": "/tmp/fc-round35-visuals-evidence/package-visual-first.stdout.log",
+  "stderr": "/tmp/fc-round35-visuals-evidence/package-visual-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 2.3590071971993893,
+  "completedUtc": "2026-10-31T17:57:17.542210+00:00",
+  "stdoutBytes": 287,
+  "stdoutSha256": "83fd833f81121d5b13e0f7fd1f52f0f82251c3c31184c580a9601521b42e457e",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

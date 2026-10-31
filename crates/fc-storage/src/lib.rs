@@ -36,6 +36,7 @@ pub enum StorageError {
     DocumentTooLarge,
     Schedule(fc_domain::schedule_document::ScheduleDocumentError),
     Display(fc_domain::desktop::DisplayError),
+    SubjectVisual(fc_domain::subject_visual::SubjectVisualError),
     Profile(fc_domain::profile::ProfileError),
     ProfileContent(fc_domain::profile_content::ProfileContentError),
     Material(fc_domain::materials::MaterialError),
@@ -442,7 +443,7 @@ struct QueueLease {
 }
 impl QueueLease {
     fn reserve(used: Arc<AtomicUsize>, bytes: usize) -> Result<Self, StorageError> {
-        used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+        used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {
             current
                 .checked_add(bytes)
                 .filter(|next| *next <= MAX_QUEUED_BYTES)

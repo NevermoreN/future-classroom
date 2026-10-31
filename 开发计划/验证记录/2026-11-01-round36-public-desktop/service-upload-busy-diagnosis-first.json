@@ -1,0 +1,92 @@
+{
+  "status": "READ_ONLY_CAUSAL_DIAGNOSIS_NO_RERUN",
+  "originalFailure": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-runtime-first.json",
+    "sha256": "7588e719864e333e925c0f61c630951e1a1e9bf9daca4253e994b3a634e74af1",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "binary": "fc_bootstrap-e6c3a587f31bdfb6.exe",
+    "newBackendPublicTests": [
+      "test backend::tests::public_desktop_lesson::public_desktop_cancel_after_real_commit_suppresses_delivery_but_does_not_claim_rollback ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_cancellation_and_original_budget_do_not_mutate_or_rebind ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_entry_rejects_stale_publication_and_uses_earlier_original_scene_end ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_external_catalog_or_schedule_change_does_not_rebase_original_binding ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_foreign_backend_and_request_execution_scope_are_not_authority ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_monotonic_regression_and_health_failure_cannot_deliver_late_success ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_os_callback_also_invalidates_unconsumed_published_entry ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_os_callback_revokes_active_flow_and_old_scene_before_main_pump_cleanup ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_requires_exact_published_entry_and_only_one_cancellable_flow ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_single_liveness_check_survives_a_deterministic_updating_to_healthy_phase_flip ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_waiting_is_not_submit_authority_and_allows_own_real_publication_to_finish ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_waiting_never_defers_original_deadline_during_real_precommit_phase ... ok",
+      "test backend::tests::public_desktop_lesson::public_desktop_without_login_survives_local_lock_and_commits_honest_origin_then_new_entry_restores ... ok"
+    ]
+  },
+  "sources": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "sha256": "ce09781c730c11d2ae3c8888765430aaa64891d78ef0a0246135df4442dedb04"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "sha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "sha256": "67a772de735a1ac232dc80bb22440a6abd532f8fff97be32864bf405f5435ed5"
+    },
+    {
+      "path": "crates/fc-runtime/src/mailbox.rs",
+      "sha256": "83e2c24da87f0b3609971d5e533e87ac6ed6f72ca689821c20d508dee08b58dd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/shared_upload.rs",
+      "sha256": "548c51d66f4c905d35d4c3c9de308970a07ebed372c962b8b14b4ba28ac7e7a4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "sha256": "7bee81b2b41d841b0ab18a11aebc4eca59e325eb93890d06ef9a6540ace45629"
+    }
+  ],
+  "primaryFailure": {
+    "test": "material_hub_keeps_ready_across_ticket_drop_and_appends_with_new_authenticated_request",
+    "site": "web_transfer/uploads/tests.rs:341 Pool::call",
+    "proof": [
+      "Pool::call uses one try_submit and panics on every rejection, including Busy",
+      "WorkerHandle::try_submit maps mailbox SubmitErrorKind::Busy to Rejection::Busy and returns the original unadmitted task",
+      "mailbox::try_send uses queue.try_lock; WouldBlock is Busy even for empty queue",
+      "This test issues one synchronous Pool::call at a time and waits before the next call. Its private pool has no direct concurrent job submissions; max one queued task cannot fill count8 or byte4MiB budget",
+      "Two worker consumers independently try_recv the same private queue, so empty/full queue ownership can contend with the next producer submit",
+      "Raw failure has no caller backtrace; exact failing call/stage cannot be inferred. Mutex-contention interpretation follows exclusion of capacity in this serial helper, not newly measured timing"
+    ]
+  },
+  "secondaryFailure": {
+    "test": "same_token_with_different_control_cell_is_rejected_before_stage_admission",
+    "site": "web_transfer/uploads/tests.rs:1099",
+    "proof": [
+      "Failure is UploadHubOwner::new().unwrap(), before wrong/right control-cell test logic or stage admission",
+      "Earlier panic skips explicit pool.join+owner.drain_after_join success path",
+      "UploadHubOwner::Drop sets OWNER=false only after drained==true and actual empty/quarantine0; otherwise retains original Shared and leaves OWNER true, even if original slots happen to be vacant",
+      "Both tests use shared upload_test_guard serial mutex; therefore the retained earlier failed owner, not a simultaneously admitted test owner, explains later Busy",
+      "Retention is required production fail-closed behavior; forcibly clearing OWNER/RETAINED or declaring Drop cleanup successful would violate ownership semantics"
+    ]
+  },
+  "newBackendTests": {
+    "count": 14,
+    "allPassed": true,
+    "scope": "All 14 only own Backend/StorageWriter fixtures and flow metadata; no UploadHubOwner, PhysicalUploadPermit or WorkerPool allocation. Joined::Drop closes/joins original writer before fixture Directory deletion. No global worker-registry capacity exists in WorkerPool::start; its fixed two workers/mailbox are private per pool. Extra tests may perturb scheduling but are not evidence of a physical permit leak."
+  },
+  "minimalRecommendation": [
+    "Change only the old uploads/tests.rs Pool submit helper: build exact boxed Job once, capture one original deadline now+15s once, retry only explicit unadmitted Rejection::Busy with returned error.task and <=1ms yield/sleep while same deadline remains",
+    "On acceptance execute exactly once and wait the returned ticket; do not rebuild closure, repeat call body, renew deadline, swallow non-Busy/Deadline/Faulted/Stopped errors, reduce test threads or alter production limits",
+    "Keep all material Ready/correlation/domain assertions unchanged and retain original FAIL evidence",
+    "Optionally a test-only join+explicit retained drain RAII cleanup could prevent cascading failures after a genuine domain assertion panic, but is a separate fixture hardening change, not required to fix first rejection handling"
+  ],
+  "notDone": [
+    "No source/doc edit",
+    "No Cargo/Windows/remote",
+    "No rerun or synthetic pass evidence",
+    "No changes to production pool/quota/cleanup"
+  ]
+}

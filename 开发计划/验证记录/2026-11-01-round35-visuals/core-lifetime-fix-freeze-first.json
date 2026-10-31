@@ -1,0 +1,44 @@
+{
+  "status": "MINIMAL_LIFETIME_FIX_SOURCE_FROZEN_NOT_REBUILT",
+  "recordedAt": "2026-10-31T17:42:48.352168+00:00",
+  "path": "/tmp/fc-round35-visuals-worktree/crates/fc-storage/src/business/subject_visual.rs",
+  "beforeSha256": "063a1637db375cf96d1f7f79423560f3e78d5fc6c2b9d3dd2f9393f3489bfcfc",
+  "afterSha256": "577167301402c5b068f078cde6023cb1267dc71a9585a1d562c3258b7cf3887e",
+  "beforeBytes": 19569,
+  "afterBytes": 19579,
+  "change": "Only SaveVisuals TransactionTask implementation changes S: Send to S: Send + 'static. Repository implementation already has the same bound; self captured by precommit closure includes generic Factory<S>.",
+  "firstFailure": {
+    "path": "/tmp/fc-round35-visuals-evidence/windows-affected-first.json",
+    "sha256": "6cf63d0ea2569b242582b96a91189249e701d937ce1f98bf401f0e1ecfe09db4",
+    "reportedExitCode": 101,
+    "error": "E0310 precommit closure captures generic S"
+  },
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "/tmp/fc-round35-visuals-worktree/crates/fc-storage/src/business/subject_visual.rs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "notRun": [
+    "Cargo",
+    "Windows",
+    "remote",
+    "Git"
+  ]
+}

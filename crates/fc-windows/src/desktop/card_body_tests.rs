@@ -484,8 +484,10 @@ fn shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_exis
     };
     scene.cards[0].kind = ComponentKind::Schedule;
     scene.cards[0].content = courses(128);
-    let full = prepare_content(&graphics, &scene.cards[0], false).unwrap();
-    assert_eq!(full.blocks.len(), 128);
+    let error = prepare_content(&graphics, &scene.cards[0], false)
+        .err()
+        .expect("long passive timetable must report capacity");
+    assert!(is_read_only_capacity_error(&error));
     scene.cards[0].content = courses(129);
     assert!(prepare_content(&graphics, &scene.cards[0], false).is_err());
 }

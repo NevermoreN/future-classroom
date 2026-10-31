@@ -9,6 +9,7 @@ import base64
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import queue
@@ -31,7 +32,7 @@ REPORT_KEYS = frozenset((
     "network", "wireResponses", "wireResponseCount", "observedRequestCount",
     "observedResponseCount", "cacheOnlyResponseCount", "apiResponses", "contentPosts",
     "sessionCsrfMatched", "writeOutcome", "contentRevision", "commandId",
-    "pageErrorCount", "consoleErrorCount", "sourceSha256", "error",
+    "pageErrorCount", "consoleErrorCount", "sourceSha256", "error", "apiOperations", "visualReads", "visualObservations",
 ))
 RECORD_KEYS = frozenset((
     "method", "url", "status", "mime", "csp", "servedFromCache", "fromDiskCache",
@@ -56,6 +57,64 @@ def failure(error, phase):
     # Exception messages can contain private stdin, a CDP capability or a remote
     # response body. Only static phase/type metadata belongs in the QA report.
     return {"phase": phase, "kind": type(error).__name__}
+
+
+API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
+                  "contentGets": 2, "contentPosts": 1, "visualGets": 4}
+VISUAL_FIELDS = frozenset(("subjectRevision", "displayRevision", "rulesVersion", "effectiveRgb", "mode",
+                          "homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent",
+                          "courseComponentOpacityPercent", "homeworkVisible", "courseVisible"))
+
+
+def validate_visual_observations(value):
+    observations = value.get("visualObservations")
+    require(type(value.get("visualReads")) is int and value["visualReads"] == API_OPERATIONS["visualGets"]
+            and isinstance(observations, list) and len(observations) == API_OPERATIONS["visualGets"], "NODE_VISUAL_COUNT")
+    stages = ("initial", "draft-refresh", "after-save", "after-reload")
+    def number(n):
+        return type(n) in (int, float) and math.isfinite(n)
+    for index, observed in enumerate(observations):
+        require(isinstance(observed, dict) and set(observed) == {"stage", "readNumber", "responseBodySha256", "visual", "dom", "draftPreserved"}
+                and observed["stage"] == stages[index] and type(observed["readNumber"]) is int
+                and observed["readNumber"] == index + 1 and observed["draftPreserved"] is True
+                and isinstance(observed["responseBodySha256"], str)
+                and re.fullmatch(r"[0-9a-f]{64}", observed["responseBodySha256"]), "NODE_VISUAL_STAGE")
+        visual, dom = observed["visual"], observed["dom"]
+        require(isinstance(visual, dict) and set(visual) == VISUAL_FIELDS
+                and all(isinstance(visual.get(k), str) and re.fullmatch(r"(?:0|[1-9][0-9]{0,19})", visual[k])
+                        and int(visual[k]) <= (1 << 64) - 1 for k in ("subjectRevision", "displayRevision"))
+                and visual["subjectRevision"] != "0" and type(visual["rulesVersion"]) is int and visual["rulesVersion"] == 1
+                and isinstance(visual["effectiveRgb"], str) and re.fullmatch(r"#[0-9A-F]{6}", visual["effectiveRgb"])
+                and visual["mode"] in ("FILLED", "OUTLINED")
+                and all(type(visual[k]) is int and 0 <= visual[k] <= 100 for k in
+                        ("homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent", "courseComponentOpacityPercent"))
+                and all(type(visual[k]) is bool for k in ("homeworkVisible", "courseVisible")), "NODE_VISUAL_VALUES")
+        require(isinstance(dom, dict) and set(dom) == {"subjectRevision", "displayRevision", "rulesVersion", "homework", "course",
+                    "refreshOpacity", "helpOpacity", "draftMatches", "bottomReminderAvailable"}
+                and dom["subjectRevision"] == visual["subjectRevision"] and dom["displayRevision"] == visual["displayRevision"]
+                and dom["rulesVersion"] == "1" and dom["draftMatches"] is True and dom["bottomReminderAvailable"] is True
+                and all(number(dom[k]) and dom[k] == 1 for k in ("refreshOpacity", "helpOpacity")), "NODE_VISUAL_DOM")
+        for kind in ("homework", "course"):
+            pill = dom[kind]
+            require(isinstance(pill, dict) and set(pill) == {"mode", "fillPercent", "effectiveRgb", "visible", "componentOpacity",
+                    "pillOpacity", "effectiveOpacity", "backgroundColor", "borderWidth", "borderStyle", "textAlign", "textMatches", "textColorUnchanged"}
+                    and pill["mode"] == visual["mode"] and pill["fillPercent"] == str(visual[kind + "FillPercent"])
+                    and pill["effectiveRgb"] == visual["effectiveRgb"] and pill["visible"] == str(visual[kind + "Visible"]).lower()
+                    and all(number(pill[k]) for k in ("componentOpacity", "pillOpacity", "effectiveOpacity", "borderWidth"))
+                    and pill["componentOpacity"] == visual[kind + "ComponentOpacityPercent"] / 100
+                    and abs(pill["effectiveOpacity"] - pill["componentOpacity"]) < 0.000001 and pill["pillOpacity"] == 1
+                    and pill["textAlign"] == "center" and pill["textMatches"] is True and pill["textColorUnchanged"] is True,
+                    "NODE_VISUAL_PILL")
+            color = re.fullmatch(r"rgba?\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(?:,\s*(\d+(?:\.\d+)?))?\s*\)", str(pill["backgroundColor"]))
+            require(color is not None, "NODE_VISUAL_COMPUTED_COLOR")
+            rgba = [float(n) for n in color.groups()[:3]] + [float(color[4]) if color[4] is not None else 1.0]
+            alpha = visual[kind + "FillPercent"] / 100 if visual["mode"] == "FILLED" else 0
+            rgb = [int(visual["effectiveRgb"][i:i + 2], 16) for i in (1, 3, 5)]
+            require(all(0 <= n <= 255 for n in rgba[:3]) and 0 <= rgba[3] <= 1
+                    and abs(rgba[3] - alpha) < 0.000001 and (alpha == 0 or rgba[:3] == rgb)
+                    and pill["borderWidth"] == (0 if visual["mode"] == "FILLED" else 1)
+                    and pill["borderStyle"] == ("none" if visual["mode"] == "FILLED" else "solid"), "NODE_VISUAL_COMPUTED_STYLE")
+
 
 
 def load_helpers():
@@ -260,9 +319,10 @@ class BrowserObserver:
                     "NODE_NETWORK_SHAPE")
             path = record["url"].removeprefix(run["origin"])
             is_content = re.fullmatch(content, path) is not None
+            is_visual = re.fullmatch(content + r"/visual", path) is not None
             require(record["url"] == run["origin"] + path
                     and (is_content or record["method"] == "GET" and
-                         (path in api or path == "/fc/" or path.startswith("/fc/") and path[4:] in assets)),
+                         (is_visual or path in api or path == "/fc/" or path.startswith("/fc/") and path[4:] in assets)),
                     "NODE_UNEXPECTED_TARGET")
             if "csp" in record:
                 require(record["csp"] == self.expected_csp, "NODE_CSP_MISMATCH")
@@ -275,14 +335,35 @@ class BrowserObserver:
         require(type(value.get("wireResponseCount")) is int and value["wireResponseCount"] == len(wires)
                 and value.get("wireResponses") == wires and value.get("observedRequestCount") == len(records)
                 and value["contentPosts"] == sum(record["method"] == "POST" for record in records)
-                and value.get("apiResponses") == 9 and value.get("pageErrorCount") == 0
+                and value.get("apiResponses") == sum(API_OPERATIONS.values()) and value.get("pageErrorCount") == 0
                 and value.get("consoleErrorCount") == 0,
                 "NODE_WIRE_LEDGER_MISMATCH")
         api_records = [record for record in records if "/api/v1/" in record["url"]]
-        require(len(api_records) == 9 and all(record.get("wireStatus") == 200
+        require(len(api_records) == sum(API_OPERATIONS.values()) and all(record.get("wireStatus") == 200
                 and record.get("status") == 200 and not any(record.get(key) for key in
                 ("servedFromCache", "fromDiskCache", "fromServiceWorker", "fromPrefetchCache"))
                 for record in api_records), "NODE_API_WIRE_IDENTITY")
+        operations = dict.fromkeys(API_OPERATIONS, 0)
+        content_paths, visual_paths = set(), set()
+        for record in api_records:
+            path = record["url"].removeprefix(run["origin"])
+            if path == api[0] and record["method"] == "GET": operations["statusGets"] += 1
+            elif path == api[1] and record["method"] == "GET": operations["sessionGets"] += 1
+            elif path == api[2] and record["method"] == "GET": operations["scopeGets"] += 1
+            elif re.fullmatch(content, path):
+                operations["contentPosts" if record["method"] == "POST" else "contentGets"] += 1
+                content_paths.add(path)
+            elif re.fullmatch(content + r"/visual", path) and record["method"] == "GET":
+                operations["visualGets"] += 1
+                visual_paths.add(path)
+            else: raise RuntimeError("NODE_API_OPERATION_UNEXPECTED")
+        reported_operations = value.get("apiOperations")
+        require(isinstance(reported_operations, dict) and set(reported_operations) == set(API_OPERATIONS)
+                and all(type(n) is int for n in reported_operations.values())
+                and operations == API_OPERATIONS and reported_operations == operations
+                and len(content_paths) == 1 and visual_paths == {next(iter(content_paths)) + "/visual"},
+                "NODE_EXACT_API_OPERATION_LEDGER")
+        validate_visual_observations(value)
         require(value.get("observedResponseCount") == sum(record.get("status") is not None for record in records)
                 and value.get("cacheOnlyResponseCount") == sum(record not in wires and
                     bool(record.get("servedFromCache") or record.get("fromDiskCache")) for record in records),

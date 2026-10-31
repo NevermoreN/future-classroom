@@ -1,0 +1,161 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_CHECKS_PASSED_RUNTIME_NOT_RUN",
+  "base": "83fe847",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "recordedAt": "2026-10-31T17:26:56.023663+00:00",
+  "files": [
+    {
+      "path": "crates/fc-domain/src/lib.rs",
+      "bytes": 360,
+      "sha256": "2a40487102eba159ae443144177f6ec67eb6a2e2054858708224e4edd0b8bd8e",
+      "basePresent": true,
+      "baseBytes": 335,
+      "baseSha256": "4924bc868af334f2de095060df2810ebb168c0395d48338f5eae736d3f64ac17"
+    },
+    {
+      "path": "crates/fc-domain/src/subject_visual.rs",
+      "bytes": 4826,
+      "sha256": "24ce6557094c89764564b5ccd2cb0a30c9c5240e81632fc0bb93cae13d22ad19",
+      "basePresent": false,
+      "baseBytes": 0,
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-domain/src/subject_visual/tests.rs",
+      "bytes": 8825,
+      "sha256": "27759107f9032c5b03b203a042a7f07a37e58748035cd594d459ffdea96ec943",
+      "basePresent": false,
+      "baseBytes": 0,
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22220,
+      "sha256": "dc5e4f8b757ceb806e80a29b6a7b6ab31c9e1685ef893be80dd949a071c6b168",
+      "basePresent": true,
+      "baseBytes": 22168,
+      "baseSha256": "38f5b77e31eb9a744bc0230a8fda3c27b83f31b46e440e9756e30262cb60b4b2"
+    },
+    {
+      "path": "crates/fc-ports/src/subject_visual.rs",
+      "bytes": 2077,
+      "sha256": "0394ce2a4a0e6a7dadbe953cce0a171a4b1fa9ef4382c46fff5cfd9f6eba2a54",
+      "basePresent": false,
+      "baseBytes": 0,
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "bytes": 69248,
+      "sha256": "fa53fff18139709a51f4b4628195bca6556b17881b8b56f32f8f999566ea5812",
+      "basePresent": true,
+      "baseBytes": 69182,
+      "baseSha256": "b3aedee25b92c95cef579fcd8cc4c0c288b67f8daa4143acad5c25888a9eef15"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 41519,
+      "sha256": "a23e77cc764cc7ebc4a986982648c9805e04ec435ff9ab440b318eea20052a98",
+      "basePresent": true,
+      "baseBytes": 41499,
+      "baseSha256": "c7658ce6d10a056dbe89c9f77ed59faf9918533d98ac4e8627f0732653140bf0"
+    },
+    {
+      "path": "crates/fc-storage/src/business/subject_visual.rs",
+      "bytes": 19569,
+      "sha256": "063a1637db375cf96d1f7f79423560f3e78d5fc6c2b9d3dd2f9393f3489bfcfc",
+      "basePresent": false,
+      "baseBytes": 0,
+      "baseSha256": null
+    },
+    {
+      "path": "crates/fc-storage/src/business/subject_visual/tests.rs",
+      "bytes": 30886,
+      "sha256": "0e5f10d621bb819535169b7897b1053f0a0baba1100757f520a8e2eacb4e25c8",
+      "basePresent": false,
+      "baseBytes": 0,
+      "baseSha256": null
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-domain/src/lib.rs",
+        "crates/fc-domain/src/subject_visual.rs",
+        "crates/fc-domain/src/subject_visual/tests.rs",
+        "crates/fc-ports/src/lib.rs",
+        "crates/fc-ports/src/subject_visual.rs",
+        "crates/fc-storage/src/lib.rs",
+        "crates/fc-storage/src/business/mod.rs",
+        "crates/fc-storage/src/business/subject_visual.rs",
+        "crates/fc-storage/src/business/subject_visual/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "tests": {
+    "crates/fc-domain/src/subject_visual/tests.rs": [
+      "complete_version_vector_is_canonical_and_bounded",
+      "color_updates_preserve_catalog_and_advance_only_changed_subjects",
+      "legacy_put_subject_aba_rename_and_new_catalog_ids_invalidate_palette",
+      "unrelated_identity_change_does_not_conflict_but_web_teacher_and_overflow_fail"
+    ],
+    "crates/fc-storage/src/business/subject_visual/tests.rs": [
+      "joint_save_is_atomic_published_from_updated_identity_and_durable_idempotent",
+      "each_cas_conflict_leaves_the_other_document_and_receipt_untouched",
+      "legacy_color_aba_and_new_subject_conflict_but_unrelated_catalog_does_not",
+      "exact_local_global_session_invalid_palette_and_settings_fail_without_writes",
+      "precommit_revocation_rolls_back_both_and_does_not_publish_a_snapshot",
+      "web_preview_is_same_version_single_subject_and_enforces_scope_day_and_session",
+      "equivalent_color_order_replays_the_same_durable_command",
+      "queued_request_execution_cancellation_never_writes_or_publishes",
+      "precommit_execution_cancellation_rolls_back_and_keeps_writer_healthy",
+      "bounded_result_and_strict_palette_codec_refuse_malformed_data",
+      "ordinary_restore_rebases_current_subject_versions_and_restores_original_colors_and_display",
+      "mapped_restore_keeps_target_colors_and_rebases_its_complete_palette_vector",
+      "web_preview_rechecks_exact_session_and_midnight_before_releasing_output"
+    ]
+  },
+  "testCount": 17,
+  "notRun": [
+    "Cargo compile",
+    "Cargo tests",
+    "Clippy",
+    "Windows",
+    "remote",
+    "Git commit/push"
+  ],
+  "persistence": "Existing business/identity/v1 and business/display/v1 only; derived palette vector. New bounded command receipts/results follow existing receipt pattern and are excluded from ordinary teaching projections.",
+  "limits": {
+    "paletteSubjects": 256,
+    "perDocumentAndOutcomeBytes": 65536
+  },
+  "recoveryCoverage": "New test source covers actual ordinary export/preflight/barrier/prepare plus mapped ordinary/preflight; not yet compiled or run."
+}

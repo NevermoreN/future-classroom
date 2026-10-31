@@ -1,0 +1,776 @@
+--- a/crates/fc-bootstrap/src/backend.rs
++++ b/crates/fc-bootstrap/src/backend.rs
+@@ -6,6 +6,8 @@
+ mod autostart;
+ mod calendar;
+ mod content_web;
++mod desktop_lesson;
++pub use desktop_lesson::{DesktopLessonFlow, DesktopLessonGuard, DesktopLessonStamp};
+ #[cfg(test)]
+ mod execution_scope_tests;
+ mod materials_web;
+@@ -200,6 +202,7 @@
+     input_last: AtomicU64,
+     material_scene: Mutex<Option<PublishedMaterialScene>>,
+     profile_content_scene: Mutex<profile_content::PublishedProfileContentScene>,
++    desktop_lesson: desktop_lesson::DesktopLessonControl,
+ }
+ #[derive(Clone)]
+ struct PublishedMaterialScene {
+@@ -626,6 +629,10 @@
+             input_last: AtomicU64::new(0),
+             material_scene: Mutex::new(None),
+             profile_content_scene: Mutex::new(Default::default()),
++            desktop_lesson: desktop_lesson::DesktopLessonControl::new(
++                clock.clone(),
++                monotonic.clone(),
++            ),
+         }));
+         let scene_control = control.clone();
+         let repository =
+@@ -1764,6 +1771,7 @@
+ #[cfg(test)]
+ mod tests {
+     use super::*;
++    include!("backend/desktop_lesson_tests.rs");
+     use std::{
+         path::PathBuf,
+         time::{SystemTime, UNIX_EPOCH},
+--- /dev/null
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson.rs
+@@ -0,0 +1,329 @@
++//! Finite capability for the trusted, rendered local desktop entry. This is not
++//! an account/session and is deliberately absent from every Web request model.
++use super::*;
++use fc_ports::{
++    DesktopLessonBinding, DesktopLessonRepository, DesktopLessonRequest, DesktopLessonSource,
++};
++
++const FLOW_BUDGET: Duration = Duration::from_secs(120);
++
++/// Captured together from the actual accepted Scene and its original facts.
++/// Only the native desktop controller publishes these stamps; FormData never
++/// supplies a scene, lesson key, identity or expected revision.
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DesktopLessonStamp {
++    pub generation: SceneGeneration,
++    pub source_revision: Revision,
++    pub binding: DesktopLessonBinding,
++    pub captured_at: LocalDateTime,
++    pub valid_until: LocalDateTime,
++}
++
++#[derive(Default)]
++struct Published {
++    high_water: u64,
++    scene: Option<DesktopLessonStamp>,
++    next_flow: u64,
++}
++pub(super) struct DesktopLessonControl {
++    published: Mutex<Published>,
++    active: AtomicU64,
++    clock: Arc<dyn Clock + Send + Sync>,
++    monotonic: Arc<dyn MonotonicClock + Send + Sync>,
++}
++impl DesktopLessonControl {
++    pub(super) fn new(
++        clock: Arc<dyn Clock + Send + Sync>,
++        monotonic: Arc<dyn MonotonicClock + Send + Sync>,
++    ) -> Self {
++        Self {
++            published: Mutex::new(Published::default()),
++            active: AtomicU64::new(0),
++            clock,
++            monotonic,
++        }
++    }
++}
++
++struct FlowState {
++    id: u64,
++    stamp: DesktopLessonStamp,
++    expires_at: Instant,
++    last_tick: AtomicU64,
++    expires_tick: u64,
++    cancelled: AtomicBool,
++}
++// The existing Work allocation reserves 1024 bytes for this fixed capability.
++const _: () = assert!(std::mem::size_of::<FlowState>() + 2 * std::mem::size_of::<usize>() <= 1024);
++
++/// The UI owns this non-Clone cancellation owner until it closes the chooser.
++/// Dropping a worker's cloned Guard cannot cancel or renew another flow.
++pub struct DesktopLessonFlow {
++    guard: DesktopLessonGuard,
++}
++impl DesktopLessonFlow {
++    pub fn guard(&self) -> DesktopLessonGuard {
++        self.guard.clone()
++    }
++    pub fn cancel(&self) {
++        self.guard.cancel();
++    }
++}
++impl Drop for DesktopLessonFlow {
++    fn drop(&mut self) {
++        self.cancel();
++    }
++}
++
++/// Opaque worker permission, bound to its exact Backend and original interval.
++#[derive(Clone)]
++pub struct DesktopLessonGuard {
++    state: Arc<FlowState>,
++    control: SessionControl,
++}
++impl DesktopLessonGuard {
++    fn cancel(&self) {
++        self.state.cancelled.store(true, Ordering::Release);
++        let _ = self.control.0.desktop_lesson.active.compare_exchange(
++            self.state.id,
++            0,
++            Ordering::AcqRel,
++            Ordering::Acquire,
++        );
++    }
++    pub fn is_current(&self) -> bool {
++        self.interval_current(false)
++    }
++    // Only the sole writer uses this during its own checked publication pulse.
++    fn writer_current(&self) -> bool {
++        self.interval_current(true)
++    }
++    fn interval_current(&self, writing: bool) -> bool {
++        let healthy = |health| {
++            health == fc_runtime::health::Health::Healthy
++                || (writing && health == fc_runtime::health::Health::AuthorityUpdating)
++        };
++        let control = &self.control.0;
++        if self.state.cancelled.load(Ordering::Acquire)
++            || control.closed.load(Ordering::Acquire)
++            || control.recovering.load(Ordering::Acquire)
++            || control.desktop_lesson.active.load(Ordering::Acquire) != self.state.id
++            || !healthy(control.health.status().health)
++        {
++            return false;
++        }
++        let now = control.desktop_lesson.clock.now();
++        let mut prior = self.state.last_tick.load(Ordering::Acquire);
++        let mut tick = control.desktop_lesson.monotonic.monotonic_millis();
++        if Instant::now() >= self.state.expires_at
++            || now < self.state.stamp.captured_at
++            || now >= self.state.stamp.valid_until
++            || tick >= self.state.expires_tick
++        {
++            self.cancel();
++            return false;
++        }
++        // A regression cannot become valid again by returning to a later tick.
++        loop {
++            if tick < prior {
++                self.cancel();
++                return false;
++            }
++            match self.state.last_tick.compare_exchange_weak(
++                prior,
++                tick,
++                Ordering::AcqRel,
++                Ordering::Acquire,
++            ) {
++                Ok(_) => break,
++                Err(value) => {
++                    prior = value;
++                    tick = control.desktop_lesson.monotonic.monotonic_millis();
++                    if tick >= self.state.expires_tick {
++                        self.cancel();
++                        return false;
++                    }
++                }
++            }
++        }
++        // Publication changes are checked by the repository's exact binding,
++        // not by the entry's old global revision (our own COMMIT changes it).
++        !self.state.cancelled.load(Ordering::Acquire)
++            && control.desktop_lesson.active.load(Ordering::Acquire) == self.state.id
++            && !control.closed.load(Ordering::Acquire)
++            && !control.recovering.load(Ordering::Acquire)
++            && healthy(control.health.status().health)
++            && Instant::now() < self.state.expires_at
++    }
++    /// Shared metadata allocation counted once by its UI owner, not per clone.
++    /// No file, database or native owner is retained by this capability.
++    pub fn allocation_bytes(&self) -> usize {
++        std::mem::size_of::<FlowState>() + 2 * std::mem::size_of::<usize>()
++    }
++}
++
++fn cancelled() -> BackendError {
++    BackendError::Storage(StorageError::ExecutionCancelled)
++}
++
++impl SessionControl {
++    fn desktop_entry_current(&self, stamp: &DesktopLessonStamp) -> bool {
++        let status = self.0.health.status();
++        let now = self.0.desktop_lesson.clock.now();
++        stamp.generation.get() != 0
++            && !self.0.closed.load(Ordering::Acquire)
++            && !self.is_recovering()
++            && status.health == fc_runtime::health::Health::Healthy
++            && status.revision == stamp.source_revision
++            && stamp.captured_at.date == stamp.binding.lesson.actual_date
++            && stamp.valid_until.date == stamp.captured_at.date
++            && stamp.valid_until > stamp.captured_at
++            && stamp.valid_until.second_of_day()
++                <= u32::from(stamp.binding.lesson.range.end.get()) * 60
++            && stamp
++                .binding
++                .lesson
++                .range
++                .contains_second(stamp.captured_at.second_of_day())
++            && now >= stamp.captured_at
++            && now < stamp.valid_until
++    }
++    /// Trusted native renderer acknowledgement only. No SQL/KDF or actor mint.
++    pub fn publish_desktop_lesson_scene(&self, stamp: DesktopLessonStamp) -> bool {
++        if !self.desktop_entry_current(&stamp) {
++            return false;
++        }
++        let Ok(mut published) = self.0.desktop_lesson.published.lock() else {
++            return false;
++        };
++        if stamp.generation.get() < published.high_water
++            || (stamp.generation.get() == published.high_water
++                && published.scene.as_ref().is_none_or(|old| old != &stamp))
++            || !self.desktop_entry_current(&stamp)
++        {
++            return false;
++        }
++        published.high_water = stamp.generation.get();
++        published.scene = Some(stamp);
++        true
++    }
++    /// Hiding the desktop removes only future entry eligibility. The already
++    /// minted chooser remains usable until its owner explicitly cancels/drops.
++    pub fn clear_desktop_lesson_scene(&self) {
++        if let Ok(mut published) = self.0.desktop_lesson.published.lock() {
++            published.scene = None;
++        }
++    }
++    pub fn begin_desktop_lesson_flow(
++        &self,
++        stamp: &DesktopLessonStamp,
++    ) -> Result<DesktopLessonFlow> {
++        if !self.desktop_entry_current(stamp) {
++            return Err(cancelled());
++        }
++        let mut published = self
++            .0
++            .desktop_lesson
++            .published
++            .lock()
++            .map_err(|_| cancelled())?;
++        if published.scene.as_ref() != Some(stamp) || !self.desktop_entry_current(stamp) {
++            return Err(cancelled());
++        }
++        let now = self.0.desktop_lesson.clock.now();
++        let tick = self.0.desktop_lesson.monotonic.monotonic_millis();
++        let seconds = stamp
++            .valid_until
++            .second_of_day()
++            .checked_sub(now.second_of_day())
++            .ok_or_else(cancelled)?;
++        let budget = FLOW_BUDGET.min(Duration::from_secs(u64::from(seconds)));
++        if budget.is_zero() {
++            return Err(cancelled());
++        }
++        let expires_at = Instant::now()
++            .checked_add(budget)
++            .ok_or(BackendError::Overflow)?;
++        let expires_tick = tick
++            .checked_add(
++                budget
++                    .as_millis()
++                    .try_into()
++                    .map_err(|_| BackendError::Overflow)?,
++            )
++            .ok_or(BackendError::Overflow)?;
++        let id = published
++            .next_flow
++            .checked_add(1)
++            .ok_or(BackendError::Overflow)?;
++        self.0
++            .desktop_lesson
++            .active
++            .compare_exchange(0, id, Ordering::AcqRel, Ordering::Acquire)
++            .map_err(|_| cancelled())?;
++        published.next_flow = id;
++        // A scene acknowledgement is consumed once. A later real render must
++        // supply a higher generation before another independent flow can mint.
++        published.scene = None;
++        let flow = DesktopLessonFlow {
++            guard: DesktopLessonGuard {
++                state: Arc::new(FlowState {
++                    id,
++                    stamp: stamp.clone(),
++                    expires_at,
++                    last_tick: AtomicU64::new(tick),
++                    expires_tick,
++                    cancelled: AtomicBool::new(false),
++                }),
++                control: self.clone(),
++            },
++        };
++        if !flow.guard.is_current() || !self.desktop_entry_current(stamp) {
++            return Err(cancelled());
++        }
++        Ok(flow)
++    }
++}
++
++impl Backend {
++    fn check_desktop_lesson(&self, guard: &DesktopLessonGuard) -> Result<()> {
++        self.check_open()?;
++        if !Arc::ptr_eq(&self.control.0, &guard.control.0) || !guard.is_current() {
++            return Err(cancelled());
++        }
++        Ok(())
++    }
++    /// Run on the existing shared worker. Reload never rebases the original
++    /// captured key or any CAS; external changes require a new desktop entry.
++    pub fn read_desktop_lesson(&self, guard: &DesktopLessonGuard) -> Result<DesktopLessonSource> {
++        self.check_desktop_lesson(guard)?;
++        let permission = guard.clone();
++        let result = self
++            .repository
++            .clone()
++            .with_desktop_lesson_guard(Arc::new(move || permission.writer_current()))
++            .desktop_lesson(guard.state.stamp.binding.clone())?;
++        self.check_desktop_lesson(guard)?;
++        Ok(result)
++    }
++    pub fn change_desktop_lesson(
++        &mut self,
++        guard: &DesktopLessonGuard,
++        action: LessonAction,
++    ) -> Result<DesktopLessonSource> {
++        self.check_desktop_lesson(guard)?;
++        let request = DesktopLessonRequest {
++            command_id: self.command_id()?,
++            binding: guard.state.stamp.binding.clone(),
++            action,
++        };
++        let permission = guard.clone();
++        let result = self
++            .repository
++            .clone()
++            .with_desktop_lesson_guard(Arc::new(move || permission.writer_current()))
++            .execute_desktop_lesson(request)?;
++        self.check_desktop_lesson(guard)?;
++        Ok(result)
++    }
++}
+--- /dev/null
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
+@@ -0,0 +1,403 @@
++// Included inside backend::tests to share its existing real-writer synthetic
++// account fixture. No bypass is added to the production public capability.
++mod public_desktop_lesson {
++    use super::*;
++    use fc_domain::{lesson_context::LessonInitiator, schedule::*, schedule_document::*};
++    use fc_ports::DesktopLessonBinding;
++
++    struct Fixture {
++        service: Joined,
++        clock: Arc<TestClock>,
++        _directory: Directory,
++    }
++    impl Fixture {
++        fn new() -> Self {
++            let directory = Directory::new();
++            let clock = Arc::new(TestClock::new());
++            let mut service = open(&directory, clock.clone());
++            policy_accounts(&mut service.0);
++            let admin = policy_lease(&service.0, 1, TrustedOrigin::Local);
++            service
++                .0
++                .identity(
++                    admin,
++                    IdentityCommand::BindCurrentClass {
++                        id: ClassId::new(1).unwrap(),
++                    },
++                )
++                .unwrap();
++            let row = TimetableRow {
++                id: RowId::new(1).unwrap(),
++                logical_key: LogicalRowKey::new(1).unwrap(),
++                group: DayGroup::Morning,
++                kind: RowKind::Course,
++                range: MinuteRange::new(Minute::new(0).unwrap(), Minute::new(120).unwrap())
++                    .unwrap(),
++                enabled_days: [true; 7],
++                courses: std::array::from_fn(|_| {
++                    Some(CourseCell {
++                        subject_id: SubjectId::new(1).unwrap(),
++                        teacher: TeacherBinding::Explicit(PrincipalId::new(2).unwrap()),
++                    })
++                }),
++            };
++            let document = ScheduleDocument {
++                semesters: vec![SemesterPlan::new(
++                    Semester {
++                        id: SemesterId::new(1).unwrap(),
++                        class_id: ClassId::new(1).unwrap(),
++                        revision: Revision::default(),
++                        enabled: true,
++                        start: LocalDate::new(2026, 10, 1).unwrap(),
++                        end: LocalDate::new(2026, 10, 31).unwrap(),
++                        first_week_monday: LocalDate::new(2026, 9, 28).unwrap(),
++                        tables: vec![WeekTable {
++                            id: TableId::new(1).unwrap(),
++                            role: TableRole::Single,
++                            rows: vec![row],
++                        }],
++                    },
++                    "Synthetic public desktop".into(),
++                )],
++                ..ScheduleDocument::default()
++            };
++            service
++                .0
++                .save_schedule(admin, Revision::default(), document)
++                .unwrap();
++            Self {
++                service,
++                clock,
++                _directory: directory,
++            }
++        }
++        fn stamp(&self, generation: u64) -> DesktopLessonStamp {
++            let facts = self.service.0.desktop_facts(0).unwrap();
++            let current = facts.lesson_context.current.as_ref().unwrap();
++            DesktopLessonStamp {
++                generation: SceneGeneration::new(generation),
++                source_revision: facts.global_revision,
++                binding: DesktopLessonBinding {
++                    expected_revision: facts.lesson_context.revision,
++                    expected_identity_revision: facts.identity.revision,
++                    expected_schedule_revision: facts.schedule.revision,
++                    lesson: current.key.clone(),
++                },
++                captured_at: facts.captured_at,
++                valid_until: current.effective_until,
++            }
++        }
++        fn flow(&self, generation: u64) -> DesktopLessonFlow {
++            let stamp = self.stamp(generation);
++            let control = self.service.0.session_control();
++            assert!(control.publish_desktop_lesson_scene(stamp.clone()));
++            control.begin_desktop_lesson_flow(&stamp).unwrap()
++        }
++    }
++    fn cancelled<T>(result: Result<T>) {
++        assert!(matches!(
++            result,
++            Err(BackendError::Storage(StorageError::ExecutionCancelled))
++        ));
++    }
++
++    #[test]
++    fn public_desktop_requires_exact_published_entry_and_only_one_cancellable_flow() {
++        let fixture = Fixture::new();
++        let control = fixture.service.0.session_control();
++        let stamp = fixture.stamp(1);
++        cancelled(control.begin_desktop_lesson_flow(&stamp));
++        assert!(control.publish_desktop_lesson_scene(stamp.clone()));
++        let mut wrong = stamp.clone();
++        wrong.binding.expected_revision = Revision::new(999);
++        cancelled(control.begin_desktop_lesson_flow(&wrong));
++        let owner = control.begin_desktop_lesson_flow(&stamp).unwrap();
++        let guard = owner.guard();
++        assert!(guard.is_current());
++        cancelled(control.begin_desktop_lesson_flow(&stamp));
++        control.clear_desktop_lesson_scene();
++        assert!(guard.is_current());
++        let second = fixture.stamp(2);
++        assert!(control.publish_desktop_lesson_scene(second.clone()));
++        cancelled(control.begin_desktop_lesson_flow(&second));
++        owner.cancel();
++        assert!(!guard.is_current());
++        let next = control.begin_desktop_lesson_flow(&second).unwrap();
++        drop(owner); // The old owner cannot cancel a later exact flow.
++        assert!(next.guard().is_current());
++        drop(next);
++        cancelled(fixture.service.0.read_desktop_lesson(&guard));
++        assert!(!control.publish_desktop_lesson_scene(stamp));
++    }
++
++    #[test]
++    fn public_desktop_entry_rejects_stale_publication_and_uses_earlier_original_scene_end() {
++        let fixture = Fixture::new();
++        let control = fixture.service.0.session_control();
++        let stamp = fixture.stamp(1);
++        let mut stale = stamp.clone();
++        stale.source_revision = Revision::default();
++        assert!(!control.publish_desktop_lesson_scene(stale));
++        let mut invalid = stamp.clone();
++        invalid.generation = SceneGeneration::default();
++        assert!(!control.publish_desktop_lesson_scene(invalid));
++        let mut invalid = stamp.clone();
++        invalid.valid_until = LocalDateTime::new(stamp.captured_at.date, 7201).unwrap();
++        assert!(!control.publish_desktop_lesson_scene(invalid));
++        let mut short = stamp;
++        short.valid_until = LocalDateTime::new(
++            short.captured_at.date,
++            short.captured_at.second_of_day() + 30,
++        )
++        .unwrap();
++        assert!(control.publish_desktop_lesson_scene(short.clone()));
++        let owner = control.begin_desktop_lesson_flow(&short).unwrap();
++        let guard = owner.guard();
++        assert!(guard.allocation_bytes() <= 1024);
++        fixture.clock.tick.store(29_999, Ordering::Release);
++        assert!(guard.is_current());
++        fixture.clock.tick.store(30_000, Ordering::Release);
++        assert!(!guard.is_current());
++    }
++
++    #[test]
++    fn public_desktop_without_login_survives_local_lock_and_commits_honest_origin_then_new_entry_restores(
++    ) {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        let admin = policy_lease(&fixture.service.0, 1, TrustedOrigin::Local);
++        fixture.service.0.session_control().lock_local();
++        assert!(fixture
++            .service
++            .0
++            .check_session(admin, SessionPurpose::Manage)
++            .is_err());
++        let source = fixture.service.0.read_desktop_lesson(&guard).unwrap();
++        assert_eq!(source.teachers.len(), 1);
++        assert_eq!(source.teachers[0].id, PrincipalId::new(2).unwrap());
++        let target = source.context.current.unwrap().base;
++        let changed = fixture
++            .service
++            .0
++            .change_desktop_lesson(&guard, LessonAction::Replace(target))
++            .unwrap();
++        assert_eq!(
++            changed.context.active_override.as_ref().unwrap().initiator,
++            LessonInitiator::LocalDesktop
++        );
++        assert!(guard.is_current()); // Own publication must not turn committed success into stale-source failure.
++        assert!(matches!(
++            fixture
++                .service
++                .0
++                .change_desktop_lesson(&guard, LessonAction::Restore),
++            Err(BackendError::Lesson(LessonRepositoryError::Domain(
++                fc_domain::lesson_context::LessonContextError::RevisionConflict { .. }
++            )))
++        ));
++        owner.cancel();
++        let restore_owner = fixture.flow(2);
++        let restored = fixture
++            .service
++            .0
++            .change_desktop_lesson(&restore_owner.guard(), LessonAction::Restore)
++            .unwrap();
++        assert!(restored.context.active_override.is_none());
++        assert!(restored.context.revision > changed.context.revision);
++    }
++
++    #[test]
++    fn public_desktop_cancellation_and_original_budget_do_not_mutate_or_rebind() {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        let before = fixture.service.0.global_revision().unwrap();
++        owner.cancel();
++        cancelled(
++            fixture
++                .service
++                .0
++                .change_desktop_lesson(&guard, LessonAction::Restore),
++        );
++        assert_eq!(fixture.service.0.global_revision().unwrap(), before);
++        let next = fixture.flow(2);
++        let next_guard = next.guard();
++        fixture.clock.tick.store(119_999, Ordering::Release);
++        assert!(next_guard.is_current());
++        assert!(fixture.service.0.read_desktop_lesson(&next_guard).is_ok());
++        fixture.clock.tick.store(120_000, Ordering::Release);
++        cancelled(fixture.service.0.read_desktop_lesson(&next_guard));
++        fixture.clock.tick.store(0, Ordering::Release);
++        assert!(!next_guard.is_current());
++        assert_eq!(fixture.service.0.global_revision().unwrap(), before);
++    }
++
++    #[test]
++    fn public_desktop_monotonic_regression_and_health_failure_cannot_deliver_late_success() {
++        let fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        fixture.clock.tick.store(2, Ordering::Release);
++        assert!(guard.is_current());
++        fixture.clock.tick.store(1, Ordering::Release);
++        assert!(!guard.is_current());
++        fixture.clock.tick.store(3, Ordering::Release);
++        assert!(!guard.is_current());
++        let next = fixture.flow(2);
++        let next_guard = next.guard();
++        fixture.service.0.session_control().fault();
++        assert!(!next_guard.is_current());
++        assert!(fixture.service.0.read_desktop_lesson(&next_guard).is_err());
++    }
++
++    #[test]
++    fn public_desktop_foreign_backend_and_request_execution_scope_are_not_authority() {
++        let fixture = Fixture::new();
++        let mut other = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        cancelled(other.service.0.read_desktop_lesson(&guard));
++        assert!(guard.is_current());
++        let other_owner = other.flow(1);
++        let other_guard = other_owner.guard();
++        let before = other.service.0.global_revision().unwrap();
++        {
++            let mut scope = other.service.0.begin_execution_scope(Arc::new(|| false));
++            cancelled(scope.read_desktop_lesson(&other_guard));
++            cancelled(scope.change_desktop_lesson(&other_guard, LessonAction::Restore));
++        }
++        assert!(other_guard.is_current());
++        assert_eq!(other.service.0.global_revision().unwrap(), before);
++        assert!(other.service.0.read_desktop_lesson(&other_guard).is_ok());
++    }
++
++    #[test]
++    fn public_desktop_external_catalog_or_schedule_change_does_not_rebase_original_binding() {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        let admin = policy_lease(&fixture.service.0, 1, TrustedOrigin::Local);
++        fixture
++            .service
++            .0
++            .identity(
++                admin,
++                IdentityCommand::RenameSchool {
++                    name: "Changed catalog".into(),
++                },
++            )
++            .unwrap();
++        assert!(matches!(
++            fixture.service.0.read_desktop_lesson(&guard),
++            Err(BackendError::Lesson(LessonRepositoryError::Domain(
++                fc_domain::lesson_context::LessonContextError::LessonContextChanged
++            )))
++        ));
++        owner.cancel();
++        let next = fixture.flow(2);
++        let next_guard = next.guard();
++        let schedule = fixture.service.0.read_schedule(admin).unwrap();
++        fixture
++            .service
++            .0
++            .save_schedule(admin, schedule.revision, schedule)
++            .unwrap();
++        assert!(matches!(
++            fixture.service.0.read_desktop_lesson(&next_guard),
++            Err(BackendError::Lesson(LessonRepositoryError::Domain(
++                fc_domain::lesson_context::LessonContextError::LessonContextChanged
++            )))
++        ));
++    }
++
++    #[test]
++    fn public_desktop_precommit_cancel_rolls_back_without_fault_and_never_renews_capability() {
++        let mut fixture = Fixture::new();
++        let owner = Arc::new(fixture.flow(1));
++        let guard = owner.guard();
++        let source = fixture.service.0.read_desktop_lesson(&guard).unwrap();
++        let target = source.context.current.unwrap().base;
++        let before = fixture.service.0.global_revision().unwrap();
++        let control = fixture.service.0.session_control();
++        let cancel_owner = owner.clone();
++        {
++            let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
++                if control.health_gate().status().health
++                    == fc_runtime::health::Health::AuthorityUpdating
++                {
++                    cancel_owner.cancel();
++                }
++                true
++            }));
++            assert_eq!(
++                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
++                Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
++            );
++        }
++        assert!(!guard.is_current());
++        assert_eq!(fixture.service.0.global_revision().unwrap(), before);
++        assert!(fixture
++            .service
++            .0
++            .control
++            .health_gate()
++            .check_sensitive()
++            .is_ok());
++        let admin = policy_lease(&fixture.service.0, 1, TrustedOrigin::Local);
++        assert!(fixture
++            .service
++            .0
++            .read_lesson(admin)
++            .unwrap()
++            .active_override
++            .is_none());
++    }
++
++    #[test]
++    fn public_desktop_cancel_after_real_commit_suppresses_delivery_but_does_not_claim_rollback() {
++        let mut fixture = Fixture::new();
++        let owner = Arc::new(fixture.flow(1));
++        let guard = owner.guard();
++        let target = fixture
++            .service
++            .0
++            .read_desktop_lesson(&guard)
++            .unwrap()
++            .context
++            .current
++            .unwrap()
++            .base;
++        let before = fixture.service.0.global_revision().unwrap();
++        let control = fixture.service.0.session_control();
++        let cancel_owner = owner.clone();
++        {
++            let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
++                let status = control.health_gate().status();
++                if status.health == fc_runtime::health::Health::Healthy && status.revision > before
++                {
++                    cancel_owner.cancel();
++                }
++                true
++            }));
++            assert_eq!(
++                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
++                Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
++            );
++        }
++        assert!(!guard.is_current());
++        assert!(fixture.service.0.global_revision().unwrap() > before);
++        let admin = policy_lease(&fixture.service.0, 1, TrustedOrigin::Local);
++        assert_eq!(
++            fixture
++                .service
++                .0
++                .read_lesson(admin)
++                .unwrap()
++                .active_override
++                .unwrap()
++                .initiator,
++            LessonInitiator::LocalDesktop
++        );
++    }
++}

@@ -1,0 +1,30 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round35-visuals-programs/fc-bootstrap.exe",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--subject-visuals",
+    "--report",
+    "/tmp/fc-round35-visuals-evidence/windows-visual-native-first.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T18:00:25.309477+00:00",
+  "stdout": "/tmp/fc-round35-visuals-evidence/windows-visual-native-first.stdout.log",
+  "stderr": "/tmp/fc-round35-visuals-evidence/windows-visual-native-first.stderr.log",
+  "exitCode": 1,
+  "elapsedSeconds": 11.342872609151527,
+  "completedUtc": "2026-10-31T18:00:36.652633+00:00",
+  "stdoutBytes": 14,
+  "stdoutSha256": "8f03718d9f618efe53a2947839fb3d07f90a3dc90be35dde2a813304ed960248",
+  "stderrBytes": 740,
+  "stderrSha256": "2e5c23b6d58a450f98dc45c6396d921a7263cd9b0633566d4a4fc3845c64b2d2"
+}

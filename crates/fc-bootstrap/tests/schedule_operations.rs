@@ -85,7 +85,7 @@ impl Clock for TestClock {
         if std::thread::current().id() != self.caller
             && self
                 .writer_reads_until_lock
-                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
+                .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
                 == Ok(1)
         {
             self.lock.lock().unwrap().as_ref().unwrap().lock_local();

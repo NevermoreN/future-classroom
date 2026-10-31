@@ -402,3 +402,6 @@ fn content_http_midnight_rejects_old_routes_and_receipts_and_day_floor_survives_
         "DAY_CHANGED",
     );
 }
+
+#[path = "subject_visual_tests.rs"]
+mod subject_visual_tests;

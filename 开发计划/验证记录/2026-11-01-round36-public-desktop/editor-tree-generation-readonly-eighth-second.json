@@ -1,0 +1,18 @@
+{
+  "stage": "Round36 readonly candidate followup - avoid rebuilt strip fixture text overflow",
+  "status": "CANDIDATE_NOT_APPLIED",
+  "priorCauseReport": "editor-tree-generation-readonly-eighth.json",
+  "sourceSha256": "0dde0428b0ca13306473145b89368a2ba2d4512875cef1b634b6dc89e86c59af",
+  "changes": [
+    "New generation before adding the separate strip, fixing the demonstrated absent native target.",
+    "Use400DIP strip width, same as existing flat passive/native-button fixture, keeping80DIP height and actual144x40button."
+  ],
+  "secondaryStaticRisk": "Old220-wide strip leaves40DIP caption width because render_lesson_control reserves164+16. After rebuild the six Chinese characters must wrap into several lines, which may violate80-24=56DIP actual text-height gate. This was not the actual seventh runtime failure (secondpresent skipped rebuild).400 leaves220DIP caption width and avoids deliberately constricted geometry.",
+  "productionAndAssertions": "Unchanged; candidate retains true tree rendering and actual native public-button assertions.",
+  "patch": {
+    "path": "editor-tree-generation-candidate-eighth-second.diff",
+    "sha256": "29461175021ba1df998907c5a93a0a48c34c5f08d02e2d2499e26048e4ed3129"
+  },
+  "sourceStillUnchanged": true,
+  "execution": "NOT_RUN; no live source mutation"
+}

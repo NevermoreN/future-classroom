@@ -1,0 +1,262 @@
+{
+  "status": "PASS",
+  "scope": "Host pure transcript validators, initial CLI parser prefix and PowerShell string builder only; NO Remote/SSH/Windows/EXE execution",
+  "sourceSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "sourceBeforeSha256": "30f6aa7530e36b39cbb944b28155601951be7c14cf4c1e54f313cd35e6fcbae7",
+  "cases": [
+    {
+      "name": "valid-exact20-final-marker",
+      "status": "PASS"
+    },
+    {
+      "name": "valid-original120s-boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "nonzero-exit",
+      "status": "PASS"
+    },
+    {
+      "name": "bool-exit-is-not-int",
+      "status": "PASS"
+    },
+    {
+      "name": "not-list",
+      "status": "PASS"
+    },
+    {
+      "name": "nonstring-output",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-step",
+      "status": "PASS"
+    },
+    {
+      "name": "repeated-step",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong-index",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong-name",
+      "status": "PASS"
+    },
+    {
+      "name": "out-of-order",
+      "status": "PASS"
+    },
+    {
+      "name": "malformed-reserved-step",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-footer",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate-footer",
+      "status": "PASS"
+    },
+    {
+      "name": "footer-before-last-step",
+      "status": "PASS"
+    },
+    {
+      "name": "cleanup-not-pass",
+      "status": "PASS"
+    },
+    {
+      "name": "wrong-workers",
+      "status": "PASS"
+    },
+    {
+      "name": "claimed-reopen",
+      "status": "PASS"
+    },
+    {
+      "name": "claimed-session",
+      "status": "PASS"
+    },
+    {
+      "name": "noncanonical-footer-tail",
+      "status": "PASS"
+    },
+    {
+      "name": "over120s",
+      "status": "PASS"
+    },
+    {
+      "name": "zero-elapsed",
+      "status": "PASS"
+    },
+    {
+      "name": "negative-elapsed",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-original-validate_subject_visual_output",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-original-validate_voice_output_output",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-original-validate_voice_settings_output",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-original-validate_migration_output",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---subject-visuals",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---voice-output",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---voice-settings",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---calendar-download",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---application",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---autostart",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---reinitialization",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---migration",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---materials",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---audio-silent",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---web-voice",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-mutual---web-pairing",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-subject-only",
+      "status": "PASS"
+    },
+    {
+      "name": "cli-subject-with-readonly-host-and-metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script-default",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---system-host",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---subject-visuals",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---voice-output",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---voice-settings",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---calendar-download",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---application",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---calendar",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---autostart",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---reinitialization",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---migration",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---materials",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---audio-silent",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---web-voice",
+      "status": "PASS"
+    },
+    {
+      "name": "unchanged-legacy-native-script---web-pairing",
+      "status": "PASS"
+    },
+    {
+      "name": "new-task-command-1",
+      "status": "PASS"
+    },
+    {
+      "name": "new-task-command-2",
+      "status": "PASS"
+    },
+    {
+      "name": "actual-rust-order-matches-python",
+      "status": "PASS"
+    }
+  ],
+  "caseCount": 62,
+  "nativeFeatureBudgetSeconds": 120,
+  "newTaskObservationSeconds": 180,
+  "newRemoteObservationSeconds": 190,
+  "originalBudgets": "unchanged240/300 task and250/310 remote; source comparison and byte-identical legacy native scripts checked",
+  "evidenceLimit": "These synthetic validators are not actual native feature/probe execution."
+}

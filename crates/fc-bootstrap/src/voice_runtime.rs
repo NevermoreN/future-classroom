@@ -134,7 +134,7 @@ impl RuntimeControl {
         if self
             .shared
             .generation
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
             .is_err()
         {
             self.shared.faulted.store(true, Ordering::Release);

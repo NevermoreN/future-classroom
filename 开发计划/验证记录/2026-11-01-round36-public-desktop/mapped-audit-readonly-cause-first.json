@@ -1,0 +1,131 @@
+{
+  "status": "READ_ONLY_CAUSE_IDENTIFIED_TEST_PATCH_PREPARED_NOT_APPLIED",
+  "recordedAt": "2026-10-31T19:18:56.527343+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "actualFailure": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-core-before-seventh.json",
+    "sha256": "28fa2f21a542a4a9b87c543ce9e2a7f9a623da6a1fa0148ec0687c0cc12d4c55",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "binary": "fc_storage-3ccf7e5bedbf5d94.exe",
+    "binarySha256": "39acea5a7a340a0a70fe9b4f665ef51619cee185d29d13a8468772e165cecafa",
+    "exitCode": 101,
+    "originalFailureLines": [
+      "thread 'business::desktop_lesson::tests::mapped_format_three_audit_remains_inert_and_preserves_complete_history' (2496) panicked at crates/fc-storage/src/business/desktop_lesson/tests.rs:791:5:",
+      "assertion failed: !restored.history.is_empty()",
+      "test result: FAILED. 190 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.07s"
+    ]
+  },
+  "cause": {
+    "finding": "Test reads live lesson context after restore, while original recovery intentionally moves history to separate inert audit then resets live context. No evidence of incomplete mapping or production format3 history loss.",
+    "chain": [
+      {
+        "source": "crates/fc-storage/src/business/desktop_lesson/tests.rs:157",
+        "fact": "Fixture::new really observes current at08:30 and commits it. source.change at08:31 finishes a genuine positive08:30–08:31 baseline interval; no fabricated earlier history is required."
+      },
+      {
+        "source": "crates/fc-storage/src/business/recovery.rs:734",
+        "fact": "Ordinary projection preserves witnessed history; current interval is added only if observed_at>end-of-start, then active_override and base_trust are stripped. Current override created at08:31 and exported at08:31 has no positive interval to add; existing baseline history remains."
+      },
+      {
+        "source": "crates/fc-storage/src/business/migration/documents.rs:121",
+        "fact": "Mapping parses strict formats1/2/3, rejects live state, maps every history context class/subject/teacher, then reserializes without deleting history. Missing mapped IDs fail the whole map; they do not silently clear history."
+      },
+      {
+        "source": "crates/fc-storage/src/recovery.rs:353",
+        "fact": "Restore recalculate(restoring=true) calls retain_lesson_audit then reset_lesson."
+      },
+      {
+        "source": "crates/fc-storage/src/business/recovery.rs:1055",
+        "fact": "retain_lesson_audit stores merged bounded history at business/recovery/lesson-audit/v1, strips live current/override/base_trust."
+      },
+      {
+        "source": "crates/fc-storage/src/business/recovery.rs:1035",
+        "fact": "reset_lesson writes a neutral live context with revision/day/class/blocked boundary and default empty history."
+      },
+      {
+        "source": "crates/fc-storage/src/recovery_tests.rs:1077",
+        "fact": "Preexisting retained_lesson_audit_survives_a_second_complete_restore_with_an_empty_live_lesson explicitly requires audit history exact equality and live history empty."
+      }
+    ],
+    "timeNote": "An unchanged08:32 observe intentionally does not persist observed_at every tick (domain observe lines405–414); merely advancing clock/read would not establish an exported positive active override interval. No artificial time injection or new transition is needed for the existing actual baseline history being tested."
+  },
+  "proposal": {
+    "scope": "Only mapped_format_three_audit_remains_inert_and_preserves_complete_history test, not production. Pending parent authorization after active Cargo terminal.",
+    "beforeSha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e",
+    "candidateSha256": "7c1efca9a37f8809b17a5d7425346a07aae8d6fc333aeca553c7667687c77a09",
+    "candidatePath": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-proposal-first/desktop-lesson-tests.candidate.rs",
+    "patchPath": "/tmp/fc-round36-public-desktop-evidence/mapped-audit-test-proposal-first/proposed.patch",
+    "patchSha256": "4b0d7cd69673eea2303266965a6d97e2199e1211b8f7fe55fa2de7a77b79527f",
+    "assertions": [
+      "Save source result and assert actual LocalDesktop initiator before deliberate projection stripping.",
+      "Assert source history nonempty and every interval strictly positive.",
+      "Open actual ordinary SQLite export and assert strict format3, inert state, complete history equals saved witnessed history.",
+      "Open actual mapped SQLite and assert same complete history equals source projection, with current/override/base_trust absent.",
+      "Final candidate live context remains explicitly empty-history/current/override/base_trust.",
+      "Read separate retained audit and assert nonempty full history equals both mapped history and source projection item-for-item, and all live fields remain stripped.",
+      "Keep existing receipt exclusion, startup validation and target live state assertions. No new persisted origin/history fields or restored authority."
+    ],
+    "formatCheck": {
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "sourceBindings": [
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson/tests.rs",
+      "bytes": 28925,
+      "sha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery.rs",
+      "bytes": 33364,
+      "sha256": "8e705461090bbcc837fb3db25fe3417cb703192ad02d6e955762b6b584ea0293"
+    },
+    {
+      "path": "crates/fc-storage/src/business/recovery.rs",
+      "bytes": 53741,
+      "sha256": "6c7b11e3355760cd04f7693e3ca0088719b13cf3ff9528e2d1817be419e9a520"
+    },
+    {
+      "path": "crates/fc-storage/src/business/migration/documents.rs",
+      "bytes": 10352,
+      "sha256": "c01b4ba139e2df62db7b448a60a987ff2d56c0206fce613c5ee0f7c06704a61b"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery/migration.rs",
+      "bytes": 8807,
+      "sha256": "c2d5999a901d24b2098e531670e3cb3101a57f9f45a7e6c5d853d3206962a990"
+    },
+    {
+      "path": "crates/fc-storage/src/recovery_tests.rs",
+      "bytes": 42990,
+      "sha256": "700a33802c06c2510567f50bbd553afe69b4164e80ff4b842983fa3e8c03c9f7"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson_codec.rs",
+      "bytes": 13947,
+      "sha256": "be314435eaab7978501e519cbed65581ba54acb36fbb6b0816ee927ce8754d6d"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22065,
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5"
+    }
+  ],
+  "repoSourceUnchanged": true,
+  "notExecuted": [
+    "Cargo",
+    "npm",
+    "Windows/SSH",
+    "test/probe executable",
+    "Git writes",
+    "production patch application"
+  ],
+  "limitations": [
+    "Cause is source analysis of an actual failing test; corrected test has not been compiled/run.",
+    "Does not claim historical override initiator survives projection: original design strips active override, history schema retains effective intervals only.",
+    "Source projection equality is valid for this explicit identity mapping fixture; no generic cross-ID equality is asserted."
+  ]
+}

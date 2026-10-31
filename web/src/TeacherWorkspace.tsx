@@ -1,3 +1,5 @@
+import SubjectVisualPreview from "./SubjectVisualPreview"
+import type { SubjectVisualApi } from "./api/subject-visual-protocol"
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleAlert, ClipboardList, FolderOpen, GraduationCap, History, LoaderCircle, LockKeyhole, LogOut, Radio, RefreshCw, Save, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,12 +16,13 @@ import { MaterialController, emptyMaterials, type MaterialState } from './api/ma
 import type { Role, Session } from './api/protocol'
 const roles: Record<Role, string> = { GLOBAL_ADMIN: '全局主管理员', TEACHER_ADMIN: '教师管理员', USER: '普通用户' }
 const empty: ContentState = { kind: 'HOMEWORK', page: null, editor: null, busy: false, pageBlocked: false, notice: '', previousOffset: null }
-function Editor({ editor: e, busy, controller }: { editor: EditorState; busy: boolean; controller: ContentController | undefined }) {
+function Editor({ editor: e, busy, controller, api, onRevoked }: { editor: EditorState; busy: boolean; controller: ContentController | undefined; api: SubjectVisualApi; onRevoked: () => void }) {
   const bytes = new TextEncoder().encode(e.draft).byteLength
   const editable = !busy && !e.expired && ['ready', 'conflict', 'merge'].includes(e.phase)
   const canSave = !busy && !e.expired && e.phase === 'ready' && draftValid(e.draft)
   return <Card className="content-editor"><CardHeader><div className="editor-heading"><div><p className="eyebrow">{e.loaded.key.kind === 'HOMEWORK' ? '老师本人当天作业' : '班级共同当天提醒'}</p><CardTitle role="heading" aria-level={2}>{e.scope.className}{e.scope.kind === 'HOMEWORK' ? ` · ${e.scope.subjectName}` : ' · 今日提醒'}</CardTitle>{e.scope.kind === 'HOMEWORK' && <CardDescription>内容所属老师：{e.scope.ownerDisplayName}</CardDescription>}</div><span className={`editor-badge ${e.expired ? 'expired' : ''}`}>{e.expired ? '旧草稿已过期' : `修订 ${e.loaded.revision}`}</span></div><p className="server-date">白板日期 {e.loaded.today}<span>有效至 {e.loaded.expiresAt.replace('T', ' ')}</span></p></CardHeader><CardContent>
     <div aria-live="polite" aria-atomic="true">{e.notice && <p className={`content-notice ${['unknown', 'conflict', 'expired', 'scope-changed'].includes(e.phase) || e.expired ? 'attention' : ''}`}><CircleAlert size={17} />{e.notice}</p>}</div>
+    {e.loaded.key.kind === 'HOMEWORK' && <SubjectVisualPreview api={api} target={e.loaded.key} source={e.latest ?? e.loaded} expired={e.expired} onRevoked={onRevoked} />}
     <label className="editor-label" htmlFor="content-text">{e.phase === 'merge' ? '你的草稿（保留，尚未提交）' : '正文（纯文本）'}<span>{bytes.toLocaleString()} / 16,384 字节</span></label>
     <textarea id="content-text" className={`content-textarea ${bytes > 16384 ? 'invalid' : ''}`} rows={10} maxLength={16384} value={e.draft} onChange={event => controller?.edit(event.target.value)} readOnly={!editable} aria-describedby="content-text-help" aria-invalid={!draftValid(e.draft)} placeholder={e.scope.kind === 'HOMEWORK' ? '填写这位老师今天布置的作业…' : '填写这个班级今天的共同提醒…'} />
     <p id="content-text-help" className="editor-help">以白板日期为准；仅支持纯文本和正常换行。保存表示持久化成功，不代表内容此刻正在白板上显示。</p>
@@ -78,7 +81,7 @@ export default function TeacherWorkspace({ session, onLogout, onRefresh, onRevok
       {state.notice && <p className="content-notice attention" role="status"><CircleAlert size={17} />{state.notice}</p>}
       {state.busy && !scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在读取白板授权范围…</p>}
       {scopes && scopes.kind === page && <Card className="scope-picker"><CardHeader><div className="scope-picker-heading"><div><CardTitle role="heading" aria-level={2}>{page === 'HOMEWORK' ? '选择实际作业范围' : '选择共同提醒班级'}</CardTitle><CardDescription>{scopes.total === 0 ? '当前没有可管理的有效范围。' : `第 ${scopes.offset + 1}–${scopes.offset + scopes.items.length} 项，共 ${scopes.total} 项（每页最多 20 项）`}</CardDescription></div></div></CardHeader><CardContent><div className="scope-options">{scopes.items.map(item => <button type="button" className={`scope-option ${state.editor && state.editor.scope.classId === item.classId && (item.kind !== 'HOMEWORK' || state.editor.scope.kind === 'HOMEWORK' && state.editor.scope.subjectId === item.subjectId && state.editor.scope.ownerTeacherId === item.ownerTeacherId) ? 'selected' : ''}`} key={item.kind === 'HOMEWORK' ? `${item.classId}/${item.subjectId}/${item.ownerTeacherId}` : item.classId} disabled={state.busy || state.pageBlocked} onClick={() => select(item)}><strong>{item.className}</strong>{item.kind === 'HOMEWORK' && <><span>{item.subjectName}</span><small>{item.ownerDisplayName}</small></>}<ChevronRight size={15} /></button>)}</div><div className="scope-pagination"><Button variant="outline" disabled={state.busy || state.pageBlocked || state.previousOffset === null} onClick={() => reload(state.previousOffset!)}><ArrowLeft />上一页</Button><Button variant="outline" disabled={state.busy || state.pageBlocked || scopes.nextOffset === null} onClick={() => reload(scopes.nextOffset!)}>下一页<ArrowRight /></Button></div></CardContent></Card>}
-      {state.editor && <Editor editor={state.editor} busy={state.busy} controller={owner.current} />}
+      {state.editor && <Editor editor={state.editor} busy={state.busy} controller={owner.current} api={api} onRevoked={onRevoked} />}
       {state.busy && scopes && <p className="loading-content" role="status"><LoaderCircle className="spinner" />正在向白板核对…</p>}
     </>}
     <div className="logout-row"><LockKeyhole size={16} /><p>注销会使这个账号的全部渠道授权失效。</p><Button variant="outline" onClick={() => { if (consent()) { owner.current?.leave(true); materialOwner.current?.leave(true); voiceOwner.current?.leave(true); onLogout() } }}><LogOut />注销账号</Button></div>

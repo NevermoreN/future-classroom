@@ -1,0 +1,33 @@
+--- a/crates/fc-bootstrap/src/application/subject_visual_probe.rs
++++ b/crates/fc-bootstrap/src/application/subject_visual_probe.rs
+@@ -278,10 +278,12 @@
+     let mut first = make_app(&paths, deadline)?;
+     let result = initial(&mut first, &paths, &mut step, deadline);
+     stop_owned_app(first, deadline)?;
++    let mut second_physically_closed = true;
+     let result = (|| {
+         let expected = result?;
+         mark(&mut step, "first-app-physical-shutdown")?;
+         let mut second = make_app(&paths, deadline)?;
++        second_physically_closed = false;
+         let reopened = (|| {
+             open(&mut second, &paths, deadline)?;
+             require(
+@@ -301,10 +303,17 @@
+             Ok(())
+         })();
+         stop_owned_app(second, deadline)?;
++        second_physically_closed = true;
+         reopened?;
+         mark(&mut step, "second-app-physical-shutdown")?;
+         Ok(())
+     })();
++    if !second_physically_closed {
++        // A failed physical close retains the original deployment. Propagate
++        // before file removal; an assertion failure with successful close may
++        // still clean up normally below.
++        return result;
++    }
+     drop(instance);
+     drop(deployment);
+     checked(

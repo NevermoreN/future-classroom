@@ -1,0 +1,81 @@
+{
+  "scope": "Read-only independent core/public UI/native production review; no compile/test/remote",
+  "files": [
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson.rs",
+      "sha256": "44a5b1b64f18094f4d60b17d9fa200c72020a75ac63f328eb61db904d130b5ec"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson_codec.rs",
+      "sha256": "be314435eaab7978501e519cbed65581ba54acb36fbb6b0816ee927ce8754d6d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "sha256": "5dc64a742d0b76b7ee551f718e2cb012d0c6fe7799ebdbeaf3c10b77b52f07cc"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+      "sha256": "b683ce934340c04fa54f45501f8b0a4e992e117f7f19e353b325ca95aa496809"
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "sha256": "a9c7a5ee3612f5e81428a9790d9c22e7466954bfd6fc849b718dedd361f4403b"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "sha256": "db290145130fb8e5e0f7a6c80ba3be19f874c7361908df1283aca0d369e49a00"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "sha256": "23dce0cb8fbe8bddcf7eb077bc68763c4f76274af8e688b81b0602a84e55830d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "sha256": "e5cd54fc77ad6b4527d08318a6b01dfb5822bee5da28d57a1a88db5805c5355e"
+    }
+  ],
+  "confirmedBoundaries": [
+    "No actor/session in DesktopLessonRepository; default missing guard refuses and false/panic is ordinary cancellation",
+    "Same writer evaluates and precommits class/catalog/schedule/full lesson key/context CAS, trusted clock and floor; before/after decode checks guard",
+    "Public UI only subject/teacher targets, reload/restore/close; same original guard retained and successful action closes chooser",
+    "Actual accepted native render publishes paired Scene/facts stamp; event generation and scene.valid_at checked",
+    "Managed APIs keep original actor authorization; format1/2 positive actor IDs map Authenticated, strict format3 disallows guessed/mixed initiators",
+    "Native flat/tree passive Schedule/Clock/Date/etc have no hit input or page routing; separate LessonControl input preserved"
+  ],
+  "findings": [
+    {
+      "state": "FIXED_SOURCE_NOT_TESTED",
+      "topic": "OS callback-to-main-pump gap",
+      "source": "application.rs control callback originally lock_local only; Backend independent OS epoch cancellation added under root authorization, editor wiring pending/finalizing",
+      "proof": "service-freeze-second.json"
+    },
+    {
+      "state": "REQUIRES_ROOT_DECISION",
+      "topic": "Foreground leave still deferred to main pump",
+      "source": "fc-windows/src/host.rs FOREGROUND_MESSAGE uses state.hint rather than control_hint; App checks lesson_foreground_allowed only after main-pump receives hints",
+      "effect": "A queued/in-flight public write can pass precommit before the main pump consumes external foreground departure",
+      "suggestion": "Trusted exact allowed-foreground memory guard updated by native control event; do not cancel on every foregroundchange because chooser activation is expected"
+    },
+    {
+      "state": "REQUIRES_ROOT_DECISION",
+      "topic": "Unrelated short writer publication closes idle chooser",
+      "source": "App::poll auto-closes publicflow when guard.is_current false and no pending task; guard public Healthy-only, backend voice maintenance can publish AuthorityUpdating",
+      "effect": "Active voice/background mutation may close an otherwise valid idle chooser without catalog/schedule change",
+      "suggestion": "Exclude known transient AuthorityUpdating from automatic permanent close, keep submission gated and recheck original guard after Healthy; actual OS epoch cancellation already prevents SQL"
+    }
+  ],
+  "notClaimed": [
+    "Successful compilation",
+    "Actual native public desktop probe",
+    "Windows compatibility",
+    "Physical input or human interaction acceptance"
+  ]
+}

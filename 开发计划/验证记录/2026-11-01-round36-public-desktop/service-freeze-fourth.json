@@ -1,0 +1,44 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_TESTED",
+  "previousFreeze": "service-freeze-third.json",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 106693,
+      "sha256": "64a129c6044e3867c45f83a67616c50e26a3ce640896b19b53d8f43779ba64a9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "bytes": 14586,
+      "sha256": "b5f820866b5edef66d890c6ff1c5aacafe6eb995e00d568279a136be0c3d57e2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "bytes": 23902,
+      "sha256": "7bee81b2b41d841b0ab18a11aebc4eca59e325eb93890d06ef9a6540ace45629"
+    }
+  ],
+  "patchSha256": "dfd988a55585e5295d2966f20214821fa2fe25014e9b2d74089c2c3db05444d8",
+  "newApi": "DesktopLessonGuard::can_keep_chooser_open()->bool",
+  "contract": [
+    "UI-only one interval check accepts Healthy or AuthorityUpdating with all original exact flow/OS epoch/cancel/closed/recovery/deadline checks",
+    "Never authorizes submit; is_current remains Healthy-only and private writer guard unchanged",
+    "App auto-close should use only !can_keep_chooser_open instead of two separate phase predicates"
+  ],
+  "testsAddedTotal": 14,
+  "regressions": [
+    "Actual writer precommit captures old is_current false in Updating, actual COMMIT flips Healthy, old is_waiting false then would misclose; one liveness predicate is true in both phases",
+    "Original expiry and OS cancellation during real precommit also explicitly assert new liveness false"
+  ],
+  "checks": [
+    "Scoped rustfmt exit0",
+    "Scoped trailing whitespace PASS"
+  ],
+  "notExecuted": [
+    "Cargo",
+    "Host tests",
+    "Windows",
+    "Git",
+    "remote"
+  ]
+}

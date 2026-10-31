@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "status": "STATIC_REVIEW_PASS",
+  "scope": "Read-only independent review of four non-public Pending initializers and packaging declarations; no source mutation, build/test, Git or remote execution. Current compile still running; no runtime success inferred.",
+  "pendingControllers": [
+    {
+      "path": "crates/fc-bootstrap/src/application/autostart_controller.rs",
+      "beforeOriginal": "pending-before-autostart_controller.rs",
+      "beforeBytes": 5555,
+      "beforeSha256": "f911e2cd3058d0c8d5f820cdffe3167695f6b12bf269a27b8325c35971b994f6",
+      "afterBytes": 5597,
+      "afterSha256": "bbe75aec37a5685ae9632816638549b749daad6ce2c4bdb0c674e41344fb4160",
+      "addedFalseInitializers": 1,
+      "allOtherBytesIdentical": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "beforeOriginal": "pending-before-backup_controller.rs",
+      "beforeBytes": 33452,
+      "beforeSha256": "a9531e9257d10b83fb1cfa28c325953f4163172b0c774a3a2dbf3ee6836d8d5b",
+      "afterBytes": 33494,
+      "afterSha256": "259282c9509bc780b550de6dd3f1aafa869fe3f35c8f6ddc6b14baa971a51cfc",
+      "addedFalseInitializers": 1,
+      "allOtherBytesIdentical": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/calendar_controller.rs",
+      "beforeOriginal": "pending-before-calendar_controller.rs",
+      "beforeBytes": 9398,
+      "beforeSha256": "be060324658ee61172dc6c4a5e62c06577e5a81dd4a2a460ba5af3aef41e5a34",
+      "afterBytes": 9486,
+      "afterSha256": "c8d6cc3684377487a06ab29c8bd573bfa59126e4841049e47336d95f59035e41",
+      "addedFalseInitializers": 2,
+      "allOtherBytesIdentical": true
+    }
+  ],
+  "pendingConclusion": "The four added false flags truthfully identify existing managed/background tasks. Removing only those exact lines reproduces complete original file bytes, so their ticket/generation/self-revocation, handling, cancellation and explicit deadline/budget statements are unchanged. None of these tasks becomes a public lesson completion.",
+  "package": {
+    "path": "scripts/package-probe.py",
+    "beforeOriginal": "package-probe.before-public-desktop.py",
+    "beforeBytes": 28325,
+    "beforeSha256": "bd34095c99cc87e78a6996bf948d508ace2b8bd471c0c6a9a597fa2bc188467f",
+    "afterBytes": 28978,
+    "afterSha256": "f1723df301d910ccdabfc5f2eedf97a9596a2ad39e196ee4411c5f9eef9a8042",
+    "changedExistingKeys": [
+      "declared_probe_commands",
+      "native_management_workbench",
+      "resident_desktop"
+    ],
+    "addedKey": "subject_visuals",
+    "addedCommands": [
+      "--subject-visuals-probe",
+      "--public-desktop-probe"
+    ],
+    "allOtherAstIdentical": true,
+    "conclusion": "Only manifest descriptions and declared command list changed. Packaging input validation, file limits, binary selection, ZIP construction, payload accounting and NOT_VALIDATED/platform gates retain identical AST. New text distinguishes authenticated management from public desktop actions and preserves visible/device/full-feature caveats."
+  },
+  "concreteBlockers": []
+}

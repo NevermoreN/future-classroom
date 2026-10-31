@@ -1,0 +1,114 @@
+{
+  "status": "STATIC_DIAGNOSIS_FOUND_PREEXISTING_NONBLOCKING_FIXTURE_RACE_AND_RETAINED_OWNER_CASCADE",
+  "recordedAt": "2026-10-31T18:56:38.051982+00:00",
+  "scope": "Read-only independent diagnosis. No tests/reproduction/source mutations.",
+  "runtimeEvidence": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-runtime-first.json",
+    "sha256": "7588e719864e333e925c0f61c630951e1a1e9bf9daca4253e994b3a634e74af1",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "testBinary": "fc_bootstrap-e6c3a587f31bdfb6.exe",
+    "testBinarySha256": "5dde3e00efe38b092fad869a94f5317f241d227aaf5535e0474b7e94ff927d7c",
+    "exitCode": 101,
+    "selectedOriginalLines": [
+      "---- web_transfer::uploads::tests::material_hub_keeps_ready_across_ticket_drop_and_appends_with_new_authenticated_request stdout ----",
+      "thread 'web_transfer::uploads::tests::material_hub_keeps_ready_across_ticket_drop_and_appends_with_new_authenticated_request' (33004) panicked at crates/fc-bootstrap/src/web_transfer/uploads/tests.rs:341:27:",
+      "test worker admission Busy",
+      "---- web_transfer::uploads::tests::same_token_with_different_control_cell_is_rejected_before_stage_admission stdout ----",
+      "thread 'web_transfer::uploads::tests::same_token_with_different_control_cell_is_rejected_before_stage_admission' (36376) panicked at crates/fc-bootstrap/src/web_transfer/uploads/tests.rs:1099:50:",
+      "called `Result::unwrap()` on an `Err` value: Busy",
+      "test result: FAILED. 313 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 67.06s"
+    ]
+  },
+  "baselineCommit": "83fe847f1a5b1787bdf2390c1294ae4e740e6e75",
+  "sourceComparison": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "baselineSha256": "ce09781c730c11d2ae3c8888765430aaa64891d78ef0a0246135df4442dedb04",
+      "currentSha256": "ce09781c730c11d2ae3c8888765430aaa64891d78ef0a0246135df4442dedb04",
+      "byteIdentical": true,
+      "diff": ""
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "baselineSha256": "c546cb5c4f07002ff940ffb5aae59744e69d84e857422dfb90747551e4979517",
+      "currentSha256": "83a5e40e206489681662ea411813cf942c8f195fa41dfbf1673bc88bf94d76ad",
+      "byteIdentical": false,
+      "diff": "--- 83fe847/crates/fc-bootstrap/src/web_transfer/uploads.rs\n+++ integrated/crates/fc-bootstrap/src/web_transfer/uploads.rs\n@@ -231,7 +231,7 @@\n             .ok_or(UploadHubError::Busy)?;\n         let serial = self\n             .serial\n-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))\n             .map_err(|_| {\n                 self.accepting.store(false, Ordering::Release);\n                 UploadHubError::SerialExhausted\n"
+    },
+    {
+      "path": "crates/fc-runtime/src/worker.rs",
+      "baselineSha256": "e050f358dc1d6776f0998210478833daaa6fe11eb2758a45e90ba598a26043eb",
+      "currentSha256": "67a772de735a1ac232dc80bb22440a6abd532f8fff97be32864bf405f5435ed5",
+      "byteIdentical": false,
+      "diff": "--- 83fe847/crates/fc-runtime/src/worker.rs\n+++ integrated/crates/fc-runtime/src/worker.rs\n@@ -105,7 +105,7 @@\n     fn completed(&self) {\n         let _ = self\n             .completions\n-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n+            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {\n                 Some(n.saturating_add(1))\n             });\n         // A completion hook must only post a non-blocking wakeup. Never run UI,\n"
+    },
+    {
+      "path": "crates/fc-runtime/src/mailbox.rs",
+      "baselineSha256": "83e2c24da87f0b3609971d5e533e87ac6ed6f72ca689821c20d508dee08b58dd",
+      "currentSha256": "83e2c24da87f0b3609971d5e533e87ac6ed6f72ca689821c20d508dee08b58dd",
+      "byteIdentical": true,
+      "diff": ""
+    },
+    {
+      "path": "crates/fc-runtime/src/worker/tests.rs",
+      "baselineSha256": "94af522c84b281a7719998ec115df59630c5d737fab24213c050eef74f8a28ec",
+      "currentSha256": "94af522c84b281a7719998ec115df59630c5d737fab24213c050eef74f8a28ec",
+      "byteIdentical": true,
+      "diff": ""
+    }
+  ],
+  "findings": [
+    {
+      "priority": 1,
+      "finding": "First failure is a test fixture incorrectly treating every one-shot nonblocking Busy as unexpected.",
+      "locations": [
+        "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs:327",
+        "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs:341",
+        "crates/fc-runtime/src/worker.rs:403",
+        "crates/fc-runtime/src/mailbox.rs:135",
+        "crates/fc-runtime/src/mailbox.rs:181"
+      ],
+      "reason": "Pool::call submits one job, immediately panics on any rejected admission, and waits for result before next call. This particular material_hub test uses that pool serially without any other producer. The mailbox has 8 queued-job slots and4MiB budget; Job declares only3*64KiB plus small inline state. A completed previous task has already been dequeued. Under these constraints queued capacity/bytes cannot be exhausted by this test; Busy can arise when the same mailbox mutex is temporarily held by either original worker try_recv. Nonblocking lock contention is an explicit existing mailbox contract, not product pool corruption. The raw failure does not record which Pool::call invocation failed, so the exact schedule is not observed."
+    },
+    {
+      "priority": 2,
+      "finding": "Second failure is UploadHubOwner global singleton Busy, not WorkerPool admission Busy.",
+      "locations": [
+        "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs:1099",
+        "crates/fc-bootstrap/src/web_transfer/uploads.rs:348",
+        "crates/fc-bootstrap/src/web_transfer/uploads.rs:430"
+      ],
+      "reason": "The line calls UploadHubOwner::new().unwrap(). First material test already created an owner but did not reach pool.join and owner.drain_after_join at its end after the fixture admission panic. Owner Drop intentionally keeps the original Shared in fixed RETAINED and leaves OWNER=true whenever drained is false, even if logical slots happen to be empty. Pool Drop joining its workers alone does not set owner.drained. The later serialized Hub test therefore cannot create a replacement; this is the expected fail-closed cascade. No permission to discard the retained owner or infer physical release is implied by this diagnosis."
+    },
+    {
+      "priority": 3,
+      "finding": "Ticket result delivery and physical worker/capacity return are distinct, but that distinction alone is not the admission cause here.",
+      "locations": [
+        "crates/fc-runtime/src/worker.rs:166",
+        "crates/fc-runtime/src/worker.rs:220",
+        "crates/fc-runtime/src/worker.rs:285",
+        "crates/fc-runtime/src/worker.rs:309",
+        "crates/fc-runtime/src/worker.rs:345",
+        "crates/fc-runtime/src/worker.rs:557"
+      ],
+      "reason": "Success Completion.finish queues reply, then sets done and runs notification; Running drops after the successful branch returns. try_result or wait may observe the reply before done/running decrements. Even is_finished is not a promise of idle physical thread. However running is only accounting and is not consulted by try_submit: admission is mailbox try_send. Queue charge is removed on receiver pop before Task execution. Waiting for ticket.done/running0 cannot guarantee next nonblocking mailbox lock is uncontended; the other worker may hold it. Production metadata-only output/worker-owner contract is unchanged."
+    },
+    {
+      "priority": 4,
+      "finding": "Preexisting baseline behavior, not introduced by Round35/36 feature delta.",
+      "reason": "uploads/tests.rs and mailbox.rs match original83fe847 byte-for-byte. worker.rs and uploads.rs differ only by exact deprecated fetch_update to try_update method renames. That migration was independently proven semantically equivalent under the two fixed toolchains in existing evidence. worker/tests.rs is also unchanged and already contains a positive setup helper retrying only the same unaccepted Busy task with fixed original deadline and bounded setup budget. No old actual Windows rerun was performed here."
+    }
+  ],
+  "narrowNextStepsNotExecuted": [
+    "For positive Hub fixture setup only, handle Busy by retrying the exact SubmitError.task that was never accepted, bounded by one original fixed15s deadline (and optionally the existing3s setup cap), retaining the same two-worker pool and --test-threads=2. Never recreate/duplicate an accepted upload or renew deadlines; non-Busy rejection must still fail.",
+    "Keep queue/capacity rejection tests using raw try_submit and preserve physical owner assertions. Merely waiting for try_result/is_finished/running0 is not a correct mailbox admission fence.",
+    "Test failure cleanup should explicitly join original workers and drain the exact retained original Hub with its original App before releasing the shared test guard. Do not reset OWNER or drop retained native resources from Net to conceal the cascade. If actual drain fails retain the diagnostic owner and report failure.",
+    "Validate with a deterministic mailbox contention regression plus affected Hub tests under original two-worker/two-test-thread configuration; preserve this initial313/2 report unchanged. No rerun or fix performed by this review."
+  ],
+  "limitations": [
+    "Actual Windows failure gives Busy but no queue state or call ordinal; causal lock schedule is inferred from reachable source branches under the serial fixture, not a recorded kernel trace.",
+    "Parent reports313 pass2 fail and cleanupPASS remain authoritative original results. This review does not turn them into passing tests.",
+    "No product concurrency/deadline/resource limit change is proposed."
+  ]
+}

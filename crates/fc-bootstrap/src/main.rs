@@ -128,6 +128,24 @@ fn run() -> Result<(), String> {
                 Err("native recovery workflow probe requires Windows".into())
             }
         }
+        [flag] if flag == "--public-desktop-probe" => {
+            #[cfg(windows)]
+            {
+                application::public_desktop_probe()
+            }
+            #[cfg(not(windows))]
+            {
+                Err("native public desktop probe requires Windows".into())
+            }
+        }
+        [flag] if flag == "--subject-visuals-probe" => {
+            #[cfg(windows)]
+            {
+                application::subject_visual_probe()
+            }
+            #[cfg(not(windows))]
+            Err("native subject visuals probe requires Windows".into())
+        }
         [flag] if flag == "--voice-output-probe" => {
             #[cfg(windows)]
             {

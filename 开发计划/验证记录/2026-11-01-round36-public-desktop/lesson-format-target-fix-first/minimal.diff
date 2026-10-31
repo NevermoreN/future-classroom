@@ -1,0 +1,20 @@
+--- before/crates/fc-bootstrap/tests/business_storage.rs
++++ after/crates/fc-bootstrap/tests/business_storage.rs
+@@ -4101,7 +4101,7 @@
+         .unwrap();
+     assert!(std::str::from_utf8(&row.value)
+         .unwrap()
+-        .contains("\"format\":2"));
++        .contains("\"format\":3"));
+     drop(repo);
+     drop(writer);
+     // There was no observation between 08:00 and 09:05, and no stored current lesson.
+@@ -4475,7 +4475,7 @@
+         .unwrap();
+     assert!(std::str::from_utf8(&row.value)
+         .unwrap()
+-        .contains("\"format\":2"));
++        .contains("\"format\":3"));
+ }
+ 
+ #[test]

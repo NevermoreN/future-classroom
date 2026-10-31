@@ -1,0 +1,167 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_RUN",
+  "recordedUtc": "2026-10-31T17:33:18.691628+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 247213,
+      "sha256": "62d1d1a61e82de405bac0382f912f07417757ed9edc93c4ee85ad4e6003f1816",
+      "beforeSha256": "9c2c5f0a5ceb01a995bf80a7b4dbae955ebd903919349d54ca73a2153fd1fbf2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor.rs",
+      "bytes": 34315,
+      "sha256": "cba7a532ba18a017bd8e0b48fec5a3689cc7034fb2b7938821fa116a16f2f900",
+      "beforeSha256": "7951237b658fbdcccf3121f704ddabd446cdab7d604d68e27c0389479589b8df"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "bytes": 41972,
+      "sha256": "a4f895a554f67f935efa32d9acfad23d8fc39289c619bb49bc1fe5402806f4bf",
+      "beforeSha256": "8531c49075161d6bf0c790f2c74fcd926ab373f78ef4d8d665934dd4ef85d0bd"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18377,
+      "sha256": "d9c68833fc587b72d98c14e25575ab7597e886a58ad23fd8f7aa06a74d2e7516",
+      "beforeSha256": "70444f3a9a46e2b72948e16b3878ee5e6b67e0a5ff231c55f32819c34f09e61a"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 102452,
+      "sha256": "db290145130fb8e5e0f7a6c80ba3be19f874c7361908df1283aca0d369e49a00",
+      "beforeSha256": "f74006416890442e64f63e524e2272c6ccb80f47c3dd9006af8778c77ab9d133"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1485,
+      "sha256": "2b229d54cc06da8107a9344b3ec215efa6ffb00294881305b2303886f21abe43",
+      "beforeSha256": "ce29c39c11ec01b24802adf7008d6273650d2bad77c163b6bfc3fb88aa7d138d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "bytes": 109632,
+      "sha256": "90bd1a7392b6b3b5145415b4aef973051573b261d8379fa44e4bcd42105b061a",
+      "beforeSha256": "b65e630599e6db7d21d3c9aca85e5d78f3df10be84584be5eb781c3ba473b0da"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor/visuals.rs",
+      "bytes": 8510,
+      "sha256": "60ef4fa641e073a4b0ff0e64560a48f871fa1b95ce2b1edabcb1fdaca34a5d8b",
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_editor/visual_tests.rs",
+      "bytes": 8515,
+      "sha256": "d8465933e6e4d4aae3d27c6ee91352a208a82477e42e58728cff2f4bfd8dcb19",
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/display_flow.rs",
+      "bytes": 2666,
+      "sha256": "8a2b35d23cebd3a1732458cfbf5b22b4030f44ff0da23d3e8c55e2914b84d4ff",
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/subject_visual_probe.rs",
+      "bytes": 10751,
+      "sha256": "c81790dddb3b8afa95b64cddf6f1ae3e4fd5558fe85169d8c8b97553ae0111d5",
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/workbench/color_picker.rs",
+      "bytes": 2641,
+      "sha256": "83a70f2fb31863a794f24f454ba458a9988f2049fd1ba3f0403af2f77f98219c",
+      "beforeSha256": null
+    }
+  ],
+  "diff": {
+    "path": "/tmp/fc-round35-visuals-evidence/editor-implementation-first.diff",
+    "bytes": 69660,
+    "sha256": "453a7b4031588acc800b622ea0b389d676f5b87e9450646488fa7a0193740ef4"
+  },
+  "formatCheck": {
+    "argv": [
+      "rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/display_editor.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/profiles_preview.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/main.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-windows/src/workbench.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/profiles_editor.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/display_editor/visuals.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/display_editor/visual_tests.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/display_flow.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/subject_visual_probe.rs",
+      "/tmp/fc-round35-visuals-worktree/crates/fc-windows/src/workbench/color_picker.rs"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "probe": {
+    "cli": "--subject-visuals-probe",
+    "stepMarker": "SUBJECT_VISUAL_NATIVE_STEP",
+    "finalMarker": "SUBJECT_VISUAL_NATIVE_PASS",
+    "budgetSeconds": 120,
+    "steps": [
+      "setup-global-admin",
+      "create-subject",
+      "open-joint-display",
+      "loaded-original-rgb",
+      "invalid-rgb-no-write",
+      "native-joint-draft-preview",
+      "lock-keeps-partial-draft",
+      "relogin-restores-draft",
+      "cancel-review-no-write",
+      "cancel-reloads-both",
+      "native-joint-save",
+      "readback-both-saved",
+      "native-palette-draft",
+      "rename-subject-preserves-color",
+      "stale-palette-save-rejected",
+      "cancel-reload-after-conflict",
+      "first-app-physical-shutdown",
+      "second-app-real-reopen",
+      "relogin-reopened-deployment",
+      "reopened-joint-state",
+      "second-app-physical-shutdown",
+      "isolated-deployment-cleanup"
+    ],
+    "scope": "hidden real native forms -> original shared 2 workers -> real SQLite joint save/reopen; real synthetic hidden D2D; no modal colour dialog, foreground activation, audio or listener"
+  },
+  "tests": {
+    "newEditorTests": 8,
+    "newPreviewTests": 2,
+    "newNativeColorrefPackingTests": 1,
+    "filters": [
+      "application::display_editor::visual_tests",
+      "application::profiles_preview::tests::subject_visual",
+      "workbench::color_picker::tests"
+    ],
+    "runStatus": "NOT_RUN_BY_THIS_AGENT"
+  },
+  "compatibility": "Legacy embedded public-layout style editor keeps old construction without palette actions, explicitly rejects picker/colour-preview commands and retains original layout/display double-CAS. Global display uses new_visuals, stable subject version vector and complete colour set; explicit no-op save still increments display revision.",
+  "pickerBindingReview": {
+    "path": "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/windows-0.62.2/src/Windows/Win32/UI/Controls/Dialogs/mod.rs",
+    "bytes": 78036,
+    "sha256": "8a7b133923828cf1e39531dc8c23aca9213a075ef2196b5df80654962f606d96",
+    "version": "windows=0.62.2",
+    "reviewed": "CHOOSECOLORW x86 packed layout, CC_RGBINIT, owned 16 COLORREF cells, owned HWND, modal memory lifetime, false result + CommDlgExtendedError zero cancellation; no RefCell borrow across modal and no cancelled rgbResult read",
+    "primaryReferences": [
+      "https://learn.microsoft.com/windows/win32/api/commdlg/ns-commdlg-choosecolorw",
+      "https://learn.microsoft.com/windows/win32/api/commdlg/nf-commdlg-choosecolorw"
+    ],
+    "actualDialogExecution": "NOT_RUN"
+  },
+  "remainingVerification": [
+    "root unified compile/tests/strict Clippy",
+    "actual Windows hidden 22-step probe and cleanup",
+    "interactive colour dialog and visible Seewo not exercised",
+    "Win7/Win10 runtime and full product gates remain separate"
+  ]
+}

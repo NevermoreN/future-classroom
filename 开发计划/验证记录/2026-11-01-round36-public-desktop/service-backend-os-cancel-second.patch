@@ -1,0 +1,192 @@
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson.rs
+@@ -23,11 +23,13 @@
+ struct Published {
+     high_water: u64,
+     scene: Option<DesktopLessonStamp>,
++    scene_epoch: u64,
+     next_flow: u64,
+ }
+ pub(super) struct DesktopLessonControl {
+     published: Mutex<Published>,
+     active: AtomicU64,
++    epoch: AtomicU64,
+     clock: Arc<dyn Clock + Send + Sync>,
+     monotonic: Arc<dyn MonotonicClock + Send + Sync>,
+ }
+@@ -39,6 +41,7 @@
+         Self {
+             published: Mutex::new(Published::default()),
+             active: AtomicU64::new(0),
++            epoch: AtomicU64::new(0),
+             clock,
+             monotonic,
+         }
+@@ -47,6 +50,7 @@
+ 
+ struct FlowState {
+     id: u64,
++    epoch: u64,
+     stamp: DesktopLessonStamp,
+     expires_at: Instant,
+     last_tick: AtomicU64,
+@@ -108,6 +112,7 @@
+             || control.closed.load(Ordering::Acquire)
+             || control.recovering.load(Ordering::Acquire)
+             || control.desktop_lesson.active.load(Ordering::Acquire) != self.state.id
++            || control.desktop_lesson.epoch.load(Ordering::Acquire) != self.state.epoch
+             || !healthy(control.health.status().health)
+         {
+             return false;
+@@ -150,6 +155,7 @@
+         // not by the entry's old global revision (our own COMMIT changes it).
+         !self.state.cancelled.load(Ordering::Acquire)
+             && control.desktop_lesson.active.load(Ordering::Acquire) == self.state.id
++            && control.desktop_lesson.epoch.load(Ordering::Acquire) == self.state.epoch
+             && !control.closed.load(Ordering::Acquire)
+             && !control.recovering.load(Ordering::Acquire)
+             && healthy(control.health.status().health)
+@@ -196,21 +202,48 @@
+         let Ok(mut published) = self.0.desktop_lesson.published.lock() else {
+             return false;
+         };
++        let epoch = self.0.desktop_lesson.epoch.load(Ordering::Acquire);
+         if stamp.generation.get() < published.high_water
+             || (stamp.generation.get() == published.high_water
+-                && published.scene.as_ref().is_none_or(|old| old != &stamp))
++                && (published.scene_epoch != epoch
++                    || published.scene.as_ref().is_none_or(|old| old != &stamp)))
+             || !self.desktop_entry_current(&stamp)
++            || self.0.desktop_lesson.epoch.load(Ordering::Acquire) != epoch
+         {
+             return false;
+         }
+         published.high_water = stamp.generation.get();
+         published.scene = Some(stamp);
++        published.scene_epoch = epoch;
+         true
+     }
+     /// Hiding the desktop removes only future entry eligibility. The already
+     /// minted chooser remains usable until its owner explicitly cancels/drops.
+     pub fn clear_desktop_lesson_scene(&self) {
+         if let Ok(mut published) = self.0.desktop_lesson.published.lock() {
++            published.scene = None;
++        }
++    }
++    /// Immediate OS-session/power/shutdown revocation. Unlike account locking,
++    /// this invalidates both the active flow and every old render acknowledgement.
++    /// The native control callback must call this before returning; it never
++    /// waits for Backend, the writer, or even the short scene-metadata mutex.
++    pub fn cancel_desktop_lesson_flow(&self) {
++        if self
++            .0
++            .desktop_lesson
++            .epoch
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |epoch| {
++                epoch.checked_add(1)
++            })
++            .is_err()
++        {
++            self.0.closed.store(true, Ordering::Release);
++        }
++        self.0.desktop_lesson.active.store(0, Ordering::Release);
++        // Epoch mismatch already revokes an old scene even when a concurrent
++        // mint/render owns this mutex. Clearing the optional value is only tidy.
++        if let Ok(mut published) = self.0.desktop_lesson.published.try_lock() {
+             published.scene = None;
+         }
+     }
+@@ -227,7 +260,11 @@
+             .published
+             .lock()
+             .map_err(|_| cancelled())?;
+-        if published.scene.as_ref() != Some(stamp) || !self.desktop_entry_current(stamp) {
++        let epoch = self.0.desktop_lesson.epoch.load(Ordering::Acquire);
++        if published.scene.as_ref() != Some(stamp)
++            || published.scene_epoch != epoch
++            || !self.desktop_entry_current(stamp)
++        {
+             return Err(cancelled());
+         }
+         let now = self.0.desktop_lesson.clock.now();
+@@ -269,6 +306,7 @@
+             guard: DesktopLessonGuard {
+                 state: Arc::new(FlowState {
+                     id,
++                    epoch,
+                     stamp: stamp.clone(),
+                     expires_at,
+                     last_tick: AtomicU64::new(tick),
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
+@@ -131,6 +131,46 @@
+     }
+ 
+     #[test]
++    fn public_desktop_os_callback_revokes_active_flow_and_old_scene_before_main_pump_cleanup() {
++        let mut fixture = Fixture::new();
++        let control = fixture.service.0.session_control();
++        let original = fixture.stamp(1);
++        assert!(control.publish_desktop_lesson_scene(original.clone()));
++        let owner = control.begin_desktop_lesson_flow(&original).unwrap();
++        let guard = owner.guard();
++        let before = fixture.service.0.global_revision().unwrap();
++        control.cancel_desktop_lesson_flow();
++        // No owner.cancel/main-pump event or worker-ticket return was needed.
++        assert!(!guard.is_current());
++        cancelled(
++            fixture
++                .service
++                .0
++                .change_desktop_lesson(&guard, LessonAction::Restore),
++        );
++        cancelled(control.begin_desktop_lesson_flow(&original));
++        assert!(!control.publish_desktop_lesson_scene(original));
++        assert_eq!(fixture.service.0.global_revision().unwrap(), before);
++        assert!(control.health_gate().check_sensitive().is_ok());
++        let next = fixture.flow(2);
++        drop(owner);
++        assert!(next.guard().is_current());
++    }
++
++    #[test]
++    fn public_desktop_os_callback_also_invalidates_unconsumed_published_entry() {
++        let fixture = Fixture::new();
++        let control = fixture.service.0.session_control();
++        let original = fixture.stamp(1);
++        assert!(control.publish_desktop_lesson_scene(original.clone()));
++        control.cancel_desktop_lesson_flow();
++        cancelled(control.begin_desktop_lesson_flow(&original));
++        assert!(!control.publish_desktop_lesson_scene(original));
++        let next = fixture.flow(2);
++        assert!(fixture.service.0.read_desktop_lesson(&next.guard()).is_ok());
++    }
++
++    #[test]
+     fn public_desktop_entry_rejects_stale_publication_and_uses_earlier_original_scene_end() {
+         let fixture = Fixture::new();
+         let control = fixture.service.0.session_control();
+@@ -312,7 +352,7 @@
+     }
+ 
+     #[test]
+-    fn public_desktop_precommit_cancel_rolls_back_without_fault_and_never_renews_capability() {
++    fn public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability() {
+         let mut fixture = Fixture::new();
+         let owner = Arc::new(fixture.flow(1));
+         let guard = owner.guard();
+@@ -320,13 +360,12 @@
+         let target = source.context.current.unwrap().base;
+         let before = fixture.service.0.global_revision().unwrap();
+         let control = fixture.service.0.session_control();
+-        let cancel_owner = owner.clone();
+         {
+             let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
+                 if control.health_gate().status().health
+                     == fc_runtime::health::Health::AuthorityUpdating
+                 {
+-                    cancel_owner.cancel();
++                    control.cancel_desktop_lesson_flow();
+                 }
+                 true
+             }));

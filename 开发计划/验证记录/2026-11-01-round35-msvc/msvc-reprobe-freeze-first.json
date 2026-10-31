@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_PURE_SELFTEST_PASS",
+  "utc": "2026-10-31T17:47:39.595409+00:00",
+  "prepared": {
+    "schemaVersion": 1,
+    "status": "PREPARED_NOT_SELFTESTED",
+    "utc": "2026-10-31T17:47:26.145298+00:00",
+    "root": "/tmp/fc-round35-msvc-reprobe",
+    "sourceProvenance": [
+      {
+        "name": "windows-tls-business-probe.py",
+        "sourcePath": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-tls-business-probe.py",
+        "sourceSha256": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+        "sourceBytes": 87838,
+        "copyPath": "/tmp/fc-round35-msvc-reprobe/windows-tls-business-probe.py"
+      },
+      {
+        "name": "windows-tls-probe.py",
+        "sourcePath": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-tls-probe.py",
+        "sourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+        "sourceBytes": 50969,
+        "copyPath": "/tmp/fc-round35-msvc-reprobe/windows-tls-probe.py"
+      },
+      {
+        "name": "windows-probe.py",
+        "sourcePath": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/scripts/windows-probe.py",
+        "sourceSha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af",
+        "sourceBytes": 50368,
+        "copyPath": "/tmp/fc-round35-msvc-reprobe/windows-probe.py"
+      }
+    ],
+    "featureHelperSource": {
+      "path": "/tmp/fc-round35-visuals-worktree/scripts/windows-tls-business-probe.py",
+      "sha256": "0757d52fc926944c040d368900243afd18ad9ac5286313b857a50ad7fa638ba1",
+      "function": "four_original_bodies_admitted"
+    },
+    "businessAfter": {
+      "sha256": "f5811201cd3c038c771acdaa2ef4f4c912230cffaa456c26311c2b08f25d19a2",
+      "bytes": 88477
+    },
+    "patch": {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-causal-only.patch",
+      "sha256": "0b6d6340b8dc0a2cc34f2de05fa067f67adbbb3393a7234689bf25c56562a549"
+    },
+    "scope": "Only causal transfer anchor/helper/predicate copied to unchanged-main runner; original pure self-test unchanged; no visual flags/endpoints; no budgets/ownership changes",
+    "mainOrFeatureModified": false,
+    "remote": "NOT_RUN"
+  },
+  "selfTest": {
+    "status": "PURE_LOCAL_CHECKS_PASS",
+    "checks": [
+      "synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)",
+      "fragmented/exact-CL response framing",
+      "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+      "204/304 omit CL/TE and count/hash zero wire body; CL0/body/duplicate-header/TE rejected",
+      "HEAD 200/403/404/405 require omitted CL/TE and zero wire body; ordinary GET remains strict",
+      "200 still requires canonical unique CL, JSON64KiB/static5MiB/download50MiB caps unchanged",
+      "binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected",
+      "ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected",
+      "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+      "120000-byte request fragmentation and head/body coalescing",
+      "READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits"
+    ],
+    "tls": "NOT_RUN",
+    "windows": "NOT_RUN",
+    "business": "NOT_RUN"
+  },
+  "scope": "Original11 pure checks only; new causal helper/predicate is identical to separately validated featurefix. Actual MSVC TLS reprobe not run by this agent.",
+  "evidence": [
+    {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-business-before.py",
+      "sha256": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+      "bytes": 87838
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-causal-only.patch",
+      "sha256": "0b6d6340b8dc0a2cc34f2de05fa067f67adbbb3393a7234689bf25c56562a549",
+      "bytes": 2697
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-prepared.json",
+      "sha256": "0c8109339c8fcf3731f880c6e524c33196f24ee0a6021166fb49faa87bd63302",
+      "bytes": 2061
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-pure-selftest-first.stdout.log",
+      "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83",
+      "bytes": 1147
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-evidence/msvc-reprobe-pure-selftest-first.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "files": [
+    {
+      "path": "/tmp/fc-round35-msvc-reprobe/windows-probe.py",
+      "sha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af",
+      "bytes": 50368
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-reprobe/windows-tls-business-probe.py",
+      "sha256": "f5811201cd3c038c771acdaa2ef4f4c912230cffaa456c26311c2b08f25d19a2",
+      "bytes": 88477
+    },
+    {
+      "path": "/tmp/fc-round35-msvc-reprobe/windows-tls-probe.py",
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+      "bytes": 50969
+    }
+  ],
+  "mainOrFeatureModified": false,
+  "remoteCargoNpmGit": "NOT_RUN",
+  "commandTemplate": [
+    "python3",
+    "-B",
+    "/tmp/fc-round35-msvc-reprobe/windows-tls-business-probe.py",
+    "--exe",
+    "<same original83fe847 MSVC EXE>",
+    "--web-bundle",
+    "<same original83fe847 developmentZIP>",
+    "--report",
+    "/tmp/fc-round35-msvc-evidence/windows-modern-continuous-after-causal-fix.json",
+    "--continuous-accept"
+  ]
+}

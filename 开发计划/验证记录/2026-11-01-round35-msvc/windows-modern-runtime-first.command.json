@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "/tmp/fc-round35-visuals-worktree/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round35-msvc-programs/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round35-msvc-evidence/metadata.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--report",
+    "/tmp/fc-round35-msvc-evidence/windows-modern-runtime-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T17:39:33.017446+00:00",
+  "stdout": "/tmp/fc-round35-msvc-evidence/windows-modern-runtime-first.stdout.log",
+  "stderr": "/tmp/fc-round35-msvc-evidence/windows-modern-runtime-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 142.3231018378865,
+  "completedUtc": "2026-10-31T17:41:55.340798+00:00",
+  "stdoutBytes": 947,
+  "stdoutSha256": "9a5c73439cece35798226e5168408bbb44222afcbb6fdac7f2bd2325c53d4af9",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

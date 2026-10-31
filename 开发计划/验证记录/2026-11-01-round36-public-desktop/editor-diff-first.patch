@@ -1,0 +1,785 @@
+diff --git a/crates/fc-bootstrap/src/application.rs b/crates/fc-bootstrap/src/application.rs
+index 7f00acd..01a7364 100644
+--- a/crates/fc-bootstrap/src/application.rs
++++ b/crates/fc-bootstrap/src/application.rs
+@@ -76,6 +76,11 @@ pub fn materials_probe() -> std::result::Result<(), String> {
+ }
+ mod lesson_editor;
+ mod materials_editor;
++mod public_desktop_probe;
++mod public_lesson_editor;
++pub fn public_desktop_probe() -> std::result::Result<(), String> {
++    public_desktop_probe::run()
++}
+ mod schedule_editor;
+ mod schedule_operations_probe;
+ mod voice_controller;
+@@ -449,6 +454,8 @@ enum Outcome {
+     CalendarMaintained {
+         attempted: bool,
+     },
++    PublicLessonLoaded(fc_ports::DesktopLessonSource),
++    PublicLessonSaved(fc_ports::DesktopLessonSource),
+     LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
+     LessonSaved(fc_domain::lesson_context::LessonContextSnapshot),
+     DisplayLoaded(fc_ports::SubjectVisualState, Arc<IdentityState>),
+@@ -525,6 +532,15 @@ enum Work {
+         Box<fc_bootstrap::autostart::Job>,
+         Option<fc_windows::system::RunScope>,
+     ),
++    LoadPublicLesson(
++        Arc<Mutex<Backend>>,
++        fc_bootstrap::backend::DesktopLessonGuard,
++    ),
++    ChangePublicLesson(
++        Arc<Mutex<Backend>>,
++        fc_bootstrap::backend::DesktopLessonGuard,
++        fc_domain::lesson_context::LessonAction,
++    ),
+     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
+     ChangeLesson(
+         Arc<Mutex<Backend>>,
+@@ -595,6 +611,8 @@ impl Task for Work {
+             | Self::Shutdown(_)
+             | Self::LoadAccounts(_, _)
+             | Self::LoadSchedule(_, _)
++            | Self::LoadPublicLesson(_, _)
++            | Self::ChangePublicLesson(..)
+             | Self::LoadLesson(_, _)
+             | Self::ChangeLesson(_, _, _, _, _)
+             | Self::LoadDisplay(_, _)
+@@ -882,6 +900,20 @@ impl Task for Work {
+                     .read_schedule(lease)?;
+                 Ok(Outcome::ScheduleLoaded(document))
+             }
++            Self::LoadPublicLesson(backend, guard) => {
++                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
++                let scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++                Ok(Outcome::PublicLessonLoaded(
++                    scoped.read_desktop_lesson(&guard)?,
++                ))
++            }
++            Self::ChangePublicLesson(backend, guard, action) => {
++                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
++                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++                Ok(Outcome::PublicLessonSaved(
++                    scoped.change_desktop_lesson(&guard, action)?,
++                ))
++            }
+             Self::LoadLesson(backend, lease) => {
+                 let snapshot = backend
+                     .lock()
+@@ -1231,6 +1263,7 @@ struct Pending {
+     ticket: JobTicket<Result<Outcome>>,
+     generation: u64,
+     self_revokes: bool,
++    public_lesson: bool,
+ }
+ struct App {
+     window: Window,
+@@ -1279,6 +1312,8 @@ struct App {
+     material_editor: Option<materials_editor::Editor>,
+     copies_loaded_sequence: u64,
+     lesson_editor: Option<lesson_editor::Editor>,
++    public_lesson_editor: Option<public_lesson_editor::Editor>,
++    public_lesson_flow: Option<fc_bootstrap::backend::DesktopLessonFlow>,
+     web_service: Option<WebService>,
+     web_editor: Option<web_editor::Editor>,
+     voice_editor: Option<voice_editor::Editor>,
+@@ -1373,6 +1408,24 @@ impl App {
+                 return view;
+             }
+         }
++        if self.public_lesson_flow.is_some() {
++            if let Some(editor) = &self.public_lesson_editor {
++                return editor.view(&status, self.pending.is_some() || self.stopping);
++            }
++            return View {
++                title: "正在读取本节课程".into(),
++                description: "本节临时换课仅影响当前这一节。".into(),
++                status,
++                fields: vec![],
++                actions: vec![Action {
++                    id: public_lesson_editor::CLOSE,
++                    label: "关闭".into(),
++                    enabled: true,
++                }],
++                busy: self.pending.is_some() || self.stopping,
++                grid: None,
++            };
++        }
+         if self.screen == Screen::Lesson {
+             if let Some(editor) = &self.lesson_editor {
+                 return editor.view(
+@@ -1796,6 +1849,16 @@ impl App {
+         Ok(())
+     }
+     fn lock(&mut self) {
++        // Account locking cannot manufacture an authentication requirement for
++        // the independent public desktop chooser. OS/foreground events close
++        // that capability explicitly before calling this management lock.
++        if self.public_lesson_flow.is_some() && !self.stopping {
++            if let Some(control) = &self.control {
++                control.lock_local();
++            }
++            self.lease = None;
++            return;
++        }
+         if self.backup.irreversible()
+             || self
+                 .control
+@@ -1873,6 +1936,7 @@ impl App {
+         self.status.clear();
+     }
+     fn begin_shutdown(&mut self) {
++        self.close_public_lesson();
+         if self
+             .control
+             .as_ref()
+@@ -1978,6 +2042,10 @@ impl App {
+         // current local lease before their completion reaches the window pump.
+         // WTS/explicit lock still wins immediately; the heartbeat must allow this
+         // particular completion to be consumed rather than cancel its own success.
++        let public_lesson = matches!(
++            &work,
++            Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
++        );
+         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
+             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
+         match self
+@@ -1990,6 +2058,7 @@ impl App {
+                     ticket,
+                     generation: self.generation,
+                     self_revokes,
++                    public_lesson,
+                 });
+                 self.status = "正在处理，请稍候。".into();
+             }
+@@ -2016,6 +2085,29 @@ impl App {
+                 _ => Ok(()),
+             };
+         }
++        if self.public_lesson_flow.is_some() {
++            return match event {
++                Event::Submit(action, data) => self.public_lesson_event(action, data),
++                Event::Close => {
++                    self.close_public_lesson();
++                    self.render()
++                }
++                Event::Input => {
++                    if self.pending.is_none() {
++                        if let (Some(editor), Ok(data)) = (
++                            &mut self.public_lesson_editor,
++                            self.window.draft_nonsecret(),
++                        ) {
++                            if editor.input(data) {
++                                self.render()?;
++                            }
++                        }
++                    }
++                    Ok(())
++                }
++                _ => Ok(()),
++            };
++        }
+         match event {
+             Event::Input => {
+                 self.last_input = Instant::now();
+@@ -3051,6 +3143,114 @@ impl App {
+         }
+         Ok(())
+     }
++    fn close_public_lesson(&mut self) {
++        if let Some(flow) = self.public_lesson_flow.take() {
++            flow.cancel();
++            self.generation = self.generation.saturating_add(1);
++            if let Some(pending) = &self.pending {
++                pending.ticket.cancel();
++            }
++            self.public_lesson_editor = None;
++            self.lesson_flow_active = false;
++            self.window.hide();
++            self.screen = if self.state.installation.is_none() {
++                Screen::Setup
++            } else if self.lease.is_some() {
++                Screen::Home
++            } else {
++                Screen::Login
++            };
++            self.status.clear();
++            self.desktop.hide();
++        }
++    }
++    fn open_public_lesson(
++        &mut self,
++        stamp: fc_bootstrap::backend::DesktopLessonStamp,
++    ) -> std::result::Result<(), String> {
++        if self.pending.is_some() || self.stopping || self.public_lesson_flow.is_some() {
++            return Ok(());
++        }
++        let Some(flow) = self
++            .control
++            .as_ref()
++            .and_then(|c| c.begin_desktop_lesson_flow(&stamp).ok())
++        else {
++            self.desktop_notice = "本节课程已变化，请重新点击桌面按钮。".into();
++            return Ok(());
++        };
++        let guard = flow.guard();
++        self.public_lesson_flow = Some(flow);
++        self.public_lesson_editor = None;
++        self.lesson_flow_active = true;
++        self.screen = Screen::Lesson;
++        self.status.clear();
++        if !self.offscreen_probe {
++            self.window.show(true);
++        }
++        if let Some(backend) = &self.backend {
++            self.submit(Work::LoadPublicLesson(backend.clone(), guard))?;
++        }
++        Ok(())
++    }
++    fn public_lesson_event(
++        &mut self,
++        action: ActionId,
++        data: FormData,
++    ) -> std::result::Result<(), String> {
++        // This branch precedes every authenticated navigation/LOCK handler.
++        if action == public_lesson_editor::CLOSE {
++            if let Some(editor) = &mut self.public_lesson_editor {
++                if let Err(message) = editor.handle(action, data) {
++                    self.status = message;
++                    return self.render();
++                }
++            } else if !data.is_empty() {
++                return Ok(());
++            }
++            self.close_public_lesson();
++            return self.render();
++        }
++        if self.pending.is_some() || self.stopping {
++            return Ok(());
++        }
++        let Some(guard) = self.public_lesson_flow.as_ref().map(|f| f.guard()) else {
++            return Ok(());
++        };
++        if !guard.is_current() {
++            self.close_public_lesson();
++            return self.render();
++        }
++        let Some(editor) = &mut self.public_lesson_editor else {
++            return Ok(());
++        };
++        match editor.handle(action, data) {
++            Ok(public_lesson_editor::Command::Stay) => {
++                self.status.clear();
++                self.render()
++            }
++            Ok(public_lesson_editor::Command::Close) => {
++                self.close_public_lesson();
++                self.render()
++            }
++            Ok(public_lesson_editor::Command::Reload) => {
++                if let Some(backend) = &self.backend {
++                    self.submit(Work::LoadPublicLesson(backend.clone(), guard))?;
++                }
++                Ok(())
++            }
++            Ok(public_lesson_editor::Command::Apply(action)) => {
++                if let Some(backend) = &self.backend {
++                    self.submit(Work::ChangePublicLesson(backend.clone(), guard, action))?;
++                }
++                Ok(())
++            }
++            Err(message) => {
++                self.status = message;
++                self.render()
++            }
++        }
++    }
+     fn open_lesson_editor(&mut self) -> std::result::Result<(), String> {
+         if self.pending.is_some() || self.stopping {
+             return Ok(());
+@@ -3545,6 +3745,14 @@ impl App {
+             self.terminate_required = true;
+             self.begin_shutdown();
+         }
++        if self
++            .public_lesson_flow
++            .as_ref()
++            .is_some_and(|f| !f.guard().is_current())
++            && self.pending.is_none()
++        {
++            self.close_public_lesson();
++        }
+         self.poll_backup()?;
+         if self.backup.irreversible() {
+             return Ok(());
+@@ -3783,11 +3991,13 @@ impl App {
+                     self.view().title
+                 );
+             }
+-            let generation = self
+-                .pending
+-                .take()
+-                .map(|p| p.generation)
+-                .unwrap_or(self.generation);
++            let completed_pending = self.pending.take();
++            let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
++            let generation = completed_pending.map_or(self.generation, |p| p.generation);
++            if generation != self.generation && public_lesson {
++                self.render()?;
++                return Ok(());
++            }
+             if generation != self.generation {
+                 if let Ok(Outcome::MaterialLaunch(launch)) = &outcome {
+                     self.cleanup_paths.push_back(launch.path.path().to_owned());
+@@ -3957,6 +4167,22 @@ impl App {
+                         self.status.clear();
+                     }
+                 }
++                Ok(Outcome::PublicLessonLoaded(source)) => {
++                    if self
++                        .public_lesson_flow
++                        .as_ref()
++                        .is_some_and(|f| f.guard().is_current())
++                    {
++                        self.public_lesson_editor = Some(public_lesson_editor::Editor::new(source));
++                        self.status.clear();
++                    } else {
++                        self.close_public_lesson();
++                    }
++                }
++                Ok(Outcome::PublicLessonSaved(_source)) => {
++                    // One successful action consumes the original scene flow.
++                    self.close_public_lesson();
++                }
+                 Ok(Outcome::LessonLoaded(snapshot)) => {
+                     self.lesson_editor = Some(lesson_editor::Editor::new(snapshot));
+                     self.screen = Screen::Lesson;
+@@ -4045,6 +4271,17 @@ impl App {
+                     | Outcome::MaterialCleaned,
+                 ) => return Err("后台结果类型不匹配".into()),
+                 Err(error) => {
++                    if self.public_lesson_flow.is_some() {
++                        let fatal_error = fatal(&error);
++                        self.close_public_lesson();
++                        if fatal_error {
++                            if let Some(control) = &self.control {
++                                control.fault();
++                            }
++                            self.begin_shutdown();
++                        }
++                        return self.render();
++                    }
+                     if self.screen == Screen::Voice {
+                         if let Some(editor) = &mut self.voice_editor {
+                             editor.invalidate();
+@@ -4181,6 +4418,9 @@ fn run_at_inner(
+             || hints.contains(HostHints::SHUTDOWN)
+         {
+             if let Some(control) = control_slot.get() {
++                // Immediate negative capability fence also runs inside native
++                // modal pumps; the UI still owns and drains the old job ticket.
++                control.cancel_desktop_lesson_flow();
+                 control.lock_local();
+             }
+         }
+@@ -4233,6 +4473,7 @@ fn run_at_inner(
+         }
+         if hints.contains(HostHints::SESSION_LOCKED) || hints.contains(HostHints::SESSION_CHANGED) {
+             app.desktop.hide();
++            app.close_public_lesson();
+             app.lock();
+             app.window.hide();
+             let _ = app.render();
+@@ -4242,6 +4483,7 @@ fn run_at_inner(
+             && hints.contains(HostHints::FOREGROUND_CHANGED)
+             && !app.window.lesson_foreground_allowed()
+         {
++            app.close_public_lesson();
+             app.lock();
+             app.window.hide();
+             let _ = app.render();
+@@ -4296,8 +4538,8 @@ fn run_at_inner(
+             if let Some(notice) = app.desktop.take_notice() {
+                 app.desktop_notice = notice;
+             }
+-            if app.desktop.take_lesson_event() {
+-                if let Err(error) = app.open_lesson_editor() {
++            if let Some(stamp) = app.desktop.take_lesson_event() {
++                if let Err(error) = app.open_public_lesson(stamp) {
+                     probe_error = Some(error);
+                     app.begin_shutdown();
+                 }
+@@ -4506,6 +4748,8 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
+         calendar_job: None,
+         next_calendar_maintenance: Instant::now() + Duration::from_secs(30),
+         lesson_editor: None,
++        public_lesson_editor: None,
++        public_lesson_flow: None,
+         web_service: None,
+         web_editor: None,
+         voice_editor: None,
+diff --git a/crates/fc-bootstrap/src/application/desktop_controller.rs b/crates/fc-bootstrap/src/application/desktop_controller.rs
+index c4a351d..4e5a8c3 100644
+--- a/crates/fc-bootstrap/src/application/desktop_controller.rs
++++ b/crates/fc-bootstrap/src/application/desktop_controller.rs
+@@ -1,7 +1,7 @@
+ //! UI-thread resident desktop orchestration. SQLite runs only through the shared
+ //! Work pool; the UI never takes Backend's mutex or refreshes a manager lease.
+ use super::{fatal, profile_content_flow, Outcome, Work};
+-use fc_bootstrap::backend::{Backend, SessionControl};
++use fc_bootstrap::backend::{Backend, DesktopLessonStamp, SessionControl};
+ use fc_bootstrap::profile_content_cache::TextFrame;
+ use fc_domain::{
+     desktop::{ComponentKind, DesktopFacts},
+@@ -324,7 +324,7 @@ pub(super) struct Controller {
+     requested: Option<Request>,
+     control: Option<SessionControl>,
+     material_events: Vec<DesktopEvent>,
+-    lesson_event: bool,
++    lesson_event: Option<DesktopLessonStamp>,
+     refresh_at: Option<LocalDateTime>,
+     history: BatchHistory,
+     next_fetch: Instant,
+@@ -467,7 +467,7 @@ impl Controller {
+             requested: None,
+             control: None,
+             material_events: Vec::new(),
+-            lesson_event: false,
++            lesson_event: None,
+             refresh_at: None,
+             history: BatchHistory::default(),
+             next_fetch: Instant::now(),
+@@ -525,9 +525,10 @@ impl Controller {
+         self.needs_scene = true;
+         if let Some(control) = &self.control {
+             control.clear_material_scene();
++            control.clear_desktop_lesson_scene();
+         }
+         self.material_events.clear();
+-        self.lesson_event = false;
++        self.lesson_event = None;
+         self.renderer.hide();
+         self.probe_presented = false;
+     }
+@@ -557,11 +558,22 @@ impl Controller {
+     pub(super) fn probe_scene(&self) -> Option<&SceneSnapshot> {
+         self.scene.as_ref()
+     }
++    pub(super) fn probe_lesson_stamp(&self) -> Option<DesktopLessonStamp> {
++        self.probe.then(|| self.lesson_stamp()).flatten()
++    }
++    pub(super) fn probe_lesson_click(&self) -> Result<(), String> {
++        if !self.probe || !self.probe_presented {
++            return Err("Hidden desktop lesson probe is not ready".into());
++        }
++        self.renderer
++            .probe_lesson_control()
++            .map_err(|_| "Hidden native lesson button unavailable".into())
++    }
+     pub(super) fn probe_metrics(&self) -> DesktopMetrics {
+         self.renderer.diagnostics()
+     }
+-    pub(super) fn take_lesson_event(&mut self) -> bool {
+-        std::mem::take(&mut self.lesson_event)
++    pub(super) fn take_lesson_event(&mut self) -> Option<DesktopLessonStamp> {
++        self.lesson_event.take()
+     }
+     pub(super) fn take_material_events(&mut self) -> Vec<DesktopEvent> {
+         std::mem::take(&mut self.material_events)
+@@ -575,11 +587,46 @@ impl Controller {
+         self.notice.failed(message);
+         self.next_render = Instant::now() + RETRY;
+     }
++    fn lesson_stamp(&self) -> Option<DesktopLessonStamp> {
++        let scene = self.scene.as_ref()?;
++        let facts = self.facts.as_ref()?;
++        let current = facts.lesson_context.current.as_ref()?;
++        if scene.source_revision != facts.global_revision
++            || !scene.lesson_control.as_ref().is_some_and(|c| c.can_change)
++        {
++            return None;
++        }
++        Some(DesktopLessonStamp {
++            generation: scene.generation,
++            source_revision: scene.source_revision,
++            captured_at: scene.captured_at,
++            valid_until: scene
++                .valid_until
++                .unwrap_or(current.effective_until)
++                .min(current.effective_until),
++            binding: fc_ports::DesktopLessonBinding {
++                expected_revision: facts.lesson_context.revision,
++                expected_identity_revision: facts.identity.revision,
++                expected_schedule_revision: facts.schedule.revision,
++                lesson: current.key.clone(),
++            },
++        })
++    }
+     fn rendered(&mut self, outcome: PresentOutcome) {
+         let visible = matches!(
+             outcome,
+             PresentOutcome::Published | PresentOutcome::Unchanged
+         ) || self.probe && outcome == PresentOutcome::Offscreen;
++        if let Some(control) = &self.control {
++            if !visible
++                || !self
++                    .lesson_stamp()
++                    .is_some_and(|stamp| control.publish_desktop_lesson_scene(stamp))
++            {
++                control.clear_desktop_lesson_scene();
++                self.lesson_event = None;
++            }
++        }
+         if let Some(control) = &self.control {
+             let published = visible
+                 && self.scene.as_ref().is_some_and(|scene| {
+@@ -1040,7 +1087,7 @@ impl Controller {
+                 // transaction; hide native input without cancelling that writer.
+                 self.renderer.hide();
+                 self.material_events.clear();
+-                self.lesson_event = false;
++                self.lesson_event = None;
+                 self.probe_presented = false;
+                 return Ok(());
+             }
+@@ -1178,8 +1225,12 @@ impl Controller {
+         };
+         let outcome = match self.renderer.present(scene, now, &guard) {
+             Ok(outcome) => outcome,
+-            Err(_) => {
+-                self.render_unavailable("桌面图形发布暂不可用，已隐藏并稍后重试。");
++            Err(error) => {
++                if fc_windows::desktop::is_read_only_capacity_error(&error) {
++                    self.render_unavailable("课表、时钟或日期内容无法在当前尺寸完整显示；请由管理员调整布局或显示区域。桌面只读内容不提供点击翻页。");
++                } else {
++                    self.render_unavailable("桌面图形发布暂不可用，已隐藏并稍后重试。");
++                }
+                 return Ok(());
+             }
+         };
+@@ -1213,7 +1264,7 @@ impl Controller {
+                         && scene.valid_at(now)
+                         && scene.lesson_control.as_ref().is_some_and(|c| c.can_change)
+                     {
+-                        self.lesson_event = true;
++                        self.lesson_event = self.lesson_stamp();
+                     }
+                 }
+                 DesktopEvent::MaterialOpen { .. } => {
+diff --git a/crates/fc-bootstrap/src/main.rs b/crates/fc-bootstrap/src/main.rs
+index 3bf403c..bd2945d 100644
+--- a/crates/fc-bootstrap/src/main.rs
++++ b/crates/fc-bootstrap/src/main.rs
+@@ -128,6 +128,16 @@ fn run() -> Result<(), String> {
+                 Err("native recovery workflow probe requires Windows".into())
+             }
+         }
++        [flag] if flag == "--public-desktop-probe" => {
++            #[cfg(windows)]
++            {
++                application::public_desktop_probe()
++            }
++            #[cfg(not(windows))]
++            {
++                Err("native public desktop probe requires Windows".into())
++            }
++        }
+         [flag] if flag == "--subject-visuals-probe" => {
+             #[cfg(windows)]
+             {
+diff --git a/crates/fc-windows/src/desktop.rs b/crates/fc-windows/src/desktop.rs
+index af2f524..c056774 100644
+--- a/crates/fc-windows/src/desktop.rs
++++ b/crates/fc-windows/src/desktop.rs
+@@ -715,7 +715,7 @@ impl DesktopRenderer {
+         let Some(c) = self.cards.iter_mut().find(|c| c.source.kind == kind) else {
+             return Ok(false);
+         };
+-        if c.body.pages.len() < 2 {
++        if read_only_classroom(&c.source) || c.body.pages.len() < 2 {
+             return Ok(false);
+         };
+         c.page = (c.page + 1) % c.body.pages.len();
+@@ -858,6 +858,8 @@ impl DesktopRenderer {
+                         width: 144.,
+                         height: 40.,
+                     })
++                } else if read_only_classroom(card) {
++                    None
+                 } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
+                     || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
+                 {
+@@ -1317,12 +1319,31 @@ fn route_nonpage(generation: SceneGeneration, action: InputAction, output: &mut
+         InputAction::Page(_) | InputAction::TreePage { .. } => {}
+     }
+ }
++/// Passive classroom facts never expose paging, settings, or other input.
++/// The separate temporary-lesson control intentionally uses Schedule styling.
++fn read_only_classroom(card: &SceneCard) -> bool {
++    !matches!(card.content, CardContent::LessonControl { .. })
++        && matches!(
++            card.kind,
++            ComponentKind::Clock
++                | ComponentKind::Date
++                | ComponentKind::Schedule
++                | ComponentKind::DateCountdown
++                | ComponentKind::Recess
++        )
++}
++pub fn is_read_only_capacity_error(error: &Error) -> bool {
++    error.code() == E_BOUNDS
++}
+ fn route_action(
+     card: &mut Card,
+     generation: SceneGeneration,
+     action: InputAction,
+     output: &mut Vec<DesktopEvent>,
+ ) -> Result<()> {
++    if read_only_classroom(&card.source) {
++        return Ok(());
++    }
+     if let InputAction::ImagePage { identity, page } = action {
+         if content::valid_page(&card.source, identity, page) {
+             route_nonpage(
+@@ -1663,6 +1684,20 @@ fn prepare_content_with_note(
+         }
+         _ => c.visible_leaf_limit as usize,
+     };
++    if read_only_classroom(c)
++        && (total > viewport + 0.1
++            || blocks
++                .iter()
++                .filter_map(|b| b.leaf)
++                .collect::<std::collections::HashSet<_>>()
++                .len()
++                > limit)
++    {
++        return Err(Error::new(
++            E_BOUNDS,
++            "Read-only classroom content does not fit its complete display area",
++        ));
++    }
+     let mut starts = Vec::new();
+     for b in &blocks {
+         starts.push(b.top);
+@@ -1716,6 +1751,12 @@ fn prepare_content_with_note(
+         }
+     }
+ 
++    if read_only_classroom(c) && pages.len() > 1 {
++        return Err(Error::new(
++            E_BOUNDS,
++            "Read-only classroom content does not fit its complete display area",
++        ));
++    }
+     Ok(ContentLayout {
+         top_inset,
+         bottom_inset: spec.bottom_inset,
+@@ -2186,7 +2227,10 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
+     let mut targets = Vec::new();
+     let control = matches!(c.source.content, CardContent::LessonControl { .. });
+     let image = matches!(c.source.content, CardContent::Image(_));
+-    let pagination = !control && !image && (!material || c.body.pages.len() > 1);
++    let pagination = !read_only_classroom(&c.source)
++        && !control
++        && !image
++        && (!material || c.body.pages.len() > 1);
+     let origin = if material {
+         (c.source.rect.width - 86., 8.)
+     } else {
+@@ -3184,3 +3228,7 @@ mod tests {
+         assert_eq!(renderer.last_metrics().visible_windows, 0);
+     }
+ }
++
++#[cfg(test)]
++#[path = "desktop/public_inputs_tests.rs"]
++mod public_inputs_tests;
+diff --git a/crates/fc-windows/src/desktop/card_body_tests.rs b/crates/fc-windows/src/desktop/card_body_tests.rs
+index 2c81c50..063b9ec 100644
+--- a/crates/fc-windows/src/desktop/card_body_tests.rs
++++ b/crates/fc-windows/src/desktop/card_body_tests.rs
+@@ -484,8 +484,10 @@ fn shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_exis
+     };
+     scene.cards[0].kind = ComponentKind::Schedule;
+     scene.cards[0].content = courses(128);
+-    let full = prepare_content(&graphics, &scene.cards[0], false).unwrap();
+-    assert_eq!(full.blocks.len(), 128);
++    let error = prepare_content(&graphics, &scene.cards[0], false)
++        .err()
++        .expect("long passive timetable must report capacity");
++    assert!(is_read_only_capacity_error(&error));
+     scene.cards[0].content = courses(129);
+     assert!(prepare_content(&graphics, &scene.cards[0], false).is_err());
+ }
+diff --git a/crates/fc-windows/src/desktop/tree.rs b/crates/fc-windows/src/desktop/tree.rs
+index 6d46cf0..1641b73 100644
+--- a/crates/fc-windows/src/desktop/tree.rs
++++ b/crates/fc-windows/src/desktop/tree.rs
+@@ -221,6 +221,8 @@ fn make_card(
+             width: 144.,
+             height: 40.,
+         })
++    } else if read_only_classroom(card) {
++        None
+     } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
+         || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty()||list.next_cursor.is_some()||body.pages.len()>1)
+     {
+@@ -1944,4 +1946,54 @@ mod recess_tests {
+         assert_eq!(image.bgra.len(), 960 * 540 * 4);
+         assert_eq!(r.metrics.visible_windows, 0);
+     }
++    #[test]
++    fn passive_tree_facts_never_aggregate_input_or_route_paging() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let (_p, gate) = authority();
++        for kind in [
++            ComponentKind::Clock,
++            ComponentKind::Date,
++            ComponentKind::Schedule,
++            ComponentKind::DateCountdown,
++            ComponentKind::Recess,
++        ] {
++            let mut s = sample();
++            s.cards[0].kind = kind;
++            s.cards[0].content = CardContent::Text("只读事实".into());
++            s.cards[0].page = fc_presentation::scene::PageInfo {
++                offset: 0,
++                shown: 1,
++                total: 2,
++            };
++            let mut renderer = DesktopRenderer::new_hidden().unwrap();
++            renderer
++                .present(&s, now(), &guard(&gate, s.generation))
++                .unwrap();
++            assert!(renderer.cards.iter().all(|c| c.input.is_none()));
++            assert!(renderer.tree.as_ref().unwrap().groups.iter().all(|g| g
++                .input
++                .state
++                .targets
++                .borrow()
++                .is_empty()));
++            assert!(renderer.take_events().unwrap().is_empty());
++            s.lesson_control = Some(fc_presentation::scene::LessonControlContent {
++                rect: rect(0., 240., 220., 80.),
++                caption: "本节临时换课".into(),
++                can_change: true,
++            });
++            renderer
++                .present(&s, now(), &guard(&gate, s.generation))
++                .unwrap();
++            renderer.probe_lesson_control().unwrap();
++            assert_eq!(
++                renderer.take_events().unwrap(),
++                vec![DesktopEvent::LessonManage {
++                    generation: s.generation
++                }]
++            );
++        }
++    }
+ }

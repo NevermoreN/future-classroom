@@ -1,0 +1,48 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_TESTED",
+  "previousFreeze": "service-freeze-first.json",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 106693,
+      "sha256": "64a129c6044e3867c45f83a67616c50e26a3ce640896b19b53d8f43779ba64a9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "bytes": 13700,
+      "sha256": "0d223ca247d29c2e6c16debc87b6224b3c0f213417259d5a0263fb708b26f4aa"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "bytes": 18278,
+      "sha256": "a43a9bec3527ab7c3586b59b82110a5208d107b637a90db337eba8eacc1b378e"
+    }
+  ],
+  "patchSha256": "c57c83d79c7c540e278a0441b376feddb1b00334131c255d40f26b7d2eea1c58",
+  "addedApi": "SessionControl::cancel_desktop_lesson_flow()",
+  "reason": "Native OS callback must revoke before queued main-pump handling; account lock is intentionally independent",
+  "implementation": [
+    "Independent checked atomic epoch permanently invalidates old flow and published scene",
+    "Atomic active=0; try_lock only best effort metadata clearing, no mutex waiting in callback",
+    "Publication and mint pin original epoch; concurrent old mint cannot cross OS cancel",
+    "A genuinely higher accepted scene generation is required for a new entry",
+    "Overflow permanently closes control, no wrap/rebind"
+  ],
+  "testsAddedTotal": 11,
+  "osRegressionChanges": [
+    "Immediate OS cancel invalidates live owner before main pump",
+    "OS cancel invalidates unconsumed render entry",
+    "Existing real precommit regression now invokes OS cancellation from original Updating phase"
+  ],
+  "checks": [
+    "Scoped rustfmt exit0",
+    "Scoped trailing whitespace PASS"
+  ],
+  "notExecuted": [
+    "Cargo",
+    "Host tests",
+    "Windows",
+    "Git",
+    "remote"
+  ]
+}

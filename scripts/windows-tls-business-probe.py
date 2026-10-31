@@ -152,10 +152,14 @@ class HttpResponse:
         return value
 
 
-def validate_ready(item, marker):
+VISUAL_FIXTURES = ("FILLED_DEFAULT", "FILLED_ZERO", "OUTLINED")
+
+
+def validate_ready(item, marker, visual_fixture="FILLED_DEFAULT"):
     if (not isinstance(item, dict) or type(item.get("port")) is not int or not 1 <= item["port"] <= 65535
             or item.get("marker") != marker or type(item.get("generation")) is not int or item["generation"] <= 0
             or item.get("origin") != "https://localhost:" + str(item["port"])
+            or item.get("visualFixture") != visual_fixture
             or item.get("basePath") != "/fc/" or item.get("classId") != "1"
             or item.get("subjectId") != "1" or item.get("loginName") != "probe"
             or type(item.get("staticAssets")) is not int or not 1 <= item["staticAssets"] <= 64
@@ -447,6 +451,17 @@ def unchanged_intervals(item, original):
     return intervals(item) == original
 
 
+def four_original_bodies_admitted(item, original, first_admitted_transfers):
+    # Progress is throttled: a prior vacant snapshot can predate successful HTTP
+    # operations already completed by the client. Anchor only at the first exact
+    # partial admission; the remaining three must cause exactly three transfers.
+    return (len(original) == 4 and item["jsonBodyRecords"] == 4
+            and len(item["requests"]) == 4 and len(intervals(item)) == 4
+            and item["acceptance"]["bound_slots"] == 4
+            and item["acceptance"]["transfers"] == first_admitted_transfers + 3
+            and item["pendingJobs"] == 0 and unchanged_intervals(item, original))
+
+
 def capacity_transport_rejection(error):
     # No timeout, refusal, generic TLS/certificate failure or alert is evidence
     # that this native capacity owner accepted then closed this exact socket.
@@ -581,10 +596,11 @@ def reject_full_capacity(client, index):
 
 def exercise_capacity_accept(client, progress, body, receipt):
     require(client.deadline - time.monotonic() >= 5, "insufficient original client budget for four-body capacity stage")
-    vacant = progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
+    progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
                            and p["acceptance"]["bound_slots"] == 0 and p["acceptance"]["ready_slots"] == 4,
                            "prior business requests physically retired/rearmed")
     pending, original = [], {}
+    first_admitted_transfers = None
     try:
         for index in range(1, 5):
             pending.append(PendingReceipt(client, index, body))
@@ -595,9 +611,9 @@ def exercise_capacity_accept(client, progress, body, receipt):
             new_key = next(key for key in intervals(observed) if key not in original)
             original = intervals(observed)
             pending[-1].event["originalInterval"] = original[new_key]
-        admitted = progress.wait(client, lambda p: p["acceptance"]["bound_slots"] == 4
-                                 and p["acceptance"]["transfers"] == vacant["acceptance"]["transfers"] + 4
-                                 and p["pendingJobs"] == 0 and unchanged_intervals(p, original),
+            if index == 1:
+                first_admitted_transfers = observed["acceptance"]["transfers"]
+        admitted = progress.wait(client, lambda p: four_original_bodies_admitted(p, original, first_admitted_transfers),
                                  "four original admitted bodies, no queued worker work")
         for index in (1, 2):
             reject_full_capacity(client, index)
@@ -795,7 +811,7 @@ def exercise_static(client, package):
             "source": "verified ZIP manifest; public resources before pairing", "browser": "NOT_RUN"}
 
 
-def exercise(client, browser_observer=None, continuous=None):
+def authenticate_business(client):
     for route, allowed in [("status", "GET"), ("pairing/requests", "POST"),
                            ("voice/broadcasts", "GET, POST")]:
         rejected = client.request("api-wrong-method-" + route, "DELETE", route, expected=(405,),
@@ -835,10 +851,76 @@ def exercise(client, browser_observer=None, continuous=None):
     require(session.get("status") == "AUTHENTICATED" and isinstance(session.get("csrf"), str)
             and re.fullmatch(r"[0-9a-fA-F]{64}", session["csrf"]), "authenticated session/CSRF payload mismatch")
     client.csrf = session["csrf"]
+
+
+def validate_visual(value, key, fixture):
+    require(fixture in VISUAL_FIXTURES, "unknown visual fixture")
+    zero = fixture == "FILLED_ZERO"
+    expected = {"schemaVersion": 1, "status": "SUBJECT_VISUAL", "key": key,
+                "subjectId": "1", "subjectName": "Synthetic TLS subject", "subjectRevision": "1",
+                "displayRevision": "0" if fixture == "FILLED_DEFAULT" else "1", "rulesVersion": 1,
+                "effectiveRgb": "#88A6C4", "mode": "OUTLINED" if fixture == "OUTLINED" else "FILLED",
+                "homeworkFillPercent": 0 if zero else 3, "courseFillPercent": 0 if zero else 20,
+                "homeworkComponentOpacityPercent": 70 if zero else 100,
+                "courseComponentOpacityPercent": 80 if zero else 100,
+                "homeworkVisible": True, "courseVisible": True}
+    require(type(value) is dict and value == expected
+            and all(type(value[k]) is type(v) for k, v in expected.items()),
+            "single-subject visual exact derived RGB/mode/independent alpha/version/disclosure contract failed")
+    return expected
+
+
+def exercise_visuals(client):
+    scopes = client.request("visual-owned-scopes", "GET", "content/homework/scopes/0").json()
+    require(scopes.get("status") == "SCOPES" and scopes.get("total") == 1
+            and scopes.get("nextOffset") is None and len(scopes.get("items", [])) == 1,
+            "visual fixture owned scope missing")
+    scope = scopes["items"][0]
+    require(scope.get("classId") == "1" and scope.get("subjectId") == "1"
+            and scope.get("ownerTeacherId") == "1" and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", scopes.get("today", "")),
+            "visual fixture scope identity mismatch")
+    key = {"kind": "HOMEWORK", "classId": "1", "subjectId": "1", "ownerTeacherId": "1", "date": scopes["today"]}
+    content_route = "content/homework/1/1/1/" + scopes["today"]
+    route = content_route + "/visual"
+    before = client.request("visual-content-before", "GET", content_route).json()
+    response = client.request("visual-read", "GET", route)
+    value = response.json()
+    validate_visual(value, key, client.ready["visualFixture"])
+    require(client.request("visual-no-session", "GET", route, expected=(401,), authenticated=False).json().get("code") == "UNAUTHORIZED",
+            "visual preview disclosed without exact authenticated session")
+    outside = "content/homework/2/1/1/" + scopes["today"] + "/visual"
+    require(client.request("visual-other-class", "GET", outside, expected=(403,)).json().get("code") == "FORBIDDEN",
+            "visual preview disclosed outside exact teaching class")
+    for method in ("POST", "DELETE"):
+        rejected = client.request("visual-write-method-" + method, method, route, expected=(405,))
+        require(rejected.unique("allow") == "GET" and rejected.json().get("code") == "METHOD_NOT_ALLOWED",
+                "visual preview accepted a write method")
+    mixed = json_bytes({"schemaVersion": 1, "commandId": "9001099", "expectedRevision": before["revision"],
+                        "text": "Synthetic rejected visual write", "effectiveRgb": "#FFFFFF"})
+    require(client.request("visual-fields-cannot-write-content", "POST", content_route, mixed, expected=(400,)).json().get("code") == "INVALID_REQUEST",
+            "content write schema accepted visual management input")
+    after = client.request("visual-content-after", "GET", content_route).json()
+    require(all(before[k] == after[k] for k in ("key", "revision", "text")),
+            "readonly preview/rejected visual writes mutated teacher content")
+    reread = client.request("visual-explicit-reread", "GET", route)
+    require(reread.body == response.body, "readonly refresh changed palette/display without a management commit")
+    return {"status": "PASS", "fixture": client.ready["visualFixture"], "preview": value,
+            "previewSha256": digest(response.body), "contentRevisionBefore": before["revision"],
+            "contentRevisionAfter": after["revision"], "readOnly": True,
+            "nativeDesktopPixels": "NOT_OBSERVED", "wallpaperContrast": "NOT_CERTIFIED"}
+
+
+def exercise(client, browser_observer=None, continuous=None, visual_only=False):
+    authenticate_business(client)
+    visuals = exercise_visuals(client)
     if browser_observer is not None:
         # Keep the original one approved session and the original client
         # deadline. The page itself must read session/CSRF through the API.
         browser_observer.run(client)
+    if visual_only:
+        client.reject_certificate("wrong-ca-rejected")
+        client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
+        return {"subjectVisuals": visuals, "scope": "TARGETED_VISUAL_MATRIX_NO_MATERIAL_OR_AUDIO_OPERATIONS"}
     material = (b"Synthetic TLS business probe material.\n" * 4000)[:MATERIAL_BYTES]
     require(len(material) == MATERIAL_BYTES, "synthetic material length changed")
     created = client.request("material-create", "POST", "materials/uploads/1/1",
@@ -913,7 +995,7 @@ def exercise(client, browser_observer=None, continuous=None):
             "actual silent PCM WAV upload response mismatch")
     client.reject_certificate("wrong-ca-rejected")
     client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
-    return {"continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
+    return {"subjectVisuals": visuals, "continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
             "commandId": COMMAND_ID, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
             "downloadBytes": downloaded.body_bytes, "downloadSha256": downloaded.body_hash.hexdigest(),
             "downloadClientRetainedBodyBytes": len(downloaded.body),
@@ -998,6 +1080,33 @@ def self_test():
         except RuntimeError:
             continue
         raise RuntimeError("progress reader accepted stale/foreign/unbounded data")
+    # Replay the preserved MSVC failure's causal gap: seq20 showed vacant/41;
+    # two already completed HTTP operations were not separately emitted during
+    # the 250ms throttle. First exact partial is seq22/44, four bodies seq25/47.
+    from itertools import permutations
+    four = [dict(original, slot=i, serial=3 + i, admittedAtNs=123 + i, deadlineNs=120_000_000_123 + i) for i in range(4)]
+    old_vacant = dict(sample, sequence=20, jsonBodyRecords=0, requests=[],
+                      acceptance=dict(sample["acceptance"], transfers=41, bound_slots=0, ready_slots=4))
+    first_admitted = dict(sample, sequence=22, jsonBodyRecords=1, requests=[four[0]],
+                          acceptance=dict(sample["acceptance"], transfers=44))
+    all_admitted = dict(sample, sequence=25, jsonBodyRecords=4, requests=[four[i] for i in (1, 2, 3, 0)],
+                        acceptance=dict(sample["acceptance"], transfers=47, bound_slots=4, ready_slots=0, native_pending=5, owned_sockets=6))
+    originals = intervals(all_admitted)
+    require(all_admitted["acceptance"]["transfers"] != old_vacant["acceptance"]["transfers"] + 4,
+            "preserved stale vacancy regression no longer exercises old false rejection")
+    anchor = first_admitted["acceptance"]["transfers"]
+    for order in permutations(four):
+        require(four_original_bodies_admitted(dict(all_admitted, requests=list(order)), originals, anchor),
+                "first-admitted anchor rejected unchanged unordered four-body intervals")
+    mutations = [dict(all_admitted, acceptance=dict(all_admitted["acceptance"], transfers=n)) for n in (46, 48)]
+    mutations += [dict(all_admitted, requests=[four[0], four[1], four[1], four[3]]),
+                  dict(all_admitted, jsonBodyRecords=3), dict(all_admitted, pendingJobs=1)]
+    for field in ("generation", "serial", "admittedAtNs", "deadlineNs"):
+        mutations.append(dict(all_admitted, requests=[dict(four[0], **{field: four[0][field] + 1}), *four[1:]]))
+    for mutation in mutations:
+        require(not four_original_bodies_admitted(mutation, originals, anchor),
+                "causal four-body barrier accepted extra/missing transfer, duplicate token or changed original interval")
+    checks.append("synthetic preserved seq20/22/25 transfers41/44/47 regression; all24 interval orders accepted, extra/missing transfers and mutated original intervals rejected; no IO")
     # Busy timing, refused TCP and certificate failures cannot masquerade as capacity rejection.
     for error in (TimeoutError(), ConnectionRefusedError(), ssl.SSLCertVerificationError(1, "synthetic"),
                   ssl.SSLError(1, "synthetic"), BrokenPipeError()):
@@ -1166,7 +1275,7 @@ def self_test():
     checks.append("120000-byte request fragmentation and head/body coalescing")
     ready = {"port": 12345, "generation": 1, "marker": "synthetic", "origin": "https://localhost:12345",
              "basePath": "/fc/", "classId": "1", "subjectId": "1", "loginName": "probe", "pairingCode": "12345678",
-             "staticAssets": 6}
+             "staticAssets": 6, "visualFixture": "FILLED_DEFAULT"}
     validate_ready(ready, "synthetic")
     final = {"physicalNativeDrain": True, "sharedWorkers": 2, "workerJoin": True, "hubPending": 0,
              "downloadHubPending": 0,
@@ -1186,6 +1295,35 @@ def self_test():
             continue
         raise RuntimeError("pure final ledger accepted missing actual cleanup/join")
     checks.append("READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits")
+    key = {"kind": "HOMEWORK", "classId": "1", "subjectId": "1", "ownerTeacherId": "1", "date": "2026-11-01"}
+    for fixture in VISUAL_FIXTURES:
+        zero = fixture == "FILLED_ZERO"
+        visual = {"schemaVersion": 1, "status": "SUBJECT_VISUAL", "key": key,
+                  "subjectId": "1", "subjectName": "Synthetic TLS subject", "subjectRevision": "1",
+                  "displayRevision": "0" if fixture == "FILLED_DEFAULT" else "1", "rulesVersion": 1,
+                  "effectiveRgb": "#88A6C4", "mode": "OUTLINED" if fixture == "OUTLINED" else "FILLED",
+                  "homeworkFillPercent": 0 if zero else 3, "courseFillPercent": 0 if zero else 20,
+                  "homeworkComponentOpacityPercent": 70 if zero else 100,
+                  "courseComponentOpacityPercent": 80 if zero else 100,
+                  "homeworkVisible": True, "courseVisible": True}
+        validate_visual(visual, key, fixture)
+        for invalid in (dict(visual, palette=[]), dict(visual, effectiveRgb="#020304"),
+                        dict(visual, homeworkVisible=1), dict(visual, subjectRevision="2"),
+                        dict(visual, homeworkComponentOpacityPercent=0), dict(visual, key=dict(key, classId="2"))):
+            try:
+                validate_visual(invalid, key, fixture)
+            except RuntimeError:
+                continue
+            raise RuntimeError("visual disclosure validator accepted extra palette/raw RGB/wrong version/scope/alpha/type")
+        for wrong in VISUAL_FIXTURES:
+            if wrong == fixture:
+                continue
+            try:
+                validate_ready(dict(ready, visualFixture=wrong), "synthetic", fixture)
+            except RuntimeError:
+                continue
+            raise RuntimeError("READY silently ignored requested visual fixture")
+    checks.append("visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected")
     print(json.dumps({"status": "PURE_LOCAL_CHECKS_PASS", "checks": checks,
                       "tls": "NOT_RUN", "windows": "NOT_RUN", "business": "NOT_RUN"}, indent=2))
 
@@ -1199,13 +1337,17 @@ def main():
     parser.add_argument("--web-bundle", type=Path, help="Existing development ZIP; only verified web manifest payloads are uploaded")
     parser.add_argument("--browser", action="store_true", help="Also verify isolated Windows Edge UI against this same finite native service")
     parser.add_argument("--continuous-accept", action="store_true", help="Also verify real idle AcceptEx repost and four admitted JSON bodies within the original client/native deadlines; not strict TCP5s evidence")
+    parser.add_argument("--visual-fixture", choices=VISUAL_FIXTURES, default="FILLED_DEFAULT", help="Exact finite isolated synthetic display fixture; no production settings")
+    parser.add_argument("--visual-only", action="store_true", help="Target only visual/scope/read-only contract within the original client/native budgets")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept:
+        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.visual_only or args.visual_fixture != "FILLED_DEFAULT":
             parser.error("self-test is pure local; do not combine with remote inputs")
         self_test()
         return
+    if args.visual_only and args.continuous_accept:
+        parser.error("visual-only is separate from full material/capacity acceptance")
     if not args.exe or not args.report or not args.web_bundle:
         parser.error("--exe, --report and --web-bundle required for actual diagnostic")
     if not re.fullmatch(r"[A-Za-z0-9_.@:-]+", args.ssh_target) or args.ssh_target.startswith("-"):
@@ -1235,6 +1377,7 @@ def main():
               "webBundleSha256": digest(args.web_bundle.read_bytes()),
               "remoteScriptsSha256": digest((COMMON + SETUP + LAUNCH + STOP + CAPTURE + CLEANUP).encode("utf-8")),
               "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
+              "visualFixture": args.visual_fixture, "visualOnly": args.visual_only,
               "events": [], "cleanup": "NOT_RUN"}
     remote = Remote(args.ssh_target, args.identity)
     directory = launcher = launcher_logs = tunnel = local_owner = browser_observer = None
@@ -1262,6 +1405,14 @@ def main():
             + "if($errors.Count-ne 0){throw (($errors|ForEach-Object{$_.Message})-join '; ')}};'TLS_CONTROL_SCRIPTS_PARSE_PASS'", timeout=15)
         require(parsed == "TLS_CONTROL_SCRIPTS_PARSE_PASS", "control script parse result missing")
         report["controlScriptsParse"] = "PASS"
+        phase = "upload-owned-bounded-visual-fixture"
+        applied = remote.powershell("$root=" + ps_literal(directory)
+            + ";if(([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-ne " + ps_literal(marker)
+            + "){throw 'visual fixture root mismatch'};[IO.File]::WriteAllText((Join-Path $root '.subject-visual-fixture'),"
+            + ps_literal(args.visual_fixture) + ",[Text.ASCIIEncoding]::new());"
+            + "[IO.File]::ReadAllText((Join-Path $root '.subject-visual-fixture'))")
+        require(applied == args.visual_fixture, "owned visual fixture upload/readback mismatch")
+        report["visualFixtureInput"] = {"bytes": len(applied), "sha256": digest(applied.encode("ascii")), "readBack": "PASS"}
         phase = "create-owned-certificate-and-cng-key"
         fixture = json.loads(remote.run_file(directory + "\\tls-setup.ps1", timeout=45))
         report["fixture"] = {key: value for key, value in fixture.items() if key != "publicPem"}
@@ -1314,7 +1465,7 @@ def main():
             if line.startswith(READY):
                 require(not ready, "duplicate business READY domain; no implicit new generation")
                 item = json.loads(line[len(READY):])
-                validate_ready(item, marker)
+                validate_ready(item, marker, args.visual_fixture)
                 require(item["staticAssets"] == len(package[2]["assets"]), "native/package static asset count mismatch")
                 progress_reader.generation = item["generation"]
                 ready.append({key: value for key, value in item.items() if key != "pairingCode"})
@@ -1323,8 +1474,8 @@ def main():
                 client = Client(port, item, tls_context, wrong_ca, expected_der, report["events"])
                 if args.continuous_accept:
                     report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
-                report["static"] = exercise_static(client, package[2])
-                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None)
+                report["static"] = {"status": "NOT_RUN_TARGETED_VISUAL_MATRIX"} if args.visual_only else exercise_static(client, package[2])
+                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None, visual_only=args.visual_only)
                 tunnel.cancel()
             elif line.startswith(PASS):
                 native.append(json.loads(line[len(PASS):]))

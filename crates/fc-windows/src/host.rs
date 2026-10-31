@@ -48,6 +48,9 @@ impl HostHints {
     pub const TASKBAR_RECREATED: Self = Self(1024);
     const TRAY_CONTEXT: Self = Self(2048);
     pub const FOREGROUND_CHANGED: Self = Self(4096);
+    /// Negative read-only sample at native message dispatch. The original OS
+    /// event-to-dispatch latency is not measured or eliminated by this fence.
+    pub const FOREGROUND_UNAVAILABLE: Self = Self(32768);
     pub const SUSPENDING: Self = Self(8192);
     pub const RESUMED: Self = Self(16384);
     pub fn contains(self, hint: Self) -> bool {
@@ -139,6 +142,12 @@ impl State {
                 self.control.fault();
                 unsafe { PostQuitMessage(1) }
             }
+        }
+    }
+    fn foreground_hint(&self, allowed: bool) {
+        self.hint(HostHints::FOREGROUND_CHANGED);
+        if !allowed {
+            self.control_hint(HostHints::FOREGROUND_UNAVAILABLE);
         }
     }
     fn hint(&self, value: HostHints) {
@@ -444,7 +453,10 @@ unsafe extern "system" fn window_proc(
                 match message {
                     FOREGROUND_MESSAGE => {
                         FOREGROUND_PENDING.with(|pending| pending.set(false));
-                        state.hint(HostHints::FOREGROUND_CHANGED);
+                        // Sample once before the main application pump. The
+                        // callback receives only a negative memory fact; neither
+                        // the writer nor its execution fence calls Windows.
+                        state.foreground_hint(crate::workbench::lesson_foreground_allowed());
                         return LRESULT(0);
                     }
                     WM_TIMER if wparam.0 == TIMER => {
@@ -640,5 +652,34 @@ mod tests {
         assert!(time_changed);
         assert!(shutdown_seen);
         assert_eq!(ticks, 2);
+    }
+    #[test]
+    fn foreground_dispatch_revokes_external_before_main_pump_but_not_own_chooser() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let host = HiddenHost::new(false).unwrap();
+        let seen = Arc::new(AtomicU32::new(0));
+        let received = seen.clone();
+        host.set_control_callback(Arc::new(move |hint| {
+            received.fetch_or(hint.0, Ordering::Release);
+        }))
+        .unwrap();
+        host.state.foreground_hint(true);
+        assert_eq!(
+            seen.load(Ordering::Acquire),
+            0,
+            "own chooser/desktop does not cancel"
+        );
+        host.state.foreground_hint(false);
+        assert_ne!(
+            seen.load(Ordering::Acquire) & HostHints::FOREGROUND_UNAVAILABLE.0,
+            0,
+            "negative callback ran before host.run/main application pump"
+        );
+        assert_ne!(
+            host.state.hints.load(Ordering::Acquire) & HostHints::FOREGROUND_CHANGED.0,
+            0
+        );
     }
 }

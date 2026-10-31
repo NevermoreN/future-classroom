@@ -1,0 +1,54 @@
+// Exact workflow: original nine API operations plus four explicit/causal
+// single-subject preview GETs. Static cache hits never contribute to this ledger.
+const API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
+  contentGets: 2, contentPosts: 1, visualGets: 4 });
+const VISUAL_STAGES = ['initial', 'draft-refresh', 'after-save', 'after-reload'];
+const VISUAL_FIELDS = ['subjectRevision', 'displayRevision', 'rulesVersion', 'effectiveRgb', 'mode',
+  'homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent',
+  'homeworkVisible', 'courseVisible'];
+function visualPayload(value, scope) {
+  shape(value, ['schemaVersion', 'status', 'key', 'subjectId', 'subjectName', ...VISUAL_FIELDS], 'VISUAL_SHAPE');
+  check(scope && value.schemaVersion === 1 && value.status === 'SUBJECT_VISUAL' && value.rulesVersion === 1
+    && value.subjectId === scope.subjectId && value.subjectName === 'Synthetic TLS subject'
+    && decimal(value.subjectRevision) && decimal(value.displayRevision, true)
+    && /^#[0-9A-F]{6}$/.test(value.effectiveRgb) && ['FILLED', 'OUTLINED'].includes(value.mode)
+    && ['homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent']
+      .every(k => Number.isInteger(value[k]) && value[k] >= 0 && value[k] <= 100)
+    && typeof value.homeworkVisible === 'boolean' && typeof value.courseVisible === 'boolean', 'VISUAL_FIELDS');
+  shape(value.key, ['kind', 'classId', 'subjectId', 'ownerTeacherId', 'date'], 'VISUAL_KEY_SHAPE');
+  check(value.key.kind === 'HOMEWORK' && value.key.classId === scope.classId
+    && value.key.subjectId === scope.subjectId && value.key.ownerTeacherId === scope.ownerTeacherId
+    && value.key.date === scope.today, 'VISUAL_SCOPE_CHANGED');
+  return Object.fromEntries(VISUAL_FIELDS.map(k => [k, value[k]]));
+}
+function cssRgba(value) {
+  const match = typeof value === 'string' && /^rgba?\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(?:,\s*(\d+(?:\.\d+)?))?\s*\)$/.exec(value);
+  check(match, 'VISUAL_COMPUTED_COLOR');
+  const result = match.slice(1, 4).map(Number); result.push(match[4] === undefined ? 1 : Number(match[4]));
+  check(result.slice(0, 3).every(n => Number.isFinite(n) && n >= 0 && n <= 255)
+    && Number.isFinite(result[3]) && result[3] >= 0 && result[3] <= 1, 'VISUAL_COMPUTED_COLOR');
+  return result;
+}
+function checkVisualDom(dom, visual) {
+  shape(dom, ['subjectRevision', 'displayRevision', 'rulesVersion', 'homework', 'course',
+    'refreshOpacity', 'helpOpacity', 'draftMatches', 'bottomReminderAvailable'], 'VISUAL_DOM_SHAPE');
+  check(dom.subjectRevision === visual.subjectRevision && dom.displayRevision === visual.displayRevision
+    && dom.rulesVersion === '1' && dom.refreshOpacity === 1 && dom.helpOpacity === 1
+    && dom.draftMatches === true && dom.bottomReminderAvailable === true, 'VISUAL_DOM_IDENTITY_OR_DRAFT');
+  for (const kind of ['homework', 'course']) {
+    const pill = dom[kind];
+    shape(pill, ['mode', 'fillPercent', 'effectiveRgb', 'visible', 'componentOpacity', 'pillOpacity', 'effectiveOpacity',
+      'backgroundColor', 'borderWidth', 'borderStyle', 'textAlign', 'textMatches', 'textColorUnchanged'], 'VISUAL_PILL_SHAPE');
+    const fill = visual[kind + 'FillPercent'], component = visual[kind + 'ComponentOpacityPercent'] / 100;
+    const rgba = cssRgba(pill.backgroundColor), alpha = visual.mode === 'FILLED' ? fill / 100 : 0;
+    const rgb = [1, 3, 5].map(offset => parseInt(visual.effectiveRgb.slice(offset, offset + 2), 16));
+    check(pill.mode === visual.mode && pill.fillPercent === String(fill) && pill.effectiveRgb === visual.effectiveRgb
+      && pill.visible === String(visual[kind + 'Visible']) && pill.componentOpacity === component
+      && pill.pillOpacity === 1 && Math.abs(pill.effectiveOpacity - component) < 0.000001
+      && Math.abs(rgba[3] - alpha) < 0.000001 && (alpha === 0 || rgb.every((v, i) => v === rgba[i]))
+      && pill.borderWidth === (visual.mode === 'FILLED' ? 0 : 1)
+      && pill.borderStyle === (visual.mode === 'FILLED' ? 'none' : 'solid')
+      && pill.textAlign === 'center' && pill.textMatches === true && pill.textColorUnchanged === true, 'VISUAL_COMPUTED_STYLE');
+  }
+  return true;
+}

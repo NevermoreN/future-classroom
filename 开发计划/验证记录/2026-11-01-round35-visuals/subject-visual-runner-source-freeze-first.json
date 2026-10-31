@@ -1,0 +1,38 @@
+{
+  "status": "SOURCE_FROZEN_LOCAL_PURE_CHECKS_PASS_WINDOWS_NOT_RUN",
+  "recordedUtc": "2026-10-31T17:36:31.231550+00:00",
+  "path": "scripts/windows-probe.py",
+  "bytes": 55175,
+  "sha256": "30f6aa7530e36b39cbb944b28155601951be7c14cf4c1e54f313cd35e6fcbae7",
+  "beforeSha256": "b83eb726d4b2f851ce32dc2006ce55f2d9b23b4c3164c40b04fbc536ed3477af",
+  "diff": {
+    "path": "/tmp/fc-round35-visuals-evidence/subject-visual-runner-first.diff",
+    "bytes": 9498,
+    "sha256": "393bbfa62fbea667952ef0454ff695aa0641303238dc3f410a51a9b64dbf907a"
+  },
+  "localValidation": [
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/subject-visual-runner-local-validation-first.json",
+      "bytes": 5444,
+      "sha256": "e0b2707cf529374b801f3232dd0c6e93381687fa5664bc4bd3b287e5dfbf95e0",
+      "caseCount": 58
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/subject-visual-runner-budget-validation-first.json",
+      "bytes": 1377,
+      "sha256": "c91d234a1b6ad1ec87df3b9ad9e3fc09ded115d0348dfa5db97a9e80ca2c234f",
+      "caseCount": 12
+    }
+  ],
+  "contract": {
+    "flag": "--subject-visuals",
+    "nativeCLI": "--subject-visuals-probe",
+    "exactSteps": 22,
+    "nativeAbsoluteBudgetSeconds": 120,
+    "wrapperTaskSeconds": 180,
+    "remoteTimeoutSeconds": 190,
+    "oldBudgets": "unchanged; all original task string/budget branches compared",
+    "mutex": "all13 previous business/diagnostic modes refused; readonly system/host and test metadata allowed"
+  },
+  "scope": "Only Python runner modified; pure AST/transcript/CLI-prefix/string checks, no Remote/SSH/Windows or EXE execution; UI frozen except separately authorized close guard followup."
+}

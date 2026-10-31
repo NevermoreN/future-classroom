@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "/tmp/fc-round36-public-desktop-evidence/audit-windows-readonly.py",
+    "--report",
+    "/tmp/fc-round36-public-desktop-evidence/windows-before-integrated.json",
+    "--baseline",
+    "/tmp/fc-round35-msvc-evidence/windows-after-msvc.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T18:39:30.120061+00:00",
+  "stdout": "/tmp/fc-round36-public-desktop-evidence/windows-before-integrated.stdout.log",
+  "stderr": "/tmp/fc-round36-public-desktop-evidence/windows-before-integrated.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 1.8140839780680835,
+  "completedUtc": "2026-10-31T18:39:31.934504+00:00",
+  "stdoutBytes": 479,
+  "stdoutSha256": "f31eccd6ac30bf1673046ffda8fd4ef7b5e1bb329fc4dcd039ca6b50964b779e",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

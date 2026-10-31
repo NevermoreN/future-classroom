@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "jobs": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 124601504147,
+              "name": "compile-i686",
+              "status": "completed",
+              "conclusion": "success",
+              "run_id": 41223081037,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Create this run's bounded evidence directory",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Compile MSVC workspace and collect original evidence",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "Clean only this ephemeral run's build and tool roots",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "Upload original logs, metadata and compiled test executables",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 6
+                },
+                {
+                  "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 12
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 13
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 124601640991,
+              "name": "compile-win7-i686",
+              "status": "completed",
+              "conclusion": "failure",
+              "run_id": 41223127643,
+              "logs_url": null,
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Create this run's bounded evidence directory",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Compile Win7 MSVC candidate with rebuilt std/test; never execute",
+                  "status": "completed",
+                  "conclusion": "failure",
+                  "number": 4
+                },
+                {
+                  "name": "Clean only this ephemeral run's build and tool roots",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "Upload original logs, metadata and compiled test executables",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 6
+                },
+                {
+                  "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 12
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 13
+                }
+              ]
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "artifacts": [
+            {
+              "id": 13051640992,
+              "name": "future-classroom-msvc-i686-83fe847f1a5b1787bdf2390c1294ae4e740e6e75-41223081037-1",
+              "size_in_bytes": 39691931,
+              "url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13051640992",
+              "archive_download_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13051640992/zip",
+              "expired": false,
+              "created_at": "2026-10-31T17:25:16Z",
+              "expires_at": "2026-11-14T17:25:14Z",
+              "updated_at": "2026-10-31T17:25:16Z",
+              "digest": "sha256:4ab21a6059b6047d02107b6ad49500d8472a9e0586876ed71f820d27e8ef2d05",
+              "workflow_run": {
+                "id": 41223081037,
+                "repository_id": 1438736199,
+                "head_repository_id": 1438736199,
+                "head_branch": "main",
+                "head_sha": "83fe847f1a5b1787bdf2390c1294ae4e740e6e75"
+              }
+            }
+          ]
+        },
+        "isError": false
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "artifacts": [
+            {
+              "id": 13051341013,
+              "name": "future-classroom-win7-msvc-i686-83fe847f1a5b1787bdf2390c1294ae4e740e6e75-41223127643-1",
+              "size_in_bytes": 40322002,
+              "url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13051341013",
+              "archive_download_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13051341013/zip",
+              "expired": false,
+              "created_at": "2026-10-31T17:26:41Z",
+              "expires_at": "2026-11-14T17:26:37Z",
+              "updated_at": "2026-10-31T17:26:41Z",
+              "digest": "sha256:2b3c8e04018d94f1b4a5c0b7585afbcefcbdc7c7fce8356244e72c875851cf8f",
+              "workflow_run": {
+                "id": 41223127643,
+                "repository_id": 1438736199,
+                "head_repository_id": 1438736199,
+                "head_branch": "main",
+                "head_sha": "83fe847f1a5b1787bdf2390c1294ae4e740e6e75"
+              }
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "status": "PASS",
+  "scope": "pure AST-extracted task string and timeout evaluation only; no Remote/SSH/Windows",
+  "sourceSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "caseCount": 13,
+  "cases": [
+    {
+      "flag": "default",
+      "status": "PASS",
+      "remoteTimeout": 50
+    },
+    {
+      "flag": "subject_visuals",
+      "status": "PASS",
+      "remoteTimeout": 190
+    },
+    {
+      "flag": "voice_output",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "voice_settings",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "application",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "materials",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "web_voice",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "calendar",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "autostart",
+      "status": "PASS",
+      "remoteTimeout": 250
+    },
+    {
+      "flag": "recovery",
+      "status": "PASS",
+      "remoteTimeout": 310
+    },
+    {
+      "flag": "reinitialization",
+      "status": "PASS",
+      "remoteTimeout": 310
+    },
+    {
+      "flag": "migration",
+      "status": "PASS",
+      "remoteTimeout": 310
+    },
+    {
+      "flag": "public_desktop",
+      "status": "PASS",
+      "taskSeconds": 180,
+      "remoteSeconds": 190
+    }
+  ]
+}

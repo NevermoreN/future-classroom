@@ -221,6 +221,8 @@ fn make_card(
             width: 144.,
             height: 40.,
         })
+    } else if read_only_classroom(card) {
+        None
     } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
         || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty()||list.next_cursor.is_some()||body.pages.len()>1)
     {
@@ -1817,6 +1819,69 @@ mod tests {
         assert_eq!(body.blocks.len(), 8);
         assert_eq!(body.pages.len(), 4);
         assert_eq!(body.visible_leaves, vec![1, 1, 1, 1]);
+    }
+    #[test]
+    fn passive_tree_facts_never_aggregate_input_or_route_paging() {
+        let _serial = crate::NATIVE_TEST_SERIAL
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        let (_p, gate) = authority();
+        for kind in [
+            ComponentKind::Clock,
+            ComponentKind::Date,
+            ComponentKind::Schedule,
+            ComponentKind::DateCountdown,
+            ComponentKind::Recess,
+        ] {
+            let mut s = sample();
+            s.cards[0].kind = kind;
+            // The authoritative tree must describe the same widget as its card.
+            // sample() starts as Materials; changing only the card is invalid.
+            s.paint_tree.as_mut().unwrap().nodes[2].widget_kind = Some(match kind {
+                ComponentKind::Clock => fc_domain::layout::WidgetKind::Clock,
+                ComponentKind::Date => fc_domain::layout::WidgetKind::Date,
+                ComponentKind::Schedule => fc_domain::layout::WidgetKind::Schedule,
+                ComponentKind::DateCountdown => fc_domain::layout::WidgetKind::DateCountdown,
+                ComponentKind::Recess => fc_domain::layout::WidgetKind::Recess,
+                _ => unreachable!("only passive builtins in this fixture"),
+            });
+            assert!(validate(s.paint_tree.as_ref().unwrap(), &s.cards).is_ok());
+            s.cards[0].content = CardContent::Text("只读事实".into());
+            s.cards[0].page = fc_presentation::scene::PageInfo {
+                offset: 0,
+                shown: 1,
+                total: 2,
+            };
+            let mut renderer = DesktopRenderer::new_hidden().unwrap();
+            renderer
+                .present(&s, now(), &guard(&gate, s.generation))
+                .unwrap();
+            assert!(renderer.cards.iter().all(|c| c.input.is_none()));
+            assert!(renderer.tree.as_ref().unwrap().groups.iter().all(|g| g
+                .input
+                .state
+                .targets
+                .borrow()
+                .is_empty()));
+            assert!(renderer.take_events().unwrap().is_empty());
+            // A changed lesson strip belongs to a new immutable scene generation.
+            s.generation = SceneGeneration::new(2);
+            s.lesson_control = Some(fc_presentation::scene::LessonControlContent {
+                rect: rect(0., 240., 400., 80.),
+                caption: "本节临时换课".into(),
+                can_change: true,
+            });
+            renderer
+                .present(&s, now(), &guard(&gate, s.generation))
+                .unwrap();
+            renderer.probe_lesson_control().unwrap();
+            assert_eq!(
+                renderer.take_events().unwrap(),
+                vec![DesktopEvent::LessonManage {
+                    generation: s.generation
+                }]
+            );
+        }
     }
 }
 #[cfg(test)]

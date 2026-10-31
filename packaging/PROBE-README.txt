@@ -38,6 +38,8 @@ FutureClassroom 0.1.0 - Windows x86 native workbench development build
   .\fc-bootstrap.exe --application-probe
   .\fc-bootstrap.exe --reinitialization-probe
   .\fc-bootstrap.exe --migration-probe
+  .\fc-bootstrap.exe --subject-visuals-probe
+  .\fc-bootstrap.exe --public-desktop-probe
   .\fc-bootstrap.exe --materials-probe
   .\fc-bootstrap.exe --audio-silent-probe
   .\fc-bootstrap.exe --web-pairing-probe
@@ -53,6 +55,9 @@ Windows 随机源、PBKDF2 与目录互斥；还验证DPAPI密钥与SQLite重开
 它还验证显示设置保存重读、锁定草稿、临时换课/恢复/CAS拒绝、退出保护及真实事实到原生离屏场景；
 新增39步公共布局联合CAS、精确科目配置保存/停用及原生预览选择/拖动流程；不截图用户桌面。
 另有52步独立文字/分页图片和65步作息角色交换/活动拆合/确认取消/锁定恢复/真实CAS读回，均使用自有隐藏窗口及临时数据。
+--public-desktop-probe 使用隔离部署和隐藏原生控件验证未登录换课/恢复原课、旧场景拒绝及实际关闭清理；
+不改变前台，不代替操作系统会话切换、Win7/Win10和希沃可见触控验收。
+--subject-visuals-probe 验证科目配色/显示设置联合保存、锁定草稿、真实SQLite重开和合成D2D预览；不打开可见颜色选择器。
 --reinitialization-probe 只使用自有临时合成部署，在独立当前程序子进程中验证取消、双确认、
 完整清除与正常重启的全新设置；不操作当前用户的正式ProgramData部署。
 --migration-probe 使用两个独立受保护合成部署、隐藏原生控件及隔离选择能力，验证逐项映射、双确认、
@@ -68,7 +73,9 @@ rendered_frames=0 代表没有确认桌面前台绘制，不能视作视觉通�
 全局本地管理员可在资料管理中查看占用，并确认清理最后写入已满24小时且未占用的副本。PDF真实解析在80MiB进程提交内存/CPU10秒/墙钟30秒的隔离子进程运行。
 --materials-probe 使用真实双worker/SQLite、合成文件及私有临时ProgID和无界面接收器验证资料链，
 不会调用本机日常Office/记事本或改变默认文件关联，不写正式ProgramData。
-主管理员可在当前课程中临时换课或恢复原课；提交捕获课程实例和修订，过节/旧版本拒绝。
+教室桌面的临时换课/恢复原课向任何使用者直接开放，无需账号、登录、口令或身份验证；
+提交仍捕获完整课程实例和修订，过节/旧版本拒绝，不改基础课表。
+课程表、时钟、日历/日期/倒计时只展示，不接收点击或翻页；账号、布局、基础课表等设置仍按管理权限操作。
 实际老师区间及覆盖持久化，已记录的课程可在课间重启恢复资料；稳定的课前基础课信任可跨夜补全未观测课程；旧格式或无充分证明时显示中性空态。
 桌面顶部换课入口只有按钮接收点击；外部应用前台时隐藏并撤销未提交意图。
 --audio-silent-probe 只生成全零PCM，不录音、不调整音量或前台；验证原生自然完成/取消及

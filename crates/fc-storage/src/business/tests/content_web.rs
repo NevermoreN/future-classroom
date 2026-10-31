@@ -266,7 +266,7 @@ impl Fixture {
         )
         .with_session_guard(Arc::new(move |identity, current| {
             let remaining = budget
-                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                     if n == usize::MAX {
                         None
                     } else {

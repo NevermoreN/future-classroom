@@ -1,0 +1,25 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round35-msvc-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+    "--continuous-accept",
+    "--report",
+    "/tmp/fc-round35-msvc-evidence/windows-modern-continuous-first.json"
+  ],
+  "cwd": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212",
+  "startedUtc": "2026-10-31T17:42:31.053247+00:00",
+  "stdout": "/tmp/fc-round35-msvc-evidence/windows-modern-continuous-first.stdout.log",
+  "stderr": "/tmp/fc-round35-msvc-evidence/windows-modern-continuous-first.stderr.log",
+  "exitCode": 1,
+  "elapsedSeconds": 26.214812160935253,
+  "completedUtc": "2026-10-31T17:42:57.268304+00:00",
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 107,
+  "stderrSha256": "5ce825171753b6d7e133903b9f6ac458365a53f3ccd1e2bf6af19feca661ae44"
+}

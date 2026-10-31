@@ -1,0 +1,25 @@
+{
+  "name": "visual-studio",
+  "executable": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe",
+  "arguments": [
+    "-latest",
+    "-version",
+    "[17.0,18.0)",
+    "-products",
+    "*",
+    "-requires",
+    "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+    "-format",
+    "json"
+  ],
+  "started_utc": "2026-10-31T17:09:20.8537810Z",
+  "duration_seconds": 0.4953557,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/visual-studio.stdout.log",
+  "stderr": "logs/visual-studio.stderr.log",
+  "passed": true
+}

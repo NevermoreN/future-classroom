@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "scope": "First staged archive verification stopped at missing ignored architecture.stderr.log. No original was deleted.",
+  "cause": "Global *.log and *.pem ignore rules; normal git add omitted archived originals.",
+  "correctiveAction": "Explicit force-add of exactly the two reviewed evidence directories, then full byte verification with git cat-file."
+}

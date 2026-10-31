@@ -61,6 +61,31 @@ pub(super) fn render(
         Arc::new(RasterCache::new()),
     )
 }
+/// Synthetic colour samples use the selected stable school subject and the
+/// common display draft. No product scene, desktop capture or published layout.
+pub(super) fn render_subject_visuals(
+    identity: &IdentityState,
+    display: &fc_domain::desktop::DisplaySettings,
+    selected: SubjectId,
+    sequence: u64,
+    now: LocalDateTime,
+) -> Result<LayoutPreview, String> {
+    let mut example = identity.clone();
+    let index = example
+        .subjects
+        .iter()
+        .position(|s| s.id == selected)
+        .ok_or("所选科目已不存在，请重新加载。")?;
+    example.subjects.swap(0, index);
+    let public = PublicLayoutState {
+        layout: Default::default(),
+        display: display.clone(),
+    };
+    let mut image = render(&example, &public, None, sequence, now)?;
+    // Colour samples are read-only; never expose layout drag/drop capabilities.
+    image.nodes.clear();
+    Ok(image)
+}
 /// The ordinary preview supplies no content authority. Published independent
 /// content requires this exact-slot cache path; no body or pixels are fabricated.
 #[allow(clippy::too_many_arguments)]
@@ -503,6 +528,7 @@ fn samples(
             },
             |s| s.color,
         );
+    let color = fc_presentation::scene::soft_subject_color(color);
     let semester = SemesterId::new(1).map_err(|_| "示例 ID 无效。")?;
     let lesson = LessonInstanceKey {
         actual_date: now.date,
@@ -573,7 +599,7 @@ fn samples(
                 current: true,
                 temporary: false,
                 fill_alpha: course_fill,
-                stroke_width: 0.,
+                stroke_width: if public.display.subject_fill { 0. } else { 1. },
             }]),
             1,
         ),
@@ -586,7 +612,11 @@ fn samples(
                 teacher_name: teacher_name.into(),
                 text: "示例作业：阅读课堂材料，完成练习并记录思考。\n此内容仅用于布局预览。".into(),
                 color,
-                fill_alpha: f32::from(public.display.homework_fill_percent) / 100.,
+                fill_alpha: if public.display.subject_fill {
+                    f32::from(public.display.homework_fill_percent) / 100.
+                } else {
+                    0.
+                },
             }]),
             1,
         ),
@@ -662,6 +692,107 @@ fn samples(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn subject_visual_samples_use_shared_soft_color_and_both_fill_modes() {
+        let subject_id = SubjectId::new(7).unwrap();
+        let raw = Rgb {
+            red: 240,
+            green: 10,
+            blue: 100,
+        };
+        let identity = IdentityState {
+            subjects: vec![fc_domain::identity::SchoolSubject {
+                id: subject_id,
+                school_id: SchoolId::new(1).unwrap(),
+                name: "Synthetic palette".into(),
+                enabled: true,
+                color: raw,
+                revision: Revision::new(1),
+            }],
+            ..Default::default()
+        };
+        let now =
+            LocalDateTime::new(fc_domain::time::LocalDate::new(2026, 11, 1).unwrap(), 0).unwrap();
+        for enabled in [true, false] {
+            let public = PublicLayoutState {
+                layout: Default::default(),
+                display: fc_domain::desktop::DisplaySettings {
+                    subject_fill: enabled,
+                    course_fill_percent: 73,
+                    homework_fill_percent: 41,
+                    ..Default::default()
+                },
+            };
+            let samples = samples(&identity, &public, None, now).unwrap();
+            let course = samples
+                .iter()
+                .find_map(|s| {
+                    if let CardContent::Courses(c) = &s.content {
+                        c.first()
+                    } else {
+                        None
+                    }
+                })
+                .unwrap();
+            let homework = samples
+                .iter()
+                .find_map(|s| {
+                    if let CardContent::Homework(c) = &s.content {
+                        c.first()
+                    } else {
+                        None
+                    }
+                })
+                .unwrap();
+            assert_eq!(
+                course.color,
+                fc_presentation::scene::soft_subject_color(raw)
+            );
+            assert_eq!(homework.color, course.color);
+            assert_eq!(course.fill_alpha, if enabled { 0.73 } else { 0. });
+            assert_eq!(homework.fill_alpha, if enabled { 0.41 } else { 0. });
+            assert_eq!(course.stroke_width, if enabled { 0. } else { 1. });
+        }
+    }
+    #[test]
+    fn subject_visual_actual_hidden_pixels_change_with_color_and_alpha_under_original_budget() {
+        let subject_id = SubjectId::new(7).unwrap();
+        let mut identity = IdentityState {
+            subjects: vec![fc_domain::identity::SchoolSubject {
+                id: subject_id,
+                school_id: SchoolId::new(1).unwrap(),
+                name: "Synthetic palette".into(),
+                enabled: true,
+                color: Rgb {
+                    red: 240,
+                    green: 10,
+                    blue: 100,
+                },
+                revision: Revision::new(1),
+            }],
+            ..Default::default()
+        };
+        let now =
+            LocalDateTime::new(fc_domain::time::LocalDate::new(2026, 11, 1).unwrap(), 0).unwrap();
+        let mut display = fc_domain::desktop::DisplaySettings {
+            course_fill_percent: 73,
+            homework_fill_percent: 41,
+            ..Default::default()
+        };
+        let first = render_subject_visuals(&identity, &display, subject_id, 1, now).unwrap();
+        identity.subjects[0].color = Rgb {
+            red: 20,
+            green: 200,
+            blue: 100,
+        };
+        let color = render_subject_visuals(&identity, &display, subject_id, 2, now).unwrap();
+        display.subject_fill = false;
+        let outlined = render_subject_visuals(&identity, &display, subject_id, 3, now).unwrap();
+        assert_eq!((first.width, first.height), (960, 540));
+        assert!(first.bgra.capacity() <= MAX_PREVIEW_BYTES);
+        assert_ne!(first.bgra, color.bgra);
+        assert_ne!(color.bgra, outlined.bgra);
+    }
     struct Provider(Vec<(ContentSlotKey, Revision, [u8; 32], Arc<str>)>);
     impl ContentTextSource for Provider {
         fn text(

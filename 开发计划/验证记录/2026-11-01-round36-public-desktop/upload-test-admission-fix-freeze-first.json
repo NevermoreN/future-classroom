@@ -1,0 +1,81 @@
+{
+  "status": "TEST_FIX_SOURCE_FROZEN_STATIC_CHECKS_PASS_RUNTIME_NOT_RUN",
+  "recordedAt": "2026-10-31T18:57:08.846722+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "file": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+  "before": {
+    "bytes": 44733,
+    "sha256": "ce09781c730c11d2ae3c8888765430aaa64891d78ef0a0246135df4442dedb04",
+    "preserved": "/tmp/fc-round36-public-desktop-evidence/upload-test-admission-fix-first/uploads-tests.before.rs"
+  },
+  "after": {
+    "bytes": 45258,
+    "sha256": "9763c1a637973bb82f32f613421b4e55439de8a88c5fa536e3de7307b7347229",
+    "preserved": "/tmp/fc-round36-public-desktop-evidence/upload-test-admission-fix-first/uploads-tests.after.rs"
+  },
+  "diff": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/upload-test-admission-fix-first/minimal.diff",
+    "sha256": "8c5b8914f063ccf962dff783a7ab609ecd9a0c17291fd6f142d9897d9b8d0a46"
+  },
+  "originalFailure": {
+    "path": "/tmp/fc-round36-public-desktop-evidence/windows-integrated-runtime-first.json",
+    "sha256": "7588e719864e333e925c0f61c630951e1a1e9bf9daca4253e994b3a634e74af1",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "unchanged": true
+  },
+  "diagnosis": "/tmp/fc-round36-public-desktop-evidence/core-upload-busy-readonly-first.json",
+  "change": [
+    "Only positive test fixture Pool::call admission loop changed.",
+    "Capture one absolute15s deadline before first submission; same deadline passed to every try_submit.",
+    "On Busy only, reuse returned error.task, preserving the original FnOnce closure, Job and owned metadata; no accepted task is recreated or replayed.",
+    "Bounded1ms yielding between unaccepted attempts. Non-Busy or original deadline expiry remains test failure.",
+    "Original ticket.wait/result handling and every business assertion remain byte-identical. No new implementation-mirroring test."
+  ],
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "unchanged": [
+    "Production Worker/mailbox/UploadHub",
+    "Two worker count",
+    "Test threads2 configuration",
+    "Business/physical-owner assertions",
+    "Ticket wait behavior",
+    "Original deadline duration",
+    "Original failure report"
+  ],
+  "notExecuted": [
+    "Cargo",
+    "npm",
+    "Windows/SSH",
+    "Product/test executable",
+    "Git writes/commit/push",
+    "CI"
+  ],
+  "nextValidation": "Parent unified libtest compile/strict lint and actual Windows full suite. Source freeze is not a runtime PASS."
+}

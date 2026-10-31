@@ -1,0 +1,8 @@
+{
+  "scope": "Private evidence-only runner copy selects exactly one newly fixed tree regression before full suite; original runner, tests, threads2, timeout and cleanup unchanged. Filtered tests never count as whole-suite PASS.",
+  "originalPath": "scripts/windows-probe.py",
+  "originalSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "privateRunner": "/tmp/fc-round36-public-desktop-evidence/windows-probe-focused-tree.py",
+  "privateSha256": "78adc29c406c38c6cedf259f0c0b2ed617423842150ef607b24ca598f06ea5b0",
+  "patch": "--- \n+++ \n@@ -398,7 +398,7 @@\n                 raise RuntimeError(\"read-only system probe failed\")\n         report[\"tests\"] = []\n         for test_index, path in enumerate(tests):\n-            test_arguments = \" --test-threads=2\" + (\" --nocapture\" if path.name.startswith(\"fc_windows-\") else \"\")\n+            test_arguments = \" desktop::tree::tests::passive_tree_facts_never_aggregate_input_or_route_paging --exact --test-threads=2 --nocapture\"\n             log = ps_literal(directory + \"\\\\test-\" + str(test_index) + \".log\")\n             script = child_temp + \"$exe=Join-Path \" + root + \" \" + ps_literal(path.name) + \";$log=\" + log + \";$digest=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant();if($digest-ne \" + ps_literal(input_digests[path]) + \"){throw 'test executable digest mismatch'};$ErrorActionPreference='Continue';$output=@(& $exe\" + test_arguments + \" 2>&1 | ForEach-Object {\\\"$_\\\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=\" + ps_literal(path.name) + \";binarySha256=$digest;exitCode=$code;output=$output}|ConvertTo-Json -Compress\"\n             try:\n"
+}

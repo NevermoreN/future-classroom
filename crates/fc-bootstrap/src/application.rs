@@ -57,6 +57,11 @@ mod calendar_editor;
 mod calendar_flow;
 mod desktop_controller;
 mod display_editor;
+mod display_flow;
+mod subject_visual_probe;
+pub fn subject_visual_probe() -> std::result::Result<(), String> {
+    subject_visual_probe::run()
+}
 mod material_flow;
 pub(crate) mod material_probe;
 mod profile_content_editor;
@@ -71,6 +76,11 @@ pub fn materials_probe() -> std::result::Result<(), String> {
 }
 mod lesson_editor;
 mod materials_editor;
+mod public_desktop_probe;
+mod public_lesson_editor;
+pub fn public_desktop_probe() -> std::result::Result<(), String> {
+    public_desktop_probe::run()
+}
 mod schedule_editor;
 mod schedule_operations_probe;
 mod voice_controller;
@@ -212,6 +222,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Autostart(fc_ports::autostart::AutostartRepositoryError::Faulted)
                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
+                | BackendError::SubjectVisual(fc_ports::SubjectVisualRepositoryError::Faulted)
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
                 | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
@@ -281,6 +292,7 @@ fn error_text(error: &Failure) -> String {
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::SubjectVisual(_) => "科目配色或显示设置的权限、版本已变化，本次未确认保存。草稿保留，请核对后明确取消并重新加载。".into(),
             BackendError::Voice(_) => "语音权限、任务或版本已变化，本次结果尚未确认，请刷新核对后再操作。".into(),
             BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Cancelled) => "本次校历任务已取消或超过处理期限，请重新读取当前状态。".into(),
@@ -442,10 +454,17 @@ enum Outcome {
     CalendarMaintained {
         attempted: bool,
     },
+    PublicLessonLoaded(fc_ports::DesktopLessonSource),
+    PublicLessonSaved(fc_ports::DesktopLessonSource),
     LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
     LessonSaved(fc_domain::lesson_context::LessonContextSnapshot),
-    DisplayLoaded(DisplaySettings),
-    DisplaySaved(DisplaySettings),
+    DisplayLoaded(fc_ports::SubjectVisualState, Arc<IdentityState>),
+    DisplaySaved(fc_ports::SubjectVisualState, Arc<IdentityState>),
+    DisplayPreview {
+        sequence: u64,
+        source_revision: Revision,
+        image: fc_windows::workbench::LayoutPreview,
+    },
     Profile(Box<profile_flow::Loaded>),
     Desktop(
         Box<DesktopFacts>,
@@ -513,6 +532,15 @@ enum Work {
         Box<fc_bootstrap::autostart::Job>,
         Option<fc_windows::system::RunScope>,
     ),
+    LoadPublicLesson(
+        Arc<Mutex<Backend>>,
+        fc_bootstrap::backend::DesktopLessonGuard,
+    ),
+    ChangePublicLesson(
+        Arc<Mutex<Backend>>,
+        fc_bootstrap::backend::DesktopLessonGuard,
+        fc_domain::lesson_context::LessonAction,
+    ),
     LoadLesson(Arc<Mutex<Backend>>, SessionLease),
     ChangeLesson(
         Arc<Mutex<Backend>>,
@@ -528,7 +556,15 @@ enum Work {
         ScheduleDocument,
     ),
     LoadDisplay(Arc<Mutex<Backend>>, SessionLease),
-    SaveDisplay(Arc<Mutex<Backend>>, SessionLease, Revision, DisplaySettings),
+    SaveDisplay(
+        Arc<Mutex<Backend>>,
+        SessionLease,
+        fc_domain::subject_visual::PaletteRevision,
+        Revision,
+        Vec<fc_domain::subject_visual::SubjectColor>,
+        DisplaySettings,
+    ),
+    DisplayPreview(Box<display_flow::PreviewJob>),
     Profile(
         Arc<Mutex<Backend>>,
         SessionLease,
@@ -575,6 +611,8 @@ impl Task for Work {
             | Self::Shutdown(_)
             | Self::LoadAccounts(_, _)
             | Self::LoadSchedule(_, _)
+            | Self::LoadPublicLesson(_, _)
+            | Self::ChangePublicLesson(..)
             | Self::LoadLesson(_, _)
             | Self::ChangeLesson(_, _, _, _, _)
             | Self::LoadDisplay(_, _)
@@ -621,7 +659,15 @@ impl Task for Work {
                 .checked_add(path.as_os_str().len())?
                 .checked_mul(2),
             Self::SaveSchedule(_, _, _, document) => document.allocation_bytes(),
-            Self::SaveDisplay(_, _, _, settings) => settings.allocation_bytes(),
+            Self::SaveDisplay(_, _, palette, _, colors, settings) => {
+                settings
+                    .allocation_bytes()?
+                    .checked_add(palette.allocation_bytes())?
+                    .checked_add(colors.capacity().checked_mul(std::mem::size_of::<
+                        fc_domain::subject_visual::SubjectColor,
+                    >())?)
+            }
+            Self::DisplayPreview(job) => job.allocation_bytes(),
         }
     }
     fn run(self, context: &JobContext) -> Self::Output {
@@ -854,6 +900,20 @@ impl Task for Work {
                     .read_schedule(lease)?;
                 Ok(Outcome::ScheduleLoaded(document))
             }
+            Self::LoadPublicLesson(backend, guard) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                let scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+                Ok(Outcome::PublicLessonLoaded(
+                    scoped.read_desktop_lesson(&guard)?,
+                ))
+            }
+            Self::ChangePublicLesson(backend, guard, action) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+                Ok(Outcome::PublicLessonSaved(
+                    scoped.change_desktop_lesson(&guard, action)?,
+                ))
+            }
             Self::LoadLesson(backend, lease) => {
                 let snapshot = backend
                     .lock()
@@ -876,19 +936,21 @@ impl Task for Work {
                 Ok(Outcome::ScheduleSaved(document))
             }
             Self::LoadDisplay(backend, lease) => {
-                let settings = backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .read_display(lease)?;
-                Ok(Outcome::DisplayLoaded(settings))
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                let scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+                let settings = scoped.read_subject_visuals(lease)?;
+                let identity = Arc::new(scoped.state()?);
+                Ok(Outcome::DisplayLoaded(settings, identity))
             }
-            Self::SaveDisplay(backend, lease, expected, settings) => {
-                let settings = backend
-                    .lock()
-                    .map_err(|_| Failure::Stopped)?
-                    .save_display(lease, expected, settings)?;
-                Ok(Outcome::DisplaySaved(settings))
+            Self::SaveDisplay(backend, lease, palette, expected, colors, settings) => {
+                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
+                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
+                let settings =
+                    scoped.save_subject_visuals(lease, palette, expected, colors, settings)?;
+                let identity = Arc::new(scoped.state()?);
+                Ok(Outcome::DisplaySaved(settings, identity))
             }
+            Self::DisplayPreview(job) => job.run(context),
             Self::Profile(backend, lease, operation, sequence, root) => {
                 profile_flow::run(backend, lease, *operation, sequence, root, context)
                     .map(|loaded| Outcome::Profile(Box::new(loaded)))
@@ -1094,7 +1156,16 @@ fn execute(mut r: Request) -> Result<Outcome> {
                     .find(|s| s.id == id)
                     .map(|s| s.revision)
             });
-            let color = parse_color(r.data.get(COLOR).unwrap_or(""))?;
+            let color = if let Some(id) = existing {
+                r.state
+                    .subjects
+                    .iter()
+                    .find(|s| s.id == id)
+                    .ok_or_else(|| invalid("科目已变化。"))?
+                    .color
+            } else {
+                parse_color(r.data.get(COLOR).unwrap_or(""))?
+            };
             backend.identity_at(
                 require_lease()?,
                 r.state.revision,
@@ -1192,6 +1263,7 @@ struct Pending {
     ticket: JobTicket<Result<Outcome>>,
     generation: u64,
     self_revokes: bool,
+    public_lesson: bool,
 }
 struct App {
     window: Window,
@@ -1240,6 +1312,8 @@ struct App {
     material_editor: Option<materials_editor::Editor>,
     copies_loaded_sequence: u64,
     lesson_editor: Option<lesson_editor::Editor>,
+    public_lesson_editor: Option<public_lesson_editor::Editor>,
+    public_lesson_flow: Option<fc_bootstrap::backend::DesktopLessonFlow>,
     web_service: Option<WebService>,
     web_editor: Option<web_editor::Editor>,
     voice_editor: Option<voice_editor::Editor>,
@@ -1333,6 +1407,32 @@ impl App {
                 view.busy = self.pending.is_some() || self.stopping;
                 return view;
             }
+        }
+        if self.public_lesson_flow.is_some() {
+            if let Some(editor) = &self.public_lesson_editor {
+                return editor.view(
+                    &status,
+                    self.pending.is_some()
+                        || self.stopping
+                        || self
+                            .public_lesson_flow
+                            .as_ref()
+                            .is_some_and(|flow| flow.guard().is_waiting_for_authority()),
+                );
+            }
+            return View {
+                title: "正在读取本节课程".into(),
+                description: "本节临时换课仅影响当前这一节。".into(),
+                status,
+                fields: vec![],
+                actions: vec![Action {
+                    id: public_lesson_editor::CLOSE,
+                    label: "关闭".into(),
+                    enabled: true,
+                }],
+                busy: self.pending.is_some() || self.stopping,
+                grid: None,
+            };
         }
         if self.screen == Screen::Lesson {
             if let Some(editor) = &self.lesson_editor {
@@ -1596,7 +1696,7 @@ impl App {
             Screen::Subjects => {
                 view.title = "学校基础科目".into();
                 view.description = format!(
-                    "已有科目：{}。修改时填写现有名称，保存后仍保留同一科目及引用。",
+                    "已有科目：{}。修改时填写现有名称；改名保留原颜色及引用，颜色请在桌面显示设置的“科目颜色与显示”中修改。",
                     self.state
                         .subjects
                         .iter()
@@ -1607,7 +1707,7 @@ impl App {
                 view.fields = vec![
                     plain(OLD_NAME, "现有科目（新建时留空）", String::new()),
                     plain(SUBJECT, "科目名称", String::new()),
-                    plain(COLOR, "科目颜色（六位色值）", "70A5D8".into()),
+                    plain(COLOR, "新建科目颜色（改名时保留原色）", "70A5D8".into()),
                 ];
                 view.actions = vec![action(SAVE, "保存科目"), action(BACK, "返回")];
             }
@@ -1757,6 +1857,16 @@ impl App {
         Ok(())
     }
     fn lock(&mut self) {
+        // Account locking cannot manufacture an authentication requirement for
+        // the independent public desktop chooser. OS/foreground events close
+        // that capability explicitly before calling this management lock.
+        if self.public_lesson_flow.is_some() && !self.stopping {
+            if let Some(control) = &self.control {
+                control.lock_local();
+            }
+            self.lease = None;
+            return;
+        }
         if self.backup.irreversible()
             || self
                 .control
@@ -1834,6 +1944,7 @@ impl App {
         self.status.clear();
     }
     fn begin_shutdown(&mut self) {
+        self.close_public_lesson();
         if self
             .control
             .as_ref()
@@ -1925,6 +2036,7 @@ impl App {
                 Work::LoadSchedule(..) => "schedule-load",
                 Work::LoadDisplay(..) => "display-load",
                 Work::SaveDisplay(..) => "display-save",
+                Work::DisplayPreview(..) => "display-preview",
                 _ => "other",
             };
             eprintln!(
@@ -1938,6 +2050,10 @@ impl App {
         // current local lease before their completion reaches the window pump.
         // WTS/explicit lock still wins immediately; the heartbeat must allow this
         // particular completion to be consumed rather than cancel its own success.
+        let public_lesson = matches!(
+            &work,
+            Work::LoadPublicLesson(..) | Work::ChangePublicLesson(..)
+        );
         let self_revokes = matches!(&work,Work::Request(r) if r.action==EXIT||r.action==SAVE&&matches!(r.screen,Screen::Password|Screen::Rotate))
             || matches!(&work, Work::SaveAccount(_, lease, operation) if matches!(operation.as_ref(), accounts_editor::Command::Update { command: IdentityCommand::UpdateAccount { id, .. }, .. } if *id == lease.principal_id()));
         match self
@@ -1950,6 +2066,7 @@ impl App {
                     ticket,
                     generation: self.generation,
                     self_revokes,
+                    public_lesson,
                 });
                 self.status = "正在处理，请稍候。".into();
             }
@@ -1972,6 +2089,29 @@ impl App {
                     self.close_backup();
                     self.shutdown_deadline = Some(Instant::now() + Duration::from_secs(30));
                     self.render()
+                }
+                _ => Ok(()),
+            };
+        }
+        if self.public_lesson_flow.is_some() {
+            return match event {
+                Event::Submit(action, data) => self.public_lesson_event(action, data),
+                Event::Close => {
+                    self.close_public_lesson();
+                    self.render()
+                }
+                Event::Input => {
+                    if self.pending.is_none() {
+                        if let (Some(editor), Ok(data)) = (
+                            &mut self.public_lesson_editor,
+                            self.window.draft_nonsecret(),
+                        ) {
+                            if editor.input(data) {
+                                self.render()?;
+                            }
+                        }
+                    }
+                    Ok(())
                 }
                 _ => Ok(()),
             };
@@ -3011,6 +3151,116 @@ impl App {
         }
         Ok(())
     }
+    fn close_public_lesson(&mut self) {
+        if let Some(flow) = self.public_lesson_flow.take() {
+            flow.cancel();
+            self.generation = self.generation.saturating_add(1);
+            if let Some(pending) = &self.pending {
+                pending.ticket.cancel();
+            }
+            self.public_lesson_editor = None;
+            self.lesson_flow_active = false;
+            self.window.hide();
+            self.screen = if self.state.installation.is_none() {
+                Screen::Setup
+            } else if self.lease.is_some() {
+                Screen::Home
+            } else {
+                Screen::Login
+            };
+            self.status.clear();
+            self.desktop.hide();
+        }
+    }
+    fn open_public_lesson(
+        &mut self,
+        stamp: fc_bootstrap::backend::DesktopLessonStamp,
+    ) -> std::result::Result<(), String> {
+        if self.pending.is_some() || self.stopping || self.public_lesson_flow.is_some() {
+            return Ok(());
+        }
+        let Some(flow) = self
+            .control
+            .as_ref()
+            .and_then(|c| c.begin_desktop_lesson_flow(&stamp).ok())
+        else {
+            self.desktop_notice = "本节课程已变化，请重新点击桌面按钮。".into();
+            return Ok(());
+        };
+        let guard = flow.guard();
+        self.public_lesson_flow = Some(flow);
+        self.public_lesson_editor = None;
+        self.lesson_flow_active = true;
+        self.screen = Screen::Lesson;
+        self.status.clear();
+        if !self.offscreen_probe {
+            self.window.show(true);
+        }
+        if let Some(backend) = &self.backend {
+            self.submit(Work::LoadPublicLesson(backend.clone(), guard))?;
+        }
+        Ok(())
+    }
+    fn public_lesson_event(
+        &mut self,
+        action: ActionId,
+        data: FormData,
+    ) -> std::result::Result<(), String> {
+        // This branch precedes every authenticated navigation/LOCK handler.
+        if action == public_lesson_editor::CLOSE {
+            if let Some(editor) = &mut self.public_lesson_editor {
+                if let Err(message) = editor.handle(action, data) {
+                    self.status = message;
+                    return self.render();
+                }
+            } else if !data.is_empty() {
+                return Ok(());
+            }
+            self.close_public_lesson();
+            return self.render();
+        }
+        if self.pending.is_some() || self.stopping {
+            return Ok(());
+        }
+        let Some(guard) = self.public_lesson_flow.as_ref().map(|f| f.guard()) else {
+            return Ok(());
+        };
+        if !guard.is_current() {
+            if !guard.can_keep_chooser_open() {
+                self.close_public_lesson();
+            }
+            return self.render();
+        }
+        let Some(editor) = &mut self.public_lesson_editor else {
+            return Ok(());
+        };
+        match editor.handle(action, data) {
+            Ok(public_lesson_editor::Command::Stay) => {
+                self.status.clear();
+                self.render()
+            }
+            Ok(public_lesson_editor::Command::Close) => {
+                self.close_public_lesson();
+                self.render()
+            }
+            Ok(public_lesson_editor::Command::Reload) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::LoadPublicLesson(backend.clone(), guard))?;
+                }
+                Ok(())
+            }
+            Ok(public_lesson_editor::Command::Apply(action)) => {
+                if let Some(backend) = &self.backend {
+                    self.submit(Work::ChangePublicLesson(backend.clone(), guard, action))?;
+                }
+                Ok(())
+            }
+            Err(message) => {
+                self.status = message;
+                self.render()
+            }
+        }
+    }
     fn open_lesson_editor(&mut self) -> std::result::Result<(), String> {
         if self.pending.is_some() || self.stopping {
             return Ok(());
@@ -3417,6 +3667,7 @@ impl App {
             self.status = "当前账号没有可继续的显示设置草稿。".into();
             return self.render();
         }
+        self.clear_profile_preview();
         match self
             .display
             .as_mut()
@@ -3433,14 +3684,66 @@ impl App {
                     self.submit(Work::LoadDisplay(backend.clone(), lease))?;
                 }
             }
-            Ok(display_editor::Command::Save { expected, settings }) => {
+            Ok(display_editor::Command::Save {
+                expected_palette,
+                expected,
+                colors,
+                settings,
+            }) => {
                 if let Some(backend) = &self.backend {
                     self.submit(Work::SaveDisplay(
                         backend.clone(),
                         lease,
+                        expected_palette,
                         expected,
+                        colors,
                         settings,
                     ))?;
+                }
+            }
+            Ok(display_editor::Command::VisualPreview { subject_id }) => {
+                if let (Some(backend), Some(editor)) = (&self.backend, &self.display) {
+                    let (palette, settings) = editor.visual_preview_input();
+                    self.submit(Work::DisplayPreview(Box::new(display_flow::PreviewJob {
+                        backend: backend.clone(),
+                        lease,
+                        palette,
+                        settings,
+                        subject: subject_id,
+                        sequence: self.preview_sequence,
+                    })))?;
+                }
+            }
+            Ok(display_editor::Command::PickColor {
+                subject_id,
+                initial,
+            }) => {
+                if self.offscreen_probe {
+                    self.status = "隔离探针不打开系统颜色选择器。".into();
+                } else {
+                    let chosen = self.window.select_color(initial);
+                    if self.control.as_ref().is_none_or(|control| {
+                        !control.note_input(lease, self.clock.monotonic_millis())
+                            || control.health_gate().check_sensitive().is_err()
+                    }) || self.lease != Some(lease)
+                        || self.screen != Screen::Display
+                    {
+                        self.lock();
+                    } else if let Some(editor) = self
+                        .display
+                        .as_mut()
+                        .filter(|e| e.owner() == lease.principal_id())
+                    {
+                        match chosen {
+                            Ok(Some(color)) => {
+                                if let Err(message) = editor.picked_color(subject_id, color) {
+                                    self.status = message;
+                                }
+                            }
+                            Ok(None) => self.status = "已取消颜色选择，草稿保留。".into(),
+                            Err(_) => self.status = "系统颜色选择器未完成，草稿保留。".into(),
+                        }
+                    }
                 }
             }
             Err(message) => self.status = message,
@@ -3451,6 +3754,13 @@ impl App {
         if self.shell.reap_nonblocking().is_err() && !self.terminate_required {
             self.terminate_required = true;
             self.begin_shutdown();
+        }
+        if self
+            .public_lesson_flow
+            .as_ref()
+            .is_some_and(|f| !f.guard().can_keep_chooser_open())
+        {
+            self.close_public_lesson();
         }
         self.poll_backup()?;
         if self.backup.irreversible() {
@@ -3675,7 +3985,11 @@ impl App {
                     Ok(Outcome::LaunchCopies(_)) => "copies",
                     Ok(Outcome::LessonLoaded(_) | Outcome::LessonSaved(_)) => "lesson",
                     Ok(Outcome::ScheduleLoaded(_) | Outcome::ScheduleSaved(_)) => "schedule",
-                    Ok(Outcome::DisplayLoaded(_) | Outcome::DisplaySaved(_)) => "display",
+                    Ok(
+                        Outcome::DisplayLoaded(..)
+                        | Outcome::DisplaySaved(..)
+                        | Outcome::DisplayPreview { .. },
+                    ) => "display",
                     Err(_) => "error",
                     _ => "other",
                 };
@@ -3686,11 +4000,13 @@ impl App {
                     self.view().title
                 );
             }
-            let generation = self
-                .pending
-                .take()
-                .map(|p| p.generation)
-                .unwrap_or(self.generation);
+            let completed_pending = self.pending.take();
+            let public_lesson = completed_pending.as_ref().is_some_and(|p| p.public_lesson);
+            let generation = completed_pending.map_or(self.generation, |p| p.generation);
+            if generation != self.generation && public_lesson {
+                self.render()?;
+                return Ok(());
+            }
             if generation != self.generation {
                 if let Ok(Outcome::MaterialLaunch(launch)) = &outcome {
                     self.cleanup_paths.push_back(launch.path.path().to_owned());
@@ -3860,6 +4176,22 @@ impl App {
                         self.status.clear();
                     }
                 }
+                Ok(Outcome::PublicLessonLoaded(source)) => {
+                    if self
+                        .public_lesson_flow
+                        .as_ref()
+                        .is_some_and(|f| f.guard().is_current())
+                    {
+                        self.public_lesson_editor = Some(public_lesson_editor::Editor::new(source));
+                        self.status.clear();
+                    } else {
+                        self.close_public_lesson();
+                    }
+                }
+                Ok(Outcome::PublicLessonSaved(_source)) => {
+                    // One successful action consumes the original scene flow.
+                    self.close_public_lesson();
+                }
                 Ok(Outcome::LessonLoaded(snapshot)) => {
                     self.lesson_editor = Some(lesson_editor::Editor::new(snapshot));
                     self.screen = Screen::Lesson;
@@ -3896,17 +4228,42 @@ impl App {
                 Ok(Outcome::MaterialLaunch(launch)) => {
                     self.dispatch_material(*launch)?;
                 }
-                Ok(Outcome::DisplayLoaded(settings)) => {
+                Ok(Outcome::DisplayLoaded(settings, identity)) => {
+                    self.state = identity;
                     if let Some(lease) = self.lease {
-                        self.display =
-                            Some(display_editor::Editor::new(settings, lease.principal_id()));
+                        self.display = Some(display_editor::Editor::new_visuals(
+                            settings,
+                            lease.principal_id(),
+                        ));
                         self.screen = Screen::Display;
                         self.status.clear();
                     }
                 }
-                Ok(Outcome::DisplaySaved(settings)) => {
+                Ok(Outcome::DisplayPreview {
+                    sequence,
+                    source_revision,
+                    image,
+                }) => {
+                    if sequence == self.preview_sequence
+                        && self.screen == Screen::Display
+                        && self.profiles_memory_gate()
+                        && self
+                            .control
+                            .as_ref()
+                            .is_some_and(|c| c.health_gate().status().revision == source_revision)
+                        && self.display.as_ref().is_some_and(|e| e.visual_page())
+                    {
+                        self.window
+                            .set_layout_preview(Some(image))
+                            .map_err(|_| "科目颜色示例显示失败。")?;
+                        self.preview_active = true;
+                        self.status = "已显示当前草稿的颜色与透明度示例，尚未保存。".into();
+                    }
+                }
+                Ok(Outcome::DisplaySaved(settings, identity)) => {
+                    self.state = identity;
                     if let Some(editor) = &mut self.display {
-                        editor.saved(settings);
+                        editor.visuals_saved(settings);
                     }
                     self.status = "桌面显示设置已保存，关闭工作台后在系统桌面生效。".into();
                 }
@@ -3923,6 +4280,17 @@ impl App {
                     | Outcome::MaterialCleaned,
                 ) => return Err("后台结果类型不匹配".into()),
                 Err(error) => {
+                    if self.public_lesson_flow.is_some() {
+                        let fatal_error = fatal(&error);
+                        self.close_public_lesson();
+                        if fatal_error {
+                            if let Some(control) = &self.control {
+                                control.fault();
+                            }
+                            self.begin_shutdown();
+                        }
+                        return self.render();
+                    }
                     if self.screen == Screen::Voice {
                         if let Some(editor) = &mut self.voice_editor {
                             editor.invalidate();
@@ -4053,12 +4421,20 @@ fn run_at_inner(
                 audio.request_stop(StopReason::Emergency);
             }
         }
+        if hints.contains(HostHints::FOREGROUND_UNAVAILABLE) {
+            if let Some(control) = control_slot.get() {
+                control.cancel_desktop_lesson_flow();
+            }
+        }
         if hints.contains(HostHints::SESSION_LOCKED)
             || hints.contains(HostHints::SESSION_CHANGED)
             || hints.contains(HostHints::POWER_CHANGED)
             || hints.contains(HostHints::SHUTDOWN)
         {
             if let Some(control) = control_slot.get() {
+                // Immediate negative capability fence also runs inside native
+                // modal pumps; the UI still owns and drains the old job ticket.
+                control.cancel_desktop_lesson_flow();
                 control.lock_local();
             }
         }
@@ -4111,6 +4487,7 @@ fn run_at_inner(
         }
         if hints.contains(HostHints::SESSION_LOCKED) || hints.contains(HostHints::SESSION_CHANGED) {
             app.desktop.hide();
+            app.close_public_lesson();
             app.lock();
             app.window.hide();
             let _ = app.render();
@@ -4120,6 +4497,7 @@ fn run_at_inner(
             && hints.contains(HostHints::FOREGROUND_CHANGED)
             && !app.window.lesson_foreground_allowed()
         {
+            app.close_public_lesson();
             app.lock();
             app.window.hide();
             let _ = app.render();
@@ -4174,8 +4552,8 @@ fn run_at_inner(
             if let Some(notice) = app.desktop.take_notice() {
                 app.desktop_notice = notice;
             }
-            if app.desktop.take_lesson_event() {
-                if let Err(error) = app.open_lesson_editor() {
+            if let Some(stamp) = app.desktop.take_lesson_event() {
+                if let Err(error) = app.open_public_lesson(stamp) {
                     probe_error = Some(error);
                     app.begin_shutdown();
                 }
@@ -4384,6 +4762,8 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         calendar_job: None,
         next_calendar_maintenance: Instant::now() + Duration::from_secs(30),
         lesson_editor: None,
+        public_lesson_editor: None,
+        public_lesson_flow: None,
         web_service: None,
         web_editor: None,
         voice_editor: None,

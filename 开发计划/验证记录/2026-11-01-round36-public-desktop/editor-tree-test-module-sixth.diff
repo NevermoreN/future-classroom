@@ -1,0 +1,115 @@
+--- first-compile/tree.rs
++++ sixth/tree.rs
+@@ -1820,6 +1820,56 @@
+         assert_eq!(body.pages.len(), 4);
+         assert_eq!(body.visible_leaves, vec![1, 1, 1, 1]);
+     }
++    #[test]
++    fn passive_tree_facts_never_aggregate_input_or_route_paging() {
++        let _serial = crate::NATIVE_TEST_SERIAL
++            .lock()
++            .unwrap_or_else(|p| p.into_inner());
++        let (_p, gate) = authority();
++        for kind in [
++            ComponentKind::Clock,
++            ComponentKind::Date,
++            ComponentKind::Schedule,
++            ComponentKind::DateCountdown,
++            ComponentKind::Recess,
++        ] {
++            let mut s = sample();
++            s.cards[0].kind = kind;
++            s.cards[0].content = CardContent::Text("只读事实".into());
++            s.cards[0].page = fc_presentation::scene::PageInfo {
++                offset: 0,
++                shown: 1,
++                total: 2,
++            };
++            let mut renderer = DesktopRenderer::new_hidden().unwrap();
++            renderer
++                .present(&s, now(), &guard(&gate, s.generation))
++                .unwrap();
++            assert!(renderer.cards.iter().all(|c| c.input.is_none()));
++            assert!(renderer.tree.as_ref().unwrap().groups.iter().all(|g| g
++                .input
++                .state
++                .targets
++                .borrow()
++                .is_empty()));
++            assert!(renderer.take_events().unwrap().is_empty());
++            s.lesson_control = Some(fc_presentation::scene::LessonControlContent {
++                rect: rect(0., 240., 220., 80.),
++                caption: "本节临时换课".into(),
++                can_change: true,
++            });
++            renderer
++                .present(&s, now(), &guard(&gate, s.generation))
++                .unwrap();
++            renderer.probe_lesson_control().unwrap();
++            assert_eq!(
++                renderer.take_events().unwrap(),
++                vec![DesktopEvent::LessonManage {
++                    generation: s.generation
++                }]
++            );
++        }
++    }
+ }
+ #[cfg(test)]
+ mod additional_tests {
+@@ -1946,54 +1996,4 @@
+         assert_eq!(image.bgra.len(), 960 * 540 * 4);
+         assert_eq!(r.metrics.visible_windows, 0);
+     }
+-    #[test]
+-    fn passive_tree_facts_never_aggregate_input_or_route_paging() {
+-        let _serial = crate::NATIVE_TEST_SERIAL
+-            .lock()
+-            .unwrap_or_else(|p| p.into_inner());
+-        let (_p, gate) = authority();
+-        for kind in [
+-            ComponentKind::Clock,
+-            ComponentKind::Date,
+-            ComponentKind::Schedule,
+-            ComponentKind::DateCountdown,
+-            ComponentKind::Recess,
+-        ] {
+-            let mut s = sample();
+-            s.cards[0].kind = kind;
+-            s.cards[0].content = CardContent::Text("只读事实".into());
+-            s.cards[0].page = fc_presentation::scene::PageInfo {
+-                offset: 0,
+-                shown: 1,
+-                total: 2,
+-            };
+-            let mut renderer = DesktopRenderer::new_hidden().unwrap();
+-            renderer
+-                .present(&s, now(), &guard(&gate, s.generation))
+-                .unwrap();
+-            assert!(renderer.cards.iter().all(|c| c.input.is_none()));
+-            assert!(renderer.tree.as_ref().unwrap().groups.iter().all(|g| g
+-                .input
+-                .state
+-                .targets
+-                .borrow()
+-                .is_empty()));
+-            assert!(renderer.take_events().unwrap().is_empty());
+-            s.lesson_control = Some(fc_presentation::scene::LessonControlContent {
+-                rect: rect(0., 240., 220., 80.),
+-                caption: "本节临时换课".into(),
+-                can_change: true,
+-            });
+-            renderer
+-                .present(&s, now(), &guard(&gate, s.generation))
+-                .unwrap();
+-            renderer.probe_lesson_control().unwrap();
+-            assert_eq!(
+-                renderer.take_events().unwrap(),
+-                vec![DesktopEvent::LessonManage {
+-                    generation: s.generation
+-                }]
+-            );
+-        }
+-    }
+-}
++}

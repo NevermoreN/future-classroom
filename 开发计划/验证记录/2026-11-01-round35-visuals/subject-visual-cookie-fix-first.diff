@@ -1,0 +1,20 @@
+--- before
++++ after
+@@ -33,7 +33,7 @@
+     let cookie = f.pair("visual-browser", false);
+     let web = f
+         .service
+-        .authenticate(&cookie_secret(&cookie).unwrap())
++        .authenticate(&cookie_secret(cookie.as_bytes()).unwrap())
+         .unwrap()
+         .lease();
+     assert!(f.backend.read_subject_visuals(web).is_err());
+@@ -171,7 +171,7 @@
+     let cookie = f.pair("guarded-visual", false);
+     let web = f
+         .service
+-        .authenticate(&cookie_secret(&cookie).unwrap())
++        .authenticate(&cookie_secret(cookie.as_bytes()).unwrap())
+         .unwrap()
+         .lease();
+     let before = f.backend.read_subject_visuals(f.admin).unwrap();

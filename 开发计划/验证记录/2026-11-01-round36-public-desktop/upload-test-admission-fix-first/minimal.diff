@@ -1,0 +1,35 @@
+--- before/crates/fc-bootstrap/src/web_transfer/uploads/tests.rs
++++ after/crates/fc-bootstrap/src/web_transfer/uploads/tests.rs
+@@ -331,14 +331,24 @@
+     ) -> T {
+         let result = Arc::new(Mutex::new(None));
+         let written = result.clone();
+-        let ticket = match self.0.as_ref().unwrap().handle().try_submit(
+-            Job(Box::new(move |context| {
+-                *written.lock().unwrap() = Some(call(context));
+-            })),
+-            Instant::now() + Duration::from_secs(15),
+-        ) {
+-            Ok(ticket) => ticket,
+-            Err(error) => panic!("test worker admission {:?}", error.kind),
++        let deadline = Instant::now() + Duration::from_secs(15);
++        let mut task = Job(Box::new(move |context| {
++            *written.lock().unwrap() = Some(call(context));
++        }));
++        let ticket = loop {
++            match self.0.as_ref().unwrap().handle().try_submit(task, deadline) {
++                Ok(ticket) => break ticket,
++                Err(error)
++                    if error.kind == fc_runtime::worker::Rejection::Busy
++                        && Instant::now() < deadline =>
++                {
++                    // Busy has not accepted this task. Retry its original owner
++                    // under the same absolute deadline, without replaying work.
++                    task = error.task;
++                    std::thread::sleep(Duration::from_millis(1));
++                }
++                Err(error) => panic!("test worker admission {:?}", error.kind),
++            }
+         };
+         ticket.wait().unwrap();
+         let returned = result.lock().unwrap().take().unwrap();

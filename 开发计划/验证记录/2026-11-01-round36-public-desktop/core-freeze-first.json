@@ -1,0 +1,181 @@
+{
+  "status": "SOURCE_FROZEN_STATIC_PASS_COMPILE_AND_RUNTIME_NOT_RUN",
+  "recordedAt": "2026-10-31T17:58:51.317997+00:00",
+  "base": "a7e8d3be66a9290b140fb8104836bf078d91d4b3",
+  "worktree": "/tmp/fc-round36-public-desktop-worktree",
+  "files": [
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22065,
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5",
+      "beforePresent": true,
+      "beforeBytes": 19927,
+      "beforeSha256": "1cfd35b716381155578e0d37f5db507fb12a6916411c636f73f9fdf09f869834"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3463,
+      "sha256": "edc4d295b815f1550fd7759188184a7bc5b7d00895047f7060db4568ecc2015a",
+      "beforePresent": true,
+      "beforeBytes": 3442,
+      "beforeSha256": "724eaab4629c21abc60c907f9bb2375f03cdb3f0a323fd820c2dc30bf9c792a5"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+      "bytes": 8559,
+      "sha256": "58e56bff46e152ee7256bac99f3b38ec43acd525538fba7ebbe813281691e7e4",
+      "beforePresent": false,
+      "beforeBytes": 0,
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22272,
+      "sha256": "1b9579379d98e437d074c924a0b9b05866dfb38c6d73456f711eeb43128228f9",
+      "beforePresent": true,
+      "beforeBytes": 22220,
+      "beforeSha256": "dc5e4f8b757ceb806e80a29b6a7b6ab31c9e1685ef893be80dd949a071c6b168"
+    },
+    {
+      "path": "crates/fc-ports/src/desktop_lesson.rs",
+      "bytes": 1653,
+      "sha256": "f03541c029a69d740964c1d586692f9d702cc5804742154d4d74293df0a8495b",
+      "beforePresent": false,
+      "beforeBytes": 0,
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 42365,
+      "sha256": "336a1672ff1059e4566089501cfd1f7174a6f6c2a7b9c361330c1beade60d1a6",
+      "beforePresent": true,
+      "beforeBytes": 41519,
+      "beforeSha256": "a23e77cc764cc7ebc4a986982648c9805e04ec435ff9ab440b318eea20052a98"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson.rs",
+      "bytes": 16390,
+      "sha256": "640b854cc218e122d47a286ed421f0514d97189658159cb6bd145b7292fed168",
+      "beforePresent": true,
+      "beforeBytes": 16440,
+      "beforeSha256": "84744b5000d1941ff5db4851e2ce23ba6ecd808991116853fc46f4a4b987c1d0"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson_codec.rs",
+      "bytes": 13947,
+      "sha256": "be314435eaab7978501e519cbed65581ba54acb36fbb6b0816ee927ce8754d6d",
+      "beforePresent": true,
+      "beforeBytes": 8183,
+      "beforeSha256": "082c8b498c10a7ed7080a61d3bdbc9942156717dda0f3ab1bf766d3e723477df"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson.rs",
+      "bytes": 20009,
+      "sha256": "44a5b1b64f18094f4d60b17d9fa200c72020a75ac63f328eb61db904d130b5ec",
+      "beforePresent": false,
+      "beforeBytes": 0,
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson/tests.rs",
+      "bytes": 28925,
+      "sha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e",
+      "beforePresent": false,
+      "beforeBytes": 0,
+      "beforeSha256": null
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "--config",
+        "skip_children=true",
+        "crates/fc-domain/src/lesson_context.rs",
+        "crates/fc-domain/src/lesson_context/tests.rs",
+        "crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+        "crates/fc-ports/src/lib.rs",
+        "crates/fc-ports/src/desktop_lesson.rs",
+        "crates/fc-storage/src/business/mod.rs",
+        "crates/fc-storage/src/business/lesson.rs",
+        "crates/fc-storage/src/business/lesson_codec.rs",
+        "crates/fc-storage/src/business/desktop_lesson.rs",
+        "crates/fc-storage/src/business/desktop_lesson/tests.rs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "newTests": {
+    "crates/fc-domain/src/lesson_context/tests/public_desktop.rs": [
+      "actorless_desktop_uses_honest_origin_and_same_key_history_restore_rules",
+      "management_keeps_exact_local_admin_authority_and_authenticated_audit",
+      "desktop_cannot_invent_teacher_or_default_target_or_cross_clock_barriers"
+    ],
+    "crates/fc-storage/src/business/desktop_lesson/tests.rs": [
+      "public_commands_need_no_account_session_and_preserve_only_this_lesson",
+      "desktop_receipts_are_idempotent_and_never_impersonate_managed_receipts",
+      "exact_catalog_schedule_lesson_key_and_class_cas_never_rebinds_a_stale_click",
+      "scope_targets_and_end_of_lesson_or_rollback_cannot_be_extended",
+      "default_deny_panic_cancel_and_combined_guards_do_not_grant_or_fault",
+      "guard_revocation_and_course_expiry_at_precommit_roll_back_without_publication",
+      "queued_public_task_cancellation_keeps_sql_state_and_receipt_unchanged",
+      "scoped_execution_fence_still_cancels_before_commit_and_base_remains_healthy",
+      "legacy_read_is_not_rewritten_until_mutation_and_reopen_has_no_implicit_capability",
+      "persistent_day_floor_and_directory_invalidation_reject_without_partial_writes",
+      "projected_backup_and_restore_never_revive_live_desktop_override_or_capability",
+      "public_source_is_bounded_and_contains_no_authentication_fields",
+      "mapped_format_three_audit_remains_inert_and_preserves_complete_history"
+    ],
+    "crates/fc-storage/src/business/lesson_codec.rs::initiator_tests": [
+      "strict_format_three_roundtrips_both_honest_initiators_and_old_formats_keep_admin",
+      "malformed_mixed_or_guessed_initiators_never_become_desktop_authority"
+    ]
+  },
+  "newTestCount": 18,
+  "contracts": {
+    "actorless": "DesktopLessonRepository methods have no ActorContext or SessionLease. Unbound repository guard denies. Guard rebinding only AND-tightens. False/panic maps to ordinary ExecutionCancelled/Unavailable.",
+    "managed": "Original LessonRepository and apply exact-management authorization remain; authenticated override provenance maps to LessonInitiator::Authenticated(real principal).",
+    "writer": "One transaction binds actual current class, catalog/schedule/lesson revisions, exact LessonInstanceKey, trusted clock and persisted/memory high-water; same precommit re-observation/health capability/execution fences; no new worker or native resource.",
+    "audit": "Strict new format3 tagged initiator Authenticated|LocalDesktop; complete old1/2 actor forms accepted, no force-write on read; original projection makes live override inactive on ordinary/mapped restore.",
+    "budgets": "MAX_LESSON_INTERVALS64 and 64KiB per document/outcome/receipt retained. Source exposes bounded enabled subject and current-class teacher display choices without authentication data.",
+    "delivery": "Guard checked before enqueue, writer evaluate, precommit, after actual ticket completion and again after decoding. Unknown postcommit cancellation never claims rollback."
+  },
+  "notRun": [
+    "Cargo compile/tests",
+    "Clippy",
+    "Windows",
+    "remote",
+    "npm",
+    "Git commit/push",
+    "CI"
+  ],
+  "testSuggestions": [
+    "cargo test --release --locked --jobs 2 -p fc-domain --lib lesson_context::tests::public_desktop -- --test-threads=2",
+    "cargo test --release --locked --jobs 2 -p fc-storage --lib business::desktop_lesson::tests:: -- --test-threads=2",
+    "cargo test --release --locked --jobs 2 -p fc-storage --lib business::lesson_codec:: -- --test-threads=2"
+  ],
+  "unchanged": [
+    "Round35 worktree",
+    "Backend/UI/native files owned by other agents",
+    "Cargo dependency graph",
+    "Web/settings/account authorization"
+  ]
+}

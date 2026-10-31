@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_LOCAL_CHECKS_ONLY",
+  "utc": "2026-10-31T17:46:14.139953+00:00",
+  "source": {
+    "path": "/tmp/fc-round35-visuals-worktree/scripts/windows-tls-business-probe.py",
+    "beforeSha256": "6bb955acd80dd9114881ccbd757758de056a7f531d1e387f5e679061e4f45fae",
+    "sha256": "0757d52fc926944c040d368900243afd18ad9ac5286313b857a50ad7fa638ba1",
+    "bytes": 99106
+  },
+  "rootCause": "Latest vacant report sequence20 had transfers41, before two already completed HTTP operations omitted by250ms throttle; original firstpartial sequence22 transfers44 and fourpartial sequence25 transfers47. Exact interval dictionaries already order-independent. Old41+4 predicate falsely rejected47.",
+  "fix": "Keep initial vacant check, capture counter from first observed exact uniqueJsonBody1 admission; require exactly+3 and allfour unchanged unique original intervals/json4/bound4/pending0.",
+  "budgetsChanged": false,
+  "productionRustChanged": false,
+  "checks": {
+    "pythonAst": "PASS",
+    "trailingWhitespace": "PASS",
+    "selfTest": {
+      "status": "PURE_LOCAL_CHECKS_PASS",
+      "checks": [
+        "synthetic preserved seq20/22/25 transfers41/44/47 regression; all24 interval orders accepted, extra/missing transfers and mutated original intervals rejected; no IO",
+        "synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)",
+        "fragmented/exact-CL response framing",
+        "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+        "204/304 omit CL/TE and count/hash zero wire body; CL0/body/duplicate-header/TE rejected",
+        "HEAD 200/403/404/405 require omitted CL/TE and zero wire body; ordinary GET remains strict",
+        "200 still requires canonical unique CL, JSON64KiB/static5MiB/download50MiB caps unchanged",
+        "binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected",
+        "ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected",
+        "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+        "120000-byte request fragmentation and head/body coalescing",
+        "READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits",
+        "visual exact single-scope disclosure: default3/20, independent0fill+70/80component, outline retains stored3/20; extra/raw/version/scope/type and wrong fixture rejected"
+      ],
+      "tls": "NOT_RUN",
+      "windows": "NOT_RUN",
+      "business": "NOT_RUN"
+    },
+    "actualPreservedProgressPureReplay": {
+      "status": "PURE_REPLAY_PASS",
+      "scope": "Unchanged preserved real FAIL progress only; not a second Windows execution",
+      "actualOriginalStatus": "FAIL",
+      "actualOriginalCleanup": "PASS",
+      "firstSequence": 22,
+      "firstTransfers": 44,
+      "finalSequence": 25,
+      "finalTransfers": 47,
+      "exactOriginalIntervalsUnchanged": true,
+      "newBarrierAcceptsPreservedFourAdmissions": true
+    }
+  },
+  "evidence": [
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-before.py",
+      "bytes": 96062,
+      "sha256": "6bb955acd80dd9114881ccbd757758de056a7f531d1e387f5e679061e4f45fae"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-original-failure.json",
+      "bytes": 120534,
+      "sha256": "2491fc25ad367efe5230f5cdad76f88dcf4ebc6446c6054fb8eb771ff61ea505"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-diagnosis-before.json",
+      "bytes": 1593,
+      "sha256": "3f869e54dc4ba599e000d090f20de8412dfb6ab0fca223081e8f151757a193d4"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-replay-after.json",
+      "bytes": 383,
+      "sha256": "89e55767eeb36a94e8073a407b95cc95978460e32e707c8c1bddaa940b39422e"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-fix.patch",
+      "bytes": 5538,
+      "sha256": "a1e97406a5a42f88adc95d7cc2fedc600dd8060f46bc7f35fd0cd856aa9f12e9"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-pure-first.stdout.log",
+      "bytes": 1494,
+      "sha256": "847d9036d886baf89a4c0da9ea10c822af0d55c4b8bac158c010c34839ceb101"
+    },
+    {
+      "path": "/tmp/fc-round35-visuals-evidence/business-continuous-pure-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Only current feature worktree TLS runner changed; preserved original WindowsFAIL+cleanupPASS unchanged; no rerun/remote/Cargo/npm/Git",
+  "remaining": "Root actual current-source MSVC/GNU finiteTLS/continuous tests still required"
+}

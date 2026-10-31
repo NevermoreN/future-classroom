@@ -18,3 +18,5 @@ pub mod schedule_document;
 pub mod time;
 
 pub mod voice;
+
+pub mod subject_visual;

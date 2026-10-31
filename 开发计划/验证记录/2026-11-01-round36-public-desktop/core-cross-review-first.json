@@ -1,0 +1,250 @@
+{
+  "status": "STATIC_REVIEW_PASS_NO_CONCRETE_BLOCKER_FOUND",
+  "recordedAt": "2026-10-31T18:13:23.994753+00:00",
+  "worktree": "/tmp/fc-round36-public-desktop-worktree",
+  "scope": "Independent Round36 domain/ports/storage to Backend/UI/native/runner cross-boundary review; source only. No permission or deployment gate change.",
+  "sourceManifests": [
+    {
+      "path": "/tmp/fc-round36-public-desktop-evidence/core-freeze-first.json",
+      "sha256": "0f8e952a085890c1af7066a53e483eaafc1b482d1ab69f7ec5134141d0e16fa8"
+    },
+    {
+      "path": "/tmp/fc-round36-public-desktop-evidence/service-freeze-third.json",
+      "sha256": "3f1c5e124132f9d7b862bf2feaedda23374d509781434ee5c5726afba7da022d"
+    },
+    {
+      "path": "/tmp/fc-round36-public-desktop-evidence/editor-freeze-third.json",
+      "sha256": "4107f15e554bebc39b9a705a54460a016384b3f9fa6ed1a3692f2efe0b803fe8"
+    },
+    {
+      "path": "/tmp/fc-round36-public-desktop-evidence/editor-runner-freeze-first.json",
+      "sha256": "919c461b5750839b201c634c379e71c36ca5b7c1cbe50e5f4ac1919eda88a937"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "bytes": 22065,
+      "sha256": "68c5ac8d8374780da0b3018cb6fad7b7de125c3731ec31314a342105480ca5f5"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context/tests.rs",
+      "bytes": 3463,
+      "sha256": "edc4d295b815f1550fd7759188184a7bc5b7d00895047f7060db4568ecc2015a"
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context/tests/public_desktop.rs",
+      "bytes": 8559,
+      "sha256": "58e56bff46e152ee7256bac99f3b38ec43acd525538fba7ebbe813281691e7e4"
+    },
+    {
+      "path": "crates/fc-ports/src/lib.rs",
+      "bytes": 22272,
+      "sha256": "1b9579379d98e437d074c924a0b9b05866dfb38c6d73456f711eeb43128228f9"
+    },
+    {
+      "path": "crates/fc-ports/src/desktop_lesson.rs",
+      "bytes": 1653,
+      "sha256": "f03541c029a69d740964c1d586692f9d702cc5804742154d4d74293df0a8495b"
+    },
+    {
+      "path": "crates/fc-storage/src/business/mod.rs",
+      "bytes": 42365,
+      "sha256": "336a1672ff1059e4566089501cfd1f7174a6f6c2a7b9c361330c1beade60d1a6"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson.rs",
+      "bytes": 16390,
+      "sha256": "640b854cc218e122d47a286ed421f0514d97189658159cb6bd145b7292fed168"
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson_codec.rs",
+      "bytes": 13947,
+      "sha256": "be314435eaab7978501e519cbed65581ba54acb36fbb6b0816ee927ce8754d6d"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson.rs",
+      "bytes": 20009,
+      "sha256": "44a5b1b64f18094f4d60b17d9fa200c72020a75ac63f328eb61db904d130b5ec"
+    },
+    {
+      "path": "crates/fc-storage/src/business/desktop_lesson/tests.rs",
+      "bytes": 28925,
+      "sha256": "c78a04a223b6014a5b227813d092c039202ba96b5e6bc872b3fdf2a42099992e"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "bytes": 106693,
+      "sha256": "64a129c6044e3867c45f83a67616c50e26a3ce640896b19b53d8f43779ba64a9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+      "bytes": 14251,
+      "sha256": "bae7261401025843b65397df0b0502260a2f9c1e2f68edfe84944a1aa72d9853"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+      "bytes": 22034,
+      "sha256": "3d195a21e7092cb62c7236ec2a5ade9d455ea7f266c20dc16f70356c6c2668e3"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 257514,
+      "sha256": "b7b39cef972a2a9c839a253003ebdeb892ba1fc2b5ef9489d9f4499e6622631a"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 60894,
+      "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+      "bytes": 10965,
+      "sha256": "b683ce934340c04fa54f45501f8b0a4e992e117f7f19e353b325ca95aa496809"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+      "bytes": 6307,
+      "sha256": "49fcd0928ada2aadc37eecd6a186cdfd0dc15cdb9c42b39e29b479e33f0f647b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_desktop_probe.rs",
+      "bytes": 14234,
+      "sha256": "baeedef26632ac292710fd054dae8c3412e1d7dc3f953c3f07e6fac8eef78648"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18687,
+      "sha256": "07e885089d1542d895e7c780bd2900b153061ba1d44c329aa4bdd574fea8e5b3"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122383,
+      "sha256": "23dce0cb8fbe8bddcf7eb077bc68763c4f76274af8e688b81b0602a84e55830d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 71115,
+      "sha256": "e5cd54fc77ad6b4527d08318a6b01dfb5822bee5da28d57a1a88db5805c5355e"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18711,
+      "sha256": "3939411439adc01897c2082a1d0c42382566f6475f6b705e5bf52d5e52545073"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/public_inputs_tests.rs",
+      "bytes": 4499,
+      "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc"
+    },
+    {
+      "path": "crates/fc-windows/src/host.rs",
+      "bytes": 26794,
+      "sha256": "3e162c9fe0e57f6037887cf0eddcae69facdc2c3ade5202c1bc1d794a55cf94d"
+    },
+    {
+      "path": "crates/fc-windows/src/workbench.rs",
+      "bytes": 103334,
+      "sha256": "ed36ea8184fdeea2eafa9adb05628a2cb8c3080a0eeb5b0aaa095d687980747a"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+    }
+  ],
+  "sourceBeforeAfterEqual": true,
+  "blockingFindings": [],
+  "conclusions": [
+    {
+      "topic": "Honest public origin and narrow authority",
+      "result": "STATIC_PASS",
+      "locations": [
+        "crates/fc-domain/src/lesson_context.rs",
+        "crates/fc-ports/src/desktop_lesson.rs",
+        "crates/fc-storage/src/business/desktop_lesson.rs:238",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:336"
+      ],
+      "detail": "No fake principal, session or login is minted. LocalDesktop provenance is distinct; old authenticated path remains. Public repository denies absent/panicking guards and preserves existing scoped request fence. Exact current class, lesson key, catalog/schedule/context CAS and original clock/high-water checks are performed on the existing writer."
+    },
+    {
+      "topic": "Own publication and stale entry",
+      "result": "STATIC_PASS",
+      "locations": [
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:96",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:183",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:259",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:345",
+        "crates/fc-bootstrap/src/application.rs:3758"
+      ],
+      "detail": "Entry requires Healthy and exact rendered source revision/generation. Only the private writer guard admits AuthorityUpdating during checked writer publication; presentation waiting cannot submit. Public entry and final delivery still require Healthy. Own COMMIT is not rejected solely because it advances the old global publication revision. Fixed original wall/monotonic/Instant interval and atomic cancellation remain in every guard."
+    },
+    {
+      "topic": "Observed foreground/session negative fence",
+      "result": "STATIC_PASS_WITH_SCOPE_LIMIT",
+      "locations": [
+        "crates/fc-windows/src/workbench.rs:37",
+        "crates/fc-windows/src/host.rs:453",
+        "crates/fc-bootstrap/src/application.rs:4423",
+        "crates/fc-bootstrap/src/backend/desktop_lesson.rs:240"
+      ],
+      "detail": "Native dispatch samples the existing desktop-or-own-PID policy and synchronously sends only a negative hint. Callback cancels atomic epoch before main App processing, without SQL/Windows calls in the writer guard. Active/entry capabilities are epoch-bound; old owner cancellation uses exact active ID. This proves only the observed message-dispatch boundary, not zero OS delivery latency or a real foreground mutation test."
+    },
+    {
+      "topic": "Passive display including queued pagination",
+      "result": "STATIC_PASS",
+      "locations": [
+        "crates/fc-windows/src/desktop.rs:1324",
+        "crates/fc-windows/src/desktop.rs:1344",
+        "crates/fc-windows/src/desktop/tree.rs:224",
+        "crates/fc-windows/src/desktop/tree.rs:1116"
+      ],
+      "detail": "Clock/Date/Schedule and related passive facts create no ordinary input in flat/tree renderer. LessonControl is an explicit separate exception. Queued TreePage reaches the same passive action guard. Unrenderable passive content is rejected with E_BOUNDS instead of silently exposing one page of incomplete timetable."
+    },
+    {
+      "topic": "Cancellation retains physical task ownership",
+      "result": "STATIC_PASS",
+      "locations": [
+        "crates/fc-bootstrap/src/application.rs:3154",
+        "crates/fc-bootstrap/src/application.rs:3175",
+        "crates/fc-bootstrap/src/application.rs:4003",
+        "crates/fc-runtime/src/worker.rs"
+      ],
+      "detail": "Closing chooser cancels owner and original ticket but does not take/drop Pending or replace its still-running work. New public entry refuses while Pending exists; late stale-generation public outcome is consumed without auth refresh/reissue. Positive output is bounded metadata, not SQL/native ownership; the pool owns worker completion/join. Cancellation is not reported as rollback after COMMIT."
+    },
+    {
+      "topic": "Finite probe and runner honesty",
+      "result": "STATIC_PASS_RUNTIME_NOT_RUN",
+      "locations": [
+        "crates/fc-bootstrap/src/application/public_desktop_probe.rs",
+        "scripts/windows-probe.py:94",
+        "scripts/windows-probe.py:532",
+        "scripts/windows-probe.py:553",
+        "scripts/windows-probe.py:622"
+      ],
+      "detail": "20 exact ordered markers require actual hidden native buttons, actorless change/restore, old-scene rejection, pending close and physical shutdown before isolated deployment removal. Native absolute120s remains; observation180s and SSH190s wrap it without renewing work/flow budgets. Runner is exclusive with other feature workflows. Probe says database_reopen NOT_EXERCISED and foreground UNTOUCHED; no runtime/visible-Seewo/three-OS claim."
+    }
+  ],
+  "testSourceCoverage": {
+    "coreNewTests": 18,
+    "backendTests": 13,
+    "editorAndNativeNewTests": 10,
+    "probeSteps": 20,
+    "execution": "NOT_RUN_BY_THIS_REVIEW"
+  },
+  "notExecuted": [
+    "Cargo",
+    "rustc",
+    "npm",
+    "Windows or SSH",
+    "CI",
+    "Git writes",
+    "product/probe executable"
+  ],
+  "limits": [
+    "No compile/borrow/API compatibility claim beyond source inspection; parent unified builds remain required.",
+    "No actual native event timing, zero-latency foreground guarantee or physical worker shutdown observation is established here.",
+    "Round35 day-floor fix is intentionally absent in this frozen independent Round36 copy; integration must apply this Round36 delta over final corrected Round35 baseline.",
+    "Original strict TCP5s failure and production gates remain unaffected."
+  ]
+}

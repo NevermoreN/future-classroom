@@ -1,0 +1,20 @@
+--- actual-third/tree.rs
++++ seventh/tree.rs
+@@ -1835,6 +1835,17 @@
+         ] {
+             let mut s = sample();
+             s.cards[0].kind = kind;
++            // The authoritative tree must describe the same widget as its card.
++            // sample() starts as Materials; changing only the card is invalid.
++            s.paint_tree.as_mut().unwrap().nodes[2].widget_kind = Some(match kind {
++                ComponentKind::Clock => fc_domain::layout::WidgetKind::Clock,
++                ComponentKind::Date => fc_domain::layout::WidgetKind::Date,
++                ComponentKind::Schedule => fc_domain::layout::WidgetKind::Schedule,
++                ComponentKind::DateCountdown => fc_domain::layout::WidgetKind::DateCountdown,
++                ComponentKind::Recess => fc_domain::layout::WidgetKind::Recess,
++                _ => unreachable!("only passive builtins in this fixture"),
++            });
++            assert!(validate(s.paint_tree.as_ref().unwrap(), &s.cards).is_ok());
+             s.cards[0].content = CardContent::Text("只读事实".into());
+             s.cards[0].page = fc_presentation::scene::PageInfo {
+                 offset: 0,

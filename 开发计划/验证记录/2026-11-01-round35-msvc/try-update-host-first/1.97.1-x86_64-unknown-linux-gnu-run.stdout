@@ -1,0 +1,3 @@
+TRY_UPDATE_CASE_PASS atomic=u64 success=true refusal_unchanged=true overflow_no_wrap=true stale_cas_retried=true
+TRY_UPDATE_CASE_PASS atomic=usize success=true refusal_unchanged=true overflow_no_wrap=true stale_cas_retried=true
+TRY_UPDATE_HOST_PASS atomic_types=2 token_issuer_bound_no_wrap=true

@@ -1,0 +1,34 @@
+{
+  "stage": "Round36 isolated public desktop runner freeze",
+  "source": {
+    "path": "scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "before": {
+    "path": "editor-runner-before.py",
+    "bytes": 55175,
+    "sha256": "30f6aa7530e36b39cbb944b28155601951be7c14cf4c1e54f313cd35e6fcbae7"
+  },
+  "checks": {
+    "pythonCompile": "PASS",
+    "transcriptCliAndLegacyBytesCases": 62,
+    "taskAndRemoteBudgetCases": 13,
+    "actualSSHWindows": "NOT_RUN"
+  },
+  "probe": {
+    "option": "--public-desktop",
+    "command": "--public-desktop-probe",
+    "steps": 20,
+    "nativeBudgetSeconds": 120,
+    "taskObservationSeconds": 180,
+    "remoteObservationSeconds": 190,
+    "legacyBudgets": "byte-equivalent PowerShell and unchanged original timeout expressions for all existing workflows"
+  },
+  "evidence": [
+    "validate-public-desktop-runner.py",
+    "public-desktop-runner-local-validation-first.json",
+    "check-public-desktop-budgets.py",
+    "public-desktop-runner-budget-validation-first.json"
+  ]
+}

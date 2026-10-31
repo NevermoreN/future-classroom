@@ -1,0 +1,11 @@
+--- a/crates/fc-windows/src/desktop/tree.rs
++++ b/crates/fc-windows/src/desktop/tree.rs
+@@ -1864,6 +1864,8 @@
+                 .borrow()
+                 .is_empty()));
+             assert!(renderer.take_events().unwrap().is_empty());
++            // A changed lesson strip belongs to a new immutable scene generation.
++            s.generation = SceneGeneration::new(2);
+             s.lesson_control = Some(fc_presentation::scene::LessonControlContent {
+                 rect: rect(0., 240., 220., 80.),
+                 caption: "本节临时换课".into(),

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round35-visuals-worktree/scripts/windows-probe.py", line 670, in <module>
+    main()
+  File "/tmp/fc-round35-visuals-worktree/scripts/windows-probe.py", line 570, in main
+    result = validate_subject_visual_output(report["native"].get("subjectVisualExitCode"), report["native"].get("subjectVisualOutput"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/fc-round35-visuals-worktree/scripts/windows-probe.py", line 123, in validate_subject_visual_output
+    raise RuntimeError("isolated native subject visual workflow failed")
+RuntimeError: isolated native subject visual workflow failed

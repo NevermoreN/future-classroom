@@ -1,0 +1,84 @@
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson.rs
+@@ -97,6 +97,12 @@
+     }
+     pub fn is_current(&self) -> bool {
+         self.interval_current(false)
++    }
++    /// UI-only liveness: keep the chooser across Healthy/Updating phase changes
++    /// using one interval check. This grants no permission to submit or deliver
++    /// results; those paths still require `is_current()` and the worker guards.
++    pub fn can_keep_chooser_open(&self) -> bool {
++        self.interval_current(true)
+     }
+     /// A transient presentation state, never permission to submit a command.
+     /// An idle chooser may remain open during a writer publication only while
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
+@@ -399,6 +399,50 @@
+     }
+ 
+     #[test]
++    fn public_desktop_single_liveness_check_survives_a_deterministic_updating_to_healthy_phase_flip(
++    ) {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        let target = fixture
++            .service
++            .0
++            .read_desktop_lesson(&guard)
++            .unwrap()
++            .context
++            .current
++            .unwrap()
++            .base;
++        let control = fixture.service.0.session_control();
++        let checking = guard.clone();
++        let first_not_current = Arc::new(AtomicBool::new(false));
++        let sampled = first_not_current.clone();
++        {
++            let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
++                if control.health_gate().status().health
++                    == fc_runtime::health::Health::AuthorityUpdating
++                {
++                    sampled.store(!checking.is_current(), Ordering::Release);
++                    assert!(checking.can_keep_chooser_open());
++                }
++                true
++            }));
++            scope
++                .change_desktop_lesson(&guard, LessonAction::Replace(target))
++                .unwrap();
++        }
++        // The first old predicate was sampled in real Updating; this second
++        // old predicate is sampled after actual COMMIT/publication is Healthy.
++        // Combining those two negative answers would close a valid chooser.
++        assert!(first_not_current.load(Ordering::Acquire));
++        assert!(!guard.is_waiting_for_authority());
++        assert!(guard.is_current());
++        assert!(guard.can_keep_chooser_open());
++        owner.cancel();
++        assert!(!guard.can_keep_chooser_open());
++    }
++
++    #[test]
+     fn public_desktop_waiting_never_defers_original_deadline_during_real_precommit_phase() {
+         let mut fixture = Fixture::new();
+         let owner = fixture.flow(1);
+@@ -426,6 +470,7 @@
+                     assert!(checking.is_waiting_for_authority());
+                     clock.tick.store(120_000, Ordering::Release);
+                     assert!(!checking.is_waiting_for_authority());
++                    assert!(!checking.can_keep_chooser_open());
+                     witness.store(true, Ordering::Release);
+                 }
+                 true
+@@ -466,6 +511,7 @@
+                     assert!(checking.is_waiting_for_authority());
+                     control.cancel_desktop_lesson_flow();
+                     assert!(!checking.is_waiting_for_authority());
++                    assert!(!checking.can_keep_chooser_open());
+                 }
+                 true
+             }));

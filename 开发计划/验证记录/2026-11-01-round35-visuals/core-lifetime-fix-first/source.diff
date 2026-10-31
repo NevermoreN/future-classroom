@@ -1,0 +1,11 @@
+--- a/crates/fc-storage/src/business/subject_visual.rs
++++ b/crates/fc-storage/src/business/subject_visual.rs
+@@ -240,7 +240,7 @@
+     session: SessionGuard,
+     factory: Factory<S>,
+ }
+-impl<S: Send> TransactionTask<S> for SaveVisuals<S> {
++impl<S: Send + 'static> TransactionTask<S> for SaveVisuals<S> {
+     fn allocation_bytes(&self) -> usize {
+         std::mem::size_of::<Self>()
+             .saturating_add(self.request.expected_palette_revision.allocation_bytes())

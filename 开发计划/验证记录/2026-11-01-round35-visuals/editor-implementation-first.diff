@@ -1,0 +1,1786 @@
+--- a/crates/fc-bootstrap/src/application.rs
++++ b/crates/fc-bootstrap/src/application.rs
+@@ -57,6 +57,11 @@
+ mod calendar_flow;
+ mod desktop_controller;
+ mod display_editor;
++mod display_flow;
++mod subject_visual_probe;
++pub fn subject_visual_probe() -> std::result::Result<(), String> {
++    subject_visual_probe::run()
++}
+ mod material_flow;
+ pub(crate) mod material_probe;
+ mod profile_content_editor;
+@@ -212,6 +217,7 @@
+                 | BackendError::Autostart(fc_ports::autostart::AutostartRepositoryError::Faulted)
+                 | BackendError::Lesson(fc_ports::LessonRepositoryError::Faulted)
+                 | BackendError::Display(fc_ports::DisplayRepositoryError::Faulted)
++                | BackendError::SubjectVisual(fc_ports::SubjectVisualRepositoryError::Faulted)
+                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
+                 | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
+                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
+@@ -281,6 +287,7 @@
+         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
+         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
+         Failure::Backend(e) => match e {
++            BackendError::SubjectVisual(_) => "科目配色或显示设置的权限、版本已变化，本次未确认保存。草稿保留，请核对后明确取消并重新加载。".into(),
+             BackendError::Voice(_) => "语音权限、任务或版本已变化，本次结果尚未确认，请刷新核对后再操作。".into(),
+             BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
+             BackendError::Calendar(fc_ports::CalendarRepositoryError::Cancelled) => "本次校历任务已取消或超过处理期限，请重新读取当前状态。".into(),
+@@ -444,8 +451,13 @@
+     },
+     LessonLoaded(fc_domain::lesson_context::LessonContextSnapshot),
+     LessonSaved(fc_domain::lesson_context::LessonContextSnapshot),
+-    DisplayLoaded(DisplaySettings),
+-    DisplaySaved(DisplaySettings),
++    DisplayLoaded(fc_ports::SubjectVisualState, Arc<IdentityState>),
++    DisplaySaved(fc_ports::SubjectVisualState, Arc<IdentityState>),
++    DisplayPreview {
++        sequence: u64,
++        source_revision: Revision,
++        image: fc_windows::workbench::LayoutPreview,
++    },
+     Profile(Box<profile_flow::Loaded>),
+     Desktop(
+         Box<DesktopFacts>,
+@@ -528,7 +540,15 @@
+         ScheduleDocument,
+     ),
+     LoadDisplay(Arc<Mutex<Backend>>, SessionLease),
+-    SaveDisplay(Arc<Mutex<Backend>>, SessionLease, Revision, DisplaySettings),
++    SaveDisplay(
++        Arc<Mutex<Backend>>,
++        SessionLease,
++        fc_domain::subject_visual::PaletteRevision,
++        Revision,
++        Vec<fc_domain::subject_visual::SubjectColor>,
++        DisplaySettings,
++    ),
++    DisplayPreview(Box<display_flow::PreviewJob>),
+     Profile(
+         Arc<Mutex<Backend>>,
+         SessionLease,
+@@ -621,7 +641,15 @@
+                 .checked_add(path.as_os_str().len())?
+                 .checked_mul(2),
+             Self::SaveSchedule(_, _, _, document) => document.allocation_bytes(),
+-            Self::SaveDisplay(_, _, _, settings) => settings.allocation_bytes(),
++            Self::SaveDisplay(_, _, palette, _, colors, settings) => {
++                settings
++                    .allocation_bytes()?
++                    .checked_add(palette.allocation_bytes())?
++                    .checked_add(colors.capacity().checked_mul(std::mem::size_of::<
++                        fc_domain::subject_visual::SubjectColor,
++                    >())?)
++            }
++            Self::DisplayPreview(job) => job.allocation_bytes(),
+         }
+     }
+     fn run(self, context: &JobContext) -> Self::Output {
+@@ -876,19 +904,21 @@
+                 Ok(Outcome::ScheduleSaved(document))
+             }
+             Self::LoadDisplay(backend, lease) => {
+-                let settings = backend
+-                    .lock()
+-                    .map_err(|_| Failure::Stopped)?
+-                    .read_display(lease)?;
+-                Ok(Outcome::DisplayLoaded(settings))
+-            }
+-            Self::SaveDisplay(backend, lease, expected, settings) => {
+-                let settings = backend
+-                    .lock()
+-                    .map_err(|_| Failure::Stopped)?
+-                    .save_display(lease, expected, settings)?;
+-                Ok(Outcome::DisplaySaved(settings))
+-            }
++                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
++                let scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++                let settings = scoped.read_subject_visuals(lease)?;
++                let identity = Arc::new(scoped.state()?);
++                Ok(Outcome::DisplayLoaded(settings, identity))
++            }
++            Self::SaveDisplay(backend, lease, palette, expected, colors, settings) => {
++                let mut backend = backend.lock().map_err(|_| Failure::Stopped)?;
++                let mut scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++                let settings =
++                    scoped.save_subject_visuals(lease, palette, expected, colors, settings)?;
++                let identity = Arc::new(scoped.state()?);
++                Ok(Outcome::DisplaySaved(settings, identity))
++            }
++            Self::DisplayPreview(job) => job.run(context),
+             Self::Profile(backend, lease, operation, sequence, root) => {
+                 profile_flow::run(backend, lease, *operation, sequence, root, context)
+                     .map(|loaded| Outcome::Profile(Box::new(loaded)))
+@@ -1094,7 +1124,16 @@
+                     .find(|s| s.id == id)
+                     .map(|s| s.revision)
+             });
+-            let color = parse_color(r.data.get(COLOR).unwrap_or(""))?;
++            let color = if let Some(id) = existing {
++                r.state
++                    .subjects
++                    .iter()
++                    .find(|s| s.id == id)
++                    .ok_or_else(|| invalid("科目已变化。"))?
++                    .color
++            } else {
++                parse_color(r.data.get(COLOR).unwrap_or(""))?
++            };
+             backend.identity_at(
+                 require_lease()?,
+                 r.state.revision,
+@@ -1596,7 +1635,7 @@
+             Screen::Subjects => {
+                 view.title = "学校基础科目".into();
+                 view.description = format!(
+-                    "已有科目：{}。修改时填写现有名称，保存后仍保留同一科目及引用。",
++                    "已有科目：{}。修改时填写现有名称；改名保留原颜色及引用，颜色请在桌面显示设置的“科目颜色与显示”中修改。",
+                     self.state
+                         .subjects
+                         .iter()
+@@ -1607,7 +1646,7 @@
+                 view.fields = vec![
+                     plain(OLD_NAME, "现有科目（新建时留空）", String::new()),
+                     plain(SUBJECT, "科目名称", String::new()),
+-                    plain(COLOR, "科目颜色（六位色值）", "70A5D8".into()),
++                    plain(COLOR, "新建科目颜色（改名时保留原色）", "70A5D8".into()),
+                 ];
+                 view.actions = vec![action(SAVE, "保存科目"), action(BACK, "返回")];
+             }
+@@ -1925,6 +1964,7 @@
+                 Work::LoadSchedule(..) => "schedule-load",
+                 Work::LoadDisplay(..) => "display-load",
+                 Work::SaveDisplay(..) => "display-save",
++                Work::DisplayPreview(..) => "display-preview",
+                 _ => "other",
+             };
+             eprintln!(
+@@ -3417,6 +3457,7 @@
+             self.status = "当前账号没有可继续的显示设置草稿。".into();
+             return self.render();
+         }
++        self.clear_profile_preview();
+         match self
+             .display
+             .as_mut()
+@@ -3433,14 +3474,66 @@
+                     self.submit(Work::LoadDisplay(backend.clone(), lease))?;
+                 }
+             }
+-            Ok(display_editor::Command::Save { expected, settings }) => {
++            Ok(display_editor::Command::Save {
++                expected_palette,
++                expected,
++                colors,
++                settings,
++            }) => {
+                 if let Some(backend) = &self.backend {
+                     self.submit(Work::SaveDisplay(
+                         backend.clone(),
+                         lease,
++                        expected_palette,
+                         expected,
++                        colors,
+                         settings,
+                     ))?;
++                }
++            }
++            Ok(display_editor::Command::VisualPreview { subject_id }) => {
++                if let (Some(backend), Some(editor)) = (&self.backend, &self.display) {
++                    let (palette, settings) = editor.visual_preview_input();
++                    self.submit(Work::DisplayPreview(Box::new(display_flow::PreviewJob {
++                        backend: backend.clone(),
++                        lease,
++                        palette,
++                        settings,
++                        subject: subject_id,
++                        sequence: self.preview_sequence,
++                    })))?;
++                }
++            }
++            Ok(display_editor::Command::PickColor {
++                subject_id,
++                initial,
++            }) => {
++                if self.probe {
++                    self.status = "隔离探针不打开系统颜色选择器。".into();
++                } else {
++                    let chosen = self.window.select_color(initial);
++                    if self.control.as_ref().is_none_or(|control| {
++                        !control.note_input(lease, self.clock.monotonic_millis())
++                            || control.health_gate().check_sensitive().is_err()
++                    }) || self.lease != Some(lease)
++                        || self.screen != Screen::Display
++                    {
++                        self.lock();
++                    } else if let Some(editor) = self
++                        .display
++                        .as_mut()
++                        .filter(|e| e.owner() == lease.principal_id())
++                    {
++                        match chosen {
++                            Ok(Some(color)) => {
++                                if let Err(message) = editor.picked_color(subject_id, color) {
++                                    self.status = message;
++                                }
++                            }
++                            Ok(None) => self.status = "已取消颜色选择，草稿保留。".into(),
++                            Err(_) => self.status = "系统颜色选择器未完成，草稿保留。".into(),
++                        }
++                    }
+                 }
+             }
+             Err(message) => self.status = message,
+@@ -3675,7 +3768,11 @@
+                     Ok(Outcome::LaunchCopies(_)) => "copies",
+                     Ok(Outcome::LessonLoaded(_) | Outcome::LessonSaved(_)) => "lesson",
+                     Ok(Outcome::ScheduleLoaded(_) | Outcome::ScheduleSaved(_)) => "schedule",
+-                    Ok(Outcome::DisplayLoaded(_) | Outcome::DisplaySaved(_)) => "display",
++                    Ok(
++                        Outcome::DisplayLoaded(..)
++                        | Outcome::DisplaySaved(..)
++                        | Outcome::DisplayPreview { .. },
++                    ) => "display",
+                     Err(_) => "error",
+                     _ => "other",
+                 };
+@@ -3896,17 +3993,42 @@
+                 Ok(Outcome::MaterialLaunch(launch)) => {
+                     self.dispatch_material(*launch)?;
+                 }
+-                Ok(Outcome::DisplayLoaded(settings)) => {
++                Ok(Outcome::DisplayLoaded(settings, identity)) => {
++                    self.state = identity;
+                     if let Some(lease) = self.lease {
+-                        self.display =
+-                            Some(display_editor::Editor::new(settings, lease.principal_id()));
++                        self.display = Some(display_editor::Editor::new_visuals(
++                            settings,
++                            lease.principal_id(),
++                        ));
+                         self.screen = Screen::Display;
+                         self.status.clear();
+                     }
+                 }
+-                Ok(Outcome::DisplaySaved(settings)) => {
++                Ok(Outcome::DisplayPreview {
++                    sequence,
++                    source_revision,
++                    image,
++                }) => {
++                    if sequence == self.preview_sequence
++                        && self.screen == Screen::Display
++                        && self.profiles_memory_gate()
++                        && self
++                            .control
++                            .as_ref()
++                            .is_some_and(|c| c.health_gate().status().revision == source_revision)
++                        && self.display.as_ref().is_some_and(|e| e.visual_page())
++                    {
++                        self.window
++                            .set_layout_preview(Some(image))
++                            .map_err(|_| "科目颜色示例显示失败。")?;
++                        self.preview_active = true;
++                        self.status = "已显示当前草稿的颜色与透明度示例，尚未保存。".into();
++                    }
++                }
++                Ok(Outcome::DisplaySaved(settings, identity)) => {
++                    self.state = identity;
+                     if let Some(editor) = &mut self.display {
+-                        editor.saved(settings);
++                        editor.visuals_saved(settings);
+                     }
+                     self.status = "桌面显示设置已保存，关闭工作台后在系统桌面生效。".into();
+                 }
+--- a/crates/fc-bootstrap/src/application/display_editor.rs
++++ b/crates/fc-bootstrap/src/application/display_editor.rs
+@@ -1,6 +1,17 @@
+-//! Non-secret global display draft. Saving publishes one independent revision.
++//! One non-secret global display and subject-colour draft; saves bind both versions.
+ use super::*;
+-use fc_domain::{desktop::*, time::LocalDate};
++use fc_domain::{
++    desktop::*,
++    subject_visual::{PaletteRevision, SubjectColor, SubjectVisualPalette},
++    time::LocalDate,
++};
++use fc_ports::SubjectVisualState;
++mod visuals;
++pub(super) use visuals::{
++    OPAQUE_RGB, PALETTE_SUBJECT, PICK_COLOR, SWITCH_SUBJECT, VISUALS, VISUAL_PREVIEW,
++};
++#[cfg(test)]
++mod visual_tests;
+ pub(super) const CLOCK: FieldId = FieldId(200);
+ pub(super) const SECONDS: FieldId = FieldId(201);
+ pub(super) const RECESS: FieldId = FieldId(202);
+@@ -34,6 +45,7 @@
+ enum Page {
+     Main,
+     Components,
++    SubjectVisuals,
+     Preview,
+     Discard,
+ }
+@@ -41,7 +53,16 @@
+     Stay,
+     Close,
+     Reload,
++    PickColor {
++        subject_id: SubjectId,
++        initial: Rgb,
++    },
++    VisualPreview {
++        subject_id: SubjectId,
++    },
+     Save {
++        expected_palette: PaletteRevision,
++        colors: Vec<SubjectColor>,
+         expected: Revision,
+         settings: DisplaySettings,
+     },
+@@ -49,6 +70,10 @@
+ pub(super) struct Editor {
+     pub(super) settings: DisplaySettings,
+     original: DisplaySettings,
++    palette: SubjectVisualPalette,
++    original_colors: Vec<SubjectColor>,
++    selected_subject: Option<SubjectId>,
++    joint_visuals: bool,
+     owner: PrincipalId,
+     expected: Revision,
+     page: Page,
+@@ -175,8 +200,39 @@
+     }
+ }
+ impl Editor {
++    // Embedded public-layout style editor retains its original layout/display
++    // transaction; it must never acquire a separate school palette write path.
+     pub(super) fn new(settings: DisplaySettings, owner: PrincipalId) -> Self {
++        let mut editor = Self::new_visuals(
++            SubjectVisualState {
++                palette: SubjectVisualPalette {
++                    revision: PaletteRevision::new(vec![]).unwrap(),
++                    subjects: vec![],
++                },
++                display: settings,
++            },
++            owner,
++        );
++        editor.joint_visuals = false;
++        editor
++    }
++    pub(super) fn new_visuals(state: SubjectVisualState, owner: PrincipalId) -> Self {
++        let settings = state.display;
++        let selected_subject = state.palette.subjects.first().map(|s| s.id);
++        let original_colors = state
++            .palette
++            .subjects
++            .iter()
++            .map(|s| SubjectColor {
++                subject_id: s.id,
++                color: s.color,
++            })
++            .collect();
+         Self {
++            palette: state.palette,
++            selected_subject,
++            joint_visuals: true,
++            original_colors,
+             expected: settings.revision,
+             original: settings.clone(),
+             settings,
+@@ -197,11 +253,16 @@
+         self.suspended = None;
+     }
+     pub(super) fn has_unsaved_changes(&self) -> bool {
+-        self.settings != self.original || self.suspended.is_some()
++        self.settings != self.original
++            || self.colors() != self.original_colors
++            || self.suspended.is_some()
+     }
+     pub(super) fn capture(&mut self, data: FormData) {
+         self.suspended = None;
+-        if matches!(self.page, Page::Main | Page::Components) {
++        if matches!(
++            self.page,
++            Page::Main | Page::Components | Page::SubjectVisuals
++        ) {
+             let view = self.view("", false);
+             let mut pending = FormData::new();
+             let mut changed = false;
+@@ -314,6 +375,7 @@
+                     action(CANCEL, "取消全部修改"),
+                 ];
+             }
++            Page::SubjectVisuals => self.visuals_view(&mut v),
+             Page::Components => {
+                 v.title = "逐组件显示与自适应约束".into();
+                 v.description.push_str("\n0%组件保留布局占位，但不绘制、不接受点击；关闭“显示组件”才移除布局。最小/最大约束不得越过工作区，过紧约束会显示诊断。");
+@@ -390,13 +452,17 @@
+             Page::Discard => {
+                 v.title = "取消显示设置修改".into();
+                 v.description =
+-                    "确认后丢弃本地显示设置草稿并重新读取已保存版，不修改数据库。".into();
++                    "确认后丢弃全部显示与科目配色草稿并重新读取已保存版，不修改数据库。".into();
+                 v.actions = vec![
+                     action(CONFIRM_CANCEL, "确认丢弃并重读"),
+                     action(KEEP, "保留草稿"),
+                 ];
+             }
+         }
++        if self.page == Page::Main && self.joint_visuals {
++            v.actions
++                .insert(2, action(VISUALS, "应用并编辑科目颜色与显示"));
++        }
+         v.actions.push(action(LOCK, "锁定并保留草稿"));
+         if let Some(data) = &self.suspended {
+             for f in &mut v.fields {
+@@ -412,9 +478,27 @@
+         action: ActionId,
+         data: FormData,
+     ) -> std::result::Result<Command, String> {
++        if !self.joint_visuals
++            && matches!(
++                action,
++                VISUALS | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW
++            )
++        {
++            return Err("科目配色请从工作台的桌面显示设置进入。".into());
++        }
++        let data = if self.visual_page() {
++            visuals::checked_form(data)?
++        } else {
++            data
++        };
+         // Navigation must preserve unparsed non-secret text. A discard prompt is
+         // not confirmation, and closing the main page is explicitly "keep draft".
+-        if action == CANCEL && matches!(self.page, Page::Main | Page::Components) {
++        if action == CANCEL
++            && matches!(
++                self.page,
++                Page::Main | Page::Components | Page::SubjectVisuals
++            )
++        {
+             self.capture(data);
+             self.discard_return = self.page;
+             self.page = Page::Discard;
+@@ -432,9 +516,13 @@
+             return Err("请先确认取消全部修改。".into());
+         }
+         let original = self.settings.clone();
++        let palette = self.palette.clone();
++        let selected = self.selected_subject;
+         let result = self.apply(action, &data);
+         if result.is_err() {
+             self.settings = original;
++            self.palette = palette;
++            self.selected_subject = selected;
+             self.capture(data);
+         } else {
+             self.suspended = None;
+@@ -443,16 +531,42 @@
+     }
+     fn apply(&mut self, action: ActionId, data: &FormData) -> std::result::Result<Command, String> {
+         match action {
+-            APPLY | SAVE_ALL | COMPONENTS | PREVIEW | SWITCH_COMPONENT => {
++            APPLY | SAVE_ALL | COMPONENTS | PREVIEW | SWITCH_COMPONENT | VISUALS
++            | SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW => {
+                 match self.page {
+                     Page::Main => self.apply_main(data)?,
+                     Page::Components => self.apply_component(data)?,
++                    Page::SubjectVisuals => self.apply_visuals(data, action == SWITCH_SUBJECT)?,
+                     _ => return Err("当前页面不能应用显示设置。".into()),
+                 }
+                 if action == SAVE_ALL {
+                     return Ok(Command::Save {
++                        expected_palette: self.palette.revision.clone(),
++                        colors: self.colors(),
+                         expected: self.expected,
+                         settings: self.settings.clone(),
++                    });
++                }
++                if action == VISUALS {
++                    self.page = Page::SubjectVisuals;
++                }
++                if action == PICK_COLOR {
++                    let subject_id = self.selected_subject.ok_or("请先创建学校科目。")?;
++                    let initial = self
++                        .palette
++                        .subjects
++                        .iter()
++                        .find(|s| s.id == subject_id)
++                        .ok_or("科目已变化。")?
++                        .color;
++                    return Ok(Command::PickColor {
++                        subject_id,
++                        initial,
++                    });
++                }
++                if action == VISUAL_PREVIEW {
++                    return Ok(Command::VisualPreview {
++                        subject_id: self.selected_subject.ok_or("请先选择科目。")?,
+                     });
+                 }
+                 if action == COMPONENTS {
+@@ -473,6 +587,9 @@
+             EDIT_BACK => {
+                 if self.page == Page::Components {
+                     self.apply_component(data)?;
++                }
++                if self.page == Page::SubjectVisuals {
++                    self.apply_visuals(data, false)?;
+                 }
+                 self.page = Page::Main;
+             }
+@@ -582,7 +699,10 @@
+         assert_eq!(value(&e, REFLECTION), "101");
+         let mut data = form(&e);
+         set(&mut data, REFLECTION, "50");
+-        let Command::Save { expected, settings } = e.handle(SAVE_ALL, data).unwrap() else {
++        let Command::Save {
++            expected, settings, ..
++        } = e.handle(SAVE_ALL, data).unwrap()
++        else {
+             panic!("explicit save must own the final draft")
+         };
+         assert_eq!(expected, original.revision);
+@@ -655,7 +775,10 @@
+         let mut data = form(&e);
+         set(&mut data, COURSE_ALPHA, "25");
+         let command = e.handle(SAVE_ALL, data).unwrap();
+-        let Command::Save { expected, settings } = command else {
++        let Command::Save {
++            expected, settings, ..
++        } = command
++        else {
+             panic!("save expected")
+         };
+         assert_eq!(expected, Revision::new(7));
+@@ -736,7 +859,13 @@
+     #[test]
+     fn every_display_page_is_a_bounded_native_schema() {
+         let mut e = Editor::new(DisplaySettings::default(), PrincipalId::new(1).unwrap());
+-        for page in [Page::Main, Page::Components, Page::Preview, Page::Discard] {
++        for page in [
++            Page::Main,
++            Page::Components,
++            Page::SubjectVisuals,
++            Page::Preview,
++            Page::Discard,
++        ] {
+             e.page = page;
+             e.view("", false).validate().unwrap();
+         }
+--- a/crates/fc-bootstrap/src/application/profiles_preview.rs
++++ b/crates/fc-bootstrap/src/application/profiles_preview.rs
+@@ -61,6 +61,31 @@
+         Arc::new(RasterCache::new()),
+     )
+ }
++/// Synthetic colour samples use the selected stable school subject and the
++/// common display draft. No product scene, desktop capture or published layout.
++pub(super) fn render_subject_visuals(
++    identity: &IdentityState,
++    display: &fc_domain::desktop::DisplaySettings,
++    selected: SubjectId,
++    sequence: u64,
++    now: LocalDateTime,
++) -> Result<LayoutPreview, String> {
++    let mut example = identity.clone();
++    let index = example
++        .subjects
++        .iter()
++        .position(|s| s.id == selected)
++        .ok_or("所选科目已不存在，请重新加载。")?;
++    example.subjects.swap(0, index);
++    let public = PublicLayoutState {
++        layout: Default::default(),
++        display: display.clone(),
++    };
++    let mut image = render(&example, &public, None, sequence, now)?;
++    // Colour samples are read-only; never expose layout drag/drop capabilities.
++    image.nodes.clear();
++    Ok(image)
++}
+ /// The ordinary preview supplies no content authority. Published independent
+ /// content requires this exact-slot cache path; no body or pixels are fabricated.
+ #[allow(clippy::too_many_arguments)]
+@@ -503,6 +528,7 @@
+             },
+             |s| s.color,
+         );
++    let color = fc_presentation::scene::soft_subject_color(color);
+     let semester = SemesterId::new(1).map_err(|_| "示例 ID 无效。")?;
+     let lesson = LessonInstanceKey {
+         actual_date: now.date,
+@@ -573,7 +599,7 @@
+                 current: true,
+                 temporary: false,
+                 fill_alpha: course_fill,
+-                stroke_width: 0.,
++                stroke_width: if public.display.subject_fill { 0. } else { 1. },
+             }]),
+             1,
+         ),
+@@ -586,7 +612,11 @@
+                 teacher_name: teacher_name.into(),
+                 text: "示例作业：阅读课堂材料，完成练习并记录思考。\n此内容仅用于布局预览。".into(),
+                 color,
+-                fill_alpha: f32::from(public.display.homework_fill_percent) / 100.,
++                fill_alpha: if public.display.subject_fill {
++                    f32::from(public.display.homework_fill_percent) / 100.
++                } else {
++                    0.
++                },
+             }]),
+             1,
+         ),
+@@ -662,6 +692,107 @@
+ #[cfg(test)]
+ mod tests {
+     use super::*;
++    #[test]
++    fn subject_visual_samples_use_shared_soft_color_and_both_fill_modes() {
++        let subject_id = SubjectId::new(7).unwrap();
++        let raw = Rgb {
++            red: 240,
++            green: 10,
++            blue: 100,
++        };
++        let identity = IdentityState {
++            subjects: vec![fc_domain::identity::SchoolSubject {
++                id: subject_id,
++                school_id: SchoolId::new(1).unwrap(),
++                name: "Synthetic palette".into(),
++                enabled: true,
++                color: raw,
++                revision: Revision::new(1),
++            }],
++            ..Default::default()
++        };
++        let now =
++            LocalDateTime::new(fc_domain::time::LocalDate::new(2026, 11, 1).unwrap(), 0).unwrap();
++        for enabled in [true, false] {
++            let public = PublicLayoutState {
++                layout: Default::default(),
++                display: fc_domain::desktop::DisplaySettings {
++                    subject_fill: enabled,
++                    course_fill_percent: 73,
++                    homework_fill_percent: 41,
++                    ..Default::default()
++                },
++            };
++            let samples = samples(&identity, &public, None, now).unwrap();
++            let course = samples
++                .iter()
++                .find_map(|s| {
++                    if let CardContent::Courses(c) = &s.content {
++                        c.first()
++                    } else {
++                        None
++                    }
++                })
++                .unwrap();
++            let homework = samples
++                .iter()
++                .find_map(|s| {
++                    if let CardContent::Homework(c) = &s.content {
++                        c.first()
++                    } else {
++                        None
++                    }
++                })
++                .unwrap();
++            assert_eq!(
++                course.color,
++                fc_presentation::scene::soft_subject_color(raw)
++            );
++            assert_eq!(homework.color, course.color);
++            assert_eq!(course.fill_alpha, if enabled { 0.73 } else { 0. });
++            assert_eq!(homework.fill_alpha, if enabled { 0.41 } else { 0. });
++            assert_eq!(course.stroke_width, if enabled { 0. } else { 1. });
++        }
++    }
++    #[test]
++    fn subject_visual_actual_hidden_pixels_change_with_color_and_alpha_under_original_budget() {
++        let subject_id = SubjectId::new(7).unwrap();
++        let mut identity = IdentityState {
++            subjects: vec![fc_domain::identity::SchoolSubject {
++                id: subject_id,
++                school_id: SchoolId::new(1).unwrap(),
++                name: "Synthetic palette".into(),
++                enabled: true,
++                color: Rgb {
++                    red: 240,
++                    green: 10,
++                    blue: 100,
++                },
++                revision: Revision::new(1),
++            }],
++            ..Default::default()
++        };
++        let now =
++            LocalDateTime::new(fc_domain::time::LocalDate::new(2026, 11, 1).unwrap(), 0).unwrap();
++        let mut display = fc_domain::desktop::DisplaySettings {
++            course_fill_percent: 73,
++            homework_fill_percent: 41,
++            ..Default::default()
++        };
++        let first = render_subject_visuals(&identity, &display, subject_id, 1, now).unwrap();
++        identity.subjects[0].color = Rgb {
++            red: 20,
++            green: 200,
++            blue: 100,
++        };
++        let color = render_subject_visuals(&identity, &display, subject_id, 2, now).unwrap();
++        display.subject_fill = false;
++        let outlined = render_subject_visuals(&identity, &display, subject_id, 3, now).unwrap();
++        assert_eq!((first.width, first.height), (960, 540));
++        assert!(first.bgra.capacity() <= MAX_PREVIEW_BYTES);
++        assert_ne!(first.bgra, color.bgra);
++        assert_ne!(color.bgra, outlined.bgra);
++    }
+     struct Provider(Vec<(ContentSlotKey, Revision, [u8; 32], Arc<str>)>);
+     impl ContentTextSource for Provider {
+         fn text(
+--- a/crates/fc-bootstrap/src/main.rs
++++ b/crates/fc-bootstrap/src/main.rs
+@@ -127,6 +127,14 @@
+             {
+                 Err("native recovery workflow probe requires Windows".into())
+             }
++        }
++        [flag] if flag == "--subject-visuals-probe" => {
++            #[cfg(windows)]
++            {
++                application::subject_visual_probe()
++            }
++            #[cfg(not(windows))]
++            Err("native subject visuals probe requires Windows".into())
+         }
+         [flag] if flag == "--voice-output-probe" => {
+             #[cfg(windows)]
+--- a/crates/fc-windows/src/workbench.rs
++++ b/crates/fc-windows/src/workbench.rs
+@@ -1,5 +1,7 @@
+ //! Native, UI-thread-only form adapter. No browser engine or synchronous worker wait.
+ use fc_presentation::workbench::{ActionId, Event, FieldId, FieldKind, FormData, View};
++#[path = "workbench/color_picker.rs"]
++mod color_picker;
+ #[path = "workbench/preview.rs"]
+ mod preview;
+ #[path = "workbench/widgets.rs"]
+@@ -1126,6 +1128,12 @@
+     }
+     /// Owned modal picker. The workbench cannot enqueue edits behind an unowned
+     /// dialog; independent hidden-host controls still revoke WTS/power immediately.
++    pub fn select_color(
++        &self,
++        initial: fc_domain::identity::Rgb,
++    ) -> Result<Option<fc_domain::identity::Rgb>> {
++        color_picker::choose(self.hwnd, initial)
++    }
+     pub fn select_material(&self) -> Result<Option<crate::materials::chooser::SelectedFile>> {
+         crate::materials::chooser::select(Some(self.hwnd))
+     }
+--- a/crates/fc-windows/Cargo.toml
++++ b/crates/fc-windows/Cargo.toml
+@@ -21,7 +21,7 @@
+   "Win32_System_SystemInformation", "Win32_Security", "Win32_Security_Cryptography",
+   "Win32_Storage_FileSystem", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_System_StationsAndDesktops",
+   "Win32_System_Registry", "Win32_Security_Authorization", "Win32_System_RemoteDesktop",
+-  "Win32_UI_Controls", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemServices",
++  "Win32_UI_Controls", "Win32_UI_Controls_Dialogs", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemServices",
+   "Win32_System_DataExchange", "Win32_System_Memory", "Win32_UI_Accessibility", "Win32_Graphics_Imaging",
+   "Win32_System_ProcessStatus", "Win32_System_WindowsProgramming", "Win32_UI_Shell_Common", "Win32_System_JobObjects", "Win32_Security_Authentication_Identity", "Win32_Security_Credentials",
+   "Win32_Media_Audio", "Win32_Networking_HttpServer", "Win32_System_IO", "Win32_Networking_WinSock", "Win32_Networking_WinHttp"
+--- a/crates/fc-bootstrap/src/application/profiles_editor.rs
++++ b/crates/fc-bootstrap/src/application/profiles_editor.rs
+@@ -1513,6 +1513,10 @@
+             action
+         };
+         match style.handle(action, data)? {
++            display_editor::Command::PickColor { .. }
++            | display_editor::Command::VisualPreview { .. } => {
++                return Err("科目配色请从工作台的桌面显示设置进入。".into());
++            }
+             display_editor::Command::Save { settings, .. } => {
+                 if let Some(Draft::Public(s)) = &mut self.draft {
+                     s.display = settings;
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/display_editor/visuals.rs
+@@ -0,0 +1,222 @@
++use super::*;
++
++pub(in crate::application) const VISUALS: ActionId = ActionId(209);
++pub(in crate::application) const SWITCH_SUBJECT: ActionId = ActionId(210);
++pub(in crate::application) const PICK_COLOR: ActionId = ActionId(211);
++pub(in crate::application) const VISUAL_PREVIEW: ActionId = ActionId(212);
++pub(in crate::application) const PALETTE_SUBJECT: FieldId = FieldId(220);
++pub(in crate::application) const OPAQUE_RGB: FieldId = FieldId(221);
++const EFFECTIVE_RGB: FieldId = FieldId(222);
++
++pub(super) fn rgb_text(rgb: Rgb) -> String {
++    format!("{:02X}{:02X}{:02X}", rgb.red, rgb.green, rgb.blue)
++}
++fn parse_rgb(text: &str) -> std::result::Result<Rgb, String> {
++    // Exactly six opaque RGB digits: no CSS, alpha, '#' or whitespace coercion.
++    if text.len() != 6 || !text.bytes().all(|b| b.is_ascii_hexdigit()) {
++        return Err("颜色请输入六位不透明RGB，例如 A6BDCE。".into());
++    }
++    let byte = |start| {
++        u8::from_str_radix(&text[start..start + 2], 16).map_err(|_| "颜色无效。".to_owned())
++    };
++    Ok(Rgb {
++        red: byte(0)?,
++        green: byte(2)?,
++        blue: byte(4)?,
++    })
++}
++pub(super) fn checked_form(mut data: FormData) -> std::result::Result<FormData, String> {
++    let fields = [
++        PALETTE_SUBJECT,
++        OPAQUE_RGB,
++        EFFECTIVE_RGB,
++        FILL,
++        COURSE_ALPHA,
++        HOMEWORK_ALPHA,
++    ];
++    let values = fields.map(|id| data.take(id));
++    if !data.is_empty() {
++        return Err("科目颜色表单包含未知字段，请重新打开。".into());
++    }
++    let mut clean = FormData::new();
++    for (id, value) in fields.into_iter().zip(values) {
++        if let Some(value) = value {
++            clean.insert(id, value).map_err(|_| "科目颜色表单无效。")?;
++        }
++    }
++    Ok(clean)
++}
++impl Editor {
++    pub(in crate::application) fn colors(&self) -> Vec<SubjectColor> {
++        self.palette
++            .subjects
++            .iter()
++            .map(|s| SubjectColor {
++                subject_id: s.id,
++                color: s.color,
++            })
++            .collect()
++    }
++    pub(in crate::application) fn visuals_saved(&mut self, state: SubjectVisualState) {
++        self.expected = state.display.revision;
++        self.original = state.display.clone();
++        self.settings = state.display;
++        self.palette = state.palette;
++        self.original_colors = self.colors();
++        if !self
++            .palette
++            .subjects
++            .iter()
++            .any(|s| Some(s.id) == self.selected_subject)
++        {
++            self.selected_subject = self.palette.subjects.first().map(|s| s.id);
++        }
++        self.suspended = None;
++    }
++    pub(in crate::application) fn visual_preview_input(
++        &self,
++    ) -> (SubjectVisualPalette, DisplaySettings) {
++        (self.palette.clone(), self.settings.clone())
++    }
++    pub(in crate::application) fn visual_page(&self) -> bool {
++        self.page == Page::SubjectVisuals
++    }
++    pub(in crate::application) fn picked_color(
++        &mut self,
++        subject: SubjectId,
++        color: Rgb,
++    ) -> std::result::Result<(), String> {
++        if !self.visual_page() || self.selected_subject != Some(subject) {
++            return Err("科目或页面已变化，请重新选择颜色。".into());
++        }
++        self.palette
++            .subjects
++            .iter_mut()
++            .find(|s| s.id == subject)
++            .ok_or("科目已变化。")?
++            .color = color;
++        self.suspended = None;
++        Ok(())
++    }
++    pub(super) fn visuals_view(&self, view: &mut View) {
++        view.title = "科目颜色与显示".into();
++        view.description="科目按固定编号区分。切换科目前先保留当前颜色；关闭底色不会删除色值。颜色与全部显示设置共用草稿，点击“保存全部”才一起生效。预览使用柔和处理后的颜色与当前透明度，仅绘制示例。".into();
++        if let Some(subject) = self
++            .palette
++            .subjects
++            .iter()
++            .find(|s| Some(s.id) == self.selected_subject)
++        {
++            view.fields.push(field(
++                PALETTE_SUBJECT,
++                "选择科目（选择后点击切换）",
++                FieldKind::Choice(
++                    self.palette
++                        .subjects
++                        .iter()
++                        .map(|s| Choice {
++                            value: s.id.get().to_string(),
++                            label: format!(
++                                "{} · {}{}",
++                                s.name,
++                                s.id.get(),
++                                if s.enabled { "" } else { "（已停用）" }
++                            ),
++                        })
++                        .collect(),
++                ),
++                subject.id.get().to_string(),
++                20,
++            ));
++            view.fields.push(plain(
++                OPAQUE_RGB,
++                "原始颜色（六位RGB）",
++                rgb_text(subject.color),
++                6,
++            ));
++            view.fields.push(field(
++                EFFECTIVE_RGB,
++                "应用到草稿后的柔和颜色",
++                FieldKind::ReadOnly,
++                rgb_text(fc_presentation::scene::soft_subject_color(subject.color)),
++                6,
++            ));
++        } else {
++            view.description
++                .push_str("\n尚无学校科目，可返回工作台新建科目。");
++        }
++        view.fields.extend([
++            toggle(FILL, "显示科目底色", self.settings.subject_fill),
++            plain(
++                COURSE_ALPHA,
++                "课程胶囊填充不透明度（0–100%）",
++                self.settings.course_fill_percent.to_string(),
++                3,
++            ),
++            plain(
++                HOMEWORK_ALPHA,
++                "作业科目标记不透明度（0–100%）",
++                self.settings.homework_fill_percent.to_string(),
++                3,
++            ),
++        ]);
++        view.actions = vec![
++            action(APPLY, "应用到共同草稿"),
++            action(SWITCH_SUBJECT, "保留当前颜色并切换科目"),
++            action(PICK_COLOR, "选择颜色…"),
++            action(VISUAL_PREVIEW, "应用并预览实际颜色"),
++            action(SAVE_ALL, "保存全部"),
++            action(EDIT_BACK, "应用并返回显示设置"),
++            action(CANCEL, "取消全部修改"),
++        ];
++        if self.selected_subject.is_none() {
++            for action in &mut view.actions {
++                if matches!(action.id, SWITCH_SUBJECT | PICK_COLOR | VISUAL_PREVIEW) {
++                    action.enabled = false;
++                }
++            }
++        }
++    }
++    pub(super) fn apply_visuals(
++        &mut self,
++        data: &FormData,
++        switch: bool,
++    ) -> std::result::Result<(), String> {
++        let fill = yes(data, FILL)?;
++        let course = percent(data, COURSE_ALPHA)?;
++        let homework = percent(data, HOMEWORK_ALPHA)?;
++        let mut target = self.selected_subject;
++        let mut color = None;
++        if let Some(selected) = self.selected_subject {
++            let requested = raw(data, PALETTE_SUBJECT)
++                .parse::<u64>()
++                .ok()
++                .and_then(|id| SubjectId::new(id).ok())
++                .filter(|id| self.palette.subjects.iter().any(|s| s.id == *id))
++                .ok_or("请选择当前列表内的科目。")?;
++            if !switch && requested != selected {
++                return Err("请先点击切换科目，再编辑该科目颜色。".into());
++            }
++            color = Some(parse_rgb(raw(data, OPAQUE_RGB))?);
++            if switch {
++                target = Some(requested);
++            }
++        } else if data.get(PALETTE_SUBJECT).is_some() || data.get(OPAQUE_RGB).is_some() {
++            return Err("没有可编辑的学校科目。".into());
++        }
++        // All fields pass before changing any part of the common draft.
++        if let Some(color) = color {
++            self.palette
++                .subjects
++                .iter_mut()
++                .find(|s| Some(s.id) == self.selected_subject)
++                .ok_or("科目已变化。")?
++                .color = color;
++        }
++        self.settings.subject_fill = fill;
++        self.settings.course_fill_percent = course;
++        self.settings.homework_fill_percent = homework;
++        self.selected_subject = target;
++        Ok(())
++    }
++}
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/display_editor/visual_tests.rs
+@@ -0,0 +1,273 @@
++use super::*;
++fn state() -> SubjectVisualState {
++    let subjects = vec![
++        SchoolSubject {
++            id: SubjectId::new(2).unwrap(),
++            school_id: SchoolId::new(1).unwrap(),
++            name: "同名".into(),
++            enabled: true,
++            color: Rgb {
++                red: 0x12,
++                green: 0x34,
++                blue: 0xAB,
++            },
++            revision: Revision::new(5),
++        },
++        SchoolSubject {
++            id: SubjectId::new(9).unwrap(),
++            school_id: SchoolId::new(1).unwrap(),
++            name: "同名".into(),
++            enabled: false,
++            color: Rgb {
++                red: 90,
++                green: 100,
++                blue: 110,
++            },
++            revision: Revision::new(8),
++        },
++    ];
++    SubjectVisualState {
++        palette: SubjectVisualPalette {
++            revision: PaletteRevision::from_subjects(&subjects).unwrap(),
++            subjects,
++        },
++        display: DisplaySettings {
++            revision: Revision::new(7),
++            ..Default::default()
++        },
++    }
++}
++fn editor() -> Editor {
++    let mut e = Editor::new_visuals(state(), PrincipalId::new(1).unwrap());
++    let data = form(&e);
++    e.handle(VISUALS, data).unwrap();
++    e
++}
++fn form(e: &Editor) -> FormData {
++    let mut d = FormData::new();
++    for f in e.view("", false).fields {
++        if f.kind != FieldKind::ReadOnly {
++            d.insert(f.id, f.value).unwrap();
++        }
++    }
++    d
++}
++fn set(d: &mut FormData, id: FieldId, value: &str) {
++    d.take(id);
++    d.insert(id, value.into()).unwrap();
++}
++fn value(e: &Editor, id: FieldId) -> String {
++    e.view("", false)
++        .fields
++        .into_iter()
++        .find(|f| f.id == id)
++        .unwrap()
++        .value
++}
++#[test]
++fn original_rgb_stable_ids_and_disabled_subjects_are_loaded_without_repainting_drafts() {
++    let e = editor();
++    assert_eq!(value(&e, OPAQUE_RGB), "1234AB");
++    assert_eq!(value(&e, PALETTE_SUBJECT), "2");
++    assert_eq!(e.colors().len(), 2);
++    assert!(!e.has_unsaved_changes());
++    e.view("", false).validate().unwrap();
++}
++#[test]
++fn bad_rgb_bad_alpha_unknown_or_missing_fields_never_partially_change_joint_draft() {
++    for (id, text) in [
++        (OPAQUE_RGB, "#12345"),
++        (OPAQUE_RGB, "12345"),
++        (OPAQUE_RGB, "GGGGGG"),
++        (OPAQUE_RGB, "abcdef00"),
++        (COURSE_ALPHA, "101"),
++        (HOMEWORK_ALPHA, "-1"),
++        (PALETTE_SUBJECT, "3"),
++    ] {
++        let mut e = editor();
++        let before = e.colors();
++        let settings = e.settings.clone();
++        let mut d = form(&e);
++        set(&mut d, OPAQUE_RGB, "AABBCC");
++        set(&mut d, COURSE_ALPHA, "77");
++        set(&mut d, id, text);
++        assert!(e.handle(APPLY, d).is_err());
++        assert_eq!(e.colors(), before);
++        assert_eq!(e.settings, settings);
++    }
++    let mut e = editor();
++    let mut d = form(&e);
++    d.insert(FieldId(900), "hidden-version".into()).unwrap();
++    assert!(e.handle(SAVE_ALL, d).is_err());
++    let mut d = form(&e);
++    d.take(FILL);
++    assert!(e.handle(APPLY, d).is_err());
++    assert!(!e.has_unsaved_changes());
++}
++#[test]
++fn save_captures_complete_original_version_vector_and_display_revision_until_success() {
++    let mut e = editor();
++    let original = state();
++    let mut d = form(&e);
++    set(&mut d, OPAQUE_RGB, "D02080");
++    set(&mut d, FILL, "0");
++    set(&mut d, COURSE_ALPHA, "73");
++    let Command::Save {
++        expected_palette,
++        expected,
++        colors,
++        settings,
++    } = e.handle(SAVE_ALL, d).unwrap()
++    else {
++        panic!()
++    };
++    assert_eq!(expected_palette, original.palette.revision);
++    assert_eq!(expected, original.display.revision);
++    assert_eq!(colors.len(), 2);
++    assert_eq!(colors[1].color, original.palette.subjects[1].color);
++    assert!(!settings.subject_fill);
++    assert_eq!(settings.course_fill_percent, 73);
++    // An error has no saved callback. A second explicit save still captures the
++    // old versions, rather than silently rebasing either half of the draft.
++    let d = form(&e);
++    let Command::Save {
++        expected_palette: again,
++        expected: display,
++        ..
++    } = e.handle(SAVE_ALL, d).unwrap()
++    else {
++        panic!()
++    };
++    assert_eq!(again, expected_palette);
++    assert_eq!(display, expected);
++    assert!(e.has_unsaved_changes());
++    let mut confirmed = original;
++    confirmed.palette.subjects[0].color = colors[0].color;
++    confirmed.palette.subjects[0].revision = Revision::new(6);
++    confirmed.palette.revision =
++        PaletteRevision::from_subjects(&confirmed.palette.subjects).unwrap();
++    confirmed.display = settings;
++    confirmed.display.revision = Revision::new(8);
++    e.visuals_saved(confirmed);
++    assert!(!e.has_unsaved_changes());
++}
++#[test]
++fn switching_subjects_saves_old_color_and_loads_selected_original_not_same_name() {
++    let mut e = editor();
++    let mut d = form(&e);
++    set(&mut d, PALETTE_SUBJECT, "9");
++    set(&mut d, OPAQUE_RGB, "AABBCC");
++    assert!(e.handle(SAVE_ALL, d).is_err());
++    assert_eq!(e.selected_subject, Some(SubjectId::new(2).unwrap()));
++    let d = form(&e);
++    e.handle(SWITCH_SUBJECT, d).unwrap();
++    assert_eq!(e.selected_subject, Some(SubjectId::new(9).unwrap()));
++    assert_eq!(value(&e, OPAQUE_RGB), "5A646E");
++    assert_eq!(
++        e.colors()[0].color,
++        Rgb {
++            red: 0xAA,
++            green: 0xBB,
++            blue: 0xCC
++        }
++    );
++}
++#[test]
++fn cancel_review_and_lock_capture_keep_partial_rgb_and_require_explicit_reload() {
++    let mut e = editor();
++    let mut d = form(&e);
++    set(&mut d, OPAQUE_RGB, "A");
++    e.capture(d);
++    assert_eq!(value(&e, OPAQUE_RGB), "A");
++    let d = form(&e);
++    e.handle(CANCEL, d).unwrap();
++    assert!(e.has_unsaved_changes());
++    e.handle(KEEP, FormData::new()).unwrap();
++    assert_eq!(value(&e, OPAQUE_RGB), "A");
++    let d = form(&e);
++    e.handle(CANCEL, d).unwrap();
++    assert!(matches!(
++        e.handle(CONFIRM_CANCEL, FormData::new()),
++        Ok(Command::Reload)
++    ));
++    assert_eq!(
++        e.colors(),
++        state()
++            .palette
++            .subjects
++            .iter()
++            .map(|s| SubjectColor {
++                subject_id: s.id,
++                color: s.color
++            })
++            .collect::<Vec<_>>()
++    );
++}
++#[test]
++fn picker_has_only_current_subject_capability_and_preview_is_draft_only() {
++    let mut e = editor();
++    let d = form(&e);
++    let Command::PickColor {
++        subject_id,
++        initial,
++    } = e.handle(PICK_COLOR, d).unwrap()
++    else {
++        panic!()
++    };
++    assert_eq!(subject_id, SubjectId::new(2).unwrap());
++    assert_eq!(initial, state().palette.subjects[0].color);
++    assert!(!e.has_unsaved_changes());
++    assert!(e.picked_color(SubjectId::new(9).unwrap(), initial).is_err());
++    let chosen = Rgb {
++        red: 1,
++        green: 2,
++        blue: 3,
++    };
++    e.picked_color(subject_id, chosen).unwrap();
++    let d = form(&e);
++    assert!(
++        matches!(e.handle(VISUAL_PREVIEW,d),Ok(Command::VisualPreview{subject_id:id}) if id==subject_id)
++    );
++    assert_eq!(e.colors()[0].color, chosen);
++    assert_eq!(e.expected, Revision::new(7));
++    let d = form(&e);
++    e.handle(EDIT_BACK, d).unwrap();
++    assert!(e.picked_color(subject_id, initial).is_err());
++}
++#[test]
++fn every_visual_schema_and_empty_school_are_bounded() {
++    let mut e = editor();
++    for page in [
++        Page::Main,
++        Page::Components,
++        Page::SubjectVisuals,
++        Page::Preview,
++        Page::Discard,
++    ] {
++        e.page = page;
++        e.view("", false).validate().unwrap();
++    }
++    let mut e = Editor::new(DisplaySettings::default(), PrincipalId::new(1).unwrap());
++    e.page = Page::SubjectVisuals;
++    e.view("", false).validate().unwrap();
++    let d = form(&e);
++    assert!(matches!(e.handle(SAVE_ALL,d),Ok(Command::Save{colors,..}) if colors.is_empty()));
++}
++
++#[test]
++fn embedded_public_layout_style_never_exposes_or_accepts_school_palette_actions() {
++    let mut editor = Editor::new(DisplaySettings::default(), PrincipalId::new(1).unwrap());
++    assert!(!editor
++        .view("", false)
++        .actions
++        .iter()
++        .any(|action| action.id == VISUALS));
++    for action in [VISUALS, SWITCH_SUBJECT, PICK_COLOR, VISUAL_PREVIEW] {
++        let data = form(&editor);
++        assert!(editor.handle(action, data).is_err());
++    }
++    let data = form(&editor);
++    assert!(
++        matches!(editor.handle(SAVE_ALL,data),Ok(Command::Save{colors,..}) if colors.is_empty())
++    );
++}
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/display_flow.rs
+@@ -0,0 +1,65 @@
++//! Bounded synthetic colour preview on the original shared worker domain.
++use super::*;
++use fc_domain::subject_visual::SubjectVisualPalette;
++pub(super) struct PreviewJob {
++    pub backend: Arc<Mutex<Backend>>,
++    pub lease: SessionLease,
++    pub palette: SubjectVisualPalette,
++    pub settings: DisplaySettings,
++    pub subject: SubjectId,
++    pub sequence: u64,
++}
++impl PreviewJob {
++    pub(super) fn allocation_bytes(&self) -> Option<usize> {
++        self.palette.subjects.iter().try_fold(
++            self.settings
++                .allocation_bytes()?
++                .checked_add(self.palette.revision.allocation_bytes())?
++                .checked_add(
++                    self.palette
++                        .subjects
++                        .capacity()
++                        .checked_mul(std::mem::size_of::<SchoolSubject>())?,
++                )?,
++            |sum, s| sum.checked_add(s.name.capacity()),
++        )
++    }
++    pub(super) fn run(self, context: &JobContext) -> Result<Outcome> {
++        context.checkpoint().map_err(|_| Failure::Stopped)?;
++        let (mut identity, source_revision) = {
++            let mut backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
++            let scoped = backend.begin_execution_scope(Arc::new(context.execution_fence()));
++            // Recheck this exact local management lease; do not renew or mint it.
++            scoped.read_subject_visuals(self.lease)?;
++            (scoped.state()?, scoped.global_revision()?)
++        };
++        context.checkpoint().map_err(|_| Failure::Stopped)?;
++        for subject in &mut identity.subjects {
++            if let Some(draft) = self.palette.subjects.iter().find(|s| s.id == subject.id) {
++                subject.color = draft.color;
++            }
++        }
++        let now = CurrentClock::new()
++            .try_now()
++            .map_err(|_| invalid("系统时间不可用。"))?;
++        let image = profiles_preview::render_subject_visuals(
++            &identity,
++            &self.settings,
++            self.subject,
++            self.sequence,
++            now,
++        )
++        .map_err(|_| invalid("颜色示例无法完成有界绘制，请检查显示尺寸。"))?;
++        context.checkpoint().map_err(|_| Failure::Stopped)?;
++        let backend = self.backend.lock().map_err(|_| Failure::Stopped)?;
++        backend.read_subject_visuals(self.lease)?;
++        if backend.global_revision()? != source_revision {
++            return Err(invalid("预览期间学校资料已变化，请重新预览。"));
++        }
++        Ok(Outcome::DisplayPreview {
++            sequence: self.sequence,
++            source_revision,
++            image,
++        })
++    }
++}
+--- /dev/null
++++ b/crates/fc-bootstrap/src/application/subject_visual_probe.rs
+@@ -0,0 +1,320 @@
++//! Hidden real controls, shared workers and real SQLite. No colour dialog,
++//! desktop capture, listener, audio, or external application is opened.
++use super::*;
++use display_editor as d;
++use voice_management_probe::{
++    checked, login, make_app, open, require, stop_owned_app, submit, LOGIN_NAME, PASSWORD_VALUE,
++};
++const ORDER: [&str; 22] = [
++    "setup-global-admin",
++    "create-subject",
++    "open-joint-display",
++    "loaded-original-rgb",
++    "invalid-rgb-no-write",
++    "native-joint-draft-preview",
++    "lock-keeps-partial-draft",
++    "relogin-restores-draft",
++    "cancel-review-no-write",
++    "cancel-reloads-both",
++    "native-joint-save",
++    "readback-both-saved",
++    "native-palette-draft",
++    "rename-subject-preserves-color",
++    "stale-palette-save-rejected",
++    "cancel-reload-after-conflict",
++    "first-app-physical-shutdown",
++    "second-app-real-reopen",
++    "relogin-reopened-deployment",
++    "reopened-joint-state",
++    "second-app-physical-shutdown",
++    "isolated-deployment-cleanup",
++];
++type Check<T> = std::result::Result<T, String>;
++fn mark(step: &mut usize, name: &str) -> Check<()> {
++    require(ORDER.get(*step) == Some(&name), "visuals exact step order")?;
++    println!("SUBJECT_VISUAL_NATIVE_STEP index={} name={name}", *step);
++    *step += 1;
++    Ok(())
++}
++fn saved(app: &App) -> Check<fc_ports::SubjectVisualState> {
++    checked(
++        app.backend
++            .as_ref()
++            .ok_or("visuals backend absent")?
++            .lock()
++            .map_err(|_| "visuals backend poisoned")?
++            .read_subject_visuals(app.lease.ok_or("visuals lease absent")?),
++        "visuals persisted observer",
++    )
++}
++fn value(app: &App, id: FieldId) -> Option<String> {
++    app.view()
++        .fields
++        .into_iter()
++        .find(|f| f.id == id)
++        .map(|f| f.value)
++}
++fn colors(app: &mut App, deadline: Instant) -> Check<()> {
++    submit(app, TO_DISPLAY, &[], deadline)?;
++    require(app.screen == Screen::Display, "visuals display open")?;
++    submit(app, d::VISUALS, &[], deadline)
++}
++fn initial(
++    app: &mut App,
++    paths: &DataPaths,
++    step: &mut usize,
++    deadline: Instant,
++) -> Check<fc_ports::SubjectVisualState> {
++    open(app, paths, deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (SCHOOL, "Synthetic subject visual school"),
++            (LOGIN, LOGIN_NAME),
++            (NAME, "Synthetic palette administrator"),
++            (PASSWORD, PASSWORD_VALUE),
++            (CONFIRM, PASSWORD_VALUE),
++        ],
++        deadline,
++    )?;
++    require(app.screen == Screen::Code, "visuals real setup")?;
++    submit(app, ACK, &[], deadline)?;
++    if app.screen == Screen::Login {
++        login(app, deadline)?;
++    }
++    mark(step, "setup-global-admin")?;
++    submit(app, TO_SUBJECTS, &[], deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (OLD_NAME, ""),
++            (SUBJECT, "Synthetic mathematics"),
++            (COLOR, "1234AB"),
++        ],
++        deadline,
++    )?;
++    submit(app, BACK, &[], deadline)?;
++    mark(step, "create-subject")?;
++    colors(app, deadline)?;
++    mark(step, "open-joint-display")?;
++    let before = saved(app)?;
++    require(
++        value(app, d::OPAQUE_RGB).as_deref() == Some("1234AB"),
++        "real original opaque colour loaded",
++    )?;
++    mark(step, "loaded-original-rgb")?;
++    submit(
++        app,
++        d::APPLY,
++        &[(d::OPAQUE_RGB, "GGGGGG"), (d::COURSE_ALPHA, "73")],
++        deadline,
++    )?;
++    require(
++        saved(app)? == before
++            && app
++                .display
++                .as_ref()
++                .is_some_and(|e| e.has_unsaved_changes()),
++        "invalid colour no partial write",
++    )?;
++    mark(step, "invalid-rgb-no-write")?;
++    submit(
++        app,
++        d::VISUAL_PREVIEW,
++        &[
++            (d::OPAQUE_RGB, "D02080"),
++            (d::FILL, "1"),
++            (d::COURSE_ALPHA, "73"),
++            (d::HOMEWORK_ALPHA, "41"),
++        ],
++        deadline,
++    )?;
++    require(
++        app.preview_active && saved(app)? == before,
++        "real hidden D2D preview leaves database unchanged",
++    )?;
++    mark(step, "native-joint-draft-preview")?;
++    checked(
++        app.window.probe_edit(d::OPAQUE_RGB, "AA"),
++        "native partial RGB",
++    )?;
++    submit(app, LOCK, &[], deadline)?;
++    require(
++        app.screen == Screen::Login
++            && !app.preview_active
++            && app
++                .display
++                .as_ref()
++                .is_some_and(|e| e.has_unsaved_changes()),
++        "lock keeps nonsecret draft and removes preview",
++    )?;
++    mark(step, "lock-keeps-partial-draft")?;
++    login(app, deadline)?;
++    submit(app, TO_DISPLAY, &[], deadline)?;
++    require(
++        value(app, d::OPAQUE_RGB).as_deref() == Some("AA"),
++        "same-owner re-login retains partial colour",
++    )?;
++    mark(step, "relogin-restores-draft")?;
++    submit(app, d::CANCEL, &[], deadline)?;
++    require(saved(app)? == before, "cancel review no write")?;
++    mark(step, "cancel-review-no-write")?;
++    submit(app, d::CONFIRM_CANCEL, &[], deadline)?;
++    submit(app, d::VISUALS, &[], deadline)?;
++    require(
++        saved(app)? == before && value(app, d::OPAQUE_RGB).as_deref() == Some("1234AB"),
++        "cancel reloads both originals",
++    )?;
++    mark(step, "cancel-reloads-both")?;
++    submit(
++        app,
++        d::SAVE_ALL,
++        &[
++            (d::OPAQUE_RGB, "D02080"),
++            (d::FILL, "0"),
++            (d::COURSE_ALPHA, "73"),
++            (d::HOMEWORK_ALPHA, "41"),
++        ],
++        deadline,
++    )?;
++    mark(step, "native-joint-save")?;
++    let after = saved(app)?;
++    require(
++        after.palette.revision != before.palette.revision
++            && after.display.revision
++                == before
++                    .display
++                    .revision
++                    .next()
++                    .map_err(|_| "visuals revision overflow")?
++            && !after.display.subject_fill
++            && after.display.course_fill_percent == 73
++            && after.display.homework_fill_percent == 41
++            && after.palette.subjects[0].color
++                == Rgb {
++                    red: 0xD0,
++                    green: 0x20,
++                    blue: 0x80,
++                }
++            && !app
++                .display
++                .as_ref()
++                .is_some_and(|e| e.has_unsaved_changes()),
++        "both settings really saved",
++    )?;
++    mark(step, "readback-both-saved")?;
++    submit(app, d::APPLY, &[(d::OPAQUE_RGB, "102030")], deadline)?;
++    require(saved(app)? == after, "new palette draft stays local")?;
++    mark(step, "native-palette-draft")?;
++    submit(app, d::EDIT_BACK, &[], deadline)?;
++    submit(app, d::EDIT_BACK, &[], deadline)?;
++    submit(app, TO_SUBJECTS, &[], deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (OLD_NAME, "Synthetic mathematics"),
++            (SUBJECT, "Synthetic renamed mathematics"),
++            (COLOR, "FFFFFF"),
++        ],
++        deadline,
++    )?;
++    submit(app, BACK, &[], deadline)?;
++    let renamed = saved(app)?;
++    require(
++        renamed.palette.subjects[0].id == after.palette.subjects[0].id
++            && renamed.palette.subjects[0].color == after.palette.subjects[0].color
++            && renamed.display == after.display,
++        "rename keeps colour and display",
++    )?;
++    mark(step, "rename-subject-preserves-color")?;
++    colors(app, deadline)?;
++    submit(app, d::SAVE_ALL, &[], deadline)?;
++    require(
++        saved(app)? == renamed
++            && app
++                .display
++                .as_ref()
++                .is_some_and(|e| e.has_unsaved_changes())
++            && value(app, d::OPAQUE_RGB).as_deref() == Some("102030"),
++        "old palette vector rejected without rebasing draft",
++    )?;
++    mark(step, "stale-palette-save-rejected")?;
++    submit(app, d::CANCEL, &[], deadline)?;
++    submit(app, d::CONFIRM_CANCEL, &[], deadline)?;
++    require(
++        saved(app)? == renamed,
++        "conflict recovery only explicit reload",
++    )?;
++    mark(step, "cancel-reload-after-conflict")?;
++    Ok(renamed)
++}
++pub(super) fn run() -> Check<()> {
++    let started = Instant::now();
++    let deadline = started + Duration::from_secs(120);
++    let mut random = [0; 16];
++    checked(SystemRandom.fill(&mut random), "visuals nonce")?;
++    let nonce: String = random.iter().map(|b| format!("{b:02x}")).collect();
++    let root = std::env::temp_dir().join(format!(
++        "FutureClassroom-Test-SubjectVisuals-{}-{nonce}",
++        std::process::id()
++    ));
++    let paths = checked(
++        DataPaths::isolated_test(root.clone()),
++        "visuals isolated paths",
++    )?;
++    let deployment = checked(
++        paths.prepare_for_current_user(),
++        "visuals protected deployment",
++    )?;
++    checked(deployment.read_back(), "visuals ACL readback")?;
++    let instance = checked(
++        InstanceGuard::acquire(paths.root()),
++        "visuals instance guard",
++    )?;
++    let mut step = 0;
++    let mut first = make_app(&paths, deadline)?;
++    let result = initial(&mut first, &paths, &mut step, deadline);
++    stop_owned_app(first, deadline)?;
++    let result = (|| {
++        let expected = result?;
++        mark(&mut step, "first-app-physical-shutdown")?;
++        let mut second = make_app(&paths, deadline)?;
++        let reopened = (|| {
++            open(&mut second, &paths, deadline)?;
++            require(
++                second.screen == Screen::Login,
++                "actual database reopened locked",
++            )?;
++            mark(&mut step, "second-app-real-reopen")?;
++            login(&mut second, deadline)?;
++            mark(&mut step, "relogin-reopened-deployment")?;
++            colors(&mut second, deadline)?;
++            require(
++                saved(&second)? == expected
++                    && value(&second, d::OPAQUE_RGB).as_deref() == Some("D02080"),
++                "both settings durable across independent app reopen",
++            )?;
++            mark(&mut step, "reopened-joint-state")?;
++            Ok(())
++        })();
++        stop_owned_app(second, deadline)?;
++        reopened?;
++        mark(&mut step, "second-app-physical-shutdown")?;
++        Ok(())
++    })();
++    drop(instance);
++    drop(deployment);
++    checked(
++        fs::remove_dir_all(&root),
++        "visuals remove closed deployment",
++    )?;
++    require(!root.exists(), "visuals deployment removed")?;
++    result?;
++    mark(&mut step, "isolated-deployment-cleanup")?;
++    require(step == ORDER.len(), "visuals all steps")?;
++    println!("SUBJECT_VISUAL_NATIVE_PASS steps={step} shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms={}",started.elapsed().as_millis());
++    Ok(())
++}
+--- /dev/null
++++ b/crates/fc-windows/src/workbench/color_picker.rs
+@@ -0,0 +1,79 @@
++//! UI-thread-owned common colour dialog; never holds a form RefCell borrow.
++//! Contract: https://learn.microsoft.com/windows/win32/api/commdlg/ns-commdlg-choosecolorw
++use fc_domain::identity::Rgb;
++use windows::{
++    core::{Error, Result, HRESULT},
++    Win32::{
++        Foundation::{COLORREF, HWND},
++        UI::Controls::Dialogs::{
++            ChooseColorW, CommDlgExtendedError, CC_FULLOPEN, CC_RGBINIT, CHOOSECOLORW,
++        },
++    },
++};
++fn encode(rgb: Rgb) -> COLORREF {
++    COLORREF(u32::from(rgb.red) | (u32::from(rgb.green) << 8) | (u32::from(rgb.blue) << 16))
++}
++fn decode(rgb: COLORREF) -> Rgb {
++    Rgb {
++        red: rgb.0 as u8,
++        green: (rgb.0 >> 8) as u8,
++        blue: (rgb.0 >> 16) as u8,
++    }
++}
++pub(super) fn choose(owner: HWND, initial: Rgb) -> Result<Option<Rgb>> {
++    // Exactly sixteen cells, owned for the full synchronous modal lifetime.
++    // Custom swatches are deliberately ephemeral and are not application settings.
++    let mut custom = [encode(initial); 16];
++    let mut dialog = CHOOSECOLORW {
++        lStructSize: std::mem::size_of::<CHOOSECOLORW>() as u32,
++        hwndOwner: owner,
++        rgbResult: encode(initial),
++        lpCustColors: custom.as_mut_ptr(),
++        Flags: CC_RGBINIT | CC_FULLOPEN,
++        ..Default::default()
++    };
++    // SAFETY: live caller-owned HWND, complete structure and sixteen mutable
++    // COLORREF cells all outlive this modal call. No State/RefCell borrow spans it.
++    if unsafe { ChooseColorW(&mut dialog) }.as_bool() {
++        return Ok(Some(decode(dialog.rgbResult)));
++    }
++    // A false result with error zero is user cancellation; rgbResult is then
++    // undefined by the contract and must never be copied into the draft.
++    // SAFETY: immediate thread-local diagnostic of the just-returned common dialog.
++    let error = unsafe { CommDlgExtendedError() }.0;
++    if error == 0 {
++        Ok(None)
++    } else {
++        Err(Error::new(
++            HRESULT(0x80004005u32 as i32),
++            "system colour dialog failed",
++        ))
++    }
++}
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn opaque_rgb_colorref_roundtrip_has_no_alpha_or_byte_order_swap() {
++        for rgb in [
++            Rgb {
++                red: 0,
++                green: 0,
++                blue: 0,
++            },
++            Rgb {
++                red: 255,
++                green: 255,
++                blue: 255,
++            },
++            Rgb {
++                red: 0x12,
++                green: 0x34,
++                blue: 0xAB,
++            },
++        ] {
++            assert_eq!(decode(encode(rgb)), rgb);
++            assert_eq!(encode(rgb).0 >> 24, 0);
++        }
++    }
++}

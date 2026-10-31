@@ -1,0 +1,11 @@
+--- fourth/application.rs
++++ fifth/application.rs
+@@ -3226,7 +3226,7 @@
+             return Ok(());
+         };
+         if !guard.is_current() {
+-            if !guard.is_waiting_for_authority() {
++            if !guard.can_keep_chooser_open() {
+                 self.close_public_lesson();
+             }
+             return self.render();

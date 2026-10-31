@@ -11,6 +11,7 @@ pub mod content;
 pub mod materials;
 pub mod pairing;
 pub mod responses;
+pub mod subject_visual;
 pub mod voice;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -52,6 +53,7 @@ pub enum Route {
     SessionLogout,
     ContentScopes { kind: content::Kind, offset: usize },
     ContentRead { key: content::Key },
+    SubjectVisual { key: content::Key },
     ContentSave { key: content::Key },
     ContentCommand { command_id: CommandId },
     Materials { route: materials::MaterialRoute },
@@ -211,6 +213,14 @@ impl WebBoundary {
                     Route::ContentScopes {
                         kind: content::Kind::Reminder,
                         offset: content::route_offset(offset).ok_or(WebError::NotFound)?,
+                    }
+                } else if let Some(key) = path
+                    .strip_prefix("content/homework/")
+                    .and_then(|p| p.strip_suffix("/visual"))
+                {
+                    Route::SubjectVisual {
+                        key: content::route_key(content::Kind::Homework, key)
+                            .ok_or(WebError::NotFound)?,
                     }
                 } else if let Some(key) = path.strip_prefix("content/homework/") {
                     let key = content::route_key(content::Kind::Homework, key)
@@ -965,5 +975,28 @@ mod tests {
             Err(WebError::Method)
         );
         assert_eq!(b.route("POST", "/fc/api/v1/session"), Err(WebError::Method));
+    }
+    #[test]
+    fn subject_visual_route_is_exact_homework_read_only_not_a_palette_or_reminder_route() {
+        let b = boundary();
+        let path = "/fc/api/v1/content/homework/1/2/3/2026-10-30/visual";
+        assert!(matches!(
+            b.route("GET", path),
+            Ok(Route::SubjectVisual {
+                key: content::Key::Homework { .. }
+            })
+        ));
+        assert_eq!(b.allowed_methods(path), Ok(AllowedMethods::Get));
+        for method in ["POST", "HEAD", "DELETE"] {
+            assert_eq!(b.route(method, path), Err(WebError::Method));
+        }
+        for path in [
+            "/fc/api/v1/content/homework/01/2/3/2026-10-30/visual",
+            "/fc/api/v1/content/homework/1/2/3/2026-10-30/visual/",
+            "/fc/api/v1/content/reminders/1/2026-10-30/visual",
+            "/fc/api/v1/subject-visuals",
+        ] {
+            assert_eq!(b.route("GET", path), Err(WebError::NotFound));
+        }
     }
 }

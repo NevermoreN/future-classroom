@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round35-visuals-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-subject-visual-dev.zip",
+    "--visual-fixture",
+    "FILLED_ZERO",
+    "--visual-only",
+    "--browser",
+    "--report",
+    "/tmp/fc-round35-visuals-evidence/windows-zero-browser-before-day-fix.json"
+  ],
+  "cwd": "/tmp/fc-round35-visuals-worktree",
+  "startedUtc": "2026-10-31T18:08:30.116230+00:00",
+  "stdout": "/tmp/fc-round35-visuals-evidence/windows-zero-browser-before-day-fix.stdout.log",
+  "stderr": "/tmp/fc-round35-visuals-evidence/windows-zero-browser-before-day-fix.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 67.91254862700589,
+  "completedUtc": "2026-10-31T18:09:38.030067+00:00",
+  "stdoutBytes": 270,
+  "stdoutSha256": "f2080531e6bf6a0234efcba21303f8da0dc315e1717971bc7fafb1924c5e9cfe",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

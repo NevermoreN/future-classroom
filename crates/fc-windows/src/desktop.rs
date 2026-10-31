@@ -715,7 +715,7 @@ impl DesktopRenderer {
         let Some(c) = self.cards.iter_mut().find(|c| c.source.kind == kind) else {
             return Ok(false);
         };
-        if c.body.pages.len() < 2 {
+        if read_only_classroom(&c.source) || c.body.pages.len() < 2 {
             return Ok(false);
         };
         c.page = (c.page + 1) % c.body.pages.len();
@@ -858,6 +858,8 @@ impl DesktopRenderer {
                         width: 144.,
                         height: 40.,
                     })
+                } else if read_only_classroom(card) {
+                    None
                 } else if matches!(&card.content,CardContent::Image(image) if image.total_pages>1)
                     || matches!(&card.content,CardContent::Materials(list) if !list.rows.is_empty() || list.next_cursor.is_some() || body.pages.len()>1)
                 {
@@ -1317,12 +1319,31 @@ fn route_nonpage(generation: SceneGeneration, action: InputAction, output: &mut 
         InputAction::Page(_) | InputAction::TreePage { .. } => {}
     }
 }
+/// Passive classroom facts never expose paging, settings, or other input.
+/// The separate temporary-lesson control intentionally uses Schedule styling.
+fn read_only_classroom(card: &SceneCard) -> bool {
+    !matches!(card.content, CardContent::LessonControl { .. })
+        && matches!(
+            card.kind,
+            ComponentKind::Clock
+                | ComponentKind::Date
+                | ComponentKind::Schedule
+                | ComponentKind::DateCountdown
+                | ComponentKind::Recess
+        )
+}
+pub fn is_read_only_capacity_error(error: &Error) -> bool {
+    error.code() == E_BOUNDS
+}
 fn route_action(
     card: &mut Card,
     generation: SceneGeneration,
     action: InputAction,
     output: &mut Vec<DesktopEvent>,
 ) -> Result<()> {
+    if read_only_classroom(&card.source) {
+        return Ok(());
+    }
     if let InputAction::ImagePage { identity, page } = action {
         if content::valid_page(&card.source, identity, page) {
             route_nonpage(
@@ -1663,6 +1684,20 @@ fn prepare_content_with_note(
         }
         _ => c.visible_leaf_limit as usize,
     };
+    if read_only_classroom(c)
+        && (total > viewport + 0.1
+            || blocks
+                .iter()
+                .filter_map(|b| b.leaf)
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                > limit)
+    {
+        return Err(Error::new(
+            E_BOUNDS,
+            "Read-only classroom content does not fit its complete display area",
+        ));
+    }
     let mut starts = Vec::new();
     for b in &blocks {
         starts.push(b.top);
@@ -1716,6 +1751,12 @@ fn prepare_content_with_note(
         }
     }
 
+    if read_only_classroom(c) && pages.len() > 1 {
+        return Err(Error::new(
+            E_BOUNDS,
+            "Read-only classroom content does not fit its complete display area",
+        ));
+    }
     Ok(ContentLayout {
         top_inset,
         bottom_inset: spec.bottom_inset,
@@ -2186,7 +2227,10 @@ fn render_inputs(g: &Graphics, c: &mut Card) -> Result<()> {
     let mut targets = Vec::new();
     let control = matches!(c.source.content, CardContent::LessonControl { .. });
     let image = matches!(c.source.content, CardContent::Image(_));
-    let pagination = !control && !image && (!material || c.body.pages.len() > 1);
+    let pagination = !read_only_classroom(&c.source)
+        && !control
+        && !image
+        && (!material || c.body.pages.len() > 1);
     let origin = if material {
         (c.source.rect.width - 86., 8.)
     } else {
@@ -3184,3 +3228,7 @@ mod tests {
         assert_eq!(renderer.last_metrics().visible_windows, 0);
     }
 }
+
+#[cfg(test)]
+#[path = "desktop/public_inputs_tests.rs"]
+mod public_inputs_tests;

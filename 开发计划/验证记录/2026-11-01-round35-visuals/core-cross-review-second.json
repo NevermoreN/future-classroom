@@ -1,0 +1,174 @@
+{
+  "status": "STATIC_REVIEW_PASS_NO_REMAINING_BLOCKER",
+  "reviewedAt": "2026-10-31T17:38:43.618007+00:00",
+  "worktree": "/tmp/fc-round35-visuals-worktree",
+  "scope": "Frozen core/service/UI integration only; no Cargo/npm/remote/runtime verification",
+  "sourceSha256": {
+    "crates/fc-bootstrap/src/application.rs": "62d1d1a61e82de405bac0382f912f07417757ed9edc93c4ee85ad4e6003f1816",
+    "crates/fc-bootstrap/src/application/display_editor.rs": "cba7a532ba18a017bd8e0b48fec5a3689cc7034fb2b7938821fa116a16f2f900",
+    "crates/fc-bootstrap/src/application/display_editor/visual_tests.rs": "d8465933e6e4d4aae3d27c6ee91352a208a82477e42e58728cff2f4bfd8dcb19",
+    "crates/fc-bootstrap/src/application/display_editor/visuals.rs": "60ef4fa641e073a4b0ff0e64560a48f871fa1b95ce2b1edabcb1fdaca34a5d8b",
+    "crates/fc-bootstrap/src/application/display_flow.rs": "8a2b35d23cebd3a1732458cfbf5b22b4030f44ff0da23d3e8c55e2914b84d4ff",
+    "crates/fc-bootstrap/src/application/profiles_editor.rs": "90bd1a7392b6b3b5145415b4aef973051573b261d8379fa44e4bcd42105b061a",
+    "crates/fc-bootstrap/src/application/profiles_preview.rs": "a4f895a554f67f935efa32d9acfad23d8fc39289c619bb49bc1fe5402806f4bf",
+    "crates/fc-bootstrap/src/application/subject_visual_probe.rs": "ad95dab296310d9206c58e0ae605382eb636d72ea6a5b0023054b18761ff46c1",
+    "crates/fc-bootstrap/src/backend.rs": "693236ba85cd694a06451ab86ff9d67d658669756d71ffbc916039e1aa52d777",
+    "crates/fc-bootstrap/src/backend/subject_visuals.rs": "8f14cb95e6fd73e051913802fcebb1b454428953dca091ed2f41652d16acb114",
+    "crates/fc-bootstrap/src/main.rs": "d9c68833fc587b72d98c14e25575ab7597e886a58ad23fd8f7aa06a74d2e7516",
+    "crates/fc-bootstrap/src/web_application.rs": "450812c312f316a6542538334c97c4601b77d758cfea79ae34509815f888998c",
+    "crates/fc-bootstrap/src/web_application/content.rs": "2bd00d2b3bbec60906656919cf152787cb75120b7a125ce09ec0085a8cfdcde1",
+    "crates/fc-bootstrap/src/web_application/content/subject_visual_tests.rs": "fba52d2243e078b36acc5a85a038ed93b8165aa017c997330abddd7a36fa396f",
+    "crates/fc-bootstrap/src/web_application/content/tests.rs": "5dcc3da54d39993381f69ac4e8a56c8c1d3a25efe0b22e2bc218899dee2225fe",
+    "crates/fc-domain/src/lib.rs": "2a40487102eba159ae443144177f6ec67eb6a2e2054858708224e4edd0b8bd8e",
+    "crates/fc-domain/src/subject_visual.rs": "24ce6557094c89764564b5ccd2cb0a30c9c5240e81632fc0bb93cae13d22ad19",
+    "crates/fc-domain/src/subject_visual/tests.rs": "27759107f9032c5b03b203a042a7f07a37e58748035cd594d459ffdea96ec943",
+    "crates/fc-ports/src/lib.rs": "dc5e4f8b757ceb806e80a29b6a7b6ab31c9e1685ef893be80dd949a071c6b168",
+    "crates/fc-ports/src/subject_visual.rs": "0394ce2a4a0e6a7dadbe953cce0a171a4b1fa9ef4382c46fff5cfd9f6eba2a54",
+    "crates/fc-protocol/src/web.rs": "ee7245cd3ebc37ea8fe26da2ff4c60bf1a49c3efd7177ea138d37ab49752b0b8",
+    "crates/fc-protocol/src/web/subject_visual.rs": "3ce7fd75f8fa96e8fc56b284150e40635faa3c4efe5236599b155e32f775064e",
+    "crates/fc-storage/src/business/mod.rs": "a23e77cc764cc7ebc4a986982648c9805e04ec435ff9ab440b318eea20052a98",
+    "crates/fc-storage/src/business/subject_visual.rs": "063a1637db375cf96d1f7f79423560f3e78d5fc6c2b9d3dd2f9393f3489bfcfc",
+    "crates/fc-storage/src/business/subject_visual/tests.rs": "0e5f10d621bb819535169b7897b1053f0a0baba1100757f520a8e2eacb4e25c8",
+    "crates/fc-storage/src/lib.rs": "de8af4f0ec84d7f1c3ce934b7c39b3519c4f3576bfa921d56eedd0da601a8d89",
+    "crates/fc-windows/Cargo.toml": "2b229d54cc06da8107a9344b3ec215efa6ffb00294881305b2303886f21abe43",
+    "crates/fc-windows/src/workbench.rs": "db290145130fb8e5e0f7a6c80ba3be19f874c7361908df1283aca0d369e49a00",
+    "crates/fc-windows/src/workbench/color_picker.rs": "83a70f2fb31863a794f24f454ba458a9988f2049fd1ba3f0403af2f77f98219c",
+    "web/src/SubjectVisualPreview.tsx": "9ac996390438293757396159e6a33fa6c075351b7b3284e77836dc644dfa74bd",
+    "web/src/TeacherWorkspace.tsx": "32b4f5f59da0ef7eb35412c38831699c43e8cf72ffc42c7bd3b815fa344e5485",
+    "web/src/api/client.ts": "2d8f99c44d3240728681a7e44c58fc912e8a37f4ce8e53797241616d4231f5e0",
+    "web/src/api/subject-visual-controller.ts": "ca21901ea25d4c227230d57463424f9c5df2872361ce35f01636d8fc92915eac",
+    "web/src/api/subject-visual-protocol.ts": "e93034a2711d35236c70de0641320c94ca2820e3c604e76ee693113ac2f1b5ad",
+    "web/tests/subject-visual.test.ts": "2b176a7c03a76985b8b5e1ab87fa1d343300119d0079ee65d32308fc7021adad"
+  },
+  "blockers": [],
+  "otherReviewedBoundaries": [
+    "Exact local global administrator and no-initial-password-change through backend actor and writer authorize_management.",
+    "Same SQL transaction loads palette/display, checks both revisions, persists both and immutable factory(updated identity); existing scoped execution fence preserved by repository clone.",
+    "CatalogChanged synchronizes ledger following published colors without role/epoch mutation or a new lease.",
+    "Preview enforces Web current session, exact owned homework scope, target teacher/class/subject enabled, current day and persisted day floor, single-subject response only.",
+    "Native joint draft retains full canonical palette version and all subjects; basic subject rename preserves current raw RGB.",
+    "Original pending generation gate rejects late display results after lock; preview sequence/health/source revision gates suppress stale D2D.",
+    "Embedded public-layout style retains legacy two-CAS and cannot access palette actions.",
+    "Web API transports only the read-only exact HomeworkKey route; front-end abort/sequence/source/api binding rejects stale preview; no palette POST or content resubmit.",
+    "Native modal picker is UI-owned and copies result only when ChooseColorW succeeds; cancellation does not read undefined output."
+  ],
+  "tests": [
+    {
+      "crate": "fc-domain",
+      "name": "subject_visual::tests::complete_version_vector_is_canonical_and_bounded"
+    },
+    {
+      "crate": "fc-domain",
+      "name": "subject_visual::tests::color_updates_preserve_catalog_and_advance_only_changed_subjects"
+    },
+    {
+      "crate": "fc-domain",
+      "name": "subject_visual::tests::legacy_put_subject_aba_rename_and_new_catalog_ids_invalidate_palette"
+    },
+    {
+      "crate": "fc-domain",
+      "name": "subject_visual::tests::unrelated_identity_change_does_not_conflict_but_web_teacher_and_overflow_fail"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::joint_save_is_atomic_published_from_updated_identity_and_durable_idempotent"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::each_cas_conflict_leaves_the_other_document_and_receipt_untouched"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::legacy_color_aba_and_new_subject_conflict_but_unrelated_catalog_does_not"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::exact_local_global_session_invalid_palette_and_settings_fail_without_writes"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::precommit_revocation_rolls_back_both_and_does_not_publish_a_snapshot"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::web_preview_is_same_version_single_subject_and_enforces_scope_day_and_session"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::equivalent_color_order_replays_the_same_durable_command"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::queued_request_execution_cancellation_never_writes_or_publishes"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::precommit_execution_cancellation_rolls_back_and_keeps_writer_healthy"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::bounded_result_and_strict_palette_codec_refuse_malformed_data"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::ordinary_restore_rebases_current_subject_versions_and_restores_original_colors_and_display"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::mapped_restore_keeps_target_colors_and_rebases_its_complete_palette_vector"
+    },
+    {
+      "crate": "fc-storage",
+      "name": "business::subject_visual::tests::web_preview_rechecks_exact_session_and_midnight_before_releasing_output"
+    }
+  ],
+  "narrowTestCommand": [
+    "cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--jobs",
+    "2",
+    "-p",
+    "fc-domain",
+    "-p",
+    "fc-storage",
+    "--lib",
+    "subject_visual::tests::",
+    "--",
+    "--test-threads=2"
+  ],
+  "expectedNewTests": 17,
+  "notRun": [
+    "Cargo compile/tests",
+    "Clippy",
+    "npm",
+    "Windows",
+    "remote"
+  ],
+  "localPureCheck": "Exact regex literal extracted from current subject-visual-protocol.ts rejects NUL and accepts English/Chinese fixture names; a prior manually over-escaped scratch literal was invalid and is not a source finding.",
+  "sourceStableDuringCapture": true,
+  "previousReport": "core-cross-review-first.json",
+  "previousBlockerResolution": {
+    "source": "/tmp/fc-round35-visuals-worktree/crates/fc-bootstrap/src/application/subject_visual_probe.rs",
+    "sha256": "ad95dab296310d9206c58e0ae605382eb636d72ea6a5b0023054b18761ff46c1",
+    "behavior": "second_physically_closed remains false until actual stop_owned_app returns Ok; result is propagated before directory cleanup when false. Ordinary assertion failure with successful physical shutdown still cleans owned deployment.",
+    "evidence": "Static source only; no build or runtime."
+  },
+  "sourceChangesAfterFirstReview": [
+    {
+      "path": "crates/fc-bootstrap/src/backend.rs",
+      "firstReviewSha256": "4fe3fe067731cf54808f4709d0cc36a9feadeacb13b5a446b0869d15c0bbb565",
+      "currentSha256": "693236ba85cd694a06451ab86ff9d67d658669756d71ffbc916039e1aa52d777"
+    },
+    {
+      "path": "crates/fc-storage/src/lib.rs",
+      "firstReviewSha256": "fa53fff18139709a51f4b4628195bca6556b17881b8b56f32f8f999566ea5812",
+      "currentSha256": "de8af4f0ec84d7f1c3ce934b7c39b3519c4f3576bfa921d56eedd0da601a8d89"
+    }
+  ],
+  "subsequentAtomicMethodMigration": {
+    "report": "/tmp/fc-round35-msvc-evidence/atomic-try-update-source-freeze-first.json",
+    "scope": "Only fetch_update->try_update method renames after first frozen review; exact original/new bytes retained separately."
+  }
+}

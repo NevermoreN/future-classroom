@@ -542,7 +542,7 @@ fn decrypt_protocol_metadata(
     use std::sync::atomic::{AtomicUsize, Ordering};
     static EMITTED: AtomicUsize = AtomicUsize::new(0);
     if EMITTED
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
             (count < 4).then_some(count + 1)
         })
         .is_err()

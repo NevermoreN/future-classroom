@@ -44,6 +44,45 @@ pub(super) struct Setup {
     service: WebService,
     admin: SessionLease,
     pairing_code: String,
+    visual_fixture: VisualFixture,
+}
+// Explicit finite-test input inside the already validated disposable root.
+// Normal listening/configuration never reads this file.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum VisualFixture {
+    Default,
+    Zero,
+    Outlined,
+}
+impl VisualFixture {
+    fn load(parent: &std::path::Path) -> Result<Self> {
+        use std::io::Read;
+        let file = match fs::File::open(parent.join(".subject-visual-fixture")) {
+            Ok(file) => file,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Self::Default),
+            Err(_) => return Err(Failure::Deployment("business visual fixture open")),
+        };
+        let mut bytes = Vec::with_capacity(33);
+        checked(
+            file.take(33).read_to_end(&mut bytes),
+            "business visual fixture read",
+        )?;
+        match bytes.as_slice() {
+            b"FILLED_DEFAULT" => Ok(Self::Default),
+            b"FILLED_ZERO" => Ok(Self::Zero),
+            b"OUTLINED" => Ok(Self::Outlined),
+            _ => Err(Failure::Deployment(
+                "business visual fixture strict bounded value",
+            )),
+        }
+    }
+    fn name(self) -> &'static str {
+        match self {
+            Self::Default => "FILLED_DEFAULT",
+            Self::Zero => "FILLED_ZERO",
+            Self::Outlined => "OUTLINED",
+        }
+    }
 }
 fn checked<T, E>(value: std::result::Result<T, E>, stage: &'static str) -> Result<T> {
     value.map_err(|_| Failure::Deployment(stage))
@@ -141,6 +180,7 @@ fn validate_parent(parent: &std::path::Path, marker: &str) -> Result<()> {
 }
 fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> Result<Setup> {
     validate_parent(&parent, marker)?;
+    let visual_fixture = VisualFixture::load(&parent)?;
     let root = parent.join("FutureClassroom-Test-Business");
     require(
         !root.exists(),
@@ -242,6 +282,45 @@ fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> R
                 "business refreshed synthetic login",
             )?,
         )?;
+        if visual_fixture != VisualFixture::Default {
+            let current = scoped.read_subject_visuals(admin)?;
+            let mut display = current.display;
+            match visual_fixture {
+                VisualFixture::Zero => {
+                    display.homework_fill_percent = 0;
+                    display.course_fill_percent = 0;
+                    for component in &mut display.components {
+                        match component.kind {
+                            fc_domain::desktop::ComponentKind::Homework => {
+                                component.opacity_percent = 70
+                            }
+                            fc_domain::desktop::ComponentKind::Schedule => {
+                                component.opacity_percent = 80
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                VisualFixture::Outlined => display.subject_fill = false,
+                VisualFixture::Default => {}
+            }
+            let colors = current
+                .palette
+                .subjects
+                .iter()
+                .map(|subject| fc_domain::subject_visual::SubjectColor {
+                    subject_id: subject.id,
+                    color: subject.color,
+                })
+                .collect();
+            scoped.save_subject_visuals(
+                admin,
+                current.palette.revision,
+                display.revision,
+                colors,
+                display,
+            )?;
+        }
         // Do not retain the job-specific WebService clone beyond this call.
         admin
     };
@@ -273,6 +352,7 @@ fn setup(parent: PathBuf, marker: &str, origin: &str, context: &JobContext) -> R
         service,
         admin,
         pairing_code,
+        visual_fixture,
     })
 }
 fn startup_call(
@@ -434,7 +514,9 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
         service,
         admin,
         pairing_code,
+        visual_fixture,
     } = setup;
+    let visual_fixture = visual_fixture.name();
     let (mut uploads, hub) =
         UploadHubOwner::new().map_err(|e| format!("business upload owner: {e:?}"))?;
     let (mut downloads, download_hub) =
@@ -449,7 +531,7 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
     );
     let static_count = static_assets.asset_count();
     net.set_static_assets(static_assets)?;
-    println!("TLS_BUSINESS_READY {{\"port\":{port},\"generation\":{generation},\"marker\":\"{marker}\",\"pairingCode\":\"{pairing_code}\",\"origin\":\"{origin}\",\"basePath\":\"/fc/\",\"classId\":\"1\",\"subjectId\":\"1\",\"loginName\":\"{LOGIN_NAME}\",\"staticAssets\":{static_count}}}");
+    println!("TLS_BUSINESS_READY {{\"port\":{port},\"generation\":{generation},\"marker\":\"{marker}\",\"pairingCode\":\"{pairing_code}\",\"origin\":\"{origin}\",\"basePath\":\"/fc/\",\"classId\":\"1\",\"subjectId\":\"1\",\"loginName\":\"{LOGIN_NAME}\",\"staticAssets\":{static_count},\"visualFixture\":\"{visual_fixture}\"}}");
     checked(std::io::stdout().flush(), "business READY flush").map_err(|e| format!("{e:?}"))?;
     let until = Instant::now() + Duration::from_secs(PROBE_SECONDS);
     let mut approval: Option<JobTicket<Result<Outcome>>> = None;

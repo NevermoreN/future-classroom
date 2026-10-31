@@ -48,6 +48,8 @@ cargo run -p fc-bootstrap --locked -- --self-check
 .\fc-bootstrap.exe --host-probe 2
 .\fc-bootstrap.exe --application-probe
 .\fc-bootstrap.exe --autostart-probe
+.\fc-bootstrap.exe --subject-visuals-probe
+.\fc-bootstrap.exe --public-desktop-probe
 .\fc-bootstrap.exe --reinitialization-probe
 .\fc-bootstrap.exe --migration-probe
 .\fc-bootstrap.exe --materials-probe
@@ -56,6 +58,8 @@ cargo run -p fc-bootstrap --locked -- --self-check
 ```
 
 诊断命令只写独立临时数据并清理；`--application-probe` 用隐藏原生控件执行真实工作台闭环，并验证课表网格、双表差异/历史恢复、独立校历、显示设置保存重读、锁定草稿、临时换课/恢复/旧CAS拒绝、退出保护及真实事实到原生离屏场景；Office校验交给同一双worker池，不访问正式ProgramData。绘制探针限时运行、透明穿透、不激活窗口，仅在确认桌面前台时显示。`rendered_frames=0` 表示没有取得桌面可见绘制证据。`--materials-probe`已通过真实双worker/SQLite/文件校验/固定副本/私有系统关联接收器闭环，使用合成文件和临时关联，不调用日常软件或更改默认关联。本地主管理员可查看并清理已到期未占用副本。`--audio-silent-probe`只生成全零PCM，验证真实文件/原Web会话/SQLite/WinMM自然与取消释放链，并检查正常按需音频域的本地锁定独立性、紧急停止、后续显式任务与关闭顺序；不录音、不改音量或前台，教师管理服务仍待接入。
+
+`--public-desktop-probe` 使用合成部署和隐藏原生控件验证未登录换课/恢复原课、旧场景拒绝及关闭清理，不改变前台；`--subject-visuals-probe` 验证科目配色与显示设置联合保存、草稿和物理重开，不打开可见系统颜色选择器。两者均不替代希沃真机触控和可见桌面验收。
 
 新构建的 Windows 自检还覆盖 DPAPI 密钥和 SQLite 重开、真实登录限速端口、改密撤权及一次性恢复；系统探针只读，宿主探针限时创建自身隐藏窗口和托盘。现有历史开发 ZIP 的命令和范围以其包内 manifest 为准，不能用新源码的验证替代旧二进制证据。
 
@@ -95,6 +99,8 @@ python3 scripts/package-probe.py --exe target/i686-pc-windows-gnu/release/fc-boo
 [4K原生定向记录](开发计划/验证记录/2026-10-30-windows11-round6-native-4k-materials.json)已通过：1080p/4K的应用DIB合计分别为3025792/4806080字节，保持16MiB上限。记录仅覆盖自身合成场景和原生离屏路径；旧失败保留，Win7/Win10、希沃、可见桌面/PPT/触控、操作系统背景内存、完整性能与72小时门槛不变。第六轮最终受测源码/EXE哈希、测试总数、失败历史及开发包均见[实施记录](开发计划/10-实施进度与验证记录.md)。
 
 ## 第七轮当前课程与实际老师历史
+
+以下记录第七轮当时实现。第三十六轮按最新要求将教室桌面换课/恢复原课改为公开操作，无需账号、登录、口令或身份验证；课程表、时钟、日历/日期/倒计时完全不接收点击或翻页。设置和基础课表管理保留原权限。新入口的实际验证范围以[实施记录](开发计划/10-实施进度与验证记录.md)为准。
 
 临时换课只由本地主管理员提交，捕获完整课程实例与覆盖修订；下课或版本变化后拒绝旧操作，不能改到下一节。有任教候选必须明确老师，无候选需二次确认未分配。恢复原课终止当前覆盖，周表不改。
 

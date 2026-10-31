@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "stage": "Round36 public desktop UI/native initial freeze",
+  "scope": "Independent worktree only; not built or executed",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 256951,
+      "sha256": "5dc64a742d0b76b7ee551f718e2cb012d0c6fe7799ebdbeaf3c10b77b52f07cc"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+      "bytes": 60894,
+      "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+      "bytes": 10965,
+      "sha256": "b683ce934340c04fa54f45501f8b0a4e992e117f7f19e353b325ca95aa496809"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+      "bytes": 6307,
+      "sha256": "49fcd0928ada2aadc37eecd6a186cdfd0dc15cdb9c42b39e29b479e33f0f647b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/public_desktop_probe.rs",
+      "bytes": 14151,
+      "sha256": "d0d69362f680ddccc401f79d83c4329f9a9b7a06c553a0075415029c48c54a35"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 18687,
+      "sha256": "07e885089d1542d895e7c780bd2900b153061ba1d44c329aa4bdd574fea8e5b3"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop.rs",
+      "bytes": 122383,
+      "sha256": "23dce0cb8fbe8bddcf7eb077bc68763c4f76274af8e688b81b0602a84e55830d"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/tree.rs",
+      "bytes": 71115,
+      "sha256": "e5cd54fc77ad6b4527d08318a6b01dfb5822bee5da28d57a1a88db5805c5355e"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/card_body_tests.rs",
+      "bytes": 18711,
+      "sha256": "3939411439adc01897c2082a1d0c42382566f6475f6b705e5bf52d5e52545073"
+    },
+    {
+      "path": "crates/fc-windows/src/desktop/public_inputs_tests.rs",
+      "bytes": 4499,
+      "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc"
+    }
+  ],
+  "ownedFileCount": 10,
+  "checks": {
+    "rustfmt": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "tests": {
+    "publicEditorPure": 5,
+    "hiddenNativeInputAndCapacity": 3,
+    "hiddenProbeSteps": 20,
+    "execution": "NOT_RUN"
+  },
+  "probe": {
+    "cli": "--public-desktop-probe",
+    "stepPrefix": "PUBLIC_DESKTOP_NATIVE_STEP",
+    "marker": "PUBLIC_DESKTOP_NATIVE_PASS",
+    "budgetSeconds": 120,
+    "databaseReopen": "NOT_EXERCISED",
+    "foreground": "UNTOUCHED"
+  },
+  "before": "editor-before.json",
+  "patch": {
+    "path": "editor-diff-first.patch",
+    "bytes": 31952,
+    "sha256": "8e5ddef56cb8775aafc5d761af4b29353e3a448ed029785044892b905faf3643"
+  },
+  "untrackedNewSourceIncludedByFileHashes": true
+}

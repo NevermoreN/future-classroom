@@ -1,3 +1,4 @@
+import { subjectVisual, type HomeworkTarget } from "./subject-visual-protocol"
 import { bodyText, commandResult, committed, content, contentPath, revision, sameKey, scopes, type CommandResult, type Committed, type ContentCommand, type ContentDocument, type ContentKey, type ContentKind, type ScopePage } from './content-protocol'
 import { decimal, errorCode, loggedOut, MAX_JSON_BYTES, pairingReceipt, pollResult, ProtocolFault, publicStatus, secret, session, strictJson, validateForm, type ErrorCode, type PairingForm, type PairingReceipt, type PollResult, type PublicStatus, type Session } from './protocol'
 export class ApiError extends Error {
@@ -122,6 +123,11 @@ export class HttpApi implements ServerApi, ContentApi {
     const r = await this.request(contentPath(key), signal, input, csrf)
     if (r.status !== 200) throw new ProtocolFault()
     return committed(r.value, input.commandId, key, input.expectedRevision, input.text)
+  }
+  async subjectVisual(target: HomeworkTarget, signal: AbortSignal) {
+    const r = await this.request(contentPath(target) + '/visual', signal)
+    if (r.status !== 200) throw new ProtocolFault()
+    return subjectVisual(r.value, target)
   }
   async commandResult(commandId: string, signal: AbortSignal) {
     const id = decimal(commandId), r = await this.request(`content/commands/${id}`, signal)

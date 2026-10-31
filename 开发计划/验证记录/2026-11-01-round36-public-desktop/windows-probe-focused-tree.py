@@ -1,0 +1,730 @@
+#!/usr/bin/env python3
+"""Run only supplied development probes in a disposable remote Windows directory.
+Credentials stay outside the repository. Existing SSH configuration is retained.
+"""
+import argparse
+import base64
+import hashlib
+import json
+import re
+from pathlib import Path
+import subprocess
+import tempfile
+import uuid
+
+MIGRATION_STEPS = (
+    "source-native-setup-real-teaching",
+    "source-package-export-saved",
+    "target-native-setup-distinct-authority",
+    "ordinary-foreign-installation-denied",
+    "pending-inspection-native-cancel-retired",
+    "incomplete-mapping-preflight-rejected",
+    "explicit-class-subject-principal-choices",
+    "mapped-full-preflight-live-unchanged",
+    "native-default-confirmation-rejected",
+    "native-partial-confirmation-rejected",
+    "explicit-double-ack-revokes-and-handoffs",
+    "physical-shutdown-and-three-tree-cold-commit",
+    "native-result-close-acknowledged",
+    "independent-process-current-target-login-and-mapped-content",
+    "source-package-and-target-key-unchanged",
+    "owned-synthetic-deployments-cleaned",
+)
+
+
+VOICE_SETTINGS_STEPS = (
+    'native-setup-global-administrator',
+    'native-open-voice-settings',
+    'saved-default-enabled-no-jobs',
+    'native-disable-review-no-write',
+    'native-unchecked-confirm-rejected',
+    'native-cancel-no-write',
+    'native-confirm-disable-persisted',
+    'native-refresh-disabled',
+    'native-enable-review-no-write',
+    'native-lock-discards-review',
+    'native-relogin',
+    'native-reopen-saved-disabled',
+    'native-limits-edit-review-no-write',
+    'native-limits-unchecked-confirm-rejected',
+    'native-limits-cancel-keeps-unsaved-draft',
+    'native-limits-confirm-custom-persisted',
+    'first-app-physical-shutdown',
+    'second-app-real-database-reopen',
+    'native-relogin-after-database-reopen',
+    'native-reopen-persisted-disabled',
+    'native-limits-persisted-after-database-reopen',
+    'native-confirm-enable-persisted',
+    'native-disable-review-captured',
+    'external-concurrent-cas-disable',
+    'native-stale-review-rejected',
+    'native-refresh-current-config',
+    'native-confirm-enable-after-refresh',
+    'native-limits-capture-review',
+    'external-concurrent-limits-cas',
+    'native-limits-stale-review-rejected',
+    'native-limits-refresh-preserves-draft',
+    'native-limits-confirm-after-refresh',
+    'native-limits-restore-defaults',
+    'native-close-settings',
+    'second-app-physical-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+VOICE_OUTPUT_STEPS = (
+    "native-setup-global-administrator",
+    "native-open-voice-settings",
+    "saved-default-enabled-no-jobs",
+    "native-draft-refresh-no-write",
+    "native-nonempty-check-rejected",
+    "native-explicit-output-query",
+    "query-keeps-saved-state-and-draft",
+    "native-refresh-retains-exact-observation",
+    "real-thirty-second-observation-expiry",
+    "native-explicit-recheck-new-observation",
+    "native-lock-discards-observation-and-draft",
+    "native-relogin-new-lease",
+    "native-reopen-unchecked-original-settings",
+    "app-physical-shutdown",
+    "isolated-deployment-cleanup",
+)
+
+
+PUBLIC_DESKTOP_STEPS = (
+    'setup-administrator-fixture',
+    'create-bound-class-and-subjects',
+    'seed-current-lesson',
+    'management-lock-removes-session',
+    'hidden-desktop-rendered',
+    'native-public-button-without-session',
+    'public-catalog-only',
+    'cancel-without-change',
+    'new-native-public-entry',
+    'unassigned-review-without-write',
+    'local-account-lock-keeps-public-flow',
+    'explicit-public-change-closes',
+    'changed-desktop-rendered',
+    'old-scene-entry-rejected',
+    'new-native-restore-entry',
+    'explicit-public-restore-closes',
+    'restored-desktop-rendered',
+    'public-close-hides-chooser',
+    'physical-shared-workers-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+def validate_public_desktop_output(exit_code, output):
+    """Finite hidden public-action transcript; no foreground/device acceptance."""
+    if type(exit_code) is not int or exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native public desktop workflow failed")
+    steps = [line for line in output if line.startswith("PUBLIC_DESKTOP_NATIVE_STEP")]
+    expected = [f"PUBLIC_DESKTOP_NATIVE_STEP index={index} name={name}" for index, name in enumerate(PUBLIC_DESKTOP_STEPS)]
+    if steps != expected:
+        raise RuntimeError("public desktop exact20 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("PUBLIC_DESKTOP_NATIVE_PASS")]
+    pattern = (r"PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("public desktop exact final public/change/restore/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(1))
+    if not 0 < elapsed_ms <= 120_000 or output.index(summaries[0]) <= output.index(expected[-1]):
+        raise RuntimeError("public desktop final marker must follow all20 steps inside its original120s budget")
+    return {"steps": len(steps), "stepNames": list(PUBLIC_DESKTOP_STEPS), "elapsedMs": elapsed_ms}
+
+
+SUBJECT_VISUAL_STEPS = (
+    'setup-global-admin',
+    'create-subject',
+    'open-joint-display',
+    'loaded-original-rgb',
+    'invalid-rgb-no-write',
+    'native-joint-draft-preview',
+    'lock-keeps-partial-draft',
+    'relogin-restores-draft',
+    'cancel-review-no-write',
+    'cancel-reloads-both',
+    'native-joint-save',
+    'readback-both-saved',
+    'native-palette-draft',
+    'rename-subject-preserves-color',
+    'stale-palette-save-rejected',
+    'cancel-reload-after-conflict',
+    'first-app-physical-shutdown',
+    'second-app-real-reopen',
+    'relogin-reopened-deployment',
+    'reopened-joint-state',
+    'second-app-physical-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+def validate_subject_visual_output(exit_code, output):
+    """Validate this finite native diagnostic transcript; not device acceptance."""
+    if type(exit_code) is not int or exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native subject visual workflow failed")
+    steps = [line for line in output if line.startswith("SUBJECT_VISUAL_NATIVE_STEP")]
+    expected = [f"SUBJECT_VISUAL_NATIVE_STEP index={index} name={name}" for index, name in enumerate(SUBJECT_VISUAL_STEPS)]
+    if steps != expected:
+        raise RuntimeError("subject visual exact22 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("SUBJECT_VISUAL_NATIVE_PASS")]
+    pattern = (r"SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("subject visual exact final joint/reopen/preview/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(1))
+    if not 0 < elapsed_ms <= 120_000 or output.index(summaries[0]) <= output.index(expected[-1]):
+        raise RuntimeError("subject visual final marker must follow all22 steps inside its original120s budget")
+    return {"steps": len(steps), "stepNames": list(SUBJECT_VISUAL_STEPS), "elapsedMs": elapsed_ms}
+
+
+def validate_voice_output_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native output query workflow failed")
+    steps = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_STEP")]
+    expected = [f"VOICE_OUTPUT_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_OUTPUT_STEPS)]
+    if steps != expected:
+        raise RuntimeError("output query exact15 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("VOICE_OUTPUT_NATIVE_PASS")]
+    result = r"(Supported|FormatUnsupported|Unavailable|Failed)"
+    pattern = (r"VOICE_OUTPUT_NATIVE_PASS steps=15 shared_workers=2 first_result=" + result
+               + r" second_result=" + result
+               + r" ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)")
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("output query exact final observation/expiry/cleanup marker missing or malformed")
+    elapsed_ms = int(summary.group(3))
+    if elapsed_ms < 30_000 or output.index(summaries[0]) < output.index(expected[-1]):
+        raise RuntimeError("output query must complete the real thirty-second expiry before its final marker")
+    return {"steps": len(steps), "stepNames": list(VOICE_OUTPUT_STEPS),
+            "firstResult": summary.group(1), "secondResult": summary.group(2),
+            "elapsedMs": elapsed_ms}
+
+
+def validate_voice_settings_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native voice settings workflow failed")
+    steps = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_STEP")]
+    expected = [f"VOICE_SETTINGS_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_SETTINGS_STEPS)]
+    if steps != expected:
+        raise RuntimeError("voice settings exact36 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_PASS")]
+    pattern = r"VOICE_SETTINGS_NATIVE_PASS steps=36 shared_workers=2 database_reopen=PASS limits_reopen=PASS limits_stale_cas=PASS limits_defaults_restored=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)"
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("voice settings exact final scope/cleanup completion marker missing or malformed")
+    return {"steps": len(steps), "stepNames": list(VOICE_SETTINGS_STEPS), "elapsedMs": int(summary.group(1))}
+
+
+def validate_migration_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native cross-installation migration workflow failed")
+    steps = [line for line in output if line.startswith("MIGRATION_NATIVE_STEP")]
+    expected = [f"MIGRATION_NATIVE_STEP index={index} name={name}" for index, name in enumerate(MIGRATION_STEPS)]
+    if steps != expected:
+        raise RuntimeError("migration exact16 ordered step indices/names missing, malformed or repeated")
+    children = [line for line in output if line.startswith("MIGRATION_SUBPROCESS_REOPEN_PASS")]
+    child_pattern = r"MIGRATION_SUBPROCESS_REOPEN_PASS nonce=([0-9a-f]{32}) target_credentials=PASS mapped_content=PASS physical_shutdown=PASS"
+    if len(children) != 1 or not (child := re.fullmatch(child_pattern, children[0])):
+        raise RuntimeError("migration exact independent-executable completion marker missing or malformed")
+    summaries = [line for line in output if line.startswith("migration_native=")]
+    summary_pattern = r"migration_native=PASS migration_native_steps=16 reopen=independent_executable_production_Open picker=ISOLATED_CAPABILITY_ONLY visible_dialog=NOT_TESTED foreground=UNTOUCHED real_run=READ_ONLY isolated_cleanup=PASS elapsed_ms=([0-9]+)"
+    if len(summaries) != 1 or not (summary := re.fullmatch(summary_pattern, summaries[0])):
+        raise RuntimeError("migration exact final scope/cleanup completion marker missing or malformed")
+    return {"steps": len(steps), "stepNames": list(MIGRATION_STEPS), "subprocessNonce": child.group(1), "elapsedMs": int(summary.group(1))}
+
+
+def project_run_snapshot_script():
+    """Read only this project's real Run value; disclose only kind/length/hash."""
+    return r"""
+$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){
+ $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;
+ try{$key=$base.OpenSubKey('Software\Microsoft\Windows\CurrentVersion\Run',$false);
+  $present=$false;$kind=$null;$digest=$null;$length=0;
+  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;
+   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);
+    if($value-is [byte[]]){$bytes=$value}else{
+     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}
+     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};
+     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)
+    };
+    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
+   }
+  };
+  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}
+ }finally{if($key){$key.Dispose()};$base.Dispose()}
+};@{views=$views}|ConvertTo-Json -Depth 5 -Compress
+"""
+
+
+def ps_literal(value):
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+class Remote:
+    def __init__(self, host, identity):
+        self.host = host
+        self.options = ["-i", str(identity), "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8"]
+
+    def powershell(self, script, timeout=60):
+        preamble = "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;"
+        encoded = base64.b64encode((preamble + script).encode("utf-16-le")).decode("ascii")
+        result = subprocess.run(["ssh", *self.options, self.host, "powershell.exe -NoProfile -NonInteractive -EncodedCommand " + encoded], capture_output=True, timeout=timeout)
+        if result.returncode:
+            raise RuntimeError(result.stderr.decode("utf-8", "replace")[-3000:])
+        return result.stdout.decode("utf-8", "replace").strip()
+
+    def upload(self, local, directory):
+        subprocess.run(["scp", "-q", *self.options, str(local), self.host + ":" + directory.replace("\\", "/") + "/" + local.name], check=True, timeout=60)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--host", required=True)
+    parser.add_argument("--identity", type=Path, required=True)
+    parser.add_argument("--exe", type=Path, required=True)
+    parser.add_argument("--test-metadata", type=Path)
+    parser.add_argument("--test-timeout-seconds", type=int, default=60, help="per supplied test EXE budget in seconds (1..900; default 60)")
+    parser.add_argument("--native-seconds", type=int, default=5)
+    parser.add_argument("--system-host", action="store_true", help="also run new read-only system and interactive hidden-host probes")
+    parser.add_argument("--audio-silent", action="store_true", help="zero PCM only; no volume/microphone/foreground changes")
+    parser.add_argument("--materials", action="store_true", help="run synthetic file/validation/SQLite/private Shell receiver integration")
+    parser.add_argument("--recovery", action="store_true", help="isolated hidden native ordinary backup/save/preflight/review/cold restore and independent process reopen; no visible picker")
+    parser.add_argument("--reinitialization", action="store_true", help="isolated hidden native no-code reset, cancellation, explicit acknowledgements and independent executable fresh setup; synthetic deployment only")
+    parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
+    parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
+    parser.add_argument("--voice-settings", action="store_true", help="isolated hidden native local-admin voice policy confirmation, lock, CAS and durable reopen; no recording/playback")
+    parser.add_argument("--public-desktop", action="store_true", help="isolated hidden native public lesson change/restore without an account; real controls/SQLite/shared workers, no foreground changes")
+    parser.add_argument("--subject-visuals", action="store_true", help="isolated hidden native joint school colours/display draft, real synthetic D2D, lock/CAS and SQLite reopen; no visible colour dialog")
+    parser.add_argument("--voice-output", action="store_true", help="isolated hidden native default-output format query, draft/refresh/expiry/lock; no recording or playback")
+    parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
+    parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
+    parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
+    parser.add_argument("--web-voice", action="store_true", help="interactive hidden-task authenticated voice upload/jobs and native zero-PCM three-repeat/cancel integration")
+    parser.add_argument("--web-pairing", action="store_true", help="noninteractive CNG/DPAPI/SQLite pairing and synthetic trusted-TLS metadata port probe; no HTTPS listener/browser")
+    parser.add_argument("--report", type=Path, required=True)
+    args = parser.parse_args()
+    if not 1 <= args.native_seconds <= 30:
+        parser.error("native seconds must be in 1..30")
+    if not 1 <= args.test_timeout_seconds <= 900:
+        parser.error("test timeout seconds must be in 1..900")
+    if args.public_desktop and any((args.subject_visuals, args.voice_output, args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated public desktop workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.subject_visuals and any((args.voice_output, args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated subject visual workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.voice_output and any((args.voice_settings, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated output query workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.voice_settings and any((args.voice_output, args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated voice settings workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.migration and any((args.application, args.calendar, args.calendar_download, args.autostart, args.recovery, args.reinitialization, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated migration workflow separately; only test metadata and read-only system/host checks may accompany it")
+    if args.recovery and (args.application or args.calendar or args.autostart):
+        parser.error("run the dedicated recovery workflow separately to preserve its independent ownership and budget")
+    if args.reinitialization and (args.application or args.calendar or args.autostart or args.recovery):
+        parser.error("run the dedicated reinitialization workflow separately to preserve its independent ownership and budget")
+    if args.autostart and (args.application or args.calendar):
+        parser.error("run the dedicated autostart workflow separately to preserve independent budgets")
+    if args.calendar and args.application:
+        parser.error("run the dedicated calendar and full application workflows separately to preserve their independent observation budgets")
+    if args.host.startswith("-") or "@" not in args.host or any(c.isspace() for c in args.host):
+        parser.error("host must be user@hostname")
+    if not args.exe.is_file() or args.exe.suffix.lower() != ".exe" or not args.identity.is_file():
+        parser.error("exe and private identity files must exist")
+    tests = []
+    if args.test_metadata:
+        for line in args.test_metadata.read_text().splitlines():
+            item = json.loads(line)
+            if item.get("reason") == "compiler-artifact" and item.get("profile", {}).get("test") and item.get("executable"):
+                path = Path(item["executable"])
+                if path.suffix.lower() != ".exe" or not path.is_file():
+                    raise RuntimeError("missing Windows test executable")
+                tests.append(path)
+        if not tests:
+            raise RuntimeError("no test executables in supplied Cargo metadata")
+    tests = list(dict.fromkeys(tests))
+    # Freeze input identities before uploading. A local rebuild during a remote
+    # test must never rewrite the identity of the already-uploaded executable.
+    input_digests = {
+        path: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in dict.fromkeys([args.exe, *tests])
+    }
+    remote = Remote(args.host, args.identity)
+    token = uuid.uuid4().hex
+    task = "FutureClassroom-RustProbe-" + token
+    directory = remote.powershell("$root=Join-Path $env:TEMP " + ps_literal(task) + ";New-Item -ItemType Directory -Path $root -ErrorAction Stop | Out-Null;Set-Content -LiteralPath (Join-Path $root '.future-classroom-probe-root') -Value " + ps_literal(token) + ";$root")
+    root = ps_literal(directory)
+    # Each child process must also place scratch files beneath our cleanup marker.
+    child_temp = "$env:TEMP=Join-Path " + root + " 'temp';New-Item -ItemType Directory -Force -Path $env:TEMP|Out-Null;$env:TMP=$env:TEMP;"
+    task_name = ps_literal(task)
+    report = {"schemaVersion": 1, "testScope": "Remote Windows x86 supplemental development verification", "win7": "NOT_VALIDATED", "cleanup": "NOT_RUN", "testTimeoutSeconds": args.test_timeout_seconds}
+    try:
+        report["platform"] = json.loads(remote.powershell("$os=Get-CimInstance Win32_OperatingSystem;@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}|ConvertTo-Json -Compress"))
+        if args.migration:
+            report["migrationRunBefore"] = json.loads(remote.powershell(project_run_snapshot_script()))
+        report["uploadedArtifacts"] = []
+        for path in dict.fromkeys([args.exe, *tests]):
+            remote.upload(path, directory)
+            actual = remote.powershell("(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path " + root + " " + ps_literal(path.name) + ")).Hash.ToLowerInvariant()")
+            if actual != input_digests[path]:
+                raise RuntimeError("uploaded executable digest mismatch: " + path.name)
+            report["uploadedArtifacts"].append({"name": path.name, "sha256": actual})
+        report["exeSha256"] = input_digests[args.exe]
+        script = child_temp + "$root=" + root + ";$exe=Join-Path $root " + ps_literal(args.exe.name) + ";$output=@(& $exe --self-check 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+        report["selfCheck"] = json.loads(remote.powershell(script, timeout=180))
+        if report["selfCheck"]["exitCode"] != 0:
+            raise RuntimeError("Windows self-check failed")
+        if args.calendar_download:
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe --calendar-download-probe 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            report["calendarDownload"] = json.loads(remote.powershell(script, timeout=90))
+            result = report["calendarDownload"]
+            if result.get("exitCode") != 0 or not any(isinstance(line, str) and line.startswith("CALENDAR_DOWNLOAD_PROBE_PASS ") for line in result.get("output", [])):
+                raise RuntimeError("fixed source WinHTTP calendar download failed")
+            report["calendarDownload"]["scope"] = "one fixed2026 outbound HTTPS download+strict parse; government notice body and native hard preemption NOT_PROVEN; no application writes"
+            print("calendar HTTPS download PASS", flush=True)
+        if args.web_pairing:
+            # This probe uses only our marked child TEMP and runs directly over
+            # noninteractive SSH; it does not need the user's foreground session.
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$ErrorActionPreference='Continue';$output=@(& $exe --web-pairing-probe 2>&1|ForEach-Object{\"$_\"});$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            report["webPairing"] = json.loads(remote.powershell(script, timeout=300))
+            report["webPairing"]["scope"] = "CNG/DPAPI/SQLite and synthetic trusted-TLS request metadata through the application port; no real HTTPS/TLS/browser/listening delivery"
+            if report["webPairing"].get("exitCode") != 0:
+                raise RuntimeError("isolated noninteractive Web pairing probe failed")
+            output = report["webPairing"].get("output", [])
+            if not isinstance(output, list) or not any(isinstance(line, str) and (line == "WEB_PAIRING_PASS" or line.startswith("WEB_PAIRING_PASS ")) for line in output):
+                raise RuntimeError("Web pairing result marker missing")
+            report["webPairing"]["status"] = "PASS"
+            print("Web pairing port probe PASS; real HTTPS/TLS/browser/listening delivery remains unvalidated", flush=True)
+        if args.system_host:
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(args.exe.name) + ";$output=@(& $exe --system-probe 2>&1|ForEach-Object{\"$_\"});@{exitCode=$LASTEXITCODE;output=$output}|ConvertTo-Json -Compress"
+            report["system"] = json.loads(remote.powershell(script))
+            if report["system"]["exitCode"] != 0:
+                raise RuntimeError("read-only system probe failed")
+        report["tests"] = []
+        for test_index, path in enumerate(tests):
+            test_arguments = " desktop::tree::tests::passive_tree_facts_never_aggregate_input_or_route_paging --exact --test-threads=2 --nocapture"
+            log = ps_literal(directory + "\\test-" + str(test_index) + ".log")
+            script = child_temp + "$exe=Join-Path " + root + " " + ps_literal(path.name) + ";$log=" + log + ";$digest=(Get-FileHash -Algorithm SHA256 -LiteralPath $exe).Hash.ToLowerInvariant();if($digest-ne " + ps_literal(input_digests[path]) + "){throw 'test executable digest mismatch'};$ErrorActionPreference='Continue';$output=@(& $exe" + test_arguments + " 2>&1 | ForEach-Object {\"$_\"} | Tee-Object -FilePath $log);$code=$LASTEXITCODE;$ErrorActionPreference='Stop';@{name=" + ps_literal(path.name) + ";binarySha256=$digest;exitCode=$code;output=$output}|ConvertTo-Json -Compress"
+            try:
+                result = json.loads(remote.powershell(script, timeout=args.test_timeout_seconds))
+            except subprocess.TimeoutExpired:
+                # PowerShell's Tee-Object log is UTF-16LE. Read only the tail
+                # through a bounded shared FileStream while our child may live;
+                # the unchanged outer finally then terminates owned processes.
+                timed_out = {"name": path.name, "budgetSeconds": args.test_timeout_seconds, "partialOutput": "", "partialOutputTruncated": False, "partialOutputReadLimitBytes": 64 * 1024}
+                report["timedOutTest"] = timed_out
+                read_log = "$log=" + log + ";if(!(Test-Path -LiteralPath $log)){@{output='';truncated=$false;missing=$true}|ConvertTo-Json -Compress}else{$stream=[IO.File]::Open($log,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite);try{$length=$stream.Length;$count=[int][Math]::Min([long]65536,$length);$null=$stream.Seek(-$count,[IO.SeekOrigin]::End);$bytes=New-Object byte[] $count;$read=0;while($read-lt $count){$n=$stream.Read($bytes,$read,$count-$read);if($n-eq 0){break};$read+=$n};$text=if($read-gt 0){[Text.Encoding]::Unicode.GetString($bytes,0,$read)}else{''};@{output=$text;truncated=($length-gt 65536);missing=$false}|ConvertTo-Json -Compress}finally{$stream.Dispose()}}"
+                try:
+                    partial = json.loads(remote.powershell(read_log, timeout=15))
+                    text = partial.get("output", "")
+                    if not isinstance(text, str):
+                        raise ValueError("invalid partial output")
+                    encoded = text.encode("utf-8", "replace")
+                    timed_out["partialOutput"] = encoded[-64 * 1024:].decode("utf-8", "ignore")
+                    timed_out["partialOutputTruncated"] = bool(partial.get("truncated")) or len(encoded) > 64 * 1024
+                    timed_out["partialOutputLogMissing"] = bool(partial.get("missing"))
+                except Exception as read_error:
+                    # TimeoutExpired.__str__ includes the entire encoded SSH
+                    # command. Keep diagnostics useful without copying it.
+                    timed_out["partialOutputReadError"] = type(read_error).__name__
+                raise RuntimeError(f"remote test timed out: {path.name} ({args.test_timeout_seconds}s); inspect timedOutTest") from None
+            if result.get("binarySha256") != input_digests[path]:
+                raise RuntimeError("executed test digest mismatch: " + path.name)
+            result["timeoutSeconds"] = args.test_timeout_seconds
+            report["tests"].append(result)
+            print(path.name, "PASS" if result["exitCode"] == 0 else "FAIL", flush=True)
+            if result["exitCode"] != 0:
+                raise RuntimeError("remote test failed: " + path.name)
+        # The interactive task only runs our own probe, with a hidden console.
+        # It does not send keys, minimize windows, change focus, capture the desktop,
+        # install services, touch production ProgramData, or alter SSH authorization.
+        body = child_temp + "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';try{$ErrorActionPreference='Continue';$out=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --native-probe " + str(args.native_seconds) + " 2>&1 | ForEach-Object {\"$_\"});$code=$LASTEXITCODE;@{exitCode=$code;output=$out;sessionId=(Get-Process -Id $PID).SessionId}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}catch{@{exitCode=1;error=$_.Exception.Message}|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 -LiteralPath " + ps_literal(directory + "\\native-result.json") + "}"
+        if args.system_host:
+            host_command = "$hostOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --host-probe 2 2>&1|ForEach-Object{\"$_\"});$hostCode=$LASTEXITCODE;"
+            body = body.replace("$code=$LASTEXITCODE;@{exitCode=", "$code=$LASTEXITCODE;" + host_command + "@{hostExitCode=$hostCode;hostOutput=$hostOutput;exitCode=")
+        if args.application:
+            app_command = "$appOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --application-probe 2>&1|ForEach-Object{\"$_\"});$appCode=$LASTEXITCODE;"
+            body = body.replace("@{exitCode=$code;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;exitCode=$code;") if not args.system_host else body.replace("@{hostExitCode=$hostCode;", app_command + "@{applicationExitCode=$appCode;applicationOutput=$appOutput;hostExitCode=$hostCode;")
+        if args.materials:
+            material_command = "$materialsOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --materials-probe 2>&1|ForEach-Object{\"$_\"});$materialsCode=$LASTEXITCODE;"
+            anchor = "@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;")
+            if body.count(anchor) != 1:
+                raise RuntimeError("materials report insertion point is ambiguous")
+            body = body.replace(anchor, material_command + "@{materialsExitCode=$materialsCode;materialsOutput=$materialsOutput;" + anchor[2:])
+
+        if args.audio_silent:
+            command = "$audioOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --audio-silent-probe 2>&1|ForEach-Object{\"$_\"});$audioCode=$LASTEXITCODE;"
+            anchor = "@{materialsExitCode=$materialsCode;" if args.materials else ("@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;"))
+            if body.count(anchor) != 1:
+                raise RuntimeError("audio report insertion point is ambiguous")
+            body = body.replace(anchor, command + "@{audioExitCode=$audioCode;audioOutput=$audioOutput;" + anchor[2:])
+
+        if args.web_voice:
+            command = "$webVoiceOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --web-voice-probe 2>&1|ForEach-Object{\"$_\"});$webVoiceCode=$LASTEXITCODE;"
+            anchor = "@{audioExitCode=$audioCode;" if args.audio_silent else ("@{materialsExitCode=$materialsCode;" if args.materials else ("@{applicationExitCode=$appCode;" if args.application else ("@{hostExitCode=$hostCode;" if args.system_host else "@{exitCode=$code;")))
+            if body.count(anchor) != 1:
+                raise RuntimeError("voice report insertion point is ambiguous")
+            body = body.replace(anchor, command + "@{webVoiceExitCode=$webVoiceCode;webVoiceOutput=$webVoiceOutput;" + anchor[2:])
+
+        if args.calendar:
+            command = "$calendarOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --calendar-probe 2>&1|ForEach-Object{\"$_\"});$calendarCode=$LASTEXITCODE;"
+            report_anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{applicationExitCode=$appCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in report_anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("calendar report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{calendarExitCode=$calendarCode;calendarOutput=$calendarOutput;" + anchor[2:])
+
+        if args.autostart:
+            command = "$autostartOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --autostart-probe 2>&1|ForEach-Object{\"$_\"});$autostartCode=$LASTEXITCODE;"
+            report_anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{applicationExitCode=$appCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in report_anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("autostart report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{autostartExitCode=$autostartCode;autostartOutput=$autostartOutput;" + anchor[2:])
+
+        if args.recovery:
+            command = "$recoveryOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --recovery-probe 2>&1|ForEach-Object{\"$_\"});$recoveryCode=$LASTEXITCODE;"
+            anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1:
+                raise RuntimeError("recovery report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{recoveryExitCode=$recoveryCode;recoveryOutput=$recoveryOutput;" + anchor[2:])
+
+        if args.reinitialization:
+            command = "$resetOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --reinitialization-probe 2>&1|ForEach-Object{\"$_\"});$resetCode=$LASTEXITCODE;"
+            anchors = ["@{webVoiceExitCode=$webVoiceCode;", "@{audioExitCode=$audioCode;", "@{materialsExitCode=$materialsCode;", "@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("reinitialization report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{reinitializationExitCode=$resetCode;reinitializationOutput=$resetOutput;" + anchor[2:])
+        if args.migration:
+            command = "$migrationOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --migration-probe 2>&1|ForEach-Object{\"$_\"});$migrationCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("migration report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{migrationExitCode=$migrationCode;migrationOutput=$migrationOutput;" + anchor[2:])
+        if args.voice_settings:
+            command = "$voiceSettingsOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --voice-settings-probe 2>&1|ForEach-Object{\"$_\"});$voiceSettingsCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("voice settings report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{voiceSettingsExitCode=$voiceSettingsCode;voiceSettingsOutput=$voiceSettingsOutput;" + anchor[2:])
+        if args.voice_output:
+            command = "$voiceOutputOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --voice-output-probe 2>&1|ForEach-Object{\"$_\"});$voiceOutputCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("output query report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{voiceOutputExitCode=$voiceOutputCode;voiceOutputOutput=$voiceOutputOutput;" + anchor[2:])
+        if args.subject_visuals:
+            command = "$subjectVisualOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --subject-visuals-probe 2>&1|ForEach-Object{\"$_\"});$subjectVisualCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("subject visual report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{subjectVisualExitCode=$subjectVisualCode;subjectVisualOutput=$subjectVisualOutput;" + anchor[2:])
+        if args.public_desktop:
+            command = "$publicDesktopOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --public-desktop-probe 2>&1|ForEach-Object{\"$_\"});$publicDesktopCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("public desktop report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{publicDesktopExitCode=$publicDesktopCode;publicDesktopOutput=$publicDesktopOutput;" + anchor[2:])
+        body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
+        # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
+        # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
+        with tempfile.TemporaryDirectory(prefix="future-classroom-probe-script-") as local:
+            native_script = Path(local) / "native-probe.ps1"
+            native_script.write_text(body, encoding="utf-8-sig")
+            remote.upload(native_script, directory)
+        arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
+        launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
+        if args.voice_output or args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
+            launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
+        if args.recovery or args.reinitialization or args.migration:
+            launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
+        if args.subject_visuals or args.public_desktop:
+            # Original native probe <=30s plus this feature's absolute120s;
+            # one bounded180s task observation includes startup/result overhead.
+            # No existing diagnostic's240/300s observation budget is changed.
+            launch = launch.replace("AddSeconds(40)", "AddSeconds(180)")
+        report["native"] = json.loads(remote.powershell(launch, timeout=190 if args.subject_visuals or args.public_desktop else 310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings or args.voice_output else 50).lstrip("\ufeff"))
+        if report["native"]["exitCode"] != 0:
+            raise RuntimeError("native probe failed")
+        if args.system_host and report["native"].get("hostExitCode") != 0:
+            raise RuntimeError("interactive hidden-host/tray probe failed")
+        if args.application and report["native"].get("applicationExitCode") != 0:
+            raise RuntimeError("isolated native workbench application failed")
+        if args.application:
+            application = report["native"].get("applicationOutput", [])
+            marker = "profiles_public_joint_cas_subject_exact_native_canvas=PASS"
+            if not isinstance(application, list) or not any(isinstance(line, str) and marker in line for line in application):
+                raise RuntimeError("native public-layout/subject-profile/canvas result marker missing")
+            report["profileNativeStatus"] = "PASS"
+            content_marker = "profile_content_text_images_clear_undo_real_preview=PASS"
+            if not any(content_marker in line for line in application if isinstance(line, str)):
+                raise RuntimeError("native independent-content workflow result marker missing")
+            content_steps = [
+                int(line.split("index=", 1)[1].split()[0])
+                for line in application
+                if isinstance(line, str) and line.startswith("PROFILE_CONTENT_UI_STEP index=")
+            ]
+            if content_steps != list(range(52)):
+                raise RuntimeError("native independent-content workflow steps incomplete or repeated")
+            report["profileContentNativeStatus"] = "PASS"
+            report["profileContentNativeSteps"] = len(content_steps)
+            if not any(isinstance(line, str) and "schedule_roles_activity_split_merge_confirm_native_worker=PASS schedule_operations_native_steps=65" in line for line in application):
+                raise RuntimeError("schedule operations result marker missing")
+            schedule_steps = [
+                int(line.split("step=", 1)[1].split(" ", 1)[0])
+                for line in application
+                if isinstance(line, str) and line.startswith("SCHEDULE_OPERATIONS_PROBE step=")
+            ]
+            if schedule_steps != list(range(65)):
+                raise RuntimeError("schedule operations did not complete exactly 65 ordered steps")
+            report["scheduleOperationsNativeSteps"] = len(schedule_steps)
+        if args.recovery:
+            output = report["native"].get("recoveryOutput", [])
+            if report["native"].get("recoveryExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native recovery workflow failed")
+            steps = [line for line in output if line.startswith("RECOVERY_NATIVE_STEP index=")]
+            if len(steps) != 23 or any(not line.startswith(f"RECOVERY_NATIVE_STEP index={i} ") for i, line in enumerate(steps)):
+                raise RuntimeError("native recovery did not complete exactly 23 ordered steps")
+            if not any("reopen=fresh_App_AND_independent_executable_production_Open" in line for line in output):
+                raise RuntimeError("independent recovery process reopen marker missing")
+            report["recoveryNativeStatus"] = "PASS"
+            report["recoveryNativeSteps"] = len(steps)
+            report["recoveryScope"] = "Hidden native controls and real DPAPI/SQLite/current-security/cold switching/independent executable reopen; picker return capabilities simulated under isolated marker; visible dialogs and hardware power loss NOT_RUN"
+        if args.reinitialization:
+            output = report["native"].get("reinitializationOutput", [])
+            if report["native"].get("reinitializationExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native reinitialization workflow failed")
+            children = [line.split("stage=", 1)[1].split()[0] for line in output if isinstance(line, str) and line.startswith("REINITIALIZATION_CHILD_PASS stage=")]
+            if children != ["cancel", "commit", "reopen"] or not any(isinstance(line, str) and line.startswith("reinitialization_native=PASS child_processes=3 ") for line in output):
+                raise RuntimeError("reinitialization exact independent-child results or completion marker missing")
+            report["reinitializationNativeStatus"] = "PASS"
+            report["reinitializationScope"] = "Synthetic hidden native controls, cancel exact bytes, explicit full reset, new process DPAPI and school/admin initialization, old backup installation rejection; foreground and real Run untouched; hardware power loss NOT_RUN"
+        if args.migration:
+            result = validate_migration_output(report["native"].get("migrationExitCode"), report["native"].get("migrationOutput"))
+            report["migrationNativeStatus"] = "PASS"
+            report["migrationNativeSteps"] = result["steps"]
+            report["migrationNativeStepNames"] = result["stepNames"]
+            report["migrationSubprocessNonce"] = result["subprocessNonce"]
+            report["migrationElapsedMs"] = result["elapsedMs"]
+            report["migrationScope"] = "Synthetic hidden native explicit class/subject/principal mapping, strict foreign-installation gate, actual cold three-tree restore and independent executable target login/mapped content; source package and target key unchanged; picker return capabilities isolated; visible dialogs and hardware power loss NOT_RUN"
+        if args.public_desktop:
+            result = validate_public_desktop_output(report["native"].get("publicDesktopExitCode"), report["native"].get("publicDesktopOutput"))
+            report["publicDesktopNativeStatus"] = "PASS"
+            report["publicDesktopNativeSteps"] = result["steps"]
+            report["publicDesktopNativeStepNames"] = result["stepNames"]
+            report["publicDesktopElapsedMs"] = result["elapsedMs"]
+            report["publicDesktopScope"] = "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+        if args.subject_visuals:
+            result = validate_subject_visual_output(report["native"].get("subjectVisualExitCode"), report["native"].get("subjectVisualOutput"))
+            report["subjectVisualNativeStatus"] = "PASS"
+            report["subjectVisualNativeSteps"] = result["steps"]
+            report["subjectVisualNativeStepNames"] = result["stepNames"]
+            report["subjectVisualElapsedMs"] = result["elapsedMs"]
+            report["subjectVisualScope"] = "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
+        if args.voice_settings:
+            result = validate_voice_settings_output(report["native"].get("voiceSettingsExitCode"), report["native"].get("voiceSettingsOutput"))
+            report["voiceSettingsNativeSteps"] = result["steps"]
+            report["voiceSettingsNativeStepNames"] = result["stepNames"]
+            report["voiceSettingsElapsedMs"] = result["elapsedMs"]
+            report["voiceSettingsNativeStatus"] = "PASS"
+            report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin limits policy, unconfirmed/cancel/draft/lock, revision conflict, limits restore and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
+        if args.voice_output:
+            result = validate_voice_output_output(report["native"].get("voiceOutputExitCode"), report["native"].get("voiceOutputOutput"))
+            report["voiceOutputNativeStatus"] = "PASS"
+            report["voiceOutputNativeSteps"] = result["steps"]
+            report["voiceOutputNativeStepNames"] = result["stepNames"]
+            report["voiceOutputFirstResult"] = result["firstResult"]
+            report["voiceOutputSecondResult"] = result["secondResult"]
+            report["voiceOutputElapsedMs"] = result["elapsedMs"]
+            report["voiceOutputScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/SQLite and default WAVE_MAPPER format queries, draft retention, original observation expiry and lock/new lease; historical format support only, no audio job/playback/microphone/volume/foreground change or audible/device certification"
+        if args.autostart:
+            output = report["native"].get("autostartOutput", [])
+            if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native autostart workflow failed")
+            steps = [int(line.split("index=", 1)[1].split()[0]) for line in output if isinstance(line, str) and line.startswith("AUTOSTART_NATIVE_STEP index=")]
+            marker = "autostart_intent_readback_confirm_cancel_lock_stale_drift_reconcile_native_worker=PASS autostart_native_steps=25 real_run=UNTOUCHED foreground=UNTOUCHED isolated_cleanup=PASS"
+            if steps != list(range(25)) or not any(isinstance(line, str) and marker in line for line in output):
+                raise RuntimeError("native autostart result or exact25 ordered steps missing")
+            report["autostartNativeSteps"] = len(steps)
+            report["autostartNativeStatus"] = "PASS"
+        if args.calendar:
+            output = report["native"].get("calendarOutput", [])
+            if report["native"].get("calendarExitCode") != 0 or not isinstance(output, list):
+                raise RuntimeError("isolated native calendar workflow failed")
+            steps = [int(line.split("index=", 1)[1].split()[0]) for line in output if isinstance(line, str) and line.startswith("CALENDAR_NATIVE_STEP index=")]
+            if steps != list(range(30)) or not any(isinstance(line, str) and "calendar_candidates_review_adopt_policy_lock_stale_native_worker=PASS calendar_native_steps=30" in line for line in output):
+                raise RuntimeError("native calendar result or exact30 ordered steps missing")
+            report["calendarNativeSteps"] = len(steps)
+            report["calendarNativeStatus"] = "PASS"
+        if args.materials and report["native"].get("materialsExitCode") != 0:
+            raise RuntimeError("isolated materials integration failed")
+        if args.audio_silent:
+            audio = report["native"].get("audioOutput", [])
+            if report["native"].get("audioExitCode") != 0:
+                raise RuntimeError("isolated silent WinMM integration failed")
+            report["audioStatus"] = "NOT_RUN" if any("AUDIO_SILENT_NOT_RUN" in line or "VOICE_PIPELINE_NOT_RUN" in line for line in audio) else "PASS"
+            if report["audioStatus"] == "PASS" and not (any("AUDIO_SILENT_PASS" in line for line in audio) and any("VOICE_PIPELINE_PASS" in line for line in audio) and any("VOICE_RUNTIME_PASS" in line for line in audio)):
+                raise RuntimeError("silent audio result missing")
+            if report["audioStatus"] == "PASS":
+                policy_marker = "VOICE_POLICY_RUNTIME_PASS actual_zero_pcm_playing_reviewed_limits_save_queued_and_pending_upload_retirement_original_release_generation_no_false_completion_fresh_explicit_job=PASS"
+                if policy_marker not in audio:
+                    raise RuntimeError("reviewed voice policy runtime result missing")
+                report["voicePolicyRuntimeStatus"] = "PASS"
+        if args.web_voice:
+            voice_output = report["native"].get("webVoiceOutput", [])
+            if report["native"].get("webVoiceExitCode") != 0:
+                raise RuntimeError("isolated authenticated native zero-PCM Web voice integration failed")
+            for marker in ["WEB_VOICE_PASS", "WEB_MATERIALS_PASS", "WEB_CONTENT_PASS", "WEB_PAIRING_PASS"]:
+                if not any(isinstance(line, str) and line.startswith(marker + " ") for line in voice_output):
+                    raise RuntimeError("Web voice diagnostic result marker missing: " + marker)
+            report["webVoiceStatus"] = "PASS"
+        print("native probe PASS; foreground/interaction evidence remains limited to counters", flush=True)
+        report["status"] = "PASS"
+    except Exception as error:
+        report["status"] = "FAIL"
+        report["error"] = str(error)
+        raise
+    finally:
+        cleanup = "$root=" + root + ";$task=Get-ScheduledTask -TaskName " + task_name + " -ErrorAction SilentlyContinue;if($task){Stop-ScheduledTask -TaskName " + task_name + " -ErrorAction SilentlyContinue;Unregister-ScheduledTask -TaskName " + task_name + " -Confirm:$false};if((Get-Content -Raw -LiteralPath (Join-Path $root '.future-classroom-probe-root')).Trim()-ne " + ps_literal(token) + "){throw 'cleanup marker mismatch'};Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\\',[StringComparison]::OrdinalIgnoreCase)}|ForEach-Object{Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop};Remove-Item -Recurse -Force -LiteralPath $root;if(Test-Path -LiteralPath $root){throw 'probe directory remains'};'CLEANUP_PASS'"
+        try:
+            outcome = remote.powershell(cleanup, timeout=30)
+            report["cleanup"] = "PASS" if outcome == "CLEANUP_PASS" else "FAIL"
+        except Exception as error:
+            report["cleanup"] = "FAIL"
+            report["cleanupError"] = str(error)
+        migration_audit_error = None
+        if args.migration and "migrationRunBefore" in report:
+            try:
+                report["migrationRunAfter"] = json.loads(remote.powershell(project_run_snapshot_script()))
+                if report["migrationRunBefore"] != report["migrationRunAfter"]:
+                    raise RuntimeError("project Run value snapshot changed during migration verification; no automatic repair attempted")
+                report["migrationRealRunAudit"] = "PASS"
+            except Exception as error:
+                report["migrationRealRunAudit"] = "FAIL"
+                report["migrationRealRunAuditError"] = str(error)
+                report["status"] = "FAIL"
+                report.setdefault("error", "migration real Run read-only audit failed")
+                migration_audit_error = str(error)
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        print("cleanup:", report["cleanup"], flush=True)
+        if report["cleanup"] != "PASS":
+            raise RuntimeError("remote test cleanup failed; inspect report")
+        if migration_audit_error:
+            raise RuntimeError("migration real Run read-only audit failed; inspect report")
+
+
+if __name__ == "__main__":
+    main()

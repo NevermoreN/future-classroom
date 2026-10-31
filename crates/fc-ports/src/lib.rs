@@ -616,3 +616,9 @@ pub trait LessonRepository {
 }
 
 pub mod voice;
+
+pub mod subject_visual;
+pub use subject_visual::*;
+
+pub mod desktop_lesson;
+pub use desktop_lesson::*;

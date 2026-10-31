@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 900,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "6ef381428008de748ca45695e52ff284aafe9a7ffeb58567199b78d54a483956"
+    },
+    {
+      "name": "fc_windows-4026d62a77fcc28b.exe",
+      "sha256": "a0eccc1ff0ffb7e4e2c38bd483d7fe653db817c6756c015899aea8f91803c949"
+    }
+  ],
+  "exeSha256": "6ef381428008de748ca45695e52ff284aafe9a7ffeb58567199b78d54a483956",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "system": {
+    "exitCode": 0,
+    "output": [
+      "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None, observation: Absent }"
+    ]
+  },
+  "tests": [
+    {
+      "binarySha256": "a0eccc1ff0ffb7e4e2c38bd483d7fe653db817c6756c015899aea8f91803c949",
+      "exitCode": 0,
+      "name": "fc_windows-4026d62a77fcc28b.exe",
+      "output": [
+        "",
+        "running 1 test",
+        "test desktop::tree::tests::passive_tree_facts_never_aggregate_input_or_route_paging ... ok",
+        "",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 182 filtered out; finished in 0.17s",
+        ""
+      ],
+      "timeoutSeconds": 900
+    }
+  ],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1000 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "exitCode": 0,
+    "hostOutput": [
+      "hidden_host=PASS tray_lifecycle=PASS ticks=3 elapsed_ms=2989 session_notifications=true"
+    ],
+    "hostExitCode": 0,
+    "sessionId": 1
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,48 @@
+{
+  "status": "READONLY_DIAGNOSIS",
+  "scope": "Preserved real FAIL + pure execution of unchanged current interval helper; no remote/retry/runtime claim",
+  "utc": "2026-10-31T17:44:58.618044+00:00",
+  "source": {
+    "path": "/tmp/fc-round35-visuals-worktree/scripts/windows-tls-business-probe.py",
+    "sha256": "6bb955acd80dd9114881ccbd757758de056a7f531d1e387f5e679061e4f45fae"
+  },
+  "originalFailure": {
+    "path": "/tmp/fc-round35-msvc-evidence/windows-modern-continuous-first.json",
+    "sha256": "2491fc25ad367efe5230f5cdad76f88dcf4ebc6446c6054fb8eb771ff61ea505",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "error": {
+      "kind": "RuntimeError",
+      "phase": "actual-tls-business-clients",
+      "message": "native progress barrier expired: four original admitted bodies, no queued worker work"
+    }
+  },
+  "actualIntervalComparison": true,
+  "orderIndependentComparison": true,
+  "lastMatchingVacant": {
+    "sequence": 20,
+    "transfers": 41
+  },
+  "firstActualPartialAdmission": {
+    "sequence": 22,
+    "transfers": 44
+  },
+  "fourActualAdmissions": {
+    "sequence": 25,
+    "transfers": 47,
+    "jsonBodyRecords": 4,
+    "boundSlots": 4,
+    "pendingJobs": 0
+  },
+  "oldTransferComparison": {
+    "expected": 45,
+    "actual": 47,
+    "passes": false
+  },
+  "proposedFirstAdmittedAnchorComparison": {
+    "expected": 47,
+    "actual": 47,
+    "passes": true
+  },
+  "conclusion": "Exact interval dictionaries already ignore order. Failure is stale vacant transfer baseline across throttled snapshots. Alternate anchored-counter fix reported to root; no edit yet."
+}

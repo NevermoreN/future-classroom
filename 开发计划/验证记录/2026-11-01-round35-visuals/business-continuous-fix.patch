@@ -1,0 +1,80 @@
+--- a/scripts/windows-tls-business-probe.py
++++ b/scripts/windows-tls-business-probe.py
+@@ -451,6 +451,17 @@
+     return intervals(item) == original
+ 
+ 
++def four_original_bodies_admitted(item, original, first_admitted_transfers):
++    # Progress is throttled: a prior vacant snapshot can predate successful HTTP
++    # operations already completed by the client. Anchor only at the first exact
++    # partial admission; the remaining three must cause exactly three transfers.
++    return (len(original) == 4 and item["jsonBodyRecords"] == 4
++            and len(item["requests"]) == 4 and len(intervals(item)) == 4
++            and item["acceptance"]["bound_slots"] == 4
++            and item["acceptance"]["transfers"] == first_admitted_transfers + 3
++            and item["pendingJobs"] == 0 and unchanged_intervals(item, original))
++
++
+ def capacity_transport_rejection(error):
+     # No timeout, refusal, generic TLS/certificate failure or alert is evidence
+     # that this native capacity owner accepted then closed this exact socket.
+@@ -585,10 +596,11 @@
+ 
+ def exercise_capacity_accept(client, progress, body, receipt):
+     require(client.deadline - time.monotonic() >= 5, "insufficient original client budget for four-body capacity stage")
+-    vacant = progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
++    progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
+                            and p["acceptance"]["bound_slots"] == 0 and p["acceptance"]["ready_slots"] == 4,
+                            "prior business requests physically retired/rearmed")
+     pending, original = [], {}
++    first_admitted_transfers = None
+     try:
+         for index in range(1, 5):
+             pending.append(PendingReceipt(client, index, body))
+@@ -599,9 +611,9 @@
+             new_key = next(key for key in intervals(observed) if key not in original)
+             original = intervals(observed)
+             pending[-1].event["originalInterval"] = original[new_key]
+-        admitted = progress.wait(client, lambda p: p["acceptance"]["bound_slots"] == 4
+-                                 and p["acceptance"]["transfers"] == vacant["acceptance"]["transfers"] + 4
+-                                 and p["pendingJobs"] == 0 and unchanged_intervals(p, original),
++            if index == 1:
++                first_admitted_transfers = observed["acceptance"]["transfers"]
++        admitted = progress.wait(client, lambda p: four_original_bodies_admitted(p, original, first_admitted_transfers),
+                                  "four original admitted bodies, no queued worker work")
+         for index in (1, 2):
+             reject_full_capacity(client, index)
+@@ -1068,6 +1080,33 @@
+         except RuntimeError:
+             continue
+         raise RuntimeError("progress reader accepted stale/foreign/unbounded data")
++    # Replay the preserved MSVC failure's causal gap: seq20 showed vacant/41;
++    # two already completed HTTP operations were not separately emitted during
++    # the 250ms throttle. First exact partial is seq22/44, four bodies seq25/47.
++    from itertools import permutations
++    four = [dict(original, slot=i, serial=3 + i, admittedAtNs=123 + i, deadlineNs=120_000_000_123 + i) for i in range(4)]
++    old_vacant = dict(sample, sequence=20, jsonBodyRecords=0, requests=[],
++                      acceptance=dict(sample["acceptance"], transfers=41, bound_slots=0, ready_slots=4))
++    first_admitted = dict(sample, sequence=22, jsonBodyRecords=1, requests=[four[0]],
++                          acceptance=dict(sample["acceptance"], transfers=44))
++    all_admitted = dict(sample, sequence=25, jsonBodyRecords=4, requests=[four[i] for i in (1, 2, 3, 0)],
++                        acceptance=dict(sample["acceptance"], transfers=47, bound_slots=4, ready_slots=0, native_pending=5, owned_sockets=6))
++    originals = intervals(all_admitted)
++    require(all_admitted["acceptance"]["transfers"] != old_vacant["acceptance"]["transfers"] + 4,
++            "preserved stale vacancy regression no longer exercises old false rejection")
++    anchor = first_admitted["acceptance"]["transfers"]
++    for order in permutations(four):
++        require(four_original_bodies_admitted(dict(all_admitted, requests=list(order)), originals, anchor),
++                "first-admitted anchor rejected unchanged unordered four-body intervals")
++    mutations = [dict(all_admitted, acceptance=dict(all_admitted["acceptance"], transfers=n)) for n in (46, 48)]
++    mutations += [dict(all_admitted, requests=[four[0], four[1], four[1], four[3]]),
++                  dict(all_admitted, jsonBodyRecords=3), dict(all_admitted, pendingJobs=1)]
++    for field in ("generation", "serial", "admittedAtNs", "deadlineNs"):
++        mutations.append(dict(all_admitted, requests=[dict(four[0], **{field: four[0][field] + 1}), *four[1:]]))
++    for mutation in mutations:
++        require(not four_original_bodies_admitted(mutation, originals, anchor),
++                "causal four-body barrier accepted extra/missing transfer, duplicate token or changed original interval")
++    checks.append("synthetic preserved seq20/22/25 transfers41/44/47 regression; all24 interval orders accepted, extra/missing transfers and mutated original intervals rejected; no IO")
+     # Busy timing, refused TCP and certificate failures cannot masquerade as capacity rejection.
+     for error in (TimeoutError(), ConnectionRefusedError(), ssl.SSLCertVerificationError(1, "synthetic"),
+                   ssl.SSLError(1, "synthetic"), BrokenPipeError()):

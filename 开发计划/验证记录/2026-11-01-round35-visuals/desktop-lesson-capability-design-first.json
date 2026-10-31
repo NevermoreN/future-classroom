@@ -1,0 +1,63 @@
+{
+  "status": "READ_ONLY_DESIGN_NOT_IMPLEMENTED",
+  "recordedAt": "2026-10-31T17:46:19.462929+00:00",
+  "sources": {
+    "crates/fc-domain/src/lesson_context.rs": "1cfd35b716381155578e0d37f5db507fb12a6916411c636f73f9fdf09f869834",
+    "crates/fc-ports/src/lib.rs": "dc5e4f8b757ceb806e80a29b6a7b6ab31c9e1685ef893be80dd949a071c6b168",
+    "crates/fc-storage/src/business/lesson.rs": "84744b5000d1941ff5db4851e2ce23ba6ecd808991116853fc46f4a4b987c1d0",
+    "crates/fc-storage/src/business/lesson_codec.rs": "082c8b498c10a7ed7080a61d3bdbc9942156717dda0f3ab1bf766d3e723477df",
+    "crates/fc-storage/src/business/recovery.rs": "6c7b11e3355760cd04f7693e3ca0088719b13cf3ff9528e2d1817be419e9a520",
+    "crates/fc-bootstrap/src/backend.rs": "693236ba85cd694a06451ab86ff9d67d658669756d71ffbc916039e1aa52d777",
+    "crates/fc-bootstrap/src/application.rs": "62d1d1a61e82de405bac0382f912f07417757ed9edc93c4ee85ad4e6003f1816",
+    "crates/fc-bootstrap/src/application/lesson_editor.rs": "6703f8a25d44972e3214c96bc0780bf179575523fb61b5e2c4515b19d76409c1"
+  },
+  "existingRestrictions": [
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "line": 416,
+      "fact": "apply requires exact authenticated actor via authorize_management and writes actor.principal_id into override."
+    },
+    {
+      "path": "crates/fc-domain/src/lesson_context.rs",
+      "line": 46,
+      "fact": "Override initiator is mandatory PrincipalId; actorless desktop cannot be represented honestly."
+    },
+    {
+      "path": "crates/fc-storage/src/business/lesson.rs",
+      "line": 264,
+      "fact": "Receipt fingerprint and replay bind ActorContext; a desktop request needs distinct origin/fingerprint, not fake actor."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "line": 3054,
+      "fact": "Current desktop entry redirects unsigned users to login and rejects non-global role."
+    }
+  ],
+  "proposal": {
+    "domain": "Extract existing apply structural transition into shared private implementation; retain apply authenticated authorization unchanged; add apply_local_desktop with explicit LocalDesktop initiator and same version/key/day/target/history/barrier rules. Override initiator becomes tagged Authenticated(PrincipalId)|LocalDesktop; no synthetic principal or account.",
+    "ports": "Separate DesktopLessonRepository, actorless desktop read/execute methods. DesktopLessonRequest contains commandId, expected lesson revision, expected identity/catalog revision, expected schedule revision, exact LessonInstanceKey and existing LessonAction. Source contains same-writer lesson+captured catalog/schedule revisions and narrow current-class subject/eligible-teacher choices, no credentials/roles/auth epochs/logins. Same 64KiB result/document limits.",
+    "backend": "Only real native desktop action opens a bounded single-slot memory capability tied to current installation/backend instance, desktop flow generation, exact bound class and original operation deadline. Not a SessionLease/ActorContext, not serialized and not based on admin lock/login. No Web/settings route. Scope cloned repository gets default-deny memory guard, composed with original request execution fence; no permanent global grant. Health checked before/after and guard rechecked by writer evaluation/precommit.",
+    "storage": "Use one existing writer Task variant with explicit Management(actor,session) vs Desktop(capabilityGuard) vs internal Observe rather than actor=None bypass. Both command variants share observe/high-water/CAS/apply/target validation/history/factory/precommit. Desktop expected identity and schedule revisions checked from actual SQL snapshot plus current installation current_class==key.class. Receipt namespace/fingerprint includes explicit origin; exact-command retry preserves result under current capability, never calls authenticated replay with fabricated actor.",
+    "codec": "Write strict format3 tagged initiator; keep full old formats1/2 readable with old positive actor decoded Authenticated. New LocalDesktop shape has no actor id; reject mixed/missing/unknown tags. Old reads do not force rewrite. Ordinary restore continues stripping active_override/baseline into inert history; never restores an old desktop capability.",
+    "capabilityScope": "Permits only Replace/Restore on the currently running COURSE of bound installation current_class, never base timetable/calendar/settings/account writes. Close/replacement flow, application shutdown, deadline/cancellation or health failure revoke it; auth login/lock are not eligibility prerequisites."
+  },
+  "requiredTests": [
+    "Domain authenticated management still rejects unsigned/Web/teacher; new desktop transition creates explicit LocalDesktop initiator and cannot alter timetable/time/calendar.",
+    "Real writer actorless read/replace/restore with no account lease or credential submission; same expected key and 64KiB bounded result.",
+    "Reject stale identity revision, schedule revision, bound class, current lesson revision, expired lesson/date and rollback/high-water states without receipt or partial write.",
+    "Target disabled/unknown subject, invalid teacher assignment and Default teacher unresolved target rejected; existing explicit Unassigned confirmation retained.",
+    "Guard false or cancelled at enqueue/evaluation/precommit cannot commit; held writer/factory hook proves no late positive effect; shared worker physical ownership remains until true completion.",
+    "Exact idempotent retry, cross-management/Desktop command collision, payload mutation, forged/stale capability and reopened process capability rejected.",
+    "Strict codec legacy1/2 roundtrip, new3 Authenticated/LocalDesktop, malformed/mixed/null/zero actor forms rejected; original audit/history stays truthful.",
+    "Ordinary and mapped restore keep historical effects inert, do not revive active override/capability; reopen recomputes current lesson through original trusted observation.",
+    "Hidden native desktop click while signed out or locally locked opens flow without login/password; settings still require original local admin; pure timetable/time/calendar display has no input hit target."
+  ],
+  "notRun": [
+    "source mutations",
+    "Cargo",
+    "Windows",
+    "remote",
+    "Git",
+    "CI"
+  ]
+}

@@ -339,6 +339,7 @@ impl App {
                     ticket,
                     generation: self.generation,
                     self_revokes: false,
+                    public_lesson: false,
                 });
                 self.backup.job_owner = Some(owner);
                 self.backup.job_sequence = sequence;

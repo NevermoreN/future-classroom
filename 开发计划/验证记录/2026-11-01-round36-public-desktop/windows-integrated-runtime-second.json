@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 900,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "64e05bc406ea9337491d59d7ee0970c0daf378f1b1fb1077031e589fa7ed1bdc"
+    },
+    {
+      "name": "calendar_execution_fence-1ec83488dbed4f30.exe",
+      "sha256": "d2be384080c9126154c75d16643143ee174701fa4b0fb45aaa1a27d1be08b53b"
+    },
+    {
+      "name": "business_storage-17284d3ac1a257da.exe",
+      "sha256": "66dc14e124e4a6f617abd568c4df8e24dc56e6d388d852dcd6bcadaa67eb08ea"
+    },
+    {
+      "name": "voice_limits_storage-0b21db1adf2928be.exe",
+      "sha256": "da94d8d46e23293ceb2ff842379d8b16a0a36bafa433e4e0d0b13d7d24ae4b8c"
+    },
+    {
+      "name": "autostart_coordinator-3f86162353dcbd5b.exe",
+      "sha256": "0c330b9a0b3153b244a4867702195e662bd33b7c34dc36af0e8b83611147a5a4"
+    },
+    {
+      "name": "schedule_operations-2019e4752789692d.exe",
+      "sha256": "9168e58448b195a666cfb795e5c8ccd32d01b37d3a3e008231a9a7242f12b264"
+    },
+    {
+      "name": "voice_storage-fee498fb1bb1e971.exe",
+      "sha256": "e7c8440a6edfff00a09a5bbdad3a830f563346ec30c96117c38d1824c59f095c"
+    },
+    {
+      "name": "verify_web_assets-2cd688c78134cd47.exe",
+      "sha256": "5e368f635cf9923dfb883e33775d1f7126652bf52dd28ebf803b8ef8ba9958eb"
+    },
+    {
+      "name": "runtime_storage-6432f0544bdb6c95.exe",
+      "sha256": "f2787fc251fba2e047bc5d4a584d4d99167df22622b15ba90e184c78579076bb"
+    },
+    {
+      "name": "fc_bootstrap-dd30f52d529302ea.exe",
+      "sha256": "752fadb6db4b96a1ce21919ab3957b8196bd804b11d927b9004da67bf8ec1893"
+    },
+    {
+      "name": "fc_windows-4026d62a77fcc28b.exe",
+      "sha256": "5f75ef1eb62829855f2d041cec66d33a72f9a8f77c63f5b0d5d66590bf00118a"
+    },
+    {
+      "name": "fc_materials-f1a7d58c131e95d5.exe",
+      "sha256": "c0edf995b2e650512d491ee061ec2da67ede6a01bde0a7d3b0f2c8e743c562e9"
+    },
+    {
+      "name": "fc_security-2889fa9301b88e80.exe",
+      "sha256": "cde98235572d0bdee3f6d5e7270aeb6c531b603127eb8dbecb9b723edbc56d20"
+    },
+    {
+      "name": "fc_storage-3ccf7e5bedbf5d94.exe",
+      "sha256": "39acea5a7a340a0a70fe9b4f665ef51619cee185d29d13a8468772e165cecafa"
+    },
+    {
+      "name": "fc_presentation-b847dfa3b68d1237.exe",
+      "sha256": "db7307937adf91ece9fbec9513b08fcb8677eb558b1c953708c47c92dd5e5079"
+    },
+    {
+      "name": "fc_protocol-4316bb63b92dda4d.exe",
+      "sha256": "4d04f960b2343ca1d9c87f3343e4e844072f2f4c2c575ec9adf629ecf2d4e391"
+    },
+    {
+      "name": "fc_audio-e1b4eabc9ef1420f.exe",
+      "sha256": "b6951d5033fbd024fb9318f9b2a4590159653525b0b657802ab4b8ea48784562"
+    },
+    {
+      "name": "fc_runtime-a09be73363edd23a.exe",
+      "sha256": "28701fa2ac516a4ebc51e700b750ffe59c33d0ed8eddef3cb89c3919fe613270"
+    },
+    {
+      "name": "fc_application-fb16268b5eff3acf.exe",
+      "sha256": "ba0f3a219a5d48a83b300682b0c851d6de51c970f8c50bfa6bad43fdb4ca78d6"
+    },
+    {
+      "name": "fc_ports-15b1ad689f79c490.exe",
+      "sha256": "199882e17eafa26df12e2619967a85c5e1453ebe01192aff7207801f0698c902"
+    },
+    {
+      "name": "fc_domain-367747e306a1dd0e.exe",
+      "sha256": "0a52d36194b2694457b4da94b0d4c2655c5a2b01b50f7f93763ef28c9190e88f"
+    },
+    {
+      "name": "fc_bootstrap-e6c3a587f31bdfb6.exe",
+      "sha256": "a913388489bf7f0f1ac304423f3242eee71291104650e10946b0ac9a4c6c3ddc"
+    }
+  ],
+  "exeSha256": "64e05bc406ea9337491d59d7ee0970c0daf378f1b1fb1077031e589fa7ed1bdc",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "system": {
+    "exitCode": 0,
+    "output": [
+      "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None, observation: Absent }"
+    ]
+  },
+  "tests": [
+    {
+      "binarySha256": "d2be384080c9126154c75d16643143ee174701fa4b0fb45aaa1a27d1be08b53b",
+      "exitCode": 0,
+      "name": "calendar_execution_fence-1ec83488dbed4f30.exe",
+      "output": [
+        "",
+        "running 4 tests",
+        "test real_worker_cancel_at_precommit_blocks_reservation_policy_and_adoption ... ok",
+        "test real_worker_cancel_cannot_publish_late_body_and_same_ticket_failure_settles ... ok",
+        "test real_worker_deadline_at_adoption_precommit_preserves_exact_original_cas ... ok",
+        "test real_worker_deadline_at_precommit_cannot_publish_late_body ... ok",
+        "",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.70s",
+        ""
+      ],
+      "timeoutSeconds": 900
+    },
+    {
+      "binarySha256": "66dc14e124e4a6f617abd568c4df8e24dc56e6d388d852dcd6bcadaa67eb08ea",
+      "exitCode": 101,
+      "name": "business_storage-17284d3ac1a257da.exe",
+      "output": [
+        "",
+        "running 43 tests",
+        "test baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart ... FAILED",
+        "test baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof ... FAILED",
+        "test baseline_proof_does_not_infer_from_old_documents_cleared_history_or_changed_default ... ok",
+        "test baseline_stable_scope_survives_offline_night_without_retaining_yesterdays_override ... ok",
+        "test commit_rechecks_midnight_after_snapshot_preparation_and_stop_rejects_new_work ... ok",
+        "test corrupt_one_credential_kind_preserves_healthy_other_kind_and_repairs_only_new_versions ... ok",
+        "test baseline_proof_cannot_cross_postlesson_catalog_schedule_rollback_or_day_barriers ... ok",
+        "test desktop_content_commit_persists_new_day_before_first_frame_and_does_not_revive_old_content ... ok",
+        "test display_and_desktop_postcommit_publication_fault_recover_committed_state_and_day_floor ... ok",
+        "test display_and_desktop_strict_codec_rejects_tampering_without_registering_or_cross_owner_release ... ok",
+        "test display_precommit_rechecks_exact_lease_and_desktop_midnight_floor_rolls_back_atomically ... ok",
+        "test display_storage_cas_receipts_and_desktop_facts_survive_restart_and_wall_rollback ... ok",
+        "test exact_local_session_lock_between_admission_and_commit_revokes_local_but_keeps_web ... ok",
+        "test failed_desktop_facts_only_persist_actual_rollback_invalidation_not_forward_baseline_observation ... ok",
+        "test lesson_override_bounded_history_keeps_natural_expiry_and_unassigned_base_safe ... ok",
+        "test desktop_facts_pages_full_texts_with_explicit_totals_and_actual_json_byte_budget ... ok",
+        "test lesson_override_revocation_and_schedule_edits_terminate_in_the_same_business_commit ... ok",
+        "test login_admission_rechecks_owned_clock_before_committing_reservation ... ok",
+        "test lesson_override_cas_restore_restart_final_teacher_and_rollback_are_durable ... ok",
+        "test login_backoff_is_atomic_exponential_capped_and_survives_restart_and_wall_changes ... ok",
+        "test login_clock_regression_is_rejected_without_releasing_running_worker ... ok",
+        "test login_completion_crossing_deadline_inside_transaction_cannot_authenticate ... ok",
+        "test login_kdf_capacity_is_shared_across_different_databases_in_one_process ... ok",
+        "test login_reservations_bound_actual_workers_even_after_authorization_times_out ... ok",
+        "test material_desktop_facts_guest_scope_and_recess_proof_are_transaction_consistent ... ok",
+        "test material_postcommit_publication_fault_preserves_original_quota_and_idempotent_result ... ok",
+        "test material_precommit_exact_lease_revocation_rolls_back_index_receipt_registry_and_quota ... ok",
+        "test material_storage_original_quota_retirement_and_finalization_keep_active_references_safe ... ok",
+        "test material_storage_independent_appends_reverse_order_scope_cursor_and_receipts_survive_reopen ... ok",
+        "test material_strict_metadata_and_receipt_tampering_fail_closed_at_read_and_startup ... ok",
+        "test plain_identity_port_cannot_fabricate_credentials_and_corruption_is_not_registration ... ok",
+        "test pending_login_restart_counts_failure_and_stale_or_corrupt_records_never_authenticate ... ok",
+        "test queued_content_rechecks_current_identity_and_midnight_in_writer ... ok",
+        "test sqlite_content_row_or_receipt_copied_between_owners_is_rejected_before_release ... ok",
+        "test reopening_writer_cannot_create_more_kdfs_while_old_worker_tokens_still_live ... ok",
+        "test timetable_codec_rejects_tampered_unknown_duplicate_revision_and_oversize_without_truncation ... ok",
+        "test timetable_commit_publication_failure_blocks_old_authority_and_reopens_committed_receipt ... ok",
+        "test timetable_commit_rechecks_captured_session_after_preparation_and_rolls_back_every_row ... ok",
+        "test timetable_storage_rejects_invalid_references_catalog_revocation_and_silent_default_switch ... ok",
+        "test timetable_storage_preserves_id_high_water_after_deletion_and_reopen ... ok",
+        "test timetable_storage_uses_independent_cas_persists_both_calendars_history_and_atomic_receipts ... ok",
+        "test typed_commit_then_publication_failure_is_durable_and_old_reads_fail_closed ... ok",
+        "test typed_identity_and_content_survive_restart_with_per_owner_cas_and_receipts ... ok",
+        "",
+        "failures:",
+        "",
+        "---- baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart stdout ----",
+        "",
+        "thread 'baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart' (6432) panicked at crates/fc-bootstrap/tests/business_storage.rs:4102:5:",
+        "assertion failed: std::str::from_utf8(&row.value).unwrap().contains(\"\\\"format\\\":2\")",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "",
+        "---- baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof stdout ----",
+        "",
+        "thread 'baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof' (38812) panicked at crates/fc-bootstrap/tests/business_storage.rs:4476:5:",
+        "assertion failed: std::str::from_utf8(&row.value).unwrap().contains(\"\\\"format\\\":2\")",
+        "",
+        "",
+        "failures:",
+        "    baseline_legacy_sqlite_document_migrates_without_promoting_observed_time_to_proof",
+        "    baseline_preclass_proof_restores_unobserved_lesson_after_real_sqlite_restart",
+        "",
+        "test result: FAILED. 41 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.82s",
+        ""
+      ],
+      "timeoutSeconds": 900
+    }
+  ],
+  "status": "FAIL",
+  "error": "remote test failed: business_storage-17284d3ac1a257da.exe"
+}

@@ -1,0 +1,67 @@
+{
+  "status": "FROZEN_STATIC_ONLY_RUNTIME_NOT_RUN",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 26252,
+      "sha256": "41bdd32c9b487b27e04842b1f80e3690f28722e508f868063996ca0f26a4c059"
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 96062,
+      "sha256": "6bb955acd80dd9114881ccbd757758de056a7f531d1e387f5e679061e4f45fae"
+    },
+    {
+      "path": "scripts/windows-native-browser-observer.py",
+      "bytes": 32978,
+      "sha256": "eb17bd4569c22b34a7b1b1fc66b541334c26db46b1cb9df61428e309a570be05"
+    },
+    {
+      "path": "scripts/windows-native-browser-harness.mjs",
+      "bytes": 58908,
+      "sha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "bytes": 55175,
+      "sha256": "30f6aa7530e36b39cbb944b28155601951be7c14cf4c1e54f313cd35e6fcbae7"
+    }
+  ],
+  "fixtureContract": {
+    "FILLED_DEFAULT": {
+      "fill": [
+        3,
+        20
+      ],
+      "componentOpacity": [
+        100,
+        100
+      ]
+    },
+    "FILLED_ZERO": {
+      "fill": [
+        0,
+        0
+      ],
+      "componentOpacity": [
+        70,
+        80
+      ]
+    },
+    "OUTLINED": {
+      "storedFill": [
+        3,
+        20
+      ],
+      "componentOpacity": [
+        100,
+        100
+      ]
+    }
+  },
+  "clientSeconds": 30,
+  "nativeSeconds": 45,
+  "noBudgetReset": true,
+  "newVisualHttpRequests": 10,
+  "separateBrowserWireApiResponses": 13
+}

@@ -1513,6 +1513,10 @@ impl Editor {
             action
         };
         match style.handle(action, data)? {
+            display_editor::Command::PickColor { .. }
+            | display_editor::Command::VisualPreview { .. } => {
+                return Err("科目配色请从工作台的桌面显示设置进入。".into());
+            }
             display_editor::Command::Save { settings, .. } => {
                 if let Some(Draft::Public(s)) = &mut self.draft {
                     s.display = settings;

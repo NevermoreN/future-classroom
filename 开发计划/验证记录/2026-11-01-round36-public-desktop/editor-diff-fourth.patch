@@ -1,0 +1,18 @@
+--- third/application.rs
++++ fourth/application.rs
+@@ -3755,10 +3755,11 @@
+             self.terminate_required = true;
+             self.begin_shutdown();
+         }
+-        if self.public_lesson_flow.as_ref().is_some_and(|f| {
+-            let guard = f.guard();
+-            !guard.is_current() && !guard.is_waiting_for_authority()
+-        }) {
++        if self
++            .public_lesson_flow
++            .as_ref()
++            .is_some_and(|f| !f.guard().can_keep_chooser_open())
++        {
+             self.close_public_lesson();
+         }
+         self.poll_backup()?;

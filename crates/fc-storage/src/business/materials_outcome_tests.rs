@@ -219,7 +219,7 @@ impl Fixture {
         BusinessRepository::new(self.handle(), Arc::new(Time), Arc::new(|_, r| Ok(r)))
             .with_session_guard(Arc::new(move |state, a| {
                 let remaining = checks
-                    .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                    .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                         if n == usize::MAX {
                             None
                         } else {

@@ -1,0 +1,149 @@
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson.rs
+@@ -97,6 +97,15 @@
+     }
+     pub fn is_current(&self) -> bool {
+         self.interval_current(false)
++    }
++    /// A transient presentation state, never permission to submit a command.
++    /// An idle chooser may remain open during a writer publication only while
++    /// its original flow, OS epoch and entire original interval remain valid.
++    pub fn is_waiting_for_authority(&self) -> bool {
++        self.control.0.health.status().health == fc_runtime::health::Health::AuthorityUpdating
++            && self.interval_current(true)
++            && self.control.0.health.status().health
++                == fc_runtime::health::Health::AuthorityUpdating
+     }
+     // Only the sole writer uses this during its own checked publication pulse.
+     fn writer_current(&self) -> bool {
+--- a/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
++++ b/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs
+@@ -352,20 +352,120 @@
+     }
+ 
+     #[test]
+-    fn public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability() {
+-        let mut fixture = Fixture::new();
+-        let owner = Arc::new(fixture.flow(1));
+-        let guard = owner.guard();
+-        let source = fixture.service.0.read_desktop_lesson(&guard).unwrap();
+-        let target = source.context.current.unwrap().base;
+-        let before = fixture.service.0.global_revision().unwrap();
+-        let control = fixture.service.0.session_control();
++    fn public_desktop_waiting_is_not_submit_authority_and_allows_own_real_publication_to_finish() {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        assert!(guard.is_current());
++        assert!(!guard.is_waiting_for_authority());
++        let target = fixture
++            .service
++            .0
++            .read_desktop_lesson(&guard)
++            .unwrap()
++            .context
++            .current
++            .unwrap()
++            .base;
++        let control = fixture.service.0.session_control();
++        let checking = guard.clone();
++        let observed = Arc::new(AtomicBool::new(false));
++        let witness = observed.clone();
+         {
+             let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
+                 if control.health_gate().status().health
+                     == fc_runtime::health::Health::AuthorityUpdating
+                 {
++                    assert!(!checking.is_current());
++                    assert!(checking.is_waiting_for_authority());
++                    witness.store(true, Ordering::Release);
++                }
++                true
++            }));
++            assert_eq!(
++                scope
++                    .change_desktop_lesson(&guard, LessonAction::Replace(target))
++                    .unwrap()
++                    .context
++                    .active_override
++                    .unwrap()
++                    .initiator,
++                LessonInitiator::LocalDesktop
++            );
++        }
++        assert!(observed.load(Ordering::Acquire));
++        assert!(guard.is_current());
++        assert!(!guard.is_waiting_for_authority());
++    }
++
++    #[test]
++    fn public_desktop_waiting_never_defers_original_deadline_during_real_precommit_phase() {
++        let mut fixture = Fixture::new();
++        let owner = fixture.flow(1);
++        let guard = owner.guard();
++        let target = fixture
++            .service
++            .0
++            .read_desktop_lesson(&guard)
++            .unwrap()
++            .context
++            .current
++            .unwrap()
++            .base;
++        let before = fixture.service.0.global_revision().unwrap();
++        let control = fixture.service.0.session_control();
++        let clock = fixture.clock.clone();
++        let checking = guard.clone();
++        let observed = Arc::new(AtomicBool::new(false));
++        let witness = observed.clone();
++        {
++            let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
++                if control.health_gate().status().health
++                    == fc_runtime::health::Health::AuthorityUpdating
++                {
++                    assert!(checking.is_waiting_for_authority());
++                    clock.tick.store(120_000, Ordering::Release);
++                    assert!(!checking.is_waiting_for_authority());
++                    witness.store(true, Ordering::Release);
++                }
++                true
++            }));
++            assert_eq!(
++                scope.change_desktop_lesson(&guard, LessonAction::Replace(target)),
++                Err(BackendError::Lesson(LessonRepositoryError::Unavailable))
++            );
++        }
++        assert!(observed.load(Ordering::Acquire));
++        assert!(!guard.is_current());
++        assert!(!guard.is_waiting_for_authority());
++        assert_eq!(fixture.service.0.global_revision().unwrap(), before);
++        assert!(fixture
++            .service
++            .0
++            .control
++            .health_gate()
++            .check_sensitive()
++            .is_ok());
++    }
++
++    #[test]
++    fn public_desktop_precommit_os_callback_rolls_back_without_fault_and_never_renews_capability() {
++        let mut fixture = Fixture::new();
++        let owner = Arc::new(fixture.flow(1));
++        let guard = owner.guard();
++        let source = fixture.service.0.read_desktop_lesson(&guard).unwrap();
++        let target = source.context.current.unwrap().base;
++        let before = fixture.service.0.global_revision().unwrap();
++        let control = fixture.service.0.session_control();
++        let checking = guard.clone();
++        {
++            let mut scope = fixture.service.0.begin_execution_scope(Arc::new(move || {
++                if control.health_gate().status().health
++                    == fc_runtime::health::Health::AuthorityUpdating
++                {
++                    assert!(checking.is_waiting_for_authority());
+                     control.cancel_desktop_lesson_flow();
++                    assert!(!checking.is_waiting_for_authority());
+                 }
+                 true
+             }));

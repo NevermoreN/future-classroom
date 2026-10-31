@@ -1,0 +1,198 @@
+--- a/crates/fc-bootstrap/src/backend.rs
++++ b/crates/fc-bootstrap/src/backend.rs
+@@ -322,7 +322,7 @@
+         if self
+             .0
+             .generation
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+             .is_err()
+         {
+             self.0.closed.store(true, Ordering::Release);
+--- a/crates/fc-bootstrap/src/backend/voice.rs
++++ b/crates/fc-bootstrap/src/backend/voice.rs
+@@ -246,7 +246,7 @@
+         let old = self
+             .inner
+             .runtime_state
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+                 Some(((word >> 1).saturating_add(1).min(u64::MAX >> 1)) << 1)
+             })
+             .unwrap_or(u64::MAX - 1);
+--- a/crates/fc-bootstrap/src/voice_runtime.rs
++++ b/crates/fc-bootstrap/src/voice_runtime.rs
+@@ -134,7 +134,7 @@
+         if self
+             .shared
+             .generation
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+             .is_err()
+         {
+             self.shared.faulted.store(true, Ordering::Release);
+--- a/crates/fc-bootstrap/src/voice_runtime/tests.rs
++++ b/crates/fc-bootstrap/src/voice_runtime/tests.rs
+@@ -64,7 +64,7 @@
+         let _ = self
+             .0
+             .state
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |w| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |w| {
+                 Some(((w >> 1) + 1) << 1)
+             });
+     }
+--- a/crates/fc-bootstrap/src/web_application/shared_upload.rs
++++ b/crates/fc-bootstrap/src/web_application/shared_upload.rs
+@@ -14,7 +14,7 @@
+ impl PhysicalUploadPermit {
+     pub(super) fn take() -> Option<Self> {
+         let previous = PHYSICAL_UPLOADS
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |mask| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |mask| {
+                 if mask == FULL {
+                     None
+                 } else {
+--- a/crates/fc-bootstrap/src/web_transfer/downloads.rs
++++ b/crates/fc-bootstrap/src/web_transfer/downloads.rs
+@@ -173,7 +173,7 @@
+             .ok_or(DownloadHubError::Busy)?;
+         let serial = self
+             .serial
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |value| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |value| {
+                 value.checked_add(1)
+             })
+             .map_err(|_| {
+--- a/crates/fc-bootstrap/src/web_transfer/uploads.rs
++++ b/crates/fc-bootstrap/src/web_transfer/uploads.rs
+@@ -231,7 +231,7 @@
+             .ok_or(UploadHubError::Busy)?;
+         let serial = self
+             .serial
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+             .map_err(|_| {
+                 self.accepting.store(false, Ordering::Release);
+                 UploadHubError::SerialExhausted
+--- a/crates/fc-bootstrap/tests/schedule_operations.rs
++++ b/crates/fc-bootstrap/tests/schedule_operations.rs
+@@ -85,7 +85,7 @@
+         if std::thread::current().id() != self.caller
+             && self
+                 .writer_reads_until_lock
+-                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
++                .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
+                 == Ok(1)
+         {
+             self.lock.lock().unwrap().as_ref().unwrap().lock_local();
+--- a/crates/fc-ports/src/http.rs
++++ b/crates/fc-ports/src/http.rs
+@@ -125,7 +125,7 @@
+     pub fn new() -> Result<Self, HttpError> {
+         use std::sync::atomic::Ordering;
+         let generation = NEXT_TRANSPORT_GENERATION
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                 n.checked_add(1).filter(|v| *v <= usize::MAX as u64)
+             })
+             .map_err(|_| HttpError::InvalidGeneration)?
+--- a/crates/fc-protocol/src/http1/response.rs
++++ b/crates/fc-protocol/src/http1/response.rs
+@@ -189,7 +189,7 @@
+         total: u64,
+     ) -> Result<Self, ResponseError> {
+         let sender = NEXT_SENDER
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+                 next.checked_add(1)
+             })
+             .map_err(|_| ResponseError::Exhausted)?
+--- a/crates/fc-runtime/src/cancel.rs
++++ b/crates/fc-runtime/src/cancel.rs
+@@ -30,7 +30,7 @@
+     pub fn cancel(&self) -> u64 {
+         let previous = self
+             .0
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                 Some(n.saturating_add(1))
+             })
+             .unwrap_or_else(|n| n);
+--- a/crates/fc-runtime/src/worker.rs
++++ b/crates/fc-runtime/src/worker.rs
+@@ -105,7 +105,7 @@
+     fn completed(&self) {
+         let _ = self
+             .completions
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                 Some(n.saturating_add(1))
+             });
+         // A completion hook must only post a non-blocking wakeup. Never run UI,
+--- a/crates/fc-storage/src/business/materials_outcome_tests.rs
++++ b/crates/fc-storage/src/business/materials_outcome_tests.rs
+@@ -219,7 +219,7 @@
+         BusinessRepository::new(self.handle(), Arc::new(Time), Arc::new(|_, r| Ok(r)))
+             .with_session_guard(Arc::new(move |state, a| {
+                 let remaining = checks
+-                    .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++                    .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                         if n == usize::MAX {
+                             None
+                         } else {
+--- a/crates/fc-storage/src/business/tests/content_web.rs
++++ b/crates/fc-storage/src/business/tests/content_web.rs
+@@ -266,7 +266,7 @@
+         )
+         .with_session_guard(Arc::new(move |identity, current| {
+             let remaining = budget
+-                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++                .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                     if n == usize::MAX {
+                         None
+                     } else {
+--- a/crates/fc-storage/src/lib.rs
++++ b/crates/fc-storage/src/lib.rs
+@@ -443,7 +443,7 @@
+ }
+ impl QueueLease {
+     fn reserve(used: Arc<AtomicUsize>, bytes: usize) -> Result<Self, StorageError> {
+-        used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
++        used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+             current
+                 .checked_add(bytes)
+                 .filter(|next| *next <= MAX_QUEUED_BYTES)
+--- a/crates/fc-storage/src/login.rs
++++ b/crates/fc-storage/src/login.rs
+@@ -361,7 +361,7 @@
+             });
+         }
+         self.cpu
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                 (n < MAX_KDF_WORKERS).then_some(n + 1)
+             })
+             .map_err(|_| StorageError::LoginCapacity)?;
+--- a/crates/fc-windows/src/audio/device.rs
++++ b/crates/fc-windows/src/audio/device.rs
+@@ -167,7 +167,7 @@
+     let client = unsafe { &*this.cast::<Client>() };
+     match client
+         .references
+-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
++        .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+             count.checked_add(1)
+         }) {
+         Ok(previous) => previous + 1,
+--- a/crates/fc-windows/src/tls_frontdoor/schannel.rs
++++ b/crates/fc-windows/src/tls_frontdoor/schannel.rs
+@@ -542,7 +542,7 @@
+     use std::sync::atomic::{AtomicUsize, Ordering};
+     static EMITTED: AtomicUsize = AtomicUsize::new(0);
+     if EMITTED
+-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
++        .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+             (count < 4).then_some(count + 1)
+         })
+         .is_err()

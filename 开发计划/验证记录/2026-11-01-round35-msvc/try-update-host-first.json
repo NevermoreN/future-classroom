@@ -1,0 +1,134 @@
+{
+  "status": "PASS_HOST_COMPATIBILITY_TWO_EXACT_TOOLCHAINS",
+  "recordedAt": "2026-10-31T17:39:42.594232+00:00",
+  "sourceSha256": "b4ed7537947fe7874ab400f0f93cf2912ffd6ba3f573bfb0a12fb27e1f256cf5",
+  "records": [
+    {
+      "toolchain": "1.97.1-x86_64-unknown-linux-gnu",
+      "phase": "version",
+      "argv": [
+        "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc",
+        "-vV"
+      ],
+      "startedAt": "2026-10-31T17:39:41.213944+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 196,
+      "stdoutSha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "toolchain": "1.97.1-x86_64-unknown-linux-gnu",
+      "phase": "compile",
+      "argv": [
+        "/config/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=1",
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof.rs",
+        "-o",
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-1.97.1-x86_64-unknown-linux-gnu"
+      ],
+      "startedAt": "2026-10-31T17:39:41.225721+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "toolchain": "1.97.1-x86_64-unknown-linux-gnu",
+      "phase": "run",
+      "argv": [
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-1.97.1-x86_64-unknown-linux-gnu"
+      ],
+      "startedAt": "2026-10-31T17:39:41.515860+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 296,
+      "stdoutSha256": "6ea485938c36487a5725c651a74c5888912a3bc1add5455aa34d37d4d0469e59",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "phase": "version",
+      "argv": [
+        "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/bin/rustc",
+        "-vV"
+      ],
+      "startedAt": "2026-10-31T17:39:41.517901+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 214,
+      "stdoutSha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "phase": "compile",
+      "argv": [
+        "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=1",
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof.rs",
+        "-o",
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-nightly-2026-10-29-x86_64-unknown-linux-gnu"
+      ],
+      "startedAt": "2026-10-31T17:39:41.789063+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "phase": "run",
+      "argv": [
+        "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-nightly-2026-10-29-x86_64-unknown-linux-gnu"
+      ],
+      "startedAt": "2026-10-31T17:39:42.586871+00:00",
+      "exitCode": 0,
+      "stdoutBytes": 296,
+      "stdoutSha256": "6ea485938c36487a5725c651a74c5888912a3bc1add5455aa34d37d4d0469e59",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "binaryFacts": [
+    {
+      "toolchain": "1.97.1-x86_64-unknown-linux-gnu",
+      "temporaryPath": "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-1.97.1-x86_64-unknown-linux-gnu",
+      "bytes": 4357904,
+      "sha256": "d09858a9cac179a6ef39e8cbfbc9822db21cbe01e40cfe4da40c618dce5d84cc",
+      "preserved": false
+    },
+    {
+      "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "temporaryPath": "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4/proof-nightly-2026-10-29-x86_64-unknown-linux-gnu",
+      "bytes": 4619080,
+      "sha256": "8d1a9899d448876fae01aeeb68e8e8bc34833c6124ee7378007af8ccdd710ddf",
+      "preserved": false
+    }
+  ],
+  "cleanup": {
+    "ownedRoot": "/tmp/fc-round35-try-update-bd70e7b82c0b43a4b7bcb359851589d4",
+    "markerMatched": true,
+    "processesTerminal": true,
+    "removed": true
+  },
+  "error": null,
+  "scope": "Host-only direct rustc compile and execution, strict -D warnings. No Cargo/Windows/product runtime proof. Deterministic mutation during update closure forces stale compare_exchange retry; checked_add rejects max without wrap.",
+  "unchanged": [
+    "product source",
+    "Cargo job owned by root",
+    "Windows",
+    "CI",
+    "Git"
+  ]
+}
