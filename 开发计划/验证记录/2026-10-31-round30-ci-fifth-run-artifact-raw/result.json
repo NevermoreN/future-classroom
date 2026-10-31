@@ -1,0 +1,372 @@
+{
+  "status": "FAILED_OR_INCOMPLETE",
+  "source_sha": "551299e17ba69f6944cf924917c632eaa005e07a",
+  "input_manifest_sha256": "2a23dd07317bad22e87589b9311069d2d803a0ea8a4e5b57fb5cf9c3016d6203",
+  "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+  "target": "i686-pc-windows-msvc",
+  "dispatch_source_sha": "551299e17ba69f6944cf924917c632eaa005e07a",
+  "commands": [
+    {
+      "name": "source-sha",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_utc": "2026-10-31T13:52:54.1134745Z",
+      "duration_seconds": 0.0844509,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-sha.stdout.log",
+      "stderr": "logs/source-sha.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-clean-before",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "status",
+        "--porcelain",
+        "--untracked-files=all"
+      ],
+      "started_utc": "2026-10-31T13:52:54.2514606Z",
+      "duration_seconds": 0.5530124,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-clean-before.stdout.log",
+      "stderr": "logs/source-clean-before.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "source-input-paths",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "ls-files",
+        "-z"
+      ],
+      "started_utc": "2026-10-31T13:52:54.8093403Z",
+      "duration_seconds": 0.5264505,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-input-paths.stdout.log",
+      "stderr": "logs/source-input-paths.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rustup-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "--version"
+      ],
+      "started_utc": "2026-10-31T13:52:57.2134256Z",
+      "duration_seconds": 15.2392803,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rustup-version.stdout.log",
+      "stderr": "logs/rustup-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "install-fixed-rust",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "toolchain",
+        "install",
+        "1.97.1-x86_64-pc-windows-msvc",
+        "--profile",
+        "minimal",
+        "--component",
+        "clippy",
+        "--component",
+        "rustfmt",
+        "--target",
+        "i686-pc-windows-msvc"
+      ],
+      "started_utc": "2026-10-31T13:53:12.4550651Z",
+      "duration_seconds": 1.8295816,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/install-fixed-rust.stdout.log",
+      "stderr": "logs/install-fixed-rust.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "run",
+        "1.97.1-x86_64-pc-windows-msvc",
+        "rustc",
+        "-vV"
+      ],
+      "started_utc": "2026-10-31T13:53:14.2871152Z",
+      "duration_seconds": 0.0747554,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-version.stdout.log",
+      "stderr": "logs/rust-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cargo-version",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "--version",
+        "--verbose"
+      ],
+      "started_utc": "2026-10-31T13:53:14.3698828Z",
+      "duration_seconds": 0.616984,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cargo-version.stdout.log",
+      "stderr": "logs/cargo-version.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "rust-target-cfg",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\rustup.exe",
+      "arguments": [
+        "run",
+        "1.97.1-x86_64-pc-windows-msvc",
+        "rustc",
+        "--target",
+        "i686-pc-windows-msvc",
+        "-C",
+        "target-feature=+crt-static",
+        "--print",
+        "cfg"
+      ],
+      "started_utc": "2026-10-31T13:53:14.9908880Z",
+      "duration_seconds": 0.0740238,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/rust-target-cfg.stdout.log",
+      "stderr": "logs/rust-target-cfg.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "visual-studio",
+      "executable": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe",
+      "arguments": [
+        "-latest",
+        "-version",
+        "[17.0,18.0)",
+        "-products",
+        "*",
+        "-requires",
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "-format",
+        "json"
+      ],
+      "started_utc": "2026-10-31T13:53:15.0676630Z",
+      "duration_seconds": 0.51816,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/visual-studio.stdout.log",
+      "stderr": "logs/visual-studio.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cl-version-probe",
+      "executable": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x86\\cl.exe",
+      "arguments": [
+        "/nologo",
+        "/Bv",
+        "/MT",
+        "/c",
+        "/FoD:\\a\\_temp\\future-classroom-msvc-41207536551-1\\scratch\\compiler-version.obj",
+        "D:\\a\\_temp\\future-classroom-msvc-41207536551-1\\scratch\\compiler-version.c"
+      ],
+      "started_utc": "2026-10-31T13:53:25.6642366Z",
+      "duration_seconds": 2.01105,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cl-version-probe.stdout.log",
+      "stderr": "logs/cl-version-probe.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "cargo-metadata",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "metadata",
+        "--locked",
+        "--format-version",
+        "1",
+        "--no-deps"
+      ],
+      "started_utc": "2026-10-31T13:53:27.6843452Z",
+      "duration_seconds": 0.1315276,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/cargo-metadata.stdout.log",
+      "stderr": "logs/cargo-metadata.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "fmt",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "started_utc": "2026-10-31T13:53:27.8239623Z",
+      "duration_seconds": 3.9493258,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/fmt.stdout.log",
+      "stderr": "logs/fmt.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "architecture",
+      "executable": "C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\python.exe",
+      "arguments": [
+        "scripts/check-architecture.py"
+      ],
+      "started_utc": "2026-10-31T13:53:31.7750980Z",
+      "duration_seconds": 1.0492139,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/architecture.stdout.log",
+      "stderr": "logs/architecture.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "workspace-test-compile",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "test",
+        "--workspace",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-pc-windows-msvc",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "started_utc": "2026-10-31T13:53:32.8264224Z",
+      "duration_seconds": 840.6966779,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/workspace-test-compile.stdout.log",
+      "stderr": "logs/workspace-test-compile.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "product-compile",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "build",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-pc-windows-msvc",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--message-format=json"
+      ],
+      "started_utc": "2026-10-31T14:07:33.5262745Z",
+      "duration_seconds": 0.5123868,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/product-compile.stdout.log",
+      "stderr": "logs/product-compile.stderr.log",
+      "passed": true
+    },
+    {
+      "name": "clippy",
+      "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+      "arguments": [
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--release",
+        "--locked",
+        "--target",
+        "i686-pc-windows-msvc",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "started_utc": "2026-10-31T14:07:34.0404867Z",
+      "duration_seconds": 68.1294513,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/clippy.stdout.log",
+      "stderr": "logs/clippy.stderr.log",
+      "passed": true
+    }
+  ],
+  "executable_count": 22,
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "windows11": "NOT_RUN",
+  "seewo_device": "NOT_RUN",
+  "purpose": "Modern formal MSVC build evidence and portable test executables, not a product installer or runtime certification.",
+  "later_test_arguments": [
+    "--test-threads=2"
+  ],
+  "test_working_directories": "Package paths in executables.json; choose an isolated controlled root.",
+  "no_toolchain_payloads": true,
+  "no_environment_dump": true,
+  "limitations": [
+    "Static CRT does not prove OS API compatibility.",
+    "Already terminated/cancelled hosted jobs may prevent always-upload.",
+    "Doctests are not compiled into the collected no-run harness executables.",
+    "Actual Windows 7/10/11 and classroom-device runs require separate evidence."
+  ]
+}
