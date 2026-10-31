@@ -59,16 +59,30 @@ pub(super) enum Call {
     Handshake,
     Decrypt,
     Encrypt,
+    /// Generate local close_notify on the existing context; does not delete it.
+    Shutdown,
+    /// Delete only this exact connection context, on its owning SSPI thread.
+    Retire,
 }
 #[cfg(any(windows, test))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(not(windows), allow(dead_code))] // Native SSPI steps have no host implementation.
 pub(super) enum Step {
     NeedInput,
-    Handshake { consumed: usize, complete: bool },
-    Plaintext { consumed: usize },
+    Handshake {
+        consumed: usize,
+        complete: bool,
+    },
+    Plaintext {
+        consumed: usize,
+    },
     Encrypted,
     PeerClosed,
+    Shutdown {
+        complete: bool,
+    },
+    /// Actual context deletion (or proof this exact context was already absent).
+    Retired,
 }
 
 /// Exactly one allocation per connection; no Clone/Debug and no borrowed native
@@ -99,14 +113,24 @@ impl Frame {
     }
 }
 #[cfg(any(windows, test))]
-impl Drop for Frame {
-    fn drop(&mut self) {
+impl Frame {
+    /// Call only with the actual unique frame owner, after all native calls
+    /// returned. This also erases previous connection contents before reuse.
+    pub fn wipe(&mut self) {
         for byte in self.input.iter_mut().chain(self.output.iter_mut()) {
             // SAFETY: this final unique owner has no native call in flight and
             // no aliases to either byte array; volatile stores retain the wipe.
             unsafe { std::ptr::write_volatile(byte, 0) };
         }
         compiler_fence(Ordering::SeqCst);
+        self.input_len = 0;
+        self.output_len = 0;
+    }
+}
+#[cfg(any(windows, test))]
+impl Drop for Frame {
+    fn drop(&mut self) {
+        self.wipe();
     }
 }
 

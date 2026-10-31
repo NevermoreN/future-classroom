@@ -1,0 +1,91 @@
+   Compiling compiler_builtins v0.1.160 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling libc v0.2.191
+   Compiling object v0.39.1
+   Compiling std v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+   Compiling windows-link v0.0.0 (/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/windows_link)
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling syn v2.0.119
+   Compiling zerocopy v0.8.63
+   Compiling serde_core v1.0.228
+   Compiling rustversion v1.0.23
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling ahash v0.8.12
+   Compiling find-msvc-tools v0.1.15
+   Compiling shlex v2.0.1
+   Compiling cc v1.10.0
+   Compiling pkg-config v0.3.34
+   Compiling vcpkg v0.2.15
+   Compiling crc32fast v1.5.3
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.145
+   Compiling libsqlite3-sys v0.30.1
+   Compiling encoding_rs v0.8.42
+   Compiling serde_derive v1.0.228
+warning: libsqlite3-sys@0.30.1: In file included from sqlite3/sqlite3.c:14678:
+warning: libsqlite3-sys@0.30.1: /usr/include/stdio.h:28:10: fatal error: bits/libc-header-start.h: No such file or directory
+warning: libsqlite3-sys@0.30.1:    28 | #include <bits/libc-header-start.h>
+warning: libsqlite3-sys@0.30.1:       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: libsqlite3-sys@0.30.1: compilation terminated.
+error: failed to run custom build command for `libsqlite3-sys v0.30.1`
+
+Caused by:
+  process didn't exit successfully: `/tmp/fc-round29-win7/release/build/libsqlite3-sys/efd0325696c030e9/out/build_script_build` (exit status: 1)
+  --- stdout
+  cargo:rerun-if-env-changed=LIBSQLITE3_SYS_USE_PKG_CONFIG
+  cargo:include=/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libsqlite3-sys-0.30.1/sqlite3
+  cargo:rerun-if-changed=sqlite3/sqlite3.c
+  cargo:rerun-if-changed=sqlite3/wasm32-wasi-vfs.c
+  cargo:rerun-if-env-changed=SQLITE_MAX_VARIABLE_NUMBER
+  cargo:rerun-if-env-changed=SQLITE_MAX_EXPR_DEPTH
+  cargo:rerun-if-env-changed=SQLITE_MAX_COLUMN
+  cargo:rerun-if-env-changed=LIBSQLITE3_FLAGS
+  cargo:rerun-if-env-changed=CC_FORCE_DISABLE
+  CC_FORCE_DISABLE = None
+  cargo:rerun-if-env-changed=CC_i686-win7-windows-gnu
+  CC_i686-win7-windows-gnu = None
+  cargo:rerun-if-env-changed=CC_i686_win7_windows_gnu
+  CC_i686_win7_windows_gnu = None
+  cargo:rerun-if-env-changed=TARGET_CC
+  TARGET_CC = None
+  cargo:rerun-if-env-changed=CC
+  CC = None
+  cargo:rerun-if-env-changed=CROSS_COMPILE
+  CROSS_COMPILE = None
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  cargo:rerun-if-env-changed=CPATH
+  cargo:rerun-if-env-changed=C_INCLUDE_PATH
+  cargo:rerun-if-env-changed=CPLUS_INCLUDE_PATH
+  cargo:rerun-if-env-changed=OBJC_INCLUDE_PATH
+  cargo:rerun-if-env-changed=OBJCPLUS_INCLUDE_PATH
+  cargo:rerun-if-env-changed=COMPILER_PATH
+  cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+  cargo:rerun-if-env-changed=GCC_EXEC_PREFIX
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  cargo:rerun-if-env-changed=CFLAGS
+  CFLAGS = None
+  cargo:rerun-if-env-changed=TARGET_CFLAGS
+  TARGET_CFLAGS = None
+  cargo:rerun-if-env-changed=CFLAGS_i686_win7_windows_gnu
+  CFLAGS_i686_win7_windows_gnu = None
+  cargo:rerun-if-env-changed=CFLAGS_i686-win7-windows-gnu
+  CFLAGS_i686-win7-windows-gnu = None
+  cargo:warning=In file included from sqlite3/sqlite3.c:14678:
+  cargo:warning=/usr/include/stdio.h:28:10: fatal error: bits/libc-header-start.h: No such file or directory
+  cargo:warning=   28 | #include <bits/libc-header-start.h>
+  cargo:warning=      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=compilation terminated.
+
+  --- stderr
+
+
+  error occurred in cc-rs: command did not execute successfully (status code exit status: 1): "cc" "-O3" "-ffunction-sections" "-fdata-sections" "-m32" "-w" "-DSQLITE_CORE" "-DSQLITE_DEFAULT_FOREIGN_KEYS=1" "-DSQLITE_ENABLE_API_ARMOR" "-DSQLITE_ENABLE_COLUMN_METADATA" "-DSQLITE_ENABLE_DBSTAT_VTAB" "-DSQLITE_ENABLE_FTS3" "-DSQLITE_ENABLE_FTS3_PARENTHESIS" "-DSQLITE_ENABLE_FTS5" "-DSQLITE_ENABLE_JSON1" "-DSQLITE_ENABLE_LOAD_EXTENSION=1" "-DSQLITE_ENABLE_MEMORY_MANAGEMENT" "-DSQLITE_ENABLE_RTREE" "-DSQLITE_ENABLE_STAT4" "-DSQLITE_SOUNDEX" "-DSQLITE_THREADSAFE=1" "-DSQLITE_USE_URI" "-DHAVE_USLEEP=1" "-DHAVE_ISNAN" "-D_POSIX_THREAD_SAFE_FUNCTIONS" "-o" "/tmp/fc-round29-win7/i686-win7-windows-gnu/release/build/libsqlite3-sys/9dac7fd195d1d207/out/8017ddc1302f104c-sqlite3.o" "-c" "sqlite3/sqlite3.c"
+
+
+warning: build failed, waiting for other jobs to finish...

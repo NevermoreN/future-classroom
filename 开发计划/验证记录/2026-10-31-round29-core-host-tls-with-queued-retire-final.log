@@ -1,0 +1,21 @@
+    Finished `release` profile [optimized] target(s) in 0.10s
+     Running unittests src/lib.rs (/tmp/fc-round29-core-target/release/deps/fc_windows-002f0ce4bf1568aa)
+
+running 14 tests
+test tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases ... ok
+test tls_frontdoor::tests::diagnostic_marker_cannot_inject_http_or_control_output ... ok
+test tls_frontdoor::worker::tests::checked_close_error_blocks_replacement_in_an_independent_process ... ok
+test tls_frontdoor::worker::tests::dropping_live_owner_quarantines_every_capability_until_physical_exit ... ok
+test tls_frontdoor::worker::tests::four_linear_permits_survive_stop_until_real_call_and_collection ... ok
+test tls_frontdoor::worker::tests::initialization_is_owned_nonblocking_and_stop_cannot_destroy_held_factory ... ok
+test tls_frontdoor::worker::tests::native_driver_is_constructed_on_worker_and_need_not_implement_send ... ok
+test tls_frontdoor::worker::tests::held_real_retire_call_never_releases_permit_before_result_is_collected ... ok
+test tls_frontdoor::worker::tests::native_reap_keeps_uncollected_results_and_the_single_admission_lease ... ok
+test tls_frontdoor::worker::tests::panic_returns_linear_frame_and_requires_actual_reap ... ok
+test tls_frontdoor::worker::tests::queued_exact_retire_on_stop_returns_stopped_without_retiring_or_releasing_owner ... ok
+test tls_frontdoor::worker::tests::readiness_must_be_collected_and_initialization_failure_keeps_its_error ... ok
+test tls_frontdoor::worker::tests::shutdown_and_retire_require_exact_live_token_and_retire_collection_before_reuse ... ok
+test tls_frontdoor::worker::tests::stale_generation_and_serial_cannot_rebind_an_existing_slot ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.46s
+

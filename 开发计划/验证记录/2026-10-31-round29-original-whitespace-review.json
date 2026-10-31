@@ -1,0 +1,9 @@
+{
+  "status": "PASS code/docs scope",
+  "rawEvidenceWhitespaceCheck": {
+    "exitCode": 2,
+    "output": "开发计划/验证记录/2026-10-31-round29-core-host-queued-retire-stop-first.log:9: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-core-host-tls-final.log:22: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-core-host-tls-stage1.log:47: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-core-host-tls-with-queued-retire-final.log:21: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-host-full-final.log:984: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-host-protocol-after-clippy-fix.log:87: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-host-protocol-exact-final.log:74: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-http1-parser-stage1.log:41: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-http1-protocol-final.log:83: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-response-release-final.log:22: new blank line at EOF.\n开发计划/验证记录/2026-10-31-round29-response-release.log:44: new blank line at EOF.\n",
+    "reason": "original logs intentionally retain terminal blank lines; no evidence bytes altered to satisfy whitespace formatting"
+  },
+  "codeAndPlanWhitespaceCheck": "PASS with only exact round29 evidence prefix excluded"
+}

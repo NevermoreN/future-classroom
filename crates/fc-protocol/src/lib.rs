@@ -1,6 +1,7 @@
 //! Versioned, bounded wire input. Actor, origin and paths never come from JSON.
 #![forbid(unsafe_code)]
 pub mod calendar_feed;
+pub mod http1;
 pub mod recovery;
 pub mod web;
 

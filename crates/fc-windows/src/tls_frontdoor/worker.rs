@@ -1,6 +1,6 @@
 //! One admitted native owner. Mailbox capacity and slot permits account for the
 //! same four linear frames until their actual completion is collected.
-use super::{Driver, Frame, TlsError, CONNECTION_SLOTS};
+use super::{Call, Driver, Frame, Step, TlsError, CONNECTION_SLOTS};
 use fc_ports::http::RequestToken;
 use std::{
     panic::{catch_unwind, AssertUnwindSafe},
@@ -55,6 +55,9 @@ struct Owner {
     thread: Option<JoinHandle<()>>,
     in_flight: [Option<RequestToken>; CONNECTION_SLOTS],
     serials: [u64; CONNECTION_SLOTS],
+    bound: [Option<RequestToken>; CONNECTION_SLOTS],
+    retired: [bool; CONNECTION_SLOTS],
+    in_flight_calls: [Option<Call>; CONNECTION_SLOTS],
     admitted: bool,
 }
 #[derive(Clone, Copy)]
@@ -196,6 +199,9 @@ impl Worker {
                 thread: Some(thread),
                 in_flight: [None; CONNECTION_SLOTS],
                 serials: [0; CONNECTION_SLOTS],
+                bound: [None; CONNECTION_SLOTS],
+                retired: [false; CONNECTION_SLOTS],
+                in_flight_calls: [None; CONNECTION_SLOTS],
                 admitted: true,
             }),
         })
@@ -247,12 +253,26 @@ impl Worker {
         if owner.in_flight[slot].is_some() {
             return Err((TlsError::Busy, frame));
         }
+        let same = owner.bound[slot] == Some(token);
+        if (same && owner.retired[slot])
+            || (!same
+                && (frame.call != Call::Handshake
+                    || token.serial() <= owner.serials[slot]
+                    || owner.bound[slot].is_some() && !owner.retired[slot]))
+            || (matches!(frame.call, Call::Shutdown | Call::Retire) && frame.input_len != 0)
+        {
+            return Err((TlsError::InvalidInput, frame));
+        }
+        let call = frame.call;
         frame.result = None;
         frame.output_len = 0;
         match owner.pending.try_send(frame) {
             Ok(()) => {
                 owner.in_flight[slot] = Some(token);
                 owner.serials[slot] = token.serial();
+                owner.bound[slot] = Some(token);
+                owner.retired[slot] = false;
+                owner.in_flight_calls[slot] = Some(call);
                 Ok(())
             }
             Err(TrySendError::Full(frame)) => Err((TlsError::Busy, frame)),
@@ -278,11 +298,21 @@ impl Worker {
         if slot >= CONNECTION_SLOTS
             || owner.in_flight[slot] != Some(frame.token)
             || frame.result.is_none()
+            || owner.in_flight_calls[slot] != Some(frame.call)
+            || frame.call == Call::Retire
+                && frame
+                    .result
+                    .as_ref()
+                    .is_some_and(|result| result.is_ok() && *result != Ok(Step::Retired))
         {
             owner.shared.stop.store(true, Ordering::Release);
             return Err(TlsError::UnexpectedCompletion);
         }
         owner.in_flight[slot] = None;
+        owner.in_flight_calls[slot] = None;
+        if frame.call == Call::Retire && frame.result == Some(Ok(Step::Retired)) {
+            owner.retired[slot] = true;
+        }
         if owner.thread.is_none() && owner.in_flight.iter().all(Option::is_none) {
             owner.release_admission();
         }
@@ -364,6 +394,7 @@ fn run(
             }
         };
         let token = frame.token;
+        let call = frame.call;
         let result = if shared.stop.load(Ordering::Acquire) {
             Err(TlsError::Stopped)
         } else {
@@ -376,12 +407,17 @@ fn run(
                 }
             }
         };
+        if let Err(error @ TlsError::Cleanup(_)) = result {
+            shared.record_cleanup_error(error);
+        }
         frame.result = Some(
-            if frame.token == token && frame.output_len <= frame.output.len() {
+            if frame.token == token && frame.call == call && frame.output_len <= frame.output.len()
+            {
                 result
             } else {
                 shared.stop.store(true, Ordering::Release);
                 frame.token = token;
+                frame.call = call;
                 Err(TlsError::UnexpectedCompletion)
             },
         );

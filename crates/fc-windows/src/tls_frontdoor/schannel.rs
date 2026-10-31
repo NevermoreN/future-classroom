@@ -20,6 +20,10 @@ const ALERT_BYTES: usize = 256;
 struct Context {
     handle: SecHandle,
     token: Option<RequestToken>,
+    last_token: Option<RequestToken>,
+    shutting_down: bool,
+    shutdown_complete: bool,
+    peer_closed: bool,
     complete: bool,
     sizes: SecPkgContext_StreamSizes,
 }
@@ -28,6 +32,10 @@ impl Default for Context {
         Self {
             handle: INVALID_HANDLE,
             token: None,
+            last_token: None,
+            shutting_down: false,
+            shutdown_complete: false,
+            peer_closed: false,
             complete: false,
             sizes: Default::default(),
         }
@@ -36,6 +44,29 @@ impl Default for Context {
 impl Context {
     fn live(&self) -> bool {
         self.handle != INVALID_HANDLE
+    }
+    fn bind(&mut self, token: RequestToken, call: Call) -> Result<(), TlsError> {
+        if self.token == Some(token) {
+            return Ok(());
+        }
+        let newer = self.last_token.is_none_or(|old| {
+            (token.generation(), token.serial()) > (old.generation(), old.serial())
+        });
+        if call != Call::Handshake || self.token.is_some() || !newer {
+            return Err(TlsError::InvalidInput);
+        }
+        self.token = Some(token);
+        self.last_token = Some(token);
+        Ok(())
+    }
+    fn retire(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+        if self.token != Some(frame.token) || frame.input_len != 0 {
+            return Err(TlsError::InvalidInput);
+        }
+        self.reset()?;
+        self.token = None;
+        frame.wipe();
+        Ok(Step::Retired)
     }
     fn reset(&mut self) -> Result<(), TlsError> {
         let handle = std::mem::replace(&mut self.handle, INVALID_HANDLE);
@@ -46,7 +77,12 @@ impl Context {
         } else {
             Ok(())
         };
-        self.token = None;
+        // Keep the exact connection identity until an explicit Retire ack.
+        // A failed handshake can already have deleted its partial context, but
+        // that never authorizes a different token to retire/rebind this owner.
+        self.shutting_down = false;
+        self.shutdown_complete = false;
+        self.peer_closed = false;
         self.complete = false;
         self.sizes = SecPkgContext_StreamSizes::default();
         result
@@ -89,26 +125,37 @@ impl Driver for SchannelSet {
             return Err(TlsError::InvalidInput);
         }
         let context = &mut self.contexts[frame.token.slot()];
-        if context.token != Some(frame.token) {
-            let newer = context.token.is_none_or(|old| {
-                (frame.token.generation(), frame.token.serial()) > (old.generation(), old.serial())
-            });
-            if frame.call != Call::Handshake || !newer {
-                return Err(TlsError::InvalidInput);
-            }
-            if let Err(error) = context.reset() {
+        context.bind(frame.token, frame.call)?;
+        if frame.call == Call::Retire {
+            let result = context.retire(frame);
+            if let Err(error @ TlsError::Cleanup(_)) = result {
                 self.cleanup_failure.get_or_insert(error);
-                return Err(error);
             }
-            context.token = Some(frame.token);
+            return result;
         }
         let result = match frame.call {
-            Call::Handshake if !context.complete => handshake(context, &self.credentials, frame),
-            Call::Decrypt if context.complete => decrypt(context, frame),
-            Call::Encrypt if context.complete => encrypt(context, frame),
+            Call::Handshake
+                if !context.complete && !context.shutting_down && !context.peer_closed =>
+            {
+                handshake(context, &self.credentials, frame)
+            }
+            Call::Decrypt if context.complete && !context.shutting_down && !context.peer_closed => {
+                decrypt(context, frame)
+            }
+            Call::Encrypt if context.complete && !context.shutting_down && !context.peer_closed => {
+                encrypt(context, frame)
+            }
+            Call::Shutdown
+                if context.complete && frame.input_len == 0 && !context.shutdown_complete =>
+            {
+                shutdown(context, &self.credentials, frame)
+            }
             _ => Err(TlsError::Protocol),
         };
-        if result.is_err() || result == Ok(Step::PeerClosed) {
+        if result == Ok(Step::PeerClosed) {
+            // Preserve the established context for the reciprocal close_notify.
+            context.peer_closed = true;
+        } else if result.is_err() {
             if let Err(error) = context.reset() {
                 self.cleanup_failure.get_or_insert(error);
                 return Err(error);
@@ -297,6 +344,103 @@ fn handshake(
     Ok(Step::Handshake {
         consumed: used,
         complete: context.complete,
+    })
+}
+
+/// Microsoft server shutdown: ApplyControlToken once, then ASC with empty
+/// input until complete, send every returned token, finally explicit Retire.
+/// https://learn.microsoft.com/en-us/windows/win32/secauthn/shutting-down-an-schannel-connection
+fn shutdown(
+    context: &mut Context,
+    credentials: &Credentials,
+    frame: &mut Frame,
+) -> Result<Step, TlsError> {
+    if !context.live() {
+        return Err(TlsError::Protocol);
+    }
+    if !context.shutting_down {
+        let mut token = SCHANNEL_SHUTDOWN;
+        let mut control = [buffer(
+            SECBUFFER_TOKEN,
+            (&mut token as *mut u32).cast(),
+            std::mem::size_of::<u32>(),
+        )];
+        let descriptor = description(&mut control);
+        // SAFETY: synchronous call on the sole owning thread; the DWORD control
+        // token remains live for this call and contains no user-provided bytes.
+        unsafe { ApplyControlToken(&context.handle, &descriptor) }
+            .map_err(|e| TlsError::Native(e.code().0))?;
+        context.shutting_down = true;
+    }
+    let mut input = [
+        buffer(SECBUFFER_TOKEN, std::ptr::null_mut(), 0),
+        SecBuffer::default(),
+    ];
+    let input_desc = description(&mut input);
+    let mut output = [
+        buffer(
+            SECBUFFER_TOKEN,
+            frame.output.as_mut_ptr(),
+            BUFFER_BYTES - ALERT_BYTES,
+        ),
+        buffer(
+            SECBUFFER_ALERT,
+            frame.output[BUFFER_BYTES - ALERT_BYTES..].as_mut_ptr(),
+            ALERT_BYTES,
+        ),
+    ];
+    let mut output_desc = description(&mut output);
+    let mut attributes = 0;
+    // SAFETY: current context, same thread, disjoint caller-owned output/alert
+    // arrays. ALLOCATE_MEMORY is not requested and returned views are checked.
+    let status = unsafe {
+        AcceptSecurityContext(
+            Some(&credentials.handle),
+            Some(&context.handle),
+            Some(&input_desc),
+            ASC_REQ_CONFIDENTIALITY
+                | ASC_REQ_REPLAY_DETECT
+                | ASC_REQ_SEQUENCE_DETECT
+                | ASC_REQ_STREAM
+                | ASC_REQ_EXTENDED_ERROR,
+            0,
+            Some(&mut context.handle),
+            Some(&mut output_desc),
+            &mut attributes,
+            None,
+        )
+    };
+    let step = shutdown_result(frame, &output[0], status, attributes)?;
+    if let Step::Shutdown { complete } = step {
+        context.shutdown_complete = complete;
+    }
+    Ok(step)
+}
+fn shutdown_result(
+    frame: &mut Frame,
+    output: &SecBuffer,
+    status: windows::core::HRESULT,
+    attributes: u32,
+) -> Result<Step, TlsError> {
+    if attributes & ASC_RET_ALLOCATED_MEMORY != 0 || output.BufferType != SECBUFFER_TOKEN {
+        return Err(TlsError::Protocol);
+    }
+    if status != SEC_E_OK && status != SEC_I_CONTEXT_EXPIRED && status != SEC_I_CONTINUE_NEEDED {
+        return Err(TlsError::Native(status.0));
+    }
+    let count = output.cbBuffer as usize;
+    if count > 0 {
+        let range = checked_range(
+            output.pvBuffer,
+            count,
+            frame.output.as_ptr(),
+            BUFFER_BYTES - ALERT_BYTES,
+        )?;
+        frame.output.copy_within(range, 0);
+    }
+    frame.output_len = count;
+    Ok(Step::Shutdown {
+        complete: status == SEC_E_OK || status == SEC_I_CONTEXT_EXPIRED,
     })
 }
 
@@ -558,5 +702,107 @@ mod tests {
         frame.input_len -= used;
         assert_eq!(frame.input_len, 31);
         assert_eq!(&frame.input[..31], expected_extra);
+    }
+    #[test]
+    fn exact_empty_context_retirement_cannot_be_forged_and_wipes_connection_data() {
+        let mut issuer = fc_ports::http::TokenIssuer::new().unwrap();
+        let old = issuer.issue(0).unwrap();
+        let new = issuer.issue(0).unwrap();
+        let mut context = Context::default();
+        assert_eq!(context.bind(old, Call::Retire), Err(TlsError::InvalidInput));
+        assert_eq!(
+            context.bind(old, Call::Shutdown),
+            Err(TlsError::InvalidInput)
+        );
+        context.bind(old, Call::Handshake).unwrap();
+        assert_eq!(
+            context.bind(new, Call::Handshake),
+            Err(TlsError::InvalidInput)
+        );
+        let mut forged = Frame::new(new);
+        forged.call = Call::Retire;
+        assert_eq!(context.retire(&mut forged), Err(TlsError::InvalidInput));
+        let mut frame = Frame::new(old);
+        frame.call = Call::Retire;
+        frame.input.fill(17);
+        frame.output.fill(29);
+        frame.output_len = 12;
+        assert_eq!(context.retire(&mut frame), Ok(Step::Retired));
+        assert!(frame
+            .input
+            .iter()
+            .chain(frame.output.iter())
+            .all(|byte| *byte == 0));
+        assert_eq!(frame.output_len, 0);
+        assert_eq!(context.retire(&mut frame), Err(TlsError::InvalidInput));
+        assert_eq!(
+            context.bind(old, Call::Handshake),
+            Err(TlsError::InvalidInput)
+        );
+        context.bind(new, Call::Handshake).unwrap();
+    }
+    #[test]
+    fn error_cleanup_preserves_exact_owner_until_retire_ack() {
+        let mut issuer = fc_ports::http::TokenIssuer::new().unwrap();
+        let old = issuer.issue(0).unwrap();
+        let new = issuer.issue(0).unwrap();
+        let mut context = Context::default();
+        context.bind(old, Call::Handshake).unwrap();
+        // No real native handle was constructed; this models the successful
+        // cleanup branch after a failed partial handshake, not Delete evidence.
+        context.reset().unwrap();
+        assert_eq!(context.token, Some(old));
+        assert_eq!(
+            context.bind(new, Call::Handshake),
+            Err(TlsError::InvalidInput)
+        );
+        let mut frame = Frame::new(old);
+        frame.call = Call::Retire;
+        assert_eq!(context.retire(&mut frame), Ok(Step::Retired));
+        context.bind(new, Call::Handshake).unwrap();
+    }
+    #[test]
+    fn shutdown_returns_only_bounded_owned_token_and_explicit_completion_status() {
+        let mut issuer = fc_ports::http::TokenIssuer::new().unwrap();
+        let mut frame = Frame::new(issuer.issue(0).unwrap());
+        frame.output[5..8].copy_from_slice(&[1, 2, 3]);
+        let token = buffer(
+            SECBUFFER_TOKEN,
+            unsafe { frame.output.as_mut_ptr().add(5) },
+            3,
+        );
+        assert_eq!(
+            shutdown_result(&mut frame, &token, SEC_E_OK, 0),
+            Ok(Step::Shutdown { complete: true })
+        );
+        assert_eq!(&frame.output[..3], &[1, 2, 3]);
+        assert_eq!(frame.output_len, 3);
+        let empty = buffer(SECBUFFER_TOKEN, std::ptr::null_mut(), 0);
+        assert_eq!(
+            shutdown_result(&mut frame, &empty, SEC_I_CONTEXT_EXPIRED, 0),
+            Ok(Step::Shutdown { complete: true })
+        );
+        assert_eq!(
+            shutdown_result(&mut frame, &empty, SEC_I_CONTINUE_NEEDED, 0),
+            Ok(Step::Shutdown { complete: false })
+        );
+        let outside = buffer(SECBUFFER_TOKEN, frame.output.as_mut_ptr(), BUFFER_BYTES);
+        assert_eq!(
+            shutdown_result(&mut frame, &outside, SEC_E_OK, 0),
+            Err(TlsError::Protocol)
+        );
+        assert_eq!(
+            shutdown_result(&mut frame, &empty, SEC_E_OK, ASC_RET_ALLOCATED_MEMORY),
+            Err(TlsError::Protocol)
+        );
+        let wrong = buffer(SECBUFFER_DATA, frame.output.as_mut_ptr(), 1);
+        assert_eq!(
+            shutdown_result(&mut frame, &wrong, SEC_E_OK, 0),
+            Err(TlsError::Protocol)
+        );
+        assert!(matches!(
+            shutdown_result(&mut frame, &empty, SEC_E_INCOMPLETE_MESSAGE, 0),
+            Err(TlsError::Native(_))
+        ));
     }
 }

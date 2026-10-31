@@ -1,0 +1,48 @@
+{
+  "scope": "TLS worker exact-token shutdown/retire core; source content observed at freeze, not whole-workspace artifact binding",
+  "host": {
+    "testCommand": "cargo test -p fc-windows --release --locked --lib tls_frontdoor:: --target-dir /tmp/fc-round29-core-target -- --test-threads=2",
+    "exitCode": 0,
+    "passed": 13,
+    "failed": 0,
+    "filtered": 11,
+    "elapsedTestSeconds": 0.47,
+    "log": "core-host-tls-final.log"
+  },
+  "clippy": {
+    "command": "cargo clippy -p fc-windows --release --all-targets --locked --target-dir /tmp/fc-round29-core-target -- -D warnings",
+    "exitCode": 0,
+    "log": "core-host-clippy-final.log"
+  },
+  "source": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "sha256": "0976d954d719389926b96783c7733d7942c56f714833b082e387434fa0352a6d"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/schannel.rs",
+      "sha256": "a66ad6672d756e0c918607c571f5070ad505e150908dbd6996fd62ecb78309ae"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker.rs",
+      "sha256": "212aa5bf10175bc553d2c4e720baf5d3f3843be90937f71348336de6f1194591"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "sha256": "a9d1e54eb56d351749296ded126c8ae887c751ff973facec34e36b95f8ea0cca"
+    }
+  ],
+  "windowsOnlyTestsAdded": 3,
+  "windowsCompilation": "NOT_RUN_BY_CORE_AGENT",
+  "actualSspiShutdownRetire": "NOT_RUN_BY_CORE_AGENT",
+  "strictP0": "NOT_VALIDATED",
+  "temporaryTargetRetainedForRootArchiveAndCleanup": "/tmp/fc-round29-core-target",
+  "liveToolHandles": [],
+  "implementationNotes": [
+    "Shutdown does not delete context; all returned token bytes must be sent before Retire.",
+    "Same-token Retire acknowledges actual checked context deletion or exact-token absence after previous checked cleanup.",
+    "New serial remains denied until the Retired result is actually polled.",
+    "Stopped Retire returns its linear frame but never changes owner.retired.",
+    "Call-level Cleanup failure latches process-wide admission fault."
+  ]
+}

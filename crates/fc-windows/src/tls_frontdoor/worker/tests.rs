@@ -7,9 +7,18 @@ pub(in crate::tls_frontdoor) static SERIAL: Mutex<()> = Mutex::new(());
 struct Immediate;
 impl Driver for Immediate {
     fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
-        frame.output[0] = 42;
-        frame.output_len = 1;
-        Ok(Step::Encrypted)
+        if frame.call == Call::Retire {
+            frame.wipe();
+            Ok(Step::Retired)
+        } else if frame.call == Call::Shutdown {
+            frame.output[0] = 1;
+            frame.output_len = 1;
+            Ok(Step::Shutdown { complete: true })
+        } else {
+            frame.output[0] = 42;
+            frame.output_len = 1;
+            Ok(Step::Encrypted)
+        }
     }
 }
 struct Held {
@@ -213,8 +222,17 @@ fn stale_generation_and_serial_cannot_rebind_an_existing_slot() {
     returned.call = Call::Decrypt;
     // The same connection can make another sequential call with its same token.
     assert!(worker.try_submit(returned).is_ok());
-    drop(take(&mut worker));
-    submit(&mut worker, issuer.issue(0).unwrap());
+    let mut returned = take(&mut worker);
+    let next = issuer.issue(0).unwrap();
+    assert_eq!(
+        worker.try_submit(Frame::new(next)).err().unwrap().0,
+        TlsError::InvalidInput
+    );
+    returned.call = Call::Retire;
+    returned.input_len = 0;
+    assert!(worker.try_submit(returned).is_ok());
+    assert_eq!(take(&mut worker).result, Some(Ok(Step::Retired)));
+    submit(&mut worker, next);
     drop(take(&mut worker));
     assert_eq!(
         worker.try_submit(Frame::new(old)).err().unwrap().0,
@@ -410,6 +428,16 @@ fn checked_close_error_blocks_replacement_in_an_independent_process() {
                 Err(ERROR)
             }
         }
+        struct FailingRetire;
+        impl Driver for FailingRetire {
+            fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+                if frame.call == Call::Retire {
+                    Err(ERROR)
+                } else {
+                    Ok(Step::NeedInput)
+                }
+            }
+        }
         struct FailingDrop;
         impl Driver for FailingDrop {
             fn call(&mut self, _: &mut Frame) -> Result<Step, TlsError> {
@@ -421,10 +449,14 @@ fn checked_close_error_blocks_replacement_in_an_independent_process() {
                 panic!("synthetic native driver destructor panic");
             }
         }
-        let issuer = TokenIssuer::new().unwrap();
+        let mut issuer = TokenIssuer::new().unwrap();
         let mut worker = match mode.as_str() {
             "driver" => {
                 Worker::start_with_factory(issuer.generation(), || Ok(Box::new(FailingClose)))
+                    .unwrap()
+            }
+            "retire" => {
+                Worker::start_with_factory(issuer.generation(), || Ok(Box::new(FailingRetire)))
                     .unwrap()
             }
             "factory" => Worker::start_with_factory(issuer.generation(), || Err(ERROR)).unwrap(),
@@ -445,12 +477,21 @@ fn checked_close_error_blocks_replacement_in_an_independent_process() {
         };
         assert_eq!(
             ready(&mut worker),
-            if matches!(mode.as_str(), "driver" | "drop-panic") {
+            if matches!(mode.as_str(), "driver" | "drop-panic" | "retire") {
                 Ok(())
             } else {
                 Err(expected_error)
             }
         );
+        if mode == "retire" {
+            let token = issuer.issue(0).unwrap();
+            submit(&mut worker, token);
+            let mut frame = take(&mut worker);
+            frame.call = Call::Retire;
+            frame.input_len = 0;
+            assert!(worker.try_submit(frame).is_ok());
+            assert_eq!(take(&mut worker).result, Some(Err(ERROR)));
+        }
         worker.request_stop();
         until(|| worker.owner.as_ref().unwrap().actual_finished());
         assert_eq!(worker.reap_nonblocking(), Err(expected_error));
@@ -467,7 +508,7 @@ fn checked_close_error_blocks_replacement_in_an_independent_process() {
     }
     // Sticky production admission is never reset for testing. Each native
     // close/factory failure is verified in its own exact-test subprocess.
-    for mode in ["driver", "factory", "factory-panic", "drop-panic"] {
+    for mode in ["driver", "factory", "factory-panic", "drop-panic", "retire"] {
         let mut command = std::process::Command::new(std::env::current_exe().unwrap());
         command
             .args(["--exact", TEST_NAME, "--nocapture", "--test-threads=1"])
@@ -504,4 +545,251 @@ fn checked_close_error_blocks_replacement_in_an_independent_process() {
     let mut worker = immediate(issuer.generation());
     assert_eq!(ready(&mut worker), Ok(()));
     stop_reap(&mut worker);
+}
+
+#[test]
+fn shutdown_and_retire_require_exact_live_token_and_retire_collection_before_reuse() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut issuer = TokenIssuer::new().unwrap();
+    let old = issuer.issue(0).unwrap();
+    let new = issuer.issue(0).unwrap();
+    let mut worker = immediate(issuer.generation());
+    ready(&mut worker).unwrap();
+    for call in [Call::Shutdown, Call::Retire] {
+        let mut frame = Frame::new(old);
+        frame.call = call;
+        assert_eq!(
+            worker.try_submit(frame).err().unwrap().0,
+            TlsError::InvalidInput
+        );
+    }
+    submit(&mut worker, old);
+    let mut frame = take(&mut worker);
+    for call in [Call::Shutdown, Call::Retire] {
+        let mut forged = Frame::new(new);
+        forged.call = call;
+        assert_eq!(
+            worker.try_submit(forged).err().unwrap().0,
+            TlsError::InvalidInput
+        );
+    }
+    frame.call = Call::Shutdown;
+    assert!(worker.try_submit(frame).is_ok());
+    let mut frame = take(&mut worker);
+    assert_eq!(frame.result, Some(Ok(Step::Shutdown { complete: true })));
+    assert_eq!(frame.output_len, 1);
+    assert_eq!(
+        worker.try_submit(Frame::new(new)).err().unwrap().0,
+        TlsError::InvalidInput
+    );
+    frame.call = Call::Retire;
+    frame.input_len = 0;
+    assert!(worker.try_submit(frame).is_ok());
+    let mut frame = take(&mut worker);
+    assert_eq!(frame.result, Some(Ok(Step::Retired)));
+    assert!(frame
+        .input
+        .iter()
+        .chain(frame.output.iter())
+        .all(|byte| *byte == 0));
+    assert_eq!(frame.input_len, 0);
+    assert_eq!(frame.output_len, 0);
+    let mut duplicate = Frame::new(old);
+    duplicate.call = Call::Retire;
+    assert_eq!(
+        worker.try_submit(duplicate).err().unwrap().0,
+        TlsError::InvalidInput
+    );
+    frame.token = new;
+    frame.call = Call::Handshake;
+    assert!(worker.try_submit(frame).is_ok());
+    drop(take(&mut worker));
+    stop_reap(&mut worker);
+}
+
+#[test]
+fn held_real_retire_call_never_releases_permit_before_result_is_collected() {
+    let _serial = SERIAL.lock().unwrap();
+    struct HeldRetire {
+        entered: SyncSender<()>,
+        release: Receiver<()>,
+        returned: Arc<AtomicBool>,
+    }
+    impl Driver for HeldRetire {
+        fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+            if frame.call == Call::Retire {
+                self.entered.send(()).unwrap();
+                self.release.recv().unwrap();
+                frame.wipe();
+                self.returned.store(true, Ordering::Release);
+                Ok(Step::Retired)
+            } else {
+                Ok(Step::NeedInput)
+            }
+        }
+    }
+    let mut issuer = TokenIssuer::new().unwrap();
+    let old = issuer.issue(0).unwrap();
+    let new = issuer.issue(0).unwrap();
+    let (entered_tx, entered) = mpsc::sync_channel(1);
+    let (release_tx, release_rx) = mpsc::sync_channel(1);
+    let mut release = Release(Some(release_tx));
+    let returned = Arc::new(AtomicBool::new(false));
+    let observed = returned.clone();
+    let mut worker = Worker::start_with_factory(issuer.generation(), move || {
+        Ok(Box::new(HeldRetire {
+            entered: entered_tx,
+            release: release_rx,
+            returned: observed,
+        }))
+    })
+    .unwrap();
+    ready(&mut worker).unwrap();
+    submit(&mut worker, old);
+    let mut frame = take(&mut worker);
+    frame.call = Call::Retire;
+    assert!(worker.try_submit(frame).is_ok());
+    entered.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(
+        worker.try_submit(Frame::new(new)).err().unwrap().0,
+        TlsError::Busy
+    );
+    assert!(worker.has_in_flight());
+    assert!(worker.poll().unwrap().is_none());
+    release.now();
+    until(|| returned.load(Ordering::Acquire));
+    // Even after allowing the native call to return, only poll() may settle the
+    // submitted identity; merely receiving a wake does not free its slot.
+    assert_eq!(
+        worker.try_submit(Frame::new(new)).err().unwrap().0,
+        TlsError::Busy
+    );
+    let mut frame = take(&mut worker);
+    assert_eq!(frame.result, Some(Ok(Step::Retired)));
+    frame.token = new;
+    frame.call = Call::Handshake;
+    assert!(worker.try_submit(frame).is_ok());
+    drop(take(&mut worker));
+    stop_reap(&mut worker);
+}
+
+#[test]
+fn queued_exact_retire_on_stop_returns_stopped_without_retiring_or_releasing_owner() {
+    let _serial = SERIAL.lock().unwrap();
+    struct StopQueuedRetire {
+        call_entered: SyncSender<()>,
+        call_release: Receiver<()>,
+        close_entered: SyncSender<()>,
+        close_release: Receiver<()>,
+        retire_calls: Arc<AtomicUsize>,
+        closed: Arc<AtomicUsize>,
+        dropped: Arc<AtomicUsize>,
+    }
+    impl Driver for StopQueuedRetire {
+        fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+            if frame.call == Call::Retire {
+                self.retire_calls.fetch_add(1, Ordering::AcqRel);
+                frame.wipe();
+                return Ok(Step::Retired);
+            }
+            if frame.token.slot() == 0 {
+                self.call_entered.send(()).unwrap();
+                self.call_release.recv().unwrap();
+            }
+            Ok(Step::NeedInput)
+        }
+        fn close(&mut self) -> Result<(), TlsError> {
+            self.close_entered.send(()).unwrap();
+            self.close_release.recv().unwrap();
+            self.closed.fetch_add(1, Ordering::AcqRel);
+            Ok(())
+        }
+    }
+    impl Drop for StopQueuedRetire {
+        fn drop(&mut self) {
+            self.dropped.fetch_add(1, Ordering::AcqRel);
+        }
+    }
+    let mut issuer = TokenIssuer::new().unwrap();
+    let live = issuer.issue(1).unwrap();
+    let next = issuer.issue(1).unwrap();
+    let held = issuer.issue(0).unwrap();
+    let (call_entered_tx, call_entered) = mpsc::sync_channel(1);
+    let (call_release_tx, call_release) = mpsc::sync_channel(1);
+    let mut release_call = Release(Some(call_release_tx));
+    let (close_entered_tx, close_entered) = mpsc::sync_channel(1);
+    let (close_release_tx, close_release) = mpsc::sync_channel(1);
+    let mut release_close = Release(Some(close_release_tx));
+    let retire_calls = Arc::new(AtomicUsize::new(0));
+    let closed = Arc::new(AtomicUsize::new(0));
+    let dropped = Arc::new(AtomicUsize::new(0));
+    let driver = StopQueuedRetire {
+        call_entered: call_entered_tx,
+        call_release,
+        close_entered: close_entered_tx,
+        close_release,
+        retire_calls: retire_calls.clone(),
+        closed: closed.clone(),
+        dropped: dropped.clone(),
+    };
+    let mut worker =
+        Worker::start_with_factory(issuer.generation(), move || Ok(Box::new(driver))).unwrap();
+    ready(&mut worker).unwrap();
+    // Establish slot 1 first, so its queued retirement has an exact live token.
+    submit(&mut worker, live);
+    let mut retiring = take(&mut worker);
+    assert_eq!(retiring.token, live);
+    assert_eq!(retiring.result, Some(Ok(Step::NeedInput)));
+    submit(&mut worker, held);
+    call_entered.recv_timeout(Duration::from_secs(3)).unwrap();
+    retiring.call = Call::Retire;
+    retiring.input_len = 0;
+    assert!(worker.try_submit(retiring).is_ok());
+    assert_eq!(worker.owner.as_ref().unwrap().in_flight[1], Some(live));
+    assert_eq!(retire_calls.load(Ordering::Acquire), 0);
+    worker.request_stop();
+    assert_eq!(worker.reap_nonblocking(), Ok(false));
+    release_call.now();
+    let returned_held = take(&mut worker);
+    assert_eq!(returned_held.token, held);
+    assert_eq!(returned_held.result, Some(Ok(Step::NeedInput)));
+    let returned_retire = take(&mut worker);
+    assert_eq!(returned_retire.token, live);
+    assert_eq!(returned_retire.call, Call::Retire);
+    assert_eq!(returned_retire.result, Some(Err(TlsError::Stopped)));
+    assert_eq!(
+        retire_calls.load(Ordering::Acquire),
+        0,
+        "the stopped queued Retire must not invoke Driver::call"
+    );
+    assert!(!worker.owner.as_ref().unwrap().retired[1]);
+    assert_eq!(worker.owner.as_ref().unwrap().bound[1], Some(live));
+    assert_eq!(
+        worker.try_submit(Frame::new(next)).err().unwrap().0,
+        TlsError::Stopped
+    );
+    assert!(!worker.has_in_flight());
+    close_entered.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(closed.load(Ordering::Acquire), 0);
+    assert_eq!(dropped.load(Ordering::Acquire), 0);
+    assert_eq!(worker.reap_nonblocking(), Ok(false));
+    assert!(ADMITTED.load(Ordering::Acquire));
+    assert!(matches!(
+        Worker::start_with_factory(issuer.generation(), || Ok(Box::new(Immediate))),
+        Err(TlsError::Busy)
+    ));
+    // Frame return is not checked native cleanup or physical thread completion.
+    release_close.now();
+    until(|| worker.owner.as_ref().unwrap().actual_finished());
+    assert_eq!(closed.load(Ordering::Acquire), 1);
+    assert_eq!(dropped.load(Ordering::Acquire), 1);
+    assert!(
+        ADMITTED.load(Ordering::Acquire),
+        "only actual reap may release the process admission lease"
+    );
+    assert_eq!(worker.reap_nonblocking(), Ok(true));
+    assert!(!ADMITTED.load(Ordering::Acquire));
+    let mut replacement = immediate(issuer.generation());
+    ready(&mut replacement).unwrap();
+    stop_reap(&mut replacement);
 }

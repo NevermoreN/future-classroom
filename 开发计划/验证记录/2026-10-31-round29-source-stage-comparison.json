@@ -1,0 +1,33 @@
+{
+  "scope": "original source snapshots retained; final full runs rebuild/confirm the final inputs and hash every executable",
+  "before": "7394f1a936c94560fc5a7f36cb2ed9a3a8a831513e7329b1eff0c87b244fb559",
+  "final": "61de3e816293a885bf21ffab30cca39bd5b2489f19aec97f5cc58c555e008652",
+  "changes": [
+    {
+      "path": "README.md",
+      "sha256": "b3f53236f1d9362c9bc9ca9d36fd96cf26fd8cfbd909c365d8772dd448190599"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "sha256": "e4598872b9d5058794ab88adc544fc91acf4cd0d1ca6f11f2d4dac20687366ca"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+      "sha256": "e6d1eb60a4bf21f66f584c4e981ac986a579e55ca2d17ef4030ba0afb75c8952"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "sha256": "df714f8be54d6dcb9df5f220b476737cdef829f1a8e091d3b5e5f328fa9d6cb2"
+    }
+  ],
+  "reasons": [
+    "README documents shared parser/close_notify scope",
+    "queued exact Retire on Stop receives direct real-worker regression",
+    "native expected retirement completion is separate from late ordinary SSPI completion; corresponding actual IOCP regression",
+    "package capability prose reflects implemented protocol foundations while retaining incomplete production gates"
+  ]
+}

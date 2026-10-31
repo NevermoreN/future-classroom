@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "scope": "only this round own build/test/scratch roots, original evidence byte-verified before deletion",
+  "roots": [
+    {
+      "path": "/tmp/fc-round29-host",
+      "files": 1343,
+      "logicalBytes": 320677925
+    },
+    {
+      "path": "/tmp/fc-round29-win",
+      "files": 1438,
+      "logicalBytes": 715798199
+    },
+    {
+      "path": "/tmp/fc-round29-win7",
+      "files": 1080,
+      "logicalBytes": 415013913
+    },
+    {
+      "path": "/tmp/fc-round29-core-target",
+      "files": 404,
+      "logicalBytes": 80810250
+    },
+    {
+      "path": "/tmp/fc-round29-http1-editor-target",
+      "files": 251,
+      "logicalBytes": 65909071
+    },
+    {
+      "path": "/tmp/fc-round29-response-target",
+      "state": "already absent, agent-owned response target cleaned after scoped tests",
+      "logicalBytes": 0
+    },
+    {
+      "path": "/tmp/fc-round29-web-dist",
+      "files": 8,
+      "logicalBytes": 473378
+    },
+    {
+      "path": "/tmp/fc-round29-repack",
+      "files": 1,
+      "logicalBytes": 5728612
+    },
+    {
+      "path": "/tmp/fc-round29-evidence",
+      "files": 100,
+      "logicalBytes": 1899064
+    }
+  ],
+  "removedLogicalBytes": 1606310412,
+  "remainingOwnedTemporaryRoots": 0,
+  "persistentSshPrivateKeyMode": "0600; retained outside repository",
+  "developmentPackage": "retained unchanged",
+  "preexistingPackagesWorkspaceNodeModulesGlobalCaches": "retained",
+  "remoteScope": "see windows-after and both TLS cleanup reports; persistent sshd/public authorization unchanged"
+}

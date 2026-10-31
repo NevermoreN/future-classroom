@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-31T07:29:00.743419+00:00",
+  "command": "cargo test -p fc-protocol --release --locked --target-dir /tmp/fc-round29-http1-editor-target -- --test-threads=2",
+  "exitCode": 0,
+  "tests": 69,
+  "failures": 0,
+  "sourceAfterTestsUnmodified": true,
+  "sourceFiles": [
+    {
+      "path": "crates/fc-protocol/src/http1.rs",
+      "bytes": 11049,
+      "sha256": "206bde860aec083efbaf81f78d8910e38eec94d5021331f594b43168ba6c6e9e"
+    },
+    {
+      "path": "crates/fc-protocol/src/http1/tests.rs",
+      "bytes": 11180,
+      "sha256": "fa77342b9242cf5a6c19d88a1e9d7fd34d6251d3ff5d67c9c7df7cf9006e0942"
+    }
+  ],
+  "testExecutable": {
+    "path": "/tmp/fc-round29-http1-editor-target/release/deps/fc_protocol-88395ea77e50a397",
+    "bytes": 1956256,
+    "sha256": "376ae6ebdfb667a464a34b91bfaa443823fd973fe9a06e3c9ce25c037bc1ca7d"
+  },
+  "originalLog": {
+    "path": "/tmp/fc-round29-evidence/http1-protocol-final.log",
+    "bytes": 6955,
+    "sha256": "7808d4f5fb84b4f4b69284059612a1f1d62639a169d97af0aa4b25ce8e471fba"
+  },
+  "scope": "fc-protocol package release host tests; no Windows or production listener evidence",
+  "temporaryTargetRetainedForRootCleanup": "/tmp/fc-round29-http1-editor-target"
+}

@@ -1,0 +1,136 @@
+{
+  "status": "PASS",
+  "scope": "Round29 protocol foundations and isolated TLS diagnostic only; full application NOT_VALIDATED",
+  "parentCommit": "7d1bdbc4255d1ce24caa11a6a660628e45cbdee5",
+  "frozenInputs": {
+    "fileCount": 425,
+    "inputSha256": "d7468b15b98049bd6dd7b3d3187c77808e60b72fdcb2a7e149bb6741a208de2e"
+  },
+  "host": {
+    "passed": 791,
+    "testExecutables": 20,
+    "resultGroups": 32,
+    "finalProtocolRetest": 69,
+    "scope": "all20 exact final binaries executed:19 unchanged programs from full791 run, final protocol69 re-executed after test-only lexical-scope Clippy fix; counts are unique coverage, not summed duplicate runs"
+  },
+  "windows": {
+    "passed": 1160,
+    "testExecutables": 20,
+    "exeSha256": "7d24ba3f8d654f7e4d971e4f29bd01cab5a923895c5894ea1d350202f8bd9d65",
+    "compiledUploadedExecutedCurrentSha256": "all equal"
+  },
+  "modernRealSchannel": {
+    "cycles": 2,
+    "accepted": 8,
+    "handshakes": 4,
+    "responses": 2,
+    "parsedRequests": 2,
+    "shutdownTokensSent": 2,
+    "explicitRetirements": 5,
+    "ioSubmissions": 47,
+    "ioCompletions": 47,
+    "sspiSubmissions": 32,
+    "sspiCompletions": 32,
+    "returnedFrames": 32,
+    "slotFramesAtDrain": 8,
+    "deadlineCloses": 3,
+    "closedWithSspiInFlight": 0,
+    "lateSspiCompletions": 0,
+    "tlsFailures": 2,
+    "firstTlsError": "Native(-2146893019)",
+    "firstTlsCall": "Handshake",
+    "handshakeCalls": 14,
+    "needInputCount": 2,
+    "consumedBytes": 2424,
+    "extraEvents": 2,
+    "extraBytes": 62,
+    "appOwnedBufferAndStructBytes": 854290,
+    "sspiThreadStackBytes": 1048576,
+    "memoryScope": "native owner inline structs, four IO/Frame allocations, parser header arenas, retained response head capacities and target/marker String capacities; stack is requested size; excludes transient decoded RequestHead allocations, worker shared/channel/runtime metadata, allocator overhead and SSPI/provider/kernel allocations",
+    "cleanupComplete": true,
+    "strictP0": "NOT_VALIDATED"
+  },
+  "supplementalWin7GnuOnSameWin11": {
+    "exeSha256": "439da0f86a0b9a2509c54399e685426cf31d0956f9db28a7977c431cd613012f",
+    "native": {
+      "cycles": 2,
+      "accepted": 8,
+      "handshakes": 4,
+      "responses": 2,
+      "parsedRequests": 2,
+      "shutdownTokensSent": 2,
+      "explicitRetirements": 5,
+      "ioSubmissions": 47,
+      "ioCompletions": 47,
+      "sspiSubmissions": 32,
+      "sspiCompletions": 32,
+      "returnedFrames": 32,
+      "slotFramesAtDrain": 8,
+      "deadlineCloses": 3,
+      "closedWithSspiInFlight": 0,
+      "lateSspiCompletions": 0,
+      "tlsFailures": 2,
+      "firstTlsError": "Native(-2146893017)",
+      "firstTlsCall": "Handshake",
+      "handshakeCalls": 14,
+      "needInputCount": 2,
+      "consumedBytes": 2424,
+      "extraEvents": 2,
+      "extraBytes": 62,
+      "appOwnedBufferAndStructBytes": 854290,
+      "sspiThreadStackBytes": 1048576,
+      "memoryScope": "native owner inline structs, four IO/Frame allocations, parser header arenas, retained response head capacities and target/marker String capacities; stack is requested size; excludes transient decoded RequestHead allocations, worker shared/channel/runtime metadata, allocator overhead and SSPI/provider/kernel allocations",
+      "cleanupComplete": true,
+      "strictP0": "NOT_VALIDATED"
+    },
+    "actualPlatform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    }
+  },
+  "frontend": "all61 inputs unchanged; exact existing six-asset bundle reused, no new browser/hardware microphone test claim",
+  "strictChecks": [
+    "Host release all-target Clippy -D warnings",
+    "Windows release all-target Clippy -D warnings",
+    "fmt",
+    "12 crates/33 dependency edges",
+    "original third-party notices/lock unchanged"
+  ],
+  "pe": {
+    "modernStructuralErrors": [],
+    "modernReviewTriggers": 5,
+    "supplementalStructuralErrors": [],
+    "supplementalReviewTriggers": 0
+  },
+  "package": {
+    "status": "PASS",
+    "path": "/mnt/data/FutureClassroom-0.1.0-http1-tls-dev.zip",
+    "sizeBytes": 5728612,
+    "sha256": "49d497d1a6a03a0d5d13ab638a1765fb07ffab2e6823a926ef848a5a34c20912",
+    "exeSha256": "7d24ba3f8d654f7e4d971e4f29bd01cab5a923895c5894ea1d350202f8bd9d65",
+    "members": 13,
+    "payloads": 12,
+    "crc": "PASS",
+    "payloadSizesAndSha256": "PASS",
+    "independentSameBasenameRepack": "byte-identical",
+    "sourceInputSha256": "d7468b15b98049bd6dd7b3d3187c77808e60b72fdcb2a7e149bb6741a208de2e",
+    "frontendManifestSha256": "fab36572dbb105b3266b1de8f539cc16c54723056fb475069c345353e5da8f3d"
+  },
+  "originalFailures": [
+    "Win7 build invocation omitted explicit C cross-compiler; preserved before correction, production source unchanged",
+    "Host strict Clippy rejected explicit drop(non-Drop) in a new test; lexical lifetime now replaces explicit drop, unchanged assertions; only final protocol69 binary replaced and rerun, unchanged19 retain exact original full-run hashes"
+  ],
+  "windowsCleanup": "PASS owned certificate/CNG key/root/process/tunnel cleanup; readonly audit zero scratch/tasks/processes, SSH authorization and project Run views unchanged",
+  "remainingNonExhaustive": [
+    "strict first-TCP-to-header5s original FAIL5/8, max overshoot577us",
+    "continuous production TLS listener, full resource bound and network-to-worker/stage/upload120s bridge",
+    "campus/browser/business integration and certificate deployment",
+    "device policy/status and real microphone/audio/PowerPoint coexistence",
+    "actual Win7 and Win10, formal MSVC and three-OS independent evidence",
+    "remaining profile/layout/calendar and visible Seewo/touch/DPI acceptance",
+    "GUI installation/upgrade/uninstall, actual logon and72h soak"
+  ],
+  "goal": "active; 按照计划完成全部开发。"
+}

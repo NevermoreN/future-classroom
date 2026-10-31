@@ -96,3 +96,10 @@ fc-protocol的JSON上限64KiB、深度32，严格Visitor拒绝重复键/未知�
 先提升取消/健康代次并停止新接纳→发独立控制信号→在各自线程解除观察者/原生回调入口→HTTP与Audio排空→Writer完成可确定的短事务并flush→各线程确认后关闭数据目录锁。UI从不等待join；系统注销不弹口令阻止关闭。超时/进程崩溃不依赖Drop，启动从持久状态恢复、语音统一标INTERRUPTED不自动重播。
 
 Q25矩阵必须覆盖：COMMIT后权威交换失败但旧token下载/音频起始并发；音频结构移动尝试/STILLPLAYING/迟到归还；HTTP无请求关闭/上传取消/立即完成+完成队列/迟到完成；A/B源学期任一修订变化；压缩比/巨XML/并发超限；队列饱和仍能停声/隐藏。部分“移动/Send”限制用编译期反例或类型边界检查，不能为通过测试加入unsafe绕过。所有程序验收当前NOT_RUN。
+
+
+### 第二十九轮：HTTP借用正文与TLS退休回执
+
+候选的每槽16KiB头从内联数组改为固定容量Parser arena，仍保留到槽退休；有界响应头Vec另逐项记入实际保留容量，正文sender只持token/长度/一块唯一回执，不存64KiB正文副本。解析头后的同Frame剩余明文不会被Parser吞掉；未来stage桥必须取得原物理上传许可后显式准入，保留Frame到文件worker真实ACK，不能在解析器外用未计费临时文件预收或重复取得许可。本轮诊断拒收任何正文，不声称上传已连通。
+
+正常响应在原密文全部真实IOCP完成后ACK正文、生成并实际发送close_notify，再关闭socket；原IOCP和Frame均已归还才请求同token Retire。worker收到并真正poll原Retired后才可接受新serial；排队Retire遇stop只负向返回，不能标退休。停止仍由实际Schannel close和线程对象终结证明归还；物理超时保留原owner并闭锁，不用另一个线程替代。见[候选ADR](14-P0独立TCP接纳候选ADR.md)，完整生产资源、持续接纳与严格五秒门槛仍未完成。

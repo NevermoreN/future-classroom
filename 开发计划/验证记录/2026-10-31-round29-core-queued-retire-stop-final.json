@@ -1,0 +1,32 @@
+{
+  "scope": "additional queued same-token Retire on Stop regression; production unchanged",
+  "source": "crates/fc-windows/src/tls_frontdoor/worker/tests.rs",
+  "sourceSha256": "e6d1eb60a4bf21f66f584c4e981ac986a579e55ca2d17ef4030ba0afb75c8952",
+  "first": {
+    "log": "core-host-queued-retire-stop-first.log",
+    "exitCode": 0,
+    "passed": 1,
+    "failed": 0,
+    "filtered": 24,
+    "testThreads": 2
+  },
+  "final": {
+    "log": "core-host-tls-with-queued-retire-final.log",
+    "exitCode": 0,
+    "passed": 14,
+    "failed": 0,
+    "filtered": 11,
+    "testThreads": 2
+  },
+  "coverage": [
+    "original slot1 handshake collected before slot0 held call actually enters",
+    "slot1 exact-token Retire queued before Stop and never invokes fake Driver",
+    "Retire returns ErrStopped and never marks the slot Retired",
+    "new serial remains denied",
+    "both linear frames collected while actual Driver.close remains held",
+    "replacement forbidden until checked close returns, actual thread exits and reap occurs"
+  ],
+  "driverScope": "held fake Driver on real Rust worker thread; not OS Schannel execution",
+  "temporaryTarget": "/tmp/fc-round29-core-target",
+  "liveToolHandles": []
+}

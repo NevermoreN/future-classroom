@@ -1,0 +1,22 @@
+   Compiling fc-protocol v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-protocol)
+    Finished `release` profile [optimized] target(s) in 31.60s
+     Running unittests src/lib.rs (/tmp/fc-round29-response-target/release/deps/fc_protocol-88395ea77e50a397)
+
+running 14 tests
+test http1::response::tests::automatic_fields_status_and_final_crlf_all_share_the_exact_sixteen_kib_budget ... ok
+test http1::response::tests::complete_head_has_one_transport_owned_length_and_close_without_secret_debug ... ok
+test http1::response::tests::dropping_a_linear_receipt_does_not_fake_a_send_or_release_an_inflight_slot ... ok
+test http1::response::tests::early_source_eof_with_or_without_inflight_work_is_permanently_negative ... ok
+test http1::response::tests::empty_oversize_and_overlong_chunk_admission_never_advances_the_counter ... ok
+test http1::response::tests::forbids_all_connection_negotiation_framing_and_nominated_field_tricks ... ok
+test http1::response::tests::forbids_crlf_controls_invalid_names_and_header_count_overflow ... ok
+test http1::response::tests::foreign_tokens_and_other_senders_receipts_cannot_ack_current_work ... ok
+test http1::response::tests::one_inflight_chunk_blocks_progress_until_its_whole_acknowledgement ... ok
+test http1::response::tests::replayed_old_chunk_ack_cannot_advance_or_retire_the_next_chunk ... ok
+test http1::response::tests::transport_maximum_and_frozen_head_cannot_be_changed_after_admission ... ok
+test http1::response::tests::zero_length_body_needs_no_empty_chunk_and_fifty_mib_stream_needs_no_body_allocation ... ok
+test http1::response::tests::zero_short_or_overreported_native_ack_is_not_logical_completion ... ok
+test http1::response::tests::status_and_no_body_rules_do_not_emit_forbidden_framing ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.01s
+

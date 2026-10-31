@@ -222,6 +222,107 @@ fn native_socket_close_keeps_held_frame_until_real_late_completion_and_reap() {
 }
 
 #[test]
+fn response_and_shutdown_io_finish_before_exact_retirement_can_release_slot() {
+    let _serial = SERIAL.lock().unwrap();
+    const CLOSE: &[u8] = b"fake-close-notify-not-TLS";
+    struct PlainDriver {
+        entered: SyncSender<RequestToken>,
+        release: Receiver<()>,
+    }
+    impl Driver for PlainDriver {
+        fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+            match frame.call {
+                Call::Handshake => Ok(Step::Handshake {
+                    consumed: 1,
+                    complete: true,
+                }),
+                Call::Decrypt | Call::Encrypt => {
+                    frame.output[..frame.input_len]
+                        .copy_from_slice(&frame.input[..frame.input_len]);
+                    frame.output_len = frame.input_len;
+                    Ok(if frame.call == Call::Decrypt {
+                        Step::Plaintext {
+                            consumed: frame.input_len,
+                        }
+                    } else {
+                        Step::Encrypted
+                    })
+                }
+                Call::Shutdown => {
+                    assert_eq!(frame.input_len, 0);
+                    frame.output[..CLOSE.len()].copy_from_slice(CLOSE);
+                    frame.output_len = CLOSE.len();
+                    Ok(Step::Shutdown { complete: true })
+                }
+                Call::Retire => {
+                    assert_eq!(frame.input_len, 0);
+                    self.entered.send(frame.token).unwrap();
+                    self.release.recv().unwrap();
+                    Ok(Step::Retired)
+                }
+            }
+        }
+    }
+    let (entered_send, entered) = mpsc::sync_channel(1);
+    let (release_send, release) = mpsc::sync_channel(1);
+    let mut release_guard = Release(Some(release_send));
+    let mut owner = Owner::new(MARKER).unwrap();
+    let worker = Worker::start_with_factory(owner.generation, move || {
+        Ok(Box::new(PlainDriver {
+            entered: entered_send,
+            release,
+        }))
+    })
+    .unwrap();
+    owner.start_with_worker(worker).unwrap();
+    let address = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number));
+    let mut client = TcpStream::connect_timeout(&address, Duration::from_secs(1)).unwrap();
+    // The first byte belongs to the deliberately fake handshake; the remaining
+    // bytes exercise actual parsing, response ownership and loopback IOCP.
+    client.write_all(format!("xGET /fc/tls-probe/{MARKER} HTTP/1.1\r\nhOsT:\tlocalhost \r\nContent-Length: 0\r\n\r\n").as_bytes()).unwrap();
+    let mut retiring = None;
+    until(|| {
+        owner.poll().unwrap();
+        retiring = entered.try_recv().ok();
+        retiring.is_some()
+    });
+    let token = retiring.unwrap();
+    let slot = &owner.resources.slots[token.slot()];
+    assert!(slot.socket == INVALID_SOCKET && slot.pending.is_none());
+    assert!(slot.frame.is_none() && !slot.retired);
+    assert!(slot.response_body.as_ref().unwrap().is_complete());
+    assert!(slot.response_chunk.is_none());
+    assert_eq!(owner.report.responses, 1);
+    assert_eq!(owner.report.parsed_requests, 1);
+    assert_eq!(owner.report.shutdown_tokens_sent, 1);
+    assert_eq!(owner.report.explicit_retirements, 0);
+    assert!(owner.resources.worker.as_ref().unwrap().has_in_flight());
+    assert!(Owner::new(MARKER).is_err());
+    client
+        .set_read_timeout(Some(Duration::from_secs(1)))
+        .unwrap();
+    let mut wire = Vec::new();
+    client.read_to_end(&mut wire).unwrap();
+    assert!(wire.starts_with(b"HTTP/1.1 200 OK\r\n"));
+    let expected_end = [MARKER.as_bytes(), CLOSE].concat();
+    assert!(wire.ends_with(&expected_end));
+    release_guard.now();
+    until(|| {
+        owner.poll().unwrap();
+        owner.resources.slots[token.slot()].retired
+    });
+    assert_eq!(owner.report.explicit_retirements, 1);
+    assert_eq!(
+        owner.report.late_sspi_completions, 0,
+        "an expected retirement is not a late ordinary TLS call"
+    );
+    assert!(owner.resources.slots[token.slot()].frame.is_some());
+    owner.finish().unwrap();
+    assert!(owner.drained);
+    println!("TLS_NATIVE_RESPONSE_RETIRE_PASS actualIOCP=true fakeDriver=true cryptography=NOT_EXERCISED exactRetireAfterShutdownSend=true physicalReap=true");
+}
+
+#[test]
 fn held_driver_drain_timeout_retains_native_owner_in_independent_process() {
     let _serial = SERIAL.lock().unwrap();
     const CHILD_ENV: &str = "FC_TLS_NATIVE_HELD_DRAIN_CHILD";

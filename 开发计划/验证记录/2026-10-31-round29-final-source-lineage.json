@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "scope": "additive clarification of immutable earlier source-stage-comparison final-at-that-time snapshot",
+  "preClippyFinalSnapshotSha256": "61de3e816293a885bf21ffab30cca39bd5b2489f19aec97f5cc58c555e008652",
+  "actualFinalSnapshotSha256": "d7468b15b98049bd6dd7b3d3187c77808e60b72fdcb2a7e149bb6741a208de2e",
+  "onlyLateChange": [
+    "crates/fc-protocol/src/http1/response/tests.rs"
+  ],
+  "change": "test-only explicit drop(non-Drop) -> lexical scope; same sender assertions; production sources unchanged",
+  "hostFinalCoverage": "19 exact original full-run programs plus exact final protocol69, unique total791",
+  "windowsFinalCoverage": "all20 final programs1160, compiled/uploaded/executed/current SHA equal",
+  "supplementalProductionBinary": "all final production artifacts remain fresh, previously executed SHA unchanged"
+}

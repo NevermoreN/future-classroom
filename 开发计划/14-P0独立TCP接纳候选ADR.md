@@ -52,3 +52,18 @@ Schannel 不支持通用 `ASC_REQ_INTEGRITY` 签名请求位，不能据此设�
 原生契约依据：[Schannel 接纳](https://learn.microsoft.com/en-us/windows/win32/secauthn/acceptsecuritycontext--schannel)、[EXTRA 缓冲](https://learn.microsoft.com/en-us/windows/win32/secauthn/extra-buffers-returned-by-schannel)、[旧凭据结构](https://learn.microsoft.com/en-us/windows/win32/api/schannel/ns-schannel-schannel_cred)、[私钥获取](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecertificateprivatekey)。上述文档约束与本轮实测分别记账；没有把同步调用的取消请求视作实际结束保证。
 
 真实Decrypt还暴露 input155/used124 的布局：HEADER13@0、DATA95@13、TRAILER47@108、EXTRA31@124。未使用header/trailer仅校验在原输入范围，DATA仍严格在已消费范围，EXTRA保留精确后缀；不能把合法trailer视图跨入EXTRA误判为越界，也不能让DATA越入EXTRA。保留失败原日志、加入布局/越界回归后再以真实TLS重测通过。
+
+
+## 第二十九轮：共用 HTTP 分帧与显式 TLS 退休
+
+新增 `fc-protocol::http1::Parser`：可信传输提供不可伪造的 `RequestToken` 和 TLS 事实；每请求独占16KiB头部 arena，头总限额包括请求行/终止CRLF，最多64字段/2048字节目标，严格HTTP/1.1和CRLF。头完成立即返回准确 consumed，后缀仍留在调用者原Frame；先通过路由、权限、配额及受控stage准入，再显式 `admit_body`。正文只借用原明文、每次最多64KiB，不缓存整个文件；调用方仍须等待文件worker实际ACK才再次接收。提前EOF、长度超限、额外正文/pipeline均拒绝；重复头保留给既有业务边界，重复Content-Length及TE/Expect/Trailer/Upgrade/Content-Encoding等不支持分帧直接拒绝。OWS规范去除，禁止obs-fold及冒号前空白。该严格端点选择不接纳部分通用HTTP合法写法，并非通用代理。[HTTP/1.1 分帧与消息语法](https://www.rfc-editor.org/rfc/rfc9112.html#section-6.3)。
+
+`http1::response` 冻结成功编码的有界响应头，自动生成唯一Content-Length/Connection: close；204不发送Content-Length，204/205/304沿既有端口仅允许零正文。拒绝连接控制/升级/隐含分帧及CRLF注入。正文sender只记长度和一个不可Clone回执，不拥有正文；同token、同sender、同块且完整真实发送后才ACK。短发送仍由原生owner累计，过短/过量ACK和源提前EOF不能假完成；模型ACK本身不是IOCP证明。
+
+TLS新增 `Shutdown` 和 `Retire`：同一SSPI线程先ApplyControlToken(SCHANNEL_SHUTDOWN)，以空输入调用ASC，将实际输出发完；socket关闭、原IOCP归还和普通Frame返回后，才能用原token请求实际DeleteSecurityContext。只有原 `Retired` 被worker真正poll收回后允许同槽新serial；Stopped或socket已关闭均不代替退休确认。错误后的上下文身份仍保留到显式退休，清理错误永久闭锁；停止路径仍等实际worker close及Windows线程对象终结。原绝对五秒与排空期限不因关闭调用重置，也不声明SSPI可硬抢占。[微软正常关闭流程](https://learn.microsoft.com/en-us/windows/win32/secauthn/shutting-down-an-schannel-connection)。
+
+当前仅把这些共用基础接入原有限两批loopback诊断，诊断仍只分派一个合成GET，未接通账号/资料/语音的生产worker和计费stage，也未实现持续listener复用。新增四份头arena和实际保留响应头容量计入报告，瞬时解码DTO/通道/分配器/SSPI/内核另计；这不是完整16MiB/进程资源门槛证明。实测范围与原始失败见本轮实施记录，不以诊断成功替代生产交付。
+
+### 条件接纳候选的只读排除依据
+
+本轮复核SO_CONDITIONAL_ACCEPT/WSAAccept官方契约：该选项改变完整接纳时机，同时禁用内建SYN保护和backlog；另一页又明确，为抵御SYN攻击先完成握手的路径会使选项不起作用，即使callback仍被调用。因此仅捕获callback时间不足以证明真正ESTABLISHED的下界；文档也未给出可用于D11的半开连接硬资源界，不能以四个应用槽替代证明。没有在用户电脑启用此选项或改变原接纳路径。[选项说明](https://learn.microsoft.com/en-us/windows/win32/winsock/so-conditional-accept)、[WSAAccept限制](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaaccept)。严格首TCP五秒仍保留第十三轮5/8超限、最大超577微秒的FAIL；生产监听继续关闭。

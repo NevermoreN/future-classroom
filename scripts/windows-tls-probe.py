@@ -538,7 +538,13 @@ def exercise_batch(local_port, marker, cycle, tls_context, wrong_ca_context, exp
                 if case == "tls-abrupt-close":
                     event["status"] = "PASS"
                     return event
-                request = f"GET /fc/tls-probe/{marker} HTTP/1.1\r\nHost: localhost\r\n\r\n".encode("ascii")
+                # Exercise the shared parser rather than matching one fixed
+                # wire spelling: field casing/OWS, an ordinary extra header and
+                # an explicit zero length must retain identical safe framing.
+                length = "Content-Length: 0\r\n" if cycle == 2 else ""
+                request = (f"GET /fc/tls-probe/{marker} HTTP/1.1\r\n"
+                           f"hOsT:\tlocalhost\t\r\nX-Probe: bounded\r\n"
+                           f"Connection: close\r\n{length}\r\n").encode("ascii")
                 if case == "fragmented-https-response":
                     for chunk in (request[:7], request[7:-3], request[-3:-1], request[-1:]):
                         connection.sendall(chunk)
@@ -549,6 +555,7 @@ def exercise_batch(local_port, marker, cycle, tls_context, wrong_ca_context, exp
                     connection.sendall(request[:-1])
             received = bytearray()
             close_kind = None
+            response_complete = False
             deadline = time.monotonic() + 8
             while time.monotonic() < deadline:
                 connection.settimeout(max(0.01, deadline - time.monotonic()))
@@ -573,10 +580,18 @@ def exercise_batch(local_port, marker, cycle, tls_context, wrong_ca_context, exp
                             raise RuntimeError("TLS diagnostic exact response length missing")
                         event["responseSha256"] = digest(bytes(received))
                         event["responseBytes"] = len(received)
-                        event["status"] = "PASS"
-                        return event
+                        response_complete = True
             if case == "fragmented-https-response":
-                raise RuntimeError("TLS diagnostic response incomplete")
+                if not response_complete:
+                    raise RuntimeError("TLS diagnostic response incomplete")
+                # suppress_ragged_eofs=False makes a bare TCP EOF/reset fail
+                # this check. The response alone does not prove close_notify.
+                if close_kind != "EOF":
+                    raise RuntimeError("TLS response lacked verified close_notify: " + str(close_kind))
+                event["closeKind"] = close_kind
+                event["closeNotify"] = "PASS: actual TLS clean EOF after exact HTTP response"
+                event["status"] = "PASS"
+                return event
             if close_kind is None:
                 raise RuntimeError("partial TLS/header connection not closed in diagnostic observation window")
             if received:
@@ -609,6 +624,10 @@ def validate_native(value):
             or value.get("sspiCompletions") != value["sspiSubmissions"]
             or value.get("returnedFrames") != value["sspiSubmissions"] or value.get("slotFramesAtDrain") != 8):
         raise RuntimeError("native TLS SSPI/frame ownership ledger mismatch")
+    if (value.get("parsedRequests") != 2
+            or type(value.get("shutdownTokensSent")) is not int or value["shutdownTokensSent"] < 2
+            or type(value.get("explicitRetirements")) is not int or value["explicitRetirements"] < 2):
+        raise RuntimeError("shared HTTP parser, real shutdown send or explicit context retirement missing")
 
 
 def main():
@@ -674,7 +693,7 @@ def main():
             expected_der = ssl.PEM_cert_to_DER_cert(fixture["publicPem"])
             tls_context = context(pem)
             wrong_ca_context = untrusted_context(expected_der)
-            report["clientVerification"] = {"checkHostname": tls_context.check_hostname, "verifyMode": "CERT_REQUIRED", "minTls": "TLSv1.2", "maxTls": "TLSv1.2", "publicCertificateSha256": digest(expected_der), "trustSource": "only owned public PEM; no system trust mutation", "wrongCaNegative": "PENDING/actual certificate rejection required", "wrongHostnameNegative": "PENDING/actual certificate rejection required", "wrongCaTrustSource": "default client trust roots; isolated fixture not added", "closeNotify": "NOT_VALIDATED; exact HTTP Content-Length completion is checked independently", "openssl": ssl.OPENSSL_VERSION}
+            report["clientVerification"] = {"checkHostname": tls_context.check_hostname, "verifyMode": "CERT_REQUIRED", "minTls": "TLSv1.2", "maxTls": "TLSv1.2", "publicCertificateSha256": digest(expected_der), "trustSource": "only owned public PEM; no system trust mutation", "wrongCaNegative": "PENDING/actual certificate rejection required", "wrongHostnameNegative": "PENDING/actual certificate rejection required", "wrongCaTrustSource": "default client trust roots; isolated fixture not added", "closeNotify": "required: actual clean TLS EOF with suppress_ragged_eofs=False after exact HTTP response", "openssl": ssl.OPENSSL_VERSION}
             phase = "start-owned-ssh-master"
             tunnel = Tunnel(remote, local)
             phase = "start-native-tls-diagnostic"

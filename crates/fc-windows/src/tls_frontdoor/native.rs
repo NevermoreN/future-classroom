@@ -4,7 +4,11 @@ use super::{
     worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsError, BUFFER_BYTES,
     CONNECTION_SLOTS, PLAINTEXT_BYTES,
 };
-use fc_ports::http::{RequestToken, TokenIssuer};
+use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
+use fc_protocol::http1::{
+    response::{BodySender, PendingChunk},
+    Event, Parser,
+};
 use std::{
     cell::UnsafeCell,
     io::Write,
@@ -45,6 +49,7 @@ enum Phase {
     Handshake,
     Http,
     Response,
+    Shutdown,
     Closed,
 }
 struct Slot {
@@ -54,8 +59,12 @@ struct Slot {
     token: RequestToken,
     frame: Option<Box<Frame>>,
     phase: Phase,
-    header: [u8; PLAINTEXT_BYTES],
-    header_len: usize,
+    parser: Parser,
+    response_body: Option<BodySender>,
+    response_chunk: Option<PendingChunk>,
+    shutdown_complete: bool,
+    context_submitted: bool,
+    retired: bool,
     send_len: usize,
     sent: usize,
     close_after_send: bool,
@@ -89,14 +98,17 @@ struct Report {
     consumed_bytes: u64,
     extra_events: usize,
     extra_bytes: u64,
+    parsed_requests: usize,
+    shutdown_tokens_sent: usize,
+    explicit_retirements: usize,
 }
 struct Owner {
     resources: ManuallyDrop<Resources>,
     started: Instant,
     generation: u64,
     port_number: u16,
-    expected: Vec<u8>,
-    response: Vec<u8>,
+    target: String,
+    marker: String,
     stopping: bool,
     drained: bool,
     report: Report,
@@ -169,8 +181,12 @@ impl Owner {
                         token,
                         frame: Some(Frame::new(token)),
                         phase: Phase::Handshake,
-                        header: [0; PLAINTEXT_BYTES],
-                        header_len: 0,
+                        parser: Parser::new(token, true),
+                        response_body: None,
+                        response_chunk: None,
+                        shutdown_complete: false,
+                        context_submitted: false,
+                        retired: false,
                         send_len: 0,
                         sent: 0,
                         close_after_send: false,
@@ -184,13 +200,8 @@ impl Owner {
             started,
             generation,
             port_number: 0,
-            expected: format!("GET /fc/tls-probe/{marker} HTTP/1.1\r\nHost: localhost\r\n\r\n")
-                .into_bytes(),
-            response: format!(
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{marker}",
-                marker.len()
-            )
-            .into_bytes(),
+            target: format!("/fc/tls-probe/{marker}"),
+            marker: marker.into(),
             stopping: false,
             drained: false,
             report: Report::default(),
@@ -478,7 +489,9 @@ impl Owner {
         if slot.pending.is_some() || slot.frame.is_none() {
             return Ok(());
         }
-        if slot.frame.as_ref().unwrap().input_len == 0 && slot.phase != Phase::Response {
+        if slot.frame.as_ref().unwrap().input_len == 0
+            && matches!(slot.phase, Phase::Handshake | Phase::Http)
+        {
             return self.receive(index);
         }
         let mut frame = slot.frame.take().unwrap();
@@ -486,6 +499,7 @@ impl Owner {
             Phase::Handshake => Call::Handshake,
             Phase::Http => Call::Decrypt,
             Phase::Response => Call::Encrypt,
+            Phase::Shutdown => Call::Shutdown,
             Phase::Closed => unreachable!(),
         };
         match self
@@ -496,6 +510,7 @@ impl Owner {
             .try_submit(frame)
         {
             Ok(()) => {
+                self.resources.slots[index].context_submitted = true;
                 self.report.sspi_submissions += 1;
                 Ok(())
             }
@@ -541,6 +556,23 @@ impl Owner {
             }
         }
         self.resources.slots[index].frame = Some(frame);
+        if call == Call::Retire {
+            if self.stopping && result == Err(TlsError::Stopped) {
+                // A queued retirement can be negatively returned on stop.
+                // Actual worker close/reap, not this frame, must clear it.
+                return Ok(());
+            }
+            if result != Ok(Step::Retired) {
+                return Err(format!("TLS explicit retirement failed: {result:?}"));
+            }
+            let slot = &mut self.resources.slots[index];
+            if slot.phase != Phase::Closed || slot.pending.is_some() || slot.retired {
+                return Err("TLS retirement before native IO returned".into());
+            }
+            slot.retired = true;
+            self.report.explicit_retirements += 1;
+            return Ok(());
+        }
         if self.stopping || self.resources.slots[index].phase == Phase::Closed {
             return Ok(());
         }
@@ -553,7 +585,12 @@ impl Owner {
         };
         match step {
             Step::NeedInput => self.receive(index),
-            Step::PeerClosed => self.close_slot(index, true),
+            Step::PeerClosed => {
+                let slot = &mut self.resources.slots[index];
+                slot.frame.as_mut().unwrap().input_len = 0;
+                slot.phase = Phase::Shutdown;
+                self.drive(index)
+            }
             Step::Handshake { consumed, complete } => {
                 let slot = &mut self.resources.slots[index];
                 let frame = slot.frame.as_mut().unwrap();
@@ -585,28 +622,71 @@ impl Owner {
                 {
                     return Err("TLS plaintext bounds".into());
                 }
-                let end = slot
-                    .header_len
-                    .checked_add(frame.output_len)
-                    .ok_or("HTTP header overflow")?;
-                if end > PLAINTEXT_BYTES || end > self.expected.len() {
-                    return self.close_slot(index, true);
-                }
-                slot.header[slot.header_len..end]
-                    .copy_from_slice(&frame.output[..frame.output_len]);
-                slot.header_len = end;
-                if slot.header[..end] != self.expected[..end] {
-                    return self.close_slot(index, true);
-                }
+                let progress = match slot.parser.feed(&frame.output[..frame.output_len]) {
+                    Ok(progress) => progress,
+                    Err(_) => return self.close_slot(index, true),
+                };
+                let head = match progress.event {
+                    Event::NeedHead => None,
+                    Event::Head(head) if progress.consumed == frame.output_len => Some(head),
+                    _ => return self.close_slot(index, true),
+                };
                 frame.input.copy_within(consumed..frame.input_len, 0);
                 frame.input_len -= consumed;
-                if end == self.expected.len() {
-                    if frame.input_len != 0 {
+                if let Some(head) = head {
+                    // This remains one isolated diagnostic route. Parsed HTTP
+                    // metadata is not session authentication or authorization.
+                    if frame.input_len != 0
+                        || head.method != "GET"
+                        || head.target != self.target
+                        || head.has_body
+                        || head.content_length.is_some_and(|length| length != 0)
+                        || head
+                            .headers
+                            .iter()
+                            .filter(|h| h.name.eq_ignore_ascii_case("host"))
+                            .count()
+                            != 1
+                        || !head.headers.iter().any(|h| {
+                            h.name.eq_ignore_ascii_case("host")
+                                && h.value.eq_ignore_ascii_case(b"localhost")
+                        })
+                    {
                         return self.close_slot(index, true);
                     }
-                    frame.input[..self.response.len()].copy_from_slice(&self.response);
-                    frame.input_len = self.response.len();
+                    slot.parser
+                        .admit_body(0)
+                        .map_err(|e| format!("TLS diagnostic body admission: {e:?}"))?;
+                    if !slot.parser.is_complete() {
+                        return Err(
+                            "TLS diagnostic framing incomplete after zero-body admission".into(),
+                        );
+                    }
+                    let response = ResponseHead {
+                        status: 200,
+                        headers: Vec::new(),
+                        content_length: self.marker.len() as u64,
+                    };
+                    let mut sender = BodySender::new(slot.token, &response)
+                        .map_err(|e| format!("TLS response head: {e:?}"))?;
+                    let header = sender.head_bytes();
+                    let length = header.len() + self.marker.len();
+                    if length > PLAINTEXT_BYTES {
+                        return Err(
+                            "TLS diagnostic response exceeds single plaintext record".into()
+                        );
+                    }
+                    frame.input[..header.len()].copy_from_slice(header);
+                    frame.input[header.len()..length].copy_from_slice(self.marker.as_bytes());
+                    frame.input_len = length;
+                    slot.response_chunk = Some(
+                        sender
+                            .begin_chunk(slot.token, self.marker.len())
+                            .map_err(|e| format!("TLS response body admission: {e:?}"))?,
+                    );
+                    slot.response_body = Some(sender);
                     slot.phase = Phase::Response;
+                    self.report.parsed_requests += 1;
                 }
                 self.drive(index)
             }
@@ -616,6 +696,23 @@ impl Owner {
                 }
                 self.start_send(index, true)
             }
+            Step::Shutdown { complete } => {
+                let slot = &mut self.resources.slots[index];
+                if slot.phase != Phase::Shutdown {
+                    return Err("unexpected TLS shutdown result".into());
+                }
+                slot.shutdown_complete = complete;
+                if slot.frame.as_ref().unwrap().output_len != 0 {
+                    self.start_send(index, true)
+                } else if complete {
+                    self.close_slot(index, false)
+                } else {
+                    // A provider producing neither output nor completion must
+                    // not create an unbounded self-waking native call loop.
+                    self.close_slot(index, true)
+                }
+            }
+            Step::Retired => Err("unsolicited TLS retirement result".into()),
         }
     }
     fn poll_io(&mut self) -> Result<(), String> {
@@ -735,8 +832,39 @@ impl Owner {
                     if sent != slot.send_len {
                         self.send(index)?;
                     } else if slot.close_after_send {
-                        self.report.responses += 1;
-                        self.close_slot(index, false)?;
+                        match slot.phase {
+                            Phase::Response => {
+                                let sender = slot
+                                    .response_body
+                                    .as_mut()
+                                    .ok_or("missing HTTP response sender")?;
+                                let chunk = slot
+                                    .response_chunk
+                                    .take()
+                                    .ok_or("missing HTTP send receipt")?;
+                                // Every ciphertext byte of this response has
+                                // returned through its actual IOCP completion.
+                                sender
+                                    .acknowledge_chunk(chunk, self.marker.len())
+                                    .map_err(|e| format!("HTTP response acknowledgement: {e:?}"))?;
+                                sender
+                                    .finish(slot.token)
+                                    .map_err(|e| format!("HTTP response incomplete: {e:?}"))?;
+                                self.report.responses += 1;
+                                slot.frame.as_mut().unwrap().input_len = 0;
+                                slot.phase = Phase::Shutdown;
+                                self.drive(index)?;
+                            }
+                            Phase::Shutdown => {
+                                self.report.shutdown_tokens_sent += 1;
+                                if slot.shutdown_complete {
+                                    self.close_slot(index, false)?;
+                                } else {
+                                    self.drive(index)?;
+                                }
+                            }
+                            _ => return Err("unexpected close-after-send phase".into()),
+                        }
                     } else {
                         self.drive(index)?;
                     }
@@ -761,9 +889,10 @@ impl Owner {
                         self.report.sspi_completions += 1;
                     }
                     let index = frame.token.slot();
-                    if self.stopping
-                        || (index < CONNECTION_SLOTS
-                            && self.resources.slots[index].phase == Phase::Closed)
+                    if frame.call != Call::Retire
+                        && (self.stopping
+                            || (index < CONNECTION_SLOTS
+                                && self.resources.slots[index].phase == Phase::Closed))
                     {
                         self.report.late_sspi_completions += 1;
                     }
@@ -772,7 +901,63 @@ impl Owner {
                 None => break,
             }
         }
+        if !self.stopping {
+            for index in 0..CONNECTION_SLOTS {
+                self.retire_closed_slot(index)?;
+            }
+        }
         Ok(())
+    }
+    fn retire_closed_slot(&mut self, index: usize) -> Result<(), String> {
+        let slot = &mut self.resources.slots[index];
+        if slot.phase != Phase::Closed
+            || slot.socket != INVALID_SOCKET
+            || slot.pending.is_some()
+            || !slot.context_submitted
+            || slot.retired
+            || slot.frame.is_none()
+        {
+            return Ok(());
+        }
+        let mut frame = slot.frame.take().unwrap();
+        frame.call = Call::Retire;
+        frame.input_len = 0;
+        match self
+            .resources
+            .worker
+            .as_mut()
+            .ok_or("missing retiring TLS worker")?
+            .try_submit(frame)
+        {
+            Ok(()) => {
+                self.report.sspi_submissions += 1;
+                Ok(())
+            }
+            Err((error, frame)) => {
+                self.resources.slots[index].frame = Some(frame);
+                Err(format!(
+                    "TLS retirement mailbox rejected exact token: {error:?}"
+                ))
+            }
+        }
+    }
+    fn app_owned_bytes(&self) -> usize {
+        size_of::<Owner>()
+            + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+            + self.target.capacity()
+            + self.marker.capacity()
+            + self
+                .resources
+                .slots
+                .iter()
+                .map(|slot| {
+                    slot.parser.header_capacity()
+                        + slot
+                            .response_body
+                            .as_ref()
+                            .map_or(0, BodySender::head_capacity)
+                })
+                .sum::<usize>()
     }
     fn stop(&mut self) -> Result<(), String> {
         self.stopping = true;
@@ -902,23 +1087,20 @@ pub(super) fn run(thumbprint: CertificateThumbprint, marker: &str) -> Result<(),
     let mut app_owned_bytes = 0;
     for cycle in 1..=2 {
         let mut owner = Owner::new(marker)?;
-        app_owned_bytes = app_owned_bytes.max(
-            size_of::<Owner>()
-                + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
-                + owner.expected.capacity()
-                + owner.response.capacity(),
-        );
+        app_owned_bytes = app_owned_bytes.max(owner.app_owned_bytes());
         let result = (|| {
             owner.start(thumbprint)?;
             println!("TLS_FRONTDOOR_READY {{\"port\":{},\"marker\":\"{}\",\"generation\":{},\"cycle\":{cycle}}}", owner.port_number, marker, owner.generation);
             std::io::stdout().flush().map_err(|e| e.to_string())?;
             while owner.started.elapsed() < BUDGET {
                 owner.poll()?;
+                app_owned_bytes = app_owned_bytes.max(owner.app_owned_bytes());
                 std::thread::sleep(Duration::from_millis(1));
             }
             Ok::<(), String>(())
         })();
         let cleanup = owner.finish();
+        app_owned_bytes = app_owned_bytes.max(owner.app_owned_bytes());
         // Bounded metadata only: never emit TLS/HTTP bytes, key material or
         // native pointers. Closed enums contain no user-controlled strings.
         let first_error = owner
@@ -929,7 +1111,7 @@ pub(super) fn run(thumbprint: CertificateThumbprint, marker: &str) -> Result<(),
             .report
             .first_tls_call
             .map_or_else(|| "null".into(), |call| format!("\"{call:?}\""));
-        eprintln!("TLS_FRONTDOOR_CYCLE {{\"cycle\":{cycle},\"accepted\":{},\"handshakes\":{},\"responses\":{},\"tlsFailures\":{},\"firstTlsError\":{},\"firstTlsCall\":{},\"handshakeCalls\":{},\"needInputCount\":{},\"consumedBytes\":{},\"extraEvents\":{},\"extraBytes\":{},\"ioSubmissions\":{},\"ioCompletions\":{},\"sspiSubmissions\":{},\"sspiCompletions\":{},\"cleanupComplete\":{}}}", owner.report.accepted, owner.report.handshakes, owner.report.responses, owner.report.tls_failures, first_error, first_call, owner.report.handshake_calls, owner.report.need_input_count, owner.report.consumed_bytes, owner.report.extra_events, owner.report.extra_bytes, owner.report.submissions, owner.report.completions, owner.report.sspi_submissions, owner.report.sspi_completions, owner.drained);
+        eprintln!("TLS_FRONTDOOR_CYCLE {{\"cycle\":{cycle},\"accepted\":{},\"handshakes\":{},\"responses\":{},\"parsedRequests\":{},\"shutdownTokensSent\":{},\"explicitRetirements\":{},\"tlsFailures\":{},\"firstTlsError\":{},\"firstTlsCall\":{},\"handshakeCalls\":{},\"needInputCount\":{},\"consumedBytes\":{},\"extraEvents\":{},\"extraBytes\":{},\"ioSubmissions\":{},\"ioCompletions\":{},\"sspiSubmissions\":{},\"sspiCompletions\":{},\"cleanupComplete\":{}}}", owner.report.accepted, owner.report.handshakes, owner.report.responses, owner.report.parsed_requests, owner.report.shutdown_tokens_sent, owner.report.explicit_retirements, owner.report.tls_failures, first_error, first_call, owner.report.handshake_calls, owner.report.need_input_count, owner.report.consumed_bytes, owner.report.extra_events, owner.report.extra_bytes, owner.report.submissions, owner.report.completions, owner.report.sspi_submissions, owner.report.sspi_completions, owner.drained);
         match (result, cleanup) {
             (Err(error), Err(cleanup)) => return Err(format!("{error}; cleanup: {cleanup}")),
             (Err(error), Ok(())) | (Ok(()), Err(error)) => return Err(error),
@@ -948,6 +1130,9 @@ pub(super) fn run(thumbprint: CertificateThumbprint, marker: &str) -> Result<(),
         total.accepted += owner.report.accepted;
         total.handshakes += owner.report.handshakes;
         total.responses += owner.report.responses;
+        total.parsed_requests += owner.report.parsed_requests;
+        total.shutdown_tokens_sent += owner.report.shutdown_tokens_sent;
+        total.explicit_retirements += owner.report.explicit_retirements;
         total.submissions += owner.report.submissions;
         total.completions += owner.report.completions;
         total.sspi_submissions += owner.report.sspi_submissions;
@@ -977,7 +1162,7 @@ pub(super) fn run(thumbprint: CertificateThumbprint, marker: &str) -> Result<(),
     let first_call = total
         .first_tls_call
         .map_or_else(|| "null".into(), |call| format!("\"{call:?}\""));
-    println!("TLS_FRONTDOOR_PASS {{\"cycles\":2,\"accepted\":{},\"handshakes\":{},\"responses\":{},\"ioSubmissions\":{},\"ioCompletions\":{},\"sspiSubmissions\":{},\"sspiCompletions\":{},\"returnedFrames\":{},\"slotFramesAtDrain\":{},\"deadlineCloses\":{},\"closedWithSspiInFlight\":{},\"lateSspiCompletions\":{},\"tlsFailures\":{},\"firstTlsError\":{},\"firstTlsCall\":{},\"handshakeCalls\":{},\"needInputCount\":{},\"consumedBytes\":{},\"extraEvents\":{},\"extraBytes\":{},\"appOwnedBufferAndStructBytes\":{},\"sspiThreadStackBytes\":1048576,\"memoryScope\":\"native owner inline structs, four IO/Frame allocations, expected/response Vec capacities; stack is requested size; excludes worker shared/channel/runtime metadata, allocator overhead and SSPI/provider/kernel allocations\",\"cleanupComplete\":true,\"strictP0\":\"NOT_VALIDATED\"}}", total.accepted, total.handshakes, total.responses, total.submissions, total.completions, total.sspi_submissions, total.sspi_completions, total.returned_frames, total.slot_frames_at_drain, total.deadline_closes, total.closed_with_sspi_in_flight, total.late_sspi_completions, total.tls_failures, first_error, first_call, total.handshake_calls, total.need_input_count, total.consumed_bytes, total.extra_events, total.extra_bytes, app_owned_bytes);
+    println!("TLS_FRONTDOOR_PASS {{\"cycles\":2,\"accepted\":{},\"handshakes\":{},\"responses\":{},\"parsedRequests\":{},\"shutdownTokensSent\":{},\"explicitRetirements\":{},\"ioSubmissions\":{},\"ioCompletions\":{},\"sspiSubmissions\":{},\"sspiCompletions\":{},\"returnedFrames\":{},\"slotFramesAtDrain\":{},\"deadlineCloses\":{},\"closedWithSspiInFlight\":{},\"lateSspiCompletions\":{},\"tlsFailures\":{},\"firstTlsError\":{},\"firstTlsCall\":{},\"handshakeCalls\":{},\"needInputCount\":{},\"consumedBytes\":{},\"extraEvents\":{},\"extraBytes\":{},\"appOwnedBufferAndStructBytes\":{},\"sspiThreadStackBytes\":1048576,\"memoryScope\":\"native owner inline structs, four IO/Frame allocations, parser header arenas, retained response head capacities and target/marker String capacities; stack is requested size; excludes transient decoded RequestHead allocations, worker shared/channel/runtime metadata, allocator overhead and SSPI/provider/kernel allocations\",\"cleanupComplete\":true,\"strictP0\":\"NOT_VALIDATED\"}}", total.accepted, total.handshakes, total.responses, total.parsed_requests, total.shutdown_tokens_sent, total.explicit_retirements, total.submissions, total.completions, total.sspi_submissions, total.sspi_completions, total.returned_frames, total.slot_frames_at_drain, total.deadline_closes, total.closed_with_sspi_in_flight, total.late_sspi_completions, total.tls_failures, first_error, first_call, total.handshake_calls, total.need_input_count, total.consumed_bytes, total.extra_events, total.extra_bytes, app_owned_bytes);
     std::io::stdout().flush().map_err(|e| e.to_string())
 }
 

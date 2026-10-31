@@ -1,0 +1,201 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native/tests.rs:232:
+     impl Driver for PlainDriver {
+         fn call(&mut self, frame: &mut Frame) -> Result<Step, TlsError> {
+             match frame.call {
+[31m-                Call::Handshake => Ok(Step::Handshake { consumed: 1, complete: true }),
+(B[m[32m+                Call::Handshake => Ok(Step::Handshake {
+(B[m[32m+                    consumed: 1,
+(B[m[32m+                    complete: true,
+(B[m[32m+                }),
+(B[m                 Call::Decrypt | Call::Encrypt => {
+[31m-                    frame.output[..frame.input_len].copy_from_slice(&frame.input[..frame.input_len]);
+(B[m[32m+                    frame.output[..frame.input_len]
+(B[m[32m+                        .copy_from_slice(&frame.input[..frame.input_len]);
+(B[m                     frame.output_len = frame.input_len;
+                     Ok(if frame.call == Call::Decrypt {
+[31m-                        Step::Plaintext { consumed: frame.input_len }
+(B[m[31m-                    } else { Step::Encrypted })
+(B[m[32m+                        Step::Plaintext {
+(B[m[32m+                            consumed: frame.input_len,
+(B[m[32m+                        }
+(B[m[32m+                    } else {
+(B[m[32m+                        Step::Encrypted
+(B[m[32m+                    })
+(B[m                 }
+                 Call::Shutdown => {
+                     assert_eq!(frame.input_len, 0);
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native/tests.rs:259:
+     let (release_send, release) = mpsc::sync_channel(1);
+     let mut release_guard = Release(Some(release_send));
+     let mut owner = Owner::new(MARKER).unwrap();
+[31m-    let worker = Worker::start_with_factory(owner.generation, move || Ok(Box::new(PlainDriver { entered: entered_send, release }))).unwrap();
+(B[m[32m+    let worker = Worker::start_with_factory(owner.generation, move || {
+(B[m[32m+        Ok(Box::new(PlainDriver {
+(B[m[32m+            entered: entered_send,
+(B[m[32m+            release,
+(B[m[32m+        }))
+(B[m[32m+    })
+(B[m[32m+    .unwrap();
+(B[m     owner.start_with_worker(worker).unwrap();
+     let address = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number));
+     let mut client = TcpStream::connect_timeout(&address, Duration::from_secs(1)).unwrap();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native/tests.rs:284:
+     assert_eq!(owner.report.explicit_retirements, 0);
+     assert!(owner.resources.worker.as_ref().unwrap().has_in_flight());
+     assert!(Owner::new(MARKER).is_err());
+[31m-    client.set_read_timeout(Some(Duration::from_secs(1))).unwrap();
+(B[m[32m+    client
+(B[m[32m+        .set_read_timeout(Some(Duration::from_secs(1)))
+(B[m[32m+        .unwrap();
+(B[m     let mut wire = Vec::new();
+     client.read_to_end(&mut wire).unwrap();
+     assert!(wire.starts_with(b"HTTP/1.1 200 OK\r\n"));
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native/tests.rs:291:
+     let expected_end = [MARKER.as_bytes(), CLOSE].concat();
+     assert!(wire.ends_with(&expected_end));
+     release_guard.now();
+[31m-    until(|| { owner.poll().unwrap(); owner.resources.slots[token.slot()].retired });
+(B[m[32m+    until(|| {
+(B[m[32m+        owner.poll().unwrap();
+(B[m[32m+        owner.resources.slots[token.slot()].retired
+(B[m[32m+    });
+(B[m     assert_eq!(owner.report.explicit_retirements, 1);
+     assert!(owner.resources.slots[token.slot()].frame.is_some());
+     owner.finish().unwrap();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:641:
+                         || head.target != self.target
+                         || head.has_body
+                         || head.content_length.is_some_and(|length| length != 0)
+[31m-                        || head.headers.iter().filter(|h| h.name.eq_ignore_ascii_case("host")).count() != 1
+(B[m[31m-                        || !head.headers.iter().any(|h| h.name.eq_ignore_ascii_case("host") && h.value.eq_ignore_ascii_case(b"localhost"))
+(B[m[32m+                        || head
+(B[m[32m+                            .headers
+(B[m[32m+                            .iter()
+(B[m[32m+                            .filter(|h| h.name.eq_ignore_ascii_case("host"))
+(B[m[32m+                            .count()
+(B[m[32m+                            != 1
+(B[m[32m+                        || !head.headers.iter().any(|h| {
+(B[m[32m+                            h.name.eq_ignore_ascii_case("host")
+(B[m[32m+                                && h.value.eq_ignore_ascii_case(b"localhost")
+(B[m[32m+                        })
+(B[m                     {
+                         return self.close_slot(index, true);
+                     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:649:
+[31m-                    slot.parser.admit_body(0).map_err(|e| format!("TLS diagnostic body admission: {e:?}"))?;
+(B[m[32m+                    slot.parser
+(B[m[32m+                        .admit_body(0)
+(B[m[32m+                        .map_err(|e| format!("TLS diagnostic body admission: {e:?}"))?;
+(B[m                     if !slot.parser.is_complete() {
+[31m-                        return Err("TLS diagnostic framing incomplete after zero-body admission".into());
+(B[m[32m+                        return Err(
+(B[m[32m+                            "TLS diagnostic framing incomplete after zero-body admission".into(),
+(B[m[32m+                        );
+(B[m                     }
+[31m-                    let response = ResponseHead { status: 200, headers: Vec::new(), content_length: self.marker.len() as u64 };
+(B[m[31m-                    let mut sender = BodySender::new(slot.token, &response).map_err(|e| format!("TLS response head: {e:?}"))?;
+(B[m[32m+                    let response = ResponseHead {
+(B[m[32m+                        status: 200,
+(B[m[32m+                        headers: Vec::new(),
+(B[m[32m+                        content_length: self.marker.len() as u64,
+(B[m[32m+                    };
+(B[m[32m+                    let mut sender = BodySender::new(slot.token, &response)
+(B[m[32m+                        .map_err(|e| format!("TLS response head: {e:?}"))?;
+(B[m                     let header = sender.head_bytes();
+                     let length = header.len() + self.marker.len();
+                     if length > PLAINTEXT_BYTES {
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:658:
+[31m-                        return Err("TLS diagnostic response exceeds single plaintext record".into());
+(B[m[32m+                        return Err(
+(B[m[32m+                            "TLS diagnostic response exceeds single plaintext record".into()
+(B[m[32m+                        );
+(B[m                     }
+                     frame.input[..header.len()].copy_from_slice(header);
+                     frame.input[header.len()..length].copy_from_slice(self.marker.as_bytes());
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:662:
+                     frame.input_len = length;
+[31m-                    slot.response_chunk = Some(sender.begin_chunk(slot.token, self.marker.len()).map_err(|e| format!("TLS response body admission: {e:?}"))?);
+(B[m[32m+                    slot.response_chunk = Some(
+(B[m[32m+                        sender
+(B[m[32m+                            .begin_chunk(slot.token, self.marker.len())
+(B[m[32m+                            .map_err(|e| format!("TLS response body admission: {e:?}"))?,
+(B[m[32m+                    );
+(B[m                     slot.response_body = Some(sender);
+                     slot.phase = Phase::Response;
+                     self.report.parsed_requests += 1;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:811:
+                     } else if slot.close_after_send {
+                         match slot.phase {
+                             Phase::Response => {
+[31m-                                let sender = slot.response_body.as_mut().ok_or("missing HTTP response sender")?;
+(B[m[31m-                                let chunk = slot.response_chunk.take().ok_or("missing HTTP send receipt")?;
+(B[m[32m+                                let sender = slot
+(B[m[32m+                                    .response_body
+(B[m[32m+                                    .as_mut()
+(B[m[32m+                                    .ok_or("missing HTTP response sender")?;
+(B[m[32m+                                let chunk = slot
+(B[m[32m+                                    .response_chunk
+(B[m[32m+                                    .take()
+(B[m[32m+                                    .ok_or("missing HTTP send receipt")?;
+(B[m                                 // Every ciphertext byte of this response has
+                                 // returned through its actual IOCP completion.
+[31m-                                sender.acknowledge_chunk(chunk, self.marker.len()).map_err(|e| format!("HTTP response acknowledgement: {e:?}"))?;
+(B[m[31m-                                sender.finish(slot.token).map_err(|e| format!("HTTP response incomplete: {e:?}"))?;
+(B[m[32m+                                sender
+(B[m[32m+                                    .acknowledge_chunk(chunk, self.marker.len())
+(B[m[32m+                                    .map_err(|e| format!("HTTP response acknowledgement: {e:?}"))?;
+(B[m[32m+                                sender
+(B[m[32m+                                    .finish(slot.token)
+(B[m[32m+                                    .map_err(|e| format!("HTTP response incomplete: {e:?}"))?;
+(B[m                                 self.report.responses += 1;
+                                 slot.frame.as_mut().unwrap().input_len = 0;
+                                 slot.phase = Phase::Shutdown;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:888:
+         let mut frame = slot.frame.take().unwrap();
+         frame.call = Call::Retire;
+         frame.input_len = 0;
+[31m-        match self.resources.worker.as_mut().ok_or("missing retiring TLS worker")?.try_submit(frame) {
+(B[m[31m-            Ok(()) => { self.report.sspi_submissions += 1; Ok(()) }
+(B[m[32m+        match self
+(B[m[32m+            .resources
+(B[m[32m+            .worker
+(B[m[32m+            .as_mut()
+(B[m[32m+            .ok_or("missing retiring TLS worker")?
+(B[m[32m+            .try_submit(frame)
+(B[m[32m+        {
+(B[m[32m+            Ok(()) => {
+(B[m[32m+                self.report.sspi_submissions += 1;
+(B[m[32m+                Ok(())
+(B[m[32m+            }
+(B[m             Err((error, frame)) => {
+                 self.resources.slots[index].frame = Some(frame);
+[31m-                Err(format!("TLS retirement mailbox rejected exact token: {error:?}"))
+(B[m[32m+                Err(format!(
+(B[m[32m+                    "TLS retirement mailbox rejected exact token: {error:?}"
+(B[m[32m+                ))
+(B[m             }
+         }
+     }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/tls_frontdoor/native.rs:901:
+             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+             + self.target.capacity()
+             + self.marker.capacity()
+[31m-            + self.resources.slots.iter().map(|slot| {
+(B[m[31m-                slot.parser.header_capacity()
+(B[m[31m-                    + slot.response_body.as_ref().map_or(0, BodySender::head_capacity)
+(B[m[31m-            }).sum::<usize>()
+(B[m[32m+            + self
+(B[m[32m+                .resources
+(B[m[32m+                .slots
+(B[m[32m+                .iter()
+(B[m[32m+                .map(|slot| {
+(B[m[32m+                    slot.parser.header_capacity()
+(B[m[32m+                        + slot
+(B[m[32m+                            .response_body
+(B[m[32m+                            .as_ref()
+(B[m[32m+                            .map_or(0, BodySender::head_capacity)
+(B[m[32m+                })
+(B[m[32m+                .sum::<usize>()
+(B[m     }
+     fn stop(&mut self) -> Result<(), String> {
+         self.stopping = true;

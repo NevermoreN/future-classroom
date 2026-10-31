@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "Host strict Clippy final",
+      "exitCode": 0,
+      "log": "host-clippy-final.log"
+    },
+    {
+      "name": "Windows strict Clippy final",
+      "exitCode": 0,
+      "log": "windows-clippy-final.log"
+    },
+    {
+      "name": "Host unique coverage791 from20 programs, protocol69 rerun after test-only style correction",
+      "exitCode": 0
+    },
+    {
+      "name": "Windows20 programs1160 all actual uploaded/current hashes equal",
+      "exitCode": 0
+    },
+    {
+      "name": "real Schannel modern and supplemental on same Win11",
+      "exitCode": 0
+    },
+    {
+      "name": "fmt/architecture/notice/lock",
+      "exitCode": 0
+    }
+  ],
+  "originalFailedStagesRetained": [
+    "host-clippy-first.log",
+    "win7-build-stage1.log"
+  ],
+  "postClippyExactProgramHashVerification": "Host20/Windows20 unchanged; no test repeat needed"
+}
