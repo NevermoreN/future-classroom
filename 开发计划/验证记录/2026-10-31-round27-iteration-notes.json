@@ -1,0 +1,89 @@
+{
+  "scope": "Round27 original failures and source-stage lineage; final acceptance requires final artifacts and actual execution",
+  "events": [
+    {
+      "stage": "local integration edit",
+      "result": "ASSERTION_FAILED",
+      "details": "runner budget anchor differed from assumed exact text; prior application/main wiring applied, runner unmodified; no build/test launched",
+      "fix": "read exact existing branch and apply explicit voice-settings branch; initialize own evidence directory afterward"
+    },
+    {
+      "stage": "native Cancel pre-run review",
+      "result": "DEFECT_FIXED_BEFORE_BUILD",
+      "details": "native review form includes ACK even on Cancel; editor rejected all non-confirm fields, trapping Cancel",
+      "fix": "consume ACK only for existing-review Cancel without interpreting consent, continue rejecting unknown fields; regression uses actual populated native-form shape"
+    },
+    {
+      "stage": "read-only integrated review",
+      "result": "DEFECTS_FIXED",
+      "details": "initial queue rejection lacked recovery actions; identity/runtime review metadata was captured but not carried through commit, and delivered results could cross later publication",
+      "fix": "fallback refresh/back/lock and real full-two-worker queue regression; reviewed setter binds identity/epoch in actual writer evaluation/precommit, exact epoch resume; memory-only stale-result delivery guard and regression"
+    },
+    {
+      "stage": "windows-test-artifacts-stage1.jsonl",
+      "result": "COMPILE_FAIL",
+      "details": "E0425: Voice page referenced local action closure before its lexical declaration; cargo still draining other build jobs at observation",
+      "fix": "construct explicit Action for Lock, consistent with preceding editor branches; final rebuild pending"
+    },
+    {
+      "stage": "memory-only completion review",
+      "result": "DEFECT_FIXED_BEFORE_FINAL_BUILD",
+      "details": "global authority publication revision differs from semantic IdentityState.revision; comparing global HealthStatus.revision with identity_revision would reject otherwise valid voice-setting completions",
+      "fix": "snapshot carries a separate publication_revision; UI compares this to healthy publication and still binds semantic identity/runtime for reviewed writes"
+    },
+    {
+      "stage": "win7-settings-on-win11-stage1.json",
+      "result": "FAIL; cleanup PASS",
+      "details": "actual Win11 login reached native Home then render failed; added direct Home entry exceeded original12-action View budget (13 actions)",
+      "fix": "keep original12 limit; move voice entry into native system settings, capture existing display draft before navigation; probe validates Home/system settings views and actually navigates both before voice page"
+    },
+    {
+      "stage": "modern-audio-final.json (original filename)",
+      "result": "FAIL; cleanup PASS",
+      "details": "actual AUDIO_SILENT_PASS, VOICE_PIPELINE_PASS, VOICE_RUNTIME_PASS; authenticated Web-port first zero-PCM broadcast completed all3 repeats and exact query/idempotency; second upload response not201, original probe lacked status detail",
+      "next": "add bounded sanitized status/error response diagnostic and investigate native idle/runtime admission race; no blind retry or permission/deadline relaxation"
+    },
+    {
+      "stage": "modern-web-voice-diagnostic.json",
+      "result": "PASS; cleanup PASS",
+      "details": "single rerun with bounded error instrumentation; original failure code remains unknown; no claim of unique cause"
+    },
+    {
+      "stage": "host-upload-publication-before-fix.log",
+      "result": "FAIL 0/4",
+      "details": "real writer publication tests deterministically prove immediate Closed defect independently of original native failure"
+    },
+    {
+      "stage": "host-upload-publication-after-fix.log",
+      "result": "FAIL 4/5",
+      "details": "production consistency fix passes short/long/newtarget/deadline; 6-case lease test reveals accumulated synthetic reservation Capacity in fixture, before later checks",
+      "fix": "independent real DB/service/reservation per kind/upload case, all six original security assertions preserved; no capacity relaxation or production change"
+    },
+    {
+      "stage": "local package verification helper",
+      "result": "KeyError size_bytes",
+      "details": "independent repack and CRC had passed, helper guessed manifest size_bytes instead of actual size; package unchanged; then inspected schema and checked all12 payload size/SHA using actual keys"
+    },
+    {
+      "stage": "host-upload-publication-after-fixture-fix.log",
+      "result": "PASS 5/5",
+      "details": "all4 original real-writer scopes plus final-success deadline; six lease/epoch cases retain original assertions with isolated real fixtures"
+    }
+  ],
+  "stageNotes": {
+    "hostStage1": "724/31groups historical7 management tests before reviewed setter",
+    "hostStage2": "historical728/31 before upload publication fix; final complete run pending",
+    "windowsStage1": "terminal101; E0425 fixed; original JSON compiler diagnostics retained",
+    "windowsStage2": "terminal0 build/no-run before navigation correction; not final actual Windows run",
+    "win7Stage1And2": "initial successful builds; first actual native workflow failed on Home action budget, cleanup PASS",
+    "win7Stage3": "historical navigation correction; final production consistency build and sameWin11 settings25PASS in final report",
+    "windowsStage3": "historical1075 full run and25 settings before production consistency fix; final full metadata/real execution pending",
+    "finalInputs": "413 files; 9d2068f6817ebcf349aa4565b54df3c01824d59db44702c8acd3be355ee51af6; only test-fixture isolation changed after modern/Win7 production EXE build; cfg(test) excluded from EXEs",
+    "finalHost": "733/31 result groups, terminal0; 19 actual-during-run SHAs equal all-fresh final no-run",
+    "finalWindows": "19 final programs/1080 tests PASS, build/upload/execution SHAs equal; modern settings25/611ms PASS; cleanup PASS",
+    "finalWin7": "supplemental build/audit and sameWin11 settings25/556ms PASS; not actual Win7",
+    "finalAudio": "modern-audio-post-publication.json PASS, actual zeroPCM native/runtime and Web-port; no actual microphone/TLS browser",
+    "finalPackage": "5690694 bytes; c625550bb42f244aaf4db9efb1f56905d2037ba7f194b3b4b7171aab11067a92;13 CRC/12 payloads and byte-identical independent repack PASS",
+    "continuationCheckpoint": "historical file not authoritative for final live jobs or results; all Round27 owned processes actually terminal before archive"
+  }
+}

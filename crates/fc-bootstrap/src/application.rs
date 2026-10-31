@@ -68,7 +68,13 @@ mod lesson_editor;
 mod materials_editor;
 mod schedule_editor;
 mod schedule_operations_probe;
+mod voice_controller;
+mod voice_editor;
+mod voice_management_probe;
 mod web_editor;
+pub fn voice_settings_probe() -> std::result::Result<(), String> {
+    voice_management_probe::run()
+}
 use fc_application::identity::SessionLease;
 use fc_bootstrap::backend::web::{WebService, WebServiceError};
 use fc_bootstrap::backend::{Backend, BackendError, Initialize, SessionControl, VoiceService};
@@ -138,6 +144,7 @@ const TO_WEB: ActionId = ActionId(23);
 const TO_PROFILES: ActionId = ActionId(24);
 const TO_AUTOSTART: ActionId = ActionId(25);
 const TO_REINITIALIZE: ActionId = ActionId(27);
+const TO_VOICE: ActionId = ActionId(28);
 const RETURN_DRAFT: ActionId = ActionId(19);
 const DISCARD_EXIT: ActionId = ActionId(20);
 const MANIFEST: &[u8] = b"FutureClassroom.Deployment.v1\n";
@@ -167,6 +174,7 @@ enum Screen {
     ProfileContent,
     Materials,
     Lesson,
+    Voice,
     Web,
     ExitDraft,
     Repair,
@@ -198,6 +206,7 @@ fn fatal(error: &Failure) -> bool {
                 | BackendError::Profile(fc_ports::ProfileRepositoryError::Faulted)
                 | BackendError::ProfileContent(fc_ports::ProfileContentRepositoryError::Faulted)
                 | BackendError::Material(fc_ports::MaterialRepositoryError::Faulted)
+                | BackendError::Voice(fc_ports::voice::VoiceRepositoryError::Faulted)
                 | BackendError::Storage(
                     S::AuthorityUnavailable
                         | S::Indeterminate
@@ -263,6 +272,7 @@ fn error_text(error: &Failure) -> String {
         Failure::Web(WebServiceError::Busy) => "教师设备状态正在更新，请稍后刷新。".into(),
         Failure::Web(_) => "教师设备操作未完成，请刷新核对当前状态。".into(),
         Failure::Backend(e) => match e {
+            BackendError::Voice(_) => "语音权限、任务或版本已变化，本次结果尚未确认，请刷新核对后再操作。".into(),
             BackendError::Autostart(_) => "启动项的权限、版本或实际状态已变化，请重新读取、核对后再明确确认。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Cancelled) => "本次校历任务已取消或超过处理期限，请重新读取当前状态。".into(),
             BackendError::Calendar(fc_ports::CalendarRepositoryError::Stale) => "校历候选或课表已更新，请重新加载、核对差异后再确认。".into(),
@@ -445,6 +455,10 @@ enum Outcome {
     LaunchCopies(material_flow::LaunchCopyReport),
     WebOpened(WebService, web_editor::Loaded),
     WebLoaded(web_editor::Loaded),
+    VoiceLoaded(
+        SessionLease,
+        Box<fc_bootstrap::backend::VoiceManagementSnapshot>,
+    ),
     Closed,
     Office(fc_materials::office::ContainerReport),
 }
@@ -520,6 +534,7 @@ enum Work {
     ProfileContent(Box<profile_content_flow::ContentJob>),
     Material(Box<material_flow::MaterialJob>),
     CleanupMaterial(PathBuf, PathBuf),
+    Voice(VoiceService, SessionLease, voice_controller::Operation),
     OpenWeb(Arc<Mutex<Backend>>, SessionLease),
     Web(
         WebService,
@@ -548,6 +563,7 @@ impl Task for Work {
             | Self::LoadLesson(_, _)
             | Self::ChangeLesson(_, _, _, _, _)
             | Self::LoadDisplay(_, _)
+            | Self::Voice(..)
             | Self::OpenWeb(_, _)
             | Self::Web(..)
             | Self::CloseWeb(..)
@@ -707,6 +723,9 @@ impl Task for Work {
                 profile_content_flow::maintain(root, backend, cursor, context)
             }
             Self::Request(r) => execute(r),
+            Self::Voice(service, lease, operation) => {
+                voice_controller::run(service, lease, operation, context)
+            }
             Self::OpenWeb(backend, lease) => {
                 let service = backend.lock().map_err(|_| Failure::Stopped)?.web_service();
                 let loaded = web_editor::load(&service, lease)?;
@@ -1204,6 +1223,7 @@ struct App {
     lesson_editor: Option<lesson_editor::Editor>,
     web_service: Option<WebService>,
     web_editor: Option<web_editor::Editor>,
+    voice_editor: Option<voice_editor::Editor>,
     web_readiness: web_editor::Readiness,
     next_web_refresh: Instant,
     close_web: Option<(WebService, SessionLease)>,
@@ -1304,6 +1324,17 @@ impl App {
                 );
             }
         }
+        if self.screen == Screen::Voice {
+            if let Some(editor) = &self.voice_editor {
+                let mut view = editor.view(&status, self.pending.is_some() || self.stopping);
+                view.actions.push(Action {
+                    id: LOCK,
+                    label: "锁定".into(),
+                    enabled: true,
+                });
+                return view;
+            }
+        }
         if self.screen == Screen::Web {
             if let Some(editor) = &self.web_editor {
                 return editor.view(
@@ -1343,6 +1374,11 @@ impl App {
                     view.actions.push(Action {
                         id: TO_BACKUP,
                         label: "完整备份与恢复".into(),
+                        enabled: true,
+                    });
+                    view.actions.push(Action {
+                        id: TO_VOICE,
+                        label: "远程语音设置".into(),
                         enabled: true,
                     });
                 }
@@ -1498,7 +1534,7 @@ impl App {
                         action(TO_SUBJECTS, "基础科目"),
                         action(TO_ACCOUNTS, "账号与任教管理"),
                         action(TO_SCHEDULE, "课表、作息与校历"),
-                        action(TO_DISPLAY, "桌面、启动与备份"),
+                        action(TO_DISPLAY, "桌面与系统设置"),
                         action(TO_LESSON, "本节临时换课"),
                         action(TO_WEB, "教师设备与配对"),
                     ]);
@@ -1628,6 +1664,17 @@ impl App {
             Screen::Lesson => {
                 view.title = "正在加载本节课程".into();
             }
+            Screen::Voice => {
+                view.title = "远程语音设置".into();
+                view.description =
+                    "尚未取得当前语音设置。后台繁忙或状态已变化时，请重新读取；也可返回工作台。"
+                        .into();
+                view.actions = vec![
+                    action(voice_editor::REFRESH, "重新读取状态"),
+                    action(voice_editor::CLOSE, "返回工作台"),
+                    action(LOCK, "锁定"),
+                ];
+            }
             Screen::Web => {
                 view.title = "正在加载教师设备".into();
                 view.description = web_editor::NOT_READY.into();
@@ -1743,6 +1790,7 @@ impl App {
         // candidates and revisions again. The physical download ticket remains.
         self.calendar = None;
         self.autostart = None;
+        self.voice_editor = None;
         if let Some(p) = &self.autostart_job {
             p.ticket.cancel();
         }
@@ -2081,6 +2129,13 @@ impl App {
                     }
                     return self.open_backup();
                 }
+                if action == TO_VOICE && self.screen == Screen::Display {
+                    if let Some(editor) = &mut self.display {
+                        editor.capture(data);
+                    }
+                    self.voice_editor = None;
+                    return self.submit_voice_management(voice_controller::Operation::Refresh);
+                }
                 if action == TO_AUTOSTART {
                     if self.screen == Screen::Display {
                         if let Some(editor) = &mut self.display {
@@ -2100,6 +2155,9 @@ impl App {
                 }
                 if self.screen == Screen::Materials {
                     return self.material_event(action, data);
+                }
+                if self.screen == Screen::Voice {
+                    return self.voice_management_event(action, data);
                 }
                 if self.screen == Screen::Web {
                     return self.web_event(action, data);
@@ -2149,6 +2207,10 @@ impl App {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
                                 Screen::Autostart
+                            } else if self.voice_editor.as_ref().is_some_and(|e| {
+                                Some(e.owner()) == owner && e.has_unsaved_changes()
+                            }) {
+                                Screen::Voice
                             } else if self.calendar.as_ref().is_some_and(|e| {
                                 Some(e.owner()) == owner && e.has_unsaved_changes()
                             }) {
@@ -3252,6 +3314,10 @@ impl App {
         };
         self.backup.has_review(owner)
             || self
+                .voice_editor
+                .as_ref()
+                .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
+            || self
                 .autostart
                 .as_ref()
                 .is_some_and(|e| e.owner() == owner && e.has_unsaved_changes())
@@ -3688,6 +3754,9 @@ impl App {
                         self.next_web_refresh = Instant::now() + Duration::from_secs(1);
                     }
                 }
+                Ok(Outcome::VoiceLoaded(lease, loaded)) => {
+                    self.voice_management_loaded(lease, *loaded)?;
+                }
                 Ok(Outcome::WebLoaded(loaded)) => {
                     if self.screen == Screen::Web {
                         let changed = loaded.changed;
@@ -3823,6 +3892,13 @@ impl App {
                     | Outcome::MaterialCleaned,
                 ) => return Err("后台结果类型不匹配".into()),
                 Err(error) => {
+                    if self.screen == Screen::Voice {
+                        if let Some(editor) = &mut self.voice_editor {
+                            editor.invalidate();
+                        } else {
+                            self.screen = Screen::Home;
+                        }
+                    }
                     if self.screen == Screen::ProfileContent {
                         if let Some(editor) = &mut self.profile_content {
                             editor.cancel_review();
@@ -4276,6 +4352,7 @@ fn create_app(clock: Arc<CurrentClock>, probe: bool) -> std::result::Result<App,
         lesson_editor: None,
         web_service: None,
         web_editor: None,
+        voice_editor: None,
         web_readiness: web_editor::Readiness::Unavailable,
         next_web_refresh: Instant::now() + Duration::from_secs(1),
         close_web: None,

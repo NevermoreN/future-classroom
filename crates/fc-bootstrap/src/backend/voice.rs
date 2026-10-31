@@ -5,6 +5,10 @@ use fc_domain::voice::*;
 use fc_ports::{audio::AudioAuthorization, voice::*};
 use fc_runtime::health::{GateError, Health, HealthGate};
 use std::collections::BTreeMap;
+mod management;
+#[cfg(test)]
+mod upload_authorization_tests;
+pub use management::VoiceManagementSnapshot;
 
 #[derive(Default)]
 struct VoiceSessions {
@@ -362,31 +366,63 @@ impl VoiceService {
             }),
         );
         if let Some(lease) = lease {
-            let service = self.clone();
-            repository = repository.with_session_guard(Arc::new(move |state, expected| {
-                if service.inner.control.0.closed.load(Ordering::Acquire) {
-                    return Err(StorageError::AuthorityUnavailable);
-                }
-                let now = service.inner.clock.now();
-                let tick = service.inner.monotonic.monotonic_millis();
-                let mut ledger = service
-                    .inner
-                    .ledger
-                    .lock()
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                ledger.synchronize(&service.inner.control, state, now, tick);
-                let actual = ledger
-                    .sessions
-                    .actor(state, lease, now, tick, SessionPurpose::Manage)
-                    .map_err(|_| StorageError::AuthorityUnavailable)?;
-                if actual == *expected {
-                    Ok(())
-                } else {
-                    Err(StorageError::AuthorityUnavailable)
-                }
-            }));
+            repository = repository.with_session_guard(self.exact_session_guard(
+                lease,
+                self.inner.control.generation(),
+                None,
+            ));
         }
         repository
+    }
+    fn exact_session_guard(
+        &self,
+        lease: SessionLease,
+        local_generation: u64,
+        review: Option<(Revision, u64)>,
+    ) -> fc_storage::business::SessionGuard {
+        let service = self.clone();
+        Arc::new(move |state, expected| {
+            let reviewed_current = || {
+                if let Some((identity_revision, epoch)) = review {
+                    if state.revision != identity_revision {
+                        return Err(StorageError::Voice(VoiceError::RevisionConflict));
+                    }
+                    if epoch >= (u64::MAX >> 1) || service.generation() != epoch {
+                        return Err(StorageError::Voice(VoiceError::StaleGeneration));
+                    }
+                }
+                Ok(())
+            };
+            reviewed_current()?;
+            service
+                .inner
+                .control
+                .check(lease, local_generation)
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            let now = service.inner.clock.now();
+            let tick = service.inner.monotonic.monotonic_millis();
+            let mut ledger = service
+                .inner
+                .ledger
+                .lock()
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            ledger.synchronize(&service.inner.control, state, now, tick);
+            let actual = ledger
+                .sessions
+                .actor(state, lease, now, tick, SessionPurpose::Manage)
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            service
+                .inner
+                .control
+                .check(lease, local_generation)
+                .map_err(|_| StorageError::AuthorityUnavailable)?;
+            reviewed_current()?;
+            if actual == *expected {
+                Ok(())
+            } else {
+                Err(StorageError::AuthorityUnavailable)
+            }
+        })
     }
     /// Bound to the original runtime generation. This does not renew a lease,
     /// take Backend's mutex, query SQLite or permit stop/resume retargeting.
@@ -396,6 +432,16 @@ impl VoiceService {
         class: ClassId,
         generation: u64,
     ) -> Result<()> {
+        self.check_web_target_until(
+            lease,
+            class,
+            generation,
+            Instant::now() + Duration::from_millis(100),
+            None,
+        )
+    }
+    fn check_upload_runtime(&self, generation: u64) -> Result<()> {
+        self.check_open()?;
         if !self.inner.enabled.load(Ordering::Acquire) {
             return Err(BackendError::Voice(VoiceRepositoryError::Domain(
                 VoiceError::Disabled,
@@ -406,24 +452,111 @@ impl VoiceService {
                 VoiceError::StaleGeneration,
             )));
         }
-        let snapshot = self
-            .inner
-            .authority
-            .snapshot()
-            .map_err(|_| BackendError::Closed)?;
-        let actor = self.actor_from_state(lease, &snapshot.data)?;
-        authorize_submit(&snapshot.data, &actor, class, self.inner.clock.now())
-            .map_err(|e| BackendError::Voice(VoiceRepositoryError::Domain(e)))?;
-        let status = self.inner.control.health_gate().status();
-        if !self.current(generation)
-            || !self.inner.enabled.load(Ordering::Acquire)
-            || status.health != Health::Healthy
-            || status.revision != snapshot.revision
-            || status.auth_epoch != snapshot.auth_epoch
-        {
-            return Err(denied());
-        }
         Ok(())
+    }
+    fn check_web_target_until(
+        &self,
+        lease: SessionLease,
+        class: ClassId,
+        generation: u64,
+        deadline: Instant,
+        upload: Option<&VoiceAsset>,
+    ) -> Result<()> {
+        let gate = self.inner.control.health_gate();
+        loop {
+            // The caller's original generation and lease remain fixed even
+            // when unrelated commits overtake this immutable memory snapshot.
+            self.check_upload_runtime(generation)?;
+            if Instant::now() >= deadline {
+                return Err(BackendError::Storage(StorageError::Busy));
+            }
+            match self.inner.authority.snapshot() {
+                Ok(snapshot) => {
+                    let before = gate.status();
+                    match before.health {
+                        Health::Healthy
+                            if before.revision == snapshot.revision
+                                && before.auth_epoch == snapshot.auth_epoch =>
+                        {
+                            let decision =
+                                self.actor_from_state(lease, &snapshot.data)
+                                    .and_then(|actor| {
+                                        let now = self.inner.clock.now();
+                                        authorize_submit(&snapshot.data, &actor, class, now)
+                                            .map_err(|error| {
+                                                BackendError::Voice(VoiceRepositoryError::Domain(
+                                                    error,
+                                                ))
+                                            })?;
+                                        if let Some(asset) = upload {
+                                            let now = civil_seconds(now);
+                                            if now < asset.created_at || now >= asset.expires_at {
+                                                return Err(BackendError::Voice(
+                                                    VoiceRepositoryError::Domain(
+                                                        VoiceError::Expired,
+                                                    ),
+                                                ));
+                                            }
+                                            if self
+                                                .inner
+                                                .sessions
+                                                .lock()
+                                                .map_err(|_| BackendError::Closed)?
+                                                .uploads
+                                                .get(&asset.id)
+                                                != Some(&lease)
+                                            {
+                                                return Err(denied());
+                                            }
+                                        }
+                                        if Instant::now() >= deadline {
+                                            return Err(BackendError::Storage(StorageError::Busy));
+                                        }
+                                        // Exact session revocation does not
+                                        // necessarily publish a new identity.
+                                        // Recheck the same proof after target
+                                        // and reservation validation as well.
+                                        if self.actor_from_state(lease, &snapshot.data)? != actor {
+                                            return Err(denied());
+                                        }
+                                        Ok(())
+                                    });
+                            let after = gate.status();
+                            self.check_upload_runtime(generation)?;
+                            if after == before {
+                                // Even a fully coherent successful check must
+                                // not escape its original 100 ms deadline.
+                                if Instant::now() >= deadline {
+                                    return Err(BackendError::Storage(StorageError::Busy));
+                                }
+                                return decision;
+                            }
+                            if !matches!(after.health, Health::Healthy | Health::AuthorityUpdating)
+                                || after.revision < before.revision
+                                || after.auth_epoch < before.auth_epoch
+                            {
+                                return Err(BackendError::Closed);
+                            }
+                        }
+                        Health::AuthorityUpdating => {}
+                        Health::Healthy
+                            if before.revision > snapshot.revision
+                                && before.auth_epoch >= snapshot.auth_epoch => {}
+                        _ => return Err(BackendError::Closed),
+                    }
+                }
+                Err(GateError::Updating) => {}
+                Err(_) => return Err(BackendError::Closed),
+            }
+            self.check_upload_runtime(generation)?;
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                return Err(BackendError::Storage(StorageError::Busy));
+            }
+            // No map, ledger or gate lock survives this bounded wait. This
+            // retries memory authorization only, never body I/O or a SQL task.
+            std::thread::sleep(remaining.min(Duration::from_millis(1)));
+        }
     }
     pub fn check_web_upload(
         &self,
@@ -431,6 +564,7 @@ impl VoiceService {
         asset: &VoiceAsset,
         generation: u64,
     ) -> Result<()> {
+        let deadline = Instant::now() + Duration::from_millis(100);
         if asset.owner != lease.principal_id()
             || self
                 .inner
@@ -443,14 +577,7 @@ impl VoiceService {
         {
             return Err(denied());
         }
-        self.check_web_target(lease, asset.class_id, generation)?;
-        let now = civil_seconds(self.inner.clock.now());
-        if now < asset.created_at || now >= asset.expires_at {
-            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
-                VoiceError::Expired,
-            )));
-        }
-        Ok(())
+        self.check_web_target_until(lease, asset.class_id, generation, deadline, Some(asset))
     }
     pub fn web_capabilities(&self, lease: SessionLease) -> Result<WebVoiceCapabilities> {
         self.check_web_actor(lease)?;
@@ -1029,40 +1156,21 @@ impl VoiceService {
         enabled: bool,
         expected: Revision,
     ) -> Result<VoiceSnapshot> {
-        let actor = self.actor(lease, false)?;
+        // Preserve the bounded authority-publication wait of the original API.
+        // The reviewed entry point still revalidates the exact lease itself.
+        self.actor(lease, false)?;
         let state = self
             .inner
             .authority
             .snapshot()
             .map_err(|_| BackendError::Closed)?;
-        state
-            .data
-            .authorize_management(&actor, self.inner.clock.now())
-            .map_err(|_| denied())?;
-        if self.inventory()?.revision != expected {
-            return Err(BackendError::Voice(VoiceRepositoryError::Domain(
-                VoiceError::RevisionConflict,
-            )));
-        }
-        if !enabled {
-            self.inner.enabled.store(false, Ordering::Release);
-            self.invalidate_runtime();
-        }
-        let snapshot = self.conclude(
-            self.repository_mode(self.generation(), Some(lease), false)
-                .set_voice_enabled(enabled, expected, &actor),
-        )?;
-        self.inner
-            .enabled
-            .store(snapshot.enabled, Ordering::Release);
-        for job in &snapshot.jobs {
-            self.update(job)?;
-        }
-        if enabled && snapshot.jobs.iter().all(|j| j.state.terminal()) && !self.is_admitting() {
-            self.resume_after_stop(self.generation())?;
-        }
-        self.wake();
-        Ok(snapshot)
+        self.set_enabled_reviewed(
+            lease,
+            enabled,
+            expected,
+            state.data.revision,
+            self.generation(),
+        )
     }
     pub fn maintain(&self) -> Result<VoiceSnapshot> {
         self.check_open()?;
@@ -1219,7 +1327,7 @@ mod tests {
     };
     // Production deadlines are wall-clock safety bounds. Avoid four synthetic
     // password KDF fixtures starving each other's real SQLite writer in tests.
-    static VOICE_FIXTURE: Mutex<()> = Mutex::new(());
+    pub(super) static VOICE_FIXTURE: Mutex<()> = Mutex::new(());
     struct ClockFixture(Mutex<LocalDateTime>);
     impl Clock for ClockFixture {
         fn now(&self) -> LocalDateTime {
@@ -1247,7 +1355,7 @@ mod tests {
         }
         std::env::temp_dir()
     }
-    struct Directory(PathBuf);
+    pub(super) struct Directory(pub(super) PathBuf);
     impl Drop for Directory {
         fn drop(&mut self) {
             let r = std::fs::remove_dir_all(&self.0);
@@ -1265,7 +1373,7 @@ mod tests {
             }
         }
     }
-    fn issue(backend: &Backend, origin: TrustedOrigin) -> SessionLease {
+    pub(super) fn issue(backend: &Backend, origin: TrustedOrigin) -> SessionLease {
         let state = backend.state().unwrap();
         let account = state.account(PrincipalId::new(1).unwrap()).unwrap();
         let lease = backend
@@ -1497,7 +1605,7 @@ mod tests {
             "source or device open crossing latest start cannot write a first buffer"
         );
     }
-    struct SharedService(Arc<Mutex<Backend>>);
+    pub(super) struct SharedService(pub(super) Arc<Mutex<Backend>>);
     impl Drop for SharedService {
         fn drop(&mut self) {
             let result = self.0.lock().unwrap_or_else(|p| p.into_inner()).close();
@@ -1506,7 +1614,7 @@ mod tests {
             }
         }
     }
-    fn shared_fixture() -> (Directory, SharedService, SessionLease, ClassId) {
+    pub(super) fn shared_fixture() -> (Directory, SharedService, SessionLease, ClassId) {
         let directory = Directory(fixture_root().join(format!(
                 "FutureClassroom-Voice-Service-{}-{}",
                 std::process::id(),
@@ -1560,7 +1668,7 @@ mod tests {
             class,
         )
     }
-    fn independent_request(
+    pub(super) fn independent_request(
         service: &VoiceService,
         lease: SessionLease,
         class: ClassId,

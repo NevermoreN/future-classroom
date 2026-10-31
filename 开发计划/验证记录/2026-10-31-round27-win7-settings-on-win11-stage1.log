@@ -1,0 +1,10 @@
+cleanup: PASS
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 526, in <module>
+    main()
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 447, in main
+    result = validate_voice_settings_output(report["native"].get("voiceSettingsExitCode"), report["native"].get("voiceSettingsOutput"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py", line 66, in validate_voice_settings_output
+    raise RuntimeError("isolated native voice settings workflow failed")
+RuntimeError: isolated native voice settings workflow failed

@@ -117,6 +117,14 @@ fn run() -> Result<(), String> {
                 Err("native recovery workflow probe requires Windows".into())
             }
         }
+        [flag] if flag == "--voice-settings-probe" => {
+            #[cfg(windows)]
+            {
+                application::voice_settings_probe()
+            }
+            #[cfg(not(windows))]
+            Err("native voice settings probe requires Windows".into())
+        }
         [flag] if flag == "--autostart-probe" => {
             #[cfg(windows)]
             {

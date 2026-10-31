@@ -197,3 +197,146 @@ fn full_shared_queue_delays_shutdown_until_the_writer_can_really_close() {
     app.pool.join().unwrap();
     drop(tickets);
 }
+
+fn voice_manager_fixture() -> (super::tests::Scratch, App) {
+    let (scratch, mut app) = fixture();
+    wait_for(&mut app, |app| app.pending.is_none());
+    let lease;
+    {
+        let mut backend = app.backend.as_ref().unwrap().lock().unwrap();
+        drop(
+            backend
+                .initialize(
+                    Initialize {
+                        school_name: "Synthetic voice queue school".into(),
+                        login_name: "voice-queue-admin".into(),
+                        display_name: "Synthetic manager".into(),
+                    },
+                    Password::new("Synthetic voice queue password!".into()).unwrap(),
+                )
+                .unwrap(),
+        );
+        lease = backend
+            .login(
+                "voice-queue-admin",
+                Password::new("Synthetic voice queue password!".into()).unwrap(),
+            )
+            .unwrap();
+        app.state = Arc::new(backend.state().unwrap());
+    }
+    app.lease = Some(lease);
+    app.screen = Screen::Home;
+    app.view().validate().unwrap();
+    assert!(app.view().actions.len() <= 12);
+    let later = Instant::now() + Duration::from_secs(120);
+    app.next_voice_maintenance = later;
+    app.next_content_maintenance = later;
+    app.next_calendar_maintenance = later;
+    app.audio.as_ref().unwrap().shutdown();
+    wait_for(&mut app, |app| {
+        app.audio.as_ref().unwrap().status().is_ok_and(|state| {
+            state.phase == RuntimePhase::Closed && !state.physical_thread_running
+        }) && app
+            .pool
+            .handle()
+            .try_stats()
+            .is_some_and(|stats| stats.running == 0 && stats.queued == 0)
+    });
+    (scratch, app)
+}
+
+#[test]
+fn full_queue_voice_loading_can_return_and_refresh_after_physical_capacity_returns() {
+    let _serial = SERIAL.lock().unwrap();
+    let (_scratch, mut app) = voice_manager_fixture();
+    let hold = Arc::new(Hold::new());
+    let _release_on_failure = ReleaseOnDrop(hold.clone());
+    let mut tickets = Vec::new();
+    for _ in 0..fc_runtime::worker::WORKER_THREADS {
+        tickets.push(submit_hold(&app, hold.clone()));
+    }
+    hold.wait_for_entered(fc_runtime::worker::WORKER_THREADS);
+    for _ in 0..fc_runtime::worker::QUEUED_JOBS {
+        tickets.push(submit_hold(&app, hold.clone()));
+    }
+    app.submit_voice_management(voice_controller::Operation::Refresh)
+        .unwrap();
+    assert!(app.pending.is_none());
+    assert!(app.voice_editor.is_none());
+    assert!(app.screen == Screen::Voice);
+    let view = app.view();
+    view.validate().unwrap();
+    for id in [voice_editor::REFRESH, voice_editor::CLOSE, LOCK] {
+        assert!(view
+            .actions
+            .iter()
+            .any(|action| action.id == id && action.enabled));
+    }
+    app.event(Event::Submit(voice_editor::CLOSE, FormData::new()))
+        .unwrap();
+    assert!(app.screen == Screen::Home);
+    assert!(app.pending.is_none());
+    hold.release();
+    wait_for(&mut app, |app| {
+        app.pool
+            .handle()
+            .try_stats()
+            .is_some_and(|stats| stats.running == 0 && stats.queued == 0)
+    });
+    app.submit_voice_management(voice_controller::Operation::Refresh)
+        .unwrap();
+    wait_for(&mut app, |app| app.pending.is_none());
+    assert!(app.screen == Screen::Voice);
+    assert!(app.voice_editor.is_some());
+    app.begin_shutdown();
+    wait_for(&mut app, App::shutdown_complete);
+    assert!(app.writer_closed);
+    app.pool.join().unwrap();
+    drop(tickets);
+}
+
+#[test]
+fn delivered_voice_metadata_cannot_cross_later_authority_or_runtime_generation() {
+    let _serial = SERIAL.lock().unwrap();
+    let (_scratch, mut app) = voice_manager_fixture();
+    let lease = app.lease.unwrap();
+    let service = app.voice_service.as_ref().unwrap().clone();
+    let initial = service.management_snapshot(lease).unwrap();
+    service.set_enabled(lease, false, initial.revision).unwrap();
+    let before_identity = service.management_snapshot(lease).unwrap();
+    assert!(before_identity.publication_revision > before_identity.identity_revision);
+    app.screen = Screen::Voice;
+    app.voice_management_loaded(lease, before_identity.clone())
+        .unwrap();
+    assert!(
+        app.voice_editor.is_some(),
+        "global publication is distinct from identity revision"
+    );
+    app.voice_editor = None;
+    app.backend
+        .as_ref()
+        .unwrap()
+        .lock()
+        .unwrap()
+        .identity(
+            lease,
+            IdentityCommand::CreateClass {
+                id: ClassId::new(1).unwrap(),
+                name: "Synthetic later authority".into(),
+            },
+        )
+        .unwrap();
+    app.screen = Screen::Voice;
+    app.voice_management_loaded(lease, before_identity).unwrap();
+    assert!(app.voice_editor.is_none());
+    assert!(!app.status.is_empty());
+    let before_stop = service.management_snapshot(lease).unwrap();
+    service.invalidate_runtime();
+    app.voice_management_loaded(lease, before_stop).unwrap();
+    assert!(app.voice_editor.is_none());
+    assert!(!app.status.is_empty());
+    app.begin_shutdown();
+    wait_for(&mut app, App::shutdown_complete);
+    assert!(app.writer_closed);
+    app.pool.join().unwrap();
+}

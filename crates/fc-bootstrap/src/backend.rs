@@ -69,7 +69,10 @@ use std::{
     },
     time::{Duration, Instant},
 };
-pub use voice::{VoiceGuard, VoicePlaybackAuthorization, VoiceRuntimeHandle, VoiceService};
+pub use voice::{
+    VoiceGuard, VoiceManagementSnapshot, VoicePlaybackAuthorization, VoiceRuntimeHandle,
+    VoiceService,
+};
 
 pub type Result<T> = std::result::Result<T, BackendError>;
 type Snapshot = PreparedAuthority<IdentityState>;

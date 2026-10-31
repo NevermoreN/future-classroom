@@ -32,6 +32,49 @@ MIGRATION_STEPS = (
 )
 
 
+VOICE_SETTINGS_STEPS = (
+    'native-setup-global-administrator',
+    'native-open-voice-settings',
+    'saved-default-enabled-no-jobs',
+    'native-disable-review-no-write',
+    'native-unchecked-confirm-rejected',
+    'native-cancel-no-write',
+    'native-confirm-disable-persisted',
+    'native-refresh-disabled',
+    'native-enable-review-no-write',
+    'native-lock-discards-review',
+    'native-relogin',
+    'native-reopen-saved-disabled',
+    'first-app-physical-shutdown',
+    'second-app-real-database-reopen',
+    'native-relogin-after-database-reopen',
+    'native-reopen-persisted-disabled',
+    'native-confirm-enable-persisted',
+    'native-disable-review-captured',
+    'external-concurrent-cas-disable',
+    'native-stale-review-rejected',
+    'native-refresh-current-config',
+    'native-confirm-enable-after-refresh',
+    'native-close-settings',
+    'second-app-physical-shutdown',
+    'isolated-deployment-cleanup',
+)
+
+
+def validate_voice_settings_output(exit_code, output):
+    if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
+        raise RuntimeError("isolated native voice settings workflow failed")
+    steps = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_STEP")]
+    expected = [f"VOICE_SETTINGS_NATIVE_STEP index={index} name={name}" for index, name in enumerate(VOICE_SETTINGS_STEPS)]
+    if steps != expected:
+        raise RuntimeError("voice settings exact25 ordered step indices/names missing, malformed or repeated")
+    summaries = [line for line in output if line.startswith("VOICE_SETTINGS_NATIVE_PASS")]
+    pattern = r"VOICE_SETTINGS_NATIVE_PASS steps=25 shared_workers=2 database_reopen=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=([0-9]+)"
+    if len(summaries) != 1 or not (summary := re.fullmatch(pattern, summaries[0])):
+        raise RuntimeError("voice settings exact final scope/cleanup completion marker missing or malformed")
+    return {"steps": len(steps), "stepNames": list(VOICE_SETTINGS_STEPS), "elapsedMs": int(summary.group(1))}
+
+
 def validate_migration_output(exit_code, output):
     if exit_code != 0 or not isinstance(output, list) or not all(isinstance(line, str) for line in output):
         raise RuntimeError("isolated native cross-installation migration workflow failed")
@@ -109,6 +152,7 @@ def main():
     parser.add_argument("--reinitialization", action="store_true", help="isolated hidden native no-code reset, cancellation, explicit acknowledgements and independent executable fresh setup; synthetic deployment only")
     parser.add_argument("--migration", action="store_true", help="dedicated hidden native cross-installation explicit mapping, cold restore and independent executable reopen; synthetic deployments and isolated picker capabilities only")
     parser.add_argument("--autostart", action="store_true", help="isolated hidden native durable startup settings; generated scratch Registry leaf only")
+    parser.add_argument("--voice-settings", action="store_true", help="isolated hidden native local-admin voice policy confirmation, lock, CAS and durable reopen; no recording/playback")
     parser.add_argument("--calendar", action="store_true", help="isolated hidden native calendar candidate review/adoption/policy/CAS; synthetic feed")
     parser.add_argument("--calendar-download", action="store_true", help="one fixed2026 WinHTTP HTTPS feed request; no application writes")
     parser.add_argument("--application", action="store_true", help="exercise the actual workbench in an isolated hidden test deployment")
@@ -120,6 +164,8 @@ def main():
         parser.error("native seconds must be in 1..30")
     if not 1 <= args.test_timeout_seconds <= 900:
         parser.error("test timeout seconds must be in 1..900")
+    if args.voice_settings and any((args.calendar_download, args.application, args.calendar, args.autostart, args.recovery, args.reinitialization, args.migration, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
+        parser.error("run the dedicated voice settings workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.migration and any((args.application, args.calendar, args.calendar_download, args.autostart, args.recovery, args.reinitialization, args.materials, args.audio_silent, args.web_voice, args.web_pairing)):
         parser.error("run the dedicated migration workflow separately; only test metadata and read-only system/host checks may accompany it")
     if args.recovery and (args.application or args.calendar or args.autostart):
@@ -312,6 +358,14 @@ def main():
                 raise RuntimeError("migration report insertion point is ambiguous")
             anchor = matched[0]
             body = body.replace(anchor, command + "@{migrationExitCode=$migrationCode;migrationOutput=$migrationOutput;" + anchor[2:])
+        if args.voice_settings:
+            command = "$voiceSettingsOutput=@(& " + ps_literal(directory + "\\" + args.exe.name) + " --voice-settings-probe 2>&1|ForEach-Object{\"$_\"});$voiceSettingsCode=$LASTEXITCODE;"
+            anchors = ["@{hostExitCode=$hostCode;", "@{exitCode=$code;"]
+            matched = [anchor for anchor in anchors if anchor in body]
+            if len(matched) != 1 or body.count(matched[0]) != 1:
+                raise RuntimeError("voice settings report insertion point is ambiguous")
+            anchor = matched[0]
+            body = body.replace(anchor, command + "@{voiceSettingsExitCode=$voiceSettingsCode;voiceSettingsOutput=$voiceSettingsOutput;" + anchor[2:])
         body = "[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;" + body
         # Upload a script rather than nesting UTF-16 base64 in Task Scheduler
         # arguments: OpenSSH's default cmd.exe command line is limited to 8191 chars.
@@ -321,11 +375,11 @@ def main():
             remote.upload(native_script, directory)
         arguments = '-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + directory + '\\native-probe.ps1"'
         launch = "$action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument " + ps_literal(arguments) + ";$principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited;Register-ScheduledTask -TaskName " + task_name + " -Action $action -Principal $principal|Out-Null;Start-ScheduledTask -TaskName " + task_name + ";$until=(Get-Date).AddSeconds(40);$result=Join-Path " + root + " 'native-result.json';while(!(Test-Path -LiteralPath $result)){if((Get-Date)-gt $until){throw 'interactive probe timed out'};Start-Sleep -Milliseconds 250};Get-Content -Raw -LiteralPath $result"
-        if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
+        if args.voice_settings or args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(40)", "AddSeconds(240)")
         if args.recovery or args.reinitialization or args.migration:
             launch = launch.replace("AddSeconds(240)", "AddSeconds(300)")
-        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart else 50).lstrip("\ufeff"))
+        report["native"] = json.loads(remote.powershell(launch, timeout=310 if args.recovery or args.reinitialization or args.migration else 250 if args.application or args.materials or args.web_voice or args.calendar or args.autostart or args.voice_settings else 50).lstrip("\ufeff"))
         if report["native"]["exitCode"] != 0:
             raise RuntimeError("native probe failed")
         if args.system_host and report["native"].get("hostExitCode") != 0:
@@ -389,6 +443,13 @@ def main():
             report["migrationSubprocessNonce"] = result["subprocessNonce"]
             report["migrationElapsedMs"] = result["elapsedMs"]
             report["migrationScope"] = "Synthetic hidden native explicit class/subject/principal mapping, strict foreign-installation gate, actual cold three-tree restore and independent executable target login/mapped content; source package and target key unchanged; picker return capabilities isolated; visible dialogs and hardware power loss NOT_RUN"
+        if args.voice_settings:
+            result = validate_voice_settings_output(report["native"].get("voiceSettingsExitCode"), report["native"].get("voiceSettingsOutput"))
+            report["voiceSettingsNativeSteps"] = result["steps"]
+            report["voiceSettingsNativeStepNames"] = result["stepNames"]
+            report["voiceSettingsElapsedMs"] = result["elapsedMs"]
+            report["voiceSettingsNativeStatus"] = "PASS"
+            report["voiceSettingsScope"] = "Synthetic protected deployment, actual hidden controls/shared workers/local-admin policy, lock, revision conflict and real database close/reopen; no audio job, recording or physical playback claim; production HTTPS and visible device acceptance remain unvalidated"
         if args.autostart:
             output = report["native"].get("autostartOutput", [])
             if report["native"].get("autostartExitCode") != 0 or not isinstance(output, list):

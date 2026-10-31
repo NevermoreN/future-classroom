@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "originalFourBeforeFix": {
+    "passed": 0,
+    "failed": 4,
+    "exitCode": 101,
+    "log": "host-upload-publication-before-fix.log",
+    "testSha256": "aeaf35a3e829d9ff1d79a1ae96f3f777218c8b6019b68f402e48e40dc3e034f6"
+  },
+  "afterProductionAndFixtureFix": {
+    "passed": 5,
+    "failed": 0,
+    "exitCode": 0,
+    "log": "host-upload-publication-after-fixture-fix.log",
+    "testSha256": "4043b4c8fefe8246ce2728c19ceb9d815ae1b17754da25485a715748c92e24cc"
+  },
+  "intermediate": {
+    "passed": 4,
+    "failed": 1,
+    "log": "host-upload-publication-after-fix.log",
+    "reason": "six-case test accumulated reservations; isolated real fixture per case, no production policy change"
+  },
+  "preservedScope": "original short/long real writer publication, all6 lease/epoch rejection cases, actual new class target; added fifth final successful-authorization deadline regression; SQL/body/prepare not replayed",
+  "originalNativeFailureCausality": "INFERENCE_ONLY; first response status not captured; single instrumented pre-fix rerun passed"
+}

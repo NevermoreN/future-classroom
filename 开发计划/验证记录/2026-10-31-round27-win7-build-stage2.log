@@ -1,0 +1,143 @@
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-ports/src/http.rs:128:14
+    |
+128 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+128 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+128 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+warning: `fc-ports` (lib) generated 1 warning (run `cargo fix --lib -p fc-ports` to apply 1 suggestion)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+  --> crates/fc-runtime/src/cancel.rs:33:14
+   |
+33 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+   |              ^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+   |
+33 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+33 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+   |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-runtime/src/worker.rs:106:14
+    |
+106 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+106 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+106 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+warning: `fc-runtime` (lib) generated 2 warnings (run `cargo fix --lib -p fc-runtime` to apply 2 suggestions)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u32>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-windows/src/audio/device.rs:170:10
+    |
+170 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |          ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+170 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+170 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-windows/src/tls_frontdoor/schannel.rs:401:10
+    |
+401 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |          ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+401 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+401 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+    |
+
+warning: `fc-windows` (lib) generated 2 warnings (run `cargo fix --lib -p fc-windows` to apply 2 suggestions)
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-storage/src/login.rs:364:14
+    |
+364 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+364 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+364 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-storage/src/lib.rs:388:14
+    |
+388 |         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+388 -         used.fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+388 +         used.try_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+    |
+
+warning: `fc-storage` (lib) generated 2 warnings (run `cargo fix --lib -p fc-storage` to apply 2 suggestions)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/backend/voice.rs:195:14
+    |
+195 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+    |              ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+195 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+195 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |word| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/backend.rs:314:14
+    |
+314 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+314 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+314 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> crates/fc-bootstrap/src/voice_runtime.rs:137:14
+    |
+137 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+137 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+137 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+ --> crates/fc-bootstrap/src/web_application/shared_upload.rs:9:14
+  |
+9 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+  |              ^^^^^^^^^^^^
+  |
+help: replace the use of the deprecated method
+  |
+9 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+9 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |count| {
+  |
+
+warning: `fc-bootstrap` (lib) generated 4 warnings (run `cargo fix --lib -p fc-bootstrap` to apply 4 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.67s

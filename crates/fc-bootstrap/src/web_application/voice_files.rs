@@ -100,6 +100,7 @@ impl WebApplication {
                     .service
                     .check_web_upload(lease, &reservation, generation)
                     .is_ok()
+                && started.elapsed() < Duration::from_secs(30)
         };
         // Read limit caps bytes before the trusted WAV adapter; one extra byte is
         // allowed only to reject framing mismatch, never to publish a larger object.

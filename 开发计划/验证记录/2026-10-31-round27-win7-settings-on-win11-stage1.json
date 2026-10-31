@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 60,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "c25c9930ab21bfad440a93760cd6ea1a7a720af9c4103f25a2c5148b00f82849"
+    }
+  ],
+  "exeSha256": "c25c9930ab21bfad440a93760cd6ea1a7a720af9c4103f25a2c5148b00f82849",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [],
+  "native": {
+    "output": [
+      "native_lifecycle=PASS elapsed_ms=1000 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+      "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+    ],
+    "exitCode": 0,
+    "voiceSettingsExitCode": 1,
+    "voiceSettingsOutput": [
+      "PROBE_SUBMIT tick=3 kind=other page=正在打开未来教室",
+      "PROBE_COMPLETE tick=42 kind=other page=正在打开未来教室",
+      "PROBE_EVENT tick=46 action=1 page=首次设置 · 创建主管理员 pending=false generation=0",
+      "PROBE_SUBMIT tick=46 kind=request page=首次设置 · 创建主管理员",
+      "PROBE_COMPLETE tick=105 kind=updated page=首次设置 · 创建主管理员",
+      "PROBE_EVENT tick=108 action=5 page=请保存恢复码 pending=false generation=0",
+      "PROBE_EVENT tick=111 action=3 page=Synthetic voice settings school · 登录工作台 pending=false generation=0",
+      "PROBE_SUBMIT tick=111 kind=request page=Synthetic voice settings school · 登录工作台",
+      "PROBE_COMPLETE tick=165 kind=updated page=Synthetic voice settings school · 登录工作台",
+      "FutureClassroom: 工作台渲染失败"
+    ],
+    "sessionId": 1
+  },
+  "status": "FAIL",
+  "error": "isolated native voice settings workflow failed"
+}

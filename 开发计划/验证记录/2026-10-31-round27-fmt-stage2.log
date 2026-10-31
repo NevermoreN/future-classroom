@@ -1,0 +1,110 @@
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/backup_shutdown_tests.rs:234:
+     wait_for(&mut app, |app| {
+         app.audio.as_ref().unwrap().status().is_ok_and(|state| {
+             state.phase == RuntimePhase::Closed && !state.physical_thread_running
+[31m-        }) && app.pool.handle().try_stats().is_some_and(|stats| {
+(B[m[31m-            stats.running == 0 && stats.queued == 0
+(B[m[31m-        })
+(B[m[32m+        }) && app
+(B[m[32m+            .pool
+(B[m[32m+            .handle()
+(B[m[32m+            .try_stats()
+(B[m[32m+            .is_some_and(|stats| stats.running == 0 && stats.queued == 0)
+(B[m     });
+     (scratch, app)
+ }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/backup_shutdown_tests.rs:263:
+     let view = app.view();
+     view.validate().unwrap();
+     for id in [voice_editor::REFRESH, voice_editor::CLOSE, LOCK] {
+[31m-        assert!(view.actions.iter().any(|action| action.id == id && action.enabled));
+(B[m[32m+        assert!(view
+(B[m[32m+            .actions
+(B[m[32m+            .iter()
+(B[m[32m+            .any(|action| action.id == id && action.enabled));
+(B[m     }
+     app.event(Event::Submit(voice_editor::CLOSE, FormData::new()))
+         .unwrap();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/backup_shutdown_tests.rs:271:
+     assert!(app.pending.is_none());
+     hold.release();
+     wait_for(&mut app, |app| {
+[31m-        app.pool.handle().try_stats().is_some_and(|stats| {
+(B[m[31m-            stats.running == 0 && stats.queued == 0
+(B[m[31m-        })
+(B[m[32m+        app.pool
+(B[m[32m+            .handle()
+(B[m[32m+            .try_stats()
+(B[m[32m+            .is_some_and(|stats| stats.running == 0 && stats.queued == 0)
+(B[m     });
+     app.submit_voice_management(voice_controller::Operation::Refresh)
+         .unwrap();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/voice_controller.rs:23:
+     // nor a captured revision, and no automatic retry replays a change.
+     service.management_snapshot(lease)?;
+     context.checkpoint().map_err(|_| Failure::Stopped)?;
+[31m-    if let Operation::SetEnabled { expected, expected_identity, expected_runtime, enabled } = operation {
+(B[m[31m-        service.set_enabled_reviewed(lease, enabled, expected, expected_identity, expected_runtime)?;
+(B[m[32m+    if let Operation::SetEnabled {
+(B[m[32m+        expected,
+(B[m[32m+        expected_identity,
+(B[m[32m+        expected_runtime,
+(B[m[32m+        enabled,
+(B[m[32m+    } = operation
+(B[m[32m+    {
+(B[m[32m+        service.set_enabled_reviewed(
+(B[m[32m+            lease,
+(B[m[32m+            enabled,
+(B[m[32m+            expected,
+(B[m[32m+            expected_identity,
+(B[m[32m+            expected_runtime,
+(B[m[32m+        )?;
+(B[m     }
+     let loaded = service.management_snapshot(lease)?;
+     context.checkpoint().map_err(|_| Failure::Stopped)?;
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/voice_controller.rs:108:
+             Ok(voice_editor::Command::Refresh) => {
+                 return self.submit_voice_management(Operation::Refresh);
+             }
+[31m-            Ok(voice_editor::Command::SetEnabled { expected, expected_identity, expected_runtime, enabled }) => {
+(B[m[31m-                return self.submit_voice_management(Operation::SetEnabled { expected, expected_identity, expected_runtime, enabled });
+(B[m[32m+            Ok(voice_editor::Command::SetEnabled {
+(B[m[32m+                expected,
+(B[m[32m+                expected_identity,
+(B[m[32m+                expected_runtime,
+(B[m[32m+                enabled,
+(B[m[32m+            }) => {
+(B[m[32m+                return self.submit_voice_management(Operation::SetEnabled {
+(B[m[32m+                    expected,
+(B[m[32m+                    expected_identity,
+(B[m[32m+                    expected_runtime,
+(B[m[32m+                    enabled,
+(B[m[32m+                });
+(B[m             }
+             Err(message) => self.status = message,
+         }
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/voice_controller.rs:133:
+             let status = control.health_gate().status();
+             status.health == fc_runtime::health::Health::Healthy
+                 && status.revision == loaded.identity_revision
+[31m-        }) && self.voice_service.as_ref().is_some_and(|service| {
+(B[m[31m-            service.generation() == loaded.runtime_generation
+(B[m[31m-        });
+(B[m[32m+        }) && self
+(B[m[32m+            .voice_service
+(B[m[32m+            .as_ref()
+(B[m[32m+            .is_some_and(|service| service.generation() == loaded.runtime_generation);
+(B[m         if !fresh {
+             if let Some(editor) = self.voice_editor.as_mut() {
+                 editor.invalidate();
+Diff in /workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs:1658:
+             }
+             Screen::Voice => {
+                 view.title = "远程语音设置".into();
+[31m-                view.description = "尚未取得当前语音设置。后台繁忙或状态已变化时，请重新读取；也可返回工作台。".into();
+(B[m[32m+                view.description =
+(B[m[32m+                    "尚未取得当前语音设置。后台繁忙或状态已变化时，请重新读取；也可返回工作台。"
+(B[m[32m+                        .into();
+(B[m                 view.actions = vec![
+                     action(voice_editor::REFRESH, "重新读取状态"),
+                     action(voice_editor::CLOSE, "返回工作台"),

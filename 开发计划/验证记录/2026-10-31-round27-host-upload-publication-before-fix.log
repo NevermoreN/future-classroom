@@ -1,0 +1,43 @@
+   Compiling fc-bootstrap v0.1.0 (/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap)
+    Finished `release` profile [optimized] target(s) in 56.20s
+     Running unittests src/lib.rs (/tmp/fc-round27-host/release/deps/fc_bootstrap-0a9672e9745706e7)
+
+running 4 tests
+test backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged ... FAILED
+test backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch ... FAILED
+test backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch ... FAILED
+test backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay ... FAILED
+
+failures:
+
+---- backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged stdout ----
+
+thread 'backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged' (14236) panicked at crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs:174:9:
+upload=false: Err(Closed)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch stdout ----
+
+thread 'backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch' (14237) panicked at crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs:133:9:
+upload=false: transient publication is uncertainty, not revocation: Err(Closed)
+
+---- backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch stdout ----
+
+thread 'backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch' (14240) panicked at crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs:248:13:
+replacement upload=false: old checkpoint must observe actual revocation, not a transient Closed: Err(Closed)
+
+---- backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay stdout ----
+
+thread 'backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay' (14243) panicked at crates/fc-bootstrap/src/backend/voice/upload_authorization_tests.rs:357:9:
+waiter must inspect the newly committed real target: Err(Closed)
+
+
+failures:
+    backend::voice::upload_authorization_tests::upload_checkpoints_bound_publication_wait_and_leave_runtime_and_reservation_unchanged
+    backend::voice::upload_authorization_tests::upload_checkpoints_wait_for_short_unrelated_publication_in_the_same_exact_epoch
+    backend::voice::upload_authorization_tests::upload_publication_wait_never_adopts_a_replacement_lease_or_runtime_epoch
+    backend::voice::upload_authorization_tests::upload_wait_rechecks_the_actual_new_class_binding_after_publication_without_sql_replay
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 107 filtered out; finished in 0.41s
+
+error: test failed, to rerun pass `-p fc-bootstrap --lib`

@@ -221,7 +221,14 @@ pub(super) fn run(
         "voice GET original command failed",
     )?;
     let second = ports.upload(&silence(16_000), 7, csrf)?;
-    require(second.head.status == 201, "voice second upload failed")?;
+    require(
+        second.head.status == 201,
+        &format!(
+            "voice second upload failed status={} error={}",
+            second.head.status,
+            text(&second).chars().take(512).collect::<String>()
+        ),
+    )?;
     ports.submit(&second, 99_002, 10)?;
     let second_id = check(VoiceJobId::new(99_002))?;
     let deadline = Instant::now() + Duration::from_secs(8);
