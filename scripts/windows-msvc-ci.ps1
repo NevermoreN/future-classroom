@@ -130,22 +130,34 @@ function Resolve-Application([string]$Name) {
     return $path
 }
 
-function Get-ActiveProcessIdentity($Process) {
+function Get-ActiveProcessIdentity($Process, [DateTime]$Deadline) {
     if ($Process.HasExited) { return $null }
     try {
         $processId = $Process.Id
         $startTicks = $Process.StartTime.ToUniversalTime().Ticks
-        $module = $Process.MainModule
-        if ($null -eq $module) { throw 'Live process main module is unavailable.' }
-        $image = [string]$module.FileName
-        if ([string]::IsNullOrWhiteSpace($image)) { throw 'Live process image is unavailable.' }
+        while ($true) {
+            if ($Process.HasExited) { return $null }
+            if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }
+            $module = $Process.MainModule
+            if ($null -ne $module) {
+                $image = [string]$module.FileName
+                if (-not [string]::IsNullOrWhiteSpace($image)) {
+                    if ($Process.HasExited) { return $null }
+                    if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }
+                    return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }
+                }
+            }
+            # Startup can temporarily expose no module or an empty image path.
+            if ($Process.HasExited) { return $null }
+            if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }
+            $Process.Refresh()
+            Start-Sleep -Milliseconds 1
+        }
     } catch {
         # The same process may exit between HasExited and the module query.
         if ($Process.HasExited) { return $null }
         throw
     }
-    if ($Process.HasExited) { return $null }
-    return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }
 }
 
 function Invoke-Logged {
@@ -168,7 +180,7 @@ function Invoke-Logged {
     try {
         if (-not $process.Start()) { throw "Cannot start $Name" }
         $processStarted = $true
-        $identity = Get-ActiveProcessIdentity $process
+        $identity = Get-ActiveProcessIdentity $process ($started.AddSeconds([Math]::Min(5, $TimeoutSeconds)))
         if ($null -ne $identity) { Write-NewJson (Join-Path $Logs "$Name.active.json") $identity }
         $streams = @(
             @{ reader = $process.StandardOutput.BaseStream; file = $outFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L },

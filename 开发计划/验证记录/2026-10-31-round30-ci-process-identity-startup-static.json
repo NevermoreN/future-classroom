@@ -1,0 +1,62 @@
+{
+  "status": "LOCAL_STATIC_AND_PYTHON_MODEL_PASS",
+  "powershellRuntime": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+  "readonlyProbe": "PREPARED_NOT_RUN",
+  "beforeSha256": "13e990098c3d2b100383ca80e5f2991df4bb96175884d46fa4391429b28ed4fb",
+  "afterSha256": "526881ca746898e626a88b71e69d8a48b6143ebfaacb1cfa879decb2d9fbb6b4",
+  "probeBinding": {
+    "path": "/tmp/fc-round30-evidence/ci-process-identity-startup-readonly-probe.ps1",
+    "bytes": 44834,
+    "sha256": "096b8b6b7100b85e0166b983cff2020bccdf35ec8a8fd510bdba216f88f459fe"
+  },
+  "exactPatchScope": "Only identity helper + one call; all other source bytes unchanged.",
+  "absoluteDeadline": "original started + min(5, TimeoutSeconds); never reset within identity helper; Invoke-Logged timeout unchanged.",
+  "pythonStateModelOnly": [
+    {
+      "name": "null-to-valid",
+      "passed": true
+    },
+    {
+      "name": "null-to-exit",
+      "passed": true
+    },
+    {
+      "name": "valid",
+      "passed": true
+    },
+    {
+      "name": "query-exit",
+      "passed": true
+    },
+    {
+      "name": "exception-exit",
+      "passed": true
+    },
+    {
+      "name": "expired-null",
+      "passed": true
+    },
+    {
+      "name": "persistent-null",
+      "passed": true
+    },
+    {
+      "name": "live-getter",
+      "passed": true
+    },
+    {
+      "name": "empty-image",
+      "passed": true
+    },
+    {
+      "name": "already-exited",
+      "passed": true
+    }
+  ],
+  "diffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "fullDiff": "--- before/windows-msvc-ci.ps1\n+++ after/windows-msvc-ci.ps1\n@@ -130,22 +130,31 @@\n     return $path\n }\n \n-function Get-ActiveProcessIdentity($Process) {\n+function Get-ActiveProcessIdentity($Process, [DateTime]$Deadline) {\n     if ($Process.HasExited) { return $null }\n     try {\n         $processId = $Process.Id\n         $startTicks = $Process.StartTime.ToUniversalTime().Ticks\n-        $module = $Process.MainModule\n-        if ($null -eq $module) { throw 'Live process main module is unavailable.' }\n-        $image = [string]$module.FileName\n-        if ([string]::IsNullOrWhiteSpace($image)) { throw 'Live process image is unavailable.' }\n+        while ($true) {\n+            if ($Process.HasExited) { return $null }\n+            if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }\n+            $module = $Process.MainModule\n+            if ($null -ne $module) {\n+                $image = [string]$module.FileName\n+                if ([string]::IsNullOrWhiteSpace($image)) { throw 'Live process image is unavailable.' }\n+                if ($Process.HasExited) { return $null }\n+                return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }\n+            }\n+            # A running process may not have loaded its main module yet.\n+            if ($Process.HasExited) { return $null }\n+            if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }\n+            Start-Sleep -Milliseconds 1\n+        }\n     } catch {\n         # The same process may exit between HasExited and the module query.\n         if ($Process.HasExited) { return $null }\n         throw\n     }\n-    if ($Process.HasExited) { return $null }\n-    return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }\n }\n \n function Invoke-Logged {\n@@ -168,7 +177,7 @@\n     try {\n         if (-not $process.Start()) { throw \"Cannot start $Name\" }\n         $processStarted = $true\n-        $identity = Get-ActiveProcessIdentity $process\n+        $identity = Get-ActiveProcessIdentity $process ($started.AddSeconds([Math]::Min(5, $TimeoutSeconds)))\n         if ($null -ne $identity) { Write-NewJson (Join-Path $Logs \"$Name.active.json\") $identity }\n         $streams = @(\n             @{ reader = $process.StandardOutput.BaseStream; file = $outFile; buffer = [byte[]]::new(16384); pending = $null; ended = $false; kept = 0L },\n"
+}

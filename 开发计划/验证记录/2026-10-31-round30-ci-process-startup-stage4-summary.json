@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent CI-only stage4 return-deadline correction after preserved earlier failed CI/owned-process evidence; no new CI run or platform claim.",
+  "productionSourceSha256": "0cb7c52757fcf22bced4af6c25ae1d52ac957907200e5e322b24e86315690508",
+  "priorSourceSha256": "7f5d6d846b817d49f43014ecc3a652fc34aecb079772a958b2eb63606eef4adb",
+  "change": "One original absolute-deadline check immediately before positive identity return; no renewal and no guessed image.",
+  "actualWindowsMock": {
+    "powershell": "5.1.26100.9711",
+    "caseCount": 14,
+    "parserErrors": 0,
+    "exitCode": 0,
+    "slowGetter": "Actual Windows in-memory getter sleeps200ms, original deadline100ms; old7f5d late positive reproduced and new rejects. No real executable launched for fake case.",
+    "cases": [
+      {
+        "name": "prior-live-null-reproduces-original-failure",
+        "passed": true
+      },
+      {
+        "name": "stage2-live-empty-reproduces-original-failure",
+        "passed": true
+      },
+      {
+        "name": "startup-cached-null-refresh-then-valid-preserves-identity",
+        "passed": true
+      },
+      {
+        "name": "startup-cached-empty-refresh-then-valid-preserves-identity",
+        "passed": true
+      },
+      {
+        "name": "live-valid-preserves-identity",
+        "passed": true
+      },
+      {
+        "name": "already-exited-no-module-query",
+        "passed": true
+      },
+      {
+        "name": "startup-null-then-exit",
+        "passed": true
+      },
+      {
+        "name": "valid-query-then-exit",
+        "passed": true
+      },
+      {
+        "name": "getter-exception-then-exit",
+        "passed": true
+      },
+      {
+        "name": "still-live-getter-exception-fails-closed",
+        "passed": true
+      },
+      {
+        "name": "persistent-null-pre-exhausted-deadline-rejects-without-renewal",
+        "passed": true
+      },
+      {
+        "name": "persistent-empty-pre-exhausted-deadline-rejects-without-renewal",
+        "passed": true
+      },
+      {
+        "name": "stage3-slow-valid-getter-reproduces-late-identity",
+        "passed": true
+      },
+      {
+        "name": "stage4-slow-valid-getter-rejected-at-original-deadline",
+        "passed": true
+      }
+    ]
+  },
+  "actualWindowsOwnedProcess": {
+    "caseCount": 25,
+    "started": 25,
+    "actualExited": 25,
+    "disposedCount": 25,
+    "oldExitedReadFailures": 8,
+    "immediateNulls": 13,
+    "immediateIdentities": 3,
+    "liveChildActualExitCode": 1,
+    "probeExitCode": 0,
+    "scope": "OWNED_HIDDEN_CMD_CHILDREN_ONLY_NO_FILES_OR_PERSISTENT_CHANGES",
+    "stderr": "Complete original CLIXML preserved."
+  },
+  "independentScope": "14 mock plus25 actual cases are39 checks in this stage, not a count of unique tests across stages. Prior7f5d37PASS, db550 ownedFAIL and CI live-nullFAIL stay unchanged.",
+  "rootReview": {
+    "utc": "2026-10-31T13:44:38.204930+00:00",
+    "source_sha256": "0cb7c52757fcf22bced4af6c25ae1d52ac957907200e5e322b24e86315690508",
+    "stage4_embedded_source_and_both_helpers_exact": true,
+    "only_stage4_change": "one original-deadline check immediately before positive identity return",
+    "full_diff_from_stage3": "--- stage3\n+++ stage4\n@@ -143,6 +143,7 @@\n                 $image = [string]$module.FileName\n                 if (-not [string]::IsNullOrWhiteSpace($image)) {\n                     if ($Process.HasExited) { return $null }\n+                    if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }\n                     return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }\n                 }\n             }\n",
+    "checks": [
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+        "stderr": ""
+      }
+    ],
+    "slow_getter_evidence": "actual Windows memory fake getter 200ms, original identity deadline100ms: old late positive reproduced; new rejects original deadline; no EXE in fake case",
+    "scope": "CI-only script; same process owner/cleanup triple/stream limits; no Rust or development ZIP changes"
+  },
+  "originalFiles": [
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-before-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-before-source.json",
+      "bytes": 38150,
+      "sha256": "8d40f37d214339c68fc8ff9d2eb282bfc6f286075fe1e367d4faa49827dc7dae"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-after-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-after-source.json",
+      "bytes": 38298,
+      "sha256": "f12e3dd698a7bd9a93b946b0a46d9714837bed11c0db51f8242516c1ac4dc8a6"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-windows-mock.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-windows-mock.json",
+      "bytes": 4414,
+      "sha256": "b0096869b731a2bc8ac5e399cf3f232a89e9593c6ce15cd37f248211e6a7d258"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-windows-owned-process.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-windows-owned-process.json",
+      "bytes": 8923,
+      "sha256": "fc4c54b42088e88e43fea05ff31b803547730ce24c130e8802071ced1156754f"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-root-review.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-root-review.json",
+      "bytes": 1500,
+      "sha256": "9c9deeed7a927c379036c95f3993d36886127e84d6bb59ef3fe8230e5536e20d"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-readonly-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-readonly-probe.ps1",
+      "bytes": 50212,
+      "sha256": "d442a85729a95af7fbe25c0a6a8adb4a296648e266801c4af8d935d034a6dc9c"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage4-owned-process-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage4-owned-process-probe.ps1",
+      "bytes": 6356,
+      "sha256": "1ad9cd3eab5426b694607c63271aa3b7ec6edd92dbf3c00ed350cf6e24ba58ca"
+    }
+  ],
+  "safetyScan": "No concrete credential/private-key or signed-download URL patterns in selected originals or decoded source payloads.",
+  "priorIndex": {
+    "files": 548,
+    "sha256": "41455a97e974ea61af590848b9110cb9da851d862e504d6741459ee6e80d7831"
+  },
+  "notRun": [
+    "No new CI after stage4 at this observation",
+    "No repeated Rust tests: CI-only script; Rust/development ZIP unchanged",
+    "No new three-OS/MSVC compilation/Seewo acceptance"
+  ],
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}

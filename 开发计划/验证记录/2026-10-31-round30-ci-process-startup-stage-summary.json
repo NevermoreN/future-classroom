@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original failed CI and staged CI-only startup identity correction, each actual Windows observation kept separate.",
+  "ciRun": {
+    "id": 41206347832,
+    "headSha": "a1c399bf43f62012a7b672b10ed0419f74fbccee",
+    "terminalConclusion": "failure",
+    "sourceShaPassed": true,
+    "commands": [
+      {
+        "name": "source-sha",
+        "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+        "arguments": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "started_utc": "2026-10-31T13:36:50.4467235Z",
+        "duration_seconds": 0.0588266,
+        "exit_code": 0,
+        "parent_exited": true,
+        "timed_out_or_pipe_stalled": false,
+        "log_truncated": false,
+        "log_limit_bytes_per_stream": 16777216,
+        "stdout": "logs/source-sha.stdout.log",
+        "stderr": "logs/source-sha.stderr.log",
+        "passed": true
+      }
+    ],
+    "executableCount": 0,
+    "originalFailure": {
+      "message": "Live process main module is unavailable.",
+      "utc": "2026-10-31T13:36:50.5831502Z"
+    },
+    "cleanup": "OWNED_BUILD_ROOTS_REMOVED",
+    "dispatchInitialStatusUnmodified": "RUN_IDENTIFIED"
+  },
+  "artifact": {
+    "rawFiles": 12,
+    "checksumRows": 11,
+    "zipBytes": 4426,
+    "zipSha256": "98646475c674420a7db0e851f03c743063be48cf59b1047c79a7167e56f88ad6",
+    "zipBase64AllOriginalMembersVerified": true
+  },
+  "staticOriginalObservations": {
+    "ci-process-identity-startup-static.json": {
+      "status": "LOCAL_STATIC_AND_PYTHON_MODEL_PASS",
+      "powershellRuntime": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+      "readonlyProbe": "PREPARED_NOT_RUN",
+      "absoluteDeadline": "original started + min(5, TimeoutSeconds); never reset within identity helper; Invoke-Logged timeout unchanged."
+    },
+    "ci-process-identity-startup-static-stage2.json": {
+      "status": "LOCAL_STATIC_AND_PYTHON_MODEL_PASS",
+      "powershellRuntime": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+      "readonlyProbe": "PREPARED_NOT_RUN",
+      "absoluteDeadline": "original started + min(5, TimeoutSeconds); never reset within identity helper; Invoke-Logged timeout unchanged."
+    },
+    "ci-process-identity-startup-stage3-static.json": {
+      "status": "LOCAL_STATIC_AND_PYTHON_MODEL_PASS",
+      "powershellRuntime": "NOT_RUN_LOCAL_PWSH_UNAVAILABLE",
+      "readonlyProbe": "PREPARED_NOT_RUN",
+      "absoluteDeadline": "original started + min(5, TimeoutSeconds); never reset within identity helper; Invoke-Logged timeout unchanged."
+    }
+  },
+  "stage2ActualWindows": {
+    "mockCases": 10,
+    "mockStatus": "PASS",
+    "ownedProbeExitCode": 1,
+    "ownedProbeStdoutBytes": 0,
+    "ownedProbeFailure": "Live process image is unavailable.",
+    "cleanupTotal": "NOT_OBSERVED: original failed probe produced no aggregate stdout; no started/exited/disposed total is invented."
+  },
+  "stage3ActualWindows": {
+    "sourceSha256": "7f5d6d846b817d49f43014ecc3a652fc34aecb079772a958b2eb63606eef4adb",
+    "mockCases": 12,
+    "mockAstErrors": 0,
+    "actualOwnedCases": 25,
+    "started": 25,
+    "actualExited": 25,
+    "disposed": 25,
+    "oldExitedReadFailures": 8,
+    "immediateNulls": 15,
+    "immediateIdentities": 1,
+    "liveChildActualExitCode": 1,
+    "probeOverallExitCodes": [
+      0,
+      0
+    ],
+    "scope": "OWNED_HIDDEN_CMD_CHILDREN_ONLY_NO_FILES_OR_PERSISTENT_CHANGES",
+    "stderr": "Original CLIXML raw bytes/base64 retained."
+  },
+  "identityBound": {
+    "source": "original command started UTC + min(5 seconds, original timeout); no retry renewal",
+    "scope": "Same Process.Refresh retries null/empty image only until original started+min(5,original timeout), consuming original Invoke-Logged budget without renewal; other getter faults stay fail-closed."
+  },
+  "rootReview": {
+    "utc": "2026-10-31T13:42:00.644730+00:00",
+    "source_sha256": "7f5d6d846b817d49f43014ecc3a652fc34aecb079772a958b2eb63606eef4adb",
+    "stage3_mock_probe_embedded_source_exact": true,
+    "mock_and_owned_process_helpers_exact": true,
+    "checks": [
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/check-architecture.py"
+        ],
+        "exit_code": 0,
+        "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+        "stderr": ""
+      }
+    ],
+    "identity_deadline": "original command started UTC + min(5 seconds, original timeout); no retry renewal",
+    "original_failure_preserved": "CI live null module and actual Windows stage2 empty image remain FAIL",
+    "scope": "CI-only startup metadata retry; same Process.Refresh; no guessed image; original cleanup triple and log bounds preserved; Rust unchanged"
+  },
+  "originalFiles": [
+    {
+      "original": "/tmp/fc-round30-evidence/git-ci-identity-sync.json",
+      "archived": "2026-10-31-round30-git-ci-identity-sync.json",
+      "bytes": 14460,
+      "sha256": "f08b6081df3dc70b4328c92810522f9bd468abc9f24f40855eb1a030bbc55283"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-fourth-once.py",
+      "archived": "2026-10-31-round30-ci-dispatch-fourth-once.py",
+      "bytes": 4659,
+      "sha256": "170a8d6f62e3df90d7e64af6e1073c5d449d2f043c45d53092456f94e9eea781"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-fourth.json",
+      "archived": "2026-10-31-round30-ci-dispatch-fourth.json",
+      "bytes": 21301,
+      "sha256": "6ba4c75a78fd2802ae4b6ce314abc8a0b810907dd36e6b0b4e87e326b34c584d"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-accepted-jobs-initial.json",
+      "archived": "2026-10-31-round30-ci-third-accepted-jobs-initial.json",
+      "bytes": 1018,
+      "sha256": "84489aa96925249c50c3ba86ce77f1222df1a636bd92d806301c5842208905f2"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-accepted-jobs-terminal.json",
+      "archived": "2026-10-31-round30-ci-third-accepted-jobs-terminal.json",
+      "bytes": 1132,
+      "sha256": "426ec5666ace2a8f9070a555f482ce41b5457a4064f8e36914691579148c1df5"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-tools.json",
+      "archived": "2026-10-31-round30-ci-third-run-tools.json",
+      "bytes": 26286,
+      "sha256": "9f89285da8a21f363eda42e96282381e56b54cbd6598d309b4f3c426b1f38bd1"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact.json",
+      "bytes": 7967,
+      "sha256": "15376db121074e844c10280cda4f891150ceb0c1c664ab5d7b5a17e85708f6f4"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-live-module-originals-preflight.json",
+      "archived": "2026-10-31-round30-ci-live-module-originals-preflight.json",
+      "bytes": 7619,
+      "sha256": "5f9c8c37ab90958d59ba88efb3696b3d337b6c2459fdc563e855c1fb8f42a939"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-after-source-stage2.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-after-source-stage2.json",
+      "bytes": 38162,
+      "sha256": "2a0f37a597d55cc2db2f2e59a1f918b59fc3d6e9bd90fb86fedc59388d324c09"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-after-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-after-source.json",
+      "bytes": 38122,
+      "sha256": "401f799ec7aeaae5b3598ab13591f48219a1bc13a37de6be1b1024676d2e3e03"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-before-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-before-source.json",
+      "bytes": 37394,
+      "sha256": "9c84d247f2ad2ede04cce60f1c7cbdc9e98b45082bddb38fc02e8076ff78b084"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-owned-process-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-owned-process-probe.ps1",
+      "bytes": 5865,
+      "sha256": "3b36182ee0aee0952282cd664128f1530bf1b61cb73779e3830d166a94082ee6"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-readonly-probe-stage2.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-readonly-probe-stage2.ps1",
+      "bytes": 45122,
+      "sha256": "bce5c0e477146a97d0f1ba59ccabe5f4d5667a962765eedeaa0e3c83dc5a63d7"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-readonly-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-readonly-probe.ps1",
+      "bytes": 44834,
+      "sha256": "096b8b6b7100b85e0166b983cff2020bccdf35ec8a8fd510bdba216f88f459fe"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-root-review.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-root-review.json",
+      "bytes": 1000,
+      "sha256": "ec826690cc4b043f43fe879c9fa1f90385f4dd5f37271401e5bfa01a134b6ac5"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-after-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-after-source.json",
+      "bytes": 38150,
+      "sha256": "8d40f37d214339c68fc8ff9d2eb282bfc6f286075fe1e367d4faa49827dc7dae"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-before-source.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-before-source.json",
+      "bytes": 38162,
+      "sha256": "2a0f37a597d55cc2db2f2e59a1f918b59fc3d6e9bd90fb86fedc59388d324c09"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-owned-process-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-owned-process-probe.ps1",
+      "bytes": 6246,
+      "sha256": "1bf638eb5222f4938571bdf7920ccb754a489a5e0ea270bb24c405927dc91f75"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-readonly-probe.ps1",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-readonly-probe.ps1",
+      "bytes": 47370,
+      "sha256": "d5311464ebda29b127645ca262ea713e32bfeb9afe83c3aa1b84eaed2200bdb3"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-static.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-static.json",
+      "bytes": 2823,
+      "sha256": "e89e19f2e855e07d95597d0949693ee09e3ca381e6cb800ca59171721b2bbbed"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-windows-mock.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-windows-mock.json",
+      "bytes": 4043,
+      "sha256": "97f7c248333a23e8ad954bf90dcfdefde9d6adbf1dde7d5e60d5cd99cad8df35"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-stage3-windows-owned-process.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-stage3-windows-owned-process.json",
+      "bytes": 8928,
+      "sha256": "9cdd8013e2e52c3ce819ba1f9b685d950972de1fcd77e773dc0518c4e41aeb4f"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-static-stage2.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-static-stage2.json",
+      "bytes": 4040,
+      "sha256": "5a35c4d0208743715dbe032062f884a8947a606c97bf22665eceb41d03bc534b"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-static.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-static.json",
+      "bytes": 4000,
+      "sha256": "9c9f19ccb41864952c2fd9d4cc54aba82bfb9278e3a419266a448676ddf71c6e"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-windows-mock.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-windows-mock.json",
+      "bytes": 3604,
+      "sha256": "6b2956823fc4e9bca7ed6ffef04345311a9f7cfb8f4918ac61b0f8a3388f02b5"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-process-identity-startup-windows-owned-process.json",
+      "archived": "2026-10-31-round30-ci-process-identity-startup-windows-owned-process.json",
+      "bytes": 2678,
+      "sha256": "42581bc16a4750fdaa1139169bea54394493559302f72a32c7aa5c53dd7a489d"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/artifact-sha256.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/artifact-sha256.json",
+      "bytes": 1656,
+      "sha256": "ad626f5fad0a6a019da4159c3db049d50994b875babc3c9a26b56e845731a879"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/bootstrap.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/bootstrap.json",
+      "bytes": 493,
+      "sha256": "cb5627ea01ec7cf104b6cec86622b59739c6f02745415ea718eda6a30865531c"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/cleanup.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/failure.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/failure.json",
+      "bytes": 104,
+      "sha256": "a601a19ddc22b9c6c750a0e278044803bdb2454235d9f175f3c83cf18c0ef810"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.active.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "1cf17e9959936916ca3258353e2affa77eb6d7e583cbe515a62ac46b6a4777a3"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.result.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "02fe489b0068e01b5b939f76748deaa313091be5f82d0e8f5dc4ad2e72fd4040"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.stderr.log",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.stdout.log",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "f67ea847e1e0ec7c052c03dfd038d88986a835682e960d776c97184af7420493"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/result.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/result.json",
+      "bytes": 1691,
+      "sha256": "09aee831e0e6daa74b68a8d61748c63e2a94620ae7e29c6e9559121e27cee2b2"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/run-start.json",
+      "archived": "2026-10-31-round30-ci-third-run-artifact-raw/run-start.json",
+      "bytes": 567,
+      "sha256": "78aeca52ac5bc4dc556c84917bed8a068def12f775c1e7723515ff5c184202fc"
+    }
+  ],
+  "safetyScan": "No concrete token/private-key or signed-download URL in exact originals or decoded source/artifact payloads.",
+  "priorIndex": {
+    "files": 509,
+    "sha256": "2723211a9a3fe2d24d2026b7157b52afdf360ee313c27adc77a1c3935d33bab7"
+  },
+  "notRun": [
+    "No new CI triggered after stage3 at this observation",
+    "No install/compile reached in failed CI",
+    "No repeated Rust tests for CI-only change",
+    "No new formal three-OS/Seewo acceptance"
+  ],
+  "fullGoal": "ACTIVE_NOT_COMPLETE"
+}

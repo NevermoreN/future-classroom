@@ -1,0 +1,30 @@
+{
+  "utc": "2026-10-31T13:42:00.644730+00:00",
+  "source_sha256": "7f5d6d846b817d49f43014ecc3a652fc34aecb079772a958b2eb63606eef4adb",
+  "stage3_mock_probe_embedded_source_exact": true,
+  "mock_and_owned_process_helpers_exact": true,
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "stderr": ""
+    }
+  ],
+  "identity_deadline": "original command started UTC + min(5 seconds, original timeout); no retry renewal",
+  "original_failure_preserved": "CI live null module and actual Windows stage2 empty image remain FAIL",
+  "scope": "CI-only startup metadata retry; same Process.Refresh; no guessed image; original cleanup triple and log bounds preserved; Rust unchanged"
+}

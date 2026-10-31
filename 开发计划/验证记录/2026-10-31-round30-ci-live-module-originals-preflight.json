@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "status": "ORIGINALS_SCAN_VERIFY_COPY_PASS_INDEX_PENDING_CORE_FIX",
+  "scope": "Only exact original third accepted CI failure evidence, no progress/index freeze before additional fix reports.",
+  "runId": 41206347832,
+  "headSha": "a1c399bf43f62012a7b672b10ed0419f74fbccee",
+  "dispatchOriginalStatus": "RUN_IDENTIFIED",
+  "dispatchOriginalRunStatus": "queued",
+  "artifactOriginalResult": "FAILED_OR_INCOMPLETE",
+  "sourceShaCommand": {
+    "name": "source-sha",
+    "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+    "arguments": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "started_utc": "2026-10-31T13:36:50.4467235Z",
+    "duration_seconds": 0.0588266,
+    "exit_code": 0,
+    "parent_exited": true,
+    "timed_out_or_pipe_stalled": false,
+    "log_truncated": false,
+    "log_limit_bytes_per_stream": 16777216,
+    "stdout": "logs/source-sha.stdout.log",
+    "stderr": "logs/source-sha.stderr.log",
+    "passed": true
+  },
+  "failure": {
+    "message": "Live process main module is unavailable.",
+    "utc": "2026-10-31T13:36:50.5831502Z"
+  },
+  "executableCount": 0,
+  "installCompile": "NOT_REACHED",
+  "cleanup": "OWNED_BUILD_ROOTS_REMOVED",
+  "zipBytes": 4426,
+  "zipSha256": "98646475c674420a7db0e851f03c743063be48cf59b1047c79a7167e56f88ad6",
+  "rawFiles": 12,
+  "checksumRowsVerified": 11,
+  "sourceState": "No new bounded-retry implementation or Windows validation evidence assumed here.",
+  "signedUrlAndCredentialPatternCheck": "No concrete patterns in exact selected files or decoded source/artifact payloads.",
+  "originalFiles": [
+    {
+      "original": "/tmp/fc-round30-evidence/git-ci-identity-sync.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-git-ci-identity-sync.json",
+      "bytes": 14460,
+      "sha256": "f08b6081df3dc70b4328c92810522f9bd468abc9f24f40855eb1a030bbc55283"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-fourth-once.py",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-dispatch-fourth-once.py",
+      "bytes": 4659,
+      "sha256": "170a8d6f62e3df90d7e64af6e1073c5d449d2f043c45d53092456f94e9eea781"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-dispatch-fourth.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-dispatch-fourth.json",
+      "bytes": 21301,
+      "sha256": "6ba4c75a78fd2802ae4b6ce314abc8a0b810907dd36e6b0b4e87e326b34c584d"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-accepted-jobs-initial.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-accepted-jobs-initial.json",
+      "bytes": 1018,
+      "sha256": "84489aa96925249c50c3ba86ce77f1222df1a636bd92d806301c5842208905f2"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-accepted-jobs-terminal.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-accepted-jobs-terminal.json",
+      "bytes": 1132,
+      "sha256": "426ec5666ace2a8f9070a555f482ce41b5457a4064f8e36914691579148c1df5"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-tools.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-tools.json",
+      "bytes": 26286,
+      "sha256": "9f89285da8a21f363eda42e96282381e56b54cbd6598d309b4f3c426b1f38bd1"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact.json",
+      "bytes": 7967,
+      "sha256": "15376db121074e844c10280cda4f891150ceb0c1c664ab5d7b5a17e85708f6f4"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/artifact-sha256.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/artifact-sha256.json",
+      "bytes": 1656,
+      "sha256": "ad626f5fad0a6a019da4159c3db049d50994b875babc3c9a26b56e845731a879"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/bootstrap.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/bootstrap.json",
+      "bytes": 493,
+      "sha256": "cb5627ea01ec7cf104b6cec86622b59739c6f02745415ea718eda6a30865531c"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/cleanup.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/failure.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/failure.json",
+      "bytes": 104,
+      "sha256": "a601a19ddc22b9c6c750a0e278044803bdb2454235d9f175f3c83cf18c0ef810"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-clean-before.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-clean-before.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.active.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.active.json",
+      "bytes": 110,
+      "sha256": "1cf17e9959936916ca3258353e2affa77eb6d7e583cbe515a62ac46b6a4777a3"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.result.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.result.json",
+      "bytes": 483,
+      "sha256": "02fe489b0068e01b5b939f76748deaa313091be5f82d0e8f5dc4ad2e72fd4040"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.stderr.log",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/logs/source-sha.stdout.log",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/logs/source-sha.stdout.log",
+      "bytes": 41,
+      "sha256": "f67ea847e1e0ec7c052c03dfd038d88986a835682e960d776c97184af7420493"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/result.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/result.json",
+      "bytes": 1691,
+      "sha256": "09aee831e0e6daa74b68a8d61748c63e2a94620ae7e29c6e9559121e27cee2b2"
+    },
+    {
+      "original": "/tmp/fc-round30-evidence/ci-third-run-artifact-raw/run-start.json",
+      "archived": "开发计划/验证记录/2026-10-31-round30-ci-third-run-artifact-raw/run-start.json",
+      "bytes": 567,
+      "sha256": "78aeca52ac5bc4dc556c84917bed8a068def12f775c1e7723515ff5c184202fc"
+    }
+  ],
+  "indexUntouched": {
+    "files": 509,
+    "sha256": "2723211a9a3fe2d24d2026b7157b52afdf360ee313c27adc77a1c3935d33bab7"
+  }
+}

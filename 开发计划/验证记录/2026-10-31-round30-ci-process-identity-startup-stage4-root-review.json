@@ -1,0 +1,30 @@
+{
+  "utc": "2026-10-31T13:44:38.204930+00:00",
+  "source_sha256": "0cb7c52757fcf22bced4af6c25ae1d52ac957907200e5e322b24e86315690508",
+  "stage4_embedded_source_and_both_helpers_exact": true,
+  "only_stage4_change": "one original-deadline check immediately before positive identity return",
+  "full_diff_from_stage3": "--- stage3\n+++ stage4\n@@ -143,6 +143,7 @@\n                 $image = [string]$module.FileName\n                 if (-not [string]::IsNullOrWhiteSpace($image)) {\n                     if ($Process.HasExited) { return $null }\n+                    if ([DateTime]::UtcNow -ge $Deadline) { throw 'Live process identity deadline expired.' }\n                     return [ordered]@{ pid = $processId; start_ticks = $startTicks; image = $image }\n                 }\n             }\n",
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "stderr": ""
+    }
+  ],
+  "slow_getter_evidence": "actual Windows memory fake getter 200ms, original identity deadline100ms: old late positive reproduced; new rejects original deadline; no EXE in fake case",
+  "scope": "CI-only script; same process owner/cleanup triple/stream limits; no Rust or development ZIP changes"
+}

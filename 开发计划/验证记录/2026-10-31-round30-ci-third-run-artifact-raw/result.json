@@ -1,0 +1,46 @@
+{
+  "status": "FAILED_OR_INCOMPLETE",
+  "source_sha": "a1c399bf43f62012a7b672b10ed0419f74fbccee",
+  "input_manifest_sha256": null,
+  "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+  "target": "i686-pc-windows-msvc",
+  "dispatch_source_sha": "a1c399bf43f62012a7b672b10ed0419f74fbccee",
+  "commands": [
+    {
+      "name": "source-sha",
+      "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_utc": "2026-10-31T13:36:50.4467235Z",
+      "duration_seconds": 0.0588266,
+      "exit_code": 0,
+      "parent_exited": true,
+      "timed_out_or_pipe_stalled": false,
+      "log_truncated": false,
+      "log_limit_bytes_per_stream": 16777216,
+      "stdout": "logs/source-sha.stdout.log",
+      "stderr": "logs/source-sha.stderr.log",
+      "passed": true
+    }
+  ],
+  "executable_count": 0,
+  "windows7": "NOT_RUN",
+  "windows10": "NOT_RUN",
+  "windows11": "NOT_RUN",
+  "seewo_device": "NOT_RUN",
+  "purpose": "Modern formal MSVC build evidence and portable test executables, not a product installer or runtime certification.",
+  "later_test_arguments": [
+    "--test-threads=2"
+  ],
+  "test_working_directories": "Package paths in executables.json; choose an isolated controlled root.",
+  "no_toolchain_payloads": true,
+  "no_environment_dump": true,
+  "limitations": [
+    "Static CRT does not prove OS API compatibility.",
+    "Already terminated/cancelled hosted jobs may prevent always-upload.",
+    "Doctests are not compiled into the collected no-run harness executables.",
+    "Actual Windows 7/10/11 and classroom-device runs require separate evidence."
+  ]
+}
