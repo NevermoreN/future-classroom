@@ -1,0 +1,1458 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_ORIGINAL_FAILURE_DIAGNOSIS_BOTH_CI_REMAIN_FAILED",
+  "sourceSha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+  "scope": "Read-only independent original R44 two CI early failures and exact Git tree metadata size diagnosis. No workflow dispatch/rerun, source mutation, Cargo, Windows or executable run. A successful artifact check does not mark either failed CI successful.",
+  "checks": [
+    {
+      "name": "modern exact original GitHub producer ZIP bytes SHA",
+      "status": "PASS"
+    },
+    {
+      "name": "modern refuse overwrite raw originals",
+      "status": "PASS"
+    },
+    {
+      "name": "modern exact18 unique ordinary ZIP members CRC",
+      "status": "PASS"
+    },
+    {
+      "name": "modern exact17 producer ledger complete set",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular artifact-sha256.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes artifact-sha256.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member safe regular run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern member CRC bytes run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original producer size SHA run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "modern source exact original CI binding",
+      "status": "PASS"
+    },
+    {
+      "name": "modern original CI remains failed before compiler admission",
+      "status": "PASS"
+    },
+    {
+      "name": "modern only3 source commands no compiler/lint/runtime command",
+      "status": "PASS"
+    },
+    {
+      "name": "modern3 source processes actualexit0 no timeout/truncation",
+      "status": "PASS"
+    },
+    {
+      "name": "modern exact source stdout and clean checkout",
+      "status": "PASS"
+    },
+    {
+      "name": "modern cleanup all four original roots removed",
+      "status": "PASS"
+    },
+    {
+      "name": "modern actual decoded job log same error source and upload success",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 exact original GitHub producer ZIP bytes SHA",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 refuse overwrite raw originals",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 exact18 unique ordinary ZIP members CRC",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 exact17 producer ledger complete set",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA cleanup.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA bootstrap.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular artifact-sha256.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes artifact-sha256.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA failure.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-clean-before.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-clean-before.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-clean-before.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-clean-before.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-input-paths.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-input-paths.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-input-paths.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-input-paths.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-sha.active.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-sha.stderr.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-sha.result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA logs/source-sha.stdout.log",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA result.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member safe regular run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 member CRC bytes run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original producer size SHA run-start.json",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 source exact original CI binding",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 original CI remains failed before compiler admission",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 only3 source commands no compiler/lint/runtime command",
+      "status": "PASS"
+    },
+    {
+      "name": "win73 source processes actualexit0 no timeout/truncation",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 exact source stdout and clean checkout",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 cleanup all four original roots removed",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 actual decoded job log same error source and upload success",
+      "status": "PASS"
+    },
+    {
+      "name": "exact6940 unique Git source metadata rows",
+      "status": "PASS"
+    },
+    {
+      "name": "all exact Git tree objects are regular files no repository symlink/submodule",
+      "status": "PASS"
+    },
+    {
+      "name": "modern exact full original CI ls-files set matches pinned Git tree",
+      "status": "PASS"
+    },
+    {
+      "name": "win7 exact full original CI ls-files set matches pinned Git tree",
+      "status": "PASS"
+    },
+    {
+      "name": "original raw Git bytes already exceed256MiB",
+      "status": "PASS"
+    },
+    {
+      "name": "original count and maximum raw file below independent original bounds",
+      "status": "PASS"
+    },
+    {
+      "name": "remaining550 tracked files fit unchanged64MiB256MiB domain bounds",
+      "status": "PASS"
+    },
+    {
+      "name": "pinned Hash-Inputs exact original source bounds",
+      "status": "PASS"
+    }
+  ],
+  "artifacts": [
+    {
+      "baseline": "modern",
+      "runId": 41247806786,
+      "jobId": 124674777677,
+      "artifactId": 13059558491,
+      "zip": {
+        "path": "/tmp/fc-round44-ci-evidence/modern-original-first.zip",
+        "bytes": 58920,
+        "sha256": "4c0055131d38f4426f0be0689e54987411276ed27fcd5c85b279484aaaec7d7a"
+      },
+      "jobDecodedLog": {
+        "path": "/tmp/fc-round44-ci-evidence/modern-job-logs-decoded-first.log",
+        "bytes": 27114,
+        "sha256": "6b55506f3d95560e9d5b3a8b98c2c4c368d8d57761963efef231dc60ec9661d4"
+      },
+      "pluginLogOriginal": {
+        "path": "/tmp/fc-round44-ci-evidence/modern-job-logs-plugin-first.json",
+        "bytes": 28684,
+        "sha256": "0da540e19e236c43cbd995f3cfc88547308a63606bd957aabda5c300dedab6f5"
+      },
+      "pluginArtifactMetadata": {
+        "path": "/tmp/fc-round44-ci-evidence/modern-artifacts-first.json",
+        "bytes": 1076,
+        "sha256": "17151f23bfe87e4556b0b0417574f0a9ded3086ada90fd2771b80d86ca7a4270"
+      },
+      "memberCount": 18,
+      "producerLedgerCount": 17,
+      "members": [
+        {
+          "path": "artifact-sha256.json",
+          "bytes": 2641,
+          "sha256": "90402b992af4bef2a3a4f8a17efc52c178b47a25596ea5cfba25d14ac65e24cb",
+          "crc32": "884e9c8f",
+          "producerLedgerMatched": false
+        },
+        {
+          "path": "bootstrap.json",
+          "bytes": 493,
+          "sha256": "1e5782cfca82a140e07e19039e35e0f0c835fe42b5ef2fe41da1e620ada9d72c",
+          "crc32": "3bbbaeb8",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "cleanup.json",
+          "bytes": 530,
+          "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+          "crc32": "709360c0",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "failure.json",
+          "bytes": 109,
+          "sha256": "c42473b4af0012b4a0c7dfef9e834497632e7c563d2d7d46b8f5032971569671",
+          "crc32": "d38350e0",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.active.json",
+          "bytes": 110,
+          "sha256": "b296a691c8373bebdb9e1f7151738dd3b43f8d7f73cfe72becc22cb52c4827c3",
+          "crc32": "a30a0387",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.result.json",
+          "bytes": 544,
+          "sha256": "747fbe63a9190eb042dd6241dee9a5d1d0c51ae2bf686cd97ac7a29333e31f06",
+          "crc32": "dfef080f",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.active.json",
+          "bytes": 110,
+          "sha256": "bc208c4f2b7296360d642cfe4523fff1733e0a6e92cd64660135296544a20d62",
+          "crc32": "5c70e32d",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.result.json",
+          "bytes": 504,
+          "sha256": "7b136191bb6259c7fde6da1f8e0fc151e78459475f2cf83a64831e5e52da9c37",
+          "crc32": "ecdb6dc7",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.stdout.log",
+          "bytes": 605923,
+          "sha256": "98d965f40e97abe8b26dbeac9e8c2ba280d18319deaf86c3f1b5c1bce8765e36",
+          "crc32": "3f9f6504",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.active.json",
+          "bytes": 109,
+          "sha256": "675e4ba1b7a2e2bf3088a1062db85e4cacca60a0a742cf9e752d03d49a97e39e",
+          "crc32": "e2c7235e",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.result.json",
+          "bytes": 483,
+          "sha256": "5df9e1fb91dbb314f99f2654668125385e075b945b17f5a26cad487875eb2fca",
+          "crc32": "3547d5ef",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.stdout.log",
+          "bytes": 41,
+          "sha256": "0e126a3df0d99e1336a213e32c7072ccc2a0205c2036c8becd29f93071f1d38c",
+          "crc32": "cb89f60f",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "result.json",
+          "bytes": 2916,
+          "sha256": "d577321a5b70c0f0832559c29f0c36a6e635d3ba9bd1e3efc51e461444b9a07c",
+          "crc32": "3c820f66",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "run-start.json",
+          "bytes": 635,
+          "sha256": "ec9ef4b05a6b781340d90059d17c43ffb0827d6de4f895f5a9bbf742916c3402",
+          "crc32": "3b509c16",
+          "producerLedgerMatched": true
+        }
+      ],
+      "originalFailure": {
+        "message": "Source inventory size/reparse bound exceeded.",
+        "utc": "2026-10-31T22:21:42.0968667Z"
+      },
+      "originalResult": {
+        "status": "FAILED_OR_INCOMPLETE",
+        "source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "input_manifest_sha256": null,
+        "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+        "target": "i686-pc-windows-msvc",
+        "baseline": "Modern",
+        "dispatch_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "commands": [
+          {
+            "name": "source-sha",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "started_utc": "2026-10-31T22:21:37.3266181Z",
+            "duration_seconds": 0.0689838,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-sha.stdout.log",
+            "stderr": "logs/source-sha.stderr.log",
+            "passed": true
+          },
+          {
+            "name": "source-clean-before",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "status",
+              "--porcelain",
+              "--untracked-files=all"
+            ],
+            "started_utc": "2026-10-31T22:21:37.4550658Z",
+            "duration_seconds": 0.8288454,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-clean-before.stdout.log",
+            "stderr": "logs/source-clean-before.stderr.log",
+            "passed": true
+          },
+          {
+            "name": "source-input-paths",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "ls-files",
+              "-z"
+            ],
+            "started_utc": "2026-10-31T22:21:38.2880959Z",
+            "duration_seconds": 1.2459531,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-input-paths.stdout.log",
+            "stderr": "logs/source-input-paths.stderr.log",
+            "passed": true
+          }
+        ],
+        "executable_count": 0,
+        "windows7": "NOT_RUN",
+        "windows10": "NOT_RUN",
+        "windows11": "NOT_RUN",
+        "seewo_device": "NOT_RUN",
+        "purpose": "Modern formal MSVC build evidence and portable test executables, not a product installer or runtime certification.",
+        "later_test_arguments": [
+          "--test-threads=2"
+        ],
+        "test_working_directories": "Package paths in executables.json; choose an isolated controlled root.",
+        "no_toolchain_payloads": true,
+        "no_environment_dump": true,
+        "limitations": [
+          "Static CRT does not prove OS API compatibility.",
+          "Already terminated/cancelled hosted jobs may prevent always-upload.",
+          "Doctests are not compiled into the collected no-run harness executables.",
+          "Actual Windows 7/10/11 and classroom-device runs require separate evidence."
+        ]
+      },
+      "originalCleanup": {
+        "status": "OWNED_BUILD_ROOTS_REMOVED",
+        "roots": [
+          {
+            "root": "target",
+            "removed": true
+          },
+          {
+            "root": "scratch",
+            "removed": true
+          },
+          {
+            "root": "cargo",
+            "removed": true
+          },
+          {
+            "root": "rustup",
+            "removed": true
+          }
+        ],
+        "artifact_lifetime": "Retained for always-upload; hosted VM disposal removes remaining local evidence.",
+        "scope": "Only this exact RunnerTemp run-id/attempt root; no user-machine cleanup or runtime tests."
+      },
+      "originalStart": {
+        "status": "STARTED_NOT_VALIDATED",
+        "utc": "2026-10-31T22:21:37.2320405Z",
+        "expected_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "dispatch_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "workflow_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "target": "i686-pc-windows-msvc",
+        "toolchain": "1.97.1-x86_64-pc-windows-msvc",
+        "rustflags": "-C target-feature=+crt-static",
+        "baseline": "Modern",
+        "role": "modern-msvc-compilation-only",
+        "tests": "COMPILE_ONLY_NO_RUN",
+        "windows7": "NOT_RUN",
+        "windows10": "NOT_RUN",
+        "windows11": "NOT_RUN",
+        "seewo_device": "NOT_RUN"
+      },
+      "commandOriginalLogBindings": [
+        {
+          "command": {
+            "name": "source-sha",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "started_utc": "2026-10-31T22:21:37.3266181Z",
+            "duration_seconds": 0.0689838,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-sha.stdout.log",
+            "stderr": "logs/source-sha.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-sha.stdout.log",
+            "bytes": 41,
+            "sha256": "0e126a3df0d99e1336a213e32c7072ccc2a0205c2036c8becd29f93071f1d38c"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-sha.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "command": {
+            "name": "source-clean-before",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "status",
+              "--porcelain",
+              "--untracked-files=all"
+            ],
+            "started_utc": "2026-10-31T22:21:37.4550658Z",
+            "duration_seconds": 0.8288454,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-clean-before.stdout.log",
+            "stderr": "logs/source-clean-before.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-clean-before.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-clean-before.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "command": {
+            "name": "source-input-paths",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "ls-files",
+              "-z"
+            ],
+            "started_utc": "2026-10-31T22:21:38.2880959Z",
+            "duration_seconds": 1.2459531,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-input-paths.stdout.log",
+            "stderr": "logs/source-input-paths.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-input-paths.stdout.log",
+            "bytes": 605923,
+            "sha256": "98d965f40e97abe8b26dbeac9e8c2ba280d18319deaf86c3f1b5c1bce8765e36"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/modern-artifact-raw/logs/source-input-paths.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      ]
+    },
+    {
+      "baseline": "win7",
+      "runId": 41247836092,
+      "jobId": 124674867418,
+      "artifactId": 13060600090,
+      "zip": {
+        "path": "/tmp/fc-round44-ci-evidence/win7-original-first.zip",
+        "bytes": 58994,
+        "sha256": "12de62c0fa852df729fa52594d795c75e89a3b375713b81549f37e63671c00b5"
+      },
+      "jobDecodedLog": {
+        "path": "/tmp/fc-round44-ci-evidence/win7-job-logs-decoded-first.log",
+        "bytes": 27165,
+        "sha256": "ecebda11b6d3de4f3e5a63c1b3614da394da1ed86b066639cb1626b4b1d781fb"
+      },
+      "pluginLogOriginal": {
+        "path": "/tmp/fc-round44-ci-evidence/win7-job-logs-plugin-first.json",
+        "bytes": 28733,
+        "sha256": "9a864cfa08bcfdf594d20f76b51f427cbf0a093a982e6e2f6160a80c9815eeb9"
+      },
+      "pluginArtifactMetadata": {
+        "path": "/tmp/fc-round44-ci-evidence/win7-artifacts-first.json",
+        "bytes": 1081,
+        "sha256": "5cea3aac3909fc3663d3d999e5257e200a52df9b643d106780422302ce8747f1"
+      },
+      "memberCount": 18,
+      "producerLedgerCount": 17,
+      "members": [
+        {
+          "path": "cleanup.json",
+          "bytes": 530,
+          "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63",
+          "crc32": "709360c0",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "bootstrap.json",
+          "bytes": 501,
+          "sha256": "bf55426e4c52f74e9678cedc997d3b9f575481887dd3688dbbcae9091005e5bd",
+          "crc32": "249e7ac9",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "artifact-sha256.json",
+          "bytes": 2641,
+          "sha256": "09e81d342530f0b5da78c1b1be433879a0e1cd7388cf01271712cdca7bb03e94",
+          "crc32": "307d6d19",
+          "producerLedgerMatched": false
+        },
+        {
+          "path": "failure.json",
+          "bytes": 109,
+          "sha256": "160c6ebfe20123880421e48c269398d247472d24d14431cd288abd8aeaf04925",
+          "crc32": "ba206fa8",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.active.json",
+          "bytes": 110,
+          "sha256": "83222116c2379a89ee8d104667f658706cc438a1dda5f222c03190c286551f89",
+          "crc32": "8ed41942",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.result.json",
+          "bytes": 544,
+          "sha256": "0a4bd3f4a08455fd434cc9bcc4486f7cb7ac4cebc3519abe2114276e59914489",
+          "crc32": "cad10c8c",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-clean-before.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.active.json",
+          "bytes": 110,
+          "sha256": "fcd72b4bc8c3769080c0fc34c2aedb4102c62fc9e52560dccef392e2cd9e6776",
+          "crc32": "82b6f12e",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.result.json",
+          "bytes": 504,
+          "sha256": "8b20a7a7aa65665e9dff2dda7983a1f026c83f0ae28c30b85f6090b459346b3b",
+          "crc32": "d5f30604",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-input-paths.stdout.log",
+          "bytes": 605923,
+          "sha256": "98d965f40e97abe8b26dbeac9e8c2ba280d18319deaf86c3f1b5c1bce8765e36",
+          "crc32": "3f9f6504",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.active.json",
+          "bytes": 110,
+          "sha256": "52c9114b5bf4ccbf16de03979566f913477e9dae15e98f1108a8e57ddc9ee596",
+          "crc32": "d6c97fcc",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "crc32": "00000000",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.result.json",
+          "bytes": 483,
+          "sha256": "d0e9ce07c2f8ac0b6388eb2d51abf03c9f8e2cffcb18ee90223320c84e8045dc",
+          "crc32": "c676f427",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "logs/source-sha.stdout.log",
+          "bytes": 41,
+          "sha256": "0e126a3df0d99e1336a213e32c7072ccc2a0205c2036c8becd29f93071f1d38c",
+          "crc32": "cb89f60f",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "result.json",
+          "bytes": 2953,
+          "sha256": "8cd0aca935a8a433616782c8f572805d3555acca2dc9fc623fafd3bb239592d0",
+          "crc32": "1f924ec5",
+          "producerLedgerMatched": true
+        },
+        {
+          "path": "run-start.json",
+          "bytes": 691,
+          "sha256": "572051aa98fc6e28b4f375cadbe12444fce9419a611a68f4979876c95d7ca85f",
+          "crc32": "2a08a5d3",
+          "producerLedgerMatched": true
+        }
+      ],
+      "originalFailure": {
+        "message": "Source inventory size/reparse bound exceeded.",
+        "utc": "2026-10-31T22:22:05.3269079Z"
+      },
+      "originalResult": {
+        "status": "FAILED_OR_INCOMPLETE",
+        "source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "input_manifest_sha256": null,
+        "toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "target": "i686-win7-windows-msvc",
+        "baseline": "Win7",
+        "dispatch_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "commands": [
+          {
+            "name": "source-sha",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "started_utc": "2026-10-31T22:22:01.3019149Z",
+            "duration_seconds": 0.0755096,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-sha.stdout.log",
+            "stderr": "logs/source-sha.stderr.log",
+            "passed": true
+          },
+          {
+            "name": "source-clean-before",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "status",
+              "--porcelain",
+              "--untracked-files=all"
+            ],
+            "started_utc": "2026-10-31T22:22:01.5478006Z",
+            "duration_seconds": 0.2345846,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-clean-before.stdout.log",
+            "stderr": "logs/source-clean-before.stderr.log",
+            "passed": true
+          },
+          {
+            "name": "source-input-paths",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "ls-files",
+              "-z"
+            ],
+            "started_utc": "2026-10-31T22:22:01.7855713Z",
+            "duration_seconds": 1.3885479,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-input-paths.stdout.log",
+            "stderr": "logs/source-input-paths.stderr.log",
+            "passed": true
+          }
+        ],
+        "executable_count": 0,
+        "windows7": "NOT_RUN",
+        "windows10": "NOT_RUN",
+        "windows11": "NOT_RUN",
+        "seewo_device": "NOT_RUN",
+        "purpose": "Win7 MSVC candidate COMPILE_ONLY with rebuilt std/test and PE32 subsystem6.1; not Win7 API, SDK/CRT compatibility or runtime certification.",
+        "later_test_arguments": [
+          "--test-threads=2"
+        ],
+        "test_working_directories": "Package paths in executables.json; choose an isolated controlled root.",
+        "no_toolchain_payloads": true,
+        "no_environment_dump": true,
+        "limitations": [
+          "Static CRT does not prove OS API compatibility.",
+          "Already terminated/cancelled hosted jobs may prevent always-upload.",
+          "Doctests are not compiled into the collected no-run harness executables.",
+          "Actual Windows 7/10/11 and classroom-device runs require separate evidence."
+        ]
+      },
+      "originalCleanup": {
+        "status": "OWNED_BUILD_ROOTS_REMOVED",
+        "roots": [
+          {
+            "root": "target",
+            "removed": true
+          },
+          {
+            "root": "scratch",
+            "removed": true
+          },
+          {
+            "root": "cargo",
+            "removed": true
+          },
+          {
+            "root": "rustup",
+            "removed": true
+          }
+        ],
+        "artifact_lifetime": "Retained for always-upload; hosted VM disposal removes remaining local evidence.",
+        "scope": "Only this exact RunnerTemp run-id/attempt root; no user-machine cleanup or runtime tests."
+      },
+      "originalStart": {
+        "status": "STARTED_NOT_VALIDATED",
+        "utc": "2026-10-31T22:22:01.2244884Z",
+        "expected_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "dispatch_source_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "workflow_sha": "e0d97689d6848d971bb9f751cc5f014c6a98882b",
+        "target": "i686-win7-windows-msvc",
+        "toolchain": "nightly-2026-10-29-x86_64-pc-windows-msvc",
+        "rustflags": "-C target-feature=+crt-static -C link-arg=/SUBSYSTEM:CONSOLE,6.01",
+        "baseline": "Win7",
+        "role": "win7-msvc-candidate-compilation-only",
+        "tests": "COMPILE_ONLY_NO_RUN",
+        "windows7": "NOT_RUN",
+        "windows10": "NOT_RUN",
+        "windows11": "NOT_RUN",
+        "seewo_device": "NOT_RUN"
+      },
+      "commandOriginalLogBindings": [
+        {
+          "command": {
+            "name": "source-sha",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "started_utc": "2026-10-31T22:22:01.3019149Z",
+            "duration_seconds": 0.0755096,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-sha.stdout.log",
+            "stderr": "logs/source-sha.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-sha.stdout.log",
+            "bytes": 41,
+            "sha256": "0e126a3df0d99e1336a213e32c7072ccc2a0205c2036c8becd29f93071f1d38c"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-sha.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "command": {
+            "name": "source-clean-before",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "status",
+              "--porcelain",
+              "--untracked-files=all"
+            ],
+            "started_utc": "2026-10-31T22:22:01.5478006Z",
+            "duration_seconds": 0.2345846,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-clean-before.stdout.log",
+            "stderr": "logs/source-clean-before.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-clean-before.stdout.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-clean-before.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "command": {
+            "name": "source-input-paths",
+            "executable": "C:\\Program Files\\Git\\bin\\git.exe",
+            "arguments": [
+              "ls-files",
+              "-z"
+            ],
+            "started_utc": "2026-10-31T22:22:01.7855713Z",
+            "duration_seconds": 1.3885479,
+            "exit_code": 0,
+            "parent_exited": true,
+            "timed_out_or_pipe_stalled": false,
+            "log_truncated": false,
+            "log_limit_bytes_per_stream": 16777216,
+            "stdout": "logs/source-input-paths.stdout.log",
+            "stderr": "logs/source-input-paths.stderr.log",
+            "passed": true
+          },
+          "stdout": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-input-paths.stdout.log",
+            "bytes": 605923,
+            "sha256": "98d965f40e97abe8b26dbeac9e8c2ba280d18319deaf86c3f1b5c1bce8765e36"
+          },
+          "stderr": {
+            "path": "/tmp/fc-round44-ci-evidence/win7-artifact-raw/logs/source-input-paths.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      ]
+    }
+  ],
+  "gitTreeMetadata": {
+    "path": "/tmp/fc-round44-ci-evidence/source-git-tree-metadata-first.json",
+    "bytes": 1880283,
+    "sha256": "38e0391fe974de8608f806133b951d37a48a1dbb148250d0689ce3e4b66ae497"
+  },
+  "pinnedCiSource": {
+    "path": "/tmp/fc-round44-ci-evidence/windows-msvc-ci.pinned-source-first.ps1",
+    "bytes": 38498,
+    "sha256": "6f73ca0d0402d0e4c98f2442308116abfa2e88875441379d2b8098ad93704dd6"
+  },
+  "sourceFacts": {
+    "files": 6940,
+    "gitBlobTotalBytes": 286613906,
+    "originalTotalBoundBytes": 268435456,
+    "rawGitBytesOverBound": 18178450,
+    "maximumGitBlobBytes": 6135101,
+    "originalPerFileBoundBytes": 67108864,
+    "archivePrefix": "开发计划/验证记录/",
+    "archiveFiles": 6390,
+    "archiveGitBlobBytes": 265890446,
+    "archiveShareOfRawGitBytes": 0.9276955529157054,
+    "outsideArchiveFiles": 550,
+    "outsideArchiveGitBlobBytes": 20723460,
+    "outsideArchiveMaximumGitBlobBytes": 2401720,
+    "largestOriginalGitBlobs": [
+      {
+        "path": "开发计划/验证记录/2026-10-31-round33-msvc/inspection-raw/logs/objdump-2.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "0c5786152d2253f3723ca40ca253c400a2440e84",
+        "gitBlobBytes": 6135101
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round35-msvc/inspection-raw/logs/objdump-2.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "0138a079a35eacb4f741161c7510aeccb0426164",
+        "gitBlobBytes": 6135101
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-31-round33-msvc/inspection-raw/logs/objdump-3.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "b54a6e3915a9cb2cad85caaab03c3161cdaeb5f1",
+        "gitBlobBytes": 5398793
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round35-msvc/inspection-raw/logs/objdump-6.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "c5153c4a93dda2c0a7abc784966211f4ab21591f",
+        "gitBlobBytes": 5398793
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round35-msvc/inspection-raw/logs/objdump-21.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "bfe9aa358fa95ba481f4e617b30e510013b1df1f",
+        "gitBlobBytes": 5296121
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-31-round33-msvc/inspection-raw/logs/objdump-21.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "106e3bb92bca0a54aaf6b843015b11de8e0205ae",
+        "gitBlobBytes": 5283292
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-31-round33-msvc/inspection-raw/logs/objdump-17.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "4f45db63bb9d09e7ca240b7150417ca918a965ae",
+        "gitBlobBytes": 3583151
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round35-msvc/inspection-raw/logs/objdump-17.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "793884b286800cd4ad37715965c3104bbadb074e",
+        "gitBlobBytes": 3583151
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round42-ci/modern-programs-independent-first.json",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "96444cf3a57cd69881507386c25cd2bca9de7bb4",
+        "gitBlobBytes": 2834731
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round42-ci/win7-original-independent-second.json",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "db2a0a3ea68eabacb650460e37b740e1e2b3a6af",
+        "gitBlobBytes": 2791212
+      },
+      {
+        "path": "开发计划/验证记录/2026-10-31-round33-msvc/inspection-raw/logs/objdump-9.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "e7cdb855785f78bde1b19c8a76e16b1ecd9a733e",
+        "gitBlobBytes": 2700320
+      },
+      {
+        "path": "开发计划/验证记录/2026-11-01-round35-msvc/inspection-raw/logs/objdump-1.stdout.log",
+        "gitMode": "100644",
+        "gitObjectType": "blob",
+        "gitBlobObjectId": "9cf846320a8cb2bbc93381233da70deebd74dffd",
+        "gitBlobBytes": 2700320
+      }
+    ]
+  },
+  "diagnosis": {
+    "observedFailure": "Both actual CI runs fail in Hash-Inputs before toolchain/compiler steps, after three successful source commands; same generic size/reparse exception. No Rust or Clippy compilation result exists in either run.",
+    "independentlyEstablishedCause": "Pinned full Git blob byte inventory is 286613906B, already18178450B over unchanged256MiB; growing preserved verification archives account for265890446B. The all-tracked-source size policy no longer admits this repository snapshot.",
+    "notRecorded": "Failure records omit triggering relative path, current file Length, cumulative total and FileAttributes. Cannot reconstruct first triggering Windows-sorted path, exact Windows checkout total or categorically exclude an earlier reparse/other filesystem condition from these original logs. Git regular modes and6.14MB raw maximum are repository metadata, not a fresh Windows attribute audit.",
+    "checkoutCaveat": "Raw Git sizes are not labeled actual Windows checkout sizes. Archived -text rules and earlier exact CRLF proofs are retained; no loose normalization or fabricated whole-checkout SHA ledger is used."
+  },
+  "proposedDesign": {
+    "status": "READ_ONLY_PROPOSAL_NOT_IMPLEMENTED",
+    "boundsUnchanged": {
+      "perContentHashedFileBytes": 67108864,
+      "hashedDomainTotalBytes": 268435456,
+      "fileCount": 10000,
+      "jobs": 2,
+      "stageBudgetSeconds": 900
+    },
+    "fullGitMetadataDomain": "Keep the complete pinned commit/tree and every tracked path, mode, blob object ID and raw Git blob size as a separate bounded metadata ledger. Hash that ledger document; never label its object IDs or metadata digest raw checkout SHA256. Preserve complete original archive INDEX/ledger proofs separately.",
+    "contentHashedDomain": "Declare a versioned conservative tracked-non-evidence domain: all tracked files outside literal normalized prefix 开发计划/验证记录/. Current pinned tree has550 such files/20723460 raw Git bytes. This retains Rust/crates/tests/build.rs/Cargo/lock/config/workflows/scripts/frontend/packaging/licenses/current plans/README instead of only assuming410 Rust files exhaust compiler input. Real Windows files are still read under original64/256/reparse checks before AND after compile; actual domain totals/SHA computed on that checkout.",
+    "partitionProof": "Require unique complete full-tree metadata set equals the disjoint union of declared content-hashed and archive-metadata domains, no missing/unclassified path, no rooted/escape/reparse aliases. Continue exact expected commit/workflow binding and full Git clean-before/after. Keep full6940 rows bounded; do not silently relax10000.",
+    "buildClosure": "Review and enforce that Cargo/build.rs/include_bytes/include_str/packaging verification cannot consume excluded archived files as build input. If any archive path is referenced as build/test input, add it explicitly to the content-hashed domain with existing limits or fail. All source/attribute/build configuration that defines selection must itself be included.",
+    "schemaAndClaims": "Emit explicit schema/version/domain labels for before/after content SHA256 and full-Git-object metadata. Result must say SHA256 of declared non-evidence checkout domain plus full historical Git-object metadata, NOT SHA256-read every Git checkout file. Record actual first failing path/length/total/reparse bool in any later bounded failure, avoiding signed URLs or environment dumps.",
+    "negativeChecks": [
+      "Unclassified or alias path rejected",
+      "A changed compiled/config/script/Web input changes before/after SHA or rejects",
+      "Excluded archive metadata change changes full-tree metadata identity but is not claimed raw SHA validation",
+      "A referenced archived file cannot silently enter compile without content-domain inclusion",
+      "File64MiB+1/total256MiB+1/real reparse remain rejected",
+      "All previous jobs2/900s/source-clean/exact-source and cleanup invariants retained"
+    ]
+  },
+  "limitations": [
+    "This is diagnosis and design only; no helper/source/workflow fix applied and neither failed CI rerun.",
+    "No Windows executable, PE artifact or runtime evidence exists in these two early-failure artifacts.",
+    "Original failure/no input manifest remain preserved, no extrapolation from R42/R41 successes."
+  ],
+  "helper": {
+    "path": "/tmp/fc-round44-ci-evidence/source-inventory-failure-independent-first.py",
+    "bytes": 13727,
+    "sha256": "f9696ffac032490be7fd995ca294da9e9d1737fefaadcd0c2ca75e2545a9d0df"
+  }
+}
