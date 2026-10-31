@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round37-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+    "--continuous-accept",
+    "--browser",
+    "--browser-content",
+    "REMINDER",
+    "--report",
+    "/tmp/fc-round37-ci-evidence/reminder-native-browser-first.json"
+  ],
+  "cwd": "/tmp/fc-round37-reminder-worktree",
+  "startedUtc": "2026-10-31T19:52:11.503314+00:00",
+  "stdout": "/tmp/fc-round37-ci-evidence/reminder-native-browser-first.stdout.log",
+  "stderr": "/tmp/fc-round37-ci-evidence/reminder-native-browser-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 67.46679334715009,
+  "completedUtc": "2026-10-31T19:53:18.970338+00:00",
+  "stdoutBytes": 259,
+  "stdoutSha256": "5db1c28517f53e0e549fcbf3b3116b0a25d53584ea0fc968a7da1a0d2b4813a8",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

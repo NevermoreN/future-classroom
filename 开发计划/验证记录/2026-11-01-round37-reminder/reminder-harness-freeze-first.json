@@ -1,0 +1,73 @@
+{
+  "status": "SOURCE_FROZEN_LOCAL_CHECKS_PASS_WINDOWS_NOT_RUN",
+  "recordedAt": "2026-10-31T19:51:46.839870+00:00",
+  "worktree": "/tmp/fc-round37-reminder-worktree",
+  "ownedFile": "scripts/windows-native-browser-harness.mjs",
+  "beforeSha256": "c7f23f6216f23ad63c1f88d680fb7add96475586e4b9935b8410c6324c262a70",
+  "afterSha256": "64f679b292fac18cb3935f66c880a23c2a703026679f22e563b2421da72b6b4d",
+  "patchSha256": "7d1208bd078ec75d4c861b1206f3d3373d69d3f0f66eba2617fdfc326e63ac19",
+  "checks": [
+    {
+      "name": "syntax",
+      "argv": [
+        "node",
+        "--check",
+        "scripts/windows-native-browser-harness.mjs"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "self-test",
+      "argv": [
+        "node",
+        "scripts/windows-native-browser-harness.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 1090,
+      "stdoutSha256": "847846074dc0eee2d9f48a96ec6de7b94691b4a26b977080e34cda05c2298525",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "selfTest": {
+    "type": "SELF_TEST",
+    "status": "PASS",
+    "builtinWebSocket": "function",
+    "checks": [
+      "synthetic scoped visual payload/DOM CSS alpha and border checks; exact HOMEWORK13-operation workflow (not browser evidence)",
+      "mandatory contentKind; strict REMINDER9 versus HOMEWORK13 routes/scopes/keys/ledger; cross-kind and any reminder visual rejected",
+      "bottom-only reminder selector hit test rejects decoy/disabled/duplicate; shortcut count increments only after successful mouse ACKs",
+      "reminder title/date/expiry/draft/no-visual DOM booleans validated without recording body",
+      "strict INIT/RUN and finite budget",
+      "pairing/logout/foreign target rejection",
+      "cached response excluded; raw304 wire status counted",
+      "Cookie/CSRF/Set-Cookie omitted from summaries",
+      "actual loopback WebSocket CDP correlation and deadline",
+      "unknown/failed/owned context disposal and expired positive command rejection",
+      "verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block"
+    ],
+    "windowsBrowser": "NOT_RUN",
+    "sourceSha256": "64f679b292fac18cb3935f66c880a23c2a703026679f22e563b2421da72b6b4d"
+  },
+  "contract": [
+    "INIT contentKind is mandatory HOMEWORK|REMINDER; report records exact kind",
+    "HOMEWORK retains thirteen APIs, four scoped visual GETs and all existing CSS/draft/session/CSP/asset/no-store/COMMITTED checks",
+    "REMINDER only its scopes0 and class/date GET/POST, exact nine API responses, zero visual reads/payloads/observations",
+    "Actual bottom-only home shortcut click count2 for reminder and0 for homework, successful full mouse ACK required before increment",
+    "Three reminder DOM observations contain stage,key,revision and six strict booleans, never original response body",
+    "Original max12000ms RUN, client/native/owner budgets unchanged, no new browser/pool/listener/SSPI effects"
+  ],
+  "notExecuted": [
+    "Actual Windows",
+    "Real Edge/TLS business run",
+    "Cargo",
+    "npm",
+    "remote",
+    "Git"
+  ]
+}

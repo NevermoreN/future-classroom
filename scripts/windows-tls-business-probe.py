@@ -1336,18 +1336,22 @@ def main():
     parser.add_argument("--report", type=Path)
     parser.add_argument("--web-bundle", type=Path, help="Existing development ZIP; only verified web manifest payloads are uploaded")
     parser.add_argument("--browser", action="store_true", help="Also verify isolated Windows Edge UI against this same finite native service")
+    parser.add_argument("--browser-content", choices=("HOMEWORK", "REMINDER"), default="HOMEWORK",
+                        help="Explicit isolated browser journey; REMINDER uses the real bottom shortcut and no subject-visual requests")
     parser.add_argument("--continuous-accept", action="store_true", help="Also verify real idle AcceptEx repost and four admitted JSON bodies within the original client/native deadlines; not strict TCP5s evidence")
     parser.add_argument("--visual-fixture", choices=VISUAL_FIXTURES, default="FILLED_DEFAULT", help="Exact finite isolated synthetic display fixture; no production settings")
     parser.add_argument("--visual-only", action="store_true", help="Target only visual/scope/read-only contract within the original client/native budgets")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.visual_only or args.visual_fixture != "FILLED_DEFAULT":
+        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept or args.visual_only or args.visual_fixture != "FILLED_DEFAULT" or args.browser_content != "HOMEWORK":
             parser.error("self-test is pure local; do not combine with remote inputs")
         self_test()
         return
     if args.visual_only and args.continuous_accept:
         parser.error("visual-only is separate from full material/capacity acceptance")
+    if args.browser_content != "HOMEWORK" and (not args.browser or args.visual_only):
+        parser.error("--browser-content REMINDER requires --browser and the full business diagnostic")
     if not args.exe or not args.report or not args.web_bundle:
         parser.error("--exe, --report and --web-bundle required for actual diagnostic")
     if not re.fullmatch(r"[A-Za-z0-9_.@:-]+", args.ssh_target) or args.ssh_target.startswith("-"):
@@ -1378,6 +1382,7 @@ def main():
               "remoteScriptsSha256": digest((COMMON + SETUP + LAUNCH + STOP + CAPTURE + CLEANUP).encode("utf-8")),
               "credentialScope": "Disposable synthetic probe account only; cookie/CSRF/poll secret omitted from client events; READY original contains synthetic pairing code",
               "visualFixture": args.visual_fixture, "visualOnly": args.visual_only,
+              "browserContentKind": args.browser_content if args.browser else None,
               "events": [], "cleanup": "NOT_RUN"}
     remote = Remote(args.ssh_target, args.identity)
     directory = launcher = launcher_logs = tunnel = local_owner = browser_observer = None
@@ -1440,7 +1445,7 @@ def main():
             observer_spec.loader.exec_module(observer_module)
             browser_observer = observer_module.BrowserObserver(
                 remote, local_owner.name, args.report, marker, json.loads(package[0]), CSP,
-                args.identity, args.ssh_target)
+                args.identity, args.ssh_target, content_kind=args.browser_content)
             browser_observer.prepare(fixture["publicPem"])
             report["scope"] = "Finite raw HTTPS API and isolated Windows Edge UI diagnostic against one native service"
         phase = "start-owned-ssh-master"

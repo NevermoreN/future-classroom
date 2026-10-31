@@ -6,6 +6,7 @@ only its CDP context. Cookie/CSRF travel through private stdin, never argv,
 environment, reports or raw CDP frames. Construction performs no I/O.
 """
 import base64
+from datetime import date
 import hashlib
 import importlib.util
 import json
@@ -32,7 +33,7 @@ REPORT_KEYS = frozenset((
     "network", "wireResponses", "wireResponseCount", "observedRequestCount",
     "observedResponseCount", "cacheOnlyResponseCount", "apiResponses", "contentPosts",
     "sessionCsrfMatched", "writeOutcome", "contentRevision", "commandId",
-    "pageErrorCount", "consoleErrorCount", "sourceSha256", "error", "apiOperations", "visualReads", "visualObservations",
+    "pageErrorCount", "consoleErrorCount", "sourceSha256", "error", "apiOperations", "visualReads", "visualObservations", "contentKind", "reminderShortcutClicks", "reminderObservations",
 ))
 RECORD_KEYS = frozenset((
     "method", "url", "status", "mime", "csp", "servedFromCache", "fromDiskCache",
@@ -61,6 +62,7 @@ def failure(error, phase):
 
 API_OPERATIONS = {"statusGets": 2, "sessionGets": 2, "scopeGets": 2,
                   "contentGets": 2, "contentPosts": 1, "visualGets": 4}
+REMINDER_OPERATIONS = {**API_OPERATIONS, "visualGets": 0}
 VISUAL_FIELDS = frozenset(("subjectRevision", "displayRevision", "rulesVersion", "effectiveRgb", "mode",
                           "homeworkFillPercent", "courseFillPercent", "homeworkComponentOpacityPercent",
                           "courseComponentOpacityPercent", "homeworkVisible", "courseVisible"))
@@ -126,9 +128,34 @@ def load_helpers():
     return helper
 
 
+def validate_reminder_observations(value, content_paths):
+    observations = value.get("reminderObservations")
+    require(isinstance(observations, list) and len(observations) == 3, "NODE_REMINDER_DOM_COUNT")
+    fields = {"stage", "key", "revision", "titleMatches", "dateMatches", "expiryMatches",
+              "draftMatches", "noVisualPreview", "bottomShortcutAvailable"}
+    for index, observed in enumerate(observations):
+        require(isinstance(observed, dict) and set(observed) == fields
+                and observed["stage"] == ("initial", "after-save", "after-reload")[index]
+                and observed["revision"] == ("0", "1", "1")[index]
+                and all(observed[k] is True for k in fields - {"stage", "key", "revision"}),
+                "NODE_REMINDER_DOM_FIELDS")
+        key = observed["key"]
+        require(isinstance(key, dict) and set(key) == {"kind", "classId", "date"}
+                and key["kind"] == "REMINDER" and key["classId"] == "1"
+                and isinstance(key["date"], str) and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", key["date"]),
+                "NODE_REMINDER_DOM_KEY")
+        try:
+            require(date.fromisoformat(key["date"]).isoformat() == key["date"], "NODE_REMINDER_DOM_DATE")
+        except ValueError:
+            raise RuntimeError("NODE_REMINDER_DOM_DATE") from None
+        require(content_paths == {f'/fc/api/v1/content/reminders/1/{key["date"]}'}, "NODE_REMINDER_DOM_BINDING")
+
+
 class BrowserObserver:
     def __init__(self, remote, local_root, report_path, marker, asset_manifest,
-                 expected_csp, identity, ssh_target):
+                 expected_csp, identity, ssh_target, content_kind="HOMEWORK"):
+        require(content_kind in ("HOMEWORK", "REMINDER"), "BROWSER_CONTENT_KIND")
+        self.content_kind = content_kind
         self.remote, self.local_root = remote, Path(local_root)
         self.report_path, self.marker = Path(report_path), marker
         self.manifest = json.loads(encoded(asset_manifest))
@@ -283,7 +310,8 @@ class BrowserObserver:
                                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.node_logs = self.helper.Logs(self.node)
             self._send({"type": "INIT", "cdpUrl": cdp_url, "expectedCsp": self.expected_csp,
-                        "assetManifest": self.manifest, "marker": self.marker}, deadline)
+                        "assetManifest": self.manifest, "marker": self.marker,
+                        "contentKind": self.content_kind}, deadline)
             ready = json.loads(self._line(self.node, self.node_logs, deadline))
             require(set(ready) == {"type", "marker", "browserVersion", "scope"}
                     and ready.get("type") == "READY" and ready.get("marker") == self.marker,
@@ -298,6 +326,7 @@ class BrowserObserver:
             raise RuntimeError("NATIVE_BROWSER_PREPARE_FAILED") from None
 
     def _validate_result(self, value, message, run):
+        expected_operations = API_OPERATIONS if self.content_kind == "HOMEWORK" else REMINDER_OPERATIONS
         require(set(value) <= REPORT_KEYS and value.get("schemaVersion") == 1
                 and value.get("status") == "PASS" and value.get("marker") == self.marker
                 and value.get("generation") == run["generation"] and value.get("origin") == run["origin"]
@@ -307,19 +336,26 @@ class BrowserObserver:
                 and value.get("expectedCspSha256") == digest(self.expected_csp.encode())
                 and value.get("contextDisposed") is True and value.get("cdpDisconnected") is True
                 and value.get("sessionCsrfMatched") is True and value.get("writeOutcome") == "COMMITTED"
-                and value.get("contentPosts") == 1, "NODE_REPORT_IDENTITY_OR_OUTCOME")
+                and type(value.get("contentPosts")) is int and value["contentPosts"] == 1
+                and value.get("contentKind") == self.content_kind,
+                "NODE_REPORT_IDENTITY_OR_OUTCOME")
+        require(type(value.get("reminderShortcutClicks")) is int
+                and value["reminderShortcutClicks"] == (2 if self.content_kind == "REMINDER" else 0),
+                "NODE_REMINDER_SHORTCUT_COUNT")
         records = value.get("network")
         require(isinstance(records, list) and len(records) <= 128, "NODE_NETWORK_BOUND")
         assets = {asset["path"]: asset for asset in self.manifest["assets"]}
-        api = ("/fc/api/v1/status", "/fc/api/v1/session", "/fc/api/v1/content/homework/scopes/0")
-        content = r"/fc/api/v1/content/homework/[1-9][0-9]{0,19}/[1-9][0-9]{0,19}/[1-9][0-9]{0,19}/[0-9]{4}-[0-9]{2}-[0-9]{2}"
+        prefix = "homework" if self.content_kind == "HOMEWORK" else "reminders"
+        api = ("/fc/api/v1/status", "/fc/api/v1/session", f"/fc/api/v1/content/{prefix}/scopes/0")
+        ids = r"[1-9][0-9]{0,19}/" * (3 if self.content_kind == "HOMEWORK" else 1)
+        content = f"/fc/api/v1/content/{prefix}/" + ids + r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
         for record in records:
             require(isinstance(record, dict) and set(record) <= RECORD_KEYS
                     and record.get("method") in ("GET", "POST") and isinstance(record.get("url"), str),
                     "NODE_NETWORK_SHAPE")
             path = record["url"].removeprefix(run["origin"])
             is_content = re.fullmatch(content, path) is not None
-            is_visual = re.fullmatch(content + r"/visual", path) is not None
+            is_visual = self.content_kind == "HOMEWORK" and re.fullmatch(content + r"/visual", path) is not None
             require(record["url"] == run["origin"] + path
                     and (is_content or record["method"] == "GET" and
                          (is_visual or path in api or path == "/fc/" or path.startswith("/fc/") and path[4:] in assets)),
@@ -328,6 +364,8 @@ class BrowserObserver:
                 require(record["csp"] == self.expected_csp, "NODE_CSP_MISMATCH")
             require(record.get("status") in (200, 304, None) and record.get("wireStatus") in (200, 304, None),
                     "NODE_UNEXPECTED_HTTP_STATUS")
+            require(record.get("finished") is True and record.get("bodyVerified") is True,
+                    "NODE_INCOMPLETE_RESPONSE")
         wires = [record for record in records if record.get("wireStatus") == 304 or
                  record.get("wireStatus") is not None and not
                  (record.get("servedFromCache") or record.get("fromDiskCache") or
@@ -335,11 +373,11 @@ class BrowserObserver:
         require(type(value.get("wireResponseCount")) is int and value["wireResponseCount"] == len(wires)
                 and value.get("wireResponses") == wires and value.get("observedRequestCount") == len(records)
                 and value["contentPosts"] == sum(record["method"] == "POST" for record in records)
-                and value.get("apiResponses") == sum(API_OPERATIONS.values()) and value.get("pageErrorCount") == 0
+                and value.get("apiResponses") == sum(expected_operations.values()) and value.get("pageErrorCount") == 0
                 and value.get("consoleErrorCount") == 0,
                 "NODE_WIRE_LEDGER_MISMATCH")
         api_records = [record for record in records if "/api/v1/" in record["url"]]
-        require(len(api_records) == sum(API_OPERATIONS.values()) and all(record.get("wireStatus") == 200
+        require(len(api_records) == sum(expected_operations.values()) and all(record.get("wireStatus") == 200
                 and record.get("status") == 200 and not any(record.get(key) for key in
                 ("servedFromCache", "fromDiskCache", "fromServiceWorker", "fromPrefetchCache"))
                 for record in api_records), "NODE_API_WIRE_IDENTITY")
@@ -360,10 +398,17 @@ class BrowserObserver:
         reported_operations = value.get("apiOperations")
         require(isinstance(reported_operations, dict) and set(reported_operations) == set(API_OPERATIONS)
                 and all(type(n) is int for n in reported_operations.values())
-                and operations == API_OPERATIONS and reported_operations == operations
-                and len(content_paths) == 1 and visual_paths == {next(iter(content_paths)) + "/visual"},
+                and operations == expected_operations and reported_operations == operations
+                and len(content_paths) == 1
+                and visual_paths == ({next(iter(content_paths)) + "/visual"} if self.content_kind == "HOMEWORK" else set()),
                 "NODE_EXACT_API_OPERATION_LEDGER")
-        validate_visual_observations(value)
+        if self.content_kind == "HOMEWORK":
+            validate_visual_observations(value)
+            require(value.get("reminderObservations") == [], "NODE_HOMEWORK_NO_REMINDER_DOM")
+        else:
+            require(type(value.get("visualReads")) is int and value["visualReads"] == 0
+                    and value.get("visualObservations") == [], "NODE_REMINDER_NO_VISUAL")
+            validate_reminder_observations(value, content_paths)
         require(value.get("observedResponseCount") == sum(record.get("status") is not None for record in records)
                 and value.get("cacheOnlyResponseCount") == sum(record not in wires and
                     bool(record.get("servedFromCache") or record.get("fromDiskCache")) for record in records),

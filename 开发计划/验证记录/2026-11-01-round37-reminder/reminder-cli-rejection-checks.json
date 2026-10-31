@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "scope": "Pure local CLI rejection, no remote invocation or private key read.",
+  "cases": [
+    {
+      "case": "requires-browser",
+      "command": [
+        "--browser-content",
+        "REMINDER"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: windows-tls-business-probe.py [-h] [--ssh-target SSH_TARGET]\n                                     [--identity IDENTITY] [--exe EXE]\n                                     [--report REPORT]\n                                     [--web-bundle WEB_BUNDLE] [--browser]\n                                     [--browser-content {HOMEWORK,REMINDER}]\n                                     [--continuous-accept]\n                                     [--visual-fixture {FILLED_DEFAULT,FILLED_ZERO,OUTLINED}]\n                                     [--visual-only] [--self-test]\nwindows-tls-business-probe.py: error: --browser-content REMINDER requires --browser and the full business diagnostic\n"
+    },
+    {
+      "case": "rejects-visual-only",
+      "command": [
+        "--browser",
+        "--browser-content",
+        "REMINDER",
+        "--visual-only"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: windows-tls-business-probe.py [-h] [--ssh-target SSH_TARGET]\n                                     [--identity IDENTITY] [--exe EXE]\n                                     [--report REPORT]\n                                     [--web-bundle WEB_BUNDLE] [--browser]\n                                     [--browser-content {HOMEWORK,REMINDER}]\n                                     [--continuous-accept]\n                                     [--visual-fixture {FILLED_DEFAULT,FILLED_ZERO,OUTLINED}]\n                                     [--visual-only] [--self-test]\nwindows-tls-business-probe.py: error: --browser-content REMINDER requires --browser and the full business diagnostic\n"
+    },
+    {
+      "case": "rejects-invalid-kind",
+      "command": [
+        "--browser-content",
+        "MATERIAL"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: windows-tls-business-probe.py [-h] [--ssh-target SSH_TARGET]\n                                     [--identity IDENTITY] [--exe EXE]\n                                     [--report REPORT]\n                                     [--web-bundle WEB_BUNDLE] [--browser]\n                                     [--browser-content {HOMEWORK,REMINDER}]\n                                     [--continuous-accept]\n                                     [--visual-fixture {FILLED_DEFAULT,FILLED_ZERO,OUTLINED}]\n                                     [--visual-only] [--self-test]\nwindows-tls-business-probe.py: error: argument --browser-content: invalid choice: 'MATERIAL' (choose from 'HOMEWORK', 'REMINDER')\n"
+    },
+    {
+      "case": "self-test-no-remote",
+      "command": [
+        "--self-test",
+        "--browser-content",
+        "REMINDER"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: windows-tls-business-probe.py [-h] [--ssh-target SSH_TARGET]\n                                     [--identity IDENTITY] [--exe EXE]\n                                     [--report REPORT]\n                                     [--web-bundle WEB_BUNDLE] [--browser]\n                                     [--browser-content {HOMEWORK,REMINDER}]\n                                     [--continuous-accept]\n                                     [--visual-fixture {FILLED_DEFAULT,FILLED_ZERO,OUTLINED}]\n                                     [--visual-only] [--self-test]\nwindows-tls-business-probe.py: error: self-test is pure local; do not combine with remote inputs\n"
+    }
+  ]
+}

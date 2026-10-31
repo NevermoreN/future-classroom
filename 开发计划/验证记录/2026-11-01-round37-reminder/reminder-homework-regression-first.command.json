@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-tls-business-probe.py",
+    "--exe",
+    "/tmp/fc-round37-programs/fc-bootstrap.exe",
+    "--web-bundle",
+    "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+    "--continuous-accept",
+    "--browser",
+    "--report",
+    "/tmp/fc-round37-ci-evidence/reminder-homework-regression-first.json"
+  ],
+  "cwd": "/tmp/fc-round37-reminder-worktree",
+  "startedUtc": "2026-10-31T19:53:29.549184+00:00",
+  "stdout": "/tmp/fc-round37-ci-evidence/reminder-homework-regression-first.stdout.log",
+  "stderr": "/tmp/fc-round37-ci-evidence/reminder-homework-regression-first.stderr.log",
+  "exitCode": 0,
+  "elapsedSeconds": 68.5868608141318,
+  "completedUtc": "2026-10-31T19:54:38.136357+00:00",
+  "stdoutBytes": 264,
+  "stdoutSha256": "7cf01118d7c2d933b20048391c4817dd21e18a0fbbb5b581a86655113b3f9c5c",
+  "stderrBytes": 0,
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

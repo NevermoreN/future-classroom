@@ -52,8 +52,9 @@ function header(headers, name) {
   return entries.length ? entries[0][1] : undefined;
 }
 function validateInit(value) {
-  shape(value, ['type', 'cdpUrl', 'expectedCsp', 'assetManifest', 'marker'], 'INVALID_INIT');
-  check(value.type === 'INIT' && MARKER.test(value.marker), 'INVALID_INIT');
+  shape(value, ['type', 'cdpUrl', 'expectedCsp', 'assetManifest', 'marker', 'contentKind'], 'INVALID_INIT');
+  check(value.type === 'INIT' && MARKER.test(value.marker)
+    && ['HOMEWORK', 'REMINDER'].includes(value.contentKind), 'INVALID_INIT');
   let url; try { url = new URL(value.cdpUrl); } catch { throw new Fault('INVALID_CDP_ENDPOINT'); }
   check(url.protocol === 'ws:' && ['127.0.0.1', '[::1]'].includes(url.hostname) && url.port
     && !url.username && !url.password && !url.search && !url.hash
@@ -96,7 +97,32 @@ function validateRun(value, init) {
 // single-subject preview GETs. Static cache hits never contribute to this ledger.
 const API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
   contentGets: 2, contentPosts: 1, visualGets: 4 });
+const REMINDER_API_OPERATIONS = Object.freeze({ statusGets: 2, sessionGets: 2, scopeGets: 2,
+  contentGets: 2, contentPosts: 1, visualGets: 0 });
+function operationsFor(kind) {
+  check(['HOMEWORK', 'REMINDER'].includes(kind), 'INVALID_CONTENT_KIND');
+  return kind === 'HOMEWORK' ? API_OPERATIONS : REMINDER_API_OPERATIONS;
+}
+function contentScope(value, kind) {
+  shape(value, ['schemaVersion', 'status', 'kind', 'today', 'identityRevision', 'offset', 'total', 'nextOffset', 'items'], 'SCOPE_SHAPE');
+  check(value.schemaVersion === 1 && value.status === 'SCOPES' && value.kind === kind && civilDate(value.today)
+    && decimal(value.identityRevision, true) && value.offset === 0 && value.total === 1 && value.nextOffset === null
+    && Array.isArray(value.items) && value.items.length === 1, 'SCOPE_FIELDS');
+  const item = value.items[0];
+  if (kind === 'REMINDER') {
+    shape(item, ['classId', 'className'], 'SCOPE_ITEM_SHAPE');
+    check(item.classId === '1' && item.className === 'Synthetic TLS class', 'SYNTHETIC_SCOPE_MISMATCH');
+    return { classId: item.classId, today: value.today };
+  }
+  check(kind === 'HOMEWORK', 'INVALID_CONTENT_KIND');
+  shape(item, ['classId', 'className', 'subjectId', 'subjectName', 'ownerTeacherId', 'ownerDisplayName'], 'SCOPE_ITEM_SHAPE');
+  check(item.classId === '1' && item.subjectId === '1' && decimal(item.ownerTeacherId)
+    && item.className === 'Synthetic TLS class' && item.subjectName === 'Synthetic TLS subject'
+    && item.ownerDisplayName === 'Synthetic TLS administrator', 'SYNTHETIC_SCOPE_MISMATCH');
+  return { classId: item.classId, subjectId: item.subjectId, ownerTeacherId: item.ownerTeacherId, today: value.today };
+}
 const VISUAL_STAGES = ['initial', 'draft-refresh', 'after-save', 'after-reload'];
+const REMINDER_STAGES = ['initial', 'after-save', 'after-reload'];
 const VISUAL_FIELDS = ['subjectRevision', 'displayRevision', 'rulesVersion', 'effectiveRgb', 'mode',
   'homeworkFillPercent', 'courseFillPercent', 'homeworkComponentOpacityPercent', 'courseComponentOpacityPercent',
   'homeworkVisible', 'courseVisible'];
@@ -144,6 +170,13 @@ function checkVisualDom(dom, visual) {
       && pill.borderStyle === (visual.mode === 'FILLED' ? 'none' : 'solid')
       && pill.textAlign === 'center' && pill.textMatches === true && pill.textColorUnchanged === true, 'VISUAL_COMPUTED_STYLE');
   }
+  return true;
+}
+
+function checkReminderDom(dom) {
+  const fields = ['titleMatches', 'dateMatches', 'expiryMatches', 'draftMatches', 'noVisualPreview', 'bottomShortcutAvailable'];
+  shape(dom, fields, 'REMINDER_DOM_SHAPE');
+  check(fields.every(field => dom[field] === true), 'REMINDER_DOM_IDENTITY_OR_DRAFT');
   return true;
 }
 
@@ -243,14 +276,17 @@ class Cdp {
 
 class Harness {
   constructor(init) {
-    this.init = init; this.until = performance.now() + 10000; this.phase = 'connect'; this.fault = null;
+    this.init = init; this.apiOperations = operationsFor(init.contentKind); this.until = performance.now() + 10000; this.phase = 'connect'; this.fault = null;
     this.contextId = null; this.sessionId = null; this.disposePromise = null; this.run = null;
     this.requests = new Map(); this.earlyExtra = new Map(); this.bodies = new Set(); this.scope = null; this.initial = null; this.committed = null;
     this.reloaded = null; this.post = null; this.saveClicks = 0; this.sessionCount = 0; this.statusCount = 0;
     this.pageErrors = 0; this.consoleErrors = 0; this.scopeReads = 0; this.contentReads = 0;
     this.visualReads = 0; this.visualPayloads = []; this.visualObservations = [];
-    this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker,
-      scope: 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.',
+    this.reminderShortcutClicks = 0; this.reminderObservations = [];
+    this.report = { schemaVersion: 1, status: 'FAIL', marker: init.marker, contentKind: init.contentKind,
+      scope: init.contentKind === 'REMINDER'
+        ? 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; actual bottom reminder shortcut, one synthetic shared class-day reminder save/reload, exact nine API operations and no visual reads. No pairing, microphone, playback, foreground or OS trust changes.'
+        : 'Actual isolated Win11 Edge to Rust native loopback HTTPS; approved session reused; one synthetic content save/reload and four scoped readonly visual reads with computed CSS/draft checks. No pairing, microphone, playback, foreground or OS trust changes.',
       assetManifestCanonicalSha256: hash(JSON.stringify(init.assetManifest)), expectedCspSha256: hash(init.expectedCsp),
       credentialScope: 'stdin memory only; Cookie/CSRF/Set-Cookie/response bodies and raw CDP frames omitted',
       browserPhysicalCleanup: 'SEPARATE_ORIGINAL_WINDOWS_JOB_OWNER_REQUIRED', assets: [], checks: [] };
@@ -281,9 +317,14 @@ class Harness {
     if (!this.run || url.origin !== this.run.origin || url.username || url.password || url.search || url.hash) return null;
     const path = url.pathname;
     if (method === 'GET' && (path === '/fc/' || this.init.assetManifest.assets.some(a => '/fc/' + a.path === path))) return { kind: 'asset', path };
-    if (method === 'GET' && ['/fc/api/v1/status', '/fc/api/v1/session', '/fc/api/v1/content/homework/scopes/0'].includes(path)) return { kind: 'api', path };
-    if (['GET', 'POST'].includes(method) && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(path)) return { kind: 'content', path };
-    if (method === 'GET' && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}\/visual$/.test(path)) return { kind: 'visual', path };
+    const reminder = this.init.contentKind === 'REMINDER';
+    const scopes = '/fc/api/v1/content/' + (reminder ? 'reminders' : 'homework') + '/scopes/0';
+    if (method === 'GET' && ['/fc/api/v1/status', '/fc/api/v1/session', scopes].includes(path)) return { kind: 'api', path };
+    const content = reminder
+      ? /^\/fc\/api\/v1\/content\/reminders\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}$/
+      : /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+    if (['GET', 'POST'].includes(method) && content.test(path)) return { kind: 'content', path };
+    if (!reminder && method === 'GET' && /^\/fc\/api\/v1\/content\/homework\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[1-9][0-9]{0,19}\/[0-9]{4}-[0-9]{2}-[0-9]{2}\/visual$/.test(path)) return { kind: 'visual', path };
     return null;
   }
   event(method, params, session) {
@@ -347,7 +388,9 @@ class Harness {
   }
   contentPath() {
     const s = this.scope;
-    return `/fc/api/v1/content/homework/${s.classId}/${s.subjectId}/${s.ownerTeacherId}/${s.today}`;
+    return this.init.contentKind === 'REMINDER'
+      ? `/fc/api/v1/content/reminders/${s.classId}/${s.today}`
+      : `/fc/api/v1/content/homework/${s.classId}/${s.subjectId}/${s.ownerTeacherId}/${s.today}`;
   }
   checkDocument(value) {
     shape(value, ['schemaVersion', 'status', 'today', 'serverNow', 'expiresAt', 'key', 'revision', 'text', 'lastActorId', 'updatedAt'], 'CONTENT_SHAPE');
@@ -355,13 +398,15 @@ class Harness {
       && typeof value.serverNow === 'string' && value.serverNow.startsWith(value.today + 'T')
       && typeof value.expiresAt === 'string' && decimal(value.revision, true)
       && typeof value.text === 'string' && Buffer.byteLength(value.text) <= 16384, 'CONTENT_FIELDS');
-    shape(value.key, ['kind', 'classId', 'subjectId', 'ownerTeacherId', 'date'], 'CONTENT_KEY_SHAPE');
-    const expected = { kind: 'HOMEWORK', classId: this.scope.classId, subjectId: this.scope.subjectId,
-      ownerTeacherId: this.scope.ownerTeacherId, date: this.scope.today };
+    const reminder = this.init.contentKind === 'REMINDER';
+    shape(value.key, reminder ? ['kind', 'classId', 'date'] : ['kind', 'classId', 'subjectId', 'ownerTeacherId', 'date'], 'CONTENT_KEY_SHAPE');
+    const expected = reminder ? { kind: 'REMINDER', classId: this.scope.classId, date: this.scope.today }
+      : { kind: 'HOMEWORK', classId: this.scope.classId, subjectId: this.scope.subjectId,
+        ownerTeacherId: this.scope.ownerTeacherId, date: this.scope.today };
     check(Object.keys(expected).every(k => value.key[k] === expected[k]), 'CONTENT_KEY_CHANGED');
     if (value.revision === '0') check(value.text === '' && value.lastActorId === null && value.updatedAt === null, 'INITIAL_CONTENT_NOT_EMPTY');
     else check(decimal(value.lastActorId) && typeof value.updatedAt === 'string' && value.updatedAt.startsWith(value.today + 'T'), 'CONTENT_AUDIT_FIELDS');
-    return { revision: value.revision, textMatches: value.text === this.text };
+    return { revision: value.revision, textMatches: value.text === this.text, expiresAt: value.expiresAt };
   }
   async analyze(id, record) {
     const result = await this.command('Network.getResponseBody', { requestId: id });
@@ -380,9 +425,10 @@ class Harness {
       let value; try { value = JSON.parse(new TextDecoder('utf8', { fatal: true }).decode(bytes)); }
       catch { throw new Fault('API_JSON'); }
       if (record.kind === 'visual') {
-        check(record.method === 'GET' && record.path === this.contentPath() + '/visual', 'VISUAL_TARGET_CHANGED');
+        check(this.init.contentKind === 'HOMEWORK' && record.method === 'GET'
+          && record.path === this.contentPath() + '/visual', 'VISUAL_TARGET_CHANGED');
         const visual = visualPayload(value, this.scope);
-        check(++this.visualReads <= API_OPERATIONS.visualGets, 'EXTRA_VISUAL_READ');
+        check(++this.visualReads <= this.apiOperations.visualGets, 'EXTRA_VISUAL_READ');
         this.visualPayloads.push({ visual, responseBodySha256: hash(bytes) });
       } else if (record.path.endsWith('/status')) {
         check(value.schemaVersion === 1 && value.apiVersion === 1 && value.uiCompatibilityVersion === 1 && value.online === true, 'STATUS_PAYLOAD');
@@ -391,16 +437,7 @@ class Harness {
         check(value.schemaVersion === 1 && value.status === 'AUTHENTICATED' && value.csrf === this.run.expectedCsrf, 'SESSION_CSRF_MISMATCH');
         this.sessionCount++;
       } else if (record.path.endsWith('/scopes/0')) {
-        shape(value, ['schemaVersion', 'status', 'kind', 'today', 'identityRevision', 'offset', 'total', 'nextOffset', 'items'], 'SCOPE_SHAPE');
-        check(value.schemaVersion === 1 && value.status === 'SCOPES' && value.kind === 'HOMEWORK' && civilDate(value.today)
-          && decimal(value.identityRevision, true) && value.offset === 0 && value.total === 1 && value.nextOffset === null
-          && Array.isArray(value.items) && value.items.length === 1, 'SCOPE_FIELDS');
-        const item = value.items[0];
-        shape(item, ['classId', 'className', 'subjectId', 'subjectName', 'ownerTeacherId', 'ownerDisplayName'], 'SCOPE_ITEM_SHAPE');
-        check(item.classId === '1' && item.subjectId === '1' && decimal(item.ownerTeacherId)
-          && item.className === 'Synthetic TLS class' && item.subjectName === 'Synthetic TLS subject'
-          && item.ownerDisplayName === 'Synthetic TLS administrator', 'SYNTHETIC_SCOPE_MISMATCH');
-        const scope = { classId: item.classId, subjectId: item.subjectId, ownerTeacherId: item.ownerTeacherId, today: value.today };
+        const scope = contentScope(value, this.init.contentKind);
         if (this.scope) check(Object.keys(scope).every(k => scope[k] === this.scope[k]), 'RELOAD_SCOPE_CHANGED');
         this.scope = scope; this.scopeReads++;
       } else if (record.method === 'POST') {
@@ -429,15 +466,17 @@ class Harness {
     while (true) { this.active(); if (await condition()) return; await sleep(Math.min(20, Math.max(1, this.until - performance.now()))); }
   }
   selectorExpression(kind) {
-    return `(() => { const kind=${JSON.stringify(kind)}; let all;
-      if(kind==='home') all=[...document.querySelectorAll('button')].filter(e=>e.textContent.trim()==='管理今日作业');
+    return `(() => { const kind=${JSON.stringify(kind)}, reminder=${this.init.contentKind === 'REMINDER'}; let all;
+      if(kind==='home') all=reminder
+        ? [...document.querySelectorAll('.bottom-reminder-action button')].filter(e=>e.textContent.trim()==='管理今日提醒')
+        : [...document.querySelectorAll('button')].filter(e=>e.textContent.trim()==='管理今日作业');
       else if(kind==='scope') all=[...document.querySelectorAll('.scope-options button.scope-option')];
       else if(kind==='visualRefresh') all=[...document.querySelectorAll('[data-testid="subject-visual-refresh"]')];
       else if(kind==='save') all=[...document.querySelectorAll('.editor-actions button')].filter(e=>e.textContent.trim()==='保存当天内容');
       else all=[...document.querySelectorAll('textarea#content-text')];
       if(all.length!==1) return {ready:false,count:all.length}; const e=all[0];
       if(e.disabled || e.readOnly) return {ready:false,count:1};
-      if(kind==='scope' && !['Synthetic TLS class','Synthetic TLS subject','Synthetic TLS administrator'].every(s=>e.textContent.includes(s))) return {ready:false,count:1};
+      if(kind==='scope' && !(reminder ? ['Synthetic TLS class'] : ['Synthetic TLS class','Synthetic TLS subject','Synthetic TLS administrator']).every(s=>e.textContent.includes(s))) return {ready:false,count:1};
       e.scrollIntoView({block:'center',inline:'center'}); const r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;
       const top=document.elementFromPoint(x,y);return {ready:r.width>0&&r.height>0&&x>=0&&y>=0&&x<innerWidth&&y<innerHeight&&(top===e||e.contains(top)),count:1,x,y}; })()`;
   }
@@ -447,6 +486,7 @@ class Harness {
     await this.command('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
     await this.command('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
     await this.command('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+    if (kind === 'home' && this.init.contentKind === 'REMINDER') this.reminderShortcutClicks++;
   }
   async openContent() {
     await this.click('home');
@@ -456,6 +496,7 @@ class Harness {
     await this.untilTrue(async () => await this.evaluate(`(() => {const e=document.querySelector('#content-text');return !!e&&!e.disabled&&!e.readOnly&&e.getAttribute('aria-invalid')==='false';})()`));
   }
   async checkVisual(stage, readNumber, expectedDraft) {
+    check(this.init.contentKind === 'HOMEWORK', 'UNEXPECTED_VISUAL_FLOW');
     await this.untilTrue(async () => this.visualReads >= readNumber);
     check(this.visualReads === readNumber, 'VISUAL_READ_SEQUENCE');
     const payload = this.visualPayloads[readNumber - 1];
@@ -487,6 +528,31 @@ class Harness {
     this.visualObservations.push({ stage, readNumber, responseBodySha256: payload.responseBodySha256,
       visual: payload.visual, dom, draftPreserved: dom.draftMatches });
   }
+  async checkReminder(stage, expectedDraft) {
+    check(this.init.contentKind === 'REMINDER' && this.scope, 'UNEXPECTED_REMINDER_FLOW');
+    const document = stage === 'initial' ? this.initial : stage === 'after-save' ? this.committed : this.reloaded;
+    check(document && stage === REMINDER_STAGES[this.reminderObservations.length], 'REMINDER_STAGE_SEQUENCE');
+    let dom;
+    await this.untilTrue(async () => {
+      dom = await this.evaluate(`(() => {
+        const root=document.querySelector('.content-editor'), date=root?.querySelector('.server-date');
+        if(!root||!date)return null;
+        const shortcut=[...document.querySelectorAll('.bottom-reminder-action button')];
+        const dateText=[...date.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();
+        return {titleMatches:root.querySelector('[role="heading"][aria-level="2"]')?.textContent.trim()==='Synthetic TLS class · 今日提醒'
+            && root.querySelector('.eyebrow')?.textContent.trim()==='班级共同当天提醒',
+          dateMatches:dateText===${JSON.stringify('白板日期 ' + this.scope.today)},
+          expiryMatches:date.querySelector('span')?.textContent.trim()===${JSON.stringify('有效至 ' + document.expiresAt.replace('T', ' '))},
+          draftMatches:root.querySelector('#content-text')?.value===${JSON.stringify(expectedDraft)},
+          noVisualPreview:document.querySelector('[data-testid="subject-visual-preview"]')===null,
+          bottomShortcutAvailable:shortcut.length===1&&!shortcut[0].disabled&&shortcut[0].textContent.trim()==='管理今日提醒'};
+      })()`);
+      return dom !== null;
+    });
+    checkReminderDom(dom);
+    this.reminderObservations.push({ stage, key: { kind: 'REMINDER', classId: this.scope.classId, date: this.scope.today },
+      revision: document.revision, ...dom });
+  }
   async execute(run, receivedAt) {
     this.run = run; this.until = receivedAt + run.maxMillis; this.text = `Synthetic Native Edge content ${run.marker}`;
     this.report.generation = run.generation; this.report.origin = run.origin; this.report.maxMillis = run.maxMillis;
@@ -502,43 +568,61 @@ class Harness {
     check(!navigation.errorText, 'NATIVE_NAVIGATION_FAILED');
     await this.untilTrue(async () => this.statusCount === 1 && this.sessionCount === 1);
     this.phase = 'read-original-content'; await this.openContent();
-    this.phase = 'visual-original'; await this.checkVisual('initial', 1, '');
+    if (this.init.contentKind === 'HOMEWORK') {
+      this.phase = 'visual-original'; await this.checkVisual('initial', 1, '');
+    } else await this.checkReminder('initial', '');
     this.phase = 'enter-synthetic-text'; await this.click('text');
     await this.command('Input.insertText', { text: this.text });
     await this.untilTrue(async () => await this.evaluate(`document.querySelector('#content-text')?.value===${JSON.stringify(this.text)}`));
-    this.phase = 'visual-refresh-with-draft';
-    check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_MUST_NOT_WRITE');
-    await this.click('visualRefresh'); await this.checkVisual('draft-refresh', 2, this.text);
-    check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_CHANGED_WRITE_STATE');
+    if (this.init.contentKind === 'HOMEWORK') {
+      this.phase = 'visual-refresh-with-draft';
+      check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_MUST_NOT_WRITE');
+      await this.click('visualRefresh'); await this.checkVisual('draft-refresh', 2, this.text);
+      check(this.saveClicks === 0 && this.post === null, 'VISUAL_REFRESH_CHANGED_WRITE_STATE');
+    }
     this.phase = 'save-once'; this.saveClicks++;
     await this.click('save');
     await this.untilTrue(async () => this.committed !== null);
     await this.untilTrue(async () => await this.evaluate(`(() => {const n=document.querySelector('.content-editor .content-notice');return n?.textContent.trim()===${JSON.stringify(SAVED)}&&!document.querySelector('.command-receipt');})()`));
-    this.phase = 'visual-after-save'; await this.checkVisual('after-save', 3, this.text);
+    if (this.init.contentKind === 'HOMEWORK') { this.phase = 'visual-after-save'; await this.checkVisual('after-save', 3, this.text); }
+    else await this.checkReminder('after-save', this.text);
     this.phase = 'reload-and-read-durable-content'; await this.command('Page.reload');
     await this.untilTrue(async () => this.statusCount === 2 && this.sessionCount === 2);
     await this.openContent();
     await this.untilTrue(async () => this.reloaded !== null && await this.evaluate(`document.querySelector('#content-text')?.value===${JSON.stringify(this.text)}`));
-    this.phase = 'visual-after-reload'; await this.checkVisual('after-reload', 4, this.text);
+    if (this.init.contentKind === 'HOMEWORK') {
+      this.phase = 'visual-after-reload'; await this.checkVisual('after-reload', 4, this.text);
+    } else await this.checkReminder('after-reload', this.text);
     this.phase = 'settle-observed-responses';
     await this.untilTrue(async () => this.responsesSettled());
-    const api = [...this.requests.values()].filter(r => r.kind !== 'asset');
-    check(api.length === Object.values(API_OPERATIONS).reduce((a, b) => a + b, 0)
-      && this.sessionCount === API_OPERATIONS.sessionGets && this.statusCount === API_OPERATIONS.statusGets
-      && this.scopeReads === API_OPERATIONS.scopeGets && this.contentReads === API_OPERATIONS.contentGets
-      && this.visualReads === API_OPERATIONS.visualGets && this.visualObservations.length === API_OPERATIONS.visualGets
-      && api.filter(r => r.method === 'POST').length === API_OPERATIONS.contentPosts, 'API_OPERATION_COUNT');
-    check(api.every(r => r.extraStatus === 200 && !r.servedFromCache && !r.fromDiskCache
-      && !r.fromServiceWorker && !r.fromPrefetchCache), 'API_NOT_PROVEN_NATIVE_NO_STORE');
+    this.checkApiLedger();
+    check(this.reminderShortcutClicks === (this.init.contentKind === 'REMINDER' ? 2 : 0)
+      && this.reminderObservations.length === (this.init.contentKind === 'REMINDER' ? REMINDER_STAGES.length : 0), 'REMINDER_WORKFLOW_COUNT');
     check(this.report.assets.some(a => a.path === 'index.html') && this.report.assets.some(a => a.path.endsWith('.css'))
       && this.report.assets.some(a => a.path.endsWith('.js')), 'MISSING_NATIVE_BROWSER_ASSETS');
     check(this.pageErrors === 0 && this.consoleErrors === 0, 'BROWSER_ERROR_COUNT');
     this.report.checks = ['Native HTML/JS/CSS exact manifest identities and CSP', 'Original approved HttpOnly cookie; actual session CSRF matched twice',
       'One synthetic authorized scope and original empty content', 'Exactly one UI content POST with original CSRF/date/revision',
-      'Committed receipt and post-reload durable content match', 'Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately',
-      'Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha', 'Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview'];
+      'Committed receipt and post-reload durable content match',
+      ...(this.init.contentKind === 'HOMEWORK' ? [
+        'Original nine plus four readonly visual GETs: exact real no-store API ledger; cache hits counted separately',
+        'Actual computed fill/border/whole alpha; text and controls do not inherit fill alpha',
+        'Explicit visual refresh preserves dirty content draft; save and reload reread scoped preview'] : [
+        'Actual bottom reminder shortcut and actual class scope button used before and after reload',
+        'Exact original nine real no-store API responses; zero visual requests/reads/observations; cache hits counted separately'])];
     this.report.elapsedMillis = Math.round(performance.now() - began); this.report.status = 'PASS';
     this.phase = 'complete';
+  }
+  checkApiLedger() {
+    const api = [...this.requests.values()].filter(r => r.kind !== 'asset');
+    check(api.length === Object.values(this.apiOperations).reduce((a, b) => a + b, 0)
+      && this.sessionCount === this.apiOperations.sessionGets && this.statusCount === this.apiOperations.statusGets
+      && this.scopeReads === this.apiOperations.scopeGets && this.contentReads === this.apiOperations.contentGets
+      && this.visualReads === this.apiOperations.visualGets && this.visualObservations.length === this.apiOperations.visualGets
+      && this.visualPayloads.length === this.apiOperations.visualGets
+      && api.filter(r => r.method === 'POST').length === this.apiOperations.contentPosts, 'API_OPERATION_COUNT');
+    check(api.every(r => r.extraStatus === 200 && !r.servedFromCache && !r.fromDiskCache
+      && !r.fromServiceWorker && !r.fromPrefetchCache), 'API_NOT_PROVEN_NATIVE_NO_STORE');
   }
   responsesSettled() {
     return this.bodies.size === 0 && this.earlyExtra.size === 0
@@ -582,6 +666,7 @@ class Harness {
     this.report.apiOperations = { statusGets: this.statusCount, sessionGets: this.sessionCount, scopeGets: this.scopeReads,
       contentGets: this.contentReads, contentPosts: records.filter(r => r.method === 'POST').length, visualGets: this.visualReads };
     this.report.visualReads = this.visualReads; this.report.visualObservations = this.visualObservations;
+    this.report.reminderShortcutClicks = this.reminderShortcutClicks; this.report.reminderObservations = this.reminderObservations;
     this.report.contentPosts = records.filter(r => r.method === 'POST').length;
     this.report.sessionCsrfMatched = this.sessionCount === 2;
     this.report.writeOutcome = this.committed ? 'COMMITTED' : this.post ? 'UNKNOWN' : 'NOT_OBSERVED';
@@ -644,7 +729,7 @@ async function selfTest() {
     { path: 'assets/index-DFFVdc8-.css', sizeBytes: 1, sha256: hash('c') },
   ] };
   const init = { type: 'INIT', cdpUrl: 'ws://127.0.0.1:12345/devtools/browser/00000000-0000-0000-0000-000000000000',
-    expectedCsp: "script-src 'self'; connect-src 'self'", assetManifest: manifest, marker: 'FutureClassroom-Test-TLS-' + 'a'.repeat(32) };
+    expectedCsp: "script-src 'self'; connect-src 'self'", assetManifest: manifest, marker: 'FutureClassroom-Test-TLS-' + 'a'.repeat(32), contentKind: 'HOMEWORK' };
   assert.equal(validateInit(init), init);
   assert.throws(() => validateInit({ ...init, cdpUrl: init.cdpUrl.replace('127.0.0.1', 'example.com') }), Fault);
   const run = { type: 'RUN', origin: 'https://localhost:12345', cookie: '__Host-FutureClassroom=' + 'b'.repeat(64),
@@ -662,6 +747,75 @@ async function selfTest() {
   assert.equal(h.classify(visualPath, 'POST'), null);
   assert.equal(h.classify(run.origin + '/fc/api/v1/subject-visuals', 'GET'), null);
   assert.equal(Object.values(API_OPERATIONS).reduce((a,b)=>a+b,0), 13);
+  const reminderInit = { ...init, contentKind: 'REMINDER' };
+  assert.equal(validateInit(reminderInit), reminderInit);
+  const missingKind = { ...init }; delete missingKind.contentKind;
+  assert.throws(() => validateInit(missingKind), Fault);
+  for (const contentKind of ['', 'reminder', 'OTHER', null]) assert.throws(() => validateInit({ ...init, contentKind }), Fault);
+  assert.equal(Object.values(operationsFor('REMINDER')).reduce((a,b)=>a+b,0), 9);
+  assert.throws(() => operationsFor('OTHER'), Fault);
+  const reminder = new Harness(reminderInit); reminder.run = { ...run }; reminder.text = 'Synthetic reminder model only';
+  const reminderPath = '/fc/api/v1/content/reminders/1/2026-11-01';
+  assert.equal(reminder.classify(run.origin + '/fc/api/v1/content/reminders/scopes/0', 'GET').kind, 'api');
+  for (const method of ['GET', 'POST']) assert.equal(reminder.classify(run.origin + reminderPath, method).kind, 'content');
+  for (const path of ['/fc/api/v1/content/homework/scopes/0', '/fc/api/v1/content/homework/1/1/1/2026-11-01',
+    '/fc/api/v1/content/homework/1/1/1/2026-11-01/visual', reminderPath + '/visual',
+    '/fc/api/v1/content/reminders/scopes/1', '/fc/api/v1/content/reminders/1/1/2026-11-01']) {
+    assert.equal(reminder.classify(run.origin + path, 'GET'), null);
+  }
+  assert.equal(reminder.classify(run.origin + reminderPath, 'DELETE'), null);
+  assert.equal(h.classify(run.origin + reminderPath, 'GET'), null);
+  assert.equal(h.classify(run.origin + '/fc/api/v1/content/reminders/scopes/0', 'GET'), null);
+  const reminderScopes = { schemaVersion:1,status:'SCOPES',kind:'REMINDER',today:'2026-11-01',identityRevision:'4',offset:0,total:1,nextOffset:null,
+    items:[{classId:'1',className:'Synthetic TLS class'}] };
+  reminder.scope = contentScope(reminderScopes, 'REMINDER');
+  assert.deepEqual(reminder.scope, {classId:'1',today:'2026-11-01'});
+  assert.equal(reminder.contentPath(), reminderPath);
+  assert.throws(() => contentScope({...reminderScopes,kind:'HOMEWORK'},'REMINDER'),Fault);
+  assert.throws(() => contentScope({...reminderScopes,items:[{...reminderScopes.items[0],subjectId:'1'}]},'REMINDER'),Fault);
+  assert.throws(() => contentScope({...reminderScopes,items:[{classId:'2',className:'Synthetic TLS class'}]},'REMINDER'),Fault);
+  assert.throws(() => contentScope(reminderScopes,'HOMEWORK'),Fault);
+  const reminderDocument = {schemaVersion:1,status:'CONTENT',today:'2026-11-01',serverNow:'2026-11-01T10:00:00',expiresAt:'2026-11-02T00:00:00',
+    key:{kind:'REMINDER',classId:'1',date:'2026-11-01'},revision:'0',text:'',lastActorId:null,updatedAt:null};
+  assert.equal(reminder.checkDocument(reminderDocument).revision,'0');
+  for (const key of [{...reminderDocument.key,kind:'HOMEWORK'}, {...reminderDocument.key,subjectId:'1'},
+    {...reminderDocument.key,ownerTeacherId:'1'}, {...reminderDocument.key,classId:'2'}, {...reminderDocument.key,date:'2026-11-02'}]) {
+    assert.throws(() => reminder.checkDocument({...reminderDocument,key}),Fault);
+  }
+  const reminderDom = {titleMatches:true,dateMatches:true,expiryMatches:true,draftMatches:true,noVisualPreview:true,bottomShortcutAvailable:true};
+  assert.equal(checkReminderDom(reminderDom),true);
+  for (const key of Object.keys(reminderDom)) assert.throws(() => checkReminderDom({...reminderDom,[key]:false}),Fault);
+  assert.throws(() => checkReminderDom({...reminderDom,text:'must not retain body'}),Fault);
+  await assert.rejects(reminder.checkVisual('initial',1,''), error => error.code==='UNEXPECTED_VISUAL_FLOW');
+  // Evaluate the production selector against a controlled DOM-shaped fixture.
+  // The decoy has the same label outside the bottom shortcut and must not win.
+  const bottom = {textContent:'管理今日提醒',disabled:false,readOnly:false,scrollIntoView(){},
+    getBoundingClientRect(){return {x:20,y:20,width:100,height:40};},contains(){return false;}};
+  const decoy = {...bottom}; let hit = bottom, candidates = [bottom]; const queried=[];
+  const selectorDocument = {querySelectorAll(selector){queried.push(selector);return selector==='.bottom-reminder-action button'?candidates:[decoy,bottom];},
+    elementFromPoint(){return hit;}};
+  const selectReminder = () => Function('document','innerWidth','innerHeight','return '+reminder.selectorExpression('home'))(selectorDocument,800,600);
+  assert.equal(selectReminder().ready,true); assert.deepEqual(queried,['.bottom-reminder-action button']);
+  hit=decoy; assert.equal(selectReminder().ready,false); hit=bottom;
+  bottom.disabled=true; assert.equal(selectReminder().ready,false); bottom.disabled=false;
+  candidates=[bottom,decoy]; assert.equal(selectReminder().ready,false); candidates=[bottom];
+  const clicks = new Harness(reminderInit); clicks.evaluate=async()=>selectReminder();
+  const mouse=[]; let failRelease=false;
+  clicks.command=async(method,params)=>{mouse.push([method,params.type]);if(failRelease&&params.type==='mouseReleased')throw new Fault('TEST_MOUSE_REJECT');};
+  await clicks.click('home'); assert.equal(clicks.reminderShortcutClicks,1); assert.equal(mouse.length,3);
+  failRelease=true; await assert.rejects(clicks.click('home'),Fault); assert.equal(clicks.reminderShortcutClicks,1);
+  reminder.statusCount=2;reminder.sessionCount=2;reminder.scopeReads=2;reminder.contentReads=2;
+  for(let i=0;i<9;i++)reminder.requests.set('reminder-api-'+i,{kind:'api',method:i===8?'POST':'GET',url:run.origin+reminderPath,
+    extraStatus:200,servedFromCache:false,fromDiskCache:false,fromServiceWorker:false,fromPrefetchCache:false});
+  assert.doesNotThrow(()=>reminder.checkApiLedger());
+  reminder.visualReads=1;assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.visualReads=0;
+  reminder.visualObservations.push({});assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.visualObservations.length=0;
+  reminder.requests.set('forbidden-visual',{kind:'visual',method:'GET',extraStatus:200});assert.throws(()=>reminder.checkApiLedger(),Fault);reminder.requests.delete('forbidden-visual');
+  const reminderApi=reminder.requests.get('reminder-api-0');reminderApi.fromDiskCache=true;assert.throws(()=>reminder.checkApiLedger(),Fault);reminderApi.fromDiskCache=false;
+  const reminderPost=reminder.requests.get('reminder-api-8');reminderPost.method='GET';assert.throws(()=>reminder.checkApiLedger(),Fault);reminderPost.method='POST';
+  const reminderSummary=reminder.summary();assert.equal(reminderSummary.contentKind,'REMINDER');assert.equal(reminderSummary.apiResponses,9);
+  assert.equal(reminderSummary.visualReads,0);assert.deepEqual(reminderSummary.visualObservations,[]);
+  assert.equal(reminderSummary.reminderShortcutClicks,0);assert.deepEqual(reminderSummary.reminderObservations,[]);
   const scope = { classId: '1', subjectId: '1', ownerTeacherId: '1', today: '2026-11-01' };
   const dto = { schemaVersion:1,status:'SUBJECT_VISUAL',key:{kind:'HOMEWORK',classId:'1',subjectId:'1',ownerTeacherId:'1',date:scope.today},
     subjectId:'1',subjectName:'Synthetic TLS subject',subjectRevision:'2',displayRevision:'4',rulesVersion:1,effectiveRgb:'#C98282',mode:'FILLED',
@@ -731,7 +885,10 @@ async function selfTest() {
   assert.equal(await owned.dispose(), true); assert.equal(calls, 1); assert.equal(owned.report.contextDisposed, true);
   await socketSelfTest();
   writeSync(1, JSON.stringify({ type: 'SELF_TEST', status: 'PASS', builtinWebSocket: typeof WebSocket,
-    checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact 13-operation workflow (not browser evidence)', 'strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
+    checks: ['synthetic scoped visual payload/DOM CSS alpha and border checks; exact HOMEWORK13-operation workflow (not browser evidence)',
+      'mandatory contentKind; strict REMINDER9 versus HOMEWORK13 routes/scopes/keys/ledger; cross-kind and any reminder visual rejected',
+      'bottom-only reminder selector hit test rejects decoy/disabled/duplicate; shortcut count increments only after successful mouse ACKs',
+      'reminder title/date/expiry/draft/no-visual DOM booleans validated without recording body', 'strict INIT/RUN and finite budget', 'pairing/logout/foreign target rejection', 'cached response excluded; raw304 wire status counted',
       'Cookie/CSRF/Set-Cookie omitted from summaries', 'actual loopback WebSocket CDP correlation and deadline', 'unknown/failed/owned context disposal and expired positive command rejection', 'verified cached assets do not wait for absent ExtraInfo; incomplete bodies/API/wire proof still block'],
     windowsBrowser: 'NOT_RUN', sourceSha256: hash(readFileSync(fileURLToPath(import.meta.url))) }) + '\n');
 }

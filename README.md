@@ -109,3 +109,20 @@ python3 scripts/package-probe.py --exe target/i686-pc-windows-gnu/release/fc-boo
 第七轮Host243项、Win11 x86 305项及98步隐藏工作台/资料链通过，最终证据见实施记录。
 
 桌面顶部控制独立于8种显示组件，仅换课按钮接受点击，新增表面计入原16MiB总DIB预算；当前格名称/颜色与资料来源同一Scene切换。隐藏控件和离屏验证不替代三系统可见桌面、白板笔/PPT、profile布局或72小时验收。
+
+
+## 有限原生TLS与浏览器提醒诊断
+
+仅在已授权Windows测试环境使用既有有限诊断；普通生产监听仍不启用。从原开发包提取确切待测EXE后，可运行：
+
+```sh
+python3 scripts/windows-tls-business-probe.py \
+  --exe /absolute/path/to/fc-bootstrap.exe \
+  --web-bundle /mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip \
+  --report /tmp/fc-reminder-browser-check.json \
+  --continuous-accept --browser --browser-content REMINDER
+```
+
+`--browser-content REMINDER` 只与 `--browser` 的完整流程配合，不适用于 `--visual-only`。浏览器从真实底部“管理今日提醒”按钮进入、选择合成班级、输入并保存一次，reload后从同一底部入口读回；严格核对9个API响应、1次POST、0次视觉读取及两次快捷按钮点击。省略 `--browser-content` 默认仍为HOMEWORK，保留原13个API与4次视觉读取/计算样式/草稿检查。原12秒浏览器、30秒客户端和45秒Native期限不变。
+
+第三十七轮提醒首次实际PASS/cleanup PASS，复用的是合成且已批准的全局管理员会话，不是实际教师角色、手机、校园TLS、跨日到期等待或可见希沃验收；未录音或播放，严格首TCP五秒原FAIL不变。默认作业分支随后也独立实际PASS/cleanup PASS，983毫秒内保留13API、4次视觉读取、1次POST且提醒快捷点击0；两流程最终矩阵及Windows只读清理审计均PASS，证据归档和本地EXE副本/工作树清理仍待按实际完成。证据与限制见[实施记录](开发计划/10-实施进度与验证记录.md)及[提醒原始报告](开发计划/验证记录/2026-11-01-round37-reminder/reminder-native-browser-first.json)。
