@@ -1,0 +1,117 @@
+{
+  "status": "FAIL",
+  "scope": "Local fixed-nightly Linux host, dependency-free no_std library, Tier3 i686-win7-windows-gnu; diagnostic core-only build-std. No Windows/CI/product changes, executable runtime, or network.",
+  "startedUtc": "2026-10-31T16:46:29.047334+00:00",
+  "commands": [
+    {
+      "name": "clippy-repro-rustc-version",
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:46:29.058605+00:00",
+      "elapsedSeconds": 0.3205072861164808,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-rustc-version.stdout.log",
+        "bytes": 214,
+        "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-rustc-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clippy-repro-cargo-version",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:46:29.380111+00:00",
+      "elapsedSeconds": 0.1159014308359474,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-cargo-version.stdout.log",
+        "bytes": 353,
+        "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-cargo-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clippy-repro-clippy-version",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-V"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 1,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:46:29.497137+00:00",
+      "elapsedSeconds": 0.3148312831763178,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-clippy-version.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-clippy-version.stderr.log",
+        "bytes": 214,
+        "sha256": "a33c8bb89f603e25b9a887a74c539bfe6a502f0e5b697f88ab4e341187b2e0f9"
+      }
+    }
+  ],
+  "cleanup": "PASS_OWNED_REPRO_ROOT_REMOVED",
+  "envWhitelist": {
+    "CARGO_NET_OFFLINE": "true",
+    "CARGO_BUILD_JOBS": "2",
+    "RUSTFLAGS": "-C target-feature=+crt-static",
+    "CARGO_ENCODED_RUSTFLAGS": "ABSENT"
+  },
+  "root": "/tmp/fc-round34-clippy-repro",
+  "rootIdentity": {
+    "device": 1048772,
+    "inode": 1076054,
+    "markerSha256": "a5002cac5d91c2b0b0cbe2d758bced7cc6e79605f742e4cafc6e731c4089eecd"
+  },
+  "fixture": [
+    {
+      "path": "/tmp/fc-round34-clippy-repro/Cargo.toml",
+      "bytes": 120,
+      "sha256": "ed93874d3a933f799996ca0c5492d7c13b647199815a079592d24b8da9ede62c",
+      "utf8": "[package]\nname = \"fc-clippy-build-std-repro\"\nversion = \"0.0.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\n"
+    },
+    {
+      "path": "/tmp/fc-round34-clippy-repro/src/lib.rs",
+      "bytes": 57,
+      "sha256": "b713494b35b8bed66a7e6ec562243176651b86119bc4e0b57f4576f37018cf07",
+      "utf8": "#![no_std]\n\npub fn identity(value: u32) -> u32 { value }\n"
+    }
+  ],
+  "error": {
+    "kind": "AssertionError",
+    "message": ""
+  },
+  "finishedUtc": "2026-10-31T16:46:29.812827+00:00",
+  "cleanupFileCount": 3,
+  "cleanupLogicalBytes": 209
+}

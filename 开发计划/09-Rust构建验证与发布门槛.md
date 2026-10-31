@@ -97,3 +97,10 @@ Rust计划初估：P0=8–13、P1=12–19、P2=10–17、P3=14–22、P4=14–22
 Win7的target专用linker、CC、`_WIN32_WINNT/WINVER=0x0601`、静态CRT与PE32 subsystem6.1分别检查，保留实际VS/SDK/CRT和选定rust-src/lock哈希。两个基线使用不同的run根、所有权标记、并发组和artifact名；仍按原135分钟job/105分钟构建、单命令预算、每流16MiB上限、固定双构建并发、精确进程归还与原件不覆盖规则执行。编译流程不运行任何生成EXE。
 
 实机PowerShell的28组/421断言仅证明完整源码可解析、三个纯函数的参数/PE边界和现代参数等价；完整采集脚本仍要求Hosted PowerShell 7.2及以上。新的共享采集代码和Win7候选都须以同步后的完整SHA各取得实际Hosted CI结果，不能用修改前的现代CI通过替代。即使所有编译及subsystem门槛通过，Win7 API动态路径、SDK/CRT兼容、真实SP1 x86运行、Win10与希沃设备证据仍须独立验收。
+
+
+## 第三十四轮：Win7 Clippy参数与持续接纳定向验证
+
+93414d5的现代共享helper Hosted CI已实际成功。Win7候选原CI的workspace测试/正常程序编译及22份PE采集通过，但Clippy缺少core而失败，整体不得填成功。固定同一nightly的独立离线最小复现确认：把build-std放在外层Cargo全局参数位置不能传入Clippy内部check；改为`cargo clippy -Z build-std … -- -D warnings`后实际编译core并成功。最小复现使用GNU Tier3和core子集，仅作因果诊断，不能代替完整MSVC依赖或运行证明。
+
+共享helper只调整Win7 Clippy的参数位置，生产继续完整无子集`build-std`；Win7 test/build及现代参数不变。修正后实际Win11 PowerShell纯函数28组/421断言通过，完整新源码仍须Hosted PowerShell>=7.2执行及真实Win7另取证。连续接纳Rust增量须核对冻结源码、受影响Windows测试程序/正常程序哈希、实际Win11运行、真实Schannel四请求容量矩阵与自有资源清理；上述应用层结果不解除严格首TCP五秒、内核/SSP资源、Win7/Win10及可见希沃门槛。

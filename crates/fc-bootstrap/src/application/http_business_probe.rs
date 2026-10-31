@@ -5,7 +5,10 @@ use super::*;
 use fc_bootstrap::{
     web_application::{quarantined_uploads, retry_quarantined_uploads, WebApplication},
     web_assets::StaticAssets,
-    web_transfer::{network::NetCoordinator, DownloadHubOwner, UploadHubOwner},
+    web_transfer::{
+        network::{NetCoordinator, NetworkReport},
+        DownloadHubOwner, UploadHubOwner,
+    },
 };
 use fc_ports::http::ListenPrefix;
 use fc_windows::tls_frontdoor::TlsHttpHost;
@@ -316,6 +319,41 @@ fn stop_failed_start(pool: shared_pool::SharedPool<Work>, error: String) -> Stri
         Err(join) => format!("{error}; business startup physical join: {join:?}"),
     }
 }
+/// Finite diagnostic metadata only. Exact relative nanoseconds do not claim a
+/// kernel TCP establishment timestamp. No credentials or request bytes appear.
+fn progress(
+    marker: &str,
+    epoch: Instant,
+    sequence: u64,
+    report: NetworkReport,
+) -> std::result::Result<(), String> {
+    use std::fmt::Write as _;
+    let a = report.acceptance;
+    let mut requests = String::with_capacity(fc_ports::http::MAX_REQUESTS * 192);
+    for interval in report.json_body_intervals.into_iter().flatten() {
+        if !requests.is_empty() {
+            requests.push(',');
+        }
+        let admitted = interval
+            .admitted_at
+            .checked_duration_since(epoch)
+            .ok_or("business interval predates observation epoch")?
+            .as_nanos();
+        let deadline = interval
+            .deadline
+            .checked_duration_since(epoch)
+            .ok_or("business deadline predates observation epoch")?
+            .as_nanos();
+        write!(&mut requests, "{{\"generation\":{},\"slot\":{},\"serial\":{},\"admittedAtNs\":{admitted},\"deadlineNs\":{deadline}}}", interval.token.generation(), interval.token.slot(), interval.token.serial())
+        .map_err(|_| "business interval encoding")?;
+    }
+    let output = std::io::stdout();
+    let mut output = output.lock();
+    writeln!(output, "TLS_BUSINESS_PROGRESS {{\"marker\":\"{marker}\",\"generation\":{},\"sequence\":{sequence},\"acceptance\":{{\"generation\":{},\"posts\":{},\"completions\":{},\"idle_cancellations\":{},\"idle_returns\":{},\"capacity_rejects\":{},\"transfers\":{},\"ready_slots\":{},\"bound_slots\":{},\"native_pending\":{},\"owned_sockets\":{}}},\"jsonBodyRecords\":{},\"retired\":{},\"rearms\":{},\"pendingJobs\":{},\"requests\":[{requests}]}}", a.generation,a.generation,a.posts,a.completions,a.idle_cancellations,a.idle_returns,a.capacity_rejects,a.transfers,a.ready_slots,a.bound_slots,a.native_pending,a.owned_sockets,report.json_body_records,report.retired,report.rearms,report.pending_jobs)
+        .map_err(|_| "business progress write")?;
+    output.flush().map_err(|_| "business progress flush".into())
+}
+
 pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), String> {
     require(
         marker.starts_with("FutureClassroom-Test-TLS-")
@@ -326,6 +364,7 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
         "business marker validation",
     )
     .map_err(|e| format!("{e:?}"))?;
+    let progress_epoch = Instant::now();
     let parent = std::env::current_dir().map_err(|_| "business current directory")?;
     let pool =
         shared_pool::SharedPool::<Work>::start().map_err(|_| "business shared worker startup")?;
@@ -416,9 +455,18 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
     let mut approval: Option<JobTicket<Result<Outcome>>> = None;
     let mut approvals = 0usize;
     let mut next_approval = Instant::now();
-    let active = (|| -> std::result::Result<(), String> {
+    let mut progress_sequence = 0u64;
+    let mut last_progress = None;
+    let mut next_progress = Instant::now();
+    let mut active = (|| -> std::result::Result<(), String> {
         while Instant::now() < until {
-            net.poll()?;
+            let report = net.poll()?;
+            if last_progress != Some(report) && Instant::now() >= next_progress {
+                progress_sequence += 1;
+                progress(marker, progress_epoch, progress_sequence, report)?;
+                last_progress = Some(report);
+                next_progress = Instant::now() + Duration::from_millis(250);
+            }
             if let Some(ticket) = approval.as_mut() {
                 match ticket.try_result() {
                     Ok(Some(Ok(Outcome::HttpProbe(completed)))) => {
@@ -459,6 +507,13 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
         }
         Ok(())
     })();
+    if last_progress != Some(net.report()) {
+        progress_sequence += 1;
+        let emitted = progress(marker, progress_epoch, progress_sequence, net.report());
+        if active.is_ok() {
+            active = emitted;
+        }
+    }
     net.request_stop()?;
     if let Some(ticket) = approval.as_ref() {
         ticket.cancel();
@@ -480,6 +535,11 @@ pub(super) fn run(thumbprint: &str, marker: &str) -> std::result::Result<(), Str
     }
     drop(approval);
     let report = net.report();
+    progress_sequence += 1;
+    let emitted = progress(marker, progress_epoch, progress_sequence, report);
+    if active.is_ok() {
+        active = emitted;
+    }
     println!("TLS_BUSINESS_REPORT {report:?}");
     pool.request_stop();
     pool.join()

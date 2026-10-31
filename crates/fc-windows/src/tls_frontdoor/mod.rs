@@ -7,6 +7,25 @@ use fc_ports::http::RequestToken;
 #[cfg(any(windows, test))]
 use std::sync::atomic::{compiler_fence, Ordering};
 
+/// Read-only candidate owner accounting, not a kernel backlog/TCB bound or
+/// evidence of an exact TCP establishment epoch. No request/user data included.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TlsAcceptSnapshot {
+    pub generation: u64,
+    pub posts: u64,
+    pub completions: u64,
+    /// Actual expired-post cancellation requests (not completion proof).
+    pub idle_cancellations: u64,
+    /// Actual IOCP returns for those expired-post Closing operations.
+    pub idle_returns: u64,
+    pub capacity_rejects: u64,
+    pub transfers: u64,
+    pub ready_slots: usize,
+    pub bound_slots: usize,
+    pub native_pending: usize,
+    pub owned_sockets: usize,
+}
+
 pub const CONNECTION_SLOTS: usize = 4;
 pub const BUFFER_BYTES: usize = 64 * 1024;
 pub const PLAINTEXT_BYTES: usize = 16 * 1024;

@@ -1,0 +1,41 @@
+--- a/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -91,6 +91,7 @@
+     posted_header_deadlines: [Instant; CONNECTION_SLOTS],
+     calls: Arc<Mutex<Calls>>,
+     closed: Arc<AtomicUsize>,
++    retain_faulted_owner_on_drop: bool,
+ }
+ impl Fixture {
+     fn new() -> Self {
+@@ -138,6 +139,7 @@
+             posted_header_deadlines,
+             calls,
+             closed,
++            retain_faulted_owner_on_drop: false,
+         }
+     }
+     fn input(&mut self, bytes: &[u8]) {
+@@ -268,6 +270,14 @@
+ }
+ impl Drop for Fixture {
+     fn drop(&mut self) {
++        if self.retain_faulted_owner_on_drop {
++            // Only the independent controlled-failure child selects this path.
++            // Leave the original Host/Owner destructors to retain their exact
++            // native resource domain; do not claim normal physical drain.
++            assert!(OWNER_FAULTED.load(Ordering::Acquire));
++            assert!(!self.host.owner.drained && !self.host.owner.bare_released());
++            return;
++        }
+         if !self.host.owner.drained {
+             self.host
+                 .owner
+@@ -1632,6 +1642,7 @@
+         let serial = bare.serial;
+         bare.fail_close_once = true;
+         let error = f.host.owner.close_bare_accept().unwrap_err();
++        f.retain_faulted_owner_on_drop = true;
+         assert!(error.contains("controlled"));
+         let bare = f.host.owner.resources.accept.as_ref().unwrap();
+         assert!(bare.pending() && bare.socket == socket);

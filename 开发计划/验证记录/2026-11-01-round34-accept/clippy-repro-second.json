@@ -1,0 +1,193 @@
+{
+  "status": "CAUSAL_REPRODUCED",
+  "scope": "Local fixed-nightly Linux host, dependency-free no_std library, Tier3 i686-win7-windows-gnu; diagnostic core-only build-std. No Windows/CI/product changes, executable runtime, or network.",
+  "startedUtc": "2026-10-31T16:48:03.507103+00:00",
+  "commands": [
+    {
+      "name": "clippy-repro-second-rustc-version",
+      "argv": [
+        "rustc",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:48:03.508822+00:00",
+      "elapsedSeconds": 0.03310808585956693,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-rustc-version.stdout.log",
+        "bytes": 214,
+        "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-rustc-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clippy-repro-second-cargo-version",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "-vV"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:48:03.543145+00:00",
+      "elapsedSeconds": 0.034128929022699594,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-cargo-version.stdout.log",
+        "bytes": 353,
+        "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-cargo-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clippy-repro-second-clippy-version",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-V"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 20,
+      "targetDirectory": null,
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:48:03.578259+00:00",
+      "elapsedSeconds": 0.06452302518300712,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-clippy-version.stdout.log",
+        "bytes": 39,
+        "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-clippy-version.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clippy-repro-second-global-first",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "-Z",
+        "build-std=core",
+        "clippy",
+        "--offline",
+        "-vv",
+        "--lib",
+        "--target",
+        "i686-win7-windows-gnu",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 180,
+      "targetDirectory": "/tmp/fc-round34-clippy-repro/target-global",
+      "exitCode": 101,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:48:03.643835+00:00",
+      "elapsedSeconds": 0.42018028208985925,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-global-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-global-first.stderr.log",
+        "bytes": 3913,
+        "sha256": "7a4cb147591b7fc5d744cdcbd2652a22de326bebdafb0937f856938981116757"
+      }
+    },
+    {
+      "name": "clippy-repro-second-after-command-first",
+      "argv": [
+        "cargo",
+        "+nightly-2026-10-29",
+        "clippy",
+        "-Z",
+        "build-std=core",
+        "--offline",
+        "-vv",
+        "--lib",
+        "--target",
+        "i686-win7-windows-gnu",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/tmp/fc-round34-clippy-repro",
+      "timeoutSeconds": 180,
+      "targetDirectory": "/tmp/fc-round34-clippy-repro/target-after-command",
+      "exitCode": 0,
+      "timedOut": false,
+      "startedUtc": "2026-10-31T16:48:04.065404+00:00",
+      "elapsedSeconds": 26.3348809981253,
+      "stdout": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-after-command-first.stdout.log",
+        "bytes": 3736,
+        "sha256": "fc931316f083fd471788cce6369e9172ae83e976af4fc2b0601d814d234160e5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-after-command-first.stderr.log",
+        "bytes": 14984,
+        "sha256": "a0cf2949f0a80db7aa1d2d233aef515632bd2837c3912d55c12c4d769a2ea6b3"
+      }
+    }
+  ],
+  "cleanup": "PASS_OWNED_REPRO_ROOT_REMOVED",
+  "envWhitelist": {
+    "CARGO_NET_OFFLINE": "true",
+    "CARGO_BUILD_JOBS": "2",
+    "RUSTFLAGS": "-C target-feature=+crt-static",
+    "CARGO_ENCODED_RUSTFLAGS": "ABSENT"
+  },
+  "root": "/tmp/fc-round34-clippy-repro",
+  "rootIdentity": {
+    "device": 1048772,
+    "inode": 1076087,
+    "markerSha256": "2bc5cdb8b70549ec5fedd55843a842d85dd31a58804f1567c364ba573670d0ea"
+  },
+  "fixture": [
+    {
+      "path": "/tmp/fc-round34-clippy-repro/Cargo.toml",
+      "bytes": 120,
+      "sha256": "ed93874d3a933f799996ca0c5492d7c13b647199815a079592d24b8da9ede62c",
+      "utf8": "[package]\nname = \"fc-clippy-build-std-repro\"\nversion = \"0.0.0\"\nedition = \"2021\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\n"
+    },
+    {
+      "path": "/tmp/fc-round34-clippy-repro/src/lib.rs",
+      "bytes": 57,
+      "sha256": "b713494b35b8bed66a7e6ec562243176651b86119bc4e0b57f4576f37018cf07",
+      "utf8": "#![no_std]\n\npub fn identity(value: u32) -> u32 { value }\n"
+    }
+  ],
+  "observed": {
+    "globalExit": 101,
+    "globalMissingCore": true,
+    "afterCommandExit": 0,
+    "afterCommandCoreCompilation": true,
+    "independentTargets": true,
+    "bothOffline": true,
+    "bothOriginalBudgets180Seconds": true,
+    "warningsDeniedBoth": true
+  },
+  "finishedUtc": "2026-10-31T16:48:30.404977+00:00",
+  "cleanupFileCount": 63,
+  "cleanupLogicalBytes": 76503259
+}

@@ -34,13 +34,14 @@ const REQUEST_BUDGET: Duration = Duration::from_secs(120);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum DeadlinePhase {
+    AwaitingConnection,
     Header,
     Request { admitted_at: Instant },
 }
 
 pub(super) struct Stream {
-    // Kept visible for the parent's initial AcceptEx post. That post+5s clock
-    // is still only the existing candidate clock, not an ESTABLISHED timestamp.
+    // Inert while Ready. Bound exactly once to the bare owner's original
+    // post-derived deadline, never an ESTABLISHED or handoff+5 timestamp.
     pub(super) deadline: Instant,
     deadline_phase: DeadlinePhase,
     admitted: bool,
@@ -74,8 +75,8 @@ pub(super) struct Stream {
 impl Stream {
     fn new() -> Self {
         Self {
-            deadline: Instant::now() + BUDGET,
-            deadline_phase: DeadlinePhase::Header,
+            deadline: Instant::now(),
+            deadline_phase: DeadlinePhase::AwaitingConnection,
             admitted: false,
             expected_body: None,
             head_only: false,
@@ -109,8 +110,8 @@ impl Stream {
     }
     fn reset(&mut self) {
         self.wipe_tx();
-        self.deadline = Instant::now() + BUDGET;
-        self.deadline_phase = DeadlinePhase::Header;
+        self.deadline = Instant::now();
+        self.deadline_phase = DeadlinePhase::AwaitingConnection;
         self.admitted = false;
         self.expected_body = None;
         self.head_only = false;
@@ -136,17 +137,23 @@ impl Stream {
         self.response_fence = None;
     }
     fn expired_at(&self, now: Instant) -> bool {
-        now >= self.deadline
+        self.deadline_phase != DeadlinePhase::AwaitingConnection && now >= self.deadline
     }
+    pub(super) fn waiting_for_connection(&self) -> bool {
+        self.deadline_phase == DeadlinePhase::AwaitingConnection
+    }
+    pub(super) fn bind_header_deadline(&mut self, deadline: Instant) {
+        assert!(self.waiting_for_connection(), "header clock already bound");
+        self.deadline_phase = DeadlinePhase::Header;
+        self.deadline = deadline;
+    }
+    #[cfg(test)]
     fn posted_header_at(&mut self, now: Instant) {
-        debug_assert_eq!(self.deadline_phase, DeadlinePhase::Header);
-        // Preserve the existing candidate's post+5s behavior. This does not
-        // establish the original TCP connection epoch or solve backlog timing.
-        self.deadline = now + BUDGET;
+        self.bind_header_deadline(now + BUDGET);
     }
     fn request_started_at(&self) -> Option<Instant> {
         match self.deadline_phase {
-            DeadlinePhase::Header => None,
+            DeadlinePhase::AwaitingConnection | DeadlinePhase::Header => None,
             DeadlinePhase::Request { admitted_at } => Some(admitted_at),
         }
     }
@@ -254,6 +261,44 @@ impl TlsHttpHost {
     }
     pub fn generation(&self) -> u64 {
         self.owner.generation
+    }
+    /// Pure owner metadata only. Socket descriptors count this owner's handles,
+    /// not kernel TCB/backlog/SSPI allocations or any deadline guarantee.
+    pub fn acceptance_snapshot(&self) -> TlsAcceptSnapshot {
+        let resources = &self.owner.resources;
+        let bare = resources.accept.as_ref();
+        TlsAcceptSnapshot {
+            generation: self.owner.generation,
+            posts: self.owner.report.accept_posts,
+            completions: self.owner.report.accept_completions,
+            idle_cancellations: self.owner.report.accept_idle_cancellations,
+            idle_returns: self.owner.report.accept_idle_returns,
+            capacity_rejects: self.owner.report.accept_capacity_rejections,
+            transfers: self.owner.report.accept_handoffs,
+            ready_slots: resources
+                .slots
+                .iter()
+                .filter(|slot| slot.phase == Phase::Ready)
+                .count(),
+            bound_slots: resources
+                .slots
+                .iter()
+                .filter(|slot| slot.phase != Phase::Ready && slot.socket != INVALID_SOCKET)
+                .count(),
+            native_pending: resources
+                .slots
+                .iter()
+                .filter(|slot| slot.pending.is_some())
+                .count()
+                + usize::from(bare.is_some_and(|bare| bare.pending())),
+            owned_sockets: usize::from(resources.listener != INVALID_SOCKET)
+                + resources
+                    .slots
+                    .iter()
+                    .filter(|slot| slot.socket != INVALID_SOCKET)
+                    .count()
+                + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
+        }
     }
     pub fn tokens(&self) -> [RequestToken; CONNECTION_SLOTS] {
         std::array::from_fn(|n| self.owner.resources.slots[n].token)
@@ -506,7 +551,10 @@ impl Owner {
             || self.stopping
             || index >= CONNECTION_SLOTS
             || self.resources.slots[index].token != token
-            || self.resources.slots[index].phase == Phase::Closed
+            || matches!(
+                self.resources.slots[index].phase,
+                Phase::Ready | Phase::Closed
+            )
             || self.expired(index)
         {
             return Err("stale or closed TLS HTTP request".into());
@@ -613,7 +661,7 @@ impl Owner {
                 slot.frame.as_mut().unwrap().input_len = 0;
                 self.submit_http_call(index, Call::Shutdown)
             }
-            Phase::Closed => Ok(()),
+            Phase::Ready | Phase::Closed => Ok(()),
         }
     }
     fn parse_http_plain(&mut self, index: usize) -> Result<(), String> {
@@ -829,6 +877,7 @@ impl Owner {
                 }
             }
             Phase::Handshake | Phase::Http => self.drive(index),
+            Phase::Ready => Err("send completion for unbound Ready business slot".into()),
             Phase::Closed => Ok(()),
         }
     }
@@ -884,7 +933,7 @@ impl Owner {
         slot.frame.as_mut().unwrap().wipe();
         slot.frame.as_mut().unwrap().token = next;
         slot.token = next;
-        slot.phase = Phase::Handshake;
+        slot.phase = Phase::Ready;
         slot.parser = Parser::new(next, true);
         slot.response_body = None;
         slot.response_chunk = None;
@@ -895,66 +944,7 @@ impl Owner {
         slot.send_len = 0;
         slot.sent = 0;
         slot.close_after_send = false;
-        self.post_http_accept(index)?;
         Ok(next)
-    }
-    fn post_http_accept(&mut self, index: usize) -> Result<(), String> {
-        let listener = self.resources.listener;
-        if listener == INVALID_SOCKET {
-            return Err("TLS HTTP listener closed".into());
-        }
-        let slot = &mut self.resources.slots[index];
-        // SAFETY: the old exact operation was dequeued and this new socket is
-        // owned by the same pinned slot. No event grants native pointer access.
-        unsafe {
-            *slot.memory.operation.get() = OVERLAPPED::default();
-            slot.socket = WSASocketW(
-                AF_INET.0 as i32,
-                SOCK_STREAM.0,
-                IPPROTO_TCP.0,
-                None,
-                0,
-                WSA_FLAG_OVERLAPPED,
-            )
-            .map_err(|e| format!("TLS HTTP accept socket: {e}"))?;
-            let mut accept: LPFN_ACCEPTEX = None;
-            let mut bytes = 0;
-            check(
-                WSAIoctl(
-                    listener,
-                    SIO_GET_EXTENSION_FUNCTION_POINTER,
-                    Some(ptr::from_ref(&WSAID_ACCEPTEX).cast()),
-                    size_of::<windows::core::GUID>() as u32,
-                    Some(ptr::from_mut(&mut accept).cast()),
-                    size_of::<LPFN_ACCEPTEX>() as u32,
-                    &mut bytes,
-                    None,
-                    None,
-                ),
-                "TLS HTTP AcceptEx lookup",
-            )?;
-            let success = accept.ok_or("TLS HTTP AcceptEx unavailable")?(
-                listener,
-                slot.socket,
-                slot.memory.addresses.get().cast(),
-                0,
-                32,
-                32,
-                &mut bytes,
-                slot.memory.operation.get(),
-            )
-            .as_bool();
-            if !success && WSAGetLastError() != WSA_IO_PENDING {
-                return Err(error("TLS HTTP AcceptEx post"));
-            }
-        }
-        slot.pending = Some(Operation::Accept);
-        slot.stream
-            .as_mut()
-            .unwrap()
-            .posted_header_at(Instant::now());
-        self.report.submissions += 1;
-        Ok(())
     }
     fn poll_http_drain(&mut self) -> Result<bool, String> {
         if self.drained {
@@ -965,7 +955,9 @@ impl Owner {
             .resources
             .slots
             .iter()
-            .any(|slot| slot.pending.is_some())
+            .any(|slot| slot.pending.is_some() || slot.socket != INVALID_SOCKET)
+            || self.resources.listener != INVALID_SOCKET
+            || !self.bare_released()
         {
             return Ok(false);
         }
@@ -979,6 +971,7 @@ impl Owner {
             }
         }
         if self.report.submissions != self.report.completions
+            || !self.accept_ledger_matches()
             || self.resources.slots.iter().any(|slot| slot.frame.is_none())
             || self.report.sspi_submissions != self.report.sspi_completions
             || self.report.sspi_completions != self.report.returned_frames

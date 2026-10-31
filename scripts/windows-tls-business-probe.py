@@ -11,6 +11,7 @@ The disposable public certificate is trusted in this Python context only; its
 private key never leaves Windows and no system trust/network setting is changed.
 """
 import argparse
+from collections import deque
 from email.utils import format_datetime, parsedate_to_datetime
 import hashlib
 import importlib.util
@@ -45,6 +46,7 @@ STOP = _tls.STOP.replace("--tls-lifecycle-probe", "--tls-business-probe")
 Remote, Tunnel, Logs = _tls.Remote, _tls.Tunnel, _tls.Logs
 digest, failure, script, ps_literal = _tls.digest, _tls.failure, _tls.script, _tls.ps_literal
 READY, PASS = "TLS_BUSINESS_READY ", "TLS_BUSINESS_PASS "
+PROGRESS = "TLS_BUSINESS_PROGRESS "
 EXIT_PREFIXES = (_tls.EXIT, "TLS_BUSINESS_PROCESS_EXIT ")
 HEAD_LIMIT, BODY_LIMIT, FRAGMENT = 16 * 1024, 64 * 1024, 16 * 1024
 DOWNLOAD_LIMIT = 50 * 1024 * 1024
@@ -337,6 +339,296 @@ class Client:
                 connection.close()
 
 
+class ProgressReader:
+    """Consume only safe progress; preserve every unrelated lifecycle line.
+
+    Uses the launcher's existing pipe-reader threads, never another thread.
+    All waits share the original Client deadline and fixed per-wait limits.
+    """
+    COUNTERS = ("posts", "completions", "idle_cancellations", "idle_returns", "capacity_rejects", "transfers")
+
+    def __init__(self, lines, marker, reports):
+        self.lines, self.marker, self.reports = lines, marker, reports
+        self.generation = None
+        self.latest = None
+        self.deferred = deque()
+        self.deferred_bytes = 0
+
+    def observe(self, line):
+        if not line.startswith(PROGRESS):
+            return False
+        require(len(line) <= 8192 and len(self.reports) < 512, "bounded native progress exceeded")
+        item = json.loads(line[len(PROGRESS):])
+        integer = lambda value: type(value) is int and 0 <= value <= (1 << 64) - 1
+        require(isinstance(item, dict) and set(item) == {"marker", "generation", "sequence", "acceptance",
+                    "jsonBodyRecords", "retired", "rearms", "pendingJobs", "requests"}
+                and item.get("marker") == self.marker
+                and integer(item.get("generation")) and item["generation"] == self.generation
+                and integer(item.get("sequence")) and item["sequence"] > 0, "native progress identity mismatch")
+        a = item.get("acceptance")
+        require(isinstance(a, dict) and set(a) == set(self.COUNTERS) | {"generation", "ready_slots", "bound_slots",
+                    "native_pending", "owned_sockets"}
+                and integer(a.get("generation")) and a.get("generation") == self.generation
+                and all(integer(a.get(key)) for key in self.COUNTERS)
+                and all(type(a.get(key)) is int and 0 <= a[key] <= limit for key, limit in
+                        (("ready_slots", 4), ("bound_slots", 4), ("native_pending", 5), ("owned_sockets", 6))),
+                "native acceptance counter/resource shape mismatch")
+        require(all(integer(item.get(key)) for key in ("retired", "rearms", "pendingJobs", "jsonBodyRecords")),
+                "native progress aggregate invalid")
+        requests = item.get("requests")
+        require(isinstance(requests, list) and len(requests) <= 4
+                and len(requests) == item["jsonBodyRecords"], "native JSON-body observation bound mismatch")
+        keys = set()
+        for request in requests:
+            require(isinstance(request, dict) and set(request) ==
+                    {"generation", "slot", "serial", "admittedAtNs", "deadlineNs"}
+                    and all(integer(value) for value in request.values())
+                    and request["generation"] == self.generation and request["slot"] < 4
+                    and request["serial"] > 0 and request["admittedAtNs"] < request["deadlineNs"]
+                    and request["deadlineNs"] - request["admittedAtNs"] == 120_000_000_000,
+                    "native original request interval mismatch")
+            key = interval_key(request)
+            require(key not in keys, "duplicate native original token")
+            keys.add(key)
+        if self.latest is not None:
+            require(item["sequence"] > self.latest["sequence"]
+                    and all(a[key] >= self.latest["acceptance"][key] for key in self.COUNTERS)
+                    and item["retired"] >= self.latest["retired"] and item["rearms"] >= self.latest["rearms"],
+                    "native progress went backwards")
+        self.latest = item
+        self.reports.append(item)
+        return True
+
+    def get(self, timeout):
+        if self.deferred:
+            line = self.deferred.popleft()
+            self.deferred_bytes -= len(line.encode("utf-8"))
+            return line
+        until = time.monotonic() + timeout
+        while True:
+            line = self.lines.get(timeout=max(0, until - time.monotonic()))
+            if not self.observe(line):
+                return line
+
+    def pump(self, timeout):
+        try:
+            line = self.lines.get(timeout=timeout)
+        except queue.Empty:
+            return
+        if not self.observe(line):
+            size = len(line.encode("utf-8"))
+            require(len(self.deferred) < 256 and self.deferred_bytes + size <= 256 * 1024,
+                    "bounded deferred native lifecycle lines exceeded")
+            self.deferred.append(line)
+            self.deferred_bytes += size
+
+    def wait(self, client, predicate, description, budget=3):
+        until = min(client.deadline, time.monotonic() + budget)
+        while True:
+            # Read already queued changes before consulting an older snapshot.
+            while not self.lines.empty():
+                self.pump(0)
+            remaining = until - time.monotonic()
+            require(remaining > 0, "native progress barrier expired: " + description)
+            if self.latest is not None and predicate(self.latest):
+                return self.latest
+            self.pump(min(0.05, remaining))
+
+
+def interval_key(interval):
+    return interval["generation"], interval["slot"], interval["serial"]
+
+
+def intervals(item):
+    return {interval_key(entry): entry for entry in item["requests"]}
+
+
+def unchanged_intervals(item, original):
+    return intervals(item) == original
+
+
+def capacity_transport_rejection(error):
+    # No timeout, refusal, generic TLS/certificate failure or alert is evidence
+    # that this native capacity owner accepted then closed this exact socket.
+    return isinstance(error, (ConnectionResetError, ssl.SSLEOFError, ssl.SSLZeroReturnError))
+
+
+def exercise_idle_accept(client, progress):
+    started = time.monotonic()
+    require(client.deadline - started >= 6, "insufficient original client budget for idle acceptance stage")
+    baseline = progress.wait(client, lambda p: p["acceptance"]["posts"] > 0,
+                             "initial bare accept post", budget=1)
+    idle_until = started + 5.05
+    while time.monotonic() < idle_until:
+        progress.pump(max(0, min(0.05, idle_until - time.monotonic())))
+    observed = progress.wait(client, lambda p:
+        p["acceptance"]["idle_returns"] > baseline["acceptance"]["idle_returns"]
+        and p["acceptance"]["posts"] > baseline["acceptance"]["posts"]
+        and p["acceptance"]["native_pending"] >= 1, "idle return and genuine repost", budget=2)
+    elapsed = time.monotonic() - started
+    require(elapsed >= 5.05, "idle client interval shorter than 5.05 seconds")
+    status = client.request("continuous-idle-repost-status", "GET", "status").json()
+    require(status.get("online") is True and status.get("apiVersion") == 1,
+            "fresh request after idle accept return failed")
+    client.events[-1]["idleNoClientSeconds"] = elapsed
+    return {"noClientSeconds": elapsed, "baselineSequence": baseline["sequence"],
+            "repostedSequence": observed["sequence"], "idleReturns": observed["acceptance"]["idle_returns"],
+            "scope": "Application AcceptEx idle return/repost; not kernel ESTABLISHED or strict TCP5s evidence"}
+
+
+class PendingReceipt:
+    """One real authenticated exact-receipt POST with just its last byte held."""
+    def __init__(self, client, index, body):
+        self.client, self.connection, self.tail = client, None, body[-1:]
+        self.started = time.monotonic_ns()
+        self.event = {"case": f"continuous-original-{index}-exact-receipt", "status": "FAIL", "method": "POST",
+                      "route": "materials/folders/1/1/append", "requestBodyBytes": len(body),
+                      "requestBodySha256": digest(body)}
+        client.events.append(self.event)
+        try:
+            require(body.endswith(b"}") and len(body) > 1 and client.cookie and client.csrf,
+                    "partial receipt fixture not authenticated/canonical")
+            authority = "localhost:" + str(client.ready["port"])
+            target = client.ready["basePath"] + "api/v1/materials/folders/1/1/append"
+            head = (f"POST {target} HTTP/1.1\r\nHost: {authority}\r\nConnection: close\r\n"
+                    f"Origin: {client.ready['origin']}\r\nCookie: {client.cookie}\r\n"
+                    f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
+                    f"X-FC-CSRF: {client.csrf}\r\n\r\n").encode("ascii")
+            connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=client.remaining())
+            self.connection = connection
+            connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            connection.settimeout(client.remaining())
+            self.connection = client.context.wrap_socket(connection, server_hostname="localhost", suppress_ragged_eofs=False)
+            connection = self.connection
+            require(connection.version() == "TLSv1.2" and connection.getpeercert(binary_form=True) == client.expected_der,
+                    "partial request TLS certificate/version mismatch")
+            self.event.update({"tlsVersion": connection.version(), "peerDerSha256": digest(client.expected_der),
+                               "serverHostname": "localhost", "hostAuthority": authority})
+            connection.settimeout(client.remaining())
+            connection.sendall(head + body[:-1])
+        except Exception as error:
+            self.event["error"] = failure(error, "client/" + self.event["case"])
+            self.close()
+            raise
+
+    def finish(self, expected_receipt):
+        try:
+            connection = self.connection
+            connection.settimeout(self.client.remaining())
+            connection.sendall(self.tail)
+            response, wire_hash, total = HttpResponse(), hashlib.sha256(), 0
+            while True:
+                connection.settimeout(self.client.remaining())
+                data = connection.recv(FRAGMENT)
+                if not data:
+                    break  # suppress_ragged_eofs=False: actual TLS close_notify
+                total += len(data)
+                require(total <= HEAD_LIMIT + BODY_LIMIT, "pending receipt response wire bound exceeded")
+                wire_hash.update(data)
+                response.feed(data)
+            response.finish()
+            date = response.unique("date")
+            require(format_datetime(parsedate_to_datetime(date), usegmt=True) == date,
+                    "pending receipt Date is not canonical IMF-fixdate")
+            response.json()
+            require(response.status in (200, 201) and response.body == expected_receipt,
+                    "original pending POST did not return the identical durable receipt")
+            require(time.monotonic() < self.client.deadline, "original client deadline expired before receipt completion")
+            self.event.update({"status": "PASS", "httpStatus": response.status, "responseWireBytes": total,
+                               "responseWireSha256": wire_hash.hexdigest(), "responseBodyBytes": response.body_bytes,
+                               "responseBodySha256": response.body_hash.hexdigest(), "responseDate": date,
+                               "responseFraming": "unique canonical Content-Length",
+                               "closeNotify": "PASS: actual clean TLS EOF", "exactOriginalReceipt": True})
+        except Exception as error:
+            self.event["error"] = failure(error, "client/" + self.event["case"])
+            raise
+        finally:
+            self.event["forwardObservationNanos"] = time.monotonic_ns() - self.started
+            self.close()
+
+    def close(self):
+        if self.connection is not None:
+            self.connection.close()
+            self.connection = None
+
+
+def reject_full_capacity(client, index):
+    event = {"case": f"continuous-capacity-reject-{index}", "status": "FAIL", "tcpConnected": False}
+    client.events.append(event)
+    connection = None
+    started = time.monotonic_ns()
+    try:
+        connection = socket.create_connection(("127.0.0.1", client.local_port), timeout=client.remaining())
+        event["tcpConnected"] = True
+        connection.settimeout(min(2, client.remaining()))
+        connection = client.context.wrap_socket(connection, server_hostname="localhost", suppress_ragged_eofs=False,
+                                               do_handshake_on_connect=False)
+        try:
+            connection.do_handshake()
+        except Exception as error:
+            require(capacity_transport_rejection(error), "capacity did not produce actual EOF/RST/SSLEOF")
+            event.update({"status": "PASS", "transportRejection": type(error).__name__})
+            return
+        raise RuntimeError("full business capacity unexpectedly completed TLS handshake")
+    except Exception as error:
+        event["error"] = failure(error, "client/" + event["case"])
+        raise
+    finally:
+        if connection is not None:
+            connection.close()
+        event["forwardObservationNanos"] = time.monotonic_ns() - started
+
+
+def exercise_capacity_accept(client, progress, body, receipt):
+    require(client.deadline - time.monotonic() >= 5, "insufficient original client budget for four-body capacity stage")
+    vacant = progress.wait(client, lambda p: p["jsonBodyRecords"] == 0
+                           and p["acceptance"]["bound_slots"] == 0 and p["acceptance"]["ready_slots"] == 4,
+                           "prior business requests physically retired/rearmed")
+    pending, original = [], {}
+    try:
+        for index in range(1, 5):
+            pending.append(PendingReceipt(client, index, body))
+            observed = progress.wait(client, lambda p: p["jsonBodyRecords"] == index
+                and all(intervals(p).get(key) == value for key, value in original.items()),
+                f"original JSON body admission {index}")
+            require(len(intervals(observed)) == index, "JSON-body admission token was reused")
+            new_key = next(key for key in intervals(observed) if key not in original)
+            original = intervals(observed)
+            pending[-1].event["originalInterval"] = original[new_key]
+        admitted = progress.wait(client, lambda p: p["acceptance"]["bound_slots"] == 4
+                                 and p["acceptance"]["transfers"] == vacant["acceptance"]["transfers"] + 4
+                                 and p["pendingJobs"] == 0 and unchanged_intervals(p, original),
+                                 "four original admitted bodies, no queued worker work")
+        for index in (1, 2):
+            reject_full_capacity(client, index)
+        rejected = progress.wait(client, lambda p:
+            p["acceptance"]["capacity_rejects"] == admitted["acceptance"]["capacity_rejects"] + 2
+            and p["acceptance"]["bound_slots"] == 4 and unchanged_intervals(p, original),
+            "two native exact capacity closes without changing four intervals")
+        pending[0].finish(receipt)
+        first_key = interval_key(pending[0].event["originalInterval"])
+        remaining = {key: value for key, value in original.items() if key != first_key}
+        retired = progress.wait(client, lambda p: p["retired"] > rejected["retired"]
+            and p["rearms"] > rejected["rearms"] and p["acceptance"]["ready_slots"] >= 1
+            and p["acceptance"]["bound_slots"] == 3
+            and unchanged_intervals(p, remaining), "first original physically Retired and rearmed")
+        require(client.request("continuous-after-retire-status", "GET", "status").json().get("online") is True,
+                "new request after exact original retirement failed")
+        recovered = progress.wait(client, lambda p: p["retired"] > retired["retired"]
+            and p["rearms"] > retired["rearms"] and p["acceptance"]["bound_slots"] == 3
+            and unchanged_intervals(p, remaining), "other original intervals unchanged after recovery GET")
+        for item in pending[1:]:
+            item.finish(receipt)
+        return {"admittedSequence": admitted["sequence"], "capacityClosedSequence": rejected["sequence"],
+                "retiredRearmedSequence": retired["sequence"], "recoveredSequence": recovered["sequence"],
+                "originalIntervals": list(original.values()), "capacityCloses": 2,
+                "sameOriginalReceipts": 4, "binaryUploadPermitsUsedByStage": 0,
+                "scope": "Real Schannel JSON-body admission/capacity/retirement; no kernel TCP timestamp claim"}
+    finally:
+        for item in pending:
+            item.close()
+
+
 def silent_wav():
     # Domain minimum: 8000 frames / 500ms, never a playback/broadcast command.
     pcm = bytes(8000 * 2)
@@ -503,7 +795,7 @@ def exercise_static(client, package):
             "source": "verified ZIP manifest; public resources before pairing", "browser": "NOT_RUN"}
 
 
-def exercise(client, browser_observer=None):
+def exercise(client, browser_observer=None, continuous=None):
     for route, allowed in [("status", "GET"), ("pairing/requests", "POST"),
                            ("voice/broadcasts", "GET, POST")]:
         rejected = client.request("api-wrong-method-" + route, "DELETE", route, expected=(405,),
@@ -598,6 +890,7 @@ def exercise(client, browser_observer=None):
     changed = json_bytes({"schemaVersion": 1, "commandId": COMMAND_ID, "uploadId": upload_id, "allowedClassIds": ["2"]})
     conflict = client.request("material-append-changed-classes", "POST", "materials/folders/1/1/append", changed, expected=(409,)).json()
     require(conflict.get("code") == "IDEMPOTENCY_CONFLICT", "changed append did not return idempotency conflict")
+    capacity = exercise_capacity_accept(client, continuous, append_body, first.body) if continuous else None
     material_id = record.get("materialId")
     require(isinstance(material_id, str) and re.fullmatch(r"[1-9][0-9]{0,19}", material_id),
             "committed download material identifier missing")
@@ -620,7 +913,7 @@ def exercise(client, browser_observer=None):
             "actual silent PCM WAV upload response mismatch")
     client.reject_certificate("wrong-ca-rejected")
     client.reject_certificate("wrong-hostname-rejected", wrong_hostname=True)
-    return {"materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
+    return {"continuousAcceptance": capacity, "materialBytes": len(material), "materialSha256": digest(material), "uploadId": upload_id,
             "commandId": COMMAND_ID, "receiptSha256": digest(first.body), "exactRetryReceipt": True,
             "downloadBytes": downloaded.body_bytes, "downloadSha256": downloaded.body_hash.hexdigest(),
             "downloadClientRetainedBodyBytes": len(downloaded.body),
@@ -675,6 +968,43 @@ def cleanup_owned(remote, directory, marker, uploaded, report_path, token, repor
 def self_test():
     """Pure local framing/fixture checks; no sockets, subprocesses or Windows IO."""
     checks = []
+    progress_queue, progress_log = queue.Queue(), []
+    reader = ProgressReader(progress_queue, "synthetic", progress_log)
+    reader.generation = 7
+    original = {"generation": 7, "slot": 0, "serial": 3, "admittedAtNs": 123,
+                "deadlineNs": 120_000_000_123}
+    sample = {"marker": "synthetic", "generation": 7, "sequence": 1,
+              "acceptance": {"generation": 7, "posts": 2, "completions": 1,
+                  "idle_cancellations": 0, "idle_returns": 0, "capacity_rejects": 0, "transfers": 1,
+                  "ready_slots": 3, "bound_slots": 1, "native_pending": 2, "owned_sockets": 3},
+              "jsonBodyRecords": 1, "retired": 0, "rearms": 0, "pendingJobs": 0, "requests": [original]}
+    progress_queue.put(PROGRESS + json.dumps(sample))
+    lifecycle = [PASS + "{}", EXIT_PREFIXES[0] + "{}", READY + "{}"]
+    for line in lifecycle:
+        progress_queue.put(line)
+    for _ in range(4):
+        reader.pump(0)
+    require(reader.latest == sample and [reader.get(0) for _ in lifecycle] == lifecycle
+            and len(progress_log) == 1 and reader.deferred_bytes == 0,
+            "progress reader lost/reordered unrelated lifecycle lines")
+    for changed in (dict(original, serial=4), dict(original, admittedAtNs=124), dict(original, deadlineNs=120_000_000_124)):
+        require(not unchanged_intervals(dict(sample, requests=[changed]), intervals(sample)),
+                "original request binding accepted changed token/admission/deadline")
+    for changed in (dict(sample, sequence=1), dict(sample, marker="foreign"),
+                    dict(sample, generation=8), dict(sample, sequence=2, requests=[dict(original, deadlineNs=123)]),
+                    dict(sample, sequence=2, acceptance=dict(sample["acceptance"], owned_sockets=7))):
+        try:
+            reader.observe(PROGRESS + json.dumps(changed))
+        except RuntimeError:
+            continue
+        raise RuntimeError("progress reader accepted stale/foreign/unbounded data")
+    # Busy timing, refused TCP and certificate failures cannot masquerade as capacity rejection.
+    for error in (TimeoutError(), ConnectionRefusedError(), ssl.SSLCertVerificationError(1, "synthetic"),
+                  ssl.SSLError(1, "synthetic"), BrokenPipeError()):
+        require(not capacity_transport_rejection(error), "unproven transport failure accepted as capacity close")
+    for error in (ConnectionResetError(), ssl.SSLEOFError(8, "synthetic"), ssl.SSLZeroReturnError(6, "synthetic")):
+        require(capacity_transport_rejection(error), "exact EOF/RST transport class not recognized")
+    checks.append("synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)")
     wire = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Type: application/json\r\n\r\n{}"
     for step in (1, 7, len(wire)):
         parsed = HttpResponse()
@@ -868,10 +1198,11 @@ def main():
     parser.add_argument("--report", type=Path)
     parser.add_argument("--web-bundle", type=Path, help="Existing development ZIP; only verified web manifest payloads are uploaded")
     parser.add_argument("--browser", action="store_true", help="Also verify isolated Windows Edge UI against this same finite native service")
+    parser.add_argument("--continuous-accept", action="store_true", help="Also verify real idle AcceptEx repost and four admitted JSON bodies within the original client/native deadlines; not strict TCP5s evidence")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        if args.exe or args.report or args.identity or args.web_bundle or args.browser:
+        if args.exe or args.report or args.identity or args.web_bundle or args.browser or args.continuous_accept:
             parser.error("self-test is pure local; do not combine with remote inputs")
         self_test()
         return
@@ -968,10 +1299,14 @@ def main():
         launcher_logs = Logs(launcher)
         until = time.monotonic() + 100
         ready, native, exits = [], [], []
+        progress_reports = []
+        progress_reader = ProgressReader(launcher_logs.lines, marker, progress_reports)
+        report["continuousAcceptEnabled"] = args.continuous_accept
+        report["nativeProgress"] = progress_reports
         report.update({"ready": ready, "nativeReports": native, "nativeProcessExits": exits})
         while time.monotonic() < until:
             try:
-                line = launcher_logs.lines.get(timeout=0.1)
+                line = progress_reader.get(timeout=0.1)
             except queue.Empty:
                 if launcher.poll() is not None and not any(thread.is_alive() for thread in launcher_logs.threads):
                     break
@@ -981,12 +1316,15 @@ def main():
                 item = json.loads(line[len(READY):])
                 validate_ready(item, marker)
                 require(item["staticAssets"] == len(package[2]["assets"]), "native/package static asset count mismatch")
+                progress_reader.generation = item["generation"]
                 ready.append({key: value for key, value in item.items() if key != "pairingCode"})
                 phase = "actual-tls-business-clients"
                 port = tunnel.open(item["port"])
                 client = Client(port, item, tls_context, wrong_ca, expected_der, report["events"])
+                if args.continuous_accept:
+                    report["continuousIdle"] = exercise_idle_accept(client, progress_reader)
                 report["static"] = exercise_static(client, package[2])
-                report["business"] = exercise(client, browser_observer)
+                report["business"] = exercise(client, browser_observer, progress_reader if args.continuous_accept else None)
                 tunnel.cancel()
             elif line.startswith(PASS):
                 native.append(json.loads(line[len(PASS):]))

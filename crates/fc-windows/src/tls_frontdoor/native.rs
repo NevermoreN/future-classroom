@@ -1,8 +1,8 @@
 //! Finite loopback evidence for owned TLS execution. This is not a production
 //! listener and does not prove the strict first-connection scheduler deadline.
 use super::{
-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsError, BUFFER_BYTES,
-    CONNECTION_SLOTS, PLAINTEXT_BYTES,
+    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptSnapshot, TlsError,
+    BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
 };
 use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
 use fc_protocol::http1::{
@@ -27,6 +27,7 @@ use windows::{
         System::IO::{CancelIoEx, CreateIoCompletionPort, GetQueuedCompletionStatus, OVERLAPPED},
     },
 };
+mod accept;
 mod stream;
 pub use stream::{TlsHttpEvent, TlsHttpHost};
 const BUDGET: Duration = Duration::from_secs(5);
@@ -48,6 +49,7 @@ enum Operation {
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Phase {
+    Ready,
     Handshake,
     Http,
     Response,
@@ -98,10 +100,20 @@ struct Resources {
     port: HANDLE,
     winsock: bool,
     worker: Option<Worker>,
+    accept: Option<accept::AcceptSlot>,
 }
 #[derive(Debug, Default)]
 struct Report {
     accepted: usize,
+    accept_posts: u64,
+    accept_completions: u64,
+    accept_idle_cancellations: u64,
+    accept_idle_returns: u64,
+    accept_handoffs: u64,
+    accept_capacity_rejections: u64,
+    accept_expired_discards: u64,
+    accept_error_discards: u64,
+    accept_stop_discards: u64,
     handshakes: usize,
     responses: usize,
     submissions: usize,
@@ -222,6 +234,7 @@ impl Owner {
                 port: HANDLE::default(),
                 winsock: false,
                 worker: None,
+                accept: None,
             }),
             started,
             generation,
@@ -344,6 +357,14 @@ impl Owner {
             )?;
             let accept = accept.ok_or("AcceptEx unavailable")?;
             let listener = self.resources.listener;
+            if self.http_mode {
+                self.resources.accept = Some(accept::AcceptSlot::new(Some(accept)));
+                for slot in &mut self.resources.slots {
+                    slot.phase = Phase::Ready;
+                }
+                self.post_bare_accept()?;
+                return Ok(());
+            }
             for slot in &mut self.resources.slots {
                 slot.socket = WSASocketW(
                     AF_INET.0 as i32,
@@ -423,7 +444,10 @@ impl Owner {
     }
     fn prepare_io(&mut self, index: usize) -> Result<(), String> {
         let slot = &self.resources.slots[index];
-        if slot.pending.is_some() || slot.socket == INVALID_SOCKET || slot.phase == Phase::Closed {
+        if slot.pending.is_some()
+            || slot.socket == INVALID_SOCKET
+            || matches!(slot.phase, Phase::Ready | Phase::Closed)
+        {
             return Err("TLS IO overlap or closed socket".into());
         }
         // SAFETY: the previous packet has been dequeued; no native writer can
@@ -563,7 +587,7 @@ impl Owner {
             Phase::Http => Call::Decrypt,
             Phase::Response => Call::Encrypt,
             Phase::Shutdown => Call::Shutdown,
-            Phase::Closed => unreachable!(),
+            Phase::Ready | Phase::Closed => unreachable!(),
         };
         match self
             .resources
@@ -789,7 +813,7 @@ impl Owner {
         if self.resources.port.is_invalid() {
             return Ok(());
         }
-        for _ in 0..CONNECTION_SLOTS {
+        for _ in 0..(CONNECTION_SLOTS + usize::from(self.http_mode)) {
             let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
             // SAFETY: IOCP and all operation allocations remain owned and pinned.
             let result = unsafe {
@@ -808,6 +832,16 @@ impl Owner {
                     }
                 }
                 break;
+            }
+            if self.http_mode
+                && self
+                    .resources
+                    .accept
+                    .as_ref()
+                    .is_some_and(|bare| bare.memory.operation.get() == operation)
+            {
+                self.complete_bare_accept(key, result.is_ok())?;
+                continue;
             }
             let index = self
                 .resources
@@ -950,6 +984,7 @@ impl Owner {
     }
     fn poll(&mut self) -> Result<(), String> {
         if self.http_mode && !self.stopping {
+            self.expire_bare_accept(Instant::now())?;
             for index in 0..CONNECTION_SLOTS {
                 if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
                     self.close_slot(index, true)?;
@@ -1040,6 +1075,11 @@ impl Owner {
     }
     fn app_owned_bytes(&self) -> usize {
         size_of::<Owner>()
+            + self
+                .resources
+                .accept
+                .as_ref()
+                .map_or(0, |_| size_of::<accept::AcceptMemory>())
             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
             + self.target.capacity()
             + self.marker.capacity()
@@ -1066,6 +1106,9 @@ impl Owner {
             worker.request_stop();
         }
         let mut failure = None;
+        if let Err(error) = self.close_bare_accept() {
+            failure = Some(error);
+        }
         if self.resources.listener != INVALID_SOCKET {
             for slot in &self.resources.slots {
                 if slot.pending == Some(Operation::Accept) {
@@ -1098,7 +1141,9 @@ impl Owner {
                 .resources
                 .slots
                 .iter()
-                .all(|slot| slot.pending.is_none());
+                .all(|slot| slot.pending.is_none() && slot.socket == INVALID_SOCKET)
+                && self.resources.listener == INVALID_SOCKET
+                && self.bare_released();
             let worker_done = match self.resources.worker.as_mut() {
                 Some(worker) => {
                     if worker.has_in_flight() {
@@ -1113,7 +1158,9 @@ impl Owner {
             };
             if io_done && worker_done {
                 stop_result?;
-                if self.report.submissions != self.report.completions {
+                if self.report.submissions != self.report.completions
+                    || !self.accept_ledger_matches()
+                {
                     return Err("TLS IO ledger mismatch".into());
                 }
                 if self.resources.slots.iter().any(|slot| slot.frame.is_none()) {

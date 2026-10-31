@@ -91,6 +91,7 @@ struct Fixture {
     posted_header_deadlines: [Instant; CONNECTION_SLOTS],
     calls: Arc<Mutex<Calls>>,
     closed: Arc<AtomicUsize>,
+    retain_faulted_owner_on_drop: bool,
 }
 impl Fixture {
     fn new() -> Self {
@@ -119,13 +120,10 @@ impl Fixture {
         let worker =
             Worker::start_with_factory(owner.generation, move || Ok(Box::new(driver))).unwrap();
         owner.start_with_worker(worker).unwrap();
-        let posted_header_deadlines = std::array::from_fn(|index| {
-            owner.resources.slots[index]
-                .stream
-                .as_ref()
-                .unwrap()
-                .deadline
-        });
+        // There is one initial native AcceptEx post, not four Ready clocks.
+        // This fixture's first connection inherits that actual bare post.
+        let posted_header_deadlines =
+            [owner.resources.accept.as_ref().unwrap().deadline().unwrap(); CONNECTION_SLOTS];
         let client = TcpStream::connect_timeout(
             &SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number).into(),
             Duration::from_secs(1),
@@ -141,6 +139,7 @@ impl Fixture {
             posted_header_deadlines,
             calls,
             closed,
+            retain_faulted_owner_on_drop: false,
         }
     }
     fn input(&mut self, bytes: &[u8]) {
@@ -271,6 +270,14 @@ impl Fixture {
 }
 impl Drop for Fixture {
     fn drop(&mut self) {
+        if self.retain_faulted_owner_on_drop {
+            // Only the independent controlled-failure child selects this path.
+            // Leave the original Host/Owner destructors to retain their exact
+            // native resource domain; do not claim normal physical drain.
+            assert!(OWNER_FAULTED.load(Ordering::Acquire));
+            assert!(!self.host.owner.drained && !self.host.owner.bare_released());
+            return;
+        }
         if !self.host.owner.drained {
             self.host
                 .owner
@@ -564,6 +571,7 @@ fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_i
     // Inject absolute instants into the private state transition. This is a
     // boundary test, not evidence of a real five-second socket wait.
     let mut stream = Stream::new();
+    stream.posted_header_at(Instant::now());
     let header_deadline = stream.deadline;
     let completed_at = header_deadline - Duration::from_nanos(1);
     assert!(stream.complete_head_at(completed_at));
@@ -587,7 +595,7 @@ fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_i
     assert!(stream.expired_at(shorter));
     assert!(!stream.admission_deadline_valid(original, completed_at));
     stream.reset();
-    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+    assert_eq!(stream.deadline_phase, DeadlinePhase::AwaitingConnection);
     assert_eq!(stream.request_started_at(), None);
     assert!(!stream.admitted);
 }
@@ -596,6 +604,7 @@ fn header_completion_transfers_one_absolute_budget_and_admission_only_tightens_i
 fn a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request() {
     for lateness in [Duration::ZERO, Duration::from_nanos(1)] {
         let mut stream = Stream::new();
+        stream.posted_header_at(Instant::now());
         let deadline = stream.deadline;
         assert!(!stream.complete_head_at(deadline + lateness));
         assert_eq!(stream.deadline, deadline);
@@ -683,7 +692,7 @@ fn real_iocp_complete_head_ends_header_budget_before_body_admission_and_keeps_on
     let next = f.host.rearm(token).unwrap();
     assert_eq!(next.slot(), index);
     let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
-    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
+    assert_eq!(stream.deadline_phase, DeadlinePhase::AwaitingConnection);
     assert_eq!(stream.request_started_at(), None);
     assert!(!stream.admitted);
     assert!(f.host.admit_body(token, 3, original).is_err());
@@ -1160,8 +1169,8 @@ fn real_iocp_head_marker_clears_on_exact_slot_reuse_so_get_keeps_its_body() {
     f.host.respond(token, error, b"ignored", false).unwrap();
     let received = complete_response_wire(&mut f, token);
     assert!(received.ends_with(b"\r\n\r\n!"));
-    // Retire the other original accepts so the new connection must use the
-    // exact old HEAD slot, rather than an unrelated initial accept slot.
+    // Retire the other Ready business slots so the new bare acceptance must
+    // use the exact rearmed HEAD slot; Ready slots have no accept I/O of their own.
     for other in f.host.tokens().into_iter().filter(|other| *other != token) {
         f.host.cancel(other).unwrap();
     }
@@ -1225,4 +1234,442 @@ fn real_iocp_head_does_not_bypass_a_revoked_response_fence() {
     f.revoked_retirement(token);
     assert!(f.host.send_response_body(token, b"late", true).is_err());
     f.stop();
+}
+
+fn extra_client(f: &Fixture) -> TcpStream {
+    let client = TcpStream::connect_timeout(
+        &SocketAddrV4::new(Ipv4Addr::LOCALHOST, f.host.port_number()).into(),
+        Duration::from_secs(1),
+    )
+    .unwrap();
+    client.set_nonblocking(true).unwrap();
+    client
+}
+fn rejected_client(f: &mut Fixture, client: &mut TcpStream) {
+    let until = Instant::now() + Duration::from_secs(3);
+    loop {
+        for event in f.host.poll().unwrap() {
+            assert!(!matches!(
+                event,
+                TlsHttpEvent::Head { .. } | TlsHttpEvent::Body { .. }
+            ));
+        }
+        let mut byte = [0];
+        match client.read(&mut byte) {
+            Ok(0) => break,
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    std::io::ErrorKind::ConnectionReset | std::io::ErrorKind::ConnectionAborted
+                ) =>
+            {
+                break
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
+            other => panic!("capacity/expired rejection must close, not send HTTP/TLS: {other:?}"),
+        }
+        assert!(Instant::now() < until, "actual rejected TCP close");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+
+#[test]
+fn ready_business_slots_have_no_native_operation_or_active_header_clock() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    assert_eq!(f.host.owner.report.submissions, 1);
+    assert_eq!(f.host.owner.report.accept_posts, 1);
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert!(bare.pending());
+    assert_eq!(bare.serial, 1);
+    for slot in &f.host.owner.resources.slots {
+        assert!(
+            slot.phase == Phase::Ready && slot.socket == INVALID_SOCKET && slot.pending.is_none()
+        );
+        assert!(slot.frame.is_some() && !slot.context_submitted && !slot.retired);
+        let stream = slot.stream.as_ref().unwrap();
+        assert!(stream.waiting_for_connection());
+        assert!(!stream.expired_at(Instant::now() + REQUEST_BUDGET));
+    }
+    for token in f.host.tokens() {
+        assert!(f
+            .host
+            .admit_body(token, 0, Instant::now() + REQUEST_BUDGET)
+            .is_err());
+    }
+    let expected = size_of::<Owner>()
+        + size_of::<super::super::accept::AcceptMemory>()
+        + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+        + f.host.owner.target.capacity()
+        + f.host.owner.marker.capacity()
+        + f.host
+            .owner
+            .resources
+            .slots
+            .iter()
+            .map(|slot| {
+                slot.parser.header_capacity() + slot.stream.as_ref().unwrap().allocation_bytes()
+            })
+            .sum::<usize>();
+    assert_eq!(f.host.owner.app_owned_bytes(), expected);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let original = f
+        .host
+        .owner
+        .resources
+        .accept
+        .as_ref()
+        .unwrap()
+        .deadline()
+        .unwrap();
+    // This is a real elapsed wait against the actual posted bare operation,
+    // not Stream::new or a claimed exact TCP ESTABLISHED timestamp.
+    std::thread::sleep(
+        original
+            .saturating_duration_since(Instant::now())
+            .saturating_sub(Duration::from_millis(500)),
+    );
+    f.host.owner.poll_io().unwrap();
+    assert_eq!(f.host.owner.report.accept_handoffs, 1);
+    let slot = f
+        .host
+        .owner
+        .resources
+        .slots
+        .iter()
+        .find(|slot| slot.phase == Phase::Handshake)
+        .unwrap();
+    assert_eq!(slot.stream.as_ref().unwrap().deadline, original);
+    assert!(original.saturating_duration_since(Instant::now()) < Duration::from_secs(1));
+    assert!(f.host.owner.resources.accept.as_ref().unwrap().serial > 1);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    // TCP connect completed but its actual AcceptEx packet has not been read.
+    // Inject an expired original post deadline; this does not claim real5s wait.
+    let bare = f.host.owner.resources.accept.as_mut().unwrap();
+    let serial = bare.serial;
+    bare.state = super::super::accept::AcceptState::Pending {
+        serial,
+        deadline: Instant::now() - Duration::from_nanos(1),
+    };
+    let until = Instant::now() + Duration::from_secs(3);
+    while f.host.owner.report.accept_expired_discards == 0 {
+        assert!(f.host.poll().unwrap().is_empty());
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(f.host.owner.report.accepted, 0);
+    assert_eq!(f.host.owner.report.sspi_submissions, 0);
+    assert_eq!(f.host.owner.report.accept_completions, 1);
+    assert_eq!(
+        f.host.owner.resources.accept.as_ref().unwrap().serial,
+        serial + 1
+    );
+    assert!(f
+        .host
+        .owner
+        .resources
+        .slots
+        .iter()
+        .all(|slot| slot.phase == Phase::Ready));
+    f.stop();
+}
+
+#[test]
+fn real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let _ = f.head();
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    let pointer = bare.memory.operation.get();
+    let serial = bare.serial;
+    let completions = f.host.owner.report.accept_completions;
+    f.host.owner.close_bare_accept().unwrap();
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert!(matches!(
+        bare.state,
+        super::super::accept::AcceptState::Closing { .. }
+    ));
+    assert!(bare.socket == INVALID_SOCKET && bare.pending());
+    assert!(f.host.owner.post_bare_accept().is_err());
+    assert_eq!(f.host.owner.report.accept_completions, completions);
+    let until = Instant::now() + Duration::from_secs(3);
+    while f.host.owner.resources.accept.as_ref().unwrap().serial == serial {
+        f.host.poll().unwrap();
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert_eq!(bare.memory.operation.get(), pointer);
+    assert_eq!(bare.serial, serial + 1);
+    assert!(bare.pending());
+    assert_eq!(f.host.owner.report.accept_completions, completions + 1);
+    assert_eq!(f.host.owner.report.accepted, 1);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut clients = Vec::new();
+    let mut tokens = Vec::new();
+    for index in 0..CONNECTION_SLOTS {
+        if index != 0 {
+            let client = extra_client(&f);
+            clients.push(std::mem::replace(&mut f.client, client));
+        }
+        let mut wire = vec![b'H'];
+        wire.extend(record(&post(3)));
+        f.input(&wire);
+        let (token, at) = f.head();
+        f.host.admit_body(token, 3, at + REQUEST_BUDGET).unwrap();
+        tokens.push(token);
+    }
+    let preserved: Vec<_> = tokens
+        .iter()
+        .map(|token| {
+            let slot = &f.host.owner.resources.slots[token.slot()];
+            (
+                slot.token,
+                slot.socket,
+                slot.stream.as_ref().unwrap().deadline,
+            )
+        })
+        .collect();
+    let sspi = f.host.owner.report.sspi_submissions;
+    for expected_rejections in 1..=2 {
+        let mut client = extra_client(&f);
+        rejected_client(&mut f, &mut client);
+        assert_eq!(
+            f.host.owner.report.accept_capacity_rejections,
+            expected_rejections
+        );
+        assert_eq!(f.host.owner.report.sspi_submissions, sspi);
+        assert_eq!(f.host.owner.report.accepted, CONNECTION_SLOTS);
+        for &(token, socket, deadline) in &preserved {
+            let slot = &f.host.owner.resources.slots[token.slot()];
+            assert_eq!(slot.token, token);
+            assert!(slot.socket == socket);
+            assert_eq!(slot.stream.as_ref().unwrap().deadline, deadline);
+            assert!(slot.phase == Phase::Http && slot.pending == Some(Operation::Receive));
+        }
+    }
+    let old = tokens[0];
+    f.host.cancel(old).unwrap();
+    f.until(|event| matches!(event, TlsHttpEvent::Retired(t) if t == old));
+    let next = f.host.rearm(old).unwrap();
+    assert!(f.host.owner.resources.slots[next.slot()].phase == Phase::Ready);
+    let client = extra_client(&f);
+    clients.push(std::mem::replace(&mut f.client, client));
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(0)));
+    f.input(&wire);
+    assert_eq!(f.head().0, next);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
+    // Obtain a genuine successful AcceptEx completion, then interpose stop
+    // before dispatching that exact packet. This does not invent a kernel serial.
+    // SAFETY: this fixture owns the IOCP and all pinned operations; the exact
+    // returned packet is dispatched once below before any operation reuse.
+    unsafe {
+        GetQueuedCompletionStatus(
+            f.host.owner.resources.port,
+            &mut bytes,
+            &mut key,
+            &mut operation,
+            1000,
+        )
+    }
+    .unwrap();
+    let bare = f.host.owner.resources.accept.as_ref().unwrap();
+    assert_eq!(operation, bare.memory.operation.get());
+    assert_eq!(key, 1);
+    let serial = bare.serial;
+    f.host.request_stop().unwrap();
+    assert!(f.host.owner.resources.accept.as_ref().unwrap().pending());
+    f.host.owner.complete_bare_accept(key, true).unwrap();
+    assert_eq!(f.host.owner.report.accepted, 0);
+    assert_eq!(f.host.owner.report.sspi_submissions, 0);
+    assert_eq!(f.host.owner.report.accept_stop_discards, 1);
+    assert_eq!(
+        f.host.owner.resources.accept.as_ref().unwrap().serial,
+        serial
+    );
+    assert!(f.host.owner.bare_released());
+    f.stop();
+}
+
+#[test]
+fn real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots() {
+    let _serial = SERIAL.lock().unwrap();
+    let (entered, started) = std::sync::mpsc::channel();
+    let (release, released) = std::sync::mpsc::channel();
+    let released = Mutex::new(released);
+    let hook = Arc::new(move || {
+        entered.send(()).unwrap();
+        released
+            .lock()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(3))
+            .unwrap();
+    });
+    let mut f = Fixture::with_hooks(None, Some(hook));
+    struct Release(Option<std::sync::mpsc::Sender<()>>);
+    impl Drop for Release {
+        fn drop(&mut self) {
+            if let Some(send) = self.0.take() {
+                let _ = send.send(());
+            }
+        }
+    }
+    let mut release = Release(Some(release));
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let until = Instant::now() + Duration::from_secs(3);
+    loop {
+        f.host.poll().unwrap();
+        if started.try_recv().is_ok() {
+            break;
+        }
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let held = f.calls.lock().unwrap().handshake[0];
+    for token in f.host.tokens() {
+        f.host.cancel(token).unwrap();
+    }
+    f.host.owner.poll().unwrap(); // preserve Closed/Retired events inside original slots
+    assert!(f.host.owner.resources.slots[held.slot()].frame.is_none());
+    assert!(!f.host.owner.resources.slots[held.slot()].retired);
+    for token in f.host.tokens() {
+        assert!(f.host.rearm(token).is_err());
+    }
+    let mut extra = extra_client(&f);
+    rejected_client(&mut f, &mut extra);
+    assert_eq!(f.host.acceptance_snapshot().capacity_rejects, 1);
+    assert_eq!(f.host.acceptance_snapshot().ready_slots, 0);
+    // Even once empty-slot retirement events were consumed, an explicit rearm
+    // and caller descriptor reservation are required; none is inferred here.
+    let mut extra = extra_client(&f);
+    rejected_client(&mut f, &mut extra);
+    assert_eq!(f.host.acceptance_snapshot().capacity_rejects, 2);
+    assert!(f.host.owner.resources.slots[held.slot()].frame.is_none());
+    assert_eq!(f.calls.lock().unwrap().handshake.len(), 1);
+    release.0.take().unwrap().send(()).unwrap();
+    f.until(|event| matches!(event, TlsHttpEvent::Retired(t) if t == held));
+    let next = f.host.rearm(held).unwrap();
+    assert_eq!(next.slot(), held.slot());
+    assert_ne!(next, held);
+    assert_eq!(f.host.acceptance_snapshot().ready_slots, 1);
+    f.stop();
+}
+
+#[test]
+fn real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately() {
+    let _serial = SERIAL.lock().unwrap();
+    let mut f = Fixture::new();
+    let mut wire = vec![b'H'];
+    wire.extend(record(&post(3)));
+    f.input(&wire);
+    let _ = f.head();
+    let before = f.host.acceptance_snapshot();
+    assert_eq!(before.transfers, 1);
+    assert_eq!(before.native_pending, 1);
+    let bare = f.host.owner.resources.accept.as_mut().unwrap();
+    bare.state = super::super::accept::AcceptState::Pending {
+        serial: bare.serial,
+        deadline: Instant::now() - Duration::from_nanos(1),
+    };
+    f.host.owner.expire_bare_accept(Instant::now()).unwrap();
+    let closing = f.host.acceptance_snapshot();
+    assert_eq!(closing.idle_cancellations, before.idle_cancellations + 1);
+    assert_eq!(closing.idle_returns, before.idle_returns);
+    assert_eq!(closing.posts, before.posts);
+    assert_eq!(
+        closing.native_pending, 1,
+        "CancelIoEx/close is not completion"
+    );
+    let until = Instant::now() + Duration::from_secs(3);
+    while f.host.acceptance_snapshot().idle_returns == before.idle_returns {
+        f.host.poll().unwrap();
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let after = f.host.acceptance_snapshot();
+    assert_eq!(after.idle_returns, before.idle_returns + 1);
+    assert_eq!(after.posts, before.posts + 1);
+    assert_eq!(after.transfers, before.transfers);
+    assert!(after.native_pending <= 5 && after.owned_sockets <= 6);
+    f.stop();
+    let stopped = f.host.acceptance_snapshot();
+    assert_eq!(stopped.native_pending, 0);
+    assert_eq!(stopped.owned_sockets, 0);
+}
+
+#[test]
+fn bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child() {
+    let _serial = SERIAL.lock().unwrap();
+    const CHILD: &str = "FC_TLS_BARE_CLOSE_FAILURE_CHILD";
+    const NAME: &str = "tls_frontdoor::native::stream::tests::bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child";
+    const MARKER: &str = "BARE_CLOSE_FAILURE_CHILD retainedOwner=true replaced=false cleanupComplete=false controlledCloseSeam=true";
+    if std::env::var(CHILD).as_deref() == Ok("1") {
+        let mut f = Fixture::new();
+        let bare = f.host.owner.resources.accept.as_mut().unwrap();
+        let socket = bare.socket;
+        let pointer = bare.memory.operation.get();
+        let serial = bare.serial;
+        bare.fail_close_once = true;
+        let error = f.host.owner.close_bare_accept().unwrap_err();
+        f.retain_faulted_owner_on_drop = true;
+        assert!(error.contains("controlled"));
+        let bare = f.host.owner.resources.accept.as_ref().unwrap();
+        assert!(bare.pending() && bare.socket == socket);
+        assert_eq!(bare.memory.operation.get(), pointer);
+        assert_eq!(bare.serial, serial);
+        assert!(f.host.owner.post_bare_accept().is_err());
+        assert!(!f.host.owner.bare_released());
+        assert!(OWNER_FAULTED.load(Ordering::Acquire));
+        assert!(Owner::new("forbidden-bare-replacement").is_err());
+        // Fault retention is intentional, not a claim that physical drain
+        // completed. This independent child is the bounded OS teardown scope.
+        drop(f);
+        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
+        assert!(Owner::new("still-forbidden-bare-replacement").is_err());
+        println!("{MARKER}");
+        return;
+    }
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
+        .env(CHILD, "1")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
+    assert!(!OWNER_FAULTED.load(Ordering::Acquire));
 }

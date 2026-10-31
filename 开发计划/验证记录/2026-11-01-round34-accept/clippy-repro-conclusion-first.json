@@ -1,0 +1,160 @@
+{
+  "status": "LOCAL_FIXED_NIGHTLY_ARGUMENT_POSITION_CAUSAL_REPRODUCED",
+  "createdUtc": "2026-10-31T16:49:24.493216+00:00",
+  "toolchain": "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+  "rustcCommit": "92ffebeceaa0a071066f233873c2438e73d70fe7",
+  "scope": "Actual local Linux-host Tier3 i686-win7-windows-gnu core-only no_std library experiment. This is not a new MSVC/Windows/CI pass.",
+  "firstPrerequisiteFailurePreserved": true,
+  "componentInstallation": "Only explicitly authorized fixed-nightly Clippy installed from official rustup; kept as development tool. Separate original command/log/manifest checksum report retained. Both compilation experiments used CARGO_NET_OFFLINE=true.",
+  "globalPosition": {
+    "exitCode": 101,
+    "error": "E0463 missing core",
+    "stdCoreCompiled": false
+  },
+  "afterSubcommandPosition": {
+    "exitCode": 0,
+    "actualCoreCompilation": true,
+    "actualRustcCoreExternObserved": "noprelude,nounused:core=.../target-after-command/.../libcore-....rmeta",
+    "elapsedSeconds": 26.3348809981253
+  },
+  "controls": {
+    "sameMinimalSource": true,
+    "dependencyFreeNoStdLibrary": true,
+    "independentFreshTargetDirectories": true,
+    "bothWarningsDenied": true,
+    "bothJobs": 2,
+    "eachOriginalTimeoutSeconds": 180,
+    "timeouts": false,
+    "networkForCompiles": false,
+    "productOrCiFilesModified": false,
+    "windowsAccessed": false,
+    "probeExecutableRuntime": false
+  },
+  "minimalSuggestedProductionCorrection": "In Get-BaselineCargoArguments only Win7/clippy emit @(\"clippy\",\"-Z\",\"build-std\") + originalArguments. Keep built-in test/build current global placement unchanged. Do not copy core-only diagnostic restriction into production: retain full default build-std crates, original --all-targets/--release/--locked/--target and -D warnings, finite logs, all exit0 gates and CRT/PE checks. Update pure argument test to the corrected clippy argv.",
+  "remainingVerification": "Actual Win7 MSVC hosted CI must be rerun on a new exact source; this local position experiment does not certify the remaining full workspace Clippy or OS support.",
+  "cleanup": {
+    "status": "PASS_OWNED_REPRO_ROOT_REMOVED",
+    "rootAbsent": true,
+    "files": 63,
+    "logicalBytes": 76503259,
+    "warning": "Logical byte count is not a physical disk reclamation measurement."
+  },
+  "summaryInspectionCorrection": "First in-memory summary assertion expected older noprelude:core syntax and failed before creating a report. Actual fixed-nightly original log says noprelude,nounused:core; inspected exact raw log before this report. Actual two-command results and original reports were not changed.",
+  "rawOriginals": [
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-first.json",
+      "bytes": 4021,
+      "sha256": "b3c54503e1a8763f791216308e1854663bd54184d327246fa9c5a7298f4c8fce"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second.json",
+      "bytes": 6535,
+      "sha256": "fddfe51f31e5a45da8cef6bd300d9d7e1d17641ece6706c049181d3b827c6613"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-component-install-first.json",
+      "bytes": 1515,
+      "sha256": "313f9a6348e41fc75dd360704fc3328434dc674fb4b2439248ad7e5833dd871c"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-run.py",
+      "bytes": 5491,
+      "sha256": "7a7c8dbac2313ceb21cd6a50bc2f66f856929af8ec84d356d09df2e0dd17079e"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-run-second.py",
+      "bytes": 5556,
+      "sha256": "817e35d38e1172a9c27c148695e2ab169a12f2be8c8d1d2a0210f5eab5511fdd"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-cargo-version.stdout.log",
+      "bytes": 353,
+      "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-clippy-version.stderr.log",
+      "bytes": 214,
+      "sha256": "a33c8bb89f603e25b9a887a74c539bfe6a502f0e5b697f88ab4e341187b2e0f9"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-clippy-version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-component-install-first.stderr.log",
+      "bytes": 35,
+      "sha256": "08cc3e5ddf8fdac43e355fa0e3215ff51d62897f38c2b9748679f1984a32d562"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-component-install-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-rustc-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-rustc-version.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-after-command-first.stderr.log",
+      "bytes": 14984,
+      "sha256": "a0cf2949f0a80db7aa1d2d233aef515632bd2837c3912d55c12c4d769a2ea6b3"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-after-command-first.stdout.log",
+      "bytes": 3736,
+      "sha256": "fc931316f083fd471788cce6369e9172ae83e976af4fc2b0601d814d234160e5"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-cargo-version.stdout.log",
+      "bytes": 353,
+      "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-clippy-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-clippy-version.stdout.log",
+      "bytes": 39,
+      "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-global-first.stderr.log",
+      "bytes": 3913,
+      "sha256": "7a4cb147591b7fc5d744cdcbd2652a22de326bebdafb0937f856938981116757"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-global-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-rustc-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/fc-round34-accept-evidence/clippy-repro-second-rustc-version.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    }
+  ]
+}

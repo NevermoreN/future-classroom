@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "status": "SOURCE_FROZEN_NOT_RUNTIME_VALIDATED",
+  "utc": "2026-10-31T16:43:34.427196+00:00",
+  "worktree": "/tmp/fc-round34-accept-worktree",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "sha256": "d13e2f0b5d21387019f71d255ed819ad7ccf6f7a5b074c8f5225bfc2312a4b86",
+      "bytes": 57800,
+      "before": "/tmp/fc-round34-accept-evidence/business-before-network.rs",
+      "afterSha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "afterBytes": 58970
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "sha256": "f305dc8f41c0d391cc18fa2f320d643900cf1ddb8851beddb7fb034b35094e6e",
+      "bytes": 20043,
+      "before": "/tmp/fc-round34-accept-evidence/business-before-http_business_probe.rs",
+      "afterSha256": "e2a8be32925c9c1f60d36d28b1be2c3336296c9dd2eb099e0dba5226d1930340",
+      "afterBytes": 23127
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf",
+      "bytes": 67685,
+      "before": "/tmp/fc-round34-accept-evidence/business-before-windows-tls-business-probe.py",
+      "afterSha256": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+      "afterBytes": 87838
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round34-accept-evidence/business-probe.patch",
+    "sha256": "33c4d10d065677a0a5171db178560bef6e14fb580b951669b603614619d7d855"
+  },
+  "localChecks": {
+    "pythonAst": "PASS",
+    "scopedRustfmtCheck": "PASS",
+    "whitespace": "PASS",
+    "pythonSelfTest": {
+      "status": "PURE_LOCAL_CHECKS_PASS",
+      "checks": [
+        "synthetic progress identity/interval bounds; unrelated lifecycle lines preserved; only EOF/RST capacity classes accepted (no real IO)",
+        "fragmented/exact-CL response framing",
+        "surplus/truncation/duplicate-CL/TE/head-body limits/folding rejected",
+        "204/304 omit CL/TE and count/hash zero wire body; CL0/body/duplicate-header/TE rejected",
+        "HEAD 200/403/404/405 require omitted CL/TE and zero wire body; ordinary GET remains strict",
+        "200 still requires canonical unique CL, JSON64KiB/static5MiB/download50MiB caps unchanged",
+        "binary streaming hash/count without retained body; truncation/surplus/50MiB cap rejected",
+        "ZIP manifest and all payload hashes verified; corrupt/version/path/count/size inputs rejected",
+        "8000-sample/500ms silent PCM fixture meets domain minimum/byte-length bounds",
+        "120000-byte request fragmentation and head/body coalescing",
+        "READY identity and actual-drain final ledger required; independent browser wire-count floor, excluding cache hits"
+      ],
+      "tls": "NOT_RUN",
+      "windows": "NOT_RUN",
+      "business": "NOT_RUN"
+    },
+    "helpExitCode": 0,
+    "rawLogs": [
+      {
+        "path": "/tmp/fc-round34-accept-evidence/business-pure-selftest-frozen.stdout.log",
+        "bytes": 1147,
+        "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83"
+      },
+      {
+        "path": "/tmp/fc-round34-accept-evidence/business-pure-selftest-frozen.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/fc-round34-accept-evidence/business-help-frozen.stdout.log",
+        "bytes": 1650,
+        "sha256": "ab97a67e810141dff702a95e98a6970ab6f7c4cc4261bcbdb69e424e55c9cf66"
+      },
+      {
+        "path": "/tmp/fc-round34-accept-evidence/business-help-frozen.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "runtimeTests": "NOT_RUN_BY_THIS_AGENT",
+  "cargoWindowsCiGit": "NOT_RUN",
+  "oldPath": "continuous-accept defaults off; original cases/assertions retained",
+  "newEvents": [
+    "continuous-idle-repost-status",
+    "continuous-original-1-exact-receipt",
+    "continuous-original-2-exact-receipt",
+    "continuous-original-3-exact-receipt",
+    "continuous-original-4-exact-receipt",
+    "continuous-capacity-reject-1",
+    "continuous-capacity-reject-2",
+    "continuous-after-retire-status"
+  ],
+  "budgets": {
+    "clientSeconds": 30,
+    "nativeSeconds": 45,
+    "drainSeconds": 20,
+    "extended": false
+  },
+  "scope": [
+    "4 actual JSON-body admissions before two capacity clients",
+    "8 added real-client events, only actual successes can mark PASS",
+    "original Net token/Head-admitted_at/absolute120s interval unchanged",
+    "first original actual Retired + successful rearm + Ready before recovery GET",
+    "other3 exact committed receipt responses with clean TLS EOF",
+    "idle >=5.05s no clients, actual idle-return counter and repost before fresh statusGET",
+    "one Net, original two workers, no additional binary permits or playback",
+    "strict original TCP5s and production-listener enablement NOT VALIDATED"
+  ],
+  "progress": {
+    "maxJsonBytesPerLine": 8192,
+    "maxStoredSnapshots": 512,
+    "maxDeferredLifecycleLines": 256,
+    "maxDeferredBytes": 262144,
+    "throttleMillis": 250,
+    "credentials": "no headers/cookie/CSRF/body/paths/lease"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "status": "SOURCE_FROZEN_NOT_COMPILED_OR_RUN",
+  "recordedUtc": "2026-10-31T16:39:30.154054+00:00",
+  "worktree": "/tmp/fc-round34-accept-worktree",
+  "base": "93414d5f26c829db552f8434433f6ad0684971f6",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "changed": true,
+      "beforeSha256": "e9b059ab65b8742d196b05cccbf4fc99ff74491f732c652dd8f98e4d5df69932"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "changed": true,
+      "beforeSha256": null
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "changed": true,
+      "beforeSha256": "4ab35d0114a59aefa3353096db23a7d26c90e7898d02a73b1e9fb5622cd304fb"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "bytes": 15822,
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "changed": false,
+      "beforeSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 62576,
+      "sha256": "29f6166ef6fbbf490bc9c17d7d94ebc11cadace166558fe4aee0e955f906ac84",
+      "changed": true,
+      "beforeSha256": "2134353f8802dcaeb78334a17abd0ca79b13cb52b9579d267dd5892cd72159f4"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 7648,
+      "sha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "changed": true,
+      "beforeSha256": "3db842b50771e846ef9319f2067e5c6b18033128108486ed9213b218491ece87"
+    }
+  ],
+  "diff": {
+    "path": "/tmp/fc-round34-accept-evidence/implementation-final.diff",
+    "bytes": 49975,
+    "sha256": "3ea3a9542be877fb4f534f828038bfa0cf45df8b9ce501ea3e1804d1386dbdd5"
+  },
+  "sourceChecks": {
+    "rustfmt": {
+      "argv": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/native.rs",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+        "/tmp/fc-round34-accept-worktree/crates/fc-windows/src/tls_frontdoor/mod.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "scope": {
+    "httpCandidateOnly": true,
+    "legacyFiniteAcceptPath": "preserved",
+    "businessSlots": 4,
+    "bareAcceptSlots": 1,
+    "ownedSocketDescriptorMax": 6,
+    "nativePendingMax": 5,
+    "workerDomains": "unchanged",
+    "deadlineOrigin": "original after-AcceptEx-post-derived +5s; inherited verbatim at handoff; not TCP ESTABLISHED evidence",
+    "requestDeadline": "legal Head completion inside old header deadline starts original admitted_at+120s; admit only tightens",
+    "strictOriginalFiveSeconds": "NOT_PROVEN; original FAIL retained",
+    "compile": "NOT_RUN_BY_THIS_AGENT",
+    "tests": "NOT_RUN_BY_THIS_AGENT",
+    "remote": "NOT_RUN_BY_THIS_AGENT",
+    "closeFailureTest": "controlled single close failure seam in independent actual test process; retained ownership until OS child teardown, not successful drain"
+  },
+  "newTests": [
+    "extra_client",
+    "rejected_client",
+    "ready_business_slots_have_no_native_operation_or_active_header_clock",
+    "real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five",
+    "real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff",
+    "real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory",
+    "real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests",
+    "real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost",
+    "real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots",
+    "real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately",
+    "bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child"
+  ],
+  "baselineModBytes": "Reconstructed by removing the exact added diagnostic type and verified byte SHA against contemporaneous source-before.json; no replacement of original capture."
+}

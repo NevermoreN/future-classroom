@@ -18,7 +18,7 @@ use fc_protocol::{
     MAX_JSON_BYTES,
 };
 use fc_runtime::worker::{Rejection, Task};
-use fc_windows::tls_frontdoor::{TlsHttpEvent, TlsHttpHost};
+use fc_windows::tls_frontdoor::{TlsAcceptSnapshot, TlsHttpEvent, TlsHttpHost};
 use std::{
     any::Any,
     cell::RefCell,
@@ -30,8 +30,18 @@ use std::{
 #[cfg(test)]
 mod tests;
 
+/// Read-only live JSON-body interval; no identity, route, headers or body.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RequestInterval {
+    pub token: RequestToken,
+    pub admitted_at: Instant,
+    pub deadline: Instant,
+}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct NetworkReport {
+    pub acceptance: TlsAcceptSnapshot,
+    pub json_body_records: usize,
+    pub json_body_intervals: [Option<RequestInterval>; MAX_REQUESTS],
     pub heads: u64,
     pub admissions: u64,
     pub body_acks: u64,
@@ -1393,6 +1403,25 @@ impl<E: HttpExecutor> Core<E> {
         Ok(())
     }
     fn refresh_report(&mut self) {
+        self.report.acceptance = self.host.acceptance_snapshot();
+        self.report.json_body_intervals = [None; MAX_REQUESTS];
+        self.report.json_body_records = 0;
+        for record in self
+            .records
+            .iter()
+            .flatten()
+            .filter(|r| r.phase == Phase::JsonBody)
+        {
+            if let (Some(life), Some(deadline)) = (&record.life, record.deadline) {
+                self.report.json_body_intervals[self.report.json_body_records] =
+                    Some(RequestInterval {
+                        token: record.token,
+                        admitted_at: life.admitted_at(),
+                        deadline,
+                    });
+                self.report.json_body_records += 1;
+            }
+        }
         self.report.active_records = self.records.iter().flatten().count();
         self.report.peak_records = self.report.peak_records.max(self.report.active_records);
         self.report.pending_jobs = self

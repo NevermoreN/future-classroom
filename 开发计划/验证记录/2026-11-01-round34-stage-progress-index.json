@@ -1,0 +1,710 @@
+{
+  "status": "PASS_IMMUTABLE_STAGE_INDEX",
+  "scope": "Original Round34 implementation reviews/failures/builds/Win11/TLS/CI diagnosis and unvalidated packaging plus summary. No EXE/ZIP/private credentials. Later sync/cleanup/CI-dispatch receipts stored separately.",
+  "files": [
+    {
+      "path": "2026-11-01-round34-accept/archive-round34.py",
+      "bytes": 8297,
+      "sha256": "896516e80be2823a56506207ec2d6207971f3534c6a058d921d409b95271782c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/audit-windows-readonly.py",
+      "bytes": 9871,
+      "sha256": "7335b024fd9d13bdfdc5b00d6b7d103b985607d7d4a544e46744a1a1c2110641"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-before-http_business_probe.rs",
+      "bytes": 20043,
+      "sha256": "f305dc8f41c0d391cc18fa2f320d643900cf1ddb8851beddb7fb034b35094e6e"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-before-network.rs",
+      "bytes": 57800,
+      "sha256": "d13e2f0b5d21387019f71d255ed819ad7ccf6f7a5b074c8f5225bfc2312a4b86"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-before-windows-tls-business-probe.py",
+      "bytes": 67685,
+      "sha256": "98f8d3d2eee3787776a545327ceed7d7944e25a2a2c603c6e05ae12f83427fbf"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-cross-review-first.json",
+      "bytes": 9972,
+      "sha256": "df319a7857ebe60ebfdc4a62f3956bb2b70762f6642397b5389b24899c46585d"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-help-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-help-final.stdout.log",
+      "bytes": 1650,
+      "sha256": "ab97a67e810141dff702a95e98a6970ab6f7c4cc4261bcbdb69e424e55c9cf66"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-help-frozen.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-help-frozen.stdout.log",
+      "bytes": 1650,
+      "sha256": "ab97a67e810141dff702a95e98a6970ab6f7c4cc4261bcbdb69e424e55c9cf66"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-probe-freeze.json",
+      "bytes": 5245,
+      "sha256": "c0d560dadeb6afa7e5d640092ea702d6b89badce1977a8e633c7afc9bb72e5b5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-probe.patch",
+      "bytes": 32905,
+      "sha256": "33c4d10d065677a0a5171db178560bef6e14fb580b951669b603614619d7d855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-final.stdout.log",
+      "bytes": 1147,
+      "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-final2.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-final2.stdout.log",
+      "bytes": 1147,
+      "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-first.stdout.log",
+      "bytes": 1147,
+      "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-frozen.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-pure-selftest-frozen.stdout.log",
+      "bytes": 1147,
+      "sha256": "57f23491f0d6d70729e4bdd1941b2282d162a03c8c3cd1b5f4ae80f3fcb38e83"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-python-addition.txt",
+      "bytes": 15619,
+      "sha256": "4e6e30210fa4bb09eb27d0c0fbdda14c3cc2a3249d1ac69893f4fec4c4145b78"
+    },
+    {
+      "path": "2026-11-01-round34-accept/business-source-before.json",
+      "bytes": 782,
+      "sha256": "cfe51b8a9b60872ca96270eac51af57e5c8f5d1040716d03e6e7cce3cbe0ac01"
+    },
+    {
+      "path": "2026-11-01-round34-accept/ci-initial.json",
+      "bytes": 4486,
+      "sha256": "5e42808c8717bee1fa5e3a2ea7adea8fbcd1eb6c0bcd9d6d82f1c846e71412ed"
+    },
+    {
+      "path": "2026-11-01-round34-accept/ci-terminal-observations.json",
+      "bytes": 66237,
+      "sha256": "4e0b0f91c6f478c6e11b750f90f6c896a60c358a085690e72ba1ce2d49916056"
+    },
+    {
+      "path": "2026-11-01-round34-accept/cleanup-local-builds.py",
+      "bytes": 5526,
+      "sha256": "bc335d7f66c6def2d97f88cfea66e7a15add6e69fca73a55d1baeeaac19b9d97"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-cargo-version.stdout.log",
+      "bytes": 353,
+      "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-clippy-version.stderr.log",
+      "bytes": 214,
+      "sha256": "a33c8bb89f603e25b9a887a74c539bfe6a502f0e5b697f88ab4e341187b2e0f9"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-clippy-version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-component-install-first.json",
+      "bytes": 1515,
+      "sha256": "313f9a6348e41fc75dd360704fc3328434dc674fb4b2439248ad7e5833dd871c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-component-install-first.stderr.log",
+      "bytes": 35,
+      "sha256": "08cc3e5ddf8fdac43e355fa0e3215ff51d62897f38c2b9748679f1984a32d562"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-component-install-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-conclusion-first.json",
+      "bytes": 7393,
+      "sha256": "3f2a8c628ee4ebd640f5dd845cde4e0b153d2ce1e7e1016c15d36caa4dab8fc4"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-first.json",
+      "bytes": 4021,
+      "sha256": "b3c54503e1a8763f791216308e1854663bd54184d327246fa9c5a7298f4c8fce"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-run-second.py",
+      "bytes": 5556,
+      "sha256": "817e35d38e1172a9c27c148695e2ab169a12f2be8c8d1d2a0210f5eab5511fdd"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-run.py",
+      "bytes": 5491,
+      "sha256": "7a7c8dbac2313ceb21cd6a50bc2f66f856929af8ec84d356d09df2e0dd17079e"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-rustc-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-rustc-version.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-after-command-first.stderr.log",
+      "bytes": 14984,
+      "sha256": "a0cf2949f0a80db7aa1d2d233aef515632bd2837c3912d55c12c4d769a2ea6b3"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-after-command-first.stdout.log",
+      "bytes": 3736,
+      "sha256": "fc931316f083fd471788cce6369e9172ae83e976af4fc2b0601d814d234160e5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-cargo-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-cargo-version.stdout.log",
+      "bytes": 353,
+      "sha256": "6dc26be8d4bd810a3c4f8a6e0dc2b445a2758896345a4313478d8173123d9aed"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-clippy-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-clippy-version.stdout.log",
+      "bytes": 39,
+      "sha256": "de3b29abcf933927a27eabafba5ea16c754659e7433ecb7a4865a0fda42989a1"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-global-first.stderr.log",
+      "bytes": 3913,
+      "sha256": "7a4cb147591b7fc5d744cdcbd2652a22de326bebdafb0937f856938981116757"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-global-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-rustc-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second-rustc-version.stdout.log",
+      "bytes": 214,
+      "sha256": "4e61a6c51c93061ebd21f7468a78634a01e378f986e62cf9e35f297aa0beea54"
+    },
+    {
+      "path": "2026-11-01-round34-accept/clippy-repro-second.json",
+      "bytes": 6535,
+      "sha256": "fddfe51f31e5a45da8cef6bd300d9d7e1d17641ece6706c049181d3b827c6613"
+    },
+    {
+      "path": "2026-11-01-round34-accept/continuous-package-helper-static-final.json",
+      "bytes": 5103,
+      "sha256": "33bbefe8ed590de99632e65883ef24e374c98d190779585eaf568c8ba7b57c45"
+    },
+    {
+      "path": "2026-11-01-round34-accept/continuous-package-helper-static-first.json",
+      "bytes": 1260,
+      "sha256": "cd2c436385b76a7c237cec898ff2e30519a213ea577ef852c77d1b1700818365"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.command.json",
+      "bytes": 776,
+      "sha256": "ad251aacd4865d2c0ecbc04577bb0476fd31914fdbdb3294c3f6aacf084cd6df"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.json",
+      "bytes": 196502,
+      "sha256": "86fc456abd10e333fe4b208e41f869337c31af10f009910bdba0ba6bd21f5844"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.package.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.package.stdout.log",
+      "bytes": 290,
+      "sha256": "22dbb4165c83c0725e7f096d0de202ce494dc7eff6d2af237a89507b252d0293"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.repack.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.repack.stdout.log",
+      "bytes": 310,
+      "sha256": "e42b5a5206939da4cbc328d7ddab734a18124a9ca851649ce247b3354a00b664"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/development-package-first.stdout.log",
+      "bytes": 357,
+      "sha256": "b77833bbed4416b5f36a91a1503d42a58a94906b4f1a36f71e4bce7161e76da4"
+    },
+    {
+      "path": "2026-11-01-round34-accept/dispatch-ci-once.py",
+      "bytes": 5161,
+      "sha256": "b9d337ff795ce04efbbea28ba030e2ad6a8d71ed86441e7d1b7fcef167a0b0cc"
+    },
+    {
+      "path": "2026-11-01-round34-accept/final-source-and-runtime-binding.json",
+      "bytes": 70258,
+      "sha256": "c5412e531bb223c2dd606a4b64deabea336a61a9860cde30bdc4ef76b9d3c4e2"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-before.json",
+      "bytes": 204915,
+      "sha256": "c232cc07b4ec7b3cd905320f87f308e7b9a7f23171dd36355a280c04b56bba4c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-close-retention-tests-before.rs",
+      "bytes": 62576,
+      "sha256": "29f6166ef6fbbf490bc9c17d7d94ebc11cadace166558fe4aee0e955f906ac84"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-final-second.diff",
+      "bytes": 1571,
+      "sha256": "e69d513f1f6cb03f5b30649b8c824330822f82a225ae932389c904485710a9c7"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-final.diff",
+      "bytes": 49975,
+      "sha256": "3ea3a9542be877fb4f534f828038bfa0cf45df8b9ce501ea3e1804d1386dbdd5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-freeze-second.json",
+      "bytes": 3075,
+      "sha256": "96a8a4cbb7206cfe940bcc3295b13609b3500e95aa1d6efbfaaefe62f2065073"
+    },
+    {
+      "path": "2026-11-01-round34-accept/implementation-freeze.json",
+      "bytes": 4757,
+      "sha256": "443395491d0ef00facf3d0f48b0ec24afb9ffffbeefac5759fbaa7b3fbf59a1c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/local-build-and-test-cleanup.json",
+      "bytes": 5126,
+      "sha256": "402574759b8b0733623e407ba1450465721fb303ca1f82548c866dec03fd4a27"
+    },
+    {
+      "path": "2026-11-01-round34-accept/make-continuous-accept-development-package.before-binding-gate.py",
+      "bytes": 30632,
+      "sha256": "b502a5bc77bc0406e3adcaaef06f34d7027f24d49cdb24e206018d1fd6b1c3ac"
+    },
+    {
+      "path": "2026-11-01-round34-accept/make-continuous-accept-development-package.py",
+      "bytes": 32264,
+      "sha256": "b754507dc68fa1876165485cf4084a597ff527f7188a76aa503724d18c0d4fea"
+    },
+    {
+      "path": "2026-11-01-round34-accept/read-win7-selected-originals.py",
+      "bytes": 4998,
+      "sha256": "44d3baa2dc0c6c5eda7e4ece085302f74e5f42c5d0d6947882df7bc51e4303fc"
+    },
+    {
+      "path": "2026-11-01-round34-accept/review-final-second.json",
+      "bytes": 10756,
+      "sha256": "5c3f8cfb39e8d1f5339a857366f11afee5e0a02732d849632438c5477e3c5204"
+    },
+    {
+      "path": "2026-11-01-round34-accept/review-final.json",
+      "bytes": 7527,
+      "sha256": "07fb54dc0cf32cb02c4c928e56b94d389ddcec28f312601cc2bb09ac260b4794"
+    },
+    {
+      "path": "2026-11-01-round34-accept/run-recorded.py",
+      "bytes": 1292,
+      "sha256": "3d01c326970e1587a4d99c36766ce36c9d50be783d1dd81ea1f65c3bb6a5cc0d"
+    },
+    {
+      "path": "2026-11-01-round34-accept/run-win7-pure-check.py",
+      "bytes": 2437,
+      "sha256": "6d29f00b25c83ffc473a52f7865bb3f235f08fd8a529b115afce6b70d90140c4"
+    },
+    {
+      "path": "2026-11-01-round34-accept/run-windows-affected.py",
+      "bytes": 4594,
+      "sha256": "5475c53b4a2068e35e2653bb36cd909cf0c630bcd703604d4397eb3706447a01"
+    },
+    {
+      "path": "2026-11-01-round34-accept/source-before.json",
+      "bytes": 1094,
+      "sha256": "5eb124d49a190f3b69261f11b17e52bd8947481757847fb300912b2371221e9b"
+    },
+    {
+      "path": "2026-11-01-round34-accept/verify-final-binding.py",
+      "bytes": 9395,
+      "sha256": "3f219e6fab6c67ad984f5966f1e4e4ac1a98fd21d6a6923dde186db9df0d3387"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-ci-powershell-first.json",
+      "bytes": 120743,
+      "sha256": "d273f619c102cc1ad527b2db541592822e962f884d2252a80d9930796eeb46cd"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-ci-pure-check.ps1",
+      "bytes": 16293,
+      "sha256": "3237d2275e78e651506b26d1100c3dda02d633c87939e75bc5db9e0f69d9f6ba"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-originals-first.json",
+      "bytes": 13025,
+      "sha256": "8e89514168ed8eaebfbcd618ea047ba976aea862ea3a33b015c6f2bba2bf22fd"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/artifact-sha256.json",
+      "bytes": 32129,
+      "sha256": "76d8dbf94adb87f352e4e238cd33cff0806216cb95ad90ba09e218da537936e6"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/cleanup.json",
+      "bytes": 530,
+      "sha256": "f3c976300f05b86f9775ee2362b80761cff1fc58c93597a9e9caf8b801118c63"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/executables.json",
+      "bytes": 10982,
+      "sha256": "68d4d0a4326fefb2c3475388df4cc663b21b5a1bed0468599d1ecdde91c0683c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/after-vs-crt-flags.json",
+      "bytes": 727,
+      "sha256": "745cab7d3166205eac27d63eb4ad0abfcd38712f2c9506f0c89ec76661ea24f3"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/before-cargo-crt-flags.json",
+      "bytes": 731,
+      "sha256": "becc46bb342c7fba3c9d08b8ddd573816e40f18d6ec9cf07ec93e1589e6de671"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/before-vs-crt-flags.json",
+      "bytes": 728,
+      "sha256": "a7a16f342ec2cd0526c3245dbd609326e0d0f5a11a9b62e8b2411f342e68f64c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/cargo-version.stdout.log",
+      "bytes": 346,
+      "sha256": "59c06167beac3ae99f676c560037b9755891268ea08aeddd20477fce7ae22540"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/clippy.result.json",
+      "bytes": 673,
+      "sha256": "d5b088a5d5effb91bcd16b930c35744e410dfd14ab6ffa1afe0aa67da866e14a"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/clippy.stderr.log",
+      "bytes": 37608,
+      "sha256": "0d130ef8257b1d317b9149e4bb7583e8ee3287d96c3f5e1bfe29757ae276cd2f"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/clippy.stdout.log",
+      "bytes": 57,
+      "sha256": "3360363727d64b6601604966481ffde53e899be1c8b1d618fd991fd3949657e2"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/rust-src-components.stdout.log",
+      "bytes": 193,
+      "sha256": "e9ef5626c16e238f38d71e3b5fd4a2529df2ec2dce84b09b12d809713bfa2ac8"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/rust-sysroot.stdout.log",
+      "bytes": 112,
+      "sha256": "3a138fc6cdfba0b18f8b2985ef26c0a41c51b1635dc2bf20ec1d2d40ab53f6b5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/logs/rust-version.stdout.log",
+      "bytes": 212,
+      "sha256": "100465d1cdcba9edbe56d8f0126660b5dc3562d45fb8b556603c6b105786724a"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/result.json",
+      "bytes": 31295,
+      "sha256": "80f6b22d010a1f60978bce4a6f10f3aaf457b5682593b15e25f89762fa8be602"
+    },
+    {
+      "path": "2026-11-01-round34-accept/win7-selected-raw/rust-src-provenance.json",
+      "bytes": 2529,
+      "sha256": "9905b45c78f29fe1163d7ef458f1f3eb4011ab373cd004a4ad413952badc7e66"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.clippy.stderr.log",
+      "bytes": 2926,
+      "sha256": "1301fb0356323d5e5c196c45a3dcc11fe380932699a21f4b558a555c387564cf"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.clippy.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.compile.stderr.log",
+      "bytes": 1671,
+      "sha256": "5632a8b990c8432a28c4b1acaa1471cc63c8b6b00ad76d0b22aba0cec164a662"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.compile.stdout.log",
+      "bytes": 38560,
+      "sha256": "f5df7e4c1fea3b4912b0e5ba680e450dd9733ebc1127d7b9f6fdfac944b4340a"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.fmt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.fmt.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.json",
+      "bytes": 133323,
+      "sha256": "0ea2f93ee24ab5ec4ad1443597a285327f0f6c29f20d1897b170a90dfa08e02e"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.linker-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.linker-version.stdout.log",
+      "bytes": 238,
+      "sha256": "1e8c1e3b498f9edce82b842bf299a805696cc9d0c6da16b65fe3ee6ba867f3e9"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.product.stderr.log",
+      "bytes": 2111,
+      "sha256": "820d4bf38283ed30ee129307da37ef1849e44b10cab05f788ca572fc7b53687c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.product.stdout.log",
+      "bytes": 82804,
+      "sha256": "9aee6fe567fe14280f3fc7a88ea38821fada3e2424a9847a77e8fbf055f18d81"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.rust-version.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-affected-first.rust-version.stdout.log",
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-after-audit-first.command.json",
+      "bytes": 908,
+      "sha256": "f01ca2472db0475eb5100fcc0dc0bf4c57cfb9b43b516edc782414e3250471b5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-after-audit-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-after-audit-first.stdout.log",
+      "bytes": 459,
+      "sha256": "511718a6c5a879a47734438245c89dc23cf676eb87ffebe4ca71850f28af44d5"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-after.json",
+      "bytes": 16659,
+      "sha256": "23a36e76b8ea2cd7f28574b818c5be4405565a34875be771c4394ca5b81a1091"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-before.json",
+      "bytes": 16676,
+      "sha256": "5f523960cf1e35806afd5a2495ee307eadb02a4236e30210c3cf829c0b0edb39"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-msvc-ci.before-clippy-fix.ps1",
+      "bytes": 38322,
+      "sha256": "91e79de38f7a90e8d7976d6551b614f8fdc790590e226980971fa0f2303bc315"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-native-first.command.json",
+      "bytes": 1166,
+      "sha256": "3ade468e3dffd3c3f4cb6a4c9a030a126cb19919dddf533b1c451c0bd18c70e2"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-native-first.json",
+      "bytes": 26323,
+      "sha256": "0f29037d3bcd31d420a6ac0bc990d077c735d2c40bc2422e11a55f55ae2b40ee"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-native-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-native-first.stdout.log",
+      "bytes": 130,
+      "sha256": "8dd260deac9ccdcd2983d571336c484da59867f2ab14a08e3c8cd8d9c2ee330f"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-pe-first.command.json",
+      "bytes": 773,
+      "sha256": "505957214770e1a28e35e6c0d5e2e7e8ec045e28b6b7f44173be0167b34cb54c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-pe-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-pe-first.stdout.log",
+      "bytes": 12751,
+      "sha256": "3bb18609b4455750ddf6013e2dbf53796870a8d98f0338af9bd41c6f16115d88"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-test-metadata.jsonl",
+      "bytes": 884,
+      "sha256": "de0d1f0564ca992dedc1cb725d1ba00846ea29d33645b5ed2f9c31af49ab0a6c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "33c2fd4fe26d9d80d4e7130bcebf48b513ad75f6b0df33fed98d1f7c9d5e4428"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "a2daab450fbf52f6966e5d7ba777f2ad44f2a302ca9946c77686d29b95564af7"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "9d795e635bc4b0a5e178191b33a6306b68396b8e43607cd7d335377583fe38ab"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "d4f3dc96d1c7d5470e8fd50ad5381ca2974e2b39c1ac08f9d40105b6fcfdf46e"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/remote-metadata.json",
+      "bytes": 899,
+      "sha256": "07f2f4889051aecff4bb4db890141d983d3ab7fb081b97148e31fe4dac017b7c"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "cfd9dcd728f89f3e4a32c616342a2a29c2cd5ac0d158e0824b4cbacc9b43e43d"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/tls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first-f650c6bb454d45549eebfacffac7cc1c-raw/tls.stdout",
+      "bytes": 17657,
+      "sha256": "0852be2e97985f324144f21ee430ac8cb477b762783c270bc87d73bb535edec7"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first.command.json",
+      "bytes": 1062,
+      "sha256": "382465ddaa9160d68dde27b6e9efb8532b53d39c0b2a03da37b693b1fb40982f"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first.json",
+      "bytes": 156215,
+      "sha256": "bc431bd61418583c5c807dc8fb7c42769d06e98a03dacd82bcca374c363ee3c3"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "2026-11-01-round34-accept/windows-tls-continuous-first.stdout.log",
+      "bytes": 262,
+      "sha256": "d67f091c4c42cede6510f7283382b99c46c1b5fd2ef3f4d9d8ba68c8f6be3dfe"
+    },
+    {
+      "path": "2026-11-01-round34-accept-stage-summary.json",
+      "bytes": 51998,
+      "sha256": "ba28e583b4ff0b080688afecadb03ed0f4de939920563e7cad270ae47f9431b1"
+    }
+  ],
+  "fileCount": 139,
+  "logicalBytes": 1961595,
+  "oldIndexes": {
+    "2026-10-31-round30-stage-progress-index.json": "7ad3e92fa452e00b3060a1eb1149934d84625abef0657372bde008edab600dfa",
+    "2026-10-31-round31-stage-progress-index.json": "10bbb497944bbd2a509622261d4e29f9ef5ed4240a21ec2bfb7bcf71b665b25e",
+    "2026-10-31-round32-stage-progress-index.json": "891087fb677173b8cfec9b0c43961ba28f6ba6ac5b95f8e9e43f24726e4385e7",
+    "2026-10-31-round30-late-originals-index.json": "75e94198db491ec4d89dc4c173ff906078073257b75b8f54a67b49b899c4ccd4",
+    "2026-10-31-round33-stage-progress-index.json": "45f9dde0abbae849308d430c50a17f40a74a5904c6ebf66fec0068f4d0d26a08"
+  }
+}

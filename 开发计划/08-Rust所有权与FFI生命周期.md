@@ -103,3 +103,10 @@ Q25矩阵必须覆盖：COMMIT后权威交换失败但旧token下载/音频起�
 候选的每槽16KiB头从内联数组改为固定容量Parser arena，仍保留到槽退休；有界响应头Vec另逐项记入实际保留容量，正文sender只持token/长度/一块唯一回执，不存64KiB正文副本。解析头后的同Frame剩余明文不会被Parser吞掉；未来stage桥必须取得原物理上传许可后显式准入，保留Frame到文件worker真实ACK，不能在解析器外用未计费临时文件预收或重复取得许可。本轮诊断拒收任何正文，不声称上传已连通。
 
 正常响应在原密文全部真实IOCP完成后ACK正文、生成并实际发送close_notify，再关闭socket；原IOCP和Frame均已归还才请求同token Retire。worker收到并真正poll原Retired后才可接受新serial；排队Retire遇stop只负向返回，不能标退休。停止仍由实际Schannel close和线程对象终结证明归还；物理超时保留原owner并闭锁，不用另一个线程替代。见[候选ADR](14-P0独立TCP接纳候选ADR.md)，完整生产资源、持续接纳与严格五秒门槛仍未完成。
+
+
+## 第三十四轮：独立接纳内存与真实完成债务
+
+HTTP候选新增唯一pinned `AcceptMemory`（OVERLAPPED与64字节地址区）和唯一接纳socket，与原四业务槽分离；不是新增四套Frame/解析器/上下文或worker。原非HTTP有限诊断保持原四接纳槽。HTTP候选的应用上限变为五个原生在途操作、六个自有socket descriptor；Ready业务槽无活动期限或socket。接纳socket移交必须先从原owner移出，保留原post+5秒截止，禁止dequeue后续期。
+
+独立接纳到期/停止后仍保留原固定内存及IOCP债务，直到观察到对应实际完成。关闭失败的descriptor不得覆盖，后续偶然关闭成功也不清除故障。任何接纳债务、业务IO/Frame/Retired或实际socket未释放均禁止IOCP/WSACleanup最终释放及替代域；超时保留原owner。新增分配计入应用自有字节，内核/SSPI及完整Web资源账另验。测试只读快照和有限探针的进度输出不改变原所有权规则，执行状态见实施记录第三十四轮。

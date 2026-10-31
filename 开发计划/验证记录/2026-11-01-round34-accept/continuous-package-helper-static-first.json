@@ -1,0 +1,27 @@
+{
+  "status": "PASS_STATIC_HELPER_PREPARED_NOT_EXECUTED",
+  "createdUtc": "2026-10-31T17:02:24.030242+00:00",
+  "helper": {
+    "path": "/tmp/fc-round34-accept-evidence/make-continuous-accept-development-package.py",
+    "bytes": 30632,
+    "sha256": "b502a5bc77bc0406e3adcaaef06f34d7027f24d49cdb24e206018d1fd6b1c3ac"
+  },
+  "checks": {
+    "pythonAstAndCompileObjectOnly": "PASS",
+    "gnuTargetAndDeclaredHostToolchain": {
+      "OLD_SHA": "1acdec0c1506db0484c0a4ba8e2bfa7187ab26d485285128b6dd35ad9e114c69",
+      "OLD_BYTES": 5960978,
+      "EXPECTED_NORMAL_SHA": "33f89b7a3592d1c926171bdc855ba938a43eb7ded15741e0af6ddbafbc5613f9",
+      "TOOLCHAIN": "1.97.1-x86_64-unknown-linux-gnu",
+      "TARGET": "i686-pc-windows-gnu"
+    },
+    "oldMsvcArtifactFullSuiteGatesRemoved": true,
+    "actual383SourceManifestGatePresent": true,
+    "affected177SingleHarnessExplicit": true,
+    "continuousReportRequiredAtExecution": true,
+    "originalStdoutProgressCrosscheckPresent": true,
+    "helperExecuted": false,
+    "zipOrTemporaryRootsCreated": false
+  },
+  "limits": "Only preparation/static syntax and constants inspection; pending TLS actual result is not assumed PASS. No packaging, compiled program execution, Cargo, Windows/SSH/CI/network or Git calls."
+}

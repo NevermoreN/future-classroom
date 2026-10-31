@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "rustup",
+    "component",
+    "add",
+    "--toolchain",
+    "nightly-2026-10-29-x86_64-unknown-linux-gnu",
+    "clippy"
+  ],
+  "timeoutSeconds": 180,
+  "officialDistServer": "https://static.rust-lang.org",
+  "priorInstalledManifest": {
+    "path": "/config/.rustup/toolchains/nightly-2026-10-29-x86_64-unknown-linux-gnu/lib/rustlib/multirust-channel-manifest.toml",
+    "bytes": 1058201,
+    "sha256": "00ec10e7ed3261901cd6ebe22b676a2063bad663601e8bcab6fed09486db93de",
+    "date": "2026-10-29",
+    "componentXzUrl": "https://static.rust-lang.org/dist/2026-10-29/clippy-nightly-x86_64-unknown-linux-gnu.tar.xz",
+    "expectedComponentXzSha256": "4803d79c1a4a938c5e9b7e51a85616c92b242231f7ed8ff34620e4a55b0e2a64"
+  },
+  "scope": "Only explicitly authorized same-fixed-nightly Clippy component; retained development tool, no compiler/src/other-toolchain deletion or modification requested. Rustup performs download checksum verification against the fixed channel manifest.",
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedSeconds": 3.7233094950206578,
+  "stdout": {
+    "path": "/tmp/fc-round34-accept-evidence/clippy-repro-component-install-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round34-accept-evidence/clippy-repro-component-install-first.stderr.log",
+    "bytes": 35,
+    "sha256": "08cc3e5ddf8fdac43e355fa0e3215ff51d62897f38c2b9748679f1984a32d562"
+  },
+  "status": "PASS"
+}

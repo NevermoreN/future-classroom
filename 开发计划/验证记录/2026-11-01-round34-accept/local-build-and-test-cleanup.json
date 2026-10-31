@@ -1,0 +1,170 @@
+{
+  "status": "PASS",
+  "createdUtc": "2026-10-31T17:05:25.576574+00:00",
+  "scope": "Remove only this round owned cross-build target, two executable snapshots, integrated source-only worktree and its base-only branch. Evidence working directory is retained until archive/Git blob proof; final development ZIP and ongoing tools/SSH are retained. Logical lengths are not physical filesystem reclaim measurements.",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round34-accept-worktree",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "stdout": "93414d5f26c829db552f8434433f6ad0684971f6\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round34-accept-worktree",
+        "diff",
+        "--name-only",
+        "-z"
+      ],
+      "exitCode": 0,
+      "stdout": "crates/fc-bootstrap/src/application/http_business_probe.rs\u0000crates/fc-bootstrap/src/web_transfer/network.rs\u0000crates/fc-windows/src/tls_frontdoor/mod.rs\u0000crates/fc-windows/src/tls_frontdoor/native.rs\u0000crates/fc-windows/src/tls_frontdoor/native/stream.rs\u0000crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs\u0000scripts/windows-tls-business-probe.py\u0000",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round34-accept-worktree",
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "-z"
+      ],
+      "exitCode": 0,
+      "stdout": "crates/fc-windows/src/tls_frontdoor/native/accept.rs\u0000",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/fc-round34-accept-worktree",
+        "ls-files",
+        "--others",
+        "--ignored",
+        "--exclude-standard",
+        "-z"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "remove",
+        "--force",
+        "/tmp/fc-round34-accept-worktree"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "-d",
+        "codex/continuous-accept-owner"
+      ],
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/continuous-accept-owner (was 93414d5).\n",
+      "stderr": ""
+    }
+  ],
+  "removed": [
+    {
+      "path": "/tmp/fc-round34-accept-target",
+      "identity": {
+        "device": 1048772,
+        "inode": 1076293
+      },
+      "fileCount": 1289,
+      "logicalBytes": 641434387,
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round34-accept-programs",
+      "identity": {
+        "device": 1048772,
+        "inode": 1085163
+      },
+      "fileCount": 2,
+      "logicalBytes": 15892825,
+      "removed": true
+    },
+    {
+      "path": "/tmp/fc-round34-accept-worktree",
+      "identity": {
+        "device": 1048772,
+        "inode": 1071742
+      },
+      "fileCount": 3913,
+      "logicalBytes": 136622495,
+      "removed": true,
+      "branchDeleted": "codex/continuous-accept-owner",
+      "sourceCopiesAllIntegratedInRoot": true
+    }
+  ],
+  "preexistingRootTarget": {
+    "device": 173,
+    "inode": 45511040
+  },
+  "integratedWorktreeFiles": {
+    "crates/fc-bootstrap/src/application/http_business_probe.rs": {
+      "bytes": 23127,
+      "sha256": "e2a8be32925c9c1f60d36d28b1be2c3336296c9dd2eb099e0dba5226d1930340"
+    },
+    "crates/fc-bootstrap/src/web_transfer/network.rs": {
+      "bytes": 58970,
+      "sha256": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987"
+    },
+    "crates/fc-windows/src/tls_frontdoor/mod.rs": {
+      "bytes": 7648,
+      "sha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native.rs": {
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/accept.rs": {
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream.rs": {
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00"
+    },
+    "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs": {
+      "bytes": 63166,
+      "sha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d"
+    },
+    "scripts/windows-tls-business-probe.py": {
+      "bytes": 87838,
+      "sha256": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876"
+    }
+  },
+  "retained": {
+    "developmentPackage": {
+      "path": "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+      "bytes": 5968710,
+      "sha256": "8e2a125c3b4a11c413618d123ad73984267f616d0b95398da043bd95886323f1"
+    },
+    "preexistingRootTarget": "UNTOUCHED",
+    "fixedNightlyClippyAndRustfmt": "CONTINUING_DEVELOPMENT_TOOLS",
+    "persistentSshKey": {
+      "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "contentsRead": false,
+      "mode": "0600"
+    }
+  }
+}

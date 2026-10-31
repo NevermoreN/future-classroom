@@ -1,0 +1,67 @@
+{
+  "status": "SOURCE_FROZEN_SECOND_NOT_COMPILED_OR_RUN",
+  "recordedUtc": "2026-10-31T16:41:29.602797+00:00",
+  "previousFreeze": {
+    "path": "/tmp/fc-round34-accept-evidence/implementation-freeze.json",
+    "sha256": "443395491d0ef00facf3d0f48b0ec24afb9ffffbeefac5759fbaa7b3fbf59a1c",
+    "preserved": true
+  },
+  "files": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "bytes": 54826,
+      "sha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "previousFreezeSha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "changedFromFirstFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "bytes": 11868,
+      "sha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "previousFreezeSha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "changedFromFirstFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "bytes": 38739,
+      "sha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "previousFreezeSha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "changedFromFirstFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "bytes": 15822,
+      "sha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "previousFreezeSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "changedFromFirstFreeze": false
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "bytes": 63166,
+      "sha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "previousFreezeSha256": "29f6166ef6fbbf490bc9c17d7d94ebc11cadace166558fe4aee0e955f906ac84",
+      "changedFromFirstFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 7648,
+      "sha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "previousFreezeSha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "changedFromFirstFreeze": false
+    }
+  ],
+  "diff": {
+    "path": "/tmp/fc-round34-accept-evidence/implementation-final-second.diff",
+    "sha256": "e69d513f1f6cb03f5b30649b8c824330822f82a225ae932389c904485710a9c7",
+    "bytes": 1571,
+    "scope": "only controlled-close-failure fixture teardown correction relative to first freeze"
+  },
+  "checks": {
+    "rustfmtExit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "correction": "Independent controlled-close-failure child explicitly selects expected fault-retention fixture teardown. Generic normal-drain finish().expect remains unchanged for every other fixture. Original Owner::drop retains exact ManuallyDrop native domain; no production code, failed flag, owner fault, bare release or drain requirements changed.",
+  "compile": "NOT_RUN_BY_THIS_AGENT",
+  "runtime": "NOT_RUN_BY_THIS_AGENT"
+}

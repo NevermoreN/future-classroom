@@ -1,0 +1,1265 @@
+--- a/crates/fc-windows/src/tls_frontdoor/native.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native.rs
+@@ -1,8 +1,8 @@
+ //! Finite loopback evidence for owned TLS execution. This is not a production
+ //! listener and does not prove the strict first-connection scheduler deadline.
+ use super::{
+-    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsError, BUFFER_BYTES,
+-    CONNECTION_SLOTS, PLAINTEXT_BYTES,
++    worker::Worker, Call, CertificateThumbprint, Frame, Step, TlsAcceptSnapshot, TlsError,
++    BUFFER_BYTES, CONNECTION_SLOTS, PLAINTEXT_BYTES,
+ };
+ use fc_ports::http::{RequestToken, ResponseHead, TokenIssuer};
+ use fc_protocol::http1::{
+@@ -27,6 +27,7 @@
+         System::IO::{CancelIoEx, CreateIoCompletionPort, GetQueuedCompletionStatus, OVERLAPPED},
+     },
+ };
++mod accept;
+ mod stream;
+ pub use stream::{TlsHttpEvent, TlsHttpHost};
+ const BUDGET: Duration = Duration::from_secs(5);
+@@ -48,6 +49,7 @@
+ }
+ #[derive(Clone, Copy, PartialEq, Eq)]
+ enum Phase {
++    Ready,
+     Handshake,
+     Http,
+     Response,
+@@ -98,10 +100,20 @@
+     port: HANDLE,
+     winsock: bool,
+     worker: Option<Worker>,
++    accept: Option<accept::AcceptSlot>,
+ }
+ #[derive(Debug, Default)]
+ struct Report {
+     accepted: usize,
++    accept_posts: u64,
++    accept_completions: u64,
++    accept_idle_cancellations: u64,
++    accept_idle_returns: u64,
++    accept_handoffs: u64,
++    accept_capacity_rejections: u64,
++    accept_expired_discards: u64,
++    accept_error_discards: u64,
++    accept_stop_discards: u64,
+     handshakes: usize,
+     responses: usize,
+     submissions: usize,
+@@ -222,6 +234,7 @@
+                 port: HANDLE::default(),
+                 winsock: false,
+                 worker: None,
++                accept: None,
+             }),
+             started,
+             generation,
+@@ -344,6 +357,14 @@
+             )?;
+             let accept = accept.ok_or("AcceptEx unavailable")?;
+             let listener = self.resources.listener;
++            if self.http_mode {
++                self.resources.accept = Some(accept::AcceptSlot::new(Some(accept)));
++                for slot in &mut self.resources.slots {
++                    slot.phase = Phase::Ready;
++                }
++                self.post_bare_accept()?;
++                return Ok(());
++            }
+             for slot in &mut self.resources.slots {
+                 slot.socket = WSASocketW(
+                     AF_INET.0 as i32,
+@@ -423,7 +444,10 @@
+     }
+     fn prepare_io(&mut self, index: usize) -> Result<(), String> {
+         let slot = &self.resources.slots[index];
+-        if slot.pending.is_some() || slot.socket == INVALID_SOCKET || slot.phase == Phase::Closed {
++        if slot.pending.is_some()
++            || slot.socket == INVALID_SOCKET
++            || matches!(slot.phase, Phase::Ready | Phase::Closed)
++        {
+             return Err("TLS IO overlap or closed socket".into());
+         }
+         // SAFETY: the previous packet has been dequeued; no native writer can
+@@ -563,7 +587,7 @@
+             Phase::Http => Call::Decrypt,
+             Phase::Response => Call::Encrypt,
+             Phase::Shutdown => Call::Shutdown,
+-            Phase::Closed => unreachable!(),
++            Phase::Ready | Phase::Closed => unreachable!(),
+         };
+         match self
+             .resources
+@@ -789,7 +813,7 @@
+         if self.resources.port.is_invalid() {
+             return Ok(());
+         }
+-        for _ in 0..CONNECTION_SLOTS {
++        for _ in 0..(CONNECTION_SLOTS + usize::from(self.http_mode)) {
+             let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
+             // SAFETY: IOCP and all operation allocations remain owned and pinned.
+             let result = unsafe {
+@@ -808,6 +832,16 @@
+                     }
+                 }
+                 break;
++            }
++            if self.http_mode
++                && self
++                    .resources
++                    .accept
++                    .as_ref()
++                    .is_some_and(|bare| bare.memory.operation.get() == operation)
++            {
++                self.complete_bare_accept(key, result.is_ok())?;
++                continue;
+             }
+             let index = self
+                 .resources
+@@ -950,6 +984,7 @@
+     }
+     fn poll(&mut self) -> Result<(), String> {
+         if self.http_mode && !self.stopping {
++            self.expire_bare_accept(Instant::now())?;
+             for index in 0..CONNECTION_SLOTS {
+                 if self.resources.slots[index].phase != Phase::Closed && self.expired(index) {
+                     self.close_slot(index, true)?;
+@@ -1040,6 +1075,11 @@
+     }
+     fn app_owned_bytes(&self) -> usize {
+         size_of::<Owner>()
++            + self
++                .resources
++                .accept
++                .as_ref()
++                .map_or(0, |_| size_of::<accept::AcceptMemory>())
+             + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
+             + self.target.capacity()
+             + self.marker.capacity()
+@@ -1066,6 +1106,9 @@
+             worker.request_stop();
+         }
+         let mut failure = None;
++        if let Err(error) = self.close_bare_accept() {
++            failure = Some(error);
++        }
+         if self.resources.listener != INVALID_SOCKET {
+             for slot in &self.resources.slots {
+                 if slot.pending == Some(Operation::Accept) {
+@@ -1098,7 +1141,9 @@
+                 .resources
+                 .slots
+                 .iter()
+-                .all(|slot| slot.pending.is_none());
++                .all(|slot| slot.pending.is_none() && slot.socket == INVALID_SOCKET)
++                && self.resources.listener == INVALID_SOCKET
++                && self.bare_released();
+             let worker_done = match self.resources.worker.as_mut() {
+                 Some(worker) => {
+                     if worker.has_in_flight() {
+@@ -1113,7 +1158,9 @@
+             };
+             if io_done && worker_done {
+                 stop_result?;
+-                if self.report.submissions != self.report.completions {
++                if self.report.submissions != self.report.completions
++                    || !self.accept_ledger_matches()
++                {
+                     return Err("TLS IO ledger mismatch".into());
+                 }
+                 if self.resources.slots.iter().any(|slot| slot.frame.is_none()) {
+--- /dev/null
++++ b/crates/fc-windows/src/tls_frontdoor/native/accept.rs
+@@ -0,0 +1,315 @@
++//! One pinned, bare AcceptEx owner. Its clock is the original post-derived
++//! candidate clock, never a TCP ESTABLISHED or accept-observed epoch.
++use super::*;
++
++pub(super) struct AcceptMemory {
++    pub(super) operation: UnsafeCell<OVERLAPPED>,
++    addresses: UnsafeCell<[u8; 64]>,
++    _pinned: PhantomPinned,
++}
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum AcceptState {
++    Idle,
++    Pending {
++        serial: u64,
++        deadline: Instant,
++    },
++    Closing {
++        serial: u64,
++        deadline: Instant,
++        expired: bool,
++    },
++}
++pub(super) struct AcceptSlot {
++    pub(super) memory: Pin<Box<AcceptMemory>>,
++    pub(super) socket: SOCKET,
++    pub(super) serial: u64,
++    pub(super) state: AcceptState,
++    accept: LPFN_ACCEPTEX,
++    failed: bool,
++    #[cfg(test)]
++    pub(super) fail_close_once: bool,
++}
++impl AcceptSlot {
++    pub(super) fn new(accept: LPFN_ACCEPTEX) -> Self {
++        Self {
++            memory: Box::pin(AcceptMemory {
++                operation: UnsafeCell::new(OVERLAPPED::default()),
++                addresses: UnsafeCell::new([0; 64]),
++                _pinned: PhantomPinned,
++            }),
++            socket: INVALID_SOCKET,
++            serial: 0,
++            state: AcceptState::Idle,
++            accept,
++            failed: false,
++            #[cfg(test)]
++            fail_close_once: false,
++        }
++    }
++    pub(super) fn pending(&self) -> bool {
++        self.state != AcceptState::Idle
++    }
++    pub(super) fn deadline(&self) -> Option<Instant> {
++        match self.state {
++            AcceptState::Pending { deadline, .. } | AcceptState::Closing { deadline, .. } => {
++                Some(deadline)
++            }
++            AcceptState::Idle => None,
++        }
++    }
++    pub(super) fn released(&self) -> bool {
++        !self.pending() && self.socket == INVALID_SOCKET && !self.failed
++    }
++}
++impl Owner {
++    pub(super) fn bare_released(&self) -> bool {
++        self.resources
++            .accept
++            .as_ref()
++            .is_none_or(AcceptSlot::released)
++    }
++    fn close_bare_socket(&mut self) -> Result<(), String> {
++        let Some(bare) = self.resources.accept.as_mut() else {
++            return Ok(());
++        };
++        #[cfg(test)]
++        let result = if std::mem::take(&mut bare.fail_close_once) {
++            Err("controlled bare close failure".to_owned())
++        } else {
++            close(&mut bare.socket, true)
++        };
++        #[cfg(not(test))]
++        let result = close(&mut bare.socket, true);
++        if let Err(error) = result {
++            // Keep this exact descriptor and allocation; never overwrite it or
++            // create a replacement even if later shutdown happens to succeed.
++            bare.failed = true;
++            OWNER_FAULTED.store(true, Ordering::Release);
++            return Err(error);
++        }
++        Ok(())
++    }
++    pub(super) fn close_bare_accept(&mut self) -> Result<(), String> {
++        self.cancel_bare_accept(false)
++    }
++    fn cancel_bare_accept(&mut self, expired: bool) -> Result<(), String> {
++        let listener = self.resources.listener;
++        let Some(bare) = self.resources.accept.as_mut() else {
++            return Ok(());
++        };
++        if let AcceptState::Pending { serial, deadline } = bare.state {
++            bare.state = AcceptState::Closing {
++                serial,
++                deadline,
++                expired,
++            };
++            if expired {
++                self.report.accept_idle_cancellations += 1;
++            }
++        }
++        if bare.pending() && listener != INVALID_SOCKET {
++            // SAFETY: exact original listener operation remains pinned and
++            // charged. Even ERROR_NOT_FOUND does not discharge its IOCP debt.
++            unsafe {
++                let _ = CancelIoEx(socket_handle(listener), Some(bare.memory.operation.get()));
++            }
++        }
++        self.close_bare_socket()
++    }
++    pub(super) fn expire_bare_accept(&mut self, now: Instant) -> Result<(), String> {
++        if self.resources.accept.as_ref().is_some_and(
++            |bare| matches!(bare.state, AcceptState::Pending { deadline, .. } if now >= deadline),
++        ) {
++            self.cancel_bare_accept(true)?;
++        }
++        Ok(())
++    }
++    pub(super) fn post_bare_accept(&mut self) -> Result<(), String> {
++        if self.stopping || !self.http_mode || self.resources.listener == INVALID_SOCKET {
++            return Err("bare AcceptEx listener stopped".into());
++        }
++        let listener = self.resources.listener;
++        let bare = self
++            .resources
++            .accept
++            .as_mut()
++            .ok_or("missing bare accept owner")?;
++        if !bare.released() {
++            return Err("bare AcceptEx still owns native debt or socket".into());
++        }
++        let serial = bare
++            .serial
++            .checked_add(1)
++            .ok_or("bare accept serial exhausted")?;
++        let accept = bare.accept.ok_or("bare AcceptEx unavailable")?;
++        // SAFETY: previous IOCP packet actually returned and the old descriptor
++        // was transferred/closed; only now may this pinned operation be reused.
++        let success = unsafe {
++            *bare.memory.operation.get() = OVERLAPPED::default();
++            *bare.memory.addresses.get() = [0; 64];
++            bare.socket = WSASocketW(
++                AF_INET.0 as i32,
++                SOCK_STREAM.0,
++                IPPROTO_TCP.0,
++                None,
++                0,
++                WSA_FLAG_OVERLAPPED,
++            )
++            .map_err(|e| format!("bare accept socket: {e}"))?;
++            let mut received = 0;
++            accept(
++                listener,
++                bare.socket,
++                bare.memory.addresses.get().cast(),
++                0,
++                32,
++                32,
++                &mut received,
++                bare.memory.operation.get(),
++            )
++            .as_bool()
++        };
++        if !success && unsafe { WSAGetLastError() } != WSA_IO_PENDING {
++            let failure = error("bare AcceptEx post");
++            self.close_bare_socket()?;
++            return Err(failure);
++        }
++        // Preserve the old capture position AFTER successful/IO_PENDING post.
++        // This has no claim to an exact TCP establishment timestamp.
++        let deadline = Instant::now() + BUDGET;
++        let bare = self.resources.accept.as_mut().unwrap();
++        bare.serial = serial;
++        bare.state = AcceptState::Pending { serial, deadline };
++        self.report.submissions += 1;
++        self.report.accept_posts += 1;
++        Ok(())
++    }
++    pub(super) fn complete_bare_accept(
++        &mut self,
++        key: usize,
++        succeeded: bool,
++    ) -> Result<(), String> {
++        let bare = self
++            .resources
++            .accept
++            .as_mut()
++            .ok_or("foreign bare completion")?;
++        if key != 1 || !bare.pending() {
++            return Err("bare accept completion key or unsubmitted operation".into());
++        }
++        let state = bare.state;
++        let deadline = bare.deadline().unwrap();
++        // Serial is a local ledger, not information present in a kernel packet.
++        // Safety comes from never reusing memory until the actual packet returns.
++        match state {
++            AcceptState::Pending { serial, .. } | AcceptState::Closing { serial, .. }
++                if serial == bare.serial => {}
++            _ => return Err("bare accept serial ledger mismatch".into()),
++        }
++        bare.state = AcceptState::Idle;
++        self.report.completions += 1;
++        self.report.accept_completions += 1;
++        if matches!(state, AcceptState::Closing { expired: true, .. }) {
++            self.report.accept_idle_returns += 1;
++        }
++        let expired = Instant::now() >= deadline
++            || matches!(state, AcceptState::Closing { expired: true, .. });
++        let canceled = matches!(state, AcceptState::Closing { .. });
++        if self.stopping || expired || canceled || !succeeded {
++            if self.stopping {
++                self.report.accept_stop_discards += 1;
++            } else if expired {
++                self.report.accept_expired_discards += 1;
++            } else {
++                self.report.accept_error_discards += 1;
++            }
++            self.close_bare_socket()?;
++        } else if let Some(index) = self
++            .resources
++            .slots
++            .iter()
++            .position(|slot| slot.phase == Phase::Ready)
++        {
++            let slot = &self.resources.slots[index];
++            if slot.socket != INVALID_SOCKET
++                || slot.pending.is_some()
++                || slot.context_submitted
++                || slot.retired
++                || slot
++                    .frame
++                    .as_ref()
++                    .is_none_or(|frame| frame.token != slot.token)
++                || !slot
++                    .stream
++                    .as_ref()
++                    .is_some_and(stream::Stream::waiting_for_connection)
++            {
++                return Err("Ready business slot retains previous ownership".into());
++            }
++            // All fallible association operations occur while the bare owner
++            // still owns its exact socket. No business I/O has been submitted.
++            let association = unsafe {
++                check(
++                    setsockopt(
++                        self.resources.accept.as_ref().unwrap().socket,
++                        SOL_SOCKET,
++                        SO_UPDATE_ACCEPT_CONTEXT,
++                        Some(&self.resources.listener.0.to_ne_bytes()),
++                    ),
++                    "bare accept context",
++                )
++                .and_then(|()| {
++                    CreateIoCompletionPort(
++                        socket_handle(self.resources.accept.as_ref().unwrap().socket),
++                        Some(self.resources.port),
++                        index + 2,
++                        1,
++                    )
++                    .map(|_| ())
++                    .map_err(|e| format!("bare socket association: {e}"))
++                })
++            };
++            if let Err(error) = association {
++                self.report.accept_error_discards += 1;
++                self.close_bare_socket()?;
++                return Err(error);
++            }
++            // Recheck after association; no late success can gain a new clock.
++            if Instant::now() >= deadline {
++                self.report.accept_expired_discards += 1;
++                self.close_bare_socket()?;
++            } else {
++                let socket = std::mem::replace(
++                    &mut self.resources.accept.as_mut().unwrap().socket,
++                    INVALID_SOCKET,
++                );
++                let slot = &mut self.resources.slots[index];
++                slot.socket = socket;
++                slot.stream.as_mut().unwrap().bind_header_deadline(deadline);
++                slot.phase = Phase::Handshake;
++                self.report.accepted += 1;
++                self.report.accept_handoffs += 1;
++                // Replenish the same single bare owner before business driving.
++                self.post_bare_accept()?;
++                return self.drive(index);
++            }
++        } else {
++            self.close_bare_socket()?;
++            self.report.accept_capacity_rejections += 1;
++        }
++        if !self.stopping {
++            self.post_bare_accept()?;
++        }
++        Ok(())
++    }
++    pub(super) fn accept_ledger_matches(&self) -> bool {
++        self.report.accept_posts == self.report.accept_completions
++            && self.report.accept_completions
++                == self.report.accept_handoffs
++                    + self.report.accept_capacity_rejections
++                    + self.report.accept_expired_discards
++                    + self.report.accept_error_discards
++                    + self.report.accept_stop_discards
++    }
++}
+--- a/crates/fc-windows/src/tls_frontdoor/native/stream.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/stream.rs
+@@ -34,13 +34,14 @@
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+ enum DeadlinePhase {
++    AwaitingConnection,
+     Header,
+     Request { admitted_at: Instant },
+ }
+ 
+ pub(super) struct Stream {
+-    // Kept visible for the parent's initial AcceptEx post. That post+5s clock
+-    // is still only the existing candidate clock, not an ESTABLISHED timestamp.
++    // Inert while Ready. Bound exactly once to the bare owner's original
++    // post-derived deadline, never an ESTABLISHED or handoff+5 timestamp.
+     pub(super) deadline: Instant,
+     deadline_phase: DeadlinePhase,
+     admitted: bool,
+@@ -74,8 +75,8 @@
+ impl Stream {
+     fn new() -> Self {
+         Self {
+-            deadline: Instant::now() + BUDGET,
+-            deadline_phase: DeadlinePhase::Header,
++            deadline: Instant::now(),
++            deadline_phase: DeadlinePhase::AwaitingConnection,
+             admitted: false,
+             expected_body: None,
+             head_only: false,
+@@ -109,8 +110,8 @@
+     }
+     fn reset(&mut self) {
+         self.wipe_tx();
+-        self.deadline = Instant::now() + BUDGET;
+-        self.deadline_phase = DeadlinePhase::Header;
++        self.deadline = Instant::now();
++        self.deadline_phase = DeadlinePhase::AwaitingConnection;
+         self.admitted = false;
+         self.expected_body = None;
+         self.head_only = false;
+@@ -136,17 +137,23 @@
+         self.response_fence = None;
+     }
+     fn expired_at(&self, now: Instant) -> bool {
+-        now >= self.deadline
+-    }
++        self.deadline_phase != DeadlinePhase::AwaitingConnection && now >= self.deadline
++    }
++    pub(super) fn waiting_for_connection(&self) -> bool {
++        self.deadline_phase == DeadlinePhase::AwaitingConnection
++    }
++    pub(super) fn bind_header_deadline(&mut self, deadline: Instant) {
++        assert!(self.waiting_for_connection(), "header clock already bound");
++        self.deadline_phase = DeadlinePhase::Header;
++        self.deadline = deadline;
++    }
++    #[cfg(test)]
+     fn posted_header_at(&mut self, now: Instant) {
+-        debug_assert_eq!(self.deadline_phase, DeadlinePhase::Header);
+-        // Preserve the existing candidate's post+5s behavior. This does not
+-        // establish the original TCP connection epoch or solve backlog timing.
+-        self.deadline = now + BUDGET;
++        self.bind_header_deadline(now + BUDGET);
+     }
+     fn request_started_at(&self) -> Option<Instant> {
+         match self.deadline_phase {
+-            DeadlinePhase::Header => None,
++            DeadlinePhase::AwaitingConnection | DeadlinePhase::Header => None,
+             DeadlinePhase::Request { admitted_at } => Some(admitted_at),
+         }
+     }
+@@ -254,6 +261,44 @@
+     }
+     pub fn generation(&self) -> u64 {
+         self.owner.generation
++    }
++    /// Pure owner metadata only. Socket descriptors count this owner's handles,
++    /// not kernel TCB/backlog/SSPI allocations or any deadline guarantee.
++    pub fn acceptance_snapshot(&self) -> TlsAcceptSnapshot {
++        let resources = &self.owner.resources;
++        let bare = resources.accept.as_ref();
++        TlsAcceptSnapshot {
++            generation: self.owner.generation,
++            posts: self.owner.report.accept_posts,
++            completions: self.owner.report.accept_completions,
++            idle_cancellations: self.owner.report.accept_idle_cancellations,
++            idle_returns: self.owner.report.accept_idle_returns,
++            capacity_rejects: self.owner.report.accept_capacity_rejections,
++            transfers: self.owner.report.accept_handoffs,
++            ready_slots: resources
++                .slots
++                .iter()
++                .filter(|slot| slot.phase == Phase::Ready)
++                .count(),
++            bound_slots: resources
++                .slots
++                .iter()
++                .filter(|slot| slot.phase != Phase::Ready && slot.socket != INVALID_SOCKET)
++                .count(),
++            native_pending: resources
++                .slots
++                .iter()
++                .filter(|slot| slot.pending.is_some())
++                .count()
++                + usize::from(bare.is_some_and(|bare| bare.pending())),
++            owned_sockets: usize::from(resources.listener != INVALID_SOCKET)
++                + resources
++                    .slots
++                    .iter()
++                    .filter(|slot| slot.socket != INVALID_SOCKET)
++                    .count()
++                + usize::from(bare.is_some_and(|bare| bare.socket != INVALID_SOCKET)),
++        }
+     }
+     pub fn tokens(&self) -> [RequestToken; CONNECTION_SLOTS] {
+         std::array::from_fn(|n| self.owner.resources.slots[n].token)
+@@ -506,7 +551,10 @@
+             || self.stopping
+             || index >= CONNECTION_SLOTS
+             || self.resources.slots[index].token != token
+-            || self.resources.slots[index].phase == Phase::Closed
++            || matches!(
++                self.resources.slots[index].phase,
++                Phase::Ready | Phase::Closed
++            )
+             || self.expired(index)
+         {
+             return Err("stale or closed TLS HTTP request".into());
+@@ -613,7 +661,7 @@
+                 slot.frame.as_mut().unwrap().input_len = 0;
+                 self.submit_http_call(index, Call::Shutdown)
+             }
+-            Phase::Closed => Ok(()),
++            Phase::Ready | Phase::Closed => Ok(()),
+         }
+     }
+     fn parse_http_plain(&mut self, index: usize) -> Result<(), String> {
+@@ -829,6 +877,7 @@
+                 }
+             }
+             Phase::Handshake | Phase::Http => self.drive(index),
++            Phase::Ready => Err("send completion for unbound Ready business slot".into()),
+             Phase::Closed => Ok(()),
+         }
+     }
+@@ -884,7 +933,7 @@
+         slot.frame.as_mut().unwrap().wipe();
+         slot.frame.as_mut().unwrap().token = next;
+         slot.token = next;
+-        slot.phase = Phase::Handshake;
++        slot.phase = Phase::Ready;
+         slot.parser = Parser::new(next, true);
+         slot.response_body = None;
+         slot.response_chunk = None;
+@@ -895,66 +944,7 @@
+         slot.send_len = 0;
+         slot.sent = 0;
+         slot.close_after_send = false;
+-        self.post_http_accept(index)?;
+         Ok(next)
+-    }
+-    fn post_http_accept(&mut self, index: usize) -> Result<(), String> {
+-        let listener = self.resources.listener;
+-        if listener == INVALID_SOCKET {
+-            return Err("TLS HTTP listener closed".into());
+-        }
+-        let slot = &mut self.resources.slots[index];
+-        // SAFETY: the old exact operation was dequeued and this new socket is
+-        // owned by the same pinned slot. No event grants native pointer access.
+-        unsafe {
+-            *slot.memory.operation.get() = OVERLAPPED::default();
+-            slot.socket = WSASocketW(
+-                AF_INET.0 as i32,
+-                SOCK_STREAM.0,
+-                IPPROTO_TCP.0,
+-                None,
+-                0,
+-                WSA_FLAG_OVERLAPPED,
+-            )
+-            .map_err(|e| format!("TLS HTTP accept socket: {e}"))?;
+-            let mut accept: LPFN_ACCEPTEX = None;
+-            let mut bytes = 0;
+-            check(
+-                WSAIoctl(
+-                    listener,
+-                    SIO_GET_EXTENSION_FUNCTION_POINTER,
+-                    Some(ptr::from_ref(&WSAID_ACCEPTEX).cast()),
+-                    size_of::<windows::core::GUID>() as u32,
+-                    Some(ptr::from_mut(&mut accept).cast()),
+-                    size_of::<LPFN_ACCEPTEX>() as u32,
+-                    &mut bytes,
+-                    None,
+-                    None,
+-                ),
+-                "TLS HTTP AcceptEx lookup",
+-            )?;
+-            let success = accept.ok_or("TLS HTTP AcceptEx unavailable")?(
+-                listener,
+-                slot.socket,
+-                slot.memory.addresses.get().cast(),
+-                0,
+-                32,
+-                32,
+-                &mut bytes,
+-                slot.memory.operation.get(),
+-            )
+-            .as_bool();
+-            if !success && WSAGetLastError() != WSA_IO_PENDING {
+-                return Err(error("TLS HTTP AcceptEx post"));
+-            }
+-        }
+-        slot.pending = Some(Operation::Accept);
+-        slot.stream
+-            .as_mut()
+-            .unwrap()
+-            .posted_header_at(Instant::now());
+-        self.report.submissions += 1;
+-        Ok(())
+     }
+     fn poll_http_drain(&mut self) -> Result<bool, String> {
+         if self.drained {
+@@ -965,7 +955,9 @@
+             .resources
+             .slots
+             .iter()
+-            .any(|slot| slot.pending.is_some())
++            .any(|slot| slot.pending.is_some() || slot.socket != INVALID_SOCKET)
++            || self.resources.listener != INVALID_SOCKET
++            || !self.bare_released()
+         {
+             return Ok(false);
+         }
+@@ -979,6 +971,7 @@
+             }
+         }
+         if self.report.submissions != self.report.completions
++            || !self.accept_ledger_matches()
+             || self.resources.slots.iter().any(|slot| slot.frame.is_none())
+             || self.report.sspi_submissions != self.report.sspi_completions
+             || self.report.sspi_completions != self.report.returned_frames
+--- a/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
++++ b/crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs
+@@ -119,13 +119,10 @@
+         let worker =
+             Worker::start_with_factory(owner.generation, move || Ok(Box::new(driver))).unwrap();
+         owner.start_with_worker(worker).unwrap();
+-        let posted_header_deadlines = std::array::from_fn(|index| {
+-            owner.resources.slots[index]
+-                .stream
+-                .as_ref()
+-                .unwrap()
+-                .deadline
+-        });
++        // There is one initial native AcceptEx post, not four Ready clocks.
++        // This fixture's first connection inherits that actual bare post.
++        let posted_header_deadlines =
++            [owner.resources.accept.as_ref().unwrap().deadline().unwrap(); CONNECTION_SLOTS];
+         let client = TcpStream::connect_timeout(
+             &SocketAddrV4::new(Ipv4Addr::LOCALHOST, owner.port_number).into(),
+             Duration::from_secs(1),
+@@ -564,6 +561,7 @@
+     // Inject absolute instants into the private state transition. This is a
+     // boundary test, not evidence of a real five-second socket wait.
+     let mut stream = Stream::new();
++    stream.posted_header_at(Instant::now());
+     let header_deadline = stream.deadline;
+     let completed_at = header_deadline - Duration::from_nanos(1);
+     assert!(stream.complete_head_at(completed_at));
+@@ -587,7 +585,7 @@
+     assert!(stream.expired_at(shorter));
+     assert!(!stream.admission_deadline_valid(original, completed_at));
+     stream.reset();
+-    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
++    assert_eq!(stream.deadline_phase, DeadlinePhase::AwaitingConnection);
+     assert_eq!(stream.request_started_at(), None);
+     assert!(!stream.admitted);
+ }
+@@ -596,6 +594,7 @@
+ fn a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request() {
+     for lateness in [Duration::ZERO, Duration::from_nanos(1)] {
+         let mut stream = Stream::new();
++        stream.posted_header_at(Instant::now());
+         let deadline = stream.deadline;
+         assert!(!stream.complete_head_at(deadline + lateness));
+         assert_eq!(stream.deadline, deadline);
+@@ -683,7 +682,7 @@
+     let next = f.host.rearm(token).unwrap();
+     assert_eq!(next.slot(), index);
+     let stream = f.host.owner.resources.slots[index].stream.as_ref().unwrap();
+-    assert_eq!(stream.deadline_phase, DeadlinePhase::Header);
++    assert_eq!(stream.deadline_phase, DeadlinePhase::AwaitingConnection);
+     assert_eq!(stream.request_started_at(), None);
+     assert!(!stream.admitted);
+     assert!(f.host.admit_body(token, 3, original).is_err());
+@@ -1160,8 +1159,8 @@
+     f.host.respond(token, error, b"ignored", false).unwrap();
+     let received = complete_response_wire(&mut f, token);
+     assert!(received.ends_with(b"\r\n\r\n!"));
+-    // Retire the other original accepts so the new connection must use the
+-    // exact old HEAD slot, rather than an unrelated initial accept slot.
++    // Retire the other Ready business slots so the new bare acceptance must
++    // use the exact rearmed HEAD slot; Ready slots have no accept I/O of their own.
+     for other in f.host.tokens().into_iter().filter(|other| *other != token) {
+         f.host.cancel(other).unwrap();
+     }
+@@ -1226,3 +1225,440 @@
+     assert!(f.host.send_response_body(token, b"late", true).is_err());
+     f.stop();
+ }
++
++fn extra_client(f: &Fixture) -> TcpStream {
++    let client = TcpStream::connect_timeout(
++        &SocketAddrV4::new(Ipv4Addr::LOCALHOST, f.host.port_number()).into(),
++        Duration::from_secs(1),
++    )
++    .unwrap();
++    client.set_nonblocking(true).unwrap();
++    client
++}
++fn rejected_client(f: &mut Fixture, client: &mut TcpStream) {
++    let until = Instant::now() + Duration::from_secs(3);
++    loop {
++        for event in f.host.poll().unwrap() {
++            assert!(!matches!(
++                event,
++                TlsHttpEvent::Head { .. } | TlsHttpEvent::Body { .. }
++            ));
++        }
++        let mut byte = [0];
++        match client.read(&mut byte) {
++            Ok(0) => break,
++            Err(error)
++                if matches!(
++                    error.kind(),
++                    std::io::ErrorKind::ConnectionReset | std::io::ErrorKind::ConnectionAborted
++                ) =>
++            {
++                break
++            }
++            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
++            other => panic!("capacity/expired rejection must close, not send HTTP/TLS: {other:?}"),
++        }
++        assert!(Instant::now() < until, "actual rejected TCP close");
++        std::thread::sleep(Duration::from_millis(1));
++    }
++}
++
++#[test]
++fn ready_business_slots_have_no_native_operation_or_active_header_clock() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    assert_eq!(f.host.owner.report.submissions, 1);
++    assert_eq!(f.host.owner.report.accept_posts, 1);
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert!(bare.pending());
++    assert_eq!(bare.serial, 1);
++    for slot in &f.host.owner.resources.slots {
++        assert!(
++            slot.phase == Phase::Ready && slot.socket == INVALID_SOCKET && slot.pending.is_none()
++        );
++        assert!(slot.frame.is_some() && !slot.context_submitted && !slot.retired);
++        let stream = slot.stream.as_ref().unwrap();
++        assert!(stream.waiting_for_connection());
++        assert!(!stream.expired_at(Instant::now() + REQUEST_BUDGET));
++    }
++    for token in f.host.tokens() {
++        assert!(f
++            .host
++            .admit_body(token, 0, Instant::now() + REQUEST_BUDGET)
++            .is_err());
++    }
++    let expected = size_of::<Owner>()
++        + size_of::<super::super::accept::AcceptMemory>()
++        + CONNECTION_SLOTS * (size_of::<IoMemory>() + size_of::<Frame>())
++        + f.host.owner.target.capacity()
++        + f.host.owner.marker.capacity()
++        + f.host
++            .owner
++            .resources
++            .slots
++            .iter()
++            .map(|slot| {
++                slot.parser.header_capacity() + slot.stream.as_ref().unwrap().allocation_bytes()
++            })
++            .sum::<usize>();
++    assert_eq!(f.host.owner.app_owned_bytes(), expected);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let original = f
++        .host
++        .owner
++        .resources
++        .accept
++        .as_ref()
++        .unwrap()
++        .deadline()
++        .unwrap();
++    // This is a real elapsed wait against the actual posted bare operation,
++    // not Stream::new or a claimed exact TCP ESTABLISHED timestamp.
++    std::thread::sleep(
++        original
++            .saturating_duration_since(Instant::now())
++            .saturating_sub(Duration::from_millis(500)),
++    );
++    f.host.owner.poll_io().unwrap();
++    assert_eq!(f.host.owner.report.accept_handoffs, 1);
++    let slot = f
++        .host
++        .owner
++        .resources
++        .slots
++        .iter()
++        .find(|slot| slot.phase == Phase::Handshake)
++        .unwrap();
++    assert_eq!(slot.stream.as_ref().unwrap().deadline, original);
++    assert!(original.saturating_duration_since(Instant::now()) < Duration::from_secs(1));
++    assert!(f.host.owner.resources.accept.as_ref().unwrap().serial > 1);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    // TCP connect completed but its actual AcceptEx packet has not been read.
++    // Inject an expired original post deadline; this does not claim real5s wait.
++    let bare = f.host.owner.resources.accept.as_mut().unwrap();
++    let serial = bare.serial;
++    bare.state = super::super::accept::AcceptState::Pending {
++        serial,
++        deadline: Instant::now() - Duration::from_nanos(1),
++    };
++    let until = Instant::now() + Duration::from_secs(3);
++    while f.host.owner.report.accept_expired_discards == 0 {
++        assert!(f.host.poll().unwrap().is_empty());
++        assert!(Instant::now() < until);
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    assert_eq!(f.host.owner.report.accepted, 0);
++    assert_eq!(f.host.owner.report.sspi_submissions, 0);
++    assert_eq!(f.host.owner.report.accept_completions, 1);
++    assert_eq!(
++        f.host.owner.resources.accept.as_ref().unwrap().serial,
++        serial + 1
++    );
++    assert!(f
++        .host
++        .owner
++        .resources
++        .slots
++        .iter()
++        .all(|slot| slot.phase == Phase::Ready));
++    f.stop();
++}
++
++#[test]
++fn real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let mut wire = vec![b'H'];
++    wire.extend(record(&post(3)));
++    f.input(&wire);
++    let _ = f.head();
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    let pointer = bare.memory.operation.get();
++    let serial = bare.serial;
++    let completions = f.host.owner.report.accept_completions;
++    f.host.owner.close_bare_accept().unwrap();
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert!(matches!(
++        bare.state,
++        super::super::accept::AcceptState::Closing { .. }
++    ));
++    assert!(bare.socket == INVALID_SOCKET && bare.pending());
++    assert!(f.host.owner.post_bare_accept().is_err());
++    assert_eq!(f.host.owner.report.accept_completions, completions);
++    let until = Instant::now() + Duration::from_secs(3);
++    while f.host.owner.resources.accept.as_ref().unwrap().serial == serial {
++        f.host.poll().unwrap();
++        assert!(Instant::now() < until);
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert_eq!(bare.memory.operation.get(), pointer);
++    assert_eq!(bare.serial, serial + 1);
++    assert!(bare.pending());
++    assert_eq!(f.host.owner.report.accept_completions, completions + 1);
++    assert_eq!(f.host.owner.report.accepted, 1);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let mut clients = Vec::new();
++    let mut tokens = Vec::new();
++    for index in 0..CONNECTION_SLOTS {
++        if index != 0 {
++            let client = extra_client(&f);
++            clients.push(std::mem::replace(&mut f.client, client));
++        }
++        let mut wire = vec![b'H'];
++        wire.extend(record(&post(3)));
++        f.input(&wire);
++        let (token, at) = f.head();
++        f.host.admit_body(token, 3, at + REQUEST_BUDGET).unwrap();
++        tokens.push(token);
++    }
++    let preserved: Vec<_> = tokens
++        .iter()
++        .map(|token| {
++            let slot = &f.host.owner.resources.slots[token.slot()];
++            (
++                slot.token,
++                slot.socket,
++                slot.stream.as_ref().unwrap().deadline,
++            )
++        })
++        .collect();
++    let sspi = f.host.owner.report.sspi_submissions;
++    for expected_rejections in 1..=2 {
++        let mut client = extra_client(&f);
++        rejected_client(&mut f, &mut client);
++        assert_eq!(
++            f.host.owner.report.accept_capacity_rejections,
++            expected_rejections
++        );
++        assert_eq!(f.host.owner.report.sspi_submissions, sspi);
++        assert_eq!(f.host.owner.report.accepted, CONNECTION_SLOTS);
++        for &(token, socket, deadline) in &preserved {
++            let slot = &f.host.owner.resources.slots[token.slot()];
++            assert_eq!(slot.token, token);
++            assert!(slot.socket == socket);
++            assert_eq!(slot.stream.as_ref().unwrap().deadline, deadline);
++            assert!(slot.phase == Phase::Http && slot.pending == Some(Operation::Receive));
++        }
++    }
++    let old = tokens[0];
++    f.host.cancel(old).unwrap();
++    f.until(|event| matches!(event, TlsHttpEvent::Retired(t) if t == old));
++    let next = f.host.rearm(old).unwrap();
++    assert!(f.host.owner.resources.slots[next.slot()].phase == Phase::Ready);
++    let client = extra_client(&f);
++    clients.push(std::mem::replace(&mut f.client, client));
++    let mut wire = vec![b'H'];
++    wire.extend(record(&post(0)));
++    f.input(&wire);
++    assert_eq!(f.head().0, next);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let (mut bytes, mut key, mut operation) = (0, 0, ptr::null_mut());
++    // Obtain a genuine successful AcceptEx completion, then interpose stop
++    // before dispatching that exact packet. This does not invent a kernel serial.
++    // SAFETY: this fixture owns the IOCP and all pinned operations; the exact
++    // returned packet is dispatched once below before any operation reuse.
++    unsafe {
++        GetQueuedCompletionStatus(
++            f.host.owner.resources.port,
++            &mut bytes,
++            &mut key,
++            &mut operation,
++            1000,
++        )
++    }
++    .unwrap();
++    let bare = f.host.owner.resources.accept.as_ref().unwrap();
++    assert_eq!(operation, bare.memory.operation.get());
++    assert_eq!(key, 1);
++    let serial = bare.serial;
++    f.host.request_stop().unwrap();
++    assert!(f.host.owner.resources.accept.as_ref().unwrap().pending());
++    f.host.owner.complete_bare_accept(key, true).unwrap();
++    assert_eq!(f.host.owner.report.accepted, 0);
++    assert_eq!(f.host.owner.report.sspi_submissions, 0);
++    assert_eq!(f.host.owner.report.accept_stop_discards, 1);
++    assert_eq!(
++        f.host.owner.resources.accept.as_ref().unwrap().serial,
++        serial
++    );
++    assert!(f.host.owner.bare_released());
++    f.stop();
++}
++
++#[test]
++fn real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots() {
++    let _serial = SERIAL.lock().unwrap();
++    let (entered, started) = std::sync::mpsc::channel();
++    let (release, released) = std::sync::mpsc::channel();
++    let released = Mutex::new(released);
++    let hook = Arc::new(move || {
++        entered.send(()).unwrap();
++        released
++            .lock()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(3))
++            .unwrap();
++    });
++    let mut f = Fixture::with_hooks(None, Some(hook));
++    struct Release(Option<std::sync::mpsc::Sender<()>>);
++    impl Drop for Release {
++        fn drop(&mut self) {
++            if let Some(send) = self.0.take() {
++                let _ = send.send(());
++            }
++        }
++    }
++    let mut release = Release(Some(release));
++    let mut wire = vec![b'H'];
++    wire.extend(record(&post(3)));
++    f.input(&wire);
++    let until = Instant::now() + Duration::from_secs(3);
++    loop {
++        f.host.poll().unwrap();
++        if started.try_recv().is_ok() {
++            break;
++        }
++        assert!(Instant::now() < until);
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let held = f.calls.lock().unwrap().handshake[0];
++    for token in f.host.tokens() {
++        f.host.cancel(token).unwrap();
++    }
++    f.host.owner.poll().unwrap(); // preserve Closed/Retired events inside original slots
++    assert!(f.host.owner.resources.slots[held.slot()].frame.is_none());
++    assert!(!f.host.owner.resources.slots[held.slot()].retired);
++    for token in f.host.tokens() {
++        assert!(f.host.rearm(token).is_err());
++    }
++    let mut extra = extra_client(&f);
++    rejected_client(&mut f, &mut extra);
++    assert_eq!(f.host.acceptance_snapshot().capacity_rejects, 1);
++    assert_eq!(f.host.acceptance_snapshot().ready_slots, 0);
++    // Even once empty-slot retirement events were consumed, an explicit rearm
++    // and caller descriptor reservation are required; none is inferred here.
++    let mut extra = extra_client(&f);
++    rejected_client(&mut f, &mut extra);
++    assert_eq!(f.host.acceptance_snapshot().capacity_rejects, 2);
++    assert!(f.host.owner.resources.slots[held.slot()].frame.is_none());
++    assert_eq!(f.calls.lock().unwrap().handshake.len(), 1);
++    release.0.take().unwrap().send(()).unwrap();
++    f.until(|event| matches!(event, TlsHttpEvent::Retired(t) if t == held));
++    let next = f.host.rearm(held).unwrap();
++    assert_eq!(next.slot(), held.slot());
++    assert_ne!(next, held);
++    assert_eq!(f.host.acceptance_snapshot().ready_slots, 1);
++    f.stop();
++}
++
++#[test]
++fn real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately() {
++    let _serial = SERIAL.lock().unwrap();
++    let mut f = Fixture::new();
++    let mut wire = vec![b'H'];
++    wire.extend(record(&post(3)));
++    f.input(&wire);
++    let _ = f.head();
++    let before = f.host.acceptance_snapshot();
++    assert_eq!(before.transfers, 1);
++    assert_eq!(before.native_pending, 1);
++    let bare = f.host.owner.resources.accept.as_mut().unwrap();
++    bare.state = super::super::accept::AcceptState::Pending {
++        serial: bare.serial,
++        deadline: Instant::now() - Duration::from_nanos(1),
++    };
++    f.host.owner.expire_bare_accept(Instant::now()).unwrap();
++    let closing = f.host.acceptance_snapshot();
++    assert_eq!(closing.idle_cancellations, before.idle_cancellations + 1);
++    assert_eq!(closing.idle_returns, before.idle_returns);
++    assert_eq!(closing.posts, before.posts);
++    assert_eq!(
++        closing.native_pending, 1,
++        "CancelIoEx/close is not completion"
++    );
++    let until = Instant::now() + Duration::from_secs(3);
++    while f.host.acceptance_snapshot().idle_returns == before.idle_returns {
++        f.host.poll().unwrap();
++        assert!(Instant::now() < until);
++        std::thread::sleep(Duration::from_millis(1));
++    }
++    let after = f.host.acceptance_snapshot();
++    assert_eq!(after.idle_returns, before.idle_returns + 1);
++    assert_eq!(after.posts, before.posts + 1);
++    assert_eq!(after.transfers, before.transfers);
++    assert!(after.native_pending <= 5 && after.owned_sockets <= 6);
++    f.stop();
++    let stopped = f.host.acceptance_snapshot();
++    assert_eq!(stopped.native_pending, 0);
++    assert_eq!(stopped.owned_sockets, 0);
++}
++
++#[test]
++fn bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child() {
++    let _serial = SERIAL.lock().unwrap();
++    const CHILD: &str = "FC_TLS_BARE_CLOSE_FAILURE_CHILD";
++    const NAME: &str = "tls_frontdoor::native::stream::tests::bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child";
++    const MARKER: &str = "BARE_CLOSE_FAILURE_CHILD retainedOwner=true replaced=false cleanupComplete=false controlledCloseSeam=true";
++    if std::env::var(CHILD).as_deref() == Ok("1") {
++        let mut f = Fixture::new();
++        let bare = f.host.owner.resources.accept.as_mut().unwrap();
++        let socket = bare.socket;
++        let pointer = bare.memory.operation.get();
++        let serial = bare.serial;
++        bare.fail_close_once = true;
++        let error = f.host.owner.close_bare_accept().unwrap_err();
++        assert!(error.contains("controlled"));
++        let bare = f.host.owner.resources.accept.as_ref().unwrap();
++        assert!(bare.pending() && bare.socket == socket);
++        assert_eq!(bare.memory.operation.get(), pointer);
++        assert_eq!(bare.serial, serial);
++        assert!(f.host.owner.post_bare_accept().is_err());
++        assert!(!f.host.owner.bare_released());
++        assert!(OWNER_FAULTED.load(Ordering::Acquire));
++        assert!(Owner::new("forbidden-bare-replacement").is_err());
++        // Fault retention is intentional, not a claim that physical drain
++        // completed. This independent child is the bounded OS teardown scope.
++        drop(f);
++        assert!(OWNER_ACTIVE.load(Ordering::Acquire));
++        assert!(Owner::new("still-forbidden-bare-replacement").is_err());
++        println!("{MARKER}");
++        return;
++    }
++    let output = std::process::Command::new(std::env::current_exe().unwrap())
++        .args(["--exact", NAME, "--nocapture", "--test-threads=2"])
++        .env(CHILD, "1")
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
++    assert!(!OWNER_FAULTED.load(Ordering::Acquire));
++}
+--- a/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ b/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -6,6 +6,25 @@
+ use fc_ports::http::RequestToken;
+ #[cfg(any(windows, test))]
+ use std::sync::atomic::{compiler_fence, Ordering};
++
++/// Read-only candidate owner accounting, not a kernel backlog/TCB bound or
++/// evidence of an exact TCP establishment epoch. No request/user data included.
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub struct TlsAcceptSnapshot {
++    pub generation: u64,
++    pub posts: u64,
++    pub completions: u64,
++    /// Actual expired-post cancellation requests (not completion proof).
++    pub idle_cancellations: u64,
++    /// Actual IOCP returns for those expired-post Closing operations.
++    pub idle_returns: u64,
++    pub capacity_rejects: u64,
++    pub transfers: u64,
++    pub ready_slots: usize,
++    pub bound_slots: usize,
++    pub native_pending: usize,
++    pub owned_sockets: usize,
++}
+ 
+ pub const CONNECTION_SLOTS: usize = 4;
+ pub const BUFFER_BYTES: usize = 64 * 1024;

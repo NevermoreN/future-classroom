@@ -1,0 +1,117 @@
+{
+  "status": "BLOCKING_STATIC_REVIEW_NOT_EXECUTED",
+  "createdUtc": "2026-10-31T16:41:49.267918+00:00",
+  "scope": "Original Native freeze only; bootstrap/service files excluded. No compilation/tests/Windows/CI. Original freeze/diff retained; test-only retention correction authorized separately.",
+  "worktree": "/tmp/fc-round34-accept-worktree",
+  "base": "93414d5f26c829db552f8434433f6ad0684971f6",
+  "freezeSource": {
+    "path": "/tmp/fc-round34-accept-evidence/implementation-freeze.json",
+    "bytes": 4757,
+    "sha256": "443395491d0ef00facf3d0f48b0ec24afb9ffffbeefac5759fbaa7b3fbf59a1c"
+  },
+  "bindings": [
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native.rs",
+      "frozenSha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "actualReadBeforeSha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "actualReadAfterSha256": "63278ffc5dc22fe11e93a74dcb55dc455d5574673f44b766f9cf2b7756c45310",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": true,
+      "bytes": 54826,
+      "baseSha256": "e9b059ab65b8742d196b05cccbf4fc99ff74491f732c652dd8f98e4d5df69932",
+      "baseMatchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+      "frozenSha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "actualReadBeforeSha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "actualReadAfterSha256": "63f8768ce3cd2e2375beb39f8d01028888a029038a1648e6550146804665c1e9",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": true,
+      "bytes": 11868
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+      "frozenSha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "actualReadBeforeSha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "actualReadAfterSha256": "bad8ffc4cfa1a4673c527e9860896fae88197a7c062cc3044896269f49f05e00",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": true,
+      "bytes": 38739,
+      "baseSha256": "4ab35d0114a59aefa3353096db23a7d26c90e7898d02a73b1e9fb5622cd304fb",
+      "baseMatchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/tests.rs",
+      "frozenSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "actualReadBeforeSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "actualReadAfterSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": true,
+      "bytes": 15822,
+      "baseSha256": "89fd9ec6be4152eb13f00d6f4dc331ae5ea3c366eec95f3d1db0b968b09ec197",
+      "baseMatchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "frozenSha256": "29f6166ef6fbbf490bc9c17d7d94ebc11cadace166558fe4aee0e955f906ac84",
+      "actualReadBeforeSha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "actualReadAfterSha256": "fe9045f80ca8b3eb0d3171b4cc1e90e276c5234c9bc1d9c47e39beec27011c6d",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": false,
+      "bytes": 63166,
+      "baseSha256": "2134353f8802dcaeb78334a17abd0ca79b13cb52b9579d267dd5892cd72159f4",
+      "baseMatchesFreeze": true
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "frozenSha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "actualReadBeforeSha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "actualReadAfterSha256": "cc91de7305074a78f21c80acbe35d827ee7dec185d172f3600710c6646a5f67a",
+      "sameDuringCapture": true,
+      "matchesOriginalFreeze": true,
+      "bytes": 7648,
+      "baseSha256": "3db842b50771e846ef9319f2067e5c6b18033128108486ed9213b218491ece87",
+      "baseMatchesFreeze": true
+    }
+  ],
+  "testNames": {
+    "baseCount": 16,
+    "currentCountAtCapture": 25,
+    "oldNamesPreserved": true,
+    "addedAtCapture": [
+      "bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child",
+      "ready_business_slots_have_no_native_operation_or_active_header_clock",
+      "real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots",
+      "real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five",
+      "real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately",
+      "real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff",
+      "real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests",
+      "real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory",
+      "real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost"
+    ]
+  },
+  "blockingFindings": [
+    {
+      "id": "NATIVE_TEST_FAULT_RETENTION_DROP",
+      "file": "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+      "location": "Fixture::drop and bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child child drop(f)",
+      "cause": "The controlled close failure sets AcceptSlot.failed=true permanently. Owner::finish requires bare_released and AcceptSlot::released requires !failed. Fixture::drop unconditionally calls finish().expect, so the fault child panics at teardown after the drain deadline before its expected marker; parent child-exit assertion fails. This is a test teardown conflict with deliberately correct production failure retention.",
+      "requiredCorrection": "Only this child opts into explicit expected fault-retention Fixture drop mode. Skip normal successful-finish assertion in that mode, then allow ordinary field destruction to call actual Owner::drop, which retains its ManuallyDrop native resources. Do not clear failed/OWNER_FAULTED, claim cleanup, or mem::forget the full fixture. Keep post-drop OWNER_ACTIVE/replacement rejection assertions and cleanupComplete=false."
+    }
+  ],
+  "positiveStaticFindings": [
+    "AcceptMemory remains pinned until exact IOCP return; Closing state continues to count debt after cancel/close.",
+    "Only one reserve exists, moves its socket before replacement, and preserves four Frame/parser/SSPI contexts; structural socket/IO limits remain six/five.",
+    "After-post capture point retained; exact absolute deadline is copied on handoff and rechecked after native association; no handoff+5 clock.",
+    "Ready cannot perform receive/send/admit; explicit rearm preserves original token/retired/frame and consumed event gates.",
+    "Stop and Closing late success do not handoff/repost; bare close failure keeps exact descriptor plus permanent failure flag and process replacement lock.",
+    "Actual-return/stop drain now includes reserve pending/socket and combined ledgers; original legacy finite path is retained."
+  ],
+  "limitations": [
+    "Blocking result concerns original frozen tests. Subsequent test-only second freeze requires independent new review.",
+    "Near-post test uses an actual elapsed wait against a real queued AcceptEx completion; other injected deadlines do not prove wallclock120s or TCP epoch.",
+    "Controlled close-failure seam proves retention path and child OS teardown, not a real failing Windows closesocket call or successful drain.",
+    "Strict original TCP5s FAIL, production off, complete app resource/kernel/SSP bounds and OS/device gates remain unchanged."
+  ]
+}

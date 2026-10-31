@@ -265,3 +265,10 @@ Windows 7 SP1 x86、Windows 10、Windows 11继续是三个正式目标。实际W
 Round32源码`9d42f7cc75c7d2545caa18366d4a6d047aedaa99`的现代MSVC编译与Win11运行现分层取得证据：固定`1.97.1`/`i686-pc-windows-msvc`的原CI产物完整SHA、192成员CRC、3,521项提交输入及22份PE32/静态CRT导入均核对通过；其中382份实际Rust/Cargo/构建配置与当前生产源码相同，另11份历史归档源码分列。原21个release测试程序在授权Win11 Pro build26300 x64/WOW64实际执行1,313项，0失败/0忽略，正常EXE的隐藏原生及15步默认输出历史格式查询通过；该查询没有录音或播放。实际上传和执行哈希见[Round33原始运行报告](验证记录/2026-10-31-round33-msvc/windows-msvc-full-first.json)。
 
 新增Win7专用MSVC候选workflow，固定匹配nightly/rust-src和专门target，采用build-std及独立有界证据根。实机28组/421断言仅覆盖脚本解析和三个纯函数，完整共享helper仍要求Hosted PowerShell>=7.2；新helper的现代回归CI与Win7编译需按最终同步SHA另取实际结果。Win7 SP1 x86、Win10 32/64位、原生x64/ARM64及可见希沃触控/DPI、设备音频、安装登录/升级和72小时均不由本次Win11 WOW64证据代验。首TCP严格五秒原FAIL和生产listener关闭状态保持。
+
+
+## 第三十四轮增量：持续接纳与Win7候选检查修正
+
+2026-11-01，D11。93414d5的现代MSVC共享helper Hosted CI已实际成功；Win7候选整体失败，具体是Clippy未继承build-std，之前的workspace测试编译、正常EXE及22份PE采集成功。固定nightly的GNU Tier3最小复现仅证明参数传递原因；修正后的28组/421断言为授权Win11 PowerShell脚本纯检查，不能填Win7系统运行通过。
+
+HTTP候选的独立固定接纳owner、空闲重投、四原请求占满/两新连接拒绝及退休后恢复，须分别绑定新源码、实际Windows程序哈希和Schannel运行报告。旧Round33 MSVC/1313项证据不自动覆盖新Rust增量。Win7 SP1 x86、Win10 32/64位和可见希沃仍需各自实机；严格首TCP五秒原FAIL与正常产品listener关闭保持。本轮现代GNU x86在同一授权Win11 Pro build26300/WOW64已实际通过受影响177项测试及真实Schannel连续接纳55事件/51响应，清理与只读审计通过；详见实施记录第三十四轮。它不代表新Rust的MSVC编译或实际Win7/Win10/可见希沃验收，未运行项目不预填PASS。

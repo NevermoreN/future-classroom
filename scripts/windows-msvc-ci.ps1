@@ -56,6 +56,8 @@ function Get-BaselineCargoArguments([string]$Command, [string[]]$Arguments,
         if ($targetIndex -lt 0 -or $targetIndex + 1 -ge $Arguments.Length -or
             $Arguments[$targetIndex + 1] -cne 'i686-win7-windows-msvc') { throw 'Win7 compilation requires its explicit target.' }
         # No explicit crate list: cargo test must include the test crate too.
+        # Clippy is an external Cargo command; forward build-std to its inner check.
+        if ($Command -eq 'clippy') { return ,(@($Command,'-Z','build-std') + $Arguments) }
         return ,(@('-Z','build-std',$Command) + $Arguments)
     }
     # Metadata/fmt do not compile; do not forward unstable flags to cargo-fmt.

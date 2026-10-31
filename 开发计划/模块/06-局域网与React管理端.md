@@ -142,3 +142,14 @@ P6-11先实现HTTP.sys API v2 + OVERLAPPED/IOCP适配，P6-01再集成宿主。�
 业务准入只能提交不晚于当前且仍有效的绝对期限，不能按worker返回时刻重开120秒，也不能放宽既有更短期限；后续块、真实ACK和响应不续期。未准入请求超时须丢弃尚未交付的Head/正文，逻辑关闭与IOCP/SSPI/Frame实际归还分开，满足原Retired及事件消费条件后才复用槽；原固定4原生槽/8请求记录/2上传和共享worker预算不增。
 
 本切片已补六项回归源码：两项纯状态时间边界，四项真实IOCP结合假记录Driver；其中一项实际等待原post+5秒再加50毫秒，其余时间场景明确使用注入。验收应分别核对Head完成前后边界、待准入跨旧截止、admit只收紧、queued Head到期丢弃、迟到解密不发布及原资源归还前禁止rearm；具体执行与清理结果待[实施记录](../10-实施进度与验证记录.md)，本节不填通过状态。fake记录不作真实Schannel或精确TCP建立起点证明，原AcceptEx post+5秒行为、持续接纳/backlog缺口与严格首TCP五秒FAIL不变；正常生产listener保持关闭，真实Win7/Win10、校园TLS/浏览器与完整产品验收仍独立推进。候选详细边界见[平台ADR](../14-P0独立TCP接纳候选ADR.md)。
+
+
+## 第三十四轮切片：有界持续接纳与业务槽分离
+
+2026-11-01，D11；仅用于显式隔离的`TlsHttpHost`候选，不开启正常产品监听。在原四个业务槽之外，用一份独立pinned `AcceptMemory`持续投递零接收长度的AcceptEx；空闲Ready业务槽不持socket、原生在途操作或运行中的header时钟。实际接纳完成只能移交给真实Ready槽，先移走accepted socket，再投递下一次接纳；四槽均忙时关闭新连接，不占SSPI许可，不抢占或续期既有请求。旧非HTTP有限诊断仍使用原路径。
+
+接纳仍记录原成功投递后的`post + 5秒`绝对期限并原样移交，不能在dequeue/移交时重置。空闲到期先取消原listener上的精确OVERLAPPED并关闭其预备socket；只有收到该次真实IOCP完成包后才可复用原内存或投递新serial。迟到成功、Closing或已过期完成不能交给业务。取消成功和socket关闭均不抵销IOCP债务。关闭失败保留原descriptor和owner、永久闭锁替代域。合法完整Head后的原`admitted_at + 120秒`及只收紧准入规则保持。
+
+本候选最多五个原生在途操作、六个自有socket descriptor（listener、独立接纳socket及四业务socket），四份Frame/解析器/SSPI上下文和原固定双业务worker不增。业务rearm仍须原IOCP、Frame、Retired实际归还及原事件消费完成。Stop/排空/Drop同时等待独立接纳债务和所有socket真正释放；未释放则保留并故障闭锁。只读快照列出实际post/完成/取消/归还/容量拒绝/移交计数；它不证明内核TCB/backlog、SSP内存或完整16MiB门槛。
+
+新增定向原生回归与默认关闭的真实TLS连续接纳测试：空闲超过五秒后真实完成归还及重投；四个已完整Head准入但暂扣最后一个JSON正文字符的原请求；第五、第六连接真实传输拒绝；原请求token/120秒间隔保持；首个请求实际Retired并rearm后新请求成功。只检查应用候选生命周期；受影响177项Win11测试、真实Schannel55事件及清理已分别留证，完整构建/运行范围见[实施记录](../10-实施进度与验证记录.md)。不将该切片视作精确TCP ESTABLISHED起算、严格五秒或校园生产部署证明；第十三轮五秒FAIL保持。

@@ -1,0 +1,31 @@
+usage: windows-tls-business-probe.py [-h] [--ssh-target SSH_TARGET]
+                                     [--identity IDENTITY] [--exe EXE]
+                                     [--report REPORT]
+                                     [--web-bundle WEB_BUNDLE] [--browser]
+                                     [--continuous-accept] [--self-test]
+
+Run the explicit finite TLS/shared-worker synthetic business diagnostic. The
+default is a raw API client through an owned SSH forward. Optional --browser
+also observes actual isolated Windows Edge UI against the same native service.
+This is not general browser acceptance, production-listener enablement, native
+strict-5s evidence, audio playback, or Windows 7/10 compatibility evidence.
+Project code runs only from the supplied diagnostic EXE; --browser uses the
+separately owned installed Edge process. The disposable public certificate is
+trusted in this Python context only; its private key never leaves Windows and
+no system trust/network setting is changed.
+
+options:
+  -h, --help            show this help message and exit
+  --ssh-target SSH_TARGET
+  --identity IDENTITY
+  --exe EXE
+  --report REPORT
+  --web-bundle WEB_BUNDLE
+                        Existing development ZIP; only verified web manifest
+                        payloads are uploaded
+  --browser             Also verify isolated Windows Edge UI against this same
+                        finite native service
+  --continuous-accept   Also verify real idle AcceptEx repost and four
+                        admitted JSON bodies within the original client/native
+                        deadlines; not strict TCP5s evidence
+  --self-test

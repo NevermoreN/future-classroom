@@ -1,0 +1,123 @@
+{
+  "status": "PASS_STATIC_NO_BLOCKING_FINDING_RUNTIME_NOT_RUN",
+  "createdUtc": "2026-10-31T16:56:12.817465+00:00",
+  "scope": "Read-only review of exactly integrated Net interval metadata, finite business fixture observation, and optional continuous-accept Python client. No source edits, Cargo/build/test execution, Windows/SSH/CI calls. Other ongoing product build is not evidence executed by this reviewer. Native owner review remains separately bound to its own report.",
+  "bindings": [
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "bytes": 58970,
+      "sha256FirstObserved": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "sha256ReadBefore": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "sha256ReadAfter": "db1cb1557b5b3bb49904c81521100fc68f81b6d8c7384484e3fcf32bf83fb987",
+      "stable": true
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/http_business_probe.rs",
+      "bytes": 23127,
+      "sha256FirstObserved": "e2a8be32925c9c1f60d36d28b1be2c3336296c9dd2eb099e0dba5226d1930340",
+      "sha256ReadBefore": "e2a8be32925c9c1f60d36d28b1be2c3336296c9dd2eb099e0dba5226d1930340",
+      "sha256ReadAfter": "e2a8be32925c9c1f60d36d28b1be2c3336296c9dd2eb099e0dba5226d1930340",
+      "stable": true
+    },
+    {
+      "path": "scripts/windows-tls-business-probe.py",
+      "bytes": 87838,
+      "sha256FirstObserved": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+      "sha256ReadBefore": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+      "sha256ReadAfter": "a10b6d11cdb225aac4388c0f592097f0c99ae91412cbac7a8f97997378260876",
+      "stable": true
+    }
+  ],
+  "blockingFindings": [],
+  "checks": [
+    {
+      "subject": "Four real authenticated JSON-body admission barriers",
+      "files": [
+        "scripts/windows-tls-business-probe.py:479-548",
+        "scripts/windows-tls-business-probe.py:582-601",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:590-704",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1405-1426"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "PendingReceipt uses genuine TLS1.2+exactDER+Host/Origin/cookie/CSRF and actual append route, sends original canonical exact-retry JSON except final byte. Each sequential barrier requires an additional unique exact native token in Phase::JsonBody, keeping earlier exact intervals; final barrier adds bound_slots4, transfers+4, pendingJobs0. JsonBody is set after the original head WebTask route/admission path and native explicit body admission. No fake tokens/admitted times or extra binary-upload permit introduced. Final full receipt must match already committed original bytes for all four sockets."
+    },
+    {
+      "subject": "Fifth/sixth transport capacity closes",
+      "files": [
+        "scripts/windows-tls-business-probe.py:450-453",
+        "scripts/windows-tls-business-probe.py:555-580",
+        "scripts/windows-tls-business-probe.py:602-607"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "Both clients must actually TCP-connect through the owned tunnel, then fail TLS handshaking specifically with reset/SSL EOF/zero-return. Timeout/refusal/certificate/other alert errors are rejected. Native capacity_rejects must increase exactly2 while all four original intervals and four bound slots persist. The transport class alone is not treated as native-capacity proof; native counter barrier is also required. This is isolated loopback diagnostic correlation, not arbitrary external-client socket attribution."
+    },
+    {
+      "subject": "Original120-second interval identity",
+      "files": [
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1405-1426",
+        "crates/fc-bootstrap/src/application/http_business_probe.rs:322-356",
+        "scripts/windows-tls-business-probe.py:362-398"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "NetworkReport copies original record token, TransferLifetime admitted_at and record deadline without mutation. Progress encodes checked relative nanoseconds against fixed earlier fixture epoch. Parser validates marker/generation/sequence, unique slot/serial and exact120_000_000_000ns interval. Equality compares full token/start/deadline before and after rejects/retirement/recovery GET. It does not wait120seconds or prove TCP ESTABLISHED origin."
+    },
+    {
+      "subject": "Retired/rearm observations",
+      "files": [
+        "scripts/windows-tls-business-probe.py:608-625",
+        "crates/fc-bootstrap/src/web_transfer/network.rs:1363-1399"
+      ],
+      "conclusion": "PASS_STATIC_WITH_DIAGNOSTIC_SCOPE",
+      "reason": "First original must receive exact durable receipt and clean TLS EOF. Before recovery, remaining original token intervals must be exactly the other3, bound_slots3, at least one Ready, and actual Net retired/rearm counters increased. Existing Native rearm still requires exact actual retirement/event delivery and Net reserves the next record before rearm. With the other3 intervals preserved and no other client launched during this barrier, the isolated flow ties the available slot to original completion. Recovery GET must succeed, retire/rearm again, and leave other3 intervals unchanged; all other3 then also must return identical receipt. Aggregate counters are not exported as a general per-token retirement audit API."
+    },
+    {
+      "subject": "Idle original post cancellation versus actual return",
+      "files": [
+        "scripts/windows-tls-business-probe.py:456-476",
+        "crates/fc-bootstrap/src/application/http_business_probe.rs:455-472"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "No-client stage waits actual local elapsed>=5.05seconds, requires native idle_returns and posts increasing and another actual pending operation, then actual TLS status succeeds. It does not count cancel request as completion. Timing observes candidate application post behavior through an SSH forward; original strict TCP clock remains unproved."
+    },
+    {
+      "subject": "30/45second and other finite budgets",
+      "files": [
+        "scripts/windows-tls-business-probe.py:203-218",
+        "scripts/windows-tls-business-probe.py:425-436",
+        "scripts/windows-tls-business-probe.py:582-583",
+        "scripts/windows-tls-business-probe.py:1300-1328",
+        "crates/fc-bootstrap/src/application/http_business_probe.rs:450-534"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "Single Client.deadline=creation+30 includes idle, static, pairing, optional browser and all capacity stages. remaining() and every progress barrier cap waits to that original deadline; no deadline reset. Each receive/send resets only timeout to remaining original total. Native until=READY+45 stays unchanged, progress emission does not reassign it. Existing startup25, transport shutdown5 and separate coordinator drain20 remain separate finite negative cleanup budgets, not extensions to active request deadlines. Tight combined scenarios may legitimately fail remaining-budget checks; no silent slack added."
+    },
+    {
+      "subject": "Bounded observation and credential safety",
+      "files": [
+        "crates/fc-bootstrap/src/web_transfer/network.rs:33-51",
+        "crates/fc-bootstrap/src/application/http_business_probe.rs:322-356",
+        "scripts/windows-tls-business-probe.py:342-436"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "Eight fixed Option<RequestInterval> entries; actual JSON-body streams cannot exceed four native slots. Metadata has only token/count/time, not headers, bodies, cookie/CSRF or actors. Progress emission throttles>=250ms and max45seconds; reader bounds each line8KiB and reports512, deferred lifecycle256/256KiB. Requests sent by client contain only synthetic fixture credentials; stored events use body lengths/SHA, not credential plaintext. Existing raw ownership evidence remains separately preserved."
+    },
+    {
+      "subject": "Cleanup and ownership boundaries",
+      "files": [
+        "scripts/windows-tls-business-probe.py:529-553",
+        "scripts/windows-tls-business-probe.py:582-629",
+        "scripts/windows-tls-business-probe.py:1339 onward",
+        "crates/fc-bootstrap/src/application/http_business_probe.rs:515 onward"
+      ],
+      "conclusion": "PASS_STATIC",
+      "reason": "Every PendingReceipt is closed in outer finally, including partial construction failure; capacity probe closes its connection in finally. Client errors still go through the existing exact owned native process stop, complete log capture/hash, certificate/key/root cleanup. Native fixture still requires net actual idle/drain and actual pool join before upload/download Hub drain, App/Backend close and owned setup cleanup. Request submission does not create extra worker/thread/domain. Readiness/progress does not replace final native physical cleanup PASS."
+    }
+  ],
+  "scopeLimits": [
+    "No runtime result inferred from source or the currently running product build. Exact three-file SHA must be included in later actual Windows evidence.",
+    "Raw capacity closes are linked by isolated stage/counters, not an externally supplied per-socket identifier. Do not export them as arbitrary network-client attribution.",
+    "JSON-body observation represents completed head/admission and withheld final byte, not proof that every body byte has already been physically received or a command committed before finish. Actual final exact-receipt checks supply later business proof.",
+    "Retirement counters are aggregate, scoped by the three unchanged original requests and controlled no-other-client interval. Not a general event log.",
+    "No claim to observed120second wall time, kernel backlog/TCB hard bounds, strict TCP5_000_000_000ns, full16MiB process/system acceptance, production listener or Win7/Win10/device compatibility. Existing original FAIL and production-off unchanged."
+  ]
+}
