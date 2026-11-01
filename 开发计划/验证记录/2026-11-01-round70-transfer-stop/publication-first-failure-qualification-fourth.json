@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_PUBLICATION_DEFECT_CONFIRMED_ACTUAL_FIRST_READ_ERROR_CAUSE_LIMITED",
+  "atUtc": "2026-11-01T09:16:23.486925+00:00",
+  "observedActualFirst": {
+    "report": "windows-ordinary-https-first.json",
+    "sha256": "bc5c7df899e6c5586cdbff47f0d0548a378ff99ccd2b3546f0ccb0e577385dbf",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "wireEvents": 16,
+    "materialBeforeStop": {
+      "readyStageBytes": 65536,
+      "partialStageBytes": 65536
+    },
+    "nativeError": "owned completion read failed",
+    "rawOsErrorCode": "NOT_CAPTURED"
+  },
+  "knownSourceDefect": "Final completion name was exposed with an exclusive write handle before write/Dispose; a consumer metadata/read can interleave. This is an actual non-atomic publication defect, independently of which OS error occurred in the first run.",
+  "fixScope": "Only Python same-root unique cycle pending CreateNew, write/Flush(true)/Dispose, then non-overwriting File.Move(pending,final); Rust read errors remain fatal.",
+  "notClaimed": [
+    "No proof that first OS error was ERROR_SHARING_VIOLATION32",
+    "No claim of sole first-run cause",
+    "No Windows runtime proof of new publication yet"
+  ],
+  "rustUnchanged": true,
+  "oldFirstReportsPreserved": true
+}

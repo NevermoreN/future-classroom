@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "helper": {
+    "path": "archive-evidence-first.py",
+    "bytes": 13814,
+    "sha256": "875640336ed2102160923f381cad3db993f891c3bae6af44526153b040c2fc1b"
+  },
+  "sourceRoot": "/tmp/fc-round70-ordinary-transfer-stop/evidence",
+  "destination": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round70-transfer-stop",
+  "gates": [
+    "root-confirmed final independent acceptance report relative path",
+    "required expected acceptance SHA256",
+    "actual acceptance status PASS or PASS_*",
+    "explicit root-controllers-terminal flag",
+    "exact owned R70 marker",
+    "fresh destination",
+    "all source and stored original bytes equality and source membership stable",
+    "raw UTF8/UTF16 + nested JSON base64/encodedCommand credential scan before destination writes"
+  ],
+  "archiveMode": "uncompressed exact originals; EXE/ZIP/DB/key/build caches excluded by identity",
+  "historicalOriginalsPreserved": true,
+  "sourceEvidenceFrozen": false,
+  "helperExecuted": false,
+  "mainWritten": false,
+  "windowsInvoked": false,
+  "cargoInvoked": false,
+  "networkInvoked": false,
+  "scannerReference": "main archived R68 archive-evidence-third.py only; no R68tmp/R69tmp access; expired/public-context allowances intentionally not inherited"
+}

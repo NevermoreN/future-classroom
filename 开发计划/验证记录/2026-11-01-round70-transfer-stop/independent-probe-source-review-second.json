@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_SECOND_SOURCE_P1_CORRECTED_PURE_ONLY_WINDOWS_NOT_RUN",
+  "recordedUtc": "2026-11-01T09:06:42.765894+00:00",
+  "implementationFreeze": {
+    "path": "implementation-freeze-second.json",
+    "sha256": "eb16a0bec8803fd7c39854a381b4f2c96ad07f92a809b708e35d4f2c99ef7802"
+  },
+  "jointFreeze": {
+    "path": "joint-source-freeze-second.json",
+    "sha256": "2407a98d2fc1eb60d3dca90f42e59fd6aba7b635ea526dbe7b15ad43515cbc7e"
+  },
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25140,
+      "sha256": "73100e7f848cbca3c8a9416c9b0f27c78d65696637597016f6256c6dd9623736"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 71671,
+      "sha256": "64c3f4f7154949cd8a870c8984fc63954382e847237bf287a076bba79e30b8b1"
+    }
+  ],
+  "sourceUnchanged": true,
+  "pureReplay": {
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py",
+      "--self-test"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.48268331796862185,
+    "actualResult": {
+      "status": "PASS",
+      "scope": "pure validators only",
+      "checks": 188,
+      "wireJourneyPositiveCases": 8,
+      "wireJourneyNegativeCases": 35,
+      "transferJourneyPositiveCases": 4,
+      "transferTypedAndCyclePositiveCases": 6,
+      "transferNegativeCases": 72,
+      "completionIdPositiveCases": 4,
+      "completionIdNegativeCases": 18,
+      "windows": "NOT_RUN",
+      "tls": "NOT_RUN",
+      "ordinaryRuntime": "NOT_RUN"
+    },
+    "streams": {
+      "stdout": {
+        "path": "independent-probe-pure-second.stdout.log",
+        "bytes": 370,
+        "sha256": "83c7618f4b8c226863de8241eacd68294853fa40fda02c7da40b6f079cdeb016"
+      },
+      "stderr": {
+        "path": "independent-probe-pure-second.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "actualProducerNoIoReview": {
+    "positiveCount": 12,
+    "positiveCases": [
+      {
+        "ids": [
+          "1",
+          "2"
+        ],
+        "generation": "1",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "1",
+          "2"
+        ],
+        "generation": "1",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "1",
+          "2"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "1",
+          "2"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "9",
+          "10"
+        ],
+        "generation": "1",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "9",
+          "10"
+        ],
+        "generation": "1",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "9",
+          "10"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "9",
+          "10"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "18446744073709551614",
+          "18446744073709551615"
+        ],
+        "generation": "1",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "18446744073709551614",
+          "18446744073709551615"
+        ],
+        "generation": "1",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "18446744073709551614",
+          "18446744073709551615"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 1,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      },
+      {
+        "ids": [
+          "18446744073709551614",
+          "18446744073709551615"
+        ],
+        "generation": "18446744073709551615",
+        "cycle": 2,
+        "canonicalRoundtrip": true,
+        "actualProducerCalled": true
+      }
+    ],
+    "negativeCount": 22,
+    "negativeScope": "Malformed/zero/noncanonical/overflow/duplicate/nonlist/nonstring/bool/Unicode IDs; invalid marker/generation/cycle and expired original deadline. All rejected before remote adapter call.",
+    "nativeConsumerContract": "Seven newline-separated fields; exact magic/marker; canonical20digit generation and each nonzero bounded u64 upload ID; exact cycle; distinct IDs; final newline; <=256 ASCII bytes."
+  },
+  "sourceDiffReview": {
+    "onlyChangedFunctions": [
+      "self_test",
+      "signal_business_done"
+    ],
+    "onlyAddedFunction": "business_done_value",
+    "otherFunctionAstIdentical": true,
+    "otherModuleAstIdentical": true,
+    "actualSignalUsesNewProducer": true,
+    "signalOwnedFileAndDeadlineAstUnchangedApartFromValue": true,
+    "nativeRustIdenticalToFirstFreeze": true,
+    "orderedNativePythonSteps": 31
+  },
+  "firstFinding": {
+    "path": "independent-probe-source-review-first.json",
+    "sha256": "09defffe805656773c8c338e0aa5a6c76f8cba243e936bb05c24911aac2272a0",
+    "status": "BLOCKED_P1_FROZEN_PROBE_RENDEZVOUS_ID_ENCODING",
+    "disposition": "Corrected in second Python source. First frozen defect and first166-check result remain original historical evidence; no Windows31 success inferred."
+  },
+  "scope": "Independent source/pure-only admission review. Original31 step contracts, first MaterialReady+partial socket lifetime, same stop5s origin, exact-stage removal, original2 shared workers, old cookie401, real second native pairing, C/D bothReady before cleanup and typed69001/retry/readback/cancel remain unchanged by AST comparison. Secrets remain memory/owned transient channels; new helper emits only canonical public identity/IDs.",
+  "findings": [],
+  "windows": "NOT_RUN",
+  "cargo": "NOT_RUN",
+  "network": "NOT_RUN",
+  "limitations": [
+    "No Rust compile/link or actual TLS/material lifecycle/partial termination/stage cleanup/permit reuse proof is claimed. Root must run actual terminal workflow and cleanup.",
+    "Neither Win7/10 OS nor classroom campus acceptance follows from this review."
+  ]
+}

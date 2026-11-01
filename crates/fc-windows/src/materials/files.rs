@@ -217,10 +217,25 @@ impl Drop for ReadOnlyMap {
 
 fn rename_handle(file: &File, target: &Path) -> Result<()> {
     use std::os::windows::ffi::OsStrExt;
-    // The Win32 wrapper resolves this DOS path before the kernel rename.
-    // Keep an explicit terminator even though FileNameLength excludes it; never
-    // let that normalization inspect the next heap allocation on exact alignment.
-    let name: Vec<u16> = target.as_os_str().encode_wide().chain(Some(0)).collect();
+    // All callers pin and check the destination. Keep the API boundary local
+    // too: only a drive-absolute DOS path may become an extended-length path.
+    local(target)?;
+    // Preserve DOS component/separator normalization without opening the target
+    // again. The Win32 wrapper can otherwise apply MAX_PATH before the handle
+    // rename, even though the filesystem and our pinned parents allow it.
+    let dos: PathBuf = target.components().collect();
+    let name: Vec<u16> = "\\\\?\\"
+        .encode_utf16()
+        .chain(dos.as_os_str().encode_wide().map(|unit| {
+            if unit == u16::from(b'/') {
+                u16::from(b'\\')
+            } else {
+                unit
+            }
+        }))
+        // Keep an explicit terminator; FileNameLength excludes this final NUL.
+        .chain(Some(0))
+        .collect();
     let offset = std::mem::offset_of!(FILE_RENAME_INFO, FileName);
     let bytes = offset.checked_add(name.len() * 2).ok_or_else(denied)?;
     let mut buffer = vec![0usize; bytes.div_ceil(std::mem::size_of::<usize>())];
@@ -813,7 +828,10 @@ impl LaunchPath {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::{Read, Write};
+    use std::{
+        io::{Read, Seek, Write},
+        os::windows::ffi::OsStrExt,
+    };
     struct Tree(PathBuf);
     impl Tree {
         fn new() -> Self {
@@ -901,6 +919,52 @@ mod tests {
             drop(verified);
             assert!(files.remove(&target).unwrap());
         }
+        // Exercise the upload's actual read+DELETE seal, at a destination longer
+        // than MAX_PATH. Do not rely on a registry policy or manifest opt-in.
+        let long_dir = files
+            .directory(&["a".repeat(80), "b".repeat(80), "c".repeat(80)])
+            .unwrap();
+        let target = long_dir.join("18446744073709551615.txt");
+        assert!(target.as_os_str().encode_wide().count() > 260);
+        let stage = dir.join("sealed-long.part");
+        let mut out = files.create_new(&stage).unwrap();
+        out.file_mut().write_all(b"sealed long target").unwrap();
+        let mut sealed = out.seal().unwrap();
+        let identity = sealed.identity().unwrap();
+        sealed.file_mut().rewind().unwrap();
+        let mut actual = Vec::new();
+        sealed.file_mut().read_to_end(&mut actual).unwrap();
+        assert_eq!(actual, b"sealed long target");
+        let mut sealed = sealed.publish(&files, &target).unwrap();
+        assert_eq!(sealed.identity().unwrap(), identity);
+        assert!(!stage.exists());
+        assert!(target.is_file());
+        sealed.file_mut().rewind().unwrap();
+        actual.clear();
+        sealed.file_mut().read_to_end(&mut actual).unwrap();
+        assert_eq!(actual, b"sealed long target");
+        drop(sealed);
+        // No replacement is permitted, even when the existing destination has
+        // no live share lock. Its identity and bytes must survive the failure.
+        let mut replacement = files.create_new(&stage).unwrap();
+        replacement
+            .file_mut()
+            .write_all(b"must not replace")
+            .unwrap();
+        assert!(replacement
+            .seal()
+            .unwrap()
+            .publish(&files, &target)
+            .is_err());
+        assert!(stage.is_file());
+        let mut unchanged = LockedFile::open(&target, 100).unwrap();
+        assert_eq!(unchanged.identity().unwrap(), identity);
+        actual.clear();
+        unchanged.file_mut().read_to_end(&mut actual).unwrap();
+        assert_eq!(actual, b"sealed long target");
+        drop(unchanged);
+        assert!(files.remove(&target).unwrap());
+        assert!(files.remove(&stage).unwrap());
     }
     #[test]
     fn native_file_capabilities_reject_aliases_and_oversized_enumeration() {

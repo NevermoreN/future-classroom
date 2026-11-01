@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "state": "DIAGNOSTIC_SOURCE_FROZEN_NOT_COMPILED_OR_EXECUTED",
+  "temporary": true,
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "bytes": 25252
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "sha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350",
+      "bytes": 78903
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "sha256": "1acfe50bd01dcab4b0ade77d97bfc6c5f76427bf9b56eb29a2d05250c67f3209",
+      "bytes": 70423
+    }
+  ],
+  "originalProductionSourceSha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4",
+  "diagnosticGate": "process argv[1] exactly --ordinary-https-probe",
+  "output": "stderr only ORDINARY_MATERIAL_PREPARATION stage=<u8> class=<u8> code=<i32>; no Display/Debug/path/name/body/hash/session/CSRF",
+  "stages": {
+    "1": "Begin",
+    "2": "Authority",
+    "3": "Kind",
+    "4": "Validate",
+    "5": "Image",
+    "6": "LengthAuthority",
+    "7": "Resource",
+    "8": "Directory",
+    "9": "Publish",
+    "10": "Complete",
+    "11": "PdfHash",
+    "12": "PdfHelper",
+    "13": "PdfReport"
+  },
+  "classes": {
+    "0": "success/entry",
+    "1": "existing explicit check failure",
+    "2": "ValidationError closed enum tag",
+    "3": "native original HRESULT signed integer",
+    "4": "MaterialResource domain validation failure"
+  },
+  "validationErrorCodes": {
+    "1": "Io",
+    "2": "InvalidName",
+    "3": "UnsupportedType",
+    "4": "InvalidText",
+    "5": "InvalidImage",
+    "6": "InvalidPdf",
+    "7": "EncryptedPdf",
+    "8": "ForbiddenContent",
+    "9": "TooLarge",
+    "10": "PdfRequiresHelper",
+    "11": "Canceled",
+    "12": "Deadline",
+    "13": "CpuBudget",
+    "14": "ClockUnavailable",
+    "15": "Office"
+  },
+  "checks": {
+    "rustfmt": "PASS",
+    "originalProbeHashesUnchanged": true,
+    "originalConditionsAndMappingsPreserved": "SOURCE_REVIEW",
+    "cargo": "NOT_RUN",
+    "windows": "NOT_RUN"
+  },
+  "mustRemoveBeforeFinalProductVerification": true,
+  "longPathTheory": "Native differential short DOS/long DOS/verbatim all PASS; no production rename fix authorized or made"
+}

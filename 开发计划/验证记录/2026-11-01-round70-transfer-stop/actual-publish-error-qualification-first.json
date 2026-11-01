@@ -1,0 +1,25 @@
+{
+  "status": "ACTUAL_PRODUCT_PUBLISH_HRESULT_206_LOCATED_FORMAL_FIX_NOT_YET_VALIDATED",
+  "recordedUtc": "2026-11-01T09:52:50.606129+00:00",
+  "failedReport": "windows-ordinary-https-fifth.json",
+  "failedReportSha256": "9ff7018db87ae5187405274a9bc4ba091cfe2ba90e460aff1b8094819f64d129",
+  "diagnosticExeSha256": "433d5cef2e0dea0792fa6c55307866d7f48794908bf489a44fe95c5783c2fc7f",
+  "diagnosticLines": [
+    "ORDINARY_MATERIAL_PREPARATION stage=1 class=0 code=0",
+    "ORDINARY_MATERIAL_PREPARATION stage=9 class=3 code=-2147024690"
+  ],
+  "hresultSigned": -2147024690,
+  "hresultHex": "0x800700CE",
+  "win32Error": 206,
+  "cleanup": "PASS",
+  "separateX86PowerShellControls": {
+    "receipt": "round71-source-order/rename-path-repro-operation-first.json",
+    "allThreeRenamesSucceeded": true,
+    "logicalTargetUtf16Units": [
+      120,
+      261,
+      261
+    ]
+  },
+  "qualification": "Actual ordinary GUI process failed in original LockedFile::publish, after resource validation and destination construction. Separate PowerShell-host API controls succeeded; their host/path/process conditions are not identical. No universal failure threshold, sole environment cause or formal fix success is inferred. Temporary diagnostics removed byte-exact before joint8 formal validation; original failure and controls preserved."
+}

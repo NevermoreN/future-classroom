@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_THIRD_FINITE_SOURCE_DIFF_ONLY_WINDOWS_NOT_RUN",
+  "recordedUtc": "2026-11-01T09:10:36.686485+00:00",
+  "implementationFreeze": {
+    "path": "implementation-freeze-third.json",
+    "sha256": "9a13b3ea4666013e6aeac69f15b78611c4170b663248ed9301ededdc55955221"
+  },
+  "jointFreeze": {
+    "path": "joint-source-freeze-third.json",
+    "sha256": "0e5f2a3a97ade635a376837d1efda1a9dcef60cb4467b137677e5d261709605e",
+    "workingFileCount": 595
+  },
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 71671,
+      "sha256": "64c3f4f7154949cd8a870c8984fc63954382e847237bf287a076bba79e30b8b1"
+    }
+  ],
+  "sourceUnchanged": true,
+  "diff": {
+    "path": "second-to-third-minimal.diff",
+    "sha256": "6b6779a187ec528348c439eae8b5a0df6322188e23488d1120d10b6b6bddb0cb",
+    "exactReconstructionMatches": true,
+    "onlyChanges": [
+      "pair accepts cycle_generation:(u8,u64) instead of separate cycle:u8/generation:u64",
+      "pair immediately destructures tuple into original cycle and generation locals",
+      "first call passes exact(1,first)",
+      "second call passes exact(2,second), rustfmt-expanded only"
+    ]
+  },
+  "pairArgumentSemantics": {
+    "first": {
+      "cycle": 1,
+      "generationExpression": "first"
+    },
+    "second": {
+      "cycle": 2,
+      "generationExpression": "second"
+    },
+    "otherArgumentsUnchanged": [
+      "app",
+      "package_root",
+      "marker",
+      "port",
+      "steps",
+      "deadline"
+    ],
+    "bodyUnchangedAfterImmediateDestructure": true,
+    "noLintSuppressionAdded": true
+  },
+  "contracts": {
+    "nativePythonOrderedSteps": 31,
+    "pythonExactSecondBytes": true,
+    "originalBudgetAndSecretLogicUnchanged": true,
+    "originalStopOriginAndPoolReuseUnchanged": true
+  },
+  "inheritedSecondReview": {
+    "path": "independent-probe-source-review-second.json",
+    "sha256": "59b3306afb72fe98acd205e2ea365c1c6d6d810b5e7502818a550c6024ca9577",
+    "status": "PASS_SECOND_SOURCE_P1_CORRECTED_PURE_ONLY_WINDOWS_NOT_RUN",
+    "pureChecks": 188,
+    "actualProducerPositiveCount": 12,
+    "actualProducerNegativeCount": 22,
+    "qualification": "Second188 pure checks and12 actual-producer boundary positives/22 rejection cases are inherited by exact unchanged Python bytes; none rerun or relabeled as third runtime proof."
+  },
+  "findings": [],
+  "validationNotPerformed": [
+    "Cargo",
+    "Clippy rerun",
+    "compiler/linker",
+    "Windows/SSH",
+    "actual31-step TLS/material stop/reuse",
+    "network"
+  ],
+  "scope": "Finite exact-source third revision admission review only. Original source2 Clippy failure and source1 ID-encoding defect stay retained as original evidence. Root must verify rebuilt binary identity, strict Clippy and actual terminal Windows workflow/cleanup. No Win7/10 OS or campus acceptance claim."
+}

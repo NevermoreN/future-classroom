@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_ONLY_NO_SOURCE_OR_ARTIFACT_BOUND_NO_RUNTIME",
+  "recordedUtc": "2026-11-01T09:42:12.180778+00:00",
+  "helper": {
+    "path": "root-run-windows-release-parameterized-first.py",
+    "bytes": 11514,
+    "sha256": "d5874bfb3412a105941c6b853527ae82cffecb2914da4d96ecb3648b80fc42c2"
+  },
+  "template": {
+    "path": "开发计划/验证记录/2026-11-01-round68-production-https/root-run-windows-release-first.py",
+    "sha256": "6def3870e12884d4aee726bc5db089eeea6e5d371cca17953714248440ecca69"
+  },
+  "arguments": [
+    "--freeze <new joint freeze path>",
+    "--freeze-sha256 <exact new freeze SHA>",
+    "--clippy-report <new terminal strict release Clippy report>",
+    "--tests-report <new terminal CargoJSON workspace all-targets test compile report>",
+    "--product-report <new terminal non-test GUI product compile report>",
+    "--label <fresh output prefix>",
+    "--execute"
+  ],
+  "scope": "Parameter adaptation of existing R68 root controller only. No current unfrozen source/build artifact or Cargo JSON was read; no Windows/SSH/Cargo/network or main mutation. Root supplies all new4-file freeze/build report identities and explicitly executes after actual terminal PASS.",
+  "retainedContracts": [
+    "actual595 working-file SHA guard before/after",
+    "three distinct terminal builds same freeze SHA/sourceUnchanged, original900s each and raw stdout/stderr bytes/SHA",
+    "actual CargoJSON lines->21 distinct test EXEs, original producer line SHA",
+    "normal unique fc-bootstrap non-test GUI2 and tests CUI3 actualI386/PE32 headers and original binarySHA",
+    "unchanged windows-probe.py identity against frozen tree",
+    "test timeout900/native1/system-host/public-desktop, actual Win11 scope",
+    "fresh output names, original child wait actualexit, cleanupPASS, after source/script/metadata/all22artifactSHA unchanged",
+    "test totals derived from actual raw output only; ordinary31 separate"
+  ],
+  "notPerformed": [
+    "No source/product freeze or artifact binding",
+    "No self-test or Cargo compile",
+    "No Windows run",
+    "No normal GUI/test metadata upload"
+  ],
+  "next": "Root invokes helper once for fresh supplied freeze/build reports after later production material-files correction. It deliberately does not treat old source4 product or prior ordinary failure as new regression success."
+}

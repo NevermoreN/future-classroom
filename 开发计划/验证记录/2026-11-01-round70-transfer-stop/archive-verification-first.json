@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_EXACT_ORIGINAL_BYTES_AND_DECODED_CREDENTIAL_SCAN",
+  "recordedUtc": "2026-11-01T10:09:06.868732+00:00",
+  "sourceRoot": "/tmp/fc-round70-ordinary-transfer-stop/evidence",
+  "archiveRoot": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round70-transfer-stop",
+  "acceptance": {
+    "path": "independent-joint-acceptance-first.json",
+    "bytes": 195527,
+    "sha256": "127b67b94dcdb73d88557dd33488877c932d29dfbda44b6c107630c5cdc110b0",
+    "status": "PASS_R70_SOURCE8_FINITE_GNU_WIN11_REGRESSION_ORDINARY31_AND_RECOVERY_ONLY"
+  },
+  "rootControllersTerminalExplicitlyConfirmed": true,
+  "originalFiles": 319,
+  "originalBytes": 4629190,
+  "credentialScan": {
+    "status": "PASS",
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value"
+    ],
+    "statistics": {
+      "textViews": 878,
+      "utf16Views": 4,
+      "jsonContainers": 370,
+      "decodedRawPayloads": 236
+    },
+    "findings": [],
+    "syntheticZeroTestVectorOccurrences": [],
+    "coverage": "Each retained original and independently reopened stored counterpart; UTF8/actual UTF16 views and nested JSON base64/encodedCommand decoded payloads. No expired-credential exception inherited."
+  },
+  "historicalFailures": "All retained FAIL reports, diagnostic before/after originals, separate C# three-case successes and final four-source records remain exact bytes. No earlier FAIL is promoted to PASS.",
+  "scope": "R70 evidence archive only; runtime/platform claims remain those of the SHA-bound independent acceptance.",
+  "sourceRemoved": false,
+  "compression": "NONE",
+  "confirmedPublicCertificatesRetained": {
+    "windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls-public.pem": {
+      "sha256": "6f96478f10777ef785950955463febd6c78d1f5a45836c09aad89d859e9289a9",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-first.json",
+      "reportSha256": "bc5c7df899e6c5586cdbff47f0d0548a378ff99ccd2b3546f0ccb0e577385dbf"
+    },
+    "windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls-public.pem": {
+      "sha256": "f31f50556d8e0b1402c9ae1d83274026220def040525128f42b409dfcb6fc04f",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-second.json",
+      "reportSha256": "71425ad83427bf76d6deb84aaf4ac722926a273f9a2d357d4a03c65f391f55b4"
+    },
+    "windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls-public.pem": {
+      "sha256": "3de79472aea1b4e4a74f7f756d7a03b801a071ec8230741e70d2be6c3e53b9db",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-third.json",
+      "reportSha256": "fc6c79319dadac8a476448b7f808c8e0c7c6d0a4ad605bf857e57c13cc1c3483"
+    },
+    "windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls-public.pem": {
+      "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-fourth.json",
+      "reportSha256": "a8e01d5d8dde219698b03939efb5b45da7fff718ab3d26d9b88b95a9fe8c5052"
+    },
+    "windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls-public.pem": {
+      "sha256": "ee423f2afcddb7cfb0436988269645529716d438ba564c8ae7912e324c95ed29",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-fifth.json",
+      "reportSha256": "9ff7018db87ae5187405274a9bc4ba091cfe2ba90e460aff1b8094819f64d129"
+    },
+    "windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls-public.pem": {
+      "sha256": "2e4991823909b90fb760d5421d6a8905660359afc2211f1f0063d7ec9b1aab11",
+      "bytes": 1141,
+      "report": "windows-ordinary-https-sixth.json",
+      "reportSha256": "24081e3c8f814908c00427e94d1467a0561344feb3ca37c6d5484834e332a7a5"
+    }
+  }
+}

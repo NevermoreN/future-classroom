@@ -1,0 +1,53 @@
+--- third/scripts/windows-ordinary-https-probe.py
++++ fourth/scripts/windows-ordinary-https-probe.py
+@@ -351,8 +351,10 @@
+     value = business_done_value(marker,generation,cycle,ids)
+     script = ("$r="+b.ps_literal(directory)+";$m="+b.ps_literal(marker)
+         + ";if((Split-Path -Leaf $r)-ne $m-or [IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned completion mismatch'};"
+-        + "$p=Join-Path $r "+b.ps_literal(f"ordinary-business-{cycle}.done")+";$s=[IO.File]::Open($p,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);"
+-        + "try{$v=[Text.Encoding]::ASCII.GetBytes("+b.ps_literal(value)+");$s.Write($v,0,$v.Length)}finally{$s.Dispose()};'OWNED_CLIENT_JOURNEY_DONE'")
++        + "$p=Join-Path $r "+b.ps_literal(f"ordinary-business-{cycle}.done")+";$t=Join-Path $r "+b.ps_literal(f"ordinary-business-{cycle}.pending")+";"
++        + "$s=[IO.File]::Open($t,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);"
++        + "try{$v=[Text.Encoding]::ASCII.GetBytes("+b.ps_literal(value)+");$s.Write($v,0,$v.Length);$s.Flush($true)}finally{$s.Dispose()};"
++        + "[IO.File]::Move($t,$p);'OWNED_CLIENT_JOURNEY_DONE'")
+     require(remote.powershell(script, timeout=min(8,deadline-time.monotonic())) == "OWNED_CLIENT_JOURNEY_DONE", "owned completion creation")
+ 
+ 
+@@ -767,10 +769,36 @@
+         else:
+             raise RuntimeError("invalid completion ID/cycle/marker accepted")
+ 
+-    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative,
++    publication_checks=0
++    class PublicationOnly:
++        # Source-contract observer only: never executes PowerShell or a socket.
++        def __init__(self):
++            self.calls=[]
++        def powershell(self,script,timeout):
++            self.calls.append(script)
++            require(0<timeout<=8,"publication uses remaining original deadline")
++            return "OWNED_CLIENT_JOURNEY_DONE"
++    for cycle in (1,2):
++        for directory in [r"C:\Temp\owned-root",r"C:\Temp\owned'quoted-root"]:
++            observer=PublicationOnly()
++            signal_business_done(observer,directory,marker,17,time.monotonic()+1,cycle,["1","2"])
++            require(len(observer.calls)==1,"one original publication command")
++            script=observer.calls[0]
++            require("$r="+b.ps_literal(directory) in script
++                    and b.ps_literal(f"ordinary-business-{cycle}.pending") in script
++                    and b.ps_literal(f"ordinary-business-{cycle}.done") in script
++                    and "[IO.File]::Open($t,[IO.FileMode]::CreateNew" in script
++                    and "[IO.File]::Open($p," not in script
++                    and script.index("$s.Write(")<script.index("$s.Flush($true)")<script.index("$s.Dispose()")<script.index("[IO.File]::Move($t,$p)")
++                    and script.count("[IO.File]::Move(")==1 and "Move($t,$p," not in script,
++                    "same-root pending write/flush/dispose then non-overwriting final publication")
++            publication_checks+=1
++
++    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative+publication_checks,
+                       "wireJourneyPositiveCases":8,"wireJourneyNegativeCases":len(negatives),
+                       "transferJourneyPositiveCases":4,"transferTypedAndCyclePositiveCases":6,"transferNegativeCases":transfer_checks,
+                       "completionIdPositiveCases":completion_positive,"completionIdNegativeCases":completion_negative,
++                      "publicationSourceContractCases":publication_checks,
+                       "windows": "NOT_RUN", "tls": "NOT_RUN", "ordinaryRuntime": "NOT_RUN"}))
+ 
+ 

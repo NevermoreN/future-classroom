@@ -1,0 +1,173 @@
+--- before/material_files.rs
++++ diagnostic/material_files.rs
+@@ -34,6 +34,54 @@
+ const TTL: Duration = Duration::from_secs(300);
+ const STREAM_TIME: Duration = Duration::from_secs(120);
+ const CHUNK: usize = 65536;
++// Temporary R70 diagnostic: only the explicit hidden ordinary probe can emit
++// closed stage/class numbers. Never format an error, path, name or request value.
++#[derive(Clone, Copy)]
++#[repr(u8)]
++enum PreparationProbeStage {
++    Begin = 1,
++    Authority = 2,
++    Kind = 3,
++    Validate = 4,
++    Image = 5,
++    LengthAuthority = 6,
++    Resource = 7,
++    Directory = 8,
++    Publish = 9,
++    Complete = 10,
++    PdfHash = 11,
++    PdfHelper = 12,
++    PdfReport = 13,
++}
++fn preparation_probe(stage: PreparationProbeStage, class: u8, code: i32) {
++    if std::env::args_os().nth(1).as_deref() == Some(std::ffi::OsStr::new("--ordinary-https-probe"))
++    {
++        eprintln!(
++            "ORDINARY_MATERIAL_PREPARATION stage={} class={} code={}",
++            stage as u8, class, code
++        );
++    }
++}
++fn validation_probe_code(error: &fc_materials::validation::ValidationError) -> i32 {
++    use fc_materials::validation::ValidationError;
++    match error {
++        ValidationError::Io => 1,
++        ValidationError::InvalidName => 2,
++        ValidationError::UnsupportedType => 3,
++        ValidationError::InvalidText => 4,
++        ValidationError::InvalidImage => 5,
++        ValidationError::InvalidPdf => 6,
++        ValidationError::EncryptedPdf => 7,
++        ValidationError::ForbiddenContent => 8,
++        ValidationError::TooLarge => 9,
++        ValidationError::PdfRequiresHelper => 10,
++        ValidationError::Canceled => 11,
++        ValidationError::Deadline => 12,
++        ValidationError::CpuBudget => 13,
++        ValidationError::ClockUnavailable => 14,
++        ValidationError::Office(_) => 15,
++    }
++}
+ fn io_error(_: impl std::fmt::Debug) -> io::Error {
+     io::Error::other("controlled material file unavailable")
+ }
+@@ -75,7 +123,10 @@
+             scope.subject_id.get().to_string(),
+             id.get().to_string(),
+         ])
+-        .map_err(io_error)?;
++        .map_err(|error| {
++            preparation_probe(PreparationProbeStage::Directory, 3, error.code().0);
++            io_error(error)
++        })?;
+     Ok(dir.join(format!(
+         "{}.{}",
+         resource.version_id.get(),
+@@ -1708,18 +1759,37 @@
+         &mut self,
+         mut file: LockedFile,
+     ) -> Result<MaterialResource, MaterialRepositoryError> {
++        preparation_probe(PreparationProbeStage::Begin, 0, 0);
+         let work = (|| -> io::Result<MaterialResource> {
+             if self.control.canceled() {
++                preparation_probe(PreparationProbeStage::Authority, 1, 1);
+                 return Err(denied());
+             }
+-            let kind = MaterialKind::from_name(&self.name).ok_or_else(invalid)?;
++            let kind = MaterialKind::from_name(&self.name).ok_or_else(|| {
++                preparation_probe(PreparationProbeStage::Kind, 1, 1);
++                invalid()
++            })?;
+             let (bytes, sha) = if kind == MaterialKind::Pdf {
+                 let (bytes, sha) =
+-                    fc_materials::validation::hash_file(file.file_mut(), &self.control)
+-                        .map_err(io_error)?;
++                    fc_materials::validation::hash_file(file.file_mut(), &self.control).map_err(
++                        |error| {
++                            preparation_probe(
++                                PreparationProbeStage::PdfHash,
++                                2,
++                                validation_probe_code(&error),
++                            );
++                            io_error(error)
++                        },
++                    )?;
+                 let report = helper::validate_pdf(file.path(), || self.control.canceled())
+-                    .map_err(io_error)?;
+-                let line = std::str::from_utf8(&report.stdout).map_err(io_error)?;
++                    .map_err(|error| {
++                        preparation_probe(PreparationProbeStage::PdfHelper, 3, error.code().0);
++                        io_error(error)
++                    })?;
++                let line = std::str::from_utf8(&report.stdout).map_err(|error| {
++                    preparation_probe(PreparationProbeStage::PdfReport, 1, 1);
++                    io_error(error)
++                })?;
+                 let parts: Vec<_> = line.split_whitespace().collect();
+                 let expected: String = sha.iter().map(|b| format!("{b:02x}")).collect();
+                 if report.exit_code != Some(0)
+@@ -1735,6 +1805,7 @@
+                         .parse::<u32>()
+                         .is_ok_and(|n| (1..=20000).contains(&n))
+                 {
++                    preparation_probe(PreparationProbeStage::PdfReport, 1, 2);
+                     return Err(invalid());
+                 }
+                 (bytes, sha)
+@@ -1744,17 +1815,29 @@
+                     &self.name,
+                     &self.control,
+                 )
+-                .map_err(io_error)?;
++                .map_err(|error| {
++                    preparation_probe(
++                        PreparationProbeStage::Validate,
++                        2,
++                        validation_probe_code(&error),
++                    );
++                    io_error(error)
++                })?;
+                 if let Some(expected) = report.image {
+                     let decoded = image::validate_image(&file, kind, || self.control.canceled())
+-                        .map_err(io_error)?;
++                        .map_err(|error| {
++                            preparation_probe(PreparationProbeStage::Image, 3, error.code().0);
++                            io_error(error)
++                        })?;
+                     if (decoded.width, decoded.height) != (expected.width, expected.height) {
++                        preparation_probe(PreparationProbeStage::Image, 1, 1);
+                         return Err(invalid());
+                     }
+                 }
+                 (report.bytes, report.sha256)
+             };
+             if bytes != self.expected || self.control.canceled() {
++                preparation_probe(PreparationProbeStage::LengthAuthority, 1, 1);
+                 return Err(invalid());
+             }
+             let resource = MaterialResource {
+@@ -1763,11 +1846,18 @@
+                 kind,
+                 bytes,
+             };
+-            resource.validate().map_err(io_error)?;
++            resource.validate().map_err(|error| {
++                preparation_probe(PreparationProbeStage::Resource, 4, 1);
++                io_error(error)
++            })?;
+             let destination = path(&self.files, self.scope, self.id, &resource)?;
+-            let file = file.publish(&self.files, &destination).map_err(io_error)?;
++            let file = file.publish(&self.files, &destination).map_err(|error| {
++                preparation_probe(PreparationProbeStage::Publish, 3, error.code().0);
++                io_error(error)
++            })?;
+             self.path = destination;
+             self.pin = Some(file);
++            preparation_probe(PreparationProbeStage::Complete, 0, 0);
+             Ok(resource)
+         })();
+         work.map_err(|e| {

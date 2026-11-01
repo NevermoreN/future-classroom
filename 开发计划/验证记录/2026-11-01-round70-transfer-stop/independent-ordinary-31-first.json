@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINAL_FROZEN_ORDINARY31_FINITE_WIN11_ONLY",
+  "recordedUtc": "2026-11-01T09:58:55.491694+00:00",
+  "freeze": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/joint-source-freeze-eighth.json",
+    "bytes": 109207,
+    "sha256": "4475984de3843334f8603247ca543f37947fe667a03ab456d06744b14447eed5"
+  },
+  "actualReport": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth.json",
+    "bytes": 83548,
+    "sha256": "24081e3c8f814908c00427e94d1467a0561344feb3ca37c6d5484834e332a7a5"
+  },
+  "productProvenance": {
+    "report": {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.json",
+      "bytes": 804,
+      "sha256": "ac6bae0f37c2d87d8f8017b24a985ffab8cae3132f509ebb49bfed973f222862"
+    },
+    "streams": {
+      "stdout": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.stdout.log",
+        "bytes": 85257,
+        "sha256": "352b011db442f54a5ada4ecede05eca4d209152e03369b3d1eea72d3b53645f5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.stderr.log",
+        "bytes": 62,
+        "sha256": "dd5cbfd46cbc7d90e44f766619e1dd80f5375b42ec46bf848bf1736968f1969b"
+      }
+    }
+  },
+  "operationProvenance": {
+    "report": {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/ordinary-https-operation-sixth.json",
+      "bytes": 1192,
+      "sha256": "cdf310d40bf0776cabf1a20b15b4f27bbe0476136d0fd2a0660a17fdb8e67afa"
+    },
+    "streams": {
+      "stdout": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/ordinary-https-operation-sixth.stdout.log",
+        "bytes": 109,
+        "sha256": "cd4c57de166ad3f52a01afd091e014c9f0b354e6d9fcf5f2457b728d6f0d0f53"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/ordinary-https-operation-sixth.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "normal": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13350783,
+    "sha256": "80fe27c788360b511e75efbaf451eadb7bd71a46657dd036db7b8a7af2622246",
+    "cargoLine": 109,
+    "cargoLineSha256": "26cc05b4e4f79edd03a709d1e7993f6e876e34664b3ad55fcdf571e553b74b84"
+  },
+  "runner": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py",
+    "bytes": 78903,
+    "sha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350"
+  },
+  "rawOriginals": [
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls.stdout",
+      "bytes": 3956,
+      "sha256": "cf3a5cb408a2aab00ef3386691ac7c06614bfcc2fa960dd090a45025da790926"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "553867dc992a08804b3a03f465141190fe5cd6a0820c2f31bb1efbd8387d66ee"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "2e4991823909b90fb760d5421d6a8905660359afc2211f1f0063d7ec9b1aab11"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls.stderr",
+      "bytes": 13581,
+      "sha256": "3fdc8d5a1258bea62280cd6fae59edb93873233490b49fcc49ad0fc59a22aba0"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "264fde177341a77e1340be0ed1966a994e2c19d076c305c66a56c636847ebd39"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "a277f4852c99caab950a7954e21f5a3448ee685eac53ae0d45e528d7c9fe8306"
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "d3a03e680d8b140888d22181d6e662997cd05b9320e6b0ef535182433b45ae4c"
+    }
+  ],
+  "nativeStepNames": [
+    "setup-local-global-administrator",
+    "native-create-synthetic-class",
+    "native-create-independent-teacher-and-complete-first-password-change",
+    "native-teacher-page-default-off",
+    "native-open-https-settings",
+    "native-save-explicit-ip-cidr-reference",
+    "saved-config-no-listener",
+    "native-enable-configured-runtime",
+    "physical-first-running-generation",
+    "first-real-tls-response-complete",
+    "native-open-actual-runtime-pairing-window",
+    "native-approve-actual-network-pairing-request",
+    "first-real-authenticated-reminder-post-and-get",
+    "first-material-ready-and-partial-upload-established",
+    "native-pairing-close-and-disable-review-cancel",
+    "native-confirm-first-disable",
+    "physical-first-domain-drained",
+    "first-two-staging-files-removed",
+    "original-shared-workers-remain-operational",
+    "native-enable-second-generation",
+    "second-real-tls-response-complete",
+    "native-open-second-runtime-pairing-window",
+    "native-approve-second-network-pairing-request",
+    "second-old-cookie-rejected-and-two-upload-slots-reused",
+    "second-typed-material-command-receipt-and-cancel",
+    "native-lock-does-not-stop-established-domain",
+    "native-relogin-confirm-second-disable",
+    "physical-second-domain-drained",
+    "native-return-to-local-workbench",
+    "actual-shared-worker-writer-shutdown",
+    "owned-deployment-cleanup"
+  ],
+  "transcript": {
+    "steps": 31,
+    "authenticatedReminder": "PASS",
+    "physicalShutdown": "PASS",
+    "materialReadyStop": "PASS"
+  },
+  "twoActualGenerations": [
+    1,
+    2
+  ],
+  "stops": [
+    {
+      "cycle": 1,
+      "marker": "FutureClassroom-Test-TLS-0b297edd37894497a51db2ecfefea601",
+      "generation": 1,
+      "elapsedNs": 33840600,
+      "activeRecords": 0,
+      "pendingJobs": 0,
+      "cleanupPending": 0,
+      "retainedCleanup": 0,
+      "nativeDrained": true
+    },
+    {
+      "cycle": 2,
+      "marker": "FutureClassroom-Test-TLS-0b297edd37894497a51db2ecfefea601",
+      "generation": 2,
+      "elapsedNs": 22098500,
+      "activeRecords": 0,
+      "pendingJobs": 0,
+      "cleanupPending": 0,
+      "retainedCleanup": 0,
+      "nativeDrained": true
+    }
+  ],
+  "journey": {
+    "status": "PASS",
+    "publicStatusRequests": 2,
+    "businessRequests": 9,
+    "pairingPolls": 1,
+    "totalRequests": 30,
+    "authenticatedReminder": "COMMITTED_REVISION1_READBACK_AND_DURABLE_RECEIPT",
+    "scope": "exact ordered operations; successful approval may take one to eight original bounded polls",
+    "materialReadyStop": "PASS",
+    "partialUploadStop": "PASS",
+    "reusedSlots": 2,
+    "oldCookie": "401",
+    "secondNativeApproval": "PASS",
+    "materialReceipt": "COMMITTED"
+  },
+  "materialBeforeStop": {
+    "status": "PASS",
+    "readyStageBytes": 65536,
+    "partialStageBytes": 65536,
+    "appendBeforeStop": false
+  },
+  "materialReuse": {
+    "status": "PASS",
+    "reusedSlots": 2,
+    "commandId": "69001",
+    "scope": {
+      "ownerTeacherId": "2",
+      "subjectId": "1"
+    },
+    "receipt": "COMMITTED",
+    "exactRetry": true,
+    "resourceVersionId": "17433309024735335187",
+    "sha256": "e190c1e27704297cee9d58b134bc4e2be53c5194dc6ab6a703746c1aac4f6b5f",
+    "bytes": 65536
+  },
+  "teacher": {
+    "principalId": "2",
+    "role": "TEACHER_ADMIN",
+    "nativeApprovals": 2,
+    "secondSession": "ACTUAL_FROZEN_RUNNER_MEMORY_ONLY_FRESH_COOKIE_AND_CSRF_ASSERTION",
+    "oldCookie": "401"
+  },
+  "cleanup": "PASS",
+  "sourceUnchanged": true,
+  "scope": "Only supplied final source/binary/report and complete actual ordinary31 loopback composition. No Win7/10 OS, classroom/campus or whole-product certification.",
+  "secrecy": "No credential-bearing DTO/header/body or credential digest copied. Typed session, exact material69001 response/retry/readback and fresh cookie/CSRF assertions run in the frozen original client; archived report keeps safe event/status/count and synthetic material digest only.",
+  "limitation": "Independent audit replays archived strict metadata and raw native transcript. It does not reconstruct redacted secret DTOs, measure kernel close timing or rerun product tests."
+}

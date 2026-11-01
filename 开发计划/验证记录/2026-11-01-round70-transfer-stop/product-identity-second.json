@@ -1,0 +1,18 @@
+{
+  "status": "PASS_STATIC_SAME_PRODUCT_BYTES",
+  "recordedUtc": "2026-11-01T09:07:28.638468+00:00",
+  "product": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13348263,
+    "sha256": "685261bb6a829e7ff1882727e1ab4d648cce34ca19f6f7f6f162adfc46918963",
+    "peMachine": 332,
+    "optionalMagic": 267,
+    "subsystem": 2
+  },
+  "firstProducer": "product-release-first.json",
+  "secondProducer": {
+    "path": "product-release-second.json",
+    "sha256": "231928505fb4f66cefd50f0670f9cde61a79c38d284da5c0affdc98319ca77e9"
+  },
+  "scope": "Python-only fix changes guarded source but no compiled Rust bytes. Both terminal normal product producers yield same observed PE bytes. No Windows execution."
+}

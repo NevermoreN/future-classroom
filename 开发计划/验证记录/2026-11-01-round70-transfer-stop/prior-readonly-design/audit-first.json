@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "status": "READ_ONLY_NEXT_SCOPE_AUDIT_NO_PRODUCT_BUG_PROVEN",
+  "atUtc": "2026-11-01T08:38:45.164289+00:00",
+  "ownedRoot": "/tmp/fc-next-https-transfer-audit-backend-20261101",
+  "sourceRoot": "/tmp/fc-round68-production-https/worktree",
+  "sources": [
+    {
+      "path": "开发计划/模块/06-局域网与React管理端.md",
+      "bytes": 20650,
+      "sha256": "f57333cf4bfa55dd81af46f0c3031c881b952745e02a7012cd693c83a558d8cc"
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "bytes": 21375,
+      "sha256": "1e54134d1c85c80c9445026dce06f58fd2f18ef2f845eeb7998614bd0408b9e7"
+    },
+    {
+      "path": "开发计划/14-P0独立TCP接纳候选ADR.md",
+      "bytes": 23288,
+      "sha256": "cd74309da502efd8fbea0b334d53d66fc9e4f2e044c1faa1963a0b76da4b169f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22674,
+      "sha256": "1005f9cd0db58ac692ed3f748b27b46b5f450856e7ca864f25aa487c462d6ee4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/live_cleanup.rs",
+      "bytes": 1931,
+      "sha256": "22b2c7fac3360de8c1fc71b3e409ebdad994428342ca0ece1f4c5a909281bf85"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads/tests.rs",
+      "bytes": 49433,
+      "sha256": "fe09d4184289b8743df6492158cfb094b5588c0b0a8ad9f222ffbfa05b61e187"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/backend/web/runtime_tests.rs",
+      "bytes": 13885,
+      "sha256": "2173db6aece2d4cd4d192c58bdedabe304f8aa1ac2383327d1c15d553a745fa4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 20746,
+      "sha256": "23f85c2888cd47b5be2cbff3f3b8d3e1e6f285560b453c547047d0e622636768"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 43248,
+      "sha256": "bf3ea57caf4a8c53a3be879345b0e41ada0329591b32c29213e79d5077aba375"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 262848,
+      "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/backup_controller.rs",
+      "bytes": 33579,
+      "sha256": "ae2bb5422c375efcb26910c384386775dd9f56027bb257d96f0b9f3a2c9a2042"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/reinitialize_entry_tests.rs",
+      "bytes": 3517,
+      "sha256": "7c02c907cfde7fe1ce62d33030f0571fe1c3aa24ea8e315ea119cd936c5d0026"
+    }
+  ],
+  "actualEvidence": {
+    "path": "/tmp/fc-round68-production-https/evidence/windows-release-full-third.json",
+    "sha256": "1c2721e4ad7a9a9f4b92401cb2cb6abb6bbee77b2ec947dad58539a41c597cd5",
+    "status": "PASS",
+    "cleanup": "PASS",
+    "harnesses": 21,
+    "specificActualPassingTests": {
+      "live_stop_drains_material_ready_and_live_download_pin_without_joining_shared_workers": [
+        "test web_transfer::uploads::tests::live_stop_drains_material_ready_and_live_download_pin_without_joining_shared_workers ... ok"
+      ],
+      "negative_stop_while_ledger_held_rejects_original_sql_write_at_real_precommit": [
+        "test backend::web::tests::runtime_tests::negative_stop_while_ledger_held_rejects_original_sql_write_at_real_precommit ... ok"
+      ],
+      "queued_sql_write_is_negative_before_ledger_after_original_runtime_stop": [
+        "test backend::web::tests::runtime_tests::queued_sql_write_is_negative_before_ledger_after_original_runtime_stop ... ok"
+      ],
+      "returned_old_reservation_cannot_clear_new_starting_or_stopping_exact_claim": [
+        "test backend::web::tests::runtime_tests::returned_old_reservation_cannot_clear_new_starting_or_stopping_exact_claim ... ok"
+      ],
+      "delayed_old_negative_stop_cannot_revoke_new_running_generation": [
+        "test backend::web::tests::runtime_tests::delayed_old_negative_stop_cannot_revoke_new_running_generation ... ok"
+      ],
+      "no_code_entry_keeps_original_data_and_requires_actual_writer_shutdown": [
+        "test application::reinitialize_entry_tests::no_code_entry_keeps_original_data_and_requires_actual_writer_shutdown ... ok"
+      ]
+    }
+  },
+  "priorityConclusion": "The smallest next useful development is an ordinary-runtime lifecycle integration probe for retained MaterialReady plus an unfinished upload during native Disable. The production path is already wired and component tests actually pass; the missing proof is the combined normal configured TLS/Net/Hub/worker/UI path with live file owners. Do not describe this as missing cleanup implementation or reimplement a second runtime.",
+  "existingProductWiring": [
+    "https_runtime::run negative stop closes Web admission, cancels both Hubs and Net, submits CleanupTask through the same HttpExecutor, requires Net idle + settled sessions + actual cleanup ticket return + both confirm_live_drained before native/SSPI destruction and physical thread receipt.",
+    "application::schedule_shutdown returns while !teacher_https_quiescent; backup_controller requires the same gate before taking original pool/Writer for restore; no-code reinitialization enters begin_shutdown and waits shutdown_complete.",
+    "The component regression actually exercises MaterialReady, a suppressed Begin and a real download pin while the original worker pool remains usable, and exact old claim/session/queued Writer negative tests pass."
+  ],
+  "notYetCombined": [
+    "ordinary_https_probe explicitly reports material_ready_stop=NOT_EXERCISED; its real authenticated request sequence is reminders and two clean native start/stop generations, with no material transfer in flight.",
+    "The passing MaterialReady/pin test directly constructs component Hubs and calls live CleanupTask; it is not an actual configured native RuntimeOwner stop over real TLS.",
+    "Existing reset/recovery entry and full reset/restore probes do not establish an active ordinary HTTPS material owner at their irreversible handoff, so they do not prove this cross-domain composition."
+  ],
+  "minimalNextFiles": [
+    "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+    "scripts/windows-ordinary-https-probe.py"
+  ],
+  "minimalNextImplementation": [
+    "Extend the existing owned ordinary fixture/client rendezvous, preserving actual teacher pairing, native Enable/Disable, original two workers and single physical runtime.",
+    "Create one real authenticated material upload, finish bytes successfully and deliberately omit Append, leaving MaterialReady. Start a second authenticated body upload and send only a bounded prefix, keeping that original connection/request alive. Do not fabricate a Hub entry or readiness flag.",
+    "After real upload success/partial-body observations, use the native confirmed Disable already exercised by the probe. Require stop to finish under its original5s budget; retain originals and mark FAIL on timeout.",
+    "Use exact owned root/process identity to read only synthetic staging file presence/absence before/after stop, require no pending native/Net ticket at actual owner quiescence, and exercise a fresh local shared-worker query after Disable.",
+    "Start second configured generation, require old teacher cookie rejected, pair a fresh teacher through the normal native approval, and complete a fresh upload to demonstrate actual capacity/permit reuse. Record counts/statuses only; never archive code/cookie/CSRF/response bodies containing credentials."
+  ],
+  "validation": [
+    "Architecture check12crates/33edges, format/strict Clippy and same-source GNU compile under existing budgets.",
+    "Real Win11 loopback trusted owned IP-SAN TLS1.2, actual clean successful response EOF before retained-MaterialReady disable, partial upload never treated as complete, original staged-file cleanup and original worker query/new-generation upload.",
+    "Keep all failure transcripts, exact source/build/EXE hashes and cleanup receipts; separately retain Win7/Win10/campus/Seewo scope. Existing1542 component tests remain regression evidence, not the new integration proof."
+  ],
+  "followupsSeparate": [
+    "A real slow download must be demonstrated actually holding its exact native pin at the stop trigger, not merely an unconsumed client response already sent by the server. Add this as a separate bounded scenario; verify actual sharing-lock evidence and old pin release before replacement.",
+    "Then run no-code reset and confirmed restore from an active ordinary HTTPS domain with retained material/partial body. Minimal additional files: application/reinitialize_entry_tests.rs, application/backup_shutdown_tests.rs plus the ordinary native probe/runner orchestration; modify production schedule/restore code only if an actual counterexample reveals a missing gate.",
+    "Suppressed Begin and queued SQL already have real component regressions. A combined normal-path stress probe needs narrowly scoped existing-worker synchronization to establish the stage without creating a second pool or bypassing ordinary auth. Do not add synthetic readiness solely to pass it."
+  ],
+  "nonChanges": [
+    "R68 frozen47 sources unchanged",
+    "No main source edit",
+    "No Cargo/Windows/network",
+    "No new goal created",
+    "Desktop public explicit actions and passive timetable/clock/calendar/countdown untouched"
+  ]
+}

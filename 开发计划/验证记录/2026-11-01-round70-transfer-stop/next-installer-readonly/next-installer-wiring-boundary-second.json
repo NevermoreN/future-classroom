@@ -1,0 +1,219 @@
+{
+  "status": "READ_ONLY_CORRECTION_OF_BUILD_CLOSURE_AND_FIRST_SUCCESSFUL_SLICE",
+  "createdUtc": "2026-11-01T09:04:14.917080+00:00",
+  "corrects": "next-installer-wiring-audit-first.json six-file list was incomplete as a deliverable build/artifact closure. It remains a conceptual core list, not an implementation-ready six-file promise.",
+  "minimumBuildClosure": {
+    "coreFilesAsPreviouslyProposed": [
+      "crates/fc-windows/Cargo.toml",
+      "crates/fc-windows/src/installer_lifecycle.rs",
+      "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "scripts/package-msi-candidate.py",
+      "scripts/check-msi-candidate.py"
+    ],
+    "additionalThreeRequired": [
+      {
+        "path": "crates/fc-bootstrap/Cargo.toml",
+        "reason": "Current manifest has no explicit binaries/default-run. src/bin helper is auto discovered, creates a second normal target and another test harness, and makes unqualified cargo run ambiguous. Preserve default-run=fc-bootstrap and explicitly document/declare the two closed binaries; keep helper tests rather than disabling its harness to preserve count21."
+      },
+      {
+        "path": "scripts/windows-msvc-ci.ps1",
+        "reason": "Get-BaselineCargoArguments rustc currently rejects every binary except fc-bootstrap; only product-compile constructs a normal executable, collection considers only that phase and enforces exactly1 product. Add explicit helper normal compilation on both baselines with the same correctly scoped productGUI/CRT flags, collection of profile.test=false helper and exact closed two normal targets, while tests stay CUI3. Keep test phase and thresholds; do not take a helper test executable as a deployable Binary stream."
+      },
+      {
+        "path": "scripts/check-msvc-gui-contract.ps1",
+        "reason": "Current pure contract deliberately rejects other bin and checks exact one normal command. Extend to closed main/helper target allowlist, both normal build identities/GUI2, rejection of unknown targets and restoration of test/Clippy CUI flags. This is necessary to avoid changing CI while leaving its own guard model contradictory."
+      }
+    ],
+    "count": "9 source/config/build-contract files minimum; packaging/MSI-CANDIDATE.md is an additional truthful product-contract update once authored behavior changes. If robust broker/protocol/effects code is extracted into child modules and actual tests, those are further real files, not hidden within a claimed six-file cap.",
+    "currentlyNoChangeRequired": [
+      {
+        "path": "scripts/windows-probe.py",
+        "reason": "Cargo compiler-artifact/profile.test/executable metadata already drives actual test enumeration dynamically; new helper harness should be discovered rather than hardcode21→22. External one-off validators and reports must derive actual membership; old CI archives remain their original counts."
+      },
+      {
+        "path": ".github/workflows/windows-msvc.yml + windows-win7-msvc.yml",
+        "reason": "Both invoke the common script and upload whole artifact root. No target names are hardcoded at workflow level, so common-script changes suffice unless actual measured duration exceeds existing job budgets; no speculative budget increase."
+      },
+      {
+        "path": "scripts/check-msvc-crt-phases.ps1",
+        "reason": "Can remain unchanged if main and helper compile within the same existing product-only flag scope and before/after phase identities remain the original five. If a new phase is introduced instead, this checker must also change; do not claim it remains valid automatically."
+      },
+      {
+        "path": "scripts/package-probe.py",
+        "reason": "Can remain unchanged if MSI helper is separately admitted and bound by the same original CI executable ledger containing both normal payload SHA and helper SHA. Do not add helper to ZIP namespace without updating its manifest/validation contract."
+      }
+    ],
+    "newArtifacts": "Expect another helper test harness plus a separately compiled normal helper. Bind both to Cargo target/package/profile, actual PE32/GUI2 vs CUI3, staticCRT/imports and source version. The current count21tests+1normal is historical, not invariant."
+  },
+  "packagerActualInterfaceClosure": {
+    "current": "Only input ZIP/SHA and four explicit tools(wixl/msiinfo/msiextract/objdump) are admitted; authoring(version,names) has no helper parameter; actual exports reject Binary/CustomAction and do not include MsiEmbeddedChainer.",
+    "minimumChanges": [
+      "Explicit normal helper path/SHA and original same-source build ledger: require helper profile.test=false, target fc-installer-lifecycle, package fc-bootstrap; bind the ordinary fc-bootstrap payload SHA to the same ledger and exact reviewed source, not a caller-declared compiler string.",
+      "Only accept fixed bounded Binary content and an exact reviewed hook/chainer/table set; independently inspect actual Binary stream bytes as well as installed payload extraction. Helper Binary is not an installed-file extraction target.",
+      "wixl0.103 R60 required msibuild table import for MsiEmbeddedChainer: add explicit pinned --msibuild tool/path/hash/version and exact IDT generation/import/export checks rather than assume unsupported WXS authoring worked.",
+      "Retain exact closed payload extraction checks; static authoring/table/PE checks do not become Windows installation proof."
+    ]
+  },
+  "r60ActualPerUserQuietSidEvidence": {
+    "fifthRunner": {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/implementation-owner-fifth/run-windows-probe.ps1",
+      "bytes": 23858,
+      "sha256": "b342315ac86a603407814818eeffd6f6b9fb37e7a5859883c8dfdc33034191b5"
+    },
+    "executeReceipt": {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/root-native-execute-second.json",
+      "bytes": 437,
+      "sha256": "65751a279c17c953fbd693fc6768684a1918100a168111b6873e3ec2a79da8f7"
+    },
+    "executeSourceSha256Matches": true,
+    "actualExitCode": 0,
+    "originalReport": {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/windows-observations-first.json",
+      "bytes": 31918,
+      "sha256": "3d4ac4b8a8e23f4dc747a54e98f4eadd2209f05b99935f51332104c7d2a1fd43"
+    },
+    "guardianHowSidWasMeasured": "The reviewed compiled guardian calls OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY) and copies TokenUser SID before recording ActualSid. The exact original guardian image SHA/process creation/handle were retained by observer before ACK. This is actual captured per-user quiet evidence, not an assumption based on UserSID property alone.",
+    "quietHowEstablished": "Actual fifth runner appends unquoted switch/qn; original four MSI logs record UILevel2 and matching UserSID. Actual execute receipt binds exact fifth runner source SHA.",
+    "operations": [
+      {
+        "operation": "install-commit",
+        "actualGuardianSidEqualsOriginalUser": true,
+        "msiUserSidEqualsOriginalUser": true,
+        "actualUiLevel": 2,
+        "guardianOriginalHandleAndExit0": true,
+        "joinReturn": 0,
+        "endReturn": 0,
+        "log": {
+          "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/install-commit.msi.log",
+          "bytes": 78856,
+          "sha256": "ec95c41b569859b1b4db2c5784d2a393b583abd9d63f3a36b6bf3518ffbaf99b"
+        }
+      },
+      {
+        "operation": "repair-commit",
+        "actualGuardianSidEqualsOriginalUser": true,
+        "msiUserSidEqualsOriginalUser": true,
+        "actualUiLevel": 2,
+        "guardianOriginalHandleAndExit0": true,
+        "joinReturn": 0,
+        "endReturn": 0,
+        "log": {
+          "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/repair-commit.msi.log",
+          "bytes": 71334,
+          "sha256": "bd1a8a954ff7b08c29542e425839240c60ce89b7eae7d723691aa10aa52d678c"
+        }
+      },
+      {
+        "operation": "uninstall-commit",
+        "actualGuardianSidEqualsOriginalUser": true,
+        "msiUserSidEqualsOriginalUser": true,
+        "actualUiLevel": 2,
+        "guardianOriginalHandleAndExit0": true,
+        "joinReturn": 0,
+        "endReturn": 0,
+        "log": {
+          "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/uninstall-commit.msi.log",
+          "bytes": 69528,
+          "sha256": "7baab3db83dbdad279e006a4e2a20917cb14949f6bb815eac27313b169a03eec"
+        }
+      },
+      {
+        "operation": "install-rollback",
+        "actualGuardianSidEqualsOriginalUser": true,
+        "msiUserSidEqualsOriginalUser": true,
+        "actualUiLevel": 2,
+        "guardianOriginalHandleAndExit0": true,
+        "joinReturn": 0,
+        "endReturn": 0,
+        "log": {
+          "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/install-rollback.msi.log",
+          "bytes": 129396,
+          "sha256": "29c95b82bab8a42d27f28d76359690fa02b63b8b5a5f86fd32d2de538517c987"
+        }
+      }
+    ],
+    "scopeLimit": "Only this Win11 synthetic perUser embedded-chainer topology. It does not prove SID for newly added deferred hooks, NoImpersonate/SYSTEM/elevated/per-machine/another-account routes. New hook/broker must measure actual process/effective token as appropriate and reject a different authority before Pending or payload mutation. Current InstallIdentity uses process TokenUser, not arbitrary MSI UserSID text or an impersonated thread assumption."
+  },
+  "smallestFirstSuccessCapableSlice": {
+    "recommendation": "Fresh per-user install plus its real rollback reconciliation, using real first-execute gate + authenticated broker + original engine guardian and a closed immutable payload manifest. Begin with a proven empty product/target namespace; no major-upgrade/repair/uninstall success claimed in this first slice. Those unsupported routes must refuse before script mutation and remain required follow-up tasks, not be deleted from the objective.",
+    "whyThisCanSucceed": "Unlike an all-failclosed owner scaffold, the fresh-install commit path can produce a real internal verified-effects receipt: exact own product/context registration, every allowed installed file hash/type/path and exact installer marker readback, all original handles returned. Known rollback can reopen only after the original absent baseline is independently re-established; this is a bounded verifiable state rather than trust in a caller bool.",
+    "beforeEffects": [
+      "Verify original per-user token/context, rollback enabled, exact package/helper/version/family and the closed payload manifest. Reject preexisting product/target contents, unsupported maintenance/upgrade/nested-delegation/advertise/forcedreboot modes before actual mutation. Do not adopt existing files as clean baseline.",
+      "Acquire existing R63 exclusive gate before any first script mutation, record original absent baseline and durable Pending, then allow only the exact reviewed File/Registry effects. No app startup, school data/DB/DPAPI changes or Run write/delete.",
+      "New deferred hook and embedded guardian must each prove actual token/process/image at their own engine entrypoints; R60 guardian SID evidence is not a substitute for the new hook."
+    ],
+    "commitAndRollbackProof": [
+      "Use an internal verifier over the trusted generated closed manifest and exact fixed installation context; no wire effects_reconciled=true, log line or productState alone constructs a positive receipt.",
+      "After actual MsiJoinTransaction/MsiEndTransaction success and original guardian physical exit0, independently reconcile expected committed files/registration/own component markers, or original absence on rollback. Track original engine process and exact transaction outcome separately.",
+      "Owned file identities, pinned parent paths, reparse/hardlink rejection and original file hashes must close verifier TOCTOU. If package/registration/rollback effects cannot be reconciled, Pending remains and the result is failed/unknown; this must be an observed exceptional path, not the only implemented behavior.",
+      "The R60 skipped rollback Error5 and SourceHash residue show End0 alone is inadequate. Define installer-engine cached-registration scope explicitly and record real residuals; do not broadly delete cache/keys to manufacture clean rollback."
+    ],
+    "runStrictness": "This first install slice performs no Run action. It neither solves nor weakens exact Run delete under arbitrary writers. Repair/upgrade/uninstall against an existing app/Run value remain incomplete and require their own exact reconciliation, not a convenient no-op claim.",
+    "scopeWarning": "Even this first successful install/rollback is not a tiny six-file patch. Authentication, original process retention, table sequencing and a real owned-effects verifier form one atomic reviewed closure; if verifier/rollback scope cannot be bounded now, implement the missing verifier/protocol first and retain MSI status unwired rather than ship a fake-success or permanently blocked candidate."
+  },
+  "notClaimed": [
+    "No new code, Cargo, Windows or network execution",
+    "No MSI integration implemented by this audit",
+    "No Win7/Win10/SYSTEM/newhook SID proof",
+    "No historical6701/exit72 success reinterpretation",
+    "No release, complete upgrade/uninstall, exact Run cleanup or whole-plan completion"
+  ],
+  "sourceFacts": [
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 494,
+      "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 52976,
+      "sha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 14248,
+      "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259"
+    },
+    {
+      "path": "scripts/check-msvc-crt-phases.ps1",
+      "bytes": 5670,
+      "sha256": "fdb57f148868845f4f75d5b2d7246f850080d42e86f894ad91fef520e6c9a05a"
+    },
+    {
+      "path": "scripts/windows-probe.py",
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 36605,
+      "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+    },
+    {
+      "path": "scripts/package-probe.py",
+      "bytes": 29849,
+      "sha256": "bf8339c74b958ae15fb63e04cf135fb13e633694d34453858768267a773ec940"
+    },
+    {
+      "path": ".github/workflows/windows-msvc.yml",
+      "bytes": 4639,
+      "sha256": "9142a7dad234808965460a4d0d6a06af11cbe5391bd8c7370fbb62541e5ddec5"
+    },
+    {
+      "path": ".github/workflows/windows-win7-msvc.yml",
+      "bytes": 4885,
+      "sha256": "cd36b5c7f3300bfc4997953553bedcd40d41e8b842741fb56d042977988f86fd"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 35343,
+      "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99"
+    }
+  ]
+}

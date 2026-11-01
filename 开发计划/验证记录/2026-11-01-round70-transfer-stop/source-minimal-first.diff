@@ -1,0 +1,1471 @@
+--- base/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
++++ candidate/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
+@@ -7,7 +7,7 @@
+     checked, login, make_app, open, pump, require, stop_owned_app, submit, LOGIN_NAME,
+     PASSWORD_VALUE,
+ };
+-const ORDER: [&str; 25] = [
++const ORDER: [&str; 31] = [
+     "setup-local-global-administrator",
+     "native-create-synthetic-class",
+     "native-create-independent-teacher-and-complete-first-password-change",
+@@ -21,12 +21,18 @@
+     "native-open-actual-runtime-pairing-window",
+     "native-approve-actual-network-pairing-request",
+     "first-real-authenticated-reminder-post-and-get",
++    "first-material-ready-and-partial-upload-established",
+     "native-pairing-close-and-disable-review-cancel",
+     "native-confirm-first-disable",
+     "physical-first-domain-drained",
++    "first-two-staging-files-removed",
+     "original-shared-workers-remain-operational",
+     "native-enable-second-generation",
+     "second-real-tls-response-complete",
++    "native-open-second-runtime-pairing-window",
++    "native-approve-second-network-pairing-request",
++    "second-old-cookie-rejected-and-two-upload-slots-reused",
++    "second-typed-material-command-receipt-and-cancel",
+     "native-lock-does-not-stop-established-domain",
+     "native-relogin-confirm-second-disable",
+     "physical-second-domain-drained",
+@@ -82,257 +88,122 @@
+     checked(std::io::stdout().flush(), "ordinary public READY flush")?;
+     Ok(())
+ }
+-fn confirm_disable(app: &mut App, deadline: Instant) -> Check<()> {
++fn confirm_disable(app: &mut App, cycle: u8, marker: &str, deadline: Instant) -> Check<()> {
++    let generation = running(app).ok_or("stop requires original running generation")?;
+     submit(app, web_editor::DISABLE, &[], deadline)?;
+-    submit(app, web_editor::CONFIRM, &[], deadline)
+-}
+-fn fixture_password() -> Check<fc_security::web::SecretText> {
+-    let mut bytes = [0u8; 32];
+-    checked(
+-        SystemRandom.fill(&mut bytes),
+-        "private teacher fixture randomness",
+-    )?;
+-    let text = bytes
+-        .iter()
+-        .map(|byte| format!("{byte:02x}"))
+-        .collect::<String>();
+-    bytes.fill(0);
+-    Ok(fc_security::web::SecretText::new(text))
+-}
+-fn create_teacher(app: &mut App, deadline: Instant) -> Check<()> {
+-    use accounts_editor as e;
+-    // Real native form commands go through the original shared workers, normal
+-    // credential KDFs and identity transactions; no SQLite/session fabrication.
+-    submit(app, TO_SUBJECTS, &[], deadline)?;
+-    submit(
+-        app,
+-        SAVE,
+-        &[
+-            (OLD_NAME, ""),
+-            (SUBJECT, "Synthetic HTTPS subject"),
+-            (COLOR, "123456"),
+-        ],
+-        deadline,
+-    )?;
+-    require(
+-        app.screen == Screen::Home,
+-        "subject save returned to actual home page",
+-    )?;
+-    submit(app, TO_ACCOUNTS, &[], deadline)?;
+-    let initial = fixture_password()?;
+-    let changed = fixture_password()?;
+-    submit(app, e::NEW, &[], deadline)?;
+-    submit(
+-        app,
+-        e::SCOPES,
+-        &[
+-            (e::LOGIN, TEACHER_LOGIN),
+-            (e::NAME, "Synthetic HTTPS teacher"),
+-            (e::ROLE, "teacher"),
+-        ],
+-        deadline,
+-    )?;
+-    submit(
+-        app,
+-        e::ADD_SCOPE,
+-        &[(e::CLASS, "1"), (e::SUBJECT, "1")],
+-        deadline,
+-    )?;
+-    submit(app, e::RETURN, &[], deadline)?;
+-    submit(app, e::REVIEW, &[], deadline)?;
+-    submit(app, e::CONFIRM, &[], deadline)?;
+-    submit(
+-        app,
+-        e::CONFIRM,
+-        &[
+-            (e::PASSWORD, initial.as_str()),
+-            (e::CONFIRM_PASSWORD, initial.as_str()),
+-        ],
+-        deadline,
+-    )?;
+-    require(
+-        app.screen == Screen::Code,
+-        "teacher created with real one-time recovery page",
+-    )?;
+-    submit(app, ACK, &[], deadline)?;
+-    submit(app, LOCK, &[], deadline)?;
+-    submit(
+-        app,
+-        LOG_IN,
+-        &[(LOGIN, TEACHER_LOGIN), (PASSWORD, initial.as_str())],
+-        deadline,
+-    )?;
+-    require(
+-        app.screen == Screen::Password,
+-        "teacher first-login password change required",
+-    )?;
+-    submit(
+-        app,
+-        SAVE,
+-        &[
+-            (PASSWORD, initial.as_str()),
+-            (NEW_PASSWORD, changed.as_str()),
+-            (CONFIRM, changed.as_str()),
+-        ],
+-        deadline,
+-    )?;
+-    drop(initial);
+-    require(
+-        app.screen == Screen::Login,
+-        "real password change invalidates prior teacher lease",
+-    )?;
+-    submit(
+-        app,
+-        LOG_IN,
+-        &[(LOGIN, TEACHER_LOGIN), (PASSWORD, changed.as_str())],
+-        deadline,
+-    )?;
+-    drop(changed);
+-    let teacher = app
+-        .state
+-        .account_by_login(TEACHER_LOGIN)
+-        .map_err(|_| "teacher absent")?;
+-    require(
+-        app.screen == Screen::Home
+-            && teacher.principal.enabled
+-            && teacher.principal.role == Role::TeacherAdmin
+-            && !teacher.must_change_password
+-            && app
+-                .state
+-                .assignments
+-                .iter()
+-                .filter(|scope| {
+-                    scope.teacher_id == teacher.principal.id
+-                        && scope.enabled
+-                        && scope.class_id.get() == 1
+-                        && scope.subject_id.get() == 1
+-                })
+-                .count()
+-                == 1,
+-        "independent enabled teacher and exact class/subject scope",
+-    )?;
+-    submit(app, LOCK, &[], deadline)?;
+-    login(app, deadline)
+-}
+-fn workflow(
++    let began = Instant::now();
++    let stop_deadline = deadline.min(began + Duration::from_secs(5));
++    submit(app, web_editor::CONFIRM, &[], stop_deadline)?;
++    wait(app, stop_deadline, |a| {
++        a.teacher_https_quiescent() && a.web_readiness == web_editor::Readiness::Disabled
++    })?;
++    let elapsed = began.elapsed();
++    require(
++        elapsed <= Duration::from_secs(5),
++        "one original stop interval",
++    )?;
++    let report = app
++        .teacher_https
++        .owner
++        .as_ref()
++        .and_then(|o| o.network_report())
++        .ok_or("original stopped network report absent")?;
++    require(
++        report.native_drained
++            && report.active_records == 0
++            && report.pending_jobs == 0
++            && report.cleanup_pending == 0
++            && report.retained_cleanup == 0,
++        "original Net/native ownership actually drained",
++    )?;
++    println!("ORDINARY_HTTPS_STOPPED {{\"cycle\":{cycle},\"marker\":\"{marker}\",\"generation\":{generation},\"elapsedNs\":{},\"activeRecords\":0,\"pendingJobs\":0,\"cleanupPending\":0,\"retainedCleanup\":0,\"nativeDrained\":true}}", elapsed.as_nanos());
++    checked(std::io::stdout().flush(), "stop observation flush")
++}
++fn stage_path(app: &App, id: u64) -> PathBuf {
++    app.root
++        .join("web-material-staging")
++        .join(format!("web-material-{id}.part"))
++}
++fn stage_length(app: &App, id: u64) -> Check<u64> {
++    use std::os::windows::fs::MetadataExt;
++    let metadata = fs::symlink_metadata(stage_path(app, id))
++        .map_err(|_| "exact owned material stage metadata unavailable")?;
++    require(
++        metadata.file_type().is_file() && metadata.file_attributes() & 0x400 == 0,
++        "owned stage must be regular and non-reparse",
++    )?;
++    Ok(metadata.len())
++}
++fn absent_stage(app: &App, id: u64) -> Check<()> {
++    require(
++        matches!(fs::symlink_metadata(stage_path(app, id)), Err(e)
++        if e.kind() == std::io::ErrorKind::NotFound),
++        "exact old material stage absent",
++    )
++}
++fn completion(
+     app: &mut App,
+-    paths: &DataPaths,
+-    reference: &str,
++    root: &Path,
++    marker: &str,
++    cycle: u8,
++    generation: u64,
++    deadline: Instant,
++) -> Check<[u64; 2]> {
++    let path = root.join(format!("ordinary-business-{cycle}.done"));
++    loop {
++        pump(app, deadline)?;
++        match fs::symlink_metadata(&path) {
++            Ok(metadata) => {
++                require(
++                    metadata.file_type().is_file() && metadata.len() <= 256,
++                    "bounded regular completion marker",
++                )?;
++                let bytes = fs::read(&path).map_err(|_| "owned completion read failed")?;
++                let text = std::str::from_utf8(&bytes).map_err(|_| "completion encoding")?;
++                let fields: Vec<_> = text.split('\n').collect();
++                require(
++                    fields.len() == 7
++                        && fields[0] == "FC_ORDINARY_DONE_V2"
++                        && fields[1] == marker
++                        && fields[2] == format!("{generation:020}")
++                        && fields[3] == cycle.to_string()
++                        && fields[6].is_empty(),
++                    "exact completion marker/cycle/generation",
++                )?;
++                let mut ids = [0; 2];
++                for (index, input) in fields[4..6].iter().enumerate() {
++                    ids[index] = input.parse().map_err(|_| "completion upload ID")?;
++                    require(
++                        ids[index] > 0 && *input == format!("{:020}", ids[index]),
++                        "canonical bounded completion ID",
++                    )?;
++                }
++                require(
++                    ids[0] != ids[1] && Instant::now() < deadline,
++                    "distinct upload IDs before original deadline",
++                )?;
++                return Ok(ids);
++            }
++            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
++            Err(_) => return Err("owned completion metadata failed".into()),
++        }
++        require(
++            Instant::now() < deadline,
++            "original authenticated transfer deadline",
++        )?;
++        std::thread::park_timeout(Duration::from_millis(10));
++    }
++}
++fn pair(
++    app: &mut App,
++    root: &Path,
++    marker: &str,
++    cycle: u8,
++    generation: u64,
+     port: u16,
+-    marker: &str,
+     steps: &mut usize,
+     deadline: Instant,
+ ) -> Check<()> {
+-    let completion = app
+-        .teacher_https
+-        .probe_package
+-        .as_ref()
+-        .and_then(|p| p.parent())
+-        .ok_or("owned probe package parent absent")?
+-        .join("ordinary-business-first.done");
+-    open(app, paths, deadline)?;
+-    submit(
+-        app,
+-        SAVE,
+-        &[
+-            (SCHOOL, "Synthetic ordinary HTTPS school"),
+-            (LOGIN, LOGIN_NAME),
+-            (NAME, "Synthetic administrator"),
+-            (PASSWORD, PASSWORD_VALUE),
+-            (CONFIRM, PASSWORD_VALUE),
+-        ],
+-        deadline,
+-    )?;
+-    submit(app, ACK, &[], deadline)?;
+-    if app.screen == Screen::Login {
+-        login(app, deadline)?;
+-    }
+-    require(app.screen == Screen::Home, "ordinary HTTPS setup completed")?;
+-    mark(steps, "setup-local-global-administrator")?;
+-    submit(app, TO_SCHOOL, &[], deadline)?;
+-    submit(
+-        app,
+-        ADD_CLASS,
+-        &[(CLASS, "Synthetic ordinary HTTPS class")],
+-        deadline,
+-    )?;
+-    require(
+-        app.state.classes.len() == 1,
+-        "exact synthetic class created through native form",
+-    )?;
+-    require(
+-        app.screen == Screen::Home,
+-        "class save returned to actual home page",
+-    )?;
+-    submit(app, TO_SCHOOL, &[], deadline)?;
+-    submit(
+-        app,
+-        BIND_CLASS,
+-        &[(CLASS, "Synthetic ordinary HTTPS class")],
+-        deadline,
+-    )?;
+-    require(
+-        app.screen == Screen::Home,
+-        "class binding returned to actual home page",
+-    )?;
+-    mark(steps, "native-create-synthetic-class")?;
+-    create_teacher(app, deadline)?;
+-    mark(
+-        steps,
+-        "native-create-independent-teacher-and-complete-first-password-change",
+-    )?;
+-    // Hidden fixtures start Unavailable; Disabled grants no runtime readiness.
+-    app.set_web_readiness(web_editor::Readiness::Disabled);
+-    submit(app, TO_WEB, &[], deadline)?;
+-    require(
+-        app.teacher_https_quiescent() && app.web_readiness == web_editor::Readiness::Disabled,
+-        "ordinary HTTPS default off",
+-    )?;
+-    mark(steps, "native-teacher-page-default-off")?;
+-    submit(app, web_editor::HTTPS_SETTINGS, &[], deadline)?;
+-    mark(steps, "native-open-https-settings")?;
+-    let port_text = port.to_string();
+-    submit(
+-        app,
+-        h::SAVE_CONFIG,
+-        &[
+-            (h::HOST, "127.0.0.1"),
+-            (h::PORT, &port_text),
+-            (h::CERTIFICATE, reference),
+-            (h::SOURCE_NETWORKS, "127.0.0.1/32"),
+-        ],
+-        deadline,
+-    )?;
+-    while app.https_unadmitted.is_some() {
+-        require(
+-            Instant::now() < deadline,
+-            "original config admission deadline",
+-        )?;
+-        app.retry_https_unadmitted()?;
+-        pump(app, deadline)?;
+-    }
+-    require(
+-        !app.https_editor
+-            .as_ref()
+-            .is_none_or(|e| e.dirty() || e.has_unknown()),
+-        "ordinary HTTPS config saved",
+-    )?;
+-    mark(steps, "native-save-explicit-ip-cidr-reference")?;
+-    require(
+-        app.teacher_https_quiescent() && app.web_readiness == web_editor::Readiness::Disabled,
+-        "save never starts listener",
+-    )?;
+-    mark(steps, "saved-config-no-listener")?;
+-    submit(app, h::CLOSE, &[], deadline)?;
+-    submit(app, web_editor::ENABLE, &[], deadline)?;
+-    mark(steps, "native-enable-configured-runtime")?;
+-    wait(app, deadline, |a| running(a).is_some())?;
+-    let first = running(app).unwrap();
+-    mark(steps, "physical-first-running-generation")?;
+-    ready(app, 1, port, marker)?;
+-    wait(app, deadline, response)?;
+-    mark(steps, "first-real-tls-response-complete")?;
+-    // Refresh coherent logical metadata before exposing a pairing button.
+     submit(app, web_editor::REFRESH, &[], deadline)?;
+     submit(app, web_editor::BEGIN, &[], deadline)?;
+     let code = app
+@@ -340,30 +211,31 @@
+         .as_ref()
+         .and_then(web_editor::Editor::code_text)
+         .ok_or("actual ordinary pairing code absent")?;
+-    let secret = completion.with_file_name("ordinary-pairing-first.secret");
+     {
+         use std::io::Write;
+         let mut output = fs::OpenOptions::new()
+             .write(true)
+             .create_new(true)
+-            .open(&secret)
++            .open(root.join(format!("ordinary-pairing-{cycle}.secret")))
+             .map_err(|_| "fresh owned pairing sidechannel unavailable")?;
+         write!(
+             output,
+-            "FC_ORDINARY_PAIR_V1\n{marker}\n{first:020}\n{}\n{TEACHER_LOGIN}\n",
++            "FC_ORDINARY_PAIR_V2\n{marker}\n{generation:020}\n{cycle}\n{}\n{TEACHER_LOGIN}\n",
+             code.as_str()
+         )
+         .map_err(|_| "owned pairing sidechannel write failed")?;
+     }
+     drop(code);
+-    // Secret values never enter the native transcript or archived report. The
+-    // external client consumes/deletes the owned sidechannel into memory only.
+-    println!("ORDINARY_HTTPS_PAIR_READY {{\"cycle\":1,\"marker\":\"{marker}\",\"port\":{port},\"generation\":{first},\"origin\":\"https://127.0.0.1:{port}\"}}");
+-    checked(
+-        std::io::stdout().flush(),
+-        "ordinary public pairing rendezvous flush",
+-    )?;
+-    mark(steps, "native-open-actual-runtime-pairing-window")?;
++    println!("ORDINARY_HTTPS_PAIR_READY {{\"cycle\":{cycle},\"marker\":\"{marker}\",\"port\":{port},\"generation\":{generation},\"origin\":\"https://127.0.0.1:{port}\"}}");
++    checked(std::io::stdout().flush(), "pairing rendezvous flush")?;
++    mark(
++        steps,
++        if cycle == 1 {
++            "native-open-actual-runtime-pairing-window"
++        } else {
++            "native-open-second-runtime-pairing-window"
++        },
++    )?;
+     let request = loop {
+         require(
+             Instant::now() < deadline,
+@@ -383,11 +255,8 @@
+                     _ => None,
+                 }
+             })
+-            .ok_or("actual native pairing request list absent")?;
+-        require(
+-            choices.len() <= 1,
+-            "only one synthetic external pairing request",
+-        )?;
++            .ok_or("actual native pairing list absent")?;
++        require(choices.len() <= 1, "only one synthetic pairing request")?;
+         if let Some(choice) = choices.first() {
+             break choice.value.clone();
+         }
+@@ -395,15 +264,15 @@
+     };
+     checked(
+         app.window.probe_choice(web_editor::REQUEST, &request),
+-        "native request ComboBox selection",
++        "native request selection",
+     )?;
+     pump(app, deadline)?;
+     require(
+         app.view()
+             .actions
+             .iter()
+-            .any(|action| action.id == web_editor::APPROVE && action.enabled),
+-        "selected actual request enables approval",
++            .any(|a| a.id == web_editor::APPROVE && a.enabled),
++        "actual selected request enables approval",
+     )?;
+     submit(
+         app,
+@@ -411,39 +280,275 @@
+         &[(web_editor::REQUEST, &request)],
+         deadline,
+     )?;
+-    mark(steps, "native-approve-actual-network-pairing-request")?;
+-    // Explicit diagnostic synchronization only. The runner writes this bounded
+-    // owned marker after authenticating, committing and reading back a reminder
+-    // over the same real host, each response with actual clean TLS EOF.
+-    let expected = format!("FC_ORDINARY_DONE_V1\n{marker}\n{first:020}\n");
+-    loop {
+-        pump(app, deadline)?;
+-        match fs::symlink_metadata(&completion) {
+-            Ok(metadata) => {
+-                require(
+-                    metadata.file_type().is_file() && metadata.len() == expected.len() as u64,
+-                    "bounded regular completion marker",
+-                )?;
+-                let value = fs::read(&completion).map_err(|_| "completion marker read failed")?;
+-                require(
+-                    value == expected.as_bytes(),
+-                    "exact owned marker and generation",
+-                )?;
+-                require(
+-                    Instant::now() < deadline,
+-                    "completion before original deadline",
+-                )?;
+-                break;
+-            }
+-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+-            Err(_) => return Err("owned business completion marker read failed".into()),
+-        }
++    mark(
++        steps,
++        if cycle == 1 {
++            "native-approve-actual-network-pairing-request"
++        } else {
++            "native-approve-second-network-pairing-request"
++        },
++    )
++}
++fn fixture_password() -> Check<fc_security::web::SecretText> {
++    let mut bytes = [0u8; 32];
++    checked(
++        SystemRandom.fill(&mut bytes),
++        "private teacher fixture randomness",
++    )?;
++    let text = bytes
++        .iter()
++        .map(|byte| format!("{byte:02x}"))
++        .collect::<String>();
++    bytes.fill(0);
++    Ok(fc_security::web::SecretText::new(text))
++}
++fn create_teacher(app: &mut App, deadline: Instant) -> Check<()> {
++    use accounts_editor as e;
++    // Real native form commands go through the original shared workers, normal
++    // credential KDFs and identity transactions; no SQLite/session fabrication.
++    submit(app, TO_SUBJECTS, &[], deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (OLD_NAME, ""),
++            (SUBJECT, "Synthetic HTTPS subject"),
++            (COLOR, "123456"),
++        ],
++        deadline,
++    )?;
++    require(
++        app.screen == Screen::Home,
++        "subject save returned to actual home page",
++    )?;
++    submit(app, TO_ACCOUNTS, &[], deadline)?;
++    let initial = fixture_password()?;
++    let changed = fixture_password()?;
++    submit(app, e::NEW, &[], deadline)?;
++    submit(
++        app,
++        e::SCOPES,
++        &[
++            (e::LOGIN, TEACHER_LOGIN),
++            (e::NAME, "Synthetic HTTPS teacher"),
++            (e::ROLE, "teacher"),
++        ],
++        deadline,
++    )?;
++    submit(
++        app,
++        e::ADD_SCOPE,
++        &[(e::CLASS, "1"), (e::SUBJECT, "1")],
++        deadline,
++    )?;
++    submit(app, e::RETURN, &[], deadline)?;
++    submit(app, e::REVIEW, &[], deadline)?;
++    submit(app, e::CONFIRM, &[], deadline)?;
++    submit(
++        app,
++        e::CONFIRM,
++        &[
++            (e::PASSWORD, initial.as_str()),
++            (e::CONFIRM_PASSWORD, initial.as_str()),
++        ],
++        deadline,
++    )?;
++    require(
++        app.screen == Screen::Code,
++        "teacher created with real one-time recovery page",
++    )?;
++    submit(app, ACK, &[], deadline)?;
++    submit(app, LOCK, &[], deadline)?;
++    submit(
++        app,
++        LOG_IN,
++        &[(LOGIN, TEACHER_LOGIN), (PASSWORD, initial.as_str())],
++        deadline,
++    )?;
++    require(
++        app.screen == Screen::Password,
++        "teacher first-login password change required",
++    )?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (PASSWORD, initial.as_str()),
++            (NEW_PASSWORD, changed.as_str()),
++            (CONFIRM, changed.as_str()),
++        ],
++        deadline,
++    )?;
++    drop(initial);
++    require(
++        app.screen == Screen::Login,
++        "real password change invalidates prior teacher lease",
++    )?;
++    submit(
++        app,
++        LOG_IN,
++        &[(LOGIN, TEACHER_LOGIN), (PASSWORD, changed.as_str())],
++        deadline,
++    )?;
++    drop(changed);
++    let teacher = app
++        .state
++        .account_by_login(TEACHER_LOGIN)
++        .map_err(|_| "teacher absent")?;
++    require(
++        app.screen == Screen::Home
++            && teacher.principal.enabled
++            && teacher.principal.role == Role::TeacherAdmin
++            && !teacher.must_change_password
++            && app
++                .state
++                .assignments
++                .iter()
++                .filter(|scope| {
++                    scope.teacher_id == teacher.principal.id
++                        && scope.enabled
++                        && scope.class_id.get() == 1
++                        && scope.subject_id.get() == 1
++                })
++                .count()
++                == 1,
++        "independent enabled teacher and exact class/subject scope",
++    )?;
++    submit(app, LOCK, &[], deadline)?;
++    login(app, deadline)
++}
++fn workflow(
++    app: &mut App,
++    paths: &DataPaths,
++    reference: &str,
++    port: u16,
++    marker: &str,
++    steps: &mut usize,
++    deadline: Instant,
++) -> Check<()> {
++    let completion_path = app
++        .teacher_https
++        .probe_package
++        .as_ref()
++        .and_then(|p| p.parent())
++        .ok_or("owned probe package parent absent")?
++        .join("ordinary-business-1.done");
++    open(app, paths, deadline)?;
++    submit(
++        app,
++        SAVE,
++        &[
++            (SCHOOL, "Synthetic ordinary HTTPS school"),
++            (LOGIN, LOGIN_NAME),
++            (NAME, "Synthetic administrator"),
++            (PASSWORD, PASSWORD_VALUE),
++            (CONFIRM, PASSWORD_VALUE),
++        ],
++        deadline,
++    )?;
++    submit(app, ACK, &[], deadline)?;
++    if app.screen == Screen::Login {
++        login(app, deadline)?;
++    }
++    require(app.screen == Screen::Home, "ordinary HTTPS setup completed")?;
++    mark(steps, "setup-local-global-administrator")?;
++    submit(app, TO_SCHOOL, &[], deadline)?;
++    submit(
++        app,
++        ADD_CLASS,
++        &[(CLASS, "Synthetic ordinary HTTPS class")],
++        deadline,
++    )?;
++    require(
++        app.state.classes.len() == 1,
++        "exact synthetic class created through native form",
++    )?;
++    require(
++        app.screen == Screen::Home,
++        "class save returned to actual home page",
++    )?;
++    submit(app, TO_SCHOOL, &[], deadline)?;
++    submit(
++        app,
++        BIND_CLASS,
++        &[(CLASS, "Synthetic ordinary HTTPS class")],
++        deadline,
++    )?;
++    require(
++        app.screen == Screen::Home,
++        "class binding returned to actual home page",
++    )?;
++    mark(steps, "native-create-synthetic-class")?;
++    create_teacher(app, deadline)?;
++    mark(
++        steps,
++        "native-create-independent-teacher-and-complete-first-password-change",
++    )?;
++    // Hidden fixtures start Unavailable; Disabled grants no runtime readiness.
++    app.set_web_readiness(web_editor::Readiness::Disabled);
++    submit(app, TO_WEB, &[], deadline)?;
++    require(
++        app.teacher_https_quiescent() && app.web_readiness == web_editor::Readiness::Disabled,
++        "ordinary HTTPS default off",
++    )?;
++    mark(steps, "native-teacher-page-default-off")?;
++    submit(app, web_editor::HTTPS_SETTINGS, &[], deadline)?;
++    mark(steps, "native-open-https-settings")?;
++    let port_text = port.to_string();
++    submit(
++        app,
++        h::SAVE_CONFIG,
++        &[
++            (h::HOST, "127.0.0.1"),
++            (h::PORT, &port_text),
++            (h::CERTIFICATE, reference),
++            (h::SOURCE_NETWORKS, "127.0.0.1/32"),
++        ],
++        deadline,
++    )?;
++    while app.https_unadmitted.is_some() {
+         require(
+             Instant::now() < deadline,
+-            "original authenticated business deadline",
++            "original config admission deadline",
+         )?;
+-        std::thread::park_timeout(Duration::from_millis(10));
+-    }
++        app.retry_https_unadmitted()?;
++        pump(app, deadline)?;
++    }
++    require(
++        !app.https_editor
++            .as_ref()
++            .is_none_or(|e| e.dirty() || e.has_unknown()),
++        "ordinary HTTPS config saved",
++    )?;
++    mark(steps, "native-save-explicit-ip-cidr-reference")?;
++    require(
++        app.teacher_https_quiescent() && app.web_readiness == web_editor::Readiness::Disabled,
++        "save never starts listener",
++    )?;
++    mark(steps, "saved-config-no-listener")?;
++    submit(app, h::CLOSE, &[], deadline)?;
++    submit(app, web_editor::ENABLE, &[], deadline)?;
++    mark(steps, "native-enable-configured-runtime")?;
++    wait(app, deadline, |a| running(a).is_some())?;
++    let first = running(app).unwrap();
++    mark(steps, "physical-first-running-generation")?;
++    ready(app, 1, port, marker)?;
++    wait(app, deadline, response)?;
++    mark(steps, "first-real-tls-response-complete")?;
++    let package_root = completion_path
++        .parent()
++        .ok_or("owned completion parent absent")?;
++    pair(app, package_root, marker, 1, first, port, steps, deadline)?;
++    let first_ids = completion(app, package_root, marker, 1, first, deadline)?;
++    require(
++        stage_length(app, first_ids[0])? == 65536,
++        "actual completed MaterialReady stage retained before stop",
++    )?;
++    let partial = stage_length(app, first_ids[1])?;
++    require(
++        partial > 0 && partial < 1048576,
++        "actual partial body consumed before native stop",
++    )?;
+     wait(app, deadline, |a| {
+         a.teacher_https
+             .owner
+@@ -452,6 +557,7 @@
+             .is_some_and(|r| r.heads >= 9 && r.responses >= 9)
+     })?;
+     mark(steps, "first-real-authenticated-reminder-post-and-get")?;
++    mark(steps, "first-material-ready-and-partial-upload-established")?;
+     submit(app, web_editor::CLOSE, &[], deadline)?;
+     submit(app, web_editor::DISABLE, &[], deadline)?;
+     submit(app, web_editor::CANCEL, &[], deadline)?;
+@@ -460,12 +566,14 @@
+         "cancel disable leaves original runtime",
+     )?;
+     mark(steps, "native-pairing-close-and-disable-review-cancel")?;
+-    confirm_disable(app, deadline)?;
++    confirm_disable(app, 1, marker, deadline)?;
+     mark(steps, "native-confirm-first-disable")?;
+-    wait(app, deadline, |a| {
+-        a.teacher_https_quiescent() && a.web_readiness == web_editor::Readiness::Disabled
+-    })?;
++
+     mark(steps, "physical-first-domain-drained")?;
++    for id in first_ids {
++        absent_stage(app, id)?;
++    }
++    mark(steps, "first-two-staging-files-removed")?;
+     require(
+         !app.pool.is_finished() && !app.pool.is_faulted(),
+         "ordinary disable retains original shared workers",
+@@ -494,6 +602,21 @@
+     wait(app, deadline, response)?;
+     mark(steps, "second-real-tls-response-complete")?;
+     let second = running(app).unwrap();
++    pair(app, package_root, marker, 2, second, port, steps, deadline)?;
++    let second_ids = completion(app, package_root, marker, 2, second, deadline)?;
++    for id in second_ids {
++        absent_stage(app, id)?;
++    }
++    require(
++        second_ids.iter().all(|id| !first_ids.contains(id)),
++        "new material IDs do not alias old generation",
++    )?;
++    mark(
++        steps,
++        "second-old-cookie-rejected-and-two-upload-slots-reused",
++    )?;
++    mark(steps, "second-typed-material-command-receipt-and-cancel")?;
++    submit(app, web_editor::CLOSE, &[], deadline)?;
+     submit(app, LOCK, &[], deadline)?;
+     require(
+         app.lease.is_none() && running(app) == Some(second),
+@@ -503,11 +626,9 @@
+     login(app, deadline)?;
+     submit(app, TO_WEB, &[], deadline)?;
+     submit(app, web_editor::REFRESH, &[], deadline)?;
+-    confirm_disable(app, deadline)?;
++    confirm_disable(app, 2, marker, deadline)?;
+     mark(steps, "native-relogin-confirm-second-disable")?;
+-    wait(app, deadline, |a| {
+-        a.teacher_https_quiescent() && a.web_readiness == web_editor::Readiness::Disabled
+-    })?;
++
+     mark(steps, "physical-second-domain-drained")?;
+     submit(app, BACK, &[], deadline)?;
+     require(
+@@ -539,7 +660,7 @@
+     let completion = package
+         .parent()
+         .ok_or("owned package parent absent")?
+-        .join("ordinary-business-first.done");
++        .join("ordinary-business-1.done");
+     require(!completion.exists(), "fresh business completion channel")?;
+     let started = Instant::now();
+     let deadline = started + Duration::from_secs(120);
+@@ -572,6 +693,6 @@
+     require(!root.exists(), "ordinary fixture root absent")?;
+     result?;
+     mark(&mut steps, "owned-deployment-cleanup")?;
+-    println!("ORDINARY_HTTPS_NATIVE_PASS steps={steps} shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=NOT_EXERCISED campus=NOT_VALIDATED elapsed_ms={}",started.elapsed().as_millis());
++    println!("ORDINARY_HTTPS_NATIVE_PASS steps={steps} shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=PASS partial_upload_stop=PASS upload_slots_reused=2 typed_material_receipt=PASS campus=NOT_VALIDATED elapsed_ms={}",started.elapsed().as_millis());
+     Ok(())
+ }
+--- base/scripts/windows-ordinary-https-probe.py
++++ candidate/scripts/windows-ordinary-https-probe.py
+@@ -4,7 +4,7 @@
+ Uses one supplied EXE, two actual configured loopback generations and two strict
+ TLS status GETs plus an actual approved teacher session and reminder POST/GET. Existing certificate/key/process/raw-evidence ownership helpers
+ are reused. No browser, recording, playback, trust/firewall/HTTP.sys mutation.
+-MaterialReady, campus reachability and Win7/Win10 runtime remain separate tests.
++MaterialReady/partial upload stops use the ordinary owner; campus and Win7/Win10 remain separate tests.
+ """
+ import argparse
+ import copy
+@@ -33,15 +33,17 @@
+     "native-save-explicit-ip-cidr-reference", "saved-config-no-listener", "native-enable-configured-runtime",
+     "physical-first-running-generation", "first-real-tls-response-complete",
+     "native-open-actual-runtime-pairing-window", "native-approve-actual-network-pairing-request",
+-    "first-real-authenticated-reminder-post-and-get", "native-pairing-close-and-disable-review-cancel", "native-confirm-first-disable",
+-    "physical-first-domain-drained", "original-shared-workers-remain-operational",
++    "first-real-authenticated-reminder-post-and-get", "first-material-ready-and-partial-upload-established", "native-pairing-close-and-disable-review-cancel", "native-confirm-first-disable",
++    "physical-first-domain-drained", "first-two-staging-files-removed", "original-shared-workers-remain-operational",
+     "native-enable-second-generation", "second-real-tls-response-complete",
++    "native-open-second-runtime-pairing-window", "native-approve-second-network-pairing-request",
++    "second-old-cookie-rejected-and-two-upload-slots-reused", "second-typed-material-command-receipt-and-cancel",
+     "native-lock-does-not-stop-established-domain", "native-relogin-confirm-second-disable",
+     "physical-second-domain-drained", "native-return-to-local-workbench",
+     "actual-shared-worker-writer-shutdown", "owned-deployment-cleanup",
+ )
+ _STEP = re.compile(r"ORDINARY_HTTPS_NATIVE_STEP index=(0|[1-9][0-9]*) name=([a-z-]+)")
+-_FOOTER = re.compile(r"ORDINARY_HTTPS_NATIVE_PASS steps=25 shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=NOT_EXERCISED campus=NOT_VALIDATED elapsed_ms=(0|[1-9][0-9]*)")
++_FOOTER = re.compile(r"ORDINARY_HTTPS_NATIVE_PASS steps=31 shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=PASS partial_upload_stop=PASS upload_slots_reused=2 typed_material_receipt=PASS campus=NOT_VALIDATED elapsed_ms=(0|[1-9][0-9]*)")
+ _old_launch = "@('--tls-lifecycle-probe',$thumbprint,$marker)"
+ if tls.LAUNCH.count(_old_launch) != 1 or tls.STOP.count("--tls-lifecycle-probe") != 1:
+     raise RuntimeError("original exact owned-process launch/cleanup contract changed")
+@@ -76,9 +78,9 @@
+             item = _FOOTER.fullmatch(line)
+             require(item is not None and int(item[1]) <= 120000, "ordinary original120s footer")
+             footer.append(index)
+-    require([(i, name) for i, name, _ in steps] == list(enumerate(STEPS)), "ordinary exact twenty-five steps")
++    require([(i, name) for i, name, _ in steps] == list(enumerate(STEPS)), "ordinary exact thirty-one steps")
+     require(len(footer) == 1 and footer[0] > steps[-1][2], "ordinary footer after all steps")
+-    return {"steps": len(steps), "authenticatedReminder": "PASS", "physicalShutdown": "PASS", "materialReadyStop": "NOT_EXERCISED"}
++    return {"steps": len(steps), "authenticatedReminder": "PASS", "physicalShutdown": "PASS", "materialReadyStop": "PASS"}
+ 
+ 
+ def validate_status(value):
+@@ -112,22 +114,22 @@
+             "tls": "TLSv1.2", "serverName": "127.0.0.1", "cookieSent": False}
+ 
+ 
+-def validate_pair_ready(value, marker, port, generation):
++def validate_pair_ready(value, marker, port, generation, cycle=1):
+     require(type(value) is dict and set(value) == {"cycle", "marker", "port", "generation", "origin"}
+-            and type(value["cycle"]) is int and value["cycle"] == 1
++            and type(value["cycle"]) is int and value["cycle"] == cycle
+             and value["marker"] == marker and type(value["port"]) is int and value["port"] == port
+             and type(value["generation"]) is int and value["generation"] == generation
+             and value["origin"] == f"https://127.0.0.1:{port}", "public pairing rendezvous identity")
+ 
+ 
+-def read_pairing_secret(remote, directory, marker, generation, deadline):
++def read_pairing_secret(remote, directory, marker, generation, deadline, cycle=1):
+     # This one SSH subprocess is deliberately outside the raw recording helper.
+     # No local file, stdout/stderr artifact, digest, exception contents or report
+     # may retain the short code. Remove the exact owned file before delivery.
+     require(time.monotonic() < deadline, "original client secret-read deadline")
+     script = ("$r=" + b.ps_literal(directory) + ";$m=" + b.ps_literal(marker)
+         + ";if((Split-Path -Leaf $r)-ne $m-or [IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned channel mismatch'};"
+-        + "$p=Join-Path $r 'ordinary-pairing-first.secret';$f=Get-Item -LiteralPath $p;"
++        + "$p=Join-Path $r "+b.ps_literal(f"ordinary-pairing-{cycle}.secret")+";$f=Get-Item -LiteralPath $p;"
+         + "if($f.Length-gt 256-or ($f.Attributes-band [IO.FileAttributes]::ReparsePoint)){throw 'bounded regular secret channel required'};"
+         + "$v=[IO.File]::ReadAllText($p);Remove-Item -LiteralPath $p;[Console]::Write($v)")
+     try:
+@@ -140,15 +142,17 @@
+     except UnicodeError:
+         raise RuntimeError("owned pairing memory-only encoding") from None
+     require(time.monotonic() < deadline, "owned pairing read before original deadline")
+-    return parse_pairing_secret(text, marker, generation)
+-
+-
+-def parse_pairing_secret(text, marker, generation):
++    return parse_pairing_secret(text, marker, generation, cycle)
++
++
++def parse_pairing_secret(text, marker, generation, cycle=1):
+     fields = text.split("\n")
+-    require(len(fields) == 6 and fields[0] == "FC_ORDINARY_PAIR_V1" and fields[1] == marker
+-            and fields[2] == f"{generation:020}" and re.fullmatch(r"[0-9]{8}", fields[3])
+-            and fields[4] == "synthetic-ordinary-teacher" and fields[5] == "", "owned pairing channel exact shape")
+-    return fields[3], fields[4]
++    require(type(cycle) is int and cycle in (1,2) and len(fields) == 7
++            and fields[0] == "FC_ORDINARY_PAIR_V2" and fields[1] == marker
++            and fields[2] == f"{generation:020}" and fields[3] == str(cycle)
++            and re.fullmatch(r"[0-9]{8}", fields[4])
++            and fields[5] == "synthetic-ordinary-teacher" and fields[6] == "", "owned pairing channel exact shape")
++    return fields[4], fields[5]
+ 
+ 
+ class OrdinaryClient:
+@@ -158,17 +162,18 @@
+         self.context, self.expected_der, self.deadline, self.events = context, expected_der, deadline, events
+         self.cookie = self.csrf = None
+ 
+-    def request(self, case, method, route, body=None, expected=(200,), authenticated=True):
++    def request(self, case, method, route, body=None, expected=(200,), authenticated=True,
++                content_type="application/json", origin=None, csrf_override=None):
+         require(time.monotonic() < self.deadline, "original business client deadline")
+-        payload = b"" if body is None else b.json_bytes(body)
++        payload = b"" if body is None else body if isinstance(body, bytes) else b.json_bytes(body)
+         headers = [f"{method} /fc/api/v1/{route} HTTP/1.1", f"Host: 127.0.0.1:{self.origin_port}",
+-                   f"Origin: https://127.0.0.1:{self.origin_port}", "Connection: close"]
++                   "Origin: " + (origin if origin is not None else f"https://127.0.0.1:{self.origin_port}"), "Connection: close"]
+         if authenticated and self.cookie:
+             headers.append("Cookie: " + self.cookie)
+         if method == "POST":
+-            headers += ["Content-Type: application/json", f"Content-Length: {len(payload)}"]
++            headers += ["Content-Type: " + content_type, f"Content-Length: {len(payload)}"]
+             if authenticated and self.csrf:
+-                headers.append("X-FC-CSRF: " + self.csrf)
++                headers.append("X-FC-CSRF: " + (self.csrf if csrf_override is None else csrf_override))
+         require(method == "POST" or not payload, "GET has no body")
+         parser = b.HttpResponse()
+         with socket.create_connection(("127.0.0.1", self.local_port), timeout=min(5, self.deadline-time.monotonic())) as raw:
+@@ -204,10 +209,11 @@
+             "actual independent teacher session and exact installed class/subject scope")
+ 
+ 
+-def authenticate_and_write(client, code, login):
+-    denied = client.request("ordinary-private-without-session", "GET", "session", expected=(401,), authenticated=False)
++def authenticate_and_write(client, code, login, cycle=1):
++    prefix = "ordinary-" if cycle == 1 else "ordinary-cycle2-"
++    denied = client.request(prefix+"private-without-session", "GET", "session", expected=(401,), authenticated=False)
+     require(denied.json().get("code") == "UNAUTHORIZED", "ordinary private session rejected before approval")
+-    requested = client.request("ordinary-pairing-request", "POST", "pairing/requests",
++    requested = client.request(prefix+"pairing-request", "POST", "pairing/requests",
+         {"schemaVersion": 1, "code": code, "loginName": login, "deviceName": "Synthetic ordinary HTTPS teacher"},
+         expected=(202,), authenticated=False).json()
+     request_id, secret = requested.get("requestId"), requested.get("pollSecret")
+@@ -217,7 +223,7 @@
+     authorized = None
+     for index in range(8):
+         time.sleep(.65)  # Respect the actual API's minimum poll interval.
+-        polled = client.request("ordinary-pairing-poll-"+str(index+1), "POST", f"pairing/requests/{request_id}/poll",
++        polled = client.request(prefix+"pairing-poll-"+str(index+1), "POST", f"pairing/requests/{request_id}/poll",
+             {"schemaVersion": 1, "pollSecret": secret}, expected=(200,202), authenticated=False)
+         if polled.status == 200:
+             authorized = polled
+@@ -227,11 +233,14 @@
+     cookie = authorized.unique("set-cookie")
+     require(re.fullmatch(r"__Host-FutureClassroom=[0-9a-fA-F]{64}; Path=/; Secure; HttpOnly; SameSite=Strict", cookie), "ordinary exact secure host cookie")
+     client.cookie = cookie.split(";",1)[0]
+-    session = client.request("ordinary-authenticated-session", "GET", "session").json()
++    session = client.request(prefix+"authenticated-session", "GET", "session").json()
+     require(session.get("status") == "AUTHENTICATED" and isinstance(session.get("csrf"), str)
+             and re.fullmatch(r"[0-9a-fA-F]{64}", session["csrf"]), "ordinary actual authenticated session")
+     validate_teacher_session(session)
+     client.csrf = session["csrf"]
++    if cycle == 2:
++        return {"status":"PASS", "principalId":"2", "role":"TEACHER_ADMIN",
++                "pairingRequestId":request_id, "pollAttempts":index+1}
+     scopes = client.request("ordinary-reminder-scopes", "GET", "content/reminders/scopes/0").json()
+     today = scopes.get("today")
+     require(scopes.get("status") == "SCOPES" and scopes.get("kind") == "REMINDER"
+@@ -253,7 +262,6 @@
+     require(receipt.get("status") == "COMMAND_RESULT" and receipt.get("state") == "COMMITTED"
+             and receipt.get("commandId") == command and receipt.get("content",{}).get("revision") == "1"
+             and receipt["content"].get("text") == text, "ordinary exact durable command receipt")
+-    client.cookie = client.csrf = None
+     return {"status": "PASS", "session": "ACTUAL_NATIVE_APPROVAL", "principalId": "2", "role": "TEACHER_ADMIN", "classId": "1", "commandId": command,
+             "beforeRevision": "0", "committedRevision": "1", "readbackRevision": "1", "durableReceipt": "COMMITTED",
+             "authenticatedGet": "PASS", "authenticatedPost": "PASS", "secretPersistence": "NONE",
+@@ -327,14 +335,208 @@
+             "scope":"exact ordered operations; successful approval may take one to eight original bounded polls"}
+ 
+ 
+-def signal_business_done(remote, directory, marker, generation, deadline):
++def signal_business_done(remote, directory, marker, generation, deadline, cycle, ids):
+     require(time.monotonic() < deadline, "client done within original deadline")
+-    value = f"FC_ORDINARY_DONE_V1\n{marker}\n{generation:020}\n"
++    value = f"FC_ORDINARY_DONE_V2\n{marker}\n{generation:020}\n{cycle}\n{ids[0]:020}\n{ids[1]:020}\n"
+     script = ("$r="+b.ps_literal(directory)+";$m="+b.ps_literal(marker)
+         + ";if((Split-Path -Leaf $r)-ne $m-or [IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned completion mismatch'};"
+-        + "$p=Join-Path $r 'ordinary-business-first.done';$s=[IO.File]::Open($p,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);"
++        + "$p=Join-Path $r "+b.ps_literal(f"ordinary-business-{cycle}.done")+";$s=[IO.File]::Open($p,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);"
+         + "try{$v=[Text.Encoding]::ASCII.GetBytes("+b.ps_literal(value)+");$s.Write($v,0,$v.Length)}finally{$s.Dispose()};'OWNED_CLIENT_JOURNEY_DONE'")
+     require(remote.powershell(script, timeout=min(8,deadline-time.monotonic())) == "OWNED_CLIENT_JOURNEY_DONE", "owned completion creation")
++
++
++
++MATERIAL = (b"Synthetic ordinary transfer fixture.\n" * 2048)[:65536]
++require(len(MATERIAL) == 65536, "fixed material fixture bytes")
++
++
++def validate_upload(value, upload_id=None, uploaded=False):
++    fields = {"schemaVersion","status","uploadId","bytes"} if uploaded else {"schemaVersion","status","uploadId","expiresInSeconds","maxChunkBytes"}
++    require(type(value) is dict and set(value) == fields and type(value["schemaVersion"]) is int
++            and value["schemaVersion"] == 1 and isinstance(value["uploadId"],str)
++            and re.fullmatch(r"[1-9][0-9]{0,19}",value["uploadId"])
++            and int(value["uploadId"]) <= 2**64-1, "typed material upload response")
++    require(upload_id is None or value["uploadId"] == upload_id, "exact original upload identity")
++    if uploaded:
++        require(value["status"] == "UPLOADED" and type(value["bytes"]) is int and value["bytes"] == len(MATERIAL), "actual complete upload receipt")
++    else:
++        require(value["status"] == "UPLOAD_READY" and type(value["expiresInSeconds"]) is int
++                and value["expiresInSeconds"] == 300 and type(value["maxChunkBytes"]) is int
++                and value["maxChunkBytes"] == 65536, "actual reservation limits")
++    return value["uploadId"]
++
++
++def create_material(client, case, name, size=65536):
++    return validate_upload(client.request(case,"POST","materials/uploads/2/1",
++        {"schemaVersion":1,"displayName":name,"bytes":size},expected=(201,)).json())
++
++
++def upload_material(client, case, upload_id):
++    validate_upload(client.request(case,"POST",f"materials/uploads/{upload_id}/bytes",MATERIAL,
++        content_type="application/octet-stream").json(), upload_id, uploaded=True)
++
++
++def validate_material_receipt(value, upload_id, command=False):
++    keys = {"schemaVersion","status","commandId","scope","record"} | ({"state"} if command else set())
++    require(type(value) is dict and set(value) == keys and type(value["schemaVersion"]) is int
++            and value["schemaVersion"] == 1 and value["commandId"] == "69001"
++            and value["status"] == ("COMMAND_RESULT" if command else "COMMITTED")
++            and (not command or value["state"] == "COMMITTED")
++            and value["scope"] == {"ownerTeacherId":"2","subjectId":"1"}, "typed scoped material command receipt")
++    record=value["record"]
++    require(type(record) is dict and set(record) == {"materialId","folderId","displayName","resourceVersionId","kind","bytes","sha256","allowedClassIds","addedAt","addedSequence","status","revision"}
++            and record["resourceVersionId"] == upload_id and record["displayName"] == "R70-reuse-c.txt"
++            and record["kind"] == "TXT" and type(record["bytes"]) is int and record["bytes"] == len(MATERIAL)
++            and record["sha256"] == b.digest(MATERIAL) and record["allowedClassIds"] == ["1"]
++            and record["status"] == "PUBLISHED"
++            and all(isinstance(record[k],str) and re.fullmatch(r"[1-9][0-9]{0,19}",record[k])
++                    for k in ("materialId","folderId","addedSequence","revision"))
++            and all(int(record[k])<=2**64-1 for k in ("materialId","folderId","addedSequence","revision")), "exact published material bytes/hash/version/scope")
++    return record
++
++
++class PartialUpload:
++    """One original TLS socket; no own worker or synthetic admission receipt."""
++    def __init__(self, client, upload_id):
++        self.socket=None
++        self.upload_id=upload_id
++        raw=socket.create_connection(("127.0.0.1",client.local_port),timeout=min(5,client.deadline-time.monotonic()))
++        try:
++            self.socket=client.context.wrap_socket(raw,server_hostname="127.0.0.1",suppress_ragged_eofs=False)
++            require(self.socket.getpeercert(binary_form=True)==client.expected_der and self.socket.version()=="TLSv1.2","partial exact owned IP-SAN TLS")
++            head=(f"POST /fc/api/v1/materials/uploads/{upload_id}/bytes HTTP/1.1\r\nHost: 127.0.0.1:{client.origin_port}\r\n"
++                  f"Origin: https://127.0.0.1:{client.origin_port}\r\nCookie: {client.cookie}\r\nX-FC-CSRF: {client.csrf}\r\n"
++                  "Content-Type: application/octet-stream\r\nContent-Length: 1048576\r\nConnection: close\r\n\r\n")
++            self.socket.sendall(head.encode("ascii")+MATERIAL)
++        except BaseException:
++            self.close();raw.close();raise
++    def peer_stop(self, deadline):
++        require(self.socket is not None and time.monotonic()<deadline,"partial original connection retained until native stop")
++        self.socket.settimeout(min(5,deadline-time.monotonic()))
++        try:
++            incoming=self.socket.recv(16384)
++            require(not incoming,"incomplete upload must not deliver a successful application response")
++            result="TLS_EOF"
++        except ssl.SSLEOFError:
++            result="TLS_TRUNCATED_BY_STOP"
++        except ConnectionResetError:
++            result="TCP_RESET_BY_STOP"
++        return {"status":"PASS","uploadId":self.upload_id,"declaredBytes":1048576,"sentPrefixBytes":65536,
++                "peerTermination":result,"successfulUploadResponse":False,"clientClosedBeforeNativeStop":False}
++    def close(self):
++        if self.socket is not None:
++            self.socket.close();self.socket=None
++
++
++def stage_sizes(remote,directory,marker,exe_name,ids,deadline):
++    require(len(ids)==2 and ids[0]!=ids[1] and all(isinstance(i,str) and re.fullmatch(r"[1-9][0-9]{0,19}",i) for i in ids),"exact two safe stage IDs")
++    require(time.monotonic()<deadline,"original stage observation deadline")
++    script=("$r="+b.ps_literal(directory)+";$m="+b.ps_literal(marker)
++        +";if([IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned stage root mismatch'};"
++        +"$n=Get-Content -Raw -LiteralPath (Join-Path $r '.tls-process.json')|ConvertFrom-Json;"
++        +"$p=Get-Process -Id $n.pid;if($n.marker-ne $m-or $p.Path-ne (Join-Path $r "+b.ps_literal(exe_name)+")-or $p.StartTime.ToUniversalTime().Ticks.ToString()-ne $n.startTicks){throw 'owned original process mismatch'};"
++        +"$a=Join-Path (Join-Path $r 'temp') ('FutureClassroom-Test-OrdinaryHttps-'+$n.pid+'-'+$m);"
++        +"$s=Join-Path $a 'web-material-staging';$v=@();foreach($id in @("+','.join(b.ps_literal(i) for i in ids)+")){"
++        +"$f=Join-Path $s ('web-material-'+$id+'.part');if(Test-Path -LiteralPath $f){$i=Get-Item -LiteralPath $f;if($i.PSIsContainer-or ($i.Attributes-band [IO.FileAttributes]::ReparsePoint)){throw 'stage must be regular'};$v+=[long]$i.Length}else{$v+=[long]-1}};ConvertTo-Json -InputObject $v -Compress")
++    values=json.loads(remote.powershell(script,timeout=min(8,deadline-time.monotonic())))
++    require(type(values) is list and len(values)==2 and all(type(x) is int and -1<=x<=1048576 for x in values),"bounded original stage metadata")
++    return values
++
++
++def first_materials(client,remote,directory,marker,exe_name):
++    body={"schemaVersion":1,"displayName":"R70-denied.txt","bytes":65536}
++    for case,route,kwargs in [("r70-wrong-origin","materials/uploads/2/1",{"origin":"https://foreign.invalid"}),
++        ("r70-wrong-csrf","materials/uploads/2/1",{"csrf_override":"0"*64 if client.csrf!="0"*64 else "1"*64}),
++        ("r70-wrong-owner","materials/uploads/1/1",{})]:
++        response=client.request(case,"POST",route,body,expected=(403,),**kwargs).json()
++        require(response=={"schemaVersion":1,"code":"FORBIDDEN"},"specific source/CSRF/scope denial")
++    a=create_material(client,"r70-create-a","R70-ready-a.txt")
++    upload_material(client,"r70-bytes-a",a)
++    b_id=create_material(client,"r70-create-b","R70-partial-b.txt",1048576)
++    require(a!=b_id,"two original upload slots distinct")
++    partial=PartialUpload(client,b_id)
++    try:
++        while True:
++            sizes=stage_sizes(remote,directory,marker,exe_name,[a,b_id],client.deadline)
++            if sizes[0]==65536 and 0<sizes[1]<1048576:break
++            require(time.monotonic()<client.deadline,"actual partial server consumption before original deadline")
++            time.sleep(.02)
++    except BaseException:
++        partial.close();raise
++    return [a,b_id],partial,{"status":"PASS","readyStageBytes":sizes[0],"partialStageBytes":sizes[1],"appendBeforeStop":False}
++
++
++def second_materials(client,old_ids):
++    c=create_material(client,"r70-create-c","R70-reuse-c.txt");upload_material(client,"r70-bytes-c",c)
++    d=create_material(client,"r70-create-d","R70-reuse-d.txt");upload_material(client,"r70-bytes-d",d)
++    require(len(set(old_ids+[c,d]))==4,"new exact upload IDs cannot alias retired generation")
++    payload={"schemaVersion":1,"commandId":"69001","uploadId":c,"allowedClassIds":["1"]}
++    committed=client.request("r70-append-c","POST","materials/folders/2/1/append",payload)
++    record=validate_material_receipt(committed.json(),c)
++    replay=client.request("r70-append-c-exact-retry","POST","materials/folders/2/1/append",payload)
++    require(replay.body==committed.body,"exact durable material receipt replay")
++    receipt=client.request("r70-material-receipt","GET","materials/commands/69001").json()
++    require(validate_material_receipt(receipt,c,command=True)==record,"typed durable material readback matches exact original commit")
++    cancelled=client.request("r70-cancel-d","POST",f"materials/uploads/{d}/cancel",{"schemaVersion":1}).json()
++    require(cancelled=={"schemaVersion":1,"status":"UPLOAD_CANCELLED","uploadId":d},"second physical slot negative cleanup")
++    return [c,d],{"status":"PASS","reusedSlots":2,"commandId":"69001","scope":{"ownerTeacherId":"2","subjectId":"1"},"receipt":"COMMITTED","exactRetry":True,"resourceVersionId":c,"sha256":b.digest(MATERIAL),"bytes":65536}
++
++
++def validate_stop(value,marker,generation,cycle):
++    keys={"cycle","marker","generation","elapsedNs","activeRecords","pendingJobs","cleanupPending","retainedCleanup","nativeDrained"}
++    require(type(value) is dict and set(value)==keys and type(value["cycle"]) is int and value["cycle"]==cycle
++            and value["marker"]==marker and type(value["generation"]) is int and value["generation"]==generation
++            and type(value["elapsedNs"]) is int and 0<=value["elapsedNs"]<=5_000_000_000
++            and value["nativeDrained"] is True and all(type(value[k]) is int and value[k]==0
++                for k in ("activeRecords","pendingJobs","cleanupPending","retainedCleanup")),"one original five-second physical stop receipt")
++
++
++def validate_transfer_journey(events,ready,business,pair2,ids,marker,port,stops,partial):
++    original=[event for event in events if not event.get("case","").startswith(("r70-","ordinary-cycle2-"))]
++    summary=validate_journey(original,ready,business,marker,port)
++    require(type(pair2) is dict and set(pair2)=={"status","principalId","role","pairingRequestId","pollAttempts"}
++            and pair2["status"]=="PASS" and pair2["principalId"]=="2" and pair2["role"]=="TEACHER_ADMIN"
++            and type(pair2["pollAttempts"]) is int and 1<=pair2["pollAttempts"]<=8
++            and isinstance(pair2["pairingRequestId"],str) and re.fullmatch(r"[1-9][0-9]{0,19}",pair2["pairingRequestId"]),"second actual teacher pairing receipt")
++    require(type(ids) is list and len(ids)==4 and len(set(ids))==4 and all(isinstance(i,str) and re.fullmatch(r"[1-9][0-9]{0,19}",i) for i in ids),"four correlated original/reused upload IDs")
++    a,b_id,c,d=ids
++    extra=[("r70-wrong-origin","POST","materials/uploads/2/1",403,True,True),
++        ("r70-wrong-csrf","POST","materials/uploads/2/1",403,True,True),
++        ("r70-wrong-owner","POST","materials/uploads/1/1",403,True,True),
++        ("r70-create-a","POST","materials/uploads/2/1",201,True,True),
++        ("r70-bytes-a","POST",f"materials/uploads/{a}/bytes",200,True,True),
++        ("r70-create-b","POST","materials/uploads/2/1",201,True,True)]
++    latter=[("r70-old-cookie-rejected","GET","session",401,True,False),
++        ("ordinary-cycle2-private-without-session","GET","session",401,False,False),
++        ("ordinary-cycle2-pairing-request","POST","pairing/requests",202,False,False)]
++    latter += [(f"ordinary-cycle2-pairing-poll-{i}","POST",f"pairing/requests/{pair2['pairingRequestId']}/poll",202 if i<pair2["pollAttempts"] else 200,False,False) for i in range(1,pair2["pollAttempts"]+1)]
++    latter += [("ordinary-cycle2-authenticated-session","GET","session",200,True,False),
++        ("r70-create-c","POST","materials/uploads/2/1",201,True,True),("r70-bytes-c","POST",f"materials/uploads/{c}/bytes",200,True,True),
++        ("r70-create-d","POST","materials/uploads/2/1",201,True,True),("r70-bytes-d","POST",f"materials/uploads/{d}/bytes",200,True,True),
++        ("r70-append-c","POST","materials/folders/2/1/append",200,True,True),("r70-append-c-exact-retry","POST","materials/folders/2/1/append",200,True,True),
++        ("r70-material-receipt","GET","materials/commands/69001",200,True,False),("r70-cancel-d","POST",f"materials/uploads/{d}/cancel",200,True,True)]
++    wanted=original[:-1]+[x[0] for x in extra]+[original[-1]]+[x[0] for x in latter]
++    wanted=[item["case"] if isinstance(item,dict) else item for item in wanted]
++    require([x.get("case") for x in events]==wanted,"exact full material-stop wire sequence without omitted/reordered/extra request")
++    by_case={x["case"]:x for x in events}
++    for case,method,route,status,auth,csrf in extra+latter:
++        event=by_case[case]
++        require(set(event)=={"case","method","route","httpStatus","requestBodyBytes","responseBodyBytes","authenticatedCookieSent","csrfSent","tls","serverName","cleanTlsEof"}
++            and (event["method"],event["route"],event["httpStatus"])==(method,route,status)
++            and type(event["httpStatus"]) is int and event["authenticatedCookieSent"] is auth and event["csrfSent"] is csrf
++            and event["tls"]=="TLSv1.2" and event["serverName"]=="127.0.0.1" and event["cleanTlsEof"] is True
++            and type(event["requestBodyBytes"]) is int and type(event["responseBodyBytes"]) is int
++            and 0<event["responseBodyBytes"]<=b.BODY_LIMIT
++            and (event["requestBodyBytes"]==0 if method=="GET" else 0<event["requestBodyBytes"]<=b.BODY_LIMIT),"typed complete material request observation")
++        if case.startswith("r70-bytes-"):
++            require(event["requestBodyBytes"]==len(MATERIAL),"exact complete synthetic binary request length")
++    require(type(stops) is list and len(stops)==2,"two original physical stop observations")
++    for index,value in enumerate(stops):validate_stop(value,marker,ready[index]["generation"],index+1)
++    require(type(partial) is dict and set(partial)=={"status","uploadId","declaredBytes","sentPrefixBytes","peerTermination","successfulUploadResponse","clientClosedBeforeNativeStop"}
++            and partial["status"]=="PASS" and partial["uploadId"]==b_id and partial["declaredBytes"]==1048576
++            and partial["sentPrefixBytes"]==65536 and partial["peerTermination"] in ("TLS_EOF","TLS_TRUNCATED_BY_STOP","TCP_RESET_BY_STOP")
++            and partial["successfulUploadResponse"] is False and partial["clientClosedBeforeNativeStop"] is False,"original partial upload actually retired by native stop")
++    return {**summary,"status":"PASS","totalRequests":len(events),"materialReadyStop":"PASS","partialUploadStop":"PASS","reusedSlots":2,"oldCookie":"401","secondNativeApproval":"PASS","materialReceipt":"COMMITTED"}
+ 
+ 
+ def self_test():
+@@ -358,7 +560,7 @@
+     else:
+         raise RuntimeError("old generation reused")
+     lines = [f"ORDINARY_HTTPS_NATIVE_STEP index={i} name={name}" for i, name in enumerate(STEPS)]
+-    footer = "ORDINARY_HTTPS_NATIVE_PASS steps=25 shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=NOT_EXERCISED campus=NOT_VALIDATED elapsed_ms=4000"
++    footer = "ORDINARY_HTTPS_NATIVE_PASS steps=31 shared_workers=2 tls_cycles=2 authenticated_reminder=PASS physical_shutdown=PASS isolated_cleanup=PASS scope=OWNED_LOOPBACK_COMPOSITION material_ready_stop=PASS partial_upload_stop=PASS upload_slots_reused=2 typed_material_receipt=PASS campus=NOT_VALIDATED elapsed_ms=4000"
+     validate_transcript(lines + [footer])
+     for invalid in [lines[:-1]+[footer], [footer]+lines, lines+[footer,footer],
+                     lines+[footer.replace("4000", "120001")], lines+[footer.replace("physical_shutdown=PASS", "physical_shutdown=FAIL")],
+@@ -388,10 +590,10 @@
+             pass
+         else:
+             raise RuntimeError("secret-bearing/foreign pairing rendezvous accepted")
+-    secret = f"FC_ORDINARY_PAIR_V1\n{marker}\n{17:020}\n00000000\nsynthetic-ordinary-teacher\n"
++    secret = f"FC_ORDINARY_PAIR_V2\n{marker}\n{17:020}\n1\n00000000\nsynthetic-ordinary-teacher\n"
+     require(parse_pairing_secret(secret,marker,17)==("00000000","synthetic-ordinary-teacher"), "pure synthetic secret channel parser")
+     for invalid in [secret+"x",secret.replace(f"{17:020}",f"{18:020}"),secret.replace("00000000\nsynthetic", "not-code\nsynthetic"),
+-                    secret.replace(marker,marker+"x"),secret.replace("FC_ORDINARY_PAIR_V1","unrecognized"),secret.replace("synthetic-ordinary-teacher","foreign")]:
++                    secret.replace(marker,marker+"x"),secret.replace("FC_ORDINARY_PAIR_V2","unrecognized"),secret.replace("synthetic-ordinary-teacher","foreign")]:
+         try:
+             parse_pairing_secret(invalid,marker,17)
+         except RuntimeError:
+@@ -455,8 +657,85 @@
+             pass
+         else:
+             raise RuntimeError("missing/reordered/extra/wrong-role/status/auth/receipt/poll operation accepted")
+-    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives),
++    transfer_checks=0
++    def rejects(call, label):
++        nonlocal transfer_checks
++        try:
++            call()
++        except RuntimeError:
++            transfer_checks+=1
++        else:
++            raise RuntimeError("invalid transfer contract accepted: "+label)
++    upload={"schemaVersion":1,"status":"UPLOAD_READY","uploadId":"11","expiresInSeconds":300,"maxChunkBytes":65536}
++    validate_upload(upload)
++    for change in [{"uploadId":"0"},{"uploadId":"01"},{"uploadId":True},{"uploadId":str(2**64)},
++                   {"schemaVersion":True},{"expiresInSeconds":True},{"expiresInSeconds":301},{"maxChunkBytes":65535},
++                   {"cookie":"fake-extra-field"},{"status":"COMMITTED"}]:
++        rejects(lambda value=dict(upload,**change):validate_upload(value),"upload identity/limits/shape")
++    uploaded={"schemaVersion":1,"status":"UPLOADED","uploadId":"11","bytes":65536}
++    validate_upload(uploaded,"11",True)
++    for change in [{"bytes":True},{"bytes":1048576},{"uploadId":"12"},{"status":"UPLOAD_READY"}]:
++        rejects(lambda value=dict(uploaded,**change):validate_upload(value,"11",True),"complete upload receipt")
++    record={"materialId":"1","folderId":"1","displayName":"R70-reuse-c.txt","resourceVersionId":"13",
++        "kind":"TXT","bytes":65536,"sha256":b.digest(MATERIAL),"allowedClassIds":["1"],"addedAt":"2026-11-01T08:00:00",
++        "addedSequence":"1","status":"PUBLISHED","revision":"1"}
++    receipt={"schemaVersion":1,"status":"COMMITTED","commandId":"69001","scope":{"ownerTeacherId":"2","subjectId":"1"},"record":record}
++    validate_material_receipt(receipt,"13")
++    durable=dict(receipt,status="COMMAND_RESULT",state="COMMITTED")
++    validate_material_receipt(durable,"13",True)
++    for change in [{"scope":{"ownerTeacherId":"1","subjectId":"1"}},{"commandId":"69002"},{"cookie":"fake-extra-field"}]:
++        rejects(lambda value=dict(receipt,**change):validate_material_receipt(value,"13"),"typed command scope/identity")
++    for change in [{"sha256":"0"*64},{"bytes":True},{"allowedClassIds":["2"]},{"resourceVersionId":"14"},
++                   {"revision":str(2**64)},{"status":"DELETED"}]:
++        rejects(lambda value=dict(receipt,record=dict(record,**change)):validate_material_receipt(value,"13"),"published record exact payload")
++    def transfer_fixture(polls1,polls2):
++        events,ready_values,business=journey_fixture(polls1)
++        def event(case,method,route,status=200,auth=True,csrf=True):
++            return {"case":case,"method":method,"route":route,"httpStatus":status,"requestBodyBytes":0 if method=="GET" else 65536 if case.startswith("r70-bytes-") else 100,
++                "responseBodyBytes":100,"authenticatedCookieSent":auth,"csrfSent":csrf,"tls":"TLSv1.2","serverName":"127.0.0.1","cleanTlsEof":True}
++        extra=[event("r70-wrong-origin","POST","materials/uploads/2/1",403),event("r70-wrong-csrf","POST","materials/uploads/2/1",403),
++            event("r70-wrong-owner","POST","materials/uploads/1/1",403),event("r70-create-a","POST","materials/uploads/2/1",201),
++            event("r70-bytes-a","POST","materials/uploads/11/bytes"),event("r70-create-b","POST","materials/uploads/2/1",201)]
++        more=[event("r70-old-cookie-rejected","GET","session",401,csrf=False),event("ordinary-cycle2-private-without-session","GET","session",401,False,False),
++            event("ordinary-cycle2-pairing-request","POST","pairing/requests",202,False,False)]
++        more += [event(f"ordinary-cycle2-pairing-poll-{i}","POST","pairing/requests/9/poll",202 if i<polls2 else 200,False,False) for i in range(1,polls2+1)]
++        more += [event("ordinary-cycle2-authenticated-session","GET","session",csrf=False),
++            event("r70-create-c","POST","materials/uploads/2/1",201),event("r70-bytes-c","POST","materials/uploads/13/bytes"),
++            event("r70-create-d","POST","materials/uploads/2/1",201),event("r70-bytes-d","POST","materials/uploads/14/bytes"),
++            event("r70-append-c","POST","materials/folders/2/1/append"),event("r70-append-c-exact-retry","POST","materials/folders/2/1/append"),
++            event("r70-material-receipt","GET","materials/commands/69001",csrf=False),event("r70-cancel-d","POST","materials/uploads/14/cancel")]
++        pair2={"status":"PASS","principalId":"2","role":"TEACHER_ADMIN","pairingRequestId":"9","pollAttempts":polls2}
++        stops=[{"cycle":cycle,"marker":marker,"generation":generation,"elapsedNs":1_000_000,"activeRecords":0,"pendingJobs":0,
++            "cleanupPending":0,"retainedCleanup":0,"nativeDrained":True} for cycle,generation in [(1,17),(2,18)]]
++        partial={"status":"PASS","uploadId":"12","declaredBytes":1048576,"sentPrefixBytes":65536,"peerTermination":"TLS_TRUNCATED_BY_STOP",
++            "successfulUploadResponse":False,"clientClosedBeforeNativeStop":False}
++        return [events[:-1]+extra+[events[-1]]+more,ready_values,business,pair2,["11","12","13","14"],marker,23456,stops,partial]
++    for polls1,polls2 in [(1,1),(1,8),(8,1),(8,8)]:
++        args=transfer_fixture(polls1,polls2)
++        validate_transfer_journey(*args)
++    args=transfer_fixture(1,1)
++    for index in range(len(args[0])):
++        bad=copy.deepcopy(args);bad[0].pop(index)
++        rejects(lambda bad=bad:validate_transfer_journey(*bad),"missing actual wire operation")
++    for change in [{"elapsedNs":5_000_000_001},{"elapsedNs":True},{"generation":18},{"pendingJobs":1},{"nativeDrained":False},
++                   {"cookie":"fake-extra-field"}]:
++        rejects(lambda value=dict(args[7][0],**change):validate_stop(value,marker,17,1),"old stop budget/owner/release")
++    for change in [{"successfulUploadResponse":True},{"clientClosedBeforeNativeStop":True},{"declaredBytes":65536},
++                   {"uploadId":"13"},{"peerTermination":"LOCAL_CLOSE"}]:
++        bad=copy.deepcopy(args);bad[8].update(change)
++        rejects(lambda bad=bad:validate_transfer_journey(*bad),"partial stop evidence")
++    for index,changes in [(12,{"httpStatus":200}),(13,{"csrfSent":False}),(-1,{"route":"materials/uploads/13/cancel"}),
++                          (-2,{"authenticatedCookieSent":False}),(-3,{"cleanTlsEof":False}),(-4,{"cookie":"fake-extra-field"})]:
++        bad=copy.deepcopy(args);bad[0][index].update(changes)
++        rejects(lambda bad=bad:validate_transfer_journey(*bad),"wrong route/status/auth/secret field")
++    for cycle in (1,2):
++        code=f"FC_ORDINARY_PAIR_V2\n{marker}\n{17:020}\n{cycle}\n00000000\nsynthetic-ordinary-teacher\n"
++        require(parse_pairing_secret(code,marker,17,cycle)==("00000000","synthetic-ordinary-teacher"),"cycle-bound memory-only secret parser")
++        rejects(lambda code=code,cycle=cycle:parse_pairing_secret(code,marker,17,3-cycle),"wrong secret cycle")
++
++    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10,
+                       "wireJourneyPositiveCases":8,"wireJourneyNegativeCases":len(negatives),
++                      "transferJourneyPositiveCases":4,"transferTypedAndCyclePositiveCases":6,"transferNegativeCases":transfer_checks,
+                       "windows": "NOT_RUN", "tls": "NOT_RUN", "ordinaryRuntime": "NOT_RUN"}))
+ 
+ 
+@@ -492,13 +771,16 @@
+     remote = b.Remote(args.ssh_target, args.identity)
+     report = {"schemaVersion": 1, "status": "FAIL", "cleanup": "NOT_RUN", "marker": marker,
+         "scope": "finite ordinary configured owner with synthetic SQLite and owned IP-SAN certificate",
+-        "campus": "NOT_VALIDATED", "win7": "NOT_RUN", "win10": "NOT_RUN", "materialReadyStop": "NOT_EXERCISED",
++        "campus": "NOT_VALIDATED", "win7": "NOT_RUN", "win10": "NOT_RUN", "materialReadyStop": "NOT_RUN",
+         "productionSchoolSettings": "UNCHANGED", "runnerSourceSha256": b.digest(Path(__file__).read_bytes()),
+         "ownershipSourceSha256": b.digest(Path(__file__).with_name("windows-tls-probe.py").read_bytes()),
+         "fixtureSetupSourceSha256": b.digest(tls.SETUP.encode("utf-8")),
+         "businessHelperSourceSha256": b.digest(Path(__file__).with_name("windows-tls-business-probe.py").read_bytes()),
+         "exeSha256": b.digest(executable), "events": []}
+     uploaded, directory, launcher, logs, tunnel = set(), None, None, None, None
++    partial = old_client = old_credentials = None
++    first_ids = second_ids = None
++    stops = []
+     local = tempfile.TemporaryDirectory(prefix="fc-ordinary-https-")
+     try:
+         directory = remote.powershell("$r=Join-Path $env:TEMP "+b.ps_literal(marker)+";New-Item -ItemType Directory -Path $r|Out-Null;$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User;$acl=[Security.AccessControl.DirectorySecurity]::new();$acl.SetOwner($sid);$acl.SetAccessRuleProtection($true,$false);$rule=[Security.AccessControl.FileSystemAccessRule]::new($sid,[Security.AccessControl.FileSystemRights]::FullControl,([Security.AccessControl.InheritanceFlags]::ContainerInherit-bor [Security.AccessControl.InheritanceFlags]::ObjectInherit),[Security.AccessControl.PropagationFlags]::None,[Security.AccessControl.AccessControlType]::Allow);$acl.AddAccessRule($rule);Set-Acl -LiteralPath $r -AclObject $acl;if(!(Get-Acl -LiteralPath $r).AreAccessRulesProtected){throw 'owned root ACL not protected'};[IO.File]::WriteAllText((Join-Path $r '.tls-probe-root'),"+b.ps_literal(marker)+");$r")
+@@ -530,7 +812,7 @@
+         tunnel = tls.Tunnel(remote,local.name)
+         launcher = subprocess.Popen(remote.command_file(directory+"\\tls-launch.ps1"),stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+         logs = tls.Logs(launcher)
+-        lines, ready, exits, client_deadline, paired = [], [], [], None, False
++        lines, ready, exits, client_deadline, paired = [], [], [], None, []
+         until=time.monotonic()+90
+         while time.monotonic()<until:
+             try:
+@@ -547,29 +829,72 @@
+                 client_deadline=client_deadline or time.monotonic()+30
+                 local_port=tunnel.open(port)
+                 report["events"].append(status_get(local_port,port,context,expected_der,client_deadline,value["cycle"],value["generation"]))
++                if value["cycle"] == 2:
++                    require(len(stops)==1 and old_client is not None and first_ids is not None,"first actual stop precedes second generation")
++                    require(stage_sizes(remote,directory,marker,args.exe.name,first_ids,client_deadline)==[-1,-1],"both original stages absent before replacement upload")
++                    old_client.local_port=local_port
++                    denied=old_client.request("r70-old-cookie-rejected","GET","session",expected=(401,)).json()
++                    require(denied=={"schemaVersion":1,"code":"UNAUTHORIZED"},"actual old-generation cookie denied")
++                    old_credentials=(old_client.cookie,old_client.csrf)
++                    old_client.cookie=old_client.csrf=None
+                 tunnel.cancel()
++            elif line.startswith("ORDINARY_HTTPS_STOPPED "):
++                value=json.loads(line.removeprefix("ORDINARY_HTTPS_STOPPED "))
++                cycle=len(stops)+1
++                require(cycle<=2 and len(ready)==cycle,"exact physical stop order")
++                validate_stop(value,marker,ready[cycle-1]["generation"],cycle)
++                stops.append(value)
++                if cycle==1:
++                    require(partial is not None,"actual partial socket still owned at native stop")
++                    report["partialUploadStop"]=partial.peer_stop(client_deadline)
++                    partial.close();partial=None
++                    tunnel.cancel()
+             elif line.startswith("ORDINARY_HTTPS_PAIR_READY "):
+-                require(len(ready) == 1 and not paired and client_deadline is not None, "one first-generation pairing rendezvous")
++                cycle=len(ready)
++                require(cycle in (1,2) and len(paired)==cycle-1 and client_deadline is not None,"two ordered actual native pairing rendezvous")
+                 value=json.loads(line.removeprefix("ORDINARY_HTTPS_PAIR_READY "))
+-                validate_pair_ready(value,marker,port,ready[0]["generation"])
+-                code, login = read_pairing_secret(remote,directory,marker,ready[0]["generation"],client_deadline)
++                generation=ready[cycle-1]["generation"]
++                validate_pair_ready(value,marker,port,generation,cycle)
++                code,login=read_pairing_secret(remote,directory,marker,generation,client_deadline,cycle)
+                 local_port=tunnel.open(port)
+                 client=OrdinaryClient(local_port,port,context,expected_der,client_deadline,report["events"])
+-                report["authenticatedBusiness"]=authenticate_and_write(client,code,login)
+-                del code, login, client
+-                tunnel.cancel()
+-                signal_business_done(remote,directory,marker,ready[0]["generation"],client_deadline)
+-                paired=True
++                business=authenticate_and_write(client,code,login,cycle)
++                del code,login
++                if cycle==1:
++                    report["authenticatedBusiness"]=business
++                    first_ids,partial,report["materialBeforeStop"]=first_materials(client,remote,directory,marker,args.exe.name)
++                    old_client=client
++                    signal_business_done(remote,directory,marker,generation,client_deadline,cycle,first_ids)
++                    # Preserve this exact forwarding domain and partial socket;
++                    # the native Disable, not the client, must terminate it.
++                else:
++                    require(old_credentials is not None and client.cookie!=old_credentials[0]
++                            and client.csrf!=old_credentials[1],"fresh second-generation authentication secrets")
++                    old_credentials=None
++                    report["secondPairing"]=business
++                    second_ids,report["materialReuse"]=second_materials(client,first_ids)
++                    client.cookie=client.csrf=None
++                    tunnel.cancel()
++                    signal_business_done(remote,directory,marker,generation,client_deadline,cycle,second_ids)
++                paired.append(cycle)
+             elif line.startswith(tls.EXIT):exits.append(json.loads(line[len(tls.EXIT):]))
+         launcher.wait(timeout=max(.01,until-time.monotonic()));logs.join()
+         report["transcript"]=validate_transcript(lines)
+         require(launcher.returncode==0 and len(exits)==1 and exits[0].get("code")==0,"actual original native and supervisor successful exit")
+-        require(paired,"actual native approval and authenticated business completed")
+-        report["wireJourney"]=validate_journey(report["events"],ready,report["authenticatedBusiness"],marker,port)
++        require(paired==[1,2] and first_ids is not None and second_ids is not None,"both actual native approvals and transfer cycles completed")
++        report["wireJourney"]=validate_transfer_journey(report["events"],ready,report["authenticatedBusiness"],
++            report["secondPairing"],first_ids+second_ids,marker,port,stops,report.get("partialUploadStop"))
++        report["materialReadyStop"]="PASS"
++        report["stops"]=stops
+         report.update(status="PASS",ready=ready,nativeExit=exits[0])
+     except Exception as error:
+         report["error"]=tls.failure(error,"ordinary-https-composition")
+     finally:
++        if partial is not None:
++            partial.close()
++        old_credentials=None
++        if old_client is not None:
++            old_client.cookie=old_client.csrf=None
+         if launcher:
+             try:
+                 if launcher.poll() is None:
+@@ -585,8 +910,8 @@
+             try:
+                 report["pairingSecretCleanup"]=remote.powershell("$r="+b.ps_literal(directory)+";$m="+b.ps_literal(marker)
+                     +";if([IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned secret cleanup mismatch'};"
+-                    +"$p=Join-Path $r 'ordinary-pairing-first.secret';if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
+-                    +"if(Test-Path -LiteralPath $p){throw 'owned secret remains'};'PASS'",timeout=8)
++                     +"foreach($cycle in @(1,2)){$p=Join-Path $r ('ordinary-pairing-'+$cycle+'.secret');if(Test-Path -LiteralPath $p){Remove-Item -LiteralPath $p};"
++                    +"if(Test-Path -LiteralPath $p){throw 'owned secret remains'}};'PASS'",timeout=8)
+             except Exception:
+                 report.update(status="FAIL",pairingSecretCleanup="FAIL")
+         if directory:b.cleanup_owned(remote,directory,marker,uploaded,args.report,token,report)

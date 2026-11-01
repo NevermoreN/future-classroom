@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_TEMPORARY_DIAGNOSTIC_DIFF_SOURCE_REVIEW_ONLY",
+  "recordedUtc": "2026-11-01T09:49:04.058019+00:00",
+  "jointFreeze": {
+    "path": "joint-source-freeze-seventh.json",
+    "sha256": "fdedd2b65de250fd74acb4f3956027833fed03c6c5107c40edc5c9cf5528863a"
+  },
+  "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+  "beforeSha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4",
+  "diagnosticSha256": "1acfe50bd01dcab4b0ade77d97bfc6c5f76427bf9b56eb29a2d05250c67f3209",
+  "deInstrumentationProof": {
+    "removedHelperDefinitionBlock": true,
+    "removedTraceCalls": 15,
+    "restoredMapErrIoErrorWrappers": 8,
+    "restoredOkOrElseInvalidWrapper": 1,
+    "remainingOriginalWhitespaceNormalizedExact": true,
+    "allRemainingStringLiteralsExact": true,
+    "consequence": "Original business conditions, evaluation counts/order, io_error/invalid/denied construction and final HTTP-error mapping remain unchanged after trace statements are erased."
+  },
+  "originalCheckAndCallCounts": {
+    "self.control.canceled()": {
+      "before": 4,
+      "diagnostic": 4
+    },
+    "MaterialKind::from_name(&self.name)": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "fc_materials::validation::hash_file(": {
+      "before": 2,
+      "diagnostic": 2
+    },
+    "helper::validate_pdf(": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "image::validate_image(": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "resource.validate()": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "file.publish(&self.files, &destination)": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "bytes != self.expected": {
+      "before": 1,
+      "diagnostic": 1
+    },
+    "report.exit_code != Some(0)": {
+      "before": 1,
+      "diagnostic": 1
+    }
+  },
+  "diagnosticScope": {
+    "gate": "Only process argv[1] exactly --ordinary-https-probe; no substring/any-argument/environment switch.",
+    "output": "One fixed stderr format with stage u8/class u8/code i32 only; stage1..13, closed ValidationError tags1..15 or native signed HRESULT integer. No error Display/Debug, path/name/body/material digest/password/pairing/session/CSRF formatting.",
+    "payloadRead": "Native error.code().0 and enum classification inspect the already returned error; no extra validation/hash/image/helper/publish call or cancellation predicate evaluation.",
+    "productionFix": false,
+    "mustRemoveBeforeFinalProduct": true,
+    "timingLimit": "Diagnostic argv lookup/stderr I/O adds observation overhead; this source-only review does not assert identical timing, compiler success, Clippy success or actual runtime outcome."
+  },
+  "longPathTheory": "Retained diagnostic-freeze record states native C# short DOS/long DOS/verbatim probes all actually succeeded. This contradicts the MAX_PATH hypothesis; no production long-path repair is justified by this review and no production fix was made here.",
+  "diagnosticFreeze": {
+    "path": "preparation-diagnostic-freeze-first.json",
+    "sha256": "6d946f706a9bd40af60d5e9d4f2fded8619d2c3c779464f2685c2b651f0cdfe5"
+  },
+  "findings": [],
+  "sourceUnchanged": true,
+  "windows": "NOT_RUN",
+  "cargo": "NOT_RUN",
+  "network": "NOT_RUN",
+  "scope": "Temporary source7 material-preparation observability only. Root is building diagnostic normal; actual Windows stage/error evidence and subsequent removal/new final freeze remain required. No new product acceptance claim."
+}

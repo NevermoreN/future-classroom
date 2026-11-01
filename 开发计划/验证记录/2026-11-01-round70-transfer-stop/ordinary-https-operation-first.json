@@ -1,0 +1,29 @@
+{
+  "status": "FAIL",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--web-bundle",
+    "/tmp/fc-round70-ordinary-transfer-stop/web-build/ordinary-https-web-first.zip",
+    "--report",
+    "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-first.json"
+  ],
+  "cwd": "/tmp/fc-round70-ordinary-transfer-stop/worktree",
+  "sourceFreeze": "joint-source-freeze-third.json",
+  "sourceFreezeSha256": "0e5f2a3a97ade635a376837d1efda1a9dcef60cb4467b137677e5d261709605e",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T09:12:52.966783+00:00",
+  "exitCode": 1,
+  "elapsedSeconds": 17.600143211195245,
+  "sourceUnchanged": true,
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 683,
+  "stderrSha256": "636bd048445907cb50a922ea55ca4514d2d4a6e7b834a6bd5b7cece2ccd63d28"
+}

@@ -1,0 +1,59 @@
+--- first/scripts/windows-ordinary-https-probe.py
++++ second/scripts/windows-ordinary-https-probe.py
+@@ -335,9 +335,20 @@
+             "scope":"exact ordered operations; successful approval may take one to eight original bounded polls"}
+ 
+ 
++def business_done_value(marker, generation, cycle, ids):
++    require(isinstance(marker,str) and re.fullmatch(r"FutureClassroom-Test-TLS-[0-9a-f]{32}",marker)
++            and type(generation) is int and 0<generation<=2**64-1
++            and type(cycle) is int and cycle in (1,2), "owned completion identity")
++    require(type(ids) is list and len(ids)==2 and ids[0]!=ids[1]
++            and all(isinstance(value,str) and re.fullmatch(r"[1-9][0-9]{0,19}",value)
++                    and int(value)<=2**64-1 for value in ids), "two canonical original u64 upload IDs")
++    return (f"FC_ORDINARY_DONE_V2\n{marker}\n{generation:020d}\n{cycle}\n"
++            f"{int(ids[0]):020d}\n{int(ids[1]):020d}\n")
++
++
+ def signal_business_done(remote, directory, marker, generation, deadline, cycle, ids):
+     require(time.monotonic() < deadline, "client done within original deadline")
+-    value = f"FC_ORDINARY_DONE_V2\n{marker}\n{generation:020}\n{cycle}\n{ids[0]:020}\n{ids[1]:020}\n"
++    value = business_done_value(marker,generation,cycle,ids)
+     script = ("$r="+b.ps_literal(directory)+";$m="+b.ps_literal(marker)
+         + ";if((Split-Path -Leaf $r)-ne $m-or [IO.File]::ReadAllText((Join-Path $r '.tls-probe-root'))-ne $m){throw 'owned completion mismatch'};"
+         + "$p=Join-Path $r "+b.ps_literal(f"ordinary-business-{cycle}.done")+";$s=[IO.File]::Open($p,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);"
+@@ -733,9 +744,33 @@
+         require(parse_pairing_secret(code,marker,17,cycle)==("00000000","synthetic-ordinary-teacher"),"cycle-bound memory-only secret parser")
+         rejects(lambda code=code,cycle=cycle:parse_pairing_secret(code,marker,17,3-cycle),"wrong secret cycle")
+ 
+-    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10,
++    completion_positive=0
++    completion_negative=0
++    for ids in [["1","2"],[str(2**64-2),str(2**64-1)]]:
++        for cycle in (1,2):
++            fields=business_done_value(marker,17,cycle,ids).split("\n")
++            require(len(fields)==7 and fields[:4]==["FC_ORDINARY_DONE_V2",marker,"00000000000000000017",str(cycle)]
++                    and fields[6]=="" and [int(v) for v in fields[4:6]]==[int(v) for v in ids]
++                    and all(len(v)==20 and v==f"{int(v):020d}" for v in fields[4:6]),
++                    "native u64 completion IDs left-pad after verified integer conversion")
++            completion_positive+=1
++    malformed=[["0","2"],["01","2"],[True,"2"],["1",2],["1","1"],["1",str(2**64)],
++               ["-1","2"],[" 1","2"],["1\n","2"],["1"],["1","2","3"],"12"]
++    invalid_args=[(marker,17,1,ids) for ids in malformed]
++    invalid_args += [(marker,True,1,["1","2"]),(marker,0,1,["1","2"]),(marker,2**64,1,["1","2"]),
++                     (marker,17,True,["1","2"]),(marker,17,3,["1","2"]),(marker+"\n",17,1,["1","2"])]
++    for invalid in invalid_args:
++        try:
++            business_done_value(*invalid)
++        except RuntimeError:
++            completion_negative+=1
++        else:
++            raise RuntimeError("invalid completion ID/cycle/marker accepted")
++
++    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative,
+                       "wireJourneyPositiveCases":8,"wireJourneyNegativeCases":len(negatives),
+                       "transferJourneyPositiveCases":4,"transferTypedAndCyclePositiveCases":6,"transferNegativeCases":transfer_checks,
++                      "completionIdPositiveCases":completion_positive,"completionIdNegativeCases":completion_negative,
+                       "windows": "NOT_RUN", "tls": "NOT_RUN", "ordinaryRuntime": "NOT_RUN"}))
+ 
+ 

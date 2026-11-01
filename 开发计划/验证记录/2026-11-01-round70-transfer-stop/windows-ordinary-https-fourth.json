@@ -1,0 +1,794 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "cleanup": "PASS",
+  "marker": "FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd",
+  "scope": "finite ordinary configured owner with synthetic SQLite and owned IP-SAN certificate",
+  "campus": "NOT_VALIDATED",
+  "win7": "NOT_RUN",
+  "win10": "NOT_RUN",
+  "materialReadyStop": "NOT_RUN",
+  "productionSchoolSettings": "UNCHANGED",
+  "runnerSourceSha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350",
+  "ownershipSourceSha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df",
+  "fixtureSetupSourceSha256": "47560c6cb6f34e159274a59225238fbcfac897362c69cb340bc5c0aa44c0a968",
+  "businessHelperSourceSha256": "0cb59751f0bd1e79dd86de9eb26ac780e264a969d74cbdbe074be988210c7208",
+  "exeSha256": "3e8cb280d56b68b6e5477bcdb120d5e7e533de021b8068e78d536b35c44756c8",
+  "events": [
+    {
+      "case": "ordinary-public-status-cycle-1",
+      "method": "GET",
+      "route": "status",
+      "cycle": 1,
+      "generation": 1,
+      "httpStatus": 200,
+      "bodyBytes": 75,
+      "bodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "cleanTlsEof": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cookieSent": false
+    },
+    {
+      "case": "ordinary-private-without-session",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 401,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 41,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-pairing-request",
+      "method": "POST",
+      "route": "pairing/requests",
+      "httpStatus": 202,
+      "requestBodyBytes": 126,
+      "responseBodyBytes": 153,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-pairing-poll-1",
+      "method": "POST",
+      "route": "pairing/requests/2/poll",
+      "httpStatus": 200,
+      "requestBodyBytes": 99,
+      "responseBodyBytes": 41,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-authenticated-session",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 273,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-reminder-scopes",
+      "method": "GET",
+      "route": "content/reminders/scopes/0",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 209,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-empty-reminder",
+      "method": "GET",
+      "route": "content/reminders/1/2026-11-01",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 248,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-authenticated-reminder-post",
+      "method": "POST",
+      "route": "content/reminders/1/2026-11-01",
+      "httpStatus": 200,
+      "requestBodyBytes": 151,
+      "responseBodyBytes": 414,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-authenticated-reminder-readback",
+      "method": "GET",
+      "route": "content/reminders/1/2026-11-01",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 343,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-durable-reminder-receipt",
+      "method": "GET",
+      "route": "content/commands/68001",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 439,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-wrong-origin",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 403,
+      "requestBodyBytes": 64,
+      "responseBodyBytes": 38,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-wrong-csrf",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 403,
+      "requestBodyBytes": 64,
+      "responseBodyBytes": 38,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-wrong-owner",
+      "method": "POST",
+      "route": "materials/uploads/1/1",
+      "httpStatus": 403,
+      "requestBodyBytes": 64,
+      "responseBodyBytes": 38,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-create-a",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 201,
+      "requestBodyBytes": 65,
+      "responseBodyBytes": 122,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-bytes-a",
+      "method": "POST",
+      "route": "materials/uploads/10541134224105572444/bytes",
+      "httpStatus": 200,
+      "requestBodyBytes": 65536,
+      "responseBodyBytes": 87,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-create-b",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 201,
+      "requestBodyBytes": 69,
+      "responseBodyBytes": 121,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-public-status-cycle-2",
+      "method": "GET",
+      "route": "status",
+      "cycle": 2,
+      "generation": 2,
+      "httpStatus": 200,
+      "bodyBytes": 75,
+      "bodySha256": "12049ce9d5e17e08da3bfe729100f1bb031ca1b70ed702eec219be8197d1e8f8",
+      "cleanTlsEof": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cookieSent": false
+    },
+    {
+      "case": "r70-old-cookie-rejected",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 401,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 41,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-cycle2-private-without-session",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 401,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 41,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-cycle2-pairing-request",
+      "method": "POST",
+      "route": "pairing/requests",
+      "httpStatus": 202,
+      "requestBodyBytes": 126,
+      "responseBodyBytes": 153,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-cycle2-pairing-poll-1",
+      "method": "POST",
+      "route": "pairing/requests/4/poll",
+      "httpStatus": 200,
+      "requestBodyBytes": 99,
+      "responseBodyBytes": 41,
+      "authenticatedCookieSent": false,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "ordinary-cycle2-authenticated-session",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 200,
+      "requestBodyBytes": 0,
+      "responseBodyBytes": 273,
+      "authenticatedCookieSent": true,
+      "csrfSent": false,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-create-c",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 201,
+      "requestBodyBytes": 65,
+      "responseBodyBytes": 120,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-bytes-c",
+      "method": "POST",
+      "route": "materials/uploads/530612033510480526/bytes",
+      "httpStatus": 200,
+      "requestBodyBytes": 65536,
+      "responseBodyBytes": 85,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-create-d",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "httpStatus": 201,
+      "requestBodyBytes": 65,
+      "responseBodyBytes": 122,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-bytes-d",
+      "method": "POST",
+      "route": "materials/uploads/18218332796813451074/bytes",
+      "httpStatus": 200,
+      "requestBodyBytes": 65536,
+      "responseBodyBytes": 87,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    {
+      "case": "r70-append-c",
+      "method": "POST",
+      "route": "materials/folders/2/1/append",
+      "httpStatus": 400,
+      "requestBodyBytes": 95,
+      "responseBodyBytes": 45,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true,
+      "errorCode": "INVALID_RESOURCE"
+    }
+  ],
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd",
+  "staticPackage": {
+    "manifestSha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+    "payloadBytes": 459077,
+    "assets": [
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sizeBytes": 282,
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a"
+      },
+      {
+        "path": "assets/index-BkiZ2CBl.js",
+        "sizeBytes": 415401,
+        "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3"
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sizeBytes": 39554,
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f"
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sizeBytes": 1724,
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa"
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sizeBytes": 884,
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886"
+      },
+      {
+        "path": "index.html",
+        "sizeBytes": 1232,
+        "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2"
+      }
+    ],
+    "uploadedFiles": [
+      {
+        "path": "fc-assets.json",
+        "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+        "bytes": 1073
+      },
+      {
+        "path": "assets/favicon-CXuYoSfB.svg",
+        "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+        "bytes": 282
+      },
+      {
+        "path": "assets/index-BkiZ2CBl.js",
+        "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3",
+        "bytes": 415401
+      },
+      {
+        "path": "assets/index-DrrJeLm9.css",
+        "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+        "bytes": 39554
+      },
+      {
+        "path": "assets/pcm-worklet-B7E4LRoP.js",
+        "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+        "bytes": 1724
+      },
+      {
+        "path": "assets/wav-worker-LSywWbpJ.js",
+        "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+        "bytes": 884
+      },
+      {
+        "path": "index.html",
+        "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2",
+        "bytes": 1232
+      }
+    ],
+    "uploadVerification": "PASS"
+  },
+  "fixture": {
+    "thumbprint": "754F08E56EBFAB439C0CF4EB76EF3E3089284BA7",
+    "keyName": "FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd-key",
+    "san": "DNS Name=localhost, IP Address=127.0.0.1",
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "privateKeyExported": false,
+    "provider": "Microsoft Software Key Storage Provider",
+    "myBefore": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    }
+  },
+  "configuredPort": 58192,
+  "uploadedControlSources": {
+    "tls-cleanup.ps1": {
+      "bytes": 4997,
+      "sha256": "2458d4c8938eabb860c5117435e831da1d6ef6d3d057dec0061ccd4d42c8faab",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$marker='FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd'\nAssert ((Split-Path -Leaf $root)-eq $marker) 'TLS cleanup basename mismatch'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS cleanup root marker mismatch'\nAssert (@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')}).Count-eq 0) 'TLS executable still running before key cleanup'\n$fixtureFile=Join-Path $root '.tls-fixture.json';$certificateRemoved=0;$keyExists=$false;$after=$null;$restored=$null;$deleteKeyFallback=$false\nif(Test-Path -LiteralPath $fixtureFile){\n  $entry=[IO.File]::ReadAllText($fixtureFile)|ConvertFrom-Json\n  Assert ($entry.marker-eq $marker-and $entry.keyName-eq ($marker+'-key')-and $entry.provider-eq 'Microsoft Software Key Storage Provider'-and $entry.keyAbsentBefore-eq $true) 'TLS fixture cleanup ownership mismatch'\n  $provider=[Security.Cryptography.CngProvider]::new($entry.provider)\n  $certificates=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker})\n  Assert ($certificates.Count-le 1) 'unexpected duplicate owned TLS certificates; refusing broad cleanup'\n  foreach($cert in $certificates){\n    Assert ((!$entry.thumbprint)-or $cert.Thumbprint-eq $entry.thumbprint) 'owned TLS certificate thumbprint changed'\n    $rsa=$null\n    try{\n      $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)\n      Assert ($rsa-is [Security.Cryptography.RSACng]-and $rsa.Key.KeyName-eq $entry.keyName-and $rsa.Key.Provider.Provider-eq $entry.provider) 'owned TLS certificate private key mismatch'\n    }finally{if($rsa){$rsa.Dispose()}}\n    $certPath='Cert:\\CurrentUser\\My\\'+$cert.Thumbprint\n    try{Remove-Item -Path $certPath -DeleteKey}\n    catch{\n      $deleteKeyFallback=$true\n      # Some Certificate-provider versions cannot perform DeleteKey. The exact\n      # existing named CNG key was checked above; never enumerate/delete keys.\n      if([Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)){\n        $key=[Security.Cryptography.CngKey]::Open($entry.keyName,$provider)\n        try{$key.Delete()}finally{$key.Dispose()}\n      }\n      if(Test-Path -LiteralPath $certPath){Remove-Item -Path $certPath}\n    }\n    $certificateRemoved++\n  }\n  # A creation failure can leave just our previously absent, exact named key.\n  # Delete it through CNG only after the immutable ownership manifest checks.\n  if([Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)){\n    $key=[Security.Cryptography.CngKey]::Open($entry.keyName,$provider)\n    try{$key.Delete()}finally{$key.Dispose()}\n  }\n  $keyExists=[Security.Cryptography.CngKey]::Exists($entry.keyName,$provider)\n  Assert (!$keyExists) 'owned TLS CNG key still exists'\n  Assert (@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker}).Count-eq 0) 'owned TLS certificate still exists'\n  $after=Store-Snapshot\n  $restored=($after.count-eq $entry.before.count-and $after.sha256-eq $entry.before.sha256)\n  Assert $restored 'CurrentUser MY collection digest not restored; preserving owned evidence root'\n}\nRemove-Item -LiteralPath $root -Recurse -Force\nAssert (!(Test-Path -LiteralPath $root)) 'owned TLS root remains'\n@{status='PASS';rootAbsent=$true;ownedProcessesRemaining=0;certificatesRemoved=$certificateRemoved;deleteKeyFallbackUsed=$deleteKeyFallback;cngKeyExists=$keyExists;myAfter=$after;myDigestRestored=$restored;sshConfiguration='UNTOUCHED';rootTrustStore='UNTOUCHED';httpSys='UNTOUCHED';firewall='UNTOUCHED'}|ConvertTo-Json -Depth 5 -Compress\n"
+    },
+    "tls-stop.ps1": {
+      "bytes": 4311,
+      "sha256": "33d831fac8d937d479ffa1dbab401517e62b4dca27c8e7e223e26e79b8e4226a",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$marker='FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd'\nAssert ((Split-Path -Leaf $root)-eq $marker) 'TLS cleanup basename mismatch'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS cleanup root marker mismatch'\n$killed=0\n# Stop the recorded supervisor first so it cannot create another child after\n# the native-child audit. A process object retains its original handle to exit.\nforeach($name in @('.tls-setup-process.json','.tls-supervisor.json','.tls-process.json')){\n  $processFile=Join-Path $root $name\n  if(Test-Path -LiteralPath $processFile){\n    $entry=[IO.File]::ReadAllText($processFile)|ConvertFrom-Json\n    Assert ($entry.marker-eq $marker-and [int]$entry.pid-ne $PID) 'TLS process journal ownership mismatch'\n    if($name-eq '.tls-process.json'){Assert ($entry.exe-eq (Join-Path $root 'fc-bootstrap.exe')) 'TLS native process path mismatch'}\n    else{Assert ((Split-Path -Leaf $entry.exe)-eq 'powershell.exe') 'TLS supervisor path mismatch'}\n    $ownedProcess=Get-Process -Id ([int]$entry.pid) -ErrorAction SilentlyContinue\n    if($ownedProcess){\n      $retainedHandle=$ownedProcess.Handle\n      Assert ($retainedHandle-ne [IntPtr]::Zero) 'owned TLS process handle unavailable during cleanup'\n      Assert ($ownedProcess.Path-eq $entry.exe-and $ownedProcess.StartTime.ToUniversalTime().Ticks.ToString()-eq $entry.startTicks) 'TLS process identity changed; refusing to kill reused PID'\n      $ownedProcess.Kill();Assert ($ownedProcess.WaitForExit(5000)) 'owned TLS process cleanup timeout';$killed++;$ownedProcess.Dispose()\n    }\n  }\n}\n# Recover the narrow Start-Process / process-journal gap, never a process-name\n# sweep. Both the unique uploaded path and the exact nonce argument must match.\n$recovered=0\n$remaining=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')})\nforeach($candidate in $remaining){\n  Assert ($candidate.CommandLine-and $candidate.CommandLine.Contains('--ordinary-https-probe')-and $candidate.CommandLine.Contains($marker)) 'unjournaled executable is not this owned diagnostic'\n  $ownedProcess=Get-Process -Id $candidate.ProcessId\n  $retainedHandle=$ownedProcess.Handle\n  Assert ($retainedHandle-ne [IntPtr]::Zero) 'recovered TLS process handle unavailable during cleanup'\n  Assert ($ownedProcess.Path-eq (Join-Path $root 'fc-bootstrap.exe')) 'unjournaled diagnostic path changed'\n  $ownedProcess.Kill();Assert ($ownedProcess.WaitForExit(5000)) 'recovered owned TLS process cleanup timeout';$recovered++;$ownedProcess.Dispose()\n}\n$remaining=@(Get-CimInstance Win32_Process|Where-Object{$_.ExecutablePath-and $_.ExecutablePath-eq (Join-Path $root 'fc-bootstrap.exe')})\nAssert ($remaining.Count-eq 0) 'owned TLS executable still running or process journal missing'\n@{status='PASS';ownedProcessesRemaining=0;ownedProcessesKilled=$killed;recoveredNativeProcesses=$recovered}|ConvertTo-Json -Compress\n"
+    },
+    "tls-capture.ps1": {
+      "bytes": 2452,
+      "sha256": "84d58ae39d2aa2bdf5e39f890e27b2fd994c787e3a5a2f3e6fb4ccf1e3fa4c84",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$marker='FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS capture root marker mismatch'\n$data=@{}\nforeach($name in @('tls.stdout','tls.stderr','.tls-process.json','.tls-supervisor.json','.tls-setup-process.json','.tls-fixture.json','tls-public.pem')){\n  $path=Join-Path $root $name\n  if(Test-Path -LiteralPath $path){\n    # The process is physically stopped before this script runs. Hash a stream,\n    # never load a potentially oversized original failure log into memory/JSON.\n    $stream=[IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)\n    $sha=[Security.Cryptography.SHA256]::Create()\n    try{\n      $length=$stream.Length\n      $digest=([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','').ToLowerInvariant()\n      Assert ($stream.Length-eq $length) 'TLS raw evidence length changed while hashing'\n      $data[$name]=@{bytes=$length;sha256=$digest}\n    }finally{$sha.Dispose();$stream.Dispose()}\n  }\n}\n$data|ConvertTo-Json -Depth 4 -Compress\n"
+    },
+    "tls-setup.ps1": {
+      "bytes": 4295,
+      "sha256": "22ff976ee9f91da7b1c59976608812df70daaa5e0cc03490f695bd8587c16cde",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n\n$marker='FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS root marker mismatch'\n$setupProcess=Get-Process -Id $PID\nWrite-Json (Join-Path $root '.tls-setup-process.json') @{marker=$marker;pid=$PID;startTicks=$setupProcess.StartTime.ToUniversalTime().Ticks.ToString();exe=$setupProcess.Path}\n$setupProcess.Dispose()\n$provider=[Security.Cryptography.CngProvider]::MicrosoftSoftwareKeyStorageProvider\n$keyName=$marker+'-key'\n$before=Store-Snapshot\nAssert (![Security.Cryptography.CngKey]::Exists($keyName,$provider)) 'unique TLS key unexpectedly exists'\nAssert (@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.FriendlyName-eq $marker}).Count-eq 0) 'unique TLS certificate unexpectedly exists'\n$manifest=@{marker=$marker;keyName=$keyName;provider=$provider.Provider;keyAbsentBefore=$true;before=$before;thumbprint=$null}\nWrite-Json (Join-Path $root '.tls-fixture.json') $manifest\n$cert=New-SelfSignedCertificate -Type SSLServerAuthentication -Subject 'CN=localhost' -TextExtension @('2.5.29.17={text}DNS=localhost&IPAddress=127.0.0.1') -CertStoreLocation 'Cert:\\CurrentUser\\My' -Provider $provider.Provider -Container $keyName -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm SHA256 -KeyExportPolicy NonExportable -KeyUsage DigitalSignature,KeyEncipherment -NotBefore (Get-Date).AddMinutes(-5) -NotAfter (Get-Date).AddDays(1) -FriendlyName $marker\n$manifest.thumbprint=$cert.Thumbprint.ToUpperInvariant()\nWrite-Json (Join-Path $root '.tls-fixture.json') $manifest\n$rsa=$null\ntry{\n  $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)\n  Assert ($rsa-is [Security.Cryptography.RSACng]) 'TLS fixture key is not CNG'\n  Assert ($rsa.Key.KeyName-eq $keyName-and $rsa.Key.Provider.Provider-eq $provider.Provider) 'TLS fixture key ownership mismatch'\n}finally{if($rsa){$rsa.Dispose()}}\nAssert ([Security.Cryptography.CngKey]::Exists($keyName,$provider)) 'TLS fixture key missing after creation'\n$unrelated=Store-Snapshot $manifest.thumbprint\nAssert ($unrelated.count-eq $before.count-and $unrelated.sha256-eq $before.sha256) 'unrelated MY certificates changed during fixture creation'\n$der=$cert.RawData\n$pem=\"-----BEGIN CERTIFICATE-----`n\"+[Convert]::ToBase64String($der,[Base64FormattingOptions]::InsertLineBreaks).Replace(\"`r\",'')+\"`n-----END CERTIFICATE-----`n\"\n[IO.File]::WriteAllText((Join-Path $root 'tls-public.pem'),$pem,[Text.ASCIIEncoding]::new())\n$os=Get-CimInstance Win32_OperatingSystem\n@{thumbprint=$manifest.thumbprint;keyName=$keyName;provider=$provider.Provider;myBefore=$before;publicPem=$pem;privateKeyExported=$false;san=(@($cert.Extensions|Where-Object{$_.Oid.Value-eq '2.5.29.17'}|ForEach-Object{$_.Format($false)})-join ';');platform=@{caption=$os.Caption;version=$os.Version;build=$os.BuildNumber;osArchitecture=$os.OSArchitecture}}|ConvertTo-Json -Depth 5 -Compress\n"
+    },
+    "tls-launch.ps1": {
+      "bytes": 4467,
+      "sha256": "3697e06a2dcdde059dbec1f7676aafe4a7c0d3dbe3c9efbb7d7339859a6da328",
+      "source": "\n$ErrorActionPreference='Stop'\n$ProgressPreference='SilentlyContinue'\n[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)\n$OutputEncoding=[Console]::OutputEncoding\nfunction Assert([bool]$Condition,[string]$Message){if(!$Condition){throw $Message}}\nfunction Write-Json([string]$Path,$Value){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 8 -Compress),[Text.UTF8Encoding]::new($false))}\nfunction Store-Snapshot([string]$Exclude=''){\n  $entries=@(Get-ChildItem -LiteralPath 'Cert:\\CurrentUser\\My'|Where-Object{$_.Thumbprint-ne $Exclude}|ForEach-Object{\n    $cert=$_;$sha=[Security.Cryptography.SHA256]::Create()\n    try{$der=([BitConverter]::ToString($sha.ComputeHash($cert.RawData))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n    $cert.Thumbprint.ToUpperInvariant()+':'+$der+':'+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$cert.FriendlyName))+':'+$cert.HasPrivateKey\n  })\n  [Array]::Sort($entries,[StringComparer]::Ordinal)\n  $sha=[Security.Cryptography.SHA256]::Create()\n  try{$digest=([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($entries-join \"`n\"))))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n  return @{count=$entries.Count;sha256=$digest}\n}\n$ordinaryPort=58192\n\n$root='C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$marker='FutureClassroom-Test-TLS-8daed1868fd54f8dbc72c3732cfa19dd';$thumbprint='754F08E56EBFAB439C0CF4EB76EF3E3089284BA7';$exe=Join-Path $root 'fc-bootstrap.exe'\nAssert (([IO.File]::ReadAllText((Join-Path $root '.tls-probe-root')))-eq $marker) 'TLS launch root marker mismatch'\n$env:TEMP=Join-Path $root 'temp';$env:TMP=$env:TEMP\nNew-Item -ItemType Directory -Path $env:TEMP|Out-Null\n$child=$null;$handle=[IntPtr]::Zero;$seen=0;$watch=[Diagnostics.Stopwatch]::StartNew()\n$supervisor=Get-Process -Id $PID\nWrite-Json (Join-Path $root '.tls-supervisor.json') @{marker=$marker;pid=$PID;startTicks=$supervisor.StartTime.ToUniversalTime().Ticks.ToString();exe=$supervisor.Path}\n$supervisor.Dispose()\nfunction Forward-Lines {\n  $path=Join-Path $root 'tls.stdout'\n  if(Test-Path -LiteralPath $path){\n    # Start-Process retains a redirected writer while the child is running.\n    # Permit that writer explicitly; ReadAllText's sharing mode conflicts with\n    # it. Keep both byte checks and a fixed, capped character allocation.\n    $stream=[IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))\n    $reader=$null\n    try{\n      Assert ($stream.Length-le 524288) 'native TLS stdout exceeded diagnostic bound'\n      $reader=[IO.StreamReader]::new($stream,[Text.UTF8Encoding]::new($false,$true),$false,4096,$true)\n      $chars=[char[]]::new(524289)\n      $length=$reader.ReadBlock($chars,0,$chars.Length)\n      Assert ($length -le 524288 -and $stream.Length -le 524288) 'native TLS stdout grew beyond diagnostic bound'\n      $text=[string]::new($chars,0,$length)\n    }finally{if($reader){$reader.Dispose()};$stream.Dispose()}\n    $lines=$text.Split([char]10)\n    $complete=$lines.Length-1\n    while($script:seen-lt $complete){[Console]::WriteLine($lines[$script:seen].TrimEnd([char]13));$script:seen++}\n    [Console]::Out.Flush()\n  }\n}\ntry{\n  $child=Start-Process -FilePath $exe -ArgumentList @('--ordinary-https-probe',$thumbprint,[string]$ordinaryPort,('\"'+(Join-Path $root 'web-package')+'\"'),$marker) -WindowStyle Hidden -WorkingDirectory $root -RedirectStandardOutput (Join-Path $root 'tls.stdout') -RedirectStandardError (Join-Path $root 'tls.stderr') -PassThru\n  $handle=$child.Handle\n  Assert ($handle-ne [IntPtr]::Zero) 'owned native TLS process handle missing'\n  $entry=@{marker=$marker;pid=$child.Id;startTicks=$child.StartTime.ToUniversalTime().Ticks.ToString();exe=$exe}\n  Write-Json (Join-Path $root '.tls-process.json') $entry\n  while(!$child.WaitForExit(10)){\n    Forward-Lines\n    Assert ($watch.ElapsedMilliseconds-lt 90000) 'native TLS diagnostic exceeded its independent 90-second observation limit'\n  }\n  Forward-Lines\n  Assert ($child.ExitCode-is [int]) 'actual native TLS Int32 exit code missing'\n  [Console]::WriteLine('TLS_FRONTDOOR_PROCESS_EXIT '+(@{code=$child.ExitCode}|ConvertTo-Json -Compress));[Console]::Out.Flush()\n}finally{\n  if($child){\n    if(!$child.HasExited){$child.Kill();Assert ($child.WaitForExit(5000)) 'owned TLS child did not terminate after diagnostic failure'}\n    $child.Dispose()\n  }\n}\n"
+    }
+  },
+  "clientVerification": {
+    "checkHostname": true,
+    "verifyMode": "CERT_REQUIRED",
+    "serverName": "127.0.0.1",
+    "minimumTls": "TLSv1.2",
+    "maximumTls": "TLSv1.2",
+    "peerCertificate": "EXACT_OWNED_DER",
+    "trustSource": "only owned public PEM",
+    "cleanTlsEof": "REQUIRED",
+    "systemTrust": "UNCHANGED"
+  },
+  "authenticatedBusiness": {
+    "status": "PASS",
+    "session": "ACTUAL_NATIVE_APPROVAL",
+    "principalId": "2",
+    "role": "TEACHER_ADMIN",
+    "classId": "1",
+    "commandId": "68001",
+    "beforeRevision": "0",
+    "committedRevision": "1",
+    "readbackRevision": "1",
+    "durableReceipt": "COMMITTED",
+    "authenticatedGet": "PASS",
+    "authenticatedPost": "PASS",
+    "secretPersistence": "NONE",
+    "pairingRequestId": "2",
+    "pollAttempts": 1,
+    "contentDate": "2026-11-01"
+  },
+  "materialBeforeStop": {
+    "status": "PASS",
+    "readyStageBytes": 65536,
+    "partialStageBytes": 65536,
+    "appendBeforeStop": false
+  },
+  "partialUploadStop": {
+    "status": "PASS",
+    "uploadId": "6457508799188236700",
+    "declaredBytes": 1048576,
+    "sentPrefixBytes": 65536,
+    "peerTermination": "TLS_TRUNCATED_BY_STOP",
+    "successfulUploadResponse": false,
+    "clientClosedBeforeNativeStop": false
+  },
+  "secondPairing": {
+    "status": "PASS",
+    "principalId": "2",
+    "role": "TEACHER_ADMIN",
+    "pairingRequestId": "4",
+    "pollAttempts": 1
+  },
+  "error": {
+    "kind": "RuntimeError",
+    "phase": "ordinary-https-composition",
+    "message": "ordinary business unexpected HTTP status"
+  },
+  "sshLauncherRaw": {
+    "stdout": {
+      "bytes": 2800,
+      "observedBytes": 2800,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "bd7d205987042f05cbcfc324a0bac649be65088142be201ddfbeaa9e10d45335",
+      "base64": "T1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MCBuYW1lPXNldHVwLWxvY2FsLWdsb2JhbC1hZG1pbmlzdHJhdG9yDQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xIG5hbWU9bmF0aXZlLWNyZWF0ZS1zeW50aGV0aWMtY2xhc3MNCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTIgbmFtZT1uYXRpdmUtY3JlYXRlLWluZGVwZW5kZW50LXRlYWNoZXItYW5kLWNvbXBsZXRlLWZpcnN0LXBhc3N3b3JkLWNoYW5nZQ0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MyBuYW1lPW5hdGl2ZS10ZWFjaGVyLXBhZ2UtZGVmYXVsdC1vZmYNCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTQgbmFtZT1uYXRpdmUtb3Blbi1odHRwcy1zZXR0aW5ncw0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9NSBuYW1lPW5hdGl2ZS1zYXZlLWV4cGxpY2l0LWlwLWNpZHItcmVmZXJlbmNlDQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD02IG5hbWU9c2F2ZWQtY29uZmlnLW5vLWxpc3RlbmVyDQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD03IG5hbWU9bmF0aXZlLWVuYWJsZS1jb25maWd1cmVkLXJ1bnRpbWUNCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTggbmFtZT1waHlzaWNhbC1maXJzdC1ydW5uaW5nLWdlbmVyYXRpb24NCk9SRElOQVJZX0hUVFBTX1JFQURZIHsiY3ljbGUiOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy04ZGFlZDE4NjhmZDU0ZjhkYmM3MmMzNzMyY2ZhMTlkZCIsInBvcnQiOjU4MTkyLCJnZW5lcmF0aW9uIjoxLCJvcmlnaW4iOiJodHRwczovLzEyNy4wLjAuMTo1ODE5MiIsInRhcmdldCI6Ii9mYy9hcGkvdjEvc3RhdHVzIn0NCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTkgbmFtZT1maXJzdC1yZWFsLXRscy1yZXNwb25zZS1jb21wbGV0ZQ0KT1JESU5BUllfSFRUUFNfUEFJUl9SRUFEWSB7ImN5Y2xlIjoxLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJwb3J0Ijo1ODE5MiwiZ2VuZXJhdGlvbiI6MSwib3JpZ2luIjoiaHR0cHM6Ly8xMjcuMC4wLjE6NTgxOTIifQ0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTAgbmFtZT1uYXRpdmUtb3Blbi1hY3R1YWwtcnVudGltZS1wYWlyaW5nLXdpbmRvdw0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTEgbmFtZT1uYXRpdmUtYXBwcm92ZS1hY3R1YWwtbmV0d29yay1wYWlyaW5nLXJlcXVlc3QNCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTEyIG5hbWU9Zmlyc3QtcmVhbC1hdXRoZW50aWNhdGVkLXJlbWluZGVyLXBvc3QtYW5kLWdldA0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTMgbmFtZT1maXJzdC1tYXRlcmlhbC1yZWFkeS1hbmQtcGFydGlhbC11cGxvYWQtZXN0YWJsaXNoZWQNCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTE0IG5hbWU9bmF0aXZlLXBhaXJpbmctY2xvc2UtYW5kLWRpc2FibGUtcmV2aWV3LWNhbmNlbA0KT1JESU5BUllfSFRUUFNfU1RPUFBFRCB7ImN5Y2xlIjoxLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJnZW5lcmF0aW9uIjoxLCJlbGFwc2VkTnMiOjM2MjM1MzAwLCJhY3RpdmVSZWNvcmRzIjowLCJwZW5kaW5nSm9icyI6MCwiY2xlYW51cFBlbmRpbmciOjAsInJldGFpbmVkQ2xlYW51cCI6MCwibmF0aXZlRHJhaW5lZCI6dHJ1ZX0NCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTE1IG5hbWU9bmF0aXZlLWNvbmZpcm0tZmlyc3QtZGlzYWJsZQ0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTYgbmFtZT1waHlzaWNhbC1maXJzdC1kb21haW4tZHJhaW5lZA0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTcgbmFtZT1maXJzdC10d28tc3RhZ2luZy1maWxlcy1yZW1vdmVkDQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xOCBuYW1lPW9yaWdpbmFsLXNoYXJlZC13b3JrZXJzLXJlbWFpbi1vcGVyYXRpb25hbA0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTkgbmFtZT1uYXRpdmUtZW5hYmxlLXNlY29uZC1nZW5lcmF0aW9uDQpPUkRJTkFSWV9IVFRQU19SRUFEWSB7ImN5Y2xlIjoyLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJwb3J0Ijo1ODE5MiwiZ2VuZXJhdGlvbiI6Miwib3JpZ2luIjoiaHR0cHM6Ly8xMjcuMC4wLjE6NTgxOTIiLCJ0YXJnZXQiOiIvZmMvYXBpL3YxL3N0YXR1cyJ9DQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0yMCBuYW1lPXNlY29uZC1yZWFsLXRscy1yZXNwb25zZS1jb21wbGV0ZQ0KT1JESU5BUllfSFRUUFNfUEFJUl9SRUFEWSB7ImN5Y2xlIjoyLCJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJwb3J0Ijo1ODE5MiwiZ2VuZXJhdGlvbiI6Miwib3JpZ2luIjoiaHR0cHM6Ly8xMjcuMC4wLjE6NTgxOTIifQ0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MjEgbmFtZT1uYXRpdmUtb3Blbi1zZWNvbmQtcnVudGltZS1wYWlyaW5nLXdpbmRvdw0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MjIgbmFtZT1uYXRpdmUtYXBwcm92ZS1zZWNvbmQtbmV0d29yay1wYWlyaW5nLXJlcXVlc3QNCg=="
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "sshTunnelRaw": {
+    "stdout": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "observedBytes": 0,
+      "captureScope": "COMPLETE",
+      "sha256Scope": "captured bytes only",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": ""
+    }
+  },
+  "pairingSecretCleanup": "PASS",
+  "ownedProcessCleanup": {
+    "ownedProcessesRemaining": 0,
+    "status": "PASS",
+    "recoveredNativeProcesses": 0,
+    "ownedProcessesKilled": 2
+  },
+  "remoteRawEvidence": {
+    "tls.stdout": {
+      "bytes": 2772,
+      "sha256": "abf13b2293e0a0b5e5ad801ea204c344515d69c86883db33253cb319c7be5113"
+    },
+    ".tls-process.json": {
+      "bytes": 240,
+      "sha256": "18e7e44c27aea9fd121821dbfeccad23636346b786aff73ad0ab801d04bf1e8c"
+    },
+    "tls-public.pem": {
+      "bytes": 1141,
+      "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee"
+    },
+    "tls.stderr": {
+      "bytes": 12309,
+      "sha256": "c5175f682f3b66846257409c956707f087c30fe493de584ee48b58c2eb1c1c1d"
+    },
+    ".tls-supervisor.json": {
+      "bytes": 187,
+      "sha256": "a43d89bccf7e70f563111d792abb9c414bf8ba23feeff495017b2436fd4dddb3"
+    },
+    ".tls-setup-process.json": {
+      "bytes": 186,
+      "sha256": "cb2b8e3ed4169501c139d349cf8999545102dec8bec65b3d6d7edfdbed123ff0"
+    },
+    ".tls-fixture.json": {
+      "bytes": 373,
+      "sha256": "12a67e492d432a1199dafb6927f0c62bd90e63baa73dd9f4e63ee3f0074d01c7"
+    }
+  },
+  "rawPreservation": {
+    "status": "PASS",
+    "directory": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw",
+    "files": {
+      "tls.stdout": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 2772,
+          "sha256": "abf13b2293e0a0b5e5ad801ea204c344515d69c86883db33253cb319c7be5113"
+        },
+        "downloaded": {
+          "bytes": 2772,
+          "sha256": "abf13b2293e0a0b5e5ad801ea204c344515d69c86883db33253cb319c7be5113"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls.stdout",
+        "base64": "T1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MCBuYW1lPXNldHVwLWxvY2FsLWdsb2JhbC1hZG1pbmlzdHJhdG9yCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTEgbmFtZT1uYXRpdmUtY3JlYXRlLXN5bnRoZXRpYy1jbGFzcwpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0yIG5hbWU9bmF0aXZlLWNyZWF0ZS1pbmRlcGVuZGVudC10ZWFjaGVyLWFuZC1jb21wbGV0ZS1maXJzdC1wYXNzd29yZC1jaGFuZ2UKT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MyBuYW1lPW5hdGl2ZS10ZWFjaGVyLXBhZ2UtZGVmYXVsdC1vZmYKT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9NCBuYW1lPW5hdGl2ZS1vcGVuLWh0dHBzLXNldHRpbmdzCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTUgbmFtZT1uYXRpdmUtc2F2ZS1leHBsaWNpdC1pcC1jaWRyLXJlZmVyZW5jZQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD02IG5hbWU9c2F2ZWQtY29uZmlnLW5vLWxpc3RlbmVyCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTcgbmFtZT1uYXRpdmUtZW5hYmxlLWNvbmZpZ3VyZWQtcnVudGltZQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD04IG5hbWU9cGh5c2ljYWwtZmlyc3QtcnVubmluZy1nZW5lcmF0aW9uCk9SRElOQVJZX0hUVFBTX1JFQURZIHsiY3ljbGUiOjEsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy04ZGFlZDE4NjhmZDU0ZjhkYmM3MmMzNzMyY2ZhMTlkZCIsInBvcnQiOjU4MTkyLCJnZW5lcmF0aW9uIjoxLCJvcmlnaW4iOiJodHRwczovLzEyNy4wLjAuMTo1ODE5MiIsInRhcmdldCI6Ii9mYy9hcGkvdjEvc3RhdHVzIn0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9OSBuYW1lPWZpcnN0LXJlYWwtdGxzLXJlc3BvbnNlLWNvbXBsZXRlCk9SRElOQVJZX0hUVFBTX1BBSVJfUkVBRFkgeyJjeWNsZSI6MSwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLThkYWVkMTg2OGZkNTRmOGRiYzcyYzM3MzJjZmExOWRkIiwicG9ydCI6NTgxOTIsImdlbmVyYXRpb24iOjEsIm9yaWdpbiI6Imh0dHBzOi8vMTI3LjAuMC4xOjU4MTkyIn0KT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTAgbmFtZT1uYXRpdmUtb3Blbi1hY3R1YWwtcnVudGltZS1wYWlyaW5nLXdpbmRvdwpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xMSBuYW1lPW5hdGl2ZS1hcHByb3ZlLWFjdHVhbC1uZXR3b3JrLXBhaXJpbmctcmVxdWVzdApPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xMiBuYW1lPWZpcnN0LXJlYWwtYXV0aGVudGljYXRlZC1yZW1pbmRlci1wb3N0LWFuZC1nZXQKT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTMgbmFtZT1maXJzdC1tYXRlcmlhbC1yZWFkeS1hbmQtcGFydGlhbC11cGxvYWQtZXN0YWJsaXNoZWQKT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MTQgbmFtZT1uYXRpdmUtcGFpcmluZy1jbG9zZS1hbmQtZGlzYWJsZS1yZXZpZXctY2FuY2VsCk9SRElOQVJZX0hUVFBTX1NUT1BQRUQgeyJjeWNsZSI6MSwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLThkYWVkMTg2OGZkNTRmOGRiYzcyYzM3MzJjZmExOWRkIiwiZ2VuZXJhdGlvbiI6MSwiZWxhcHNlZE5zIjozNjIzNTMwMCwiYWN0aXZlUmVjb3JkcyI6MCwicGVuZGluZ0pvYnMiOjAsImNsZWFudXBQZW5kaW5nIjowLCJyZXRhaW5lZENsZWFudXAiOjAsIm5hdGl2ZURyYWluZWQiOnRydWV9Ck9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTE1IG5hbWU9bmF0aXZlLWNvbmZpcm0tZmlyc3QtZGlzYWJsZQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xNiBuYW1lPXBoeXNpY2FsLWZpcnN0LWRvbWFpbi1kcmFpbmVkCk9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTE3IG5hbWU9Zmlyc3QtdHdvLXN0YWdpbmctZmlsZXMtcmVtb3ZlZApPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xOCBuYW1lPW9yaWdpbmFsLXNoYXJlZC13b3JrZXJzLXJlbWFpbi1vcGVyYXRpb25hbApPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0xOSBuYW1lPW5hdGl2ZS1lbmFibGUtc2Vjb25kLWdlbmVyYXRpb24KT1JESU5BUllfSFRUUFNfUkVBRFkgeyJjeWNsZSI6MiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLThkYWVkMTg2OGZkNTRmOGRiYzcyYzM3MzJjZmExOWRkIiwicG9ydCI6NTgxOTIsImdlbmVyYXRpb24iOjIsIm9yaWdpbiI6Imh0dHBzOi8vMTI3LjAuMC4xOjU4MTkyIiwidGFyZ2V0IjoiL2ZjL2FwaS92MS9zdGF0dXMifQpPUkRJTkFSWV9IVFRQU19OQVRJVkVfU1RFUCBpbmRleD0yMCBuYW1lPXNlY29uZC1yZWFsLXRscy1yZXNwb25zZS1jb21wbGV0ZQpPUkRJTkFSWV9IVFRQU19QQUlSX1JFQURZIHsiY3ljbGUiOjIsIm1hcmtlciI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy04ZGFlZDE4NjhmZDU0ZjhkYmM3MmMzNzMyY2ZhMTlkZCIsInBvcnQiOjU4MTkyLCJnZW5lcmF0aW9uIjoyLCJvcmlnaW4iOiJodHRwczovLzEyNy4wLjAuMTo1ODE5MiJ9Ck9SRElOQVJZX0hUVFBTX05BVElWRV9TVEVQIGluZGV4PTIxIG5hbWU9bmF0aXZlLW9wZW4tc2Vjb25kLXJ1bnRpbWUtcGFpcmluZy13aW5kb3cKT1JESU5BUllfSFRUUFNfTkFUSVZFX1NURVAgaW5kZXg9MjIgbmFtZT1uYXRpdmUtYXBwcm92ZS1zZWNvbmQtbmV0d29yay1wYWlyaW5nLXJlcXVlc3QK"
+      },
+      ".tls-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 240,
+          "sha256": "18e7e44c27aea9fd121821dbfeccad23636346b786aff73ad0ab801d04bf1e8c"
+        },
+        "downloaded": {
+          "bytes": 240,
+          "sha256": "18e7e44c27aea9fd121821dbfeccad23636346b786aff73ad0ab801d04bf1e8c"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJleGUiOiJDOlxcVXNlcnNcXEVsaW9yXFxBcHBEYXRhXFxMb2NhbFxcVGVtcFxcRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLThkYWVkMTg2OGZkNTRmOGRiYzcyYzM3MzJjZmExOWRkXFxmYy1ib290c3RyYXAuZXhlIiwicGlkIjoyODMwMCwic3RhcnRUaWNrcyI6IjYzOTI5MTIyNTUyNDEwNTI1NiJ9"
+      },
+      "tls-public.pem": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 1141,
+          "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee"
+        },
+        "downloaded": {
+          "bytes": 1141,
+          "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls-public.pem",
+        "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURIakNDQWdhZ0F3SUJBZ0lRTUh5YUEweHY4NjlCcDc1OVJiNWUyekFOQmdrcWhraUc5dzBCQVFzRkFEQVVNUkl3RUFZRFZRUUQKREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TVRBeE1Ea3pNRFE1V2hjTk1qWXhNVEF5TURrek5UUTVXakFVTVJJd0VBWURWUVFEREFscwpiMk5oYkdodmMzUXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDM3lkdVY3dU1aU0FpNVBVK0VyUUIyCmgwcXBLVnVEb01TdUVHeDRFeTdQWUxsTDhzWGdnL0h1UmdKVmhJank3MWdick5INEQ5YmpOcTNydmw0WkZwb2xPOWd3OWh1MXN5RFAKb1RzY3hHcVFwZ0M2Mm9YVXgyL2tDVjlIUGoxQ3I2N3V6TkFmeWdmWmo2S1lBcnJ2Tm1HMEVzdk9ubVRtek1BMldvZXJTWkhsMWFnbApyOUZVNHppSkhXRHB3cUs4dGJHbFJCRTd0WjBVYmRHUXdnNVVnZVY1eUNLcXFLWEkzK1U3d3NMdTIrOGFjUlhqRGRIdkZEeXdHZE96CkV0YzN2MzhtUEphd0EyTjdRUG14NHQwMVdUQlE4cytVbWs2NDVRVGNKYnE5SjN4ZWx1bHQvUTJRVy9ZSmh3Nm5JbllEVlNKNmtXTmEKMFNEbTMzanlPVk1KOG5wWkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRApBZ1lJS3dZQkJRVUhBd0V3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvYjNOMGh3Ui9BQUFCTUIwR0ExVWREZ1FXQkJUVGRnV2lWbDMvCmllV2NtSmRORkNTZnQ5d3JFekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBY3RicWVyS3VTc3lIdnE4dE1SZHRpYUNCYTNYV2Z2SzQKZUxPaWkzMVI0amtmTU5ENEpJR1kreG5YTUNxNVowbzVKTzR1MnVzQWJKVWtPZjgzL3BNN0pRWkhLTWpxRHpBN2JuN3V4OG9DeEZDdApFQ1duZTJ4WGxwWXlISzVRUzNmMDV5UDF3N0lBeklIUTFZWmxxbkpCSVI3RlBDWEN4KzlaQSt3ZkI3Tm10b0dkN0k4ZVVNYzYydFVtCnVYY0VYSzh3SlpPWkxVaDA1ZFlrQjhNSWVQMTk4SzJnUEZudWtxblM3QzhWczhMQ1Q2SHA1OUp0eFNXM2U4cTRGNFBZQzRxMkJGMHYKQ2VYWXJ1TUxPRjNzdVJCd1pNWlB2Tm1TUHhtQ25WVExGeEFuMTY2Q09aWFR4QmQ1cUpoNnpiU2tvRU5uOUR5NEZlemw3Y1JKelVpUgpIdi9VVFE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+      },
+      "tls.stderr": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 12309,
+          "sha256": "c5175f682f3b66846257409c956707f087c30fe493de584ee48b58c2eb1c1c1d"
+        },
+        "downloaded": {
+          "bytes": 12309,
+          "sha256": "c5175f682f3b66846257409c956707f087c30fe493de584ee48b58c2eb1c1c1d"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls.stderr",
+        "base64": "UFJPQkVfU1VCTUlUIHRpY2s9MCBraW5kPW90aGVyIHBhZ2U95q2j5Zyo5omT5byA5pyq5p2l5pWZ5a6kClBST0JFX0NPTVBMRVRFIHRpY2s9NTIga2luZD1vdGhlciBwYWdlPeato+WcqOaJk+W8gOacquadpeaVmeWupApQUk9CRV9FVkVOVCB0aWNrPTYxIGFjdGlvbj0xIHBhZ2U96aaW5qyh6K6+572uIMK3IOWIm+W7uuS4u+euoeeQhuWRmCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz03MyBraW5kPXJlcXVlc3QgcGFnZT3pppbmrKHorr7nva4gwrcg5Yib5bu65Li7566h55CG5ZGYClBST0JFX0NPTVBMRVRFIHRpY2s9MTMzIGtpbmQ9dXBkYXRlZCBwYWdlPemmluasoeiuvue9riDCtyDliJvlu7rkuLvnrqHnkIblkZgKUFJPQkVfRVZFTlQgdGljaz0xNDIgYWN0aW9uPTUgcGFnZT3or7fkv53lrZjmgaLlpI3noIEgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfRVZFTlQgdGljaz0xNTUgYWN0aW9uPTMgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz0xNjYga2luZD1yZXF1ZXN0IHBhZ2U9U3ludGhldGljIG9yZGluYXJ5IEhUVFBTIHNjaG9vbCDCtyDnmbvlvZXlt6XkvZzlj7AKUFJPQkVfQ09NUExFVEUgdGljaz0yMjYga2luZD11cGRhdGVkIHBhZ2U9U3ludGhldGljIG9yZGluYXJ5IEhUVFBTIHNjaG9vbCDCtyDnmbvlvZXlt6XkvZzlj7AKUFJPQkVfRVZFTlQgdGljaz0yMjkgYWN0aW9uPTcgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTIzMSBhY3Rpb249MTMgcGFnZT3lrabmoKHkuI7nj63nuqcgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfU1VCTUlUIHRpY2s9MjMxIGtpbmQ9cmVxdWVzdCBwYWdlPeWtpuagoeS4juePree6pwpQUk9CRV9DT01QTEVURSB0aWNrPTIzNyBraW5kPXVwZGF0ZWQgcGFnZT3lrabmoKHkuI7nj63nuqcKUFJPQkVfRVZFTlQgdGljaz0yMzggYWN0aW9uPTcgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTI0MCBhY3Rpb249MTQgcGFnZT3lrabmoKHkuI7nj63nuqcgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfU1VCTUlUIHRpY2s9MjQwIGtpbmQ9cmVxdWVzdCBwYWdlPeWtpuagoeS4juePree6pwpQUk9CRV9DT01QTEVURSB0aWNrPTI0NiBraW5kPXVwZGF0ZWQgcGFnZT3lrabmoKHkuI7nj63nuqcKUFJPQkVfRVZFTlQgdGljaz0yNDggYWN0aW9uPTggcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTI1MCBhY3Rpb249MSBwYWdlPeWtpuagoeWfuuehgOenkeebriBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz0yNTAga2luZD1yZXF1ZXN0IHBhZ2U95a2m5qCh5Z+656GA56eR55uuClBST0JFX0NPTVBMRVRFIHRpY2s9MjU2IGtpbmQ9dXBkYXRlZCBwYWdlPeWtpuagoeWfuuehgOenkeebrgpQUk9CRV9FVkVOVCB0aWNrPTI1NyBhY3Rpb249OSBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg5bel5L2c5Y+wIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0wClBST0JFX1NVQk1JVCB0aWNrPTI1OCBraW5kPW90aGVyIHBhZ2U96LSm5Y+35LiO5Lu75pWZ566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9MjU5IGtpbmQ9b3RoZXIgcGFnZT3otKblj7fkuI7ku7vmlZnnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz0yNjAgYWN0aW9uPTYwMCBwYWdlPei0puWPt+S4juS7u+aVmeiMg+WbtCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTI2MiBhY3Rpb249NjA2IHBhZ2U96LSm5Y+35LiO5Lu75pWZ6IyD5Zu0IHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0wClBST0JFX0VWRU5UIHRpY2s9MjY1IGFjdGlvbj02MDcgcGFnZT3otKblj7fkuI7ku7vmlZnojIPlm7QgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfRVZFTlQgdGljaz0yNjYgYWN0aW9uPTYwOSBwYWdlPei0puWPt+S4juS7u+aVmeiMg+WbtCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTI2OCBhY3Rpb249NjEwIHBhZ2U96LSm5Y+35LiO5Lu75pWZ6IyD5Zu0IHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0wClBST0JFX0VWRU5UIHRpY2s9MjcwIGFjdGlvbj02MTEgcGFnZT3otKblj7fkuI7ku7vmlZnojIPlm7QgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfRVZFTlQgdGljaz0yNzIgYWN0aW9uPTYxMSBwYWdlPei0puWPt+S4juS7u+aVmeiMg+WbtCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9TVUJNSVQgdGljaz0yNzIga2luZD1vdGhlciBwYWdlPei0puWPt+S4juS7u+aVmeiMg+WbtApQUk9CRV9DT01QTEVURSB0aWNrPTMyNCBraW5kPXVwZGF0ZWQgcGFnZT3otKblj7fkuI7ku7vmlZnojIPlm7QKUFJPQkVfRVZFTlQgdGljaz0zMjUgYWN0aW9uPTUgcGFnZT3or7fkv53lrZjmgaLlpI3noIEgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTAKUFJPQkVfRVZFTlQgdGljaz0zMjYgYWN0aW9uPTYgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOW3peS9nOWPsCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MApQUk9CRV9FVkVOVCB0aWNrPTMyOCBhY3Rpb249MyBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg55m75b2V5bel5L2c5Y+wIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0xClBST0JFX1NVQk1JVCB0aWNrPTMyOCBraW5kPXJlcXVlc3QgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsApQUk9CRV9DT01QTEVURSB0aWNrPTM4MCBraW5kPXVwZGF0ZWQgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsApQUk9CRV9FVkVOVCB0aWNrPTM4MiBhY3Rpb249MSBwYWdlPeS/ruaUueacrOS6uuWPo+S7pCBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MQpQUk9CRV9TVUJNSVQgdGljaz0zODIga2luZD1yZXF1ZXN0IHBhZ2U95L+u5pS55pys5Lq65Y+j5LukClBST0JFX0NPTVBMRVRFIHRpY2s9NDgzIGtpbmQ9dXBkYXRlZCBwYWdlPeS/ruaUueacrOS6uuWPo+S7pApQUk9CRV9FVkVOVCB0aWNrPTQ4NCBhY3Rpb249MyBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg55m75b2V5bel5L2c5Y+wIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0xClBST0JFX1NVQk1JVCB0aWNrPTQ4NSBraW5kPXJlcXVlc3QgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsApQUk9CRV9DT01QTEVURSB0aWNrPTUzOCBraW5kPXVwZGF0ZWQgcGFnZT1TeW50aGV0aWMgb3JkaW5hcnkgSFRUUFMgc2Nob29sIMK3IOeZu+W9leW3peS9nOWPsApQUk9CRV9FVkVOVCB0aWNrPTUzOSBhY3Rpb249NiBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg5bel5L2c5Y+wIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0xClBST0JFX0VWRU5UIHRpY2s9NTQwIGFjdGlvbj0zIHBhZ2U9U3ludGhldGljIG9yZGluYXJ5IEhUVFBTIHNjaG9vbCDCtyDnmbvlvZXlt6XkvZzlj7AgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NTQxIGtpbmQ9cmVxdWVzdCBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg55m75b2V5bel5L2c5Y+wClBST0JFX0NPTVBMRVRFIHRpY2s9NTkyIGtpbmQ9dXBkYXRlZCBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg55m75b2V5bel5L2c5Y+wClBST0JFX0VWRU5UIHRpY2s9NTk0IGFjdGlvbj0yMyBwYWdlPVN5bnRoZXRpYyBvcmRpbmFyeSBIVFRQUyBzY2hvb2wgwrcg5bel5L2c5Y+wIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTU5NSBraW5kPW90aGVyIHBhZ2U95q2j5Zyo5Yqg6L295pWZ5biI6K6+5aSHClBST0JFX0NPTVBMRVRFIHRpY2s9NTk2IGtpbmQ9b3RoZXIgcGFnZT3mraPlnKjliqDovb3mlZnluIjorr7lpIcKUFJPQkVfRVZFTlQgdGljaz01OTkgYWN0aW9uPTUxMiBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9DT01QTEVURSB0aWNrPTYwMSBraW5kPW90aGVyIHBhZ2U95pys5py6IEhUVFBTIOi/nuaOpemFjee9rgpQUk9CRV9FVkVOVCB0aWNrPTYwNCBhY3Rpb249OTIwIHBhZ2U95pys5py6IEhUVFBTIOi/nuaOpemFjee9riBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9DT01QTEVURSB0aWNrPTYxMSBraW5kPW90aGVyIHBhZ2U95pys5py6IEhUVFBTIOi/nuaOpemFjee9rgpQUk9CRV9FVkVOVCB0aWNrPTYxNSBhY3Rpb249OTI3IHBhZ2U95pys5py6IEhUVFBTIOi/nuaOpemFjee9riBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz02MTYga2luZD1vdGhlciBwYWdlPeato+WcqOWKoOi9veaVmeW4iOiuvuWkhwpQUk9CRV9DT01QTEVURSB0aWNrPTYxOCBraW5kPW90aGVyIHBhZ2U95q2j5Zyo5Yqg6L295pWZ5biI6K6+5aSHClBST0JFX0VWRU5UIHRpY2s9NjIwIGFjdGlvbj01MDEgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfRVZFTlQgdGljaz03NDAgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz03NDAga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTc0MSBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NzQyIGFjdGlvbj01MDIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NzQzIGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz03NDMga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTc0NSBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTc0NiBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NzQ3IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz04NDggYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz04NDkga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTg1MCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9OTU3IGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9OTU4IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz05NTkga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTEwNjUgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz0xMDY2IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz0xMDY3IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz0xMTczIGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9MTE3NCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9MTE3NSBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9MTI4MiBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTEyODMga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTEyODQga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTEzOTMgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz0xMzk0IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz0xMzk1IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz0xMzk5IGFjdGlvbj01MDQgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9MTQwMCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9MTQwMSBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX1NVQk1JVCB0aWNrPTI0MDQga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTI0MDUga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9TVUJNSVQgdGljaz0zNDE3IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz0zNDE5IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz00MTY1IGFjdGlvbj01MDMgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NDE2NiBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NDE2NiBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NDE2NyBhY3Rpb249NTA3IHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX0VWRU5UIHRpY2s9NDE3MSBhY3Rpb249NTExIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX0VWRU5UIHRpY2s9NDE3MyBhY3Rpb249NTA3IHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX0VWRU5UIHRpY2s9NDE3OCBhY3Rpb249NTEwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTQyMDgga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTQyMDkga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9TVUJNSVQgdGljaz00MjE1IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz00MjE2IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz00MjE3IGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NDIxNyBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NDIxOCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NDIxOSBhY3Rpb249NTAxIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX0VWRU5UIHRpY2s9NDMwMSBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTQzMDEga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTQzMDIga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTQzMDMgYWN0aW9uPTUwMiBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz00MzA0IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz00MzA0IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz00MzA3IGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NDMwNyBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NDMwOCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NDQwOSBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTQ0MTAga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTQ0MTIga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTQ1MTcgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz00NTE4IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz00NTE5IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz00NjI3IGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NDYyOCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NDYyOCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NDczNSBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTQ3MzYga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTQ3Mzcga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTQ4NDIgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz00ODQzIGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz00ODQ0IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz00OTUwIGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NDk1MSBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NDk1MiBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NTA1OCBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTUwNjMga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTUwNjYga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTUxODIgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz01MTg0IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz01MTg1IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz01MjkwIGFjdGlvbj01MDAgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NTI5MiBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NTI5MyBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0VWRU5UIHRpY2s9NTQwMCBhY3Rpb249NTAwIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGIHBlbmRpbmc9ZmFsc2UgZ2VuZXJhdGlvbj0yClBST0JFX1NVQk1JVCB0aWNrPTU0MDEga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTU0MDIga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9FVkVOVCB0aWNrPTU1MDcgYWN0aW9uPTUwMCBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhiBwZW5kaW5nPWZhbHNlIGdlbmVyYXRpb249MgpQUk9CRV9TVUJNSVQgdGljaz01NTA4IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz01NTA5IGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfRVZFTlQgdGljaz01NTE0IGFjdGlvbj01MDQgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYgcGVuZGluZz1mYWxzZSBnZW5lcmF0aW9uPTIKUFJPQkVfU1VCTUlUIHRpY2s9NTUxNCBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX0NPTVBMRVRFIHRpY2s9NTUxNSBraW5kPW90aGVyIHBhZ2U95pWZ5biI6K6+5aSH5LiO6YWN5a+5566h55CGClBST0JFX1NVQk1JVCB0aWNrPTY1MjMga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9DT01QTEVURSB0aWNrPTY1MjQga2luZD1vdGhlciBwYWdlPeaVmeW4iOiuvuWkh+S4jumFjeWvueeuoeeQhgpQUk9CRV9TVUJNSVQgdGljaz03NTMxIGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYKUFJPQkVfQ09NUExFVEUgdGljaz03NTMzIGtpbmQ9b3RoZXIgcGFnZT3mlZnluIjorr7lpIfkuI7phY3lr7nnrqHnkIYK"
+      },
+      ".tls-supervisor.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 187,
+          "sha256": "a43d89bccf7e70f563111d792abb9c414bf8ba23feeff495017b2436fd4dddb3"
+        },
+        "downloaded": {
+          "bytes": 187,
+          "sha256": "a43d89bccf7e70f563111d792abb9c414bf8ba23feeff495017b2436fd4dddb3"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-supervisor.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6MTUzMDAsInN0YXJ0VGlja3MiOiI2MzkyOTEyMjU1MjE0MzcwMDEifQ=="
+      },
+      ".tls-setup-process.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 186,
+          "sha256": "cb2b8e3ed4169501c139d349cf8999545102dec8bec65b3d6d7edfdbed123ff0"
+        },
+        "downloaded": {
+          "bytes": 186,
+          "sha256": "cb2b8e3ed4169501c139d349cf8999545102dec8bec65b3d6d7edfdbed123ff0"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-setup-process.json",
+        "base64": "eyJtYXJrZXIiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQiLCJleGUiOiJDOlxcV2luZG93c1xcU3lzdGVtMzJcXFdpbmRvd3NQb3dlclNoZWxsXFx2MS4wXFxwb3dlcnNoZWxsLmV4ZSIsInBpZCI6NjY0OCwic3RhcnRUaWNrcyI6IjYzOTI5MTIyNTQ5MDI2NjQwNCJ9"
+      },
+      ".tls-fixture.json": {
+        "status": "PASS",
+        "remote": {
+          "bytes": 373,
+          "sha256": "12a67e492d432a1199dafb6927f0c62bd90e63baa73dd9f4e63ee3f0074d01c7"
+        },
+        "downloaded": {
+          "bytes": 373,
+          "sha256": "12a67e492d432a1199dafb6927f0c62bd90e63baa73dd9f4e63ee3f0074d01c7"
+        },
+        "artifact": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-fixture.json",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzU0RjA4RTU2RUJGQUI0MzlDMENGNEVCNzZFRjNFMzA4OTI4NEJBNyIsInByb3ZpZGVyIjoiTWljcm9zb2Z0IFNvZnR3YXJlIEtleSBTdG9yYWdlIFByb3ZpZGVyIiwibWFya2VyIjoiRnV0dXJlQ2xhc3Nyb29tLVRlc3QtVExTLThkYWVkMTg2OGZkNTRmOGRiYzcyYzM3MzJjZmExOWRkIiwiYmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImtleUFic2VudEJlZm9yZSI6dHJ1ZSwia2V5TmFtZSI6IkZ1dHVyZUNsYXNzcm9vbS1UZXN0LVRMUy04ZGFlZDE4NjhmZDU0ZjhkYmM3MmMzNzMyY2ZhMTlkZC1rZXkifQ=="
+      }
+    }
+  },
+  "cleanupDetails": {
+    "myAfter": {
+      "count": 4,
+      "sha256": "adc3472f766f12a5a78914c5327721a1fb1e5cc4c8bacce2ed9d1b12c1ddd5f4"
+    },
+    "cngKeyExists": false,
+    "httpSys": "UNTOUCHED",
+    "sshConfiguration": "UNTOUCHED",
+    "rootAbsent": true,
+    "deleteKeyFallbackUsed": false,
+    "rootTrustStore": "UNTOUCHED",
+    "certificatesRemoved": 1,
+    "firewall": "UNTOUCHED",
+    "myDigestRestored": true,
+    "status": "PASS",
+    "ownedProcessesRemaining": 0
+  },
+  "remoteControlRunsRaw": [
+    {
+      "script": "tls-setup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 1655,
+        "sha256": "16da85f0bb1f0b276ff9055e56d698bd4c084c13197fb3c8032b753d9f0376c8",
+        "base64": "eyJ0aHVtYnByaW50IjoiNzU0RjA4RTU2RUJGQUI0MzlDMENGNEVCNzZFRjNFMzA4OTI4NEJBNyIsImtleU5hbWUiOiJGdXR1cmVDbGFzc3Jvb20tVGVzdC1UTFMtOGRhZWQxODY4ZmQ1NGY4ZGJjNzJjMzczMmNmYTE5ZGQta2V5Iiwic2FuIjoiRE5TIE5hbWU9bG9jYWxob3N0LCBJUCBBZGRyZXNzPTEyNy4wLjAuMSIsInBsYXRmb3JtIjp7ImNhcHRpb24iOiJNaWNyb3NvZnQgV2luZG93cyAxMSDkuJPkuJrniYgiLCJvc0FyY2hpdGVjdHVyZSI6IjY0LWJpdCIsImJ1aWxkIjoiMjYzMDAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCJ9LCJwcml2YXRlS2V5RXhwb3J0ZWQiOmZhbHNlLCJwcm92aWRlciI6Ik1pY3Jvc29mdCBTb2Z0d2FyZSBLZXkgU3RvcmFnZSBQcm92aWRlciIsInB1YmxpY1BlbSI6Ii0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLVxuTUlJREhqQ0NBZ2FnQXdJQkFnSVFNSHlhQTB4djg2OUJwNzU5UmI1ZTJ6QU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRFxuREFsc2IyTmhiR2h2YzNRd0hoY05Nall4TVRBeE1Ea3pNRFE1V2hjTk1qWXhNVEF5TURrek5UUTVXakFVTVJJd0VBWURWUVFEREFsc1xuYjJOaGJHaHZjM1F3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQzN5ZHVWN3VNWlNBaTVQVStFclFCMlxuaDBxcEtWdURvTVN1RUd4NEV5N1BZTGxMOHNYZ2cvSHVSZ0pWaElqeTcxZ2JyTkg0RDliak5xM3J2bDRaRnBvbE85Z3c5aHUxc3lEUFxub1RzY3hHcVFwZ0M2Mm9YVXgyL2tDVjlIUGoxQ3I2N3V6TkFmeWdmWmo2S1lBcnJ2Tm1HMEVzdk9ubVRtek1BMldvZXJTWkhsMWFnbFxucjlGVTR6aUpIV0Rwd3FLOHRiR2xSQkU3dFowVWJkR1F3ZzVVZ2VWNXlDS3FxS1hJMytVN3dzTHUyKzhhY1JYakRkSHZGRHl3R2RPelxuRXRjM3YzOG1QSmF3QTJON1FQbXg0dDAxV1RCUThzK1VtazY0NVFUY0picTlKM3hlbHVsdC9RMlFXL1lKaHc2bkluWURWU0o2a1dOYVxuMFNEbTMzanlPVk1KOG5wWkFnTUJBQUdqYkRCcU1BNEdBMVVkRHdFQi93UUVBd0lGb0RBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjRFxuQWdZSUt3WUJCUVVIQXdFd0dnWURWUjBSQkJNd0VZSUpiRzlqWVd4b2IzTjBod1IvQUFBQk1CMEdBMVVkRGdRV0JCVFRkZ1dpVmwzL1xuaWVXY21KZE5GQ1NmdDl3ckV6QU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFjdGJxZXJLdVNzeUh2cTh0TVJkdGlhQ0JhM1hXZnZLNFxuZUxPaWkzMVI0amtmTU5ENEpJR1kreG5YTUNxNVowbzVKTzR1MnVzQWJKVWtPZjgzL3BNN0pRWkhLTWpxRHpBN2JuN3V4OG9DeEZDdFxuRUNXbmUyeFhscFl5SEs1UVMzZjA1eVAxdzdJQXpJSFExWVpscW5KQklSN0ZQQ1hDeCs5WkErd2ZCN05tdG9HZDdJOGVVTWM2MnRVbVxudVhjRVhLOHdKWk9aTFVoMDVkWWtCOE1JZVAxOThLMmdQRm51a3FuUzdDOFZzOExDVDZIcDU5SnR4U1czZThxNEY0UFlDNHEyQkYwdlxuQ2VYWXJ1TUxPRjNzdVJCd1pNWlB2Tm1TUHhtQ25WVExGeEFuMTY2Q09aWFR4QmQ1cUpoNnpiU2tvRU5uOUR5NEZlemw3Y1JKelVpUlxuSHYvVVRRPT1cbi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS1cbiIsIm15QmVmb3JlIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In19DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-stop.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 101,
+        "sha256": "b7a85300637df210d2170b26d85a2f20440d422007e033a6d649eba03eb9aabf",
+        "base64": "eyJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MCwic3RhdHVzIjoiUEFTUyIsInJlY292ZXJlZE5hdGl2ZVByb2Nlc3NlcyI6MCwib3duZWRQcm9jZXNzZXNLaWxsZWQiOjJ9DQo="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-capture.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 769,
+        "sha256": "f53c8ada16520afe8786502355fc5a89267958f89d854f6b86b7ac108fb13116",
+        "base64": "eyJ0bHMuc3Rkb3V0Ijp7ImJ5dGVzIjoyNzcyLCJzaGEyNTYiOiJhYmYxM2IyMjkzZTBhMGI1ZTVhZDgwMWVhMjA0YzM0NDUxNWQ2OWM4Njg4M2RiMzMyNTNjYjMxOWM3YmU1MTEzIn0sIi50bHMtcHJvY2Vzcy5qc29uIjp7ImJ5dGVzIjoyNDAsInNoYTI1NiI6IjE4ZTdlNDRjMjdhZWE5ZmQxMjE4MjFkYmZlY2NhZDIzNjM2MzQ2Yjc4NmFmZjczYWQwYWI4MDFkMDRiZjFlOGMifSwidGxzLXB1YmxpYy5wZW0iOnsiYnl0ZXMiOjExNDEsInNoYTI1NiI6IjQwMDBmOGEzYjM0YmUzNDY5NDUyYTdkYzFhNmQyODkwOTUwODdkYjQzOTkyYTAxNzhjNzY4ZjYxYmM0ODBjZWUifSwidGxzLnN0ZGVyciI6eyJieXRlcyI6MTIzMDksInNoYTI1NiI6ImM1MTc1ZjY4MmYzYjY2ODQ2MjU3NDA5Yzk1NjcwN2YwODdjMzBmZTQ5M2RlNTg0ZWU0OGI1OGMyZWIxYzFjMWQifSwiLnRscy1zdXBlcnZpc29yLmpzb24iOnsiYnl0ZXMiOjE4Nywic2hhMjU2IjoiYTQzZDg5YmNjZjdlNzBmNTYzMTExZDc5MmFiYjljNDE0YmY4YmEyM2ZlZWZmNDk1MDE3YjI0MzZmZDRkZGRiMyJ9LCIudGxzLXNldHVwLXByb2Nlc3MuanNvbiI6eyJieXRlcyI6MTg2LCJzaGEyNTYiOiJjYjJiOGUzZWQ0MTY5NTAxYzEzOWQzNDljZjg5OTk1NDUxMDJkZWM4YmVjNjViM2Q2ZDdlZGZkYmVkMTIzZmYwIn0sIi50bHMtZml4dHVyZS5qc29uIjp7ImJ5dGVzIjozNzMsInNoYTI1NiI6IjEyYTY3ZTQ5MmQ0MzJhMTE5OWRhZmI2OTI3ZjBjNjJiZDkwZTYzYmFhNzNkZDlmNGU2M2VlM2YwMDc0ZDAxYzcifX0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    },
+    {
+      "script": "tls-cleanup.ps1",
+      "exitCode": 0,
+      "stdout": {
+        "bytes": 367,
+        "sha256": "e9b460e15bfb44a4deff8e9c3252b582180ed8e64239d0ecbcc63102979228c3",
+        "base64": "eyJteUFmdGVyIjp7ImNvdW50Ijo0LCJzaGEyNTYiOiJhZGMzNDcyZjc2NmYxMmE1YTc4OTE0YzUzMjc3MjFhMWZiMWU1Y2M0YzhiYWNjZTJlZDlkMWIxMmMxZGRkNWY0In0sImNuZ0tleUV4aXN0cyI6ZmFsc2UsImh0dHBTeXMiOiJVTlRPVUNIRUQiLCJzc2hDb25maWd1cmF0aW9uIjoiVU5UT1VDSEVEIiwicm9vdEFic2VudCI6dHJ1ZSwiZGVsZXRlS2V5RmFsbGJhY2tVc2VkIjpmYWxzZSwicm9vdFRydXN0U3RvcmUiOiJVTlRPVUNIRUQiLCJjZXJ0aWZpY2F0ZXNSZW1vdmVkIjoxLCJmaXJld2FsbCI6IlVOVE9VQ0hFRCIsIm15RGlnZXN0UmVzdG9yZWQiOnRydWUsInN0YXR1cyI6IlBBU1MiLCJvd25lZFByb2Nlc3Nlc1JlbWFpbmluZyI6MH0NCg=="
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "base64": ""
+      }
+    }
+  ]
+}

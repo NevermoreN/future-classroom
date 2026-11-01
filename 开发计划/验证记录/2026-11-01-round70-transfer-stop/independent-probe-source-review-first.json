@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "status": "BLOCKED_P1_FROZEN_PROBE_RENDEZVOUS_ID_ENCODING",
+  "recordedUtc": "2026-11-01T08:59:45.137797+00:00",
+  "implementationFreeze": {
+    "path": "implementation-freeze-first.json",
+    "sha256": "a473602e8c189d2f198b2e6195f687590ead600b7951454a7c81ecf398cb37b6"
+  },
+  "source": [
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25140,
+      "sha256": "73100e7f848cbca3c8a9416c9b0f27c78d65696637597016f6256c6dd9623736"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 69563,
+      "sha256": "f831be629435f7caeca6126b6bf7642dd3906d5cf839ad53435eee835c67db1f"
+    }
+  ],
+  "sourceUnchanged": true,
+  "pureReplay": {
+    "command": [
+      "python3",
+      "-B",
+      "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py",
+      "--self-test"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.4333251609932631,
+    "actualResult": {
+      "status": "PASS",
+      "scope": "pure validators only",
+      "checks": 166,
+      "wireJourneyPositiveCases": 8,
+      "wireJourneyNegativeCases": 35,
+      "transferJourneyPositiveCases": 4,
+      "transferTypedAndCyclePositiveCases": 6,
+      "transferNegativeCases": 72,
+      "windows": "NOT_RUN",
+      "tls": "NOT_RUN",
+      "ordinaryRuntime": "NOT_RUN"
+    },
+    "streams": {
+      "stdout": {
+        "path": "independent-probe-pure-first.stdout.log",
+        "bytes": 305,
+        "sha256": "aa44262e66948abc46f6f775fd3b46c193613c4852a13ff1e45a57b5098c698e"
+      },
+      "stderr": {
+        "path": "independent-probe-pure-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "qualification": "All166 existing pure checks pass, but they do not invoke signal_business_done with actual string upload IDs; this is not Windows or transfer execution proof."
+  },
+  "finding": {
+    "priority": "P1",
+    "file": "scripts/windows-ordinary-https-probe.py",
+    "line": 340,
+    "function": "signal_business_done",
+    "problem": "validate_upload/create_material produce str IDs. f-string format020 on str right-pads zeroes, whereas native completion expects20digit canonical numeric IDs.",
+    "actualPureReproduction": {
+      "producerInvokedWithNoIoRemote": true,
+      "syntheticInputIds": [
+        "1",
+        "2"
+      ],
+      "actualStringFormattedFields": [
+        "10000000000000000000",
+        "20000000000000000000"
+      ],
+      "requiredNumericFields": [
+        "00000000000000000001",
+        "00000000000000000002"
+      ],
+      "firstFieldChangesNumericId": true,
+      "secondFieldExceedsU64": true
+    },
+    "consequence": "Native completion reads a different stage ID or rejects u64 overflow, so the frozen first-generation actual31-step workflow cannot reach intended stage/stop validation.",
+    "minimalCorrection": "After the existing bounded decimal ID validation, convert each ID with int and use020d numeric formatting. Add a pure actual producer/consumer roundtrip for string IDs.",
+    "sourceNotModified": true
+  },
+  "otherReviewedContracts": [
+    "31 native/Python ordered step names agree. Only initialUnavailable->Disabled fixture readiness is assigned; actual Running is observed from ordinary RuntimeOwner.",
+    "FullA UPLOADED response maps to production UploadHub Stage::MaterialReady; both runner and native check its exact65536-byte original stage before Disable. PartialB sends65536 of declared1048576 and observes real stage consumption.",
+    "PartialB original TLS socket and forwarding domain remain owned through first native STOPPED. Runner cancels that forward only after observing peer terminal; error-finally cleanup does not promote PASS.",
+    "Native stop observes one Instant captured immediately before CONFIRM and caps submit/wait/elapsed at original5s; production State passes its own earliest observation to request_stop_at and RuntimeOwner retains min original stop_at. No phase-specific renewed stop budget.",
+    "First stage deletion occurs only after teacher_https_quiescent and original network counters/nativeDrained; original App pool is neither recreated nor closed, and actual OpenWeb query is pumped before second enable.",
+    "Second generation checks old cookie401 with exact unauthorized body, then opens native pairing again, approves actual selected teacher request and obtains fresh cookie/CSRF in memory.",
+    "C andD both receive complete UPLOADED receipts before appendC or cancelD, so the intended slot-reuse proof is concurrent MaterialReady occupancy, not sequential reuse. Typed command69001 commits, exact retries and GET readback compare in memory; D is canceled.",
+    "Real teacher credentials are random native fixtures. Code sidechannels use memory-only nonrecorded SSH read and exact removal; request headers/bodies containing cookie/CSRF/pollSecret are not placed in event reports. Only fixed synthetic MATERIAL digest plus public artifacts/status digests enter reports, not credential digests.",
+    "Completion marker only coordinates an already completed client journey. It supplies canonical ID/generation identity to native checks; it is not RuntimeReady, authentication or durable commit evidence."
+  ],
+  "limits": [
+    "This report concerns frozen firstsource only. The P1 must be fixed and newly frozen before actual workflow acceptance.",
+    "No Rust typecheck/link, actual TLS, native31 runtime, Windows/SSH, network, Cargo, Git mutation or main change performed.",
+    "Partial peer terminal sample is read after native stopped receipt; no independent per-channel kernel-close timing or arbitrary scheduler guarantee is claimed.",
+    "Published material bytes/hash and transport/staging lifetime remain intended runtime assertions until an actual complete terminal run. Win7/10/campus remain separate."
+  ]
+}

@@ -1,0 +1,72 @@
+--- fourth/scripts/windows-ordinary-https-probe.py
++++ fifth/scripts/windows-ordinary-https-probe.py
+@@ -189,12 +189,14 @@
+                         break
+                     parser.feed(chunk)
+         parser.finish()
+-        require(parser.status in expected, "ordinary business unexpected HTTP status")
++        # Preserve only safe wire metadata even when the status assertion fails.
++        # Never include headers, auth-bearing response JSON or its body digest.
+         self.events.append({"case": case, "method": method, "route": route, "httpStatus": parser.status,
+                             "requestBodyBytes": len(payload), "responseBodyBytes": parser.body_bytes,
+                             "authenticatedCookieSent": bool(authenticated and self.cookie),
+                             "csrfSent": bool(method == "POST" and authenticated and self.csrf),
+                             "tls": "TLSv1.2", "serverName": "127.0.0.1", "cleanTlsEof": True})
++        require(parser.status in expected, "ordinary business unexpected HTTP status")
+         return parser
+ 
+ 
+@@ -794,11 +796,52 @@
+                     "same-root pending write/flush/dispose then non-overwriting final publication")
+             publication_checks+=1
+ 
+-    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative+publication_checks,
++    unexpected_metadata_checks=0
++    class MemoryRaw:
++        def __enter__(self):return self
++        def __exit__(self,*unused):return False
++    class MemoryTls(MemoryRaw):
++        def __init__(self,status):
++            body=b'{"schemaVersion":1,"code":"SERVICE_UNAVAILABLE","opaque":"RAW_BODY_MUST_NOT_PERSIST"}'
++            self.chunks=[f"HTTP/1.1 {status} Fixture\r\nContent-Length: {len(body)}\r\nSet-Cookie: FAKE_RESPONSE_COOKIE_MUST_NOT_PERSIST\r\n\r\n".encode("ascii")+body,b""]
++        def getpeercert(self,binary_form):return b"fixture-public-der"
++        def version(self):return "TLSv1.2"
++        def sendall(self,data):pass
++        def settimeout(self,timeout):pass
++        def recv(self,limit):return self.chunks.pop(0)
++    class MemoryContext:
++        def __init__(self,status):self.status=status
++        def wrap_socket(self,*unused,**options):return MemoryTls(self.status)
++    original_connect=socket.create_connection
++    try:
++        socket.create_connection=lambda *unused,**options:MemoryRaw()
++        for status in (400,403,409,429,503):
++            observed=[]
++            client=OrdinaryClient(1,2,MemoryContext(status),b"fixture-public-der",time.monotonic()+1,observed)
++            client.cookie="FAKE_REQUEST_COOKIE_MUST_NOT_PERSIST"
++            client.csrf="FAKE_CSRF_MUST_NOT_PERSIST"
++            try:
++                client.request("fixture-unexpected-append","POST","materials/folders/2/1/append",{"schemaVersion":1})
++            except RuntimeError as error:
++                require(str(error)=="ordinary business unexpected HTTP status","original unexpected-status assertion remains strict")
++            else:
++                raise RuntimeError("unexpected HTTP status was accepted")
++            require(len(observed)==1 and observed[0]["httpStatus"]==status
++                    and observed[0]["case"]=="fixture-unexpected-append" and observed[0]["method"]=="POST"
++                    and observed[0]["route"]=="materials/folders/2/1/append" and observed[0]["cleanTlsEof"] is True
++                    and not any(secret in json.dumps(observed) for secret in
++                        ("RAW_BODY_MUST_NOT_PERSIST","FAKE_REQUEST_COOKIE_MUST_NOT_PERSIST","FAKE_RESPONSE_COOKIE_MUST_NOT_PERSIST","FAKE_CSRF_MUST_NOT_PERSIST")),
++                    "safe unexpected status metadata retained without credential/header/body persistence")
++            unexpected_metadata_checks+=1
++    finally:
++        socket.create_connection=original_connect
++
++    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative+publication_checks+unexpected_metadata_checks,
+                       "wireJourneyPositiveCases":8,"wireJourneyNegativeCases":len(negatives),
+                       "transferJourneyPositiveCases":4,"transferTypedAndCyclePositiveCases":6,"transferNegativeCases":transfer_checks,
+                       "completionIdPositiveCases":completion_positive,"completionIdNegativeCases":completion_negative,
+                       "publicationSourceContractCases":publication_checks,
++                      "unexpectedStatusSafeMetadataCases":unexpected_metadata_checks,
+                       "windows": "NOT_RUN", "tls": "NOT_RUN", "ordinaryRuntime": "NOT_RUN"}))
+ 
+ 

@@ -1,0 +1,43 @@
+--- second/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
++++ third/crates/fc-bootstrap/src/application/ordinary_https_probe.rs
+@@ -198,12 +198,12 @@
+     app: &mut App,
+     root: &Path,
+     marker: &str,
+-    cycle: u8,
+-    generation: u64,
++    cycle_generation: (u8, u64),
+     port: u16,
+     steps: &mut usize,
+     deadline: Instant,
+ ) -> Check<()> {
++    let (cycle, generation) = cycle_generation;
+     submit(app, web_editor::REFRESH, &[], deadline)?;
+     submit(app, web_editor::BEGIN, &[], deadline)?;
+     let code = app
+@@ -538,7 +538,7 @@
+     let package_root = completion_path
+         .parent()
+         .ok_or("owned completion parent absent")?;
+-    pair(app, package_root, marker, 1, first, port, steps, deadline)?;
++    pair(app, package_root, marker, (1, first), port, steps, deadline)?;
+     let first_ids = completion(app, package_root, marker, 1, first, deadline)?;
+     require(
+         stage_length(app, first_ids[0])? == 65536,
+@@ -602,7 +602,15 @@
+     wait(app, deadline, response)?;
+     mark(steps, "second-real-tls-response-complete")?;
+     let second = running(app).unwrap();
+-    pair(app, package_root, marker, 2, second, port, steps, deadline)?;
++    pair(
++        app,
++        package_root,
++        marker,
++        (2, second),
++        port,
++        steps,
++        deadline,
++    )?;
+     let second_ids = completion(app, package_root, marker, 2, second, deadline)?;
+     for id in second_ids {
+         absent_stage(app, id)?;

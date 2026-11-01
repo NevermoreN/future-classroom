@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-bootstrap",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--message-format=json"
+  ],
+  "cwd": "/tmp/fc-round70-ordinary-transfer-stop/worktree",
+  "sourceFreeze": "joint-source-freeze-third.json",
+  "sourceFreezeSha256": "0e5f2a3a97ade635a376837d1efda1a9dcef60cb4467b137677e5d261709605e",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T09:09:41.129738+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 91.6561869289726,
+  "sourceUnchanged": true,
+  "stdoutBytes": 85280,
+  "stdoutSha256": "f4319c912b0dea37d0b19abe060f09c9918751a5ab9a50e77ad549642f6c180c",
+  "stderrBytes": 166,
+  "stderrSha256": "a65d528731656a07a6dae06e465eac97a1cbd36eb620c4c80ce022848d118852"
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py", line 1087, in <module>
+    main()
+  File "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py", line 1082, in main
+    require(report["status"]==report["cleanup"]=="PASS","ordinary probe failed; preserve report "+str(args.report))
+  File "/tmp/fc-round70-ordinary-transfer-stop/worktree/scripts/windows-ordinary-https-probe.py", line 57, in require
+    raise RuntimeError(message)
+RuntimeError: ordinary probe failed; preserve report /tmp/fc-round70-ordinary-transfer-stop/evidence/windows-ordinary-https-fifth.json

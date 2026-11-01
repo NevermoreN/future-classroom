@@ -1,0 +1,75 @@
+    transfer_checks=0
+    def rejects(call, label):
+        nonlocal transfer_checks
+        try:
+            call()
+        except RuntimeError:
+            transfer_checks+=1
+        else:
+            raise RuntimeError("invalid transfer contract accepted: "+label)
+    upload={"schemaVersion":1,"status":"UPLOAD_READY","uploadId":"11","expiresInSeconds":300,"maxChunkBytes":65536}
+    validate_upload(upload)
+    for change in [{"uploadId":"0"},{"uploadId":"01"},{"uploadId":True},{"uploadId":str(2**64)},
+                   {"schemaVersion":True},{"expiresInSeconds":True},{"expiresInSeconds":301},{"maxChunkBytes":65535},
+                   {"cookie":"fake-extra-field"},{"status":"COMMITTED"}]:
+        rejects(lambda value=dict(upload,**change):validate_upload(value),"upload identity/limits/shape")
+    uploaded={"schemaVersion":1,"status":"UPLOADED","uploadId":"11","bytes":65536}
+    validate_upload(uploaded,"11",True)
+    for change in [{"bytes":True},{"bytes":1048576},{"uploadId":"12"},{"status":"UPLOAD_READY"}]:
+        rejects(lambda value=dict(uploaded,**change):validate_upload(value,"11",True),"complete upload receipt")
+    record={"materialId":"1","folderId":"1","displayName":"R70-reuse-c.txt","resourceVersionId":"13",
+        "kind":"TXT","bytes":65536,"sha256":b.digest(MATERIAL),"allowedClassIds":["1"],"addedAt":"2026-11-01T08:00:00",
+        "addedSequence":"1","status":"PUBLISHED","revision":"1"}
+    receipt={"schemaVersion":1,"status":"COMMITTED","commandId":"69001","scope":{"ownerTeacherId":"2","subjectId":"1"},"record":record}
+    validate_material_receipt(receipt,"13")
+    durable=dict(receipt,status="COMMAND_RESULT",state="COMMITTED")
+    validate_material_receipt(durable,"13",True)
+    for change in [{"scope":{"ownerTeacherId":"1","subjectId":"1"}},{"commandId":"69002"},{"cookie":"fake-extra-field"}]:
+        rejects(lambda value=dict(receipt,**change):validate_material_receipt(value,"13"),"typed command scope/identity")
+    for change in [{"sha256":"0"*64},{"bytes":True},{"allowedClassIds":["2"]},{"resourceVersionId":"14"},
+                   {"revision":str(2**64)},{"status":"DELETED"}]:
+        rejects(lambda value=dict(receipt,record=dict(record,**change)):validate_material_receipt(value,"13"),"published record exact payload")
+    def transfer_fixture(polls1,polls2):
+        events,ready_values,business=journey_fixture(polls1)
+        def event(case,method,route,status=200,auth=True,csrf=True):
+            return {"case":case,"method":method,"route":route,"httpStatus":status,"requestBodyBytes":0 if method=="GET" else 65536 if case.startswith("r70-bytes-") else 100,
+                "responseBodyBytes":100,"authenticatedCookieSent":auth,"csrfSent":csrf,"tls":"TLSv1.2","serverName":"127.0.0.1","cleanTlsEof":True}
+        extra=[event("r70-wrong-origin","POST","materials/uploads/2/1",403),event("r70-wrong-csrf","POST","materials/uploads/2/1",403),
+            event("r70-wrong-owner","POST","materials/uploads/1/1",403),event("r70-create-a","POST","materials/uploads/2/1",201),
+            event("r70-bytes-a","POST","materials/uploads/11/bytes"),event("r70-create-b","POST","materials/uploads/2/1",201)]
+        more=[event("r70-old-cookie-rejected","GET","session",401,csrf=False),event("ordinary-cycle2-private-without-session","GET","session",401,False,False),
+            event("ordinary-cycle2-pairing-request","POST","pairing/requests",202,False,False)]
+        more += [event(f"ordinary-cycle2-pairing-poll-{i}","POST","pairing/requests/9/poll",202 if i<polls2 else 200,False,False) for i in range(1,polls2+1)]
+        more += [event("ordinary-cycle2-authenticated-session","GET","session",csrf=False),
+            event("r70-create-c","POST","materials/uploads/2/1",201),event("r70-bytes-c","POST","materials/uploads/13/bytes"),
+            event("r70-create-d","POST","materials/uploads/2/1",201),event("r70-bytes-d","POST","materials/uploads/14/bytes"),
+            event("r70-append-c","POST","materials/folders/2/1/append"),event("r70-append-c-exact-retry","POST","materials/folders/2/1/append"),
+            event("r70-material-receipt","GET","materials/commands/69001",csrf=False),event("r70-cancel-d","POST","materials/uploads/14/cancel")]
+        pair2={"status":"PASS","principalId":"2","role":"TEACHER_ADMIN","pairingRequestId":"9","pollAttempts":polls2}
+        stops=[{"cycle":cycle,"marker":marker,"generation":generation,"elapsedNs":1_000_000,"activeRecords":0,"pendingJobs":0,
+            "cleanupPending":0,"retainedCleanup":0,"nativeDrained":True} for cycle,generation in [(1,17),(2,18)]]
+        partial={"status":"PASS","uploadId":"12","declaredBytes":1048576,"sentPrefixBytes":65536,"peerTermination":"TLS_TRUNCATED_BY_STOP",
+            "successfulUploadResponse":False,"clientClosedBeforeNativeStop":False}
+        return [events[:-1]+extra+[events[-1]]+more,ready_values,business,pair2,["11","12","13","14"],marker,23456,stops,partial]
+    for polls1,polls2 in [(1,1),(1,8),(8,1),(8,8)]:
+        args=transfer_fixture(polls1,polls2)
+        validate_transfer_journey(*args)
+    args=transfer_fixture(1,1)
+    for index in range(len(args[0])):
+        bad=copy.deepcopy(args);bad[0].pop(index)
+        rejects(lambda bad=bad:validate_transfer_journey(*bad),"missing actual wire operation")
+    for change in [{"elapsedNs":5_000_000_001},{"elapsedNs":True},{"generation":18},{"pendingJobs":1},{"nativeDrained":False},
+                   {"cookie":"fake-extra-field"}]:
+        rejects(lambda value=dict(args[7][0],**change):validate_stop(value,marker,17,1),"old stop budget/owner/release")
+    for change in [{"successfulUploadResponse":True},{"clientClosedBeforeNativeStop":True},{"declaredBytes":65536},
+                   {"uploadId":"13"},{"peerTermination":"LOCAL_CLOSE"}]:
+        bad=copy.deepcopy(args);bad[8].update(change)
+        rejects(lambda bad=bad:validate_transfer_journey(*bad),"partial stop evidence")
+    for index,changes in [(12,{"httpStatus":200}),(13,{"csrfSent":False}),(-1,{"route":"materials/uploads/13/cancel"}),
+                          (-2,{"authenticatedCookieSent":False}),(-3,{"cleanTlsEof":False}),(-4,{"cookie":"fake-extra-field"})]:
+        bad=copy.deepcopy(args);bad[0][index].update(changes)
+        rejects(lambda bad=bad:validate_transfer_journey(*bad),"wrong route/status/auth/secret field")
+    for cycle in (1,2):
+        code=f"FC_ORDINARY_PAIR_V2\n{marker}\n{17:020}\n{cycle}\n00000000\nsynthetic-ordinary-teacher\n"
+        require(parse_pairing_secret(code,marker,17,cycle)==("00000000","synthetic-ordinary-teacher"),"cycle-bound memory-only secret parser")
+        rejects(lambda code=code,cycle=cycle:parse_pairing_secret(code,marker,17,3-cycle),"wrong secret cycle")

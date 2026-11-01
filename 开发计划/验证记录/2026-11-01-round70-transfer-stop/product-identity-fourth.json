@@ -1,0 +1,19 @@
+{
+  "status": "PASS_STATIC_FOURTH_PRODUCT_IDENTITY_ONLY",
+  "sourceFreeze": "joint-source-freeze-fourth.json",
+  "productReport": "product-release-fourth.json",
+  "exe": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13348263,
+    "sha256": "3e8cb280d56b68b6e5477bcdb120d5e7e533de021b8068e78d536b35c44756c8",
+    "peMachine": 332,
+    "subsystem": 2
+  },
+  "frontendBinding": {
+    "originalProducer": "web-build-first.json",
+    "sourceProducerFreeze": "joint-source-freeze-first.json",
+    "actualFrozenWebInputsStillEqual": 65,
+    "source4RustAndOrdinaryPythonChangesAreNotFrontendCompilerInputs": true
+  },
+  "scope": "Actual combined source4 normal product. Original source1 frontend build remains bound only to its unchanged65 web sources and unchanged package/reader helpers; do not claim all595 source1 guard rows unchanged to source4. No runtime claim."
+}

@@ -1,0 +1,53 @@
+{
+  "status": "PASS_PURE_CONTRACT_AND_FORMAT_ONLY",
+  "atUtc": "2026-11-01T09:32:16.972195+00:00",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/windows-ordinary-https-probe.py",
+    "--self-test"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 0.3900109229143709,
+  "source": {
+    "crates/fc-bootstrap/src/application/ordinary_https_probe.rs": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+    "scripts/windows-ordinary-https-probe.py": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350"
+  },
+  "sourceUnchanged": true,
+  "actualPureResult": {
+    "status": "PASS",
+    "scope": "pure validators only",
+    "checks": 235,
+    "wireJourneyPositiveCases": 8,
+    "wireJourneyNegativeCases": 35,
+    "transferJourneyPositiveCases": 4,
+    "transferTypedAndCyclePositiveCases": 6,
+    "transferNegativeCases": 72,
+    "completionIdPositiveCases": 4,
+    "completionIdNegativeCases": 18,
+    "publicationSourceContractCases": 4,
+    "unexpectedStatusSafeMetadataCases": 5,
+    "closedErrorDtoCases": 38,
+    "windows": "NOT_RUN",
+    "tls": "NOT_RUN",
+    "ordinaryRuntime": "NOT_RUN"
+  },
+  "nativePythonOrderedStepsMatch": 31,
+  "ast": "PASS",
+  "rustfmtExitCode": 0,
+  "originalBudgets": {
+    "workflowSeconds": 120,
+    "clientSeconds": 30,
+    "stopSeconds": 5,
+    "stopOrigin": "one captured Instant immediately before native Confirm, no per-phase renewal"
+  },
+  "windowsInvoked": false,
+  "networkInvoked": false,
+  "cargoInvoked": false,
+  "notProven": [
+    "Rust typecheck/codegen",
+    "actual MaterialReady/partial consumption and stop",
+    "actual sixth native pairing and two physical permit reuse",
+    "actual Win11 cleanup/Win7/Win10/campus"
+  ]
+}

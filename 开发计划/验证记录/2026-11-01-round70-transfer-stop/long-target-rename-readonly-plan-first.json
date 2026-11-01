@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "r70-long-target-rename-readonly-plan",
+  "state": "AWAITING_ACTUAL_NATIVE_REPRODUCTION_AND_SOURCE_AUTHORIZATION",
+  "createdUtc": "2026-11-01T09:40:19.654055+00:00",
+  "source": {
+    "path": "crates/fc-windows/src/materials/files.rs",
+    "sha256": "35773416bdb8ffed37b49a4436db3b52531c3c020ebb340e3239bdbd12d71c51"
+  },
+  "actualFourthRun": {
+    "report": "windows-ordinary-https-fourth.json",
+    "result": "FAIL",
+    "cleanup": "PASS",
+    "case": "r70-append-c",
+    "httpStatus": 400,
+    "exactWhitelistedErrorCode": "INVALID_RESOURCE",
+    "specificPreparationStage": "NOT_YET_OBSERVED"
+  },
+  "sourceFacts": [
+    "Preparation maps validation/resource/destination/publish failures to INVALID_RESOURCE and erases underlying IO/HRESULT.",
+    "rename_handle currently passes ordinary absolute DOS UTF16 target to SetFileInformationByHandle(FileRenameInfo), with an explicit trailing NUL excluded from FileNameLength.",
+    "std filesystem and OpenOptions path handling do not prove this raw Win32 wrapper receives equivalent long-path normalization.",
+    "Earlier 225-character estimate used small IDs; ordinary final destination includes material and version decimal IDs and can cross MAX_PATH. Actual native differential reproduction is required before asserting cause."
+  ],
+  "candidateIfReproduced": {
+    "minimalSourceScope": [
+      "crates/fc-windows/src/materials/files.rs"
+    ],
+    "operation": "Inside rename_handle only, validate existing absolute local drive path and encode an extended-length DOS target for the same handle rename. Preserve stored ordinary PathBuf and existing ownership checks.",
+    "constraints": [
+      "No shortening ordinary fixture root",
+      "No cancellation of second Ready material before Append",
+      "No HTTP expectation or error mapping change",
+      "No re-open/re-copy or inode replacement",
+      "Keep ReplaceIfExists false",
+      "Keep explicit NUL and accurate UTF16 byte length",
+      "No longPathAware manifest/policy dependency; Win7-compatible extended path syntax",
+      "Do not admit UNC/ADS/network/reparse input; current local/files.check/pins and regular checks stay enforced",
+      "Normalize accepted DOS separators before verbatim encoding; never prepend blindly to relative or network input"
+    ],
+    "authorization": "No source changed; await parent authorization after actual reproduction"
+  },
+  "nativeRegressionPlan": [
+    "Existing native serialization mutex and owned Tree cleanup only.",
+    "Build nested local directory using ControlledFiles.directory (each synthetic component <=80) and target UTF16 length >260. Require target length explicitly so a short temp base cannot make test vacuous.",
+    "Create staging with ControlledFiles.create_new, write fixed synthetic bytes, seal to actual read+DELETE LockedFile, record identity, publish to long target. Assert identity unchanged, source absent, target exists, locked read bytes exact.",
+    "Retain an occupied long destination; another sealed source publishing there must fail and original destination bytes/identity remain unchanged (nooverwrite).",
+    "Include short target control and unicode/UTF16 parity without dependence on system long-path policy.",
+    "Drop locked handles/pins then remove owned test tree. Preserve existing UNC/ADS/hardlink tests; do not introduce user directories or registry changes.",
+    "Parent runs targeted Windows native test plus unchanged full ordinary 31-step journey. A native regression PASS alone is not product journey PASS."
+  ],
+  "execution": {
+    "cargo": false,
+    "windows": false,
+    "network": false,
+    "productionSourceEdited": false,
+    "probeSourceEdited": false
+  }
+}

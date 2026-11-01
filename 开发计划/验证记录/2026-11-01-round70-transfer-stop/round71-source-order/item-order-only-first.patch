@@ -1,0 +1,43 @@
+--- before/crates/fc-windows/src/tls_frontdoor/mod.rs
++++ after/crates/fc-windows/src/tls_frontdoor/mod.rs
+@@ -253,6 +253,21 @@
+     native::run(thumbprint, marker)
+ }
+ 
++/// Sanitized startup result for an explicitly configured production listener.
++/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum ConfiguredTlsError {
++    InvalidConfiguration,
++    MissingSourceNetworks,
++    UnsupportedAddress,
++    AmbiguousAddress,
++    AddressUnavailable,
++    Certificate,
++    Busy,
++    Native,
++    Cleanup,
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -288,18 +303,3 @@
+         }
+     }
+ }
+-
+-/// Sanitized startup result for an explicitly configured production listener.
+-/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
+-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+-pub enum ConfiguredTlsError {
+-    InvalidConfiguration,
+-    MissingSourceNetworks,
+-    UnsupportedAddress,
+-    AmbiguousAddress,
+-    AddressUnavailable,
+-    Certificate,
+-    Busy,
+-    Native,
+-    Cleanup,
+-}

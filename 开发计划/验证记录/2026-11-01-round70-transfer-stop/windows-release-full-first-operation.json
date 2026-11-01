@@ -1,0 +1,409 @@
+{
+  "status": "PASS_COMMAND",
+  "startedUtc": "2026-11-01T09:59:04.924696+00:00",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-tests-first.stdout.log",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--system-host",
+    "--public-desktop",
+    "--report",
+    "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-release-full-first.json"
+  ],
+  "sourceFreeze": "joint-source-freeze-eighth.json",
+  "sourceFreezeSha256": "4475984de3843334f8603247ca543f37947fe667a03ab456d06744b14447eed5",
+  "workingFileCount": 595,
+  "script": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "metadata": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-tests-first.stdout.log",
+    "bytes": 103037,
+    "sha256": "d67ae663001b543a7faa2e891af02312a75c4d812fa0583abeda44c1f4a4fe6f"
+  },
+  "buildProvenance": {
+    "clippy": {
+      "report": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-clippy-fourth.json",
+        "bytes": 816,
+        "sha256": "259fe9cead815960915a8b4bad99234d7dfff06fabaa068db13e5a68e36b7ef6"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-clippy-fourth.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-clippy-fourth.stderr.log",
+        "bytes": 265,
+        "sha256": "a59e43149b7249136b00f1654cf9fa765ab042f01dcc54fe50166280874b035b"
+      },
+      "elapsedSeconds": 23.286653237883
+    },
+    "tests": {
+      "report": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-tests-first.json",
+        "bytes": 831,
+        "sha256": "ef27b7e7f2b60ede1babf02e567999fa0e91858191272a4462b34b6734aa240d"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-tests-first.stdout.log",
+        "bytes": 103037,
+        "sha256": "d67ae663001b543a7faa2e891af02312a75c4d812fa0583abeda44c1f4a4fe6f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/release-tests-first.stderr.log",
+        "bytes": 1271,
+        "sha256": "c515f82d9f26467f2014a2d26814d86ebb772cfbd58026dccddc2539b10d7748"
+      },
+      "elapsedSeconds": 397.8271756118629
+    },
+    "product": {
+      "report": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.json",
+        "bytes": 804,
+        "sha256": "ac6bae0f37c2d87d8f8017b24a985ffab8cae3132f509ebb49bfed973f222862"
+      },
+      "stdout": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.stdout.log",
+        "bytes": 85257,
+        "sha256": "352b011db442f54a5ada4ecede05eca4d209152e03369b3d1eea72d3b53645f5"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/product-release-eighth.stderr.log",
+        "bytes": 62,
+        "sha256": "dd5cbfd46cbc7d90e44f766619e1dd80f5375b42ec46bf848bf1736968f1969b"
+      },
+      "elapsedSeconds": 0.5153313530609012
+    }
+  },
+  "normal": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13350783,
+    "sha256": "80fe27c788360b511e75efbaf451eadb7bd71a46657dd036db7b8a7af2622246",
+    "cargoMetadataLine": 109,
+    "cargoMetadataLineSha256": "26cc05b4e4f79edd03a709d1e7993f6e876e34664b3ad55fcdf571e553b74b84",
+    "cargoTarget": "fc-bootstrap",
+    "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+    "cargoProfileTest": false,
+    "peMachine": "I386",
+    "peMagic": "PE32",
+    "peSubsystem": 2
+  },
+  "tests": [
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_audio-e1b4eabc9ef1420f.exe",
+      "bytes": 1246736,
+      "sha256": "8108af493090002aa6fd06518e4fcf9204a1c906ebe4f1a553fd16abd19e0a59",
+      "cargoMetadataLine": 108,
+      "cargoMetadataLineSha256": "b25363dfe00c1588b49c8c4f0d471ea302bed80045d1eb81ea566ea574d46503",
+      "cargoTarget": "fc_audio",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-audio#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_security-2889fa9301b88e80.exe",
+      "bytes": 1224276,
+      "sha256": "3877eaf309ed78fff1fee31cf910a635de968509299c97dd1d13feb5e55e2949",
+      "cargoMetadataLine": 109,
+      "cargoMetadataLineSha256": "10e7c21e7adaba1e658d739d6d6a74b0396f2acd3fc34c4981e7215bee231f20",
+      "cargoTarget": "fc_security",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-security#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_presentation-b847dfa3b68d1237.exe",
+      "bytes": 1853766,
+      "sha256": "4468f86655e935379d795d47b469a0a3078f6b3d7c23f5e709410fed4364d917",
+      "cargoMetadataLine": 110,
+      "cargoMetadataLineSha256": "59d9d81339eebf93cbafb9ed713877cadc0c5256ed00a6b6110d73a75a35e038",
+      "cargoTarget": "fc_presentation",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-presentation#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_materials-f1a7d58c131e95d5.exe",
+      "bytes": 2352762,
+      "sha256": "c0fe7f1979093a59d1909f2cf5b9ee2431c4646e15f72cc3a5a026e793d0af80",
+      "cargoMetadataLine": 111,
+      "cargoMetadataLineSha256": "a749f8ae56712e11119f2608fd2ca1cfd4fe1b5b3d6a13806bdc6b2481559beb",
+      "cargoTarget": "fc_materials",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-materials#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_protocol-4316bb63b92dda4d.exe",
+      "bytes": 1983421,
+      "sha256": "d37c9be005e23b3aafb1317fc635039c6daa64a7bfa4a7942e96eac8077c47af",
+      "cargoMetadataLine": 112,
+      "cargoMetadataLineSha256": "5eeaf7d045fbd2747cb80455e9ce7e100a06208fc55822305a662ce9931dead8",
+      "cargoTarget": "fc_protocol",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-protocol#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_runtime-a09be73363edd23a.exe",
+      "bytes": 1430273,
+      "sha256": "e82a0ee077da86e826337d411f32791c49165c2be957f38a5c0df42cd61637fe",
+      "cargoMetadataLine": 113,
+      "cargoMetadataLineSha256": "c2d40847352477ac21c66629f5c973f32e620a9f8614cb93f2a7d160a32095b4",
+      "cargoTarget": "fc_runtime",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-runtime#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_application-fb16268b5eff3acf.exe",
+      "bytes": 1280300,
+      "sha256": "8c0f3ae3edac11d8e122af14e72b6638c520360b42b9260a7603eeafb4f73c04",
+      "cargoMetadataLine": 114,
+      "cargoMetadataLineSha256": "e414361f8b282eeccf4251f6c9a6558a4efb9f617c944614a9e21d28a2e8455c",
+      "cargoTarget": "fc_application",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-application#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_ports-15b1ad689f79c490.exe",
+      "bytes": 1185286,
+      "sha256": "036cbb4aab6b524f0a0119ee6947706afe45a9526220c4e6f65c6b0c3643c654",
+      "cargoMetadataLine": 116,
+      "cargoMetadataLineSha256": "4d237efa79fda65d1aa4745d27a0b9c5afa58166915097449e60fd0cccf3dc85",
+      "cargoTarget": "fc_ports",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-ports#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_windows-e3f8369176e1b545.exe",
+      "bytes": 3797883,
+      "sha256": "f2092a6be41c667cb7a4cc2218da4475a89510f7b7d8a42366974678ee10c71b",
+      "cargoMetadataLine": 117,
+      "cargoMetadataLineSha256": "b9a3cc155f7b5b232a3d54245e5e84d910ba5a1f6c67a45da1a8267bd28dbaae",
+      "cargoTarget": "fc_windows",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-windows#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_domain-367747e306a1dd0e.exe",
+      "bytes": 2403377,
+      "sha256": "3f8d60ccb7f01abe9ab3d7d03695780b313d1b1bdb8ca2dfdf371987fb359d63",
+      "cargoMetadataLine": 118,
+      "cargoMetadataLineSha256": "851f1a96ee3aeb30ec92e8f567742f998b361265d01d929406b035f3575eba5f",
+      "cargoTarget": "fc_domain",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-domain#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/voice_limits_storage-f0677ddaab0e1941.exe",
+      "bytes": 5191522,
+      "sha256": "33c7e379c6c5d5e18a6e6c929c0ee96d7a99a25f190ab87c96dd3f096cf655fd",
+      "cargoMetadataLine": 119,
+      "cargoMetadataLineSha256": "c4909479972af173d89a5294e9f22da8d2dc2153230291014a7cac6226f7b4a3",
+      "cargoTarget": "voice_limits_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/voice_storage-05cf611acb952b21.exe",
+      "bytes": 5235233,
+      "sha256": "387380c1d988e57b45744f892752df8d11c1c9efa8407c1f00d990090b221a7a",
+      "cargoMetadataLine": 120,
+      "cargoMetadataLineSha256": "2602a5aa8d5d755ec086232bf1f8af4fcfccce046d7d2fd08ee0410051fdc592",
+      "cargoTarget": "voice_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/calendar_execution_fence-c79d3cfb3961109e.exe",
+      "bytes": 5624776,
+      "sha256": "bc64375f96e14679ed9b3b087b761213d6e87ded858ce097762e8020f5235045",
+      "cargoMetadataLine": 121,
+      "cargoMetadataLineSha256": "0a3d027349c61f4ab4e63bc99f7cd1a09b92165a35dd8e48df9e5117d1d76d47",
+      "cargoTarget": "calendar_execution_fence",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/examples/verify_web_assets-d1cacbf262e9f4f4.exe",
+      "bytes": 1097085,
+      "sha256": "5ee9be8dd26781ecbdd354943386dab5930c58a519c15fefa1db121283dc6b86",
+      "cargoMetadataLine": 122,
+      "cargoMetadataLineSha256": "bb787762d89c08b6bcda1e5c8135ddf8edacda5333847ba5078bb306d9ab08c7",
+      "cargoTarget": "verify_web_assets",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/autostart_coordinator-74ff40b715302c3c.exe",
+      "bytes": 5534391,
+      "sha256": "37f36daef21196aa02f99d62283566f32bf76b9b11eb6344cb17b656792ecab2",
+      "cargoMetadataLine": 123,
+      "cargoMetadataLineSha256": "ad1e2ebbb8af6d10b381b28edb6c1e93caa2728375bc8b2b8d9e2f3b982cd8f1",
+      "cargoTarget": "autostart_coordinator",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/business_storage-576d09efbb6083a0.exe",
+      "bytes": 6196993,
+      "sha256": "275318d089fbb1a45a0612b9915d17627687605fefeda3b16692960ec8aa5356",
+      "cargoMetadataLine": 124,
+      "cargoMetadataLineSha256": "c5c11301d02f88e6a6ff8021d6550de1bbaa744bad614be1eb98ad77f437cd3e",
+      "cargoTarget": "business_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_storage-3ccf7e5bedbf5d94.exe",
+      "bytes": 8423418,
+      "sha256": "4234a93f8df5c4d496a3ca49a58e64f4799a761493d6e1e044b3b85fa754f703",
+      "cargoMetadataLine": 125,
+      "cargoMetadataLineSha256": "b471d596e756b33bf1bfb74608029ceeedf569573070b234c00b3aa0c1334ca2",
+      "cargoTarget": "fc_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-storage#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/schedule_operations-48fa032341d76709.exe",
+      "bytes": 5784801,
+      "sha256": "a94649d5b61bce878814f4d1877459e8cb1ff9c08ca54ded94159015d6f3651b",
+      "cargoMetadataLine": 126,
+      "cargoMetadataLineSha256": "5db267e75c94613565855d6890b61fc1f1a8451207f7ed633417b7aed48eb390",
+      "cargoTarget": "schedule_operations",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/runtime_storage-0e708d04bae2889e.exe",
+      "bytes": 4991689,
+      "sha256": "300768405681f621f8c07f8358820459bacc9c4e3a47477547b73b9971e83195",
+      "cargoMetadataLine": 127,
+      "cargoMetadataLineSha256": "2985183e9ff9b1ddde67abaeeaa0e4a34e29a99dc6e2c9214c8ad9dc149edeca",
+      "cargoTarget": "runtime_storage",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-2d073072bc663873.exe",
+      "bytes": 13094567,
+      "sha256": "c6bc0553a8d7eee99ccbe11057ee1f256f8d0ccefc728e04572f9386797decdf",
+      "cargoMetadataLine": 128,
+      "cargoMetadataLineSha256": "6c4c3b566d8bcd0ba243e1a7596c6779b4ec1ad4cb68ab9dd844f97d1e51dbea",
+      "cargoTarget": "fc_bootstrap",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    },
+    {
+      "path": "/tmp/fc-round70-ordinary-transfer-stop/target/i686-pc-windows-gnu/release/deps/fc_bootstrap-d2b8e39fd0668fa3.exe",
+      "bytes": 12846573,
+      "sha256": "fa165598ff87b8de18c2350033c53ceeaade7774093c242a22816eae88c0c58c",
+      "cargoMetadataLine": 129,
+      "cargoMetadataLineSha256": "f1c3211f1f6be667a8ba1ece1abaa7a659c1530eb849189889dcbac63e9109b0",
+      "cargoTarget": "fc-bootstrap",
+      "cargoPackageId": "path+file:///tmp/fc-round70-ordinary-transfer-stop/worktree/crates/fc-bootstrap#0.1.0",
+      "cargoProfileTest": true,
+      "peMachine": "I386",
+      "peMagic": "PE32",
+      "peSubsystem": 3
+    }
+  ],
+  "expectedHarnessCount": 21,
+  "testTotal": "COUNT_FROM_ACTUAL_RAW_RESULTS_ONLY",
+  "scope": "R70 supplied joint source/freeze, including later root-owned production long-path publication correction when present; actual Win11/WOW64 GNU release harnesses plus hidden public desktop only. Aggregate case total comes from actual results, never hardcoded1542. Ordinary31 material-stop/reuse, visual/repair and other flows are separate; no Win7/10 OS or campus proof.",
+  "controllerPid": 2273,
+  "exitCode": 0,
+  "elapsedSeconds": 160.81096954806708,
+  "sourceUnchanged": true,
+  "scriptUnchanged": true,
+  "metadataUnchanged": true,
+  "artifactsUnchanged": true,
+  "stdout": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-release-full-first.stdout.log",
+    "bytes": 947,
+    "sha256": "9d81d90b5f20d517e9cfc7d66aeff836018addad535f33df029e9938e4b5979c"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-release-full-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "resultStatus": "PASS",
+  "cleanup": "PASS",
+  "result": {
+    "path": "/tmp/fc-round70-ordinary-transfer-stop/evidence/windows-release-full-first.json",
+    "bytes": 221487,
+    "sha256": "c68957f0703ef705511c1ec58b0e6641aaa0db0393a5dc8fc8b2be8740ef65fc"
+  }
+}

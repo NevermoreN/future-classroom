@@ -1,0 +1,196 @@
+{
+  "status": "READ_ONLY_NEXT_IMPLEMENTATION_RECOMMENDATION_NOT_IMPLEMENTED",
+  "createdUtc": "2026-11-01T08:58:01.348101+00:00",
+  "mainHead": "8bc1c9812df765865a54988a23ff3973d04884fc",
+  "scope": "Only main D11/current product source and committed R60/R63 evidence. No source edits, builds, Windows, network, private keys or deleted R68 paths accessed.",
+  "recommendation": "Implement a single product candidate vertical slice: first actual MSI execute hook acquires the existing R63 maintenance owner through a bounded authenticated broker; the engine-launched embedded guardian joins/ends that exact transaction and returns an authenticated settlement; the broker retains the original process object and refuses positive release until actual physical return and exact file/installer-effects reconciliation. Do not rerun unchanged R60 feasibility or substitute an outer setup wrapper.",
+  "whyNext": {
+    "plan": "P5-03/Q13 explicitly require direct installer maintenance, upgrade, rollback/uninstall and residual ownership; P5-01/02/06 remain wider release dependencies.",
+    "implemented": "Normal/manual+autostart application::run and standalone application--repair already call installation_startup before DataPaths. The original shared startup lease/exclusive maintenance owner use current SID+INSTALL_FAMILY99378807-098D-5F04-8D4D-F181DFA218D5 independent of school data.",
+    "missing": [
+      "No normal product code starts a maintenance broker or performs authenticated IPC.",
+      "Settlement is explicitly trusted caller input, not validation of external Join/End messages. No product code proves effects_reconciled.",
+      "watch_guardian takes std::process::Child; current engine-launched guardian is not a broker-spawned Child, so accepting raw PID would weaken original identity.",
+      "MSI authoring forbids Binary/CustomAction and has no MsiEmbeddedChainer; active application therefore does not gate direct /i,/f,/x.",
+      "RemoveExistingProducts currently immediately follows InstallInitialize; adding deferred BeginGate there does not make it execute before old-product removal.",
+      "Run strict compare/delete remains unresolved and cannot be replaced with ordinary Registry table removal or preimage check."
+    ]
+  },
+  "sixNonOverlappingFiles": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "change": "Enable only needed generated Windows pipe/MSI binding features (e.g. System_Pipes and System_ApplicationInstallationAndServicing) after checking actual local0.62.2 API signatures; no new crate or dependency direction."
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "change": "Expose a small closed lifecycle-host API and opaque authenticated guardian capability. Keep existing public StartupLease/MaintenanceOwner ownership and original deadline. Add guarded registration of the exact native process object supplied by authenticated IPC rather than arbitrary PID/HANDLE or caller-set effects bool."
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "change": "Implement bounded same-SID local pipe broker and exact process/image/creation binding; retain original gate, Pending, IPC and actual guardian handle through trusted transaction/effect settlement. Refactor Child registration through one checked native process-registration routine. Inline private tests initially to keep this cut bounded; extract internal helper only if implementation size demands it rather than omit checks."
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "change": "New GUI-subsystem helper with closed hook/broker/embedded-guardian roles. No user-selected executable/path/registry target/server commands, no ordinary desktop startup, no password/DB initialization. Role dispatch only composes native lifecycle functions. Binary-table helper survives uninstall file removal; it is not an installed app EXE. Use cfg(not(test)) for GUI subsystem so test harness remains CUI. Product helper provenance/GUI/Win7 imports remain independently required."
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "change": "Admit an explicit separately hashed compiled lifecycle helper from the same reviewed source/version; it stays Binary-table payload so current installed closed ZIP namespace need not gain an unaudited executable. Author only closed reviewed execute/rollback/commit notification hooks plus embedded guardian. Move RemoveExistingProducts after InstallExecute and before InstallFinalize. Preserve per-user fixed private path and current family/component stability. Do not generically remove CustomAction/Binary bans: replace them with exact table/role/sequence allowlists."
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "change": "Update hostile authoring/table assertions for the exact new lifecycle rows and helper identity, operation conditions/direct repair and uninstall, unknown delegation rejection, wrong sequence/extra action/unreviewed Binary refusal. Pure checks remain authoring evidence only."
+    }
+  ],
+  "permissionsAndIdentity": {
+    "authority": "Use actual Windows deployment account token, the per-user MSI context and actual authenticated engine/helper transaction. A public MSI property, CLI switch, UserSID text, PID or nonce alone is not authority. Application Manage/Web sessions do not authorize OS maintenance, and normal classroom feature buttons gain no authentication requirement.",
+    "sid": "Resolve same current-user fixed InstallIdentity as production startup. Bind authenticated peer token SID and original process creation/image identity. Reject SYSTEM, another account and machine-context escalation; sameSID elevation must not silently change scope or deployment identity. Existing protected deployment identity is read-only if needed; never create school data to perform maintenance.",
+    "ipc": "One local pipe/session and one operation slot with fixed bounded packets. Restrict DACL to original current SID, reject remote clients, verify actual pipe peer process object/SID/creation and trusted helper image before acknowledging. Bind both directions to family/opid/phase and original deadline; use random channel material as correlation, not as a substitute for OS/process authentication.",
+    "criticalGap": "The engine owns the embedded guardian process. Open/retain its exact object from the verified connection, compare process creation and approved image; do not reconstruct identity from a later PID lookup or fake it as a Child. Never accept a caller-fabricated Settlement directly from a packet."
+  },
+  "oneVerticalFlow": [
+    "Before any product-file/installer Registry script action, the real synchronous execute BeginGate hook starts/attaches exactly one reviewed broker. Broker acquires existing LifecycleGate::try_begin_maintenance with the same SID/family/root used by installed normal/autostart/appRepair. Active original StartupLease causes refusal before mutation.",
+    "Broker persists the existing bounded Pending under exclusive gate and only then sends BeginAck. The immediate MSI action may gather bounded metadata but cannot mutate coordination state. Do not schedule a deferred action and assume it ran before RemoveExistingProducts.",
+    "Every direct install/repair/uninstall execute route carries hooks in the cached package. The guardian is MsiEmbeddedChainer Binary-table role with its original engine transaction ID; actual Join/End and returned event handles are checked. Public delegated flags cannot bypass the original owner; initially unsupported nested/major-upgrade ownership handoff must refuse before mutation until implemented rather than silently run ungated.",
+    "The original broker authenticates exact guardian receipt, retains the process handle, waits nonblocking for actual signaled exit0, checks original Join0/End0 and clean owned effects, then calls the existing record_settlement/try_release. A log line, ACK, pipe EOF, owner-change event or process disappearance alone is never release.",
+    "On expiry, transport loss, unknown End, skipped rollback effect, close failure, identity mismatch or crash keep original Pending and bounded owner. No stale marker GC, automatic replacement broker, repeated commit or silent repair. No normal app launch from MSI."
+  ],
+  "effectsAndRunBoundary": {
+    "candidateOwnedEffects": "Restrict to reviewed closed payload files and MSI-owned component marker keys. Install/repair verify exact fixed payload hash/membership and own product context; uninstall verify exact authored removals while school data is untouched. Rollback requires actual previous exact state/payload reconciliation, not productState or End0 alone. Unknown rollback keeps Pending.",
+    "run": "Do not add RemoveRegistry rows for Run, call ordinary RunAtLogin mutation as strict uninstall cleanup, resurrect rejected TxR proposals or weaken the foreign-replacement survival assertion. The existing shared gate excludes only cooperating app writers, not arbitrary registry writers. A partial lifecycle-hook candidate must continue declaring strict Run cleanup/uninstall completeness unresolved.",
+    "upgrade": "Do not certify arbitrary legacy dev ZIP/cached uninstrumented MSI live upgrades. First supported baseline must carry cooperative startup gate and cached hooks. Major-upgrade nested old-remove must bind same exact original broker without a forged delegation property; it may remain refused/NOT_VALIDATED until this stage is implemented and tested."
+  },
+  "actualOwnedFixtureValidation": [
+    "Reuse the implemented real gate/transport/broker/guardian code under a separately test-only opaque owned namespace. An unrelated normal installation cannot enter that namespace via user CLI path.",
+    "Build a synthetic package with owned ephemeral product identifiers and payload leaves, preserving real Binary/hooks/execute sequence topology. Exercise direct /i,/f and /x (including cached productcode) quiet/basic/full paths where feasible, not only wrapper initiation.",
+    "Hold a real original application startup lease while invoking direct MSI and verify no payload/Registry mutation. Reverse order: maintenance first blocks normal/autostart/applicationRepair gate acquisition. Empty school-data root remains absent.",
+    "Authenticated packet errors, spoofed SID/process/operation/phase, wrong image, late old receipt, pipe close, deadline, guardian still running after receipt, PID reuse and broker/guardian loss all retain Pending; original same owner alone can settle after known completion.",
+    "Known install/repair/uninstall and rollback effect checks use only own synthetic files/keys. Preserve skipped-rollback failure as blocked, and record real transaction and original process returns independently.",
+    "Cleanup only exact known NEW owned fixtures after every original process/native operation returns; unknown operation remains retained for explicit reconciliation, never broad installer cache/registry cleanup."
+  ],
+  "mustRemainSeparateAcceptance": [
+    "Actual production direct MSI integration beyond synthetic namespace; first formal cooperative version upgrade/rollback/uninstall, exact Run cleanup and no school-layout/data loss.",
+    "Real Windows7SP1x86, Windows10 and Windows11 OS install/repair/upgrade/rollback/uninstall and standard-user login/deployment-account handover; WOW64 or dual MSVC builds do not establish those.",
+    "Visible classroom/Seewo active app/lesson startup, real logoff/logon, reboot/powerloss and external policy/driver behavior.",
+    "Formal P5-01/02/06, full ICE verification,72-hour runtime and signing/release/provenance gates. No new release tag from this audit."
+  ],
+  "historicalEvidenceQualification": {
+    "r60": "Direct synthetic /i,/famus,/x,/i rollback observed Join0/End0/original guardian/msiexec exit0; no new package/IPC/broker protection was implemented by that feasibility probe. Rollback log includes skipped Error5, so no blanket clean rollback claim.",
+    "r63": "Real shared/exclusive gate and durable Pending plus ordinary startup wiring are implemented and tested, but comments/records explicitly leave MSI broker/authIPC/packagehooks unwired.",
+    "registry6701": "R60 third value-intent overall native exit72 remains FAIL; real delete returned6701, no commit, rollback0 and replacement preserved. This limited observation is not6800, not universal CAS, and not permission to delete production Run."
+  },
+  "sourceFacts": [
+    {
+      "path": "开发计划/04-开发阶段与任务步骤.md",
+      "bytes": 27561,
+      "sha256": "5038eb9f75a71e33e091dd5142cd1cf2e406f44bdb04c4b72f0b889094efcf78"
+    },
+    {
+      "path": "开发计划/05-测试验收与发布清理.md",
+      "bytes": 41406,
+      "sha256": "5d1f56ac2a95ef99243dfc9cde3afbef41adb3310a82abee8237688855704092"
+    },
+    {
+      "path": "开发计划/08-Rust所有权与FFI生命周期.md",
+      "bytes": 21375,
+      "sha256": "1e54134d1c85c80c9445026dce06f58fd2f18ef2f845eeb7998614bd0408b9e7"
+    },
+    {
+      "path": "开发计划/22-自启动与系统变更核对.md",
+      "bytes": 11801,
+      "sha256": "d367c63f1995173a4f559283880a7c78d6db868843a71e9fbebdbd5dcf95a4a8"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 494543,
+      "sha256": "1ec19d1ca6dc0b24328297f0836d11b26cf995b79a88c6896b929dd902e03241"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 7057,
+      "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 36605,
+      "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1532,
+      "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9506,
+      "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 35343,
+      "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/tests.rs",
+      "bytes": 22174,
+      "sha256": "7b2c995d421d1524747cf5b76de622dbd19d8bb89d3ff0e30e778d5e79224082"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 14491,
+      "sha256": "36aa0a7d6efea53a3da00e97c6a5dd6d46795dff5f38b96f7dff3e6a08af11ca"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 494,
+      "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/installation_startup.rs",
+      "bytes": 850,
+      "sha256": "88560eebf08a58a490b33b11bcbaa2ef85ab29a934006d820e2f07828b44309f"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/main.rs",
+      "bytes": 21856,
+      "sha256": "a30233d87465baca146f1bb985f1d75a8fc51afb72e10ed9d41c6f115051330b"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 262848,
+      "sha256": "2e764fa6be7070fdb5401b6998d8b422051aad97d70dd8e1b3e8ff3b640361e9"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "bytes": 23731,
+      "sha256": "f45dfb54e545d3b75e853db9da7f166bad06dfee249cb7efc120c8a5844d6f1b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/installer-owner-design-first.json",
+      "bytes": 23318,
+      "sha256": "15b933cebda7fe7f42bb8ce8f4b6c4d0f93aa8c8ef85319fbf263df2bde8234d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/implementation-final/guardian.c",
+      "bytes": 6729,
+      "sha256": "2879e7fb61048b9fff30eafd3f5b75eda7e57eed91359be798bef42448248a5d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round60-native-feasibility/installer-owner/feasibility/windows-original-second/windows-observations-first.json",
+      "bytes": 31918,
+      "sha256": "3d4ac4b8a8e23f4dc747a54e98f4eadd2209f05b99935f51332104c7d2a1fd43"
+    }
+  ],
+  "notPerformed": [
+    "No source modifications",
+    "No Cargo/build/test execution",
+    "No Windows/SSH/network operation",
+    "No private key access",
+    "No old R68 directory access"
+  ]
+}

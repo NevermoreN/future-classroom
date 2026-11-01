@@ -253,6 +253,21 @@ pub fn probe(thumbprint: &str, marker: &str) -> Result<(), String> {
     native::run(thumbprint, marker)
 }
 
+/// Sanitized startup result for an explicitly configured production listener.
+/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ConfiguredTlsError {
+    InvalidConfiguration,
+    MissingSourceNetworks,
+    UnsupportedAddress,
+    AmbiguousAddress,
+    AddressUnavailable,
+    Certificate,
+    Busy,
+    Native,
+    Cleanup,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -287,19 +302,4 @@ mod tests {
             assert!(CertificateThumbprint::parse(bad).is_err());
         }
     }
-}
-
-/// Sanitized startup result for an explicitly configured production listener.
-/// Native includes socket/bind/listen failure; no provider/path detail is exposed.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ConfiguredTlsError {
-    InvalidConfiguration,
-    MissingSourceNetworks,
-    UnsupportedAddress,
-    AmbiguousAddress,
-    AddressUnavailable,
-    Certificate,
-    Busy,
-    Native,
-    Cleanup,
 }

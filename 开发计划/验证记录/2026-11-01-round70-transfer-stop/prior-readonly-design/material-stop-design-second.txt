@@ -1,0 +1,9 @@
+R69 两文件细化设计（只读，等新基点/工作树）
+
+API owner 必须为独立教师 principal2，因此所有材料作用域为 /materials/uploads/2/1 和 /materials/folders/2/1/append，不能复制旧管理员夹具的1/1。POST 必须同时具备准确Host/Origin、真实已批准Cookie、当前X-FC-CSRF，先分别测错Origin/错CSRF/错owner403。
+
+第一代：完整上传A65536字节→typed UPLOADED200、真实干净TLS EOF、保留不Append；B声明1048576字节只发65536前缀且连接保持，须观察自有staging实际长度>0才可触发停用（sendall不是服务端接收证据）。本机原Disable确认→同一最初5秒内真正Disabled/线程归还、A/B精确stage删除、原worker仍可查询。
+
+第二代：旧Cookie GET session必须401；本机新开配对并确认同一独立教师，保密通道仅内存。连续成功上传C/D且先不释放任何一份，证明两个旧许可都归还。Append C用command69001、classes[1]，校验typed COMMITTED scope2/1、大小/哈希/版本；GET materials/commands/69001必须COMMAND_RESULT/COMMITTED且记录完全相同。Cancel D用typed UPLOAD_CANCELLED，随后第二次原5秒停用及实际关闭/精确清理。
+
+只改 ordinary_https_probe.rs 与 windows-ordinary-https-probe.py；保留双worker/单HTTP/单SSPI，不伪造Ready，不扩下载/reset/restore。每个阶段的公开marker只含nonce/cycle/generation/材料ID及结果，所有密码/code/pollSecret/cookie/CSRF及其正文哈希均不得进入归档。失败保存原件；证书/CNG/目录按现有独占身份核对后精确清理，SSH授权保留。

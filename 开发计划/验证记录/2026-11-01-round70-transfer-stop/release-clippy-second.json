@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "command": [
+    "cargo",
+    "clippy",
+    "--release",
+    "--locked",
+    "--offline",
+    "--workspace",
+    "--all-targets",
+    "--target",
+    "i686-pc-windows-gnu",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/tmp/fc-round70-ordinary-transfer-stop/worktree",
+  "sourceFreeze": "joint-source-freeze-third.json",
+  "sourceFreezeSha256": "0e5f2a3a97ade635a376837d1efda1a9dcef60cb4467b137677e5d261709605e",
+  "workingFileCount": 595,
+  "originalBudgetSeconds": 900,
+  "startedUtc": "2026-11-01T09:11:48.316496+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 10.071460291044787,
+  "sourceUnchanged": true,
+  "stdoutBytes": 0,
+  "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrBytes": 165,
+  "stderrSha256": "cbbbd624352b9968c238ade2606dfb64c064ceb596ff5193294dad1fd4b44f1c"
+}

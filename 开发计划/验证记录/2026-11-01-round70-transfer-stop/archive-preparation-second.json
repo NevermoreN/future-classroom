@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "status": "PUBLIC_CERTIFICATE_GATE_PREPARED_PURE_CHECKS_PASS_NOT_ARCHIVED",
+  "helper": {
+    "path": "archive-evidence-first.py",
+    "bytes": 18644,
+    "sha256": "476aaf2fd68e78359b0362f302ba8986acfd2ddb06dda8ae9cd83a76a84570a7"
+  },
+  "previousHelper": {
+    "path": "archive-helper-before-public-cert-first.py",
+    "sha256": "875640336ed2102160923f381cad3db993f891c3bae6af44526153b040c2fc1b"
+  },
+  "expectedFinalAcceptanceSha256": "127b67b94dcdb73d88557dd33488877c932d29dfbda44b6c107630c5cdc110b0",
+  "positiveCertificateCases": [
+    {
+      "path": "windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls-public.pem",
+      "sha256": "6f96478f10777ef785950955463febd6c78d1f5a45836c09aad89d859e9289a9",
+      "bytes": 1141
+    },
+    {
+      "path": "windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls-public.pem",
+      "sha256": "f31f50556d8e0b1402c9ae1d83274026220def040525128f42b409dfcb6fc04f",
+      "bytes": 1141
+    },
+    {
+      "path": "windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls-public.pem",
+      "sha256": "3de79472aea1b4e4a74f7f756d7a03b801a071ec8230741e70d2be6c3e53b9db",
+      "bytes": 1141
+    },
+    {
+      "path": "windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls-public.pem",
+      "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee",
+      "bytes": 1141
+    },
+    {
+      "path": "windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls-public.pem",
+      "sha256": "ee423f2afcddb7cfb0436988269645529716d438ba564c8ae7912e324c95ed29",
+      "bytes": 1141
+    },
+    {
+      "path": "windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls-public.pem",
+      "sha256": "2e4991823909b90fb760d5421d6a8905660359afc2211f1f0063d7ec9b1aab11",
+      "bytes": 1141
+    }
+  ],
+  "negativeGateCases": [
+    "certificate_plus_private_key_block",
+    "invalid_base64",
+    "base64_valid_DER_not_X509",
+    "unconfirmed_pem_excluded_without_inspecting_contents"
+  ],
+  "counts": {
+    "actualConfirmedPublicCertificates": 6,
+    "negativeGateCases": 4
+  },
+  "gate": "Only six exact controlled raw/tls-public.pem identities and SHA-bound raw provenance reports; exactly one public CERTIFICATE envelope, strict canonical base64, exact DER sequence length, successful standard-library OpenSSL X509 parse. All other PEM/key formats stay excluded. No private key exception.",
+  "ast": "PASS",
+  "archiveMainExecuted": false,
+  "currentEvidenceFrozen": false,
+  "allEvidenceSecretScanRun": false,
+  "unconfirmedKeysInspected": false,
+  "mainWritten": false,
+  "sourceWorktreeWritten": false,
+  "windowsInvoked": false,
+  "cargoInvoked": false,
+  "networkInvoked": false
+}

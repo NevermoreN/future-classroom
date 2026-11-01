@@ -1,0 +1,48 @@
+{
+  "status": "ACTUAL_SECOND_APPEND_STATUS_UNCAPTURED_NO_STATIC_DTO_ERROR_FOUND",
+  "atUtc": "2026-11-01T09:25:56.158919+00:00",
+  "actualSecond": {
+    "report": "windows-ordinary-https-second.json",
+    "sha256": "71425ad83427bf76d6deb84aaf4ac722926a273f9a2d357d4a03c65f391f55b4",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "lastSafeEvent": {
+      "case": "r70-bytes-d",
+      "method": "POST",
+      "route": "materials/uploads/5752840725450234034/bytes",
+      "httpStatus": 200,
+      "requestBodyBytes": 65536,
+      "responseBodyBytes": 86,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    },
+    "actualNextHttpStatus": "NOT_CAPTURED"
+  },
+  "nextRequestSourceReview": {
+    "case": "r70-append-c",
+    "method": "POST",
+    "route": "materials/folders/2/1/append",
+    "payload": {
+      "schemaVersion": 1,
+      "commandId": "69001",
+      "uploadId": "originalC canonical string",
+      "allowedClassIds": [
+        "1"
+      ]
+    },
+    "dto": "fc-protocol/src/web/materials.rs AppendDto matches all four fields; scope ownerTeacherId2 subject1 matches actual TeacherAdmin principal2 assignment class1/subject1",
+    "successStatus": "web_application/materials.rs committed explicitly response200; no basis to add201 or weaken expectation",
+    "productionConclusion": "No proved static payload/route/expected-code error and no proved production defect from this missing status."
+  },
+  "change": "Only move existing safe event append before unchanged unexpected-status assertion so actual status/method/route/case/body byte counts/TLS EOF survive a future failure. No auth body/header/body digest added; no payload or production API change.",
+  "notClaimed": [
+    "No guessed actual400/403/409/429/503 status or error body",
+    "No claim of successful final Append/receipt/cancel/second stop",
+    "No claim first publication fix was sole first failure cause"
+  ],
+  "rustUnchanged": true,
+  "oldFailuresPreserved": true
+}

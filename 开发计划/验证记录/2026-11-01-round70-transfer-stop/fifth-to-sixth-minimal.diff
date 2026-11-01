@@ -1,0 +1,84 @@
+--- fifth/scripts/windows-ordinary-https-probe.py
++++ sixth/scripts/windows-ordinary-https-probe.py
+@@ -153,6 +153,38 @@
+             and re.fullmatch(r"[0-9]{8}", fields[4])
+             and fields[5] == "synthetic-ordinary-teacher" and fields[6] == "", "owned pairing channel exact shape")
+     return fields[4], fields[5]
++
++
++# Exact closed disclosure enum from fc_protocol::web::responses::ErrorCode.
++ERROR_CODES = frozenset({
++    "INVALID_REQUEST", "UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "METHOD_NOT_ALLOWED",
++    "RATE_LIMITED", "SERVICE_UNAVAILABLE", "RESULT_UNKNOWN", "REVISION_CONFLICT", "DAY_CHANGED",
++    "IDEMPOTENCY_CONFLICT", "STALE_CURSOR", "UPLOAD_EXPIRED", "UPLOAD_NOT_READY", "INVALID_RESOURCE",
++    "CAPACITY", "VOICE_DISABLED", "TARGET_CHANGED", "INVALID_WAV", "QUEUE_FULL", "OWNER_LIMIT", "EXPIRED",
++})
++
++
++def safe_error_code(body):
++    # Diagnostic only: do not relax the HTTP status assertion or preserve an
++    # unknown/extra field, response body, body hash or parser exception text.
++    if not isinstance(body,(bytes,bytearray)) or len(body)>512:
++        return None
++    def unique(pairs):
++        value={}
++        for key,item in pairs:
++            if key in value:
++                raise ValueError("duplicate error DTO field")
++            value[key]=item
++        return value
++    try:
++        value=json.loads(bytes(body).decode("utf-8","strict"),object_pairs_hook=unique)
++    except (ValueError,UnicodeError,TypeError):
++        return None
++    if (type(value) is dict and set(value)=={"schemaVersion","code"}
++            and type(value["schemaVersion"]) is int and value["schemaVersion"]==1
++            and isinstance(value["code"],str) and value["code"] in ERROR_CODES):
++        return value["code"]
++    return None
+ 
+ 
+ class OrdinaryClient:
+@@ -196,6 +228,10 @@
+                             "authenticatedCookieSent": bool(authenticated and self.cookie),
+                             "csrfSent": bool(method == "POST" and authenticated and self.csrf),
+                             "tls": "TLSv1.2", "serverName": "127.0.0.1", "cleanTlsEof": True})
++        if parser.status not in expected:
++            code=safe_error_code(parser.body)
++            if code is not None:
++                self.events[-1]["errorCode"]=code
+         require(parser.status in expected, "ordinary business unexpected HTTP status")
+         return parser
+ 
+@@ -836,12 +872,30 @@
+     finally:
+         socket.create_connection=original_connect
+ 
+-    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative+publication_checks+unexpected_metadata_checks,
++    error_code_checks=0
++    for code in ERROR_CODES:
++        require(safe_error_code(b.json_bytes({"schemaVersion":1,"code":code}))==code,
++                "exact typed error enum disclosure")
++        error_code_checks+=1
++    invalid_errors=[b'{"schemaVersion":true,"code":"INVALID_RESOURCE"}',
++        b'{"schemaVersion":2,"code":"INVALID_RESOURCE"}', b'{"schemaVersion":1,"code":42}',
++        b'{"schemaVersion":1,"code":"FAKE_AUTH_SECRET_MUST_NOT_PERSIST"}',
++        b'{"schemaVersion":1,"code":"invalid_resource"}', b'{"schemaVersion":1,"code":"INVALID_RESOURCE","cookie":"FAKE_COOKIE"}',
++        b'{"schemaVersion":1,"code":"INVALID_RESOURCE","code":"FORBIDDEN"}',
++        b'{"schemaVersion":1,"schemaVersion":1,"code":"INVALID_RESOURCE"}',
++        b'{"schemaVersion":1,"code":["INVALID_RESOURCE"]}',b'{"code":"INVALID_RESOURCE"}',
++        b'[]',b'null',b'not-json',b'\xff',b' '*513,"INVALID_RESOURCE"]
++    for value in invalid_errors:
++        require(safe_error_code(value) is None,"unknown/duplicate/extra/secret/malformed error DTO has no disclosure")
++        error_code_checks+=1
++
++    print(json.dumps({"status": "PASS", "scope": "pure validators only", "checks": 41+8+len(negatives)+transfer_checks+10+completion_positive+completion_negative+publication_checks+unexpected_metadata_checks+error_code_checks,
+                       "wireJourneyPositiveCases":8,"wireJourneyNegativeCases":len(negatives),
+                       "transferJourneyPositiveCases":4,"transferTypedAndCyclePositiveCases":6,"transferNegativeCases":transfer_checks,
+                       "completionIdPositiveCases":completion_positive,"completionIdNegativeCases":completion_negative,
+                       "publicationSourceContractCases":publication_checks,
+                       "unexpectedStatusSafeMetadataCases":unexpected_metadata_checks,
++                      "closedErrorDtoCases":error_code_checks,
+                       "windows": "NOT_RUN", "tls": "NOT_RUN", "ordinaryRuntime": "NOT_RUN"}))
+ 
+ 

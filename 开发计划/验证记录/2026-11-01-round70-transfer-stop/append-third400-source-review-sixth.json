@@ -1,0 +1,74 @@
+{
+  "status": "ACTUAL_APPEND400_TYPED_CODE_NOT_YET_CAPTURED_STATIC_PATHS_REVIEWED",
+  "atUtc": "2026-11-01T09:32:16.522039+00:00",
+  "actualThird": {
+    "report": "windows-ordinary-https-third.json",
+    "sha256": "fc6c79319dadac8a476448b7f808c8e0c7c6d0a4ad605bf857e57c13cc1c3483",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "lastEvent": {
+      "case": "r70-append-c",
+      "method": "POST",
+      "route": "materials/folders/2/1/append",
+      "httpStatus": 400,
+      "requestBodyBytes": 97,
+      "responseBodyBytes": 45,
+      "authenticatedCookieSent": true,
+      "csrfSent": true,
+      "tls": "TLSv1.2",
+      "serverName": "127.0.0.1",
+      "cleanTlsEof": true
+    }
+  },
+  "sources": [
+    {
+      "path": "crates/fc-protocol/src/web/materials.rs",
+      "sha256": "d8e9808b1b2f5425b21b29f8a848efc5bc033513eecd63cbbca4eba76f3ace5a"
+    },
+    {
+      "path": "crates/fc-protocol/src/web/responses.rs",
+      "sha256": "33c8f327bb9c73bb891a414b34e43e832f9df070fd4bac4b9b02a8809194ebc7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "sha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/network.rs",
+      "sha256": "f20da7d047f6c42749efd5813295da6b707642277a108aa794f43534cbd896e2"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_transfer/uploads.rs",
+      "sha256": "aed4160d24208d6bd491734515b9f3bf1794d4c7348cce251d150da040abf2e0"
+    },
+    {
+      "path": "crates/fc-materials/src/validation.rs",
+      "sha256": "f97243102870985a510b99eee2242058a84f2851ad032b2e2fdb0a5943ea8ff6"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "sha256": "35773416bdb8ffed37b49a4436db3b52531c3c020ebb340e3239bdbd12d71c51"
+    }
+  ],
+  "append400Paths": [
+    "Net UploadHubError::Invalid becomes400 INVALID_REQUEST; prepare checks route/body actual Content-Length and strictAppendDto then returns400 INVALID_REQUEST on mismatch.",
+    "Preparation invokes actual TXT validator, optional native validation, MaterialResource validation, destination directory creation and LockedFile.publish. Non-PermissionDenied failures in this closure are collapsed to MaterialError::InvalidResource, mapped to400 INVALID_RESOURCE. It is not possible to identify the failing IO/validation stage from status400 alone."
+  ],
+  "fixtureSourceFindings": [
+    "ASCII65536B .txt is explicitly supported: MaterialKind::Txt in validate_file reads bounded blocks, TextValidator::new has content=None and does not apply the separate content-node10000-scalar limit, ordinary material cap50MiB. Payload contains only ordinary ASCII and newline.",
+    "Teacher principal2 scope2/1 class1, AppendDto exact schemaVersion/commandId/uploadId/allowedClassIds and success200 remain correct in source. No proved fixture type/root initialization mismatch; do not replace type or cancelD to mask the case."
+  ],
+  "safeNextDiagnostic": "Only unexpected response exact ErrorDTO schemaVersion int1+code, duplicate keys rejected, only22 fc-protocol enum strings may be added as errorCode. Extra/unknown/string secret data and raw JSON/hash are never recorded; expected200 remains strict.",
+  "limitations": [
+    "45-byte response size is not proof of any concrete typed code.",
+    "No basis yet for production file-policy, lifecycle, capacity or permission relaxation.",
+    "Actual first/second/thirdFAIL and raw original files remain unchanged."
+  ],
+  "rustUnchanged": true,
+  "productionEdited": false,
+  "windowsInvoked": false
+}

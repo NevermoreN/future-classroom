@@ -1,0 +1,100 @@
+--- before/archive-evidence-first.py
++++ after/archive-evidence-first.py
+@@ -15,6 +15,7 @@
+ import json
+ import re
+ import stat
++import ssl
+ 
+ SOURCE = Path('/tmp/fc-round70-ordinary-transfer-stop/evidence')
+ DEST = Path('/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round70-transfer-stop')
+@@ -24,6 +25,8 @@
+     '.obj', '.o', '.a', '.so', '.dylib', '.wasm', '.7z', '.tar', '.gz',
+     '.db', '.sqlite', '.sqlite3', '.cache', '.key', '.pem', '.pfx', '.p12',
+ }
++PUBLIC_CERTIFICATES = {'windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls-public.pem': {'sha256': '6f96478f10777ef785950955463febd6c78d1f5a45836c09aad89d859e9289a9', 'bytes': 1141, 'report': 'windows-ordinary-https-first.json', 'reportSha256': 'bc5c7df899e6c5586cdbff47f0d0548a378ff99ccd2b3546f0ccb0e577385dbf'}, 'windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls-public.pem': {'sha256': 'f31f50556d8e0b1402c9ae1d83274026220def040525128f42b409dfcb6fc04f', 'bytes': 1141, 'report': 'windows-ordinary-https-second.json', 'reportSha256': '71425ad83427bf76d6deb84aaf4ac722926a273f9a2d357d4a03c65f391f55b4'}, 'windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls-public.pem': {'sha256': '3de79472aea1b4e4a74f7f756d7a03b801a071ec8230741e70d2be6c3e53b9db', 'bytes': 1141, 'report': 'windows-ordinary-https-third.json', 'reportSha256': 'fc6c79319dadac8a476448b7f808c8e0c7c6d0a4ad605bf857e57c13cc1c3483'}, 'windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls-public.pem': {'sha256': '4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee', 'bytes': 1141, 'report': 'windows-ordinary-https-fourth.json', 'reportSha256': 'a8e01d5d8dde219698b03939efb5b45da7fff718ab3d26d9b88b95a9fe8c5052'}, 'windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls-public.pem': {'sha256': 'ee423f2afcddb7cfb0436988269645529716d438ba564c8ae7912e324c95ed29', 'bytes': 1141, 'report': 'windows-ordinary-https-fifth.json', 'reportSha256': '9ff7018db87ae5187405274a9bc4ba091cfe2ba90e460aff1b8094819f64d129'}, 'windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls-public.pem': {'sha256': '2e4991823909b90fb760d5421d6a8905660359afc2211f1f0063d7ec9b1aab11', 'bytes': 1141, 'report': 'windows-ordinary-https-sixth.json', 'reportSha256': '24081e3c8f814908c00427e94d1467a0561344feb3ca37c6d5484834e332a7a5'}}
++
+ PATTERNS = {
+     'private-key-pem': re.compile(r'-----BEGIN (?:OPENSSH |RSA |EC |DSA |ENCRYPTED )?PRIVATE KEY-----\s+[A-Za-z0-9+/=\s]{32,}-----END (?:OPENSSH |RSA |EC |DSA |ENCRYPTED )?PRIVATE KEY-----'),
+     'github-token': re.compile(r'(?<![A-Za-z0-9])(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})(?![A-Za-z0-9])'),
+@@ -59,7 +62,62 @@
+     return sorted(paths)
+ 
+ 
+-def excluded(path):
++def public_certificate_der(data):
++    # Exactly one public certificate block, never a bundle, key or surrounding
++    # text. Decode strictly, reject trailing/noncanonical DER, then parse X.509.
++    match = re.fullmatch(br'-----BEGIN CERTIFICATE-----\r?\n([A-Za-z0-9+/=\r\n]+)-----END CERTIFICATE-----\r?\n?', data)
++    need(match is not None, 'public certificate PEM envelope rejected')
++    encoded = match.group(1).replace(b'\r', b'').replace(b'\n', b'')
++    try:
++        der = base64.b64decode(encoded, validate=True)
++    except (ValueError, TypeError):
++        raise AssertionError('public certificate base64 rejected') from None
++    need(base64.b64encode(der) == encoded and len(der) >= 4 and der[0] == 0x30,
++         'public certificate DER sequence rejected')
++    first = der[1]
++    if first < 0x80:
++        header, length = 2, first
++    else:
++        count = first & 0x7f
++        need(1 <= count <= 4 and len(der) >= 2 + count and der[2] != 0,
++             'public certificate DER length rejected')
++        header, length = 2 + count, int.from_bytes(der[2:2 + count], 'big')
++        need(length >= 0x80 and (length.bit_length() + 7) // 8 == count,
++             'public certificate DER nonminimal length rejected')
++    need(header + length == len(der), 'public certificate DER trailing bytes rejected')
++    try:
++        ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT).load_verify_locations(cadata=der)
++    except (ssl.SSLError, ValueError):
++        raise AssertionError('public certificate X509 parse rejected') from None
++    return der
++
++
++def confirmed_public_certificate(path, data):
++    rel = path.relative_to(SOURCE).as_posix()
++    expected = PUBLIC_CERTIFICATES.get(rel)
++    if expected is None:
++        return False
++    need(path.name == 'tls-public.pem' and path.parent.parent == SOURCE,
++         'exact public certificate raw scope required')
++    need(len(data) == expected['bytes'] and sha(data) == expected['sha256'],
++         'exact confirmed public certificate bytes required')
++    report_data = (SOURCE / expected['report']).read_bytes()
++    need(sha(report_data) == expected['reportSha256'], 'exact public certificate provenance report required')
++    report = json.loads(report_data.decode('utf-8-sig'))
++    preserved = report['rawPreservation']
++    record = preserved['files']['tls-public.pem']
++    need(preserved['status'] == record['status'] == 'PASS'
++         and Path(preserved['directory']) == path.parent and record['artifact'] == str(path)
++         and record['remote'] == record['downloaded'] == {'bytes': len(data), 'sha256': sha(data)}
++         and base64.b64decode(record['base64'], validate=True) == data,
++         'public certificate controlled raw provenance mismatch')
++    public_certificate_der(data)
++    return True
++
++
++def excluded(path, data):
++    if path.suffix.lower() == '.pem' and confirmed_public_certificate(path, data):
++        return False
+     return (path.suffix.lower() in EXCLUDED_SUFFIXES
+             or path.name.lower().endswith(('.db-wal', '.db-shm', '.sqlite-wal', '.sqlite-shm'))
+             or any(part in ('__pycache__', 'node_modules', '.npm-cache', 'target', '.cache')
+@@ -176,7 +234,7 @@
+     # fails closed, reports only location/category, and never modifies originals.
+     for path in originals:
+         data, row = identity(path)
+-        if excluded(path):
++        if excluded(path, data):
+             row['reason'] = 'Binary, archive, database, key or build-cache payload excluded; original bytes are not committed.'
+             omitted.append(row)
+         else:
+@@ -214,6 +272,7 @@
+         'historicalFailures': 'All retained FAIL reports, diagnostic before/after originals, separate C# three-case successes and final four-source records remain exact bytes. No earlier FAIL is promoted to PASS.',
+         'scope': 'R70 evidence archive only; runtime/platform claims remain those of the SHA-bound independent acceptance.',
+         'sourceRemoved': False, 'compression': 'NONE',
++        'confirmedPublicCertificatesRetained': PUBLIC_CERTIFICATES,
+     }
+     receipt_bytes = (json.dumps(receipt, ensure_ascii=False, indent=2) + '\n').encode()
+     scan(receipt_bytes, 'new-verification-receipt')

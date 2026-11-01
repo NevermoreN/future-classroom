@@ -1,0 +1,301 @@
+{
+  "schema": 1,
+  "status": "DETAILED_DESIGN_ONLY_AWAIT_NEW_BASE_AND_ISOLATED_R69_WORKTREE",
+  "atUtc": "2026-11-01T08:41:46.750531+00:00",
+  "scopeFiles": [
+    "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+    "scripts/windows-ordinary-https-probe.py"
+  ],
+  "referenceSources": [
+    {
+      "path": "crates/fc-protocol/src/web/materials.rs",
+      "bytes": 19271,
+      "sha256": "d8e9808b1b2f5425b21b29f8a848efc5bc033513eecd63cbbca4eba76f3ace5a"
+    },
+    {
+      "path": "crates/fc-protocol/src/web.rs",
+      "bytes": 38605,
+      "sha256": "ee7245cd3ebc37ea8fe26da2ff4c60bf1a49c3efd7177ea138d37ab49752b0b8"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/material_files.rs",
+      "bytes": 66839,
+      "sha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/web_application/materials.rs",
+      "bytes": 8874,
+      "sha256": "5980271491bfc76bd012a49e39f19064b17ab2a418b0205d165eeca5ec85eb48"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 20746,
+      "sha256": "23f85c2888cd47b5be2cbff3f3b8d3e1e6f285560b453c547047d0e622636768"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 43248,
+      "sha256": "bf3ea57caf4a8c53a3be879345b0e41ada0329591b32c29213e79d5077aba375"
+    },
+    {
+      "path": "scripts/windows-tls-probe.py",
+      "bytes": 50969,
+      "sha256": "1a91ac72ccb3fff0a08d9aa98222a82019af86a8d1b903e9fb10eb69ad8d94df"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/https_runtime.rs",
+      "bytes": 22674,
+      "sha256": "1005f9cd0db58ac692ed3f748b27b46b5f450856e7ca864f25aa487c462d6ee4"
+    }
+  ],
+  "commonWireContract": {
+    "tls": "exact owned IP-SAN certificate DER, CERT_REQUIRED, check_hostname true, TLS1.2",
+    "host": "127.0.0.1:<configuredPort>",
+    "origin": "https://127.0.0.1:<configuredPort>",
+    "cookie": "memory-only host cookie from actual native approved teacher pairing",
+    "csrf": "X-FC-CSRF memory-only exact session.csrf on every authenticated POST",
+    "connection": "close for complete requests; keep original partial socket alive until native disable",
+    "basePath": "/fc/api/v1/",
+    "networkPolicy": "explicit127.0.0.1/32; actual server source is SSH loopback peer; no campus reachability claim"
+  },
+  "orderedPhases": [
+    {
+      "id": "setup",
+      "action": "Reuse ordinary native setup, independent TeacherAdmin principal2, subject1/class1, local first password change; save HTTPS127.0.0.1 source CIDR127.0.0.1/32 and real CurrentUser MY reference; normal native Enable."
+    },
+    {
+      "id": "pair1",
+      "action": "Normal native Begin, real HTTPS pairing request for synthetic-ordinary-teacher, exact selected native approval, bounded original polling; cookie/CSRF only memory. Keep generation1 credential tuple in memory across disable."
+    },
+    {
+      "id": "negative-boundary",
+      "action": "Before reserving staging, require correct-session POST with wrong Origin403 FORBIDDEN, wrong CSRF403 FORBIDDEN and wrong owner scope1/1 instead of2/1 returns403. Do not use no-session requests to substitute for these distinct checks."
+    },
+    {
+      "id": "readyA",
+      "action": "POST create at materials/uploads/2/1 with R69-ready-a.txt and deterministic65536B; stream all65536B via octet-stream with exact Content-Length; require200 UPLOADED and actual clean TLS EOF. Deliberately omit Append/Cancel; verify exact owned stagingA remains present with size65536."
+    },
+    {
+      "id": "partialB",
+      "action": "POST create second upload at2/1 R69-partial-b.txt declared1048576B. Open real verified TLS socket; send ordinary authenticated binary headers and65536B prefix, keep socket/tunnel alive, send no EOF/rest. Require exact synthetic stagingB exists and its observed length is >0 and <1048576 before trigger; transport sendall alone is not evidence server consumed bytes."
+    },
+    {
+      "id": "disable",
+      "action": "Write only bounded public marker+generation+upload IDs to an exact CreateNew rendezvous; native probe receives it and uses existing local Disable review/Confirm. Capture a single conservative Instant immediately before Confirm; local probe waits with min(overall deadline, began+5s), controller/runtime retain their own original same-stop budget. Do not give cleanup/client/phase another5s."
+    },
+    {
+      "id": "cleanup",
+      "action": "Native first domain is physically quiescent/Disabled without fault; exact two old staging paths absent, no unconsumed marker/process remainder, original pool still live and original shared-worker query succeeds. Partial socket observes peer termination by EOF/RST/SSLError under bounded observation; successful incomplete-upload200 is forbidden. Do not label cancellation EOF as clean successful TLS EOF."
+    },
+    {
+      "id": "second",
+      "action": "Normal native Enable second generation distinct from first. Real public status200. Submit generation1 old cookie to GET session, require401 UNAUTHORIZED; only then discard old credentials. No automatically refreshed session or copied native readiness."
+    },
+    {
+      "id": "pair2",
+      "action": "Native Begin again, memory-only cycle2 pairing sidechannel, actual teacher request selected/approved locally, fresh session GET verifies principal2 TeacherAdmin/class1/subject1 and fresh cookie/CSRF distinct in memory; do not report hashes or secret values."
+    },
+    {
+      "id": "reuse",
+      "action": "Create and fully stream freshC and freshD before cancelling either: both201 UPLOAD_READY and200 UPLOADED prove both physical upload capacities returned. Append C with fixed R69 command69001 and class1. Check typed COMMITTED record, exact retry returns original receipt, GET materials/commands/69001 matches it. Cancel D via authenticated POST and typed UPLOAD_CANCELLED. No downloads."
+    },
+    {
+      "id": "finish",
+      "action": "Normal native second Disable with one original5s budget, original local worker remains queryable, final normal app/Writer/pool physical shutdown; exact owned root/certificate/CNG cleanup receipts and original-byte preservation."
+    }
+  ],
+  "exactRequestsAndTypedReceipts": [
+    {
+      "case": "create",
+      "method": "POST",
+      "route": "materials/uploads/2/1",
+      "contentType": "application/json",
+      "body": {
+        "schemaVersion": 1,
+        "displayName": "R69-ready-a.txt",
+        "bytes": 65536
+      },
+      "httpStatus": 201,
+      "exactResponseKeys": [
+        "schemaVersion",
+        "status",
+        "uploadId",
+        "expiresInSeconds",
+        "maxChunkBytes"
+      ],
+      "assertions": [
+        "schemaVersion integer1 not bool",
+        "status UPLOAD_READY",
+        "uploadId canonical nonzero decimal string<=u64",
+        "expiresInSeconds integer300",
+        "maxChunkBytes integer65536"
+      ]
+    },
+    {
+      "case": "bytes-complete",
+      "method": "POST",
+      "route": "materials/uploads/<id>/bytes",
+      "contentType": "application/octet-stream",
+      "declaredContentLength": 65536,
+      "actualBytes": 65536,
+      "httpStatus": 200,
+      "exactResponseKeys": [
+        "schemaVersion",
+        "status",
+        "uploadId",
+        "bytes"
+      ],
+      "assertions": [
+        "schemaVersion1",
+        "status UPLOADED",
+        "uploadId exact original",
+        "bytes integer65536",
+        "complete response length and real clean TLS EOF",
+        "no Append/Cancel before native stop"
+      ]
+    },
+    {
+      "case": "bytes-partial",
+      "method": "POST",
+      "route": "materials/uploads/<other-id>/bytes",
+      "contentType": "application/octet-stream",
+      "declaredContentLength": 1048576,
+      "actualBytesBeforeStop": 65536,
+      "responseAtReady": "NONE_COMPLETE",
+      "assertions": [
+        "same valid cookie/Origin/CSRF",
+        "two upload IDs distinct",
+        "actual server staging length1..1048575 before native disable",
+        "no successful UPLOADED response accepted for incomplete body",
+        "no socket client-close before native stop trigger"
+      ]
+    },
+    {
+      "case": "old-cookie",
+      "method": "GET",
+      "route": "session",
+      "httpStatus": 401,
+      "response": {
+        "schemaVersion": 1,
+        "code": "UNAUTHORIZED"
+      },
+      "assertions": [
+        "send actual generation1 cookie after actual second Running",
+        "no CSRF required for GET",
+        "old cookie remains memory-only"
+      ]
+    },
+    {
+      "case": "append-second",
+      "method": "POST",
+      "route": "materials/folders/2/1/append",
+      "body": {
+        "schemaVersion": 1,
+        "commandId": "69001",
+        "uploadId": "<newC>",
+        "allowedClassIds": [
+          "1"
+        ]
+      },
+      "httpStatus": 200,
+      "exactResponseKeys": [
+        "schemaVersion",
+        "status",
+        "commandId",
+        "scope",
+        "record"
+      ],
+      "assertions": [
+        "status COMMITTED",
+        "commandId69001",
+        "scope exact ownerTeacherId2 subjectId1",
+        "record kindTXT statusPUBLISHED resourceVersionId newC bytes65536 sha256 deterministic synthetic body digest allowedClassIds[1]",
+        "materialId canonical nonzero decimal",
+        "same command exact retry identical typed receipt, no duplicate side effect"
+      ]
+    },
+    {
+      "case": "durable-material-receipt",
+      "method": "GET",
+      "route": "materials/commands/69001",
+      "httpStatus": 200,
+      "exactResponseKeys": [
+        "schemaVersion",
+        "status",
+        "commandId",
+        "state",
+        "scope",
+        "record"
+      ],
+      "assertions": [
+        "status COMMAND_RESULT",
+        "state COMMITTED",
+        "commandId69001",
+        "scope and record exactly match original Append receipt"
+      ]
+    },
+    {
+      "case": "cancel-second-D",
+      "method": "POST",
+      "route": "materials/uploads/<newD>/cancel",
+      "body": {
+        "schemaVersion": 1
+      },
+      "httpStatus": 200,
+      "exactResponseKeys": [
+        "schemaVersion",
+        "status",
+        "uploadId"
+      ],
+      "assertions": [
+        "status UPLOAD_CANCELLED",
+        "uploadId exact newD",
+        "actual second-generation cleanup no leftover newD stage"
+      ]
+    }
+  ],
+  "existingHelperChangesWithinTwoFiles": [
+    "OrdinaryClient.request must accept bounded explicit binary body/content-type without JSON-encoding bytes, retaining existing strict complete-body/TLS EOF rules. Partial upload uses one separately owned socket context; no new worker/thread/pool.",
+    "Keep first cookie/CSRF in an ephemeral client object instead of clearing at end of reminder journey; second-generation old-cookie test occurs before actual new pairing.",
+    "Cycle-specific code sidechannel names and public rendezvous schemas must validate exact marker/generation/cycle and reject unknown/secret fields. Read via nonrecording direct subprocess into memory and remove before delivery, as current code already does for first cycle.",
+    "Replace exact25-step/old exact wire-journey validator with a new exact ordered phase/request contract including both pairings and material operations; explicitly update expected outcomes and malformed/missing/reordered/extra/secret-field pure negative fixtures. Do not use a minimum request-count heuristic.",
+    "Capture exact owned normal App root from known native process identity and marker. Any staging observation uses bounded read-only metadata of specific upload IDs; never scan/delete unrelated TEMP or write an external process-selected path."
+  ],
+  "secretHandling": [
+    "No passwords, recovery codes, pairing code/pollSecret, cookie, CSRF, private key data, credential-bearing response body or hash enters stdout/stderr/report/raw artifacts.",
+    "Synthetic material hashes, IDs, public marker/cycle/generation, statuses, content byte counts and typed receipt nonsecret fields may be reported.",
+    "Partial request error messages must be static stage identifiers; never stringify the full request headers, SSL objects or response payloads. Suppress exception chaining on the direct secret-channel read.",
+    "Keep one-time pairing sidechannels only in the exact protected owned root and delete immediately via verified memory-only read; report only absence/status. Scan artifacts before archive."
+  ],
+  "budgetAndOwnership": [
+    "Preserve original5s stop origin and controller Faulted/controlled-exit behavior; no hidden new stop grace, no integer truncation to pass a deadline.",
+    "Use original Work::Http two-worker pool, same normal RuntimeOwner configured native host/single SSPI domain, no fake native Ready or direct logical set_enabled.",
+    "Global finite workflow/client budgets remain original until implementation demonstrates need; no automatic increase to pass a failed scenario.",
+    "No retry of accepted side-effect commands under a new ID; exact Append replay is a deliberate assertion of durable idempotency with the same ID."
+  ],
+  "cleanup": [
+    "Reuse current exclusive marker MY certificate + nonexportable CNG key ownership helpers; verify exact original PID/creation/exe before terminating an unfinished fixture.",
+    "Close the one partial client socket and its original tunnel in finally; do not cancel its tunnel while native disable is supposed to cause the peer close.",
+    "Preserve actual complete raw native stdout/stderr and report identities before deleting owned certificate/key/root; retain root if physical stop or original-byte capture is unproven.",
+    "Delete only exact own markers/staging/deployment/certificate/CNG objects; preserve SSH service, public authorization and external private test key."
+  ],
+  "acceptance": [
+    "All ordered native steps and actual wire events close exactly, including two native teacher approvals, both capacity reuse uploads and durable typed receipt.",
+    "Generation1 stageA full/Ready and stageB consumed partial are both established before confirmed Disable. Both old stage paths are absent at actual first quiescence, before any second-generation upload.",
+    "Each of both native stops completes within the single original5s interval and retains local worker/Writer capability. Any timeout or unexpected success/error remains actual FAIL with originals, no filtered pass.",
+    "Generation1 cookie returns401 in second actual generation; second fresh approval and validOrigin/CSRF are required for every mutation.",
+    "Both replacement upload slots work before freeing either; material Append/command receipt match exact teacher2/subject1/class1/body digest and no download/reset/restore is introduced.",
+    "Host/codegen/Win11/three-system/campus claims remain separated. Actual Windows execution is root-serialized only."
+  ],
+  "pendingBeforeImplementation": [
+    "Root completes R68 archive/commit and provides new base commit plus independent R69 worktree.",
+    "Re-read AGENTS/current source at that base; do not modify frozen R68 or main.",
+    "Parent explicitly grants edits to the two scoped probe files; source-before/after/minimaldiff stored under new owned evidence."
+  ],
+  "actionsNotPerformed": [
+    "No source edit",
+    "No Cargo/test/Windows/network",
+    "No new goal",
+    "No download/reset/restore expansion"
+  ]
+}
