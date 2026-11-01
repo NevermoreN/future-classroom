@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_SECOND_AST_ONLY_NOT_EXECUTED",
+  "atUtc": "2026-11-01T11:46:25.672513+00:00",
+  "firstPreserved": true,
+  "originalHelperSha256": "81d9037d3ce2c709747e2dc1a1229f70724d8edad1663e2a7080ad130002c3d0",
+  "helper": {
+    "path": "/tmp/fc-round73-cleanup-controller/cleanup-r73-second.py",
+    "bytes": 21427,
+    "sha256": "549e945dac403c5904f2ce5266e0233ee36514b1e38eeb0234e4233ec7a6a6c7"
+  },
+  "changes": [
+    "terminal root child set excludes already-removed host-scratch-first",
+    "require original exact scratchCleanup and scratchRoot plus os.path.lexists false",
+    "README describes source/archive commit, closure commit and independent explicit-SHA main final proof; no commit workflow implemented"
+  ],
+  "syntax": {
+    "method": "ast.parse",
+    "success": true,
+    "nodes": 4462
+  },
+  "executedHelper": false,
+  "deletionPerformed": false,
+  "originalEvidenceWritten": false,
+  "mainWritten": false,
+  "unknownFinalFields": [
+    "final main commit SHA",
+    "final committed proof path/SHA and files[] blob identities",
+    "final root-reviewed plan path/SHA",
+    "final archive index SHA",
+    "root, archive-controller and cleanup-controller complete sorted entries[] inventories after every producer has stopped",
+    "exact actual terminalReports[] paths/statuses/SHAs including final host and runtime acceptance",
+    "controllerCopies[] mapping every controller regular file including marker/preparation/helper/proofs to committed repository paths"
+  ],
+  "artifacts": [
+    {
+      "path": "cleanup-r73-second.py",
+      "bytes": 21427,
+      "sha256": "549e945dac403c5904f2ce5266e0233ee36514b1e38eeb0234e4233ec7a6a6c7"
+    },
+    {
+      "path": "README-second.md",
+      "bytes": 5776,
+      "sha256": "00ff10f5b36d033d26a96c72a4b9b4276cfcaea777d1e2790cf4a6df67bc3e37"
+    },
+    {
+      "path": "first-to-second.diff",
+      "bytes": 1141,
+      "sha256": "74086a2b361cce70739265f9cdd5dc57c28177f0051f324c5f5bbd3828268a19"
+    }
+  ]
+}

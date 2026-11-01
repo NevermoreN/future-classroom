@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_THIRD_AST_ONLY_NOT_EXECUTED",
+  "atUtc": "2026-11-01T11:47:56.285931+00:00",
+  "firstAndSecondPreserved": true,
+  "originalHelperSha256": "81d9037d3ce2c709747e2dc1a1229f70724d8edad1663e2a7080ad130002c3d0",
+  "secondHelperSha256": "549e945dac403c5904f2ce5266e0233ee36514b1e38eeb0234e4233ec7a6a6c7",
+  "helper": {
+    "path": "/tmp/fc-round73-cleanup-controller/cleanup-r73-third.py",
+    "bytes": 24269,
+    "sha256": "1e925c602705971a648a762fd8e914292aa8d90a9fd715802e1bef7435d5b43d"
+  },
+  "syntax": {
+    "method": "ast.parse",
+    "success": true,
+    "nodes": 4870
+  },
+  "executedHelper": false,
+  "deletionPerformed": false,
+  "originalEvidenceWritten": false,
+  "mainWritten": false,
+  "changes": [
+    "exact n-host-first.json FAIL SHA/shape qualified without altering original status",
+    "pin N readonly qualification and actual reaped producer; all other final statuses remain PASS",
+    "READMEthird adds hostFailureAttribution field and honest HostFAIL terminal row"
+  ],
+  "unknownFinalFields": [
+    "final main commit SHA",
+    "final committed proof path/SHA and files[] blob identities",
+    "final root-reviewed plan path/SHA",
+    "final archive index SHA",
+    "root, archive-controller and cleanup-controller complete sorted entries[] inventories after every producer has stopped",
+    "exact actual terminalReports[] paths/statuses/SHAs including final host and runtime acceptance",
+    "controllerCopies[] mapping every controller regular file including marker/preparation/helper/proofs to committed repository paths"
+  ],
+  "artifacts": [
+    {
+      "path": "cleanup-r73-third.py",
+      "bytes": 24269,
+      "sha256": "1e925c602705971a648a762fd8e914292aa8d90a9fd715802e1bef7435d5b43d"
+    },
+    {
+      "path": "README-third.md",
+      "bytes": 7201,
+      "sha256": "52105b3aa715b5337b78ea57a46bbf78c69672c9c898f4a33d790e5e8d7d1cb6"
+    },
+    {
+      "path": "second-to-third.diff",
+      "bytes": 3774,
+      "sha256": "ce1978122e1c8b17a8c4880e7731fa6f5a0bbf0366c0aa8317970a2ebfbb4297"
+    }
+  ]
+}

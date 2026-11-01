@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_AST_ONLY_NOT_EXECUTED",
+  "atUtc": "2026-11-01T11:44:41.747903+00:00",
+  "owner": "future-classroom-owned-r73-cleanup-controller/v1\n",
+  "helper": {
+    "path": "/tmp/fc-round73-cleanup-controller/cleanup-r73-first.py",
+    "bytes": 21106,
+    "sha256": "81d9037d3ce2c709747e2dc1a1229f70724d8edad1663e2a7080ad130002c3d0"
+  },
+  "syntax": {
+    "method": "ast.parse",
+    "success": true,
+    "nodes": 4403
+  },
+  "files": [
+    {
+      "path": ".owner",
+      "bytes": 49,
+      "sha256": "107986d682d1334adf9f9c498c94e9c79e0eeff1d1ebbe2179d876403482e1ab"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4789,
+      "sha256": "dd47c5cd753879b6cc54f572792714555302ee136bb54bcc853dde8c072b853d"
+    },
+    {
+      "path": "cleanup-r73-first.py",
+      "bytes": 21106,
+      "sha256": "81d9037d3ce2c709747e2dc1a1229f70724d8edad1663e2a7080ad130002c3d0"
+    }
+  ],
+  "executedHelper": false,
+  "executedInventory": false,
+  "originalEvidenceWritten": false,
+  "mainWritten": false,
+  "deletionPerformed": false,
+  "futureRootInputs": [
+    "final terminal reviewed plan + SHA256 with all three complete non-following inventories",
+    "final committed blobs proof + SHA256/full commit",
+    "all controller files copied byte-for-byte into committed repository paths first"
+  ],
+  "scope": "Preparation only in new owned cleanup controller; no import, dry-run, source edit, Cargo, Windows, network or removal.",
+  "unknownFinalFields": [
+    "final main commit SHA",
+    "final committed proof path/SHA and files[] blob identities",
+    "final root-reviewed plan path/SHA",
+    "final archive index SHA",
+    "root, archive-controller and cleanup-controller complete sorted entries[] inventories after every producer has stopped",
+    "exact actual terminalReports[] paths/statuses/SHAs including final host and runtime acceptance",
+    "controllerCopies[] mapping every controller regular file including marker/preparation/helper/proofs to committed repository paths"
+  ],
+  "notAdditionalRequirements": [
+    "No tar-member leaf provenance gate",
+    "No per-object target compiler provenance",
+    "No reading or hashing persistent keys"
+  ],
+  "sourceAllowlistHint": "/tmp/fc-round73-archive-controller/candidate-source-paths-first.json (root will archive; integrated report independently fixes the same 15-source boundary)"
+}

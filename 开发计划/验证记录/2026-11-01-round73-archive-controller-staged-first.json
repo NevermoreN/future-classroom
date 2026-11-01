@@ -1,0 +1,1996 @@
+{
+  "status": "PASS_EXACT_STAGED_BLOBS",
+  "commit": null,
+  "parentGitBase": "9c410aaea8e5cd9487d78b9d2540e20268ad03c7",
+  "candidateGitBaseOnly": "00120a026eea5dc4ff330f8526bf31169b373565",
+  "executedCandidateProducerSha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07",
+  "candidateSourceFreezeSha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+  "archiveIndexSha256": "c8b8e39ed49b2a0230bacff3679579ecd686d2fa233d0f9c6c08e8ccedc93b7d",
+  "verificationReceiptSha256": "b4c084a6adccba07d088c72c996c66a6ba12813fc9e8662069677b55d96fe371",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 5639,
+      "sha256": "b66bebcb3038973e1a13138e528b9bffde97d3736a8bf7b271cff66f9cf085ec",
+      "gitBlobOid": "66a2196736ea00b44397b1ebbba45916aa4e205b"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2207,
+      "sha256": "b7d082c8eae52e2505e7d476afe6b621148b15df1b017007555e13c2e4154ad3",
+      "gitBlobOid": "a9281dc3f3019df770ac0656eb6514eb7eb99cf2"
+    },
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4",
+      "gitBlobOid": "17f91c1f72fd6f721150c9fb918e1d16afbdb013"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/web_editor.rs",
+      "bytes": 25289,
+      "sha256": "541c7743fff130df55d36675cdf4c57a13218db2b7ebc21a531239eeffa2f627",
+      "gitBlobOid": "470f407a861a24c9c9a65038c633d3e3869948de"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292",
+      "gitBlobOid": "f091f9abbfadad1b9ee430f0e9b5a5b6e3bf15b3"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "gitBlobOid": "1c17aaffb23295fc207fbeed8087586b28a9e92c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "gitBlobOid": "16471ecbc3e2e0b98c7ef3ff8973f88511e67270"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "gitBlobOid": "cbde9ef55171b0c93266905c989f11258e960ef3"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "gitBlobOid": "c7325e15d7ad6a5cc3cd48084905e84a280fab60"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "gitBlobOid": "cb4aa51ab69c4747f91ff3c3b33b7437599e4a93"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "gitBlobOid": "6bbf02e684a3b0c1c46a93d125f2c83a5c2f9fc1"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4",
+      "gitBlobOid": "a554b234d632bc7b4fe00859fac5ef016ae8e87e"
+    },
+    {
+      "path": "packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79",
+      "gitBlobOid": "ca1598ecfd8c1ec892be20f45f2dd1fe7a84f715"
+    },
+    {
+      "path": "scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b",
+      "gitBlobOid": "c6287e8ae2ac099a208732c3c5bbb72acb9dc033"
+    },
+    {
+      "path": "scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50",
+      "gitBlobOid": "2dac3abd2b63e2d521aaa5091e1999a7c112cd2e"
+    },
+    {
+      "path": "scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a",
+      "gitBlobOid": "17f186db9489050aa87829cca7d8aa33df6e931b"
+    },
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802",
+      "gitBlobOid": "ed5daf136d99a0f2f320e508f7077729758aa53b"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 518813,
+      "sha256": "b0cfad2708c6fa689d4f044dfb5a15eea39d88aebc6d49f9298dcf5d8f988d5c",
+      "gitBlobOid": "ea2479dc3f3e5688fcdeee7d3e276cdee9b48441"
+    },
+    {
+      "path": "开发计划/11-Windows兼容矩阵与验收.md",
+      "bytes": 62164,
+      "sha256": "db9dabe304db59edda00df1c92564f8a95deebe19678420b3ddf73606d4f7bb1",
+      "gitBlobOid": "81a67cbd26a0a7f1daaa7677f7b4d70823028bf6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-controller-copy-map-first.json",
+      "bytes": 3616,
+      "sha256": "68f22d97bd1b252c8987186d47791486d62307919759e701f57cb3a8f9ec752b",
+      "gitBlobOid": "2fa0529e4acd678c2cebd12cbc238deec9e01a95"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-controller-owner.log",
+      "bytes": 49,
+      "sha256": "f0642719ce60621fd1c73df923e2e10ea91e475cb6508a608603e64a9f0a22d0",
+      "gitBlobOid": "dd819390fe29b8b192eb4c718efe239e20676740"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-controller-preparation-first.json",
+      "bytes": 3689,
+      "sha256": "4f1b3df2620455eff0517f0d7f150216ecedd62ed44c10982cf13e94e59e095b",
+      "gitBlobOid": "77860924b4d63564009587b7165e9f5bf3ef878a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-operation-first.json",
+      "bytes": 1415,
+      "sha256": "ea7f9532bbbde050dc2e8a2697c6a797c114685bd27f72dd14a669c33702b223",
+      "gitBlobOid": "906b98424c164e6a0334336adf095e238d9850a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-archive-operation-first.stdout.log",
+      "bytes": 439,
+      "sha256": "90e19a544783b51968967f5527bbb627ebff20d2dad367b5ab45f77a753c1a78",
+      "gitBlobOid": "a991dcfdfc66be8a83bbe3f653bfe8d8056eb1bc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-byte-replay-first.json",
+      "bytes": 83496,
+      "sha256": "2399c0ec449ec8cc9b58886fbfb4993c702abd3a53869d6df3957ffc8e8d90d4",
+      "gitBlobOid": "fe5be45490c7df64056a9d7773cfcaadd4291370"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-candidate-source-paths-first.json",
+      "bytes": 733,
+      "sha256": "78ff96030d96c03a4dbfa47c5b6777c41f597c26c5a2b973bc3e8c084000cbb6",
+      "gitBlobOid": "c8c2260085ffab43339892c24f0e02b827f5ef78"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/.owner",
+      "bytes": 56,
+      "sha256": "c27c71f14aa5ed856f401ec3e6f028f721958d3331803ce8dad421fe8de51907",
+      "gitBlobOid": "68ef7ef467d6202ba60199c2da04e8e5b81d7c22"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/acceptance-preparation-first/.owner",
+      "bytes": 60,
+      "sha256": "0610e1481da5f9c28e58cbbe053ce26e7b2aec61125c8e121390872573c7b090",
+      "gitBlobOid": "434fa959c5adca0b435e412a1983c1fc85a5f800"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/acceptance-preparation-first/independent-finite-first.py",
+      "bytes": 22657,
+      "sha256": "6a14e7b4274911b6c420ab012d4bc04c38ef04396d1f758c7ca8f9b710e05e6c",
+      "gitBlobOid": "4f9433027f3575a7a9afe8f733477f2f0010347e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/acceptance-preparation-first/preparation-first.json",
+      "bytes": 1280,
+      "sha256": "37022abb5f7d16729292a69e09b5e575fc1875d42719f46178484ff674e27da7",
+      "gitBlobOid": "154ebdef558b4468ba3c705dfc63472f5c42734d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-index-first.json",
+      "bytes": 64677,
+      "sha256": "c8b8e39ed49b2a0230bacff3679579ecd686d2fa233d0f9c6c08e8ccedc93b7d",
+      "gitBlobOid": "487e1b2cbe79eab7d4c6eb86c58a787336f2815c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-preparation-first/archive-evidence-first.py",
+      "bytes": 20496,
+      "sha256": "adb774f3d27d72458173d023fd3a5896a9d532037e56b97e9d1850cf13bb332e",
+      "gitBlobOid": "a14ea53f5399cd16151e98d94c02a8161281dd24"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-preparation-first/archive-evidence-second.py",
+      "bytes": 21443,
+      "sha256": "c29f93178ddca078a0335234ea6c38e001b98027f7d76a6e68e118ddbba1740b",
+      "gitBlobOid": "6ec47b4928637e3fe0dc5fe75536e094a4926b33"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-preparation-first/first-to-second.diff",
+      "bytes": 6208,
+      "sha256": "4223f0098fc6c187dbe20bad481cba6ab7a36697a2c7b5774372b0e6cd11bd43",
+      "gitBlobOid": "0bbf263db1d4c21499442d6e0f63d5017a490718"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-preparation-first/preparation-second.json",
+      "bytes": 454,
+      "sha256": "033aba825b82bd7cf488ef7022ffc2bfa099fbebb5a26116925ef374e6917700",
+      "gitBlobOid": "54bf46aa7697a8cfda02c0d2a3fde113d06c7c34"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/archive-verification-first.json",
+      "bytes": 152930,
+      "sha256": "b4c084a6adccba07d088c72c996c66a6ba12813fc9e8662069677b55d96fe371",
+      "gitBlobOid": "629cf6cb810c78d3b4e9425048e02c714f1567fd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-architecture-first.json",
+      "bytes": 132,
+      "sha256": "a31915e72d87459bc938021b188f96a370d9d853608e776f072061edba4a4ca9",
+      "gitBlobOid": "c86a72404334bfc26c631cf30ed40f6b62a4d12c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlobOid": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-argv-first-string-diagnostic.json",
+      "bytes": 1186,
+      "sha256": "a3f4c423c300ce613b3d67498deb02260f4e13b5ba2154900b6479ec278839d2",
+      "gitBlobOid": "e5ced825a1789ee13019cae1b10e108fefd7253d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-argv-first-string-source/scripts/check-msi-candidate.py",
+      "bytes": 29916,
+      "sha256": "f6a0c38ed571912082fc235f6fc0737c5490da9e71989ec9550362a3e9c163d2",
+      "gitBlobOid": "1675aef690c79b060c0c944546c87694e215c3b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-argv-first-string-source/scripts/package-msi-candidate.py",
+      "bytes": 54020,
+      "sha256": "65ae825efe32d904f8c469894c08c9938791ce89e40f09f94a51a2a12e4ae784",
+      "gitBlobOid": "ff8a1e647053f1a125b643428b83a0235da9e992"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-first.json",
+      "bytes": 118,
+      "sha256": "e8632aff2c36d8970ba549ad410a7a13c61bcab3a1efe2bb8a814e884aa316d5",
+      "gitBlobOid": "ab7637d2d885f0d9e78fd99f0b1bd878d8f0d8f8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-second.json",
+      "bytes": 117,
+      "sha256": "da756d7ac7d7e047b462cfd7871ee18213849b77290eb9cf60fb651dde1de8df",
+      "gitBlobOid": "ebe242aee69e172a5b8c57c390748aaccf885caa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-diffcheck-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-implementation-freeze-first.json",
+      "bytes": 5954,
+      "sha256": "bb49743c651cf0e8940fc039a0c3f54885ab1f0ea76f5dda66a149ed60888c2e",
+      "gitBlobOid": "ef7ba41cbf39722268d8eda42c2cc9f2b0791d2f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-implementation-minimal-first.diff",
+      "bytes": 68754,
+      "sha256": "678c5020011ecdcb4c9396bd2bcd67e69f2418b6aad63f18c955d3b9c3073e41",
+      "gitBlobOid": "51e114ba33cd5c8bf52867ed330554da3523143f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-first.json",
+      "bytes": 141,
+      "sha256": "7cc13843956174e03b810d246074a0200d2e8555cd3caa2fbebb00f69d40278c",
+      "gitBlobOid": "44bbd498d696336467e52529cd5c151cac8d5ca4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-first.stderr.log",
+      "bytes": 3202,
+      "sha256": "ee4c765f04f5b07680b8a8f1488782de71085f86d958a4ea8100b74608b49b31",
+      "gitBlobOid": "cb00ed0e6456c71b95142516fedfc9cca354d8ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-second.json",
+      "bytes": 141,
+      "sha256": "da06c64778726670df96c6f65cb04478fa7e4cd30f570a3f2137e17875865e6d",
+      "gitBlobOid": "023bc1062ffbc6a02ae2f9012c0cc462dd3448b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-second.stderr.log",
+      "bytes": 3355,
+      "sha256": "684779bc0f6461cb1971286e245594ff6baf34efd91ef43f0c635b1406ede06b",
+      "gitBlobOid": "1f60313a5517b0c8d5e7cf38ee3bbce893c4c93c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-msi-contract-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-rustfmt-first.json",
+      "bytes": 200,
+      "sha256": "e3ed4aa8452fb0411cfd11ff5c1692220001a257ef44ebf87e863a12bf6d2b16",
+      "gitBlobOid": "2271a9a2d4c462b74d6169add5d075e5c32071f3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-rustfmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-rustfmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/crates/fc-bootstrap/Cargo.toml",
+      "bytes": 676,
+      "sha256": "9bf57af8f2f872f7cf438daefa92e88fc286d7bc4b49d6c0ca3bfd79e9dea1b4",
+      "gitBlobOid": "17f91c1f72fd6f721150c9fb918e1d16afbdb013"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/crates/fc-bootstrap/src/bin/fc-installer-lifecycle.rs",
+      "bytes": 1162,
+      "sha256": "4b4c5b1a4e81d5e80094743f211d8c3f262aed4a0a99ab973d6c6903bf0b6292",
+      "gitBlobOid": "f091f9abbfadad1b9ee430f0e9b5a5b6e3bf15b3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/packaging/MSI-CANDIDATE.md",
+      "bytes": 10471,
+      "sha256": "e6e3e2140cf46c11a4b4bccef8af40b3522ae17717f4e7453bdf31bf04b7fa79",
+      "gitBlobOid": "ca1598ecfd8c1ec892be20f45f2dd1fe7a84f715"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/scripts/check-msi-candidate.py",
+      "bytes": 30725,
+      "sha256": "b14f40537c70606ad1c566c806b1e5902b8a1b30dfff6f27fd04eaa6469b670b",
+      "gitBlobOid": "c6287e8ae2ac099a208732c3c5bbb72acb9dc033"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 15333,
+      "sha256": "cc6f4600666604824049d5bfc3d3ebb9da288452154e6cead300f1417b10cc50",
+      "gitBlobOid": "2dac3abd2b63e2d521aaa5091e1999a7c112cd2e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/scripts/package-msi-candidate.py",
+      "bytes": 54045,
+      "sha256": "e1a6fbac4d49f7c3644620a37cd4f951cec042be021f2fb759e4d6a6b62d591a",
+      "gitBlobOid": "17f186db9489050aa87829cca7d8aa33df6e931b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-after-first/scripts/windows-msvc-ci.ps1",
+      "bytes": 54457,
+      "sha256": "edec879ecad9bad5b3ef21f48afa895bb3e8f0ac58e6aba561d5748e5e147802",
+      "gitBlobOid": "ed5daf136d99a0f2f320e508f7077729758aa53b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/crates/fc-bootstrap/Cargo.toml",
+      "bytes": 494,
+      "sha256": "09c891535e4c37e50b4a50a19d1ff012b8353c09b06782a5c2a9597370399a66",
+      "gitBlobOid": "5cfde28f1e449848b4b3a80b355a203562c63be6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/packaging/MSI-CANDIDATE.md",
+      "bytes": 7057,
+      "sha256": "22904b474322cb96c2ee7afcf7f7c879919cfb68641f98fc9cb595b61332506e",
+      "gitBlobOid": "02c3461329ab0631235ccbb2a950400344c82796"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/scripts/check-msi-candidate.py",
+      "bytes": 20199,
+      "sha256": "a8b9d7b433a3300d54f77b6c14c1878f6943e97f03770305ebb6a8095783b04c",
+      "gitBlobOid": "5192068a847c7a430890e41f9f6106ca5fd0f07a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/scripts/check-msvc-gui-contract.ps1",
+      "bytes": 14248,
+      "sha256": "70414b86bba595f323b84af9404bb039af0c1c50f0786cd5e22fcec67a087259",
+      "gitBlobOid": "60841c4693cd773e6424aef9fba2252fde078483"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/scripts/package-msi-candidate.py",
+      "bytes": 36605,
+      "sha256": "4e56ae981d9951da21c6a9d423e25e7e71d27380f16a8889d63b145208d8dbb0",
+      "gitBlobOid": "071fe5422ee5b0f287ba83afd387d7bee0df254e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/b-source-before-first/scripts/windows-msvc-ci.ps1",
+      "bytes": 52976,
+      "sha256": "d4d554df3f5871b434736f306ba97da2f030952f5147a54319a63a917f986886",
+      "gitBlobOid": "a17f1f2783479393b13b80712b11bd8b6af123f6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/child-attribution-review-first/.owner",
+      "bytes": 55,
+      "sha256": "9484e595a80401a7dddf869780c5ce40cab1cedce9c861b1fcfd0fc69a63e9cd",
+      "gitBlobOid": "debfb179fcb7c7cb02f1e8f9d42d5fdedc001c88"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/child-attribution-review-first/review-first.json",
+      "bytes": 7539,
+      "sha256": "b8421c635b2f4b90e85535428f2b8dfbdef829ee4d4f42ec3e525ac035cccd41",
+      "gitBlobOid": "dc4c181bf1f027f644ced89b59b3f23cc16b10af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/.owner",
+      "bytes": 53,
+      "sha256": "86267af4ce0742f417f50c26437cd3e974ad35484e65536193f01091f297b299",
+      "gitBlobOid": "23662bc78c8a34cc66e6f3fabdd21dd78b9b7b5d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/first-to-second-all-targets.diff",
+      "bytes": 1225,
+      "sha256": "cdfc51a1eabac769591958c84e341556d5a24adc264064d36d4d1244fc47e8c3",
+      "gitBlobOid": "9b4b06f033b0586fd24a686068350fd221b1dc9f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/preparation-first.json",
+      "bytes": 3938,
+      "sha256": "8a8a36177e4da2a6df37430aff397d75630f8526d515984b3369771e2ece3a4a",
+      "gitBlobOid": "ef4acc3867cc2ac0e36d856c7a4a2f40e37446b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/preparation-second.json",
+      "bytes": 3192,
+      "sha256": "2cbb08df8253fc382aaa022e83be6dc3dedcb1532dd2e1bc8a7707e01f635668",
+      "gitBlobOid": "f017c0e186f045f28205b4cf5099ac31e9f25ae9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/template-r69-original.py",
+      "bytes": 66125,
+      "sha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527",
+      "gitBlobOid": "592f2b0e621a6a3d679abf0139141e7b4a41e3dc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/template-to-dual-gui-first.diff",
+      "bytes": 37696,
+      "sha256": "315c41a7b59ca0502356c6c79c5dfe8592ed6f3ab383a9496aa2d74659903ac9",
+      "gitBlobOid": "ebe3a747b9f245c8ead169a85366a3ff4901d6b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/verify-ci-artifact-dual-gui-first.py",
+      "bytes": 53361,
+      "sha256": "e7553ef84b240453784a38df370db86e5f03f2f60b3c65910ebec17da282466f",
+      "gitBlobOid": "5cc8f1aead77a6c30ea80e6cb394641be1eb4555"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/ci-auditor-preparation-first/verify-ci-artifact-dual-gui-second.py",
+      "bytes": 53791,
+      "sha256": "ca0d64eff8d8e4c38dd8a8673d60631fb3b7a1d9fa3c5b4402348dd324d2565b",
+      "gitBlobOid": "339d212e19dbfa853117a9c57e1c9d57f468c0c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/download-msi-tool-first.py",
+      "bytes": 3287,
+      "sha256": "1d93d4e0bfbde1f7c0de684b9a97fe2a14b092f6b6eba6318ac19d0fb9d4c2c7",
+      "gitBlobOid": "45779c7caae726946bc3e2ad918d6b9bcda96120"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/independent-finite-acceptance-first.json",
+      "bytes": 37892,
+      "sha256": "8d2aaadc96212736aec0318a2b99b9de06570191f7206fde6d620562e23bb96a",
+      "gitBlobOid": "022254ee42c5f1b9422489d94a300e00805eda21"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgcab-1.0-0-first.json",
+      "bytes": 1607,
+      "sha256": "c22e3c45bebd524bcc30121ead3b8d85da8ed0e98b9c36c39a65db7230ca460a",
+      "gitBlobOid": "165c152c8b923fd91c803d98da0410e5b95b2552"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgcab-1.0-0-first.stderr.log",
+      "bytes": 396,
+      "sha256": "64c041db66fafe069484f14de386f21ce9afb34c26d12fc1ea91e268944f35b2",
+      "gitBlobOid": "8146ce468973404cf36f6ac017a1fbe178ddcca3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgcab-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-114-first.json",
+      "bytes": 1626,
+      "sha256": "37cbea4ed2d506e5f47dcf78eaaa51c37db400bbb5936c35ea81cffa7bb58488",
+      "gitBlobOid": "66ca29760d22deaa9212cfdb87eb30324b9039af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-114-first.stderr.log",
+      "bytes": 396,
+      "sha256": "e71e2f1c5bea9220b17b847acdcade03ea62a2e3cb04ab1fbbc42b8888581131",
+      "gitBlobOid": "cbdf37965bb275c0306e813a4ac94ebc6ef0735e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-114-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-common-first.json",
+      "bytes": 1635,
+      "sha256": "ac71fe41027299054dad79e16368c37f64ae0fbbc4bb319975c0e7173b386ebf",
+      "gitBlobOid": "46908eb50695163890c2d50739dd940cf7cc07d8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-common-first.stderr.log",
+      "bytes": 396,
+      "sha256": "ec7d268999b325b8ff30090a9c63688e863c8014b9031fb1518b76374cc327f7",
+      "gitBlobOid": "ac84f00b767790c7a80006aa6f5fbcdfa6315055"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libgsf-1-common-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libmsi-1.0-0-first.json",
+      "bytes": 1631,
+      "sha256": "3cb6ea3232d8738fed1e03faf7fe9a408d1f6a22ae906bbeab2250e320cd706e",
+      "gitBlobOid": "3cf82689d3cf4bab55f125ae0df18660403b533b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libmsi-1.0-0-first.stderr.log",
+      "bytes": 396,
+      "sha256": "24c6c1a357244f009c05db1ea528fdb12ef3dec25078150eae6ab3ed090747a9",
+      "gitBlobOid": "6fa73d0b4e631ca51fc39b5b146e595b6afc2004"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-libmsi-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-msitools-first.json",
+      "bytes": 1608,
+      "sha256": "5eb4eaac847abc0eed0299a5d941d72b30caa58f17eec4f669756f31a4a0051a",
+      "gitBlobOid": "6b89fef13305df637ffcd41b7d40ab8107b9d80a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-msitools-first.stderr.log",
+      "bytes": 396,
+      "sha256": "5a5685a5f500d318780be2c679f32211f0e5838e55ee834815b1b9a0817cf3dd",
+      "gitBlobOid": "b559fe9d9e9263ad55d302859ca5c723098a5439"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-msitools-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-data-first.json",
+      "bytes": 1610,
+      "sha256": "4d2a3e1cefef5a6683e7c1ce88f170ac0cf3110abde1b13131bb7dfeeee06034",
+      "gitBlobOid": "fc3a8818ba8ad9a0544b62acda195c1a1a646a4f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-data-first.stderr.log",
+      "bytes": 475,
+      "sha256": "8cd0ad1a5095656cd530d55be78ffed4ce2b1d878f16627512e96adcb1377572",
+      "gitBlobOid": "97d6ec10aebf3ecb090ac7258f73fd8e93ba9eab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-data-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-first.json",
+      "bytes": 1586,
+      "sha256": "a646f5b8e6157a8b33bd831114d8085619c7cece394fdd96bf00de314741a421",
+      "gitBlobOid": "ccca87e7bbf80081e354a531de58e4d35ed57606"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-first.stderr.log",
+      "bytes": 396,
+      "sha256": "3edcc40f91525c9ccd98dead3e713d4e3b0947567da290cc11ee301f262499f1",
+      "gitBlobOid": "5466644255805749ae31b39ca0c63bbd1b86e2f3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-download-wixl-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgcab-1.0-0-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgcab-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgsf-1-114-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgsf-1-114-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgsf-1-common-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libgsf-1-common-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libmsi-1.0-0-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-libmsi-1.0-0-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-msitools-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-msitools-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-wixl-data-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-wixl-data-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-wixl-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-extract-wixl-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgcab-1.0-0-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgcab-1.0-0-first.stdout.log",
+      "bytes": 136,
+      "sha256": "469059113cf262b7dbd40bb9ef682ec41ce649a8274d477a6729184fb4b23365",
+      "gitBlobOid": "84b89707468e0ade52d8a4851af05dc0f3d1ca26"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgsf-1-114-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgsf-1-114-first.stdout.log",
+      "bytes": 218,
+      "sha256": "2754bd19064a51eb50234de2571cdf3190b0c2dd5d38e71a48067ac1176bb40e",
+      "gitBlobOid": "273a2381c5a23f087762dba880b9d7d4a061a8ba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgsf-1-common-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libgsf-1-common-first.stdout.log",
+      "bytes": 71,
+      "sha256": "90d6db4a8c4ebb001dcead36a942fd14d87edb9b4820e2a065663ff5561406cf",
+      "gitBlobOid": "e02d69ec96b43b99b448b91aefb8cf67ce680e63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libmsi-1.0-0-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-libmsi-1.0-0-first.stdout.log",
+      "bytes": 152,
+      "sha256": "302641ed7c94e70f5795916f7590d5951b9cacb73c7287846059f233bc3c1567",
+      "gitBlobOid": "8a16ff7870f3699516b809d4b637afe9b82f7d16"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-msitools-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-msitools-first.stdout.log",
+      "bytes": 170,
+      "sha256": "98b9d40a3bca0e53a5cc9c8dd24b690fae91ec7f81d37eba2da07f61aa1b6da2",
+      "gitBlobOid": "8425f852f9d756265749f3e85278fba868a90db9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-wixl-data-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-wixl-data-first.stdout.log",
+      "bytes": 67,
+      "sha256": "6c57beddf5c64dcec4dbe62f60e81e3e9b968f1e3aeae90aeaa1856d6f76cbe3",
+      "gitBlobOid": "92977b1c1b4e263186af09d67f5570c3cedc8456"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-wixl-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-fields-wixl-first.stdout.log",
+      "bytes": 222,
+      "sha256": "aa82274703767d42ef5b6af4931d4ec4e3c43fa0fee0cec4c6068fd1de768d7f",
+      "gitBlobOid": "e2c56af854e05eb75f5b97e84838bbdd5b7dac4e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-input-first.json",
+      "bytes": 4066,
+      "sha256": "f2cedba8e8cff6dc4bce034861d92efaf8604475b993c965d0472645365bec12",
+      "gitBlobOid": "30419e319f963c61a671ec51c4d137e44353ebfd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msibuild-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msibuild-first.stdout.log",
+      "bytes": 1785,
+      "sha256": "ec91cb4cbee211683ac8615614da6588f77456a92cef09d9814fe6dd56d057f7",
+      "gitBlobOid": "0ac650d848ec93781bb5c620a49bd57c72fee0c0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msiextract-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msiextract-first.stdout.log",
+      "bytes": 1913,
+      "sha256": "43008a083d8a1a49a4427b1564383a1937cbe25f16607a307b37f29bf8cb9c9c",
+      "gitBlobOid": "bc0d4a7c6e3441e83268ac9f71ae9f55364161a5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msiinfo-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-msiinfo-first.stdout.log",
+      "bytes": 1785,
+      "sha256": "2ae9254819670ca2c2319da027e1154c3fad0c20e863c7c73d2ae2b218a9fb51",
+      "gitBlobOid": "f574355cc920df156699e4a636a3be48d67d4c84"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-wixl-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-ldd-wixl-first.stdout.log",
+      "bytes": 1913,
+      "sha256": "8de06cc69487934890b4a3be1dfb15b846965bd57224b992e60c1e328f0a42bb",
+      "gitBlobOid": "8665090bc89a5405ce68c95e4dd56170b7b857b2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-objdump-version-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-objdump-version-first.stdout.log",
+      "bytes": 288,
+      "sha256": "8feb2cb2830955a0c282e6abca2b512dcf52cb9380e6b0263a481bf1c6349d8d",
+      "gitBlobOid": "bf0a20ee2da8de52660061e01db46d7fa8c542a6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-preparation-first.json",
+      "bytes": 51702,
+      "sha256": "d955b2b42162c2f037ba2b1b94fa64e10dbda895cb0e8d66e09b888c0bd8c229",
+      "gitBlobOid": "0bc5c75154f1a8620255f2439f3ed121f502cf6b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-source-guard-first.json",
+      "bytes": 2048,
+      "sha256": "1c04ab703527411c08cdd108a587776b1a67ff54576956b791d5117e8b673e6b",
+      "gitBlobOid": "a277e26c781f9ff961def91e50c8433ba29afab7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-usage-msibuild-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-usage-msibuild-first.stdout.log",
+      "bytes": 406,
+      "sha256": "b1fc54726bb12bcfbb6639fbda6c2394d0f78a4dfcdaef7420e5b0a4df17f0ae",
+      "gitBlobOid": "ec692b4adc553dad1552eb7842943b4c2d099ff3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-msiextract-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-msiextract-first.stdout.log",
+      "bytes": 6,
+      "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2",
+      "gitBlobOid": "bafd071bcc371ac97d732fc4c0d812a0c6a77caf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-msiinfo-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-msiinfo-first.stdout.log",
+      "bytes": 33,
+      "sha256": "800355227b76826fac964bf4dfa464bac08a221935f22c6bf90f635df05100e3",
+      "gitBlobOid": "d8f34831a6439edfdb7145fcd7f5b1e451bbb12a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-wixl-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-version-wixl-first.stdout.log",
+      "bytes": 6,
+      "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2",
+      "gitBlobOid": "bafd071bcc371ac97d732fc4c0d812a0c6a77caf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-wrapper-wixl-version-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/msi-tools-wrapper-wixl-version-first.stdout.log",
+      "bytes": 6,
+      "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2",
+      "gitBlobOid": "bafd071bcc371ac97d732fc4c0d812a0c6a77caf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlobOid": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-compile-first.json",
+      "bytes": 9238,
+      "sha256": "f710e2a42341bdecdbb04596a7ebe8e49520a2a7ad9da2b715fb3a9eeff7f19b",
+      "gitBlobOid": "ab2519071d19015dd921c2a8ae5708f7e594abaa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n-implementation-freeze-second.json",
+      "bytes": 5777,
+      "sha256": "25d6f11c55b5d4e7638fdd36246794c7711ae6ea98dcbd09116082535ddc96e2",
+      "gitBlobOid": "1a90b22c604849b8de1ca4e068e17f70c111c932"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "gitBlobOid": "1c17aaffb23295fc207fbeed8087586b28a9e92c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "gitBlobOid": "16471ecbc3e2e0b98c7ef3ff8973f88511e67270"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "gitBlobOid": "cbde9ef55171b0c93266905c989f11258e960ef3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "gitBlobOid": "c7325e15d7ad6a5cc3cd48084905e84a280fab60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "gitBlobOid": "cb4aa51ab69c4747f91ff3c3b33b7437599e4a93"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "gitBlobOid": "6bbf02e684a3b0c1c46a93d125f2c83a5c2f9fc1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/n2-source/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 22760,
+      "sha256": "fb54da0bc8b4fc2c905c64a95e0df23ce1ec836e7d9814cf1560d94c57cb19dd",
+      "gitBlobOid": "d7c1302f1830ebe5d40776956c05069d97baba47"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/preservation-first.json",
+      "bytes": 3078,
+      "sha256": "36770218efb8ff700ff83315e88649e3b326ba33dca5a390cf3e1bd976e81a95",
+      "gitBlobOid": "b10a15d5056e18ef658c5f5a28275cbf1be3299d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/root-windows-gnu-full-first.command.json",
+      "bytes": 17322,
+      "sha256": "0346b5eb5a3632a60932a4552a8e500f0b8670290887cd1d74a8f38ef412b749",
+      "gitBlobOid": "c015da6cc3c27f4999117f3db8fb4017bfb3e115"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/root-windows-gnu-full-first.json",
+      "bytes": 109139,
+      "sha256": "37a64d413fc4a3560eac92fdeaa2a00644b28935036b85fb393956b120875b82",
+      "gitBlobOid": "59b1e59a6023818e73f5e552af1cb37c32faf2aa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/root-windows-gnu-full-first.stderr.log",
+      "bytes": 365,
+      "sha256": "651edf3b56e19cf9b91eecf6a2efe9f9f968e05df7e9249ed9015e84a144d43f",
+      "gitBlobOid": "944f24473ed8b972493b6c4577b45b3021ea0cca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/root-windows-gnu-full-first.stdout.log",
+      "bytes": 392,
+      "sha256": "d2a6f75c68ccac31234b9c2bbf0f8ce291271696cc11ddcc973047aea738c93c",
+      "gitBlobOid": "d96468f3ab5ae31aad36ede30c9c163a70008ec6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-file-proof-first-failure/windows-readonly-after-first-failure.json",
+      "bytes": 16755,
+      "sha256": "98458faa6fc47287478507bb137a96df007ac1a5a114644ee3db2f3ecf325bae",
+      "gitBlobOid": "e44ae6a29c72cb633e9842f6a6248e8d20c26d00"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-first-to-second-minimal.diff",
+      "bytes": 3008,
+      "sha256": "8f43b88a26294b646bd68fbd8d706c0d5b7ce0eb50c3ae0cdc1b2989e683fd4c",
+      "gitBlobOid": "08308cc01cbe854bd1aa7ab1238f22720e62ad46"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-helper-typecheck-first.stderr.log",
+      "bytes": 2105,
+      "sha256": "e37396e1d3f4f7254cb2f7ae535445915a9e8a608c77cce928938b4555aaaab3",
+      "gitBlobOid": "7d8e579e799b6c0189c8490882ff9b6273807992"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-helper-typecheck-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-first.json",
+      "bytes": 21902,
+      "sha256": "da0715d485985841af18f274ba28a6db9425f0edcc596877c392d206f89db036",
+      "gitBlobOid": "a91a93de9381f90e8001d34f3153677f6d97be0d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-producer-terminal-first.json",
+      "bytes": 1804,
+      "sha256": "35043829f5a53c286c8c9564e696865de2c8438fb755043208882eb5a23c9779",
+      "gitBlobOid": "3b2038105e3b4177db88dfe2dec45b2e69437640"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-qualification-first.json",
+      "bytes": 10715,
+      "sha256": "c2883954cb93bea75730c95a42b56430fe1759b162b078ab1648ce60089ad6d1",
+      "gitBlobOid": "085a9659154bb41774caf10d589bb96ba9071c22"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-strict-clippy-first.stderr.log",
+      "bytes": 5539,
+      "sha256": "c6af3cb9840a7039430ce2a413fc20d39db3bc1e993735b31d5cdbc40d06cae7",
+      "gitBlobOid": "697f93c13f76838246222815880f5002463b9fe6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-strict-clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-tests-first.stderr.log",
+      "bytes": 5407,
+      "sha256": "9c45e88854f0211b23029bef1a5ee73a1fd474145645e84ba44a89ce05bf299d",
+      "gitBlobOid": "dce203b85855a4d81aa78f9a15f2028a08a3fd7f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-host-tests-first.stdout.log",
+      "bytes": 219184,
+      "sha256": "315a7a25f007d1163d9f621e397b10137f969df48a8c0c08ee83e1d8de6b8dd3",
+      "gitBlobOid": "e07f0136a3c5a290cedce29083048b8aeb0c397f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-implementation-freeze-first.json",
+      "bytes": 4965,
+      "sha256": "6b06ac159c1a2b4176a942a239b0d4a07cc79e82b84d08c2d9d655ed6ecdbb0c",
+      "gitBlobOid": "9471d426a9d9bf42605761ccb7622ce98f1232eb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-implementation-freeze-second.json",
+      "bytes": 5777,
+      "sha256": "25d6f11c55b5d4e7638fdd36246794c7711ae6ea98dcbd09116082535ddc96e2",
+      "gitBlobOid": "1a90b22c604849b8de1ca4e068e17f70c111c932"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-implementation-freeze-third.json",
+      "bytes": 7015,
+      "sha256": "fbcdee53b97badcdb323e22cfb0649e851798d8756d5552833cf46f959c24131",
+      "gitBlobOid": "fb55281a4336fec024497c247ef78ac116f11456"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-nightly-workspace-strict-clippy-first.stderr.log",
+      "bytes": 3710,
+      "sha256": "f5d2fb145600c10a7bef691b483c067654228785c89661b23f5746c0ec2f06d0",
+      "gitBlobOid": "983e9e79af861cfae47425e91d67e7a17c884486"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-nightly-workspace-strict-clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-nightly-workspace-strict-clippy-third.stderr.log",
+      "bytes": 574,
+      "sha256": "a5615b064de39a2e6c27cfe7a46cac47cb3966b4f2a8e192b12ee96356b9e4eb",
+      "gitBlobOid": "edf2c596888691fef3ee3de4b7281eb304866f14"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-nightly-workspace-strict-clippy-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-bootstrap-objdump-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-bootstrap-objdump-first.stdout.log",
+      "bytes": 3285444,
+      "sha256": "fdcaba80a4ace915f9eb549598625638779bdf40541dfc4eca8e818bcd58035e",
+      "gitBlobOid": "d37907825abd87def56b6386c1c95018a5eefe14"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-bootstrap-objdump-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-bootstrap-objdump-third.stdout.log",
+      "bytes": 3285444,
+      "sha256": "1e94c4e811502f2506730cf1620e092c50278ec7c5d3c3184a13ccd86d015fe4",
+      "gitBlobOid": "580702f140ccb19c09636c8a7ce1f056b2e51148"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-installer-lifecycle-objdump-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-installer-lifecycle-objdump-first.stdout.log",
+      "bytes": 200800,
+      "sha256": "7497b2397184042da0b716192eeeac84fa477ff8a5a50b8a3ab084f4d82a01b8",
+      "gitBlobOid": "6ef03ac3008804d08428c7e196311b76d9fdd5ba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-installer-lifecycle-objdump-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-normal-fc-installer-lifecycle-objdump-third.stdout.log",
+      "bytes": 200641,
+      "sha256": "bc3b77aef31bcbf987bdefe4154dec6e60b3c107bc60a8034ebb55397c79ae79",
+      "gitBlobOid": "8f6a8c45b02bacad3a7dbb51cb647e252ddb0cba"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-producer-terminal-first.json",
+      "bytes": 1932,
+      "sha256": "3a7828aa67973acb603a5e81104a05e0a88d11decbd87ca2902fdf03f10e449a",
+      "gitBlobOid": "ec6c5655f2cf99171694d015243af04b33e08cb5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-producer-terminal-third.json",
+      "bytes": 2157,
+      "sha256": "e5a5041f66e359aef2e1e865760ebd2dce71d0c5a3e45f1fb6314f5801988ae9",
+      "gitBlobOid": "5093342c3fa7f4bb5cf1939b0e1203850c893dea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-release-first.json",
+      "bytes": 28909,
+      "sha256": "1da38a99c0b7f0eef9bc22d2f2502d9e6e7569ddcfc1312a9f316a166e86d892",
+      "gitBlobOid": "8e47fe2b58a11b6044d057790d3ef17da52af07b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-release-third.json",
+      "bytes": 28911,
+      "sha256": "858d3c62e4d3c4e6739a5763a77e26ccf368038a22d4ef150f5d284a080b5b07",
+      "gitBlobOid": "81a6fe8c3926be815b7bc0546234554dd7842d2b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-run-compile-first.py",
+      "bytes": 3489,
+      "sha256": "604a5a6f813c6812e50811b4a91a69e35cc2e447670ca314ea55b8a1fb96876f",
+      "gitBlobOid": "c222368ee3a09756142ded601f0777b433f5b114"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-run-host-first.py",
+      "bytes": 7534,
+      "sha256": "02954ba5206f7af9657774bc569003c7392d39e1b62af4f70815dafc452414dd",
+      "gitBlobOid": "115780aa807a34b97aaec321893c1d3295396b5b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-run-release-first.py",
+      "bytes": 5750,
+      "sha256": "d4056411306fb3d0d3e239e3f367c82185fa6788b8b0a40100242e4dc4c5f90c",
+      "gitBlobOid": "c477f7e7edac828ab4e6ee06d8aeba9ee5113048"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-run-release-third.py",
+      "bytes": 5749,
+      "sha256": "7a6b554793886c3c63fccf3971af09ebadd4ffe672c88fde22e0dec48c56157a",
+      "gitBlobOid": "8031a90312bc2e75898ace9f852cd611d7e58298"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-second-to-third-minimal.diff",
+      "bytes": 3752,
+      "sha256": "0f78e0de4dfe53796309cde566b686758913f70c6e89de5c1fea3ed88b0502c7",
+      "gitBlobOid": "10be255a26f9d527f8a59bd2ea619f3de6398a34"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "gitBlobOid": "1c17aaffb23295fc207fbeed8087586b28a9e92c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "gitBlobOid": "16471ecbc3e2e0b98c7ef3ff8973f88511e67270"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "gitBlobOid": "cbde9ef55171b0c93266905c989f11258e960ef3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "gitBlobOid": "c7325e15d7ad6a5cc3cd48084905e84a280fab60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "gitBlobOid": "cb4aa51ab69c4747f91ff3c3b33b7437599e4a93"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "gitBlobOid": "6bbf02e684a3b0c1c46a93d125f2c83a5c2f9fc1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-first/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 20754,
+      "sha256": "3b3b586dd918978c51825354dd1bbabb2b8c60417b79b5a7d1999f86cb3326f1",
+      "gitBlobOid": "e771ae3fdad39f37dca9437a303e1d2167e587d2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "gitBlobOid": "1c17aaffb23295fc207fbeed8087586b28a9e92c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "gitBlobOid": "16471ecbc3e2e0b98c7ef3ff8973f88511e67270"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "gitBlobOid": "cbde9ef55171b0c93266905c989f11258e960ef3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "gitBlobOid": "c7325e15d7ad6a5cc3cd48084905e84a280fab60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "gitBlobOid": "cb4aa51ab69c4747f91ff3c3b33b7437599e4a93"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "gitBlobOid": "6bbf02e684a3b0c1c46a93d125f2c83a5c2f9fc1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-second/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 22760,
+      "sha256": "fb54da0bc8b4fc2c905c64a95e0df23ce1ec836e7d9814cf1560d94c57cb19dd",
+      "gitBlobOid": "d7c1302f1830ebe5d40776956c05069d97baba47"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/Cargo.toml",
+      "bytes": 1645,
+      "sha256": "02f544d4ea42c291d9356781e8b79f3e709837feec440d54ccc1caed3fce68bf",
+      "gitBlobOid": "1c17aaffb23295fc207fbeed8087586b28a9e92c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9592,
+      "sha256": "59816a8ef6ef9af51e21095397985bf44c5176b90aa9a81a17bdf21a75f93d98",
+      "gitBlobOid": "16471ecbc3e2e0b98c7ef3ff8973f88511e67270"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 3198,
+      "sha256": "1d577d095b68c839895bb1dbc649f0b242c000e53874418d5670c0e31d571ceb",
+      "gitBlobOid": "cbde9ef55171b0c93266905c989f11258e960ef3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle/broker/manifest.rs",
+      "bytes": 8256,
+      "sha256": "3c6f9d6dd235447882ab58dcc62d9815d8367af403116a48a8dc45ed1cd82959",
+      "gitBlobOid": "c7325e15d7ad6a5cc3cd48084905e84a280fab60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 36478,
+      "sha256": "51c7383bea13c4d077d8f4e882e5acd4ce4d221825537ed65243d38bc70a6e2f",
+      "gitBlobOid": "cb4aa51ab69c4747f91ff3c3b33b7437599e4a93"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle/native/broker.rs",
+      "bytes": 38816,
+      "sha256": "977a4ab8fd8cf15ee400e30bb5a6badea67f773cf500ca4d791ec4286bd96a04",
+      "gitBlobOid": "6bbf02e684a3b0c1c46a93d125f2c83a5c2f9fc1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-after-third/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 24471,
+      "sha256": "8eccbed8b0c916aed63103d1e98f89db948b0578648289ca317f1841fe82dff4",
+      "gitBlobOid": "a554b234d632bc7b4fe00859fac5ef016ae8e87e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-before-first/crates/fc-windows/Cargo.toml",
+      "bytes": 1532,
+      "sha256": "b54f0c7b47107edb9a01eca9e35aec972fe12cd44cf53b6968d53af7e710cff8",
+      "gitBlobOid": "44e5a21958e924fa5701caab77b9f9bab4167271"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-before-first/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 9506,
+      "sha256": "5d21ab12b6acc03f942de3dff6c61b9abfb7fe8a1f6bcb50afed92f267e2b22e",
+      "gitBlobOid": "7081b3878d8aa7849518405165c0bcffdb7766ea"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-before-first/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 35343,
+      "sha256": "2fd1cfdb5ce742b70575ebf4548dbebd5b91fa3f4ad63bd6b8ead1ee41251c99",
+      "gitBlobOid": "4045de8ed0dbfc0499e8f6e53d6245ae555d2b9a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-source-minimal-first.diff",
+      "bytes": 77561,
+      "sha256": "7c90a24d17cbab0efe362f421825c9a307f6f6e1c32ec8f288f61e9fc79efdec",
+      "gitBlobOid": "ed1cb38eb8e11eecc76d9cc0193d710c3774b933"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-bins-first.stderr.log",
+      "bytes": 62,
+      "sha256": "90cd17589695a9408e03339923d9c1a773abb66817ada44612b284f0c374fc90",
+      "gitBlobOid": "7516252d037aa04e3d5d6840413001942591217a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-bins-first.stdout.log",
+      "bytes": 84842,
+      "sha256": "c6758f2d3911820354e1a2e195fc40780884d04daeaa1077a8174b9bae48b9d6",
+      "gitBlobOid": "29861aa1e2f85a465848e9b3eceb9879b0a4efbf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-bins-third.stderr.log",
+      "bytes": 62,
+      "sha256": "d1235ea4563620b53ef5bdd2da5f595fec9d54f9efb48376378c20547dd95e57",
+      "gitBlobOid": "f625e09531073a3937fc3dc16f5c8633617275e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-bins-third.stdout.log",
+      "bytes": 84842,
+      "sha256": "04cd4f956146b82acbf91f63ebf2e2a0bdf91a10b965d873166c24dbb5e33f67",
+      "gitBlobOid": "876307808db124438fcef6fc1d7bb8b35a0a2772"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-tests-first.stderr.log",
+      "bytes": 3389,
+      "sha256": "bec8f3bc39d14ebad61547dc412163bf7f99e4a564cbcd8fb7a23418fcf2dad1",
+      "gitBlobOid": "65753c02256a715b64368463bd6462633871bf67"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-tests-first.stdout.log",
+      "bytes": 102922,
+      "sha256": "89fef4d70ec73768ec9a6e3d413a8f8bc84315987c568bddb4a0d5700a960bb7",
+      "gitBlobOid": "85ef1be489678f05b2705d204f54c0b64e0bbf3d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-tests-third.stderr.log",
+      "bytes": 253,
+      "sha256": "bbbf5db68c48b20da6c25d72bba1c4d85799a319e79aaee74e1324f6d36e1f76",
+      "gitBlobOid": "e2839d130e1ca7fa7f03d7089e8ad5ed47b1bfd5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-stable-release-tests-third.stdout.log",
+      "bytes": 102819,
+      "sha256": "c42886718d75bc5b5fad0d2cf0cf1c3a1a3f1bc279c1d4f421b2c39c21264a59",
+      "gitBlobOid": "2c3e2abab5c3409dc00d471a6328fdf57bed0030"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-workspace-strict-clippy-first.stderr.log",
+      "bytes": 1209,
+      "sha256": "d079507dfcfb15fc6e0bc24a3f3434592a3c2246582ee1a2bfc84a5d0a2c49e4",
+      "gitBlobOid": "a87bb0e08bcd20c250414d6f0d4b66904e3e2000"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/n-workspace-strict-clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-authoring-first/.owner",
+      "bytes": 61,
+      "sha256": "7d73aed7547eb90f4a865a28d559c7b6856050478bb91289e00a63560845cf1e",
+      "gitBlobOid": "025eb1eadc5924e76b5fd4027911c76e9c4f81d1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-authoring-first/acceptance-matrix.json",
+      "bytes": 2906,
+      "sha256": "8bdb8b84c31929b609a5362011b1178c613eeaffb2c1c376340c1d8a58263814",
+      "gitBlobOid": "640dbf5d53a8a0f222dabee9d5d3f66d8b9cca54"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-authoring-first/authoring.md",
+      "bytes": 7113,
+      "sha256": "610b66d44c5fd3005b57a66963725a009e579247df6f2498cdca42f4e25d919a",
+      "gitBlobOid": "d114075e78e73a8d79fe303905994e816fbfcfe4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-authoring-first/engine-context-probe.md",
+      "bytes": 4176,
+      "sha256": "4bd5c8078b3645a4dad446a250ed93c2d6151b67db496acc746491522111894d",
+      "gitBlobOid": "92a2663fc36b6c2b895a388ac736b4dc30f7515d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-authoring-first/read-only-review.json",
+      "bytes": 4002,
+      "sha256": "3b1dd9b30972e516107dae6b545d02c488d4965d2be6ea69012307e9b3795c92",
+      "gitBlobOid": "5c090c3f2cf307ca6c4c965023ab560d6c287cdd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/next-maintenance-design-first/design.json",
+      "bytes": 13145,
+      "sha256": "9a64a0fcf061a0d06d2d9a8d706832d248de79d088086a141d4f10a11928d1d4",
+      "gitBlobOid": "780d7b6b5d3dfdbec472dc899ba4f297b26e5afb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/.owner",
+      "bytes": 62,
+      "sha256": "bb82d490fca6dc8e464a633c3381527fb528a6d98425a60904d80fa0d6565fe0",
+      "gitBlobOid": "641e5e6c393295bdb382f144e3a0d2c7080c0b57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/first-failure-qualification-first.json",
+      "bytes": 2103,
+      "sha256": "2157609ad1e3d83d5e1de55883d8414e7f32312f682014c35b7a4e55aa5e28bd",
+      "gitBlobOid": "8da8a38d6710724d60fa1666f83c3c05890abbbc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/powershell-first-to-second.diff",
+      "bytes": 1439,
+      "sha256": "741a0c910abf50cbcbd8188a2a295b112ea14a1635dd304bff1ece8dae715b5b",
+      "gitBlobOid": "03c0ca6c9b3ed7d75c75cf9b08aabf37d4dac102"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/preparation-first.json",
+      "bytes": 1806,
+      "sha256": "92a210eab32a65861c2bb19253458f705ea4e9e99132ba7f9d988f6863fe7578",
+      "gitBlobOid": "8983ef7a3653046a39cb33589fe5e430db242d37"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/preparation-second.json",
+      "bytes": 862,
+      "sha256": "a1faf54beb7e205e78a22576b3c88cf7269c30d7d3ec8ff321fcaad2e5493952",
+      "gitBlobOid": "0cfcd542fbd80329edbddcf4fbed08ecb48e5996"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/.owner",
+      "bytes": 68,
+      "sha256": "741883b93d8cc75d8bc51a9a6ae80565cac3a50d8eaeb167eadae521b18271b6",
+      "gitBlobOid": "a5c2fc6c258c1926f82119163221f0a753bb6971"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/01-create.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/01-create.stdout.log",
+      "bytes": 213,
+      "sha256": "24393cf0bc2f0392b5a5886a1da6451576b14c828e70b5d57145bd12a4ce98e6",
+      "gitBlobOid": "0aacbbbbeeb85cfca9c26ce97726ea0701432c50"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/02-scp.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/02-scp.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/03-scp.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/03-scp.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/04-discovery.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/04-discovery.stdout.log",
+      "bytes": 81,
+      "sha256": "65c79201f9fd63e75b43d9712dd39320473511d4644b4e1c9e646bcc07c385cd",
+      "gitBlobOid": "bfe927f8d57f235992fc1b2dc40cf408e8c53a07"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/05-contract-desktop51.stderr.log",
+      "bytes": 616,
+      "sha256": "9483ff7adc8edd3f35442799b1fc66dbbb2db2aa0cd5c867ebf3084cc7825535",
+      "gitBlobOid": "1f0211e857c53e765fa8f1c4fec09add96b270b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/05-contract-desktop51.stdout.log",
+      "bytes": 458,
+      "sha256": "1c1a55deb571c6575cbd2230f5ad315b08e9571cc73c90bb1a045d5e39fccc9e",
+      "gitBlobOid": "ee08a2dc64df86b0b6265bf7623beea2dcccf565"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/99-finally-cleanup.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-04080bfa0c88448ba1609e52576d2ba4/99-finally-cleanup.stdout.log",
+      "bytes": 213,
+      "sha256": "e2911ae25c7018f096244ae87efb33f1008f5a63450a55c25a21a2491904820c",
+      "gitBlobOid": "0d522a8d212b02f5d05455e2c9ca77dee6b914a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/.owner",
+      "bytes": 68,
+      "sha256": "4f94b70fc35e0afcc9cd0b12401b77801584873a1b185aae3c5bb04a79ba0c5c",
+      "gitBlobOid": "04bb80528d86f41336eeedc4add7510b82899756"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/01-create.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/01-create.stdout.log",
+      "bytes": 213,
+      "sha256": "438a34bbca2e5324a98199b3d03b4c374453e688a3e777259ab31f795173887f",
+      "gitBlobOid": "1e962c42d83161f3da1d6e0330b1b5a8d3f2d291"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/02-scp.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/02-scp.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/03-scp.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/03-scp.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/04-discovery.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/04-discovery.stdout.log",
+      "bytes": 81,
+      "sha256": "65c79201f9fd63e75b43d9712dd39320473511d4644b4e1c9e646bcc07c385cd",
+      "gitBlobOid": "bfe927f8d57f235992fc1b2dc40cf408e8c53a07"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/05-contract-desktop51.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/05-contract-desktop51.stdout.log",
+      "bytes": 3437,
+      "sha256": "8d838fe208712fd444ff6c63f5be39737911543cdffa33b1b2304a136dc76f6f",
+      "gitBlobOid": "b4a695193e004a62d2098c11216a5d3e205fd6e8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/06-post-source-hashes.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/06-post-source-hashes.stdout.log",
+      "bytes": 81,
+      "sha256": "65c79201f9fd63e75b43d9712dd39320473511d4644b4e1c9e646bcc07c385cd",
+      "gitBlobOid": "bfe927f8d57f235992fc1b2dc40cf408e8c53a07"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/99-finally-cleanup.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-8e757df82817410c8ad4b244ad64b168/99-finally-cleanup.stdout.log",
+      "bytes": 213,
+      "sha256": "7777fb256850bba5d26ee741abc9bc98dcb0a0c70d2a780a26897aa7ff712f19",
+      "gitBlobOid": "807f32a093b04f0b4647939846278253ecb9ed71"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-powershell-contract-first.py",
+      "bytes": 15049,
+      "sha256": "c48dcd8ec45c44534c1a57b29302172dc7ad02a19030ccf6f10b826d5d293ca5",
+      "gitBlobOid": "1fde12561b67099d7aa5782f57453eb6a02bff5a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/run-powershell-contract-second.py",
+      "bytes": 15139,
+      "sha256": "b03734a8be5207aeccb4f952e09a7ce8fa5bb447136edc916af6ca35e45144d1",
+      "gitBlobOid": "0b135c078a74b7fdcdd3bd045274293ee29fe0ee"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/windows-powershell-contract-first.json",
+      "bytes": 28080,
+      "sha256": "27c43f4fd5624a982fa2b72c041694e3a3a647ec4a57055ec0b2052d836507bd",
+      "gitBlobOid": "61813023dd92224c351662c7479a6f1415deeca5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/powershell-contract-preparation-first/windows-powershell-contract-second.json",
+      "bytes": 40667,
+      "sha256": "3ef8b20183e35217c840436000ee8658fbac68473dd103874f5dc35022b1bdb9",
+      "gitBlobOid": "44da4b6f0df052424e05195470693e562ed41cc8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/prepare-msi-tools-local-first.py",
+      "bytes": 7347,
+      "sha256": "65467c87e574e991b778dae2bf0c188bb3094f948efc845f69a170b8e1865ebf",
+      "gitBlobOid": "c5a15c6812c4985647e975ceb39f02a60944a33d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/producer-n2-compiled-originals-first/retention-first.json",
+      "bytes": 11181,
+      "sha256": "01944c668aeb532b05f3ca074e107b8abf163ff1bbd4ccb4905800212d07f0a7",
+      "gitBlobOid": "dfc4815d383c0e17fe4e63d05bac79534b37bf90"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-audit-windows-readonly-first.py",
+      "bytes": 9881,
+      "sha256": "92f82414d4a83428ca57174343255c6080760a2b84a80056a9142670fd37f230",
+      "gitBlobOid": "9d9ac8eaa93e0b1ea97e60e89ddc27c5550d77e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-format-check-first-return.json",
+      "bytes": 424,
+      "sha256": "231367f06f63ab19af841da86571252310af8361d40ef28a08f28a5a75649c9b",
+      "gitBlobOid": "d2999c3a3b5adcda4b08ba214a392c1b15c5145d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-main-integrated-source-first.json",
+      "bytes": 102059,
+      "sha256": "9f5c25eb103e3b38aa9b5cbf356767b3d73d01adaab47186b14ab39ec18f68fe",
+      "gitBlobOid": "b717be5b39e6da9a00b1df874416ab673160735f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-native-child-attribution-first.json",
+      "bytes": 3110,
+      "sha256": "2091d3213b7883a5b66a3bb39f2606fb8492da22b7fc5bde168e226ead1e0993",
+      "gitBlobOid": "5caaa129c371488347b081b574b3e70788b048f3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-native-harness-metadata-third.jsonl",
+      "bytes": 792,
+      "sha256": "592165091ee4defa38f31300274469dc310d84ee29c44637760791dfc76df258",
+      "gitBlobOid": "0a37ccda21701df2b89b551b704428c3867a6b92"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-native-harness-third-terminal-qualification.json",
+      "bytes": 1426,
+      "sha256": "408c3027d37d424f9e5de590ecc9a791a3ae1e70db3b412b7f51592a10368636",
+      "gitBlobOid": "cc26acc1ed9b4381c10939e3cbbc6bbdbb57f137"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-parse-native-children-first.py",
+      "bytes": 4505,
+      "sha256": "8dfd6c4731f25a4e981a985b7c85566889e6100e83f49180e70555a29ee69a62",
+      "gitBlobOid": "6fcfccd4485dc1778ef9d0796caac4689bbc8db5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-record-final-readonly-first.py",
+      "bytes": 1276,
+      "sha256": "1350f2c45f2e1825d075a80c0577bd6ea6d16411f0e8233cb7b806d41ac6d7b3",
+      "gitBlobOid": "36dcde32e2d154cf4668671096ea2f76ada34502"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-run-gnu-runtime-first.py",
+      "bytes": 6154,
+      "sha256": "ea4f768f4876acc94aaf852879ca14d77ad993c4f1b4f5f950f9fe791e9ed229",
+      "gitBlobOid": "8a744647ba093a0e81c2529454be72fd078ead49"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-run-gnu-runtime-second.py",
+      "bytes": 6158,
+      "sha256": "223b4a687ba3a583d30f7d114b8be74eff1315ac02fd4aa77765bd6ee12f9136",
+      "gitBlobOid": "871da56bb59dfc1ec2fab2001e8ed1f1288fb131"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-run-gnu-runtime-third.py",
+      "bytes": 6663,
+      "sha256": "9bba5e6ad480e2251c45bc427ef15029a30b2ac6e21678f7ae60b6d40d969be2",
+      "gitBlobOid": "d4fadf86959db40951d641ef273df7394f2e2e55"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-run-native-harness-third.py",
+      "bytes": 3857,
+      "sha256": "12ba83eaefbc67507b7dae05695a3a404a7a2dc7991a28a742c670eeb8afd350",
+      "gitBlobOid": "27bfc6370ff43a8473013af493917636fed90772"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-win7-readiness-lint-first/fix-first.json",
+      "bytes": 620,
+      "sha256": "2fac2c2b783771886844331078bea1eee3c7ac75603b64cf21ca73d4013b4e8e",
+      "gitBlobOid": "da42eaf9eeb137319082dabd9bfa456938e55831"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-win7-readiness-lint-first/minimal.diff",
+      "bytes": 485,
+      "sha256": "5c33aa2d5b28a35a44a06c738942e25095efa51b1bd4421ba42d53ed58cb8748",
+      "gitBlobOid": "ebebf08be14fa6e720c8b07babca49a4d97c27c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-win7-readiness-lint-first/web_editor.after.rs",
+      "bytes": 25289,
+      "sha256": "541c7743fff130df55d36675cdf4c57a13218db2b7ebc21a531239eeffa2f627",
+      "gitBlobOid": "470f407a861a24c9c9a65038c633d3e3869948de"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-win7-readiness-lint-first/web_editor.before.rs",
+      "bytes": 25255,
+      "sha256": "8d2f4a41a6a3361069f9f4120a1e7116e9e011ff25d807ca8ec8229e7134fde3",
+      "gitBlobOid": "9d7b49432bfbf6a9244268c13cc2becda23ff8b1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-first.command.json",
+      "bytes": 17322,
+      "sha256": "0346b5eb5a3632a60932a4552a8e500f0b8670290887cd1d74a8f38ef412b749",
+      "gitBlobOid": "c015da6cc3c27f4999117f3db8fb4017bfb3e115"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-first.json",
+      "bytes": 109139,
+      "sha256": "37a64d413fc4a3560eac92fdeaa2a00644b28935036b85fb393956b120875b82",
+      "gitBlobOid": "59b1e59a6023818e73f5e552af1cb37c32faf2aa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-first.stderr.log",
+      "bytes": 365,
+      "sha256": "651edf3b56e19cf9b91eecf6a2efe9f9f968e05df7e9249ed9015e84a144d43f",
+      "gitBlobOid": "944f24473ed8b972493b6c4577b45b3021ea0cca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-first.stdout.log",
+      "bytes": 392,
+      "sha256": "d2a6f75c68ccac31234b9c2bbf0f8ce291271696cc11ddcc973047aea738c93c",
+      "gitBlobOid": "d96468f3ab5ae31aad36ede30c9c163a70008ec6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-third.command.json",
+      "bytes": 29688,
+      "sha256": "fec8be2067db62892afc3babf8cc178e122130ccaa96e939fcdb85da122a1cab",
+      "gitBlobOid": "13d8321c114802124d189d323677664fed53366f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-third.json",
+      "bytes": 224052,
+      "sha256": "0f306c60555b316e48b6046194c172926a46b4e7df82549c2e48ab457c27696f",
+      "gitBlobOid": "da4790bb6cfe3548778d8506815de6a50286e398"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-gnu-full-third.stdout.log",
+      "bytes": 996,
+      "sha256": "30825686c2c573f9867d0c6640a66bf7a75aeab2eeb57989b6d466bb91764267",
+      "gitBlobOid": "05aae9b8ff3c8036c2ec00a3c6274cc924ac2678"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-native-harness-third.command.json",
+      "bytes": 1779,
+      "sha256": "066a8cf08baa9f7aee8ad06d94ffc098500bfadcc82a768d60ff27aeee7a6338",
+      "gitBlobOid": "d7cdf8f80b76b5ccd936f91ef258691a8b2e0e6a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-native-harness-third.json",
+      "bytes": 49302,
+      "sha256": "a7366a2bac75aeb07beaf587c4a18a038ad93773af4794ef209c46f2e8e1626f",
+      "gitBlobOid": "cca8cf0c33cecab7a5b699b90afc0d79399740ca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-native-harness-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/root-windows-native-harness-third.stdout.log",
+      "bytes": 130,
+      "sha256": "5f40de12a0745b5fcf93632d87afaf8ea229f77d71f690ae5e2e224b178b4da0",
+      "gitBlobOid": "d2e9db037e6f0146a4defab132a9cf795cbc6240"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/triage-effects-first/.owner",
+      "bytes": 45,
+      "sha256": "6e6b5cb893daf9deac3b9c3388974869869add79ab8ab35cc0b7cddc0f32ef8c",
+      "gitBlobOid": "78d61b1d686dd9fbe20b70912520d4116b99c19f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/triage-effects-first/triage-first.json",
+      "bytes": 4127,
+      "sha256": "d0da1ded54ee2c3d1412452e21eeef81d06f715c2816e0d8b46a7a85dec2fd3d",
+      "gitBlobOid": "2cc21dacb5a0f05bb3db2d30d48266318eeb8c35"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/windows-readonly-after-first-failure.json",
+      "bytes": 16755,
+      "sha256": "98458faa6fc47287478507bb137a96df007ac1a5a114644ee3db2f3ecf325bae",
+      "gitBlobOid": "e44ae6a29c72cb633e9842f6a6248e8d20c26d00"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/windows-readonly-final-first.json",
+      "bytes": 16755,
+      "sha256": "eb279c7fd15815a4a5f60b34472114abab983d62ea5ec5678cef01fd7e6d8387",
+      "gitBlobOid": "b5dfac547bb2f0677bb66ac6c0a54ddafa9bb1a9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/windows-readonly-operation-first.json",
+      "bytes": 1083,
+      "sha256": "99e62deb733dd518f8c11494dd30a53b3f5f9bffa8490bf24ef00aea3e827f16",
+      "gitBlobOid": "472a5204421bf5107942c13ba78814ef30b9a166"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/windows-readonly-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-installer-broker/windows-readonly-operation-first.stdout.log",
+      "bytes": 484,
+      "sha256": "350997f3ee5eaa9c97f549cff46be6dc166f9fcd81f209e98e698c4b8efe2f82",
+      "gitBlobOid": "81a29bb9c382d78e6f7a7e77001cbd17166c5ba7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-record-archive-first-to-second.diff",
+      "bytes": 1564,
+      "sha256": "14538f1e87ffeb91dc20539163e13d92669ddc1f0b68d57800b920c6b5c1ddc6",
+      "gitBlobOid": "162a849778beee558170ce9dd6f3787d19c71e18"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-record-archive-first.py",
+      "bytes": 2878,
+      "sha256": "21d181e17683ce11fab5af6c0689c3b4a116230c0d214e7f5e4eb4c0ae6d4c5e",
+      "gitBlobOid": "eab73c5f5f02c947ef2c6ee76637dffcea92ad53"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-record-archive-second.py",
+      "bytes": 3503,
+      "sha256": "4d6bef77a503f1c4527e26a1e4621226584e617e50499ea59f01979e3baa8653",
+      "gitBlobOid": "734df2686020f22467c196e4901e4d3fc4707037"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-verify-archive-bytes-first.py",
+      "bytes": 6799,
+      "sha256": "a3f7e6d2f283355c08c583a788fa6c8d1b779f758248891f34476b3d4ebc3277",
+      "gitBlobOid": "702898ce0e8e9df7a18f29004b45d60a2f680232"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round73-verify-git-bytes-first.py",
+      "bytes": 7894,
+      "sha256": "6bf27afa6f5e290ab99f4c24c8b411ba053ae1cc6c3b1cb19e0371f26925d40d",
+      "gitBlobOid": "bf999fc76ec4bd3dd8378a88ca4450787a50e15b"
+    }
+  ],
+  "fileCount": 330,
+  "bytes": 11457458,
+  "cargoLock": "UNCHANGED_GUARD_ONLY_NOT_CHANGED_PATH",
+  "scope": "Exactly15 frozen candidate source files, four reviewed documentation/attributes paths, complete R73 archive, and explicitly supplied R73 outside controller/proof paths. No staging/commit/network/Windows/Cargo/key-content access or acceptance expansion."
+}

@@ -1,0 +1,15 @@
+--- cleanup-r73-first.py
++++ cleanup-r73-second.py
+@@ -324,7 +324,11 @@
+     for root, marker in OWNERS.items():
+         need(stat.S_ISDIR(root.lstat().st_mode) and regular(root / '.owner') == marker, 'owner mismatch')
+         need(inventory(root) == roots[root]['entries'], 'unknown final inventory delta: ' + str(root))
+-    need({r['path'].split('/')[0] for r in roots[ROOT]['entries']} == {'.owner', 'evidence', 'worktree', 'target', 'tools', 'host-scratch-first'}, 'unknown root child')
++    host = read_json(EVIDENCE / 'n-host-first.json')
++    need(host['scratchRoot'] == str(ROOT / 'host-scratch-first')
++         and host['scratchCleanup'] == 'PASS_ONLY_EXACT_OWNED_MARKER_AND_EMPTY_ROOT_REMOVED', 'Host scratch cleanup not proved')
++    need(not os.path.lexists(ROOT / 'host-scratch-first'), 'Host scratch unexpectedly remains')
++    need({r['path'].split('/')[0] for r in roots[ROOT]['entries']} == {'.owner', 'evidence', 'worktree', 'target', 'tools'}, 'unknown root child')
+     for terminal in plan['terminalReports']:
+         path = relative(EVIDENCE, terminal['path'])
+         value = read_json(path, terminal['sha256'])

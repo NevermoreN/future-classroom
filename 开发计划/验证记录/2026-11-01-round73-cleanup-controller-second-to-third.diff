@@ -1,0 +1,41 @@
+--- cleanup-r73-second.py
++++ cleanup-r73-third.py
+@@ -332,8 +332,36 @@
+     for terminal in plan['terminalReports']:
+         path = relative(EVIDENCE, terminal['path'])
+         value = read_json(path, terminal['sha256'])
+-        need(value.get('status') == terminal['status'] and terminal['status'].startswith('PASS')
+-             and not any(x in terminal['status'] for x in ('RUNNING', 'PREPARED', 'PENDING', 'INTERRUPTED')), 'nonterminal final controller')
++        need(value.get('status') == terminal['status'], 'terminal status differs from original')
++        if terminal['path'] == 'n-host-first.json' and terminal['status'] == 'FAIL':
++            need(terminal['sha256'] == 'da0715d485985841af18f274ba28a6db9425f0edcc596877c392d206f89db036', 'only exact original Host failure is qualified')
++            need(value['sourceUnchanged'] is True and value['sourceBefore'] == value['sourceAfter']
++                 and value['testHarnessCount'] == 22 and value['totalPassed'] == 989
++                 and value['scratchCleanup'] == 'PASS_ONLY_EXACT_OWNED_MARKER_AND_EMPTY_ROOT_REMOVED', 'Host failure shape changed')
++            need(len(value['steps']) == 2, 'Host original two steps required')
++            for step, expected in zip(value['steps'], [('tests', 'PASS', 0), ('strict-clippy', 'FAIL', 101)]):
++                need((step['name'], step['status'], step['exitCode']) == expected
++                     and step['actualExit'] is True and step['timedOut'] is False, 'Host original actual exits not proved')
++            attribution = plan['hostFailureAttribution']
++            need(attribution['path'] == 'n-host-qualification-first.json'
++                 and attribution['sha256'] == 'c2883954cb93bea75730c95a42b56430fe1759b162b078ab1648ce60089ad6d1', 'exact readonly Host attribution required')
++            qualified = read_json(relative(EVIDENCE, attribution['path']), attribution['sha256'])
++            need(qualified['status'] == 'HOST_TEST_PASS_HOST_STRICT_CLIPPY_FAIL_PREEXISTING_WINDOWS_CALLER_CFG'
++                 and qualified['originalReport'] == {'path': terminal['path'], 'sha256': terminal['sha256']}
++                 and qualified['sourceUnchangedSixteenInputs'] is True
++                 and qualified['scratchRootAbsent'] is True
++                 and len(qualified['primaryDiagnostics']) == 6 and len(qualified['diagnosticFiles']) == 4, 'Host attribution does not match original six diagnostics')
++            producer = read_json(EVIDENCE / 'n-host-producer-terminal-first.json',
++                                 '35043829f5a53c286c8c9564e696865de2c8438fb755043208882eb5a23c9779')
++            need(producer['status'] == 'FAIL_HOST_CLIPPY_CONTROLLER_ACTUAL_EXIT1_REAPED'
++                 and producer['report'] == qualified['originalReport']
++                 and qualified['actualParentTerminal'] == {'path': 'n-host-producer-terminal-first.json', 'sha256': '35043829f5a53c286c8c9564e696865de2c8438fb755043208882eb5a23c9779'}
++                 and producer['actualToolTerminal']['exitCode'] == 1
++                 and producer['actualToolTerminal']['runningSessionReturned'] is False, 'Host original producer not physically terminal')
++        else:
++            need(terminal['status'].startswith('PASS')
++                 and not any(x in terminal['status'] for x in ('RUNNING', 'PREPARED', 'PENDING', 'INTERRUPTED')), 'nonterminal final controller')
++    need(any(row['path'] == 'n-host-first.json' and row['status'] == 'FAIL' for row in plan['terminalReports']), 'original Host FAIL must be honestly listed and qualified')
+     need(len({row['path'] for row in plan['terminalReports']}) >= 3, 'finite acceptance, build, host terminal reports required')
+     reports = verify_sources(committed)
+     verify_tools(reports)
