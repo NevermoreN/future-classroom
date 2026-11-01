@@ -1,0 +1,147 @@
+{
+  "status": "FINITE_COMPLETED_OWNED_FIXTURE_REMOVAL_AND_NORMAL33_JOINT_EVIDENCE",
+  "candidate": "33c11f5e41cce727746aeb5b5801b0e87eaf0f41",
+  "oldPayloadSource": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+  "coreReports": [
+    {
+      "path": "owned-removal-native-runtime-first/report.json",
+      "bytes": 112335,
+      "sha256": "6d4ff522a995bf1e2012986393d84da8424a85bb063dd6a013c4e8da5098c000"
+    },
+    {
+      "path": "owned-removal-runtime-first/report.json",
+      "bytes": 74653,
+      "sha256": "a252752d124c4053db9c618135c0b5c2b326ec655e96419de6ac4ac87fc36b2c"
+    },
+    {
+      "path": "owned-removal-cleanup-first/report.json",
+      "bytes": 35647,
+      "sha256": "8c9daab45c4b2e38944d41bbe482536ae1252eac71dc9556a5f384b1b6a1013e"
+    },
+    {
+      "path": "controlled-product-runtime-second/report.json",
+      "bytes": 127785,
+      "sha256": "04671228fafe69c3eb799640dce2eae2802efc847838df4d81a5392bebb89de9"
+    },
+    {
+      "path": "guard-owned-removal-clippy-feature-first/report.json",
+      "bytes": 170028,
+      "sha256": "6c20f4490f74bb9d2ba58b521d15910f49398a8d0dae1647247513c9b28689bc"
+    },
+    {
+      "path": "guard-owned-removal-clippy-feature-second/report.json",
+      "bytes": 170060,
+      "sha256": "24ebd6b0f9acd94c04e90aeb03ba12d2fcab280afc38d9331bfa65c2884831d4"
+    },
+    {
+      "path": "guard-owned-removal-clippy-default-first/report.json",
+      "bytes": 170000,
+      "sha256": "eb47a9de98338e9a73ef3c44bb28bbed86b3e30bcebba397f400be2df4ff4833"
+    },
+    {
+      "path": "guard-owned-removal-build-second/report.json",
+      "bytes": 170706,
+      "sha256": "75e25c7c90cb8e9ddc73b71da6f3fd46ff0ac53dadea2c22e8bd97911fc8156c"
+    },
+    {
+      "path": "pending-readonly-runtime-first/report.json",
+      "bytes": 24748,
+      "sha256": "d4cf8e4b8f23133fb6f096c8083e336f2f9419dc2e0baf558c820acc056bd232"
+    },
+    {
+      "path": "pending-readonly-retrieval-first/report.json",
+      "bytes": 18759,
+      "sha256": "8a51d4c50426fded71da57455243142c8a9858ec005d3ee701c76515e83ff78f"
+    },
+    {
+      "path": "owned-removal-source-preservation-first/source-preservation-first.json",
+      "bytes": 2999,
+      "sha256": "295fd527faa8508f27cf4a2eb8cd0a897d280f6ca537f00729264017384157a0"
+    },
+    {
+      "path": "owned-removal-candidate-sync-first.json",
+      "bytes": 432,
+      "sha256": "1e0a26efc5d165e0783d842b815db974cb6cebb0d38374f15b1a118b9744bc13"
+    },
+    {
+      "path": "setup-msvc-monitor-first/report.json",
+      "bytes": 2604,
+      "sha256": "0ddf5c866da9ced897ea026e5f1411902dbd1b117f8cb030aa60808e936e7c5a"
+    },
+    {
+      "path": "setup-msvc-monitor-second/report.json",
+      "bytes": 3686,
+      "sha256": "de700c5100dbdca97b96adec1bd7f8b542e06070ee412a7af19631ae1d8266b3"
+    },
+    {
+      "path": "setup-msvc-modern-download-first/reports/result.json",
+      "bytes": 48303,
+      "sha256": "13a881ce8099f739bce1229a65d66ab2ea0aeff50d4d08f965ea2ba4861b513a"
+    },
+    {
+      "path": "setup-msvc-win7-download-first/diagnostics/logs/clippy.result.json",
+      "bytes": 850,
+      "sha256": "0688f5d9091b09ddd2794d4993200c5a33efe642f327ba2b5a9c449a0d81a35a"
+    }
+  ],
+  "core69": {
+    "scopes": {
+      "controlled": 6,
+      "lifecycle": 69
+    },
+    "overlap": "69 includes6; component scope distinct from joint product runtime"
+  },
+  "PendingCaptureHistory": {
+    "originalStatus": "FAIL_OR_UNKNOWN_RETAIN_NEW_CAPTURE_NONCE",
+    "retrievalStatus": "PASS_RETRIEVAL_AND_EXACT_CAPTURE_NONCE_CLEANUP_ORIGINAL_OPERATION_REMAINS_FAIL",
+    "originalFailurePreserved": true
+  },
+  "explicitRemoval": {
+    "status": "PASS_GNU_WIN11_EXPLICIT_REMOVAL_COMPLETE_DOWNLOAD_OLD_END_UNKNOWN",
+    "BExit": 0,
+    "newNativeTransactions": 2,
+    "oldEnd": "UNKNOWN_UNCHANGED",
+    "newNativeAuditStage": "RemovalAuthorized plus actual B0/fullAbsent and PendingAbsent; not audit-only deletion proof",
+    "filesDownloaded": 21,
+    "cleanupSeparate": "PASS_EXACT_EMPTY_GATE_AND_BOTH_DOWNLOADED_NONCES_CLEANED"
+  },
+  "normal33Joint": {
+    "status": "PASS_GNU_WIN11_DEV_CONTROLLED_PRODUCT_CLOSURE_AND_EXACT_SCRATCH_CLEANUP",
+    "phases": [
+      "install",
+      "repair after exact LICENSE damage",
+      "uninstall"
+    ],
+    "allThreeActualB0": true,
+    "all14Restored": true,
+    "finalProductPendingGateAbsent": true,
+    "downloadedFiles": 30,
+    "nonceKnownAbsent": true
+  },
+  "historicalClippy": {
+    "featureFirstActualExit": 101,
+    "featureSecondActualExit": 0,
+    "defaultFirstActualExit": 0,
+    "oldHostFailuresIndependent": true
+  },
+  "CI7cScope": "Modern compile checks passed/runtime NOT_RUN; Win7 actual lint failure retained. Separate source7c, not a33c official product release. Only finite metadata and useful official diagnostic reports; ZIP/PE identity only.",
+  "oldFullBatchReference": {
+    "path": "开发计划/验证记录/2026-11-02-round80-controlled-setup/evidence-originals-first.tar.gz",
+    "sha256": "f49494a0d6b540724ba3bf66b0b23610e3c69952a6d1e043d3337bcf48a07345",
+    "originalThreeStageFail": "Retained unchanged in that previous archive; not reclassified or duplicated wholesale."
+  },
+  "notClaimed": [
+    "No old unknown transaction settlement",
+    "No general production crash recovery/ARP proof",
+    "No Win7/Win10 actual runtime or official hostedMSVC product joint proof",
+    "No active a470 monitor/W2/postwrite scan or archival"
+  ],
+  "actions": {
+    "Windows": false,
+    "Cargo": false,
+    "activeWorktreeRead": false,
+    "sourceDeletion": false,
+    "progressWritten": false,
+    "commitPush": false
+  }
+}

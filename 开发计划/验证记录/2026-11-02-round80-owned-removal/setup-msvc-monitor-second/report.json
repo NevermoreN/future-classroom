@@ -1,0 +1,99 @@
+{
+  "status": "PASS_READONLY_MODERN_CI_TERMINAL_OBSERVATION",
+  "fixed_source_sha": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2",
+  "run_id": 41359217299,
+  "job_id": 125005763332,
+  "github_status": "completed",
+  "github_conclusion": "success",
+  "event": "workflow_dispatch",
+  "run_attempt": 1,
+  "observation_start_utc": "2026-11-01 23:10:01 UTC",
+  "terminal_job_response_utc": "2026-11-01 23:11:13 UTC",
+  "elapsed_to_terminal_response_seconds": 71.556,
+  "maximum_observation_seconds": 900,
+  "original_workflow_budget_unchanged": true,
+  "all_actual_steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1
+    },
+    {
+      "name": "Create this run's bounded evidence directory",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3
+    },
+    {
+      "name": "Compile MSVC workspace and collect original evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4
+    },
+    {
+      "name": "Clean only this ephemeral run's build and tool roots",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5
+    },
+    {
+      "name": "Upload original logs, metadata and compiled test executables",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13
+    }
+  ],
+  "html_url": "https://github.com/NevermoreN/future-classroom/actions/runs/41359217299",
+  "run_logs_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/runs/41359217299/logs",
+  "job_logs_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/jobs/125005763332/logs",
+  "artifacts": [
+    {
+      "id": 13105341240,
+      "name": "future-classroom-msvc-i686-7c135c3dcb2dd4e78f70f39b97fb53746454fec2-41359217299-1",
+      "size_in_bytes": 45729175,
+      "url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13105341240",
+      "archive_download_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13105341240/zip",
+      "expired": false,
+      "created_at": "2026-11-01T23:11:06Z",
+      "expires_at": "2026-11-15T23:11:03Z",
+      "updated_at": "2026-11-01T23:11:06Z",
+      "digest": "sha256:9429c51e729d67381a19412048adfdc0941caf930b220b02dee0b27447cc7998",
+      "workflow_run": {
+        "id": 41359217299,
+        "repository_id": 1438736199,
+        "head_repository_id": 1438736199,
+        "head_branch": "implementation/r80-controlled-repair",
+        "head_sha": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2"
+      }
+    }
+  ],
+  "artifact_bytes_not_downloaded": true,
+  "source_or_ref_not_modified": true,
+  "no_windows_cargo_or_pe_execution": true,
+  "prior_observation_freeze_sha256": "4c5bdc6a1dff5846c30545514f12902bdd8b29def48ead028521c53724ff5947",
+  "boundaries": [
+    "Modern original compile-only CI passed for fixed source 7c135c3.",
+    "Win7 original run41359220317 remains failure under pinned nightly Clippy; second observer did not retry or mutate it.",
+    "Recovery candidate 33c11f5 and later minimal lint-fix preparation are separate sources.",
+    "No Win7/Win10/Win11 runtime or product integration acceptance is inferred from CI compile success."
+  ]
+}

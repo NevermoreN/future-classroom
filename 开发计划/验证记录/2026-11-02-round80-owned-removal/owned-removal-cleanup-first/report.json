@@ -1,0 +1,960 @@
+{
+  "status": "PASS_EXACT_EMPTY_GATE_AND_BOTH_DOWNLOADED_NONCES_CLEANED",
+  "binding": {
+    "recoveryReport": {
+      "path": "/tmp/fc-round80-controlled-repair/owned-removal-runtime-first/report.json",
+      "bytes": 74653,
+      "sha256": "a252752d124c4053db9c618135c0b5c2b326ec655e96419de6ac4ac87fc36b2c"
+    },
+    "oldReport": {
+      "path": "/tmp/fc-round80-controlled-repair/controlled-product-runtime-first/report.json",
+      "bytes": 123135,
+      "sha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+    },
+    "oldInventoryCanonicalSha256": "3dbdb252b9a6d100bea93f7123de7e86cb8b3948921f39b9cec64befe5c65b17",
+    "newAudit": {
+      "path": "/tmp/fc-round80-controlled-repair/owned-removal-runtime-first/download/FutureClassroom-r80-owned-removal-0409398be71c42d981dc3debc99a8505/explicit-removal-audit.v1",
+      "bytes": 1252,
+      "sha256": "11b0ab692200720b623d75e0576184b9286cf4edf203e5f08fbd1254c3a94470"
+    },
+    "localDownloadReplay": "PASS_BOTH_COMPLETE_ORIGINALS",
+    "oldEnd": "UNKNOWN_UNCHANGED"
+  },
+  "oldEnd": "UNKNOWN_UNCHANGED",
+  "actualExit": 0,
+  "originalLocalParentReaped": true,
+  "remoteReturnUnknown": false,
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "future-classroom-win11",
+    "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA7ACQAbwBrAD0AJAA/ADsAJABjAG8AZABlAD0ARwBlAHQALQBWAGEAcgBpAGEAYgBsAGUAIAAtAE4AYQBtAGUAIABMAEEAUwBUAEUAWABJAFQAQwBPAEQARQAgAC0ARQByAHIAbwByAEEAYwB0AGkAbwBuACAAUwBpAGwAZQBuAHQAbAB5AEMAbwBuAHQAaQBuAHUAZQA7AGkAZgAoACQAbgB1AGwAbAAtAG4AZQAkAGMAbwBkAGUAKQB7AGUAeABpAHQAIAAoAFsAaQBuAHQAXQAkAGMAbwBkAGUALgBWAGEAbAB1AGUAKQB9ADsAaQBmACgAJABvAGsAKQB7AGUAeABpAHQAIAAwAH0AOwBlAHgAaQB0ACAAMQA="
+  ],
+  "budgetSeconds": 600,
+  "noRetry": true,
+  "originalLocalPid": 16243,
+  "phase": {
+    "status": "PASS_EXACT_OWNED_REMOVAL_TWO_NONCES_AND_ORIGINAL_EMPTY_GATE_CLEANED",
+    "oldEnd": "UNKNOWN_UNCHANGED",
+    "newRecovery": "ROOT_BOUND_ACTUAL_PASS_ALREADY_DOWNLOADED",
+    "gateRetirementAttempted": true,
+    "rootsDeleted": [
+      {
+        "kind": "old",
+        "readback": {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067",
+          "status": "KNOWN_ABSENT"
+        }
+      },
+      {
+        "kind": "new",
+        "readback": {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-owned-removal-0409398be71c42d981dc3debc99a8505",
+          "status": "KNOWN_ABSENT"
+        }
+      }
+    ],
+    "mutations": "ONLY_EXACT_TEST_GATE_AND_TWO_TEST_NONCES",
+    "WindowsSSH": "PRESERVED",
+    "Run": "READONLY_ABSENCE_ONLY",
+    "systemCache": "NO_OPERATIONS",
+    "beforeInventories": [
+      {
+        "kind": "old",
+        "inventory": {
+          "directories": [
+            "install-msi-logs",
+            "instrument-temp",
+            "repair-msi-logs",
+            "uninstall-msi-logs"
+          ],
+          "files": [
+            {
+              "path": ".owner",
+              "sha256": "330c2fedd2234992a85825b0e381dd4cfeb6cc9233cafe7586676eca119b0a10",
+              "bytes": 57
+            },
+            {
+              "path": "artifact-manifest.json",
+              "sha256": "6eddcfac9453789745ea48012620c69c3e5604ccd830a330dc748174f918a521",
+              "bytes": 4537
+            },
+            {
+              "path": "Capture.cs",
+              "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+              "bytes": 11335
+            },
+            {
+              "path": "FutureClassroom.msi",
+              "sha256": "3414d92c3e23981d2b910bc9381375c9a1dca04ad748f4cc54261179519d308a",
+              "bytes": 12699648
+            },
+            {
+              "path": "GateRetirement.cs",
+              "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01",
+              "bytes": 10693
+            },
+            {
+              "path": "install-client.stderr.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "install-client.stdout.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "install-originals.jsonl",
+              "sha256": "13621c64ef41a38bf4e4b73286cb0475835bc0b221b01b3ddd32228474d0af5b",
+              "bytes": 14135
+            },
+            {
+              "path": "install-phase.json",
+              "sha256": "e2e0da746ca3b729db0405cf438b1660d2c0bc58102bcf721afdb509e6f61aa5",
+              "bytes": 16303
+            },
+            {
+              "path": "Invoke-ControlledProduct.ps1",
+              "sha256": "54736e0c2a4b3835e974a003db3fc49e6451f14a641fedc1bccf342cfe1dbb14",
+              "bytes": 23770
+            },
+            {
+              "path": "ProcessObserver.cs",
+              "sha256": "b363b6947a90f4697af50300d24a71154ed29e355bdbb863b4707e1ba1549e7f",
+              "bytes": 26810
+            },
+            {
+              "path": "product-result.json",
+              "sha256": "42b9cef5600789d4d7d883a738300dc2a258537ecce0e4c72874a9505d916a8f",
+              "bytes": 265138
+            },
+            {
+              "path": "ProductState.cs",
+              "sha256": "f1ed5387d971ecdf5de1416bcf78d613e4d3a8d0b12f82548db0f5514c93a6a7",
+              "bytes": 28349
+            },
+            {
+              "path": "ProductState.ps1",
+              "sha256": "48bf9e33450d5a8f82876ee5967381ecac213cc631da700d9800fbd3abb10e3c",
+              "bytes": 3391
+            },
+            {
+              "path": "ReadOnlyPreflightFunction.ps1",
+              "sha256": "7a0421a1809896ab0eb824d55bb64b71d7a65d4db8e0ebef75001cdecb30a729",
+              "bytes": 4944
+            },
+            {
+              "path": "repair-client.stderr.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "repair-client.stdout.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "repair-originals.jsonl",
+              "sha256": "18a40d1305216ea59067f9cf243c1a5bb4e9987c95ec0730127e267f2db509b8",
+              "bytes": 14105
+            },
+            {
+              "path": "repair-phase.json",
+              "sha256": "6133d6e3ea44dcb5d88ce780d625490636f60b3f3c64f4a51cf0533c5283cce2",
+              "bytes": 16290
+            },
+            {
+              "path": "runtime-config.json",
+              "sha256": "ccafe5430ae81273153ce8cca6867e01164d8ad0d10d2acf358d14b28891267f",
+              "bytes": 5072
+            },
+            {
+              "path": "runtime-inputs.json",
+              "sha256": "7d962541fbf52c1371ba01a4b4c953176d320886f7a3b102f6b340982f77549d",
+              "bytes": 1875
+            },
+            {
+              "path": "Setup.exe",
+              "sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+              "bytes": 818914
+            },
+            {
+              "path": "source-manifest.json",
+              "sha256": "319bcc61c0fe3a8b93a68b1ded81d38dfd842e6ccc7bd09aaf090785f72a9144",
+              "bytes": 100868
+            },
+            {
+              "path": "uninstall-client.stderr.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "uninstall-client.stdout.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "uninstall-originals.jsonl",
+              "sha256": "f02d4992c433a958acc0083b3f7ccd2e8babf85b5dd5ea33a5bb701f79965fce",
+              "bytes": 14132
+            },
+            {
+              "path": "uninstall-phase.json",
+              "sha256": "cade6603196cb5498157a5427006b60956ee2f206315897d9312c00f43d20601",
+              "bytes": 16227
+            },
+            {
+              "path": "install-msi-logs/MSI117b0.LOG",
+              "sha256": "b95357e0b6e19db5e73aa8f4851d425e9050e4ba431af4aa6e2b062f1f78526b",
+              "bytes": 126990
+            },
+            {
+              "path": "repair-msi-logs/MSI11d4d.LOG",
+              "sha256": "488cbca84d3ff8cc8d25d4f356532c949fdaf45ef2aba92bb6132a8b62bad1b1",
+              "bytes": 132954
+            },
+            {
+              "path": "uninstall-msi-logs/MSI1223f.LOG",
+              "sha256": "2591dffc99a326157edc017df1fb6071dfeb85cc2b9675efac32d8895703a885",
+              "bytes": 84028
+            }
+          ]
+        }
+      },
+      {
+        "kind": "new",
+        "inventory": {
+          "directories": [
+            "instrument-temp",
+            "owned-removal-msi-logs"
+          ],
+          "files": [
+            {
+              "path": ".owner",
+              "sha256": "c67d8d43011ba4babef2928dfb12eb2dfd8d94debe46a1c690deda2d4f148334",
+              "bytes": 52
+            },
+            {
+              "path": "artifact-manifest.json",
+              "sha256": "f753d568091773b766fb1854383e8ed7b48cea5d29f21c6f7fee55a31f52e225",
+              "bytes": 6223
+            },
+            {
+              "path": "Capture.cs",
+              "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+              "bytes": 11335
+            },
+            {
+              "path": "explicit-removal-audit.v1",
+              "sha256": "11b0ab692200720b623d75e0576184b9286cf4edf203e5f08fbd1254c3a94470",
+              "bytes": 1252
+            },
+            {
+              "path": "FutureClassroom.msi",
+              "sha256": "ea2eb4d2b5ecb8ce3ddbf5b28527c2d109d0d1e3476c36529af35ffb80f24cc7",
+              "bytes": 12761600
+            },
+            {
+              "path": "Invoke-OwnedRemoval.ps1",
+              "sha256": "1fef5fa0cb6349fea2ed2425fa9f385c5c2ae734ab7863e4e50b635571b3535d",
+              "bytes": 23796
+            },
+            {
+              "path": "owned-removal-client.stderr.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "owned-removal-client.stdout.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            },
+            {
+              "path": "owned-removal-originals.jsonl",
+              "sha256": "546bf5065a465bea647ae2f11d8f2e3e928f83ab0212182660ff22882b1fc979",
+              "bytes": 22067
+            },
+            {
+              "path": "owned-removal-phase.json",
+              "sha256": "b9add44f2a1ab4495c9f7a3c2a8f5f05d10edd39d2cb3bfd4ab9c872032cfcd5",
+              "bytes": 23012
+            },
+            {
+              "path": "PendingSnapshot.cs",
+              "sha256": "04b8183284ac4c870fda69ac0a3ae4c207438e726328bbd2a463e769187c6a38",
+              "bytes": 13891
+            },
+            {
+              "path": "ProcessObserver.cs",
+              "sha256": "82ec13572aa365485497306779cd942ff56aa1cc960e5cd6ff644a422b61a619",
+              "bytes": 26795
+            },
+            {
+              "path": "ProductState.cs",
+              "sha256": "f1ed5387d971ecdf5de1416bcf78d613e4d3a8d0b12f82548db0f5514c93a6a7",
+              "bytes": 28349
+            },
+            {
+              "path": "ProductState.ps1",
+              "sha256": "48bf9e33450d5a8f82876ee5967381ecac213cc631da700d9800fbd3abb10e3c",
+              "bytes": 3391
+            },
+            {
+              "path": "removal-result.json",
+              "sha256": "0493ab40dd5b8dbd237de2842b5406e8688fd8fd1ffcc1eeb3d6ffeeda5c2a6e",
+              "bytes": 146403
+            },
+            {
+              "path": "runtime-config.json",
+              "sha256": "3a3700d0d96d8f39dc682dbcc92528e9bfd6d801eebb6c103079fb7889cf4800",
+              "bytes": 8415
+            },
+            {
+              "path": "runtime-inputs.json",
+              "sha256": "2bfba570503444be3fd2b0d35340d5d8fa2c1247928053cb98539d618720436f",
+              "bytes": 1706
+            },
+            {
+              "path": "Setup.exe",
+              "sha256": "759eddeefef903c960846689b5f40cdbb7cc43496dc65a74781df7d283f7d2f7",
+              "bytes": 849137
+            },
+            {
+              "path": "source-manifest.json",
+              "sha256": "f1d27c86e910ab6e0d8f1f45d299a00fce569a8d24f73e84de90086f906bfe23",
+              "bytes": 84548
+            },
+            {
+              "path": "owned-removal-msi-logs/MSId972b.LOG",
+              "sha256": "3c206d7ea750fc3ec69ccb177a739f30d2023448fb51e77f327cf1ff07c0c4e7",
+              "bytes": 135042
+            },
+            {
+              "path": "owned-removal-msi-logs/MSId9bce.LOG",
+              "sha256": "137823363bdfd0aa05893f982b3b781e14310e47d4fbf3415d550e00781b867a",
+              "bytes": 109486
+            }
+          ]
+        }
+      }
+    ],
+    "beforeOwnProcesses": {
+      "knownZero": true,
+      "commandsRead": false,
+      "owned": [],
+      "unknown": []
+    },
+    "beforeProduct": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "18B1A37C-EE86-5233-ACC2-773B48D189BB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "gateCaptureFacts": [
+      "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+      "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "9a59d62d:002f00000008c8d4:01dd6a5029ef3196",
+      "9a59d62d:002a00000008c8d5:01dd6a5029ef3196",
+      "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;OICI;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;OICI;FA;;;SY)",
+      "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)"
+    ],
+    "nativeGateRetirement": {
+      "closeEvidence": "ALL_CHECKED_BY_FIXED_NATIVE_RETURNING_CODE_PATH_NOT_SYNTHETIC_PER_HANDLE_RECEIPTS",
+      "return": "DISPOSITION_AND_CHECKED_CLOSE_ONLY_REQUIRE_EXTERNAL_ABSENCE_READBACK",
+      "pendingDeletedByController": false
+    },
+    "gateKnownAbsent": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+      "status": "KNOWN_ABSENT"
+    },
+    "afterGateProduct": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "18B1A37C-EE86-5233-ACC2-773B48D189BB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "finalOwnProcesses": {
+      "knownZero": true,
+      "commandsRead": false,
+      "owned": [],
+      "unknown": []
+    },
+    "finalProduct": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "D0B2E913-0457-5E64-A66B-EC1EE7DA7138",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "18B1A37C-EE86-5233-ACC2-773B48D189BB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "finalGate": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+      "status": "KNOWN_ABSENT"
+    },
+    "elapsedMilliseconds": 1132,
+    "originalBudgetExceeded": false,
+    "finalPath_old": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067",
+      "status": "KNOWN_ABSENT"
+    },
+    "finalPath_new": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-owned-removal-0409398be71c42d981dc3debc99a8505",
+      "status": "KNOWN_ABSENT"
+    }
+  },
+  "elapsedSeconds": 1.679223915998591,
+  "originalWholeBudgetExceeded": false,
+  "stdout": {
+    "bytes": 20808,
+    "sha256": "bdb2a3c11fac74fa2b3272a638b44b224eaddc530a62e9943e0eb64e81732ecf"
+  },
+  "stderr": {
+    "bytes": 843,
+    "sha256": "e6884f811be9d847142b7346c3a11bd1f336c2e82e4edafd0337215d462592ea"
+  }
+}

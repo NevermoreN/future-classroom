@@ -1,0 +1,63 @@
+{
+  "status": "FINITE_ACTUAL_WIN11_POST_WRITE_ROLLBACK_EVIDENCE_ONLY",
+  "sourceGit": "33c11f5e41cce727746aeb5b5801b0e87eaf0f41",
+  "actualRuntimeReport": {
+    "path": "controlled-post-write-runtime-first/report.json",
+    "bytes": 185707,
+    "sha256": "c877f6972c67ebd07ef6eb28d3aead351281978e2a9fe5b3ff9cf2f4a7a56387"
+  },
+  "localDerivationActualCommands": 85,
+  "localDerivation": {
+    "path": "controlled-post-write-package-first/derivation-report.json",
+    "bytes": 68082,
+    "sha256": "b7aea6e5912e2f9dabc558b7fa10cad5006fc9e7561f2843e147fb8a67c49b43"
+  },
+  "BActualExits": [
+    1603,
+    0,
+    1603,
+    0,
+    0
+  ],
+  "GActualExits": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "actualOuterExit": 0,
+  "originalParentReaped": true,
+  "outerSeconds": 12.234052500996768,
+  "nativeWholeMilliseconds": 9331,
+  "originalWholeSeconds": 600,
+  "eachClientSeconds": 150,
+  "nativeSeconds": 120,
+  "forcedSameLogSequence": "guard1 -> InstallExecute1 -> full14witness1 -> fixedType19fail3 -> ScriptType2 rollback header",
+  "damagedPreimage": "LICENSE absent + exact51B PROBE restored; remaining12 bytes and registration/component/marker preimage equal",
+  "final": "canonical repair0 + uninstall0; product/full14/registration/marker/Pending/gate/20 exact installer paths/2 cache paths/46files8dirs nonce absent",
+  "nativeBeginEnd": "NOT_SERIALIZED; fixed source+G0+PendingAbsent inference only",
+  "externalOriginalGThreadCap": "NOT_AVAILABLE_CODEPATH_INFERENCE_ONLY",
+  "initialAstFailure": {
+    "path": "root-post-write-ps-parse-first-local-failure.json",
+    "bytes": 308,
+    "sha256": "cb2a21322c67c11721786f850a67e4574ec05210122e9bf0e217bfee6bc5e312"
+  },
+  "actualSecondAst0": {
+    "path": "root-post-write-runtime-ps-parse-second.json",
+    "bytes": 901,
+    "sha256": "381a7ac770abd527e90fa41eb1117e3a08ea0e2cb2d60795fe23194b04f85fbe"
+  },
+  "notClaimed": [
+    "Win7/Win10/Seewo actual tests",
+    "production crash recovery/release/ARP uninstall",
+    "direct serialized Begin/End receipt",
+    "all14 replacement during damaged repair (only two damaged; witness all14 healthy at instant)"
+  ],
+  "preparationNotRunOriginalsPreserved": true,
+  "sourceDeletion": false,
+  "WindowsContactedByArchiver": false,
+  "WOrTargetRead": false,
+  "progressWritten": false,
+  "GitOperation": false
+}

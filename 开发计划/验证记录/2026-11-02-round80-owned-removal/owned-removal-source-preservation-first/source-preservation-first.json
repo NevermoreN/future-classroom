@@ -1,0 +1,71 @@
+{
+  "status": "PASS_CANDIDATE_SOURCE_COMMIT_NOT_PRODUCT_RECOVERY_EXECUTION",
+  "parent": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2",
+  "commit": "33c11f5e41cce727746aeb5b5801b0e87eaf0f41",
+  "files": [
+    {
+      "path": "crates/fc-bootstrap/Cargo.toml",
+      "bytes": 756,
+      "sha256": "51ad77e22840323b0c9688d5d10026b32310b786846871a1ba87cf28a5483ce6"
+    },
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1814,
+      "sha256": "6091d70da6fe82aaed9c04bbe9128b22509af605b2681c42bdd44831b605970a"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/broker.rs",
+      "bytes": 7370,
+      "sha256": "de7e1f0f06736b1f739dbde09cc0dc57f3b2537bc705083d8a1b5047c2123d64"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 43414,
+      "sha256": "57f2d9700bbdd3a46a611b5798a0271a9499d0e3fac1849ebffa975eaf58bb53"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 29830,
+      "sha256": "dde438b13553a861f651af5651a4184a1dfb2acc09ca2cb276d280ef9ed4c27b"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 53653,
+      "sha256": "7316478a2df4be6b98acee1af2122501b8413fe4246c5fa2e2811be79b34bd6f"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery.rs",
+      "bytes": 18237,
+      "sha256": "2cbe9723f0b83d6ca31dddbae2f1383088b45d6f881e9405b64e9a6f57f0b6fe"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/recovery/scope.rs",
+      "bytes": 13631,
+      "sha256": "e1a315026b5e10958e74674f2eb11b8df971268c1dbb1296132f5a6aab5c29aa"
+    }
+  ],
+  "actualCommitExit": 0,
+  "scope": "Default-off owned-test-removal feature; fixture scope bytes not committed;69 native tests include controlled6 and3scope tests; actual old failed install and Pending unchanged",
+  "verificationReports": [
+    {
+      "path": "/tmp/fc-round80-controlled-repair/guard-owned-removal-build-second/report.json",
+      "sha256": "75e25c7c90cb8e9ddc73b71da6f3fd46ff0ac53dadea2c22e8bd97911fc8156c"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/guard-owned-removal-clippy-feature-second/report.json",
+      "sha256": "24ebd6b0f9acd94c04e90aeb03ba12d2fcab280afc38d9331bfa65c2884831d4"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/guard-owned-removal-clippy-default-first/report.json",
+      "sha256": "eb47a9de98338e9a73ef3c44bb28bbed86b3e30bcebba397f400be2df4ff4833"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/owned-removal-native-runtime-first/report.json",
+      "sha256": "6d4ff522a995bf1e2012986393d84da8424a85bb063dd6a013c4e8da5098c000"
+    },
+    {
+      "path": "/tmp/fc-round80-controlled-repair/owned-removal-semantic-review-third/review-third.json",
+      "sha256": "d1e497d2994a031c964da2767db6a650c1314923477c6d6919ec117a173dbfae"
+    }
+  ]
+}

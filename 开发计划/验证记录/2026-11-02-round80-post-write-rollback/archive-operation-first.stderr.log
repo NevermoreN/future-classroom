@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-02-round80-post-write-rollback/archive-controller-first.py", line 104, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-02-round80-post-write-rollback/archive-controller-first.py", line 76, in main
+    for row in rows:scan(original(row),'source:'+row['path'])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-02-round80-post-write-rollback/archive-controller-first.py", line 70, in scan
+    ns['credential_scan'](b,label,stats,findings)
+  File "<committed-scanner>", line 237, in credential_scan
+  File "<committed-scanner>", line 232, in walk
+  File "<committed-scanner>", line 234, in walk
+  File "<committed-scanner>", line 232, in walk
+  File "<committed-scanner>", line 234, in walk
+  File "<committed-scanner>", line 236, in walk
+  File "<committed-scanner>", line 195, in credential_scan
+  File "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-02-round80-post-write-rollback/archive-controller-first.py", line 57, in exact_views
+    if row is None:return base_views(data,label)
+                          ^^^^^^^^^^^^^^^^^^^^^^
+  File "<committed-scanner>", line 174, in text_views
+  File "<committed-scanner>", line 164, in add
+  File "<committed-scanner>", line 39, in need
+AssertionError: NON_TEXT_CONTROL_BYTES

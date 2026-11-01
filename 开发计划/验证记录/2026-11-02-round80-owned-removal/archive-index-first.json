@@ -1,0 +1,352 @@
+{
+  "status": "PASS_FINITE_ARCHIVE",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 1466111,
+    "sha256": "e8bf230a421cb393f1271edd3a22f1958feaeb02683354dd4de6aa2e6d8656d6",
+    "members": 584
+  },
+  "originalTextBytes": 7919248,
+  "sourceManifest": {
+    "path": "source-manifest-first.json",
+    "sha256": "7c2783149ad7c975537c3d3916cdbea95321d321fa5e5ebd61b463bc779c2fc0"
+  },
+  "promoted": [
+    {
+      "path": "owned-removal-native-runtime-first/report.json",
+      "bytes": 112335,
+      "sha256": "6d4ff522a995bf1e2012986393d84da8424a85bb063dd6a013c4e8da5098c000"
+    },
+    {
+      "path": "owned-removal-runtime-first/report.json",
+      "bytes": 74653,
+      "sha256": "a252752d124c4053db9c618135c0b5c2b326ec655e96419de6ac4ac87fc36b2c"
+    },
+    {
+      "path": "owned-removal-cleanup-first/report.json",
+      "bytes": 35647,
+      "sha256": "8c9daab45c4b2e38944d41bbe482536ae1252eac71dc9556a5f384b1b6a1013e"
+    },
+    {
+      "path": "controlled-product-runtime-second/report.json",
+      "bytes": 127785,
+      "sha256": "04671228fafe69c3eb799640dce2eae2802efc847838df4d81a5392bebb89de9"
+    },
+    {
+      "path": "guard-owned-removal-clippy-feature-first/report.json",
+      "bytes": 170028,
+      "sha256": "6c20f4490f74bb9d2ba58b521d15910f49398a8d0dae1647247513c9b28689bc"
+    },
+    {
+      "path": "guard-owned-removal-clippy-feature-second/report.json",
+      "bytes": 170060,
+      "sha256": "24ebd6b0f9acd94c04e90aeb03ba12d2fcab280afc38d9331bfa65c2884831d4"
+    },
+    {
+      "path": "guard-owned-removal-clippy-default-first/report.json",
+      "bytes": 170000,
+      "sha256": "eb47a9de98338e9a73ef3c44bb28bbed86b3e30bcebba397f400be2df4ff4833"
+    },
+    {
+      "path": "guard-owned-removal-build-second/report.json",
+      "bytes": 170706,
+      "sha256": "75e25c7c90cb8e9ddc73b71da6f3fd46ff0ac53dadea2c22e8bd97911fc8156c"
+    },
+    {
+      "path": "pending-readonly-runtime-first/report.json",
+      "bytes": 24748,
+      "sha256": "d4cf8e4b8f23133fb6f096c8083e336f2f9419dc2e0baf558c820acc056bd232"
+    },
+    {
+      "path": "pending-readonly-retrieval-first/report.json",
+      "bytes": 18759,
+      "sha256": "8a51d4c50426fded71da57455243142c8a9858ec005d3ee701c76515e83ff78f"
+    },
+    {
+      "path": "owned-removal-source-preservation-first/source-preservation-first.json",
+      "bytes": 2999,
+      "sha256": "295fd527faa8508f27cf4a2eb8cd0a897d280f6ca537f00729264017384157a0"
+    },
+    {
+      "path": "owned-removal-candidate-sync-first.json",
+      "bytes": 432,
+      "sha256": "1e0a26efc5d165e0783d842b815db974cb6cebb0d38374f15b1a118b9744bc13"
+    },
+    {
+      "path": "setup-msvc-monitor-first/report.json",
+      "bytes": 2604,
+      "sha256": "0ddf5c866da9ced897ea026e5f1411902dbd1b117f8cb030aa60808e936e7c5a"
+    },
+    {
+      "path": "setup-msvc-monitor-second/report.json",
+      "bytes": 3686,
+      "sha256": "de700c5100dbdca97b96adec1bd7f8b542e06070ee412a7af19631ae1d8266b3"
+    },
+    {
+      "path": "setup-msvc-modern-download-first/reports/result.json",
+      "bytes": 48303,
+      "sha256": "13a881ce8099f739bce1229a65d66ab2ea0aeff50d4d08f965ea2ba4861b513a"
+    },
+    {
+      "path": "setup-msvc-win7-download-first/diagnostics/logs/clippy.result.json",
+      "bytes": 850,
+      "sha256": "0688f5d9091b09ddd2794d4993200c5a33efe642f327ba2b5a9c449a0d81a35a"
+    }
+  ],
+  "binaryIdentitiesOnly": [
+    {
+      "path": "controlled-product-input-second/FutureClassroom-GNU-DEV.zip",
+      "bytes": 6342124,
+      "sha256": "b04d7b42ba30f05a5b3cb1f96a5fb4c46783243ba81ab9df03f1d702da812ab3",
+      "kind": "ZIP"
+    },
+    {
+      "path": "controlled-product-package-second/FutureClassroom.msi",
+      "bytes": 12699136,
+      "sha256": "4dd5b531da2c9958cd3093ac9a061accd8ed330cf52b617f3a2b40f4513a8830",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-second/Setup.exe",
+      "bytes": 818407,
+      "sha256": "295edcd9a85f1810bc57a19e6dab940b8b587ed3511654eca0e4331b869dc181",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-second/binary-readback-FcControlledGuardDll.stdout.log",
+      "bytes": 4887688,
+      "sha256": "321f2bb27da4429354fd0de26227ca0401097ffab4e63f5cb0c924d6afaa56ac",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-second/binary-readback-FcGuardClientTemplate.stdout.log",
+      "bytes": 818407,
+      "sha256": "ac1ebb2fdc739a6c75f7ba21a369878ff30ede845bd421be1de8f698a14df247",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-producer-second/artifacts/fc-bootstrap.exe",
+      "bytes": 13390071,
+      "sha256": "19769ee68cc41b60ab2ce98291dbfa5490137278aa7e9d2a27edfed067bf843d",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-producer-second/artifacts/fc-installer-lifecycle.exe",
+      "bytes": 816943,
+      "sha256": "d780336e3c85aaad4b5ec24d89a0a2cf258b10c6e8fa9fc47c4c1b6d1bcd0e27",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-producer-second/artifacts/fc_windows.dll",
+      "bytes": 4887688,
+      "sha256": "321f2bb27da4429354fd0de26227ca0401097ffab4e63f5cb0c924d6afaa56ac",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-second/download/FutureClassroom-r80-controlled-product-5290bb2e6dd5465b9cd0d43cc50c1ce8/FutureClassroom.msi",
+      "bytes": 12699136,
+      "sha256": "4dd5b531da2c9958cd3093ac9a061accd8ed330cf52b617f3a2b40f4513a8830",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-second/download/FutureClassroom-r80-controlled-product-5290bb2e6dd5465b9cd0d43cc50c1ce8/Setup.exe",
+      "bytes": 818407,
+      "sha256": "295edcd9a85f1810bc57a19e6dab940b8b587ed3511654eca0e4331b869dc181",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-second/upload/FutureClassroom.msi",
+      "bytes": 12699136,
+      "sha256": "4dd5b531da2c9958cd3093ac9a061accd8ed330cf52b617f3a2b40f4513a8830",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-second/upload/Setup.exe",
+      "bytes": 818407,
+      "sha256": "295edcd9a85f1810bc57a19e6dab940b8b587ed3511654eca0e4331b869dc181",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-auxiliary-first/artifacts/fc-installer-lifecycle.exe",
+      "bytes": 847673,
+      "sha256": "e8daa87c1661f868c0fbba54a3094faf54950d78c0192dd41f63af42cb07dcc6",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-auxiliary-first/artifacts/fc_windows.dll",
+      "bytes": 4917979,
+      "sha256": "54efff903d0ee2a8f8e439abb302d3e1b78784ad0d37e97eebbe837995e722d8",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-native-runtime-first/download/FutureClassroom-r80-owned-removal-native-f373cbac7c357c2aca8452962f2357f9/candidate-tests.exe",
+      "bytes": 4299522,
+      "sha256": "42c3eccdc055d7df6ff5c5e11e367f49a4db7f89cfb7bf4874eb46638191f873",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-native-runtime-first/upload/candidate-tests.exe",
+      "bytes": 4299522,
+      "sha256": "42c3eccdc055d7df6ff5c5e11e367f49a4db7f89cfb7bf4874eb46638191f873",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-package-first/FutureClassroom.msi",
+      "bytes": 12761600,
+      "sha256": "ea2eb4d2b5ecb8ce3ddbf5b28527c2d109d0d1e3476c36529af35ffb80f24cc7",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-package-first/Setup.exe",
+      "bytes": 849137,
+      "sha256": "759eddeefef903c960846689b5f40cdbb7cc43496dc65a74781df7d283f7d2f7",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-package-first/binary-readback-FcControlledGuardDll.stdout.log",
+      "bytes": 4917979,
+      "sha256": "54efff903d0ee2a8f8e439abb302d3e1b78784ad0d37e97eebbe837995e722d8",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-package-first/binary-readback-FcGuardClientTemplate.stdout.log",
+      "bytes": 849137,
+      "sha256": "e2159553023515ff92b7bfea4089d89a0bca9ce1e7e28eb4f9d391105c7b5128",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-runtime-first/download/FutureClassroom-r80-owned-removal-0409398be71c42d981dc3debc99a8505/FutureClassroom.msi",
+      "bytes": 12761600,
+      "sha256": "ea2eb4d2b5ecb8ce3ddbf5b28527c2d109d0d1e3476c36529af35ffb80f24cc7",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-runtime-first/download/FutureClassroom-r80-owned-removal-0409398be71c42d981dc3debc99a8505/Setup.exe",
+      "bytes": 849137,
+      "sha256": "759eddeefef903c960846689b5f40cdbb7cc43496dc65a74781df7d283f7d2f7",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-runtime-first/upload/FutureClassroom.msi",
+      "bytes": 12761600,
+      "sha256": "ea2eb4d2b5ecb8ce3ddbf5b28527c2d109d0d1e3476c36529af35ffb80f24cc7",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "owned-removal-runtime-first/upload/Setup.exe",
+      "bytes": 849137,
+      "sha256": "759eddeefef903c960846689b5f40cdbb7cc43496dc65a74781df7d283f7d2f7",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "pending-readonly-retrieval-first/download/FutureClassroom-r80-pending-capture-2949bb6b89d645d09547c3b8d1ff88b6/PendingSnapshot.dll",
+      "bytes": 14848,
+      "sha256": "0a7cddfb3e1076eb607d7f6d19d21f435d9e6fbfd92ac91eca36a07b3bd5fbdb",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "derivedDisassemblyIdentitiesOnly": [
+    {
+      "path": "controlled-product-package-second/guard-pe.stdout.log",
+      "bytes": 1265566,
+      "sha256": "6905c28f2f4c2ff74e88e101f93bb81b749d83d79f7737aac0fdf5b8d518e0da",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    },
+    {
+      "path": "controlled-product-package-second/helper-pe.stdout.log",
+      "bytes": 234024,
+      "sha256": "b69f84c416538a9c62356115c26b16aa65ae13cd79479ecbb1eaf220cad29d6e",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    },
+    {
+      "path": "controlled-product-package-second/payload-pe.stdout.log",
+      "bytes": 3296641,
+      "sha256": "feec6e9442af3a6d088f8c5c280a93652a418c8063c387a9400076cf440cc2a4",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    },
+    {
+      "path": "owned-removal-package-first/guard-pe.stdout.log",
+      "bytes": 1271397,
+      "sha256": "0feb0d56f42cc93793c1f6002768b1bc6f87b60628e7f2012305c8c950dafe2e",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    },
+    {
+      "path": "owned-removal-package-first/helper-pe.stdout.log",
+      "bytes": 240427,
+      "sha256": "d2d9b68eba5067756ae1e81d9eefbbbc24aebf7f9058984c6cbabd7d8a8d82c8",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    },
+    {
+      "path": "owned-removal-package-first/payload-pe.stdout.log",
+      "bytes": 3298358,
+      "sha256": "56ce0955676be2aff954e8f04aba23e5b911392aab3ba9c33fd97524513966b9",
+      "kind": "LARGE_DERIVED_PE_DISASSEMBLY_REPORT_CONTAINS_IDENTITY"
+    }
+  ],
+  "explicitExcluded": [
+    {
+      "path": "owned-removal-implementation-first/scope.bin",
+      "bytes": 1788,
+      "reason": "COMPILED_MACHINE_SCOPE_CONTENT_NOT_READ_OR_ARCHIVED"
+    },
+    {
+      "path": "owned-removal-implementation-first/scope.hex",
+      "bytes": 3576,
+      "reason": "COMPILED_MACHINE_SCOPE_CONTENT_NOT_READ_OR_ARCHIVED"
+    },
+    {
+      "path": "setup-msvc-monitor-first/win7-job-125005771547-logs-first.json",
+      "bytes": 35797,
+      "sha256": "53fd36c7b8de02372e58ff51cffeffa0943799aada6189e2ed47dd43a2cb8a28",
+      "reason": "DUPLICATE_API_ANSI_LOG_OFFICIAL_COMPLETE_CLIPPY_DIAGNOSTIC_PRESERVED"
+    },
+    {
+      "path": "setup-msvc-modern-download-first/artifact.zip",
+      "bytes": 45729175,
+      "sha256": "9429c51e729d67381a19412048adfdc0941caf930b220b02dee0b27447cc7998",
+      "reason": "OFFICIAL_DOWNLOAD_REPORT_IDENTITY_ZIP_NOT_OPENED_OR_ARCHIVED"
+    },
+    {
+      "path": "setup-msvc-win7-download-first/artifact.zip",
+      "bytes": 46540677,
+      "sha256": "703b8eaf8a907c3b2f9a7464df87ff3e7bfe099c4ecfe58bdfa7dd60d3caa6d2",
+      "reason": "OFFICIAL_DOWNLOAD_REPORT_IDENTITY_ZIP_NOT_OPENED_OR_ARCHIVED"
+    }
+  ],
+  "prunedNotEntered": [
+    {
+      "path": "owned-removal-package-first/Binary",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "owned-removal-package-first/extracted",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "owned-removal-package-first/lifecycle",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "owned-removal-package-first/payload",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "controlled-product-package-second/Binary",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "controlled-product-package-second/extracted",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "controlled-product-package-second/lifecycle",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    },
+    {
+      "path": "controlled-product-package-second/payload",
+      "reason": "DERIVED_DUPLICATED_PAYLOAD_LIFECYCLE_BINARY_EXTRACTED_NOT_ENTERED"
+    }
+  ],
+  "symlinksNotFollowed": [],
+  "sourceDeletion": false
+}

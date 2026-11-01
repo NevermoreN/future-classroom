@@ -1,0 +1,43 @@
+{
+  "status": "PASS_FULL_TAR_REPLAY_AND_BOUNDED_DECODED_CREDENTIAL_SCAN",
+  "members": 291,
+  "originalBytes": 3248203,
+  "binaryIdentityOnlyCount": 37,
+  "promotedRawReports": 8,
+  "archiveSha256": "7bafbc66326ff2df4df568180ccd7425cf848feb0dd997073f38bd500159c519",
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 36680,
+      "utf16Views": 74,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 10,
+      "decodedBase64Views": 47,
+      "jsonContainers": 167,
+      "decodedJsonStringViews": 35897
+    },
+    "jsonlRecordsAlsoDecoded": 38,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All291 originals/raw text, full gzip/tar decompressed byte replay, 8 raw promoted reports, D controller/selector/manifest/forms/diagnostics/facts/index. Existing committed scanner decodes UTF8/UTF16/CP936/CLIXML/JSON/JSONL/nested generic and declared base64 under its original limits. Four exact one-note MSI controls among five reviewed logs, two exact ASCII stream listings, two exact23B ForceCodepage IDTs and six exact parent-document/JSON-trail/19B SummaryInformation argv views: raw/visible-boundary/concatenated complete views all scanned. No generic control tolerance. Raw PE/ZIP/CAB/MSI/DLL/payload/propertyset streams only identities."
+  },
+  "sourceDeletion": false,
+  "WindowsContacted": false,
+  "Cargo": false,
+  "WOrTargetRead": false,
+  "privateKeyRead": false,
+  "progressWritten": false,
+  "GitOperation": false
+}

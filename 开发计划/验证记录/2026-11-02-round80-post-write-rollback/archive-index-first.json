@@ -1,0 +1,299 @@
+{
+  "status": "PASS_FINITE_ACTUAL_POST_WRITE_ORIGINALS_ARCHIVED",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 528084,
+    "sha256": "7bafbc66326ff2df4df568180ccd7425cf848feb0dd997073f38bd500159c519",
+    "members": 291
+  },
+  "originalBytes": 3248203,
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "bytes": 74153,
+    "sha256": "c520fdede36a5fb5e1e247a8a4a443d445774003ee52f14ed2fe5d4d0ff0bb12"
+  },
+  "facts": {
+    "path": "batch-facts-first.json",
+    "bytes": 2311,
+    "sha256": "c42d230e5db86760fa07a662c990e3601ec43cdc761a5a98ff0ee30ae08f1e1d"
+  },
+  "promoted": [
+    {
+      "path": "controlled-post-write-runtime-first/report.json",
+      "bytes": 185707,
+      "sha256": "c877f6972c67ebd07ef6eb28d3aead351281978e2a9fe5b3ff9cf2f4a7a56387"
+    },
+    {
+      "path": "controlled-post-write-package-first/derivation-report.json",
+      "bytes": 68082,
+      "sha256": "b7aea6e5912e2f9dabc558b7fa10cad5006fc9e7561f2843e147fb8a67c49b43"
+    },
+    {
+      "path": "controlled-post-write-operation-first/report.json",
+      "bytes": 2417,
+      "sha256": "8c91002267a0aeb14577a136f75e2e6be37f3ce94191a93b80bbdb061604581f"
+    },
+    {
+      "path": "controlled-post-write-operation-first/static-review.json",
+      "bytes": 1529,
+      "sha256": "5c4fdf78cf2edeff73d45796a7cf96c889f07aae703e7ce29fc450a0b9685c07"
+    },
+    {
+      "path": "controlled-product-package-second/report.json",
+      "bytes": 112386,
+      "sha256": "9714e3b8ef3f40b735fb8929d810bd62e8fc7bd497f3ec8ac6fda072cf32c5f8"
+    },
+    {
+      "path": "root-post-write-ps-parse-first-local-failure.json",
+      "bytes": 308,
+      "sha256": "cb2a21322c67c11721786f850a67e4574ec05210122e9bf0e217bfee6bc5e312"
+    },
+    {
+      "path": "root-post-write-runtime-ps-parse-second.json",
+      "bytes": 901,
+      "sha256": "381a7ac770abd527e90fa41eb1117e3a08ea0e2cb2d60795fe23194b04f85fbe"
+    },
+    {
+      "path": "root-post-write-runtime-operation-first.json",
+      "bytes": 1004,
+      "sha256": "40c30cece36d35635e1c6422f2694806a82aff474bddf1ee73e6714eb5883080"
+    }
+  ],
+  "binaryIdentitiesOnly": [
+    {
+      "path": "controlled-post-write-package-first/Binary/Binary.FcControlledGuardDll",
+      "bytes": 4887688,
+      "sha256": "321f2bb27da4429354fd0de26227ca0401097ffab4e63f5cb0c924d6afaa56ac",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/Binary/Binary.FcGuardClientTemplate",
+      "bytes": 818407,
+      "sha256": "ac1ebb2fdc739a6c75f7ba21a369878ff30ede845bd421be1de8f698a14df247",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/Binary/Binary.FcPostWriteWitness",
+      "bytes": 541610,
+      "sha256": "1e60f732780407dfa4ccb1871af2f218f4784f8c492425a8ed68dca3e4aa074a",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/FutureClassroom.msi",
+      "bytes": 13245440,
+      "sha256": "627f6b8a34e07f2365c8bee6e73fc9367d9fdd03343758a2dded04fa009bda1b",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-package-first/Setup.exe",
+      "bytes": 818407,
+      "sha256": "8ca8ed53e44bf538b6a39270b8f1e099c0668db5fab6696a9fea820b0479d3b3",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-package-first/derived-stream-0.stdout.log",
+      "bytes": 6876989,
+      "sha256": "d9ad763b9e36ae77a49aebfe3ba400ea273415a90276709042c96c5d279d713a",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/derived-stream-1.stdout.log",
+      "bytes": 4887688,
+      "sha256": "321f2bb27da4429354fd0de26227ca0401097ffab4e63f5cb0c924d6afaa56ac",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/derived-stream-2.stdout.log",
+      "bytes": 818407,
+      "sha256": "ac1ebb2fdc739a6c75f7ba21a369878ff30ede845bd421be1de8f698a14df247",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/derived-stream-3.stdout.log",
+      "bytes": 544,
+      "sha256": "848aabacf03e40bdbdc6262d553e8f2e89d985f2f1d8a007f0a62d77e3df9a91",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/derived-witness-stream.stdout.log",
+      "bytes": 541610,
+      "sha256": "1e60f732780407dfa4ccb1871af2f218f4784f8c492425a8ed68dca3e4aa074a",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/LICENSE",
+      "bytes": 1067,
+      "sha256": "1fef5a26bc7b7bf66e38e83ac8d246a54e2e4e3d62fcfcb416d4db77603b2e40",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/MSI-CANDIDATE.txt",
+      "bytes": 1784,
+      "sha256": "5995cd920d173e401a7767f2a86974d28b65b0927e866882aa39a8227d9d7634",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/PROBE-README.txt",
+      "bytes": 21767,
+      "sha256": "7ebdcc9f18d6f0c1f9d2471f7b496f317e1ac5797264940b0f95be1945f64e09",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/THIRD-PARTY-NOTICES.txt",
+      "bytes": 2401720,
+      "sha256": "b611a4c99e2f65d2c5c2f1618f088dec978cab792cbdef2810937cc60d7ed6b0",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/fc-bootstrap.exe",
+      "bytes": 13390071,
+      "sha256": "19769ee68cc41b60ab2ce98291dbfa5490137278aa7e9d2a27edfed067bf843d",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/manifest.json",
+      "bytes": 34837,
+      "sha256": "84502ade788bb7e2c8f4373f6ace31591a34013c0a5cf5fa01b5d408cd8304d6",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/THIRD-PARTY-NOTICES.txt",
+      "bytes": 25543,
+      "sha256": "67cdd6d8f98149012bd01d11eeb5b1c2942298c26c043db461301a8b64b875e7",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/assets/favicon-CXuYoSfB.svg",
+      "bytes": 282,
+      "sha256": "46593a2ec46a77d65026d609dcd5630c447360522518d745458091a9df2f7f8a",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/assets/index-BkiZ2CBl.js",
+      "bytes": 415401,
+      "sha256": "cdf0d8f9c8cfa259031cb22e10aacb1ffea7b1f7affb3a4235478069b2138bf3",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/assets/index-DrrJeLm9.css",
+      "bytes": 39554,
+      "sha256": "fd6d963cdb889b3bffdebf631c310d869730a56474a389351fd7bdf49bdf385f",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/assets/pcm-worklet-B7E4LRoP.js",
+      "bytes": 1724,
+      "sha256": "9934c276d98e30992dc8148ffc3a0dfdc178fed9aacbb8227255bede45c1fcfa",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/assets/wav-worker-LSywWbpJ.js",
+      "bytes": 884,
+      "sha256": "a0e364aa7c0d888d0f7118b86d873c95df95e461303546a8ad1d56d5038e1886",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/fc-assets.json",
+      "bytes": 1073,
+      "sha256": "2b4034c8a0f0bfa73812a7f2853ba83b766772ff55096fc1e33c9f2ddb9e4593",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/extracted/Programs/FutureClassroom/web/index.html",
+      "bytes": 1232,
+      "sha256": "8761e3d65d2bee4fb860e14b315eec9e634a019b1633aea627c335397f8299f2",
+      "kind": "RAW_PAYLOAD_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/original-stream-0.stdout.log",
+      "bytes": 6876989,
+      "sha256": "d9ad763b9e36ae77a49aebfe3ba400ea273415a90276709042c96c5d279d713a",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/original-stream-1.stdout.log",
+      "bytes": 4887688,
+      "sha256": "321f2bb27da4429354fd0de26227ca0401097ffab4e63f5cb0c924d6afaa56ac",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/original-stream-2.stdout.log",
+      "bytes": 818407,
+      "sha256": "ac1ebb2fdc739a6c75f7ba21a369878ff30ede845bd421be1de8f698a14df247",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/original-stream-3.stdout.log",
+      "bytes": 544,
+      "sha256": "848aabacf03e40bdbdc6262d553e8f2e89d985f2f1d8a007f0a62d77e3df9a91",
+      "kind": "RAW_MSI_EXTRACT_STREAM_IDENTITY_ONLY"
+    },
+    {
+      "path": "controlled-post-write-package-first/witness.dll",
+      "bytes": 541610,
+      "sha256": "1e60f732780407dfa4ccb1871af2f218f4784f8c492425a8ed68dca3e4aa074a",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/download/FutureClassroom-r80-controlled-post-write-33499c11ebd0419a9a45d5d7dca1cc19/canonical/FutureClassroom.msi",
+      "bytes": 12699136,
+      "sha256": "4dd5b531da2c9958cd3093ac9a061accd8ed330cf52b617f3a2b40f4513a8830",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/download/FutureClassroom-r80-controlled-post-write-33499c11ebd0419a9a45d5d7dca1cc19/canonical/Setup.exe",
+      "bytes": 818407,
+      "sha256": "295edcd9a85f1810bc57a19e6dab940b8b587ed3511654eca0e4331b869dc181",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/download/FutureClassroom-r80-controlled-post-write-33499c11ebd0419a9a45d5d7dca1cc19/forced/FutureClassroom.msi",
+      "bytes": 13245440,
+      "sha256": "627f6b8a34e07f2365c8bee6e73fc9367d9fdd03343758a2dded04fa009bda1b",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/download/FutureClassroom-r80-controlled-post-write-33499c11ebd0419a9a45d5d7dca1cc19/forced/Setup.exe",
+      "bytes": 818407,
+      "sha256": "8ca8ed53e44bf538b6a39270b8f1e099c0668db5fab6696a9fea820b0479d3b3",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/upload/canonical-FutureClassroom.msi",
+      "bytes": 12699136,
+      "sha256": "4dd5b531da2c9958cd3093ac9a061accd8ed330cf52b617f3a2b40f4513a8830",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/upload/canonical-Setup.exe",
+      "bytes": 818407,
+      "sha256": "295edcd9a85f1810bc57a19e6dab940b8b587ed3511654eca0e4331b869dc181",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/upload/forced-FutureClassroom.msi",
+      "bytes": 13245440,
+      "sha256": "627f6b8a34e07f2365c8bee6e73fc9367d9fdd03343758a2dded04fa009bda1b",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-post-write-runtime-first/upload/forced-Setup.exe",
+      "bytes": 818407,
+      "sha256": "8ca8ed53e44bf538b6a39270b8f1e099c0668db5fab6696a9fea820b0479d3b3",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "derivedViews": {
+    "path": "derived-views-first.json",
+    "bytes": 3774,
+    "sha256": "feb2da249fab3d59b87584d2daccadcbf3c6fffe3c241bed36282ab9e07a30da"
+  },
+  "scannerBackend": {
+    "priorCommittedTar": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz",
+    "member": "archive-preparation-second/archive-second.py",
+    "sha256": "da2906c450ea8c2ac7d18e358507023f519dbcc6faf1a9ac1abb1ae16af8c30f"
+  },
+  "sourceDeletion": false,
+  "WindowsContacted": false,
+  "progressWritten": false
+}

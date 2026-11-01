@@ -1,0 +1,54 @@
+{
+  "status": "OBSERVATION_COMPLETE_WIN7_FAILED_MODERN_NOT_TERMINAL",
+  "fixed_source_sha": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2",
+  "scope": "Read-only original GitHub run/job/step/artifact/log observation. No dispatch/retry/cancel/ref mutation, Cargo, Windows connection, PE execution, product source write or credential read.",
+  "observation": {
+    "start_utc": "2026-11-01 22:53:03 UTC",
+    "last_jobs_response_utc": "2026-11-01 23:08:03 UTC",
+    "elapsed_seconds": 900.024,
+    "nominal_max_seconds": 900,
+    "timing_note": "Last response received 0.024 seconds after nominal observation window; no workflow budget changed.",
+    "poll_snapshots": 13,
+    "separate_modern_end_snapshot": true
+  },
+  "run_identities_file": "run-identities-first.json",
+  "modern": {
+    "run_id": 41359217299,
+    "job_id": 125005763332,
+    "status": "NOT_TERMINAL_AT_OBSERVATION_END",
+    "actual_github_status": "in_progress",
+    "actual_github_conclusion": null,
+    "active_step": "Compile MSVC workspace",
+    "html_url": "https://github.com/NevermoreN/future-classroom/actions/runs/41359217299",
+    "logs_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/runs/41359217299/logs",
+    "workflow_left_running": true,
+    "terminal_artifacts_not_observed": true
+  },
+  "win7_compile_only": {
+    "run_id": 41359220317,
+    "job_id": 125005771547,
+    "status": "COMPLETED_FAILURE",
+    "actual_github_status": "completed",
+    "actual_github_conclusion": "failure",
+    "failed_step": "Compile Win7 MSVC candidate with rebuilt std/test; never execute",
+    "cleanup_step": "success",
+    "upload_step": "success",
+    "diagnosis_file": "win7-failure-diagnosis-first.json",
+    "html_url": "https://github.com/NevermoreN/future-classroom/actions/runs/41359220317",
+    "job_logs_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/jobs/125005771547/logs",
+    "artifact": {
+      "id": 13105570010,
+      "size_in_bytes": 46540677,
+      "digest": "sha256:703b8eaf8a907c3b2f9a7464df87ff3e7bfe099c4ecfe58bdfa7dd60d3caa6d2",
+      "archive_download_url": "https://api.github.com/repos/NevermoreN/future-classroom/actions/artifacts/13105570010/zip",
+      "expired": false,
+      "downloaded_by_observer": false
+    }
+  },
+  "boundaries": [
+    "CI observations apply only to fixed 7c135c3 source; recovery candidate 33c11f5 is separate.",
+    "Compile-only evidence is not Win7, Win10 or Win11 runtime evidence.",
+    "Win7 failure remains original FAILURE; Modern nonterminal is not failure.",
+    "Original workflow 135/105/60 budgets remain unchanged."
+  ]
+}

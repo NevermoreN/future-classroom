@@ -1,0 +1,59 @@
+{
+  "status": "PASS_LOCAL_DERIVATION_ONLY_NOT_RUNTIME",
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/fc-round80-controlled-repair/controlled-post-write-preparation-first/derive-post-write.py",
+    "--execute",
+    "--source-root",
+    "/tmp/fc-round80-controlled-repair/checkout-52d6392-first",
+    "--canonical-dir",
+    "/tmp/fc-round80-controlled-repair/controlled-product-package-second",
+    "--report-sha256",
+    "9714e3b8ef3f40b735fb8929d810bd62e8fc7bd497f3ec8ac6fda072cf32c5f8",
+    "--output-dir",
+    "/tmp/fc-round80-controlled-repair/controlled-post-write-package-first",
+    "--tools-manifest",
+    "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools.json",
+    "--child-environment",
+    "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/child-environment.json"
+  ],
+  "actualExit": 0,
+  "originalParentReaped": true,
+  "timedOut": false,
+  "elapsedSeconds": 6.445103861999087,
+  "outerBudgetSeconds": 240,
+  "stdout": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-post-write-operation-first/stdout.log",
+    "bytes": 172,
+    "sha256": "fea2d73a8b22c202cb0696de2e30dd1654daca72e488fcc0761b244082bc0e84"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-post-write-operation-first/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "preparationFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-post-write-preparation-first/freeze-first.json",
+    "bytes": 1483,
+    "sha256": "e45dfd3f3f924adf09eac7437409ab3bff1b2c7b12f4488614dfb89585d2af91"
+  },
+  "script": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-post-write-preparation-first/derive-post-write.py",
+    "bytes": 22439,
+    "sha256": "8099b959e376c1e35cfa115ba986371e57494ecd3beab787d1b400a60641d70c"
+  },
+  "canonicalReport": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-product-package-second/report.json",
+    "bytes": 112386,
+    "sha256": "9714e3b8ef3f40b735fb8929d810bd62e8fc7bd497f3ec8ac6fda072cf32c5f8"
+  },
+  "windows": "NOT_CONTACTED",
+  "originalPending": "NOT_TOUCHED",
+  "runtimeRollback": "NOT_RUN",
+  "derivationReport": {
+    "path": "/tmp/fc-round80-controlled-repair/controlled-post-write-package-first/derivation-report.json",
+    "bytes": 68082,
+    "sha256": "b7aea6e5912e2f9dabc558b7fa10cad5006fc9e7561f2843e147fb8a67c49b43"
+  }
+}

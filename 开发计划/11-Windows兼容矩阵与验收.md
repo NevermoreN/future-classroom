@@ -9,7 +9,7 @@
 | Windows 7 SP1 32位 | x86，正式候选i686-win7-windows-msvc | 干净系统、实际白板显卡/触控及必需补丁、完整功能与安装包 | 实机NOT_RUN：目前无该系统测试机；R78同源Win7目标MSVC构建及在Win11运行通过，不能替代Win7实机 |
 | Windows 10 32位 | x86 | 实际学校build/补丁、低权限完整运行、驱动/触控与安装恢复 | 实机NOT_RUN：用户确认目前只有已授权Win11，不重复询问 |
 | Windows 10 64位 | x86经WOW64 | 完整功能，文件/注册表重定向，资料关联打开与系统配置实态 | 实机NOT_RUN：用户确认目前只有已授权Win11，不重复询问 |
-| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：R78两套同源MSVC各1567项及公开桌面20步、产品MSI首次安装/同版重应用/卸载通过；R79损坏拒绝及私有事务原型通过。受损自动修复接入、升级、真实登录、可见希沃及长稳等仍未完成，详见实施记录R78–R80 |
+| Windows 11 64位 | x86经WOW64 | 完整功能及当前系统安全/证书/音频/显示行为 | 局部PASS：R78两套同源MSVC各1567项及公开桌面20步；R80固定GNU DEV产品Setup安装、缺失修复、卸载及实际写入后失败回滚通过。跨版本升级、Run归属、真实登录、可见希沃及长稳等仍未完成，详见实施记录R78–R80 |
 | ARM64操作系统/原生ARM64包 | 待目标系统确认 | 独立工具链、驱动、设备与安装包 | NOT_RUN，不因存在Windows 11 ARM64就自动宣称支持 |
 
 Windows 10和Windows 11是产品运行目标，不是仅开发机构建环境。首轮复用x86程序；x64操作系统下运行x86程序与交付原生x64二进制是不同事项。WOW64是微软提供的兼容机制，但仍必须做真实产品验证，不能据此跳过测试。[微软WOW64说明](https://learn.microsoft.com/en-us/windows/win32/winprog64/running-32-bit-applications)
@@ -374,3 +374,8 @@ R54已最小移除三处Windows适配引入的上述WinRT/combase依赖；新GNU
 用户再次确认仅有现有授权Win11 Pro build26300/WOW64测试机。继续隐藏、串行测试并保留其SSH服务、公钥授权和仓库外持续私钥，不改变该机系统。上表当前状态已按最新证据更新；历史各轮BLOCKED/NOT_RUN/FAIL原件及当时范围保留，Win7 SP1 x86、Win10两种位数各自实机仍为NOT_RUN。
 
 R78同一源码261c58a的现代与Win7专用MSVC构建均通过，在该Win11各执行22份测试程序、父harness各1567通过；正式产品MSI候选实际首次安装、同版本重应用及卸载通过。R79同源产品MSI的缺失/篡改/额外文件三例均实际拒绝且保留受损前像，随后恢复测试夹具并正式卸载；另有受控事务原型四条有限路径通过，不能把单payload原型当作实际14份产品文件自动修复。R80私有Draft/Begin所有权基础在Win11新增6项及完整生命周期52项通过，真实安装adapter尚在接入。各计数、原始失败、清理及源码范围详见[实施记录](10-实施进度与验证记录.md)，不把跨系统构建、同机运行或有限原型升格为三系统正式验收。
+
+
+R80后续固定源码33c11f5的[69项生命周期组件](验证记录/2026-11-02-round80-owned-removal/owned-removal-native-runtime-first/report.json)、[正常Setup安装／缺失文件修复／卸载](验证记录/2026-11-02-round80-owned-removal/controlled-product-runtime-second/report.json)及[完整14文件写入后的首次安装／受损修复失败回滚](验证记录/2026-11-02-round80-post-write-rollback/controlled-post-write-runtime-first/report.json)均已在该Win11实际通过。69项包含原维护6项及新解析3项，不重复相加；普通三阶段实际B/G均0，五阶段回滚流程B1603/0/1603/0/0且五G均0。损坏前像包含LICENSE缺失和51字节PROBE内容，回滚逐字节及组件／注册事实恢复；随后正常修复及卸载通过。各自原件完整下载核对，相关nonce、Pending及gate均精确清理，持续SSH授权保持。独立显式恢复清除上一次失败测试安装不回填旧事务End0，原卸载失败仍保持。
+
+这些为固定GNU DEV产物的Win11运行证据；7c135c的现代MSVC编译成功与Win7严格Clippy失败分别保留，修正候选a4702b5的新现代MSVC和Win7目标MSVC工作流均实际SUCCESS，官方ZIP大小及SHA核同；两份原结果均为COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN，尚未执行这些产物的Win11运行。当前没有新增Win7或Win10实机证据，也没有以这些安装测试代替可见白板、触控／DPI、物理音频、真实登录、跨版本升级、Run所有权、校园网络或72小时验收。

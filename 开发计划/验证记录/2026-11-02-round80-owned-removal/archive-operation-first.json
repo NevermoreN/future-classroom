@@ -1,0 +1,19 @@
+{
+  "status": "ACTUAL_ARCHIVE_ATTEMPT_FAILED_BEFORE_TAR_WRITE",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-02-round80-owned-removal/archive-controller-first.py",
+    "--execute"
+  ],
+  "session": 9346,
+  "actualExit": 1,
+  "originalLocalParentReaped": true,
+  "controllerSha256": "e4816d532f42f7007b2b8cd15fc198855875d15f9dff4a9302b6cb60021a0f9d",
+  "failureType": "JSONDecodeError",
+  "cause": "Three exact plain cargo/rustc/linker version stdout files have .jsonl filename, not JSONL syntax. All bytes remain valid plain text and fully scanned.",
+  "tarCreated": false,
+  "sourceChanged": false,
+  "findingNotReclassified": "Original archive attempt remains FAIL. No source/compiler/runtime failure inferred.",
+  "minimalCorrection": "Second controller exact3 path/bytes/SHA-bound plain version form; scan all raw text and every line, all other JSONL remains strict."
+}

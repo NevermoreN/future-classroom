@@ -1,0 +1,46 @@
+{
+  "status": "PASS_FULL_MEMBER_REPLAY_AND_STRICT_FINITE_CREDENTIAL_SCAN",
+  "archiveSha256": "e8bf230a421cb393f1271edd3a22f1958feaeb02683354dd4de6aa2e6d8656d6",
+  "archiveBytes": 1466111,
+  "memberCount": 584,
+  "originalTextBytes": 7919248,
+  "statistics": {
+    "textViews": 117515,
+    "utf16Views": 250,
+    "cp936Views": 20,
+    "clixmlDecodedViews": 48,
+    "decodedBase64Views": 243,
+    "jsonContainers": 4702,
+    "decodedJsonStringViews": 114209
+  },
+  "jsonlRecordsAlsoDecoded": 1424,
+  "exactPlainToolVersionLinesAlsoScanned": 24,
+  "nativeStructuralDecodedViews": {
+    "nativeStructuralDecodedViews": 123
+  },
+  "credentialFindings": [],
+  "credentialPatterns": [
+    "private-key-pem",
+    "github-token",
+    "openai-secret",
+    "aws-access-key",
+    "bearer-secret",
+    "basic-secret",
+    "signed-download-url",
+    "session-cookie-bearer",
+    "json-issued-web-secret",
+    "json-password-value",
+    "potential-pairing-short-code"
+  ],
+  "textForms": "3 exact UTF16 MSI notes,51 exact parentPath/bytes/SHA+JSONtrail+decodedSHA native structures;3 known decoded identities only. Every raw original preserved; full structural/hex/visible/concatenated native views scanned. Unknown controls rejected.",
+  "encodingCoverage": "Strict UTF8/UTF16/CP936,CLIXML,JSON/JSONL strings,canonical and declared nestedbase64. Depth12/JSON250000/decoded64MiB per original bounds retained.",
+  "directReports": 16,
+  "actions": {
+    "Windows": false,
+    "Cargo": false,
+    "activeWorktreeRead": false,
+    "sourceDeletion": false,
+    "progressWritten": false,
+    "commitPush": false
+  }
+}

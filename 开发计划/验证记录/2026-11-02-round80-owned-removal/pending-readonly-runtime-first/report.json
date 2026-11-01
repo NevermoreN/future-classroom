@@ -1,0 +1,589 @@
+{
+  "status": "FAIL_OR_UNKNOWN_RETAIN_NEW_CAPTURE_NONCE",
+  "operations": [
+    {
+      "label": "01-create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "budgetSeconds": 25,
+      "actualExit": 0,
+      "originalLocalParentReaped": true,
+      "remoteReturnUnknown": false,
+      "originalLocalPid": 27717,
+      "stdout": {
+        "path": "01-create.stdout.log",
+        "bytes": 218,
+        "sha256": "943f4b5d6ec6cc94df954d12fb5b83678c26b3851d7d4dddecca7f18484952a6"
+      },
+      "stderr": {
+        "path": "01-create.stderr.log",
+        "bytes": 618,
+        "sha256": "f566a859b2b61507590e43af7243c40be20de68476fa55bd33df57cea526dbe0"
+      }
+    },
+    {
+      "label": "02-upload",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "/tmp/fc-round80-controlled-repair/pending-readonly-runtime-first/upload/PendingSnapshot.cs",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-pending-capture-2949bb6b89d645d09547c3b8d1ff88b6/PendingSnapshot.cs"
+      ],
+      "budgetSeconds": 25,
+      "actualExit": 0,
+      "originalLocalParentReaped": true,
+      "remoteReturnUnknown": false,
+      "originalLocalPid": 27727,
+      "stdout": {
+        "path": "02-upload.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "02-upload.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "03-capture",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "budgetSeconds": 60,
+      "actualExit": 0,
+      "originalLocalParentReaped": true,
+      "remoteReturnUnknown": false,
+      "originalLocalPid": 27729,
+      "stdout": {
+        "path": "03-capture.stdout.log",
+        "bytes": 9919,
+        "sha256": "22ffe6d60ce413d4e920d17cdeca6c599bd5c432accb085c9878ec5826582530"
+      },
+      "stderr": {
+        "path": "03-capture.stderr.log",
+        "bytes": 843,
+        "sha256": "44bc18e340138f9bd4f602218b304114965d94aaa21c65edc6b7a98227ef9dbd"
+      }
+    },
+    {
+      "label": "04-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "budgetSeconds": 20,
+      "actualExit": 1,
+      "originalLocalParentReaped": true,
+      "remoteReturnUnknown": false,
+      "originalLocalPid": 27730,
+      "stdout": {
+        "path": "04-inventory.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "04-inventory.stderr.log",
+        "bytes": 1227,
+        "sha256": "dfea6d14e6ee969a0058ba5cf901aa6bcd9e476320d1d3f1b55d734811a458ad"
+      }
+    }
+  ],
+  "originalEvidence": {
+    "originalReport": {
+      "path": "/tmp/fc-round80-controlled-repair/controlled-product-runtime-first/report.json",
+      "bytes": 123135,
+      "sha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+    },
+    "originals": [
+      {
+        "path": "/tmp/fc-round80-controlled-repair/controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/product-result.json",
+        "bytes": 265138,
+        "sha256": "42b9cef5600789d4d7d883a738300dc2a258537ecce0e4c72874a9505d916a8f"
+      },
+      {
+        "path": "/tmp/fc-round80-controlled-repair/controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/uninstall-phase.json",
+        "bytes": 16227,
+        "sha256": "cade6603196cb5498157a5427006b60956ee2f206315897d9312c00f43d20601"
+      }
+    ],
+    "beforeAbsent": {
+      "mutations": false,
+      "run": {
+        "contentsRetained": false,
+        "knownAbsent": true,
+        "view": "Registry32",
+        "writePerformed": false,
+        "value": "FutureClassroom"
+      },
+      "sourceGit": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+      "componentMarkers": {
+        "knownAbsent": true,
+        "key": "Software\\FutureClassroom\\Installer\\Components",
+        "view": "Registry32"
+      },
+      "localKnownFolder": "C:\\Users\\Elior\\AppData\\Local",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "registration": {
+        "contexts": 7,
+        "otherUsers": "NOT_QUERIED",
+        "relatedCount": 0,
+        "relatedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+        "knownAbsent": true,
+        "sidArgument": "",
+        "state": -1,
+        "count": 0,
+        "product": "{9E50831D-7811-5039-8BC3-4934647448D8}"
+      },
+      "status": "PASS_BEFORE_KNOWN_ABSENCE_ONLY_NOT_EXECUTION_ADMISSION",
+      "target": "i686-pc-windows-gnu",
+      "scope": "Current authorized admin Win11 only; other users/cache/school data not queried; candidate helper independently rechecks under original native owner.",
+      "fixedPaths": [
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "status": "KNOWN_ABSENT"
+        },
+        {
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "normalRustHelper": "NOT_EXECUTED",
+      "productMSI": "NOT_EXECUTED"
+    },
+    "gateFacts": [
+      "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+      "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "9a59d62d:002f00000008c8d4:01dd6a5029ef3196",
+      "9a59d62d:002a00000008c8d5:01dd6a5029ef3196",
+      "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;OICI;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;OICI;FA;;;SY)",
+      "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)"
+    ],
+    "originalSetup": {
+      "Pid": 37196,
+      "Tid": 0,
+      "Wait": 0,
+      "ExitCode": 1603,
+      "Creation": 134380456451547673,
+      "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067\\Setup.exe",
+      "Sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Kind": "process",
+      "Status": "HELD_ORIGINAL_IDENTITY",
+      "Error": null,
+      "ExitKnown": true,
+      "CheckedClose": true,
+      "CloseAttempted": true
+    },
+    "originalG": {
+      "CaptureSource": "10MS_FIXED_SETUP_NAME_POLL",
+      "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+      "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067\\Setup.exe",
+      "Sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "Role": "owned-guardian",
+      "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+      "ParentLink": "ORIGINAL_SETUP_PARENT_INSTANCE_FACT_NOT_SESSION_AUTHORITY",
+      "Pid": 9528,
+      "ParentPid": 37196,
+      "Transaction": null,
+      "CreationFiletime": 134380456452000970,
+      "ParentCreationFiletime": 134380456451547673,
+      "ParentImage": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067\\Setup.exe",
+      "ParentSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+      "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+      "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+      "ActualWait": 0,
+      "ActualExitCode": 1603,
+      "ExactCandidateArgv": [
+        "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067\\Setup.exe",
+        "owned-guardian"
+      ],
+      "NativeCommandStatus": "SUCCESS_VALIDATED_UTF16",
+      "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+      "NativeBasicStatus": "EXACT_ORIGINAL_HANDLE_BASIC_INFORMATION",
+      "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+      "ParentPidSource": "ORIGINAL_HANDLE_PBI_CLASS0",
+      "WmiSupplementStatus": "NOT_REQUESTED_NATIVE_COMMAND_AND_PARENT_COMPLETE",
+      "NativeCommandNtStatus": 0,
+      "NativeBasicNtStatus": 0,
+      "NativeCommandReturnLength": 282,
+      "NativeBasicReturnLength": 48,
+      "NativeBasicPid": 9528,
+      "NativeBasicParentPid": 37196,
+      "NativeCommandLength": 264,
+      "NativeCommandMaximumLength": 266,
+      "NativeCommandBufferOffset": 16,
+      "AtOriginalOpenWait": 258,
+      "AtAuthenticatedCaptureWait": 258,
+      "ArrivalElapsedTicks": 640698,
+      "OriginalOpenElapsedTicks": 640715,
+      "AuthenticatedElapsedTicks": 649181,
+      "MetadataCompleteElapsedTicks": 649389
+    },
+    "originalThread": "NOT_EXTERNALLY_CAPTURED_NOT_SYNTHESIZED",
+    "originalEnd": "UNKNOWN_UNCHANGED",
+    "sameBoot": "NOT_ASSERTED",
+    "oldBootIdentity": "NOT_CAPTURED_IN_ORIGINAL_REPORT",
+    "captureOnlyNoRecoveryAuthority": true
+  },
+  "originalEnd": "UNKNOWN_UNCHANGED",
+  "recoveryOrDeletePermission": false,
+  "scope": "READONLY_PENDING_FILE_FACTS_ONLY",
+  "windowsRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-pending-capture-2949bb6b89d645d09547c3b8d1ff88b6",
+  "captureRemoteExit": 0,
+  "snapshot": {
+    "originalEnd": "UNKNOWN_UNCHANGED",
+    "restoreOrDeleteAuthorized": false,
+    "capture": {
+      "Status": "PASS_READONLY_PINNED_PENDING_SNAPSHOT_ONLY",
+      "Scope": "CURRENT_PENDING_BYTES_ONLY_NOT_END_OR_RECOVERY_AUTHORITY",
+      "Error": null,
+      "Mutations": false,
+      "OriginalEndKnown": false,
+      "SameHandleBytesEqual": true,
+      "SameHandleMetadataEqual": true,
+      "CloseUnknown": false,
+      "OriginalEnd": "UNKNOWN_UNCHANGED",
+      "BytesBase64": "RkMtSU5TVEFMTC1QRU5ESU5HAHYxADk5Mzc4ODA3LTA5OEQtNUYwNC04RDRELUYxODFERkEyMThENQB2E0vYHFhzi/N4P49VsbjxBRwAAQUAAAAAAAUVAAAAZ/A56MpuVG+iH4R16QMAAA==",
+      "Sha256": "6b385a9577182edeb9abc51bfa3d317386f0f070c126fd545534d1c437f9459d",
+      "CurrentUtc": "2026-11-01T22:45:59.8593240Z",
+      "CurrentUtcFiletime": 134380467598593240,
+      "CurrentTickCount64": 898769921,
+      "CompleteBytes": 106,
+      "SchemaDiagnostic": "CANONICAL_V1_BYTES_ONLY_NO_OWNER_LIVENESS_END_OR_RECOVERY_AUTHORITY",
+      "ParsedFamily": "99378807-098D-5F04-8D4D-F181DFA218D5",
+      "ParsedNonce": "76134bd81c58738bf3783f8f55b1b8f1",
+      "ParsedSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "ParsedOperationTag": 5,
+      "SchemaContainsPidOrBootIdentity": false,
+      "BootIdentity": "UNKNOWN_NOT_CAPTURED_IN_OLD_REPORT",
+      "SameBoot": "NOT_ASSERTED",
+      "PendingAclStatus": "EXACT_ORIGINAL_PROTECTED_LEAF_OWNER_DACL",
+      "RootBefore": {
+        "Role": "familyroot",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+        "Identity": "9a59d62d:002f00000008c8d4:01dd6a5029ef3196",
+        "Volume": "9a59d62d",
+        "FileId": "002f00000008c8d4",
+        "CreationHex": "01dd6a5029ef3196",
+        "CreationUtc": "2026-11-01T22:27:22.4452502Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;OICI;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;OICI;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAAyQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAAxQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+        "CreationFiletime": 134380456424452502,
+        "WriteFiletime": 134380456453054245,
+        "Bytes": 0,
+        "Links": 1,
+        "Attributes": 16
+      },
+      "GateBefore": {
+        "Role": "exclusive_gate",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\gate.lock",
+        "Identity": "9a59d62d:002a00000008c8d5:01dd6a5029ef3196",
+        "Volume": "9a59d62d",
+        "FileId": "002a00000008c8d5",
+        "CreationHex": "01dd6a5029ef3196",
+        "CreationUtc": "2026-11-01T22:27:22.4452502Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAACQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAABQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\gate.lock",
+        "CreationFiletime": 134380456424452502,
+        "WriteFiletime": 134380456424452502,
+        "Bytes": 0,
+        "Links": 1,
+        "Attributes": 32
+      },
+      "PendingBefore": {
+        "Role": "pending_readonly",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+        "Identity": "9a59d62d:001b00000008c8fe:01dd6a502a05f195",
+        "Volume": "9a59d62d",
+        "FileId": "001b00000008c8fe",
+        "CreationHex": "01dd6a502a05f195",
+        "CreationUtc": "2026-11-01T22:27:22.5943445Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAACQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAABQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+        "CreationFiletime": 134380456425943445,
+        "WriteFiletime": 134380456453054245,
+        "Bytes": 106,
+        "Links": 1,
+        "Attributes": 32
+      },
+      "PendingAfter": {
+        "Role": "pending_readonly",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+        "Identity": "9a59d62d:001b00000008c8fe:01dd6a502a05f195",
+        "Volume": "9a59d62d",
+        "FileId": "001b00000008c8fe",
+        "CreationHex": "01dd6a502a05f195",
+        "CreationUtc": "2026-11-01T22:27:22.5943445Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAACQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAABQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+        "CreationFiletime": 134380456425943445,
+        "WriteFiletime": 134380456453054245,
+        "Bytes": 106,
+        "Links": 1,
+        "Attributes": 32
+      },
+      "GateAfter": {
+        "Role": "exclusive_gate",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\gate.lock",
+        "Identity": "9a59d62d:002a00000008c8d5:01dd6a5029ef3196",
+        "Volume": "9a59d62d",
+        "FileId": "002a00000008c8d5",
+        "CreationHex": "01dd6a5029ef3196",
+        "CreationUtc": "2026-11-01T22:27:22.4452502Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAACQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAABQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\gate.lock",
+        "CreationFiletime": 134380456424452502,
+        "WriteFiletime": 134380456424452502,
+        "Bytes": 0,
+        "Links": 1,
+        "Attributes": 32
+      },
+      "RootAfter": {
+        "Role": "familyroot",
+        "Path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+        "Identity": "9a59d62d:002f00000008c8d4:01dd6a5029ef3196",
+        "Volume": "9a59d62d",
+        "FileId": "002f00000008c8d4",
+        "CreationHex": "01dd6a5029ef3196",
+        "CreationUtc": "2026-11-01T22:27:22.4452502Z",
+        "OwnerDaclSddl": "O:S-1-5-21-3896111207-1867804362-1971593122-1001D:P(A;OICI;FA;;;S-1-5-21-3896111207-1867804362-1971593122-1001)(A;OICI;FA;;;SY)",
+        "SecurityDescriptorBase64": "AQAEkBQAAAAAAAAAAAAAADAAAAABBQAAAAAABRUAAABn8Dnoym5Ub6IfhHXpAwAAAgBAAAIAAAAAAyQA/wEfAAEFAAAAAAAFFQAAAGfwOejKblRvoh+EdekDAAAAAxQA/wEfAAEBAAAAAAAFEgAAAA==",
+        "FinalPath": "\\\\?\\C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+        "CreationFiletime": 134380456424452502,
+        "WriteFiletime": 134380456453054245,
+        "Bytes": 0,
+        "Links": 1,
+        "Attributes": 16
+      },
+      "NativeReturns": [
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836425008,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836430208,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836430208,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836430208,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836422928,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836425008,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836436448,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836425008,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836425008,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836425008,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836432288,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "security_descriptor_LocalFree",
+          "OriginalHandle": 2621836434368,
+          "ReturnValue": 0,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "pending_readonly",
+          "OriginalHandle": 2744,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "exclusive_gate",
+          "OriginalHandle": 2740,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "familyroot",
+          "OriginalHandle": 2736,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "ancestor",
+          "OriginalHandle": 2732,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "ancestor",
+          "OriginalHandle": 2728,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "ancestor",
+          "OriginalHandle": 2724,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "ancestor",
+          "OriginalHandle": 2720,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        },
+        {
+          "Role": "ancestor",
+          "OriginalHandle": 2716,
+          "ReturnValue": 1,
+          "Attempted": true,
+          "Success": true,
+          "Unknown": false,
+          "LastError": 0
+        }
+      ]
+    },
+    "assembly": {
+      "bytes": 14848,
+      "sha256": "0a7cddfb3e1076eb607d7f6d19d21f435d9e6fbfd92ac91eca36a07b3bd5fbdb"
+    },
+    "bootDiagnostic": {
+      "lastBootUtc": "2026-10-22T13:06:36.5000000Z",
+      "status": "CURRENT_BOOT_WMI_DIAGNOSTIC_ONLY",
+      "sameBoot": "NOT_ASSERTED",
+      "lastBootFiletime": 134371479965000000,
+      "oldBootIdentity": "NOT_CAPTURED_IN_ORIGINAL_REPORT"
+    },
+    "source": {
+      "bytes": 13891,
+      "sha256": "04b8183284ac4c870fda69ac0a3ae4c207438e726328bbd2a463e769187c6a38"
+    },
+    "status": "RETURNED_READONLY_CAPTURE_NOT_RECOVERY",
+    "originalReportSha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+  },
+  "error": "ValueError:INVENTORY0",
+  "elapsedSeconds": 2.097323107002012
+}
