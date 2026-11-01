@@ -1,0 +1,28 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "nas",
+    "sudo /usr/local/bin/docker exec --user 0 -i b0a126d6ae04 /config/.python/python/bin/python3 -"
+  ],
+  "privilege": "Authorized NAS passwordless sudo; main and owned worktree safe.directory process-only, no global Git writes",
+  "payload": "import os,sys,runpy,hashlib\nfrom pathlib import Path\nmain=Path('/workspace/共享/Eliora/未来教室计划');script=Path('/tmp/fc-round76-cleanup-controller-second/cleanup-round76-third.py');assert hashlib.sha256(script.read_bytes()).hexdigest()=='e44d0c8caa52e719aa00ed72ac87c39e86b1d1e61c7e5d7eef93c8d8382fdee8'\nowner=main.stat();os.chdir(main)\nos.environ['GIT_CONFIG_COUNT']='2'\nos.environ['GIT_CONFIG_KEY_0']='safe.directory';os.environ['GIT_CONFIG_VALUE_0']=str(main)\nos.environ['GIT_CONFIG_KEY_1']='safe.directory';os.environ['GIT_CONFIG_VALUE_1']='/tmp/fc-round76-ci-evidence/msi-checkout-preparation-first/checkout-3bad949-first'\nsys.argv=['/tmp/fc-round76-cleanup-controller-second/cleanup-round76-third.py', '--commit', '326035e508213d10f2595592fe4b57bdbccefef2', '--index', '/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round76-ci/archive-index-first.json', '--expected-index-sha256', '0bff29512459bbbf3ccefc1aeefc9d831a87398d5e9fab825c3e534db40243ba', '--archive', '/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round76-ci/evidence-originals-first.tar.gz', '--expected-archive-sha256', '5cf341c1ff112b9f63aed82199f8adfb23ce46cbe23ac5c0df214fe4bdada5ef', '--controller-committed-path', '开发计划/验证记录/2026-11-01-round76-cleanup-controller-third.py', '--all-controllers-reaped', '--execute']\ntry:runpy.run_path(str(script),run_name='__main__')\nfinally:\n report=main/'开发计划/验证记录/2026-11-01-round76-cleanup-second.json'\n if report.is_file():os.chown(report,owner.st_uid,owner.st_gid)\n",
+  "payloadSha256": "1afcec3e2d80934ab14757519fd7cc5de2345ce327c45a7caf8aad57b57e633d",
+  "actualExit": true,
+  "exitCode": 0,
+  "reaped": true,
+  "elapsedSeconds": 15.890268353978172,
+  "stdout": {
+    "bytes": 244,
+    "sha256": "cd2ef4a5d0ebf2bc77dacd7b41dd5987a90e0eec87072475e09f8f048563be5f",
+    "text": "{\"status\": \"PASS_COMMITTED_R76_EXACT_LOCAL_CLEANUP\", \"report\": \"/workspace/\\u5171\\u4eab/Eliora/\\u672a\\u6765\\u6559\\u5ba4\\u8ba1\\u5212/\\u5f00\\u53d1\\u8ba1\\u5212/\\u9a8c\\u8bc1\\u8bb0\\u5f55/2026-11-01-round76-cleanup-second.json\", \"rootRemoved\": true}\n"
+  },
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text": ""
+  }
+}
