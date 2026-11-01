@@ -1,0 +1,113 @@
+{
+  "status": "FINITE_CONTROLLED_SETUP_EVIDENCE_ARCHIVE_NOT_NEW_RUNTIME",
+  "latestCandidate": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2",
+  "sourceBase": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "parent": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+  "preservedSourceFiles": 12,
+  "candidateSync": {
+    "path": "setup-replay-candidate-sync-first.json",
+    "bytes": 487,
+    "sha256": "5162995fb28010fe6936dd18a3469204f64a5f396ea29d6012bd92fd8b62044c"
+  },
+  "componentRegressions": [
+    {
+      "report": {
+        "path": "setup-native-runtime-first/report.json",
+        "bytes": 110903,
+        "sha256": "06f47e433d6060aaeb5593af91ad46ede4365a6f6605e25ff4fa445b92bc8c77"
+      },
+      "scopes": {
+        "controlled": 6,
+        "lifecycle": 65
+      },
+      "overlap": "65 includes controlled6; nested child summaries are not added to parent totals",
+      "authority": "LEGACY_AND_SETUP_COMPONENT_REGRESSION_NOT_ACTUAL_PRODUCT_MSI_FLOW",
+      "cleanup": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+      "jointProductRetest": "NOT_RUN"
+    },
+    {
+      "report": {
+        "path": "setup-replay-native-runtime-first/report.json",
+        "bytes": 111276,
+        "sha256": "68575b0d208cea556a3892866354d9333248e10162a6a2ef468c25df36334a53"
+      },
+      "scopes": {
+        "controlled": 6,
+        "lifecycle": 66
+      },
+      "overlap": "66 includes controlled6; nested child summaries are not added to parent totals",
+      "authority": "LEGACY_AND_SETUP_COMPONENT_REGRESSION_NOT_ACTUAL_PRODUCT_MSI_FLOW",
+      "cleanup": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+      "jointProductRetest": "NOT_RUN"
+    }
+  ],
+  "normalProducer": {
+    "report": {
+      "path": "controlled-product-producer-first/evidence.json",
+      "bytes": 5370,
+      "sha256": "9b0784a8c2b25a334e3505d313a0325c7f78f99485bee78c470d10781bce11e2"
+    },
+    "sourceHead": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+    "status": "DEV_FROZEN_NORMAL_BUILD_ONLY"
+  },
+  "staticPackage": {
+    "report": {
+      "path": "controlled-product-package-first/report.json",
+      "bytes": 112379,
+      "sha256": "6af236d4087f68383ecaea38981bc3b2cf1b7ea7ec0b69cc7fe5e6f2c3e3d943"
+    },
+    "status": "PASS",
+    "target": "i686-pc-windows-gnu",
+    "developmentFixtureOnly": true,
+    "payloadExtraction": "EXACT_BYTES_MATCH",
+    "setup": {
+      "path": "Setup.exe",
+      "bytes": 818914,
+      "sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "template_sha256": "dc885a85cd7576f7512cc3ff2513d2c41d37311f5ec9323745f744f82aa6d4e2",
+      "inner_sha256": "3414d92c3e23981d2b910bc9381375c9a1dca04ad748f4cc54261179519d308a",
+      "only_zero32_filled": true
+    }
+  },
+  "originalJointRun": {
+    "report": {
+      "path": "controlled-product-runtime-first/report.json",
+      "bytes": 123135,
+      "sha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+    },
+    "outerActualExit": 1,
+    "nestedOuterPowerShellActualExit": 0,
+    "phaseStatus": "FAIL_NOT_COMPLETE",
+    "clientExitCodes": [
+      0,
+      0,
+      1603
+    ],
+    "actualMsiLogReturns": [
+      0,
+      0,
+      1602
+    ],
+    "downloadedOriginals": 30,
+    "Pending": "RETAINED_NOT_SETTLED",
+    "controllerFindings": {
+      "path": "controlled-product-failure-review-first/review-first.json",
+      "bytes": 11444,
+      "sha256": "d1bee45faf6d20cd14f5c88fa2af995f7bb531b52a38163fe092c64d6445d720"
+    }
+  },
+  "notRunOrNotClaimed": [
+    "No joint product retest of candidate7c135 after replay fix;65/66 are component tests only.",
+    "Original known nonzero physical process returns do not settle Pending.",
+    "Second controller fixes and teardown study are preparation/research, not Windows execution or recovery authority.",
+    "No current post-write/Pending/recovery active work included or queried.",
+    "No official hosted MSVC/Win7/Win10/ARP or production release proof."
+  ],
+  "actions": {
+    "WindowsContacted": false,
+    "worktreeOrTargetRead": false,
+    "sourceDeletion": false,
+    "mainProgressWritten": false,
+    "commitPush": false
+  }
+}

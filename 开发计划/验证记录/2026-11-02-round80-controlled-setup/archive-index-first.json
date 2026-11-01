@@ -1,0 +1,226 @@
+{
+  "status": "PASS_FINITE_CONTROLLED_SETUP_ORIGINALS_ARCHIVED",
+  "latestCandidate": "7c135c3dcb2dd4e78f70f39b97fb53746454fec2",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 2462856,
+    "sha256": "f49494a0d6b540724ba3bf66b0b23610e3c69952a6d1e043d3337bcf48a07345",
+    "memberCount": 376
+  },
+  "originalCount": 376,
+  "originalBytes": 13278445,
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "bytes": 83662,
+    "sha256": "9488aa02aab3311914124438ff460a952b242f1681a1bcb5f432973a4ceebffd"
+  },
+  "textForms": {
+    "path": "text-forms-first.json",
+    "bytes": 1708,
+    "sha256": "c153fbaf8e4f6209e75cc0f77eac77e80b6c9b81e39d7fdcf0ca1ecc7e2e0f7a"
+  },
+  "facts": {
+    "path": "batch-facts-first.json",
+    "bytes": 4091,
+    "sha256": "021fd8258d77c571504a0f110461e7154acda43bafee30b05a08c7805b8ff15c"
+  },
+  "promoted": [
+    {
+      "path": "setup-native-runtime-first/report.json",
+      "bytes": 110903,
+      "sha256": "06f47e433d6060aaeb5593af91ad46ede4365a6f6605e25ff4fa445b92bc8c77"
+    },
+    {
+      "path": "setup-replay-native-runtime-first/report.json",
+      "bytes": 111276,
+      "sha256": "68575b0d208cea556a3892866354d9333248e10162a6a2ef468c25df36334a53"
+    },
+    {
+      "path": "controlled-product-producer-first/evidence.json",
+      "bytes": 5370,
+      "sha256": "9b0784a8c2b25a334e3505d313a0325c7f78f99485bee78c470d10781bce11e2"
+    },
+    {
+      "path": "controlled-product-package-first/report.json",
+      "bytes": 112379,
+      "sha256": "6af236d4087f68383ecaea38981bc3b2cf1b7ea7ec0b69cc7fe5e6f2c3e3d943"
+    },
+    {
+      "path": "controlled-product-runtime-first/report.json",
+      "bytes": 123135,
+      "sha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+    },
+    {
+      "path": "controlled-product-failure-review-first/review-first.json",
+      "bytes": 11444,
+      "sha256": "d1bee45faf6d20cd14f5c88fa2af995f7bb531b52a38163fe092c64d6445d720"
+    },
+    {
+      "path": "setup-replay-source-preservation-first/source-preservation-first.json",
+      "bytes": 2914,
+      "sha256": "8a8dadded096406b7e06edc2901e57759bffadd7f1d48887ead0435dd2a3fb6e"
+    },
+    {
+      "path": "setup-replay-candidate-sync-first.json",
+      "bytes": 487,
+      "sha256": "5162995fb28010fe6936dd18a3469204f64a5f396ea29d6012bd92fd8b62044c"
+    },
+    {
+      "path": "guard-setup-build-second/report.json",
+      "bytes": 169544,
+      "sha256": "32a2e4449552129b714f14dfe4a5877b43c370061f3d9b08a6d3a333dcac14ce"
+    },
+    {
+      "path": "guard-setup-clippy-first/report.json",
+      "bytes": 168898,
+      "sha256": "74a550764ead735cf8e3a1cfe9e5605e47c052c0581d4f31059fc20bfbc02d1f"
+    },
+    {
+      "path": "guard-setup-replay-build-first/report.json",
+      "bytes": 169545,
+      "sha256": "c91649c8242719d8859958379683ae46ff1c520c4622708ef4f3909922796fd8"
+    },
+    {
+      "path": "guard-setup-replay-clippy-first/report.json",
+      "bytes": 168897,
+      "sha256": "f27646d9c2877e29295d21a1309de01189f21d21d0545c434f457b10cf68fd67"
+    },
+    {
+      "path": "root-controlled-product-runtime-operation-first.json",
+      "bytes": 1363,
+      "sha256": "ef803155c23c569710b0ef3eb80a8315ec8c61a6fab79abfe87650a1a277c74d"
+    },
+    {
+      "path": "root-setup-native-runtime-operation-first.json",
+      "bytes": 600,
+      "sha256": "4c683f285ee92077737d150d3cf7cc572b28e71b85cf9cd039fc0c3350f19fd7"
+    },
+    {
+      "path": "root-setup-replay-native-runtime-operation-first.json",
+      "bytes": 1083,
+      "sha256": "1a54e8e307ea9fb3ef1b9532b8bf14a821c9717b99271f84337017bbe856937e"
+    }
+  ],
+  "excludedBinaryIdentities": [
+    {
+      "path": "controlled-product-package-first/FutureClassroom.msi",
+      "bytes": 12699648,
+      "sha256": "3414d92c3e23981d2b910bc9381375c9a1dca04ad748f4cc54261179519d308a",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-first/Setup.exe",
+      "bytes": 818914,
+      "sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-first/binary-readback-FcControlledGuardDll.stdout.log",
+      "bytes": 4886912,
+      "sha256": "44660934f6fb865baec41f16e60d7f39ef19949811f0b26358ef13f1867332c7",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-first/binary-readback-FcGuardClientTemplate.stdout.log",
+      "bytes": 818914,
+      "sha256": "dc885a85cd7576f7512cc3ff2513d2c41d37311f5ec9323745f744f82aa6d4e2",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-package-first/payload/fc-bootstrap.exe",
+      "bytes": 13390217,
+      "sha256": "cafe047745e1043a4a79e3f9b8adb0c61c9b17a47ede6d6ff17dcf907567d809",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/FutureClassroom.msi",
+      "bytes": 12699648,
+      "sha256": "3414d92c3e23981d2b910bc9381375c9a1dca04ad748f4cc54261179519d308a",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/Setup.exe",
+      "bytes": 818914,
+      "sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-first/upload/FutureClassroom.msi",
+      "bytes": 12699648,
+      "sha256": "3414d92c3e23981d2b910bc9381375c9a1dca04ad748f4cc54261179519d308a",
+      "kind": "OLE_COMPOUND_MSI_OR_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-runtime-first/upload/Setup.exe",
+      "bytes": 818914,
+      "sha256": "38a84679e6650d3589409b37299719cefb23124876701956e5abb1c454d227d1",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "setup-native-runtime-first/download/FutureClassroom-r80-setup-native-e1e4bd9daab3cc15ced1d07c60bec129/candidate-tests.exe",
+      "bytes": 4277097,
+      "sha256": "a207bcf16ff407eaca155c041ec0a36644d3c3a6f1796b5979d74917804f1306",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "setup-native-runtime-first/upload/candidate-tests.exe",
+      "bytes": 4277097,
+      "sha256": "a207bcf16ff407eaca155c041ec0a36644d3c3a6f1796b5979d74917804f1306",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "setup-replay-native-runtime-first/download/FutureClassroom-r80-setup-replay-native-e72205af6565626196a3ea5d49f6e4dc/candidate-tests.exe",
+      "bytes": 4277097,
+      "sha256": "05e43e9634d3b67c29fd182275807f383b64e4822647c9f253f0452d9f912ba0",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "setup-replay-native-runtime-first/upload/candidate-tests.exe",
+      "bytes": 4277097,
+      "sha256": "05e43e9634d3b67c29fd182275807f383b64e4822647c9f253f0452d9f912ba0",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "producerArtifactsIdentityOnly": [
+    {
+      "path": "controlled-product-producer-first/artifacts/fc-bootstrap.exe",
+      "bytes": 13390217,
+      "sha256": "cafe047745e1043a4a79e3f9b8adb0c61c9b17a47ede6d6ff17dcf907567d809",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-producer-first/artifacts/fc-installer-lifecycle.exe",
+      "bytes": 817450,
+      "sha256": "9c7afc426f96a3f540e6c3360a458a80343875c3cb2086a5ec470fa540a915d5",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "controlled-product-producer-first/artifacts/fc_windows.dll",
+      "bytes": 4886912,
+      "sha256": "44660934f6fb865baec41f16e60d7f39ef19949811f0b26358ef13f1867332c7",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "symlinksNotFollowed": [],
+  "prunedDerivedPackageTrees": [
+    {
+      "path": "controlled-product-package-first/Binary",
+      "policy": "NOT_TRAVERSED_DUPLICATE_DERIVED_PACKAGE_TREE",
+      "identitySource": "controlled-product-package-first/report.json"
+    },
+    {
+      "path": "controlled-product-package-first/extracted",
+      "policy": "NOT_TRAVERSED_DUPLICATE_DERIVED_PACKAGE_TREE",
+      "identitySource": "controlled-product-package-first/report.json"
+    },
+    {
+      "path": "controlled-product-package-first/lifecycle",
+      "policy": "NOT_TRAVERSED_DUPLICATE_DERIVED_PACKAGE_TREE",
+      "identitySource": "controlled-product-package-first/report.json"
+    }
+  ],
+  "sourceDeletion": false,
+  "WindowsContacted": false,
+  "worktreeOrTargetRead": false,
+  "mainProgressWritten": false
+}

@@ -1,0 +1,181 @@
+{
+  "status": "DEV_FROZEN_NORMAL_BUILD_ONLY",
+  "target": "i686-pc-windows-gnu",
+  "source_root": "/tmp/fc-round80-controlled-repair/checkout-52d6392-first",
+  "source_head": "c50882df40b86248e3e2d4e404d0fbe8e43e30a9",
+  "formal_ci": false,
+  "environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_TARGET_DIR": "/tmp/fc-round80-controlled-repair/target-first",
+    "CARGO_TARGET_I686_PC_WINDOWS_GNU_LINKER": "i686-w64-mingw32-gcc",
+    "RUSTFLAGS": "-C target-feature=+crt-static -C link-arg=-Wl,--major-subsystem-version,6,--minor-subsystem-version,1"
+  },
+  "removed_environment_keys": [
+    "CARGO_ENCODED_RUSTFLAGS"
+  ],
+  "runtime": "NOT_RUN",
+  "commands": [
+    {
+      "name": "product-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-bootstrap",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 433.78398204300174,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "product-compile.stdout.jsonl",
+        "bytes": 87448,
+        "sha256": "c1b9248bf5411bc8b97321e67a2c3b992e19b3ba3d470abc842370d8f6a92945"
+      },
+      "stderr": {
+        "path": "product-compile.stderr.log",
+        "bytes": 3082,
+        "sha256": "575b9bbc48de78b8700ff4cea0a3932b5a2cf4945095f0179e879acca77fc00a"
+      },
+      "artifact": {
+        "path": "artifacts/fc-bootstrap.exe",
+        "bytes": 13390217,
+        "sha256": "cafe047745e1043a4a79e3f9b8adb0c61c9b17a47ede6d6ff17dcf907567d809"
+      }
+    },
+    {
+      "name": "lifecycle-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-bootstrap",
+        "--bin",
+        "fc-installer-lifecycle",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 8.976936320999812,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "lifecycle-compile.stdout.jsonl",
+        "bytes": 87433,
+        "sha256": "ea8696a53f6753a9b8f9d103a09d24987fa83f1c4c6bc7658650ff235b03f8e4"
+      },
+      "stderr": {
+        "path": "lifecycle-compile.stderr.log",
+        "bytes": 174,
+        "sha256": "869dc2b26faf4c33907fd5b15ef4b8155909cd8e9d1bb466dccdc7be4e6bd73a"
+      },
+      "artifact": {
+        "path": "artifacts/fc-installer-lifecycle.exe",
+        "bytes": 817450,
+        "sha256": "9c7afc426f96a3f540e6c3360a458a80343875c3cb2086a5ec470fa540a915d5"
+      }
+    },
+    {
+      "name": "guard-library-compile",
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "fc-windows",
+        "--lib",
+        "--target",
+        "i686-pc-windows-gnu",
+        "--target-dir",
+        "/tmp/fc-round80-controlled-repair/target-first",
+        "--message-format=json"
+      ],
+      "actual_exit": 0,
+      "parent_reaped": true,
+      "timed_out": false,
+      "seconds": 56.36300528100037,
+      "original_budget_seconds": 900,
+      "stdout": {
+        "path": "guard-library-compile.stdout.jsonl",
+        "bytes": 41512,
+        "sha256": "dce01c13f5f18880013cbc2b84941d36d5b9786f7ba3e401e65e6a310000d0f4"
+      },
+      "stderr": {
+        "path": "guard-library-compile.stderr.log",
+        "bytes": 395,
+        "sha256": "64440fbc808520671bac4d7de3ce66c04b3f6391bed4514a39de3bbaeb7ac1b8"
+      },
+      "artifact": {
+        "path": "artifacts/fc_windows.dll",
+        "bytes": 4886912,
+        "sha256": "44660934f6fb865baec41f16e60d7f39ef19949811f0b26358ef13f1867332c7"
+      }
+    }
+  ],
+  "producer_script": {
+    "path": "/tmp/fc-round80-controlled-repair/build-controlled-product-first.py",
+    "sha256": "4108b3686bb65de22b9c0d5e9a3a5bc65834e041c9ca723d4a80f05bbf49d145"
+  },
+  "metadata_command": {
+    "name": "metadata",
+    "argv": [
+      "cargo",
+      "metadata",
+      "--offline",
+      "--locked",
+      "--no-deps",
+      "--format-version",
+      "1"
+    ],
+    "actual_exit": 0,
+    "parent_reaped": true,
+    "timed_out": false,
+    "seconds": 0.06065561000286834,
+    "original_budget_seconds": 60,
+    "stdout": {
+      "path": "metadata.stdout.jsonl",
+      "bytes": 28204,
+      "sha256": "f55cf80a7cc0ce9e81484884306474e62d24a52ccf2b1348296ec3d8cac67eae"
+    },
+    "stderr": {
+      "path": "metadata.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "metadata": {
+    "path": "metadata.stdout.jsonl",
+    "bytes": 28204,
+    "sha256": "f55cf80a7cc0ce9e81484884306474e62d24a52ccf2b1348296ec3d8cac67eae"
+  },
+  "inputs_before": {
+    "path": "inputs-before.json",
+    "bytes": 95169,
+    "sha256": "b30f405c9bd3dc9ef246337ae6edb0b332cb8d33e8cceb690d864161e37a8b75"
+  },
+  "inputs_after": {
+    "path": "inputs-after.json",
+    "bytes": 95169,
+    "sha256": "b30f405c9bd3dc9ef246337ae6edb0b332cb8d33e8cceb690d864161e37a8b75"
+  }
+}

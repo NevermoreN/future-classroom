@@ -1,0 +1,312 @@
+{
+  "status": "FROZEN_FINITE_READBACK_ORIGINAL_PRODUCT_FAIL_RETAINED",
+  "originalReport": {
+    "path": "controlled-product-runtime-first/report.json",
+    "bytes": 123135,
+    "sha256": "5ef468302208d1061aa6e9f197686017af66b90c7890ea703646feee207a66ab"
+  },
+  "outerOriginal": {
+    "path": "root-controlled-product-runtime-operation-first.json",
+    "bytes": 1363,
+    "sha256": "ef803155c23c569710b0ef3eb80a8315ec8c61a6fab79abfe87650a1a277c74d"
+  },
+  "outerActualExit": 1,
+  "outerSeconds": 7.836119532999874,
+  "completeDownloadedFiles": 30,
+  "completeDownloadIdentityReadback": true,
+  "operations": [
+    {
+      "label": "01-create",
+      "actualExit": 0,
+      "originalLocalParentReaped": true
+    },
+    {
+      "label": "02-upload",
+      "actualExit": 0,
+      "originalLocalParentReaped": true
+    },
+    {
+      "label": "03-three-phase",
+      "actualExit": 0,
+      "originalLocalParentReaped": true
+    },
+    {
+      "label": "04-inventory",
+      "actualExit": 0,
+      "originalLocalParentReaped": true
+    },
+    {
+      "label": "05-download",
+      "actualExit": 0,
+      "originalLocalParentReaped": true
+    }
+  ],
+  "phaseFacts": [
+    {
+      "name": "install",
+      "clientExit": 0,
+      "clientOriginal": {
+        "pid": 36276,
+        "creation": 134380456423804731,
+        "wait": 0,
+        "exitKnown": true,
+        "exitCode": 0,
+        "checkedClose": true
+      },
+      "guardianOriginal": {
+        "pid": 7956,
+        "creation": 134380456424557103,
+        "wait": 0,
+        "exitCode": 0,
+        "checkedClose": "CHECKED_CLOSE_SUCCESS"
+      },
+      "allObservedOriginalControlsPhysicallyReturned": true,
+      "businessExitZero": true,
+      "originalKnownControlsReturnedLabel": true,
+      "originalCapturedObjectsReturnedLabel": true,
+      "directOriginalFinalRawShape": "dict",
+      "logs": [
+        {
+          "log": {
+            "path": "controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/install-msi-logs/MSI117b0.LOG",
+            "bytes": 126990,
+            "sha256": "b95357e0b6e19db5e73aa8f4851d425e9050e4ba431af4aa6e2b062f1f78526b"
+          },
+          "mainEngineThreadReturnCodes": [
+            0,
+            0
+          ],
+          "guardActionSucceededField": true
+        }
+      ],
+      "postPhaseProcessObservationPresent": true
+    },
+    {
+      "name": "repair",
+      "clientExit": 0,
+      "clientOriginal": {
+        "pid": 24396,
+        "creation": 134380456438893063,
+        "wait": 0,
+        "exitKnown": true,
+        "exitCode": 0,
+        "checkedClose": true
+      },
+      "guardianOriginal": {
+        "pid": 27992,
+        "creation": 134380456439341683,
+        "wait": 0,
+        "exitCode": 0,
+        "checkedClose": "CHECKED_CLOSE_SUCCESS"
+      },
+      "allObservedOriginalControlsPhysicallyReturned": true,
+      "businessExitZero": true,
+      "originalKnownControlsReturnedLabel": true,
+      "originalCapturedObjectsReturnedLabel": true,
+      "directOriginalFinalRawShape": "dict",
+      "logs": [
+        {
+          "log": {
+            "path": "controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/repair-msi-logs/MSI11d4d.LOG",
+            "bytes": 132954,
+            "sha256": "488cbca84d3ff8cc8d25d4f356532c949fdaf45ef2aba92bb6132a8b62bad1b1"
+          },
+          "mainEngineThreadReturnCodes": [
+            0,
+            0
+          ],
+          "guardActionSucceededField": true
+        }
+      ],
+      "postPhaseProcessObservationPresent": true
+    },
+    {
+      "name": "uninstall",
+      "clientExit": 1603,
+      "clientOriginal": {
+        "pid": 37196,
+        "creation": 134380456451547673,
+        "wait": 0,
+        "exitKnown": true,
+        "exitCode": 1603,
+        "checkedClose": true
+      },
+      "guardianOriginal": {
+        "pid": 9528,
+        "creation": 134380456452000970,
+        "wait": 0,
+        "exitCode": 1603,
+        "checkedClose": "CHECKED_CLOSE_SUCCESS"
+      },
+      "allObservedOriginalControlsPhysicallyReturned": true,
+      "businessExitZero": false,
+      "originalKnownControlsReturnedLabel": false,
+      "originalCapturedObjectsReturnedLabel": false,
+      "directOriginalFinalRawShape": "dict",
+      "logs": [
+        {
+          "log": {
+            "path": "controlled-product-runtime-first/download/FutureClassroom-r80-controlled-product-02dad94f16f04dddb6d952634feb9067/uninstall-msi-logs/MSI1223f.LOG",
+            "bytes": 84028,
+            "sha256": "2591dffc99a326157edc017df1fb6071dfeb85cc2b9675efac32d8895703a885"
+          },
+          "mainEngineThreadReturnCodes": [
+            1602,
+            1602
+          ],
+          "guardActionSucceededField": true
+        }
+      ],
+      "postPhaseProcessObservationPresent": false
+    }
+  ],
+  "healthSnapshots": {
+    "installed": {
+      "healthyPresent": true,
+      "runAbsent": true,
+      "fileCount": 14,
+      "allObservedFilesExact": true,
+      "paths": [
+        "LICENSE",
+        "MSI-CANDIDATE.txt",
+        "PROBE-README.txt",
+        "THIRD-PARTY-NOTICES.txt",
+        "fc-bootstrap.exe",
+        "manifest.json",
+        "web/THIRD-PARTY-NOTICES.txt",
+        "web/fc-assets.json",
+        "web/index.html",
+        "web/assets/favicon-CXuYoSfB.svg",
+        "web/assets/index-BkiZ2CBl.js",
+        "web/assets/index-DrrJeLm9.css",
+        "web/assets/pcm-worklet-B7E4LRoP.js",
+        "web/assets/wav-worker-LSywWbpJ.js"
+      ]
+    },
+    "damaged": {
+      "healthyPresent": false,
+      "runAbsent": true,
+      "fileCount": 13,
+      "allObservedFilesExact": true,
+      "paths": [
+        "MSI-CANDIDATE.txt",
+        "PROBE-README.txt",
+        "THIRD-PARTY-NOTICES.txt",
+        "fc-bootstrap.exe",
+        "manifest.json",
+        "web/THIRD-PARTY-NOTICES.txt",
+        "web/fc-assets.json",
+        "web/index.html",
+        "web/assets/favicon-CXuYoSfB.svg",
+        "web/assets/index-BkiZ2CBl.js",
+        "web/assets/index-DrrJeLm9.css",
+        "web/assets/pcm-worklet-B7E4LRoP.js",
+        "web/assets/wav-worker-LSywWbpJ.js"
+      ]
+    },
+    "repaired": {
+      "healthyPresent": true,
+      "runAbsent": true,
+      "fileCount": 14,
+      "allObservedFilesExact": true,
+      "paths": [
+        "LICENSE",
+        "MSI-CANDIDATE.txt",
+        "PROBE-README.txt",
+        "THIRD-PARTY-NOTICES.txt",
+        "fc-bootstrap.exe",
+        "manifest.json",
+        "web/THIRD-PARTY-NOTICES.txt",
+        "web/fc-assets.json",
+        "web/index.html",
+        "web/assets/favicon-CXuYoSfB.svg",
+        "web/assets/index-BkiZ2CBl.js",
+        "web/assets/index-DrrJeLm9.css",
+        "web/assets/pcm-worklet-B7E4LRoP.js",
+        "web/assets/wav-worker-LSywWbpJ.js"
+      ]
+    },
+    "finallyProduct": {
+      "healthyPresent": true,
+      "runAbsent": true,
+      "fileCount": 14,
+      "allObservedFilesExact": true,
+      "paths": [
+        "LICENSE",
+        "MSI-CANDIDATE.txt",
+        "PROBE-README.txt",
+        "THIRD-PARTY-NOTICES.txt",
+        "fc-bootstrap.exe",
+        "manifest.json",
+        "web/THIRD-PARTY-NOTICES.txt",
+        "web/fc-assets.json",
+        "web/index.html",
+        "web/assets/favicon-CXuYoSfB.svg",
+        "web/assets/index-BkiZ2CBl.js",
+        "web/assets/index-DrrJeLm9.css",
+        "web/assets/pcm-worklet-B7E4LRoP.js",
+        "web/assets/wav-worker-LSywWbpJ.js"
+      ]
+    }
+  },
+  "originalFailure": {
+    "status": "FAIL_NOT_COMPLETE",
+    "failureCode": "ORIGINAL_CLIENT_OR_CAPTURE_RETURN_UNKNOWN",
+    "ownerUnknown": true,
+    "instrumentUnknown": false,
+    "cleanup": "RETAIN_UNKNOWN_OR_NONHEALTHY_NO_RECOVERY_KILL_OR_CACHE_DELETE"
+  },
+  "pendingObservation": {
+    "namespaceKnownAbsent": false,
+    "root": {
+      "reparse": false,
+      "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+      "directory": true,
+      "status": "KNOWN_PRESENT"
+    },
+    "pending": {
+      "reparse": false,
+      "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+      "directory": false,
+      "status": "KNOWN_PRESENT"
+    },
+    "pendingKnownAbsent": false
+  },
+  "controllerFindings": [
+    {
+      "id": "CTRL-EXIT-PROPAGATION",
+      "kind": "observed telemetry defect",
+      "evidence": "Invoke-ControlledProduct.ps1 ends exit1 on failure, but nested invocation and BOOT do not explicitly propagate LASTEXITCODE; actual03 outer PowerShell0, raw phase FAIL. Python still returned1 and retained scratch.",
+      "minimalFutureCorrection": "In a new preparation only, explicitly propagate nested script LASTEXITCODE through both invocation and BOOT. No old receipt rewrite.",
+      "doesNotExplain": "Actual MSI1602 or Setup/G1603; those remain product/native failure."
+    },
+    {
+      "id": "CTRL-KNOWN-NONZERO-RETURN",
+      "kind": "physical return and native success conflated",
+      "evidence": "All three original direct clients plus captured G objects were signaled and checked closed; uninstall actual known1603 nevertheless sets capturedObjectsReturned=false, knownControlsReturned=false and ownerUnknown=true.",
+      "minimalFutureCorrection": "Separate physicalReturnKnown and businessExitZero; keep nonzero failure and retained Pending/settlement status. Return-known does not mean transaction settled.",
+      "doesNotAuthorize": "No clearing Pending, retirement, new Install, synthetic End, or retry permission."
+    },
+    {
+      "id": "CTRL-SINGLETON-SHAPE",
+      "kind": "latent false rejection on full-success path",
+      "evidence": "All three actual directOriginalFinal raw values are JSON objects, not arrays, due PowerShell single-element pipeline enumeration; Python phase_returned accepts only list length1. Current first/second successful phases therefore would fail full-success cleanup classifier.",
+      "minimalFutureCorrection": "Emit a fixed array in new PowerShell preparation and accept exactly one object or one-element list for this named legacy field; never relax cardinality or native cap checks.",
+      "effect": "Safe retention false-negative, not an unsafe cleanup or product cancellation cause."
+    }
+  ],
+  "currentLiveObservation": "NOT_PERFORMED; root reports no active test process, but no new Windows query is made or synthesized here.",
+  "settlementAuthority": "NONE. Physical process return, healthy14 state and log return1602 do not settle retained Pending. Original session remains FAIL.",
+  "futureIndependentCleanupFactsNeeded": [
+    "A current, exact, authorized native admission/read-only recovery result for retained Pending is not present in this30-file snapshot. Without it no product/gate cleanup authority follows.",
+    "Current product/14files/marker/Run/registration, actual LocalPackage/source identities and exact own-process absence must be independently established for any future bounded operation. These old snapshots are evidence, not live permission.",
+    "Any independent test teardown must have a separate explicit contract protecting real data and retaining original FAIL; it must not pretend native End, remove guard or edit Pending/cache/registry by hand. This report grants no such route."
+  ],
+  "actions": {
+    "WindowsContacted": false,
+    "originalsChanged": false,
+    "worktreeReadOrWritten": false,
+    "pendingOrGateMutated": false,
+    "cleanupExecuted": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "status": "PASS_FULL_TAR_REPLAY_AND_BOUNDED_DECODED_CREDENTIAL_SCAN",
+  "archiveSha256": "f49494a0d6b540724ba3bf66b0b23610e3c69952a6d1e043d3337bcf48a07345",
+  "archiveBytes": 2462856,
+  "indexSha256": "7c3e348a9a8f29875f241053343c9de463c5a3a90be8e9bddb32de144c9c6a22",
+  "originalCount": 376,
+  "originalBytes": 13278445,
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 87039,
+      "utf16Views": 170,
+      "cp936Views": 40,
+      "clixmlDecodedViews": 34,
+      "decodedBase64Views": 78,
+      "jsonContainers": 3305,
+      "decodedJsonStringViews": 84978
+    },
+    "jsonlRecordsAlsoDecoded": 1086,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All376 original text raw bytes, full decompressed tar member replay,15 raw promoted reports, manifest/forms/facts/controller/selector/index. Strict UTF8/UTF16/CP936, parsed CLIXML, JSON and JSONL strings, nested canonical generic/declared base64. Only3 exact path/size/SHA-bound structural control forms:18 license FF, two single MSI DigitalSignature stream notes; raw/visible-boundary/concatenated views all scanned. Unknown controls rejected; no generic tolerance. Depth12, JSON250000, decoded64MiB per original.",
+    "structuralControlFormCount": 3
+  },
+  "scope": "Finite GNU DEV setup source/build/static14payload package, original joint FAIL and65/66 component regressions. No new joint MSI test, no Pending settlement/clearance or production release.",
+  "sourceDeletion": false,
+  "WindowsContacted": false,
+  "Cargo": false,
+  "worktreeOrTargetRead": false,
+  "mainProgressWritten": false,
+  "privateKeyContentRead": false,
+  "commitPush": false
+}
