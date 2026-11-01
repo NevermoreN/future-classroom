@@ -1,0 +1,2000 @@
+{
+  "status": "PASS_EXACT_COMMITTED_BYTES",
+  "recordedUtc": "2026-11-01T10:11:23.423867+00:00",
+  "baseCommit": "7324fab8318392af3606d63b6ec1567e61633b22",
+  "verifiedCommit": "HEAD",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 5287,
+      "sha256": "a9f4bfd933266af31c8f1ee92b65851c523f012bc099ebe2809f6a6471ca0250",
+      "gitBlob": "a2c66f718454c3386d5a5db0a79d2a409a214c07"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "crates/fc-windows/src/materials/files.rs",
+      "bytes": 37433,
+      "sha256": "74c35a3d7298dc206b65dcec6a655cb7efca2285910de4c07c9f9d4e2dfec6c6",
+      "gitBlob": "27bed449ee94653c10d2e3416e6cece174c873c5"
+    },
+    {
+      "path": "crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "352ff6fbd43b567617aace0c6801498333967a84e030421859ee63973e7f0d97",
+      "gitBlob": "bb6b1b740739f303ce65556dd3369c15e340f6c6"
+    },
+    {
+      "path": "scripts/windows-ordinary-https-probe.py",
+      "bytes": 78903,
+      "sha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350",
+      "gitBlob": "8928cf320b0d37b375aa75b32cce09ad0fce9bc7"
+    },
+    {
+      "path": "开发计划/10-实施进度与验证记录.md",
+      "bytes": 505363,
+      "sha256": "bdb0b546f8716ddb8bbe27f0c74b8e99bbf844824ea4925c53b723c41fe719ef",
+      "gitBlob": "8416ff0ff952707eaf6f61294818ad710b02fec6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-archive-operation-first.json",
+      "bytes": 716,
+      "sha256": "d66e787a3becd5d2e2b72ccd8871b224beba6a5704f609fe592f7dfb35e843a2",
+      "gitBlob": "5f99103a02ebfffa7f07247d5f6e0f6ae02f5891"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-archive-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-archive-operation-first.stdout.log",
+      "bytes": 347,
+      "sha256": "3fd00b0ecdb504d0bd3d0cbd61822b4af14e4c88b66c089e62d5e83e5aaeb2be",
+      "gitBlob": "263aab1e84f6dd8eaa1356855e8ee1951b33f87a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-git-byte-verifier.py",
+      "bytes": 7309,
+      "sha256": "a052c44c842833f51fc83976211dabf086a2dc161e42fe42cba9fb27e98a8caf",
+      "gitBlob": "1b3a54410198ebca97eba7e5bdbea0917e4862d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/actual-publish-error-qualification-first.json",
+      "bytes": 1327,
+      "sha256": "6ea196bbc4d9c50b8dcc0ffb20ade603be720b10e5a1bee6ec565f94cf1f63de",
+      "gitBlob": "4172d67c4f4d9c51b1971f633e32417a48f62b52"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/append-second-failure-qualification-fifth.json",
+      "bytes": 2047,
+      "sha256": "86990084747a0ba6482581448acb3ee77bb319731fa8d95e769cbc6a30ea5679",
+      "gitBlob": "9d80bc589f2821bc2528468526aa348b8cd57e49"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/append-third400-source-review-sixth.json",
+      "bytes": 3744,
+      "sha256": "e396446b8a3085086f17044f527fe3bb73ba43cdc2b2845c71212bf8df0a1c85",
+      "gitBlob": "507b47611b4ec4cc85d9e37fe37f8766909ac795"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/architecture-first.json",
+      "bytes": 707,
+      "sha256": "9993c81ec63249c20dc68b658045d333796d0f9e722643e97de368e3f8e3283d",
+      "gitBlob": "180c638cde4f8631b5dab083799ec9a07a9cd1bc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-evidence-first.py",
+      "bytes": 18644,
+      "sha256": "476aaf2fd68e78359b0362f302ba8986acfd2ddb06dda8ae9cd83a76a84570a7",
+      "gitBlob": "4313a78964a803efb006dfbca5329f564d06c9af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-helper-before-public-cert-first.py",
+      "bytes": 13814,
+      "sha256": "875640336ed2102160923f381cad3db993f891c3bae6af44526153b040c2fc1b",
+      "gitBlob": "5440531e8a3dbf30149c8083c9c23b9f7f902556"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-index-first.json",
+      "bytes": 57132,
+      "sha256": "c22873724e3155854c498443e374f4f0afe6b574fe911e967cc9ce8e2b8d674f",
+      "gitBlob": "ac701a62373fe3baea775bfe2126f1e5154715ec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-preparation-first.json",
+      "bytes": 1349,
+      "sha256": "8caa45c295afffcf05e14ba9943e8eb1d3eca7b3dd7db028cac5be8963a17c1b",
+      "gitBlob": "3dc6f324baa4cde7f062036d6c669f271bfeb3b6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-preparation-second.json",
+      "bytes": 2746,
+      "sha256": "d1727ee038f7fb8bf08ca682aa52a7ec3379417652eb26fb8501cb89f7fc4507",
+      "gitBlob": "d538598c9b07bdb31301c1c73dffeb9e89e1b9bb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-public-certificate-minimal-first.diff",
+      "bytes": 7013,
+      "sha256": "e963092851417ef9e40230801a15020f0b0412b3a6f2f620436f9322f5e8298c",
+      "gitBlob": "d943458f1ea27e296963e4cf05d4fe0de38e2e0b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/archive-verification-first.json",
+      "bytes": 3953,
+      "sha256": "2b9d6e517c8f8d8659aedc876a8b45d757c6349360edcb215eed75e86a005b0b",
+      "gitBlob": "93de16f2196a631785be89a16dfde4904193b9f0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/audit-windows-readonly-first.py",
+      "bytes": 9887,
+      "sha256": "397da964f60311083ccf440ad363bb56ccabbc9d121407445e5e6296361ea2cc",
+      "gitBlob": "60284910df5dc7844a10bfcd670d3738cd7237bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/build-web-only-first.py",
+      "bytes": 9064,
+      "sha256": "e78f3e46d261b62ff87a4b85b2557be0fd0daf953db52e52d1fc10fc92208bf9",
+      "gitBlob": "909ac90468aa4573d2d78bf122beb5ebdab81436"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/business-done-encoding-review-second.json",
+      "bytes": 728,
+      "sha256": "16c5c1af745d604f78ab07547d339f55281f1b0d407cb80db9c82c1125ed77d4",
+      "gitBlob": "d8b2459bbcfdbc5038f30c814f3a9e2034f0f47d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/business-done-encoding-review-second.py",
+      "bytes": 2597,
+      "sha256": "9f504314144c34491aa5d0809df7fcd683b7cd34a90a8b84bed4681d004fb6b5",
+      "gitBlob": "a7e5d9b5a3f49256566d5321fec49b9ea1864971"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/business-done-value-proposed-second.txt",
+      "bytes": 695,
+      "sha256": "df0fd1308c38c47da4153ec1dfbfc5c41ef412c3012e562242acc3a382bd17b8",
+      "gitBlob": "0aa09b78a23f5ef64b65f513a93eb6254b615ed5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-fifth.py",
+      "bytes": 3449,
+      "sha256": "4cc390e25ffdf4fa69aed79f09e9508572cb4f6fe453f939bcbdaa8f92b98f68",
+      "gitBlob": "ebf86b2fe60750cc2531071a4dfeaad13b4b745d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-first.py",
+      "bytes": 3238,
+      "sha256": "65839b3c9de866cb7db9d5efc722ade320db6310bdcec6889c3c1dd51c165715",
+      "gitBlob": "829051d876af67581cc4c7df86b2a27488f6399d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-fourth.py",
+      "bytes": 3403,
+      "sha256": "bd24514d363d75be62a62e24ba42c9d0eae56a541600ddea981fe24da3a9fa8f",
+      "gitBlob": "8fd27cd3f0727e05352727e76dbd20a92a40ebeb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-second.py",
+      "bytes": 3355,
+      "sha256": "59c95383b0667806cf5b4b7aeef8cf0c02a464e60e9ad4f83cddd18f535eb158",
+      "gitBlob": "7318329368abbeaa1fbd4a2fd52131ad2726fc8f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-sixth.py",
+      "bytes": 3855,
+      "sha256": "37b6c49fe4ca61f0dbd171cc1394c36068605f9a9b5c09f4ab3e07cf2dbee582",
+      "gitBlob": "5084cf57d967929c71a3e30cf14e227903794e62"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/check-contract-third.py",
+      "bytes": 3350,
+      "sha256": "602726115ebb464784f7f6b1c387341f338419ecc01fc3bff8288e5f9c88e4b8",
+      "gitBlob": "3c4937a18a3386f8302f2b2342cd5bdfed5bb82f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/design-transfer-first.json",
+      "bytes": 1023,
+      "sha256": "6f8dad5277546f99f3375b75763ed4acec9f5e057cbaccc0b77e1e0c7b655914",
+      "gitBlob": "b7003ae480388c0191432ba123eb4d561eaf8fd1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/edit-native-first.py",
+      "bytes": 9992,
+      "sha256": "53ce999c739d38ed43cb57c91a14a1a1f437b1a4f3061b6ca754315de924c46c",
+      "gitBlob": "e3b66131d2b53a601f65576d070151239e54d1ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/edit-python-first.py",
+      "bytes": 5520,
+      "sha256": "e27c3be1c2a778f7bdd53061ddeb644fd5e2eb5c6638360808293b0c72723d67",
+      "gitBlob": "749f62b6b1f7d334d1b0457349de395192c66fb8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/edit-runner-flow-first.py",
+      "bytes": 5419,
+      "sha256": "3006258fa92d059cacdaf046698455161427377361f9af0264cd0b4339d383bd",
+      "gitBlob": "7c1ae196a63ed0f42734a820558dce863f3d7c64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/fifth-to-sixth-minimal.diff",
+      "bytes": 4710,
+      "sha256": "a7c14fa150fc6d8d292338327eedc3f65a74801cef6b8cff8303b60e8f1c34ee",
+      "gitBlob": "21667771134b7b82a028e1f8fa53a6a612711954"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/final-readonly-operation-first.json",
+      "bytes": 1072,
+      "sha256": "8349e33e91cdca8551bbfe7cca0f3ef2b0b685ed8de71f3d684aecf549873928",
+      "gitBlob": "84c036163b0168f675bae49df004400e77182413"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/final-readonly-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/final-readonly-operation-first.stdout.log",
+      "bytes": 490,
+      "sha256": "8bd5ccf68cd0729576017017f28489b5ef6a96808772f4251041493ed43195a8",
+      "gitBlob": "84c3ea86d30bdadedf5d25d739b3e4d2f12fa718"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/first-to-second-minimal.diff",
+      "bytes": 4013,
+      "sha256": "391b5981ea90cc74b011e2b865f3191fea4ec45f9e3458082ad8f386a59ba33a",
+      "gitBlob": "bd757e058bdb1155947df31dd558bd2b7f861472"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/fmt-first.json",
+      "bytes": 713,
+      "sha256": "fc0cb78828397a55f345793b29e41f776f05e296d2a558e1fdf6ac39354e2b63",
+      "gitBlob": "baffefff363f42aad679eddf1e5b022051028281"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/fourth-to-fifth-minimal.diff",
+      "bytes": 4754,
+      "sha256": "bfd3492cd8724831744665f79eeb3080af985894a613c0c8dd835084a0f77859",
+      "gitBlob": "429e721b380f8378c0d1cacfb74d12534b82fc12"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-fifth.py",
+      "bytes": 3474,
+      "sha256": "7e01c46e01ee4500f30c695e635514122fbca168c5fb45bfc33f6e54f2d917ad",
+      "gitBlob": "8af6d192ab6ae1199bb082963c157dd01bd6db3a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-first.py",
+      "bytes": 3860,
+      "sha256": "4dafaa6b2632ab242e4fe760f5c08b3d7a14bdb2221c515798346da22974cc40",
+      "gitBlob": "5cd47a8f614743bac485ce8babfbea8f0ecad177"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-fourth.py",
+      "bytes": 3285,
+      "sha256": "a7fd1f5d505fc6668bae51dbaac29a82be535e435959739e0deb2ff9a3131543",
+      "gitBlob": "b3349939af0617104f740600a88d75dbc2d4f05d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-second.py",
+      "bytes": 3048,
+      "sha256": "c91cec0296c0892830825b3a88f3f47502f8f05fcb35de1e120ba56025c090a8",
+      "gitBlob": "9b67f9db9e851bc83409c8d06b3dd0af0c23f2c7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-sixth.py",
+      "bytes": 3210,
+      "sha256": "0fb4fd062608112e496130eeb3d6fba7cda79aac7736361237b0ae10baca762d",
+      "gitBlob": "09920657fc5b3c90b80f9f9972a3c177860aaff1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/freeze-third.py",
+      "bytes": 3017,
+      "sha256": "796747c62e641606d9d1540e5618cf3e22d49b65f3215b260091ccc685b60013",
+      "gitBlob": "47c0e09efc36a70a0745ecd32dc077380b228c76"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/full-release-controller-preparation-first.json",
+      "bytes": 2379,
+      "sha256": "ef788bea9614f7ed008ab9f4894d30dbf594613db1047268c7ed17d70439a95f",
+      "gitBlob": "ffd35f995d29c3c39cb3a545f527e7b6044fe2b0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-fifth.json",
+      "bytes": 5997,
+      "sha256": "25d0036616e3109fd4d1deca5b7767f23fd95dc4397a4901af79d12dee45bc10",
+      "gitBlob": "a00757aed722d46f157b73310f07986f161f7dbb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-first.json",
+      "bytes": 3672,
+      "sha256": "a473602e8c189d2f198b2e6195f687590ead600b7951454a7c81ecf398cb37b6",
+      "gitBlob": "e4f2f89f4387e1c2bf2b0967361b6c0ec1415b45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-fourth.json",
+      "bytes": 5425,
+      "sha256": "e4ed7f5a8dbe971246fa91b037d3223b4dddcbc77fa3bff56ad721f596724e31",
+      "gitBlob": "d8d63509ad234bb328604217b6e0d1e6225b8aa2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-second.json",
+      "bytes": 4582,
+      "sha256": "eb16a0bec8803fd7c39854a381b4f2c96ad07f92a809b708e35d4f2c99ef7802",
+      "gitBlob": "45dfed893c0893a33b1ad8ce06edd54942850bfb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-seventh.json",
+      "bytes": 2901,
+      "sha256": "6acb0900eec3d057fd951ebb06f65c239a1e8d53c024f1ccfa087dd980b7d7db",
+      "gitBlob": "2cf8499484da6ddbb477fab5005d4ed1b1e012a6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-sixth.json",
+      "bytes": 6337,
+      "sha256": "095022c8693e84d6731bd0d2d2a8f21660496c03d738ca86a5de934cc7cb0179",
+      "gitBlob": "0d9a0d004938884b0d5056f99be762e018604d48"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/implementation-freeze-third.json",
+      "bytes": 5068,
+      "sha256": "9a13b3ea4666013e6aeac69f15b78611c4170b663248ed9301ededdc55955221",
+      "gitBlob": "1541a30b4cb30c272478eeeb082a8e783db34f8a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-acceptance-operation-first.json",
+      "bytes": 2132,
+      "sha256": "1384f8de4fa206bf7c4f613c80121844f83ad6a9e8c65f73991986e715f37d69",
+      "gitBlob": "1415a30e4376e41a1af7f92d23138dc6e41c12f1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-acceptance-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-acceptance-operation-first.stdout.log",
+      "bytes": 267,
+      "sha256": "3822cb40806ea6ad68a2e6f79c36cb76b29cfd30478dc3c2b8b21764cbded47f",
+      "gitBlob": "7c581b381bab3105060a2788d77f51bab1079480"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-joint-acceptance-first.json",
+      "bytes": 195527,
+      "sha256": "127b67b94dcdb73d88557dd33488877c932d29dfbda44b6c107630c5cdc110b0",
+      "gitBlob": "04386c36426dd3b23bc9eeeca15cc6ab2ad151a3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-joint-acceptance-parameterized-first.py",
+      "bytes": 20175,
+      "sha256": "51ba07f51122d40263de905a86d3ddc2b34579ee2ef185c189f58aef67e244fd",
+      "gitBlob": "864dde8a6ad776dc54d6921f55573657cdcad136"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-material-preparation-diagnostic-review-first.json",
+      "bytes": 3476,
+      "sha256": "63270b36be05812ea1aaef55714b7fe2b5e7922f5ea8b18de5a44a6a7baf4169",
+      "gitBlob": "dc3faad46fe6953907afe16ec1fb8123860123bc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-ordinary-31-first.json",
+      "bytes": 8705,
+      "sha256": "50195c3d7f7b26ad39055c91522e8a46f772fe4e1add35fc55527b9d48f9fd9e",
+      "gitBlob": "a47d2cb6be0cb42a2b35cdc60834cc4b9fbd3de3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-ordinary-31-parameterized-first.py",
+      "bytes": 14559,
+      "sha256": "1dbc401c78472efb90d646e1526671ae21126ec8920f6eb6f6044e19d805fa9b",
+      "gitBlob": "2a2dde01fc4b9b80cb511d9606a7fbd4d3972a24"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-pure-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-pure-first.stdout.log",
+      "bytes": 305,
+      "sha256": "aa44262e66948abc46f6f775fd3b46c193613c4852a13ff1e45a57b5098c698e",
+      "gitBlob": "b679cf68cd48ac0a451909e9984a0efca685607c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-pure-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-pure-second.stdout.log",
+      "bytes": 370,
+      "sha256": "83c7618f4b8c226863de8241eacd68294853fa40fda02c7da40b6f079cdeb016",
+      "gitBlob": "b91c41d19e019e226bd1babc6a298f0b3dc975bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-first.json",
+      "bytes": 5917,
+      "sha256": "09defffe805656773c8c338e0aa5a6c76f8cba243e936bb05c24911aac2272a0",
+      "gitBlob": "324808e791829cfd3ec629215dcca19bcbd8fd5f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-first.py",
+      "bytes": 7086,
+      "sha256": "8b65180206fce5e9aeff5de2fe3cd3b59c80c1dafddb96fd4f532fb858c08c44",
+      "gitBlob": "1cf016818ea8385edc477d8fd358a254f78db1ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-fourth.json",
+      "bytes": 4640,
+      "sha256": "9967ab099b92fee456793addb7c989336a2c225cf1b4f11886ce5d8579003ac1",
+      "gitBlob": "fd394b9c5f14a5b1bbcad8f606df230411be3575"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-fourth.py",
+      "bytes": 9345,
+      "sha256": "16f81592ee6ab30284937cc6f8abd68d5eaa73b5cb733cae43df28c5cf8ac1a9",
+      "gitBlob": "60a8a5dff65c70dba291093ba922b6aa23db494b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-second.json",
+      "bytes": 6801,
+      "sha256": "59b3306afb72fe98acd205e2ea365c1c6d6d810b5e7502818a550c6024ca9577",
+      "gitBlob": "d5765b97e17926205b2e9d36ba1468673db68313"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-second.py",
+      "bytes": 8468,
+      "sha256": "e13451f4ccf0cfec3f431072e9f1a97a2c49f1e6d6fa1110653c06213fba449d",
+      "gitBlob": "48f6347d95ec87e4391c44f8dd2dfde71c88f8b6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-third.json",
+      "bytes": 3064,
+      "sha256": "db7bb6d337eb5489c5a62228b2ed086ac32a202c01e4faa83e73e0b020db7691",
+      "gitBlob": "58be69c6e03e2544140861e0143cc2276b5b2da4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/independent-probe-source-review-third.py",
+      "bytes": 6131,
+      "sha256": "beca5e99be8eac251175e1f9e52e6c88026dddf834db2f183612fd8c4766543a",
+      "gitBlob": "bf80d1cbb2d341d378e919de119c95ab6ba2eb1d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/insert-contract-tests-first.txt",
+      "bytes": 6715,
+      "sha256": "fb73941068adc29b4308afee5a091c3b089eb9956add861a4f90eeab0e1f3200",
+      "gitBlob": "4685a05532e2157ed0c4f3117ef36cb1565a18ae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-eighth.json",
+      "bytes": 109207,
+      "sha256": "4475984de3843334f8603247ca543f37947fe667a03ab456d06744b14447eed5",
+      "gitBlob": "eb4bae9b26435a0e6fcc980e6e031c26b648b13c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-fifth.json",
+      "bytes": 108808,
+      "sha256": "1f5914fbd53debaa3ab068c11c8d05bed5fc24d25091a06973e905312e2c66d7",
+      "gitBlob": "5b62d71d52a085f9bf07c8fbad0c7a15bc31b2ad"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-first.json",
+      "bytes": 107964,
+      "sha256": "1be04eb5ba650bdf0912d030897837b67bf4fc89bc30611ae11c83766babf319",
+      "gitBlob": "4aa0b32c7ea3715fa3b2434d20ea80e4386eb1ed"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-fourth.json",
+      "bytes": 108858,
+      "sha256": "177ffdd8c2fd9ace0ece16fd039bc44daea5eae0feeedbf0e3640be23f3637dd",
+      "gitBlob": "dfd05b699ab3d38844ee4d504a957f0af0b308fd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-second.json",
+      "bytes": 108199,
+      "sha256": "2407a98d2fc1eb60d3dca90f42e59fd6aba7b635ea526dbe7b15ad43515cbc7e",
+      "gitBlob": "4ef31235ccffcf391d85b3934653c133d79f6134"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-seventh.json",
+      "bytes": 109309,
+      "sha256": "fdedd2b65de250fd74acb4f3956027833fed03c6c5107c40edc5c9cf5528863a",
+      "gitBlob": "0cb27f1574366de69fcb1de0b51feb39b7f0da57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-sixth.json",
+      "bytes": 108807,
+      "sha256": "48e54c2fec7d92e4200fb1a95a6c3702c62867b831a08b9c26c7351aec3a7627",
+      "gitBlob": "820b22c8fe10361ed03854f956e55411bf84a67c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/joint-source-freeze-third.json",
+      "bytes": 108219,
+      "sha256": "0e5f2a3a97ade635a376837d1efda1a9dcef60cb4467b137677e5d261709605e",
+      "gitBlob": "515911ef8b808c998eefd523825eddd7b77c48ac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/long-target-rename-readonly-plan-first.json",
+      "bytes": 3720,
+      "sha256": "3a85652b090aca8ce2b9265fe12d17e4cfe40f495a46a6fbf95c53a53f7dba38",
+      "gitBlob": "c8b117ce4e1d89a8ae1be4fa1c7c47c96f24dd13"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-architecture-first.json",
+      "bytes": 132,
+      "sha256": "4988d1c78819a19527c799dbd6fb376c7d5755c83e2db250cb274cd83a178007",
+      "gitBlob": "21c098666c8626a985b40c8c933bf355aeed09c4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-architecture-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-architecture-first.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36",
+      "gitBlob": "58ac41e56d90ef86113f75d1ef8f02025410b323"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-diffcheck-first.json",
+      "bytes": 118,
+      "sha256": "76c71a35b422f4fa859d1f615a37f54a8bfefee23702a8a82f597174b431def3",
+      "gitBlob": "9edf448240cc5698ed03fac84a1fc7d55a0c8fbd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-diffcheck-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-diffcheck-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-fmt-first.json",
+      "bytes": 140,
+      "sha256": "d839a6d8918f4920239632b9a49528ff1993a55b12e77cb1e15064cec2e59cd9",
+      "gitBlob": "ede0149c66ff3fea48b51645de7bea665612eb3c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-fmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-fmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-integrated-source-first.json",
+      "bytes": 4158,
+      "sha256": "b01b50ccbdecf989c6033cf087864b54c90ce9aae33183bc2529d2169f715496",
+      "gitBlob": "372c481437ec58799cc921992dc1724a00aa8884"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/main-integration-preflight-first.json",
+      "bytes": 99363,
+      "sha256": "534bea28a2b528a741c46d85fa4d6e0fce2d0d3b33f977ce8fb04f6d6853e987",
+      "gitBlob": "a3f6ad426754a540e347576254fc25481a8e514e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/next-installer-readonly/.owner",
+      "bytes": 54,
+      "sha256": "3cc5935afa9a923d072288b9030c07a38ac79ef441af7893200e89ee6498eada",
+      "gitBlob": "beaff5902bc4703e1127cae7b12573b2d5cfeb34"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/next-installer-readonly/copy-first.json",
+      "bytes": 747,
+      "sha256": "cd2d4c03dddff7a4cdc732b33a810ce78a9034c604d9b2a89e53e60cc6eeb78c",
+      "gitBlob": "575c9dda47304521cf1700b44fce807712a83183"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/next-installer-readonly/next-installer-wiring-audit-first.json",
+      "bytes": 16709,
+      "sha256": "5d4fa86f16c98838813ac50640332095b54d55d7774dc8718f3aeef70ac078f8",
+      "gitBlob": "1b9117f7067df7b4ad8503881196f9f77b56fed2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/next-installer-readonly/next-installer-wiring-boundary-second.json",
+      "bytes": 15670,
+      "sha256": "48160d229fe82481320d989e87f88d3f38ee3aa0ace7f38e14426f3eed30b2b2",
+      "gitBlob": "ea921b57ea31fc93d33038d1054fff88e3001be8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fifth.json",
+      "bytes": 1194,
+      "sha256": "bdada8221cf7b403e2b1bc4738a617e009b437838b924c862bf04f674cfb335d",
+      "gitBlob": "756050bad90268ad44bcd6a0d935a33191cd6b7d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fifth.stderr.log",
+      "bytes": 685,
+      "sha256": "164a6319743728f98535673b5babe9273b26c15d8b41a7694bbf4437e42182c4",
+      "gitBlob": "51bb17d27c28435489e2a1871a473efd518601d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fifth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-first.json",
+      "bytes": 1192,
+      "sha256": "e0dc0d832ebb9ab748bec691028c0bc762000e9e66403acc7d2b5970159ea80a",
+      "gitBlob": "ef0169fe113bae23e1d0da9e2a5e0facf29ec96c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-first.stderr.log",
+      "bytes": 683,
+      "sha256": "636bd048445907cb50a922ea55ca4514d2d4a6e7b834a6bd5b7cece2ccd63d28",
+      "gitBlob": "309517532bc1e7a85eda97404b464784c0251152"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fourth.json",
+      "bytes": 1193,
+      "sha256": "4451e2c31e07f2ae391ade93bd2f4e81931091804b79a53f0864277c72f440ca",
+      "gitBlob": "513bb3eb1d62ff15d8b10a024ede4c0891d19abf"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fourth.stderr.log",
+      "bytes": 686,
+      "sha256": "c338197dbe0bfa1a38e84b0d031389f3b869592725df8130de33878b93ee5fc9",
+      "gitBlob": "c45fb4ba6c468f26d721d79a47140ac739a418b9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-second.json",
+      "bytes": 1193,
+      "sha256": "cc2802140aa2a446acdbabf4ae314dc5b0cd0195984145e57aa929daded7c711",
+      "gitBlob": "347b5b6f2467df344bdeb53d501f374f1b5deb86"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-second.stderr.log",
+      "bytes": 684,
+      "sha256": "9d08b79a3f42b2d70171a5e186d395f6d96d671c3a370ba82b2a8380d168de16",
+      "gitBlob": "de8eb867c4b19b2b36180ecdcab81da52878bddc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-sixth.json",
+      "bytes": 1192,
+      "sha256": "cdf310d40bf0776cabf1a20b15b4f27bbe0476136d0fd2a0660a17fdb8e67afa",
+      "gitBlob": "7f6d5374462fc87131b61126b495c8497ea16ccd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-sixth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-sixth.stdout.log",
+      "bytes": 109,
+      "sha256": "cd4c57de166ad3f52a01afd091e014c9f0b354e6d9fcf5f2457b728d6f0d0f53",
+      "gitBlob": "42612687d7bd356845134b201aeaa977de302cae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-third.json",
+      "bytes": 1191,
+      "sha256": "0f740263030dddb5eef58ac09a21f6a68ad667fbe430c4f5e019cdf083046c77",
+      "gitBlob": "32d0eadc8e2a84a8a230ca5d8a2a6a30555f1a44"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-third.stderr.log",
+      "bytes": 685,
+      "sha256": "65b2e1729650d016b732cd3afef777b25210883a6456e70dec407cd43f9ebd53",
+      "gitBlob": "ff1da655a5063e073f9d01746de53e22df108b12"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/ordinary-https-operation-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/preparation-diagnostic-before-first.rs",
+      "bytes": 66839,
+      "sha256": "e9026b73170d84fe5c249246f8215eb6daa1f1be4d95e0ba8368e8cab57202d4",
+      "gitBlob": "0a93252d02a983c03fbfd48522e9988b556586e3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/preparation-diagnostic-freeze-first.json",
+      "bytes": 2306,
+      "sha256": "6d946f706a9bd40af60d5e9d4f2fded8619d2c3c779464f2685c2b651f0cdfe5",
+      "gitBlob": "255302797f68d59640de26fa7869d207bd51dc0c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/preparation-diagnostic-minimal-first.diff",
+      "bytes": 7322,
+      "sha256": "9e25318575d345bee645fd645d305cc5d5fa4bcb35259fd3947e8d9aadb334e2",
+      "gitBlob": "435f6224f0086f1a7908c4361679f588fa99d6ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/preparation-diagnostic-source-first.rs",
+      "bytes": 70423,
+      "sha256": "1acfe50bd01dcab4b0ade77d97bfc6c5f76427bf9b56eb29a2d05250c67f3209",
+      "gitBlob": "bc9eb58d8ceac15f05efe6d492ee86e7ab488853"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/prior-readonly-design/.owner",
+      "bytes": 52,
+      "sha256": "56dda07e046fe59b4c33838e6ef03d84016551a57c4d7f604f2e26016924efa9",
+      "gitBlob": "0336d75f34b465e5e7701d66e00418c90a9d4423"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/prior-readonly-design/audit-first.json",
+      "bytes": 9325,
+      "sha256": "926a67c1a16b9cad276961361abc762b4b8f609521aff10e6159e4f70cb41b6c",
+      "gitBlob": "91424c041c162d3ade8d9049b247195117b87893"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/prior-readonly-design/material-stop-design-second.json",
+      "bytes": 15360,
+      "sha256": "52d7cee6f996698a8a9a90e8a763c42cb7166fbe63d50323fdb8d15147c04814",
+      "gitBlob": "a26943158b3eba4adca9384acf283255d74aa2ae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/prior-readonly-design/material-stop-design-second.txt",
+      "bytes": 1627,
+      "sha256": "6aa249289049efc6f04ec48b458a6922e57d8166fe07738c732bf926558eb711",
+      "gitBlob": "224a4385b1b66e03617db69ac23f39506e0e50d7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/prior-readonly-design/recommendation-first.txt",
+      "bytes": 1251,
+      "sha256": "d5e6e4bc6c97defb75e2e8fc1d2b6bbc8e1983ee442028909ccd45d699892310",
+      "gitBlob": "da7770fb653bfc5115ae4663061c85a73c5ba2c5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-identity-eighth.json",
+      "bytes": 588,
+      "sha256": "e7303318461756b7a413f73f81cef0257c124dd2f5ec6968fd41b290680898e8",
+      "gitBlob": "5830a11c94f209fd8a2ea021961a4e954b765c90"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-identity-first.json",
+      "bytes": 717,
+      "sha256": "424817154bdf552756c2cb09d23b0be410c698f37082ddab527e9cac8cc4b51e",
+      "gitBlob": "b69637e6e2b1131cacc8c815cfbfcf8db09a183f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-identity-fourth.json",
+      "bytes": 940,
+      "sha256": "1ddac2298537b244ca85a26360fdd45f4b8959ccedc6566e95887715b3365229",
+      "gitBlob": "ffd9ca680264af54296008f8edc8a0e932716751"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-identity-second.json",
+      "bytes": 772,
+      "sha256": "5d1f7660cedc65b766c19741281f2f150973a623a8d27168fc96127167394f9f",
+      "gitBlob": "5586a6ddaab5d6013313c6d30829a7fff2670a9e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-identity-third.json",
+      "bytes": 548,
+      "sha256": "ad05f31520db534ec5ede7404b22b7e51e2cc47793892dbb64fd7b798c1ddf15",
+      "gitBlob": "311ef82c70d02c0c7a1278fbac3ac8411c6f2295"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-eighth.json",
+      "bytes": 804,
+      "sha256": "ac6bae0f37c2d87d8f8017b24a985ffab8cae3132f509ebb49bfed973f222862",
+      "gitBlob": "124ec4df2b03206af15b14f8619aaf59d0dd044d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-eighth.stderr.log",
+      "bytes": 62,
+      "sha256": "dd5cbfd46cbc7d90e44f766619e1dd80f5375b42ec46bf848bf1736968f1969b",
+      "gitBlob": "32a58bbb4c41898e491e0add4284585d9a493906"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-eighth.stdout.log",
+      "bytes": 85257,
+      "sha256": "352b011db442f54a5ada4ecede05eca4d209152e03369b3d1eea72d3b53645f5",
+      "gitBlob": "6f35547fb5764b919de740d1ce44ad225e46be3d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fifth.json",
+      "bytes": 870,
+      "sha256": "28880a82d34611d68367b4958a339cddb7d963291665557c8f5990c61ecbc0ca",
+      "gitBlob": "70b4e400924a5a8fe67c112ba3b7f3dd76f9c57e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fifth.stderr.log",
+      "bytes": 62,
+      "sha256": "d1235ea4563620b53ef5bdd2da5f595fec9d54f9efb48376378c20547dd95e57",
+      "gitBlob": "f625e09531073a3937fc3dc16f5c8633617275e6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fifth.stdout.log",
+      "bytes": 85279,
+      "sha256": "7291ce9068edf6bc8209c2835c9771259118ff25dc43150bd14e0b3e2ac326bc",
+      "gitBlob": "24004846068b23776726d2589d4181fc17cc2f16"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-first.json",
+      "bytes": 871,
+      "sha256": "4754fde920ef142954b232c00945d53b8a9ddb8c10ff6667394c3e645b33bfb6",
+      "gitBlob": "be2edc247355e5d1f1137d7a8a1ed01326b61f42"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-first.stderr.log",
+      "bytes": 3461,
+      "sha256": "2cec751c7419259ec920aae9646bf1a7fcd26ba443fd1c8c670aaf8fd6eb2352",
+      "gitBlob": "37087bfd0f80a4139b6337bdade6a84c645207ce"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-first.stdout.log",
+      "bytes": 85375,
+      "sha256": "a8ccd57c36fb4b9fb18eb411fc478e5cd2a8039910bd692618edb665fda1c7f0",
+      "gitBlob": "d6316120bece12bcb1915fead36f90da1aa71e70"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fourth.json",
+      "bytes": 871,
+      "sha256": "7c5bb5729421c7830a4fdce84a9f457a68a20b7fa59f60723f9342de159c739d",
+      "gitBlob": "61958451ea6903db96abc90428f8648f502e26b5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fourth.stderr.log",
+      "bytes": 265,
+      "sha256": "70606b838972bd5f0cdbe4004a68f98569338616ba9f87034525b565f226ec70",
+      "gitBlob": "0b4be4ff2b3c813bd208f13947d8bb0755300ba1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-fourth.stdout.log",
+      "bytes": 85282,
+      "sha256": "c4d327acac0730530356c95d3bb683742663ec5dcfb6b6c25031c1308a85f528",
+      "gitBlob": "83910b2502110258c69a7e97b0eea02d9e723a8c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-second.json",
+      "bytes": 870,
+      "sha256": "231928505fb4f66cefd50f0670f9cde61a79c38d284da5c0affdc98319ca77e9",
+      "gitBlob": "71fbf1826ba1381e3ad1cfc0b0af2ff416ae73f5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-second.stderr.log",
+      "bytes": 62,
+      "sha256": "a40c1884a95654da1e9ce0b9042cc3b906a7c879f74bfc6527def185ef03cdb2",
+      "gitBlob": "bb08b7dd0f39a2f7694f328980b95b13b6decbd2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-second.stdout.log",
+      "bytes": 85279,
+      "sha256": "088fb45294232feaef87b1768855252821a734854e7b74f7868f7ac1aca1c36d",
+      "gitBlob": "da8a9714bf05c4eaaa4448df9d47895bc69a8016"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-seventh.json",
+      "bytes": 806,
+      "sha256": "77c78e8133ef67f0f274e6584ce40eea20c6f33ac53679ff2186ef47a3bf1204",
+      "gitBlob": "794f08d1de74e921633a58515bb4b00785b9810b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-seventh.stderr.log",
+      "bytes": 166,
+      "sha256": "ebe2c07a72657b301c7b23f0860d629af7b1cd51e1f5052473063b4106ce80d3",
+      "gitBlob": "0efcac52f6f4fcaa62d639d87fac40281b0bc468"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-seventh.stdout.log",
+      "bytes": 85259,
+      "sha256": "0113e0de252dca0b5bd2aea9da5cad499734cd4eaea2a2e85bc4154a64385ba9",
+      "gitBlob": "435418001b82ea8762851ee1f1a01b0759a3ded7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-sixth.json",
+      "bytes": 770,
+      "sha256": "5eca5746dcf31e2ad571c896bacafbfa1b503fe24efda6788233aa737e26f2f7",
+      "gitBlob": "ab64f0ca376f01b08024f0a024a182142399574c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-sixth.stderr.log",
+      "bytes": 62,
+      "sha256": "85ef9aeedf4527a50122b04b79b35cad30a1b117183a6d191372522ffb137951",
+      "gitBlob": "832fd2fdbb7de6a939a86d931dea568baf788521"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-sixth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-third.json",
+      "bytes": 868,
+      "sha256": "15c96981b6d193f50d8324e5d9f521dcaa005cea9f1421417e38b80538406e34",
+      "gitBlob": "bd44ee8d2db50c56a918f0d64e0850d7ad9da174"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-third.stderr.log",
+      "bytes": 166,
+      "sha256": "a65d528731656a07a6dae06e465eac97a1cbd36eb620c4c80ce022848d118852",
+      "gitBlob": "a055de21008e1a6b2dbf989555258da5090ecaef"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/product-release-third.stdout.log",
+      "bytes": 85280,
+      "sha256": "f4319c912b0dea37d0b19abe060f09c9918751a5ab9a50e77ad549642f6c180c",
+      "gitBlob": "e6cf66ea92c0492c809b9ea14879825f3a944a56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/publication-first-failure-qualification-fourth.json",
+      "bytes": 1241,
+      "sha256": "f3cbfd039d52e0016945b909e2654c271ad6865bd3b3ee7abc8d5050d766ac52",
+      "gitBlob": "7ccc32906a689a00eeb690e61389d16eee8cfd60"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fifth.json",
+      "bytes": 1675,
+      "sha256": "7f6bc6b23f5938cf64a5da239007585c40ca14d8db5ed9f7a97dd13f9e52ff6e",
+      "gitBlob": "6d6df01ab000287fcfc46877a3af9379b2f71f8a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fifth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fifth.stdout.log",
+      "bytes": 447,
+      "sha256": "45c0a78feeadf3dedc66799c3b43fa27ab6733af64fc643062409fa235ffc12a",
+      "gitBlob": "3158ba34b33adec29dd172be37dffa951a3198d6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-first.json",
+      "bytes": 1517,
+      "sha256": "177734243dfcf9686751a616977e90484342a5f606f4c6edc76b183806472bac",
+      "gitBlob": "f324d462a756668943b6aefea2cf5cf25928d7df"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-first.stdout.log",
+      "bytes": 305,
+      "sha256": "aa44262e66948abc46f6f775fd3b46c193613c4852a13ff1e45a57b5098c698e",
+      "gitBlob": "b679cf68cd48ac0a451909e9984a0efca685607c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fourth.json",
+      "bytes": 1632,
+      "sha256": "c5491cf5f26af219cc2a3280598d621b349dc3452b79e9114303ab5ed5071ce0",
+      "gitBlob": "b3f4824354d2d65d31af348977ebd936e903536c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-fourth.stdout.log",
+      "bytes": 407,
+      "sha256": "57b041fc75e183dad74972616c212f366ed9f2008efc1c24116d0d81de15b98a",
+      "gitBlob": "fbdf9557d141df0d5fd158fb16eb365a83631a5c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-second.json",
+      "bytes": 1590,
+      "sha256": "ea836b7a108846b52fac6408d5e4f86d04593aadf69745dcddfae2f4c193418b",
+      "gitBlob": "ed977bf0fc616e772b726b7b357df406c6203af6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-second.stdout.log",
+      "bytes": 370,
+      "sha256": "83c7618f4b8c226863de8241eacd68294853fa40fda02c7da40b6f079cdeb016",
+      "gitBlob": "b91c41d19e019e226bd1babc6a298f0b3dc975bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-sixth.json",
+      "bytes": 1705,
+      "sha256": "8ce7e3f36b811e98181f517145e9aea293b976f8a2026b201eef525dfd4c1016",
+      "gitBlob": "3a52938a7d6430a93b9424f720fef23bc68c20d7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-sixth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-sixth.stdout.log",
+      "bytes": 474,
+      "sha256": "d554ae2d31a3aa39ff38a8f9195d435509663fb753b9b5ee25593743552534db",
+      "gitBlob": "24291cfa8619c21e68d8a55f6b8945e7f08c1893"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-third.json",
+      "bytes": 1589,
+      "sha256": "7e8d31834b3b0495bb7a14e21ed14d6e57f334015585da8fe6a142406295bcae",
+      "gitBlob": "77c3201312343e206a8aaaff17776dd9962e8b63"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/pure-contract-third.stdout.log",
+      "bytes": 370,
+      "sha256": "83c7618f4b8c226863de8241eacd68294853fa40fda02c7da40b6f079cdeb016",
+      "gitBlob": "b91c41d19e019e226bd1babc6a298f0b3dc975bd"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/python-transfer-helpers-first.txt",
+      "bytes": 15069,
+      "sha256": "49b1f2489b02f03d62d7851792cea91f83c4737c4ad3f284b8e66e2380304175",
+      "gitBlob": "c06b981278aed99fa70949b969283bcced31cef7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/record-command-first.py",
+      "bytes": 1858,
+      "sha256": "05164002cbe430e25703e1f50e39655fc0cc7aa4fba62ef89df09001297aa73f",
+      "gitBlob": "c5ac9e1ed6b957a9c8ea925f4be9b8f0bd308d58"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/recovery-operation-first.json",
+      "bytes": 1158,
+      "sha256": "f4b643666f2b385eb64bdeb77dffd22a069e65874730bf2d1e771a7a8bc52560",
+      "gitBlob": "bfb78ae79aece3a4ffc3b7cf08eb7ec2f903ffca"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/recovery-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/recovery-operation-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/reinitialization-operation-first.json",
+      "bytes": 1175,
+      "sha256": "b954cec2a9fa15f8f99080b80f3ab897c2a6beb70dca78707c4d9e671cffd7ba",
+      "gitBlob": "9e65f9813c20e2a6d1af571be0dc9a605f011625"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/reinitialization-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/reinitialization-operation-first.stdout.log",
+      "bytes": 93,
+      "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da",
+      "gitBlob": "97531064b7773f483df1c1c25ee5c884f36df743"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-first.json",
+      "bytes": 854,
+      "sha256": "40ba07e4ab50be466a17ff093544543d0e7f341867a4a1e66f5435008a85ccbc",
+      "gitBlob": "3c3e6b8252dfe5021083cd03e74fea79d53cc32c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-first.stderr.log",
+      "bytes": 3737,
+      "sha256": "a6c8f9ebc5e84c18186f4d926e0b48f23233ed2c379278993f465ddf35c808f3",
+      "gitBlob": "40641de26563cbc1df3dd0fc13b10b30cbd51d64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-fourth.json",
+      "bytes": 816,
+      "sha256": "259fe9cead815960915a8b4bad99234d7dfff06fabaa068db13e5a68e36b7ef6",
+      "gitBlob": "97220679cd1409d56bcb206c5a2fdecd9e8b1ee2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-fourth.stderr.log",
+      "bytes": 265,
+      "sha256": "a59e43149b7249136b00f1654cf9fa765ab042f01dcc54fe50166280874b035b",
+      "gitBlob": "7644600002997d41dd664d330f8c211b7d22aa33"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-second.json",
+      "bytes": 851,
+      "sha256": "32bb05c2f8668de21d08ed613fb097116fd0a4f598f176fe7a38b86aca165f48",
+      "gitBlob": "2b94997fc6e8d2ef2157a0f19424041948ad9953"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-second.stderr.log",
+      "bytes": 165,
+      "sha256": "cbbbd624352b9968c238ade2606dfb64c064ceb596ff5193294dad1fd4b44f1c",
+      "gitBlob": "b5f5585569b68df1b2af0482cc4e56cf49b09d79"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-third.json",
+      "bytes": 852,
+      "sha256": "8ccefe6554f3ca772dc556d3510f10bddba5ee5587c6874d9360e0d1762939c6",
+      "gitBlob": "8ae62b7decb82b418eea8300c6a7a88186c2f435"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-third.stderr.log",
+      "bytes": 265,
+      "sha256": "780a7165f871cb384dd0ea73edcb7136234f3d5f059d75ea9c34238e5448e550",
+      "gitBlob": "67fffab413d0c76720e6fe1f351be638c9d76e99"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-clippy-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-tests-first.json",
+      "bytes": 831,
+      "sha256": "ef27b7e7f2b60ede1babf02e567999fa0e91858191272a4462b34b6734aa240d",
+      "gitBlob": "8fcd2a3578c8070bd1184f294e60d3379c2a6160"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-tests-first.stderr.log",
+      "bytes": 1271,
+      "sha256": "c515f82d9f26467f2014a2d26814d86ebb772cfbd58026dccddc2539b10d7748",
+      "gitBlob": "a8c60c6e6d92952b581d0365965d539415ee39e2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/release-tests-first.stdout.log",
+      "bytes": 103037,
+      "sha256": "d67ae663001b543a7faa2e891af02312a75c4d812fa0583abeda44c1f4a4fe6f",
+      "gitBlob": "1039460e680e1a408c2368508009aef394c4881d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rename-boundary-before-first.rs",
+      "bytes": 34678,
+      "sha256": "35773416bdb8ffed37b49a4436db3b52531c3c020ebb340e3239bdbd12d71c51",
+      "gitBlob": "ded181425c9f249e2218c069317c40704814250b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rename-boundary-minimal-first.diff",
+      "bytes": 4321,
+      "sha256": "30c102509886ac6449ca88622625c2393bd49f0b2d49ec28f501ccfee05856ac",
+      "gitBlob": "b92fc2caa975adfa99c7720fa8873311fd5b39ff"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/root-run-windows-release-parameterized-first.py",
+      "bytes": 11514,
+      "sha256": "d5874bfb3412a105941c6b853527ae82cffecb2914da4d96ecb3648b80fc42c2",
+      "gitBlob": "952163455ca60a2ce5fe0ef35e7c0b365454b47e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-evidence-copy-second.json",
+      "bytes": 2590,
+      "sha256": "f0338050e7541f1f505abdedb30e43e62b1ed250bc521b4ed8e0f0c0582cee9a",
+      "gitBlob": "8f1317047fc373c908d5bb777ba7e17f579f4451"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/implementation-freeze-first.json",
+      "bytes": 2896,
+      "sha256": "698349073d6c1a3d54ea3009389efe7a97396ef6be42b04dcce9f478b4e3dcc3",
+      "gitBlob": "a1a6bd42aa4834ef9f97495715defb965d5e4375"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/item-order-equivalence-first.json",
+      "bytes": 1217,
+      "sha256": "5f0f4ea84ed870e0da710217f5eba2ae5ec34603b527d5451bebec80c516c488",
+      "gitBlob": "ddde412d35c2adbc341b222132b5c3a729b11563"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/item-order-only-first.patch",
+      "bytes": 1120,
+      "sha256": "4ee9968359072fcb2797372b75178af7803b53d55c68ec51378f9b768a31d7b9",
+      "gitBlob": "f5cf15753b5bfc8b094c1de8a7b082f9b98d4311"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rename-path-repro-execution-first.lock",
+      "bytes": 49,
+      "sha256": "d8f890b7600076484ff843fed4d6c5457094f106e390d682ccc2e2de66d6e8e6",
+      "gitBlob": "443a841fcbdea2f56c10c81af74a3cc1c4fd728f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rename-path-repro-first.ps1",
+      "bytes": 12719,
+      "sha256": "28c446d2c26db8adb7743aa3b0b8974c66d12e7f82d523dbc6f25aa390478091",
+      "gitBlob": "0c2299605d522307d23e16b060f8ac3225b38851"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rename-path-repro-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rename-path-repro-first.stdout.log",
+      "bytes": 9833,
+      "sha256": "b63cbb954628cdcf6c0664e167e61abd0dea05c5a18436975cebdfae33cd0859",
+      "gitBlob": "dd82416d0fa1a8919082db9cc091f4c0c433da45"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rename-path-repro-operation-first.json",
+      "bytes": 20294,
+      "sha256": "6f73d77d43d03e2ea4e29e5323ec3c244325331a87ed5f811fa662781d517c04",
+      "gitBlob": "de20560db608583a996d3ce83424fe5db5b5381b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/run-rename-path-repro-first.py",
+      "bytes": 3907,
+      "sha256": "2c9c15ee90f2b67c6db7fdc6407c4778ebb17f3c2adad6dfa238147aa8c719d1",
+      "gitBlob": "824326286e355e55f6bb9038f495e41ffed971f9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rustfmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/rustfmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/source-after/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "352ff6fbd43b567617aace0c6801498333967a84e030421859ee63973e7f0d97",
+      "gitBlob": "bb6b1b740739f303ce65556dd3369c15e340f6c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/round71-source-order/source-before/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "1186d9c4c78d52907397508a8af503ca4038404293a7df49430d08b9a109a5bc",
+      "gitBlob": "310ef9c830259664682d56073253856ba80dd4b4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-fifth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-fifth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-fourth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-fourth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-second.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-second.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-sixth.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-sixth.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-third.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/rustfmt-third.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/second-to-third-minimal.diff",
+      "bytes": 1493,
+      "sha256": "6b6779a187ec528348c439eae8b5a0df6322188e23488d1120d10b6b6bddb0cb",
+      "gitBlob": "8be51abefb9b26c9f4dc1b317f47ded1fe1b4549"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-fifth/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-fifth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 76141,
+      "sha256": "5ac668a87f3982510f6208b777297240b467758f253c92a6b87851cc71cb4ac4",
+      "gitBlob": "04270032e1f59e321f70fb3ac99e8f823a90a06e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-first/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25140,
+      "sha256": "73100e7f848cbca3c8a9416c9b0f27c78d65696637597016f6256c6dd9623736",
+      "gitBlob": "9feefc0d21f388a0f1a3916ded938643482dfa64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-first/scripts/windows-ordinary-https-probe.py",
+      "bytes": 69563,
+      "sha256": "f831be629435f7caeca6126b6bf7642dd3906d5cf839ad53435eee835c67db1f",
+      "gitBlob": "17269e2745fc15331d4060cfb55fa549c181afcc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-fourth/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-fourth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 73399,
+      "sha256": "01cc6c674c82d0b0a16ece0bbf7859ba1a9a158e087df18761703084cb47eb79",
+      "gitBlob": "4fc5798963ae3f99e341c8e72020896928236eae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-second/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25140,
+      "sha256": "73100e7f848cbca3c8a9416c9b0f27c78d65696637597016f6256c6dd9623736",
+      "gitBlob": "9feefc0d21f388a0f1a3916ded938643482dfa64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-second/scripts/windows-ordinary-https-probe.py",
+      "bytes": 71671,
+      "sha256": "64c3f4f7154949cd8a870c8984fc63954382e847237bf287a076bba79e30b8b1",
+      "gitBlob": "a2e8a4cd80005022b741aff25e85a52e0ad1eead"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-seventh/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-seventh/crates/fc-windows/src/materials/files.rs",
+      "bytes": 37433,
+      "sha256": "74c35a3d7298dc206b65dcec6a655cb7efca2285910de4c07c9f9d4e2dfec6c6",
+      "gitBlob": "27bed449ee94653c10d2e3416e6cece174c873c5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-seventh/crates/fc-windows/src/tls_frontdoor/mod.rs",
+      "bytes": 10617,
+      "sha256": "352ff6fbd43b567617aace0c6801498333967a84e030421859ee63973e7f0d97",
+      "gitBlob": "bb6b1b740739f303ce65556dd3369c15e340f6c6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-seventh/scripts/windows-ordinary-https-probe.py",
+      "bytes": 78903,
+      "sha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350",
+      "gitBlob": "8928cf320b0d37b375aa75b32cce09ad0fce9bc7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-sixth/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-sixth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 78903,
+      "sha256": "ffb2a905cfe088877b346dd28e55f477906fa17eaa91ae7b0fc9f6cfd72f4350",
+      "gitBlob": "8928cf320b0d37b375aa75b32cce09ad0fce9bc7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-third/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25252,
+      "sha256": "0a4f309afb7b76bbd94f557ae74768bcb9e4f5080c083e01e9d686505f02f36a",
+      "gitBlob": "d61ede3ef80c7e5b5e226d5acb91d8df07a83c9d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-after-third/scripts/windows-ordinary-https-probe.py",
+      "bytes": 71671,
+      "sha256": "64c3f4f7154949cd8a870c8984fc63954382e847237bf287a076bba79e30b8b1",
+      "gitBlob": "a2e8a4cd80005022b741aff25e85a52e0ad1eead"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-fifth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 73399,
+      "sha256": "01cc6c674c82d0b0a16ece0bbf7859ba1a9a158e087df18761703084cb47eb79",
+      "gitBlob": "4fc5798963ae3f99e341c8e72020896928236eae"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-first/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 20746,
+      "sha256": "23f85c2888cd47b5be2cbff3f3b8d3e1e6f285560b453c547047d0e622636768",
+      "gitBlob": "368a3e94ebb8f498932bb63e97f29a80451b83d9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-first/scripts/windows-ordinary-https-probe.py",
+      "bytes": 43248,
+      "sha256": "bf3ea57caf4a8c53a3be879345b0e41ada0329591b32c29213e79d5077aba375",
+      "gitBlob": "15007a228ebb32dae36983a36892bf39cf0c1527"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-fourth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 71671,
+      "sha256": "64c3f4f7154949cd8a870c8984fc63954382e847237bf287a076bba79e30b8b1",
+      "gitBlob": "a2e8a4cd80005022b741aff25e85a52e0ad1eead"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-second/scripts/windows-ordinary-https-probe.py",
+      "bytes": 69563,
+      "sha256": "f831be629435f7caeca6126b6bf7642dd3906d5cf839ad53435eee835c67db1f",
+      "gitBlob": "17269e2745fc15331d4060cfb55fa549c181afcc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-sixth/scripts/windows-ordinary-https-probe.py",
+      "bytes": 76141,
+      "sha256": "5ac668a87f3982510f6208b777297240b467758f253c92a6b87851cc71cb4ac4",
+      "gitBlob": "04270032e1f59e321f70fb3ac99e8f823a90a06e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-before-third/crates/fc-bootstrap/src/application/ordinary_https_probe.rs",
+      "bytes": 25140,
+      "sha256": "73100e7f848cbca3c8a9416c9b0f27c78d65696637597016f6256c6dd9623736",
+      "gitBlob": "9feefc0d21f388a0f1a3916ded938643482dfa64"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/source-minimal-first.diff",
+      "bytes": 79049,
+      "sha256": "812a0ec46d666681deafbe07bb6108fda6ed1f2e6ece9e461dfde8a35f755ffb",
+      "gitBlob": "a55c5d965f57051db28377b7c76e66e1ebda741f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/third-to-fourth-minimal.diff",
+      "bytes": 3857,
+      "sha256": "84e477413f5f586d42099e0f1e49ef96491213fc5125235622802d94d8ef39cf",
+      "gitBlob": "b4be0cf4ed4e1db1b47b0b7cce90e3f8a506c348"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-build-first.json",
+      "bytes": 21249,
+      "sha256": "51a8e3f203261742186817cf15916e4129915165cb53232530d56cd5df441cad",
+      "gitBlob": "1da46a5f401aa9547b926001509eac2c62471c7a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-node-version-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-node-version-first.stdout.log",
+      "bytes": 9,
+      "sha256": "1506cdf8613ebb6c1198a9587c5e1b708b3e779b139a0b59f937efa199e2ecae",
+      "gitBlob": "c004e356d66ba9679bd4a87022126c585e054312"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-build-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-build-first.stdout.log",
+      "bytes": 939,
+      "sha256": "75468a1d3e25f95251833c3d19df291657ed2b3107895ae4eb424e23041bfb72",
+      "gitBlob": "dbfbd6cecb3dd78d0de08985dd87f65462b9bae6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-ci-first.stderr.log",
+      "bytes": 208,
+      "sha256": "59bbfd8a173a5aa0dce07a3a7024b45ca87acd51cc349a0abc09cff1084ebb5c",
+      "gitBlob": "0406a68b186d919ed7c98b573bc91d9459816220"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-ci-first.stdout.log",
+      "bytes": 92,
+      "sha256": "6bb792bf2ec2390eb1759e36a91b6355aaf0c1b932598d6b7ff3c57be9ebc410",
+      "gitBlob": "9180ef3f3c59e0fc1252a7f368cdc80caaaa14a7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-version-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/web-npm-version-first.stdout.log",
+      "bytes": 7,
+      "sha256": "d4f77e92e0e96c2e3d354af321e208badc2c0ee0d5d33087659b027af2c9466e",
+      "gitBlob": "b97ab1ef1f51b6d1b4156be79f70b678b282baec"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "c6a3f1abf3f27190af90cbb3e684ebbbe64d31380df84f81cd74c03aff3f180c",
+      "gitBlob": "7b52914ef037edbd8bcfdd771f2c9639580fc910"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "a72e80a8f593008445effaa7411c5c3bb47eecb535ba92ff2c82e4af88db17e9",
+      "gitBlob": "41b98654c66d8e493775f6c8332f7554dddb0403"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "7b2d3aa53f4adb336459270a79513a52f765c4efd3c808fd9cd41fe7e1536bda",
+      "gitBlob": "a533ceb49daed0bb6fbb1e0ddac8a19990e7de0c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "46dc52d44f2e1fc72a450f0f14a857ee11fa80d3131484d20c1909e8f2c28e2e",
+      "gitBlob": "c2bfee369b33165a03b2057368802f4e984b61de"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/remote-metadata.json",
+      "bytes": 902,
+      "sha256": "8c5017227c8bd9c2ee412bd7f388ca06dbc83221f83e1609a884221aeb0e4b2b",
+      "gitBlob": "9ed25fcd3da63cd7509d5ea63eae68314811bf58"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "ee423f2afcddb7cfb0436988269645529716d438ba564c8ae7912e324c95ed29",
+      "gitBlob": "50ea0964799f3d9eded227c06602311778c38ffc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls.stderr",
+      "bytes": 12425,
+      "sha256": "7118bf0df9612cf73ae99a9db7e0f2c4a6f35e9807d1dabbc5bce009cca659e8",
+      "gitBlob": "33a841d998fc9dfb9699384855dfacf199d2db66"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth-b84ccd1e14bf4270bf9f5d303929ddf3-raw/tls.stdout",
+      "bytes": 2772,
+      "sha256": "00c5441f69852cff98eff3b11fa75ba2c809ef0da2db3356397524a8a3fc02bc",
+      "gitBlob": "d1972fd10ae178adc8ebe61e7a434bce7724875c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fifth.json",
+      "bytes": 75744,
+      "sha256": "9ff7018db87ae5187405274a9bc4ba091cfe2ba90e460aff1b8094819f64d129",
+      "gitBlob": "92bb7892e2bd17fde600fa6cea54d867b3609f34"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "24a422c1142203cbd8a106f71083f19087603f6cf70fc66e4738fd470f7fda68",
+      "gitBlob": "4f418e5dfbc395fb7aed4bbebdf72dd2890bad81"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "e2893d795bced63be32d06e7e6a391f6ac6fab06f0dfa59ea711e7a75278ee04",
+      "gitBlob": "b8a2b95c5fb23c3fbd1a433f1eb1ec518f16792e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "8d688e8c372f48eabd3f19a5a36e4eb748bd178311bfd31676800f80534a7874",
+      "gitBlob": "f2b549e3e5378d73004f42c6e6f026ce1a211bab"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "62c9d0d911bdd6d2e4ecdef0503cde96c1d08c4e3256989985c5fd551a992f78",
+      "gitBlob": "7f465ca9efaf076590ccb73962dbeb0df6d11db1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/remote-metadata.json",
+      "bytes": 901,
+      "sha256": "91bbbcc7bfa3d54c38a8078d7480f02f0bccefe8859c8bcd4219a048e720dc69",
+      "gitBlob": "738ed92a1eb824b5af2d92f27aa94039bf055971"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "6f96478f10777ef785950955463febd6c78d1f5a45836c09aad89d859e9289a9",
+      "gitBlob": "581e15db45351d6f9b0eee7af5689c77569318fe"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls.stderr",
+      "bytes": 7231,
+      "sha256": "48f7a2145cd4080d1f0c5786837b2b9545f206fe5c5f797f7d640f61f06280d3",
+      "gitBlob": "256a1ff315638691f551c3d2e2b8e6f9db79479a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first-16ad2567a9464414bddbb1be0a236476-raw/tls.stdout",
+      "bytes": 1289,
+      "sha256": "2dc1cc8079a6ecafb4c04d0d4c127d2694d22dbc08ee1439d83da52c4d338a2b",
+      "gitBlob": "7974fe6c9a49220b4a713d4dedffb47633e3b66b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-first.json",
+      "bytes": 60509,
+      "sha256": "bc5c7df899e6c5586cdbff47f0d0548a378ff99ccd2b3546f0ccb0e577385dbf",
+      "gitBlob": "ca04627b2ade933b06430220b50a8841951e04d0"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "12a67e492d432a1199dafb6927f0c62bd90e63baa73dd9f4e63ee3f0074d01c7",
+      "gitBlob": "9889f68a6b651a74357b568931bfb96ef9f7154f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "18e7e44c27aea9fd121821dbfeccad23636346b786aff73ad0ab801d04bf1e8c",
+      "gitBlob": "38d24747df02a17e0017a11cd25ad01b37e284f2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-setup-process.json",
+      "bytes": 186,
+      "sha256": "cb2b8e3ed4169501c139d349cf8999545102dec8bec65b3d6d7edfdbed123ff0",
+      "gitBlob": "f8110ad640294c6970a8afde3c6587ccee9e6944"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "a43d89bccf7e70f563111d792abb9c414bf8ba23feeff495017b2436fd4dddb3",
+      "gitBlob": "75c486ffdff30aac788ceefe7790b5e0bf9887cc"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/remote-metadata.json",
+      "bytes": 902,
+      "sha256": "18a8739dba1897ca72b4ac87a0fff0699980c2e9ca7eaab4884c85185f5eab63",
+      "gitBlob": "32d80ba81b94f92372d44cbc59cec17ab475b225"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "4000f8a3b34be3469452a7dc1a6d289095087db43992a0178c768f61bc480cee",
+      "gitBlob": "78279c2836ae84fb7f7e746e76dc5617bc2107af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls.stderr",
+      "bytes": 12309,
+      "sha256": "c5175f682f3b66846257409c956707f087c30fe493de584ee48b58c2eb1c1c1d",
+      "gitBlob": "fbebf067b246fc8112989591c8624f1c4c37d2c1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth-8daed1868fd54f8dbc72c3732cfa19dd-raw/tls.stdout",
+      "bytes": 2772,
+      "sha256": "abf13b2293e0a0b5e5ad801ea204c344515d69c86883db33253cb319c7be5113",
+      "gitBlob": "8c419e65b3c6d6d701dc3971fc9ac213bece3588"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-fourth.json",
+      "bytes": 75592,
+      "sha256": "a8e01d5d8dde219698b03939efb5b45da7fff718ab3d26d9b88b95a9fe8c5052",
+      "gitBlob": "69b483017c59bcae4f8e2ac94509a72221fcd529"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "5a4ed34bec3a5205da485afc2277bc7e40e0d8a89653f8b520e03c77f88288ff",
+      "gitBlob": "2a7057c65ae3148b46329a8db66ce4fa89340bfb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "33efd6394b0858c81f3b3213a526c8bfe8dd14041b313b6691c24ea248f68313",
+      "gitBlob": "e71ed2d2b6e27f2d275263447d9987f5b5b198eb"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "185a32e280acdf489871468fd201e16ae352dab4818b125b4fc20fa2620784b3",
+      "gitBlob": "b98cfe85d3cd77f3b6bc8eed1d583503068dc014"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "9445b3c629aa8bbecae57895583f640733eade1f7b2117146b4768ec2eb8d995",
+      "gitBlob": "ae7ccb42492ea000eefafbaf9b3cbd2b0f952212"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/remote-metadata.json",
+      "bytes": 902,
+      "sha256": "6cfd5b218653491d4735c2ede4e977b25b661f99921b21c7d027fecd017a299a",
+      "gitBlob": "3d820680efa49fceb6ca3f94a66813cc41e758a8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "f31f50556d8e0b1402c9ae1d83274026220def040525128f42b409dfcb6fc04f",
+      "gitBlob": "a4650e1645eb0efcd4c899b923f1d82ff86e8d44"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls.stderr",
+      "bytes": 12309,
+      "sha256": "071ab809262e9a15b0224252b060224eb29affb96e4c0081d7a4725bb80c6365",
+      "gitBlob": "c4ba270d9d075f1dd1f3a678c210d4d1090e1b91"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second-fda240d426604bc680ffcc8cd46dea6c-raw/tls.stdout",
+      "bytes": 2772,
+      "sha256": "d7c430c61cf4f1c35aeddb040705435cd0e37717a8417c6fb55b5cd7da4eed21",
+      "gitBlob": "e4995446a18819f95c17b6148dcdf220afb69242"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-second.json",
+      "bytes": 75211,
+      "sha256": "71425ad83427bf76d6deb84aaf4ac722926a273f9a2d357d4a03c65f391f55b4",
+      "gitBlob": "137c3f10653769581dc8423dfb4d826f92125bc7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "d3a03e680d8b140888d22181d6e662997cd05b9320e6b0ef535182433b45ae4c",
+      "gitBlob": "a57a18a9822e194408d6fd2499f1c9cf3b670726"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "553867dc992a08804b3a03f465141190fe5cd6a0820c2f31bb1efbd8387d66ee",
+      "gitBlob": "9c895380e63e0c0e934235c97475803a6c6dd868"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "a277f4852c99caab950a7954e21f5a3448ee685eac53ae0d45e528d7c9fe8306",
+      "gitBlob": "ed87ff5ed423136496b12df0832d39840b5907b1"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "264fde177341a77e1340be0ed1966a994e2c19d076c305c66a56c636847ebd39",
+      "gitBlob": "0ce5bdfcea0bd496bf3bb41c68a94548042f9fc2"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/remote-metadata.json",
+      "bytes": 902,
+      "sha256": "c3e034c735ab25623cf6359de560633493fb08fc81cd91ca7d7bbed710e8bdf1",
+      "gitBlob": "268c095ce2bb73f1831a7253f4fdd00eb8bc5e57"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "2e4991823909b90fb760d5421d6a8905660359afc2211f1f0063d7ec9b1aab11",
+      "gitBlob": "0296f3dcbd597e4265e7094aa89aedf9960ee35e"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls.stderr",
+      "bytes": 13581,
+      "sha256": "3fdc8d5a1258bea62280cd6fae59edb93873233490b49fcc49ad0fc59a22aba0",
+      "gitBlob": "9a6580be7900812e523623d556d10f5013a51d67"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth-0b297edd37894497a51db2ecfefea601-raw/tls.stdout",
+      "bytes": 3956,
+      "sha256": "cf3a5cb408a2aab00ef3386691ac7c06614bfcc2fa960dd090a45025da790926",
+      "gitBlob": "8659f94427040479749b694f7837bbe5eafe2f0a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-sixth.json",
+      "bytes": 83548,
+      "sha256": "24081e3c8f814908c00427e94d1467a0561344feb3ca37c6d5484834e332a7a5",
+      "gitBlob": "78b1c95e0805e3afb151b1ac585ed186ecf10341"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/.tls-fixture.json",
+      "bytes": 373,
+      "sha256": "ce44f391f13e3d49fda2b0cbcfa67bb3bf584fde3de18491d27cab9e0fa481a0",
+      "gitBlob": "023a0561f60483305a2501d9d82a8168ccf5a98f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/.tls-process.json",
+      "bytes": 240,
+      "sha256": "98dd4e6e5665c3e6a0470da008c37a88434c828910e48c9c365d8544ef2919a6",
+      "gitBlob": "bddbbb2082ac184b10a73489040058883d57a05c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/.tls-setup-process.json",
+      "bytes": 187,
+      "sha256": "12f97304620e47553b8f705ebcc0bb3efcbba649a4a70eb32424eca8f0454b64",
+      "gitBlob": "dd28cace0a656c90bf7063f6feaf57156673b3b7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/.tls-supervisor.json",
+      "bytes": 187,
+      "sha256": "49c9a81941b39177592ba4cac6d311219e6debb8d4a0faad6fc7892b21945132",
+      "gitBlob": "168af015b663d001719975f0510acf9868b2d43f"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/remote-metadata.json",
+      "bytes": 902,
+      "sha256": "39d34c6acc1d4d4e466d6e05fc735d0db54273ef0f110d39e2e5237ae7b32547",
+      "gitBlob": "7e9a24840a7e8ea8015768c8b568686f4322edac"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls-public.pem",
+      "bytes": 1141,
+      "sha256": "3de79472aea1b4e4a74f7f756d7a03b801a071ec8230741e70d2be6c3e53b9db",
+      "gitBlob": "c9a05a5d7eb6290731d473fe1df3e76ea26d4522"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls.stderr",
+      "bytes": 12309,
+      "sha256": "34d94fe2d800699c4d267f44bb6a3cc344c7402bddacb3be359d6fa0bbc3936d",
+      "gitBlob": "803295645dd81305de8a3ae739682e21d5acabde"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third-5075300ccd6e405c9c41a466f39765b0-raw/tls.stdout",
+      "bytes": 2772,
+      "sha256": "ccd66e3aefee6affa9cd3a6c8b7bf9fa2e4cf3062a76f7f4e6e24e639b051d2e",
+      "gitBlob": "794415cd7b29ca02b08564af71220a2b149930c8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-ordinary-https-third.json",
+      "bytes": 75551,
+      "sha256": "fc6c79319dadac8a476448b7f808c8e0c7c6d0a4ad605bf857e57c13cc1c3483",
+      "gitBlob": "6cf1c26bc695809313666a00bb9bbe37757c2502"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-readonly-final-first.json",
+      "bytes": 16759,
+      "sha256": "53df4aaee37929229d7f92835f373e110fdecf962fdb15f6525550572300582d",
+      "gitBlob": "aa15ef30bf58c1638377a6d015720b45b92fcb02"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-recovery-first.json",
+      "bytes": 11245,
+      "sha256": "8efdeec6c9bf9e236e5df3805158afd85bb66b5d25798be9235a9e5f72c69e9d",
+      "gitBlob": "780da54e59bb30d0432a31ef79106a29514827b8"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-reinitialization-first.json",
+      "bytes": 5212,
+      "sha256": "739da23b83890990cd32a6ce914efa245a6626181d49aa7365c0b28cffa69cf3",
+      "gitBlob": "8175b0ceccd85e1c5c28f48f25fe7c506aa4400c"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-release-full-first-operation.json",
+      "bytes": 19190,
+      "sha256": "9b95db9b7638cce8bd0ac2791ef934eccb7e9f4e5653a51353895a0da7612f8a",
+      "gitBlob": "00cf682602f8a99513a0eea0db3964e491e5a64a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-release-full-first.json",
+      "bytes": 221487,
+      "sha256": "c68957f0703ef705511c1ec58b0e6641aaa0db0393a5dc8fc8b2be8740ef65fc",
+      "gitBlob": "1dba471ffa70a6d7ad2884979ea99354f81c3aaa"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-release-full-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-01-round70-transfer-stop/windows-release-full-first.stdout.log",
+      "bytes": 947,
+      "sha256": "9d81d90b5f20d517e9cfc7d66aeff836018addad535f33df029e9938e4b5979c",
+      "gitBlob": "008aaa58f5352db59b16f2d23eb1da79b36721ff"
+    }
+  ],
+  "fileCount": 331,
+  "archiveFileCount": 321,
+  "totalBytes": 5361502,
+  "archiveIndexSha256": "c22873724e3155854c498443e374f4f0afe6b574fe911e967cc9ce8e2b8d674f",
+  "scope": "R70 exact331 membership:4 frozen source files,321 archived files,2 metadata,3 actual archive-controller records and this helper. Every Git blob equals reviewed working bytes, including ignored logs; Actual finite GNU Win11 regression/ordinary31/recovery scope remains limited; all earlier failures remain retained. No private key read, push or cleanup.",
+  "verifierSha256": "a052c44c842833f51fc83976211dabf086a2dc161e42fe42cba9fb27e98a8caf"
+}
