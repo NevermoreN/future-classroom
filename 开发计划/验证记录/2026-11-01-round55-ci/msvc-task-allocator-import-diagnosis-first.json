@@ -1,0 +1,171 @@
+{
+  "schema": "future-classroom.msvc-task-allocator-import-diagnosis/v1",
+  "status": "READ_ONLY_CONFIRMED_IMPORT_RISK_CANDIDATE_FIX_NOT_IMPLEMENTED",
+  "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "scope": "Read-only local source/artifact inspection and official documentation; no source mutation, Cargo, Windows, CI or Git mutation. Win7 CI status not inspected or inferred.",
+  "evidence": [
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-original-independent-first.json",
+      "bytes": 497415,
+      "sha256": "d6ea3001b7495ad5ffecec0fde31aedffe3f4d4f389e9fcb14dee0e3e0991f3a"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-artifact-original/pe-21.objdump.stdout.log",
+      "bytes": 5557195,
+      "sha256": "30f3c0c2c487594b884d5ef097b5f6ffe447cc531f53f9106485e148879bf693"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-artifact-original/raw/msvc-sdk.json",
+      "bytes": 1587,
+      "sha256": "68574ab1f91556256fd3b0b21d3c94178c536a86a3a89db22f3cfbbdba8748d5"
+    }
+  ],
+  "normalExecutable": {
+    "bytes": 10515456,
+    "sha256": "7aea98d5b64df96b32e16a1799af2e753e069a351f1205a1d25c87dd41b0b034",
+    "combaseImports": [
+      "CoTaskMemFree"
+    ],
+    "ole32Imports": [
+      "CoCreateInstance",
+      "CoInitializeEx",
+      "CoUninitialize"
+    ],
+    "rawLines": [
+      {
+        "line": 227,
+        "text": ""
+      },
+      {
+        "line": 228,
+        "text": "\tDLL Name: ole32.dll"
+      },
+      {
+        "line": 229,
+        "text": "\tvma:  Hint/Ord Member-Name Bound-To"
+      },
+      {
+        "line": 230,
+        "text": "\t9bced2\t    0  CoInitializeEx"
+      },
+      {
+        "line": 231,
+        "text": "\t9bcc74\t    0  CoCreateInstance"
+      },
+      {
+        "line": 232,
+        "text": "\t9bcb82\t    0  CoUninitialize"
+      },
+      {
+        "line": 233,
+        "text": ""
+      },
+      {
+        "line": 512,
+        "text": "\tDLL Name: combase.dll"
+      },
+      {
+        "line": 513,
+        "text": "\tvma:  Hint/Ord Member-Name Bound-To"
+      },
+      {
+        "line": 514,
+        "text": "\t9bda30\t    0  CoTaskMemFree"
+      }
+    ]
+  },
+  "sourceBindings": [
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/native.rs",
+      "bytes": 21451,
+      "sha256": "078f80e3bc5b4176015bcc39618ea2c87a0bb284fd457bde8044bafd01a9612a"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/materials/chooser.rs",
+      "bytes": 9516,
+      "sha256": "7bdc43fff3dba9f9e44ec79d7f3fc3c1deb3563997dc6ef951379d38df16fd32"
+    },
+    {
+      "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/audio/device.rs",
+      "bytes": 17804,
+      "sha256": "964a09a22272056b6a19f35ff4ae5b6286a637352a2dad638559ef50a0607016"
+    },
+    {
+      "path": "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/windows-0.62.2/src/Windows/Win32/System/Com/mod.rs",
+      "bytes": 750590,
+      "sha256": "baafc59ea14e937eff7ecfd57a9e29a4774b56d822d7dadd19652f792735cae3"
+    },
+    {
+      "path": "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/windows-core-0.62.2/src/imp/bindings.rs",
+      "bytes": 2035,
+      "sha256": "7e54bcd14f10e690320e91caecc5cd4cbbf0eab5278c72df2913c7ca5d7323ba"
+    },
+    {
+      "path": "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/windows-core-0.62.2/src/array.rs",
+      "bytes": 5095,
+      "sha256": "a991330fdb48bbceedbe33eb3d438e44f77bd257081e9e2409d304e7bf805a66"
+    },
+    {
+      "path": "/config/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/windows-link-0.2.1/src/lib.rs",
+      "bytes": 1147,
+      "sha256": "ca9cf5a2a97cf72d855c677c936355b6d29e41682e5abfa505f28b3d216b5333"
+    }
+  ],
+  "confirmed": [
+    "Three local extern system declarations use link(name=ole32) and link_name=CoTaskMemFree. Renaming the Rust item does not rename that external symbol.",
+    "windows 0.62.2 generated Win32::System::Com::CoTaskMemFree declares combase.dll via windows_core::link!. windows-core 0.62.2 imp/bindings.rs independently declares the same name via windows_link; Array::clear uses it. That generic source existence alone does not prove Array is instantiated by this application.",
+    "windows-link 0.2.1 on x86 emits raw-dylib,+verbatim,import_name_type=undecorated. Rust documents raw-dylib as generating an import library; plain dylib instead searches an existing import library. The local declarations and generated imports expose the same native symbol.",
+    "The actual Modern product import table retains combase.dll!CoTaskMemFree; therefore the three plain Ole32 library annotations did not achieve the required final import boundary. The result does not identify the sole contributing import-library member or call site.",
+    "Captured SDK provenance is VS17.14.37824.6, MSVC tools14.44.35207/linker14.44.35229.0, SDK10.0.26100.0. The report captures cl/linker/staticCRT/kernel32.lib hashes but not ole32.lib bytes, linker /VERBOSE selection or link map. It cannot prove a specific SDK Ole32 forwarding member as unique cause."
+  ],
+  "officialPrimary": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-cotaskmemfree",
+      "supports": "Documented default OLE allocator, void return/null no-op, Ole32.lib/Ole32.dll, minimum Windows2000. These requirements support the Win7 API contract, not actual Win7 execution certification."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress",
+      "supports": "Resolve exact exported name from specified module; NULL failure; match case/spelling; resolve by name instead of ordinal. No arbitrary module selection is needed."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexw",
+      "supports": "Already-loaded module only. Full path avoids ambiguous duplicate basenames. Default increments reference count; PIN holds until process exit; UNCHANGED_REFCOUNT can race unload. XP minimum."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemdirectoryw",
+      "supports": "System directory path with explicit bounded buffer; zero failure, required-size/truncation handling. No hardcoded Windows drive or environment-supplied DLL directory."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamew",
+      "supports": "Read actual loaded module path with bounded truncation checks; returned path spelling/short-name form may differ. Must fail safely rather than truncate or silently accept arbitrary basename."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary",
+      "supports": "Decrements reference count; BOOL failure/GetLastError; do not release an unincremented GetModuleHandle reference."
+    },
+    {
+      "url": "https://doc.rust-lang.org/reference/items/external-blocks.html",
+      "supports": "dylib versus raw-dylib import-library behavior, and extern system is stdcall on Windows x86_32. Function pointer ABI must exactly match one pointer argument and void return."
+    }
+  ],
+  "recommendedCandidate": {
+    "shape": "Private shared task allocator capability with exact unsafe extern system fn(*const c_void) function pointer; all three adapters acquire it before any API that can transfer task memory.",
+    "module": "Construct fixed Ole32.dll full system path with bounded GetSystemDirectoryW; GetModuleHandleExW against that full path, since Ole32 already has static COM imports. No LoadLibrary basename, DLL search-policy changes, or environment lookup. Optional bounded GetModuleFileNameW identity validation must handle truncation and WOW64/path representation conservatively.",
+    "lifetime": "Hold an incremented module reference until every task pointer obtained in that operation is freed, and check actual FreeLibrary outcome; if a single process-lifetime PIN is chosen instead, make the intentional permanent system-module pin explicit and bounded rather than accumulating references per call. No pointer may outlive its module capability.",
+    "resolve": "GetProcAddress(module, exact ASCII CoTaskMemFree + NUL); fail before allocation if missing. Transmute only non-null FARPROC to exact extern system ABI, retain the capability, call once per transferred allocation including conversion errors. No call to generated windows CoTaskMemFree or static extern of that symbol.",
+    "forwarding": "Do not infer Ole32 identity from an imported CoInitializeEx function address: it may resolve to a forwarded implementation. Exact Ole32 export resolution may legitimately forward on modern Windows; this is distinct from a static combase dependency in our EXE.",
+    "otherAllocations": "Do not alter LocalFree/BSTR/CRT allocator families or use Rust allocator/HeapFree for task storage. No DLL handle/fn pointer enters domain/protocol.",
+    "failure": "Resolver failure aborts the operation before task allocation. Resource-release errors need exact ownership/fault handling, never silently treat a dropped Rust wrapper as physical module release."
+  },
+  "necessaryProofAfterAuthorizedImplementation": [
+    "Both actual Modern and Win7 MSVC final EXE and relevant tests: inspect raw PE imports; no combase.dll CoTaskMemFree and no new winrt-error/API-set import regression. GNU success alone is insufficient.",
+    "Capture chosen SDK import-library provenance/link map if attributing original unique cause; not needed to avoid static task allocator symbol via explicit runtime resolution.",
+    "Meaningful resolver missing/invalid-module-before-allocation tests and cleanup on task-string conversion failure; x86 ABI and one-free ownership assertions.",
+    "Real authorized Win11 query/picker use only in owned hidden fixture where applicable; Win7/10/Seewo remain separate actual runtime gates."
+  ],
+  "limitations": [
+    "No proof of exclusive original linker root cause without link-map/import-library evidence.",
+    "Modern CI success is not Win7 loader/runtime compatibility. Win7 ongoing CI conclusion is deliberately absent.",
+    "No production fix or new test execution in this research."
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only production source/plan investigation; no source edit, model, build, Windows, network or installer execution",
+  "source_commit": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "status": "IMPLEMENTATION_GAPS_CONFIRMED",
+  "task": "Next MSI lifecycle cut after bounded candidate generation",
+  "requirements": [
+    {
+      "file": "开发计划/04-开发阶段与任务步骤.md",
+      "line": 121,
+      "id": "P5-03",
+      "boundary": "ZIP/MSI clean-system install/upgrade/restore/uninstall and static-version consistency; preceding P5-01/P5-02/P5-06 gates remain."
+    },
+    {
+      "file": "开发计划/05-测试验收与发布清理.md",
+      "line": 46,
+      "id": "Q11/Q13",
+      "boundary": "Verify ownership of Run/bindings/firewall/cert changes; never remove unrelated items."
+    },
+    {
+      "file": "开发计划/05-测试验收与发布清理.md",
+      "line": 152,
+      "id": "Q15",
+      "boundary": "Fixed deployment Windows account, protected project-only ACL, cross-session exclusion; updates/uninstall preserve school originals/layout per line154."
+    }
+  ],
+  "reusable_existing_code": [
+    {
+      "file": "crates/fc-windows/src/native.rs",
+      "lines": [
+        554,
+        559,
+        565,
+        569,
+        588
+      ],
+      "api": "InstanceGuard::acquire(root)",
+      "facts": "Existing runtime/instance.lock uses CreateFileW OPEN_ALWAYS and FILE_SHARE_MODE(0), excluding other live opens across sessions; file existence is not liveness. Owner is !Send/!Sync via Rc marker; Drop currently ignores CloseHandle result."
+    },
+    {
+      "file": "crates/fc-bootstrap/src/application.rs",
+      "lines": [
+        4430,
+        4439,
+        4442,
+        4444,
+        1362,
+        4738,
+        4751
+      ],
+      "api": "run_at_inner / shutdown_complete",
+      "facts": "Normal composition verifies existing deployment ACL, pins runtime, holds InstanceGuard in the outer run scope through actual worker/writer/audio/shell close and joins. Fault paths terminate the owning process. Do not release an installer gate on logical shutdown request."
+    },
+    {
+      "file": "crates/fc-bootstrap/src/reinitialize_application.rs",
+      "lines": [
+        429,
+        435,
+        437
+      ],
+      "api": "run_at_with",
+      "facts": "Independent repair also validates/pins the same root/runtime and acquires the same instance lock. A maintenance gate must cover repair and autostart, not only visible workbench startup."
+    },
+    {
+      "file": "crates/fc-windows/src/system/paths.rs",
+      "lines": [
+        70,
+        76,
+        224
+      ],
+      "api": "verify_root_for_current_user / prepare_instance_runtime / prepare_for_current_user",
+      "facts": "Can reuse read-only root ACL/SID verification and pinning. The prepare methods create directories and must not be called by an installer merely to probe whether data/app is running."
+    },
+    {
+      "file": "crates/fc-windows/src/system/autorun.rs",
+      "lines": [
+        19,
+        46,
+        106,
+        112,
+        175,
+        226,
+        267,
+        288,
+        295,
+        319,
+        328,
+        363,
+        382
+      ],
+      "api": "RunScope / RunAtLogin / command_for / observe / apply",
+      "facts": "Fixed HKCU Run value FutureClassroom; bounded REG_SZ+UTF16 validation, preimage compare, fresh check before mutation, factual readback and explicit errors. Production RunScope derives current_exe; scratch cleanup refuses production. Query/delete is explicitly non-atomic against external writers."
+    },
+    {
+      "file": "crates/fc-bootstrap/src/autostart.rs",
+      "lines": [
+        14,
+        111,
+        164,
+        181
+      ],
+      "api": "Job::run / PhysicalOwner",
+      "facts": "Existing app change coordination uses original shared worker and durable Prepared/Applying/factual settlement. PhysicalOwner is process-local only; it cannot serialize a separate MSI process."
+    },
+    {
+      "file": "crates/fc-bootstrap/src/backend/autostart.rs",
+      "lines": [
+        30,
+        53,
+        66,
+        86
+      ],
+      "api": "begin_autostart_while / mark_autostart_applying_while / autostart_effect_guard / finish_autostart",
+      "facts": "Sensitive application writes require exact management SessionLease and active intent. Do not fabricate a login/admin Actor or initialize/open a school DB just to allow MSI uninstall cleanup."
+    }
+  ],
+  "confirmed_missing": [
+    {
+      "gap": "No maintenance owner spans an MSI transaction",
+      "file": "scripts/package-msi-candidate.py",
+      "lines": [
+        34,
+        42,
+        221
+      ],
+      "detail": "Current MSI deliberately forbids CustomAction and reports active-process refusal NOT_IMPLEMENTED. RemoveExistingProducts after InstallInitialize is only authoring order; it neither acquires nor retains the app exclusion lock."
+    },
+    {
+      "gap": "No installer-bound Run cleanup capability",
+      "file": "crates/fc-windows/src/system/autorun.rs",
+      "lines": [
+        46,
+        112,
+        278,
+        292,
+        319
+      ],
+      "detail": "Current production constructor targets current_exe, which in a custom-action/helper process would be the helper/MSI host, not the installed application. apply(expected,false) compares whatever eligible command the caller supplied; it is not an installer ownership decision proving expected==this exact installed product command."
+    },
+    {
+      "gap": "Strict external compare-delete is not implemented",
+      "file": "crates/fc-windows/src/system/autorun.rs",
+      "lines": [
+        1,
+        292,
+        297,
+        319
+      ],
+      "detail": "A replacement can occur after the last read and before RegDeleteValueW. Final Absent readback cannot prove a racing external replacement was not deleted. Existing app documentation honestly retains this window; do not label it atomic CAS."
+    }
+  ],
+  "recommended_next_cut": {
+    "name": "Native installer-maintenance owner and installer-bound negative-only Run operation, followed by explicit MSI integration",
+    "touchpoints": [
+      "fc-windows: dedicated trusted installer lifecycle module reusing pinned path/SID and OS exclusion primitives",
+      "fc-windows/system/autorun.rs: factor bounded exact observations/command formatting without exposing arbitrary registry paths or reusing current_exe for the MSI helper",
+      "fc-bootstrap normal/--autostart/repair earliest entry: cooperate with same maintenance gate before data initialization/admission",
+      "MSI authoring/validator: add only the specifically reviewed lifecycle custom action/controller after its actual owner protocol exists"
+    ],
+    "held_lifetime_contract": "Acquire exact deployment/installation exclusion before MSI touches program files, old-product removal or Run. Keep a physically live owner through file and registry changes, old-version uninstall, commit or rollback, final cleanup and actual action return. A one-shot check followed by dropping the handle is insufficient. Separate UI/execute/deferred/rollback/commit action processes cannot assume a shared Rust static/HANDLE. Choose and verify explicit owner handoff/retention; cancellation, action error, controller loss and close failure must not be reported as successful release.",
+    "legacy_and_no_data_root": "InstanceGuard::acquire creates runtime directories; do not invoke it for an absent ProgramData deployment. Need a separate bounded installation/account gate usable before data exists, plus compatibility with the existing root lock. Older binaries lacking the new gate and an absent deployment root are a real startup race; define the supported cooperative upgrade baseline or another proven exclusion method before claiming full protection.",
+    "cross_account": "Per-user MSI runs under the original deployment SID. Compare actual token SID, resolved per-user install location, existing protected deployment ACL/identity and intended registry view. Wrong SID/SYSTEM/elevated-other-account cannot silently fall back to its own HKCU, scan HKEY_USERS, adopt another data root or rebind DPAPI. Upgrade continues fixed path; do not delete a Run entry pointing at a moved ZIP/other product merely because its value name is FutureClassroom.",
+    "run_cleanup_contract": "Construct the exact installed EXE command from trusted MSI/installation identity and verified fixed location, not a form/current_exe/basename or loose prefix. Delete only the fixed value after exact REG_SZ type, original bytes including NUL, SID/view and command match; Absent is idempotent; foreign/Opaque/oversized/unreadable values are preserved and classified. Hold maintenance ownership so cooperating app processes cannot re-enable Run mid-uninstall. Bind cleanup to actual uninstall, not the old-product removal leg of a same-path upgrade; preserve desired startup behavior on upgrade and on rollback.",
+    "external_toctou_decision_required": "A cooperative lock does not exclude external policy/admin writers. If strict never-delete-a-replaced-value is required, implement and verify a genuine native transactional/atomic compare-delete mechanism and conflict handling before enabling deletion. Current plain RegQueryValueExW+RegDeleteValueW cannot provide it; if unavailable, preserve the Run item/return unresolved failure rather than claim exact cleanup. No new API support or atomicity was inferred in this offline audit.",
+    "scope_limit": "This is a genuine code/API and owner-lifecycle gap, not merely missing a Windows test report. Candidate build/table passes remain valid; full lifecycle/P5-03 remains incomplete."
+  },
+  "necessary_future_validation": [
+    "Actual separate-process lock contention across sessions: running app causes MSI refusal without close/kill/reboot; app/autostart/repair launched during every held installation phase cannot enter; resume only after actual final owner release.",
+    "Actual MSI full/silent install/repair/upgrade/uninstall, injected file/registry/rollback/action-owner failures, including cancellation between check and mutation; no one-shot idle probe accepted as full-lifetime evidence.",
+    "Synthetic owned registry scope only: exact owned REG_SZ, absence, other EXE/ZIP path, extra arguments, REG_EXPAND_SZ/opaque/type/NUL/size variants, replacement before compare and at the final compare-delete boundary; preserve unrelated values.",
+    "Original vs wrong deployment SID and registry view; no school DB/DPAPI/admin initialization by installer; own MSI marker cleanup is separate from Run ownership.",
+    "Real Win7/Win10/Win11 Q13 and separate Seewo visible/long-stability gates remain future evidence; no Windows runtime validation performed here."
+  ],
+  "no_changes_outside_this_report": true
+}

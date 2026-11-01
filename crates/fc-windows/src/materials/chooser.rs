@@ -13,11 +13,6 @@ use windows::{
         UI::Shell::{Common::COMDLG_FILTERSPEC, *},
     },
 };
-#[link(name = "ole32")]
-unsafe extern "system" {
-    #[link_name = "CoTaskMemFree"]
-    fn free_task_memory(memory: *const core::ffi::c_void);
-}
 pub struct SelectedFile {
     path: PathBuf,
 }
@@ -67,7 +62,7 @@ pub fn select(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
     // SAFETY: called on the UI STA. No path has been trusted or opened here;
     // worker handle validation follows before copying any bytes. The native modal
     // loop continues routing WTS/power to the independent memory-only host control.
-    unsafe {
+    crate::com_task::with_task_memory(|memory| unsafe {
         let dialog: IFileOpenDialog =
             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
         dialog.SetOptions(
@@ -92,12 +87,12 @@ pub fn select(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
         let item = dialog.GetResult()?;
         let p = item.GetDisplayName(SIGDN_FILESYSPATH)?;
         let value = p.to_string();
-        free_task_memory(p.0.cast());
+        memory.free(p.0.cast());
         let path = PathBuf::from(value?);
         // Force drive-letter local validation again on the worker; picker options
         // alone are not a network/reparse/type guarantee.
         Ok(Some(SelectedFile { path }))
-    }
+    })
 }
 
 pub fn select_content_txt(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
@@ -109,7 +104,7 @@ pub fn select_content_images(owner: Option<HWND>) -> Result<Vec<SelectedFile>> {
 fn select_content(owner: Option<HWND>, images: bool) -> Result<Vec<SelectedFile>> {
     // SAFETY: own UI STA picker; all external paths remain opaque selections.
     // A bounded worker pins/verifies every source again after the dialog closes.
-    unsafe {
+    crate::com_task::with_task_memory(|memory| unsafe {
         let dialog: IFileOpenDialog =
             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
         let mut options = dialog.GetOptions()?
@@ -151,20 +146,20 @@ fn select_content(owner: Option<HWND>, images: bool) -> Result<Vec<SelectedFile>
             let item = items.GetItemAt(index)?;
             let text = item.GetDisplayName(SIGDN_FILESYSPATH)?;
             let value = text.to_string();
-            free_task_memory(text.0.cast());
+            memory.free(text.0.cast());
             files.push(SelectedFile {
                 path: PathBuf::from(value?),
             });
         }
         Ok(files)
-    }
+    })
 }
 
 /// Native picker only; no external package bytes are opened on the UI thread.
 pub fn select_backup(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
     // SAFETY: called on the UI STA, same COM lifetime and cancellation contract
     // as the material picker. Worker validation establishes actual file trust.
-    unsafe {
+    crate::com_task::with_task_memory(|memory| unsafe {
         let dialog: IFileOpenDialog =
             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
         dialog.SetOptions(
@@ -189,7 +184,7 @@ pub fn select_backup(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
         }
         let text = dialog.GetResult()?.GetDisplayName(SIGDN_FILESYSPATH)?;
         let value = text.to_string();
-        free_task_memory(text.0.cast());
+        memory.free(text.0.cast());
         let path = PathBuf::from(value?);
         if !path
             .file_name()
@@ -199,7 +194,7 @@ pub fn select_backup(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
             return Err(Error::from_hresult(E_INVALIDARG));
         }
         Ok(Some(SelectedFile { path }))
-    }
+    })
 }
 /// Selection only: returns an opaque untrusted target, creates no files and
 /// changes no current directory. Existing targets are never overwritten later.
@@ -209,7 +204,7 @@ pub fn save_backup(owner: Option<HWND>, suggested_name: &str) -> Result<Option<B
     }
     // SAFETY: UI STA owns the modal dialog. HSTRINGs live through synchronous
     // calls; the returned filesystem name still requires worker handle checks.
-    unsafe {
+    crate::com_task::with_task_memory(|memory| unsafe {
         let dialog: IFileSaveDialog =
             CoCreateInstance(&FileSaveDialog, None, CLSCTX_INPROC_SERVER)?;
         dialog.SetOptions(
@@ -235,7 +230,7 @@ pub fn save_backup(owner: Option<HWND>, suggested_name: &str) -> Result<Option<B
         }
         let text = dialog.GetResult()?.GetDisplayName(SIGDN_FILESYSPATH)?;
         let value = text.to_string();
-        free_task_memory(text.0.cast());
+        memory.free(text.0.cast());
         BackupDestination::from_picker(PathBuf::from(value?)).map(Some)
-    }
+    })
 }

@@ -1,0 +1,40 @@
+{
+  "status": "ORIGINAL_BOTH_JOBS_VERIFIED_IN_PROGRESS",
+  "observedUtc": "2026-11-01T02:16:08.045634+00:00",
+  "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "observations": [
+    {
+      "baseline": "modern",
+      "sourceReport": "modern-jobs-second.json",
+      "sha256": "4e3b401656f59184190e5d8c3b39e78889f150b61c3af603d0ae817ff7298a6e",
+      "jobs": [
+        {
+          "id": 124723560195,
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "baseline": "win7",
+      "sourceReport": "win7-jobs-second.json",
+      "sha256": "86097286854884ac5e8b3e0cfe6ec52a471dfd986d49f7156e1376e40a0fe149",
+      "jobs": [
+        {
+          "id": 124723651405,
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    }
+  ],
+  "nextCutReport": {
+    "path": "/tmp/fc-round55-ci-evidence/installer-lifecycle-next-cut-readonly-first.json",
+    "bytes": 10815,
+    "sha256": "78e23c216b73162882561b4634348e0e81f5c2c2c7f388e21e04c3517c66a787",
+    "status": "READ_ONLY_NEXT_IMPLEMENTATION_CUT_IDENTIFIED; NOT_IMPLEMENTED"
+  },
+  "mainClean": true,
+  "noManualCargoOrWindowsRuntimeRunning": true,
+  "goal": "ACTIVE full original plan objective; not complete/paused/blocked"
+}

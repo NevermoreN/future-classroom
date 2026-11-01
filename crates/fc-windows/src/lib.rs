@@ -3,6 +3,8 @@
 #[cfg(windows)]
 pub mod audio;
 pub mod calendar_download;
+#[cfg(windows)]
+mod com_task;
 pub mod http;
 #[cfg(windows)]
 mod native;

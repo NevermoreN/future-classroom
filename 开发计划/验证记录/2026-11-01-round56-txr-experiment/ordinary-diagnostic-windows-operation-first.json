@@ -1,0 +1,67 @@
+{
+  "status": "FAIL",
+  "scope": "Same production candidate, one existing test gets raw diagnostic output. Execute exactly one fresh-process ordinary competing-writer test without system-probe preflight; original assertion unchanged, other tests intentionally filtered. Native UI may remain unexecuted if tests fail.",
+  "compile": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-compile-first.json",
+    "bytes": 150325,
+    "sha256": "12e79408a358956264cedfe38caa69cb181b286ebc0da19f0b47240a57cd8e0d"
+  },
+  "test": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+    "bytes": 3573681,
+    "sha256": "848b77ceb7944f3c71c6b5cb8396743ae1c78056e56f618d1c4863e620866001"
+  },
+  "normal": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13133115,
+    "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+  },
+  "selectedOriginalMetadata": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-selected-original-first.jsonl",
+    "bytes": 870,
+    "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+  },
+  "fullOriginalMetadata": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-compile-first.stdout.log",
+    "bytes": 40437,
+    "sha256": "041b55edddee0f1cc7d375181b5e7dc2a0503415b0d16cc9f4123591dee93ff2"
+  },
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/fc-round56-transactional-autorun-evidence/windows-probe-ordinary-filter-first.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-selected-original-first.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--report",
+    "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.json"
+  ],
+  "exitCode": 1,
+  "actualExit": true,
+  "elapsedSeconds": 5.61945098801516,
+  "result": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.json",
+    "bytes": 2775,
+    "sha256": "5f9334127306ca1629ec4e4b1162a8ca35f2b5e65a31c361d80d10474e793ef8"
+  },
+  "cleanup": "PASS",
+  "stdout": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.stdout.log",
+    "bytes": 51,
+    "sha256": "1be8329a03dc2b76436a0768586893da184a44f80fe2a4ce577085d63e05da12"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.stderr.log",
+    "bytes": 403,
+    "sha256": "4f7d9920a3da330ffb7822f5bf9c684147d0b8babdf74744f51fe0bd8a54b7a9"
+  }
+}

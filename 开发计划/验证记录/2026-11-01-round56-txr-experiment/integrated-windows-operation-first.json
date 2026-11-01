@@ -1,0 +1,93 @@
+{
+  "status": "FAIL",
+  "scope": "Only affected fc_windows executable, public20/visual22/autostart25/default-output finite flows. Actual Win11/WOW64 only; no real Run, audible audio, visible picker, login/reboot, TLS/browser or Win7/Win10 certification.",
+  "sourceBinding": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/main-integration-first.json",
+    "bytes": 75122,
+    "sha256": "67fb56bdfa73cd70fb6fee8a999a14542b2463ffe382d1b9bb7cef1bc64d6bdc"
+  },
+  "compileChecks": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-checks-first.json",
+    "bytes": 155260,
+    "sha256": "349c10a95f28aea4984f96878890c515597c34c61eda02ea08b95cc73579fa1c"
+  },
+  "inputs": {
+    "normal": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13133115,
+      "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+    },
+    "test": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "bytes": 3564041,
+      "sha256": "605462f63f603e53d7e0d45686756bb2d9be5f3aeb8288109c0f9121ab20cd00"
+    },
+    "selectedOriginalMetadata": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-selected-original-first.jsonl",
+      "bytes": 870,
+      "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+    },
+    "fullOriginalMetadata": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-fc-windows-compile-first.stdout.log",
+      "bytes": 40438,
+      "sha256": "4124536f3a3455c872c5632ff0c428205673ecf992fbad21591fc4cb3d3a1b12"
+    },
+    "productOriginalMetadata": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-product-first.stdout.log",
+      "bytes": 86935,
+      "sha256": "faef9dfaa066f818282f359375bce0e0690027a661f88e5269386f21fdcaa9e2"
+    }
+  },
+  "script": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "operations": [
+    {
+      "name": "integrated-windows-affected-public-first",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-affected-public-first.json",
+        "--test-metadata",
+        "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-selected-original-first.jsonl",
+        "--system-host",
+        "--public-desktop"
+      ],
+      "status": "FAIL",
+      "exitCode": 1,
+      "actualExit": true,
+      "elapsedSeconds": 5.482958746841177,
+      "result": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-affected-public-first.json",
+        "bytes": 1973,
+        "sha256": "ff1494aa7a4a2156016639c3ed394778764957b98181c638cb2148d6fc31fa10"
+      },
+      "resultStatus": "FAIL",
+      "cleanup": "PASS",
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-affected-public-first.stdout.log",
+        "bytes": 14,
+        "sha256": "8f03718d9f618efe53a2947839fb3d07f90a3dc90be35dde2a813304ed960248"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-affected-public-first.stderr.log",
+        "bytes": 1322,
+        "sha256": "3de20956d334a5733109c562d715b87d0562b4aa140c9297f658b63faf830f83"
+      }
+    }
+  ]
+}

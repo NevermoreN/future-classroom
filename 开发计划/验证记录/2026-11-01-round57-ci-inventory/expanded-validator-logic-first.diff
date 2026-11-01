@@ -1,0 +1,181 @@
+--- old/verify-ci-artifact-first.py
++++ new/verify-ci-artifact-expanded-first.py
+@@ -1,9 +1,9 @@
+ #!/usr/bin/env python3
+-"""R46 static original-artifact audit. No downloads, executable execution or CI dispatch.
++"""R57 finite 20,000-source-path original-artifact audit. No downloads, executable execution or CI dispatch.
+ 
+ Examples (all output paths must be fresh and under this script's evidence directory):
+-  python3 verify-ci-artifact-first.py --self-test --report <fresh-model-report.json>
+-  python3 verify-ci-artifact-first.py --source <40hex> --baseline Modern \
++  python3 verify-ci-artifact-expanded-first.py --self-test --report <fresh-model-report.json>
++  python3 verify-ci-artifact-expanded-first.py --source <40hex> --baseline Modern \
+     --zip <original.zip> --zip-bytes <bytes> --zip-sha256 <64hex> \
+     --run-id <id> --job-id <id> --artifact-id <id> \
+     --run-metadata <run.json> --job-metadata <jobs.json> \
+@@ -37,7 +37,8 @@
+ EV = Path(__file__).resolve().parent
+ ROOT = Path('/workspace/共享/Eliora/未来教室计划')
+ PREFIX = '开发计划/验证记录/'
+-CI_SHA256 = 'ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418'
++CI_SHA256 = '0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd'
++MAX_SOURCE_PATHS = 20000 # Source inventory only; artifact/ZIP and byte caps stay unchanged.
+ MAX_FILE = 64 * 1024 * 1024
+ MAX_HASHED = 256 * 1024 * 1024
+ MAX_META = 16 * 1024 * 1024
+@@ -72,6 +73,9 @@
+ def digest(data):
+     return hashlib.sha256(data).hexdigest()
+ 
++def ci_source_matches(data):
++    return digest(data) == CI_SHA256
++
+ def file_fact(path):
+     h = hashlib.sha256(); count = 0
+     with Path(path).open('rb') as source:
+@@ -124,13 +128,13 @@
+         path = safe_path(name.decode('utf-8'))
+         rows.append(dict(path=path, mode=m[1].decode(), type='blob', git_blob_oid_sha1=m[2].decode(),
+             git_blob_bytes=integer(int(m[3]), MAX_FILE), domain=domain(path)))
+-    unique_rows(rows)
++    unique_rows(rows, max_rows=MAX_SOURCE_PATHS)
+     return rows
+ 
+ def parse_paths(raw):
+     need(0 < len(raw) <= MAX_META and raw.endswith(b'\0'), 'INVALID_TRACKED_PATH_BYTES')
+     paths = [safe_path(x.decode('utf-8')) for x in raw[:-1].split(b'\0')]
+-    need(len(paths) <= 10000 and len(set(paths)) == len(paths) and len({x.casefold() for x in paths}) == len(paths), 'INVALID_TRACKED_PATH_SET')
++    need(len(paths) <= MAX_SOURCE_PATHS and len(set(paths)) == len(paths) and len({x.casefold() for x in paths}) == len(paths), 'INVALID_TRACKED_PATH_SET')
+     return set(paths)
+ 
+ def compare_checkout(blob, row):
+@@ -148,16 +152,16 @@
+     hashed, tree, summary = before
+     need(isinstance(tree, dict) and tree.get('schema') == TREE_SCHEMA and tree.get('source_sha') == source
+          and tree.get('root_tree_oid_sha1') == tree_oid, 'GIT_MANIFEST_IDENTITY')
+-    actual = unique_rows(tree.get('files')); expected = unique_rows(expected_rows)
++    actual = unique_rows(tree.get('files'), max_rows=MAX_SOURCE_PATHS); expected = unique_rows(expected_rows, max_rows=MAX_SOURCE_PATHS)
+     need(actual == expected, 'FULL_GIT_METADATA_MISMATCH')
+     need(isinstance(summary, dict) and summary.get('schema') == SCHEMA and summary.get('source_sha') == source
+          and summary.get('root_tree_oid_sha1') == tree_oid, 'DOMAIN_MANIFEST_IDENTITY')
+-    need(summary.get('limits') == dict(paths=10000, per_file_bytes=MAX_FILE,
++    need(summary.get('limits') == dict(paths=MAX_SOURCE_PATHS, per_file_bytes=MAX_FILE,
+         sha256_input_total_bytes=MAX_HASHED, metadata_output_bytes=MAX_META), 'SOURCE_LIMITS_CHANGED')
+     need(isinstance(summary.get('explicit_build_reference_policy'), str)
+          and 'not hermetic' in summary['explicit_build_reference_policy'], 'HERMETICITY_CLAIM_CHANGED')
+     s = {p for p in expected if domain(p) == 'sha256_input'}; h = set(expected)-s
+-    sha_rows = unique_rows(hashed)
++    sha_rows = unique_rows(hashed, max_rows=MAX_SOURCE_PATHS)
+     need(set(sha_rows) == s, 'SHA_SUBSET_NOT_COMPLETE_PARTITION')
+     total = 0
+     for row in sha_rows.values():
+@@ -166,7 +170,7 @@
+     need(total <= MAX_HASHED, 'SHA_TOTAL_OVER_256MIB')
+     hist = summary.get('historical_git_archive'); sh = summary.get('sha256_input')
+     need(isinstance(hist, dict) and isinstance(sh, dict), 'MISSING_DOMAIN_DETAIL')
+-    hist_rows = unique_rows(hist.get('checkout_metadata'))
++    hist_rows = unique_rows(hist.get('checkout_metadata'), max_rows=MAX_SOURCE_PATHS)
+     need(set(hist_rows) == h, 'HISTORY_NOT_COMPLETE_PARTITION')
+     hist_size = 0
+     for row in hist_rows.values():
+@@ -380,7 +384,7 @@
+             sha256_checkout_bytes_hashed=counts['actualCheckoutBytesHashed'],historical_file_count=counts['historicalMetadataOnly'],
+             historical_git_blob_bytes=counts['historicalRawGitBlobBytes'],historical_checkout_metadata_bytes=counts['historicalCheckoutMetadataBytes'],
+             historical_content_sha256='NOT_READ_BY_INPUT_HASHER'))
+-        metadata=unique_rows(expected);direct=crlf=0
++        metadata=unique_rows(expected, max_rows=MAX_SOURCE_PATHS);direct=crlf=0
+         # Only S blobs are read. Historical H content is never cat-file/read/hashed here.
+         process=subprocess.Popen(['git','cat-file','--batch'],cwd=a.repo,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+         try:
+@@ -402,7 +406,7 @@
+             process.stdin.close();code=process.wait(timeout=30);need(code==0,'GIT_BATCH_EXIT')
+         self.check('all SHA subset exact blob or exact whole LF->CRLF only',direct+crlf==counts['actualShaSubset'])
+         counts.update(directGitBlobMatches=direct,exactFullLfToCrlfMatches=crlf)
+-        self.check('exact R45 CI helper pinned source',digest(self.ci_source)==CI_SHA256)
++        self.check('exact R57 CI helper pinned source',ci_source_matches(self.ci_source))
+         source_text=self.ci_source.decode()
+         for literal in ["$env:CARGO_BUILD_JOBS = '2'",'[int]$TimeoutSeconds = 120',"$Baseline) 2400", "$Baseline) 1200", "$Baseline) 1500",'Get-FileHash -LiteralPath $path -Algorithm SHA256','if ($total -gt 256MB)']:
+             self.check('unchanged source contract '+literal,literal in source_text)
+@@ -589,7 +593,7 @@
+     test('mixed original CR and NUL do not normalize',lambda:(reject('UNSUPPORTED_CHECKOUT_TRANSFORM',lambda:compare_checkout(b'a\r\n',dict(row,sha256='0'*64))),reject('UNSUPPORTED_CHECKOUT_TRANSFORM',lambda:compare_checkout(b'a\0',dict(row,sha256='0'*64)))))
+     source='1'*40;oid='2'*40
+     rows=[dict(path='a.rs',mode='100644',type='blob',git_blob_oid_sha1='3'*40,git_blob_bytes=4,domain='sha256_input'),dict(path=PREFIX+'old.json',mode='100644',type='blob',git_blob_oid_sha1='4'*40,git_blob_bytes=7,domain='historical_git_archive')]
+-    triple=[[dict(path='a.rs',bytes=4,sha256='5'*64)],dict(schema=TREE_SCHEMA,source_sha=source,root_tree_oid_sha1=oid,files=rows),dict(schema=SCHEMA,source_sha=source,root_tree_oid_sha1=oid,tracked_file_count=2,explicit_build_reference_policy='not hermetic',limits=dict(paths=10000,per_file_bytes=MAX_FILE,sha256_input_total_bytes=MAX_HASHED,metadata_output_bytes=MAX_META),sha256_input=dict(manifest='input-sha256.json',file_count=1,checkout_bytes_hashed=4),historical_git_archive=dict(exact_prefix=PREFIX,file_count=1,git_blob_bytes=7,checkout_metadata_bytes=9,git_manifest='input-git-tree.json',checkout_metadata=[dict(path=PREFIX+'old.json',checkout_bytes=9)],content_sha256='NOT_READ_BY_INPUT_HASHER'))]
++    triple=[[dict(path='a.rs',bytes=4,sha256='5'*64)],dict(schema=TREE_SCHEMA,source_sha=source,root_tree_oid_sha1=oid,files=rows),dict(schema=SCHEMA,source_sha=source,root_tree_oid_sha1=oid,tracked_file_count=2,explicit_build_reference_policy='not hermetic',limits=dict(paths=MAX_SOURCE_PATHS,per_file_bytes=MAX_FILE,sha256_input_total_bytes=MAX_HASHED,metadata_output_bytes=MAX_META),sha256_input=dict(manifest='input-sha256.json',file_count=1,checkout_bytes_hashed=4),historical_git_archive=dict(exact_prefix=PREFIX,file_count=1,git_blob_bytes=7,checkout_metadata_bytes=9,git_manifest='input-git-tree.json',checkout_metadata=[dict(path=PREFIX+'old.json',checkout_bytes=9)],content_sha256='NOT_READ_BY_INPUT_HASHER'))]
+     test('full metadata/S/H partition and distinct historical checkout bytes',lambda:need(validate_domains(source,oid,rows,triple,copy.deepcopy(triple))[0]['historicalRawGitBlobBytes']==7,'MODEL_DOMAINS'))
+     def mutation(code,fn):
+         changed=copy.deepcopy(triple);fn(changed);reject(code,lambda:validate_domains(source,oid,rows,changed,copy.deepcopy(changed)))
+@@ -614,6 +618,73 @@
+         need(required_commands('Win7')['workspace-test-compile'][:3]==['-Z','build-std','test'],'MODEL_TEST')
+         need('--no-run' in required_commands('Modern')['workspace-test-compile'],'MODEL_NO_RUN')
+     test('baseline exact buildstd placement/no metadata fmt leakage',arguments)
++    # Real-sized pure source inventories, not a whole fake CI artifact. Both
++    # variants exceed the old cap in a different partition while total M stays
++    # at the new finite maximum. No payload allocation/EXE/network/CI activity.
++    def source_fixture(s_count):
++        rs=[]
++        for i in range(MAX_SOURCE_PATHS):
++            name=(f'src/input-{i:05d}.txt' if i<s_count else PREFIX+f'old-{i:05d}.json')
++            rs.append(dict(path=name,mode='100644',type='blob',git_blob_oid_sha1='3'*40,git_blob_bytes=1,domain=domain(name)))
++        value=[[dict(path=r['path'],bytes=1,sha256='5'*64) for r in rs[:s_count]],
++            dict(schema=TREE_SCHEMA,source_sha=source,root_tree_oid_sha1=oid,files=rs),
++            dict(schema=SCHEMA,source_sha=source,root_tree_oid_sha1=oid,tracked_file_count=len(rs),explicit_build_reference_policy='not hermetic',
++                limits=dict(paths=MAX_SOURCE_PATHS,per_file_bytes=MAX_FILE,sha256_input_total_bytes=MAX_HASHED,metadata_output_bytes=MAX_META),
++                sha256_input=dict(manifest='input-sha256.json',file_count=s_count,checkout_bytes_hashed=s_count),
++                historical_git_archive=dict(exact_prefix=PREFIX,file_count=len(rs)-s_count,git_blob_bytes=len(rs)-s_count,
++                    checkout_metadata_bytes=2*(len(rs)-s_count),git_manifest='input-git-tree.json',
++                    checkout_metadata=[dict(path=r['path'],checkout_bytes=2) for r in rs[s_count:]],content_sha256='NOT_READ_BY_INPUT_HASHER'))]
++        return rs,value
++    def real_source_counts():
++        rs,_=source_fixture(1)
++        raw=b''.join((f"100644 blob {r['git_blob_oid_sha1']}       1\t{r['path']}\0").encode() for r in rs)
++        paths=b''.join((r['path']+'\0').encode() for r in rs)
++        parsed=parse_git_tree(raw)
++        need(len(parsed)==MAX_SOURCE_PATHS and parsed[-1]==rs[-1] and parsed[10000]==rs[10000],'MODEL_SOURCE_LAST_ENTRY')
++        need(parse_paths(paths)=={r['path'] for r in rs},'MODEL_FULL_TRACKED_PATHS')
++        extra=(f"100644 blob {'4'*40}       1\textra.txt\0").encode()
++        reject('INVALID_ROW_COLLECTION',lambda:parse_git_tree(raw+extra))
++        reject('INVALID_TRACKED_PATH_SET',lambda:parse_paths(paths+b'extra.txt\0'))
++    test('real 20000 Git/path entries preserve last row; 20001 rejected',real_source_counts)
++    def complete_large_partitions():
++        for s_count in (1,10001):
++            rs,value=source_fixture(s_count)
++            counts,hashed=validate_domains(source,oid,rs,value,copy.deepcopy(value))
++            need(counts['fullGitMetadata']==MAX_SOURCE_PATHS and counts['actualShaSubset']==s_count
++                and counts['historicalMetadataOnly']==MAX_SOURCE_PATHS-s_count and len(hashed)==s_count,'MODEL_FULL_LARGE_PARTITION')
++            need(value[1]['files'][-1]['path']==rs[-1]['path'],'MODEL_PARTITION_LAST_PATH')
++    test('full 20000 partitions allow over10000 SHA or historical rows without skipping',complete_large_partitions)
++    def tail_and_old_limit_rejection():
++        rs,value=source_fixture(1)
++        changed=copy.deepcopy(value);changed[2]['historical_git_archive']['checkout_metadata'].pop()
++        reject('HISTORY_NOT_COMPLETE_PARTITION',lambda:validate_domains(source,oid,rs,changed,copy.deepcopy(changed)))
++        changed=copy.deepcopy(value);changed[1]['files'].pop()
++        reject('FULL_GIT_METADATA_MISMATCH',lambda:validate_domains(source,oid,rs,changed,copy.deepcopy(changed)))
++        changed=copy.deepcopy(value);changed[2]['limits']['paths']=10000
++        reject('SOURCE_LIMITS_CHANGED',lambda:validate_domains(source,oid,rs,changed,copy.deepcopy(changed)))
++        rs,value=source_fixture(10001);changed=copy.deepcopy(value);changed[0].pop()
++        reject('SHA_SUBSET_NOT_COMPLETE_PARTITION',lambda:validate_domains(source,oid,rs,changed,copy.deepcopy(changed)))
++    test('missing large partition tail/fullGit/SHA tail and old10000 summary rejected',tail_and_old_limit_rejection)
++    def frozen_source_pin():
++        # The R57 immutable before/after fixtures are real original bytes. This
++        # checks the SAME predicate as Audit.sources, not an invented hash map.
++        before=(EV/'windows-msvc-ci.before.ps1').read_bytes()
++        after=(EV/'implementation-after-first/scripts/windows-msvc-ci.ps1').read_bytes()
++        need(digest(before)=='ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418','MODEL_OLD_CI_ORIGINAL_CHANGED')
++        need(CI_SHA256=='0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd' and ci_source_matches(after),'MODEL_NEW_CI_PIN')
++        need(not ci_source_matches(before),'MODEL_OLD_CI_FALSELY_ADMITTED')
++    test('new exact CI source pin accepts actual new bytes and rejects actual old helper',frozen_source_pin)
++    def unrelated_caps_unchanged():
++        need(unique_rows.__defaults__==('path',10000),'MODEL_GENERIC_ROW_CAP_CHANGED')
++        reject('INVALID_ROW_COLLECTION',lambda:unique_rows([dict(path=f'a{i}') for i in range(10001)]))
++        infos=[]
++        for i in range(10000):
++            member=zipfile.ZipInfo(f'a{i}.json');member.file_size=1;infos.append(member)
++        need(len(zip_inventory(infos))==10000,'MODEL_ZIP_CAP_SHRANK')
++        reject('ZIP_MEMBER_COUNT',lambda:zip_inventory(infos+[zipfile.ZipInfo('extra.json')]))
++        need((MAX_FILE,MAX_HASHED,MAX_META,MAX_PAYLOAD)==(64*1024*1024,256*1024*1024,16*1024*1024,512*1024*1024),'MODEL_BYTE_CAP_CHANGED')
++    test('generic rows and ZIP members stay10000; all byte limits unchanged',unrelated_caps_unchanged)
++
+     test('CI failure can never become static PASS',lambda:(need(not terminal_pass(dict(status='FAILED_OR_INCOMPLETE'),'success'),'MODEL_FAILURE'),need(not terminal_pass(dict(status='COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN'),'failure'),'MODEL_OFFICIAL_FAIL')))
+     def pe_cases():
+         data=bytearray(512);data[:2]=b'MZ';struct.pack_into('<I',data,0x3c,64);data[64:68]=b'PE\0\0';struct.pack_into('<HH',data,68,0x14c,1);struct.pack_into('<H',data,84,224);struct.pack_into('<H',data,88,0x10b);struct.pack_into('<HH',data,136,6,1);struct.pack_into('<H',data,156,3)

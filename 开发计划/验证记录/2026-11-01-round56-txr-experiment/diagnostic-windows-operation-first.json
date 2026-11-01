@@ -1,0 +1,67 @@
+{
+  "status": "FAIL",
+  "scope": "Same production candidate, one existing test gets raw diagnostic output. Execute actual fc_windows suite without failing system-probe preflight; no assertion or runtime acceptance relaxed. Native UI may remain unexecuted if tests fail.",
+  "compile": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-compile-first.json",
+    "bytes": 149997,
+    "sha256": "40b2d801bb66b2aaf1f9cf63bbb439de6fb8761bf66b61e4f609da0d0f84d836"
+  },
+  "test": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+    "bytes": 3568690,
+    "sha256": "eba054cfced0f5308dd40438d9610cd58c31edcaee649e7c84bddfeb4b0f7c68"
+  },
+  "normal": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13133115,
+    "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+  },
+  "selectedOriginalMetadata": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-selected-original-first.jsonl",
+    "bytes": 870,
+    "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+  },
+  "fullOriginalMetadata": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-compile-first.stdout.log",
+    "bytes": 40437,
+    "sha256": "2c63d33e6a5a6f7188bab178f5110d0d0588152ffd284c80ec6efe2507f950cd"
+  },
+  "argv": [
+    "python3",
+    "-B",
+    "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "--host",
+    "elior@192.168.10.212",
+    "--identity",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "--exe",
+    "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "--test-metadata",
+    "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-selected-original-first.jsonl",
+    "--test-timeout-seconds",
+    "900",
+    "--native-seconds",
+    "1",
+    "--report",
+    "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.json"
+  ],
+  "exitCode": 1,
+  "actualExit": true,
+  "elapsedSeconds": 31.004458416020498,
+  "result": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.json",
+    "bytes": 44620,
+    "sha256": "95f7071684a42b2caea7b553d821fefd5df9c206130276055029255a9c33600e"
+  },
+  "cleanup": "PASS",
+  "stdout": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.stdout.log",
+    "bytes": 51,
+    "sha256": "1be8329a03dc2b76436a0768586893da184a44f80fe2a4ce577085d63e05da12"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.stderr.log",
+    "bytes": 369,
+    "sha256": "91d8bea36c2373d60ab38ef5d7ab1ba973140980dee20bfdbbef2fe474bb3045"
+  }
+}

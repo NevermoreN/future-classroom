@@ -1,0 +1,175 @@
+--- second/crates/fc-windows/src/system/autorun.rs
++++ third/crates/fc-windows/src/system/autorun.rs
+@@ -131,6 +131,8 @@
+         Ok(RunAtLogin {
+             scope: self.clone(),
+             deadline,
++            #[cfg(test)]
++            fail_transaction_close: false,
+             _thread: PhantomData,
+         })
+     }
+@@ -186,6 +188,8 @@
+ pub struct RunAtLogin {
+     scope: RunScope,
+     deadline: Instant,
++    #[cfg(test)]
++    fail_transaction_close: bool,
+     _thread: PhantomData<Rc<()>>,
+ }
+ impl RunAtLogin {
+@@ -348,6 +352,10 @@
+                 }
+             }
+         };
++        #[cfg(test)]
++        if self.fail_transaction_close {
++            native.fail_transaction_close_for_test();
++        }
+         let staged = (|| {
+             native.open_key(&self.scope.0.key, enabled)?;
+             let actual = native
+@@ -406,11 +414,12 @@
+             return AutostartSystemOutcome {
+                 observation: AutostartObservation::Unavailable(AutostartFailure::Interrupted),
+                 failure: Some(AutostartFailure::Interrupted),
+-                mutated: settlement.outcome == transaction::Outcome::Committed,
++                mutated: settlement.outcome == transaction::Outcome::Committed
++                    && staged.unwrap_or(false),
+             };
+         }
+         let committed = settlement.outcome == transaction::Outcome::Committed;
+-        let mutated = committed && staged.unwrap_or(true);
++        let mutated = committed && staged.unwrap_or(false);
+         if settlement.outcome == transaction::Outcome::Undetermined {
+             failure = Some(AutostartFailure::Interrupted);
+         } else if !committed && failure.is_none() {
+--- second/crates/fc-windows/src/system/autorun_tests.rs
++++ third/crates/fc-windows/src/system/autorun_tests.rs
+@@ -752,3 +752,76 @@
+         assert_eq!(run.observe(), expected);
+     }
+ }
++
++#[test]
++fn failed_transaction_close_records_only_actual_committed_effect_and_retains_owner() {
++    const CHILD: &str = "FUTURE_CLASSROOM_TXR_TRANSACTION_CLOSE_CHILD";
++    let mode = std::env::var(CHILD).ok();
++    if mode.is_none() {
++        let name = std::thread::current().name().unwrap().to_owned();
++        for scenario in ["empty-disable", "committed-enable"] {
++            let mut child = std::process::Command::new(std::env::current_exe().unwrap())
++                .args(["--exact", &name, "--nocapture", "--test-threads=1"])
++                .env(CHILD, scenario)
++                .stdout(std::process::Stdio::piped())
++                .stderr(std::process::Stdio::piped())
++                .spawn()
++                .unwrap();
++            let deadline = Instant::now() + Duration::from_secs(15);
++            while child.try_wait().unwrap().is_none() {
++                if Instant::now() >= deadline {
++                    child.kill().unwrap();
++                    child.wait().unwrap();
++                    panic!("owned close-fault child exceeded its original 15s deadline");
++                }
++                std::thread::sleep(Duration::from_millis(1));
++            }
++            let output = child.wait_with_output().unwrap();
++            assert!(
++                output.status.success(),
++                "{scenario}: {}",
++                String::from_utf8_lossy(&output.stderr)
++            );
++            assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed"));
++        }
++        return;
++    }
++    let enabled = match mode.as_deref() {
++        Some("empty-disable") => false,
++        Some("committed-enable") => true,
++        _ => panic!("unknown owned synthetic child scenario"),
++    };
++    let scratch = Scratch::new();
++    let mut run = scratch.run();
++    run.fail_transaction_close = true;
++    let outcome = run.apply(&AutostartObservation::Absent, enabled, &|| true);
++    assert_eq!(outcome.failure, Some(AutostartFailure::Interrupted));
++    assert_eq!(
++        outcome.observation,
++        AutostartObservation::Unavailable(AutostartFailure::Interrupted)
++    );
++    // Both transactions really committed. Only enable staged a successful value
++    // mutation; an empty disable commit must not invent a changed Run value.
++    assert_eq!(outcome.mutated, enabled);
++    assert_eq!(transaction::retained_for_test(), (true, false, true));
++    assert!(transaction::MutationPermit::acquire().is_none());
++    assert_eq!(
++        run.observe(),
++        AutostartObservation::Unavailable(AutostartFailure::Unavailable)
++    );
++    // This injected failure withheld CloseHandle, so the exact original HANDLE
++    // remains valid. Actually close it once before native readback/scratch cleanup.
++    // Production does not expose this cleanup or reset its permanent Faulted gate.
++    assert!(transaction::release_retained_for_test());
++    assert_eq!(transaction::retained_for_test(), (true, false, false));
++    assert!(transaction::MutationPermit::acquire().is_none());
++    let key = run.open_key(false, false).unwrap().unwrap();
++    let actual = RunAtLogin::read_key(&key);
++    key.close().unwrap();
++    let expected = if enabled {
++        AutostartObservation::Command(run.expected_command().into())
++    } else {
++        AutostartObservation::Absent
++    };
++    assert_eq!(actual, expected);
++}
+--- second/crates/fc-windows/src/system/autorun_transaction.rs
++++ third/crates/fc-windows/src/system/autorun_transaction.rs
+@@ -67,6 +67,8 @@
+     cleanup_failed: bool,
+     #[cfg(test)]
+     fail_key_close: bool,
++    #[cfg(test)]
++    fail_transaction_close: bool,
+ }
+ impl<'a> NativeTransaction<'a> {
+     pub(super) fn begin(
+@@ -96,6 +98,8 @@
+             cleanup_failed: false,
+             #[cfg(test)]
+             fail_key_close: false,
++            #[cfg(test)]
++            fail_transaction_close: false,
+         })
+     }
+     pub(super) fn open_key(&mut self, path: &str, create: bool) -> Result<(), AutostartFailure> {
+@@ -225,7 +229,7 @@
+         }
+         if !self.cleanup_failed {
+             // SAFETY: correct close API for this original transaction HANDLE.
+-            if unsafe { CloseHandle(self.transaction.unwrap()) }.is_ok() {
++            if self.close_transaction_handle() {
+                 self.transaction = None;
+             } else {
+                 self.cleanup_failed = true;
+@@ -247,6 +251,20 @@
+             outcome: self.outcome,
+             released: true,
+         }
++    }
++    fn close_transaction_handle(&self) -> bool {
++        #[cfg(test)]
++        if self.fail_transaction_close {
++            // Test-only withholding of the first real close, not an invalid handle
++            // or a second close. The exact valid HANDLE goes to retention.
++            return false;
++        }
++        // SAFETY: original owned transaction; production attempts this once.
++        unsafe { CloseHandle(self.transaction.unwrap()) }.is_ok()
++    }
++    #[cfg(test)]
++    pub(super) fn fail_transaction_close_for_test(&mut self) {
++        self.fail_transaction_close = true;
+     }
+     pub(super) fn settle(mut self) -> Settlement {
+         self.settle_inner()

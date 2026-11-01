@@ -47,6 +47,14 @@ Win32回调依官方绑定使用extern "system"（尤其x86），必要C库按�
 
 HWND userdata记录唯一UI所有者和generation，WM_NCDESTROY解除映射后拒收旧回调；后台不直接持其&mut。有界PostMessage/句柄通知失败必须回收仍归发送方的owned载荷或改用预存票据，不能悬挂裸Box指针。COM初始化成功（含S_FALSE）与CoUninitialize在同一线程配对；UI/渲染、WIC、Shell分别维护线程域。GDI SelectObject替换对象后恢复原对象再释放DIB/DC，半初始化失败走逆序清理。
 
+### 第五十八轮：COM task 内存释放能力
+
+`SHGetKnownFolderPath`、文件选择器 `IShellItem::GetDisplayName` 和音频端点 `IMMDevice::GetId` 返回的 task 内存，统一由 Windows 适配层先取得可失败的释放能力，再调用可能分配内存的 API。只从完整 OS 系统目录对应的已加载 Ole32.dll 按精确名称解析 `CoTaskMemFree`；WOW64 使用 `GetSystemWow64DirectoryW`，原生 x86/x64 使用 `GetSystemDirectoryW`。以有界 `K32GetMappedFileNameW` 从真正模块基址取得 NT 映像名，与 OS 系统目录及该驱动器 `QueryDosDeviceW` 当前第一项映射构成的完整 NT 路径进行 Unicode ordinal 比较；前后映射必须一致，历史映射不能授权。各路径及映射缓冲均限 1024 个 UTF-16 单元，截断、缺失或不符均拒绝，不将 System32 与 SysWOW64 字符串视为等价，不新增文件或映射句柄。ARM64 另行确认。
+
+全进程单个 `OnceLock` 缓存函数指针或失败 HRESULT，一次初始化对该已加载系统模块执行进程寿命 `PIN`。PIN 到进程终止才结束，后续检查失败也不声称卸载或撤销；不另建替代引用，不调用 LoadLibrary 或改变 DLL 搜索策略，不新增线程或手工 Send/Sync。函数类型严格为 `unsafe extern "system" fn(*const c_void)`，保留 x86 stdcall 单指针参数和 void 返回；原 owned 指针在转换成功或失败时均于原位置恰好释放一次，null 按系统契约为空操作。解析失败发生在 task 分配之前，不以 Rust allocator、HeapFree、LocalFree 或 BSTR 释放器替代。测试的配对 `CoTaskMemAlloc` 也从同一模块按名取得，避免测试重新引入静态 task 符号。[微软释放契约](https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-cotaskmemfree)、[模块 PIN](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexw)。
+
+首版直接比较 `GetModuleFileNameW` 的 loader 拼写，在真实 WOW64 中因 SysWOW64 与 System32 的返回差异失败；原件保留，不能以编译通过覆盖。NT 映像修正的实际编译、Windows 分配释放及新双 MSVC 导入表证据见实施记录；源码中的链接库提示或 GNU 导入结果不足以证明 MSVC 最终选择了同一 DLL。Win11 上执行 Win7 target 程序不等于 Win7 实机运行，各系统与希沃可见桌面分别验收。[映像查询与 Win7 K32 导出](https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-getmappedfilenamew)、[DOS 设备当前及历史映射](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew)。
+
 ## 4. WinMM固定地址与释放（RR-02）
 
 WinMM对象仅由Audio执行域持有。WAVEHDR与其PCM指向拥有型固定堆分配（例如Box控制块/固定长度切片并维护不移动pointee不变量），地址、容量和事件句柄在驱动持有期间不变；禁止对Vec内结构扩容/移位，也不把栈上WAVEHDR地址提交后再返回。Pin必须配合正确的不变量封装，不能因WAVEHDR实现Unpin而误以为类型名已经禁止移动。

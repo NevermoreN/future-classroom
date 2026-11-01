@@ -1,0 +1,177 @@
+{
+  "status": "PASS_ACTUAL_WIN11_AFFECTED_AND3_NATIVE_FLOWS",
+  "scope": "Only affected fc_windows executable, public20/visual22/default-output finite flows. Actual Win11/WOW64 only; no real Run, audible audio, visible picker, login/reboot, TLS/browser or Win7/Win10 certification.",
+  "sourceBinding": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/main-integration-second.json",
+    "bytes": 75547,
+    "sha256": "ea74ee792c38975e1d70eb9a89e943c6ecf26d89b2b7bd0d84158765f3f6c9e8"
+  },
+  "compileChecks": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-checks-second.json",
+    "bytes": 155159,
+    "sha256": "2ebcd5cca12610c41662d49a40ac61f97e8e56c11a79b3b1569ef5fba6f6e928"
+  },
+  "inputs": {
+    "normal": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13124548,
+      "sha256": "102cf749fba657ef83d9aaa10f4794a4e5b8b31b920b14f929552efddbafe983"
+    },
+    "test": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "bytes": 3527268,
+      "sha256": "84f27257a78ab5bffee96156d86701d6b67f200ee3267f7a3c7d991ef6b56390"
+    },
+    "selectedOriginalMetadata": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-selected-original-first.jsonl",
+      "bytes": 870,
+      "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+    },
+    "fullOriginalMetadata": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-fc-windows-compile-second.stdout.log",
+      "bytes": 40437,
+      "sha256": "cc8cf3d86a333307c5d2263920a5d7c541a43248074bab23d89b1c45d4210bbe"
+    },
+    "productOriginalMetadata": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-product-second.stdout.log",
+      "bytes": 86935,
+      "sha256": "b5d7a4610323ff2cf35f87fdc70d0a29b5955636e5f7560e9aef33d9d3db8ec3"
+    }
+  },
+  "script": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "operations": [
+    {
+      "name": "nt-windows-affected-public-first",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.json",
+        "--test-metadata",
+        "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-selected-original-first.jsonl",
+        "--system-host",
+        "--public-desktop"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 39.62937699398026,
+      "result": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.json",
+        "bytes": 41053,
+        "sha256": "174cde7c392df0f3a125d016aca9de5219f0e82ad9a37ae697c13543ee7ade43"
+      },
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.stdout.log",
+        "bytes": 130,
+        "sha256": "c30cde36f0c78e12ce8a80a3a0dec10879eaa34897c50efcb0f8b28b60d64cc0"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "nt-windows-visual-first",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.json",
+        "--subject-visuals"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 8.2151824219618,
+      "result": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.json",
+        "bytes": 9897,
+        "sha256": "2a41eb5e8f3af79ccb8f9074eedfc1ac2ce4dead3bd8ba649f8aae1cee722217"
+      },
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.stdout.log",
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "nt-windows-voice-output-first",
+      "argv": [
+        "python3",
+        "-B",
+        "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+        "--host",
+        "elior@192.168.10.212",
+        "--identity",
+        "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+        "--exe",
+        "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "--test-timeout-seconds",
+        "900",
+        "--native-seconds",
+        "1",
+        "--report",
+        "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.json",
+        "--voice-output"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "actualExit": true,
+      "elapsedSeconds": 37.308293886017054,
+      "result": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.json",
+        "bytes": 8102,
+        "sha256": "6fcec32de8243fc3642f0692d54b9f5840f81917830ed8df785161ed2e7f3d88"
+      },
+      "resultStatus": "PASS",
+      "cleanup": "PASS",
+      "stdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.stdout.log",
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

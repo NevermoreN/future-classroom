@@ -1,0 +1,27 @@
+{
+  "status": "DRIVER_CREATE_NEW_LOG_COLLISION_CORRECTED_PRODUCT_SOURCE_UNCHANGED",
+  "originalFailure": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/checks-first.json",
+    "sha256": "b064b37b0ef1e6c9d93285c1969b3e0ef23587de6c51afb40eec51c7dbb54ad5"
+  },
+  "firstHelper": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/run-checks-first.py",
+    "sha256": "256cf4d9da5d247b3f8ac8c2a7adade70880d0dc995aa57451f680b8d1743463"
+  },
+  "secondHelper": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/run-checks-second.py",
+    "sha256": "43275e8649dff87cabb9701ddee50960b46919d8f9ee5024497945d6729aa598"
+  },
+  "correction": "Only distinct second report and log names. Already passed two exacttoolchain version commands remain original firstreport, not rerun. NoCargo was started in first attempt.",
+  "sourceFreeze": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/source-freeze-second.json",
+    "sha256": "42987369c012b49723d12717fc969fe587d1f8eab718b99e0296d08d2266a5ee"
+  },
+  "budget": {
+    "secondsPerCommand": 900,
+    "stdoutBytes": 16777216,
+    "stderrBytes": 16777216,
+    "jobs": 2,
+    "testThreads": 2
+  }
+}

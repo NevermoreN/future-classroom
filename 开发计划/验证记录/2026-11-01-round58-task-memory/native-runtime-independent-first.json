@@ -1,0 +1,1776 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_NARROW_GNU_WIN11_AFFECTED_AND_THREE_NATIVE_FLOWS",
+  "scope": "Read-only independent original-binding review; no new Windows/Cargo/network/PE/test/source actions. Original R58 candidate includes R57 inventory change, excludes withdrawn R56.",
+  "originals": [
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-delivery-second.json",
+      "bytes": 8966,
+      "sha256": "e12bdd9f447056a517e8913cef041aebf0b55231c786172727611d35c059ad6c"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-checks-second.json",
+      "bytes": 155159,
+      "sha256": "2ebcd5cca12610c41662d49a40ac61f97e8e56c11a79b3b1569ef5fba6f6e928"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-programs-static-second.json",
+      "bytes": 113419,
+      "sha256": "d8c85c8de28763cd98eff0b71a478f33050ff7197dbd8a559972afd8bfb890ef"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/main-integration-second.json",
+      "bytes": 75547,
+      "sha256": "ea74ee792c38975e1d70eb9a89e943c6ecf26d89b2b7bd0d84158765f3f6c9e8"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/implementation-freeze-second.json",
+      "bytes": 9394,
+      "sha256": "d1e8fb3f459f1bf98f3d6c78d12b34e3dc75910cbcc8c17df0c0d8ff3108ded1"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-operation-first.json",
+      "bytes": 7055,
+      "sha256": "0bcacd8234e3dbb514672a5a94d02e7044531103cdd8f9d76226feabe89a3f35"
+    },
+    {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/windows-readonly-final-first.json",
+      "bytes": 16699,
+      "sha256": "27b6830640c0be386eac9bb4bcf679bb3b298e1a455ab65643a1bc819cd6dd34"
+    }
+  ],
+  "sourceAndArtifactBinding": {
+    "sourceCount": 431,
+    "r57ExtraCount": 3,
+    "exactBeforeAfterManifestMatch": true,
+    "originalNormal": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13124548,
+      "sha256": "102cf749fba657ef83d9aaa10f4794a4e5b8b31b920b14f929552efddbafe983"
+    },
+    "originalAffectedLibtest": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "bytes": 3527268,
+      "sha256": "84f27257a78ab5bffee96156d86701d6b67f200ee3267f7a3c7d991ef6b56390"
+    },
+    "metadata": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-test-metadata-second.jsonl",
+      "bytes": 911,
+      "sha256": "d540eb31463d13250ab020843c62f1bdb16b1d62c390b9c6944a656ee2a53a82"
+    },
+    "selectedOriginalMetadata": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-selected-original-first.jsonl",
+      "bytes": 870,
+      "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+    },
+    "originalCompilerStdout": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-fc-windows-compile-second.stdout.log",
+      "bytes": 40437,
+      "sha256": "cc8cf3d86a333307c5d2263920a5d7c541a43248074bab23d89b1c45d4210bbe"
+    },
+    "originalProductStdout": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-product-second.stdout.log",
+      "bytes": 86935,
+      "sha256": "b5d7a4610323ff2cf35f87fdc70d0a29b5955636e5f7560e9aef33d9d3db8ec3"
+    },
+    "runner": {
+      "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+      "bytes": 59676,
+      "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+    },
+    "r56WithdrawalOriginal": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/main-withdrawal-first.json",
+      "sha256": "476b95cd63dfb490d815721bd0f0ea66c5ca8af9f42335b1b43783470b377b79"
+    },
+    "compiledCommands": [
+      {
+        "name": "fmt",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 3.6146627319976687,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "architecture",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 0.21088979300111532,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "diffcheck",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 0.21037632087245584,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "windows-fc-windows-compile",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 47.45808701496571,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "windows-product",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 126.34455261100084,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "windows-stable-strict",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 25.852739927126095,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      },
+      {
+        "name": "windows-nightly-strict",
+        "status": "PASS",
+        "exitCode": 0,
+        "actualExit": true,
+        "elapsedSeconds": 19.83299337583594,
+        "timeoutSeconds": 900,
+        "logBoundBytes": 16777216
+      }
+    ],
+    "retainedTwoPeFacts": [
+      {
+        "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+        "kernel32BaselineImports": [
+          "K32GetMappedFileNameW",
+          "QueryDosDeviceW"
+        ],
+        "combasePresent": false,
+        "winrtErrorPresent": false,
+        "withdrawnR56KtmPresent": false,
+        "osMsvcrtRetained": true,
+        "remainingRisk": [
+          {
+            "kind": "API_SET_DLL",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WaitOnAddress",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WakeByAddressAll",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WakeByAddressSingle",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "kernel32.dll",
+            "api": "GetSystemTimePreciseAsFileTime",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          }
+        ]
+      },
+      {
+        "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+        "kernel32BaselineImports": [
+          "K32GetMappedFileNameW",
+          "QueryDosDeviceW"
+        ],
+        "combasePresent": false,
+        "winrtErrorPresent": false,
+        "withdrawnR56KtmPresent": false,
+        "osMsvcrtRetained": true,
+        "remainingRisk": [
+          {
+            "kind": "API_SET_DLL",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WaitOnAddress",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WakeByAddressAll",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "api-ms-win-core-synch-l1-2-0.dll",
+            "api": "WakeByAddressSingle",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          },
+          {
+            "kind": "MODERN_API",
+            "dll": "kernel32.dll",
+            "api": "GetSystemTimePreciseAsFileTime",
+            "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+          }
+        ]
+      }
+    ],
+    "noRecomputedWholeGitHistoryOrObjdump": true
+  },
+  "affectedLibrary": {
+    "programs": 1,
+    "binarySha256": "84f27257a78ab5bffee96156d86701d6b67f200ee3267f7a3c7d991ef6b56390",
+    "exitCode": 0,
+    "summary": {
+      "outputIndex": 257,
+      "originalText": "test result: ok. 215 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.34s",
+      "passed": 215,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    "allPerTestResults": [
+      {
+        "name": "audio::capability::tests::query_distinguishes_unsupported_format_from_unavailable_output",
+        "result": "ok",
+        "outputIndex": 2
+      },
+      {
+        "name": "audio::capability::tests::query_preserves_real_driver_and_resource_failures",
+        "result": "ok",
+        "outputIndex": 3
+      },
+      {
+        "name": "audio::capability::tests::query_uses_only_mapper_query_and_exact_playback_pcm",
+        "result": "ok",
+        "outputIndex": 4
+      },
+      {
+        "name": "audio::device::tests::endpoint_changes_ignore_capture_other_roles_and_unrelated_usb",
+        "result": "ok",
+        "outputIndex": 5
+      },
+      {
+        "name": "audio::tests::deferred_start_has_no_native_submission_and_resumes_same_source_once",
+        "result": "ok",
+        "outputIndex": 6
+      },
+      {
+        "name": "audio::tests::deferral_after_prepare_preserves_ready_block_order_and_never_counts_done_early",
+        "result": "ok",
+        "outputIndex": 7
+      },
+      {
+        "name": "audio::tests::failed_reset_even_when_all_buffers_return_releases_safely_but_forbids_reopening",
+        "result": "ok",
+        "outputIndex": 8
+      },
+      {
+        "name": "audio::tests::late_return_and_stillplaying_keep_allocations_and_admission_closed",
+        "result": "ok",
+        "outputIndex": 9
+      },
+      {
+        "name": "audio::tests::not_run_device_classification_does_not_hide_unexpected_driver_errors",
+        "result": "ok",
+        "outputIndex": 10
+      },
+      {
+        "name": "audio::tests::reset_done_releases_without_counting_natural_and_stale_stop_cannot_cancel",
+        "result": "ok",
+        "outputIndex": 11
+      },
+      {
+        "name": "audio::tests::revoked_authority_and_failed_write_use_cleanup_without_a_natural_event",
+        "result": "ok",
+        "outputIndex": 12
+      },
+      {
+        "name": "audio::tests::stream_reuses_three_fixed_addresses_and_releases_before_natural_completion",
+        "result": "ok",
+        "outputIndex": 13
+      },
+      {
+        "name": "calendar_download::tests::response_bounds_and_status_do_not_accept_redirect_or_uncached_304",
+        "result": "ok",
+        "outputIndex": 18
+      },
+      {
+        "name": "calendar_download::tests::validators_are_bounded_ascii_and_never_header_injection",
+        "result": "ok",
+        "outputIndex": 19
+      },
+      {
+        "name": "calendar_download::tests::cancellation_panics_fail_closed_and_busy_never_releases_physical_owner",
+        "result": "ok",
+        "outputIndex": 23
+      },
+      {
+        "name": "com_task::tests::task_memory_allocator_module_and_capability_remain_process_pinned",
+        "result": "ok",
+        "outputIndex": 24
+      },
+      {
+        "name": "com_task::tests::task_memory_current_device_mapping_binds_exact_mapped_image_not_loader_spelling",
+        "result": "ok",
+        "outputIndex": 25
+      },
+      {
+        "name": "com_task::tests::task_memory_device_mapping_metadata_is_bounded_and_fail_closed",
+        "result": "ok",
+        "outputIndex": 26
+      },
+      {
+        "name": "com_task::tests::task_memory_missing_export_rejects_before_any_task_allocation",
+        "result": "ok",
+        "outputIndex": 27
+      },
+      {
+        "name": "com_task::tests::task_memory_path_check_rejects_wrong_folder_prefix_and_module",
+        "result": "ok",
+        "outputIndex": 28
+      },
+      {
+        "name": "com_task::tests::task_memory_real_system_ole32_allocate_free_and_null",
+        "result": "ok",
+        "outputIndex": 29
+      },
+      {
+        "name": "com_task::tests::task_memory_system_path_uses_windows_unicode_case_rules",
+        "result": "ok",
+        "outputIndex": 30
+      },
+      {
+        "name": "com_task::tests::task_memory_real_wow64_path_uses_the_matching_system_directory",
+        "result": "ok",
+        "outputIndex": 34
+      },
+      {
+        "name": "desktop::card_body_tests::shared_body_course_unverified_subtitle_reserves_real_header_and_complete_capsule_padding",
+        "result": "ok",
+        "outputIndex": 35
+      },
+      {
+        "name": "desktop::card_body_tests::shared_body_homework_labels_and_text_use_actual_width_full_utf16_and_page_line_coverage",
+        "result": "ok",
+        "outputIndex": 36
+      },
+      {
+        "name": "desktop::card_body_tests::shared_body_materials_actual_compositor_one_page_with_gaps_rows_note_and_full_more_target",
+        "result": "ok",
+        "outputIndex": 37
+      },
+      {
+        "name": "desktop::card_body_tests::shared_body_text_over_fifty_pages_and_full_sixty_four_homework_rows_keep_existing_bounds",
+        "result": "ok",
+        "outputIndex": 38
+      },
+      {
+        "name": "desktop::content::tests::actual_hidden_image_waits_for_verified_frame_pages_by_metadata_and_retains_physical_owner",
+        "result": "ok",
+        "outputIndex": 39
+      },
+      {
+        "name": "desktop::content::tests::premultiplied_blend_scales_without_touching_padding_or_double_alpha",
+        "result": "ok",
+        "outputIndex": 40
+      },
+      {
+        "name": "desktop::content::tests::scoped_requests_reject_owner_revision_and_tree_aliases",
+        "result": "ok",
+        "outputIndex": 41
+      },
+      {
+        "name": "desktop::content::tests::actual_hidden_two_text_nodes_page_only_the_exact_scoped_node",
+        "result": "ok",
+        "outputIndex": 42
+      },
+      {
+        "name": "desktop::public_inputs_tests::passive_facts_have_no_flat_input_or_queued_page_route_but_lesson_control_does",
+        "result": "ok",
+        "outputIndex": 43
+      },
+      {
+        "name": "desktop::public_inputs_tests::passive_overflow_is_explicit_capacity_error_after_complete_measurement",
+        "result": "ok",
+        "outputIndex": 44
+      },
+      {
+        "name": "desktop::tests::filename_hit_rectangles_bind_source_and_resource_versions_and_reject_stale_actions",
+        "result": "ok",
+        "outputIndex": 45
+      },
+      {
+        "name": "desktop::tests::full_1080p_and_4k_recess_regions_preserve_alpha_with_bounded_dibs",
+        "result": "ok",
+        "outputIndex": 50
+      },
+      {
+        "name": "desktop::tests::lesson_control_uses_only_its_button_and_cancels_old_scene_input",
+        "result": "ok",
+        "outputIndex": 51
+      },
+      {
+        "name": "desktop::tests::long_filename_pages_preserve_extension_and_only_visible_text_accepts_input",
+        "result": "ok",
+        "outputIndex": 52
+      },
+      {
+        "name": "desktop::tests::native_readonly_buttons_turn_local_pages_then_request_bounded_homework_batches",
+        "result": "ok",
+        "outputIndex": 53
+      },
+      {
+        "name": "desktop::tests::one_hundred_real_scene_rebuilds_release_handles_and_denied_ticks_do_zero_work",
+        "result": "ok",
+        "outputIndex": 54
+      },
+      {
+        "name": "desktop::tests::real_com_dib_text_pages_and_three_clocks_remain_offscreen",
+        "result": "ok",
+        "outputIndex": 55
+      },
+      {
+        "name": "desktop::tests::stale_gate_generation_revision_expired_date_and_alpha_zero_never_draw",
+        "result": "ok",
+        "outputIndex": 56
+      },
+      {
+        "name": "desktop::tree::additional_tests::material_visible_rows_and_row_gap_are_actual_native_pagination_constraints",
+        "result": "ok",
+        "outputIndex": 57
+      },
+      {
+        "name": "desktop::tree::recess_tests::four_k_recess_partitions_native_background_holes_and_combines_alpha_once",
+        "result": "ok",
+        "outputIndex": 58
+      },
+      {
+        "name": "desktop::tree::tests::combined_root_cache_and_simultaneous_scratch_are_rejected_at_original_budget",
+        "result": "ok",
+        "outputIndex": 59
+      },
+      {
+        "name": "desktop::tree::tests::empty_transparent_model_group_remains_selectable_metadata_without_a_surface",
+        "result": "ok",
+        "outputIndex": 60
+      },
+      {
+        "name": "desktop::tree::tests::native_clock_tick_changes_only_owned_patch_without_remeasuring_tree",
+        "result": "ok",
+        "outputIndex": 61
+      },
+      {
+        "name": "desktop::tree::tests::native_homework_title_and_body_share_one_leaf_and_real_pages",
+        "result": "ok",
+        "outputIndex": 62
+      },
+      {
+        "name": "desktop::tree::tests::native_tree_page_is_bound_to_exact_node_when_component_kind_repeats",
+        "result": "ok",
+        "outputIndex": 63
+      },
+      {
+        "name": "desktop::tree::tests::passive_tree_facts_never_aggregate_input_or_route_paging",
+        "result": "ok",
+        "outputIndex": 64
+      },
+      {
+        "name": "desktop::tree::tests::resident_and_preview_renderers_share_class_registration_until_last_owner",
+        "result": "ok",
+        "outputIndex": 65
+      },
+      {
+        "name": "desktop::tree::tests::true_subtree_group_has_single_alpha_in_overlap_and_no_leaf_hwnds",
+        "result": "ok",
+        "outputIndex": 66
+      },
+      {
+        "name": "host::tests::foreground_dispatch_revokes_external_before_main_pump_but_not_own_chooser",
+        "result": "ok",
+        "outputIndex": 67
+      },
+      {
+        "name": "http::lifecycle::tests::both_accepted_return_codes_wait_but_inline_failure_withdraws_without_packet",
+        "result": "ok",
+        "outputIndex": 68
+      },
+      {
+        "name": "http::lifecycle::tests::cancellation_ack_never_releases_the_original_io",
+        "result": "ok",
+        "outputIndex": 69
+      },
+      {
+        "name": "http::lifecycle::tests::closing_generation_cannot_publish_into_new_cycle_or_reuse_slot_early",
+        "result": "ok",
+        "outputIndex": 70
+      },
+      {
+        "name": "http::lifecycle::tests::fixed_eight_slots_bound_all_admission",
+        "result": "ok",
+        "outputIndex": 71
+      },
+      {
+        "name": "http::lifecycle::tests::original_completion_before_cancel_ack_also_retains_the_slot",
+        "result": "ok",
+        "outputIndex": 72
+      },
+      {
+        "name": "http::lifecycle::tests::sync_success_and_pending_keep_ownership_until_one_completion",
+        "result": "ok",
+        "outputIndex": 73
+      },
+      {
+        "name": "http::native::tests::captured_completion_hresult_is_decoded_without_thread_last_error",
+        "result": "ok",
+        "outputIndex": 74
+      },
+      {
+        "name": "http::native::tests::fixed_header_is_aligned_and_pointer_tables_cannot_escape_allocation",
+        "result": "ok",
+        "outputIndex": 75
+      },
+      {
+        "name": "http::native::tests::invalid_function_requires_exact_synchronously_confirmed_disconnection",
+        "result": "ok",
+        "outputIndex": 76
+      },
+      {
+        "name": "http::native::tests::native_slack_does_not_expand_wire_header_budget",
+        "result": "ok",
+        "outputIndex": 77
+      },
+      {
+        "name": "http::native::tests::raw_target_and_ssl_pointer_are_range_checked_before_use",
+        "result": "ok",
+        "outputIndex": 78
+      },
+      {
+        "name": "http::native::tests::rejected_body_and_rejected_cancel_vacate_only_their_own_records",
+        "result": "ok",
+        "outputIndex": 79
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::cng_sha256_matches_known_vector_and_copy_uses_actual_bytes",
+        "result": "ok",
+        "outputIndex": 80
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::copy_cancellation_and_late_cancel_delete_only_the_owned_inode",
+        "result": "ok",
+        "outputIndex": 81
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::destination_constructor_rejects_undisplayable_complete_paths_before_io",
+        "result": "ok",
+        "outputIndex": 82
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::destination_reparse_directory_is_rejected_before_any_copy",
+        "result": "ok",
+        "outputIndex": 83
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::diagnostic_destinations_require_the_isolated_marker_and_safe_backup_name",
+        "result": "ok",
+        "outputIndex": 84
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::existing_and_racing_destinations_are_never_overwritten",
+        "result": "ok",
+        "outputIndex": 85
+      },
+      {
+        "name": "materials::chooser::backup_destination::tests::source_pin_denies_mutation_and_bad_hash_or_tail_has_no_published_output",
+        "result": "ok",
+        "outputIndex": 86
+      },
+      {
+        "name": "materials::chooser::validation::tests::backup_names_reject_devices_ads_navigation_and_wrong_extensions",
+        "result": "ok",
+        "outputIndex": 87
+      },
+      {
+        "name": "materials::chooser::validation::tests::cancellation_lengths_truncation_and_trailing_bytes_are_rejected",
+        "result": "ok",
+        "outputIndex": 88
+      },
+      {
+        "name": "materials::chooser::validation::tests::complete_display_paths_preserve_chinese_and_emoji_but_reject_bidi_and_controls",
+        "result": "ok",
+        "outputIndex": 89
+      },
+      {
+        "name": "materials::chooser::validation::tests::short_writes_hash_exactly_the_written_bytes",
+        "result": "ok",
+        "outputIndex": 90
+      },
+      {
+        "name": "host::tests::hidden_top_level_routes_events_and_control_stops_without_queue",
+        "result": "ok",
+        "outputIndex": 91
+      },
+      {
+        "name": "materials::files::tests::native_file_capabilities_reject_aliases_and_oversized_enumeration",
+        "result": "ok",
+        "outputIndex": 92
+      },
+      {
+        "name": "materials::files::tests::private_file_publish_cancel_mapping_and_exclusive_cleanup",
+        "result": "ok",
+        "outputIndex": 93
+      },
+      {
+        "name": "materials::image::admission_tests::admission_original_deadline_and_post_acquire_cancel_precede_wic",
+        "result": "ok",
+        "outputIndex": 94
+      },
+      {
+        "name": "materials::image::admission_tests::legal_validation_waits_for_physical_owner_then_full_wic_completes",
+        "result": "ok",
+        "outputIndex": 95
+      },
+      {
+        "name": "materials::image::admission_tests::raster_same_gate_cancel_charges_no_pixels_and_retry_decodes_after_release",
+        "result": "ok",
+        "outputIndex": 96
+      },
+      {
+        "name": "materials::raster::tests::concurrent_reservations_cannot_oversubscribe_or_return_each_others_bytes",
+        "result": "ok",
+        "outputIndex": 97
+      },
+      {
+        "name": "materials::raster::tests::containment_handles_extreme_aspects_without_overflow_crop_or_enlargement",
+        "result": "ok",
+        "outputIndex": 98
+      },
+      {
+        "name": "materials::raster::tests::physical_frame_keeps_budget_after_cache_clear_until_final_arc_drops",
+        "result": "ok",
+        "outputIndex": 99
+      },
+      {
+        "name": "materials::image::admission_tests::waiting_validation_cancels_without_decoder_or_early_owner_release",
+        "result": "ok",
+        "outputIndex": 100
+      },
+      {
+        "name": "materials::raster::tests::real_wic_decodes_same_pinned_bmp_after_hash_eof_and_keeps_node_identity",
+        "result": "ok",
+        "outputIndex": 101
+      },
+      {
+        "name": "materials::raster::tests::verification_metadata_and_cancellation_fail_without_leaking_decode_reservations",
+        "result": "ok",
+        "outputIndex": 102
+      },
+      {
+        "name": "materials::shell::tests::logical_finish_and_rust_packet_do_not_hide_a_held_tls_destructor",
+        "result": "ok",
+        "outputIndex": 103
+      },
+      {
+        "name": "materials::shell::tests::native_reap_keeps_unconsumed_results_and_blocks_replacement_until_consumed",
+        "result": "ok",
+        "outputIndex": 104
+      },
+      {
+        "name": "materials::shell::tests::outer_thread_panic_is_sticky_and_stops_new_admission_after_reap",
+        "result": "ok",
+        "outputIndex": 108
+      },
+      {
+        "name": "materials::shell::tests::lazy_sta_retires_and_restarts_without_losing_a_queued_request",
+        "result": "ok",
+        "outputIndex": 109
+      },
+      {
+        "name": "materials::shell::tests::recheck_panic_faults_gate_and_production_owner_cannot_open_from_noninteractive_session",
+        "result": "ok",
+        "outputIndex": 113
+      },
+      {
+        "name": "materials::shell::tests::sta_queue_results_and_shutdown_stay_bounded_and_private_association_is_removed",
+        "result": "ok",
+        "outputIndex": 114
+      },
+      {
+        "name": "system::autorun::tests::access_denial_has_specific_failure_without_leaking_os_error_text",
+        "result": "ok",
+        "outputIndex": 115
+      },
+      {
+        "name": "system::autorun::tests::applying_fixed_project_value_preserves_other_values_in_the_same_key",
+        "result": "ok",
+        "outputIndex": 116
+      },
+      {
+        "name": "system::autorun::tests::cancellation_after_write_reports_actual_state_without_rollback",
+        "result": "ok",
+        "outputIndex": 117
+      },
+      {
+        "name": "system::autorun::tests::cancellation_before_write_preserves_observed_value",
+        "result": "ok",
+        "outputIndex": 118
+      },
+      {
+        "name": "system::autorun::tests::command_validation_rejects_ambiguous_and_overlength_targets",
+        "result": "ok",
+        "outputIndex": 119
+      },
+      {
+        "name": "system::autorun::tests::explicit_scratch_cleanup_is_idempotent_after_workers_return",
+        "result": "ok",
+        "outputIndex": 120
+      },
+      {
+        "name": "system::autorun::tests::external_change_after_write_reports_mismatch_without_compensating_write",
+        "result": "ok",
+        "outputIndex": 121
+      },
+      {
+        "name": "system::autorun::tests::external_change_before_compare_is_not_overwritten",
+        "result": "ok",
+        "outputIndex": 122
+      },
+      {
+        "name": "system::autorun::tests::generated_scope_can_open_new_worker_without_moving_a_registry_handle",
+        "result": "ok",
+        "outputIndex": 123
+      },
+      {
+        "name": "system::autorun::tests::moved_executable_requires_reviewed_exact_preimage",
+        "result": "ok",
+        "outputIndex": 124
+      },
+      {
+        "name": "system::autorun::tests::native_wrong_type_and_oversize_values_are_opaque_and_preserved",
+        "result": "ok",
+        "outputIndex": 125
+      },
+      {
+        "name": "system::autorun::tests::production_scope_cleanup_is_refused",
+        "result": "ok",
+        "outputIndex": 126
+      },
+      {
+        "name": "system::autorun::tests::quoted_absolute_command_and_isolated_registry_roundtrip",
+        "result": "ok",
+        "outputIndex": 127
+      },
+      {
+        "name": "system::autorun::tests::registry_decoder_rejects_exact_untrusted_string_bytes_without_normalizing",
+        "result": "ok",
+        "outputIndex": 128
+      },
+      {
+        "name": "system::autorun::tests::unavailable_preimage_never_requests_a_write_guard",
+        "result": "ok",
+        "outputIndex": 129
+      },
+      {
+        "name": "system::clock::tests::native_current_clock_provides_valid_civil_and_monotonic_times",
+        "result": "ok",
+        "outputIndex": 130
+      },
+      {
+        "name": "system::crypto::tests::current_user_dpapi_roundtrip_tamper_and_bounds",
+        "result": "ok",
+        "outputIndex": 131
+      },
+      {
+        "name": "system::paths::tests::isolated_deployment_acl_and_cross_handle_exclusion",
+        "result": "ok",
+        "outputIndex": 132
+      },
+      {
+        "name": "system::tests::native_thread_cpu_clock_is_monotonic",
+        "result": "ok",
+        "outputIndex": 133
+      },
+      {
+        "name": "materials::shell::tests::stale_scope_expiry_and_memory_guard_cancel_before_any_native_open",
+        "result": "ok",
+        "outputIndex": 134
+      },
+      {
+        "name": "tcp_frontdoor::tests::bytes_do_not_renew_absolute_deadline",
+        "result": "ok",
+        "outputIndex": 135
+      },
+      {
+        "name": "tcp_frontdoor::tests::split_terminator_and_exact_bound_are_checked",
+        "result": "ok",
+        "outputIndex": 136
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::flight::tests::certificate_query_failed_owner_is_retained_and_fault_is_permanent",
+        "result": "ok",
+        "outputIndex": 137
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::flight::tests::certificate_query_flight_is_busy_until_explicit_physical_release",
+        "result": "ok",
+        "outputIndex": 138
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::flight::tests::certificate_query_poison_preserves_original_retained_owner_and_rejects_claim",
+        "result": "ok",
+        "outputIndex": 142
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::flight::tests::certificate_query_unfinished_claim_cannot_silently_publish_idle",
+        "result": "ok",
+        "outputIndex": 143
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_api_failure_cannot_be_treated_like_zero_policy_status",
+        "result": "ok",
+        "outputIndex": 144
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_cached_revocation_unknown_and_revoked_remain_distinct",
+        "result": "ok",
+        "outputIndex": 145
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_cancellation_at_each_checkpoint_closes_exact_original_driver",
+        "result": "ok",
+        "outputIndex": 146
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_delivers_only_after_original_driver_cleanup_and_keeps_scope",
+        "result": "ok",
+        "outputIndex": 147
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_incomplete_chain_never_promises_cached_revocation_success",
+        "result": "ok",
+        "outputIndex": 148
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_independent_negative_facts_are_retained_without_skipping_cleanup",
+        "result": "ok",
+        "outputIndex": 149
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_ip_and_ipv6_name_stay_unverified_even_with_zero_policy_error",
+        "result": "ok",
+        "outputIndex": 150
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_missing_or_failed_lookup_never_inspects_another_certificate",
+        "result": "ok",
+        "outputIndex": 151
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_panicking_authority_is_cancelled_and_still_closes",
+        "result": "ok",
+        "outputIndex": 158
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_policy_true_with_error_is_not_policy_or_name_success",
+        "result": "ok",
+        "outputIndex": 159
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_rejects_noncanonical_or_unbounded_input_before_native_work",
+        "result": "ok",
+        "outputIndex": 160
+      },
+      {
+        "name": "tls_frontdoor::certificate_query::tests::certificate_query_release_failure_overrides_success_cancel_and_missing_certificate",
+        "result": "ok",
+        "outputIndex": 161
+      },
+      {
+        "name": "tls_frontdoor::credentials::tests::certificate_query_empty_eku_preserves_unrestricted_empty_and_unknown_distinction",
+        "result": "ok",
+        "outputIndex": 162
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::all_native_response_status_classes_get_one_date_in_the_frozen_head",
+        "result": "ok",
+        "outputIndex": 163
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::caller_date_is_rejected_case_insensitively_instead_of_preserved_or_duplicated",
+        "result": "ok",
+        "outputIndex": 164
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::generated_date_counts_towards_the_original_header_byte_and_field_limits",
+        "result": "ok",
+        "outputIndex": 165
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::head_date_uses_the_same_validation_and_budget_without_cl_or_logical_body",
+        "result": "ok",
+        "outputIndex": 166
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::imf_fixdate_is_fixed_english_utc_with_verified_weekday_and_leap_days",
+        "result": "ok",
+        "outputIndex": 167
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::invalid_windows_utc_structures_are_rejected_without_fabricating_a_date",
+        "result": "ok",
+        "outputIndex": 168
+      },
+      {
+        "name": "tls_frontdoor::http_date::tests::native_get_system_time_produces_one_valid_utc_date_without_local_clock_conversion",
+        "result": "ok",
+        "outputIndex": 169
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::a_head_completed_at_or_after_the_original_header_deadline_never_starts_a_request",
+        "result": "ok",
+        "outputIndex": 170
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::abortive_option_failure_preserves_original_socket_and_faults_replacement_in_child",
+        "result": "ok",
+        "outputIndex": 171
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::bare_close_failure_retains_exact_owner_and_forbids_replacement_in_child",
+        "result": "ok",
+        "outputIndex": 172
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::header_completion_transfers_one_absolute_budget_and_admission_only_tightens_it",
+        "result": "ok",
+        "outputIndex": 173
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::header_negative_alarm_is_distinct_from_hard_deadline_and_never_shortens_request_stage",
+        "result": "ok",
+        "outputIndex": 174
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::ready_business_slots_have_no_native_operation_or_active_header_clock",
+        "result": "ok",
+        "outputIndex": 175
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_accept_cannot_steal_held_frame_or_unconsumed_retired_business_slots",
+        "result": "ok",
+        "outputIndex": 176
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_bare_alarm_preserves_original_deadline_and_requires_actual_packet_before_repost",
+        "result": "ok",
+        "outputIndex": 177
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_bare_handoff_near_original_post_deadline_never_gets_handoff_plus_five",
+        "result": "ok",
+        "outputIndex": 178
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_complete_head_ends_header_budget_before_body_admission_and_keeps_one_start",
+        "result": "ok",
+        "outputIndex": 179
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_early_header_close_reports_socket_return_without_discharge_of_receive_debt",
+        "result": "ok",
+        "outputIndex": 180
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_expired_idle_post_snapshot_counts_request_and_actual_return_separately",
+        "result": "ok",
+        "outputIndex": 181
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_expired_queued_accept_is_discarded_before_any_business_handoff",
+        "result": "ok",
+        "outputIndex": 182
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_fake_records_deadline_is_absolute_and_closed_event_precedes_retirement_reuse",
+        "result": "ok",
+        "outputIndex": 183
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_fake_records_keep_head_tail_and_pause_until_exact_body_ack_then_send_all_records",
+        "result": "ok",
+        "outputIndex": 184
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_fake_records_zero_body_extra_pipeline_and_early_eof_never_become_ready",
+        "result": "ok",
+        "outputIndex": 185
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_first_header_reserve_keeps_original_five_second_wire_sample_strict",
+        "result": "ok",
+        "outputIndex": 187
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_four_busy_business_requests_reject_excess_without_touching_old_requests",
+        "result": "ok",
+        "outputIndex": 188
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_head_does_not_bypass_a_revoked_response_fence",
+        "result": "ok",
+        "outputIndex": 189
+      },
+      {
+        "name": "tcp_frontdoor::native::tests::native_finite_admission_deadline_and_drain",
+        "result": "ok",
+        "outputIndex": 191
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_head_errors_send_only_date_headers_and_wait_for_actual_header_ack",
+        "result": "ok",
+        "outputIndex": 192
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_head_marker_clears_on_exact_slot_reuse_so_get_keeps_its_body",
+        "result": "ok",
+        "outputIndex": 193
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_header_alarm_keeps_a_held_decrypt_frame_and_suppresses_its_late_head",
+        "result": "ok",
+        "outputIndex": 194
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_idle_bare_cancel_keeps_debt_until_packet_then_reposts_same_memory",
+        "result": "ok",
+        "outputIndex": 195
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_late_decrypt_cannot_publish_a_head_or_release_its_slot_before_actual_return",
+        "result": "ok",
+        "outputIndex": 196
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_queued_accept_after_negative_alarm_is_rejected_without_new_hard_deadline",
+        "result": "ok",
+        "outputIndex": 197
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_response_fence_allows_complete_response_and_does_not_gate_close_notify",
+        "result": "ok",
+        "outputIndex": 198
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_response_fence_rechecks_after_sspi_before_first_and_next_record_send",
+        "result": "ok",
+        "outputIndex": 199
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_response_fence_rejects_false_or_panicking_guard_before_response_admission",
+        "result": "ok",
+        "outputIndex": 203
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_response_fence_rejects_next_chunk_after_physical_header_ack",
+        "result": "ok",
+        "outputIndex": 204
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_stop_after_actual_success_packet_does_not_handoff_or_repost",
+        "result": "ok",
+        "outputIndex": 205
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_unadmitted_request_expiry_discards_a_queued_head_and_cannot_be_renewed",
+        "result": "ok",
+        "outputIndex": 206
+      },
+      {
+        "name": "tls_frontdoor::native::stream::tests::real_iocp_wait_past_original_post_header_deadline_then_admit_without_renewing_request",
+        "result": "ok",
+        "outputIndex": 207
+      },
+      {
+        "name": "tls_frontdoor::native::tests::held_driver_drain_timeout_retains_native_owner_in_independent_process",
+        "result": "ok",
+        "outputIndex": 208
+      },
+      {
+        "name": "tls_frontdoor::native::tests::native_socket_close_keeps_held_frame_until_real_late_completion_and_reap",
+        "result": "ok",
+        "outputIndex": 210
+      },
+      {
+        "name": "tls_frontdoor::schannel::tests::decrypted_record_keeps_extra_when_trailer_views_the_original_remainder",
+        "result": "ok",
+        "outputIndex": 211
+      },
+      {
+        "name": "tls_frontdoor::schannel::tests::error_cleanup_preserves_exact_owner_until_retire_ack",
+        "result": "ok",
+        "outputIndex": 212
+      },
+      {
+        "name": "tls_frontdoor::schannel::tests::exact_empty_context_retirement_cannot_be_forged_and_wipes_connection_data",
+        "result": "ok",
+        "outputIndex": 213
+      },
+      {
+        "name": "tls_frontdoor::schannel::tests::native_ranges_and_extra_never_accept_outside_or_nonprogressing_buffers",
+        "result": "ok",
+        "outputIndex": 214
+      },
+      {
+        "name": "tls_frontdoor::schannel::tests::shutdown_returns_only_bounded_owned_token_and_explicit_completion_status",
+        "result": "ok",
+        "outputIndex": 215
+      },
+      {
+        "name": "tls_frontdoor::tests::certificate_identity_is_exact_ascii_hex_without_aliases",
+        "result": "ok",
+        "outputIndex": 216
+      },
+      {
+        "name": "tls_frontdoor::tests::diagnostic_marker_cannot_inject_http_or_control_output",
+        "result": "ok",
+        "outputIndex": 217
+      },
+      {
+        "name": "tls_frontdoor::native::tests::response_and_shutdown_io_finish_before_exact_retirement_can_release_slot",
+        "result": "ok",
+        "outputIndex": 219
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::checked_close_error_blocks_replacement_in_an_independent_process",
+        "result": "ok",
+        "outputIndex": 220
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::dropping_live_owner_quarantines_every_capability_until_physical_exit",
+        "result": "ok",
+        "outputIndex": 221
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::four_linear_permits_survive_stop_until_real_call_and_collection",
+        "result": "ok",
+        "outputIndex": 222
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::held_real_retire_call_never_releases_permit_before_result_is_collected",
+        "result": "ok",
+        "outputIndex": 223
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::initialization_is_owned_nonblocking_and_stop_cannot_destroy_held_factory",
+        "result": "ok",
+        "outputIndex": 224
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::native_driver_is_constructed_on_worker_and_need_not_implement_send",
+        "result": "ok",
+        "outputIndex": 225
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::native_reap_keeps_uncollected_results_and_the_single_admission_lease",
+        "result": "ok",
+        "outputIndex": 226
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::panic_returns_linear_frame_and_requires_actual_reap",
+        "result": "ok",
+        "outputIndex": 230
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::queued_exact_retire_on_stop_returns_stopped_without_retiring_or_releasing_owner",
+        "result": "ok",
+        "outputIndex": 231
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::readiness_must_be_collected_and_initialization_failure_keeps_its_error",
+        "result": "ok",
+        "outputIndex": 232
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::rust_packet_completion_does_not_reap_a_held_windows_tls_destructor",
+        "result": "ok",
+        "outputIndex": 233
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::shutdown_and_retire_require_exact_live_token_and_retire_collection_before_reuse",
+        "result": "ok",
+        "outputIndex": 234
+      },
+      {
+        "name": "workbench::color_picker::tests::opaque_rgb_colorref_roundtrip_has_no_alpha_or_byte_order_swap",
+        "result": "ok",
+        "outputIndex": 235
+      },
+      {
+        "name": "workbench::empty_action_tests::empty_action_preserves_native_drafts_confirmation_and_prior_forms",
+        "result": "ok",
+        "outputIndex": 236
+      },
+      {
+        "name": "workbench::empty_action_tests::empty_action_registration_is_immutable_and_disjoint_from_lock",
+        "result": "ok",
+        "outputIndex": 237
+      },
+      {
+        "name": "workbench::empty_action_tests::empty_action_rejects_nonempty_disabled_busy_missing_and_spoofed_commands",
+        "result": "ok",
+        "outputIndex": 238
+      },
+      {
+        "name": "workbench::preview::tests::native_layout_preview_opaque_checker_select_drag_reorder_and_hidden_capture_is_untouched",
+        "result": "ok",
+        "outputIndex": 239
+      },
+      {
+        "name": "workbench::preview::tests::native_layout_preview_replacement_busy_clip_scope_and_lock_reject_stale_gestures",
+        "result": "ok",
+        "outputIndex": 240
+      },
+      {
+        "name": "tls_frontdoor::worker::tests::stale_generation_and_serial_cannot_rebind_an_existing_slot",
+        "result": "ok",
+        "outputIndex": 241
+      },
+      {
+        "name": "workbench::public_foreground_policy_tests::foreground_policy_accepts_only_observed_own_process_and_rejects_unknown_or_external",
+        "result": "ok",
+        "outputIndex": 242
+      },
+      {
+        "name": "workbench::tests::busy_and_disabled_actions_refuse_commands_and_close_wipes_revealed_secret",
+        "result": "ok",
+        "outputIndex": 243
+      },
+      {
+        "name": "workbench::preview::tests::native_layout_preview_strict_capacity_generations_and_owned_child_cleanup",
+        "result": "ok",
+        "outputIndex": 244
+      },
+      {
+        "name": "workbench::tests::hidden_events_are_bounded_and_invalid_native_text_is_never_truncated_into_a_form",
+        "result": "ok",
+        "outputIndex": 245
+      },
+      {
+        "name": "workbench::tests::hidden_multiline_edit_preserves_10000_astral_scalars_without_truncation",
+        "result": "ok",
+        "outputIndex": 246
+      },
+      {
+        "name": "workbench::tests::hidden_native_form_preserves_drafts_masks_and_consumes_password_without_activation",
+        "result": "ok",
+        "outputIndex": 247
+      },
+      {
+        "name": "workbench::tests::hidden_probe_edit_preserves_half_date_through_empty_lock_and_refuses_secret_or_busy_fields",
+        "result": "ok",
+        "outputIndex": 248
+      },
+      {
+        "name": "workbench::tests::isolated_probe_submission_uses_real_controls_and_refuses_invalid_forms_before_changes",
+        "result": "ok",
+        "outputIndex": 249
+      },
+      {
+        "name": "workbench::tests::lock_requires_registration_enabled_current_view_and_exact_native_binding",
+        "result": "ok",
+        "outputIndex": 250
+      },
+      {
+        "name": "workbench::tests::native_numeric_time_mask_preserves_punctuation_segment_edits_and_partial_drafts",
+        "result": "ok",
+        "outputIndex": 251
+      },
+      {
+        "name": "workbench::tests::native_timetable_grid_and_combo_use_bounded_stable_selections",
+        "result": "ok",
+        "outputIndex": 252
+      },
+      {
+        "name": "workbench::tests::registered_lock_during_busy_emits_only_empty_event_and_clears_secrets_without_reading_fields",
+        "result": "ok",
+        "outputIndex": 253
+      },
+      {
+        "name": "workbench::tests::repeated_grid_paint_and_dynamic_choice_mask_rebuilds_release_native_resources",
+        "result": "ok",
+        "outputIndex": 254
+      },
+      {
+        "name": "workbench::tests::repeated_hidden_render_and_submit_do_not_accumulate_native_resources",
+        "result": "ok",
+        "outputIndex": 255
+      }
+    ],
+    "comTaskTests": [
+      {
+        "name": "com_task::tests::task_memory_allocator_module_and_capability_remain_process_pinned",
+        "result": "ok",
+        "outputIndex": 24
+      },
+      {
+        "name": "com_task::tests::task_memory_current_device_mapping_binds_exact_mapped_image_not_loader_spelling",
+        "result": "ok",
+        "outputIndex": 25
+      },
+      {
+        "name": "com_task::tests::task_memory_device_mapping_metadata_is_bounded_and_fail_closed",
+        "result": "ok",
+        "outputIndex": 26
+      },
+      {
+        "name": "com_task::tests::task_memory_missing_export_rejects_before_any_task_allocation",
+        "result": "ok",
+        "outputIndex": 27
+      },
+      {
+        "name": "com_task::tests::task_memory_path_check_rejects_wrong_folder_prefix_and_module",
+        "result": "ok",
+        "outputIndex": 28
+      },
+      {
+        "name": "com_task::tests::task_memory_real_system_ole32_allocate_free_and_null",
+        "result": "ok",
+        "outputIndex": 29
+      },
+      {
+        "name": "com_task::tests::task_memory_system_path_uses_windows_unicode_case_rules",
+        "result": "ok",
+        "outputIndex": 30
+      },
+      {
+        "name": "com_task::tests::task_memory_real_wow64_path_uses_the_matching_system_directory",
+        "result": "ok",
+        "outputIndex": 34
+      }
+    ],
+    "comTaskCount": 8,
+    "systemProbe": {
+      "exitCode": 0,
+      "output": [
+        "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None, observation: Absent }"
+      ]
+    },
+    "hiddenHost": {
+      "exitCode": 0,
+      "output": [
+        "hidden_host=PASS tray_lifecycle=PASS ticks=3 elapsed_ms=2999 session_notifications=true"
+      ]
+    }
+  },
+  "actualNtAllocatorEvidence": {
+    "originalCompactLines": [
+      "R58_TASK_MEMORY_SYSTEM_LOOKUP expected_dos_utf16=[67, 58, 92, 87, 105, 110, 100, 111, 119, 115, 92, 83, 121, 115, 87, 79, 87, 54, 52, 92, 111, 108, 101, 51, 50, 46, 100, 108, 108] unref_result=Ok(())",
+      "R58_TASK_MEMORY_MAPPED_IDENTITY expected_nt_utf16=Ok([92, 68, 101, 118, 105, 99, 101, 92, 72, 97, 114, 100, 100, 105, 115, 107, 86, 111, 108, 117, 109, 101, 52, 92, 87, 105, 110, 100, 111, 119, 115, 92, 83, 121, 115, 87, 79, 87, 54, 52, 92, 111, 108, 101, 51, 50, 46, 100, 108, 108]) actual_nt_utf16=Ok([92, 68, 101, 118, 105, 99, 101, 92, 72, 97, 114, 100, 100, 105, 115, 107, 86, 111, 108, 117, 109, 101, 52, 92, 87, 105, 110, 100, 111, 119, 115, 92, 83, 121, 115, 87, 79, 87, 54, 52, 92, 111, 108, 101, 51, 50, 46, 100, 108, 108]) loader_utf16=Ok([67, 58, 92, 87, 105, 110, 100, 111, 119, 115, 92, 83, 121, 115, 116, 101, 109, 51, 50, 92, 111, 108, 101, 51, 50, 46, 100, 108, 108])",
+      "R58_TASK_MEMORY_SYSTEM_MODULE wow64=true exact_path=true pinned=true allocation_abi=system"
+    ],
+    "expectedDosUtf16": [
+      67,
+      58,
+      92,
+      87,
+      105,
+      110,
+      100,
+      111,
+      119,
+      115,
+      92,
+      83,
+      121,
+      115,
+      87,
+      79,
+      87,
+      54,
+      52,
+      92,
+      111,
+      108,
+      101,
+      51,
+      50,
+      46,
+      100,
+      108,
+      108
+    ],
+    "expectedNtUtf16": [
+      92,
+      68,
+      101,
+      118,
+      105,
+      99,
+      101,
+      92,
+      72,
+      97,
+      114,
+      100,
+      100,
+      105,
+      115,
+      107,
+      86,
+      111,
+      108,
+      117,
+      109,
+      101,
+      52,
+      92,
+      87,
+      105,
+      110,
+      100,
+      111,
+      119,
+      115,
+      92,
+      83,
+      121,
+      115,
+      87,
+      79,
+      87,
+      54,
+      52,
+      92,
+      111,
+      108,
+      101,
+      51,
+      50,
+      46,
+      100,
+      108,
+      108
+    ],
+    "actualNtUtf16": [
+      92,
+      68,
+      101,
+      118,
+      105,
+      99,
+      101,
+      92,
+      72,
+      97,
+      114,
+      100,
+      100,
+      105,
+      115,
+      107,
+      86,
+      111,
+      108,
+      117,
+      109,
+      101,
+      52,
+      92,
+      87,
+      105,
+      110,
+      100,
+      111,
+      119,
+      115,
+      92,
+      83,
+      121,
+      115,
+      87,
+      79,
+      87,
+      54,
+      52,
+      92,
+      111,
+      108,
+      101,
+      51,
+      50,
+      46,
+      100,
+      108,
+      108
+    ],
+    "loaderSpellingUtf16": [
+      67,
+      58,
+      92,
+      87,
+      105,
+      110,
+      100,
+      111,
+      119,
+      115,
+      92,
+      83,
+      121,
+      115,
+      116,
+      101,
+      109,
+      51,
+      50,
+      92,
+      111,
+      108,
+      101,
+      51,
+      50,
+      46,
+      100,
+      108,
+      108
+    ],
+    "decodedExpectedDos": "C:\\Windows\\SysWOW64\\ole32.dll",
+    "decodedExpectedNt": "\\Device\\HarddiskVolume4\\Windows\\SysWOW64\\ole32.dll",
+    "decodedActualNt": "\\Device\\HarddiskVolume4\\Windows\\SysWOW64\\ole32.dll",
+    "decodedLoaderSpelling": "C:\\Windows\\System32\\ole32.dll",
+    "mappedIdentitiesEqual": true,
+    "actualWow64": true,
+    "actualPinned": true,
+    "allocatorAbi": "system",
+    "interpretation": "Returned loader DOS string remains System32. Expected current drive-mapped NT image and actual mapped NT image are both SysWOW64 and equal; acceptance is based on exact mapped identity, not trusting loader spelling or a directory exception."
+  },
+  "nativeFlows": [
+    {
+      "name": "nt-windows-affected-public-first",
+      "report": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.json",
+        "bytes": 41053,
+        "sha256": "174cde7c392df0f3a125d016aca9de5219f0e82ad9a37ae697c13543ee7ade43"
+      },
+      "rawStdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.stdout.log",
+        "bytes": 130,
+        "sha256": "c30cde36f0c78e12ce8a80a3a0dec10879eaa34897c50efcb0f8b28b60d64cc0"
+      },
+      "rawStderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-affected-public-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualControllerExit": true,
+      "controllerExitCode": 0,
+      "nativeExitCode": 0,
+      "steps": 20,
+      "orderedStepNames": [
+        "setup-administrator-fixture",
+        "create-bound-class-and-subjects",
+        "seed-current-lesson",
+        "management-lock-removes-session",
+        "hidden-desktop-rendered",
+        "native-public-button-without-session",
+        "public-catalog-only",
+        "cancel-without-change",
+        "new-native-public-entry",
+        "unassigned-review-without-write",
+        "local-account-lock-keeps-public-flow",
+        "explicit-public-change-closes",
+        "changed-desktop-rendered",
+        "old-scene-entry-rejected",
+        "new-native-restore-entry",
+        "explicit-public-restore-closes",
+        "restored-desktop-rendered",
+        "public-close-hides-chooser",
+        "physical-shared-workers-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=2422",
+      "elapsedMs": 2422,
+      "scope": "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+    },
+    {
+      "name": "nt-windows-visual-first",
+      "report": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.json",
+        "bytes": 9897,
+        "sha256": "2a41eb5e8f3af79ccb8f9074eedfc1ac2ce4dead3bd8ba649f8aae1cee722217"
+      },
+      "rawStdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.stdout.log",
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "rawStderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-visual-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualControllerExit": true,
+      "controllerExitCode": 0,
+      "nativeExitCode": 0,
+      "steps": 22,
+      "orderedStepNames": [
+        "setup-global-admin",
+        "create-subject",
+        "open-joint-display",
+        "loaded-original-rgb",
+        "invalid-rgb-no-write",
+        "native-joint-draft-preview",
+        "lock-keeps-partial-draft",
+        "relogin-restores-draft",
+        "cancel-review-no-write",
+        "cancel-reloads-both",
+        "native-joint-save",
+        "readback-both-saved",
+        "native-palette-draft",
+        "rename-subject-preserves-color",
+        "stale-palette-save-rejected",
+        "cancel-reload-after-conflict",
+        "first-app-physical-shutdown",
+        "second-app-real-reopen",
+        "relogin-reopened-deployment",
+        "reopened-joint-state",
+        "second-app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=834",
+      "elapsedMs": 834,
+      "scope": "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
+    },
+    {
+      "name": "nt-windows-voice-output-first",
+      "report": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.json",
+        "bytes": 8102,
+        "sha256": "6fcec32de8243fc3642f0692d54b9f5840f81917830ed8df785161ed2e7f3d88"
+      },
+      "rawStdout": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.stdout.log",
+        "bytes": 93,
+        "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+      },
+      "rawStderr": {
+        "path": "/tmp/fc-round58-msvc-task-memory-evidence/nt-windows-voice-output-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualControllerExit": true,
+      "controllerExitCode": 0,
+      "nativeExitCode": 0,
+      "steps": 15,
+      "orderedStepNames": [
+        "native-setup-global-administrator",
+        "native-open-voice-settings",
+        "saved-default-enabled-no-jobs",
+        "native-draft-refresh-no-write",
+        "native-nonempty-check-rejected",
+        "native-explicit-output-query",
+        "query-keeps-saved-state-and-draft",
+        "native-refresh-retains-exact-observation",
+        "real-thirty-second-observation-expiry",
+        "native-explicit-recheck-new-observation",
+        "native-lock-discards-observation-and-draft",
+        "native-relogin-new-lease",
+        "native-reopen-unchecked-original-settings",
+        "app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "VOICE_OUTPUT_NATIVE_PASS steps=15 shared_workers=2 first_result=Supported second_result=Supported ttl_expired=PASS audio_jobs=NONE physical_playback=NOT_EXERCISED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=30380",
+      "elapsedMs": 30380,
+      "scope": "Synthetic protected deployment, actual hidden controls/shared workers/SQLite and default WAVE_MAPPER format queries, draft retention, original observation expiry and lock/new lease; historical format support only, no audio job/playback/microphone/volume/foreground change or audible/device certification"
+    }
+  ],
+  "actualHistoricalOutputQuery": {
+    "first": "Supported",
+    "second": "Supported",
+    "realOriginalObservationExpiryPassed": true,
+    "elapsedMs": 30380,
+    "audioJobs": "NONE",
+    "physicalPlayback": "NOT_EXERCISED",
+    "foreground": "UNTOUCHED",
+    "interpretation": "Historical PCM-format support only. No audible/current-device/readiness guarantee."
+  },
+  "freshReadonlyAudit": {
+    "original": {
+      "path": "/tmp/fc-round58-msvc-task-memory-evidence/windows-readonly-final-first.json",
+      "bytes": 16699,
+      "sha256": "27b6830640c0be386eac9bb4bcf679bb3b298e1a455ab65643a1bc819cd6dd34"
+    },
+    "status": "PASS",
+    "integrityStatus": "PASS",
+    "completedAtUtc": "2026-11-01T03:24:08.889343+00:00",
+    "sshExitCode": 0,
+    "rawCompleteStdoutSha256": "14a095ff60bfe5eebee6fed6ea3ce585bc50ab023e10f2dd99cae0cd051ef4ed",
+    "rawCompleteStderrSha256": "564514a88fb5143c62a2593cbe025395b5c7fd3a1420f47997082bbe606c8687",
+    "stderrScope": "Retained CLIXML scheduled-task progress, not empty stderr claim.",
+    "sshd": "Running",
+    "publicAuthorizationUnchanged": true,
+    "projectRunUnchanged": true,
+    "projectRunViews": {
+      "views": [
+        {
+          "keyPresent": true,
+          "sha256": null,
+          "encodedBytes": 0,
+          "kind": null,
+          "valuePresent": false,
+          "view": "Registry32"
+        },
+        {
+          "keyPresent": true,
+          "sha256": null,
+          "encodedBytes": 0,
+          "kind": null,
+          "valuePresent": false,
+          "view": "Registry64"
+        }
+      ]
+    },
+    "persistentKeyMode": "0o600",
+    "privateKeyContentsRead": false,
+    "scratchDirectories": 0,
+    "ownedProcesses": 0,
+    "ownedTasks": 0,
+    "activityObserved": false,
+    "baselineMatched": true
+  },
+  "limitations": [
+    "Actual execution is GNU PE32x86 on authorized Windows11x64/WOW64 only. No new formal MSVC PE artifact or actual Win7/Win10 result.",
+    "Visible Seewo/PPT/touch/DPI and visible colour picker not exercised; hidden controls and offscreen counters are finite supplemental evidence.",
+    "Public flow footer database_reopen=NOT_EXERCISED; only visual flow separately reports real_sqlite_reopen=PASS.",
+    "Voice15 checks historical format support/30s expiry and cleanup, not microphone/volume/audio job/playback or audible device acceptance.",
+    "Prior four R58 allocator failures and rejected R56 CAS failures remain preserved; R56 was withdrawn and is not covered by this new production PASS.",
+    "Both retained GNU PE primary audits remain NOT_VALIDATED with API-set/modern API risks; systemmsvcrt remains. Absence of combase/WinRT error DLL and R56 KTM imports is static evidence only.",
+    "Original strict firstTCP5s and normal production-listener acceptance gates unchanged."
+  ],
+  "reviewIssues": []
+}

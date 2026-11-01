@@ -1,0 +1,28 @@
+[package]
+name = "fc-windows"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+fc-domain.workspace = true
+fc-ports.workspace = true
+fc-runtime.workspace = true
+fc-presentation.workspace = true
+fc-protocol.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "=0.62.2", features = [
+  "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Graphics_Direct2D",
+  "Win32_Graphics_Direct2D_Common", "Win32_Graphics_DirectWrite", "Win32_Graphics_Dxgi_Common",
+  "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Threading",
+  "Win32_System_SystemInformation", "Win32_Security", "Win32_Security_Cryptography",
+  "Win32_Storage_FileSystem", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_System_StationsAndDesktops",
+  "Win32_System_Registry", "Win32_Security_Authorization", "Win32_System_RemoteDesktop",
+  "Win32_UI_Controls", "Win32_UI_Controls_Dialogs", "Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemServices",
+  "Win32_System_DataExchange", "Win32_System_Memory", "Win32_UI_Accessibility", "Win32_Graphics_Imaging",
+  "Win32_System_ProcessStatus", "Win32_System_WindowsProgramming", "Win32_UI_Shell_Common", "Win32_System_JobObjects", "Win32_Security_Authentication_Identity", "Win32_Security_Credentials",
+  "Win32_Media_Audio", "Win32_Networking_HttpServer", "Win32_System_IO", "Win32_Networking_WinSock", "Win32_Networking_WinHttp"
+] }

@@ -1,0 +1,56 @@
+{
+  "schema": "future-classroom.r57-source-inventory-freeze/v1",
+  "status": "FROZEN_STATIC_CHECKED_POWERSHELL_NOT_RUN",
+  "recordedUtc": "2026-11-01T02:24:29.842750+00:00",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "worktree": "/tmp/fc-round57-ci-inventory-worktree",
+  "branch": "codex/ci-inventory-capacity",
+  "sourceSnapshot": "/tmp/fc-round57-ci-inventory-evidence/implementation-after-first",
+  "ownedFiles": [
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 49976,
+      "sha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd"
+    },
+    {
+      "path": "scripts/check-ci-source-inventory.ps1",
+      "bytes": 13901,
+      "sha256": "b706d3d68627cc99570550c2e59fac645d66d2c997197393e00f689996bebbb8"
+    },
+    {
+      "path": "scripts/CI-SOURCE-INVENTORY.md",
+      "bytes": 2415,
+      "sha256": "0ca5ba63fa1adc72e234635373f3037483c84d83f174833a964bce5d01b1c822"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round57-ci-inventory-evidence/implementation-first.patch",
+    "bytes": 20904,
+    "sha256": "dd970f026cb70d6266f6b18a5e7162e7eb8ce9654ccae24e56e4b317dbbc8e19"
+  },
+  "reason": "9,970 tracked paths at base; 10,000-path metadata inventory had only30 remaining. Bounded expansion to20,000 retains every historical row. No product/runtime/deadline relaxation.",
+  "staticReport": "source-static-first.json",
+  "newPowerShellCheck": "scripts/check-ci-source-inventory.ps1",
+  "executionForParent": {
+    "mode": "ParseInput exact injected TextSource and ExpectedSourceSha256; only four whitelisted helper definitions and two original Split RHS expressions executed in memory. Hosted entrypoint and #requires never executed.",
+    "expectedSourceSha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd",
+    "arguments": [
+      "-TextSource",
+      "<exact UTF8 source in memory>",
+      "-ExpectedSourceSha256",
+      "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd"
+    ],
+    "checks": "10 pure groups:20000/max+1; last entry; duplicate beyond old cap; both Split paths; actual Hash-Inputs count gate with sentinel before filesystem; mismatched/count overflows;20000 fullS/H; exact prefix;16MiB UTF8 bound.",
+    "warning": "No pwsh installed here. Neither PowerShell parse nor actual pure checks have run; root must perform original authorized Windows in-memory check before accepting."
+  },
+  "notRun": [
+    "PowerShell parser/execution",
+    "Cargo",
+    "Windows",
+    "SSH",
+    "CI dispatch",
+    "new artifact audit"
+  ],
+  "historicalOriginalsUnchanged": true,
+  "cleanup": "No tests run/no database/process/Windows fixture created. Worktree/evidence intentionally retained for parent integration; main not modified."
+}

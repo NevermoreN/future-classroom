@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "source_commit": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "scope": "Microsoft primary documentation research only; no source change/build/Windows execution",
+  "decision": "TxR is a viable fail-closed candidate for the existing fixed-value negative operation; documentation supports transactional delete/non-transacted-conflict rollback. No production universal-CAS/runtime claim before actual races and OS testing.",
+  "primary_sources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeytransactedw",
+      "facts": [
+        "Vista+ / Advapi32, therefore within documented minimum OS for Win7/10/11 desktop targets.",
+        "Opening the named subkey associates subsequent operations on that key with the supplied active transaction; a non-transacted operation before commit causes rollback per Remarks.",
+        "Does not create a missing key. A returned predefined-root handle is NOT enlisted; must open the actual fixed nonempty Run subkey.",
+        "Impersonating applications must use RegOpenCurrentUser instead of cached HKEY_CURRENT_USER. Subkeys are not automatically transacted."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regdeletevaluew",
+      "facts": [
+        "Accepts a handle returned by RegOpenKeyTransacted; requires KEY_SET_VALUE.",
+        "Deletes one named value, not its parent key; LSTATUS is the actual error result."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-createtransaction",
+      "facts": [
+        "Vista+ / KtmW32. Failure returns INVALID_HANDLE_VALUE; capture GetLastError.",
+        "IsolationLevel and IsolationFlags are reserved and must be zero; cannot invent SERIALIZABLE flags.",
+        "Use a finite remaining transaction timeout, not zero/INFINITE. Timeout aborts before prepared state, not a hard wall-clock bound on every synchronous call.",
+        "Last transaction-handle close before commit rolls back; NULL security attributes avoid inheriting the handle."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-committransaction",
+      "facts": [
+        "Commit result is BOOL; zero is failure and requires captured GetLastError.",
+        "Requires active transaction and TRANSACTION_COMMIT. Never infer commit success from a successful staged RegDeleteValue alone."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-rollbacktransaction",
+      "facts": [
+        "RollbackTransaction is synchronous; BOOL failure requires GetLastError."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-gettransactioninformation",
+      "facts": [
+        "Can query TRANSACTION_OUTCOME with QUERY_INFORMATION rights; it is evidence about transaction outcome, not a fresh permission grant."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle",
+      "facts": [
+        "Close bound transacted handles before committing; close the transaction with CloseHandle.",
+        "CloseHandle must NOT close HKEY: it does not close registry keys and may not report that misuse as failure."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regclosekey",
+      "facts": [
+        "RegCloseKey closes HKEY and returns LSTATUS, which must be checked. Its completion is not itself a disk-flush guarantee."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winprog64/shared-registry-keys",
+      "facts": [
+        "HKCU and HKCU\\Software are shared on Win7/newer; subkeys inherit unless excepted. The fixed HKCU Software\\Microsoft\\Windows\\CurrentVersion\\Run path is not an exception.",
+        "Therefore do not invent two independent 32/64 Run copies or delete twice."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/winprog64/accessing-an-alternate-registry-view",
+      "facts": [
+        "WOW64 flags have no effect on shared keys. Do not combine both flags or hard-code Wow6432Node.",
+        "This differs from HKLM\\Software redirection; retain exact current-user scope."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--6000-8199-",
+      "facts": [
+        "6800 ERROR_TRANSACTIONAL_CONFLICT is a reserved-name conflict; 6801 ERROR_RM_NOT_ACTIVE means transactional support is not started or shut down.",
+        "Preserve actual error categories; no blind retry or nontransactional fallback."
+      ]
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/fileio/deprecation-of-txf",
+      "facts": [
+        "The recommendation against new TxF dependencies is explicitly about Transactional NTFS. It is not proof that every TxR/KTM function is absent or already removed.",
+        "Conversely documented Vista minimum does not certify every future Windows/security-policy/resource-manager configuration."
+      ]
+    }
+  ],
+  "candidate_negative_only_flow": [
+    "Reuse existing RunScope fixed value FutureClassroom, bounded raw REG_SZ/UTF16 parsing, current command capture and original permission/JobContext callback. No caller-selected registry path, no RegCreateKeyTransacted, no RegSetValue, no alternate target or HKLM/HKEY_USERS fallback.",
+    "Create a local transaction with finite original remaining deadline; open the actual existing Run subkey transacted with KEY_QUERY_VALUE|KEY_SET_VALUE. Read exact type/size/UTF16 bytes on that same HKEY; compare the captured approved preimage. Missing key/value returns an observed no-op, not proof that it can never reappear.",
+    "Mismatch/opaque/overlimit/access failure/cancellation: roll back and check all close results, without a delete. Matching preimage: recheck permission/cancel, RegDeleteValueW on the same transacted HKEY, then actually RegCloseKey successfully before CommitTransaction; keep the original transaction handle and execution owner alive.",
+    "Commit only after final original permission/deadline check. A failed mutation/commit/conflict/timeout is not success. Resolve/report committed/aborted/undetermined facts conservatively; after commit, late cancellation cannot undo it. Fresh ordinary readback is a separate observation, not proof of exclusion or permanent absence.",
+    "Always close root/HKEY/transaction handles with their correct checked APIs. Cleanup failure retains the exact owner in a bounded fail-closed slot; do not swallow Drop errors, assume resource release, or create replacement work while native ownership is unresolved."
+  ],
+  "guarantee_and_limit": {
+    "documented_basis": "Inference from RegOpenKeyTransacted Remarks plus RegDeleteValue accepting its HKEY: a transaction-bound exact read/delete avoids the ordinary non-transacted query/delete window against a conflicting ordinary external operation, because the documented outcome is transaction rollback rather than our stale delete committing.",
+    "not_yet_proved": "The fetched primary API pages do not fully specify all read-set isolation/conflict timings between multiple concurrent TxR transactions; ACID wording alone is not a license to claim a universal compare-and-delete primitive. Reserved isolation arguments cannot upgrade that guarantee. Actual query-to-delete and delete-to-commit competing-writer tests are release-blocking; any counterexample rejects this design rather than widening success.",
+    "external_after_commit": "Another writer may recreate/replace Run after our successful commit. That does not make the earlier commit atomicity false, but it forbids claiming permanent disabled state or compensating deletion of the new value.",
+    "unsupported": "Missing API/resource manager/access/transaction support must leave the operation unsupported or failed. No plain RegDeleteValue fallback; static imports vs checked runtime resolution must be chosen explicitly for startup compatibility, then tested on Win7/10/11.",
+    "not_msi_atomicity": "A standalone KTM transaction does not make MSI file changes/SQLite intent and registry one transaction. It does not supply install identity, original SID, upgrade/uninstall phase semantics or a full-lifetime maintenance owner."
+  },
+  "minimal_existing_code_cut": {
+    "files": [
+      "crates/fc-windows/src/system/autorun.rs:226,267,288,319,363",
+      "crates/fc-bootstrap/src/autostart.rs:111,181",
+      "crates/fc-ports/src/autostart.rs:AutostartSystem"
+    ],
+    "proposal": "Implement and test a native exact-preimage transactional negative operation behind the existing fixed Run adapter, with enable path unchanged. Retain management authorization, original command review, factual readback and settlement. The existing explicitly reviewed disable may target a foreign observed command; do not silently change that product policy while adding concurrency protection. A later installer-specific ownership capability is separate and cannot be derived from a guessed current_exe or fabricated SessionLease.",
+    "future_validation": "Only generated scratch RunScope in an owned synthetic registry leaf: exact/no-op/mismatch/unsupported/cleanup failures, ordinary and transacted external replacement at query-delete and delete-commit boundaries, cancellation before and after commit, checked close, actual shared-view behavior and Win7/10/11 target evidence. No production Run mutation is authorized by this research."
+  },
+  "execution": {
+    "code_changes": false,
+    "cargo": false,
+    "windows": false,
+    "models": false,
+    "installer": false,
+    "network": "Official documentation read only"
+  }
+}

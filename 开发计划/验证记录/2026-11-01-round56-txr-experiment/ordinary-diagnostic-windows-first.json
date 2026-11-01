@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "testScope": "Remote Windows x86 supplemental development verification",
+  "win7": "NOT_VALIDATED",
+  "cleanup": "PASS",
+  "testTimeoutSeconds": 900,
+  "platform": {
+    "caption": "Microsoft Windows 11 专业版",
+    "osArchitecture": "64-bit",
+    "build": "26300",
+    "version": "10.0.26300"
+  },
+  "uploadedArtifacts": [
+    {
+      "name": "fc-bootstrap.exe",
+      "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+    },
+    {
+      "name": "fc_windows-7a1e1d30f2dac501.exe",
+      "sha256": "848b77ceb7944f3c71c6b5cb8396743ae1c78056e56f618d1c4863e620866001"
+    }
+  ],
+  "exeSha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117",
+  "selfCheck": {
+    "exitCode": 0,
+    "output": [
+      "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+      "credential.dpapi-key-reopen: PASS",
+      "credential.sqlite-reopen-login-kdf: PASS",
+      "credential.password-rotation-old-lease: PASS",
+      "credential.recovery-one-use-rotation: PASS",
+      "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+      "isolated_test_cleanup=PASS"
+    ]
+  },
+  "tests": [
+    {
+      "binarySha256": "848b77ceb7944f3c71c6b5cb8396743ae1c78056e56f618d1c4863e620866001",
+      "exitCode": 101,
+      "name": "fc_windows-7a1e1d30f2dac501.exe",
+      "output": [
+        "",
+        "running 1 test",
+        "TXR_SCRATCH_DIAGNOSTIC transacted=false enabled=false phase=2 fresh_calls=4 attempted=true foreign_committed=true ordinary_status=Some((0, Some(0), Some(0))) expected_preimage=Command(\"reviewed synthetic previous\") returned_observation=Absent ordinary_after=Absent own_failure=None own_mutated=true",
+        "TXR_SCRATCH_FINAL_RAW open=0 query=2 kind=0 reported_bytes=520 close=0 decoded=Absent",
+        "System.Management.Automation.RemoteException",
+        "thread 'system::autorun::tests::ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window' (22748) panicked at crates/fc-windows/src/system/autorun_tests.rs:676:17:",
+        "stale preimage must not commit over the replacement",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "test system::autorun::tests::ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window ... FAILED",
+        "",
+        "failures:",
+        "",
+        "failures:",
+        "    system::autorun::tests::ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+        "",
+        "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 221 filtered out; finished in 0.00s",
+        ""
+      ],
+      "timeoutSeconds": 900
+    }
+  ],
+  "status": "FAIL",
+  "error": "remote test failed: fc_windows-7a1e1d30f2dac501.exe"
+}

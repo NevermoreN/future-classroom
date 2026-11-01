@@ -1,0 +1,268 @@
+{
+  "status": "FROZEN_FINAL_MAIN_GNU_BUILD_STRICT_LINT_TWO_PE_PASS_THIS_AGENT_DID_NOT_RUN_WINDOWS",
+  "finalizedUtc": "2026-11-01T03:01:21.593474+00:00",
+  "mainRoot": "/workspace/共享/Eliora/未来教室计划",
+  "binding": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/main-integration-first.json",
+    "bytes": 75122,
+    "sha256": "67fb56bdfa73cd70fb6fee8a999a14542b2463ffe382d1b9bb7cef1bc64d6bdc"
+  },
+  "sourceCount": 432,
+  "r57ExtraCount": 3,
+  "compiledInputsStillExactlyMatchBinding": true,
+  "checks": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-checks-first.json",
+    "bytes": 155260,
+    "sha256": "349c10a95f28aea4984f96878890c515597c34c61eda02ea08b95cc73579fa1c"
+  },
+  "runner": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/run-integrated-checks-first.py",
+    "bytes": 6600,
+    "sha256": "5996df94ae772a59a7e6804855794981a11c2424ab54f2376e1340282259557b"
+  },
+  "commands": [
+    {
+      "name": "fmt",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 4.62073083803989,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "architecture",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.21214366098865867,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "diffcheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.2147809190209955,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-fc-windows-compile",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 126.59988222806714,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-product",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 153.05604676506482,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-stable-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 70.4904557899572,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-nightly-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 63.87394251814112,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    }
+  ],
+  "peAudit": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-programs-static-first.json",
+    "bytes": 113697,
+    "sha256": "c5b75944966400132be97a365f05899e8466b8b224a4a7fe691c9606283388da"
+  },
+  "peHelper": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/audit-integrated-programs-first.py",
+    "bytes": 6465,
+    "sha256": "1cb098cc9b3c054f39a0fed195e6c474a3b160f99cdbafd3f3c2f48c03a804be"
+  },
+  "peCommand": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-pe-audit-first.command.json",
+    "bytes": 661,
+    "sha256": "415f0b880433bb6ed5ee8a6c6dfaa3f96f60cec3ad1133cb47298acbe77edaec"
+  },
+  "normal": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13133115,
+    "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+  },
+  "affectedTest": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+    "bytes": 3564041,
+    "sha256": "605462f63f603e53d7e0d45686756bb2d9be5f3aeb8288109c0f9121ab20cd00"
+  },
+  "metadata": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-test-metadata-first.jsonl",
+    "bytes": 911,
+    "sha256": "d540eb31463d13250ab020843c62f1bdb16b1d62c390b9c6944a656ee2a53a82"
+  },
+  "metadataLine": 1,
+  "actualDlls": [
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "KtmW32Imports": [
+        "CommitTransaction",
+        "CreateTransaction",
+        "GetTransactionInformation",
+        "RollbackTransaction"
+      ],
+      "Advapi32TransactedImports": [
+        "RegCreateKeyTransactedW",
+        "RegOpenKeyTransactedW"
+      ],
+      "systemMsvcrtRetained": true,
+      "forbiddenCombase": false,
+      "forbiddenWinrtError": false,
+      "remainingRisks": [
+        {
+          "kind": "API_SET_DLL",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WaitOnAddress",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressAll",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressSingle",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "kernel32.dll",
+          "api": "GetSystemTimePreciseAsFileTime",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        }
+      ]
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "KtmW32Imports": [
+        "CommitTransaction",
+        "CreateTransaction",
+        "GetTransactionInformation",
+        "RollbackTransaction"
+      ],
+      "Advapi32TransactedImports": [
+        "RegCreateKeyTransactedW",
+        "RegOpenKeyTransactedW"
+      ],
+      "systemMsvcrtRetained": true,
+      "forbiddenCombase": false,
+      "forbiddenWinrtError": false,
+      "remainingRisks": [
+        {
+          "kind": "API_SET_DLL",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WaitOnAddress",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressAll",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressSingle",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "kernel32.dll",
+          "api": "GetSystemTimePreciseAsFileTime",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        }
+      ]
+    }
+  ],
+  "historicalReportsPreserved": [
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/checks-first.json",
+      "bytes": 147382,
+      "sha256": "b064b37b0ef1e6c9d93285c1969b3e0ef23587de6c51afb40eec51c7dbb54ad5"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/driver-correction-second.json",
+      "bytes": 1178,
+      "sha256": "28770cc9ce264332b39e4975f7566e08048ecbbd06ee6af0635e28047e868087"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/checks-second.json",
+      "bytes": 152827,
+      "sha256": "bd582269f70d1de2f4f4fd591d35aa578f49e328c8a47d27f7d5633a22e4b5f7"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/source-freeze-first.json",
+      "bytes": 4153,
+      "sha256": "a5d11ad7906957e2c8523b8c0b44c3b24bc793fea8fdaeaa0a88c573aade362f"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/source-freeze-second.json",
+      "bytes": 1915,
+      "sha256": "42987369c012b49723d12717fc969fe587d1f8eab718b99e0296d08d2266a5ee"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/source-freeze-third.json",
+      "bytes": 5418,
+      "sha256": "94cd3e0f960400c35d94578d3f9d450d94dbcf9698dfd5eb0ed832b3c4e09506"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/programs-before-effect-fix.json",
+      "bytes": 3127,
+      "sha256": "95c60394b7b68220b64f7e1c8740c55fb1381abf31289956656e8be9cf21531b"
+    }
+  ],
+  "scope": [
+    "Only final integrated source432 +threeR57extra byte identity supports this PASS; old430/secondfreeze PASS remains separate.",
+    "No source change, Git commit, Windows, SSH orCI action by this agent during final checks/audit. RootWindows60230 is a separate actualruntime consumer and was not counted as passed here.",
+    "Only one finalfc_windows test binary plusone product audited; no claim of rebuilding/all22test-executables for this slice.",
+    "PrimaryPE audits remainNOT_VALIDATED; GNU modernAPI imports and OSmsvcrt remain; no formalMSVC/Win7/Win10 compatibility conclusion.",
+    "SynchronousKTM calls cannot be forcibly canceled; registryrace/TTL/panic/quarantine actualbehavior must be proven by realWindows tests.",
+    "MSI identity/full-maintenance ownership and SQLite/OS singletransaction remainunimplemented and unclaimed.",
+    "All ownCargo groups exited; onlymanualCargo slot released. Ownedtarget/evidence remain for root current runtime/integration consumers."
+  ]
+}

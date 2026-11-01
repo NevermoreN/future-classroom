@@ -1,0 +1,120 @@
+{
+  "status": "FROZEN_STATIC_CANDIDATE_ONLY",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 19274,
+      "sha256": "e02840dbb14ec73d38caceffe456abb2d78baf07d61a79ad7c03542ba82dabe3"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_tests.rs",
+      "bytes": 25051,
+      "sha256": "94c15a98ff28a227ed378f531f79bea499076c0857aae5ea49ed7cacc612ff57"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_transaction.rs",
+      "bytes": 11151,
+      "sha256": "062f4471244612a0e04b06940b7e67f220deeed4eb5ce582a306b2313b18189d"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260371,
+      "sha256": "765448626293a26398a79c88329703ea23e4659f250431bc6ef0cc4ad6bc029a"
+    }
+  ],
+  "patch": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/implementation-first.diff",
+    "bytes": 42919,
+    "sha256": "fddb7a7c112f6e25095446275c926a4e251f5d6574e44d300f02c1c226639ef3"
+  },
+  "semanticReview": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/semantic-review-first.json",
+    "sha256": "1ed130bb86991776596a1bb6073ddda78eba77007ab59b1a63de38131361c76b"
+  },
+  "staticCommands": [
+    {
+      "name": "fmt",
+      "argv": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-windows/src/system/autorun.rs",
+        "crates/fc-windows/src/system/autorun_tests.rs",
+        "crates/fc-windows/src/system/autorun_transaction.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.8629215590190142,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/fmt-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/fmt-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "architecture",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.13615337014198303,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/architecture-first.stdout.log",
+        "bytes": 71,
+        "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/architecture-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "diffcheck",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.02735068602487445,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/diffcheck-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/diffcheck-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "testCount": 22,
+  "newTests": [
+    "cancellation_after_staging_before_commit_rolls_back_enable_and_disable",
+    "original_adapter_deadline_is_not_restarted_by_apply_or_transaction",
+    "ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+    "transacted_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+    "transacted_staging_never_uses_the_ordinary_observer_before_commit",
+    "failed_bound_key_close_retains_exact_owner_and_permanently_blocks_replacement",
+    "missing_scratch_key_disable_is_noop_and_enable_creates_only_owned_leaf"
+  ],
+  "cargo": false,
+  "windows": false,
+  "CI": false,
+  "mainChanged": false
+}

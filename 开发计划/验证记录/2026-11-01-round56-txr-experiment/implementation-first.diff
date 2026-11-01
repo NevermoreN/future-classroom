@@ -1,0 +1,1108 @@
+diff --git a/crates/fc-bootstrap/src/application.rs b/crates/fc-bootstrap/src/application.rs
+index ba8157c..ce37932 100644
+--- a/crates/fc-bootstrap/src/application.rs
++++ b/crates/fc-bootstrap/src/application.rs
+@@ -907,7 +907,7 @@ impl Task for Work {
+                 let owner = job.lease.map(|lease| lease.principal_id());
+                 let scope = match scope { Some(scope) => scope, None => fc_windows::system::RunScope::current_executable().map_err(|_| invalid("当前程序路径无法用于登录自启动，请将程序移至较短的本地目录后重新核对。"))? };
+                 let mut system = scope
+-                    .open()
++                    .open_until(context.deadline())
+                     .map_err(|_| invalid("启动项适配器不可用，请重新读取。"))?;
+                 job.run(context, &mut system)
+                     .map(|loaded| Outcome::Autostart(owner, Box::new(loaded)))
+diff --git a/crates/fc-windows/src/system/autorun.rs b/crates/fc-windows/src/system/autorun.rs
+index 6a114b6..e13ba5b 100644
+--- a/crates/fc-windows/src/system/autorun.rs
++++ b/crates/fc-windows/src/system/autorun.rs
+@@ -1,5 +1,6 @@
+ //! Fixed HKCU Run value, with an explicit observed preimage and real readback.
+-//! Registry comparison and mutation are not atomic against other processes.
++//! Exact preimage, staged mutation and commit share one native transaction.
++//! This is not an MSI/SQLite transaction or a universal registry isolation claim.
+ use fc_domain::autostart::{AutostartFailure, AutostartObservation};
+ use fc_ports::autostart::{AutostartSystem, AutostartSystemOutcome};
+ use std::{
+@@ -10,18 +11,33 @@ use std::{
+         atomic::{AtomicU64, Ordering},
+         Arc,
+     },
++    time::{Duration, Instant},
+ };
+ use windows::{
+-    core::{w, Error, Result, HSTRING},
++    core::{w, Error, Result, HRESULT, HSTRING},
+     Win32::{Foundation::*, System::Registry::*},
+ };
+ 
++#[path = "autorun_transaction.rs"]
++mod transaction;
++
+ const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
+ // Includes the terminating UTF-16 NUL. Never allocate from a registry-reported size.
+ const MAX_COMMAND_UNITS: usize = 260;
+ static NEXT_SCOPE: AtomicU64 = AtomicU64::new(1);
+ 
+ struct Key(HKEY);
++impl Key {
++    fn close(self) -> std::result::Result<(), HKEY> {
++        let key = std::mem::ManuallyDrop::new(self);
++        // SAFETY: transfer this exact owned key to checked close or retention.
++        if unsafe { RegCloseKey(key.0) } == ERROR_SUCCESS {
++            Ok(())
++        } else {
++            Err(key.0)
++        }
++    }
++}
+ impl Drop for Key {
+     fn drop(&mut self) {
+         // SAFETY: exclusively owned successful registry open/create result.
+@@ -104,8 +120,17 @@ impl RunScope {
+         Err(Error::from_hresult(E_UNEXPECTED))
+     }
+     pub fn open(&self) -> Result<RunAtLogin> {
++        self.open_until(Instant::now() + Duration::from_secs(40))
++    }
++    /// The original shared-worker deadline, including time already queued.
++    /// Synchronous registry/KTM calls cannot be forcibly interrupted by this fence.
++    pub fn open_until(&self, deadline: Instant) -> Result<RunAtLogin> {
++        if transaction::remaining_millis(deadline).is_none() {
++            return Err(Error::from_hresult(HRESULT::from_win32(ERROR_TIMEOUT.0)));
++        }
+         Ok(RunAtLogin {
+             scope: self.clone(),
++            deadline,
+             _thread: PhantomData,
+         })
+     }
+@@ -160,6 +185,7 @@ pub struct AutostartReadback {
+ /// every opened HKEY remains exclusively on the calling worker's stack.
+ pub struct RunAtLogin {
+     scope: RunScope,
++    deadline: Instant,
+     _thread: PhantomData<Rc<()>>,
+ }
+ impl RunAtLogin {
+@@ -223,14 +249,34 @@ impl RunAtLogin {
+         }
+         Ok(Some(Key(key)))
+     }
++    // Called only with our native mutation/observation permit, after any original
++    // transaction has physically settled and its handles have actually closed.
++    fn observe_owned(&self) -> AutostartObservation {
++        match self.open_key(false, false) {
++            Ok(None) => AutostartObservation::Absent,
++            Ok(Some(key)) => {
++                let observation = Self::read_key(&key);
++                if let Err(key) = key.close() {
++                    transaction::retain_key(key);
++                    AutostartObservation::Unavailable(AutostartFailure::Interrupted)
++                } else {
++                    observation
++                }
++            }
++            Err(error) => AutostartObservation::Unavailable(read_failure(error)),
++        }
++    }
+     fn read_key(key: &Key) -> AutostartObservation {
++        Self::read_handle(key.0)
++    }
++    fn read_handle(key: HKEY) -> AutostartObservation {
+         let mut data = [0u8; MAX_COMMAND_UNITS * 2];
+         let mut bytes = data.len() as u32;
+         let mut kind = REG_VALUE_TYPE::default();
+         // SAFETY: bounded stack buffer; never interpret it on ERROR_MORE_DATA.
+         let status = unsafe {
+             RegQueryValueExW(
+-                key.0,
++                key,
+                 w!("FutureClassroom"),
+                 None,
+                 Some(&mut kind),
+@@ -258,91 +304,148 @@ impl AutostartSystem for RunAtLogin {
+         self.expected_command()
+     }
+     fn observe(&self) -> AutostartObservation {
+-        match self.open_key(false, false) {
+-            Ok(None) => AutostartObservation::Absent,
+-            Ok(Some(key)) => Self::read_key(&key),
+-            Err(error) => AutostartObservation::Unavailable(read_failure(error)),
+-        }
++        // An ordinary observer must not abort another in-flight own transaction.
++        let Some(_permit) = transaction::MutationPermit::acquire() else {
++            return AutostartObservation::Unavailable(AutostartFailure::Unavailable);
++        };
++        self.observe_owned()
+     }
++
+     fn apply(
+         &mut self,
+         expected: &AutostartObservation,
+         enabled: bool,
+         fresh: &dyn Fn() -> bool,
+     ) -> AutostartSystemOutcome {
+-        let finish = |this: &Self, failure, mutated| AutostartSystemOutcome {
+-            observation: this.observe(),
++        let finish = |failure, mutated| AutostartSystemOutcome {
++            observation: self.observe(),
+             failure,
+             mutated,
+         };
+         if !expected.mutation_eligible() {
+-            return finish(self, Some(AutostartFailure::InvalidValue), false);
++            return finish(Some(AutostartFailure::InvalidValue), false);
+         }
+-        if !fresh() {
+-            return finish(self, Some(AutostartFailure::Cancelled), false);
++        let fresh_now = || fresh() && transaction::remaining_millis(self.deadline).is_some();
++        if !fresh_now() {
++            return finish(Some(AutostartFailure::Cancelled), false);
+         }
+-        let key = match self.open_key(true, enabled) {
+-            Ok(key) => key,
+-            Err(error) => return finish(self, Some(write_failure(error)), false),
++        // A retained native owner is a permanent negative gate, not a released
++        // worker or a new permission. No Backend/SQL lock is held by this call.
++        let Some(_mutation) = transaction::MutationPermit::acquire() else {
++            return AutostartSystemOutcome {
++                observation: AutostartObservation::Unavailable(AutostartFailure::Unavailable),
++                failure: Some(AutostartFailure::Unavailable),
++                mutated: false,
++            };
+         };
+-        let actual = key
+-            .as_ref()
+-            .map(Self::read_key)
+-            .unwrap_or(AutostartObservation::Absent);
+-        if &actual != expected {
+-            return finish(self, Some(AutostartFailure::PreimageChanged), false);
+-        }
+-        // Authority/execution fence is checked after obtaining the actual preimage
+-        // and immediately before the one mutation. No DB lock is held here.
+-        if !fresh() {
+-            return finish(self, Some(AutostartFailure::Cancelled), false);
+-        }
+-        let changed = if enabled {
+-            let bytes: Vec<u8> = self
+-                .expected_command()
+-                .encode_utf16()
+-                .chain(Some(0))
+-                .flat_map(u16::to_le_bytes)
+-                .collect();
+-            // SAFETY: bounded REG_SZ includes its terminating NUL; fixed value.
+-            unsafe {
+-                RegSetValueExW(
+-                    key.as_ref().expect("enabled creates key").0,
+-                    w!("FutureClassroom"),
+-                    None,
+-                    REG_SZ,
+-                    Some(&bytes),
+-                )
++        let mut native = match transaction::NativeTransaction::begin(&_mutation, self.deadline) {
++            Ok(native) => native,
++            Err(failure) => {
++                return AutostartSystemOutcome {
++                    observation: AutostartObservation::Unavailable(failure),
++                    failure: Some(failure),
++                    mutated: false,
++                }
+             }
+-        } else if let Some(key) = &key {
+-            // SAFETY: only fixed project value, never the Run key or another value.
+-            unsafe { RegDeleteValueW(key.0, w!("FutureClassroom")) }
+-        } else {
+-            ERROR_FILE_NOT_FOUND
+         };
+-        if changed != ERROR_SUCCESS && !(changed == ERROR_FILE_NOT_FOUND && !enabled) {
+-            return finish(self, Some(write_failure(changed)), false);
++        let staged = (|| {
++            native.open_key(&self.scope.0.key, enabled)?;
++            let actual = native
++                .key()
++                .map(Self::read_handle)
++                .unwrap_or(AutostartObservation::Absent);
++            if &actual != expected {
++                return Err(AutostartFailure::PreimageChanged);
++            }
++            if !fresh_now() {
++                return Err(AutostartFailure::Cancelled);
++            }
++            let status = if enabled {
++                let bytes: Vec<u8> = self
++                    .expected_command()
++                    .encode_utf16()
++                    .chain(Some(0))
++                    .flat_map(u16::to_le_bytes)
++                    .collect();
++                // SAFETY: bounded REG_SZ in the same transaction-bound key.
++                unsafe {
++                    RegSetValueExW(
++                        native.key().expect("enabled creates key"),
++                        w!("FutureClassroom"),
++                        None,
++                        REG_SZ,
++                        Some(&bytes),
++                    )
++                }
++            } else if let Some(key) = native.key() {
++                // SAFETY: one fixed value; the original preimage was read through
++                // this same transacted HKEY. Never deletes a Run key/other value.
++                unsafe { RegDeleteValueW(key, w!("FutureClassroom")) }
++            } else {
++                ERROR_FILE_NOT_FOUND
++            };
++            if status != ERROR_SUCCESS && !(status == ERROR_FILE_NOT_FOUND && !enabled) {
++                return Err(write_failure(status));
++            }
++            // Microsoft requires bound handles to be closed before commit.
++            // A failed close retains this exact key and transaction fail-closed.
++            native.close_key()?;
++            if !fresh_now() {
++                return Err(AutostartFailure::Cancelled);
++            }
++            Ok(status == ERROR_SUCCESS)
++        })();
++        let mut failure = staged.as_ref().err().copied();
++        if staged.is_ok() {
++            failure = native.commit().err();
++        }
++        // Close/rollback and determine outcome BEFORE using an ordinary observer:
++        // non-transacted access while the transaction is active can abort it.
++        let settlement = native.settle();
++        if !settlement.released {
++            return AutostartSystemOutcome {
++                observation: AutostartObservation::Unavailable(AutostartFailure::Interrupted),
++                failure: Some(AutostartFailure::Interrupted),
++                mutated: settlement.outcome == transaction::Outcome::Committed,
++            };
++        }
++        let committed = settlement.outcome == transaction::Outcome::Committed;
++        let mutated = committed && staged.unwrap_or(true);
++        if settlement.outcome == transaction::Outcome::Undetermined {
++            failure = Some(AutostartFailure::Interrupted);
++        } else if !committed && failure.is_none() {
++            failure = Some(AutostartFailure::WriteFailed);
++        }
++        // Only this fourth freshness check is after the actual native commit.
++        // Late cancellation never performs a compensating registry write.
++        if committed && !fresh_now() {
++            failure = Some(AutostartFailure::Cancelled);
++        }
++        if settlement.outcome == transaction::Outcome::Undetermined {
++            // Unknown is not a factual claim of mutation. This observation forces
++            // existing storage settlement into NeedsReconcile without inventing it.
++            return AutostartSystemOutcome {
++                observation: AutostartObservation::Unavailable(AutostartFailure::Interrupted),
++                failure,
++                mutated: false,
++            };
++        }
++        let observation = self.observe_owned();
++        if observation == AutostartObservation::Unavailable(AutostartFailure::Interrupted) {
++            failure = Some(AutostartFailure::Interrupted);
+         }
+-        // The fresh check after the physical call cannot undo a mutation. Expose
+-        // actual readback and reconciliation status; never write a compensating value.
+-        let still_fresh = fresh();
+-        let observation = self.observe();
+         let desired = if enabled {
+             AutostartObservation::Command(self.expected_command().into())
+         } else {
+             AutostartObservation::Absent
+         };
+-        let failure = if !still_fresh {
+-            Some(AutostartFailure::Cancelled)
+-        } else if observation != desired {
+-            Some(AutostartFailure::ReadbackMismatch)
+-        } else {
+-            None
+-        };
++        if failure.is_none() && observation != desired {
++            failure = Some(AutostartFailure::ReadbackMismatch);
++        }
+         AutostartSystemOutcome {
+             observation,
+             failure,
+-            mutated: changed == ERROR_SUCCESS,
++            mutated,
+         }
+     }
+ }
+diff --git a/crates/fc-windows/src/system/autorun_tests.rs b/crates/fc-windows/src/system/autorun_tests.rs
+index 301785d..efb6da0 100644
+--- a/crates/fc-windows/src/system/autorun_tests.rs
++++ b/crates/fc-windows/src/system/autorun_tests.rs
+@@ -1,13 +1,29 @@
+ use super::*;
+-use std::cell::Cell;
++use std::{
++    cell::Cell,
++    sync::{Mutex, MutexGuard},
++};
+ 
+-struct Scratch(RunScope);
++static TEST_LOCK: Mutex<()> = Mutex::new(());
++fn test_lock() -> MutexGuard<'static, ()> {
++    TEST_LOCK.lock().unwrap()
++}
++
++struct Scratch {
++    scope: RunScope,
++    _guard: MutexGuard<'static, ()>,
++}
+ impl Scratch {
+     fn new() -> Self {
+-        Self(RunScope::scratch_for(PathBuf::from(r"C:\合成 测试\future-classroom.exe")).unwrap())
++        let lock = test_lock();
++        Self {
++            scope: RunScope::scratch_for(PathBuf::from(r"C:\合成 测试\future-classroom.exe"))
++                .unwrap(),
++            _guard: lock,
++        }
+     }
+     fn run(&self) -> RunAtLogin {
+-        self.0.open().unwrap()
++        self.scope.open().unwrap()
+     }
+     fn raw(&self, kind: REG_VALUE_TYPE, bytes: &[u8]) {
+         let run = self.run();
+@@ -22,7 +38,7 @@ impl Scratch {
+ }
+ impl Drop for Scratch {
+     fn drop(&mut self) {
+-        self.0.cleanup().unwrap();
++        self.scope.cleanup().unwrap();
+     }
+ }
+ fn encoded(text: &str) -> Vec<u8> {
+@@ -59,7 +75,7 @@ fn generated_scope_can_open_new_worker_without_moving_a_registry_handle() {
+     fn assert_send_sync<T: Send + Sync>() {}
+     assert_send_sync::<RunScope>();
+     let scratch = Scratch::new();
+-    let scope = scratch.0.clone();
++    let scope = scratch.scope.clone();
+     let result = std::thread::spawn(move || {
+         let mut run = scope.open().unwrap();
+         run.apply(&AutostartObservation::Absent, true, &|| true)
+@@ -142,7 +158,7 @@ fn moved_executable_requires_reviewed_exact_preimage() {
+     let mut original = scratch.run();
+     let enabled = original.apply(&AutostartObservation::Absent, true, &|| true);
+     let moved_scope = RunScope::build(
+-        scratch.0 .0.key.clone(),
++        scratch.scope.0.key.clone(),
+         PathBuf::from(r"C:\moved\future-classroom.exe"),
+         true,
+     )
+@@ -184,7 +200,7 @@ fn cancellation_after_write_reports_actual_state_without_rollback() {
+     let outcome = run.apply(&AutostartObservation::Absent, true, &|| {
+         let n = calls.get() + 1;
+         calls.set(n);
+-        n < 3
++        n < 4
+     });
+     assert_eq!(outcome.failure, Some(AutostartFailure::Cancelled));
+     assert!(outcome.mutated);
+@@ -217,7 +233,7 @@ fn external_change_after_write_reports_mismatch_without_compensating_write() {
+     let outcome = run.apply(&AutostartObservation::Absent, true, &|| {
+         let n = calls.get() + 1;
+         calls.set(n);
+-        if n == 3 {
++        if n == 4 {
+             scratch.raw(REG_SZ, &encoded("external writer"));
+         }
+         true
+@@ -294,6 +310,7 @@ fn unavailable_preimage_never_requests_a_write_guard() {
+ }
+ #[test]
+ fn explicit_scratch_cleanup_is_idempotent_after_workers_return() {
++    let _lock = test_lock();
+     let scope = RunScope::scratch_for(PathBuf::from(r"C:\test\app.exe")).unwrap();
+     {
+         let mut run = scope.open().unwrap();
+@@ -351,3 +368,352 @@ fn applying_fixed_project_value_preserves_other_values_in_the_same_key() {
+     }
+     assert_eq!(&actual[..bytes as usize], sentinel);
+ }
++
++#[test]
++fn cancellation_after_staging_before_commit_rolls_back_enable_and_disable() {
++    let scratch = Scratch::new();
++    for enabled in [true, false] {
++        let mut run = scratch.run();
++        let previous = if enabled {
++            AutostartObservation::Absent
++        } else {
++            let saved = run.apply(&AutostartObservation::Absent, true, &|| true);
++            assert!(saved.failure.is_none());
++            saved.observation
++        };
++        let calls = Cell::new(0);
++        let outcome = run.apply(&previous, enabled, &|| {
++            calls.set(calls.get() + 1);
++            calls.get() < 3
++        });
++        assert_eq!(calls.get(), 3);
++        assert_eq!(outcome.failure, Some(AutostartFailure::Cancelled));
++        assert!(
++            !outcome.mutated,
++            "a staged write is not a committed mutation"
++        );
++        assert_eq!(outcome.observation, previous);
++        assert_eq!(run.observe(), previous);
++    }
++}
++
++#[test]
++fn original_adapter_deadline_is_not_restarted_by_apply_or_transaction() {
++    let scratch = Scratch::new();
++    assert!(scratch
++        .scope
++        .open_until(Instant::now() - Duration::from_secs(1))
++        .is_err());
++    assert_eq!(transaction::remaining_millis(Instant::now()), None);
++    let deadline = Instant::now() + Duration::from_millis(150);
++    let mut run = scratch.scope.open_until(deadline).unwrap();
++    let calls = Cell::new(0);
++    let outcome = run.apply(&AutostartObservation::Absent, true, &|| {
++        calls.set(calls.get() + 1);
++        if calls.get() == 2 {
++            std::thread::sleep(
++                (deadline + Duration::from_millis(10)).saturating_duration_since(Instant::now()),
++            );
++        }
++        true
++    });
++    assert_eq!(run.deadline, deadline);
++    assert!(Instant::now() >= deadline);
++    assert_eq!(outcome.failure, Some(AutostartFailure::Cancelled));
++    assert!(!outcome.mutated);
++    assert_eq!(outcome.observation, AutostartObservation::Absent);
++    let again = run.apply(&AutostartObservation::Absent, true, &|| true);
++    assert_eq!(again.failure, Some(AutostartFailure::Cancelled));
++    assert!(!again.mutated);
++    assert_eq!(run.observe(), AutostartObservation::Absent);
++}
++
++fn ordinary_replacement(scope: &RunScope, command: &str) -> bool {
++    let name = HSTRING::from(scope.0.key.as_str());
++    let mut key = HKEY::default();
++    // SAFETY: another ordinary writer of the same owned synthetic leaf/value.
++    let opened = unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, &name, None, KEY_SET_VALUE, &mut key) };
++    if opened != ERROR_SUCCESS {
++        return false;
++    }
++    let changed = unsafe {
++        RegSetValueExW(
++            key,
++            w!("FutureClassroom"),
++            None,
++            REG_SZ,
++            Some(&encoded(command)),
++        )
++    };
++    // SAFETY: close the exact successful ordinary open, even on write conflict.
++    assert_eq!(unsafe { RegCloseKey(key) }, ERROR_SUCCESS);
++    changed == ERROR_SUCCESS
++}
++
++fn transacted_replacement(scope: &RunScope, command: &str, deadline: Instant) -> bool {
++    use windows::Win32::Storage::FileSystem::*;
++    struct Foreign {
++        key: Option<HKEY>,
++        transaction: HANDLE,
++    }
++    impl Drop for Foreign {
++        fn drop(&mut self) {
++            // SAFETY: only this synthetic competitor's exclusive handles. Rollback
++            // is negative and cannot undo an already committed transaction.
++            unsafe {
++                if let Some(key) = self.key.take() {
++                    assert_eq!(RegCloseKey(key), ERROR_SUCCESS);
++                }
++                let _ = RollbackTransaction(self.transaction);
++                CloseHandle(self.transaction).unwrap();
++            }
++        }
++    }
++    let Some(timeout) = transaction::remaining_millis(deadline) else {
++        return false;
++    };
++    // SAFETY: independent finite transaction, no inherited handles/extra threads.
++    let transaction = unsafe {
++        CreateTransaction(
++            std::ptr::null_mut(),
++            std::ptr::null_mut(),
++            0,
++            0,
++            0,
++            timeout,
++            w!("FutureClassroom synthetic competing transaction"),
++        )
++    }
++    .unwrap();
++    let mut foreign = Foreign {
++        key: None,
++        transaction,
++    };
++    let mut key = HKEY::default();
++    let name = HSTRING::from(scope.0.key.as_str());
++    let status = unsafe {
++        RegOpenKeyTransactedW(
++            HKEY_CURRENT_USER,
++            &name,
++            None,
++            KEY_QUERY_VALUE | KEY_SET_VALUE,
++            &mut key,
++            transaction,
++            None,
++        )
++    };
++    if status != ERROR_SUCCESS {
++        return false;
++    }
++    foreign.key = Some(key);
++    let status = unsafe {
++        RegSetValueExW(
++            key,
++            w!("FutureClassroom"),
++            None,
++            REG_SZ,
++            Some(&encoded(command)),
++        )
++    };
++    if status != ERROR_SUCCESS {
++        return false;
++    }
++    assert_eq!(unsafe { RegCloseKey(key) }, ERROR_SUCCESS);
++    foreign.key = None;
++    if unsafe { CommitTransaction(transaction) }.is_ok() {
++        return true;
++    }
++    let (mut outcome, mut isolation, mut flags, mut timeout) = (0, 0, 0, 0);
++    unsafe {
++        GetTransactionInformation(
++            transaction,
++            &mut outcome,
++            &mut isolation,
++            &mut flags,
++            &mut timeout,
++            None,
++        )
++    }
++    .unwrap();
++    if outcome == TransactionOutcomeUndetermined.0 as u32 {
++        // A failed commit is not proof of abort; actually resolve the competitor
++        // before deciding what this scratch interleaving demonstrated.
++        unsafe { RollbackTransaction(transaction) }.unwrap();
++        unsafe {
++            GetTransactionInformation(
++                transaction,
++                &mut outcome,
++                &mut isolation,
++                &mut flags,
++                &mut timeout,
++                None,
++            )
++        }
++        .unwrap();
++    }
++    assert!(
++        outcome == TransactionOutcomeCommitted.0 as u32
++            || outcome == TransactionOutcomeAborted.0 as u32
++    );
++    outcome == TransactionOutcomeCommitted.0 as u32
++}
++
++#[test]
++fn ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window() {
++    competing_replacements(false);
++}
++#[test]
++fn transacted_competing_replacements_cannot_be_stale_overwritten_at_either_window() {
++    competing_replacements(true);
++}
++fn competing_replacements(transacted: bool) {
++    for enabled in [false, true] {
++        for phase in [2, 3] {
++            let scratch = Scratch::new();
++            let previous = AutostartObservation::Command("reviewed synthetic previous".into());
++            scratch.raw(REG_SZ, &encoded("reviewed synthetic previous"));
++            let deadline = Instant::now() + Duration::from_secs(3);
++            let mut run = scratch.scope.open_until(deadline).unwrap();
++            let calls = Cell::new(0);
++            let attempted = Cell::new(false);
++            let foreign_committed = Cell::new(false);
++            let outcome = run.apply(&previous, enabled, &|| {
++                calls.set(calls.get() + 1);
++                if calls.get() == phase {
++                    attempted.set(true);
++                    foreign_committed.set(if transacted {
++                        transacted_replacement(
++                            &scratch.scope,
++                            "external reviewed replacement",
++                            deadline,
++                        )
++                    } else {
++                        ordinary_replacement(&scratch.scope, "external reviewed replacement")
++                    });
++                }
++                true
++            });
++            assert!(attempted.get());
++            let after = scratch.run().observe();
++            assert_eq!(after, outcome.observation);
++            if foreign_committed.get() {
++                assert!(
++                    outcome.failure.is_some(),
++                    "stale preimage must not commit over the replacement"
++                );
++                assert_eq!(
++                    after,
++                    AutostartObservation::Command("external reviewed replacement".into())
++                );
++            } else {
++                let desired = if enabled {
++                    AutostartObservation::Command(run.expected_command().into())
++                } else {
++                    AutostartObservation::Absent
++                };
++                assert!(after == previous || after == desired);
++                if outcome.failure.is_none() {
++                    assert_eq!(after, desired);
++                }
++            }
++            eprintln!("TXR_SCRATCH_INTERLEAVING transacted={transacted} enabled={enabled} phase={phase} foreign_committed={} own_mutated={} own_failure={:?}",
++                foreign_committed.get(), outcome.mutated, outcome.failure);
++        }
++    }
++}
++
++#[test]
++fn transacted_staging_never_uses_the_ordinary_observer_before_commit() {
++    let scratch = Scratch::new();
++    let mut run = scratch.run();
++    let calls = Cell::new(0);
++    let outcome = run.apply(&AutostartObservation::Absent, true, &|| {
++        calls.set(calls.get() + 1);
++        if calls.get() == 3 {
++            assert_eq!(
++                scratch.run().observe(),
++                AutostartObservation::Unavailable(AutostartFailure::Unavailable)
++            );
++        }
++        true
++    });
++    assert_eq!(calls.get(), 4);
++    assert!(outcome.failure.is_none());
++    assert!(outcome.mutated);
++    assert_eq!(
++        outcome.observation,
++        AutostartObservation::Command(run.expected_command().into())
++    );
++}
++
++#[test]
++fn failed_bound_key_close_retains_exact_owner_and_permanently_blocks_replacement() {
++    const CHILD: &str = "FUTURE_CLASSROOM_TXR_CLOSE_CHILD";
++    if std::env::var_os(CHILD).is_none() {
++        let name = std::thread::current().name().unwrap().to_owned();
++        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
++            .args(["--exact", &name, "--nocapture", "--test-threads=1"])
++            .env(CHILD, "owned-scratch-only")
++            .stdout(std::process::Stdio::piped())
++            .stderr(std::process::Stdio::piped())
++            .spawn()
++            .unwrap();
++        let deadline = Instant::now() + Duration::from_secs(15);
++        while child.try_wait().unwrap().is_none() {
++            if Instant::now() >= deadline {
++                child.kill().unwrap();
++                child.wait().unwrap();
++                panic!("owned child exceeded its original 15s deadline");
++            }
++            std::thread::sleep(Duration::from_millis(1));
++        }
++        let output = child.wait_with_output().unwrap();
++        assert!(
++            output.status.success(),
++            "{}",
++            String::from_utf8_lossy(&output.stderr)
++        );
++        assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed"));
++        return;
++    }
++    let scratch = Scratch::new();
++    let permit = transaction::MutationPermit::acquire().unwrap();
++    let mut native =
++        transaction::NativeTransaction::begin(&permit, Instant::now() + Duration::from_secs(5))
++            .unwrap();
++    native.open_key(&scratch.scope.0.key, false).unwrap();
++    assert!(native.key().is_some());
++    native.fail_key_close_for_test();
++    assert_eq!(native.close_key(), Err(AutostartFailure::Interrupted));
++    let settled = native.settle();
++    assert!(!settled.released);
++    assert_eq!(settled.outcome, transaction::Outcome::Aborted);
++    drop(permit);
++    assert_eq!(transaction::retained_for_test(), (true, true, true));
++    assert!(transaction::MutationPermit::acquire().is_none());
++    let mut run = scratch.run();
++    let outcome = run.apply(&AutostartObservation::Absent, true, &|| true);
++    assert_eq!(outcome.failure, Some(AutostartFailure::Unavailable));
++    assert!(!outcome.mutated);
++    assert_eq!(transaction::retained_for_test(), (true, true, true));
++    // Actually close the exact retained test handles before deleting this owned
++    // registry leaf. This test-only cleanup does not clear the permanent fault.
++    assert!(transaction::release_retained_for_test());
++    assert_eq!(transaction::retained_for_test(), (true, false, false));
++    assert!(transaction::MutationPermit::acquire().is_none());
++}
++
++#[test]
++fn missing_scratch_key_disable_is_noop_and_enable_creates_only_owned_leaf() {
++    let scratch = Scratch::new();
++    scratch.scope.cleanup().unwrap();
++    let mut run = scratch.run();
++    let disabled = run.apply(&AutostartObservation::Absent, false, &|| true);
++    assert!(disabled.failure.is_none());
++    assert!(!disabled.mutated);
++    assert_eq!(disabled.observation, AutostartObservation::Absent);
++    let enabled = run.apply(&AutostartObservation::Absent, true, &|| true);
++    assert!(enabled.failure.is_none());
++    assert!(enabled.mutated);
++    assert!(run.read_back().unwrap().matches_expected);
++}
+diff --git a/crates/fc-windows/src/system/autorun_transaction.rs b/crates/fc-windows/src/system/autorun_transaction.rs
+new file mode 100644
+index 0000000..ff06095
+--- /dev/null
++++ b/crates/fc-windows/src/system/autorun_transaction.rs
+@@ -0,0 +1,327 @@
++//! Private stack-owned KTM/TxR lifetime. No ordinary registry write fallback.
++use super::{write_failure, AutostartFailure};
++use std::{
++    sync::{
++        atomic::{AtomicU8, Ordering},
++        Mutex,
++    },
++    time::Instant,
++};
++use windows::{
++    core::{w, Error, HSTRING},
++    Win32::{Foundation::*, Storage::FileSystem::*, System::Registry::*},
++};
++
++const IDLE: u8 = 0;
++const ACTIVE: u8 = 1;
++const FAULTED: u8 = 2;
++static MUTATION: AtomicU8 = AtomicU8::new(IDLE);
++// Raw identities remain owned here until process exit on a cleanup failure.
++// Integer storage does not grant another thread permission to use the handles.
++struct Retained {
++    key: Option<usize>,
++    transaction: Option<usize>,
++}
++static RETAINED: Mutex<Option<Retained>> = Mutex::new(None);
++
++pub(super) struct MutationPermit;
++impl MutationPermit {
++    pub(super) fn acquire() -> Option<Self> {
++        MUTATION
++            .compare_exchange(IDLE, ACTIVE, Ordering::AcqRel, Ordering::Acquire)
++            .ok()
++            .map(|_| Self)
++    }
++}
++impl Drop for MutationPermit {
++    fn drop(&mut self) {
++        // A failed close cannot be reset by logical completion/cancellation.
++        let _ = MUTATION.compare_exchange(ACTIVE, IDLE, Ordering::AcqRel, Ordering::Acquire);
++    }
++}
++
++pub(super) fn remaining_millis(deadline: Instant) -> Option<u32> {
++    let remaining = deadline.checked_duration_since(Instant::now())?.as_millis();
++    if remaining == 0 {
++        return None;
++    }
++    // Neither zero (default/infinite) nor INFINITE is an acceptable timeout.
++    Some(remaining.min(u128::from(u32::MAX - 1)) as u32)
++}
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub(super) enum Outcome {
++    Committed,
++    Aborted,
++    Undetermined,
++}
++pub(super) struct Settlement {
++    pub(super) outcome: Outcome,
++    pub(super) released: bool,
++}
++pub(super) struct NativeTransaction<'a> {
++    _permit: &'a MutationPermit,
++    key: Option<HKEY>,
++    transaction: Option<HANDLE>,
++    outcome: Outcome,
++    cleanup_failed: bool,
++    #[cfg(test)]
++    fail_key_close: bool,
++}
++impl<'a> NativeTransaction<'a> {
++    pub(super) fn begin(
++        permit: &'a MutationPermit,
++        deadline: Instant,
++    ) -> Result<Self, AutostartFailure> {
++        let timeout = remaining_millis(deadline).ok_or(AutostartFailure::Cancelled)?;
++        // SAFETY: non-inheritable, unbound transaction. Reserved isolation args
++        // are zero; the remaining original deadline is finite, never restarted.
++        let transaction = unsafe {
++            CreateTransaction(
++                std::ptr::null_mut(),
++                std::ptr::null_mut(),
++                0,
++                0,
++                0,
++                timeout,
++                w!("FutureClassroom current-user Run change"),
++            )
++        }
++        .map_err(native_failure)?;
++        Ok(Self {
++            _permit: permit,
++            key: None,
++            transaction: Some(transaction),
++            outcome: Outcome::Undetermined,
++            cleanup_failed: false,
++            #[cfg(test)]
++            fail_key_close: false,
++        })
++    }
++    pub(super) fn open_key(&mut self, path: &str, create: bool) -> Result<(), AutostartFailure> {
++        let name = HSTRING::from(path);
++        let mut key = HKEY::default();
++        let access = KEY_QUERY_VALUE | KEY_SET_VALUE;
++        let transaction = self.transaction.expect("owned active transaction");
++        // SAFETY: caller supplies only the fixed production or generated scratch
++        // path. Both query and staged write use this same transacted HKEY.
++        let status = unsafe {
++            if create {
++                RegCreateKeyTransactedW(
++                    HKEY_CURRENT_USER,
++                    &name,
++                    None,
++                    None,
++                    REG_OPTION_NON_VOLATILE,
++                    access,
++                    None,
++                    &mut key,
++                    None,
++                    transaction,
++                    None,
++                )
++            } else {
++                RegOpenKeyTransactedW(
++                    HKEY_CURRENT_USER,
++                    &name,
++                    None,
++                    access,
++                    &mut key,
++                    transaction,
++                    None,
++                )
++            }
++        };
++        if status == ERROR_FILE_NOT_FOUND {
++            return Ok(());
++        }
++        if status != ERROR_SUCCESS {
++            return Err(write_failure(status));
++        }
++        self.key = Some(key);
++        Ok(())
++    }
++    pub(super) fn key(&self) -> Option<HKEY> {
++        self.key
++    }
++    pub(super) fn close_key(&mut self) -> Result<(), AutostartFailure> {
++        if self.cleanup_failed {
++            return Err(AutostartFailure::Interrupted);
++        }
++        if let Some(key) = self.key {
++            #[cfg(test)]
++            if self.fail_key_close {
++                self.cleanup_failed = true;
++                return Err(AutostartFailure::Interrupted);
++            }
++            // SAFETY: the one exclusive key returned by the transacted open.
++            // HKEY must never be passed to CloseHandle (which can falsely succeed).
++            let status = unsafe { RegCloseKey(key) };
++            if status != ERROR_SUCCESS {
++                self.cleanup_failed = true;
++                return Err(AutostartFailure::Interrupted);
++            }
++            self.key = None;
++        }
++        Ok(())
++    }
++    pub(super) fn commit(&mut self) -> Result<(), AutostartFailure> {
++        if self.key.is_some() || self.cleanup_failed {
++            return Err(AutostartFailure::Interrupted);
++        }
++        // SAFETY: bound HKEY was actually closed, original transaction still owned.
++        // This synchronous syscall cannot be forcibly interrupted by a job signal.
++        let result = unsafe { CommitTransaction(self.transaction.expect("owned transaction")) };
++        if result.is_ok() {
++            self.outcome = Outcome::Committed;
++        } else {
++            self.query_outcome();
++        }
++        result.map_err(native_failure)
++    }
++    fn query_outcome(&mut self) {
++        let Some(transaction) = self.transaction else {
++            return;
++        };
++        let (mut outcome, mut isolation, mut flags, mut timeout) = (0, 0, 0, 0);
++        // SAFETY: exclusive live transaction; all fixed-size output pointers live.
++        let result = unsafe {
++            GetTransactionInformation(
++                transaction,
++                &mut outcome,
++                &mut isolation,
++                &mut flags,
++                &mut timeout,
++                None,
++            )
++        };
++        if result.is_ok() {
++            self.outcome = if outcome == TransactionOutcomeCommitted.0 as u32 {
++                Outcome::Committed
++            } else if outcome == TransactionOutcomeAborted.0 as u32 {
++                Outcome::Aborted
++            } else {
++                Outcome::Undetermined
++            };
++        }
++    }
++    fn settle_inner(&mut self) -> Settlement {
++        if self.transaction.is_none() {
++            return Settlement {
++                outcome: self.outcome,
++                released: self.key.is_none(),
++            };
++        }
++        let _ = self.close_key(); // any failure is retained below, never swallowed
++        if self.outcome != Outcome::Committed {
++            // SAFETY: rollback only the original transaction; never a compensating
++            // non-transacted write. RollbackTransaction is synchronous.
++            let rollback = unsafe { RollbackTransaction(self.transaction.unwrap()) };
++            if rollback.is_ok() {
++                self.outcome = Outcome::Aborted;
++            } else {
++                self.query_outcome();
++            }
++        }
++        if !self.cleanup_failed {
++            // SAFETY: correct close API for this original transaction HANDLE.
++            if unsafe { CloseHandle(self.transaction.unwrap()) }.is_ok() {
++                self.transaction = None;
++            } else {
++                self.cleanup_failed = true;
++            }
++        }
++        if self.cleanup_failed {
++            // The single permit proves this slot cannot have another owner.
++            // No user code, SQL or native syscall runs while its short lock is held.
++            retain(Retained {
++                key: self.key.take().map(|h| h.0 as usize),
++                transaction: self.transaction.take().map(|h| h.0 as usize),
++            });
++            return Settlement {
++                outcome: self.outcome,
++                released: false,
++            };
++        }
++        Settlement {
++            outcome: self.outcome,
++            released: true,
++        }
++    }
++    pub(super) fn settle(mut self) -> Settlement {
++        self.settle_inner()
++    }
++    #[cfg(test)]
++    pub(super) fn fail_key_close_for_test(&mut self) {
++        self.fail_key_close = true;
++    }
++}
++impl Drop for NativeTransaction<'_> {
++    fn drop(&mut self) {
++        if self.key.is_some() || self.transaction.is_some() {
++            let _ = self.settle_inner();
++        }
++    }
++}
++fn retain(owner: Retained) {
++    MUTATION.store(FAULTED, Ordering::Release);
++    let mut slot = RETAINED.lock().unwrap_or_else(|poison| poison.into_inner());
++    assert!(slot.is_none(), "single retained native transaction owner");
++    debug_assert!(owner.key.is_some() || owner.transaction.is_some());
++    *slot = Some(owner);
++}
++pub(super) fn retain_key(key: HKEY) {
++    retain(Retained {
++        key: Some(key.0 as usize),
++        transaction: None,
++    });
++}
++
++fn native_failure(error: Error) -> AutostartFailure {
++    if error.code() == windows::core::HRESULT::from_win32(ERROR_ACCESS_DENIED.0) {
++        AutostartFailure::AccessDenied
++    } else {
++        AutostartFailure::WriteFailed
++    }
++}
++
++#[cfg(test)]
++pub(super) fn retained_for_test() -> (bool, bool, bool) {
++    let slot = RETAINED.lock().unwrap_or_else(|p| p.into_inner());
++    (
++        MUTATION.load(Ordering::Acquire) == FAULTED,
++        slot.as_ref().is_some_and(|s| s.key.is_some()),
++        slot.as_ref().is_some_and(|s| s.transaction.is_some()),
++    )
++}
++#[cfg(test)]
++pub(super) fn release_retained_for_test() -> bool {
++    let mut retained = RETAINED.lock().unwrap_or_else(|p| p.into_inner()).take();
++    let Some(owner) = &mut retained else {
++        return false;
++    };
++    // Only the isolated child test invokes explicit negative cleanup with exact
++    // original handles; failures put the remaining owner back in the same slot.
++    let released = (|| {
++        if let Some(key) = owner.key {
++            if unsafe { RegCloseKey(HKEY(key as *mut _)) } != ERROR_SUCCESS {
++                return false;
++            }
++            owner.key = None;
++        }
++        if let Some(tx) = owner.transaction {
++            let handle = HANDLE(tx as *mut _);
++            let _ = unsafe { RollbackTransaction(handle) };
++            if unsafe { CloseHandle(handle) }.is_err() {
++                return false;
++            }
++            owner.transaction = None;
++        }
++        true
++    })();
++    if !released {
++        *RETAINED.lock().unwrap_or_else(|p| p.into_inner()) = retained;
++    }
++    // Deliberately retain the permanent FAULTED gate even after test cleanup.
++    released
++}

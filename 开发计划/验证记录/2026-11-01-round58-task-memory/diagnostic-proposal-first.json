@@ -1,0 +1,44 @@
+{
+  "schema": "future-classroom.r58-diagnostic-candidate/v1",
+  "status": "PREPARED_NOT_COMPILED_OR_RUN",
+  "scope": "Only immutable evidence candidate; no main/working-tree source edits, no Cargo/Windows/network/Git mutation.",
+  "originalFailure": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/integrated-windows-affected-public-first.json",
+    "sha256": "ff1494aa7a4a2156016639c3ed394778764957b98181c638cb2148d6fc31fa10",
+    "status": "FAIL",
+    "cleanup": "PASS",
+    "known": "System probe HRESULT E_ACCESSDENIED; original report does not establish R58 stage or path difference."
+  },
+  "candidate": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/diagnostic-candidate-first/crates/fc-windows/src/com_task/tests.rs",
+    "bytes": 10012,
+    "sha256": "049252f97272e067cebd22c5ee8c8dced328e4ea02f2753c6f8a9e4bada75232",
+    "beforeSha256": "a60862c6927daed2f8bbe3bf108f243fd1280589e7ea47ecbda9ea1089085fb0",
+    "mainStillBefore": true
+  },
+  "patch": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/diagnostic-first.patch",
+    "bytes": 4323,
+    "sha256": "0e09afe01477ff81626b8f112f7359e58f3f2736c4a9994755c1f0bace793983",
+    "gitApplyCheckExitCode": 0
+  },
+  "change": "Only existing task_memory_real_wow64_path_uses_the_matching_system_directory test gains bounded diagnostics before original allocator/strict assertions; still six tests and same filter.",
+  "observations": [
+    "Native architecture, IsWow64Process actual mode, selected directory raw API length, last error only on zero, full fixed1024 UTF16 buffer.",
+    "system_ole32_path exact length/rawUTF16 including terminator, or HRESULT.",
+    "GetModuleHandleExW with full expected path and UNCHANGED_REFCOUNT only: success/error HRESULT and invalid-handle state. This is a borrowed test observation, not production PIN result.",
+    "Raw GetModuleFileNameW actual length/full fixed1024 UTF16 buffer, termination/interiorNul, failure/full-buffer error, raw ordinal comparison result.",
+    "Original allocator Result/HRESULT, then original unwrap and all original strict assertions. OnceLock/PIN implementation is untouched."
+  ],
+  "safety": [
+    "No LoadLibrary, basename retry, additional PIN or FreeLibrary. The process already statically imports Ole32 for this test context.",
+    "No key, account, credential, audio, desktop or business file content is observed. Output only public native metadata/paths.",
+    "A diagnostic failure remains a failing test; original report is preserved.",
+    "Already-cached allocator results remain unchanged. Borrowed metadata can still identify path/NUL causes without altering capability."
+  ],
+  "limits": [
+    "Only same actual compiled fc_windows test EXE execution can provide the intended module-loading context. Alternate PS process results would not be a substitute.",
+    "No attribution to System32/SysWOW64 until exact raw output is recorded.",
+    "If paths differ due to a real alias, do not simply make their strings equivalent or fall back to basename; subsequent fix needs a proven exact loaded-image identity relation."
+  ]
+}

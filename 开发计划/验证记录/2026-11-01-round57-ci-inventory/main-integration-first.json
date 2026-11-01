@@ -1,0 +1,27 @@
+{
+  "status": "PASS_EXACT_SOURCE_INTEGRATION_AFTER_ACTUAL_POWERSHELL_TESTS",
+  "files": [
+    {
+      "path": "scripts/windows-msvc-ci.ps1",
+      "bytes": 49976,
+      "sha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd",
+      "beforeSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418"
+    },
+    {
+      "path": "scripts/check-ci-source-inventory.ps1",
+      "bytes": 13901,
+      "sha256": "b706d3d68627cc99570550c2e59fac645d66d2c997197393e00f689996bebbb8",
+      "beforeSha256": null
+    },
+    {
+      "path": "scripts/CI-SOURCE-INVENTORY.md",
+      "bytes": 2415,
+      "sha256": "0ca5ba63fa1adc72e234635373f3037483c84d83f174833a964bce5d01b1c822",
+      "beforeSha256": null
+    }
+  ],
+  "purePSReportSha256": "c4162dae1f1e42f1fbcf427fa1a575d053ce5657a3fd3e04fa36f565d2e79302",
+  "checks": 10,
+  "assertions": 20081,
+  "scope": "Main CI capacity delta only; new hosted CI/new product build not claimed."
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "scope": "Concise binding of already independently retained original artifact audits plus actual Win11 runtime originals; historical Git/objdump not re-executed.",
+  "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "sourceDomains": {
+    "fullGitMetadataM": 9970,
+    "actualShaSubsetS": 573,
+    "historicalMetadataOnlyH": 9397,
+    "partition": "M = S disjoint-union H",
+    "actualSDirectGitBlobMatches": 6,
+    "actualSExactFullLfToCrlfMatches": 567,
+    "actualSRowsIdenticalAcrossBaselines": true,
+    "historicalHCheckoutContentSha256": "NOT_READ_BY_INPUT_HASHER; Git OID/size metadata only, not full historical raw SHA256"
+  },
+  "baselines": [
+    {
+      "baseline": "modern",
+      "independentRuntime": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-runtime-independent-first.json",
+        "bytes": 15458,
+        "sha256": "10d06148704d001ca2b86c745dcd592291dd82fc36ce5603495c256b73b018d5"
+      },
+      "independentOriginalArtifact": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-original-independent-first.json",
+        "bytes": 497415,
+        "sha256": "d6ea3001b7495ad5ffecec0fde31aedffe3f4d4f389e9fcb14dee0e3e0991f3a"
+      },
+      "ciOfficialIdentity": {
+        "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+        "runId": 41264231080,
+        "jobId": 124723560195,
+        "artifactId": 13066468230,
+        "runAttempt": 1,
+        "runStatus": "completed",
+        "runConclusion": "success",
+        "jobConclusion": "success",
+        "workflow": ".github/workflows/windows-msvc.yml",
+        "artifactName": "future-classroom-msvc-i686-9ebe818bfc57c075e8b21419082dd44130b0e923-41264231080-1",
+        "jobSourceBinding": "EXACT_JOB_ID_AND_RUN_ID_TO_SOURCE_BOUND_OFFICIAL_RUN",
+        "jobHeadShaProvided": false
+      },
+      "ciStatus": "COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN",
+      "runtimeStatus": "PASS_ORIGINAL_BINDING_WIN11_RUNTIME_ONLY",
+      "runtimeCleanup": "PASS",
+      "totals": {
+        "programs": 21,
+        "passed": 1481,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "normalExecutableSha256": "7aea98d5b64df96b32e16a1799af2e753e069a351f1205a1d25c87dd41b0b034",
+      "normalExecutableBytes": 10515456,
+      "metadataSha256": "b4bb33a270cf63d665395151ebf93c79843a4327c2d7a1683c170604be9bc8fb",
+      "actualCombaseCoTaskMemFree": "PRESENT",
+      "winrtErrorDll": "ABSENT_IN_RETAINED_ACTUAL_MSVC_IMPORT_AUDITS"
+    },
+    {
+      "baseline": "win7",
+      "independentRuntime": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-runtime-independent-first.json",
+        "bytes": 14323,
+        "sha256": "e3766b43899fde834197ae5ed4006da7464330d6dc32e271652a204c33bf833b"
+      },
+      "independentOriginalArtifact": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-original-independent-first.json",
+        "bytes": 478515,
+        "sha256": "891d22904d0daa884125c51b333c57ed0e8639ac5a7c46ac69ba14aa7bde3e00"
+      },
+      "ciOfficialIdentity": {
+        "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+        "runId": 41264260118,
+        "jobId": 124723651405,
+        "artifactId": 13066584947,
+        "runAttempt": 1,
+        "runStatus": "completed",
+        "runConclusion": "success",
+        "jobConclusion": "success",
+        "workflow": ".github/workflows/windows-win7-msvc.yml",
+        "artifactName": "future-classroom-win7-msvc-i686-9ebe818bfc57c075e8b21419082dd44130b0e923-41264260118-1",
+        "jobSourceBinding": "EXACT_JOB_ID_AND_RUN_ID_TO_SOURCE_BOUND_OFFICIAL_RUN",
+        "jobHeadShaProvided": false
+      },
+      "ciStatus": "COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN",
+      "runtimeStatus": "PASS_ORIGINAL_BINDING_WIN11_RUNTIME_ONLY",
+      "runtimeCleanup": "PASS",
+      "totals": {
+        "programs": 21,
+        "passed": 1481,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "normalExecutableSha256": "38d30fd9f661aee5740ac876dddf262a6f538a19cbfc0396568e1d47c07b7656",
+      "normalExecutableBytes": 10695168,
+      "metadataSha256": "63373d99137ec57450eede88b2c3d9cce21d00b3e7d369ed7f1ddf9433c92696",
+      "actualCombaseCoTaskMemFree": "PRESENT",
+      "winrtErrorDll": "ABSENT_IN_RETAINED_ACTUAL_MSVC_IMPORT_AUDITS"
+    }
+  ],
+  "limitations": [
+    "Both target suites actually ran on authorized Windows11x64/WOW64, not on Windows7 or Windows10.",
+    "Modern and Win7-target normal executables both retain combase!CoTaskMemFree; keep baseline OS import/load risks.",
+    "No GNU import result substituted, no static PE green promoted into actual Win7 compatibility.",
+    "No new tests/Windows/Cargo/CI/Git/source/main mutation; source ledger conclusions are bound to retained original independent reports.",
+    "Original strict5sFAIL/production listener off/visible Seewo and actual Win7/Win10 acceptance unchanged."
+  ],
+  "issues": [
+    "source partition/count mismatch modern {'EXACT_FULL_LF_TO_CRLF': 567, 'EXACT_GIT_BLOB': 6}",
+    "source partition/count mismatch win7 {'EXACT_FULL_LF_TO_CRLF': 567, 'EXACT_GIT_BLOB': 6}"
+  ]
+}

@@ -1,0 +1,124 @@
+--- third/crates/fc-windows/src/system/autorun_tests.rs
++++ diagnostic/crates/fc-windows/src/system/autorun_tests.rs
+@@ -428,12 +428,27 @@
+     assert_eq!(run.observe(), AutostartObservation::Absent);
+ }
+ 
+-fn ordinary_replacement(scope: &RunScope, command: &str) -> bool {
++#[derive(Clone, Copy, Debug)]
++struct OrdinaryAttempt {
++    open_status: u32,
++    write_status: Option<u32>,
++    close_status: Option<u32>,
++}
++fn ordinary_replacement(
++    scope: &RunScope,
++    command: &str,
++    attempt: &Cell<Option<OrdinaryAttempt>>,
++) -> bool {
+     let name = HSTRING::from(scope.0.key.as_str());
+     let mut key = HKEY::default();
+     // SAFETY: another ordinary writer of the same owned synthetic leaf/value.
+     let opened = unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, &name, None, KEY_SET_VALUE, &mut key) };
+     if opened != ERROR_SUCCESS {
++        attempt.set(Some(OrdinaryAttempt {
++            open_status: opened.0,
++            write_status: None,
++            close_status: None,
++        }));
+         return false;
+     }
+     let changed = unsafe {
+@@ -446,8 +461,51 @@
+         )
+     };
+     // SAFETY: close the exact successful ordinary open, even on write conflict.
+-    assert_eq!(unsafe { RegCloseKey(key) }, ERROR_SUCCESS);
++    let closed = unsafe { RegCloseKey(key) };
++    attempt.set(Some(OrdinaryAttempt {
++        open_status: opened.0,
++        write_status: Some(changed.0),
++        close_status: Some(closed.0),
++    }));
++    assert_eq!(closed, ERROR_SUCCESS);
+     changed == ERROR_SUCCESS
++}
++
++// Diagnostic only, called after apply has synchronously settled/closed its Tx.
++// Keep the bounded native status/type/length and decoded value; never print arrays.
++fn diagnose_final_raw_read(scope: &RunScope) {
++    let name = HSTRING::from(scope.0.key.as_str());
++    let mut key = HKEY::default();
++    // SAFETY: only this generated owned scratch leaf; no active own transaction.
++    let open = unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, &name, None, KEY_QUERY_VALUE, &mut key) };
++    if open != ERROR_SUCCESS {
++        eprintln!("TXR_SCRATCH_FINAL_RAW open={} query=NOT_CALLED", open.0);
++        return;
++    }
++    let mut data = [0u8; MAX_COMMAND_UNITS * 2];
++    let mut bytes = data.len() as u32;
++    let mut kind = REG_VALUE_TYPE::default();
++    let query = unsafe {
++        RegQueryValueExW(
++            key,
++            w!("FutureClassroom"),
++            None,
++            Some(&mut kind),
++            Some(data.as_mut_ptr()),
++            Some(&mut bytes),
++        )
++    };
++    let decoded = if query == ERROR_SUCCESS {
++        decode_value(kind.0, bytes, &data)
++    } else if query == ERROR_FILE_NOT_FOUND {
++        AutostartObservation::Absent
++    } else {
++        AutostartObservation::Unavailable(read_failure(query))
++    };
++    let close = unsafe { RegCloseKey(key) };
++    eprintln!("TXR_SCRATCH_FINAL_RAW open={} query={} kind={} reported_bytes={bytes} close={} decoded={decoded:?}",
++        open.0, query.0, kind.0, close.0);
++    assert_eq!(close, ERROR_SUCCESS);
+ }
+ 
+ fn transacted_replacement(scope: &RunScope, command: &str, deadline: Instant) -> bool {
+@@ -577,6 +635,7 @@
+             let calls = Cell::new(0);
+             let attempted = Cell::new(false);
+             let foreign_committed = Cell::new(false);
++            let ordinary_attempt = Cell::new(None);
+             let outcome = run.apply(&previous, enabled, &|| {
+                 calls.set(calls.get() + 1);
+                 if calls.get() == phase {
+@@ -588,13 +647,30 @@
+                             deadline,
+                         )
+                     } else {
+-                        ordinary_replacement(&scratch.scope, "external reviewed replacement")
++                        ordinary_replacement(
++                            &scratch.scope,
++                            "external reviewed replacement",
++                            &ordinary_attempt,
++                        )
+                     });
+                 }
+                 true
+             });
+             assert!(attempted.get());
+             let after = scratch.run().observe();
++            // Emit before strict assertions: the original failure must retain the
++            // exact interleaving and native LSTATUS, not just a post-assert trace.
++            let ordinary_status = ordinary_attempt.get().map(|attempt| {
++                (
++                    attempt.open_status,
++                    attempt.write_status,
++                    attempt.close_status,
++                )
++            });
++            eprintln!("TXR_SCRATCH_DIAGNOSTIC transacted={transacted} enabled={enabled} phase={phase} fresh_calls={} attempted={} foreign_committed={} ordinary_status={ordinary_status:?} expected_preimage={previous:?} returned_observation={:?} ordinary_after={after:?} own_failure={:?} own_mutated={}",
++                calls.get(), attempted.get(), foreign_committed.get(),
++                outcome.observation, outcome.failure, outcome.mutated);
++            diagnose_final_raw_read(&scratch.scope);
+             assert_eq!(after, outcome.observation);
+             if foreign_committed.get() {
+                 assert!(

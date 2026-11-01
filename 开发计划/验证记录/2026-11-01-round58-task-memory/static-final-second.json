@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "command": [
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "crates/fc-windows/src/com_task.rs",
+        "crates/fc-windows/src/com_task/tests.rs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "architecture": "Prior second architecture PASS with exactly unchanged Cargo manifests and first-party imports; 12 crates/33 edges."
+}

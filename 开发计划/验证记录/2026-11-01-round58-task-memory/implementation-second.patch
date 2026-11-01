@@ -1,0 +1,293 @@
+--- a/crates/fc-windows/src/com_task.rs
++++ b/crates/fc-windows/src/com_task.rs
+@@ -7,17 +7,17 @@
+ //! pointer valid through process exit; it is not a per-operation DLL reference.
+ //! No DLL is loaded, no search policy changes, and no allocation is attempted if
+ //! resolution fails. Failed initialization is cached too, with no replacement.
++//! Loaded-image identity uses its mapped NT name, not loader path spelling.
+ use std::{ffi::c_void, sync::OnceLock};
+ use windows::{
+     core::{s, Error, Result, BOOL, HRESULT, PCSTR, PCWSTR},
+     Win32::{
+         Foundation::{ERROR_INSUFFICIENT_BUFFER, E_ACCESSDENIED, E_NOTIMPL, HMODULE},
+         Globalization::{CompareStringOrdinal, CSTR_EQUAL},
++        Storage::FileSystem::QueryDosDeviceW,
+         System::{
+-            LibraryLoader::{
+-                GetModuleFileNameW, GetModuleHandleExW, GetProcAddress,
+-                GET_MODULE_HANDLE_EX_FLAG_PIN,
+-            },
++            LibraryLoader::{GetModuleHandleExW, GetProcAddress, GET_MODULE_HANDLE_EX_FLAG_PIN},
++            ProcessStatus::K32GetMappedFileNameW,
+             SystemInformation::{
+                 GetNativeSystemInfo, GetSystemDirectoryW, GetSystemWow64DirectoryW,
+                 PROCESSOR_ARCHITECTURE_AMD64, PROCESSOR_ARCHITECTURE_INTEL, SYSTEM_INFO,
+@@ -156,13 +156,15 @@
+     Ok(path)
+ }
+ 
++#[cfg(test)]
+ fn loaded_path(module: HMODULE) -> Result<ModulePath> {
++    use windows::Win32::System::LibraryLoader::GetModuleFileNameW;
+     let mut path = ModulePath {
+         units: [0; PATH_UNITS],
+         len: 0,
+     };
+-    // SAFETY: the returned module has already been pinned, and the buffer is
+-    // fully owned. A full/truncated buffer is always rejected.
++    // SAFETY: tests borrow the statically imported module or the pinned module
++    // for this synchronous query. A full/truncated buffer is always rejected.
+     let len = unsafe { GetModuleFileNameW(Some(module), &mut path.units) } as usize;
+     if len == 0 {
+         return Err(Error::from_thread());
+@@ -174,6 +176,95 @@
+         return Err(Error::from_hresult(E_ACCESSDENIED));
+     }
+     path.len = len;
++    Ok(path)
++}
++
++fn mapped_path(module: HMODULE) -> Result<ModulePath> {
++    let mut path = ModulePath {
++        units: [0; PATH_UNITS],
++        len: 0,
++    };
++    // SAFETY: production pins the exact module before this query; tests borrow
++    // the statically imported module. Its image base stays valid across the call.
++    // The process pseudo handle is borrowed. K32 is exported by Kernel32 on Win7+
++    // and this query creates no mapping or file/process handle.
++    let len =
++        unsafe { K32GetMappedFileNameW(GetCurrentProcess(), module.0, &mut path.units) } as usize;
++    if len == 0 {
++        return Err(Error::from_thread());
++    }
++    if len >= PATH_UNITS {
++        return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++    }
++    if path.units[..len].contains(&0) || path.units[len] != 0 {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    path.len = len;
++    Ok(path)
++}
++
++fn nt_system_path(dos: &ModulePath) -> Result<ModulePath> {
++    let drive = [dos.units[0], dos.units[1], 0];
++    let mut mappings = [0u16; PATH_UNITS];
++    // SAFETY: only the drive from the already validated OS system path is
++    // queried, by its exact two-character name. No enumeration or mutation.
++    let len = unsafe { QueryDosDeviceW(PCWSTR(drive.as_ptr()), Some(&mut mappings)) } as usize;
++    if len == 0 {
++        return Err(Error::from_thread());
++    }
++    if len >= PATH_UNITS {
++        return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++    }
++    nt_path_from_current_mapping(dos.as_slice(), &mappings[..len])
++}
++
++fn nt_path_from_current_mapping(dos: &[u16], mappings: &[u16]) -> Result<ModulePath> {
++    // QueryDosDevice returns MULTI_SZ: only the first string is CURRENT. Never
++    // authorize a match against an undeleted historical mapping from later rows.
++    if mappings.len() < 2
++        || mappings.len() >= PATH_UNITS
++        || mappings[mappings.len() - 2..] != [0, 0]
++    {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    let end = mappings
++        .iter()
++        .position(|&unit| unit == 0)
++        .filter(|&end| end > 0)
++        .ok_or_else(|| Error::from_hresult(E_ACCESSDENIED))?;
++    let current = &mappings[..end];
++    let device_prefix = [
++        b'\\' as u16,
++        b'D' as u16,
++        b'e' as u16,
++        b'v' as u16,
++        b'i' as u16,
++        b'c' as u16,
++        b'e' as u16,
++        b'\\' as u16,
++    ];
++    if dos.len() < 3
++        || dos[1] != b':' as u16
++        || dos[2] != b'\\' as u16
++        || dos.contains(&0)
++        || current.len() <= device_prefix.len()
++        || !same_system_path(&device_prefix, &current[..device_prefix.len()])
++        || current.last() == Some(&(b'\\' as u16))
++    {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    let suffix = &dos[2..];
++    let len = current
++        .len()
++        .checked_add(suffix.len())
++        .filter(|&len| len < PATH_UNITS)
++        .ok_or_else(|| Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()))?;
++    let mut path = ModulePath {
++        units: [0; PATH_UNITS],
++        len,
++    };
++    path.units[..current.len()].copy_from_slice(current);
++    path.units[current.len()..len].copy_from_slice(suffix);
+     Ok(path)
+ }
+ 
+@@ -191,6 +282,7 @@
+ 
+ fn resolve() -> Result<TaskMemory> {
+     let expected = system_ole32_path()?;
++    let expected_nt = nt_system_path(&expected)?;
+     let mut module = HMODULE::default();
+     // SAFETY: the full OS-selected system path is bounded and NUL terminated.
+     // This only retrieves an ALREADY LOADED module. Ole32 is a static dependency
+@@ -203,8 +295,16 @@
+             &mut module,
+         )?
+     };
+-    let actual = loaded_path(module)?;
+-    if !same_system_path(expected.as_slice(), actual.as_slice()) {
++    // GetModuleFileName retains loader spelling: the actual WOW64 image can be
++    // reported with a System32 name. Match the physical mapped NT image against
++    // the current OS-derived device path instead; never equate the two folders.
++    let actual_nt = mapped_path(module)?;
++    if !same_system_path(expected_nt.as_slice(), actual_nt.as_slice())
++        || !same_system_path(
++            expected_nt.as_slice(),
++            nt_system_path(&expected)?.as_slice(),
++        )
++    {
+         return Err(Error::from_hresult(E_ACCESSDENIED));
+     }
+     resolve_export(module)
+--- a/crates/fc-windows/src/com_task/tests.rs
++++ b/crates/fc-windows/src/com_task/tests.rs
+@@ -18,8 +18,8 @@
+         .expect("the exact pinned module remains loaded");
+     }
+     assert!(same_system_path(
+-        expected.as_slice(),
+-        loaded_path(module).unwrap().as_slice()
++        nt_system_path(&expected).unwrap().as_slice(),
++        mapped_path(module).unwrap().as_slice()
+     ));
+     module
+ }
+@@ -97,11 +97,37 @@
+ 
+ #[test]
+ fn task_memory_real_wow64_path_uses_the_matching_system_directory() {
++    // Borrow the statically loaded Ole32 for compact diagnostics before the
++    // allocator's original OnceLock/PIN. No load/refcount change or extra PIN.
++    let expected = system_ole32_path().unwrap();
++    let expected_nt = nt_system_path(&expected);
++    let mut module = HMODULE::default();
++    let lookup = unsafe {
++        GetModuleHandleExW(
++            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++            expected.as_pcwstr(),
++            &mut module,
++        )
++    };
++    eprintln!(
++        "R58_TASK_MEMORY_SYSTEM_LOOKUP expected_dos_utf16={:?} unref_result={:?}",
++        expected.as_slice(),
++        lookup.as_ref().map(|_| ()).map_err(|error| error.code().0)
++    );
++    lookup.unwrap();
++    let loader_spelling = loaded_path(module);
++    let actual_nt = mapped_path(module);
++    eprintln!(
++        "R58_TASK_MEMORY_MAPPED_IDENTITY expected_nt_utf16={:?} actual_nt_utf16={:?} loader_utf16={:?}",
++        expected_nt.as_ref().map(|path| path.as_slice()).map_err(|error| error.code().0),
++        actual_nt.as_ref().map(|path| path.as_slice()).map_err(|error| error.code().0),
++        loader_spelling.as_ref().map(|path| path.as_slice()).map_err(|error| error.code().0)
++    );
+     allocator().unwrap();
+-    let expected = system_ole32_path().unwrap();
+-    let module = current_module();
+-    let actual = loaded_path(module).unwrap();
+-    assert!(same_system_path(expected.as_slice(), actual.as_slice()));
++    assert!(same_system_path(
++        expected_nt.unwrap().as_slice(),
++        actual_nt.unwrap().as_slice()
++    ));
+     let mut wow64 = BOOL::default();
+     // SAFETY: borrowed process pseudo handle and synchronous bool output.
+     unsafe { IsWow64Process(GetCurrentProcess(), &mut wow64).unwrap() };
+@@ -166,3 +192,72 @@
+         &[b'x' as u16; PATH_UNITS]
+     ));
+ }
++
++#[test]
++fn task_memory_current_device_mapping_binds_exact_mapped_image_not_loader_spelling() {
++    let wide = |value: &str| value.encode_utf16().collect::<Vec<_>>();
++    let dos = wide("C:\\Windows\\SysWOW64\\ole32.dll");
++    let current_and_prior = wide("\\Device\\HarddiskVolume3\0\\Device\\HarddiskVolume8\0\0");
++    let expected = nt_path_from_current_mapping(&dos, &current_and_prior).unwrap();
++    assert!(same_system_path(
++        expected.as_slice(),
++        &wide("\\Device\\HarddiskVolume3\\Windows\\SysWOW64\\ole32.dll")
++    ));
++    // Loader spelling can be System32 on a real WOW64 load. It never authorizes
++    // the image; the mapped NT object must match the actual OS-selected folder.
++    for wrong in [
++        "\\Device\\HarddiskVolume3\\Windows\\System32\\ole32.dll",
++        "\\Device\\HarddiskVolume8\\Windows\\SysWOW64\\ole32.dll",
++        "\\Device\\HarddiskVolume3\\Windows\\SysWOW64\\combase.dll",
++        "\\Device\\HarddiskVolume3\\Users\\Synthetic\\ole32.dll",
++    ] {
++        assert!(
++            !same_system_path(expected.as_slice(), &wide(wrong)),
++            "{wrong}"
++        );
++    }
++    let native = nt_path_from_current_mapping(
++        &wide("C:\\Windows\\System32\\ole32.dll"),
++        &current_and_prior,
++    )
++    .unwrap();
++    assert!(!same_system_path(expected.as_slice(), native.as_slice()));
++    // The same helper used by the final live requery rejects a changed current
++    // drive mapping even when its prior mappings include the original volume.
++    let changed = nt_path_from_current_mapping(
++        &dos,
++        &wide("\\Device\\HarddiskVolume8\0\\Device\\HarddiskVolume3\0\0"),
++    )
++    .unwrap();
++    assert!(!same_system_path(expected.as_slice(), changed.as_slice()));
++}
++
++#[test]
++fn task_memory_device_mapping_metadata_is_bounded_and_fail_closed() {
++    let wide = |value: &str| value.encode_utf16().collect::<Vec<_>>();
++    let dos = wide("C:\\Windows\\SysWOW64\\ole32.dll");
++    for invalid in [
++        Vec::new(),
++        wide("\0\0"),
++        wide("\\Device\\HarddiskVolume3"),
++        wide("C:\\Synthetic\0\0"),
++        wide("\\Device\\\0\0"),
++        wide("\\Device\\HarddiskVolume3\\\0\0"),
++    ] {
++        assert!(nt_path_from_current_mapping(&dos, &invalid).is_err());
++    }
++    let valid_mapping = wide("\\Device\\HarddiskVolume3\0\0");
++    assert!(
++        nt_path_from_current_mapping(&wide("C:\\Windows\0\\ole32.dll"), &valid_mapping).is_err()
++    );
++    assert!(nt_path_from_current_mapping(&wide("ole32.dll"), &valid_mapping).is_err());
++    let mut oversized = wide("C:\\");
++    oversized.extend([b'x' as u16; PATH_UNITS]);
++    assert_eq!(
++        nt_path_from_current_mapping(&oversized, &valid_mapping)
++            .err()
++            .unwrap()
++            .code(),
++        ERROR_INSUFFICIENT_BUFFER.to_hresult()
++    );
++}

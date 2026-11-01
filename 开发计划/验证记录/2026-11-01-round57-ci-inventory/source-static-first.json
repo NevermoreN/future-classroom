@@ -1,0 +1,35 @@
+{
+  "status": "PASS_STATIC_DELTA_AND_SCOPED_WHITESPACE_ONLY",
+  "productionBeforeSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+  "productionAfterSha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd",
+  "exactDelta": "Seven numeric literals for finite path counts/Split plus one explanatory comment; no other production-byte differences.",
+  "newLimit": 20000,
+  "unchanged": {
+    "perFileBytes": 67108864,
+    "actualShaInputTotalBytes": 268435456,
+    "metadataAndLogBytes": 16777216,
+    "WaitForExit10000MillisecondsOccurrences": 2
+  },
+  "oldArtifactValidator": {
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c",
+    "modified": false,
+    "scope": "Historical original source only; not applicable unchanged to new CI source."
+  },
+  "pureTestProvenance": [
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round34-accept/win7-ci-pure-check.ps1",
+      "bytes": 16293,
+      "sha256": "3237d2275e78e651506b26d1100c3dda02d633c87939e75bc5db9e0f69d9f6ba"
+    },
+    {
+      "path": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round45-ci-input-domains/input-domain-powershell-fixture-first.ps1",
+      "bytes": 76817,
+      "sha256": "ab2942c7793d004719cd457055163a9868b7d6b995a81b861407d2d73ee9d849"
+    }
+  ],
+  "newPurePsCases": 10,
+  "powershellAvailable": false,
+  "powershellParseAndExecution": "NOT_RUN_NO_PWSH",
+  "WindowsSSHCI": "NOT_RUN",
+  "scope": "Static text/diff checks are not PowerShell AST or boundary execution evidence."
+}

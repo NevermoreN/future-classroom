@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_INDEPENDENT_FREEZE_OF_ACTUAL_FILTERED_COUNTEREXAMPLE",
+  "underlyingExecutionStatus": "FAIL",
+  "scope": "Only one fresh-process ordinary competing-writer filtered native test on Win11/WOW64; not a full suite or qualified R56 CAS implementation. No new execution or source mutation by reviewer.",
+  "originals": [
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.json",
+      "bytes": 2775,
+      "sha256": "5f9334127306ca1629ec4e4b1162a8ca35f2b5e65a31c361d80d10474e793ef8"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-operation-first.json",
+      "bytes": 2985,
+      "sha256": "fe51bfee2c941910809257e88177d807f465b7c8a886473882960aa716b88219"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-compile-first.json",
+      "bytes": 150325,
+      "sha256": "12e79408a358956264cedfe38caa69cb181b286ebc0da19f0b47240a57cd8e0d"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-filter-preparation-first.json",
+      "bytes": 806,
+      "sha256": "62c3202de8890472072cf213f644c3fa00508638cd6bf5de73bab453a64c6099"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-freeze-first.json",
+      "bytes": 5817,
+      "sha256": "9428734bcc9c4e5a4b323c829662b6aad3f41681892f5af05ce215a302ba0b3a"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-main-integration-first.json",
+      "bytes": 512,
+      "sha256": "0e994872871c77f0ca6ebb1ae6cfd18df4426a1d72b58463da837f2b499f92ff"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/native-failures-independent-first.json",
+      "bytes": 51845,
+      "sha256": "6fabefc73ce20b83a3967c487f4147c75744ba97ce5bfbbe30e7dfe5456d4430"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.stdout.log",
+      "bytes": 51,
+      "sha256": "1be8329a03dc2b76436a0768586893da184a44f80fe2a4ce577085d63e05da12"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.stderr.log",
+      "bytes": 403,
+      "sha256": "4f7d9920a3da330ffb7822f5bf9c684147d0b8babdf74744f51fe0bd8a54b7a9"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-selected-original-first.jsonl",
+      "bytes": 870,
+      "sha256": "0370a9f9221c903be75378a0c693bfa38d1612dc5da3769632c962daf5806963"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-compile-first.stdout.log",
+      "bytes": 40437,
+      "sha256": "041b55edddee0f1cc7d375181b5e7dc2a0503415b0d16cc9f4123591dee93ff2"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-first.candidate.rs",
+      "bytes": 32940,
+      "sha256": "200425fdc63f1babae06db93274f3101fc404732fe6c7523d054961cf36b0266"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-first.before.rs",
+      "bytes": 29830,
+      "sha256": "1bf2caf3945c4b71e6607ed79396687a29d867a341f0688a1b9a11dcea197568"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/source-after-third/crates/fc-windows/src/system/autorun.rs",
+      "bytes": 19567,
+      "sha256": "0d53cf0b4eecaea585ba744298fd08e26b956474804db20e1f46812372338bd0"
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/windows-probe-ordinary-filter-first.py",
+      "bytes": 59731,
+      "sha256": "8b23927cdc3c7f16bf8f36b5bd506d7f761ce4649e42f3b5669ce86d0de28391"
+    }
+  ],
+  "binding": {
+    "normalExecutable": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "bytes": 13133115,
+      "sha256": "040f5dd3096c32e8fe2597698c64015db1f4db49e56b4db0d7a910a0ec0fc117"
+    },
+    "diagnosticExecutable": {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "bytes": 3573681,
+      "sha256": "848b77ceb7944f3c71c6b5cb8396743ae1c78056e56f618d1c4863e620866001"
+    },
+    "sameOriginalNormalAcrossAttempts": true,
+    "compiledCandidateSource": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-first.candidate.rs",
+      "bytes": 32940,
+      "sha256": "200425fdc63f1babae06db93274f3101fc404732fe6c7523d054961cf36b0266"
+    },
+    "unchangedProductionCompiledSource": [
+      {
+        "path": "crates/fc-windows/src/system/autorun.rs",
+        "bytes": 19567,
+        "sha256": "0d53cf0b4eecaea585ba744298fd08e26b956474804db20e1f46812372338bd0"
+      },
+      {
+        "path": "crates/fc-windows/src/system/autorun_transaction.rs",
+        "bytes": 11831,
+        "sha256": "3fbccab38a4edc12517503111b0f241ecac800740e75f52fc7d3cc997808e0a7"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "bytes": 260371,
+        "sha256": "765448626293a26398a79c88329703ea23e4659f250431bc6ef0cc4ad6bc029a"
+      }
+    ],
+    "compileActualExit": true,
+    "compileExitCode": 0,
+    "compileInputChanges": [],
+    "extraInputChanges": [],
+    "filteredHelperDelta": {
+      "originalSourceSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+      "adaptedSourceSha256": "8b23927cdc3c7f16bf8f36b5bd506d7f761ce4649e42f3b5669ce86d0de28391",
+      "changedBlocks": 1,
+      "testChildArguments": "--test-threads=1 --nocapture --exact system::autorun::tests::ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+      "purpose": "Diagnostic exact filter only. Preserves timeout, cleanup, strict assertion and original uploader. Other221 deliberately not exercised."
+    }
+  },
+  "actualExecution": {
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "win7": "NOT_VALIDATED",
+    "controllerActualExit": true,
+    "controllerExitCode": 1,
+    "testExitCode": 101,
+    "cleanup": "PASS",
+    "selfCheckExitCode": 0,
+    "programs": 1,
+    "testName": "system::autorun::tests::ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+    "summary": {
+      "outputIndex": 15,
+      "originalLine": "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 221 filtered out; finished in 0.00s",
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 221
+    },
+    "nativeUi": "NOT_RUN",
+    "systemProbe": "NOT_REQUESTED"
+  },
+  "observedCounterexample": {
+    "diagnosticOutputIndex": 2,
+    "originalDiagnosticLine": "TXR_SCRATCH_DIAGNOSTIC transacted=false enabled=false phase=2 fresh_calls=4 attempted=true foreign_committed=true ordinary_status=Some((0, Some(0), Some(0))) expected_preimage=Command(\"reviewed synthetic previous\") returned_observation=Absent ordinary_after=Absent own_failure=None own_mutated=true",
+    "transactedCompetitor": false,
+    "enableRequested": false,
+    "freshnessCallbackPhase": 2,
+    "totalFreshnessCalls": 4,
+    "competitorAttempted": true,
+    "foreignCommittedFlag": true,
+    "foreignOrdinaryLstatus": {
+      "open": 0,
+      "set": 0,
+      "close": 0
+    },
+    "expectedPreimage": "reviewed synthetic previous",
+    "returnedObservation": "Absent",
+    "ordinaryAfterObservation": "Absent",
+    "ownFailure": null,
+    "ownMutated": true,
+    "finalRaw": {
+      "outputIndex": 3,
+      "originalLine": "TXR_SCRATCH_FINAL_RAW open=0 query=2 kind=0 reported_bytes=520 close=0 decoded=Absent",
+      "openLstatus": 0,
+      "queryLstatus": 2,
+      "reportedKind": 0,
+      "reportedBytes": 520,
+      "closeLstatus": 0,
+      "decoded": "Absent",
+      "interpretation": "Query2 is ERROR_FILE_NOT_FOUND; kind0/520 length are not successful returned value/type proof."
+    },
+    "strictAssertion": {
+      "source": "crates/fc-windows/src/system/autorun_tests.rs",
+      "candidateLine": 676,
+      "message": "stale preimage must not commit over the replacement",
+      "passed": false
+    }
+  },
+  "codeBindingInterpretation": {
+    "frozenProduction": "source-after-third/crates/fc-windows/src/system/autorun.rs",
+    "phase2SourceLines": [
+      359,
+      368
+    ],
+    "phase2Meaning": "Second freshness callback occurs after transaction-bound preimage read/compare, before staged delete. The trusted diagnostic callback injects an ordinary writer here.",
+    "settledResult": "Recorded foreign RegOpen/RegSet/RegClose all succeeded, then own apply returned no failure and mutated=true; two post-settlement observers report Absent. This is an actual lost-update counterexample to the proposed exact-preimage CAS guarantee.",
+    "notClaimed": [
+      "Not evidence of phase3 or bound-key-close-before-commit as root cause.",
+      "Not a tested transacted competitor or remaining enable/phase combinations; first false/phase2 case aborts the loop.",
+      "No general Windows TxR isolation/behavior proof beyond this owned synthetic interleaving.",
+      "No success from the prior211passing cases is used to waive the failed ordinary CAS assertion."
+    ]
+  },
+  "dispositionBoundary": "This report freezes the failed candidate and diagnostic facts only; root-reported source withdrawal is not independently executed or certified by this reviewer. Retain candidate/evidence for future design rather than presenting unqualified CAS as shipping.",
+  "reviewIssues": []
+}

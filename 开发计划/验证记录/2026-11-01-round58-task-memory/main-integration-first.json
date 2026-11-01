@@ -1,0 +1,83 @@
+{
+  "status": "PASS_EXACT_SOURCE_INTEGRATION_BUILD_AND_RUNTIME_NOT_RUN",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "sourceFreeze": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/implementation-freeze-first.json",
+    "sha256": "13a1caef80d20bfa475f80b069b93619d457be68d597fba88261eab8232099d5"
+  },
+  "mainRoot": "/workspace/共享/Eliora/未来教室计划",
+  "files": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "before": {
+        "bytes": 1485,
+        "sha256": "2b229d54cc06da8107a9344b3ec215efa6ffb00294881305b2303886f21abe43"
+      },
+      "after": {
+        "bytes": 1508,
+        "sha256": "546d4dcdea9d66c6aa2083f749815b19c4a7dc1382edb29829489ef496efe69a"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "before": {
+        "bytes": 815,
+        "sha256": "60cb98cb3b7992852f52964b91187f33ae22725c072be876b73b1c92f97e4700"
+      },
+      "after": {
+        "bytes": 845,
+        "sha256": "4963e6a462e1d9d3dd526e94ebf93d574fede686399aca5505cba49e5efe4919"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "before": {
+        "bytes": 21451,
+        "sha256": "078f80e3bc5b4176015bcc39618ea2c87a0bb284fd457bde8044bafd01a9612a"
+      },
+      "after": {
+        "bytes": 21100,
+        "sha256": "f81aa5fa6b1cac6a2777ae0d397264c9829ded85bdc1736b8ade0deadb871776"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser.rs",
+      "before": {
+        "bytes": 9516,
+        "sha256": "7bdc43fff3dba9f9e44ec79d7f3fc3c1deb3563997dc6ef951379d38df16fd32"
+      },
+      "after": {
+        "bytes": 9527,
+        "sha256": "3d6e0f39c3a5ec8f1217a89783f0b26af4083abad1dd3981868491c28cc88e5a"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "before": {
+        "bytes": 17804,
+        "sha256": "964a09a22272056b6a19f35ff4ae5b6286a637352a2dad638559ef50a0607016"
+      },
+      "after": {
+        "bytes": 17554,
+        "sha256": "2493638ceb2f5f7ea5921f40d753d95650355528b255b331a66ab0ba7b5c382f"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/com_task.rs",
+      "before": null,
+      "after": {
+        "bytes": 8902,
+        "sha256": "2d64fdb0b361bbfb596cabeda68e62ad8ae7f1e531dba087ecc2f72cd3b3380a"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/com_task/tests.rs",
+      "before": null,
+      "after": {
+        "bytes": 6156,
+        "sha256": "a60862c6927daed2f8bbe3bf108f243fd1280589e7ea47ecbda9ea1089085fb0"
+      }
+    }
+  ],
+  "scope": "Exact seven frozen R58 sources integrated; no compilation or Windows runtime implied; R57 scripts remain separate."
+}

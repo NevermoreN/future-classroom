@@ -1,0 +1,123 @@
+{
+  "status": "TEST_ONLY_DIAGNOSTIC_CANDIDATE_FROZEN_NOT_COMPILED_OR_RUN",
+  "worktree": "/tmp/fc-round56-transactional-autorun-worktree",
+  "file": "crates/fc-windows/src/system/autorun_tests.rs",
+  "before": {
+    "bytes": 29830,
+    "sha256": "1bf2caf3945c4b71e6607ed79396687a29d867a341f0688a1b9a11dcea197568"
+  },
+  "candidate": {
+    "path": "/tmp/fc-round56-transactional-autorun-worktree/crates/fc-windows/src/system/autorun_tests.rs",
+    "bytes": 32940,
+    "sha256": "200425fdc63f1babae06db93274f3101fc404732fe6c7523d054961cf36b0266"
+  },
+  "candidateCopy": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-first.candidate.rs",
+  "diff": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-first.diff",
+    "bytes": 5171,
+    "sha256": "c6938ea33c35176f1a568e2584f87f3dcae4d3d83cc83639868bbfd00de828e7"
+  },
+  "unchangedProductionFiles": [
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 19567,
+      "sha256": "0d53cf0b4eecaea585ba744298fd08e26b956474804db20e1f46812372338bd0"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_transaction.rs",
+      "bytes": 11831,
+      "sha256": "3fbccab38a4edc12517503111b0f241ecac800740e75f52fc7d3cc997808e0a7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260371,
+      "sha256": "765448626293a26398a79c88329703ea23e4659f250431bc6ef0cc4ad6bc029a"
+    }
+  ],
+  "mainR56TestFileUnchanged": true,
+  "preservedTestCount": 24,
+  "originalAssertionsAndPoisonBehaviorUnchanged": true,
+  "changes": [
+    "Move diagnostic visibility beforestale-write assertions while preserving them.",
+    "Record ordinary RegOpen/RegSet/RegClose actual LSTATUS from exactly existing calls; no additional API during activeTxn.",
+    "Log transacted/enabled/phase/freshcount/attempted/foreigncommitted/expectedpreimage/outcome.failure/mutated/returnedobservation/postsettlementordinaryobservation.",
+    "One bounded rawquery afterapplysettles and closes; report actualopen/query/type/bytecount/close+decodedREG_SZ, no rawarrays."
+  ],
+  "actualFailure": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.json",
+    "sha256": "95f7071684a42b2caea7b553d821fefd5df9c206130276055029255a9c33600e",
+    "summary": "test result: FAILED. 211 passed; 11 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.36s",
+    "noPrecedingPostAssertInterleavingTrace": true,
+    "inference": "Loop first case is ordinary disablephase2, so absenceofanypostassert trace strongly suggests this firstcase failed. Need newmetadatafor directconfirmation; doesnotestablishphase3/closebeforecommitcausality."
+  },
+  "primaryDocs": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeytransactedw",
+      "use": "Subsequentoperationsassociatedwithtransaction; remarknotcompletecross-processread-setCASproof."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-createtransaction",
+      "use": "IsolationLevel/IsolationFlags reservedzero; cannot upgradeisolation with inventedflags."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle",
+      "use": "Boundhandleclosurebeforecommitremainsrequired; do notremove it basedonunconfirmedphase3hypothesis."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/sysinfo/writing-and-deleting-registry-data",
+      "use": "Windowsstateskeywritecannotbelocked throughregistryAPI; securityattributesareseparate. Not a CAS guarantee."
+    }
+  ],
+  "nextEvidence": "Rootmaycompile onlythis test-onlycandidate withR58fixedsource and run exact ordinary_competing... in freshprocess first; retain failure and metadata. Transactedmatrix shouldrunin separatefreshprocess toavoidTEST_LOCKpoison masking it. Noassertweakening or productionfix justified yet.",
+  "productionConclusion": "Original CASprotectionassumption blockedbyrealcounterexample; R56cannotbequalifiedPASS or shipasprovenCAS. TxRatomicmutation!=provenvalidatedread-setCAS; exactfailurephase/outcome stillneedmetadata.",
+  "staticChecks": [
+    {
+      "argv": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "/tmp/fc-round56-transactional-autorun-worktree/crates/fc-windows/src/system/autorun_tests.rs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.027916906867176294,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-fmt-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-fmt-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.02742790710180998,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-diffcheck-first.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-interleaving-diagnostic-diffcheck-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "execution": {
+    "Cargo": false,
+    "Windows": false,
+    "mainMutation": false
+  }
+}

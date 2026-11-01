@@ -1,0 +1,13 @@
+{
+  "status": "PRESERVED_SELFTEST_FIXTURE_FAILURE",
+  "originalSource": {
+    "path": "expanded-validator-first-failed.py",
+    "bytes": 61491,
+    "sha256": "38bfae25b39b0b40634dd706afc69f58d2884c75a4877656c31f8ffa0f888169"
+  },
+  "originalExitCode": 1,
+  "failureCode": "SOURCE_LIMITS_CHANGED",
+  "cause": "Old existing small self-test triple still declared paths10000; production now correctly requires MAX_SOURCE_PATHS20000.",
+  "fix": "Only self-test fixture limit changed; production source/domain/byte guard untouched in this correction.",
+  "scope": "Synthetic host model failure; no actual CI/artifact/runtime audited."
+}

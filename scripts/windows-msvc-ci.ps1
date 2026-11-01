@@ -344,11 +344,12 @@ function Get-SourceInputDomain([string]$Relative) {
     return 'sha256_input'
 }
 function ConvertFrom-SourceGitTree([string]$Raw) {
+    # Fixed 20,000-path metadata inventory includes historical evidence; byte budgets stay unchanged.
     # Invoke-Logged also preserves the original prefix and fails on truncation.
     if ($Raw.Length -eq 0 -or $Utf8.GetByteCount($Raw) -gt $LogLimit -or
         $Raw[$Raw.Length - 1] -ne [char]0) { throw 'Git tree metadata empty, truncated or over bound.' }
-    $records = $Raw.Split([char[]]@([char]0), 10002, [StringSplitOptions]::None)
-    if ($records.Length - 1 -gt 10000) { throw 'Source file inventory exceeds bound.' }
+    $records = $Raw.Split([char[]]@([char]0), 20002, [StringSplitOptions]::None)
+    if ($records.Length - 1 -gt 20000) { throw 'Source file inventory exceeds bound.' }
     $entries = [Collections.Generic.List[object]]::new()
     $names = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     for ($number = 0; $number -lt $records.Length - 1; $number++) {
@@ -387,7 +388,7 @@ function Assert-NoHistoricalBuildReference([string]$Relative, [string]$Path) {
     }
 }
 function Hash-Inputs([string[]]$Paths, [object[]]$GitEntries) {
-    if ($Paths.Count -gt 10000 -or $GitEntries.Count -gt 10000 -or $Paths.Count -ne $GitEntries.Count) {
+    if ($Paths.Count -gt 20000 -or $GitEntries.Count -gt 20000 -or $Paths.Count -ne $GitEntries.Count) {
         throw 'Source file inventory count/tree mismatch.'
     }
     $tree = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
@@ -438,7 +439,7 @@ function New-SourceDomainSummary($Inventory, [string]$HeadSha, [string]$TreeId) 
         schema = 'future-classroom.ci-input-domains/v1'; source_sha = $HeadSha; root_tree_oid_sha1 = $TreeId
         tracked_file_count = $Inventory.sha256_files.Count + $Inventory.historical_checkout.Count
         explicit_build_reference_policy = 'Rust/Cargo input text may not explicitly reference the historical prefix, including Windows separators. This guard is not hermetic and cannot prove absence of arbitrary dynamic build.rs IO.'
-        limits = [ordered]@{ paths = 10000; per_file_bytes = 64MB; sha256_input_total_bytes = 256MB; metadata_output_bytes = $LogLimit }
+        limits = [ordered]@{ paths = 20000; per_file_bytes = 64MB; sha256_input_total_bytes = 256MB; metadata_output_bytes = $LogLimit }
         sha256_input = [ordered]@{
             manifest = 'input-sha256.json'; file_count = $Inventory.sha256_files.Count
             checkout_bytes_hashed = $Inventory.sha256_checkout_bytes
@@ -531,7 +532,7 @@ try {
     if ((Read-Output $clean).Length -ne 0) { throw 'Source is not a clean checkout.' }
     $tracked = Invoke-Logged 'source-input-paths' $git @('ls-files','-z')
     Require-Step $tracked
-    $paths = (Read-Output $tracked).Split([char[]]@([char]0), 10001, [StringSplitOptions]::RemoveEmptyEntries)
+    $paths = (Read-Output $tracked).Split([char[]]@([char]0), 20001, [StringSplitOptions]::RemoveEmptyEntries)
     $treeStep = Invoke-Logged 'source-git-tree-before' $git @('ls-tree','-r','-z','-l','--full-tree','HEAD')
     Require-Step $treeStep
     $gitEntries = ConvertFrom-SourceGitTree (Read-Output $treeStep)
@@ -698,7 +699,7 @@ try {
     if ((Read-Output $shaAfter).Trim() -ine $ExpectedSourceSha -or $env:GITHUB_SHA -ine $ExpectedSourceSha) { throw 'Build changed the exact checked-out/dispatch source SHA.' }
     $trackedAfter = Invoke-Logged 'source-input-paths-after' $git @('ls-files','-z')
     Require-Step $trackedAfter
-    $pathsAfter = (Read-Output $trackedAfter).Split([char[]]@([char]0), 10001, [StringSplitOptions]::RemoveEmptyEntries)
+    $pathsAfter = (Read-Output $trackedAfter).Split([char[]]@([char]0), 20001, [StringSplitOptions]::RemoveEmptyEntries)
     $treeAfterStep = Invoke-Logged 'source-git-tree-after' $git @('ls-tree','-r','-z','-l','--full-tree','HEAD')
     Require-Step $treeAfterStep
     $gitEntriesAfter = ConvertFrom-SourceGitTree (Read-Output $treeAfterStep)

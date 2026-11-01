@@ -1,0 +1,526 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_NARROW_READONLY_POLICY_AND_FOUR_ORIGINAL_FLOWS",
+  "scope": "Current main desktop/public lesson code and current specifications, plus retained four R55 MSVC hidden-native original flows. Read-only: no source edits/new tests/Windows/Git history or objdump reruns.",
+  "operationOriginal": {
+    "path": "/tmp/fc-round55-ci-evidence/public-visual-operation-first.json",
+    "bytes": 5812,
+    "sha256": "b1c0985901810e7ca7989929841b388f10571300c81b3ea5dd3572070d6c6770"
+  },
+  "runnerOriginalBinding": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "bytes": 59676,
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14"
+  },
+  "flows": [
+    {
+      "label": "modern-msvc-public-native-first",
+      "original": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-msvc-public-native-first.json",
+        "bytes": 8522,
+        "sha256": "0d5847b8cfa8ab79ea98d49e89e036745055aabec1c503a2abb0fe05815f1887"
+      },
+      "originalArtifactAudit": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-original-independent-first.json",
+        "bytes": 497415,
+        "sha256": "d6ea3001b7495ad5ffecec0fde31aedffe3f4d4f389e9fcb14dee0e3e0991f3a"
+      },
+      "rawLogs": [
+        {
+          "path": "/tmp/fc-round55-ci-evidence/modern-msvc-public-native-first.stdout.log",
+          "bytes": 93,
+          "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+        },
+        {
+          "path": "/tmp/fc-round55-ci-evidence/modern-msvc-public-native-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "normalExecutableSha256": "7aea98d5b64df96b32e16a1799af2e753e069a351f1205a1d25c87dd41b0b034",
+      "normalExecutableBytes": 10515456,
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualCommandExit": true,
+      "commandExitCode": 0,
+      "nativeExitCode": 0,
+      "stepCount": 20,
+      "orderedStepNames": [
+        "setup-administrator-fixture",
+        "create-bound-class-and-subjects",
+        "seed-current-lesson",
+        "management-lock-removes-session",
+        "hidden-desktop-rendered",
+        "native-public-button-without-session",
+        "public-catalog-only",
+        "cancel-without-change",
+        "new-native-public-entry",
+        "unassigned-review-without-write",
+        "local-account-lock-keeps-public-flow",
+        "explicit-public-change-closes",
+        "changed-desktop-rendered",
+        "old-scene-entry-rejected",
+        "new-native-restore-entry",
+        "explicit-public-restore-closes",
+        "restored-desktop-rendered",
+        "public-close-hides-chooser",
+        "physical-shared-workers-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=2436",
+      "elapsedMs": 2436,
+      "platform": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "reportedScope": "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+    },
+    {
+      "label": "modern-msvc-visual-native-first",
+      "original": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-msvc-visual-native-first.json",
+        "bytes": 9897,
+        "sha256": "f0daa2fd72795b0099fd58369991589d8755b2d19e8e096d3eb349ce7054d183"
+      },
+      "originalArtifactAudit": {
+        "path": "/tmp/fc-round55-ci-evidence/modern-original-independent-first.json",
+        "bytes": 497415,
+        "sha256": "d6ea3001b7495ad5ffecec0fde31aedffe3f4d4f389e9fcb14dee0e3e0991f3a"
+      },
+      "rawLogs": [
+        {
+          "path": "/tmp/fc-round55-ci-evidence/modern-msvc-visual-native-first.stdout.log",
+          "bytes": 93,
+          "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+        },
+        {
+          "path": "/tmp/fc-round55-ci-evidence/modern-msvc-visual-native-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "normalExecutableSha256": "7aea98d5b64df96b32e16a1799af2e753e069a351f1205a1d25c87dd41b0b034",
+      "normalExecutableBytes": 10515456,
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualCommandExit": true,
+      "commandExitCode": 0,
+      "nativeExitCode": 0,
+      "stepCount": 22,
+      "orderedStepNames": [
+        "setup-global-admin",
+        "create-subject",
+        "open-joint-display",
+        "loaded-original-rgb",
+        "invalid-rgb-no-write",
+        "native-joint-draft-preview",
+        "lock-keeps-partial-draft",
+        "relogin-restores-draft",
+        "cancel-review-no-write",
+        "cancel-reloads-both",
+        "native-joint-save",
+        "readback-both-saved",
+        "native-palette-draft",
+        "rename-subject-preserves-color",
+        "stale-palette-save-rejected",
+        "cancel-reload-after-conflict",
+        "first-app-physical-shutdown",
+        "second-app-real-reopen",
+        "relogin-reopened-deployment",
+        "reopened-joint-state",
+        "second-app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=824",
+      "elapsedMs": 824,
+      "platform": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "reportedScope": "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
+    },
+    {
+      "label": "win7-msvc-public-native-first",
+      "original": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-msvc-public-native-first.json",
+        "bytes": 8523,
+        "sha256": "73effe907a6ab298ee5df2ba7802dbf591d990afdbb15761cbf9e32a18bbffb9"
+      },
+      "originalArtifactAudit": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-original-independent-first.json",
+        "bytes": 478515,
+        "sha256": "891d22904d0daa884125c51b333c57ed0e8639ac5a7c46ac69ba14aa7bde3e00"
+      },
+      "rawLogs": [
+        {
+          "path": "/tmp/fc-round55-ci-evidence/win7-msvc-public-native-first.stdout.log",
+          "bytes": 93,
+          "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+        },
+        {
+          "path": "/tmp/fc-round55-ci-evidence/win7-msvc-public-native-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "normalExecutableSha256": "38d30fd9f661aee5740ac876dddf262a6f538a19cbfc0396568e1d47c07b7656",
+      "normalExecutableBytes": 10695168,
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualCommandExit": true,
+      "commandExitCode": 0,
+      "nativeExitCode": 0,
+      "stepCount": 20,
+      "orderedStepNames": [
+        "setup-administrator-fixture",
+        "create-bound-class-and-subjects",
+        "seed-current-lesson",
+        "management-lock-removes-session",
+        "hidden-desktop-rendered",
+        "native-public-button-without-session",
+        "public-catalog-only",
+        "cancel-without-change",
+        "new-native-public-entry",
+        "unassigned-review-without-write",
+        "local-account-lock-keeps-public-flow",
+        "explicit-public-change-closes",
+        "changed-desktop-rendered",
+        "old-scene-entry-rejected",
+        "new-native-restore-entry",
+        "explicit-public-restore-closes",
+        "restored-desktop-rendered",
+        "public-close-hides-chooser",
+        "physical-shared-workers-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "PUBLIC_DESKTOP_NATIVE_PASS steps=20 shared_workers=2 public_session=NONE database_reopen=NOT_EXERCISED change_restore=PASS old_scene=REJECTED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=2447",
+      "elapsedMs": 2447,
+      "platform": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "reportedScope": "Synthetic protected deployment, actual hidden desktop button/native business choices/shared workers/SQLite public lesson change and restore with no account session, cancellation/old scene rejection/physical shutdown; independent process reopen NOT_EXERCISED, visible desktop/OS foreground/Seewo and three-system acceptance NOT_RUN"
+    },
+    {
+      "label": "win7-msvc-visual-native-first",
+      "original": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-msvc-visual-native-first.json",
+        "bytes": 9901,
+        "sha256": "e93dc45d0944e64f4acb9facd653271e06dd1dae5f0fa33dce73b81f0aa1b071"
+      },
+      "originalArtifactAudit": {
+        "path": "/tmp/fc-round55-ci-evidence/win7-original-independent-first.json",
+        "bytes": 478515,
+        "sha256": "891d22904d0daa884125c51b333c57ed0e8639ac5a7c46ac69ba14aa7bde3e00"
+      },
+      "rawLogs": [
+        {
+          "path": "/tmp/fc-round55-ci-evidence/win7-msvc-visual-native-first.stdout.log",
+          "bytes": 93,
+          "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+        },
+        {
+          "path": "/tmp/fc-round55-ci-evidence/win7-msvc-visual-native-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+      "normalExecutableSha256": "38d30fd9f661aee5740ac876dddf262a6f538a19cbfc0396568e1d47c07b7656",
+      "normalExecutableBytes": 10695168,
+      "status": "PASS",
+      "cleanup": "PASS",
+      "actualCommandExit": true,
+      "commandExitCode": 0,
+      "nativeExitCode": 0,
+      "stepCount": 22,
+      "orderedStepNames": [
+        "setup-global-admin",
+        "create-subject",
+        "open-joint-display",
+        "loaded-original-rgb",
+        "invalid-rgb-no-write",
+        "native-joint-draft-preview",
+        "lock-keeps-partial-draft",
+        "relogin-restores-draft",
+        "cancel-review-no-write",
+        "cancel-reloads-both",
+        "native-joint-save",
+        "readback-both-saved",
+        "native-palette-draft",
+        "rename-subject-preserves-color",
+        "stale-palette-save-rejected",
+        "cancel-reload-after-conflict",
+        "first-app-physical-shutdown",
+        "second-app-real-reopen",
+        "relogin-reopened-deployment",
+        "reopened-joint-state",
+        "second-app-physical-shutdown",
+        "isolated-deployment-cleanup"
+      ],
+      "exactFooter": "SUBJECT_VISUAL_NATIVE_PASS steps=22 shared_workers=2 real_sqlite_reopen=PASS joint_save=PASS stale_rejected=PASS synthetic_d2d=PASS colour_dialog=NOT_OPENED foreground=UNTOUCHED isolated_cleanup=PASS elapsed_ms=857",
+      "elapsedMs": 857,
+      "platform": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "reportedScope": "Synthetic protected deployment, actual hidden native controls/original shared workers/SQLite joint palette-display save, cancel, lock/nonsecret draft, stale palette rejection, rename colour preservation and independent app reopen; real synthetic hidden D2D only, visible colour dialog/foreground/Seewo and three-system acceptance NOT_RUN"
+    }
+  ],
+  "currentCodeAndPolicyReview": {
+    "blockers": [],
+    "findings": [
+      "No substantive contradiction found: actual public desktop change/restore has no application account/session authentication requirement. Internal scene/CAS/health/OS availability/cancellation guards are business/lifecycle checks, not user identity verification.",
+      "Flat and tree passive Clock/Date/Schedule/DateCountdown/Recess cards have no input strips/hit targets; queued paging is discarded; only separate lesson button and explicitly permitted content/material actions remain interactive.",
+      "Existing administrator lesson APIs remain separately authenticated management APIs. README105/module07:172/module08:155 admin-only wording is explicitly retained seventh-round history, not current desktop rules.",
+      "Hidden synthetic flows establish finite actorless change/restore and input regressions; no fresh visible Seewo/touch/OS-event latency acceptance inferred."
+    ],
+    "references": [
+      {
+        "path": "crates/fc-presentation/src/scene.rs",
+        "line": 636,
+        "evidence": "can_change depends on current lesson and clock rollback, not user/session"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "line": 850,
+        "evidence": "flat input prioritizes separate LessonControl then rejects passive facts"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "line": 1324,
+        "evidence": "read_only_classroom rejects Clock/Date/Schedule/DateCountdown/Recess except separate LessonControl"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "line": 1338,
+        "evidence": "route_action drops queued passive-card actions"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop.rs",
+        "line": 2141,
+        "evidence": "WM_NCHITTEST returns HTTRANSPARENT outside exact allowed hit targets"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/tree.rs",
+        "line": 211,
+        "evidence": "tree cards apply same passive input exclusion"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/tree.rs",
+        "line": 1092,
+        "evidence": "tree queued page action routes through same route_action"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/desktop_controller.rs",
+        "line": 590,
+        "evidence": "stamp captured only from actual scene and matching current facts"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "line": 3222,
+        "evidence": "public entry opens flow directly, with no account/session login gate"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "line": 2132,
+        "evidence": "public editor branch precedes authenticated navigation"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application.rs",
+        "line": 923,
+        "evidence": "same shared Work worker, execution scope; public backend APIs accept guard not SessionLease"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+        "line": 342,
+        "evidence": "public service checks same-instance flow and health, not application account authorization"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+        "line": 363,
+        "evidence": "actorless desktop request carries business action and exact captured binding"
+      },
+      {
+        "path": "crates/fc-storage/src/business/desktop_lesson.rs",
+        "line": 1,
+        "evidence": "actorless writer uses exact memory capability, metadata/CAS and deadline, no fabricated admin actor"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+        "line": 55,
+        "evidence": "form accepts only subject/teacher target data, no identity/version authority fields"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+        "line": 204,
+        "evidence": "existing real-writer regression: no login/local lock independence, LocalDesktop origin, restore"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/public_inputs_tests.rs",
+        "line": 8,
+        "evidence": "existing hidden native regression: passive flat cards no input or queued page route; explicit lesson button works"
+      },
+      {
+        "path": "crates/fc-windows/src/desktop/tree.rs",
+        "line": 1824,
+        "evidence": "existing hidden native tree regression: five passive kinds no targets; separate lesson control works"
+      },
+      {
+        "path": "crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+        "line": 88,
+        "evidence": "existing UI tests reject account navigation/arbitrary identity metadata"
+      },
+      {
+        "path": "AGENTS.md",
+        "line": 6,
+        "evidence": "current explicit public-desktop/passive-card policy"
+      },
+      {
+        "path": "开发计划/未来教室项目完整开发计划.md",
+        "line": 90,
+        "evidence": "current roles matrix gives all users and guests public desktop actions without authentication"
+      },
+      {
+        "path": "开发计划/模块/01-运行窗口与绘制.md",
+        "line": 120,
+        "evidence": "pure display body/title/background not clickable, no settings jump"
+      },
+      {
+        "path": "开发计划/模块/07-多科目联动与临时课堂.md",
+        "line": 112,
+        "evidence": "current public lesson contract explicitly no login/password/identity checks"
+      },
+      {
+        "path": "开发计划/模块/08-三级权限与教师文件夹打开.md",
+        "line": 79,
+        "evidence": "current rule public change/restore; management and Web remain distinct"
+      },
+      {
+        "path": "README.md",
+        "line": 103,
+        "evidence": "historical admin-only statement at105 explicitly covered by R36 public rule"
+      },
+      {
+        "path": "开发计划/模块/07-多科目联动与临时课堂.md",
+        "line": 170,
+        "evidence": "historical seventh-round admin-only line172 explicitly labelled overridden"
+      },
+      {
+        "path": "开发计划/模块/08-三级权限与教师文件夹打开.md",
+        "line": 153,
+        "evidence": "historical seventh-round admin-only line155 explicitly labelled overridden"
+      }
+    ],
+    "sourceFacts": [
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/AGENTS.md",
+        "bytes": 1514,
+        "sha256": "17c6afd464d32a6636aab0960479a4457e3ece4a073d3f9334a3ffadf80a21af"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/README.md",
+        "bytes": 16932,
+        "sha256": "b847d92158090dc27345dae72ea8f0e8afef4ee7b88cf639482d532b9eb7ac52"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application.rs",
+        "bytes": 260347,
+        "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/desktop_controller.rs",
+        "bytes": 60894,
+        "sha256": "e7b78e9557f40c791268d2f4b0007179948b38b954bde52e0cd39e0f030c353d"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/public_lesson_editor.rs",
+        "bytes": 10965,
+        "sha256": "b683ce934340c04fa54f45501f8b0a4e992e117f7f19e353b325ca95aa496809"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/application/public_lesson_editor/tests.rs",
+        "bytes": 6307,
+        "sha256": "49fcd0928ada2aadc37eecd6a186cdfd0dc15cdb9c42b39e29b479e33f0f647b"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/backend/desktop_lesson.rs",
+        "bytes": 14586,
+        "sha256": "b5f820866b5edef66d890c6ff1c5aacafe6eb995e00d568279a136be0c3d57e2"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-bootstrap/src/backend/desktop_lesson_tests.rs",
+        "bytes": 23902,
+        "sha256": "7bee81b2b41d841b0ab18a11aebc4eca59e325eb93890d06ef9a6540ace45629"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-presentation/src/scene.rs",
+        "bytes": 31921,
+        "sha256": "0cd07f148ccce95aced264f5be08d76ed0848aed50f9347db3431d8648cf1b84"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-storage/src/business/desktop_lesson.rs",
+        "bytes": 20009,
+        "sha256": "44a5b1b64f18094f4d60b17d9fa200c72020a75ac63f328eb61db904d130b5ec"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/desktop.rs",
+        "bytes": 122219,
+        "sha256": "7766d77c5d9c99cf30f64fa8f3ef99f888210d6c08c81ab274fbd07f75759667"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/desktop/public_inputs_tests.rs",
+        "bytes": 4499,
+        "sha256": "4617d71ac4ee1910bdc2bb3daef16ac4a5aa335692c59e885539832e83b3d1bc"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/crates/fc-windows/src/desktop/tree.rs",
+        "bytes": 72080,
+        "sha256": "1b78d293546f3cf289a3d6ead8c9e21c11c3b85db3b25be6f817164f63087c1c"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/未来教室项目完整开发计划.md",
+        "bytes": 36850,
+        "sha256": "1b688820605e90ac3793f309167a16fe172b6417841b52492c4f22253d7c2a94"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/模块/01-运行窗口与绘制.md",
+        "bytes": 15026,
+        "sha256": "a555e11d5930d9906c24c45a4f6a96abaebd2f4793a70618b03d430df0cbd33d"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/模块/07-多科目联动与临时课堂.md",
+        "bytes": 22528,
+        "sha256": "aa22e272748dc102cb9a1fd7c1ac64a1f996220104371e306453eb65b4e1b065"
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/开发计划/模块/08-三级权限与教师文件夹打开.md",
+        "bytes": 22878,
+        "sha256": "39df708434a50ca71617f57cec677b646fcdd96610dbe8a8a38c5a59cce2f096"
+      }
+    ]
+  },
+  "limitations": [
+    "All four actual flows used authorized Win11x64/WOW64; Win7-target is not actual Win7OS evidence.",
+    "Public flow footer explicitly database_reopen=NOT_EXERCISED; visual flow separately proves real SQLite reopen.",
+    "No visible desktop/Seewo/PPT/touch/DPI or true foreground/session instant revocation guarantee.",
+    "Existing strict firstTCP5s and production-listener gates unchanged.",
+    "This review does not broaden public desktop business operations into management or Web anonymous authorization."
+  ],
+  "issues": []
+}

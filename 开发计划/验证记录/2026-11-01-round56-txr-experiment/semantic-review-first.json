@@ -1,0 +1,59 @@
+{
+  "status": "STATIC_SOURCE_CANDIDATE_NO_COMPILE_OR_WINDOWS_EXECUTION",
+  "sourceScope": [
+    "crates/fc-windows/src/system/autorun.rs",
+    "crates/fc-windows/src/system/autorun_tests.rs",
+    "crates/fc-windows/src/system/autorun_transaction.rs",
+    "crates/fc-bootstrap/src/application.rs"
+  ],
+  "portDomainCargoUnchanged": true,
+  "oldTestsRetained": [
+    "quoted_absolute_command_and_isolated_registry_roundtrip",
+    "generated_scope_can_open_new_worker_without_moving_a_registry_handle",
+    "production_scope_cleanup_is_refused",
+    "native_wrong_type_and_oversize_values_are_opaque_and_preserved",
+    "registry_decoder_rejects_exact_untrusted_string_bytes_without_normalizing",
+    "moved_executable_requires_reviewed_exact_preimage",
+    "cancellation_before_write_preserves_observed_value",
+    "cancellation_after_write_reports_actual_state_without_rollback",
+    "external_change_before_compare_is_not_overwritten",
+    "external_change_after_write_reports_mismatch_without_compensating_write",
+    "command_validation_rejects_ambiguous_and_overlength_targets",
+    "access_denial_has_specific_failure_without_leaking_os_error_text",
+    "unavailable_preimage_never_requests_a_write_guard",
+    "explicit_scratch_cleanup_is_idempotent_after_workers_return",
+    "applying_fixed_project_value_preserves_other_values_in_the_same_key"
+  ],
+  "newTests": [
+    "cancellation_after_staging_before_commit_rolls_back_enable_and_disable",
+    "original_adapter_deadline_is_not_restarted_by_apply_or_transaction",
+    "ordinary_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+    "transacted_competing_replacements_cannot_be_stale_overwritten_at_either_window",
+    "transacted_staging_never_uses_the_ordinary_observer_before_commit",
+    "failed_bound_key_close_retains_exact_owner_and_permanently_blocks_replacement",
+    "missing_scratch_key_disable_is_noop_and_enable_creates_only_owned_leaf"
+  ],
+  "testCount": 22,
+  "runtimeContract": [
+    "RunScope::open_until(Instant) stores original worker deadline; application Work::Autostart passes context.deadline(). Convenience open captures finite40s once.",
+    "KTM timeout=floor(originalremainingms), reject<1ms, clamp excludesINFINITE. No syscall hardpreemption claim.",
+    "Single native permit covers ordinary observation and transaction; busy/faulted observation does not make a native query.",
+    "One transacted HKEY for exact bounded preimage and staged same-value set/delete. RegCloseKey checked before finalfresh then nativeCommit.",
+    "Normal observed readback only after successful closure of original tx/HKEY; observer HKEY close checked too.",
+    "ConfirmedCommitted allows mutated true; Aborted does not. Undetermined is Unavailable(Interrupted), failureInterrupted, mutatedfalse; existingstorage NeedsReconcile handles unknown.",
+    "Fixed one retained native owner slot with exact raw handle identities and permanent Faulted. No production retry/reset/UnsafeSend or new admission while quarantined; logical job completion is not physical clearance.",
+    "Scope scratch cleanup remains explicit after original worker has actually returned; no native or SQL worker/thread added.",
+    "No ordinary write fallback or blindretry; postcommit cancellation cannot compensate a completed write."
+  ],
+  "testBoundaries": [
+    "Two existing tests move callback fromthird tofourth to keep true postcommit cancellation/externalchange semantics.",
+    "Native ordinary/transacted competitor cases execute only generated scratch keys at phasesafterpreimage/beforecommit; assert committed foreign replacement is not overwritten, without assuming specific errorcode/winner.",
+    "Closefailure branch uses test-only withheld RegCloseKey on realowned handles in isolated testchild, then explicit actual negative cleanup; production Faulted is never reset. This is faultinjection, not an observed OS close failure.",
+    "Registry/KTM behavior, conflict semantics and new tests are not yet compiled or executed. A counterexample rejects the candidate rather than relaxing the invariant."
+  ],
+  "remainingGates": [
+    "No universal serializableCAS claim; concurrent TxR readsets not fullyspecified by cited primary pages.",
+    "Not one transaction withSQLite intent orMSI; installer identity and full-maintenance owner stillunimplemented.",
+    "Win7/Win10/Win11 compatibility and real scratch races require separate actual execution."
+  ]
+}

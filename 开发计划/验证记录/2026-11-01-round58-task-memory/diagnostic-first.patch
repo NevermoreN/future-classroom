@@ -1,0 +1,97 @@
+--- a/crates/fc-windows/src/com_task/tests.rs
++++ b/crates/fc-windows/src/com_task/tests.rs
+@@ -97,7 +97,93 @@
+ 
+ #[test]
+ fn task_memory_real_wow64_path_uses_the_matching_system_directory() {
+-    allocator().unwrap();
++    // Diagnostic observations only: borrow the already statically imported
++    // Ole32. UNCHANGED_REFCOUNT does not PIN, load, or release a module. The
++    // original allocator below is still the only production OnceLock/PIN path.
++    let mut diagnostic_system = SYSTEM_INFO::default();
++    let mut diagnostic_wow64 = BOOL::default();
++    unsafe {
++        GetNativeSystemInfo(&mut diagnostic_system);
++        IsWow64Process(GetCurrentProcess(), &mut diagnostic_wow64).unwrap();
++    }
++    let diagnostic_architecture =
++        unsafe { diagnostic_system.Anonymous.Anonymous.wProcessorArchitecture };
++    let mut diagnostic_directory = [0u16; PATH_UNITS];
++    let diagnostic_directory_len = unsafe {
++        if diagnostic_wow64.as_bool() {
++            GetSystemWow64DirectoryW(Some(&mut diagnostic_directory))
++        } else {
++            GetSystemDirectoryW(Some(&mut diagnostic_directory))
++        }
++    } as usize;
++    let diagnostic_directory_error = if diagnostic_directory_len == 0 {
++        Some(unsafe { windows::Win32::Foundation::GetLastError() }.0)
++    } else {
++        None
++    };
++    eprintln!(
++        "R58_TASK_MEMORY_DIAG directory wow64={} native_arch={} raw_len={} last_error_if_zero={:?} utf16={:?}",
++        diagnostic_wow64.as_bool(), diagnostic_architecture.0,
++        diagnostic_directory_len, diagnostic_directory_error, diagnostic_directory
++    );
++    let diagnostic_expected = system_ole32_path();
++    eprintln!(
++        "R58_TASK_MEMORY_DIAG expected result={:?}",
++        diagnostic_expected
++            .as_ref()
++            .map(|path| (path.len, &path.units[..=path.len]))
++            .map_err(|error| error.code().0)
++    );
++    if let Ok(expected) = diagnostic_expected.as_ref() {
++        let mut diagnostic_module = HMODULE::default();
++        let diagnostic_lookup = unsafe {
++            GetModuleHandleExW(
++                GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++                expected.as_pcwstr(),
++                &mut diagnostic_module,
++            )
++        };
++        eprintln!(
++            "R58_TASK_MEMORY_DIAG lookup flags=UNCHANGED_REFCOUNT result={:?} module_invalid={}",
++            diagnostic_lookup
++                .as_ref()
++                .map(|_| ())
++                .map_err(|error| error.code().0),
++            diagnostic_module.is_invalid()
++        );
++        if diagnostic_lookup.is_ok() {
++            let mut diagnostic_actual = [0u16; PATH_UNITS];
++            let diagnostic_actual_len =
++                unsafe { GetModuleFileNameW(Some(diagnostic_module), &mut diagnostic_actual) }
++                    as usize;
++            let diagnostic_actual_error =
++                if diagnostic_actual_len == 0 || diagnostic_actual_len >= PATH_UNITS {
++                    Some(unsafe { windows::Win32::Foundation::GetLastError() }.0)
++                } else {
++                    None
++                };
++            let diagnostic_actual_slice =
++                &diagnostic_actual[..diagnostic_actual_len.min(PATH_UNITS)];
++            let diagnostic_compare =
++                unsafe { CompareStringOrdinal(expected.as_slice(), diagnostic_actual_slice, true) };
++            eprintln!(
++                "R58_TASK_MEMORY_DIAG actual raw_len={} terminated={} interior_nul={} last_error_if_failed_or_full={:?} ordinal_result={} utf16={:?}",
++                diagnostic_actual_len,
++                diagnostic_actual_len < PATH_UNITS && diagnostic_actual[diagnostic_actual_len] == 0,
++                diagnostic_actual_slice.contains(&0), diagnostic_actual_error,
++                diagnostic_compare.0, diagnostic_actual
++            );
++        }
++    }
++    let diagnostic_allocator = allocator();
++    eprintln!(
++        "R58_TASK_MEMORY_DIAG production_allocator result={:?}",
++        diagnostic_allocator
++            .as_ref()
++            .map(|_| ())
++            .map_err(|error| error.code().0)
++    );
++    diagnostic_allocator.unwrap();
+     let expected = system_ole32_path().unwrap();
+     let module = current_module();
+     let actual = loaded_path(module).unwrap();

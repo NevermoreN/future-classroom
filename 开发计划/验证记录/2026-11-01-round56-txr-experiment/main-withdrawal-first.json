@@ -1,0 +1,49 @@
+{
+  "status": "UNQUALIFIED_R56_SOURCE_WITHDRAWN_FROM_MAIN_EXACT_BASE_RESTORED",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "reason": "Actual Win11 phase2 disable counterexample: ordinary replacement open/set/close succeeds, candidate commit reports success and deletes the newer replacement. Read-before-write TxR candidate does not satisfy strict compare-delete. No failing assertion removed or relaxed.",
+  "scope": "Only four owned R56 paths restored/deleted; R58 and R57 stay in main. Candidate immutable snapshot and original failures remain for research/archival; this is not project completion or proof the legacy plain implementation is atomic.",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "candidate": {
+        "bytes": 19567,
+        "sha256": "0d53cf0b4eecaea585ba744298fd08e26b956474804db20e1f46812372338bd0"
+      },
+      "restoredBase": {
+        "bytes": 14491,
+        "sha256": "36aa0a7d6efea53a3da00e97c6a5dd6d46795dff5f38b96f7dff3e6a08af11ca"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_tests.rs",
+      "candidate": {
+        "bytes": 32940,
+        "sha256": "200425fdc63f1babae06db93274f3101fc404732fe6c7523d054961cf36b0266"
+      },
+      "restoredBase": {
+        "bytes": 11794,
+        "sha256": "e1d9443f560dfc8fda6f8e8c4c6319d9037c7184fc7343ed2f3fa8a24ce5bb70"
+      }
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_transaction.rs",
+      "candidate": {
+        "bytes": 11831,
+        "sha256": "3fbccab38a4edc12517503111b0f241ecac800740e75f52fc7d3cc997808e0a7"
+      },
+      "restoredBase": null
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "candidate": {
+        "bytes": 260371,
+        "sha256": "765448626293a26398a79c88329703ea23e4659f250431bc6ef0cc4ad6bc029a"
+      },
+      "restoredBase": {
+        "bytes": 260347,
+        "sha256": "9924f860568ef6adf521411caa01a5331674b6deccdfc027963b7b9fe4794671"
+      }
+    }
+  ]
+}

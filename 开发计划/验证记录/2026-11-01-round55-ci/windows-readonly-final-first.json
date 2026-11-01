@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fresh read-only Windows inventory; no runtime/browser/test or cleanup mutation performed.",
+  "observedAtUtc": "2026-11-01T02:50:04.762553+00:00",
+  "contract": "No upload, registry/task/service/trust/file mutation, private-key read, browser interaction or process termination. Project activity is recorded only.",
+  "baseline": {
+    "path": "开发计划/验证记录/2026-11-01-round54-win7-loader/windows-readonly-final-first.json",
+    "sha256": "a5795a956800502696f97f5cd8cce0fcae48f1b87e1731fadef0f12140ab339e"
+  },
+  "auditSource": {
+    "path": "/tmp/fc-round55-ci-evidence/audit-windows-readonly.py",
+    "sha256": "3228ee6bc3f0d52cd0677b7b3e4803a28418e76a1a75c33c254f37c35c2ccf3f"
+  },
+  "remoteAdapterSource": {
+    "path": "/workspace/共享/Eliora/未来教室计划/scripts/windows-probe.py",
+    "sha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+    "scope": "Unmodified Remote SSH options and exact preamble; raw subprocess is captured here because Remote.powershell otherwise discards original stderr."
+  },
+  "powershell": {
+    "script": "\nfunction Read-ProjectRunSnapshot {\n\n$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){\n $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;\n try{$key=$base.OpenSubKey('Software\\Microsoft\\Windows\\CurrentVersion\\Run',$false);\n  $present=$false;$kind=$null;$digest=$null;$length=0;\n  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;\n   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);\n    if($value-is [byte[]]){$bytes=$value}else{\n     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}\n     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};\n     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)\n    };\n    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n   }\n  };\n  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}\n }finally{if($key){$key.Dispose()};$base.Dispose()}\n};@{views=$views}|ConvertTo-Json -Depth 5 -Compress\n\n}\n$runSnapshot = Read-ProjectRunSnapshot | ConvertFrom-Json;\n$dirs = @(Get-ChildItem -LiteralPath $env:TEMP -Directory -Force |\n Where-Object {$_.Name -like 'FutureClassroom*'} |\n Sort-Object Name | Select-Object -ExpandProperty Name);\n$processes = @(Get-CimInstance Win32_Process |\n Where-Object {\n  ($_.Name -like 'FutureClassroom*') -or\n  ($_.Name -match '^fc[-_]bootstrap(?:[.-].*)?\\.exe$') -or\n  ($_.ExecutablePath -and $_.ExecutablePath -match '(?:^|[\\\\/])FutureClassroom[^\\\\/]*(?:[\\\\/]|$)')\n } | Sort-Object ProcessId | ForEach-Object {\n  @{name=$_.Name;pid=$_.ProcessId;executablePath=$_.ExecutablePath}\n });\n$tasks = @(Get-ScheduledTask | Where-Object {$_.TaskName -like 'FutureClassroom*'} |\n Sort-Object TaskPath,TaskName | ForEach-Object {\n  @{name=$_.TaskName;path=$_.TaskPath;state=$_.State.ToString()}\n });\n$os = Get-CimInstance Win32_OperatingSystem;\n@{\n os=$os.Caption;build=$os.BuildNumber;version=$os.Version;osArchitecture=$os.OSArchitecture;\n sshd=(Get-Service sshd).Status.ToString();\n tempDirectory=$env:TEMP;scratchDirectories=$dirs;ownedProcesses=$processes;ownedTasks=$tasks;\n projectRunReadOnlySnapshot=$runSnapshot;\n sshPublicAuthorizationSha256=(Get-FileHash -LiteralPath \"$env:ProgramData\\ssh\\administrators_authorized_keys\" -Algorithm SHA256).Hash.ToLowerInvariant()\n} | ConvertTo-Json -Depth 10 -Compress\n",
+    "preamble": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;",
+    "fullSource": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false);$OutputEncoding=[Console]::OutputEncoding;\nfunction Read-ProjectRunSnapshot {\n\n$views=@();foreach($view in @([Microsoft.Win32.RegistryView]::Registry32,[Microsoft.Win32.RegistryView]::Registry64)){\n $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,$view);$key=$null;\n try{$key=$base.OpenSubKey('Software\\Microsoft\\Windows\\CurrentVersion\\Run',$false);\n  $present=$false;$kind=$null;$digest=$null;$length=0;\n  if($key){$present=@($key.GetValueNames()|Where-Object{[String]::Equals($_,'FutureClassroom',[StringComparison]::OrdinalIgnoreCase)}).Count -ne 0;\n   if($present){$kind=$key.GetValueKind('FutureClassroom').ToString();$value=$key.GetValue('FutureClassroom',$null,[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames);\n    if($value-is [byte[]]){$bytes=$value}else{\n     if($value-is [string]){$encoded=$value}elseif($value-is [string[]]){$encoded=ConvertTo-Json -InputObject $value -Compress}\n     elseif($value-is [int] -or $value-is [long]){$encoded=$value.ToString([Globalization.CultureInfo]::InvariantCulture)}else{throw 'unsupported project Run value for read-only audit'};\n     $bytes=[Text.Encoding]::UTF8.GetBytes($encoded)\n    };\n    $length=$bytes.Length;$sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}\n   }\n  };\n  $views+=@{view=$view.ToString();keyPresent=($null -ne $key);valuePresent=$present;kind=$kind;encodedBytes=$length;sha256=$digest}\n }finally{if($key){$key.Dispose()};$base.Dispose()}\n};@{views=$views}|ConvertTo-Json -Depth 5 -Compress\n\n}\n$runSnapshot = Read-ProjectRunSnapshot | ConvertFrom-Json;\n$dirs = @(Get-ChildItem -LiteralPath $env:TEMP -Directory -Force |\n Where-Object {$_.Name -like 'FutureClassroom*'} |\n Sort-Object Name | Select-Object -ExpandProperty Name);\n$processes = @(Get-CimInstance Win32_Process |\n Where-Object {\n  ($_.Name -like 'FutureClassroom*') -or\n  ($_.Name -match '^fc[-_]bootstrap(?:[.-].*)?\\.exe$') -or\n  ($_.ExecutablePath -and $_.ExecutablePath -match '(?:^|[\\\\/])FutureClassroom[^\\\\/]*(?:[\\\\/]|$)')\n } | Sort-Object ProcessId | ForEach-Object {\n  @{name=$_.Name;pid=$_.ProcessId;executablePath=$_.ExecutablePath}\n });\n$tasks = @(Get-ScheduledTask | Where-Object {$_.TaskName -like 'FutureClassroom*'} |\n Sort-Object TaskPath,TaskName | ForEach-Object {\n  @{name=$_.TaskName;path=$_.TaskPath;state=$_.State.ToString()}\n });\n$os = Get-CimInstance Win32_OperatingSystem;\n@{\n os=$os.Caption;build=$os.BuildNumber;version=$os.Version;osArchitecture=$os.OSArchitecture;\n sshd=(Get-Service sshd).Status.ToString();\n tempDirectory=$env:TEMP;scratchDirectories=$dirs;ownedProcesses=$processes;ownedTasks=$tasks;\n projectRunReadOnlySnapshot=$runSnapshot;\n sshPublicAuthorizationSha256=(Get-FileHash -LiteralPath \"$env:ProgramData\\ssh\\administrators_authorized_keys\" -Algorithm SHA256).Hash.ToLowerInvariant()\n} | ConvertTo-Json -Depth 10 -Compress\n",
+    "sourceSha256Utf8": "49d0902c01bb24e7b20c7366f9a44fb27e0b60fba00f6d975f039618855ef5bb",
+    "sourceSha256Utf16Le": "66a76f06488774fceda811d21fad9e6780d751801eb0a64d0c9481e099d32f40",
+    "encodedCommand": "WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAYQB1AGQAaQB0AFMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABhAHUAZABpAHQAUwBvAHUAcgBjAGUAKQApADsA",
+    "encodedWrapperSource": "[Console]::InputEncoding=[System.Text.UTF8Encoding]::new($false);$auditSource=[Console]::In.ReadToEnd();& ([ScriptBlock]::Create($auditSource));",
+    "encodedWrapperSourceSha256Utf16Le": "f54ebcc080e5cfda399b05cc12a2cf1cf627a039171ed711036ec66c6ba2e84a",
+    "stdin": {
+      "bytes": 3120,
+      "sha256": "49d0902c01bb24e7b20c7366f9a44fb27e0b60fba00f6d975f039618855ef5bb",
+      "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7JFByb2dyZXNzUHJlZmVyZW5jZT0nU2lsZW50bHlDb250aW51ZSc7W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bU3lzdGVtLlRleHQuVVRGOEVuY29kaW5nXTo6bmV3KCRmYWxzZSk7JE91dHB1dEVuY29kaW5nPVtDb25zb2xlXTo6T3V0cHV0RW5jb2Rpbmc7CmZ1bmN0aW9uIFJlYWQtUHJvamVjdFJ1blNuYXBzaG90IHsKCiR2aWV3cz1AKCk7Zm9yZWFjaCgkdmlldyBpbiBAKFtNaWNyb3NvZnQuV2luMzIuUmVnaXN0cnlWaWV3XTo6UmVnaXN0cnkzMixbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5Vmlld106OlJlZ2lzdHJ5NjQpKXsKICRiYXNlPVtNaWNyb3NvZnQuV2luMzIuUmVnaXN0cnlLZXldOjpPcGVuQmFzZUtleShbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5SGl2ZV06OkN1cnJlbnRVc2VyLCR2aWV3KTska2V5PSRudWxsOwogdHJ5eyRrZXk9JGJhc2UuT3BlblN1YktleSgnU29mdHdhcmVcTWljcm9zb2Z0XFdpbmRvd3NcQ3VycmVudFZlcnNpb25cUnVuJywkZmFsc2UpOwogICRwcmVzZW50PSRmYWxzZTska2luZD0kbnVsbDskZGlnZXN0PSRudWxsOyRsZW5ndGg9MDsKICBpZigka2V5KXskcHJlc2VudD1AKCRrZXkuR2V0VmFsdWVOYW1lcygpfFdoZXJlLU9iamVjdHtbU3RyaW5nXTo6RXF1YWxzKCRfLCdGdXR1cmVDbGFzc3Jvb20nLFtTdHJpbmdDb21wYXJpc29uXTo6T3JkaW5hbElnbm9yZUNhc2UpfSkuQ291bnQgLW5lIDA7CiAgIGlmKCRwcmVzZW50KXska2luZD0ka2V5LkdldFZhbHVlS2luZCgnRnV0dXJlQ2xhc3Nyb29tJykuVG9TdHJpbmcoKTskdmFsdWU9JGtleS5HZXRWYWx1ZSgnRnV0dXJlQ2xhc3Nyb29tJywkbnVsbCxbTWljcm9zb2Z0LldpbjMyLlJlZ2lzdHJ5VmFsdWVPcHRpb25zXTo6RG9Ob3RFeHBhbmRFbnZpcm9ubWVudE5hbWVzKTsKICAgIGlmKCR2YWx1ZS1pcyBbYnl0ZVtdXSl7JGJ5dGVzPSR2YWx1ZX1lbHNlewogICAgIGlmKCR2YWx1ZS1pcyBbc3RyaW5nXSl7JGVuY29kZWQ9JHZhbHVlfWVsc2VpZigkdmFsdWUtaXMgW3N0cmluZ1tdXSl7JGVuY29kZWQ9Q29udmVydFRvLUpzb24gLUlucHV0T2JqZWN0ICR2YWx1ZSAtQ29tcHJlc3N9CiAgICAgZWxzZWlmKCR2YWx1ZS1pcyBbaW50XSAtb3IgJHZhbHVlLWlzIFtsb25nXSl7JGVuY29kZWQ9JHZhbHVlLlRvU3RyaW5nKFtHbG9iYWxpemF0aW9uLkN1bHR1cmVJbmZvXTo6SW52YXJpYW50Q3VsdHVyZSl9ZWxzZXt0aHJvdyAndW5zdXBwb3J0ZWQgcHJvamVjdCBSdW4gdmFsdWUgZm9yIHJlYWQtb25seSBhdWRpdCd9OwogICAgICRieXRlcz1bVGV4dC5FbmNvZGluZ106OlVURjguR2V0Qnl0ZXMoJGVuY29kZWQpCiAgICB9OwogICAgJGxlbmd0aD0kYnl0ZXMuTGVuZ3RoOyRzaGE9W1NlY3VyaXR5LkNyeXB0b2dyYXBoeS5TSEEyNTZdOjpDcmVhdGUoKTt0cnl7JGRpZ2VzdD0oW0JpdENvbnZlcnRlcl06OlRvU3RyaW5nKCRzaGEuQ29tcHV0ZUhhc2goJGJ5dGVzKSkpLlJlcGxhY2UoJy0nLCcnKS5Ub0xvd2VySW52YXJpYW50KCl9ZmluYWxseXskc2hhLkRpc3Bvc2UoKX0KICAgfQogIH07CiAgJHZpZXdzKz1Ae3ZpZXc9JHZpZXcuVG9TdHJpbmcoKTtrZXlQcmVzZW50PSgkbnVsbCAtbmUgJGtleSk7dmFsdWVQcmVzZW50PSRwcmVzZW50O2tpbmQ9JGtpbmQ7ZW5jb2RlZEJ5dGVzPSRsZW5ndGg7c2hhMjU2PSRkaWdlc3R9CiB9ZmluYWxseXtpZigka2V5KXska2V5LkRpc3Bvc2UoKX07JGJhc2UuRGlzcG9zZSgpfQp9O0B7dmlld3M9JHZpZXdzfXxDb252ZXJ0VG8tSnNvbiAtRGVwdGggNSAtQ29tcHJlc3MKCn0KJHJ1blNuYXBzaG90ID0gUmVhZC1Qcm9qZWN0UnVuU25hcHNob3QgfCBDb252ZXJ0RnJvbS1Kc29uOwokZGlycyA9IEAoR2V0LUNoaWxkSXRlbSAtTGl0ZXJhbFBhdGggJGVudjpURU1QIC1EaXJlY3RvcnkgLUZvcmNlIHwKIFdoZXJlLU9iamVjdCB7JF8uTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKid9IHwKIFNvcnQtT2JqZWN0IE5hbWUgfCBTZWxlY3QtT2JqZWN0IC1FeHBhbmRQcm9wZXJ0eSBOYW1lKTsKJHByb2Nlc3NlcyA9IEAoR2V0LUNpbUluc3RhbmNlIFdpbjMyX1Byb2Nlc3MgfAogV2hlcmUtT2JqZWN0IHsKICAoJF8uTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKicpIC1vcgogICgkXy5OYW1lIC1tYXRjaCAnXmZjWy1fXWJvb3RzdHJhcCg/OlsuLV0uKik/XC5leGUkJykgLW9yCiAgKCRfLkV4ZWN1dGFibGVQYXRoIC1hbmQgJF8uRXhlY3V0YWJsZVBhdGggLW1hdGNoICcoPzpefFtcXC9dKUZ1dHVyZUNsYXNzcm9vbVteXFwvXSooPzpbXFwvXXwkKScpCiB9IHwgU29ydC1PYmplY3QgUHJvY2Vzc0lkIHwgRm9yRWFjaC1PYmplY3QgewogIEB7bmFtZT0kXy5OYW1lO3BpZD0kXy5Qcm9jZXNzSWQ7ZXhlY3V0YWJsZVBhdGg9JF8uRXhlY3V0YWJsZVBhdGh9CiB9KTsKJHRhc2tzID0gQChHZXQtU2NoZWR1bGVkVGFzayB8IFdoZXJlLU9iamVjdCB7JF8uVGFza05hbWUgLWxpa2UgJ0Z1dHVyZUNsYXNzcm9vbSonfSB8CiBTb3J0LU9iamVjdCBUYXNrUGF0aCxUYXNrTmFtZSB8IEZvckVhY2gtT2JqZWN0IHsKICBAe25hbWU9JF8uVGFza05hbWU7cGF0aD0kXy5UYXNrUGF0aDtzdGF0ZT0kXy5TdGF0ZS5Ub1N0cmluZygpfQogfSk7CiRvcyA9IEdldC1DaW1JbnN0YW5jZSBXaW4zMl9PcGVyYXRpbmdTeXN0ZW07CkB7CiBvcz0kb3MuQ2FwdGlvbjtidWlsZD0kb3MuQnVpbGROdW1iZXI7dmVyc2lvbj0kb3MuVmVyc2lvbjtvc0FyY2hpdGVjdHVyZT0kb3MuT1NBcmNoaXRlY3R1cmU7CiBzc2hkPShHZXQtU2VydmljZSBzc2hkKS5TdGF0dXMuVG9TdHJpbmcoKTsKIHRlbXBEaXJlY3Rvcnk9JGVudjpURU1QO3NjcmF0Y2hEaXJlY3Rvcmllcz0kZGlycztvd25lZFByb2Nlc3Nlcz0kcHJvY2Vzc2VzO293bmVkVGFza3M9JHRhc2tzOwogcHJvamVjdFJ1blJlYWRPbmx5U25hcHNob3Q9JHJ1blNuYXBzaG90Owogc3NoUHVibGljQXV0aG9yaXphdGlvblNoYTI1Nj0oR2V0LUZpbGVIYXNoIC1MaXRlcmFsUGF0aCAiJGVudjpQcm9ncmFtRGF0YVxzc2hcYWRtaW5pc3RyYXRvcnNfYXV0aG9yaXplZF9rZXlzIiAtQWxnb3JpdGhtIFNIQTI1NikuSGFzaC5Ub0xvd2VySW52YXJpYW50KCkKfSB8IENvbnZlcnRUby1Kc29uIC1EZXB0aCAxMCAtQ29tcHJlc3MK",
+      "captureScope": "COMPLETE"
+    },
+    "command": [
+      "ssh",
+      "-i",
+      "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "-o",
+      "IdentitiesOnly=yes",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=8",
+      "elior@192.168.10.212",
+      "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACQAYQB1AGQAaQB0AFMAbwB1AHIAYwBlAD0AWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAJABhAHUAZABpAHQAUwBvAHUAcgBjAGUAKQApADsA"
+    ],
+    "timeoutSeconds": 45,
+    "originalRunSnapshotSourceSha256": "7f46e7240c7e7fbdb7c771d1793fc8b5451f3a07bef4e9069c602224d7464c5c"
+  },
+  "persistentKeyMetadata": {
+    "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "mode": "0o600",
+    "contentsRead": false
+  },
+  "persistentKeyMode": "0o600",
+  "ssh": {
+    "exitCode": 0,
+    "stdout": {
+      "bytes": 587,
+      "sha256": "14a095ff60bfe5eebee6fed6ea3ce585bc50ab023e10f2dd99cae0cd051ef4ed",
+      "base64": "eyJ0ZW1wRGlyZWN0b3J5IjoiQzpcXFVzZXJzXFxFbGlvclxcQXBwRGF0YVxcTG9jYWxcXFRlbXAiLCJ2ZXJzaW9uIjoiMTAuMC4yNjMwMCIsInNzaFB1YmxpY0F1dGhvcml6YXRpb25TaGEyNTYiOiJkNjY5YmE1OGY4ODE3OWI5OTYyYjIwMjEzMzIxNDFkMGZiMGZjODQ0NzhiNjk0NDkxMTU1YTFmMTg0ZDQzMmI1IiwiYnVpbGQiOiIyNjMwMCIsInByb2plY3RSdW5SZWFkT25seVNuYXBzaG90Ijp7InZpZXdzIjpbeyJrZXlQcmVzZW50Ijp0cnVlLCJzaGEyNTYiOm51bGwsImVuY29kZWRCeXRlcyI6MCwia2luZCI6bnVsbCwidmFsdWVQcmVzZW50IjpmYWxzZSwidmlldyI6IlJlZ2lzdHJ5MzIifSx7ImtleVByZXNlbnQiOnRydWUsInNoYTI1NiI6bnVsbCwiZW5jb2RlZEJ5dGVzIjowLCJraW5kIjpudWxsLCJ2YWx1ZVByZXNlbnQiOmZhbHNlLCJ2aWV3IjoiUmVnaXN0cnk2NCJ9XX0sIm9zIjoiTWljcm9zb2Z0IFdpbmRvd3MgMTEg5LiT5Lia54mIIiwic2NyYXRjaERpcmVjdG9yaWVzIjpbXSwib3NBcmNoaXRlY3R1cmUiOiI2NC1iaXQiLCJvd25lZFByb2Nlc3NlcyI6W10sIm93bmVkVGFza3MiOltdLCJzc2hkIjoiUnVubmluZyJ9DQo=",
+      "captureScope": "COMPLETE"
+    },
+    "stderr": {
+      "bytes": 454,
+      "sha256": "57a103141bf11567ef594aa18d38ff7397ac92b26291f08ec756e7a47561d4d2",
+      "base64": "IzwgQ0xJWE1MDQo8T2JqcyBWZXJzaW9uPSIxLjEuMC4xIiB4bWxucz0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9wb3dlcnNoZWxsLzIwMDQvMDQiPjxPYmogUz0icHJvZ3Jlc3MiIFJlZklkPSIwIj48VE4gUmVmSWQ9IjAiPjxUPlN5c3RlbS5NYW5hZ2VtZW50LkF1dG9tYXRpb24uUFNDdXN0b21PYmplY3Q8L1Q+PFQ+U3lzdGVtLk9iamVjdDwvVD48L1ROPjxNUz48STY0IE49IlNvdXJjZUlkIj4yPC9JNjQ+PFBSIE49IlJlY29yZCI+PEFWPkdldC1TY2hlZHVsZWRUYXNrIHwgV2hlcmUtT2JqZWN0IHskXy5UYXNrTmFtZSAtbGlrZSAnRnV0dXJlQ2xhc3Nyb29tKid9IHw8L0FWPjxBST4xMTgzMTQyMDc4PC9BST48TmlsIC8+PFBJPi0xPC9QST48UEM+MTAwPC9QQz48VD5Db21wbGV0ZWQ8L1Q+PFNSPjA8L1NSPjxTRD7lt7LlrozmiJAgMS8xPC9TRD48L1BSPjwvTVM+PC9PYmo+PC9PYmpzPg==",
+      "captureScope": "COMPLETE"
+    }
+  },
+  "tempDirectory": "C:\\Users\\Elior\\AppData\\Local\\Temp",
+  "version": "10.0.26300",
+  "sshPublicAuthorizationSha256": "d669ba58f88179b9962b2021332141d0fb0fc84478b694491155a1f184d432b5",
+  "build": "26300",
+  "projectRunReadOnlySnapshot": {
+    "views": [
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry32"
+      },
+      {
+        "keyPresent": true,
+        "sha256": null,
+        "encodedBytes": 0,
+        "kind": null,
+        "valuePresent": false,
+        "view": "Registry64"
+      }
+    ]
+  },
+  "os": "Microsoft Windows 11 专业版",
+  "scratchDirectories": [],
+  "osArchitecture": "64-bit",
+  "ownedProcesses": [],
+  "ownedTasks": [],
+  "sshd": "Running",
+  "authentication": "PASS",
+  "publicAuthorizationUnchanged": true,
+  "projectRunUnchanged": true,
+  "integrityStatus": "PASS",
+  "activityObserved": false,
+  "activityHandling": "Recorded only; nothing stopped, changed or deleted.",
+  "status": "PASS",
+  "completedAtUtc": "2026-11-01T02:50:06.126741+00:00"
+}

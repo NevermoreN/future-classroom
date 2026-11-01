@@ -1,0 +1,237 @@
+{
+  "status": "FROZEN_R58_SECOND_R57_MAIN_GNU_COMPILE_STRICT_AND_TWO_PE_PASS_R56_WITHDRAWN_RUNTIME_NOT_RUN_BY_REVIEWER",
+  "finalizedUtc": "2026-11-01T03:22:07.550121+00:00",
+  "mainRoot": "/workspace/共享/Eliora/未来教室计划",
+  "binding": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/main-integration-second.json",
+    "bytes": 75547,
+    "sha256": "ea74ee792c38975e1d70eb9a89e943c6ecf26d89b2b7bd0d84158765f3f6c9e8"
+  },
+  "r56Withdrawal": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/main-withdrawal-first.json",
+    "sha256": "476b95cd63dfb490d815721bd0f0ea66c5ca8af9f42335b1b43783470b377b79"
+  },
+  "r58Freeze": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/implementation-freeze-second.json",
+    "sha256": "d1e8fb3f459f1bf98f3d6c78d12b34e3dc75910cbcc8c17df0c0d8ff3108ded1"
+  },
+  "sourceCount": 431,
+  "r57ExtraCount": 3,
+  "exactInputsStillMatch": true,
+  "checks": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-checks-second.json",
+    "bytes": 155159,
+    "sha256": "2ebcd5cca12610c41662d49a40ac61f97e8e56c11a79b3b1569ef5fba6f6e928"
+  },
+  "driver": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/run-integrated-checks-second.py",
+    "bytes": 6835,
+    "sha256": "dbd237d5cfae6a6d75363dd712ed1cb42e88ac691ba5380ecd11e9645dfaa40c"
+  },
+  "commands": [
+    {
+      "name": "fmt",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 3.6146627319976687,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "architecture",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.21088979300111532,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "diffcheck",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 0.21037632087245584,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-fc-windows-compile",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 47.45808701496571,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-product",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 126.34455261100084,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-stable-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 25.852739927126095,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    },
+    {
+      "name": "windows-nightly-strict",
+      "status": "PASS",
+      "exitCode": 0,
+      "elapsedSeconds": 19.83299337583594,
+      "timedOut": false,
+      "logBoundExceeded": false,
+      "actualExit": true,
+      "liveOwnedGroupRemaining": []
+    }
+  ],
+  "peAudit": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-programs-static-second.json",
+    "bytes": 113419,
+    "sha256": "d8c85c8de28763cd98eff0b71a478f33050ff7197dbd8a559972afd8bfb890ef"
+  },
+  "peDriver": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/audit-integrated-programs-second.py",
+    "bytes": 6856,
+    "sha256": "30ffbba17ca306dde19016640eaa1cf4ab9020689da6069871e6fe7caed18b29"
+  },
+  "peCommand": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-pe-audit-second.command.json",
+    "bytes": 650,
+    "sha256": "86956546334941c10e2c3e6028a20c7a2f653b306e2c3b51ab6901328dfd852e"
+  },
+  "normal": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+    "bytes": 13124548,
+    "sha256": "102cf749fba657ef83d9aaa10f4794a4e5b8b31b920b14f929552efddbafe983"
+  },
+  "affectedTest": {
+    "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+    "bytes": 3527268,
+    "sha256": "84f27257a78ab5bffee96156d86701d6b67f200ee3267f7a3c7d991ef6b56390"
+  },
+  "metadata": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/integrated-windows-test-metadata-second.jsonl",
+    "bytes": 911,
+    "sha256": "d540eb31463d13250ab020843c62f1bdb16b1d62c390b9c6944a656ee2a53a82"
+  },
+  "metadataLine": 1,
+  "actualDllFacts": [
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/deps/fc_windows-7a1e1d30f2dac501.exe",
+      "kernel32BaselineImports": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "combasePresent": false,
+      "winrtErrorPresent": false,
+      "withdrawnR56KtmPresent": false,
+      "osMsvcrtRetained": true,
+      "remainingRisk": [
+        {
+          "kind": "API_SET_DLL",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WaitOnAddress",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressAll",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressSingle",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "kernel32.dll",
+          "api": "GetSystemTimePreciseAsFileTime",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        }
+      ]
+    },
+    {
+      "path": "/tmp/fc-round56-transactional-autorun-target/stable/i686-pc-windows-gnu/release/fc-bootstrap.exe",
+      "kernel32BaselineImports": [
+        "K32GetMappedFileNameW",
+        "QueryDosDeviceW"
+      ],
+      "combasePresent": false,
+      "winrtErrorPresent": false,
+      "withdrawnR56KtmPresent": false,
+      "osMsvcrtRetained": true,
+      "remainingRisk": [
+        {
+          "kind": "API_SET_DLL",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WaitOnAddress",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressAll",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "api-ms-win-core-synch-l1-2-0.dll",
+          "api": "WakeByAddressSingle",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        },
+        {
+          "kind": "MODERN_API",
+          "dll": "kernel32.dll",
+          "api": "GetSystemTimePreciseAsFileTime",
+          "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+        }
+      ]
+    }
+  ],
+  "documentedBaseline": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-getmappedfilenamew",
+      "claim": "Microsoft documents K32GetMappedFileName as Kernel32 export fromWindows7, distinctfromolderPsapi wrapper."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew",
+      "claim": "Microsoft documents QueryDosDeviceW inKernel32 withXPminimum; onlycurrentdrive mapping is read, nevermodified."
+    }
+  ],
+  "boundary": [
+    "R56 CAS proposal was experimentally rejected and sourcewithdrawn; noR56 PASS or qualifiedMSIownership cleanup claim.",
+    "This exact final main431inputs+threeR57extras passed compile/lint and twoGNUstaticPE checks. No21test-executable or22PE fullsuite claim.",
+    "NoWindows, SSH, CI, Gitmutation or sourceedit by this reviewer; realWindows outcomes remain separate rootconsumer evidence.",
+    "Existingprimary auditNOT_VALIDATED statuses and modernGNU API/systemmsvcrt risks retained; individualkernel32 symbols haveWin7 documentation, not formalMSVC/wholeWin7/Win10runtime proof.",
+    "All ownCargo groups actuallyexited. SolemanualCargo slot released; target/evidence retained for rootcurrentruntime/archive consumers."
+  ]
+}

@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_ORIGINAL_BINDING_WIN11_RUNTIME_ONLY",
+  "scope": "Read-only review of retained R55 modern MSVC originals; no test/Windows/CI execution, Git-history revalidation or source change performed.",
+  "originals": [
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-msvc-runtime-first.json",
+      "bytes": 196771,
+      "sha256": "b04855e0202c8562be1a455c191c9a9e56ee98187a7476be3881c1bac6f9d275"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-msvc-runtime-first.command.json",
+      "bytes": 1811,
+      "sha256": "cd82a314ab3d85f5a2ad39d2871d46a6c292c5bb982ea4254922b3de48c4bb03"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-original-independent-first.json",
+      "bytes": 497415,
+      "sha256": "d6ea3001b7495ad5ffecec0fde31aedffe3f4d4f389e9fcb14dee0e3e0991f3a"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-artifact-original/test-metadata.jsonl",
+      "bytes": 21556,
+      "sha256": "b4bb33a270cf63d665395151ebf93c79843a4327c2d7a1683c170604be9bc8fb"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-msvc-runtime-first.stdout.log",
+      "bytes": 947,
+      "sha256": "db9e6206aeaada9f0551903c9293456711316a487043c0a52091002c8ecc06ad"
+    },
+    {
+      "path": "/tmp/fc-round55-ci-evidence/modern-msvc-runtime-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "binding": {
+    "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+    "ciHelperSourceSha256": "ed26c9932325d377bbbf4eaf63aad29d75fc0cc8ad77561b1121f3389024c418",
+    "officialIdentity": {
+      "sourceSha": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+      "runId": 41264231080,
+      "jobId": 124723560195,
+      "artifactId": 13066468230,
+      "runAttempt": 1,
+      "runStatus": "completed",
+      "runConclusion": "success",
+      "jobConclusion": "success",
+      "workflow": ".github/workflows/windows-msvc.yml",
+      "artifactName": "future-classroom-msvc-i686-9ebe818bfc57c075e8b21419082dd44130b0e923-41264231080-1",
+      "jobSourceBinding": "EXACT_JOB_ID_AND_RUN_ID_TO_SOURCE_BOUND_OFFICIAL_RUN",
+      "jobHeadShaProvided": false
+    },
+    "normalExecutableSha256": "7aea98d5b64df96b32e16a1799af2e753e069a351f1205a1d25c87dd41b0b034",
+    "normalExecutableBytes": 10515456,
+    "testMetadataSha256": "b4bb33a270cf63d665395151ebf93c79843a4327c2d7a1683c170604be9bc8fb",
+    "producerCount": 22,
+    "uploadedExactProducerMatches": 22,
+    "testMetadataExactProducerMatches": 21
+  },
+  "totals": {
+    "programs": 21,
+    "passed": 1481,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 0
+  },
+  "programs": [
+    {
+      "name": "fc_windows-86a0761c41446c23.exe",
+      "sha256": "7546527f5d15dcb99fe004c05a755eda596ab860c7d70f1220ce8c5d23271f97",
+      "producerRelativePath": "tests/fc-windows/fc_windows-86a0761c41446c23.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 207,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "autostart_coordinator-259ed5dd9d85d8cf.exe",
+      "sha256": "f7f66d1d55bfa8f2513376d7abc03271415971c8855dde28b0c1c3cdd3c510ea",
+      "producerRelativePath": "tests/fc-bootstrap/autostart_coordinator-259ed5dd9d85d8cf.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "verify_web_assets-b51e8901d8cb76d0.exe",
+      "sha256": "64c80ae15dc2413abfb212a186e363af05f544c61126315eaac197b652c84af0",
+      "producerRelativePath": "tests/fc-bootstrap/verify_web_assets-b51e8901d8cb76d0.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "calendar_execution_fence-6baf602eefe1b45f.exe",
+      "sha256": "6e174996ce69d778462cb1b8b6191910845d37b6cd4d1084d671c19384da967f",
+      "producerRelativePath": "tests/fc-bootstrap/calendar_execution_fence-6baf602eefe1b45f.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "schedule_operations-cafc5bbf4144778f.exe",
+      "sha256": "a592d6683853727d85b9c406e81c32458cf20d62967a00dc5ed51f2ca9e7daee",
+      "producerRelativePath": "tests/fc-bootstrap/schedule_operations-cafc5bbf4144778f.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "runtime_storage-5469901f9ed4b60d.exe",
+      "sha256": "cb9ea62610354baf1b36bd66c45b7d75a8816a2b6f955cd786987ed23e58c445",
+      "producerRelativePath": "tests/fc-bootstrap/runtime_storage-5469901f9ed4b60d.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "voice_storage-ca0214d3c27d2e51.exe",
+      "sha256": "8344ec2418e3dcbef41d30bff2b99ca1c8f530fa31b575bf08f7ec2210643520",
+      "producerRelativePath": "tests/fc-bootstrap/voice_storage-ca0214d3c27d2e51.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_bootstrap-d4b4bddf8df4dc3b.exe",
+      "sha256": "8076d4ac0de6c10fd007a9ba03993bc61b0c21c1d5623f864cb081b2d4b2ef82",
+      "producerRelativePath": "tests/fc-bootstrap/fc_bootstrap-d4b4bddf8df4dc3b.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 217,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "business_storage-1184e7550c9ca79d.exe",
+      "sha256": "ec521155e8516f385706960f646c6f76ec62b50428fdf581c7d49cfbab7af263",
+      "producerRelativePath": "tests/fc-bootstrap/business_storage-1184e7550c9ca79d.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "voice_limits_storage-869fcf586f5dc71e.exe",
+      "sha256": "ead3a7d72306b8ff32d3f31d26c46886290577cb09c8b1b1db55399c8c4a7e2d",
+      "producerRelativePath": "tests/fc-bootstrap/voice_limits_storage-869fcf586f5dc71e.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_materials-2e428b959a090e75.exe",
+      "sha256": "bd8939f647cc1dde3a7124a6dc3b4c00fa189f3bbe3255056d2896c63af03aba",
+      "producerRelativePath": "tests/fc-materials/fc_materials-2e428b959a090e75.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_security-897ee1bbd038f1a8.exe",
+      "sha256": "de26d9db5170b4ecf9d3233f3813506aafbad6198dbd2eb7ed3fb1cb628c6e04",
+      "producerRelativePath": "tests/fc-security/fc_security-897ee1bbd038f1a8.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_bootstrap-5b56e4a05549cc59.exe",
+      "sha256": "ac1f29c53a7209fddb7dcbb4abe473f01d5e88b13a64809e1707a179efd9d44d",
+      "producerRelativePath": "tests/fc-bootstrap/fc_bootstrap-5b56e4a05549cc59.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 339,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_presentation-0ebca4673ff953f0.exe",
+      "sha256": "008bb954890f7e369e4fa07ba58498fa8b1eb4b73b5346231fdd6d338e1f4122",
+      "producerRelativePath": "tests/fc-presentation/fc_presentation-0ebca4673ff953f0.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_protocol-a7cf91af1d25db3b.exe",
+      "sha256": "5d0d6efbc0eb35a45c28a4b6f07dbc788cab3d3d55a3b1be4fc144d64ba91953",
+      "producerRelativePath": "tests/fc-protocol/fc_protocol-a7cf91af1d25db3b.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 82,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_ports-2a65d64830b4e099.exe",
+      "sha256": "e98449ae8e184f8624a471a1b4342b183050ad816a3c13ee8e8af578bf7cdd5c",
+      "producerRelativePath": "tests/fc-ports/fc_ports-2a65d64830b4e099.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_application-452d4d2887413f93.exe",
+      "sha256": "f54b2cc78af43224f9cc22c6d3f095469e2dae430a1d90528a51d4c2d65ea0e5",
+      "producerRelativePath": "tests/fc-application/fc_application-452d4d2887413f93.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_audio-3b8d060b615f92df.exe",
+      "sha256": "fff00d7ef516463b191d995955ae3a1a8446c097d0f61b5a8396c07f2411774d",
+      "producerRelativePath": "tests/fc-audio/fc_audio-3b8d060b615f92df.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_runtime-beae710b833bf51a.exe",
+      "sha256": "489bfe4cd7b83753021fe474e2d8bd20ea50a3a12326b24edfcfaa9e59e9658a",
+      "producerRelativePath": "tests/fc-runtime/fc_runtime-beae710b833bf51a.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_storage-e351e410d252c84e.exe",
+      "sha256": "f87fb999a92e5cb4065bbb60b122a85f4319c09725cd8ff6bbcd69436a18e00e",
+      "producerRelativePath": "tests/fc-storage/fc_storage-e351e410d252c84e.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 206,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    },
+    {
+      "name": "fc_domain-7c20761d03caf301.exe",
+      "sha256": "aa94f8c4c68150272c3a3f8e61efe659e422de4e05c1d19f134acae06d15cd23",
+      "producerRelativePath": "tests/fc-domain/fc_domain-7c20761d03caf301.exe",
+      "exitCode": 0,
+      "terminalSummaries": 1,
+      "passed": 148,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0
+    }
+  ],
+  "originalRuntime": {
+    "status": "PASS",
+    "cleanup": "PASS",
+    "commandActualExit": true,
+    "commandExitCode": 0,
+    "platform": {
+      "caption": "Microsoft Windows 11 专业版",
+      "osArchitecture": "64-bit",
+      "build": "26300",
+      "version": "10.0.26300"
+    },
+    "executionScope": "PE32 x86 binaries on Windows11 x64 (WOW64), not Win7 or Win10 runtime evidence.",
+    "selfCheck": {
+      "exitCode": 0,
+      "output": [
+        "sqlite_commit=PASS authority_publish=PASS idempotency=PASS",
+        "credential.dpapi-key-reopen: PASS",
+        "credential.sqlite-reopen-login-kdf: PASS",
+        "credential.password-rotation-old-lease: PASS",
+        "credential.recovery-one-use-rotation: PASS",
+        "system_csprng=PASS pbkdf2_600000=PASS directory_lock=PASS",
+        "isolated_test_cleanup=PASS"
+      ]
+    },
+    "system": {
+      "exitCode": 0,
+      "output": [
+        "system_discovery=PASS program_data_absolute=true user_sid_resolved=true thread_cpu_clock=PASS autostart_readback=AutostartReadback { present: false, matches_expected: false, actual_command: None, observation: Absent }"
+      ]
+    },
+    "native": {
+      "output": [
+        "native_lifecycle=PASS elapsed_ms=1252 rendered_frames=0 visible_samples=0 dib_bytes=288000 program_data_resolved=true offscreen_render_verified=true",
+        "desktop_render=NOT_RUN (no confirmed desktop foreground); foreground/session behavior needs interactive QA"
+      ],
+      "exitCode": 0,
+      "hostOutput": [
+        "hidden_host=PASS tray_lifecycle=PASS ticks=3 elapsed_ms=2998 session_notifications=true"
+      ],
+      "hostExitCode": 0,
+      "sessionId": 1
+    }
+  },
+  "originalCiCleanup": {
+    "status": "OWNED_BUILD_ROOTS_REMOVED",
+    "roots": [
+      {
+        "root": "target",
+        "removed": true
+      },
+      {
+        "root": "scratch",
+        "removed": true
+      },
+      {
+        "root": "cargo",
+        "removed": true
+      },
+      {
+        "root": "rustup",
+        "removed": true
+      }
+    ],
+    "artifact_lifetime": "Retained for always-upload; hosted VM disposal removes remaining local evidence.",
+    "scope": "Only this exact RunnerTemp run-id/attempt root; no user-machine cleanup or runtime tests."
+  },
+  "actualModernMsVcImports": {
+    "normalCombaseCoTaskMemFree": "PRESENT",
+    "normalOle32Imports": [
+      "CoCreateInstance",
+      "CoInitializeEx",
+      "CoUninitialize"
+    ],
+    "winrtErrorDllAcross22Executables": "ABSENT_IN_RETAINED_ACTUAL_MSVC_IMPORT_AUDITS",
+    "normalIndependentPeStatus": "NOT_VALIDATED",
+    "normalRisks": [
+      {
+        "kind": "API_SET_DLL",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "reason": "API-set contract availability must be verified on the exact OS and update baseline."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WaitOnAddress",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressAll",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "api-ms-win-core-synch-l1-2-0.dll",
+        "api": "WakeByAddressSingle",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      },
+      {
+        "kind": "WINRT_DLL",
+        "dll": "combase.dll",
+        "reason": "WinRT/COM import requires baseline OS export validation; Win7 is not established."
+      },
+      {
+        "kind": "MODERN_API",
+        "dll": "kernel32.dll",
+        "api": "GetSystemTimePreciseAsFileTime",
+        "reason": "Post-baseline API review trigger; verify target exports and load behavior."
+      }
+    ],
+    "gnuResultsSubstituted": false
+  },
+  "limitations": [
+    "Win7 CI/runtime not reviewed or passed by this report; no double-baseline success claim.",
+    "Modern combase.dll!CoTaskMemFree remains; GNU ole32-only import results do not apply to this MSVC executable.",
+    "Native desktop rendering was NOT_RUN without confirmed desktop foreground; visible interaction/Seewo QA remains separate.",
+    "Runtime cleanup PASS is the original finite runner result; original CI cleanup only covers its owned hosted roots. No fresh system/SSH/Run cleanup audit performed here.",
+    "Static imports and Win11 execution do not establish Win7 load compatibility or remove the retained modern API risks."
+  ],
+  "issues": []
+}

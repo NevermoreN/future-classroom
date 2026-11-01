@@ -16,15 +16,6 @@ use windows::{
         System::Com::*,
     },
 };
-// The same COM task allocator is available through Ole32 on the Win7 baseline.
-// The generated binding targets combase.dll; keep this import narrow as in the
-// native KnownFolder and file-picker adapters without changing ownership.
-#[link(name = "ole32")]
-unsafe extern "system" {
-    #[link_name = "CoTaskMemFree"]
-    fn free_task_memory(memory: *const core::ffi::c_void);
-}
-
 static ACTIVE: AtomicBool = AtomicBool::new(false);
 static POISONED: AtomicBool = AtomicBool::new(false);
 const MAX_ID_UNITS: usize = 32_768;
@@ -270,26 +261,28 @@ fn endpoint_id(enumerator: &IMMDeviceEnumerator, role: ERole) -> Result<Option<V
         Err(error) if error.code().0 as u32 == 0x80070490 => return Ok(None), // E_NOTFOUND
         Err(error) => return Err(error),
     };
-    // SAFETY: returned PWSTR is an allocated opaque endpoint ID; always free it.
-    let id = unsafe { endpoint.GetId()? };
-    let mut units = Vec::new();
-    let mut result = Err(Error::from_hresult(E_FAIL));
-    if !id.is_null() {
-        for index in 0..MAX_ID_UNITS {
-            // SAFETY: GetId returns NUL-terminated COM allocated storage.
-            let unit = unsafe { id.0.add(index).read() };
-            if unit == 0 {
-                result = Ok(Some(units));
-                break;
+    crate::com_task::with_task_memory(|memory| {
+        // SAFETY: returned PWSTR is an allocated opaque endpoint ID; always free it.
+        let id = unsafe { endpoint.GetId()? };
+        let mut units = Vec::new();
+        let mut result = Err(Error::from_hresult(E_FAIL));
+        if !id.is_null() {
+            for index in 0..MAX_ID_UNITS {
+                // SAFETY: GetId returns NUL-terminated COM allocated storage.
+                let unit = unsafe { id.0.add(index).read() };
+                if unit == 0 {
+                    result = Ok(Some(units));
+                    break;
+                }
+                units.push(unit);
             }
-            units.push(unit);
         }
-    }
-    // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
-    unsafe {
-        free_task_memory(id.0.cast());
-    }
-    result
+        // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
+        unsafe {
+            memory.free(id.0.cast());
+        }
+        result
+    })
 }
 struct Registration {
     client: IMMNotificationClient,

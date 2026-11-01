@@ -22,15 +22,6 @@ use windows::{
     },
 };
 
-// The current metadata binds CoTaskMemFree to combase.dll (Win8+). The same
-// documented function is exported by ole32.dll on Win7. Keep this one corrected
-// import narrow instead of accidentally importing the Windows Runtime DLL.
-#[link(name = "ole32")]
-unsafe extern "system" {
-    #[link_name = "CoTaskMemFree"]
-    fn win7_co_task_mem_free(memory: *const core::ffi::c_void);
-}
-
 pub struct SystemRandom;
 impl fc_ports::RandomSource for SystemRandom {
     type Error = Error;
@@ -351,12 +342,12 @@ pub struct NativeProbeReport {
 pub fn program_data() -> Result<PathBuf> {
     // SAFETY: Windows allocates the NUL-terminated KnownFolder result with CoTaskMem;
     // convert to owned UTF-16 string before freeing it exactly once, including errors.
-    unsafe {
+    crate::com_task::with_task_memory(|memory| unsafe {
         let ptr = SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, None)?;
         let value = ptr.to_string();
-        win7_co_task_mem_free(ptr.0.cast());
+        memory.free(ptr.0.cast());
         Ok(PathBuf::from(value?).join("FutureClassroom"))
-    }
+    })
 }
 
 pub fn probe(seconds: u32) -> Result<NativeProbeReport> {

@@ -1,0 +1,183 @@
+{
+  "schema": "future-classroom.r58-task-memory-source-freeze/v2",
+  "status": "SOURCE_FROZEN_NT_IMAGE_IDENTITY_CANDIDATE_NOT_COMPILED_OR_RUN",
+  "worktree": "/tmp/fc-round58-msvc-task-memory-worktree",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "firstFreezePreserved": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/implementation-freeze-first.json",
+    "bytes": 8518,
+    "sha256": "13a1caef80d20bfa475f80b069b93619d457be68d597fba88261eab8232099d5"
+  },
+  "actualFailureEvidence": {
+    "expectedPath": "C:\\Windows\\SysWOW64\\ole32.dll",
+    "expectedLength": 29,
+    "actualLoaderPath": "C:\\Windows\\System32\\ole32.dll",
+    "actualLength": 29,
+    "ordinalResult": 3,
+    "actualRawBufferUnits": 1024,
+    "actualAllTailZeros": true,
+    "sourceReport": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/diagnostic-windows-first.json",
+      "bytes": 44620,
+      "sha256": "95f7071684a42b2caea7b553d821fefd5df9c206130276055029255a9c33600e"
+    },
+    "originalStatus": "FAIL",
+    "cleanup": "PASS",
+    "testExeSha256": "eba054cfced0f5308dd40438d9610cd58c31edcaee649e7c84bddfeb4b0f7c68"
+  },
+  "causeScope": "Original loader-spelling identity check wrongly rejected the recorded valid full-path lookup because loader GetModuleFileName spelling was System32 while OS-selected WOW64 path was SysWOW64. This explains the recorded R58 ordinal/E_ACCESSDENIED branch; R56 registry failures are separate and untouched. No unique SDK/import-library attribution is asserted.",
+  "ownedPaths": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "first": {
+        "bytes": 1508,
+        "sha256": "546d4dcdea9d66c6aa2083f749815b19c4a7dc1382edb29829489ef496efe69a"
+      },
+      "second": {
+        "bytes": 1508,
+        "sha256": "546d4dcdea9d66c6aa2083f749815b19c4a7dc1382edb29829489ef496efe69a"
+      },
+      "changedFromFirst": false
+    },
+    {
+      "path": "crates/fc-windows/src/lib.rs",
+      "first": {
+        "bytes": 845,
+        "sha256": "4963e6a462e1d9d3dd526e94ebf93d574fede686399aca5505cba49e5efe4919"
+      },
+      "second": {
+        "bytes": 845,
+        "sha256": "4963e6a462e1d9d3dd526e94ebf93d574fede686399aca5505cba49e5efe4919"
+      },
+      "changedFromFirst": false
+    },
+    {
+      "path": "crates/fc-windows/src/native.rs",
+      "first": {
+        "bytes": 21100,
+        "sha256": "f81aa5fa6b1cac6a2777ae0d397264c9829ded85bdc1736b8ade0deadb871776"
+      },
+      "second": {
+        "bytes": 21100,
+        "sha256": "f81aa5fa6b1cac6a2777ae0d397264c9829ded85bdc1736b8ade0deadb871776"
+      },
+      "changedFromFirst": false
+    },
+    {
+      "path": "crates/fc-windows/src/materials/chooser.rs",
+      "first": {
+        "bytes": 9527,
+        "sha256": "3d6e0f39c3a5ec8f1217a89783f0b26af4083abad1dd3981868491c28cc88e5a"
+      },
+      "second": {
+        "bytes": 9527,
+        "sha256": "3d6e0f39c3a5ec8f1217a89783f0b26af4083abad1dd3981868491c28cc88e5a"
+      },
+      "changedFromFirst": false
+    },
+    {
+      "path": "crates/fc-windows/src/audio/device.rs",
+      "first": {
+        "bytes": 17554,
+        "sha256": "2493638ceb2f5f7ea5921f40d753d95650355528b255b331a66ab0ba7b5c382f"
+      },
+      "second": {
+        "bytes": 17554,
+        "sha256": "2493638ceb2f5f7ea5921f40d753d95650355528b255b331a66ab0ba7b5c382f"
+      },
+      "changedFromFirst": false
+    },
+    {
+      "path": "crates/fc-windows/src/com_task.rs",
+      "first": {
+        "bytes": 8902,
+        "sha256": "2d64fdb0b361bbfb596cabeda68e62ad8ae7f1e531dba087ecc2f72cd3b3380a"
+      },
+      "second": {
+        "bytes": 12749,
+        "sha256": "648228da8eb381c3fcb27af0f625673663ae1e0d24b3f4d7a69208333ea22ada"
+      },
+      "changedFromFirst": true
+    },
+    {
+      "path": "crates/fc-windows/src/com_task/tests.rs",
+      "first": {
+        "bytes": 6156,
+        "sha256": "a60862c6927daed2f8bbe3bf108f243fd1280589e7ea47ecbda9ea1089085fb0"
+      },
+      "second": {
+        "bytes": 10090,
+        "sha256": "0af7b676ba1b65ac2c38cc5de155a597677a99142d6f2e87538444e67a1278c8"
+      },
+      "changedFromFirst": true
+    }
+  ],
+  "changedSinceFirst": 2,
+  "unchangedSinceFirst": 5,
+  "patch": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/implementation-second.patch",
+    "bytes": 11782,
+    "sha256": "d6cb38d857d5edbd44f62f0511cfbe66e4b5e19ad6616030732f686c1a75624f"
+  },
+  "currentMainCandidatePatch": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/main-candidate-second.patch",
+    "bytes": 15711,
+    "sha256": "48a89aa0425a79dbc3374aca2a0945b5a21d9a978f5d884ff274fe72686ab9a3",
+    "applyCheckExit": 0,
+    "applied": false
+  },
+  "finalSourceChecks": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/static-final-second.json",
+    "bytes": 628,
+    "sha256": "291fb152e15c40eb913dff84af63717ac2b43ed4365ed7845d11b3fccc072e2c"
+  },
+  "precedingMetadataArchitecture": {
+    "path": "/tmp/fc-round58-msvc-task-memory-evidence/static-checks-second.json",
+    "bytes": 1943,
+    "sha256": "6527d9848ed453a034d861865422a8927e0081441aee6f8318fd78629631e9fa"
+  },
+  "nativeIdentityContract": [
+    "Full OS-selected DOS Ole32 path remains the only GetModuleHandleEx(PIN) source. No LoadLibrary, basename, export-address/FROM_ADDRESS selection, search changes or additional native owner.",
+    "Before PIN obtain only that path drive current target via QueryDosDeviceW; first MULTI_SZ item only. Reject zero/truncation/invalid bounded metadata, malformed terminators and empty current target. Never authorize historical target entries.",
+    "K32GetMappedFileNameW uses actual pinned HMODULE image base and borrowed current-process pseudo handle; returns actual mapped image NT name. No CreateFile, mapping, new file/process handle or close obligation is introduced.",
+    "Compare current drive target plus exact OS-chosen DOS suffix against complete mapped NT image name with Windows Unicode ordinal ignore-case. No System32/SysWOW64 replacement, basename or prefix match.",
+    "Read current drive mapping again before creating release capability and require the full NT expectation unchanged; final mapping change fails closed.",
+    "All path/mapping buffers remain fixed1024 UTF16 units; bound/truncation/NUL checks remain. OnceLock, single intentional process-lifetime PIN, failure caching and typed system free ABI are unchanged.",
+    "Loader GetModuleFileName is now cfg(test) diagnostic only; it is not treated as mapped file identity."
+  ],
+  "testSource": {
+    "count": 8,
+    "previousCount": 6,
+    "newTests": 2,
+    "filter": "com_task::tests::task_memory_",
+    "runtime": "NOT_RUN",
+    "changes": "All six existing purposes retained; actual module identity assertions now compare mapped NT paths. Verbose zero-array diagnostic removed in favor of bounded valid path-slice logging. Added wrong-volume/folder/module/current-vs-prior/changed-drive and malformed/oversized metadata tests. Alloc/free pairing still resolves both names from same pinned Ole32, not generated bindings."
+  },
+  "primary": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamew",
+      "supports": "Loaded format can retain long/short or special-prefix spelling. Its string is not required to be physical mapped path identity."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-getmappedfilenamew",
+      "supports": "Maps an address to actual mapped filename. K32 entry exported by Kernel32 starting Win7/Server2008R2; fixed buffers and zero/full failures checked."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-querydosdevicew",
+      "supports": "Only queried drive, not enumeration; first MULTI_SZ string current, later strings prior mappings; Kernel32 WindowsXP+. Requery does not mutate mappings."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/memory/obtaining-a-file-name-from-a-file-handle",
+      "supports": "Official example relates mapped NT device-name paths to QueryDosDevice drive mapping. This candidate uses an already-loaded image and creates no sample file/map owners."
+    }
+  ],
+  "features": "Existing Win32_System_ProcessStatus and Win32_Storage_FileSystem already cover both new APIs. No extra Cargo/lock/dependency change beyond first Win32_Globalization addition.",
+  "limitations": [
+    "New K32/QueryDosDevice native behavior and exact NT equality remain NOT_RUN until parent owned real test; original failed source and raw diagnostic are preserved.",
+    "The mapping comparison proves complete OS-observed image path relation under current OS drive/object namespace, not DLL content signing or resistance to a malicious administrator rewriting protected system files.",
+    "Arbitrary UNC/SUBST/unsupported device target mappings are not silently normalized. System path construction remains the existing local drive OS target.",
+    "Modern/Win7 MSVC all22 actual import proofs and Win7/10/11/Seewo runtime evidence remain separate pending gates.",
+    "The previous documentation draft describes old loader-path comparison and must be revised to mapped NT identity before merging."
+  ],
+  "operations": "Only R58 independent owned source and evidence edits; rustfmt/diff/metadata architecture only. No Cargo build/test/clippy, Windows/SSH, CI, main edits or Git commit."
+}

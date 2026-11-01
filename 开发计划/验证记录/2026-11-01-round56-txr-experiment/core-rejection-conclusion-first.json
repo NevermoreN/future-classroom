@@ -1,0 +1,46 @@
+{
+  "status": "R56_CANDIDATE_REJECTED_READ_SET_CAS_COUNTEREXAMPLE_CONFIRMED",
+  "scope": "Read-only conclusion from frozen actual Win11/WOW64 scratch evidence; no new prototype/build/Windows action.",
+  "actualCounterexample": {
+    "source": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-diagnostic-windows-first.json",
+    "sha256": "5f9334127306ca1629ec4e4b1162a8ca35f2b5e65a31c361d80d10474e793ef8",
+    "actualNativeStatus": "FAIL",
+    "cleanup": "PASS",
+    "phase": "ordinarywriter,disable,phase2 afterexactpreimageread butbeforestageddelete",
+    "foreignOpenSetCloseLstatus": [
+      0,
+      0,
+      0
+    ],
+    "ownFailure": null,
+    "ownMutated": true,
+    "ownReturnedObservation": "Absent",
+    "postSettlementRawQueryLstatus": 2,
+    "postSettlementRawDecoded": "Absent"
+  },
+  "independentEvidence": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/ordinary-counterexample-independent-first.json",
+    "sha256": "c900a7013a51ce935310f42d3a86fbedbd877dea3d9fec26ee6b1dcb51edd922"
+  },
+  "causalConclusion": "The external replacement was successfully written after the approved preimage was read, then this candidate deleted it and reported success. This falsifies this candidate's proposed read-set CAS guarantee. The demonstrated window precedes the staged delete; it is not evidence blaming HKEY closure before commit.",
+  "notClaimed": [
+    "No conclusion about all TxR APIs/isolation modes or all Windows versions.",
+    "No transacted competitor/phase3/enable combination result: the first strict failure stopped that matrix.",
+    "Other passing tests cannot waive this counterexample; originalFAIL/cleanupPASS retained."
+  ],
+  "disposition": {
+    "production": "MainR56fourfiles withdrawn to9ebe byroot; candidate and diagnostics remain independentworktree/evidence. Do not qualify/sync this as a successfulCAS fix.",
+    "proof": {
+      "path": "/tmp/fc-round56-transactional-autorun-evidence/main-withdrawal-first.json",
+      "sha256": "476b95cd63dfb490d815721bd0f0ea66c5ca8af9f42335b1b43783470b377b79"
+    },
+    "futureInstaller": "Strict MSI Run ownership cleanup remains NOT_IMPLEMENTED/NOT_VALIDATED and must not be enabled from this rejected candidate. A KTM transaction does not supply install identity, full-lifetime maintenance ownership or SQLite/MSI atomicity.",
+    "existingBaseline": "This rejects the new CASclaim. It does not reclassify the restored baseline ordinary registry implementation as CAS or completeMSIcleanup."
+  },
+  "execution": {
+    "sourceMutation": false,
+    "Cargo": false,
+    "Windows": false,
+    "newTests": false
+  }
+}

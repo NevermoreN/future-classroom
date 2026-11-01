@@ -1,0 +1,135 @@
+{
+  "schema": "future-classroom.r57-expanded-source-artifact-validator/v1",
+  "status": "FROZEN_NEW_SOURCE_VALIDATOR_MODELS_PASS_NO_ARTIFACT_AUDITED",
+  "recordedUtc": "2026-11-01T02:32:03.924869+00:00",
+  "oldValidator": {
+    "path": "/tmp/fc-round55-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 55618,
+    "sha256": "cf3780a6d08dec8f395383a20a9a1992b5e7d5a4b70f5cf865c16ce0b5e13e9c",
+    "unchanged": true,
+    "scope": "Original source pin ed26 and10000 inventory; R55 preserved results not modified."
+  },
+  "newValidator": {
+    "path": "/tmp/fc-round57-ci-inventory-evidence/verify-ci-artifact-expanded-first.py",
+    "bytes": 61502,
+    "sha256": "de7d52d7ca2c04a72b4dcd4de727fd1b1b2882259024e5bbc8b184007679fbb9",
+    "ciSourcePin": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd",
+    "maxSourcePaths": 20000
+  },
+  "logicDiff": {
+    "path": "/tmp/fc-round57-ci-inventory-evidence/expanded-validator-logic-first.diff",
+    "bytes": 14983,
+    "sha256": "63f0af433e7fb73824dbbbf089b2bb494ff28ddedbd704869c38a0ab4cb59f52",
+    "productionChanges": [
+      "CI pin to exact0cef matching actualR57PS helper source; same ci_source_matches predicate used by audit and byte-fixture test.",
+      "MAX_SOURCE_PATHS20000 for source-only parseGitTree/parsePaths/fullGit expected+actual/S/H and sources metadata rows; six unique_rows production calls pass explicit newmax.",
+      "summary.paths requires20000; old10000 summary rejected.",
+      "All other production functions/methods and existing constants AST-identical; no generic or artifact capacity expansion."
+    ],
+    "explicitSourceRowCalls": [
+      "unique_rows(rows, max_rows=MAX_SOURCE_PATHS)",
+      "unique_rows(tree.get('files'), max_rows=MAX_SOURCE_PATHS)",
+      "unique_rows(expected_rows, max_rows=MAX_SOURCE_PATHS)",
+      "unique_rows(hashed, max_rows=MAX_SOURCE_PATHS)",
+      "unique_rows(hist.get('checkout_metadata'), max_rows=MAX_SOURCE_PATHS)",
+      "unique_rows(expected, max_rows=MAX_SOURCE_PATHS)"
+    ],
+    "astIdenticalFunctionsAndMethods": [
+      "need",
+      "integer",
+      "hexstr",
+      "digest",
+      "file_fact",
+      "json_pairs",
+      "decode_json",
+      "safe_path",
+      "domain",
+      "unique_rows",
+      "compare_checkout",
+      "cargo_arguments",
+      "required_commands",
+      "terminal_pass",
+      "pe_header",
+      "unwrap_metadata",
+      "output_path",
+      "zip_inventory",
+      "main",
+      "Audit.__init__",
+      "Audit.check",
+      "Audit.record",
+      "Audit.original",
+      "Audit.json",
+      "Audit.log",
+      "Audit.textlog",
+      "Audit.git",
+      "Audit.official",
+      "Audit.zip_members",
+      "Audit.commands_and_baseline",
+      "Audit.pe_and_associations",
+      "Audit.cleanup",
+      "Audit.run"
+    ]
+  },
+  "selftest": {
+    "originalFirstFailure": {
+      "source": "expanded-validator-first-failed.py",
+      "sourceSha256": "38bfae25b39b0b40634dd706afc69f58d2884c75a4877656c31f8ffa0f888169",
+      "stdout": "expanded-validator-selftest-first.stdout.log",
+      "stderr": "expanded-validator-selftest-first.stderr.log",
+      "command": "expanded-validator-selftest-first.command.json",
+      "reason": "Old small triple fixture retained10000 while production correctly required20000; saved then fixed only fixture."
+    },
+    "second": {
+      "report": "expanded-validator-selftest-second.json",
+      "sha256": "2a457ad04f7efe71b944233ba6899d1e79f3a04671a76ab0eb64b22325288520",
+      "groups": 24,
+      "exitCode": 0,
+      "stdout": "expanded-validator-selftest-second.stdout.log",
+      "stderr": "expanded-validator-selftest-second.stderr.log",
+      "command": "expanded-validator-selftest-second.command.json"
+    },
+    "expectedNegativeCiPhase": {
+      "path": "expanded-validator-selftest-second.phase-negative.json",
+      "status": "FAIL_EXPECTED_SYNTHETIC_CI_FAILURE",
+      "sha256": "9f40622789d7eac8f6c533f723d7222e7b2b73c389673977fe010cdecaa21e09",
+      "cleanupStillObserved": true
+    },
+    "newCases": [
+      "Real20000 Git/path rows with index10000 and lastentry preserved;20001 both rejected.",
+      "Full20000 partition with19999historical rows or10001SHA rows, no omitted metadata.",
+      "Missinghistorical/fullGit/SHA tail rejected; old10000summary rejected.",
+      "ActualimmutablebeforeCIbytes reject undernewpin; actualnewCIbytes accept.",
+      "Genericunique_rows default10000 andZIP member cap10000 unchanged; all bytecaps unchanged."
+    ],
+    "scope": "Pure bounded Python models only, not CI/artifact/runtime evidence."
+  },
+  "actualR57PowerShellSourceBinding": {
+    "path": "pure-powershell-first.json",
+    "sha256": "c4162dae1f1e42f1fbcf427fa1a575d053ce5657a3fd3e04fa36f565d2e79302",
+    "status": "PASS_ACTUAL_POWERSHELL_MEMORY_ONLY",
+    "sourceSha256": "0cef8840cd51b1383e252b08df14b5c19f8dea9c3903583f97a4e6d4e5f365bd"
+  },
+  "remainingBounds": {
+    "genericUniqueRowsDefault": 10000,
+    "artifactZipMembers": 10000,
+    "perFileBytes": 67108864,
+    "actualShaSubsetBytes": 268435456,
+    "metadataBytes": 16777216,
+    "artifactPayloadBytes": 536870912,
+    "zipUnpackedBytes": 1073741824,
+    "peExecutableList": 128
+  },
+  "notRun": [
+    "Any CI artifact audit",
+    "Windows",
+    "SSH",
+    "Cargo",
+    "CI dispatch"
+  ],
+  "limits": [
+    "This validator prepares future sources with exact new CI pin and20000 contract; never use it to rewriteR55 old-source results green.",
+    "FullGit metadata remains distinct from actualSHA subset and exactLF-to-CRLF evidence. Historical payloads not falselyclaimed contenthashed.",
+    "Original CI failure still FAIL, independentcleanup stillobserved; no strict5s/productionlistener/Win7-runtime promotion.",
+    "New selftest source-pin case usesR57immutable before/after fixture paths underEV; preserve these when copying selftest assets. Artifact mode uses actual exact-source Git/CI evidence and does not depend on these model fixtures."
+  ]
+}

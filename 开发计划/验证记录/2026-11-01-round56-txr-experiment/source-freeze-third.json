@@ -1,0 +1,129 @@
+{
+  "status": "THIRD_SOURCE_FROZEN_STATIC_ONLY_PENDING_FINAL_MAIN_INTEGRATED_COMPILE_AND_RUNTIME",
+  "base": "9ebe818bfc57c075e8b21419082dd44130b0e923",
+  "files": [
+    {
+      "path": "crates/fc-windows/src/system/autorun.rs",
+      "bytes": 19567,
+      "sha256": "0d53cf0b4eecaea585ba744298fd08e26b956474804db20e1f46812372338bd0"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_tests.rs",
+      "bytes": 29830,
+      "sha256": "1bf2caf3945c4b71e6607ed79396687a29d867a341f0688a1b9a11dcea197568"
+    },
+    {
+      "path": "crates/fc-windows/src/system/autorun_transaction.rs",
+      "bytes": 11831,
+      "sha256": "3fbccab38a4edc12517503111b0f241ecac800740e75f52fc7d3cc997808e0a7"
+    },
+    {
+      "path": "crates/fc-bootstrap/src/application.rs",
+      "bytes": 260371,
+      "sha256": "765448626293a26398a79c88329703ea23e4659f250431bc6ef0cc4ad6bc029a"
+    }
+  ],
+  "priorFreeze": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/source-freeze-second.json",
+    "sha256": "42987369c012b49723d12717fc969fe587d1f8eab718b99e0296d08d2266a5ee"
+  },
+  "originalCompile": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/checks-second.json",
+    "sha256": "bd582269f70d1de2f4f4fd591d35aa578f49e328c8a47d27f7d5633a22e4b5f7",
+    "boundary": "Originalsecondfreeze only; these PASS results do not validate this changed thirdfreeze."
+  },
+  "patch": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/implementation-third.diff",
+    "bytes": 48806,
+    "sha256": "040ce18297beb4be24570245ce6925bc5d6d3b4e6d95b4a1e29bb2ec330f461c"
+  },
+  "incrementalDiff": {
+    "path": "/tmp/fc-round56-transactional-autorun-evidence/effect-fix-second-to-third.diff",
+    "sha256": "f97b133d6472b5e29586cf1a4bb85d4eb0a00f58a1856ec09478d88a1f1d5ca7",
+    "bytes": 7067
+  },
+  "staticCommands": [
+    {
+      "name": "fmt",
+      "argv": [
+        "rustup",
+        "run",
+        "1.97.1",
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/fc-windows/src/system/autorun.rs",
+        "crates/fc-windows/src/system/autorun_transaction.rs",
+        "crates/fc-windows/src/system/autorun_tests.rs"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.12588659208267927,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/fmt-third.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/fmt-third.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "architecture",
+      "argv": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.16468648007139564,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/architecture-third.stdout.log",
+        "bytes": 71,
+        "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/architecture-third.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "diffcheck",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 0.17805929412133992,
+      "stdout": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/diffcheck-third.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round56-transactional-autorun-evidence/diffcheck-third.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "testCount": 24,
+  "newRegression": "failed_transaction_close_records_only_actual_committed_effect_and_retains_owner",
+  "exactCorrection": "mutated=confirmedCommitted && stagedRegMutationSuccess, for both clean and failed-close settlement; emptydisable commit remains mutatedfalse.",
+  "injection": "RunAtLogin+NativeTransaction test-only perinstance flag withholds original CloseHandle, with no invalid/double close. Two isolated real scratch children use emptydisable and realenable commits, prove actualeffect flag false/true, tx-only retained exactHANDLE+permanentFaulted. Test-only exactnegative cleanup closes stillvalid originalhandle before rawread/ownedkeycleanup and never resets productionFaulted. This is not an observed kernelclose failure cause.",
+  "preserved": "Alloriginal15tests; sevenfirstfreeze additions and secondpanic regression remain. App open_until(context.deadline()) unchanged. Noports/domain/Cargo or unrelatedsource mutation.",
+  "nextValidation": "Root will integrate final4 R56files+R58final+R57scripts into main; one final targetedGNU libtest/normalproduct/stable+nightlystrict and twoPEchecks will then validate that exactintegrated source, using ownedR56target. No newCargo started here.",
+  "execution": {
+    "CargoAfterThirdMutation": false,
+    "Windows": false,
+    "SSH": false,
+    "CI": false,
+    "GitMutation": false
+  }
+}

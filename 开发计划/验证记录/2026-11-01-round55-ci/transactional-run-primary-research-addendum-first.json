@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "scope": "READ_ONLY_PRIMARY_DOCUMENTATION; NO_CODE_BUILD_WINDOWS_OR_CI",
+  "original_report": {
+    "path": "/tmp/fc-round55-ci-evidence/transactional-run-primary-research-first.json",
+    "sha256": "daea8a743032aa15d7915b240aafda31269e057e1dcc54b8f3d8610ada9aaf63",
+    "preserved": true
+  },
+  "decision": "Sufficient official basis to implement a fail-closed transactional RunAtLogin candidate, followed by real scratch-registry interleaving tests; not proof of universal serializable compare-and-swap.",
+  "sources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeytransactedw",
+      "fact": "Subsequent operations on the opened key are transacted; non-transacted operations before commit cause rollback. Documentation does not specify every competing TxR read-set schedule, writer priority, blocking duration, or exact conflict error."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle",
+      "fact": "Handles bound to a transaction should be closed before commit. HKEY uses RegCloseKey; CloseHandle does not close registry keys."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-committransaction",
+      "fact": "FALSE reports failure with GetLastError; documentation does not establish that every failure proves no prior commit. Do not treat all failed/uncertain outcomes as mutation-free."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/ktmw32/nf-ktmw32-gettransactioninformation",
+      "fact": "Outcome can be queried with TRANSACTION_QUERY_INFORMATION; inability to prove the outcome remains unknown."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/win32/docs/desktop-src/Ktm/programming-model.md",
+      "fact": "A transaction must never be assumed active: it can be rolled back for many reasons and at any time."
+    }
+  ],
+  "candidate_sequence": [
+    "Keep existing exact authority, intent, journal, and original deadline.",
+    "Begin one transaction; open existing fixed Run key transactionally; enabling a missing key requires a separately reviewed RegCreateKeyTransacted path.",
+    "Read bounded exact preimage and compare; fresh check before tentative transacted set/delete.",
+    "Treat staging as tentative, not as a committed mutation.",
+    "Actually RegCloseKey successfully before commit; perform final memory-only fresh check.",
+    "Commit, then classify actual outcome conservatively; rollback when applicable and check actual handle closure.",
+    "Only after transaction cleanup use ordinary observation; never fall back to ordinary set/delete."
+  ],
+  "scope_adjustment": "The first report deliberately proposed negative-only deletion. Parent subsequently requested exploring both existing enable and disable paths; the documented handle-based mechanism supports that candidate direction without weakening original authority/journal policy.",
+  "limits": [
+    "No claim of bounded native syscall completion or writer priority.",
+    "No claim all concurrent transactional read/write schedules are serializable.",
+    "No MSI account selection, full maintenance-owner lifecycle, runtime certification, or platform PASS is supplied by this research.",
+    "Cleanup failure must preserve exact owner and reject replacement, rather than report a logical cancellation as physical release."
+  ],
+  "verification_pending": [
+    "Real scratch key external ordinary replacement between comparison and staging/commit.",
+    "Competing transactional writer timing and actual conflict outcomes.",
+    "Fresh-check cancellation, key absence, unsupported transaction manager, rollback/close failure and unknown outcome handling.",
+    "Win7/10/11 actual execution evidence separately."
+  ]
+}

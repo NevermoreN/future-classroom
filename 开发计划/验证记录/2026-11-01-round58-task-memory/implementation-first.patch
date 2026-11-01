@@ -1,0 +1,636 @@
+--- a/crates/fc-windows/Cargo.toml
++++ b/crates/fc-windows/Cargo.toml
+@@ -15,7 +15,7 @@
+ 
+ [target.'cfg(windows)'.dependencies]
+ windows = { version = "=0.62.2", features = [
+-  "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Graphics_Direct2D",
++  "Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_Graphics_Direct2D",
+   "Win32_Graphics_Direct2D_Common", "Win32_Graphics_DirectWrite", "Win32_Graphics_Dxgi_Common",
+   "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Threading",
+   "Win32_System_SystemInformation", "Win32_Security", "Win32_Security_Cryptography",
+--- a/crates/fc-windows/src/lib.rs
++++ b/crates/fc-windows/src/lib.rs
+@@ -3,6 +3,8 @@
+ #[cfg(windows)]
+ pub mod audio;
+ pub mod calendar_download;
++#[cfg(windows)]
++mod com_task;
+ pub mod http;
+ #[cfg(windows)]
+ mod native;
+--- a/crates/fc-windows/src/native.rs
++++ b/crates/fc-windows/src/native.rs
+@@ -21,15 +21,6 @@
+         UI::{Shell::*, WindowsAndMessaging::*},
+     },
+ };
+-
+-// The current metadata binds CoTaskMemFree to combase.dll (Win8+). The same
+-// documented function is exported by ole32.dll on Win7. Keep this one corrected
+-// import narrow instead of accidentally importing the Windows Runtime DLL.
+-#[link(name = "ole32")]
+-unsafe extern "system" {
+-    #[link_name = "CoTaskMemFree"]
+-    fn win7_co_task_mem_free(memory: *const core::ffi::c_void);
+-}
+ 
+ pub struct SystemRandom;
+ impl fc_ports::RandomSource for SystemRandom {
+@@ -351,12 +342,12 @@
+ pub fn program_data() -> Result<PathBuf> {
+     // SAFETY: Windows allocates the NUL-terminated KnownFolder result with CoTaskMem;
+     // convert to owned UTF-16 string before freeing it exactly once, including errors.
+-    unsafe {
++    crate::com_task::with_task_memory(|memory| unsafe {
+         let ptr = SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, None)?;
+         let value = ptr.to_string();
+-        win7_co_task_mem_free(ptr.0.cast());
++        memory.free(ptr.0.cast());
+         Ok(PathBuf::from(value?).join("FutureClassroom"))
+-    }
++    })
+ }
+ 
+ pub fn probe(seconds: u32) -> Result<NativeProbeReport> {
+--- a/crates/fc-windows/src/materials/chooser.rs
++++ b/crates/fc-windows/src/materials/chooser.rs
+@@ -13,11 +13,6 @@
+         UI::Shell::{Common::COMDLG_FILTERSPEC, *},
+     },
+ };
+-#[link(name = "ole32")]
+-unsafe extern "system" {
+-    #[link_name = "CoTaskMemFree"]
+-    fn free_task_memory(memory: *const core::ffi::c_void);
+-}
+ pub struct SelectedFile {
+     path: PathBuf,
+ }
+@@ -67,7 +62,7 @@
+     // SAFETY: called on the UI STA. No path has been trusted or opened here;
+     // worker handle validation follows before copying any bytes. The native modal
+     // loop continues routing WTS/power to the independent memory-only host control.
+-    unsafe {
++    crate::com_task::with_task_memory(|memory| unsafe {
+         let dialog: IFileOpenDialog =
+             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
+         dialog.SetOptions(
+@@ -92,12 +87,12 @@
+         let item = dialog.GetResult()?;
+         let p = item.GetDisplayName(SIGDN_FILESYSPATH)?;
+         let value = p.to_string();
+-        free_task_memory(p.0.cast());
++        memory.free(p.0.cast());
+         let path = PathBuf::from(value?);
+         // Force drive-letter local validation again on the worker; picker options
+         // alone are not a network/reparse/type guarantee.
+         Ok(Some(SelectedFile { path }))
+-    }
++    })
+ }
+ 
+ pub fn select_content_txt(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
+@@ -109,7 +104,7 @@
+ fn select_content(owner: Option<HWND>, images: bool) -> Result<Vec<SelectedFile>> {
+     // SAFETY: own UI STA picker; all external paths remain opaque selections.
+     // A bounded worker pins/verifies every source again after the dialog closes.
+-    unsafe {
++    crate::com_task::with_task_memory(|memory| unsafe {
+         let dialog: IFileOpenDialog =
+             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
+         let mut options = dialog.GetOptions()?
+@@ -151,20 +146,20 @@
+             let item = items.GetItemAt(index)?;
+             let text = item.GetDisplayName(SIGDN_FILESYSPATH)?;
+             let value = text.to_string();
+-            free_task_memory(text.0.cast());
++            memory.free(text.0.cast());
+             files.push(SelectedFile {
+                 path: PathBuf::from(value?),
+             });
+         }
+         Ok(files)
+-    }
++    })
+ }
+ 
+ /// Native picker only; no external package bytes are opened on the UI thread.
+ pub fn select_backup(owner: Option<HWND>) -> Result<Option<SelectedFile>> {
+     // SAFETY: called on the UI STA, same COM lifetime and cancellation contract
+     // as the material picker. Worker validation establishes actual file trust.
+-    unsafe {
++    crate::com_task::with_task_memory(|memory| unsafe {
+         let dialog: IFileOpenDialog =
+             CoCreateInstance(&FileOpenDialog, None, CLSCTX_INPROC_SERVER)?;
+         dialog.SetOptions(
+@@ -189,7 +184,7 @@
+         }
+         let text = dialog.GetResult()?.GetDisplayName(SIGDN_FILESYSPATH)?;
+         let value = text.to_string();
+-        free_task_memory(text.0.cast());
++        memory.free(text.0.cast());
+         let path = PathBuf::from(value?);
+         if !path
+             .file_name()
+@@ -199,7 +194,7 @@
+             return Err(Error::from_hresult(E_INVALIDARG));
+         }
+         Ok(Some(SelectedFile { path }))
+-    }
++    })
+ }
+ /// Selection only: returns an opaque untrusted target, creates no files and
+ /// changes no current directory. Existing targets are never overwritten later.
+@@ -209,7 +204,7 @@
+     }
+     // SAFETY: UI STA owns the modal dialog. HSTRINGs live through synchronous
+     // calls; the returned filesystem name still requires worker handle checks.
+-    unsafe {
++    crate::com_task::with_task_memory(|memory| unsafe {
+         let dialog: IFileSaveDialog =
+             CoCreateInstance(&FileSaveDialog, None, CLSCTX_INPROC_SERVER)?;
+         dialog.SetOptions(
+@@ -235,7 +230,7 @@
+         }
+         let text = dialog.GetResult()?.GetDisplayName(SIGDN_FILESYSPATH)?;
+         let value = text.to_string();
+-        free_task_memory(text.0.cast());
++        memory.free(text.0.cast());
+         BackupDestination::from_picker(PathBuf::from(value?)).map(Some)
+-    }
+-}
++    })
++}
+--- a/crates/fc-windows/src/audio/device.rs
++++ b/crates/fc-windows/src/audio/device.rs
+@@ -16,15 +16,6 @@
+         System::Com::*,
+     },
+ };
+-// The same COM task allocator is available through Ole32 on the Win7 baseline.
+-// The generated binding targets combase.dll; keep this import narrow as in the
+-// native KnownFolder and file-picker adapters without changing ownership.
+-#[link(name = "ole32")]
+-unsafe extern "system" {
+-    #[link_name = "CoTaskMemFree"]
+-    fn free_task_memory(memory: *const core::ffi::c_void);
+-}
+-
+ static ACTIVE: AtomicBool = AtomicBool::new(false);
+ static POISONED: AtomicBool = AtomicBool::new(false);
+ const MAX_ID_UNITS: usize = 32_768;
+@@ -270,26 +261,28 @@
+         Err(error) if error.code().0 as u32 == 0x80070490 => return Ok(None), // E_NOTFOUND
+         Err(error) => return Err(error),
+     };
+-    // SAFETY: returned PWSTR is an allocated opaque endpoint ID; always free it.
+-    let id = unsafe { endpoint.GetId()? };
+-    let mut units = Vec::new();
+-    let mut result = Err(Error::from_hresult(E_FAIL));
+-    if !id.is_null() {
+-        for index in 0..MAX_ID_UNITS {
+-            // SAFETY: GetId returns NUL-terminated COM allocated storage.
+-            let unit = unsafe { id.0.add(index).read() };
+-            if unit == 0 {
+-                result = Ok(Some(units));
+-                break;
++    crate::com_task::with_task_memory(|memory| {
++        // SAFETY: returned PWSTR is an allocated opaque endpoint ID; always free it.
++        let id = unsafe { endpoint.GetId()? };
++        let mut units = Vec::new();
++        let mut result = Err(Error::from_hresult(E_FAIL));
++        if !id.is_null() {
++            for index in 0..MAX_ID_UNITS {
++                // SAFETY: GetId returns NUL-terminated COM allocated storage.
++                let unit = unsafe { id.0.add(index).read() };
++                if unit == 0 {
++                    result = Ok(Some(units));
++                    break;
++                }
++                units.push(unit);
+             }
+-            units.push(unit);
+-        }
+-    }
+-    // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
+-    unsafe {
+-        free_task_memory(id.0.cast());
+-    }
+-    result
++        }
++        // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
++        unsafe {
++            memory.free(id.0.cast());
++        }
++        result
++    })
+ }
+ struct Registration {
+     client: IMMNotificationClient,
+--- /dev/null
++++ b/crates/fc-windows/src/com_task.rs
+@@ -0,0 +1,231 @@
++//! COM task storage uses the documented system Ole32 allocator, including on
++//! Win7. Resolving by name avoids a same-symbol MSVC import-library choice that
++//! can otherwise bind a plain `#[link(name = "ole32")]` declaration to combase.
++//!
++//! One initialization permanently pins the already-loaded exact system Ole32.
++//! This intentional, bounded process-lifetime pin makes every returned function
++//! pointer valid through process exit; it is not a per-operation DLL reference.
++//! No DLL is loaded, no search policy changes, and no allocation is attempted if
++//! resolution fails. Failed initialization is cached too, with no replacement.
++use std::{ffi::c_void, sync::OnceLock};
++use windows::{
++    core::{s, Error, Result, BOOL, HRESULT, PCSTR, PCWSTR},
++    Win32::{
++        Foundation::{ERROR_INSUFFICIENT_BUFFER, E_ACCESSDENIED, E_NOTIMPL, HMODULE},
++        Globalization::{CompareStringOrdinal, CSTR_EQUAL},
++        System::{
++            LibraryLoader::{
++                GetModuleFileNameW, GetModuleHandleExW, GetProcAddress,
++                GET_MODULE_HANDLE_EX_FLAG_PIN,
++            },
++            SystemInformation::{
++                GetNativeSystemInfo, GetSystemDirectoryW, GetSystemWow64DirectoryW,
++                PROCESSOR_ARCHITECTURE_AMD64, PROCESSOR_ARCHITECTURE_INTEL, SYSTEM_INFO,
++            },
++            Threading::{GetCurrentProcess, IsWow64Process},
++        },
++    },
++};
++
++type FreeTaskMemory = unsafe extern "system" fn(*const c_void);
++
++// Only a function pointer is shared. There are no Send/Sync handle wrappers or
++// owner transmutations. Ole32 was pinned before this value became reachable.
++static ALLOCATOR: OnceLock<std::result::Result<TaskMemory, HRESULT>> = OnceLock::new();
++const PATH_UNITS: usize = 1024;
++const OLE32: &[u16] = &[
++    b'o' as u16,
++    b'l' as u16,
++    b'e' as u16,
++    b'3' as u16,
++    b'2' as u16,
++    b'.' as u16,
++    b'd' as u16,
++    b'l' as u16,
++    b'l' as u16,
++];
++
++#[derive(Clone, Copy)]
++pub(crate) struct TaskMemory {
++    free: FreeTaskMemory,
++}
++impl TaskMemory {
++    /// # Safety
++    /// `memory` is null or an allocation transferred by the COM task allocator,
++    /// not yet freed. It must be freed exactly once and never used afterwards.
++    pub(crate) unsafe fn free(self, memory: *const c_void) {
++        // SAFETY: caller supplies the task allocation. Resolution checked the
++        // exact export and ABI before the process-lifetime capability was made.
++        unsafe { (self.free)(memory) };
++    }
++}
++
++/// The operation (including any call that can return task storage) cannot begin
++/// until the fallible release capability has been resolved successfully.
++pub(crate) fn with_task_memory<T>(operation: impl FnOnce(TaskMemory) -> Result<T>) -> Result<T> {
++    with_resolver(allocator, operation)
++}
++
++fn with_resolver<T>(
++    resolve: impl FnOnce() -> Result<TaskMemory>,
++    operation: impl FnOnce(TaskMemory) -> Result<T>,
++) -> Result<T> {
++    operation(resolve()?)
++}
++
++fn allocator() -> Result<TaskMemory> {
++    ALLOCATOR
++        .get_or_init(|| resolve().map_err(|error| error.code()))
++        .as_ref()
++        .copied()
++        .map_err(|code| Error::from_hresult(*code))
++}
++
++struct ModulePath {
++    units: [u16; PATH_UNITS],
++    len: usize,
++}
++impl ModulePath {
++    fn as_pcwstr(&self) -> PCWSTR {
++        PCWSTR(self.units.as_ptr())
++    }
++    fn as_slice(&self) -> &[u16] {
++        &self.units[..self.len]
++    }
++}
++
++fn system_ole32_path() -> Result<ModulePath> {
++    let mut system = SYSTEM_INFO::default();
++    let mut wow64 = BOOL::default();
++    // SAFETY: synchronous calls write initialized, correctly sized outputs;
++    // GetCurrentProcess is a borrowed pseudo handle and is never closed here.
++    unsafe {
++        GetNativeSystemInfo(&mut system);
++        IsWow64Process(GetCurrentProcess(), &mut wow64)?;
++    }
++    // IsWow64Process is ambiguous for some ARM emulation. ARM64 support is not a
++    // confirmed project target; do not silently choose its wrong system folder.
++    // SAFETY: GetNativeSystemInfo initializes the documented architecture union.
++    let architecture = unsafe { system.Anonymous.Anonymous.wProcessorArchitecture };
++    if architecture != PROCESSOR_ARCHITECTURE_INTEL && architecture != PROCESSOR_ARCHITECTURE_AMD64
++    {
++        return Err(Error::from_hresult(E_NOTIMPL));
++    }
++    let mut path = ModulePath {
++        units: [0; PATH_UNITS],
++        len: 0,
++    };
++    // SAFETY: fixed bounded output buffers. WOW64 uses its actual 32-bit system
++    // directory, not an unredirected System32 string compared against SysWOW64.
++    let len = unsafe {
++        if wow64.as_bool() {
++            GetSystemWow64DirectoryW(Some(&mut path.units))
++        } else {
++            GetSystemDirectoryW(Some(&mut path.units))
++        }
++    } as usize;
++    if len == 0 {
++        return Err(Error::from_thread());
++    }
++    if len >= PATH_UNITS {
++        return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++    }
++    // System directories must be absolute, non-truncated and NUL terminated.
++    // No environment variable, user path or caller-provided DLL name is used.
++    if len < 3
++        || path.units[1] != b':' as u16
++        || path.units[2] != b'\\' as u16
++        || path.units[..len].contains(&0)
++        || path.units[len] != 0
++    {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    path.len = len;
++    if path.units[path.len - 1] != b'\\' as u16 {
++        if path.len + 1 >= PATH_UNITS {
++            return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++        }
++        path.units[path.len] = b'\\' as u16;
++        path.len += 1;
++    }
++    if path.len + OLE32.len() >= PATH_UNITS {
++        return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++    }
++    path.units[path.len..path.len + OLE32.len()].copy_from_slice(OLE32);
++    path.len += OLE32.len();
++    Ok(path)
++}
++
++fn loaded_path(module: HMODULE) -> Result<ModulePath> {
++    let mut path = ModulePath {
++        units: [0; PATH_UNITS],
++        len: 0,
++    };
++    // SAFETY: the returned module has already been pinned, and the buffer is
++    // fully owned. A full/truncated buffer is always rejected.
++    let len = unsafe { GetModuleFileNameW(Some(module), &mut path.units) } as usize;
++    if len == 0 {
++        return Err(Error::from_thread());
++    }
++    if len >= PATH_UNITS {
++        return Err(Error::from_hresult(ERROR_INSUFFICIENT_BUFFER.to_hresult()));
++    }
++    if path.units[..len].contains(&0) || path.units[len] != 0 {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    path.len = len;
++    Ok(path)
++}
++
++fn same_system_path(expected: &[u16], actual: &[u16]) -> bool {
++    // Case-insensitive Windows ordinal comparison, including Unicode paths. No
++    // basename-only match, alias expansion or System32/SysWOW64 equivalence.
++    if expected.is_empty() || expected.len() != actual.len() || expected.len() >= PATH_UNITS {
++        return false;
++    }
++    // SAFETY: valid owned UTF-16 slices, explicit lengths bounded below i32::MAX,
++    // and true is passed through the documented BOOL conversion. API failure (0)
++    // is not CSTR_EQUAL and therefore cannot authorize a different module.
++    unsafe { CompareStringOrdinal(expected, actual, true) == CSTR_EQUAL }
++}
++
++fn resolve() -> Result<TaskMemory> {
++    let expected = system_ole32_path()?;
++    let mut module = HMODULE::default();
++    // SAFETY: the full OS-selected system path is bounded and NUL terminated.
++    // This only retrieves an ALREADY LOADED module. Ole32 is a static dependency
++    // of the existing COM calls. PIN holds it until process termination, including
++    // on a later validation failure; OnceLock bounds this to one initialization.
++    unsafe {
++        GetModuleHandleExW(
++            GET_MODULE_HANDLE_EX_FLAG_PIN,
++            expected.as_pcwstr(),
++            &mut module,
++        )?
++    };
++    let actual = loaded_path(module)?;
++    if !same_system_path(expected.as_slice(), actual.as_slice()) {
++        return Err(Error::from_hresult(E_ACCESSDENIED));
++    }
++    resolve_export(module)
++}
++
++fn export(module: HMODULE, name: PCSTR) -> Result<unsafe extern "system" fn() -> isize> {
++    // SAFETY: private callers pass the pinned module and a static NUL name. This
++    // only retrieves an address, not a typed capability for arbitrary exports.
++    unsafe { GetProcAddress(module, name) }.ok_or_else(Error::from_thread)
++}
++
++fn resolve_export(module: HMODULE) -> Result<TaskMemory> {
++    let export = export(module, s!("CoTaskMemFree"))?;
++    // SAFETY: production name is exactly documented CoTaskMemFree: WINAPI void
++    // (LPVOID). `system` preserves stdcall on x86 and one pointer/void ABI. The
++    // non-null export belongs to the pinned module (forwarders are loader-owned).
++    let free = unsafe {
++        std::mem::transmute::<unsafe extern "system" fn() -> isize, FreeTaskMemory>(export)
++    };
++    Ok(TaskMemory { free })
++}
++
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/crates/fc-windows/src/com_task/tests.rs
+@@ -0,0 +1,168 @@
++use super::*;
++use std::{cell::Cell, ptr};
++use windows::Win32::System::LibraryLoader::GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
++
++type AllocTaskMemory = unsafe extern "system" fn(usize) -> *mut c_void;
++
++fn current_module() -> HMODULE {
++    let expected = system_ole32_path().expect("OS-selected system directory");
++    let mut module = HMODULE::default();
++    // SAFETY: initialization succeeded before this helper; its exact module is
++    // pinned. This test borrows that reference and never decrements it.
++    unsafe {
++        GetModuleHandleExW(
++            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++            expected.as_pcwstr(),
++            &mut module,
++        )
++        .expect("the exact pinned module remains loaded");
++    }
++    assert!(same_system_path(
++        expected.as_slice(),
++        loaded_path(module).unwrap().as_slice()
++    ));
++    module
++}
++
++fn allocation_export(module: HMODULE) -> AllocTaskMemory {
++    // SAFETY: resolve from the same exact pinned Ole32, rather than generating a
++    // possibly competing import for the test allocator. The documented ABI is
++    // WINAPI LPVOID(size_t), including stdcall and 32-bit size_t on x86.
++    let export = unsafe { GetProcAddress(module, s!("CoTaskMemAlloc")) }
++        .expect("system Ole32 CoTaskMemAlloc export");
++    unsafe { std::mem::transmute::<unsafe extern "system" fn() -> isize, AllocTaskMemory>(export) }
++}
++
++#[test]
++fn task_memory_real_system_ole32_allocate_free_and_null() {
++    with_task_memory(|memory| {
++        let module = current_module();
++        let alloc = allocation_export(module);
++        // SAFETY: real default COM task allocation; release capability already
++        // exists and the module stays pinned. No generated task allocator import.
++        unsafe {
++            let storage = alloc(64).cast::<u8>();
++            assert!(!storage.is_null());
++            storage.write_bytes(0xa5, 64);
++            assert_eq!(std::slice::from_raw_parts(storage, 64), &[0xa5; 64]);
++            memory.free(storage.cast());
++            memory.free(ptr::null());
++        }
++        Ok(())
++    })
++    .expect("real system Ole32 task allocator");
++}
++
++#[test]
++fn task_memory_missing_export_rejects_before_any_task_allocation() {
++    let memory = allocator().unwrap();
++    let module = current_module();
++    let allocated = Cell::new(0);
++    let result = with_resolver(
++        || {
++            export(module, s!("FutureClassroom_R58_Absent_Task_Export"))?;
++            Ok(memory)
++        },
++        |resolved| {
++            allocated.set(allocated.get() + 1);
++            let alloc = allocation_export(module);
++            // SAFETY: this real allocation branch must not run on lookup failure.
++            unsafe {
++                let pointer = alloc(16);
++                resolved.free(pointer);
++            }
++            Ok(())
++        },
++    );
++    assert!(result.is_err());
++    assert_eq!(allocated.get(), 0);
++    // A deliberately missing test export did not alter the real once-resolved
++    // process capability. It is still callable, not replaced by a test fake.
++    unsafe { memory.free(ptr::null()) };
++}
++
++#[test]
++fn task_memory_allocator_module_and_capability_remain_process_pinned() {
++    let first = allocator().unwrap();
++    let first_module = current_module();
++    for _ in 0..4 {
++        let next = allocator().unwrap();
++        assert!(std::ptr::fn_addr_eq(first.free, next.free));
++        assert_eq!(current_module(), first_module);
++        // SAFETY: null is documented as a no-op. Cached function remains valid
++        // between calls without per-call LoadLibrary/refcount/unload operations.
++        unsafe { next.free(ptr::null()) };
++    }
++}
++
++#[test]
++fn task_memory_real_wow64_path_uses_the_matching_system_directory() {
++    allocator().unwrap();
++    let expected = system_ole32_path().unwrap();
++    let module = current_module();
++    let actual = loaded_path(module).unwrap();
++    assert!(same_system_path(expected.as_slice(), actual.as_slice()));
++    let mut wow64 = BOOL::default();
++    // SAFETY: borrowed process pseudo handle and synchronous bool output.
++    unsafe { IsWow64Process(GetCurrentProcess(), &mut wow64).unwrap() };
++    let mut selected = [0u16; PATH_UNITS];
++    // SAFETY: owned bounded directory output, matching the actual process mode.
++    let len = unsafe {
++        if wow64.as_bool() {
++            GetSystemWow64DirectoryW(Some(&mut selected))
++        } else {
++            GetSystemDirectoryW(Some(&mut selected))
++        }
++    } as usize;
++    assert!(len > 0 && len < PATH_UNITS);
++    let expected_directory_len = expected.len - OLE32.len() - 1;
++    // API documents a possible trailing slash only for a root directory.
++    let directory_len = if selected[len - 1] == b'\\' as u16 {
++        len - 1
++    } else {
++        len
++    };
++    assert!(same_system_path(
++        &selected[..directory_len],
++        &expected.as_slice()[..expected_directory_len]
++    ));
++    eprintln!(
++        "R58_TASK_MEMORY_SYSTEM_MODULE wow64={} exact_path=true pinned=true allocation_abi=system",
++        wow64.as_bool()
++    );
++}
++
++#[test]
++fn task_memory_path_check_rejects_wrong_folder_prefix_and_module() {
++    let wide = |value: &str| value.encode_utf16().collect::<Vec<_>>();
++    let expected = wide("C:\\Windows\\SysWOW64\\Ole32.dll");
++    assert!(same_system_path(
++        &expected,
++        &wide("c:\\WINDOWS\\syswow64\\ole32.DLL")
++    ));
++    for wrong in [
++        "C:\\Windows\\System32\\Ole32.dll",
++        "C:\\Windows\\SysWOW64\\combase.dll",
++        "C:\\Users\\Synthetic\\Ole32.dll",
++        "Ole32.dll",
++        "C:\\Windows\\SysWOW64\\Ole32.dll.extra",
++    ] {
++        assert!(!same_system_path(&expected, &wide(wrong)), "{wrong}");
++    }
++}
++
++#[test]
++fn task_memory_system_path_uses_windows_unicode_case_rules() {
++    let upper = "C:\\WÜNDOWS\\System32\\Ole32.dll"
++        .encode_utf16()
++        .collect::<Vec<_>>();
++    let lower = "c:\\wündows\\system32\\ole32.DLL"
++        .encode_utf16()
++        .collect::<Vec<_>>();
++    assert!(same_system_path(&upper, &lower));
++    assert!(!same_system_path(&upper, &[]));
++    assert!(!same_system_path(
++        &[b'x' as u16; PATH_UNITS],
++        &[b'x' as u16; PATH_UNITS]
++    ));
++}
