@@ -1,0 +1,194 @@
+{
+  "status": "PREPARED_THIRD_NATIVE_ORIGINAL_HANDLE_METADATA_ONLY_NOT_WINDOWS_VALIDATED",
+  "sourceGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "previous": [
+    {
+      "freeze": {
+        "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/final-preparation-freeze-first.json",
+        "bytes": 3222,
+        "sha256": "ef2f5218c18c4be2ed58ab715736ce597afa9ba8e3f2e10b8728e0885e1bf1af"
+      },
+      "allOriginalsUnchanged": true
+    },
+    {
+      "freeze": {
+        "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/final-preparation-freeze-second.json",
+        "bytes": 8576,
+        "sha256": "027b9df072c47375a32f51f1accf1185cf507a543b62d5cf4bc4f62e9f84689b"
+      },
+      "allOriginalsUnchanged": true
+    }
+  ],
+  "firstActualProductMsi": {
+    "report": {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/report.json",
+      "bytes": 68483,
+      "sha256": "5126fb9b3c20f861ce7b3cf1f5ba7024508dfb17d827430e5da3cc33afd9545e"
+    },
+    "status": "FAIL_PRODUCT_PHASE_OR_COVERAGE_RETAINED",
+    "failureCode": "PHASE_INDEPENDENT_ROLE_COVERAGE_UNKNOWN",
+    "reapply": "NOT_REACHED",
+    "scope": "Original fresh succeeds and cleanup /x succeeds; overall original finite role-coverage FAIL is preserved, not upgraded by this later instrument preparation."
+  },
+  "files": [
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/bind-production-msi-r78-third.py",
+      "bytes": 12144,
+      "sha256": "fdf2883efd291d0e5b01565b70970e59c42ff667f4130d007721382f305f07ec"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/GateRetirement.cs",
+      "bytes": 10693,
+      "sha256": "6384a7e0ab90e91fc3eeed9f0d922fc73f7a1f6d9c70062cf949253265d6cf01"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/Invoke-ProductionMsiPhases.ps1",
+      "bytes": 26752,
+      "sha256": "442d6be361b362a0886cfca1a9156d630b3a8ec6aec1385a148137ff9f41c659"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/ProcessObserver.cs",
+      "bytes": 26377,
+      "sha256": "165553f93fc736b6d9ddf5d4daa605420fd2ce2e3d8dc12afaccf80753776cbe"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/ProductState.cs",
+      "bytes": 24893,
+      "sha256": "6045cf06448719bf50a51a1d52fa086e986df7a3a1ba0ed780ba6dc379118623"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/ProductState.ps1",
+      "bytes": 3433,
+      "sha256": "bdbb1f623a9709ec1e128b426ec3fa876423002eabc7e80948203b95f8a57fdf"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/ReadOnlyPreflightFunction.ps1",
+      "bytes": 4962,
+      "sha256": "b40be44f31562c6c14cfe34053fc0d12158ab7108758a6be3d3bff1cfde738d9"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/run-production-msi-r78-third.py",
+      "bytes": 20989,
+      "sha256": "fd85ced0b4afcaf495037d9314e94be313679d3985f1d5138003a9624fb8850f"
+    }
+  ],
+  "staticChecks": {
+    "same_held_query_only": true,
+    "fixed_class60_single_allocation": true,
+    "exact_status_and_retlen": true,
+    "entire_unicode_max_extent": true,
+    "strict_utf16": true,
+    "checked_native_free_no_retry": true,
+    "no_remote_peb_reads": true,
+    "no_permission_increase": true,
+    "native_caller_layout_checked": true,
+    "foreign_cli_not_requested": true,
+    "real_parent_native_and_wmi_conflicts_unknown": true,
+    "native_status_admission_only": true,
+    "four_role_and_relationships_preserved": true,
+    "unknown_native_stays_fallback_or_unknown": true,
+    "no_suspend_or_kill": true,
+    "native_instrument_scope_explicit": true
+  },
+  "independentSyntheticNativeBufferCases": [
+    {
+      "name": "exact native copy synthetic buffer",
+      "actual": "ACCEPTED"
+    },
+    {
+      "name": "nonzero status",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "zero return",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "return exceeds allocation",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "odd length",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "maximum below length",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "pointer into header",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "pointer beyond returned",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "maximum outside returned",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "unpaired surrogate",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "embedded null",
+      "actual": "REJECTED"
+    },
+    {
+      "name": "embedded line break",
+      "actual": "REJECTED"
+    }
+  ],
+  "independentLocalLayoutArithmetic": {
+    "localHostPointerBytes": 8,
+    "unicodeBytes": 16,
+    "unicodeBufferOffset": 8,
+    "basicBytes": 48,
+    "basicPidOffset": 32,
+    "basicParentOffset": 40,
+    "scope": "Independent local ctypes x64 layout arithmetic only, not Windows C# Marshal/runtime proof"
+  },
+  "defaultInertCommands": [
+    {
+      "command": [
+        "python3",
+        "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/bind-production-msi-r78-third.py"
+      ],
+      "actualExitCode": 0,
+      "stdout": "{\"status\": \"PREPARED_NO_BINDING_OR_EXECUTION\", \"sourceGit\": \"261c58aca8b0f63ff2cfb4dbd5e85c0d17770005\", \"windows\": \"NOT_RUN\", \"writes\": false}\n",
+      "windows": "NOT_RUN"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/run-production-msi-r78-third.py"
+      ],
+      "actualExitCode": 0,
+      "stdout": "{\"status\": \"PREPARED_PRODUCT_TRANSPORT_NOT_RUN\", \"windows\": \"NOT_RUN\", \"msi\": \"NOT_RUN\"}\n",
+      "windows": "NOT_RUN"
+    }
+  ],
+  "primarySources": {
+    "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/primary-native-metadata-third.json",
+    "bytes": 1938,
+    "sha256": "16ec673afdbd45a8fa203a17f5622b1a79544736dc7691ea599aa6cba8ee07c7"
+  },
+  "powershellParse": "NOT_RUN_THIRD",
+  "csharpCompile": "NOT_RUN_THIRD",
+  "nativeClass60": "NOT_RUN_THIRD",
+  "windows": "NOT_RUN_THIRD",
+  "productFourSources": "UNCHANGED",
+  "budgets": {
+    "brokerSeconds": 120,
+    "phaseSeconds": 150,
+    "wholeSeconds": 600,
+    "outerSeconds": 900
+  },
+  "remaining": "Root must parse/compile then perform a new original three-phase test; class60 may fail on already-exited candidates or be unsupported, which remains metadata UNKNOWN/factual WMI fallback. No synchronous OS hard-realtime claim.",
+  "entrypoints": {
+    "binder": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/bind-production-msi-r78-third.py",
+    "transport": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/adapted-third/run-production-msi-r78-third.py"
+  },
+  "finalFilesFrozen": true
+}

@@ -1,0 +1,361 @@
+{
+  "status": "PASS",
+  "mutations": "NONE",
+  "runtimeReportSha256": "a636d1cc6a3f3f91a8c21d0aaf0dac43cbe93e856e9a66e5926af1ee3437d1f7",
+  "independentCheckedOriginalsSha256": "c504a319c12a13b9b369364ab7500d3930a2c29eed706d6876fea88907d30d0a",
+  "sourceSha256": "bbc38d63c3df6b651b41205a7fe44a22763a38976016545a7aeded65817ad687",
+  "paths": [
+    {
+      "path": "C:\\Windows\\Installer\\349b6c28.msi",
+      "origins": [
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 136,
+          "line": "MSI (s) (44:DC) [02:16:31:067]: Package we're running from ==> C:\\Windows\\Installer\\349b6c28.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 212,
+          "line": "MSI (s) (44:DC) [02:16:31:092]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\349b6c28.msi'."
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 493,
+          "line": "MSI (s) (44:DC) [02:16:31:375]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=65536,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\349b6c28.msi,,,,,IsFirstPhysicalMedia=1)"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 561,
+          "line": "MSI (s) (44:DC) [02:16:31:445]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=0,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\349b6c28.msi,,,,,IsFirstPhysicalMedia=1)"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 562,
+          "line": "MSI (s) (44:DC) [02:16:31:445]: Executing op: DatabaseCopy(DatabasePath=C:\\Windows\\Installer\\349b6c28.msi,ProductCode={9E50831D-7811-5039-8BC3-4934647448D8},,,)"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 709,
+          "line": "Property(S): DATABASE = C:\\Windows\\Installer\\349b6c28.msi"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\349b6c2c.msi",
+      "origins": [
+        {
+          "kind": "ACTUAL_LOCALPACKAGE_API_PATH"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 564,
+          "line": "MSI (s) (44:DC) [02:16:31:446]: Note: 1: 2318 2: C:\\Windows\\Installer\\349b6c2c.msi "
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "reapply",
+          "log": "reapply-msi.log",
+          "lineNumber": 35,
+          "line": "MSI (s) (44:DC) [02:16:32:042]: Package we're running from ==> C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "reapply",
+          "log": "reapply-msi.log",
+          "lineNumber": 149,
+          "line": "MSI (s) (44:DC) [02:16:32:064]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\349b6c2c.msi'."
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "reapply",
+          "log": "reapply-msi.log",
+          "lineNumber": 710,
+          "line": "Property(S): DATABASE = C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 36,
+          "line": "MSI (s) (44:B0) [02:16:33:024]: Original package ==> C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 37,
+          "line": "MSI (s) (44:B0) [02:16:33:024]: Package we're running from ==> C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 142,
+          "line": "MSI (s) (44:B0) [02:16:33:046]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\349b6c2c.msi'."
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 143,
+          "line": "MSI (s) (44:B0) [02:16:33:046]: PROPERTY CHANGE: Adding OriginalDatabase property. Its value is 'C:\\Windows\\Installer\\349b6c2c.msi'."
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 403,
+          "line": "MSI (s) (44:B0) [02:16:33:344]: Scheduling file 'C:\\Windows\\Installer\\349b6c2c.msi' for deletion during post-install cleanup (not post-reboot)."
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 639,
+          "line": "Property(S): DATABASE = C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 640,
+          "line": "Property(S): OriginalDatabase = C:\\Windows\\Installer\\349b6c2c.msi"
+        },
+        {
+          "kind": "EXACT_INSTALLER_PATH_IN_ORIGINAL_LOG",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 672,
+          "line": "MSI (s) (44:3C) [02:16:33:697]: Post-install cleanup: removing installer file 'C:\\Windows\\Installer\\349b6c2c.msi'"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI6C66.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI6D42.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI6D52.tmp",
+      "origins": [
+        {
+          "kind": "RUNNING_SCRIPT_LOG_PATH",
+          "phase": "fresh",
+          "log": "fresh-msi.log",
+          "lineNumber": 454,
+          "line": "MSI (s) (44:DC) [02:16:31:364]: Running Script: C:\\Windows\\Installer\\MSI6D52.tmp"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI7061.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI715C.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI716C.tmp",
+      "origins": [
+        {
+          "kind": "RUNNING_SCRIPT_LOG_PATH",
+          "phase": "reapply",
+          "log": "reapply-msi.log",
+          "lineNumber": 417,
+          "line": "MSI (s) (44:DC) [02:16:32:413]: Running Script: C:\\Windows\\Installer\\MSI716C.tmp"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI740D.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI7508.tmp",
+      "origins": [
+        {
+          "kind": "CAPTURED_EXECUTABLE_IMAGE_ORIGINAL_HANDLE"
+        }
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSI7509.tmp",
+      "origins": [
+        {
+          "kind": "RUNNING_SCRIPT_LOG_PATH",
+          "phase": "uninstall",
+          "log": "uninstall-msi.log",
+          "lineNumber": 380,
+          "line": "MSI (s) (44:B0) [02:16:33:338]: Running Script: C:\\Windows\\Installer\\MSI7509.tmp"
+        }
+      ]
+    }
+  ],
+  "originalLogs": [
+    {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-second/download/FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e/fresh-msi.log",
+      "bytes": 158914,
+      "sha256": "a445044cc46338cd957472cba7a3d03e078238c7dc156f42db2f29e08176ce20",
+      "encoding": "UTF-16-LE-BOM"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-second/download/FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e/reapply-msi.log",
+      "bytes": 152500,
+      "sha256": "730ce78250fc259bd97ea50e01bb44d9f163974bab5988f475825f16bd0a8d20",
+      "encoding": "UTF-16-LE-BOM"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-second/download/FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e/uninstall-msi.log",
+      "bytes": 126722,
+      "sha256": "b7cdc126d343a9b206c5a9894f49b04dd6edb0148c8bcb1a097be88cd44e88fd",
+      "encoding": "UTF-16-LE-BOM"
+    }
+  ],
+  "powershellSource": "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);\nAdd-Type -TypeDefinition 'using System;using System.Runtime.InteropServices;public static class ExactReadonlyAttributes{[DllImport(\"kernel32.dll\",CharSet=CharSet.Unicode,SetLastError=true)]public static extern uint GetFileAttributesW(string name);}'\n$paths=@('C:\\Windows\\Installer\\349b6c28.msi','C:\\Windows\\Installer\\349b6c2c.msi','C:\\Windows\\Installer\\MSI6C66.tmp','C:\\Windows\\Installer\\MSI6D42.tmp','C:\\Windows\\Installer\\MSI6D52.tmp','C:\\Windows\\Installer\\MSI7061.tmp','C:\\Windows\\Installer\\MSI715C.tmp','C:\\Windows\\Installer\\MSI716C.tmp','C:\\Windows\\Installer\\MSI740D.tmp','C:\\Windows\\Installer\\MSI7508.tmp','C:\\Windows\\Installer\\MSI7509.tmp'); $facts=@(foreach($p in $paths){$a=[ExactReadonlyAttributes]::GetFileAttributesW($p);$e=[Runtime.InteropServices.Marshal]::GetLastWin32Error();$s=if($a -ne [uint32]::MaxValue){'PRESENT'}elseif($e -eq 2 -or $e -eq 3){'KNOWN_ABSENT'}else{'UNKNOWN'};@{path=$p;attributes=[uint64]$a;win32Error=$e;status=$s}});\n@{facts=$facts;mutations='NONE';scope='Exact original twelve-role trial system paths only; no enumeration, deletion, remote scratch access, or process interaction'}|ConvertTo-Json -Depth 8 -Compress\n",
+  "command": [
+    "ssh",
+    "-i",
+    "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "elior@192.168.10.212",
+    "powershell.exe -NoProfile -NonInteractive -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAFUAVABGADgARQBuAGMAbwBkAGkAbgBnAF0AOgA6AG4AZQB3ACgAJABmAGEAbABzAGUAKQA7ACYAIAAoAFsAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAF0AOgA6AEMAcgBlAGEAdABlACgAWwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgAuAFIAZQBhAGQAVABvAEUAbgBkACgAKQApACkAOwA="
+  ],
+  "stdin": {
+    "bytes": 1282,
+    "sha256": "b77711f993d30430ae9960e1e416394bc60f3f4025737cd674df016ac46b6e8a",
+    "base64": "JEVycm9yQWN0aW9uUHJlZmVyZW5jZT0nU3RvcCc7JFByb2dyZXNzUHJlZmVyZW5jZT0nU2lsZW50bHlDb250aW51ZSc7W0NvbnNvbGVdOjpPdXRwdXRFbmNvZGluZz1bVGV4dC5VVEY4RW5jb2RpbmddOjpuZXcoJGZhbHNlKTsKQWRkLVR5cGUgLVR5cGVEZWZpbml0aW9uICd1c2luZyBTeXN0ZW07dXNpbmcgU3lzdGVtLlJ1bnRpbWUuSW50ZXJvcFNlcnZpY2VzO3B1YmxpYyBzdGF0aWMgY2xhc3MgRXhhY3RSZWFkb25seUF0dHJpYnV0ZXN7W0RsbEltcG9ydCgia2VybmVsMzIuZGxsIixDaGFyU2V0PUNoYXJTZXQuVW5pY29kZSxTZXRMYXN0RXJyb3I9dHJ1ZSldcHVibGljIHN0YXRpYyBleHRlcm4gdWludCBHZXRGaWxlQXR0cmlidXRlc1coc3RyaW5nIG5hbWUpO30nCiRwYXRocz1AKCdDOlxXaW5kb3dzXEluc3RhbGxlclwzNDliNmMyOC5tc2knLCdDOlxXaW5kb3dzXEluc3RhbGxlclwzNDliNmMyYy5tc2knLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k2QzY2LnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTZENDIudG1wJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNkQ1Mi50bXAnLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k3MDYxLnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTcxNUMudG1wJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNzE2Qy50bXAnLCdDOlxXaW5kb3dzXEluc3RhbGxlclxNU0k3NDBELnRtcCcsJ0M6XFdpbmRvd3NcSW5zdGFsbGVyXE1TSTc1MDgudG1wJywnQzpcV2luZG93c1xJbnN0YWxsZXJcTVNJNzUwOS50bXAnKTsgJGZhY3RzPUAoZm9yZWFjaCgkcCBpbiAkcGF0aHMpeyRhPVtFeGFjdFJlYWRvbmx5QXR0cmlidXRlc106OkdldEZpbGVBdHRyaWJ1dGVzVygkcCk7JGU9W1J1bnRpbWUuSW50ZXJvcFNlcnZpY2VzLk1hcnNoYWxdOjpHZXRMYXN0V2luMzJFcnJvcigpOyRzPWlmKCRhIC1uZSBbdWludDMyXTo6TWF4VmFsdWUpeydQUkVTRU5UJ31lbHNlaWYoJGUgLWVxIDIgLW9yICRlIC1lcSAzKXsnS05PV05fQUJTRU5UJ31lbHNleydVTktOT1dOJ307QHtwYXRoPSRwO2F0dHJpYnV0ZXM9W3VpbnQ2NF0kYTt3aW4zMkVycm9yPSRlO3N0YXR1cz0kc319KTsKQHtmYWN0cz0kZmFjdHM7bXV0YXRpb25zPSdOT05FJztzY29wZT0nRXhhY3Qgb3JpZ2luYWwgdHdlbHZlLXJvbGUgdHJpYWwgc3lzdGVtIHBhdGhzIG9ubHk7IG5vIGVudW1lcmF0aW9uLCBkZWxldGlvbiwgcmVtb3RlIHNjcmF0Y2ggYWNjZXNzLCBvciBwcm9jZXNzIGludGVyYWN0aW9uJ318Q29udmVydFRvLUpzb24gLURlcHRoIDggLUNvbXByZXNzCg==",
+    "captureScope": "COMPLETE"
+  },
+  "timeoutSeconds": 45,
+  "ssh": {
+    "actualExit": true,
+    "exitCode": 0,
+    "stdout": {
+      "bytes": 1378,
+      "sha256": "9b8112cf420b88dcadcde95388b8cdce135440fef3c00d53b4c6ebfe19ef9043",
+      "base64": "eyJmYWN0cyI6W3sicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXDM0OWI2YzI4Lm1zaSIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsIndpbjMyRXJyb3IiOjIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCJ9LHsicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXDM0OWI2YzJjLm1zaSIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsIndpbjMyRXJyb3IiOjIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCJ9LHsicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTZDNjYudG1wIiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwid2luMzJFcnJvciI6Miwic3RhdHVzIjoiS05PV05fQUJTRU5UIn0seyJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNkQ0Mi50bXAiLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJ3aW4zMkVycm9yIjoyLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQifSx7InBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k2RDUyLnRtcCIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsIndpbjMyRXJyb3IiOjIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCJ9LHsicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTcwNjEudG1wIiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwid2luMzJFcnJvciI6Miwic3RhdHVzIjoiS05PV05fQUJTRU5UIn0seyJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNzE1Qy50bXAiLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJ3aW4zMkVycm9yIjoyLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQifSx7InBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k3MTZDLnRtcCIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsIndpbjMyRXJyb3IiOjIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCJ9LHsicGF0aCI6IkM6XFxXaW5kb3dzXFxJbnN0YWxsZXJcXE1TSTc0MEQudG1wIiwiYXR0cmlidXRlcyI6NDI5NDk2NzI5NSwid2luMzJFcnJvciI6Miwic3RhdHVzIjoiS05PV05fQUJTRU5UIn0seyJwYXRoIjoiQzpcXFdpbmRvd3NcXEluc3RhbGxlclxcTVNJNzUwOC50bXAiLCJhdHRyaWJ1dGVzIjo0Mjk0OTY3Mjk1LCJ3aW4zMkVycm9yIjoyLCJzdGF0dXMiOiJLTk9XTl9BQlNFTlQifSx7InBhdGgiOiJDOlxcV2luZG93c1xcSW5zdGFsbGVyXFxNU0k3NTA5LnRtcCIsImF0dHJpYnV0ZXMiOjQyOTQ5NjcyOTUsIndpbjMyRXJyb3IiOjIsInN0YXR1cyI6IktOT1dOX0FCU0VOVCJ9XSwic2NvcGUiOiJFeGFjdCBvcmlnaW5hbCB0d2VsdmUtcm9sZSB0cmlhbCBzeXN0ZW0gcGF0aHMgb25seTsgbm8gZW51bWVyYXRpb24sIGRlbGV0aW9uLCByZW1vdGUgc2NyYXRjaCBhY2Nlc3MsIG9yIHByb2Nlc3MgaW50ZXJhY3Rpb24iLCJtdXRhdGlvbnMiOiJOT05FIn0NCg==",
+      "captureScope": "COMPLETE"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "base64": "",
+      "captureScope": "COMPLETE"
+    }
+  },
+  "observed": {
+    "facts": [
+      {
+        "path": "C:\\Windows\\Installer\\349b6c28.msi",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\349b6c2c.msi",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6C66.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6D42.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6D52.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7061.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI715C.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI716C.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI740D.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7508.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7509.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      }
+    ],
+    "scope": "Exact original twelve-role trial system paths only; no enumeration, deletion, remote scratch access, or process interaction",
+    "mutations": "NONE"
+  }
+}

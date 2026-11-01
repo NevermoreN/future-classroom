@@ -1,0 +1,29 @@
+{
+  "sourceSha": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "observedAtUtc": "2026-11-01T18:22:54.546115+00:00",
+  "scope": "No product source changes in R78; current main architecture and diff checks only",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "stdout": "Architecture OK: 12 crates, 33 first-party edges; D11 boundaries hold.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "actualExit": true,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "status": "PASS"
+}

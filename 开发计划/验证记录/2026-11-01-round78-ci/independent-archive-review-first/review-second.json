@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_SECOND_ARCHIVE_TEXT_REPAIR_STATIC_REVIEW_NOT_ARCHIVE_EXECUTION",
+  "recordedAtUtc": "2026-11-01T18:31:32.267738+00:00",
+  "firstDiagnosisReview": {
+    "path": "/tmp/fc-round78-ci-evidence/independent-archive-review-first/review-first.json",
+    "bytes": 11869,
+    "sha256": "62b406cf3d6f663fc7f53c98931472944f47c5547980a18f61c8f8be29b11dd6"
+  },
+  "originalArchiver": {
+    "path": "/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py",
+    "bytes": 22950,
+    "sha256": "44d39cce64f64735cb43e95cf9dd022683fa93e60d320c3c14900c3bdd700149"
+  },
+  "secondArchiver": {
+    "path": "/tmp/fc-round78-ci-evidence/archive-preparation-second/archive-second.py",
+    "bytes": 28754,
+    "sha256": "ea621b1a5402e5800c4bb0675365cc53a017bbe9dadfbc82430070e864207b01"
+  },
+  "exactTextFormsConfig": {
+    "path": "/tmp/fc-round78-ci-evidence/archive-preparation-second/text-forms-first.json",
+    "bytes": 9338,
+    "sha256": "b291eb21a858dfeadf2f758a91a4d916fde856db6772f360446c086d042b241d"
+  },
+  "blockingFindings": [],
+  "sourceAndCredentialGateComparison": {
+    "credentialPatternsAstUnchanged": true,
+    "sizePathPruningPrivateCertificateBinaryCapsUnchanged": true,
+    "runtimeSourceCiToolsAcceptanceGates": "Existing gates retained; patch adds exact textforms config/container/diagnosis identities and updates controller ownership only. No acceptance status, ZIP/24PE/static/runtime/tool source binding lowered.",
+    "destinationCreation": "Still after original gates, source inventory/credential scan and findings rejection; no new early DEST writes.",
+    "rawPreservation": "All15 raw originals must remain retained tar members; patch asserts their membership. No source decoding/re-encoding/normalization writes or binary exclusion introduced."
+  },
+  "finiteControlRecognition": {
+    "all15OriginalFilesRehashed": true,
+    "license": "Exactly5 immutable path/byte/SHA copies of18 formfeeds; strict UTF8 roundtrip/control subset, all content preserved.",
+    "gitTree": "Exactly6 immutable source ls-tree-long-z paths,19252 records/finalNUL; full mode/type/OID40/size/TAB/path grammar, consistent object modes and sizes, canonical unique noncontrol paths; exact immutable bytes prevents broader grammar from admitting other files.",
+    "gitWeb": "Exactly1 immutable lsfiles-z path with65 complete unique canonical web-prefixed path records; finalNUL and no interior control.",
+    "msiLogs": "Exactly3 immutable owned original UTF16LE-BOM logs, strict roundtrip, exactly1 U+0005 at pinned line129/129/465 and complete MSI Note2262 DigitalSignature/error integer pattern. Unknown control elsewhere rejects. No general extension/encoding/U5 allowance.",
+    "jsonViews": "Exactly3 immutable82-byte excerpts reached from original reviewer whole-container hash62b406... and precise observed9/10/11 line JSON trails. Complete escaped controlLineEscaped in config remains visible literal backslash x05. This is necessary because scanner recursively decodes JSON and recovers control character from escaped JSON text. All18 original/view hashes independently reopened by this reviewer.",
+    "allOtherControls": "Original strict decoder unchanged except finite recognized path+bytes views; any wrong path or modified bytes rejects."
+  },
+  "scanCoverage": {
+    "rawFullView": true,
+    "visibleBoundaryFullView": true,
+    "controlConcatenatedFullView": true,
+    "noSkippedLineOrRecord": true,
+    "credentialPatternsUnchanged": true,
+    "recursiveNestedJsonAndBase64": "Existing depth12/traversal250000/decoded byte caps and strict declared base64 scans retained. recognized textviews remain fed into same full pattern/nested decoder.",
+    "labels": "source:, stored-tar-gzip-decoded:, promoted: prefixes resolve to exact same finite relative key. Recursive JSON ::json/observed/<index>/line matches only3 config pinned derived keys.",
+    "sourceTarPromotionIndex": "Existing before-source scan, decompressed tar replay, promoted copies and new index/verification scanning remain; raw bytes are stored unchanged and full views are scan-only derivatives."
+  },
+  "finitePreparationTestOriginal": {
+    "report": {
+      "path": "/tmp/fc-round78-ci-evidence/archive-preparation-second/preparation-validation-first.json",
+      "bytes": 13430,
+      "sha256": "ad126034b946d66e9e5662051b6ba1071bbb8a8bd23de77472d7b6d2bdd72a1e"
+    },
+    "status": "PASS_AST_DEFAULT_NOT_RUN_15_RAW_AND_THREE_EXACT_JSON_NOTE_VIEWS",
+    "controllerAndConfigIdentityMatch": true,
+    "rawFiles": 15,
+    "derivedJsonViews": 3,
+    "wrongPathOrAlteredBytesRejections": 30,
+    "elapsedSeconds": 27.170435223999448,
+    "qualification": "Read existing finite source-agent report; this reviewer did not rerun scanner/tests/full inventory/archive. Actual source-agent tool parent terminal is reported separately by its owner, not invented here."
+  },
+  "firstFailurePreservation": {
+    "diagnosis": {
+      "path": "/tmp/fc-round78-ci-evidence/root-archive-text-diagnosis-first.json",
+      "bytes": 5672,
+      "sha256": "4be4ca64dfe7e8e19625204540b431e4577d76ab37bb9e4c7f1ff9efbcf861fa"
+    },
+    "runtimeAcceptance": {
+      "path": "/tmp/fc-round78-ci-evidence/independent-finite-acceptance-first/acceptance-first.json",
+      "bytes": 61311,
+      "sha256": "51c5daa45e07ca0781174e973757e55c17a9d25d4308ae3a62c512e6a5d04735"
+    },
+    "firstReviewUnchanged": true,
+    "originalSourceBytesUnchanged": true,
+    "qualification": "First archive control-byte rejection and first preparation negative originals remain. This static repair review is not an archive or new runtime success."
+  },
+  "reviewActions": "Only local read/hash/AST/minimaldiff of current frozen repair and finite15+3 identities. New review-second.json only; no full replay/scanner rerun, DEST creation, Windows/GitHub/network/Cargo/source edits.",
+  "remaining": "Root must wait all writers/tool parents terminal, run new exact archive controller, preserve raw archive success/failure and verify stored tar replay before cleanup. This review introduces no new product/runtime gate."
+}

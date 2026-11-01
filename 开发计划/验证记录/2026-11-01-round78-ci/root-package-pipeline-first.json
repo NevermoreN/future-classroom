@@ -1,0 +1,189 @@
+{
+  "status": "PASS_LOCAL_PACKAGE_PIPELINE_MSI_RUNTIME_NOT_RUN",
+  "sourceSha": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "scope": "Reviewed local-only source checkout, Web build, probe ZIP, and candidate MSI static build. No Windows, product/installer execution, or release.",
+  "startedUtc": "2026-11-01T18:01:54.491522+00:00",
+  "steps": [
+    {
+      "name": "create-checkout",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/create-checkout-first.py",
+        "--execute",
+        "--source-sha",
+        "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+        "--accepted-static-report",
+        "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-audit-first.json",
+        "--accepted-static-report-sha256",
+        "c7c1874cc341ad5e0b0ab030a64a7e488669e8cf0abb0029abbdd791d7a7ba77",
+        "--raw",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first",
+        "--run-id",
+        "41332469102"
+      ],
+      "status": "PASS_COMMAND",
+      "pid": 26196,
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 9.616296080000211,
+      "stdout": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-create-checkout-first.stdout.log",
+        "bytes": 427,
+        "sha256": "c7a76ff6ef3fdb27a1c26fde39f594330e3840c1f0bda9509c054fc6e4a771f2"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-create-checkout-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build-web",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/build-web-first.py",
+        "--execute",
+        "--source-sha",
+        "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+        "--accepted-static-report",
+        "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-audit-first.json",
+        "--accepted-static-report-sha256",
+        "c7c1874cc341ad5e0b0ab030a64a7e488669e8cf0abb0029abbdd791d7a7ba77",
+        "--raw",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first",
+        "--run-id",
+        "41332469102",
+        "--checkout-proof-sha256",
+        "5938662a060c70d60601310ba073048fda85e37e90b16c0b1cab32cf1b363965"
+      ],
+      "status": "PASS_COMMAND",
+      "pid": 26329,
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 7.574796447000153,
+      "stdout": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-web-first.stdout.log",
+        "bytes": 636,
+        "sha256": "7def71b68db2174ba2fddb31a515bd0c8cf58a20c017fd00c26a3c27be8ff819"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-web-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build-probe",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/build-probe-first.py",
+        "--execute",
+        "--source-sha",
+        "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+        "--accepted-static-report",
+        "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-audit-first.json",
+        "--accepted-static-report-sha256",
+        "c7c1874cc341ad5e0b0ab030a64a7e488669e8cf0abb0029abbdd791d7a7ba77",
+        "--raw",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first",
+        "--run-id",
+        "41332469102",
+        "--checkout-proof-sha256",
+        "5938662a060c70d60601310ba073048fda85e37e90b16c0b1cab32cf1b363965",
+        "--web-report",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/web-build-first/build-report-first.json",
+        "--web-report-sha256",
+        "cb2608c201946efcf351dea99667241e76efaa41fff01cf6cc5f9e61ec08af7b"
+      ],
+      "status": "PASS_COMMAND",
+      "pid": 26490,
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 2.715354338999532,
+      "stdout": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-probe-first.stdout.log",
+        "bytes": 367,
+        "sha256": "711e0b34d710bbd8168ca41e52f7334c3763989904be678d362bb3b71bf94450"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-probe-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "build-msi",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/build-msi-first.py",
+        "--execute",
+        "--source-sha",
+        "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+        "--accepted-static-report",
+        "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-audit-first.json",
+        "--accepted-static-report-sha256",
+        "c7c1874cc341ad5e0b0ab030a64a7e488669e8cf0abb0029abbdd791d7a7ba77",
+        "--raw",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first",
+        "--run-id",
+        "41332469102",
+        "--input-zip",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/local-probe-first/FutureClassroom-0.1.0-windows-x86-dev.zip",
+        "--input-sha256",
+        "6fddedc01b95499400493e1d6915cf9c9010bc43243556aee5ba35659c3a9b51",
+        "--build-evidence",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first",
+        "--lifecycle-helper",
+        "/tmp/fc-round78-ci-evidence/win7-build-original-first/product/fc-bootstrap/fc-installer-lifecycle.exe",
+        "--lifecycle-helper-sha256",
+        "1026845eeed3fa41f2fe6375e7f6d7fde0d0b72fe8efdf194dd65fca75affaa9",
+        "--build-result-sha256",
+        "8a8916b70a53d27e3ebdc3e74636e99289f78800513f23cbddf719a155be86ff",
+        "--local-probe-receipt",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/local-probe-first/producer-first.json",
+        "--local-probe-receipt-sha256",
+        "9c760447eb28b1f7c1a19b753c738d15cd3bf20928a103ff146bf0b609d7ba92",
+        "--checkout-script-sha256",
+        "87b69cee95aae29e95b2e0fc0a5a86c167850e24ed75dde5104eacdaa66a294e",
+        "--checkout-script-blob-sha256",
+        "bc51fe8f5fe49476aa0152b398d5fce858e638c51169c2a04b75701e0669452f",
+        "--objdump",
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "--objdump-sha256",
+        "521df27111c0ac3c8f6b6498505cbd35e8f087551418f4e084055f8ac308379a",
+        "--tools-report",
+        "/tmp/fc-round78-ci-evidence/msi-tools-preparation-first/msi-tools-preparation-first.json",
+        "--tools-report-sha256",
+        "f76db8b7e920215c82949012369477d1cdb7e4d9c7977801c29f5afa170b9a8c",
+        "--output-dir",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/candidate-output-first",
+        "--report",
+        "/tmp/fc-round78-ci-evidence/package-source-preparation-first/package-build-first.json"
+      ],
+      "status": "PASS_COMMAND",
+      "pid": 26545,
+      "actualExit": true,
+      "exitCode": 0,
+      "elapsedSeconds": 3.8372635830000945,
+      "stdout": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-msi-first.stdout.log",
+        "bytes": 191,
+        "sha256": "9e0c05f13297f252adc2f635e9ca44444150667dc3df1046a1370f991245406f"
+      },
+      "stderr": {
+        "path": "/tmp/fc-round78-ci-evidence/root-package-build-msi-first.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "packageReceipt": {
+    "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/package-build-first.json",
+    "bytes": 495617,
+    "sha256": "6bc8e58a9733f39eb1a3ab9569d0474e136ea15790387c5717e4277c82ccf8d6"
+  }
+}

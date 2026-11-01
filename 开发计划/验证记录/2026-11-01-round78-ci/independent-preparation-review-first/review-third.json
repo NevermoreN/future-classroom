@@ -1,0 +1,811 @@
+{
+  "schemaVersion": 1,
+  "status": "FINITE_ACTUAL_FIRST_MSI_FACTS_REVIEW_ORIGINAL_FAIL_RETAINED_NOT_FULL_ACCEPTANCE",
+  "reviewedAtUtc": "2026-11-01T18:08:52.845673+00:00",
+  "sourceGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "originalReport": {
+    "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/report.json",
+    "bytes": 68483,
+    "sha256": "5126fb9b3c20f861ce7b3cf1f5ba7024508dfb17d827430e5da3cc33afd9545e"
+  },
+  "originalOperation": {
+    "path": "/tmp/fc-round78-ci-evidence/root-product-msi-operation-first.json",
+    "bytes": 1225,
+    "sha256": "f0db8afa4e07937ed9a3b1b238c725272baae02480fd69c7dffe71d4e042b781"
+  },
+  "originalStatuses": {
+    "transport": "FAIL_PRODUCT_PHASE_OR_COVERAGE_RETAINED",
+    "transportParentActualExit": 1,
+    "phaseParentActualExit": 0,
+    "phase": "FAIL_NOT_COMPLETE",
+    "phaseFailure": "PHASE_INDEPENDENT_ROLE_COVERAGE_UNKNOWN",
+    "scratchDeleteAdmission": "RETAIN_UNKNOWN",
+    "transportCleanup": "RETAIN_LIVE_PENDING_UNKNOWN_INSTALLATION_OR_INCOMPLETE_PROOF"
+  },
+  "download": {
+    "allOriginalFileMembershipSizesHashesRecomputed": true,
+    "fileCount": 21,
+    "directoryCount": 1,
+    "downloadedPhaseReceiptEqualsOriginal": true,
+    "root": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380"
+  },
+  "actualPhases": [
+    {
+      "name": "fresh",
+      "client": {
+        "creationFiletime": 134380299181029901,
+        "pipesComplete": true,
+        "started": true,
+        "pid": 16180,
+        "timedOut": false,
+        "exitCode": 0,
+        "arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380\\candidate.msi\" /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380\\fresh-msi.log\"",
+        "actualExit": true,
+        "file": "C:\\Windows\\System32\\msiexec.exe"
+      },
+      "ownerProof": {
+        "engineSupplement": "UNKNOWN_NOT_IMPLEMENTED",
+        "businessAndCleanupSeparation": "A supervisor nonzero after original broker exit0 is cleanup failure of potentially settled product; this observer does not infer retained Pending or rollback from that failure",
+        "metadataWarnings": [
+          "candidate_metadata:33344:Win32Exception:image",
+          "final_parent:33344:Win32Exception:image"
+        ],
+        "captureWarnings": [],
+        "knownControlsReturned": true,
+        "returnProblems": [],
+        "channel": "Original held object actual return is separate from mandatory external four-role/engine/parent/transaction coverage",
+        "coverageProblems": [
+          "CAPTURED_ORIGINAL_ROLE_METADATA_UNKNOWN",
+          "ROLE_begin_UNKNOWN_OR_NONUNIQUE"
+        ],
+        "productNativeAuthentication": "Product-internal proof is not substituted for external observer coverage",
+        "brokerEverObservedWait258": true,
+        "complete": false
+      },
+      "processes": [
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI27DC.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "UNKNOWN",
+          "CommandStatus": "UNKNOWN_NO_ORIGINAL_WMI_INSTANCE",
+          "ParentLink": "UNKNOWN",
+          "Pid": 41072,
+          "ParentPid": 0,
+          "Transaction": null,
+          "CreationFiletime": 134380299182728447,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": null
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI27DC.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "broker",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "UNKNOWN",
+          "Pid": 33344,
+          "ParentPid": 41072,
+          "Transaction": null,
+          "CreationFiletime": 134380299182955061,
+          "ParentCreationFiletime": 0,
+          "ParentImage": null,
+          "ParentSid": null,
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI27DC.tmp",
+            "broker"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI28B8.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "supervisor",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+          "Pid": 38232,
+          "ParentPid": 23572,
+          "Transaction": 2,
+          "CreationFiletime": 134380299186385355,
+          "ParentCreationFiletime": 134380299181294047,
+          "ParentImage": "C:\\Windows\\System32\\msiexec.exe",
+          "ParentSid": "S-1-5-18",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI28B8.tmp",
+            "2",
+            "supervisor"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI28B8.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "guardian",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "HELD_ORIGINAL_SUPERVISOR_INSTANCE",
+          "Pid": 13556,
+          "ParentPid": 38232,
+          "Transaction": 2,
+          "CreationFiletime": 134380299186695558,
+          "ParentCreationFiletime": 134380299186385355,
+          "ParentImage": "C:\\Windows\\Installer\\MSI28B8.tmp",
+          "ParentSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI28B8.tmp",
+            "2",
+            "guardian"
+          ]
+        }
+      ],
+      "helperImageCleanup": {
+        "allCapturedImagesKnownAbsent": true,
+        "status": "PASS_PRECISE_HELPER_IMAGE_AUTOMATIC_ABSENCE",
+        "brokerImageKnownAbsent": true,
+        "scope": "Precise paths of authenticated actual helpers only; no enumeration/deletion of MSI cache or shared processes",
+        "images": [
+          {
+            "reparse": false,
+            "path": "C:\\Windows\\Installer\\MSI27DC.tmp",
+            "directory": false,
+            "status": "KNOWN_ABSENT"
+          },
+          {
+            "reparse": false,
+            "path": "C:\\Windows\\Installer\\MSI28B8.tmp",
+            "directory": false,
+            "status": "KNOWN_ABSENT"
+          }
+        ],
+        "mutations": false,
+        "brokerImage": "C:\\Windows\\Installer\\MSI27DC.tmp"
+      }
+    },
+    {
+      "name": "failure-formal-uninstall",
+      "client": {
+        "creationFiletime": 134380299191775981,
+        "pipesComplete": true,
+        "started": true,
+        "pid": 30928,
+        "timedOut": false,
+        "exitCode": 0,
+        "arguments": "/x {9E50831D-7811-5039-8BC3-4934647448D8} /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380\\failure-formal-uninstall-msi.log\"",
+        "actualExit": true,
+        "file": "C:\\Windows\\System32\\msiexec.exe"
+      },
+      "ownerProof": {
+        "engineSupplement": "UNKNOWN_NOT_IMPLEMENTED",
+        "businessAndCleanupSeparation": "A supervisor nonzero after original broker exit0 is cleanup failure of potentially settled product; this observer does not infer retained Pending or rollback from that failure",
+        "metadataWarnings": [],
+        "captureWarnings": [],
+        "knownControlsReturned": true,
+        "returnProblems": [],
+        "channel": "Original held object actual return is separate from mandatory external four-role/engine/parent/transaction coverage",
+        "coverageProblems": [],
+        "productNativeAuthentication": "Product-internal proof is not substituted for external observer coverage",
+        "brokerEverObservedWait258": true,
+        "complete": true
+      },
+      "processes": [
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI2BE6.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "begin",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+          "Pid": 11928,
+          "ParentPid": 23572,
+          "Transaction": null,
+          "CreationFiletime": 134380299192996474,
+          "ParentCreationFiletime": 134380299181294047,
+          "ParentImage": "C:\\Windows\\System32\\msiexec.exe",
+          "ParentSid": "S-1-5-18",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI2BE6.tmp",
+            "begin",
+            "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom\\fc-bootstrap.exe"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI2BE6.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "broker",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "HELD_ORIGINAL_BEGIN_INSTANCE",
+          "Pid": 26212,
+          "ParentPid": 11928,
+          "Transaction": null,
+          "CreationFiletime": 134380299193338321,
+          "ParentCreationFiletime": 134380299192996474,
+          "ParentImage": "C:\\Windows\\Installer\\MSI2BE6.tmp",
+          "ParentSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI2BE6.tmp",
+            "broker"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI2CE1.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "supervisor",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+          "Pid": 40572,
+          "ParentPid": 23572,
+          "Transaction": 4,
+          "CreationFiletime": 134380299196160301,
+          "ParentCreationFiletime": 134380299181294047,
+          "ParentImage": "C:\\Windows\\System32\\msiexec.exe",
+          "ParentSid": "S-1-5-18",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI2CE1.tmp",
+            "4",
+            "supervisor"
+          ]
+        },
+        {
+          "CaptureSource": "10MS_NAME_POLL",
+          "IdentityStatus": "ORIGINAL_QUERY_SYNC_HANDLE_EXACT_IMAGE_BYTES_USER",
+          "Image": "C:\\Windows\\Installer\\MSI2CE1.tmp",
+          "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Role": "guardian",
+          "CommandStatus": "EXACT_CREATION_MATCHED_WMI_FACT_ONLY",
+          "ParentLink": "HELD_ORIGINAL_SUPERVISOR_INSTANCE",
+          "Pid": 34552,
+          "ParentPid": 40572,
+          "Transaction": 4,
+          "CreationFiletime": 134380299196470470,
+          "ParentCreationFiletime": 134380299196160301,
+          "ParentImage": "C:\\Windows\\Installer\\MSI2CE1.tmp",
+          "ParentSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "WaitStatus": "ORIGINAL_OBJECT_SIGNALED",
+          "ExitStatus": "ACTUAL_ORIGINAL_GET_EXIT_CODE",
+          "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+          "ActualWait": 0,
+          "ActualExitCode": 0,
+          "ExactCandidateArgv": [
+            "C:\\Windows\\Installer\\MSI2CE1.tmp",
+            "4",
+            "guardian"
+          ]
+        }
+      ],
+      "helperImageCleanup": {
+        "allCapturedImagesKnownAbsent": true,
+        "status": "PASS_PRECISE_HELPER_IMAGE_AUTOMATIC_ABSENCE",
+        "brokerImageKnownAbsent": true,
+        "scope": "Precise paths of authenticated actual helpers only; no enumeration/deletion of MSI cache or shared processes",
+        "images": [
+          {
+            "reparse": false,
+            "path": "C:\\Windows\\Installer\\MSI2BE6.tmp",
+            "directory": false,
+            "status": "KNOWN_ABSENT"
+          },
+          {
+            "reparse": false,
+            "path": "C:\\Windows\\Installer\\MSI2CE1.tmp",
+            "directory": false,
+            "status": "KNOWN_ABSENT"
+          }
+        ],
+        "mutations": false,
+        "brokerImage": "C:\\Windows\\Installer\\MSI2BE6.tmp"
+      }
+    }
+  ],
+  "businessFacts": {
+    "beforeKnownAbsent": true,
+    "freshClientActualExit0": true,
+    "finallyHealthyInstalledBeforeFormalCleanup": true,
+    "exactPayloadFiles": 14,
+    "knownOriginalControlsReturned": 8,
+    "freshRoleCoverage": "Begin independent WMI role/engine-parent unavailable: PID41072 remains UNKNOWN. Broker33344 WMI ParentPid41072 and same captured original image are supplemental facts, not substituted for complete independent Begin role/parent evidence.",
+    "freshFourRoleCoverageComplete": false,
+    "formalUninstallClientActualExit0": true,
+    "formalUninstallFourRoleEngineParentTransactionComplete": true,
+    "formalUninstallProductComponentsMarkersPayloadRunAbsent": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "45E9FBBF-3FC2-568C-9872-CCA2D5E8DB62",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "151713EA-13D2-5783-A7E7-3D58A83F3160",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "capturedHelperImagesAutomaticallyAbsent": true,
+    "testGateRetiredWithOriginalSnapshotAndCheckedCloses": "DISPOSITION_AND_CHECKED_CLOSE_ONLY_REQUIRE_EXTERNAL_ABSENCE_READBACK",
+    "testGateExternalReadback": {
+      "pendingKnownAbsent": true,
+      "root": {
+        "reparse": false,
+        "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+        "directory": false,
+        "status": "KNOWN_ABSENT"
+      },
+      "pending": {
+        "reparse": false,
+        "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+        "directory": false,
+        "status": "KNOWN_ABSENT"
+      },
+      "namespaceKnownAbsent": true,
+      "scope": "Read-only fixed coordination path; not an owner/lease/settlement capability"
+    },
+    "originalWholeMs": 2475,
+    "budgetExceeded": false,
+    "metadataCoverageFailureIsNotPhysicalOwnerFailure": true,
+    "reapply": "NOT_RUN"
+  },
+  "logs": [
+    {
+      "original": {
+        "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380/failure-formal-uninstall-msi.log",
+        "bytes": 126782,
+        "sha256": "61f5f017d6ed944cd6aaba318a106e37609aca90d639a7192627999fbc2eec5b"
+      },
+      "decoding": "Original UTF16 bytes retained; lines counted after decode",
+      "selectedPathLines": [
+        {
+          "line": 36,
+          "text": "MSI (s) (14:30) [02:05:19:203]: Original package ==> C:\\Windows\\Installer\\349127a1.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 37,
+          "text": "MSI (s) (14:30) [02:05:19:203]: Package we're running from ==> C:\\Windows\\Installer\\349127a1.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 142,
+          "text": "MSI (s) (14:30) [02:05:19:225]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\349127a1.msi'.",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 143,
+          "text": "MSI (s) (14:30) [02:05:19:225]: PROPERTY CHANGE: Adding OriginalDatabase property. Its value is 'C:\\Windows\\Installer\\349127a1.msi'.",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 380,
+          "text": "MSI (s) (14:30) [02:05:19:517]: Running Script: C:\\Windows\\Installer\\MSI2CE2.tmp",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\MSI2CE2.tmp"
+          ]
+        },
+        {
+          "line": 403,
+          "text": "MSI (s) (14:30) [02:05:19:523]: Scheduling file 'C:\\Windows\\Installer\\349127a1.msi' for deletion during post-install cleanup (not post-reboot).",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 639,
+          "text": "Property(S): DATABASE = C:\\Windows\\Installer\\349127a1.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 640,
+          "text": "Property(S): OriginalDatabase = C:\\Windows\\Installer\\349127a1.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 672,
+          "text": "MSI (s) (14:64) [02:05:19:861]: Post-install cleanup: removing installer file 'C:\\Windows\\Installer\\349127a1.msi'",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        }
+      ],
+      "engineSuccessLines": [
+        {
+          "line": 661,
+          "text": "MSI (s) (14:30) [02:05:19:573]: MainEngineThread is returning 0"
+        },
+        {
+          "line": 677,
+          "text": "MSI (c) (D0:A0) [02:05:19:879]: MainEngineThread is returning 0"
+        }
+      ],
+      "beginActionLines": [
+        {
+          "line": 295,
+          "text": "Action start 2:05:19: FcBeginGate."
+        },
+        {
+          "line": 297,
+          "text": "Action ended 2:05:19: FcBeginGate. Return value 1."
+        }
+      ],
+      "qualification": "Action Return1 is an MSI action result, not an original OS process GetExitCode or standalone PID/parent proof. Running Script .tmp is only an original execution-script path, not asserted executable helper/chainer image."
+    },
+    {
+      "original": {
+        "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/download/FutureClassroom-r78-production-msi-e8e43de622406a396b6f962fc003b380/fresh-msi.log",
+        "bytes": 158914,
+        "sha256": "7c00ce219053e486a2366d5b7d244d9f93c83cfc222e691d2ff0e060b3bab479"
+      },
+      "decoding": "Original UTF16 bytes retained; lines counted after decode",
+      "selectedPathLines": [
+        {
+          "line": 136,
+          "text": "MSI (s) (14:B0) [02:05:18:169]: Package we're running from ==> C:\\Windows\\Installer\\3491279d.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        },
+        {
+          "line": 212,
+          "text": "MSI (s) (14:B0) [02:05:18:195]: PROPERTY CHANGE: Adding DATABASE property. Its value is 'C:\\Windows\\Installer\\3491279d.msi'.",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        },
+        {
+          "line": 454,
+          "text": "MSI (s) (14:B0) [02:05:18:465]: Running Script: C:\\Windows\\Installer\\MSI28C8.tmp",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\MSI28C8.tmp"
+          ]
+        },
+        {
+          "line": 493,
+          "text": "MSI (s) (14:B0) [02:05:18:487]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=65536,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\3491279d.msi,,,,,IsFirstPhysicalMedia=1)",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        },
+        {
+          "line": 561,
+          "text": "MSI (s) (14:B0) [02:05:18:555]: Executing op: ChangeMedia(,MediaPrompt=Please insert the disk: ,MediaCabinet=payload.cab,BytesPerTick=0,CopierType=2,ModuleFileName=C:\\Windows\\Installer\\3491279d.msi,,,,,IsFirstPhysicalMedia=1)",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        },
+        {
+          "line": 562,
+          "text": "MSI (s) (14:B0) [02:05:18:555]: Executing op: DatabaseCopy(DatabasePath=C:\\Windows\\Installer\\3491279d.msi,ProductCode={9E50831D-7811-5039-8BC3-4934647448D8},,,)",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        },
+        {
+          "line": 564,
+          "text": "MSI (s) (14:B0) [02:05:18:556]: Note: 1: 2318 2: C:\\Windows\\Installer\\349127a1.msi ",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\349127a1.msi"
+          ]
+        },
+        {
+          "line": 709,
+          "text": "Property(S): DATABASE = C:\\Windows\\Installer\\3491279d.msi",
+          "exactPaths": [
+            "C:\\Windows\\Installer\\3491279d.msi"
+          ]
+        }
+      ],
+      "engineSuccessLines": [
+        {
+          "line": 733,
+          "text": "MSI (s) (14:B0) [02:05:18:598]: MainEngineThread is returning 0"
+        },
+        {
+          "line": 747,
+          "text": "MSI (c) (34:D0) [02:05:19:049]: MainEngineThread is returning 0"
+        }
+      ],
+      "beginActionLines": [
+        {
+          "line": 358,
+          "text": "Action start 2:05:18: FcBeginGate."
+        },
+        {
+          "line": 360,
+          "text": "Action ended 2:05:18: FcBeginGate. Return value 1."
+        }
+      ],
+      "qualification": "Action Return1 is an MSI action result, not an original OS process GetExitCode or standalone PID/parent proof. Running Script .tmp is only an original execution-script path, not asserted executable helper/chainer image."
+    }
+  ],
+  "preciseAdditionalWindowsReadOnlyPaths": [
+    "C:\\Windows\\Installer\\3491279d.msi",
+    "C:\\Windows\\Installer\\349127a1.msi",
+    "C:\\Windows\\Installer\\MSI28C8.tmp",
+    "C:\\Windows\\Installer\\MSI2CE2.tmp"
+  ],
+  "cacheQualification": {
+    "freshLocalPackageApiWasReached": false,
+    "reportedPreviouslyObservedExactPaths": [],
+    "actualProductAbsentApi": {
+      "productCode": "{9E50831D-7811-5039-8BC3-4934647448D8}",
+      "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "context": 2,
+      "property": "LocalPackage",
+      "apiCode": 1605,
+      "returnedChars": 32768,
+      "path": "",
+      "mutations": false,
+      "scope": "Exact product API query only; no Windows Installer directory enumeration",
+      "status": "KNOWN_PRODUCT_ABSENT_NO_CACHE_PATH"
+    },
+    "knownCachePathAbsenceFromThisLocalReview": "NOT_QUERIED_WINDOWS",
+    "meaning": "Original MSI logs precisely identify3491279d.msi temporary running database and349127a1.msi product database copy/formal-x OriginalDatabase. Removal scheduling/log text does not establish actual current absence. Root may read only these exact paths and the two Running Script paths, separately from captured helper .tmp paths."
+  },
+  "cleanupAuthority": {
+    "scope": "Only this nonce-owned remote transport scratch after Root original-fact read-only recheck and exact downloaded membership/hash match. No source or current Windows path was accessed by reviewer.",
+    "factsSupportingRootExactScratchRetirement": [
+      "Both actual original clients returned0 with pipes complete and no retained direct clients",
+      "All8 captured exact overlay/SID original process handles signaled, exit0, checked close",
+      "Formal-x four-role/engine/parent/txn coverage complete",
+      "Independent exact product/payload/marker/component/related/Run state known absent",
+      "Pending and coordination namespace externally absent after original gate snapshot retirement",
+      "Every captured original helper image path readback known absent",
+      "All remote scratch bytes were downloaded and locally independently rehashed"
+    ],
+    "remainingBeforeRootCleanup": [
+      "Root exact current read-only process/product/Pending/namespace confirmation",
+      "Precise cached database and Running Script path absence query from raw log list; no directory enumeration or manual cached MSI removal",
+      "Root exact owned scratch inventory remains byte-identical before deleting only that downloaded scratch"
+    ],
+    "doesNotAuthorize": [
+      "Rewriting first FAIL to PASS",
+      "Claiming same-manifest reapply was tested",
+      "Deleting cached MSI or unrelated Windows Installer paths",
+      "Killing MSI service or any process",
+      "Clearing Pending/registry or fabricating Settlement"
+    ]
+  },
+  "qualifications": [
+    "MSI logs show Begin action success and final engine0 but do not independently name original short Begin process PID/parent; no upgrade of UNKNOWN role performed.",
+    "No native Join/End integer return logging was added to product; true product behavior is evidenced by actual successful original controls and independently checked effects. C# prior prerequisite remains separate.",
+    "No original status or source file changed. This is a finite factual review, not full fresh/reapply/x acceptance.",
+    "Win11 authorized administrator only; Win7/Win10 OS and standard-user acceptance remain NOT_RUN."
+  ],
+  "reviewActions": "Local originals only; no Windows/network/Cargo/new compile. Only review-third.json created."
+}

@@ -1,0 +1,1544 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_R78_FINITE_DUAL_MSVC_WIN11_AND_PRODUCT_MSI_AUTOMATIC_IMAGE_CLEANUP",
+  "sourceSha": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "sourceGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "reviewedAtUtc": "2026-11-01T18:22:48.480717+00:00",
+  "scope": "Finite actual authorized Win11 administrator evidence only; not complete release/three-OS/Seewo/campus acceptance. Independent local originals replay, no Windows/GitHub/network/Cargo/PE or MSI execution by reviewer.",
+  "independentReplay": {
+    "checker": {
+      "path": "/tmp/fc-round78-ci-evidence/independent-finite-acceptance-first/check-local-originals.py",
+      "bytes": 10783,
+      "sha256": "fe9b8c1dbcec823ac373629a75c9f06eb9a64e1d57d435883193dcbd294343b0"
+    },
+    "result": {
+      "path": "/tmp/fc-round78-ci-evidence/independent-finite-acceptance-first/checked-originals.json",
+      "bytes": 154806,
+      "sha256": "c504a319c12a13b9b369364ab7500d3930a2c29eed706d6876fea88907d30d0a"
+    },
+    "actualExitCode": 0,
+    "unifiedSession": 59477,
+    "actualTerminalReaped": true,
+    "qualification": "Local checker only, original tool response actual exit0; no runtime repeated."
+  },
+  "dualCI": [
+    {
+      "baseline": "modern",
+      "audit": {
+        "path": "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/modern-static-audit-first.json",
+        "bytes": 587741,
+        "sha256": "af22170491244c24b93a8718f1bbe29c4060d995ebc51bd5b48ff10fb2ec5bb7"
+      },
+      "staticParent": {
+        "path": "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/modern-static-operation-first.json",
+        "bytes": 3522,
+        "sha256": "efd331c14b1401c37e77fa5ca463babccfc7b240c1551d781e09bacdb0950bef"
+      },
+      "wholeZip": {
+        "path": "/tmp/fc-round78-ci-evidence/modern-official-first.zip",
+        "bytes": 45402815,
+        "sha256": "087b86b04f4bdbf4b34aede8b77592e28b26d57b0c4270daeacdb67028732a49"
+      },
+      "zipMembers": 237,
+      "wholeZipCrcAndEveryMemberRehashed": true,
+      "sourceMatches603Recomputed": 603,
+      "sourceLineEndingQualification": "Actual CI full CRLF/unchanged binary bytes checked separately against Git LF blobs; no normalized CI input hash accepted.",
+      "peCount": 24,
+      "runtime": {
+        "path": "/tmp/fc-round78-ci-evidence/modern-msvc-runtime-first.json",
+        "bytes": 226099,
+        "sha256": "ceb1b3c64cfc2d9cbe60403e32f624ccf4b9c09f1599b7ea04d89ba2b9d119b3"
+      },
+      "runtimeParent": {
+        "path": "/tmp/fc-round78-ci-evidence/modern-msvc-runtime-operation-first.json",
+        "bytes": 257932,
+        "sha256": "535802c088ca39bed10c433ce05844fb53995417c1415447f4def78c8e4ef205"
+      },
+      "harnessCount": 22,
+      "totals": {
+        "passed": 1567,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0
+      },
+      "harnesses": [
+        {
+          "name": "fc_materials-2e428b959a090e75.exe",
+          "binarySha256": "f6d1f0c04f579062ac951df9450ef3d5db388a4a7eef9fd692279877bf40fe6a",
+          "declared": 39,
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "voice_storage-9a09faea7de6e275.exe",
+          "binarySha256": "2f42439b62dd6d5f2912c134266a3746afedfa353a26ed25553f7940b3859f42",
+          "declared": 6,
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_installer_lifecycle-69e68a0892726b9f.exe",
+          "binarySha256": "b4f0ce09ed4152e0215e5d9b3db744a3d7b036b02b6b13e9a57d360f8038f14f",
+          "declared": 1,
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "calendar_execution_fence-4ea19c121455e89e.exe",
+          "binarySha256": "b250921b66780cb19a137f472e7e931ea07e1f528464a137db377eb145ccea79",
+          "declared": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_bootstrap-1f379e8fc9721e9a.exe",
+          "binarySha256": "60502ac7d7f25e4554290c2ab02f55a4f94e494f387ffe356e960aeb40d4bf6b",
+          "declared": 348,
+          "passed": 348,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "business_storage-012e6208d459f883.exe",
+          "binarySha256": "a0946d88b9b8d6128553806c26937daca6ffc03cade30c2aea95faf58990697d",
+          "declared": 43,
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_bootstrap-d11d42cb4133ba64.exe",
+          "binarySha256": "f9a14fcbd9c992f011ec8cf46fe8e02657612a4cf01ee3f00452ce4209792e85",
+          "declared": 223,
+          "passed": 223,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "runtime_storage-15c693100780ca27.exe",
+          "binarySha256": "656049434a3ad0ca1c74fd301b444a16e005693ae335a8e54b12f6599ab9d939",
+          "declared": 3,
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "schedule_operations-de7d48ef80c09271.exe",
+          "binarySha256": "48a3491e2be313167efc462d7219afac54983945b531ec36ae275e65b20223fc",
+          "declared": 5,
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "verify_web_assets-f09c7f87b2ce0e25.exe",
+          "binarySha256": "69c83eeecb5bb715b808b59a098ad8737e391d4739a26b705f941ad2c25c5b07",
+          "declared": 0,
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "voice_limits_storage-85dfbb116c0a27fc.exe",
+          "binarySha256": "b3d4a08a5eaf52e871be388334d70b2e964a83a794f1257e38e0b1deb9134d6e",
+          "declared": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "autostart_coordinator-35e94d18352c3ece.exe",
+          "binarySha256": "d482563548991216338283ce3a2acba2f2bea0c22884a19755513134adf9a071",
+          "declared": 13,
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_security-897ee1bbd038f1a8.exe",
+          "binarySha256": "bf348f3664d9df9a7a16fbb723514850bf9b45cf70d3bdfcc95f36df420f55ca",
+          "declared": 19,
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_windows-d0107c6860c2a3fb.exe",
+          "binarySha256": "a8f7a95c56c374768263aa87b76640caf489466cd94f32cfda7300b00d681be3",
+          "declared": 274,
+          "passed": 274,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_presentation-0ebca4673ff953f0.exe",
+          "binarySha256": "46a5ac344aa9768566b0c3b99fca54f6135407e16e4916c59864e7baf9b35465",
+          "declared": 58,
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_protocol-a7cf91af1d25db3b.exe",
+          "binarySha256": "898876ec54792aad388a5e2ea680526dcfd7ccbf1deae90a5a75a1e1607bcef3",
+          "declared": 82,
+          "passed": 82,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_storage-e351e410d252c84e.exe",
+          "binarySha256": "f86c36d3dbc6523453d457fb8556ee107220ae271a11ef0b12f42ce1039ae631",
+          "declared": 208,
+          "passed": 208,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_ports-2a65d64830b4e099.exe",
+          "binarySha256": "c9df1eb4ac58257941cf1f024a3e7eae52bd25a5cee1e4ab78bd4d17e6b4c0df",
+          "declared": 8,
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_audio-3b8d060b615f92df.exe",
+          "binarySha256": "5bd89e3a10e04b0284c63bae6407ef347a81bcf37f34d55fc9707d22d2cdd956",
+          "declared": 22,
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_runtime-beae710b833bf51a.exe",
+          "binarySha256": "b9842af8ddaa9791d9700fc1385d8cbd7ba6d1f433c7f1a591eec672d0e84189",
+          "declared": 33,
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_application-452d4d2887413f93.exe",
+          "binarySha256": "a4dc1fb277667ab0e02d5ff14ad33d3ef35dbba8806922dfa3ccb5603a536690",
+          "declared": 25,
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_domain-7c20761d03caf301.exe",
+          "binarySha256": "144cc58b876575cadc0b2eb7a778575eaafa56daf44e7d0d822af4b9fee52f23",
+          "declared": 149,
+          "passed": 149,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        }
+      ],
+      "childScopesQualification": "Three source-bound child scopes per native harness are parsed separately;1 passed/outerDeclared-1 filtered each are not summed into distinct outer1567. Raw child PID/creation absent, not invented.",
+      "publicDesktop": {
+        "steps": 20,
+        "elapsedMs": 2440,
+        "foreground": "UNTOUCHED",
+        "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified"
+      },
+      "cleanup": "PASS",
+      "normalLifecycleHelper": "Pinned only by full22 runner; real normal Win7 helper is independently run by product MSI trial."
+    },
+    {
+      "baseline": "win7",
+      "audit": {
+        "path": "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-audit-first.json",
+        "bytes": 563684,
+        "sha256": "c7c1874cc341ad5e0b0ab030a64a7e488669e8cf0abb0029abbdd791d7a7ba77"
+      },
+      "staticParent": {
+        "path": "/tmp/fc-round78-ci-evidence/ci-admission-preparation-first/win7-static-operation-first.json",
+        "bytes": 3488,
+        "sha256": "a40deaca62900669153cf1f587cf3b280852a1a4fb92956c1690c3eb717cb038"
+      },
+      "wholeZip": {
+        "path": "/tmp/fc-round78-ci-evidence/win7-official-first.zip",
+        "bytes": 46196057,
+        "sha256": "bf6d7fcc24056235e7720d2de055cc74d71e799a30ab76ec8c90772e41dd1a8c"
+      },
+      "zipMembers": 246,
+      "wholeZipCrcAndEveryMemberRehashed": true,
+      "sourceMatches603Recomputed": 603,
+      "sourceLineEndingQualification": "Actual CI full CRLF/unchanged binary bytes checked separately against Git LF blobs; no normalized CI input hash accepted.",
+      "peCount": 24,
+      "runtime": {
+        "path": "/tmp/fc-round78-ci-evidence/win7-msvc-runtime-first.json",
+        "bytes": 226098,
+        "sha256": "0b4ab4a5318162d891c727e2f3bdca3a1773e33f9160d6525c61546504c94237"
+      },
+      "runtimeParent": {
+        "path": "/tmp/fc-round78-ci-evidence/win7-msvc-runtime-operation-first.json",
+        "bytes": 230100,
+        "sha256": "5c9f6441697805684cb9bb17c5b6091d6f2d6e18d1f09eb9d704ef84e3c7fcab"
+      },
+      "harnessCount": 22,
+      "totals": {
+        "passed": 1567,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0
+      },
+      "harnesses": [
+        {
+          "name": "fc_materials-27e90f6481865594.exe",
+          "binarySha256": "6c497a1dcbaa8924745c12a55fa19315150aea0b200b84915e0f71aac3f9940c",
+          "declared": 39,
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "schedule_operations-73449ff9470d3218.exe",
+          "binarySha256": "ce4366de376d44009aef2cd968ce5bbfe05ecf0effa15cce0413c622204aa05d",
+          "declared": 5,
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_bootstrap-ab3fe02d74b0cc4f.exe",
+          "binarySha256": "53dd3a274218aad4567e01c7cca542e816482f105edf9aabaee443017dfdad39",
+          "declared": 348,
+          "passed": 348,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_bootstrap-236069e453c22287.exe",
+          "binarySha256": "2b0207e7174603dda8c6635c65f6a84253197e37fd6183ee3f45eb1c718a0f51",
+          "declared": 223,
+          "passed": 223,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "calendar_execution_fence-c228a7aa7951baf5.exe",
+          "binarySha256": "348b8366049973f09777723353a24d6e0c6423bd57c623ac163df0ad23969e91",
+          "declared": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "verify_web_assets-8af12de420811c64.exe",
+          "binarySha256": "72ea71b5c2ee54debec6e5fdd378724716f6260e541178389b487ef296a97a0e",
+          "declared": 0,
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "voice_limits_storage-62943725a08ea322.exe",
+          "binarySha256": "5007f4f5c9c390393e60ed87beec959a7a9b9d24c7e82f8d8b75a34a6e6b42af",
+          "declared": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "voice_storage-968d582fbca570dd.exe",
+          "binarySha256": "819a54b8b2801fb73ddc0381c1edbf9b1cecde0d37ac2b33ddd3bc3c384dcfff",
+          "declared": 6,
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "runtime_storage-b05b4c919790cafc.exe",
+          "binarySha256": "4bdb321d39d453432b1f181193e04326fe124a591090fca048fea59efe13cf2c",
+          "declared": 3,
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_installer_lifecycle-d09aedd3dca2ea60.exe",
+          "binarySha256": "391bae5caadd6030cd33d1ac9174b68ceeb933765c74de8a1b315d52a9c8c29d",
+          "declared": 1,
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "autostart_coordinator-2c053326fea8b495.exe",
+          "binarySha256": "27d1421e77a02142c41bbc368c6f9ce83218343f091cc88e95720716e7bf53ff",
+          "declared": 13,
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "business_storage-2d8bfba34cc4c638.exe",
+          "binarySha256": "5741f655a419944bf39f91f97a75729cbc08e5cf902d9ed6254b0d8611ca7d02",
+          "declared": 43,
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_security-3bf217f9b927aa4c.exe",
+          "binarySha256": "c5eaff498efc16a197b7eb2ef40227c7efdbea9a1a695e57410c66d142a0a3f1",
+          "declared": 19,
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_windows-f3ce076b8a82cb9a.exe",
+          "binarySha256": "1fd8ffe6889b6e99dee965c9b625ca0119184c8f0fb0900bb45144c5aa6c2fd4",
+          "declared": 274,
+          "passed": 274,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_application-9e82411b268941a8.exe",
+          "binarySha256": "723be644c861b48b0872ba6511f51d7d6532b8c03900b245b9d245dbf6f37b62",
+          "declared": 25,
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_presentation-ebc9347ec035f379.exe",
+          "binarySha256": "3225997e8a5ccca5c848a95773ab4238beae7d90e73ddc6caaadf3001cddf8ef",
+          "declared": 58,
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_runtime-93d068d0c2da548f.exe",
+          "binarySha256": "947b0d88d3d2a88b585f794150674973088cf9454c9c2ae6686cdf34831ca908",
+          "declared": 33,
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_ports-7edd2d56c0c9c5d7.exe",
+          "binarySha256": "0e64cc49658bc76ce911058782772dd35131be4542679485682c3c91cc7056d2",
+          "declared": 8,
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_storage-f6972f806e9d4523.exe",
+          "binarySha256": "87eb8d11643989efead918f1c511bbd5cf3bb30075c0bfefb0d33b1fab19f9c3",
+          "declared": 208,
+          "passed": 208,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_audio-ccd283b0aa061f9d.exe",
+          "binarySha256": "cc1cb1b3db1193321938737e7e2b783fd9f46bf198855a27638ba9c148ac8ef0",
+          "declared": 22,
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_protocol-46c0f0d76d445238.exe",
+          "binarySha256": "d0e719e31cc90ea4e4405fc20898d181ec0a40643ab9c1ba9bd6155459b3d73c",
+          "declared": 82,
+          "passed": 82,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "name": "fc_domain-858bf456d034c981.exe",
+          "binarySha256": "4e51d9a7d85c51351303b5d6fdafe10e92dbf4045d0a63f15a2eaba6cdb568e1",
+          "declared": 149,
+          "passed": 149,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        }
+      ],
+      "childScopesQualification": "Three source-bound child scopes per native harness are parsed separately;1 passed/outerDeclared-1 filtered each are not summed into distinct outer1567. Raw child PID/creation absent, not invented.",
+      "publicDesktop": {
+        "steps": 20,
+        "elapsedMs": 2423,
+        "foreground": "UNTOUCHED",
+        "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified"
+      },
+      "cleanup": "PASS",
+      "normalLifecycleHelper": "Pinned only by full22 runner; real normal Win7 helper is independently run by product MSI trial."
+    }
+  ],
+  "sourceAndProducer": {
+    "actual48PeFilesRehashed": true,
+    "eachBaselineActual603SourceMatchesRecomputed": true,
+    "checkout": {
+      "original": {
+        "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/actual-checkout-first.json",
+        "bytes": 146018,
+        "sha256": "5938662a060c70d60601310ba073048fda85e37e90b16c0b1cab32cf1b363965"
+      },
+      "selectedActualCiFilesRehashed": 544,
+      "scriptActualCheckout": {
+        "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/checkout-261c58a-first/scripts/package-msi-candidate.py",
+        "bytes": 64351,
+        "sha256": "87b69cee95aae29e95b2e0fc0a5a86c167850e24ed75dde5104eacdaa66a294e"
+      },
+      "scriptGitLfBlobSha256": "bc51fe8f5fe49476aa0152b398d5fce858e638c51169c2a04b75701e0669452f"
+    },
+    "selectedCiCompileAndPackaging544Rehashed": true,
+    "mainGitLfAndActualCheckoutCrlfSeparate": true,
+    "normalHelper": "Actual same-source Win7-target normal GUI helper and Cargo metadata/command/ledger equality re-admitted; no GNU/test/C# fixture/clone substitution.",
+    "wholeOfficialZips": "Both actual full official ZIPs independently SHA/CRC/every-member verified; connector incomplete file references are not used as archive evidence.",
+    "artifactExecutionQualification": "CI compile result remains COMPILE_CHECKS_PASSED_RUNTIME_NOT_RUN; separate actual Win11 runtime does not relabel CI job as on-target OS run.",
+    "fullCurrentB5PlanBindingReplayed": true
+  },
+  "productMSI": {
+    "original": {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-second/report.json",
+      "bytes": 119231,
+      "sha256": "a636d1cc6a3f3f91a8c21d0aaf0dac43cbe93e856e9a66e5926af1ee3437d1f7"
+    },
+    "rootParent": {
+      "path": "/tmp/fc-round78-ci-evidence/root-product-msi-operation-second.json",
+      "bytes": 1367,
+      "sha256": "3c604cdc7cc27050851971f080a2ae0910034715c0ef6f963793b434f030d53d"
+    },
+    "actualRootParentExit": 0,
+    "originalScope": "Authorized Win11 exact current-user source261c58 Win7-target product MSI finite lifecycle only",
+    "staticAndSourceBinderReplayed": true,
+    "config": {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/bound-plan-second/candidate-inputs.json",
+      "bytes": 154031,
+      "sha256": "fea7efe2f13556e484bea9f68bf478da9f0463cd3aa5edbcdd2ebccb22525731"
+    },
+    "msi": {
+      "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/candidate-output-first/candidate.msi",
+      "bytes": 6453248,
+      "sha256": "c033c275652f267e1b2a7e0214369d603f29e13e383f64041549ed3c55652d3e"
+    },
+    "status": "PASS_PRODUCT_MSI_RUNTIME_CAPTURE_AND_EXACT_SCRATCH_CLEANUP_WIN11_ONLY",
+    "phaseWholeMilliseconds": 3409,
+    "originalBudgets": {
+      "whole": 600,
+      "phaseMaximum": 150,
+      "cleanupReserve": 180,
+      "nativeBroker": 120,
+      "outer": 900,
+      "noRenewal": true
+    },
+    "phases": [
+      {
+        "name": "fresh",
+        "client": {
+          "creationFiletime": 134380305910079849,
+          "pipesComplete": true,
+          "started": true,
+          "pid": 16192,
+          "timedOut": false,
+          "exitCode": 0,
+          "arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e\\candidate.msi\" /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e\\fresh-msi.log\"",
+          "actualExit": true,
+          "file": "C:\\Windows\\System32\\msiexec.exe"
+        },
+        "fourRoleCoverage": true,
+        "originalControlsReturned": true,
+        "originalProcesses": [
+          {
+            "Pid": 25816,
+            "CreationFiletime": 134380305911692822,
+            "Image": "C:\\Windows\\Installer\\MSI6C66.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "begin",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 7192,
+            "CreationFiletime": 134380305911923562,
+            "Image": "C:\\Windows\\Installer\\MSI6C66.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "broker",
+            "ParentPid": 25816,
+            "ParentCreationFiletime": 134380305911692822,
+            "ParentLink": "HELD_ORIGINAL_BEGIN_INSTANCE",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 24568,
+            "CreationFiletime": 134380305915167638,
+            "Image": "C:\\Windows\\Installer\\MSI6D42.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "supervisor",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": 2,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 19880,
+            "CreationFiletime": 134380305915492362,
+            "Image": "C:\\Windows\\Installer\\MSI6D42.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "guardian",
+            "ParentPid": 24568,
+            "ParentCreationFiletime": 134380305915167638,
+            "ParentLink": "HELD_ORIGINAL_SUPERVISOR_INSTANCE",
+            "Transaction": 2,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          }
+        ],
+        "automaticHelperImageCleanup": {
+          "allCapturedImagesKnownAbsent": true,
+          "status": "PASS_PRECISE_HELPER_IMAGE_AUTOMATIC_ABSENCE",
+          "brokerImageKnownAbsent": true,
+          "scope": "Precise paths of authenticated actual helpers only; no enumeration/deletion of MSI cache or shared processes",
+          "images": [
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI6C66.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            },
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI6D42.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            }
+          ],
+          "mutations": false,
+          "brokerImage": "C:\\Windows\\Installer\\MSI6C66.tmp"
+        }
+      },
+      {
+        "name": "reapply",
+        "client": {
+          "creationFiletime": 134380305920160906,
+          "pipesComplete": true,
+          "started": true,
+          "pid": 10704,
+          "timedOut": false,
+          "exitCode": 0,
+          "arguments": "/i \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e\\candidate.msi\" REINSTALL=ALL REINSTALLMODE=amus /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e\\reapply-msi.log\"",
+          "actualExit": true,
+          "file": "C:\\Windows\\System32\\msiexec.exe"
+        },
+        "fourRoleCoverage": true,
+        "originalControlsReturned": true,
+        "originalProcesses": [
+          {
+            "Pid": 29968,
+            "CreationFiletime": 134380305921788614,
+            "Image": "C:\\Windows\\Installer\\MSI7061.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "begin",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 26008,
+            "CreationFiletime": 134380305922152756,
+            "Image": "C:\\Windows\\Installer\\MSI7061.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "broker",
+            "ParentPid": 29968,
+            "ParentCreationFiletime": 134380305921788614,
+            "ParentLink": "HELD_ORIGINAL_BEGIN_INSTANCE",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 10416,
+            "CreationFiletime": 134380305925870045,
+            "Image": "C:\\Windows\\Installer\\MSI715C.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "supervisor",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": 4,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 16764,
+            "CreationFiletime": 134380305926187084,
+            "Image": "C:\\Windows\\Installer\\MSI715C.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "guardian",
+            "ParentPid": 10416,
+            "ParentCreationFiletime": 134380305925870045,
+            "ParentLink": "HELD_ORIGINAL_SUPERVISOR_INSTANCE",
+            "Transaction": 4,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          }
+        ],
+        "automaticHelperImageCleanup": {
+          "allCapturedImagesKnownAbsent": true,
+          "status": "PASS_PRECISE_HELPER_IMAGE_AUTOMATIC_ABSENCE",
+          "brokerImageKnownAbsent": true,
+          "scope": "Precise paths of authenticated actual helpers only; no enumeration/deletion of MSI cache or shared processes",
+          "images": [
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI7061.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            },
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI715C.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            }
+          ],
+          "mutations": false,
+          "brokerImage": "C:\\Windows\\Installer\\MSI7061.tmp"
+        }
+      },
+      {
+        "name": "uninstall",
+        "client": {
+          "creationFiletime": 134380305929993316,
+          "pipesComplete": true,
+          "started": true,
+          "pid": 18304,
+          "timedOut": false,
+          "exitCode": 0,
+          "arguments": "/x {9E50831D-7811-5039-8BC3-4934647448D8} /qn /norestart REBOOT=ReallySuppress MSIRESTARTMANAGERCONTROL=DisableShutdown /L*vx \"C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r78-production-msi-a3daa2dca2cb559c179e300cb6c7d18e\\uninstall-msi.log\"",
+          "actualExit": true,
+          "file": "C:\\Windows\\System32\\msiexec.exe"
+        },
+        "fourRoleCoverage": true,
+        "originalControlsReturned": true,
+        "originalProcesses": [
+          {
+            "Pid": 26544,
+            "CreationFiletime": 134380305931170809,
+            "Image": "C:\\Windows\\Installer\\MSI740D.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "begin",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 21884,
+            "CreationFiletime": 134380305931514974,
+            "Image": "C:\\Windows\\Installer\\MSI740D.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "broker",
+            "ParentPid": 26544,
+            "ParentCreationFiletime": 134380305931170809,
+            "ParentLink": "HELD_ORIGINAL_BEGIN_INSTANCE",
+            "Transaction": null,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 5508,
+            "CreationFiletime": 134380305934361925,
+            "Image": "C:\\Windows\\Installer\\MSI7508.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "supervisor",
+            "ParentPid": 26692,
+            "ParentCreationFiletime": 134380305910316611,
+            "ParentLink": "ORIGINAL_ENGINE_INSTANCE_FACT_NOT_SESSION_ID",
+            "Transaction": 6,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          },
+          {
+            "Pid": 13864,
+            "CreationFiletime": 134380305934667908,
+            "Image": "C:\\Windows\\Installer\\MSI7508.tmp",
+            "Sha256": "2f980cba09899e191615d00f3ccaa2a19382ca9b3369f83df7192383e6ae268a",
+            "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+            "Role": "guardian",
+            "ParentPid": 5508,
+            "ParentCreationFiletime": 134380305934361925,
+            "ParentLink": "HELD_ORIGINAL_SUPERVISOR_INSTANCE",
+            "Transaction": 6,
+            "CommandStatus": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+            "NativeCommandNtStatus": 0,
+            "NativeBasicNtStatus": 0,
+            "ActualWait": 0,
+            "ActualExitCode": 0,
+            "CloseStatus": "CHECKED_CLOSE_SUCCESS",
+            "NativeCommandBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS",
+            "NativeBasicBufferFreeStatus": "CHECKED_LOCALFREE_SUCCESS"
+          }
+        ],
+        "automaticHelperImageCleanup": {
+          "allCapturedImagesKnownAbsent": true,
+          "status": "PASS_PRECISE_HELPER_IMAGE_AUTOMATIC_ABSENCE",
+          "brokerImageKnownAbsent": true,
+          "scope": "Precise paths of authenticated actual helpers only; no enumeration/deletion of MSI cache or shared processes",
+          "images": [
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI740D.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            },
+            {
+              "reparse": false,
+              "path": "C:\\Windows\\Installer\\MSI7508.tmp",
+              "directory": false,
+              "status": "KNOWN_ABSENT"
+            }
+          ],
+          "mutations": false,
+          "brokerImage": "C:\\Windows\\Installer\\MSI740D.tmp"
+        }
+      }
+    ],
+    "class60Status0OriginalHandles": 12,
+    "class0Status0OriginalHandles": 12,
+    "allCommandSources": "EXACT_ORIGINAL_HANDLE_NT_CLASS60_FACT_ONLY",
+    "freshAndHealthySameManifestReapplyExactPayloadFiles": 14,
+    "uninstalledPoststate": {
+      "status": "PASS_READONLY_EXPECTED_ABSENT",
+      "sourceGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+      "expected": "Absent",
+      "healthyPresent": false,
+      "knownAbsent": true,
+      "matchesExpected": true,
+      "stateClassification": "KNOWN_ABSENT",
+      "observations": {
+        "files": {
+          "root": "C:\\Users\\Elior\\AppData\\Local\\Programs\\FutureClassroom",
+          "presentExact": false,
+          "absentExact": true,
+          "files": [],
+          "rootOpenCode": 2
+        },
+        "markers": {
+          "view": "Registry32",
+          "key": "Software\\FutureClassroom\\Installer\\Components",
+          "presentExact": false,
+          "absentExact": true,
+          "values": []
+        },
+        "registration": {
+          "productsEx": [],
+          "relatedProducts": [],
+          "calls": [
+            {
+              "index": 0,
+              "queryContext": 3,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "index": 0,
+              "queryContext": 4,
+              "sidArgument": null,
+              "code": 259,
+              "returnedSidChars": 256
+            },
+            {
+              "relatedIndex": 0,
+              "code": 259
+            }
+          ],
+          "productState": -1,
+          "apiCallsComplete": true,
+          "presentExact": false,
+          "absentExact": true,
+          "scope": "Exact product, actual-user managed/unmanaged plus machine contexts; no other-user enumeration"
+        },
+        "components": {
+          "rows": [
+            {
+              "component": "BF8ECC92-DF5E-5031-AF8F-B122A05E64E6",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "00CBA46A-3182-5F3E-A3C2-3B4D08BF8FCC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "1F2DCDC9-9F80-51BE-A10D-F294D45FDB05",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "44E7E505-D3CB-5DC8-9730-50964BA3CC8C",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0CA01C62-B71F-5C57-905B-B6C979ACB487",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "8D7F75D1-8AD6-5097-AEE4-62389B788737",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "51201E26-0CF3-5876-A591-91F68B3A94DB",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "45E9FBBF-3FC2-568C-9872-CCA2D5E8DB62",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "151713EA-13D2-5783-A7E7-3D58A83F3160",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "B9ADCF83-BCB1-5F42-97D8-967FF84A306F",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "28DB1C02-71DB-5DAF-8D0C-9844E24D16DC",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "C0EC8190-410A-52A3-895E-AD6564B75C1E",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "0C6686BF-2327-51F5-89A6-4243C1FD11CF",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            },
+            {
+              "component": "58B108D4-3264-56B1-9DE5-19636D8437E2",
+              "context": 2,
+              "sidArgument": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+              "state": -1,
+              "reportedCharacterCount": 1024,
+              "path": ""
+            }
+          ],
+          "presentExact": false,
+          "absentExact": true
+        },
+        "run": {
+          "view": "Registry32",
+          "value": "FutureClassroom",
+          "queryCode": 2,
+          "type": 0,
+          "bytes": 0,
+          "absent": true,
+          "contentsRead": false
+        }
+      },
+      "phaseErrors": [],
+      "mutations": false,
+      "coordinationGate": "NOT_MEASURED_BY_THIS_MODULE",
+      "scope": "Independent finite readonly poststate, not permission or broker Settlement; no Pending/gate query or cleanup",
+      "currentUserSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+      "runAbsent": true
+    },
+    "localPackageCache": {
+      "mutations": false,
+      "previouslyObservedExactPaths": [
+        {
+          "reparse": false,
+          "path": "C:\\Windows\\Installer\\349b6c2c.msi",
+          "directory": false,
+          "status": "KNOWN_ABSENT"
+        }
+      ],
+      "actualProductQuery": {
+        "productCode": "{9E50831D-7811-5039-8BC3-4934647448D8}",
+        "userSid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "context": 2,
+        "property": "LocalPackage",
+        "apiCode": 1605,
+        "returnedChars": 32768,
+        "path": "",
+        "mutations": false,
+        "scope": "Exact product API query only; no Windows Installer directory enumeration",
+        "status": "KNOWN_PRODUCT_ABSENT_NO_CACHE_PATH"
+      },
+      "allPreviouslyObservedPathsKnownAbsent": true,
+      "scope": "No cache directory enumeration; no cache deletion; cache SHA is observed, not falsely equated to input MSI bytes"
+    },
+    "originalGateRetirement": {
+      "result": "DISPOSITION_AND_CHECKED_CLOSE_ONLY_REQUIRE_EXTERNAL_ABSENCE_READBACK",
+      "externalReadback": {
+        "pendingKnownAbsent": true,
+        "root": {
+          "reparse": false,
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5",
+          "directory": false,
+          "status": "KNOWN_ABSENT"
+        },
+        "pending": {
+          "reparse": false,
+          "path": "C:\\Users\\Elior\\AppData\\Local\\FutureClassroom-Installer-99378807-098D-5F04-8D4D-F181DFA218D5\\pending.v1",
+          "directory": false,
+          "status": "KNOWN_ABSENT"
+        },
+        "namespaceKnownAbsent": true,
+        "scope": "Read-only fixed coordination path; not an owner/lease/settlement capability"
+      },
+      "qualification": "Only test-owned persistent coordination gate retired with original snapshot after formal uninstall; not a production recovery/owner bypass."
+    },
+    "automaticProductImageCleanup": {
+      "sixPreciseExecutableImages": [
+        "C:\\Windows\\Installer\\MSI6C66.tmp",
+        "C:\\Windows\\Installer\\MSI6D42.tmp",
+        "C:\\Windows\\Installer\\MSI7061.tmp",
+        "C:\\Windows\\Installer\\MSI715C.tmp",
+        "C:\\Windows\\Installer\\MSI740D.tmp",
+        "C:\\Windows\\Installer\\MSI7508.tmp"
+      ],
+      "allAbsent": true,
+      "manualImageOrCacheDelete": false
+    },
+    "scratchCleanup": {
+      "downloadedOriginalFilesIndependentlyRehashed": 26,
+      "exactRemoteInventoryEqualsLocal": true,
+      "actualReceipt": {
+        "nonce": "a3daa2dca2cb559c179e300cb6c7d18e",
+        "status": "REMOVED_EXACT_PRODUCT_RUNTIME_ROOT",
+        "knownAbsent": true
+      },
+      "status": "PASS_EXACT_DOWNLOADED_OWNED_SCRATCH_ONLY",
+      "deletedRemoteRootNotRequeried": true
+    },
+    "engineAndMetadataQualification": "Shared original msiexec instance is not a per-MSI session ID. Real role/source command facts/parent capabilities/txn and original Wait/GetExit/checkedclose are separate; no engine ActionReturn1 used as GetExit0. Native metadata API is Win11 nativeAMD64 test-only, not product Win7 dependency.",
+    "failureScope": "Healthy same-manifest reapply and formal uninstall only; does not certify damaged repair, Run-present cleanup or all rollback/failure paths."
+  },
+  "finalSystemPaths": {
+    "original": {
+      "path": "/tmp/fc-round78-ci-evidence/root-second-msi-system-paths-first.json",
+      "bytes": 17488,
+      "sha256": "fe383d0b8f0bb95de0e2f8309aa21eea0140def165c6bbb892c74ae096472772"
+    },
+    "actualSshExit": 0,
+    "mutations": "NONE",
+    "paths11AllKnownAbsent": [
+      {
+        "path": "C:\\Windows\\Installer\\349b6c28.msi",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\349b6c2c.msi",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6C66.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6D42.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI6D52.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7061.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI715C.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI716C.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI740D.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7508.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSI7509.tmp",
+        "attributes": 4294967295,
+        "win32Error": 2,
+        "status": "KNOWN_ABSENT"
+      }
+    ],
+    "pathDerivation": "6 exact captured process executable images +2 original log/cache MSI databases +3 Running Script paths. These categories remain distinct, no directory enumeration/deletion or access to deleted remote scratch."
+  },
+  "finalWindowsReadOnlyAudit": {
+    "original": {
+      "path": "/tmp/fc-round78-ci-evidence/windows-readonly-final-first.json",
+      "bytes": 17087,
+      "sha256": "c62f735c28fd60ab5aaea6053453ce41a32ba6545f6245bcb14ef840a1a7a23d"
+    },
+    "status": "PASS",
+    "scratchDirectories": 0,
+    "ownedProcesses": 0,
+    "ownedTasks": 0,
+    "projectRunUnchanged": true,
+    "publicSshAuthorizationUnchanged": true,
+    "sshd": "Running",
+    "persistentPrivateKey": "Metadata only, mode0600; contentsRead=false, authorization preserved."
+  },
+  "retainedOriginalFailures": {
+    "firstPsParse": {
+      "path": "/tmp/fc-round78-ci-evidence/root-fixture-precheck-first.json",
+      "bytes": 140842,
+      "sha256": "c40e04ddb94ba8c43f528b55954f8d694329074ac4beab644d368357538c250c"
+    },
+    "firstPsParseStatus": "FAIL_RETAIN_ORIGINALS",
+    "qualification": "Invalid -cine/-cieq rejected before MSI; later corrected instrument/precheck does not rewrite first failure.",
+    "firstActualMsi": {
+      "path": "/tmp/fc-round78-ci-evidence/product-msi-runtime-first/report.json",
+      "bytes": 68483,
+      "sha256": "5126fb9b3c20f861ce7b3cf1f5ba7024508dfb17d827430e5da3cc33afd9545e"
+    },
+    "firstActualMsiStatus": "FAIL_PRODUCT_PHASE_OR_COVERAGE_RETAINED",
+    "firstFreshQualification": "Actual fresh client0 and14 healthy payloads, original controls return0 and automatic image absence; Begin role/engine metadata UNKNOWN remains UNKNOWN.",
+    "firstReapply": "NOT_RUN",
+    "firstFailureFormalUninstall": "Actual client0/full four roles/known product and gate absence; independent finite facts only.",
+    "firstScratchCleanup": {
+      "path": "/tmp/fc-round78-ci-evidence/root-first-product-scratch-cleanup-first.json",
+      "bytes": 205043,
+      "sha256": "e9704b77fd1b00440f23cc5582f3438117c26dc252b03541d17c878e7c461f7c"
+    },
+    "firstScratchCleanupStatus": "PASS",
+    "oldReportsUnchanged": true,
+    "previousIndependentReviews": [
+      {
+        "path": "/tmp/fc-round78-ci-evidence/independent-preparation-review-first/review-first.json",
+        "bytes": 13297,
+        "sha256": "70be41b9109d86c8ec4f4eaa0640a02a3974ea4783f9f2a770b529be98dc1591"
+      },
+      {
+        "path": "/tmp/fc-round78-ci-evidence/independent-preparation-review-first/review-second.json",
+        "bytes": 11510,
+        "sha256": "38b11e73b3ae768517b7b53347cc56ddd0ff5a2748f1c7171a80942562b10a48"
+      },
+      {
+        "path": "/tmp/fc-round78-ci-evidence/independent-preparation-review-first/review-third.json",
+        "bytes": 34289,
+        "sha256": "df2cf2e28a3e12a0e00c550ab5e5638aa207f067096a7dfa5fc8ba28d1e9a89f"
+      },
+      {
+        "path": "/tmp/fc-round78-ci-evidence/independent-preparation-review-first/review-fourth.json",
+        "bytes": 11575,
+        "sha256": "48f4644841a07082d62710929ae23bba28baf23093baa81ccfbc52e68a4424ca"
+      }
+    ]
+  },
+  "remainingNotValidated": [
+    "Windows7 SP1 x86 OS runtime",
+    "Windows10 OS runtime",
+    "Standard-user installation/per-user permission matrix",
+    "Complete damaged repair, rollback/failure/timeout owner-retention matrix",
+    "Run-present removal and all Run CAS recovery paths",
+    "Major upgrade/downgrade and cross-version maintenance",
+    "Full Seewo hardware/foreground/visual acceptance",
+    "Campus network calibration/header/TLS capacity full field matrix",
+    "72-hour soak/stability and full release acceptance",
+    "Independent desktop database process reopen (public20 marker NOT_EXERCISED)"
+  ],
+  "countQualification": "1567 per baseline across22 distinct outer harnesses; no aggregate unique-count claim across two builds and no duplicate child count inflation. Public20 is no-session/change_restore PASS/foregroundUNTOUCHED with database reopen explicitly NOT_EXERCISED.",
+  "otherOriginalIdentities": [
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-product-msi-operation-second.json",
+      "bytes": 1367,
+      "sha256": "3c604cdc7cc27050851971f080a2ae0910034715c0ef6f963793b434f030d53d"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-product-msi-operation-first.json",
+      "bytes": 1225,
+      "sha256": "f0db8afa4e07937ed9a3b1b238c725272baae02480fd69c7dffe71d4e042b781"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-first-product-scratch-cleanup-first.json",
+      "bytes": 205043,
+      "sha256": "e9704b77fd1b00440f23cc5582f3438117c26dc252b03541d17c878e7c461f7c"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/msi-preparation-review-first/final-preparation-freeze-third.json",
+      "bytes": 6973,
+      "sha256": "abcc03eb5ff963cf8d5deba495a8795eaeb266fa339f25c40bd18985d6966f9b"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-fixture-precheck-third.json",
+      "bytes": 146971,
+      "sha256": "9184f477bd502bca7f075865bf23019c00afd2e5f759d3f821c943a413ecf9ba"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-fixture-precheck-second.json",
+      "bytes": 133838,
+      "sha256": "5540a0ea8b16820c88ca5e21442e73d5f553e77d3cfe753f2c66a0a4f75b87d3"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-package-pipeline-first.json",
+      "bytes": 7916,
+      "sha256": "3e8bac96cf99a9d7025566a915871ac8fc57f6446f7b7156fc8091610b689989"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/package-build-first.json",
+      "bytes": 495617,
+      "sha256": "6bc8e58a9733f39eb1a3ab9569d0474e136ea15790387c5717e4277c82ccf8d6"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/package-source-preparation-first/candidate-output-first/report.json",
+      "bytes": 86733,
+      "sha256": "20c9d24cb338240139b8681379900b193e3add1dc822bfdaf0054e28a9905b8d"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-run-final-first.json",
+      "bytes": 13052,
+      "sha256": "5ed2d10d6f0556f848cef575c595c659f5bfaa9c40fb75592499e9310f3f9b0f"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-jobs-final-first.json",
+      "bytes": 2452,
+      "sha256": "da43830da09b50f98ef5fdcc9788ee97a12d3441f610b00453b026221e988ccd"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-artifacts-final-first.json",
+      "bytes": 737,
+      "sha256": "b8304fdd2a528eebe1ceacc8547ff1ef3c4c7af0e972b7a048c4dcfed036789e"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-download-original-official-first.json",
+      "bytes": 1076,
+      "sha256": "5d0580ceb06a10d5c88467779960e501dc37f27e0d95561bf2f826d4648d0752"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-download-operation-official-first.json",
+      "bytes": 1149,
+      "sha256": "add907a147dae6d92569ad008c677b260ba7ad82f6dec470eabdb6d3f1752374"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-msvc-runtime-first.json",
+      "bytes": 226099,
+      "sha256": "ceb1b3c64cfc2d9cbe60403e32f624ccf4b9c09f1599b7ea04d89ba2b9d119b3"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/modern-msvc-runtime-operation-first.json",
+      "bytes": 257932,
+      "sha256": "535802c088ca39bed10c433ce05844fb53995417c1415447f4def78c8e4ef205"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-modern-runtime-invocation-first.json",
+      "bytes": 2753,
+      "sha256": "638b087e3f11346df78b698cd69340c1058f5ee30079d6010a9682e13811806f"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-modern-static-invocation-first.json",
+      "bytes": 2360,
+      "sha256": "44a0c5bc67d9e557662298e3c9b735da80204db2f4ddcbc8baa5aacd4e5d9db2"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-run-final-first.json",
+      "bytes": 13073,
+      "sha256": "d4564db104bd2453c748ad79606e0420f1d7f53c219c57e5e6f048e52dc675c1"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-jobs-final-first.json",
+      "bytes": 2477,
+      "sha256": "31b6aff0e98b1a634cb1775471c584df353a57414b1568937237169a08ce73e6"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-artifacts-final-first.json",
+      "bytes": 742,
+      "sha256": "2d6db996d144d6838081325ef81efacb28c0eca099e7f2573d27bc18bd933e29"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-download-original-official-first.json",
+      "bytes": 1077,
+      "sha256": "f2a64824dae54bdd8a24b7230e9d8a367a58f027e6b8f244570f37e819bc3bd1"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-download-operation-official-first.json",
+      "bytes": 1144,
+      "sha256": "726959bf653994f666efd0aa4861a210c81c9115939ee4651305f50eea7282c4"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-msvc-runtime-first.json",
+      "bytes": 226098,
+      "sha256": "0b4ab4a5318162d891c727e2f3bdca3a1773e33f9160d6525c61546504c94237"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/win7-msvc-runtime-operation-first.json",
+      "bytes": 230100,
+      "sha256": "5c9f6441697805684cb9bb17c5b6091d6f2d6e18d1f09eb9d704ef84e3c7fcab"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-win7-runtime-invocation-first.json",
+      "bytes": 2725,
+      "sha256": "8e11d2e87dc5a0717ce092e394867d49dc6be7202fdb2df1d4d79dfea19c81ef"
+    },
+    {
+      "path": "/tmp/fc-round78-ci-evidence/root-win7-static-invocation-first.json",
+      "bytes": 2335,
+      "sha256": "3710e033dc50f16de869f4b20151aa7277c8653c8e69d6c1f1c780d092b5153e"
+    }
+  ],
+  "reviewActions": "Only this owned independent review directory written. All source/runtime/failure originals unchanged; final audit/system report actualPASS bound before final freeze. No future evidence assumed."
+}

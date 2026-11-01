@@ -1,0 +1,15 @@
+{
+  "status": "FAIL_BEFORE_DESTINATION_CREATION_ORIGINAL_PRESERVED",
+  "actualExit": true,
+  "exitCode": 1,
+  "originalUnifiedSessionId": 61379,
+  "terminalOutputChunkId": "e6f4f2",
+  "controller": "archive-preparation-first/archive-first.py",
+  "controllerSha256": "44d39cce64f64735cb43e95cf9dd022683fa93e60d320c3c14900c3bdd700149",
+  "sourceRoot": "/tmp/fc-round78-ci-evidence",
+  "sourceDeletion": false,
+  "windowsContacted": false,
+  "destinationCreated": false,
+  "observedReason": "NON_TEXT_CONTROL_BYTES in credential_scan -> text_views -> add; original source bytes untouched. Exact text-encoding diagnosis recorded separately. Subsequent revised archive is a new operation, not a changed result for this attempt.",
+  "originalTerminalOutput": "Traceback (most recent call last):\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 266, in <module>\n    if __name__=='__main__':raise SystemExit(main())\n                                             ^^^^^^\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 231, in main\n    credential_scan(data,'source:'+row['path'],stats,findings);stats['sourceFiles']+=1;rows.append(row)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 142, in credential_scan\n    views=text_views(data)\n          ^^^^^^^^^^^^^^^^\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 122, in text_views\n    try:add('utf8',data.decode('utf-8-sig'))\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 112, in add\n    need(not any(ord(c)<32 and c not in '\\r\\n\\t\\ufeff' for c in text),'NON_TEXT_CONTROL_BYTES')\n  File \"/tmp/fc-round78-ci-evidence/archive-preparation-first/archive-first.py\", line 35, in need\n    if not v:raise AssertionError(m)\n             ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: NON_TEXT_CONTROL_BYTES\n"
+}
