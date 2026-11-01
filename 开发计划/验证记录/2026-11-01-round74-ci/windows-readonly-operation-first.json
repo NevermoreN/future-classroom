@@ -1,0 +1,26 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/root-audit-windows-readonly-first.py",
+    "--report",
+    "/tmp/fc-round74-ci-evidence/windows-readonly-final-first.json",
+    "--baseline",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round73-installer-broker/windows-readonly-final-first.json"
+  ],
+  "scope": "Final read-only owned-residue, Run and persistent SSH check after R74 modern MSVC finite Windows runtime; before R75 independent MSI probes.",
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 1.4680888939183205,
+  "stdout": {
+    "path": "/tmp/fc-round74-ci-evidence/windows-readonly-operation-first.stdout.log",
+    "bytes": 470,
+    "sha256": "1be331b8ee3f8788d27bb6b6f1cba734803cb8ba6344ff6592574a9c62861ed0"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-ci-evidence/windows-readonly-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

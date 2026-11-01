@@ -1,0 +1,32 @@
+{
+  "status": "OWNED_REDUNDANT_CONNECTOR_DOWNLOAD_CANCELLATION_REQUESTED",
+  "recordedUtc": "2026-11-01T12:42:48.600944+00:00",
+  "reason": "Same exact Win7 official artifact completed via separate bounded fallback with size/SHA PASS; stop only redundant owned read-only connector worker. Preserve first report/raw/partial ZIP, do not extend its1200s budget. No Windows activity.",
+  "officialOperationSha256": "565bb0e74d3fde0008fd05d3a29802d4e439b094bb7b5105c7514d373e6c7cc3",
+  "workers": [
+    {
+      "pid": 19687,
+      "argv": [
+        "python3",
+        "-B",
+        "/tmp/fc-round74-ci-evidence/download-plugin-original-first.py",
+        "--baseline",
+        "win7",
+        "--source-sha",
+        "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+        "--run-id",
+        "41303949352",
+        "--artifact-id",
+        "13083292891",
+        "--expected-bytes",
+        "45775412",
+        "--expected-sha256",
+        "43c526bf498a4cf1e04881375495b876081f4de5f400762989a4683f2dee68b1",
+        "--connector-response-file",
+        "/tmp/fc-round74-ci-evidence/win7-plugin-download-first.json"
+      ],
+      "exe": "/config/.python/python/bin/python3.12"
+    }
+  ],
+  "signal": "SIGTERM"
+}

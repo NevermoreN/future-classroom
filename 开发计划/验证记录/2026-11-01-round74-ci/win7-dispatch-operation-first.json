@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "startedUtc": "2026-11-01T11:54:18.235958+00:00",
+  "originalBudgetSeconds": 180,
+  "scope": "Single bounded workflow dispatch only; never retry POST on failure.",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/dispatch-ci-once.py",
+    "--source-sha",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--workflow",
+    "windows-win7-msvc.yml"
+  ],
+  "pid": 25345,
+  "timedOut": false,
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 4.976398004218936,
+  "stdout": {
+    "path": "win7-dispatch-operation-first.stdout.log",
+    "bytes": 290,
+    "sha256": "1f713d83e8ad9ca148e7cbaf3c5e0ea593c5f314e276e3a1fc738ef8efe8a09a"
+  },
+  "stderr": {
+    "path": "win7-dispatch-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "status": "READONLY_PROPOSED_SECOND_CONTRACT_REVIEW_NOT_EXECUTED",
+  "recordedUtc": "2026-11-01T11:58:53.541828+00:00",
+  "first": {
+    "path": "/tmp/fc-round74-ci-evidence/record-download-first.py",
+    "bytes": 2186,
+    "sha256": "9f00e216380f3b1bd76a813abc5e743cc3d39fe56ebf9bd0474ec325bc059902"
+  },
+  "gate": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/ci-inputs-first.py",
+    "bytes": 14334,
+    "sha256": "2177a76d50ba52da42a415594e76c39f711dcf1a5133b4ba08a849228d34cbf4"
+  },
+  "secondPresentAtReview": false,
+  "checks": [
+    {
+      "field": "actualExit",
+      "first": "absent; only actualControllerReturned present",
+      "proposed": "code is not None",
+      "effect": "When direct download subprocess.run returned code0, true satisfies strict gate; timeout codeNone gives false and statusFAIL remains rejected."
+    },
+    {
+      "field": "stdout/stderr.path",
+      "first": "basename only",
+      "proposed": "str(path) for owned absolute E path",
+      "effect": "strict exact() scoped fact can reopen bytes and compare length/SHA without resolving from a different cwd."
+    }
+  ],
+  "otherSchema": {
+    "status": "Existing PASS iff code0 matches gate PASS/PASS_COMMAND with exitCode0; timeout remainsFAIL.",
+    "sourceAndIDs": "Gate closes source/baseline/run/artifact/expectedbytes/SHA against exact original command and download receipt. It does not require root wrapper to invent additional run/job/artifact fields.",
+    "rawBytes": "Existing bytes/SHA256 raw capture values match exact() contract; empty raw streams allowed.",
+    "processScope": "subprocess.run(timeout) kills/waits its direct subprocess before TimeoutExpired; actualControllerReturned is not successful completion and no independent descendant exit proof. Success still requires physical direct child returned0. Root must observe wrapper terminal/reaped before invoking gate.",
+    "budget": "Original1200s unchanged; no timeout-success branch or budget extension proposed."
+  },
+  "qualifications": [
+    "Only first implementation and delivered gate AST/source were read. Proposed second has not yet been written at this review; no assertion of actual second bytes or runtime compatibility is made.",
+    "First was not executed; schema mismatches are preparation issues, not CI/download/product failures.",
+    "No gate/model/auditor/downloader/network/Windows/Cargo invocation; first/gate/main unchanged."
+  ]
+}

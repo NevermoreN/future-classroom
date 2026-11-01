@@ -1,0 +1,95 @@
+{
+  "status": "PASS_STATIC_AUDITOR_ACTUAL_EXIT0",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/verify-ci-artifact-dual-gui-second.py",
+    "--source",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--baseline",
+    "Modern",
+    "--zip",
+    "/tmp/fc-round74-ci-evidence/modern-official-original-second.zip",
+    "--zip-bytes",
+    "44985843",
+    "--zip-sha256",
+    "ca90aefb17365edabc0e12b1f9cdebe9767beae86dbf557d323ff02aa1cbe5a8",
+    "--run-id",
+    "41303935002",
+    "--job-id",
+    "124840381170",
+    "--artifact-id",
+    "13083057624",
+    "--run-metadata",
+    "/tmp/fc-round74-ci-evidence/modern-run-terminal1.json",
+    "--job-metadata",
+    "/tmp/fc-round74-ci-evidence/modern-jobs-observation-fifth.json",
+    "--artifact-metadata",
+    "/tmp/fc-round74-ci-evidence/modern-artifacts-terminal-first.json",
+    "--output-dir",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/modern-artifact-original",
+    "--report",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/modern-independent-first.json",
+    "--repo",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212"
+  ],
+  "inputs": {
+    "sourceSha": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "baseline": "modern",
+    "runId": 41303935002,
+    "jobId": 124840381170,
+    "artifactId": 13083057624,
+    "zip": {
+      "path": "/tmp/fc-round74-ci-evidence/modern-official-original-second.zip",
+      "bytes": 44985843,
+      "sha256": "ca90aefb17365edabc0e12b1f9cdebe9767beae86dbf557d323ff02aa1cbe5a8"
+    },
+    "downloadReceipt": {
+      "path": "/tmp/fc-round74-ci-evidence/modern-download-original-official-second.json",
+      "bytes": 832,
+      "sha256": "2034f69c439ad9b424b06e92389ebfbe27b44b7ca9b69a2c94b95b2b6d456a17"
+    },
+    "downloadOperation": {
+      "path": "/tmp/fc-round74-ci-evidence/modern-download-operation-official-second.json",
+      "bytes": 1136,
+      "sha256": "f8f80866d6e6c58801dee2a31d86fc689cc9241e8afbe56fad10e791c34bd040"
+    },
+    "officialMetadata": [
+      {
+        "path": "/tmp/fc-round74-ci-evidence/modern-run-terminal1.json",
+        "bytes": 13073,
+        "sha256": "25cf0c207a3d0dcbeb6b51fc23eeb2abad40f72db1cfddc210c0b86cd5a4babf"
+      },
+      {
+        "path": "/tmp/fc-round74-ci-evidence/modern-jobs-observation-fifth.json",
+        "bytes": 1905,
+        "sha256": "96bae6203716bcce093eb82901eee738e8f5fd2f009a9aa41b5df23407263adf"
+      },
+      {
+        "path": "/tmp/fc-round74-ci-evidence/modern-artifacts-terminal-first.json",
+        "bytes": 1079,
+        "sha256": "19f9887fff9a1700e997862aef3493a2ad32de893b93466e25bbcb2744d9e553"
+      }
+    ]
+  },
+  "startedUtc": "2026-11-01T12:39:51.509194+00:00",
+  "pid": 28417,
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 14.386145870899782,
+  "stdout": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/modern-static-operation-first.stdout.log",
+    "bytes": 736,
+    "sha256": "9c9e1b1e5e90e34a3a3baad61bf87190b2400d9c7acaecaf2693f1cea73a141b"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/modern-static-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualReport": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/modern-independent-first.json",
+    "bytes": 586089,
+    "sha256": "3a328fcd58325ade9b9679d2bea81510d0511994a74c7bff5ed87afe611de521"
+  }
+}

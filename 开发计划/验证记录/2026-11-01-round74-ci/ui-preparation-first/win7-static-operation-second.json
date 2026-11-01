@@ -1,0 +1,95 @@
+{
+  "status": "PASS_STATIC_AUDITOR_ACTUAL_EXIT0",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/verify-ci-artifact-dual-gui-third.py",
+    "--source",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--baseline",
+    "Win7",
+    "--zip",
+    "/tmp/fc-round74-ci-evidence/win7-official-original-second.zip",
+    "--zip-bytes",
+    "45775412",
+    "--zip-sha256",
+    "43c526bf498a4cf1e04881375495b876081f4de5f400762989a4683f2dee68b1",
+    "--run-id",
+    "41303949352",
+    "--job-id",
+    "124840423063",
+    "--artifact-id",
+    "13083292891",
+    "--run-metadata",
+    "/tmp/fc-round74-ci-evidence/win7-run-terminal1.json",
+    "--job-metadata",
+    "/tmp/fc-round74-ci-evidence/win7-jobs-observation-sixth.json",
+    "--artifact-metadata",
+    "/tmp/fc-round74-ci-evidence/win7-artifacts-terminal-first.json",
+    "--output-dir",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-artifact-second",
+    "--report",
+    "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-independent-second.json",
+    "--repo",
+    "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212"
+  ],
+  "inputs": {
+    "sourceSha": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "baseline": "win7",
+    "runId": 41303949352,
+    "jobId": 124840423063,
+    "artifactId": 13083292891,
+    "zip": {
+      "path": "/tmp/fc-round74-ci-evidence/win7-official-original-second.zip",
+      "bytes": 45775412,
+      "sha256": "43c526bf498a4cf1e04881375495b876081f4de5f400762989a4683f2dee68b1"
+    },
+    "downloadReceipt": {
+      "path": "/tmp/fc-round74-ci-evidence/win7-download-original-official-second.json",
+      "bytes": 833,
+      "sha256": "c1ace06c27de4d030daaba42c31d22da77e0dada8984fa8d27343d074d27ba65"
+    },
+    "downloadOperation": {
+      "path": "/tmp/fc-round74-ci-evidence/win7-download-operation-official-second.json",
+      "bytes": 1129,
+      "sha256": "565bb0e74d3fde0008fd05d3a29802d4e439b094bb7b5105c7514d373e6c7cc3"
+    },
+    "officialMetadata": [
+      {
+        "path": "/tmp/fc-round74-ci-evidence/win7-run-terminal1.json",
+        "bytes": 13094,
+        "sha256": "ea53e380b8a87ca33c5fb2c63bb80f3c7e50f2d7ee982b7bfed7844c73eb4c9d"
+      },
+      {
+        "path": "/tmp/fc-round74-ci-evidence/win7-jobs-observation-sixth.json",
+        "bytes": 1922,
+        "sha256": "9e3a1dfab4061b0a36bf4480b441592d4e4ec0da3c5384989262107ca895b5e0"
+      },
+      {
+        "path": "/tmp/fc-round74-ci-evidence/win7-artifacts-terminal-first.json",
+        "bytes": 1084,
+        "sha256": "e1c119ec7f96b70dc51057cafa7411a645f04e3699e97056f3f9bb173c6df8e5"
+      }
+    ]
+  },
+  "startedUtc": "2026-11-01T12:41:16.124926+00:00",
+  "pid": 29024,
+  "exitCode": 0,
+  "actualExit": true,
+  "elapsedSeconds": 14.43226924794726,
+  "stdout": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-static-operation-second.stdout.log",
+    "bytes": 735,
+    "sha256": "966f123fb8b94be1854bb8bc91e716c1429fc3b6778ad0168cbfaf52059d85f7"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-static-operation-second.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualReport": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-independent-second.json",
+    "bytes": 561917,
+    "sha256": "67531d3feb4ad03a5f0bfcd82fbd3de7284c36a737424c65a93501756088f085"
+  }
+}

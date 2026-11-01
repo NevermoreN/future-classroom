@@ -1,0 +1,11 @@
+--- verify-ci-artifact-dual-gui-second.py
++++ verify-ci-artifact-dual-gui-third.py
+@@ -587,7 +587,7 @@
+                     need(test_profile is False and package['id']==bootstrap['id'] and package['name']=='fc-bootstrap'
+                         and package['version']==source_version and target['name']==PRODUCT_COMMANDS[command] and target['kind']==['bin'],'CLOSED_NORMAL_COMMAND_PACKAGE_TARGET_VERSION_FALSE_PROFILE')
+                 original=PureWindowsPath(msg['executable']);path_key=str(original).casefold()
+-                need(original.is_absolute() and original.is_relative_to(target_directory) and str(original) in msg.get('filenames',[]),'CARGO_EXECUTABLE_AND_FILENAMES_OWNED_TARGET_ASSOCIATION')
++                need(original.is_absolute() and original.is_relative_to(target_directory) and msg['executable'] in msg.get('filenames',[]),'CARGO_EXECUTABLE_AND_FILENAMES_OWNED_TARGET_ASSOCIATION')
+                 target_relative=original.relative_to(target_directory).parts
+                 need(target_relative[:2]==(BASELINES[self.args.baseline]['target'],'release'),'EXACT_TARGET_RELEASE_EXECUTABLE')
+                 if role=='product':

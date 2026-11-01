@@ -1,0 +1,58 @@
+{
+  "status": "PASS_ROOT_R74_CONTROLLERS_PHYSICALLY_TERMINAL_OBSERVATION",
+  "terminalSessions": {
+    "modernConnectorFirst": {
+      "session": 18821,
+      "exit": 1,
+      "reason": "original1200s child timeout; parent reaped; worker original RUNNING report preserved as interrupted"
+    },
+    "win7ConnectorFirst": {
+      "session": 58818,
+      "exit": 1,
+      "reason": "owned redundant download cancellation; worker -15 reaped by parent"
+    },
+    "modernOfficialSecond": {
+      "session": 48066,
+      "exit": 0
+    },
+    "win7OfficialSecond": {
+      "session": 27478,
+      "exit": 0
+    },
+    "win7StaticFirst": {
+      "session": 28165,
+      "exit": 1
+    },
+    "modernStaticFirst": {
+      "session": 94712,
+      "exit": 0
+    },
+    "win7StaticSecond": {
+      "session": 51325,
+      "exit": 0
+    },
+    "modernWin11Runtime": {
+      "session": 30840,
+      "exit": 0
+    },
+    "finalReadonlyAudit": {
+      "session": 3007,
+      "exit": 0
+    }
+  },
+  "limits": "Exact observed tool terminals only. First two connector worker receipts retain RUNNING because timeout/signal interrupted before normal-finally; no completed artifact claim from partial ZIPs.",
+  "interruptedPartialZipIdentities": [
+    {
+      "path": "/tmp/fc-round74-ci-evidence/modern-original.zip",
+      "bytes": 23068672,
+      "sha256": "05cbf63e7bb270dbb476ed7f3cdd7979f3441f1ea94fae30aa7168df7f257ec7",
+      "scope": "Interrupted partial bytes; not ZIP-opened/executed. Exclude payload from Git."
+    },
+    {
+      "path": "/tmp/fc-round74-ci-evidence/win7-original.zip",
+      "bytes": 16252928,
+      "sha256": "a695053404c70b0847e1c67395d8322595674dbd29fc329b2fd8cd1834674a2b",
+      "scope": "Interrupted partial bytes; not ZIP-opened/executed. Exclude payload from Git."
+    }
+  ]
+}

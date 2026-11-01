@@ -1,0 +1,29 @@
+{
+  "name": "lifecycle-compile",
+  "executable": "C:\\Users\\runneradmin\\.cargo\\bin\\cargo.exe",
+  "arguments": [
+    "rustc",
+    "-vv",
+    "--release",
+    "--locked",
+    "--target",
+    "i686-pc-windows-msvc",
+    "-p",
+    "fc-bootstrap",
+    "--bin",
+    "fc-installer-lifecycle",
+    "--message-format=json"
+  ],
+  "started_utc": "2026-11-01T12:09:30.5957875Z",
+  "duration_seconds": 1.7805952,
+  "exit_code": 0,
+  "parent_exited": true,
+  "timed_out_or_pipe_stalled": false,
+  "log_truncated": false,
+  "log_limit_bytes_per_stream": 16777216,
+  "stdout": "logs/lifecycle-compile.stdout.log",
+  "stderr": "logs/lifecycle-compile.stderr.log",
+  "stdout_sha256": "33318eedeb7c944ecf9c281722a85190ed870aa4ceda12e8e0f55a0285c7f79b",
+  "stderr_sha256": "7f21df62bb0e8ee90c9553a214ff7885564fffd53838ac53c4839b717f8d6ca8",
+  "passed": true
+}

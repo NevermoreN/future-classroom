@@ -1,0 +1,39 @@
+{
+  "status": "FAIL",
+  "sourceSha": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/download-plugin-original-first.py",
+    "--baseline",
+    "modern",
+    "--source-sha",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--run-id",
+    "41303935002",
+    "--artifact-id",
+    "13083057624",
+    "--expected-bytes",
+    "44985843",
+    "--expected-sha256",
+    "ca90aefb17365edabc0e12b1f9cdebe9767beae86dbf557d323ff02aa1cbe5a8",
+    "--connector-response-file",
+    "/tmp/fc-round74-ci-evidence/modern-plugin-download-first.json"
+  ],
+  "originalBudgetSeconds": 1200,
+  "startedUtc": "2026-11-01T12:17:09.850809+00:00",
+  "exitCode": null,
+  "elapsedSeconds": 1200.1020183609799,
+  "actualControllerReturned": true,
+  "actualExit": false,
+  "stdout": {
+    "path": "/tmp/fc-round74-ci-evidence/modern-download-operation-first.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-ci-evidence/modern-download-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

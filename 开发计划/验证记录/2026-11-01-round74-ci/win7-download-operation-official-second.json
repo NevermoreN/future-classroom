@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "sourceSha": "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-ci-evidence/download-original-official-second.py",
+    "--baseline",
+    "win7",
+    "--source-sha",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--run-id",
+    "41303949352",
+    "--artifact-id",
+    "13083292891",
+    "--expected-bytes",
+    "45775412",
+    "--expected-sha256",
+    "43c526bf498a4cf1e04881375495b876081f4de5f400762989a4683f2dee68b1"
+  ],
+  "originalBudgetSeconds": 1200,
+  "startedUtc": "2026-11-01T12:38:43.877512+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 40.09537379001267,
+  "actualControllerReturned": true,
+  "actualExit": true,
+  "stdout": {
+    "path": "/tmp/fc-round74-ci-evidence/win7-download-operation-official-second.stdout.log",
+    "bytes": 196,
+    "sha256": "dfc47410c3dec49733b6756380fa5a1a376eb3c4d1eb8b4a93f7ddfd1285f7c1"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-ci-evidence/win7-download-operation-official-second.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

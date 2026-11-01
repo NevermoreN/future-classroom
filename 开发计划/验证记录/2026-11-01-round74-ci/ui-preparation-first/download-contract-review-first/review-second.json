@@ -1,0 +1,25 @@
+{
+  "status": "PASS_READONLY_SECOND_SOURCE_CONTRACT_ONLY_NOT_RUNTIME",
+  "recordedUtc": "2026-11-01T11:59:10.714445+00:00",
+  "first": {
+    "path": "/tmp/fc-round74-ci-evidence/record-download-first.py",
+    "bytes": 2186,
+    "sha256": "9f00e216380f3b1bd76a813abc5e743cc3d39fe56ebf9bd0474ec325bc059902"
+  },
+  "actualSecond": {
+    "path": "/tmp/fc-round74-ci-evidence/record-download-second.py",
+    "bytes": 2215,
+    "sha256": "ac6b18d1a226265c598b9dc5656baf3264ecbaaec0a3173b7d7e38923babd704"
+  },
+  "gate": {
+    "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/ci-inputs-first.py",
+    "bytes": 14334,
+    "sha256": "2177a76d50ba52da42a415594e76c39f711dcf1a5133b4ba08a849228d34cbf4"
+  },
+  "exactTwoReplacementsOnly": true,
+  "astParse": true,
+  "qualification": "Actual second is byte-for-byte exactly first with only actualExit=code is not None and raw.path=str(path). All status/timeout/1200s/command/raw bytes rules retained. Success schema now satisfies strict delivered gate; no actual gate or download has run in this review.",
+  "constraints": "Root must independently observe wrapper terminal/reaped. Timeout remainsFAIL and actualExitfalse; no additional descendant identity/completion guarantee. First and earlier preparation qualification are preserved.",
+  "executedGateDownloaderNetworkWindowsCargo": false,
+  "mainChanged": false
+}

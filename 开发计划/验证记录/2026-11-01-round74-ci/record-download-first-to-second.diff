@@ -1,0 +1,16 @@
+--- record-download-first.py
++++ record-download-second.py
+@@ -31,11 +31,11 @@
+ except subprocess.TimeoutExpired as error:
+     code, out, err = None, error.stdout or b'', error.stderr or b''
+ value.update(status='PASS' if code == 0 else 'FAIL', exitCode=code,
+-             elapsedSeconds=time.monotonic() - started, actualControllerReturned=True)
++             elapsedSeconds=time.monotonic() - started, actualControllerReturned=True, actualExit=code is not None)
+ for key, path, data in [('stdout', stdout, out), ('stderr', stderr, err)]:
+     with path.open('xb') as stream:
+         stream.write(data)
+-    value[key] = {'path': path.name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
++    value[key] = {'path': str(path), 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+ report.write_text(json.dumps(value, indent=2) + '\n')
+ print(json.dumps(value))
+ print(out.decode('utf-8', 'replace'))

@@ -1,0 +1,33 @@
+{
+  "status": "PASS_COMMAND",
+  "command": [
+    "python3",
+    "-B",
+    "/tmp/fc-round74-archive-controller/archive-evidence-second.py",
+    "--source-base-git",
+    "2dfb2e7e07ace64c61abf66c9a423aa815de7110",
+    "--acceptance-report",
+    "modern-msvc-runtime-operation-first.json",
+    "--expected-acceptance-sha256",
+    "6183eeb42d39ee68a48ba226c23261b1a043f428a0f91dcd5762252d5c39cae5",
+    "--expected-acceptance-status",
+    "PASS_R74_MODERN_MSVC_FULL22_WIN11_ONLY",
+    "--expected-readonly-sha256",
+    "555a30b87d8b555d29ee2b25fee31ca16839ab8d1904aa86872fa2d9099b47ec",
+    "--root-controllers-terminal",
+    "--execute"
+  ],
+  "actualExit": true,
+  "exitCode": 0,
+  "elapsedSeconds": 122.0081225540489,
+  "stdout": {
+    "path": "/tmp/fc-round74-archive-controller/archive-operation-first.stdout.log",
+    "bytes": 441,
+    "sha256": "df903e3818fd8068b86aa03ca1cc1535028fc7ce6aa93e4ba25b9f6d09f22340"
+  },
+  "stderr": {
+    "path": "/tmp/fc-round74-archive-controller/archive-operation-first.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

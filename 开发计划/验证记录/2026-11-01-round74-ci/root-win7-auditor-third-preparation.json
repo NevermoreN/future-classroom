@@ -1,0 +1,35 @@
+{
+  "status": "PASS_MINIMAL_ORIGINAL_CARGO_PATH_SPELLING_FIX_PURE_ONLY",
+  "recordedUtc": "2026-11-01T12:41:02.231102+00:00",
+  "failurePreserved": "/tmp/fc-round74-ci-evidence/ui-preparation-first/win7-independent-first.json",
+  "reason": "Actual Cargo Windows JSON executable/filenames are byte-identical mixed slash strings. PureWindowsPath canonical spelling was incorrectly compared to raw filenames. Exact original JSON membership now precedes unchanged absolute/owned-target constraints. No artifact/source/PE changes.",
+  "positive": 2,
+  "negative": 4,
+  "files": [
+    {
+      "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/verify-ci-artifact-dual-gui-second.py",
+      "bytes": 53791,
+      "sha256": "ca0d64eff8d8e4c38dd8a8673d60631fb3b7a1d9fa3c5b4402348dd324d2565b"
+    },
+    {
+      "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/verify-ci-artifact-dual-gui-third.py",
+      "bytes": 53795,
+      "sha256": "4047bc6598059bd99a0aaf266c670b14983263a1a7909c4a0e19c9fc8c3b9622"
+    },
+    {
+      "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/ci-inputs-first.py",
+      "bytes": 14334,
+      "sha256": "2177a76d50ba52da42a415594e76c39f711dcf1a5133b4ba08a849228d34cbf4"
+    },
+    {
+      "path": "/tmp/fc-round74-ci-evidence/ui-preparation-first/ci-inputs-win7-second.py",
+      "bytes": 14333,
+      "sha256": "a544dc705cdcb147fac33694146b08ece22d37d07e0e01f829445193eace5d8e"
+    },
+    {
+      "path": "/tmp/fc-round74-ci-evidence/root-win7-auditor-third.diff",
+      "bytes": 1156,
+      "sha256": "6ef526ba0948a3cadad58aef3876e124099ff4a67f040b2a4fd792662577185e"
+    }
+  ]
+}
