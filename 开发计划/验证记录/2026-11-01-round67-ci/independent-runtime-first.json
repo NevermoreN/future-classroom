@@ -1,0 +1,1478 @@
+{
+  "schema": "future-classroom.r67-independent-runtime/v1",
+  "status": "PASS_R67_TWO_MSVC_BUILDS_ACTUAL_WIN11_ONLY",
+  "recordedUtc": "2026-11-01T07:45:29.415737+00:00",
+  "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+  "scope": "Read-only audit of original R67 MSVC ZIPs,22 PE bytes per build,original controllers and normalized actual Windows11 test/native transcripts. No Windows,SSH,Cargo,network or source mutation.",
+  "limitations": [
+    "Both executable sets ran on Windows11 build26300 x64 via WOW64; no Windows7/10 OS or Seewo runtime proof.",
+    "Per-harness/native output is the original runner normalized merged lines, not separate raw stdout/stderr byte streams. Controller stdout/stderr original files are independently byte verified.",
+    "Source54397 is R67. These results do not validate new R68 production HTTPS implementation."
+  ],
+  "baselines": {
+    "modern": {
+      "status": "PASS",
+      "runId": 41283223610,
+      "jobId": 124779223219,
+      "artifactId": 13074073386,
+      "staticAudit": {
+        "path": "/tmp/fc-round67-ci-evidence/modern-original-independent-first.json",
+        "bytes": 505152,
+        "sha256": "9bb6ce73504c2872025d21c9fb0672d39a004ac892686b4a407f87c51674dfc5"
+      },
+      "zip": {
+        "path": "/tmp/fc-round67-ci-evidence/modern-original.zip",
+        "bytes": 43305753,
+        "sha256": "d537d8060ce49537bb56db259adf462ebc856ea54552d70abc30efd23667e70f"
+      },
+      "executables": [
+        {
+          "name": "schedule_operations-75016802763f2d21.exe",
+          "bytes": 4164096,
+          "sha256": "096eecf4de36ab5c8997caa695df86d640f38b81db15fd86a966ff28b9e80f75",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_bootstrap-1904026c21c0adea.exe",
+          "bytes": 10758656,
+          "sha256": "309265e07927885a2db27da8f1e78124df28d38af30a9f17ca214beb9249fe0c",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "calendar_execution_fence-90c781596b821bb1.exe",
+          "bytes": 4030976,
+          "sha256": "f8867c3e38617751f80641dba929910c84481f2cf65e4061db287bf50bb1417e",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "runtime_storage-be315465b9650302.exe",
+          "bytes": 3560960,
+          "sha256": "384fa73ecbbd6fb1371a75f4c2c457a4ba273759db60098f054db49b2de95943",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "business_storage-d7acb8a02f6a164c.exe",
+          "bytes": 4616704,
+          "sha256": "51e0129b4f4049ebefa1d8d96785cc1437bb021de0e56b44289ba82925c9f084",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "verify_web_assets-875fd155fb56602c.exe",
+          "bytes": 696320,
+          "sha256": "b743404a596d57e7433624a3405408db4d5cbfe73f528721c1061b08dbd82ed4",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "voice_limits_storage-fa38bda5134dfcda.exe",
+          "bytes": 3708416,
+          "sha256": "9f23eb823e6b254c090b433218036f0ed26a343a423de269565d94f44e3946f5",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "autostart_coordinator-4d8ffe50e568cd1d.exe",
+          "bytes": 3972608,
+          "sha256": "e8b81f88ba6f2f5336e4bf66fae78cf4d957048336006d7bfabec2bf88890296",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "voice_storage-2f35be146f47b683.exe",
+          "bytes": 3755008,
+          "sha256": "e03815052a7363279ec420f8056111d8f8c8b960121600a4ed8e76ddb8dc8792",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_bootstrap-f2a1cc65f02b0804.exe",
+          "bytes": 9954304,
+          "sha256": "3b589cc327782f5c24d4fd371023ac47ede208142cd30c7fc70beaeced09fb6a",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_windows-cd50618b48fb17d8.exe",
+          "bytes": 2917888,
+          "sha256": "c6f52c29c74da04a8122a48d583e1c717cede753fc8c3d41b02fe645fa189218",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_security-897ee1bbd038f1a8.exe",
+          "bytes": 806400,
+          "sha256": "fe1ca6e56b81aaecdb570a1e0ac6270918e519778452eee6a044dc29cd180794",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_materials-2e428b959a090e75.exe",
+          "bytes": 1793536,
+          "sha256": "327ea2d72a3c9b61b734fae9e4fecdc5875bae0344fc48c74fde02a5b5610e96",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_presentation-0ebca4673ff953f0.exe",
+          "bytes": 1305088,
+          "sha256": "46e2a0b76a0d4ee3307fefcca9245368767e9ee04400d44931e8ad5d046cda8a",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_protocol-a7cf91af1d25db3b.exe",
+          "bytes": 1449472,
+          "sha256": "00322772b9f1a47de89924ab2487ae1f81eb6160727295ffebcf25396e156253",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_audio-3b8d060b615f92df.exe",
+          "bytes": 828928,
+          "sha256": "e6ea0de3df65ac828cc8b1dd17d6bbb8c8db5cf40baf6a72a2f5d854c69e0f90",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_application-452d4d2887413f93.exe",
+          "bytes": 844800,
+          "sha256": "5959b355a6cf1bbfd7fd304ad58419c5c225ff88b1d23274ecf1acce41704a55",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_runtime-beae710b833bf51a.exe",
+          "bytes": 991232,
+          "sha256": "bb314c0ae3603d65417ce55fc49485e65b6e7d680d023b84f7b9dca6ab5dd6af",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_storage-e351e410d252c84e.exe",
+          "bytes": 6769152,
+          "sha256": "e93690d83c4f0ba5b8587a539e8615ac33b4fb8706b11ae40a5db00689f95721",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_ports-2a65d64830b4e099.exe",
+          "bytes": 765440,
+          "sha256": "01272cce211668b5e32b30f44d55a3bea9fbce8de9edd2b28265f7b76b1cefb9",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc_domain-7c20761d03caf301.exe",
+          "bytes": 1771008,
+          "sha256": "dd16d54f267f0f36c27515920f7cbe3aa5175cbc98688c04a993e49339e1d46f",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "fc-bootstrap.exe",
+          "bytes": 10539520,
+          "sha256": "9cf1ed6c0f2a7d4f8d8d808628baaba155a6f69d3345daa483531638a4fe89a7",
+          "role": "product",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 2,
+            "subsystemVersion": [
+              6,
+              0
+            ]
+          }
+        }
+      ],
+      "normalSha256": "9cf1ed6c0f2a7d4f8d8d808628baaba155a6f69d3345daa483531638a4fe89a7",
+      "metadataSha256": "7c36ada887ad35917011653e525f4051b5f344da317e78e3edca9c1451f1ebd1",
+      "actualHost": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "runtimeArchitecture": "x86 PE32 on x64 Windows11 (WOW64)",
+      "harnesses": [
+        {
+          "name": "schedule_operations-75016802763f2d21.exe",
+          "binarySha256": "096eecf4de36ab5c8997caa695df86d640f38b81db15fd86a966ff28b9e80f75",
+          "declared": 5,
+          "actualCaseLines": 5,
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 1.23,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_bootstrap-1904026c21c0adea.exe",
+          "binarySha256": "309265e07927885a2db27da8f1e78124df28d38af30a9f17ca214beb9249fe0c",
+          "declared": 339,
+          "actualCaseLines": 339,
+          "passed": 339,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 66.36,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "calendar_execution_fence-90c781596b821bb1.exe",
+          "binarySha256": "f8867c3e38617751f80641dba929910c84481f2cf65e4061db287bf50bb1417e",
+          "declared": 4,
+          "actualCaseLines": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 4.67,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "runtime_storage-be315465b9650302.exe",
+          "binarySha256": "384fa73ecbbd6fb1371a75f4c2c457a4ba273759db60098f054db49b2de95943",
+          "declared": 3,
+          "actualCaseLines": 3,
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.11,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "business_storage-d7acb8a02f6a164c.exe",
+          "binarySha256": "51e0129b4f4049ebefa1d8d96785cc1437bb021de0e56b44289ba82925c9f084",
+          "declared": 43,
+          "actualCaseLines": 43,
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 2.48,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "verify_web_assets-875fd155fb56602c.exe",
+          "binarySha256": "b743404a596d57e7433624a3405408db4d5cbfe73f528721c1061b08dbd82ed4",
+          "declared": 0,
+          "actualCaseLines": 0,
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "voice_limits_storage-fa38bda5134dfcda.exe",
+          "binarySha256": "9f23eb823e6b254c090b433218036f0ed26a343a423de269565d94f44e3946f5",
+          "declared": 4,
+          "actualCaseLines": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.13,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "autostart_coordinator-4d8ffe50e568cd1d.exe",
+          "binarySha256": "e8b81f88ba6f2f5336e4bf66fae78cf4d957048336006d7bfabec2bf88890296",
+          "declared": 13,
+          "actualCaseLines": 13,
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 2.14,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "voice_storage-2f35be146f47b683.exe",
+          "binarySha256": "e03815052a7363279ec420f8056111d8f8c8b960121600a4ed8e76ddb8dc8792",
+          "declared": 6,
+          "actualCaseLines": 6,
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.72,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_bootstrap-f2a1cc65f02b0804.exe",
+          "binarySha256": "3b589cc327782f5c24d4fd371023ac47ede208142cd30c7fc70beaeced09fb6a",
+          "declared": 218,
+          "actualCaseLines": 218,
+          "passed": 218,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 3.24,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_windows-cd50618b48fb17d8.exe",
+          "binarySha256": "c6f52c29c74da04a8122a48d583e1c717cede753fc8c3d41b02fe645fa189218",
+          "declared": 241,
+          "actualCaseLines": 241,
+          "passed": 241,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 25.83,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_security-897ee1bbd038f1a8.exe",
+          "binarySha256": "fe1ca6e56b81aaecdb570a1e0ac6270918e519778452eee6a044dc29cd180794",
+          "declared": 19,
+          "actualCaseLines": 19,
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.2,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_materials-2e428b959a090e75.exe",
+          "binarySha256": "327ea2d72a3c9b61b734fae9e4fecdc5875bae0344fc48c74fde02a5b5610e96",
+          "declared": 39,
+          "actualCaseLines": 39,
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.07,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_presentation-0ebca4673ff953f0.exe",
+          "binarySha256": "46e2a0b76a0d4ee3307fefcca9245368767e9ee04400d44931e8ad5d046cda8a",
+          "declared": 58,
+          "actualCaseLines": 58,
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.02,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_protocol-a7cf91af1d25db3b.exe",
+          "binarySha256": "00322772b9f1a47de89924ab2487ae1f81eb6160727295ffebcf25396e156253",
+          "declared": 82,
+          "actualCaseLines": 82,
+          "passed": 82,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.06,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_audio-3b8d060b615f92df.exe",
+          "binarySha256": "e6ea0de3df65ac828cc8b1dd17d6bbb8c8db5cf40baf6a72a2f5d854c69e0f90",
+          "declared": 22,
+          "actualCaseLines": 22,
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_application-452d4d2887413f93.exe",
+          "binarySha256": "5959b355a6cf1bbfd7fd304ad58419c5c225ff88b1d23274ecf1acce41704a55",
+          "declared": 25,
+          "actualCaseLines": 25,
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_runtime-beae710b833bf51a.exe",
+          "binarySha256": "bb314c0ae3603d65417ce55fc49485e65b6e7d680d023b84f7b9dca6ab5dd6af",
+          "declared": 33,
+          "actualCaseLines": 33,
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.1,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_storage-e351e410d252c84e.exe",
+          "binarySha256": "e93690d83c4f0ba5b8587a539e8615ac33b4fb8706b11ae40a5db00689f95721",
+          "declared": 206,
+          "actualCaseLines": 206,
+          "passed": 206,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 6.86,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_ports-2a65d64830b4e099.exe",
+          "binarySha256": "01272cce211668b5e32b30f44d55a3bea9fbce8de9edd2b28265f7b76b1cefb9",
+          "declared": 8,
+          "actualCaseLines": 8,
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_domain-7c20761d03caf301.exe",
+          "binarySha256": "dd16d54f267f0f36c27515920f7cbe3aa5175cbc98688c04a993e49339e1d46f",
+          "declared": 148,
+          "actualCaseLines": 148,
+          "passed": 148,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.01,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        }
+      ],
+      "harnessCount": 21,
+      "totals": {
+        "passed": 1516,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0
+      },
+      "controllerRaw": {
+        "stdout": {
+          "path": "/tmp/fc-round67-ci-evidence/modern-msvc-runtime-first.stdout.log",
+          "bytes": 947,
+          "sha256": "46e1d2753505164fc4c5f22e7ce07c6b259c3fb1250895e6cd465852e844677b"
+        },
+        "stderr": {
+          "path": "/tmp/fc-round67-ci-evidence/modern-msvc-runtime-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "nativeFlows": {
+        "public": {
+          "steps": 20,
+          "elapsedMs": 2461,
+          "foreground": "UNTOUCHED",
+          "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified",
+          "controllerRaw": {
+            "stdout": {
+              "path": "/tmp/fc-round67-ci-evidence/modern-msvc-public-native-first.stdout.log",
+              "bytes": 93,
+              "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+            },
+            "stderr": {
+              "path": "/tmp/fc-round67-ci-evidence/modern-msvc-public-native-first.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        },
+        "visual": {
+          "steps": 22,
+          "elapsedMs": 854,
+          "foreground": "UNTOUCHED",
+          "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified",
+          "controllerRaw": {
+            "stdout": {
+              "path": "/tmp/fc-round67-ci-evidence/modern-msvc-visual-native-first.stdout.log",
+              "bytes": 93,
+              "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+            },
+            "stderr": {
+              "path": "/tmp/fc-round67-ci-evidence/modern-msvc-visual-native-first.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        }
+      },
+      "cleanup": "PASS"
+    },
+    "win7": {
+      "status": "PASS",
+      "runId": 41283223767,
+      "jobId": 124779223557,
+      "artifactId": 13074588673,
+      "staticAudit": {
+        "path": "/tmp/fc-round67-ci-evidence/win7-original-independent-second.json",
+        "bytes": 486430,
+        "sha256": "83a045fe1f983daed431a97a5b8b787c56b576c990911687cae7516799931ede"
+      },
+      "zip": {
+        "path": "/tmp/fc-round67-ci-evidence/win7-original.zip",
+        "bytes": 44056009,
+        "sha256": "9dc7d304b6e3233545bdb6a4202bc8cce87c6dbc32411f30897553bdf91d1eec"
+      },
+      "executables": [
+        {
+          "name": "fc_materials-27e90f6481865594.exe",
+          "bytes": 1859584,
+          "sha256": "cca40f884e1eb8849d128458cd890c021ec28aa42ff3963dd4cfbc738e31e1b5",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "voice_limits_storage-abed18096ae314db.exe",
+          "bytes": 3759104,
+          "sha256": "00898f330739b9719a5bc82621b7906334fde322d0b068f84bc00a5853a4d451",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "runtime_storage-bf961cb76f115c90.exe",
+          "bytes": 3614720,
+          "sha256": "cbf589d0d9a45392cca323f8b74a265430cb6894d575390884dc4d169dcfa4f6",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "verify_web_assets-7ac500a422c06d1a.exe",
+          "bytes": 730112,
+          "sha256": "3a7aa269746402fc2d110b8cef016649ac7024def826f5baefda099907825798",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_bootstrap-91b9195dc595ae6a.exe",
+          "bytes": 10875392,
+          "sha256": "9fa348b19c015d8ae28e391d2dae1792b0b8a8d5114350fda2dcf4709ef0a6c9",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "schedule_operations-a07e2c7c41633cad.exe",
+          "bytes": 4195840,
+          "sha256": "534e37874149822e5e9e0c1e7789c4817f5bd5e1ef073837d9c6685867720cd4",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "voice_storage-785dd80176e1848e.exe",
+          "bytes": 3806208,
+          "sha256": "4a4e00b9818688d09f4e2336825a2912a698eda0d935f5d17805bea6bb5ebdd8",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "calendar_execution_fence-21b0f4c4743fb589.exe",
+          "bytes": 4077056,
+          "sha256": "b720b10603241a2c6b422bbdefe08999c1836a76e9811066a2c22423ff7ca668",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "business_storage-9ab94b602a63138a.exe",
+          "bytes": 4636160,
+          "sha256": "43c565ed0770a561228381e1d15401ff9714e31e9b78e849d5de37100d7f5dbd",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "autostart_coordinator-66a4d714f5577a8a.exe",
+          "bytes": 4018176,
+          "sha256": "dc2b1af36d5ceab43b40f04450793ad28d83d62a0fa443da85b69c7a15aa5f07",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_bootstrap-6b3baf5e1e32f754.exe",
+          "bytes": 10047488,
+          "sha256": "471939b7a763f9df7218217c10881063469e50be36fe5e99bd9759e99ef6b004",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_security-3bf217f9b927aa4c.exe",
+          "bytes": 838144,
+          "sha256": "62388d95cf4f210d891fd25a84c6621f30c83e70f29905db113c907c3936e6ce",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_windows-188127b3800ef746.exe",
+          "bytes": 2989056,
+          "sha256": "23b2b5a31da6e452cc408b9b914ded39e0d07b54b258589ad89849bce6f088f2",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_ports-7edd2d56c0c9c5d7.exe",
+          "bytes": 800768,
+          "sha256": "114985ebbcfcd21f9c1de4ea2c7ef747f10228c7b2b2d1e8b81173fd8094949b",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_runtime-93d068d0c2da548f.exe",
+          "bytes": 1051136,
+          "sha256": "7561276d6f4200988716bd31e20212380e1cfebe7e6fb62d48daa65817582925",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_presentation-ebc9347ec035f379.exe",
+          "bytes": 1344000,
+          "sha256": "ed490c1a3d5e47bde667a49f4e3cbb83d9e1299c1fac4b69150665954ba12b26",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_application-9e82411b268941a8.exe",
+          "bytes": 878080,
+          "sha256": "0484797d06fffa38ee0dc7831095d858d510d4ca459b755c0210c4987a73cac1",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_audio-ccd283b0aa061f9d.exe",
+          "bytes": 862208,
+          "sha256": "6d0848286199aee9133e9ee33fc2d9cd612a331370c78a2e5efb1de976b6a63f",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_storage-f6972f806e9d4523.exe",
+          "bytes": 6774272,
+          "sha256": "fca5459cb75824e1c76bef3905456ca876824872e10d46ca0eacc74a9ccb224a",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_protocol-46c0f0d76d445238.exe",
+          "bytes": 1487360,
+          "sha256": "0eee651f4464074744b4e9c6804101746eca5a9b5d85697c2be7bfcca33bc3ef",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc_domain-858bf456d034c981.exe",
+          "bytes": 1796096,
+          "sha256": "f7be00eb71b519830aa8c05a01cbb70aafe75e56e934c2f9734158fc9ee14bb6",
+          "role": "tests",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 3,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        },
+        {
+          "name": "fc-bootstrap.exe",
+          "bytes": 10716160,
+          "sha256": "fd88e203fc3725636f2dbb0798801a6220596b43949319e9e743fe1b2de1244d",
+          "role": "product",
+          "pe": {
+            "machine": "0x014c",
+            "optionalMagic": "0x010b",
+            "subsystem": 2,
+            "subsystemVersion": [
+              6,
+              1
+            ]
+          }
+        }
+      ],
+      "normalSha256": "fd88e203fc3725636f2dbb0798801a6220596b43949319e9e743fe1b2de1244d",
+      "metadataSha256": "5fcf411b679f8b99b00199b3f5280216853d2eee77985f3af2b30b56e080b59d",
+      "actualHost": {
+        "caption": "Microsoft Windows 11 专业版",
+        "osArchitecture": "64-bit",
+        "build": "26300",
+        "version": "10.0.26300"
+      },
+      "runtimeArchitecture": "x86 PE32 on x64 Windows11 (WOW64)",
+      "harnesses": [
+        {
+          "name": "fc_materials-27e90f6481865594.exe",
+          "binarySha256": "cca40f884e1eb8849d128458cd890c021ec28aa42ff3963dd4cfbc738e31e1b5",
+          "declared": 39,
+          "actualCaseLines": 39,
+          "passed": 39,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.08,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "voice_limits_storage-abed18096ae314db.exe",
+          "binarySha256": "00898f330739b9719a5bc82621b7906334fde322d0b068f84bc00a5853a4d451",
+          "declared": 4,
+          "actualCaseLines": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.14,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "runtime_storage-bf961cb76f115c90.exe",
+          "binarySha256": "cbf589d0d9a45392cca323f8b74a265430cb6894d575390884dc4d169dcfa4f6",
+          "declared": 3,
+          "actualCaseLines": 3,
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.14,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "verify_web_assets-7ac500a422c06d1a.exe",
+          "binarySha256": "3a7aa269746402fc2d110b8cef016649ac7024def826f5baefda099907825798",
+          "declared": 0,
+          "actualCaseLines": 0,
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_bootstrap-91b9195dc595ae6a.exe",
+          "binarySha256": "9fa348b19c015d8ae28e391d2dae1792b0b8a8d5114350fda2dcf4709ef0a6c9",
+          "declared": 339,
+          "actualCaseLines": 339,
+          "passed": 339,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 67.46,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "schedule_operations-a07e2c7c41633cad.exe",
+          "binarySha256": "534e37874149822e5e9e0c1e7789c4817f5bd5e1ef073837d9c6685867720cd4",
+          "declared": 5,
+          "actualCaseLines": 5,
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 1.39,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "voice_storage-785dd80176e1848e.exe",
+          "binarySha256": "4a4e00b9818688d09f4e2336825a2912a698eda0d935f5d17805bea6bb5ebdd8",
+          "declared": 6,
+          "actualCaseLines": 6,
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.73,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "calendar_execution_fence-21b0f4c4743fb589.exe",
+          "binarySha256": "b720b10603241a2c6b422bbdefe08999c1836a76e9811066a2c22423ff7ca668",
+          "declared": 4,
+          "actualCaseLines": 4,
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 4.7,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "business_storage-9ab94b602a63138a.exe",
+          "binarySha256": "43c565ed0770a561228381e1d15401ff9714e31e9b78e849d5de37100d7f5dbd",
+          "declared": 43,
+          "actualCaseLines": 43,
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 2.68,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "autostart_coordinator-66a4d714f5577a8a.exe",
+          "binarySha256": "dc2b1af36d5ceab43b40f04450793ad28d83d62a0fa443da85b69c7a15aa5f07",
+          "declared": 13,
+          "actualCaseLines": 13,
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 2.13,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_bootstrap-6b3baf5e1e32f754.exe",
+          "binarySha256": "471939b7a763f9df7218217c10881063469e50be36fe5e99bd9759e99ef6b004",
+          "declared": 218,
+          "actualCaseLines": 218,
+          "passed": 218,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 3.18,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_security-3bf217f9b927aa4c.exe",
+          "binarySha256": "62388d95cf4f210d891fd25a84c6621f30c83e70f29905db113c907c3936e6ce",
+          "declared": 19,
+          "actualCaseLines": 19,
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.2,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_windows-188127b3800ef746.exe",
+          "binarySha256": "23b2b5a31da6e452cc408b9b914ded39e0d07b54b258589ad89849bce6f088f2",
+          "declared": 241,
+          "actualCaseLines": 241,
+          "passed": 241,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 25.95,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_ports-7edd2d56c0c9c5d7.exe",
+          "binarySha256": "114985ebbcfcd21f9c1de4ea2c7ef747f10228c7b2b2d1e8b81173fd8094949b",
+          "declared": 8,
+          "actualCaseLines": 8,
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_runtime-93d068d0c2da548f.exe",
+          "binarySha256": "7561276d6f4200988716bd31e20212380e1cfebe7e6fb62d48daa65817582925",
+          "declared": 33,
+          "actualCaseLines": 33,
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.1,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_presentation-ebc9347ec035f379.exe",
+          "binarySha256": "ed490c1a3d5e47bde667a49f4e3cbb83d9e1299c1fac4b69150665954ba12b26",
+          "declared": 58,
+          "actualCaseLines": 58,
+          "passed": 58,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.02,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_application-9e82411b268941a8.exe",
+          "binarySha256": "0484797d06fffa38ee0dc7831095d858d510d4ca459b755c0210c4987a73cac1",
+          "declared": 25,
+          "actualCaseLines": 25,
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_audio-ccd283b0aa061f9d.exe",
+          "binarySha256": "6d0848286199aee9133e9ee33fc2d9cd612a331370c78a2e5efb1de976b6a63f",
+          "declared": 22,
+          "actualCaseLines": 22,
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.0,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_storage-f6972f806e9d4523.exe",
+          "binarySha256": "fca5459cb75824e1c76bef3905456ca876824872e10d46ca0eacc74a9ccb224a",
+          "declared": 206,
+          "actualCaseLines": 206,
+          "passed": 206,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 6.52,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_protocol-46c0f0d76d445238.exe",
+          "binarySha256": "0eee651f4464074744b4e9c6804101746eca5a9b5d85697c2be7bfcca33bc3ef",
+          "declared": 82,
+          "actualCaseLines": 82,
+          "passed": 82,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.06,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        },
+        {
+          "name": "fc_domain-858bf456d034c981.exe",
+          "binarySha256": "f7be00eb71b519830aa8c05a01cbb70aafe75e56e934c2f9734158fc9ee14bb6",
+          "declared": 148,
+          "actualCaseLines": 148,
+          "passed": 148,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0,
+          "summarySeconds": 0.01,
+          "capture": "normalized merged per-harness output lines; not raw streams"
+        }
+      ],
+      "harnessCount": 21,
+      "totals": {
+        "passed": 1516,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 0
+      },
+      "controllerRaw": {
+        "stdout": {
+          "path": "/tmp/fc-round67-ci-evidence/win7-msvc-runtime-first.stdout.log",
+          "bytes": 947,
+          "sha256": "9c68d7376fceed95a7355487ad8ebbc9fecf02866062495ec9f56e4aa5f2ca90"
+        },
+        "stderr": {
+          "path": "/tmp/fc-round67-ci-evidence/win7-msvc-runtime-first.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "nativeFlows": {
+        "public": {
+          "steps": 20,
+          "elapsedMs": 2442,
+          "foreground": "UNTOUCHED",
+          "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified",
+          "controllerRaw": {
+            "stdout": {
+              "path": "/tmp/fc-round67-ci-evidence/win7-msvc-public-native-first.stdout.log",
+              "bytes": 93,
+              "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+            },
+            "stderr": {
+              "path": "/tmp/fc-round67-ci-evidence/win7-msvc-public-native-first.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        },
+        "visual": {
+          "steps": 22,
+          "elapsedMs": 853,
+          "foreground": "UNTOUCHED",
+          "capture": "normalized merged native output lines; controller stdout/stderr separately byte-verified",
+          "controllerRaw": {
+            "stdout": {
+              "path": "/tmp/fc-round67-ci-evidence/win7-msvc-visual-native-first.stdout.log",
+              "bytes": 93,
+              "sha256": "803fead99386bca726919712d97310592fdfe434e5c2d486fef11296662d90da"
+            },
+            "stderr": {
+              "path": "/tmp/fc-round67-ci-evidence/win7-msvc-visual-native-first.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        }
+      },
+      "cleanup": "PASS"
+    }
+  },
+  "historicalPrematureAudit": {
+    "qualification": {
+      "path": "/tmp/fc-round67-ci-evidence/win7-premature-audit-qualification-first.json",
+      "bytes": 981,
+      "sha256": "8cdbe117a0ec32be013a7074def8f7a0235217b52f04e3aa9755ab2d6a3d5cf1"
+    },
+    "originalFail": {
+      "path": "/tmp/fc-round67-ci-evidence/win7-original-independent-first.json",
+      "bytes": 5167,
+      "sha256": "fd18a68ec1f0cf894415578bd0d36ba6be978162dbf95e54685c4a62c87f97ee",
+      "status": "FAIL"
+    },
+    "scope": "Premature static audit of then-incomplete download; not product failure. Later second audit requires actual original terminal download PASS."
+  },
+  "runtimeInputs": [
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-original-independent-first.json",
+      "bytes": 505152,
+      "sha256": "9bb6ce73504c2872025d21c9fb0672d39a004ac892686b4a407f87c51674dfc5"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-msvc-runtime-first.json",
+      "bytes": 201689,
+      "sha256": "cebb72b188c6010c4664bf91d142b67355ba7c7a2fe8043092ea8fb6baf9a0c7"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-msvc-runtime-first.command.json",
+      "bytes": 1811,
+      "sha256": "0b413adb5fd0103ea25f1c64d38d3b5fa23aa75c5ba9fc06f3a46cf6682f27c5"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-public-visual-operation-first.json",
+      "bytes": 3093,
+      "sha256": "f1d058bc72561585b1d93fdc4bdb45e1f02220ea78c9d9337a65bd599fcc01d4"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-msvc-public-native-first.json",
+      "bytes": 8523,
+      "sha256": "0e33395cd51181a21de4d5d4a7b133f154ecc921c44a7a003938bd7061b2a146"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/modern-msvc-visual-native-first.json",
+      "bytes": 9897,
+      "sha256": "2aaf18f749202272f52e78a1cbdc128cc57184de7bda47c9585b5668cd6892e9"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-original-independent-second.json",
+      "bytes": 486430,
+      "sha256": "83a045fe1f983daed431a97a5b8b787c56b576c990911687cae7516799931ede"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-msvc-runtime-first.json",
+      "bytes": 201685,
+      "sha256": "92c72c63c611e6308a52048e3d80a76cd3d837d5f8f34069e71006d2d08ab194"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-msvc-runtime-first.command.json",
+      "bytes": 1815,
+      "sha256": "33648536672b8663ac30fdafe2e9f27dde0f284f97578ab493a358baea922968"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-public-visual-operation-first.json",
+      "bytes": 3087,
+      "sha256": "4931e4a696fffcd3070bfc1fa6504aa3e021a66a72516f6b9a76fd4903986a58"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-msvc-public-native-first.json",
+      "bytes": 8523,
+      "sha256": "affc4106fec7c42082c8805fff0c90b4b67f6992dfb3ae3f4c4e9ab80abbcb56"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-msvc-visual-native-first.json",
+      "bytes": 9897,
+      "sha256": "f6fff002aa17d6270ebc07705ecf2fcd43dc03202ce4d6ac5242609a3afc91f7"
+    }
+  ],
+  "sourceProbeSha256": "f176a022bf90565be7074f53a2d502d6519afd1748cdd2022f608a217d485c14",
+  "helper": {
+    "path": "/tmp/fc-round67-ci-evidence/independent-runtime-first.py",
+    "bytes": 25653,
+    "sha256": "0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5"
+  }
+}

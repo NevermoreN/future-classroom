@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "createdUtc": "2026-11-01T07:04:04.205465+00:00",
+  "implementationCommit": "7a171203b3929085296c9af286daa9dcc29d6150",
+  "committedByteProof": {
+    "status": "PASS_EXACT_COMMITTED_BYTES",
+    "commit": "7a171203b3929085296c9af286daa9dcc29d6150",
+    "proofPath": "\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round63-66-committed-bytes-first.json",
+    "proofSha256": "6b0a1cc0c3c02dbe611d6089ffb8827808027867f549bb13eb9e3224e5a4bc8b",
+    "files": 1028,
+    "bytes": 82496642
+  },
+  "roots": [
+    {
+      "root": "/tmp/fc-round63-installer-owner",
+      "marker": "future-classroom-owned-r63-installer-owner/v1\n",
+      "originalArchive": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round63-installer-startup",
+      "archivedFilesVerified": 267,
+      "archiveIndexSha256": "e9de964929bef3038cfc344d04317731fa533130f794912734eb8a1c9ce39592",
+      "worktree": "/tmp/fc-round63-installer-owner/worktree",
+      "changesAlreadyInMain": [
+        "crates/fc-bootstrap/src/application.rs",
+        "crates/fc-bootstrap/src/main.rs",
+        "crates/fc-bootstrap/src/reinitialize_application.rs",
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-windows/src/lib.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs",
+        "crates/fc-bootstrap/src/installation_startup.rs",
+        "crates/fc-windows/src/installer_lifecycle.rs",
+        "crates/fc-windows/src/installer_lifecycle/native.rs",
+        "crates/fc-windows/src/installer_lifecycle/tests.rs"
+      ],
+      "branch": "codex/installer-owner",
+      "logicalFileBytesBeforeRemoval": 9359019182,
+      "rootAbsent": true
+    },
+    {
+      "root": "/tmp/fc-round64-ci-evidence",
+      "marker": "future-classroom-owned-r64-ci-evidence/v1\n",
+      "originalArchive": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round64-ci",
+      "archivedFilesVerified": 519,
+      "archiveIndexSha256": "f6d9a33ba73488bc4399175d583d6d8633fca9b5388a75a1aeab08bb264d8749",
+      "logicalFileBytesBeforeRemoval": 397909920,
+      "rootAbsent": true
+    },
+    {
+      "root": "/tmp/fc-round65-header-expiry",
+      "marker": "future-classroom-round65-header-expiry-owned\n",
+      "originalArchive": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round65-header-expiry",
+      "archivedFilesVerified": 70,
+      "archiveIndexSha256": "9c750e70d48bc7f01aaa9df9a2315e8239fe011681073e3b8167458e673c0b85",
+      "worktree": "/tmp/fc-round65-header-expiry/worktree",
+      "changesAlreadyInMain": [
+        "crates/fc-bootstrap/src/web_transfer/network.rs",
+        "crates/fc-windows/src/tls_frontdoor/native.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/accept.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream.rs",
+        "crates/fc-windows/src/tls_frontdoor/native/stream/tests.rs"
+      ],
+      "branch": "codex/header-expiry",
+      "logicalFileBytesBeforeRemoval": 2814499460,
+      "rootAbsent": true
+    },
+    {
+      "root": "/tmp/fc-round66-integration",
+      "marker": "future-classroom-owned-r66-integration/v1\n",
+      "originalArchive": "/workspace/\u5171\u4eab/Eliora/\u672a\u6765\u6559\u5ba4\u8ba1\u5212/\u5f00\u53d1\u8ba1\u5212/\u9a8c\u8bc1\u8bb0\u5f55/2026-11-01-round66-integration",
+      "archivedFilesVerified": 97,
+      "archiveIndexSha256": "fca644b2d4254265d1d86a0b537d27e08086617cb74ffb1d6f922db48f801485",
+      "logicalFileBytesBeforeRemoval": 3632490,
+      "rootAbsent": true
+    }
+  ],
+  "preserved": [
+    "main workspace and target/debug",
+    "global Cargo/compiler caches",
+    "persistent Windows SSH service and authorization",
+    "external persistent private test key (contents never opened)",
+    "three intentional /mnt/data development ZIPs",
+    "R67 currently active CI evidence"
+  ],
+  "completedUtc": "2026-11-01T07:04:14.165034+00:00",
+  "scope": "Only marker-owned completed roots removed after exact archive/main-source and committed-byte proof. Logical file bytes are inventory, not a claim of physical disk space recovered."
+}

@@ -1,0 +1,155 @@
+{
+  "schema": "future-classroom.ci-independent-artifact/v2",
+  "status": "FAIL",
+  "recordedUtc": "2026-11-01T07:33:20.691683+00:00",
+  "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+  "baseline": "Win7",
+  "runId": 41283223767,
+  "jobId": 124779223557,
+  "artifactId": 13074588673,
+  "runtime": "NOT_RUN",
+  "scope": "Read-only original CI artifact audit. Git reads and static PE inspection only; no network, executable, Windows, Cargo, dispatch or Git mutation.",
+  "checks": [
+    {
+      "name": "official exact run/source/completed/workflow",
+      "status": "PASS"
+    },
+    {
+      "name": "official exact completed job belongs original run",
+      "status": "PASS"
+    },
+    {
+      "name": "official artifact exact identity/ZIP digest/bytes/source",
+      "status": "PASS"
+    },
+    {
+      "name": "official artifact original baseline/run/attempt name",
+      "status": "PASS"
+    },
+    {
+      "name": "original whole ZIP exact external bytes/SHA",
+      "status": "FAIL"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-run-final-first.json",
+      "bytes": 28416,
+      "sha256": "c235962e52af21f235d09d5f0ef32dc52f92beefc3c173821bfe0d9218dd8412"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-jobs-sixth.json",
+      "bytes": 1922,
+      "sha256": "57fcb700f5948595f11a88322291dfbdf49491200e159a70fd6a446a832d0493"
+    },
+    {
+      "path": "/tmp/fc-round67-ci-evidence/win7-artifacts-first.json",
+      "bytes": 1084,
+      "sha256": "89110854e842ecb541a63061d44391a526044724ded67b8dc3000efcd93d9639"
+    }
+  ],
+  "members": [],
+  "executables": [],
+  "sourceMatches": [],
+  "limitations": [
+    "Full Git metadata M is not full historical checkout SHA256. Actual checkout SHA256 covers only nonhistorical subset S; H historical payloads are NOT_READ_BY_INPUT_HASHER.",
+    "Git clean/reparse guards and compiler/source observations are source-bound original CI evidence, not a hermetic sandbox or independently reobserved Windows filesystem.",
+    "Toolchain/rust-src/SDK hashes are retained provenance and static evidence, not target-OS runtime certification or complete installed-toolchain certification.",
+    "All Windows7/10/11, Seewo, production listener and strict firstTCP deadline acceptance remain separate. No executable is run by this helper."
+  ],
+  "helper": {
+    "path": "/tmp/fc-round67-ci-evidence/verify-ci-artifact-first.py",
+    "bytes": 66125,
+    "sha256": "c136efb0ecb5dc1dbffadadae31b933c43ac3d298c308921dd7c8e409fc75527"
+  },
+  "phases": [
+    {
+      "name": "officialIdentity",
+      "status": "PASS"
+    },
+    {
+      "name": "originalZip",
+      "status": "FAIL",
+      "failureCode": "original whole ZIP exact external bytes/SHA",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "sourceDomains",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_input-sha256.json",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "commandsAndBaseline",
+      "status": "FAIL",
+      "failureCode": "UNEXPECTED_INPUT_OR_TOOL_FAILURE",
+      "errorKind": "AttributeError"
+    },
+    {
+      "name": "peAndAssociations",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_executables.json",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "originalCleanup",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_cleanup.json",
+      "errorKind": "Invalid"
+    }
+  ],
+  "officialIdentity": {
+    "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+    "runId": 41283223767,
+    "jobId": 124779223557,
+    "artifactId": 13074588673,
+    "runAttempt": 1,
+    "runStatus": "completed",
+    "runConclusion": "success",
+    "jobConclusion": "success",
+    "workflow": ".github/workflows/windows-win7-msvc.yml",
+    "artifactName": "future-classroom-win7-msvc-i686-54397fdd358a42bf8896e86b048c6b43a4e12028-41283223767-1",
+    "jobSourceBinding": "EXACT_JOB_ID_AND_RUN_ID_TO_SOURCE_BOUND_OFFICIAL_RUN",
+    "jobHeadShaProvided": false
+  },
+  "pinnedGit": {
+    "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+    "rootTreeOidSha1": "139a8a4f2e93c930f07a67b30204fd1424fe5b90",
+    "metadataBytes": 2114542,
+    "metadataSha256": "b15b40ce2c3509d0d34671f507862410ad4539384eaaa9527a2eb9574fe500cc"
+  },
+  "phaseFailures": [
+    {
+      "name": "originalZip",
+      "status": "FAIL",
+      "failureCode": "original whole ZIP exact external bytes/SHA",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "sourceDomains",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_input-sha256.json",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "commandsAndBaseline",
+      "status": "FAIL",
+      "failureCode": "UNEXPECTED_INPUT_OR_TOOL_FAILURE",
+      "errorKind": "AttributeError"
+    },
+    {
+      "name": "peAndAssociations",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_executables.json",
+      "errorKind": "Invalid"
+    },
+    {
+      "name": "originalCleanup",
+      "status": "FAIL",
+      "failureCode": "MISSING_ORIGINAL_cleanup.json",
+      "errorKind": "Invalid"
+    }
+  ],
+  "failureCode": "original whole ZIP exact external bytes/SHA",
+  "helperUnchanged": true
+}

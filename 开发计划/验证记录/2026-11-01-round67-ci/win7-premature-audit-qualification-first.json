@@ -1,0 +1,16 @@
+{
+  "status": "QUALIFIED_PREMATURE_AUDIT_NOT_PRODUCT_OR_CI_FAILURE",
+  "recordedUtc": "2026-11-01T07:33:56.730351+00:00",
+  "originalAudit": {
+    "path": "/tmp/fc-round67-ci-evidence/win7-original-independent-first.json",
+    "bytes": 5167,
+    "sha256": "fd18a68ec1f0cf894415578bd0d36ba6be978162dbf95e54685c4a62c87f97ee",
+    "status": "FAIL"
+  },
+  "cause": "Root launched static audit before the existing download controller32473 had physically completed. Exact external whole-ZIP length/SHA guard correctly rejected partial bytes. No partial artifact was executed.",
+  "observedOriginalDownloadStatus": "RUNNING",
+  "observedZipBytesAtQualification": 40108032,
+  "expectedZipBytes": 44056009,
+  "originalReportPreserved": true,
+  "nextAction": "Poll the same original download handle. Only after its actual exit0 and PASS exact byte/SHA proof, run a separate exclusive second audit/output directory. Never repeat download or CI dispatch merely because observation yielded."
+}

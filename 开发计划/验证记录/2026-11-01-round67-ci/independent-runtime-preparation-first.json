@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_NOT_EXECUTED",
+  "utc": "2026-11-01T07:40:41.655297+00:00",
+  "script": {
+    "path": "/tmp/fc-round67-ci-evidence/independent-runtime-first.py",
+    "bytes": 25653,
+    "sha256": "0317ffb1719737bd9dfa45ca7952c242df6ffff0baa6b1611d7b912277f9e0e5"
+  },
+  "syntax": "AST_PARSE_PASS_ONLY",
+  "execution": "NOT_RUN",
+  "sourceSha": "54397fdd358a42bf8896e86b048c6b43a4e12028",
+  "trigger": "Root may run python3 -B /tmp/fc-round67-ci-evidence/independent-runtime-first.py only after actual original Win7 runtime and public/visual controllers finish. Missing/RUNNING inputs yield WAIT and no report.",
+  "scope": "Standalone read-only original ZIP/producer/Cargo/PE/native upload/runtime audit; no Windows/SSH/Cargo/network. Only permitted subprocess is local git show for exact source-pinned native validator constants and script SHA.",
+  "noCurrentWin7RuntimeClaim": true,
+  "note": "Both Modern and Win7-target executable runtime sets are Win11 build26300 WOW64. No Win7/10 OS or R68 implementation validation. Original premature static Win7 FAIL/qualification are required to remain byte-bound and preserved."
+}
