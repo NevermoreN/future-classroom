@@ -1,0 +1,2494 @@
+{
+  "status": "PASS_FINITE_QUIET_TYPE1_INFO_AND_SUCCESSOR_API_PROBE_NOT_PRODUCTION_AUTHORITY",
+  "productionAuthority": "NONE",
+  "transport": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-second/run-probe.py",
+    "bytes": 32356,
+    "sha256": "04d42fc76d8444c850abfaf9f7c7bde4b272e2df78bc85119f1844aa64086920"
+  },
+  "baseTransport": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-second/reference/compile-only.py",
+    "bytes": 29374,
+    "sha256": "3b3aa837646c78157c0c8ce1d5d44f4325f8bcdd34f4fc59e85c801b555a4783"
+  },
+  "phaseSeconds": 600,
+  "clientSeconds": 120,
+  "finallyReserveSeconds": 180,
+  "latestNewClientStartCutoffSeconds": 300,
+  "outerTransportSeconds": 900,
+  "sourceFreeze": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-second/freeze-first.json",
+    "bytes": 6541,
+    "sha256": "c10462f1ec621842fffe9c0a438a02dc557cca0d23fdf34815ab38c7b073a41f"
+  },
+  "stageManifest": {
+    "path": "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/runtime-inputs.json",
+    "bytes": 1704,
+    "sha256": "fac37d0612d2be9951e3ef9fbaea3c5aa8687c37e203a5dd446da5b285edf6de"
+  },
+  "spec": {
+    "bytes": 1999,
+    "sha256": "fbca3a0b29ba867a1a22487ace91607cd51b7e9adfebb49c5bdc29881401b4a3"
+  },
+  "operations": [
+    {
+      "label": "01-before-parent-and-create",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.5569218849996105,
+      "stdin.ps1": {
+        "path": "01-before-parent-and-create.stdin.ps1",
+        "bytes": 9531,
+        "sha256": "e1f0702f48ec46debf58125a52ef392a332f4ac39954aa07d858eace489f4280"
+      },
+      "stdout.log": {
+        "path": "01-before-parent-and-create.stdout.log",
+        "bytes": 386,
+        "sha256": "e7f4ad6f1b137366fdecbbfcadcf8be9179ec602e79728381f5dd91f58819276"
+      },
+      "stderr.log": {
+        "path": "01-before-parent-and-create.stderr.log",
+        "bytes": 618,
+        "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+      }
+    },
+    {
+      "label": "02-upload-actual-stage",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/Capture.cs",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/Guard.dll",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/Invoke-Probe.ps1",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/Owner.exe",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/build-report.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/early-fail.msi",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/healthy.msi",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/payload.txt",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/runtime-inputs.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/stage/spec.json",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.29528921599921887,
+      "stdout.log": {
+        "path": "02-upload-actual-stage.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "02-upload-actual-stage.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "03-original-fixture-phase",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 3.2483856569997442,
+      "stdin.ps1": {
+        "path": "03-original-fixture-phase.stdin.ps1",
+        "bytes": 7879,
+        "sha256": "26c3edcab8ef3681bef38a82a8c1d7958a9c90a9b8262703bb0cc6329dfe07b0"
+      },
+      "stdout.log": {
+        "path": "03-original-fixture-phase.stdout.log",
+        "bytes": 16067,
+        "sha256": "8da0e49bd6d4b4bbd3f6b87a28180f8fac5e26f9d3dc565d35766c003ac5c6c9"
+      },
+      "stderr.log": {
+        "path": "03-original-fixture-phase.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "04-readonly-original-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.7972401249971881,
+      "stdin.ps1": {
+        "path": "04-readonly-original-inventory.stdin.ps1",
+        "bytes": 7815,
+        "sha256": "7fe78501a9a86d13740b3a92794da75333c9e1c9552e88643e8a4c5ca22b41ea"
+      },
+      "stdout.log": {
+        "path": "04-readonly-original-inventory.stdout.log",
+        "bytes": 2964,
+        "sha256": "ae3f983b4ff6865d792e0b61e6ed624034ae7087388943645932b69b79bc2287"
+      },
+      "stderr.log": {
+        "path": "04-readonly-original-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "05-download-000",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/.owner",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/.owner"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.222255351000058,
+      "stdout.log": {
+        "path": "05-download-000.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-000.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-001",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/build-report.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/build-report.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2300818010007788,
+      "stdout.log": {
+        "path": "05-download-001.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-001.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-002",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/Capture.cs",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/Capture.cs"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2534925680010929,
+      "stdout.log": {
+        "path": "05-download-002.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-002.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-003",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback-case.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback-case.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.23048881700015045,
+      "stdout.log": {
+        "path": "05-download-003.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-003.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-004",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback-msi.log",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback-msi.log"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.24093561400150065,
+      "stdout.log": {
+        "path": "05-download-004.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-004.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-005",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback.callbacks.jsonl",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback.callbacks.jsonl"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.24926600500111817,
+      "stdout.log": {
+        "path": "05-download-005.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-005.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-006",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback.capture-ack",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback.capture-ack"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2561655970021093,
+      "stdout.log": {
+        "path": "05-download-006.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-006.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-007",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback.guard.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback.guard.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.24127406899788184,
+      "stdout.log": {
+        "path": "05-download-007.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-007.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-008",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail-rollback.jsonl",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail-rollback.jsonl"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.24801424399993266,
+      "stdout.log": {
+        "path": "05-download-008.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-008.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-009",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/early-fail.msi",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/early-fail.msi"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2849577130000398,
+      "stdout.log": {
+        "path": "05-download-009.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-009.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-010",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/Guard.dll",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/Guard.dll"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2655848319991492,
+      "stdout.log": {
+        "path": "05-download-010.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-010.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-011",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback-case.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback-case.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.31066964300043765,
+      "stdout.log": {
+        "path": "05-download-011.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-011.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-012",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback-msi.log",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback-msi.log"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.45432814399828203,
+      "stdout.log": {
+        "path": "05-download-012.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-012.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-013",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback.callbacks.jsonl",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback.callbacks.jsonl"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.24336589399899822,
+      "stdout.log": {
+        "path": "05-download-013.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-013.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-014",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback.capture-ack",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback.capture-ack"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.25487397400138434,
+      "stdout.log": {
+        "path": "05-download-014.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-014.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-015",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback.guard.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback.guard.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.31047634500282584,
+      "stdout.log": {
+        "path": "05-download-015.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-015.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-016",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy-rollback.jsonl",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy-rollback.jsonl"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2954696029992192,
+      "stdout.log": {
+        "path": "05-download-016.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-016.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-017",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/healthy.msi",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/healthy.msi"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2709209300010116,
+      "stdout.log": {
+        "path": "05-download-017.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-017.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-018",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/Invoke-Probe.ps1",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/Invoke-Probe.ps1"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.27892501699898276,
+      "stdout.log": {
+        "path": "05-download-018.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-018.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-019",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/Owner.exe",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/Owner.exe"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.3366451149995555,
+      "stdout.log": {
+        "path": "05-download-019.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-019.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-020",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/payload.txt",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/payload.txt"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2589803920018312,
+      "stdout.log": {
+        "path": "05-download-020.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-020.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-021",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/probe-result.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/probe-result.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2546362440007215,
+      "stdout.log": {
+        "path": "05-download-021.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-021.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-022",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/runtime-inputs.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/runtime-inputs.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2212461599992821,
+      "stdout.log": {
+        "path": "05-download-022.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-022.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "05-download-023",
+      "argv": [
+        "scp",
+        "-q",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11:C:/Users/Elior/AppData/Local/Temp/FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096/spec.json",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-runtime-first/download/spec.json"
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.2873649920002208,
+      "stdout.log": {
+        "path": "05-download-023.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "path": "05-download-023.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "06-second-readonly-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.5856035580000025,
+      "stdin.ps1": {
+        "path": "06-second-readonly-inventory.stdin.ps1",
+        "bytes": 7815,
+        "sha256": "7fe78501a9a86d13740b3a92794da75333c9e1c9552e88643e8a4c5ca22b41ea"
+      },
+      "stdout.log": {
+        "path": "06-second-readonly-inventory.stdout.log",
+        "bytes": 2964,
+        "sha256": "ae3f983b4ff6865d792e0b61e6ed624034ae7087388943645932b69b79bc2287"
+      },
+      "stderr.log": {
+        "path": "06-second-readonly-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "07-independent-final-readonly",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6878503549996822,
+      "stdin.ps1": {
+        "path": "07-independent-final-readonly.stdin.ps1",
+        "bytes": 9624,
+        "sha256": "4505174c800a5d97edd79c541dc7375d1cc1268bf0fa935f92c5b99cdd252dc8"
+      },
+      "stdout.log": {
+        "path": "07-independent-final-readonly.stdout.log",
+        "bytes": 1629,
+        "sha256": "49265132101f66ccb400629b62994ea3720eaab30259f0aaf7d1846327107a2d"
+      },
+      "stderr.log": {
+        "path": "07-independent-final-readonly.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "08-after-readonly-compiler-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.5780853610012855,
+      "stdin.ps1": {
+        "path": "08-after-readonly-compiler-inventory.stdin.ps1",
+        "bytes": 7815,
+        "sha256": "7fe78501a9a86d13740b3a92794da75333c9e1c9552e88643e8a4c5ca22b41ea"
+      },
+      "stdout.log": {
+        "path": "08-after-readonly-compiler-inventory.stdout.log",
+        "bytes": 2989,
+        "sha256": "92f7ee8a48c953044d0816890f5f53a1ae335d1f994c9f3abe92381cf53a6751"
+      },
+      "stderr.log": {
+        "path": "08-after-readonly-compiler-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "10-final-stable-inventory",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.5659936269985337,
+      "stdin.ps1": {
+        "path": "10-final-stable-inventory.stdin.ps1",
+        "bytes": 7815,
+        "sha256": "7fe78501a9a86d13740b3a92794da75333c9e1c9552e88643e8a4c5ca22b41ea"
+      },
+      "stdout.log": {
+        "path": "10-final-stable-inventory.stdout.log",
+        "bytes": 2989,
+        "sha256": "92f7ee8a48c953044d0816890f5f53a1ae335d1f994c9f3abe92381cf53a6751"
+      },
+      "stderr.log": {
+        "path": "10-final-stable-inventory.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    },
+    {
+      "label": "10b-zero-own-processes",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.6459754140014411,
+      "stdin.ps1": {
+        "path": "10b-zero-own-processes.stdin.ps1",
+        "bytes": 8418,
+        "sha256": "62007ed230b324eb3a76884d3c205e01b9d6177b9731addd71d087a9a2b12044"
+      },
+      "stdout.log": {
+        "path": "10b-zero-own-processes.stdout.log",
+        "bytes": 93,
+        "sha256": "b1648cc9e121c2112f09c149217ab5252fa13098083ab497a35a41269897e586"
+      },
+      "stderr.log": {
+        "path": "10b-zero-own-processes.stderr.log",
+        "bytes": 618,
+        "sha256": "57aa5ca00c305862c0dcde30c4865943b5e6bc6218de1e727fd9ce4a76614423"
+      }
+    },
+    {
+      "label": "11-exact-downloaded-root-delete",
+      "argv": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "future-classroom-win11",
+        "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand WwBDAG8AbgBzAG8AbABlAF0AOgA6AEkAbgBwAHUAdABFAG4AYwBvAGQAaQBuAGcAPQBbAFQAZQB4AHQALgBVAFQARgA4AEUAbgBjAG8AZABpAG4AZwBdADoAOgBuAGUAdwAoACQAZgBhAGwAcwBlACkAOwBbAEMAbwBuAHMAbwBsAGUAXQA6ADoATwB1AHQAcAB1AHQARQBuAGMAbwBkAGkAbgBnAD0AWwBUAGUAeAB0AC4AVQBUAEYAOABFAG4AYwBvAGQAaQBuAGcAXQA6ADoAbgBlAHcAKAAkAGYAYQBsAHMAZQApADsAJgAgACgAWwBTAGMAcgBpAHAAdABCAGwAbwBjAGsAXQA6ADoAQwByAGUAYQB0AGUAKABbAEMAbwBuAHMAbwBsAGUAXQA6ADoASQBuAC4AUgBlAGEAZABUAG8ARQBuAGQAKAApACkAKQA="
+      ],
+      "actualLocalExit": 0,
+      "localParentReaped": true,
+      "remoteReturnKnown": true,
+      "timedOut": false,
+      "seconds": 0.649696666001546,
+      "stdin.ps1": {
+        "path": "11-exact-downloaded-root-delete.stdin.ps1",
+        "bytes": 11741,
+        "sha256": "1b406eab0bbe25903bcbafa022338474bc11c94b6340925dc02f188902203ecb"
+      },
+      "stdout.log": {
+        "path": "11-exact-downloaded-root-delete.stdout.log",
+        "bytes": 119,
+        "sha256": "4801de46846b558ee37c63812beeb374701fe8e2576fe5004f6bc4b6cfc49bd5"
+      },
+      "stderr.log": {
+        "path": "11-exact-downloaded-root-delete.stderr.log",
+        "bytes": 393,
+        "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+      }
+    }
+  ],
+  "cleanup": {
+    "nonce": "5b8e765e944a41308b9efca5d617d096",
+    "status": "PASS_REMOVED_EXACT_DOWNLOADED_RUNTIME_ROOT",
+    "knownAbsent": true
+  },
+  "startedUtc": "2026-11-01T21:27:52.884292+00:00",
+  "remoteRoot": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096",
+  "before": {
+    "nonce": "5b8e765e944a41308b9efca5d617d096",
+    "status": "PASS_CREATED_ONLY_PROTECTED_FIXTURE_RUNTIME_ROOT",
+    "root": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096",
+    "registryParentBefore": {
+      "status": "KNOWN_ABSENT",
+      "key": "Software\\FutureClassroomTest",
+      "view": "Registry32"
+    },
+    "sid": "S-1-5-21-3896111207-1867804362-1971593122-1001"
+  },
+  "phase": {
+    "status": "PASS_REAL_BEGIN_INSTALL_END_CLOSE_AND_PHYSICAL_EXIT_NOT_PRODUCTION_AUTHORITY",
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "nativeSeconds": 120,
+    "wholeSeconds": 600,
+    "finallyReserveSeconds": 180,
+    "cases": [
+      {
+        "name": "healthy-rollback",
+        "before": {
+          "marker": "KNOWN_ABSENT",
+          "effect": {
+            "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+            "status": "KNOWN_ABSENT",
+            "attributes": 4294967295,
+            "lastError": 2
+          },
+          "knownAbsent": true,
+          "components": {
+            "rows": [
+              {
+                "context": 1,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 2,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 4,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              }
+            ],
+            "allUnknownStates": true
+          },
+          "registration": {
+            "registrations": [],
+            "enumerationReturns": [
+              259
+            ],
+            "related": [],
+            "localPackageRc": 1605,
+            "localPackage": null
+          }
+        },
+        "api": [
+          {
+            "sequence": 1,
+            "stage": "IDENTITY_PROCESS_CREATION",
+            "attempted": true,
+            "return": 0,
+            "object": 134380420744931399,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940849690497,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 2,
+            "stage": "ACK_HANDLE_CLOSE",
+            "attempted": true,
+            "return": 0,
+            "object": 604,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940850323475,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 3,
+            "stage": "SET_UI_PREVIOUS_LEVEL",
+            "attempted": true,
+            "return": 1,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940850340269,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 4,
+            "stage": "LOG_ENABLE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940850347849,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 5,
+            "stage": "EXTERNAL_UI_RECORD_SET_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940850356399,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 6,
+            "stage": "PREVIOUS_EXTERNAL_CALLBACK_NULL",
+            "attempted": false,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940850364811,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 7,
+            "stage": "BEGIN_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940851188099,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 8,
+            "stage": "BEGIN_CHANGE_EVENT",
+            "attempted": false,
+            "return": 0,
+            "object": 804,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940851196523,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 9,
+            "stage": "INSTALL_ENTER",
+            "attempted": false,
+            "return": 0,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940851204562,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 10,
+            "stage": "INSTALL_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940862140800,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 11,
+            "stage": "END_ROLLBACK_ENTER",
+            "attempted": false,
+            "return": 0,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940862147192,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 12,
+            "stage": "END_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865188268,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 13,
+            "stage": "TRANSACTION_ID_NO_INSTALL_HANDLE_CLOSE",
+            "attempted": false,
+            "return": 4294967295,
+            "object": 1,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865194944,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 14,
+            "stage": "CHANGE_EVENT_CLOSE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 804,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865202988,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 15,
+            "stage": "EXTERNAL_UI_RECORD_DISABLE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865211405,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 16,
+            "stage": "CALLBACK_FILE_CLOSE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865220268,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 17,
+            "stage": "ALL_API_CALLS_RETURNED",
+            "attempted": false,
+            "return": 0,
+            "object": 0,
+            "pid": 4776,
+            "tid": 11408,
+            "originalTid": 11408,
+            "threadCreation": 134380420744931419,
+            "qpc": 8940865227914,
+            "frequency": 10000000,
+            "clockValid": true
+          }
+        ],
+        "originalProcess": {
+          "Pid": 4776,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380420744931399,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\Owner.exe",
+          "Sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true,
+          "CloseAttempted": true
+        },
+        "originalThread": {
+          "Pid": 4776,
+          "Tid": 11408,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380420744931419,
+          "Image": null,
+          "Sha256": null,
+          "Sid": null,
+          "Kind": "thread",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true,
+          "CloseAttempted": true
+        },
+        "after": {
+          "marker": "KNOWN_ABSENT",
+          "effect": {
+            "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+            "status": "KNOWN_ABSENT",
+            "attributes": 4294967295,
+            "lastError": 2
+          },
+          "knownAbsent": true,
+          "components": {
+            "rows": [
+              {
+                "context": 1,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 2,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 4,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              }
+            ],
+            "allUnknownStates": true
+          },
+          "registration": {
+            "registrations": [],
+            "enumerationReturns": [
+              259
+            ],
+            "related": [],
+            "localPackageRc": 1605,
+            "localPackage": null
+          }
+        },
+        "nativeReturnsComplete": true,
+        "apiSuccessful": true,
+        "actualExit": 0,
+        "elapsedMilliseconds": 1583
+      },
+      {
+        "name": "early-fail-rollback",
+        "before": {
+          "marker": "KNOWN_ABSENT",
+          "effect": {
+            "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+            "status": "KNOWN_ABSENT",
+            "attributes": 4294967295,
+            "lastError": 2
+          },
+          "knownAbsent": true,
+          "components": {
+            "rows": [
+              {
+                "context": 1,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 2,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 4,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              }
+            ],
+            "allUnknownStates": true
+          },
+          "registration": {
+            "registrations": [],
+            "enumerationReturns": [
+              259
+            ],
+            "related": [],
+            "localPackageRc": 1605,
+            "localPackage": null
+          }
+        },
+        "api": [
+          {
+            "sequence": 1,
+            "stage": "IDENTITY_PROCESS_CREATION",
+            "attempted": true,
+            "return": 0,
+            "object": 134380420761056358,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940865775418,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 2,
+            "stage": "ACK_HANDLE_CLOSE",
+            "attempted": true,
+            "return": 0,
+            "object": 568,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866020030,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 3,
+            "stage": "SET_UI_PREVIOUS_LEVEL",
+            "attempted": true,
+            "return": 1,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866036518,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 4,
+            "stage": "LOG_ENABLE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866044660,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 5,
+            "stage": "EXTERNAL_UI_RECORD_SET_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866052851,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 6,
+            "stage": "PREVIOUS_EXTERNAL_CALLBACK_NULL",
+            "attempted": false,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866061051,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 7,
+            "stage": "BEGIN_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866220341,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 8,
+            "stage": "BEGIN_CHANGE_EVENT",
+            "attempted": false,
+            "return": 0,
+            "object": 776,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866226875,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 9,
+            "stage": "INSTALL_ENTER",
+            "attempted": false,
+            "return": 0,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940866236241,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 10,
+            "stage": "INSTALL_RETURN",
+            "attempted": true,
+            "return": 1603,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940873871989,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 11,
+            "stage": "END_ROLLBACK_ENTER",
+            "attempted": false,
+            "return": 0,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940873878520,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 12,
+            "stage": "END_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874080167,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 13,
+            "stage": "TRANSACTION_ID_NO_INSTALL_HANDLE_CLOSE",
+            "attempted": false,
+            "return": 4294967295,
+            "object": 5,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874086862,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 14,
+            "stage": "CHANGE_EVENT_CLOSE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 776,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874094771,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 15,
+            "stage": "EXTERNAL_UI_RECORD_DISABLE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874102642,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 16,
+            "stage": "CALLBACK_FILE_CLOSE_RETURN",
+            "attempted": true,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874111655,
+            "frequency": 10000000,
+            "clockValid": true
+          },
+          {
+            "sequence": 17,
+            "stage": "ALL_API_CALLS_RETURNED",
+            "attempted": false,
+            "return": 0,
+            "object": 0,
+            "pid": 2888,
+            "tid": 34144,
+            "originalTid": 34144,
+            "threadCreation": 134380420761056377,
+            "qpc": 8940874119451,
+            "frequency": 10000000,
+            "clockValid": true
+          }
+        ],
+        "originalProcess": {
+          "Pid": 2888,
+          "Tid": 0,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380420761056358,
+          "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\Owner.exe",
+          "Sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+          "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+          "Kind": "process",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true,
+          "CloseAttempted": true
+        },
+        "originalThread": {
+          "Pid": 2888,
+          "Tid": 34144,
+          "Wait": 0,
+          "ExitCode": 0,
+          "Creation": 134380420761056377,
+          "Image": null,
+          "Sha256": null,
+          "Sid": null,
+          "Kind": "thread",
+          "Status": "HELD_ORIGINAL_IDENTITY",
+          "Error": null,
+          "ExitKnown": true,
+          "CheckedClose": true,
+          "CloseAttempted": true
+        },
+        "after": {
+          "marker": "KNOWN_ABSENT",
+          "effect": {
+            "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+            "status": "KNOWN_ABSENT",
+            "attributes": 4294967295,
+            "lastError": 2
+          },
+          "knownAbsent": true,
+          "components": {
+            "rows": [
+              {
+                "context": 1,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 2,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              },
+              {
+                "context": 4,
+                "state": -1,
+                "path": "",
+                "returnedLength": 32768
+              }
+            ],
+            "allUnknownStates": true
+          },
+          "registration": {
+            "registrations": [],
+            "enumerationReturns": [
+              259
+            ],
+            "related": [],
+            "localPackageRc": 1605,
+            "localPackage": null
+          }
+        },
+        "nativeReturnsComplete": true,
+        "apiSuccessful": true,
+        "actualExit": 0,
+        "elapsedMilliseconds": 858
+      }
+    ],
+    "errors": [],
+    "cleaned": false,
+    "sharedServiceKill": false,
+    "manualRegistryOrCacheDelete": false,
+    "before": {
+      "marker": "KNOWN_ABSENT",
+      "effect": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+        "status": "KNOWN_ABSENT",
+        "attributes": 4294967295,
+        "lastError": 2
+      },
+      "knownAbsent": true,
+      "components": {
+        "rows": [
+          {
+            "context": 1,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 2,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 4,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          }
+        ],
+        "allUnknownStates": true
+      },
+      "registration": {
+        "registrations": [],
+        "enumerationReturns": [
+          259
+        ],
+        "related": [],
+        "localPackageRc": 1605,
+        "localPackage": null
+      }
+    },
+    "after": {
+      "marker": "KNOWN_ABSENT",
+      "effect": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+        "status": "KNOWN_ABSENT",
+        "attributes": 4294967295,
+        "lastError": 2
+      },
+      "knownAbsent": true,
+      "components": {
+        "rows": [
+          {
+            "context": 1,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 2,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 4,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          }
+        ],
+        "allUnknownStates": true
+      },
+      "registration": {
+        "registrations": [],
+        "enumerationReturns": [
+          259
+        ],
+        "related": [],
+        "localPackageRc": 1605,
+        "localPackage": null
+      }
+    },
+    "afterFinally": {
+      "marker": "KNOWN_ABSENT",
+      "effect": {
+        "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+        "status": "KNOWN_ABSENT",
+        "attributes": 4294967295,
+        "lastError": 2
+      },
+      "knownAbsent": true,
+      "components": {
+        "rows": [
+          {
+            "context": 1,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 2,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          },
+          {
+            "context": 4,
+            "state": -1,
+            "path": "",
+            "returnedLength": 32768
+          }
+        ],
+        "allUnknownStates": true
+      },
+      "registration": {
+        "registrations": [],
+        "enumerationReturns": [
+          259
+        ],
+        "related": [],
+        "localPackageRc": 1605,
+        "localPackage": null
+      }
+    },
+    "originalCaps": [
+      {
+        "Pid": 4776,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380420744931399,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\Owner.exe",
+        "Sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true,
+        "CloseAttempted": true
+      },
+      {
+        "Pid": 4776,
+        "Tid": 11408,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380420744931419,
+        "Image": null,
+        "Sha256": null,
+        "Sid": null,
+        "Kind": "thread",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true,
+        "CloseAttempted": true
+      },
+      {
+        "Pid": 2888,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380420761056358,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\Owner.exe",
+        "Sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true,
+        "CloseAttempted": true
+      },
+      {
+        "Pid": 2888,
+        "Tid": 34144,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380420761056377,
+        "Image": null,
+        "Sha256": null,
+        "Sid": null,
+        "Kind": "thread",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true,
+        "CloseAttempted": true
+      }
+    ],
+    "nativeCloseUnknown": false,
+    "nativeCloseFacts": [
+      {
+        "Role": "process_token",
+        "OriginalHandle": 2728,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      },
+      {
+        "Role": "process_token",
+        "OriginalHandle": 2764,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      },
+      {
+        "Role": "process",
+        "OriginalHandle": 2712,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      },
+      {
+        "Role": "thread",
+        "OriginalHandle": 1900,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      },
+      {
+        "Role": "process",
+        "OriginalHandle": 2740,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      },
+      {
+        "Role": "thread",
+        "OriginalHandle": 2748,
+        "Attempted": true,
+        "Success": true,
+        "Unknown": false,
+        "LastError": 0
+      }
+    ],
+    "elapsedMilliseconds": 2726,
+    "ownedCommitOutstanding": false,
+    "originalOwnerReturned": true
+  },
+  "phaseParentExit": 0,
+  "originalControlProof": {
+    "status": "PASS_ORIGINAL_CONTROLLED_OWNER_API_AND_PHYSICAL_RETURNS",
+    "authority": "NO_PRODUCTION_AUTHORITY",
+    "caseCount": 2
+  },
+  "inventory": {
+    "directories": [
+      "compiler-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "9246f5672b7ef6ec21f87b3d62e70baad75baf3a4f542ebc5ec3374087b78709",
+        "bytes": 46
+      },
+      {
+        "path": "build-report.json",
+        "sha256": "b9ce6fb68af13209a625afce5256a358ece12ec7099583523bc2d216b6945375",
+        "bytes": 66688
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+        "bytes": 11335
+      },
+      {
+        "path": "early-fail-rollback-case.json",
+        "sha256": "dff3c6192bd3c1c3420bc2b39f727173f0b094991f9f0ff93b003ecf030f8dd2",
+        "bytes": 16452
+      },
+      {
+        "path": "early-fail-rollback-msi.log",
+        "sha256": "1663f8dfca8a4fbc5dcfb7d3fbc540828a07845ff9beb96825025c8696d78d51",
+        "bytes": 131476
+      },
+      {
+        "path": "early-fail-rollback.callbacks.jsonl",
+        "sha256": "bd7ea7b0c84ecfde03e223b2d9390e35e5bbe1680c2c207ceba6b0b799fd9823",
+        "bytes": 78911
+      },
+      {
+        "path": "early-fail-rollback.capture-ack",
+        "sha256": "19258cb3bac4f58351e337a24b56c180749624b41eb42e2d8d1e421709cd9d5a",
+        "bytes": 32
+      },
+      {
+        "path": "early-fail-rollback.guard.json",
+        "sha256": "6d1806d6e34c07367ac05f665a6c584bba9951dc9dacd24761403f9eab459a99",
+        "bytes": 306
+      },
+      {
+        "path": "early-fail-rollback.jsonl",
+        "sha256": "397f9c6e7e41617c5336fc776d7fc7f9cd8a7b8ba059866343afa1ce1963f19a",
+        "bytes": 3868
+      },
+      {
+        "path": "early-fail.msi",
+        "sha256": "7f66d546a234413cf2e5fe4bcac6c95b3f769871fb6ee7765234fce761afef0d",
+        "bytes": 280576
+      },
+      {
+        "path": "Guard.dll",
+        "sha256": "520a9c281ea39068a1fcc66de456af58a4cdb59e64e3767cc2a071b84d27cac4",
+        "bytes": 266300
+      },
+      {
+        "path": "healthy-rollback-case.json",
+        "sha256": "19373d9c70c0c2f5f52f976265de1bb5d63c01e6122224b27692dfdcf8a3d834",
+        "bytes": 16447
+      },
+      {
+        "path": "healthy-rollback-msi.log",
+        "sha256": "b7653e9f3c198a0e59373698507083e30815a9216b1e0eee57add9ef44810b2b",
+        "bytes": 235808
+      },
+      {
+        "path": "healthy-rollback.callbacks.jsonl",
+        "sha256": "245dd36f47cfe20b912ce507ff77c89cb437385a3ac878b1ee1b7536ee17c420",
+        "bytes": 111804
+      },
+      {
+        "path": "healthy-rollback.capture-ack",
+        "sha256": "19258cb3bac4f58351e337a24b56c180749624b41eb42e2d8d1e421709cd9d5a",
+        "bytes": 32
+      },
+      {
+        "path": "healthy-rollback.guard.json",
+        "sha256": "4de17bdb7e89b395923bf9a90155c0631adb6fe6d33cfd86934d3fdce37a3ef0",
+        "bytes": 300
+      },
+      {
+        "path": "healthy-rollback.jsonl",
+        "sha256": "ab893b370b32dda9cd4fd00c266a5701332fc4e8f53ee8cedf79f031e8094881",
+        "bytes": 3865
+      },
+      {
+        "path": "healthy.msi",
+        "sha256": "1c105482c7fdf6e60e55e7fda6ff863a47999632228f7a9c0f7fbacbc733ead4",
+        "bytes": 280576
+      },
+      {
+        "path": "Invoke-Probe.ps1",
+        "sha256": "72b1e83c7cb3a0c61f558fc8788e0d273b153148ce87c69c39cf43b289090442",
+        "bytes": 10888
+      },
+      {
+        "path": "Owner.exe",
+        "sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+        "bytes": 300027
+      },
+      {
+        "path": "payload.txt",
+        "sha256": "7c820c67b81d58159dc64b674f31cf74296b9adaec5612a1cffd48dc523a585d",
+        "bytes": 75
+      },
+      {
+        "path": "probe-result.json",
+        "sha256": "41f82d2a3d668bc592a36e8ad232ad262a3ed5ef5f753f4309e06271608d53ee",
+        "bytes": 60639
+      },
+      {
+        "path": "runtime-inputs.json",
+        "sha256": "fac37d0612d2be9951e3ef9fbaea3c5aa8687c37e203a5dd446da5b285edf6de",
+        "bytes": 1704
+      },
+      {
+        "path": "spec.json",
+        "sha256": "fbca3a0b29ba867a1a22487ace91607cd51b7e9adfebb49c5bdc29881401b4a3",
+        "bytes": 1999
+      }
+    ]
+  },
+  "downloadVerified": true,
+  "apiProbeFacts": [
+    {
+      "case": "healthy-rollback",
+      "guard": {
+        "nonce": "5b8e765e944a41308b9efca5d617d096",
+        "mode": "OK",
+        "pid": 8780,
+        "tid": 38224,
+        "hInstall": 3,
+        "productRc": 0,
+        "productValid": true,
+        "createdRecord": 4,
+        "formatRc": 0,
+        "fieldRc": 0,
+        "messageAttempted": true,
+        "messageReturn": 1,
+        "recordCloseAttempted": true,
+        "recordCloseReturn": 0,
+        "intendedReturn": 0,
+        "authority": "NONE"
+      },
+      "infoSequence": 24,
+      "callbackThreadIds": [
+        11408
+      ],
+      "successorSequences": [
+        26
+      ],
+      "callbackCount": 178,
+      "scope": "API_FACTS_ONLY_NOT_PERMISSION_OR_PRODUCTION_AUTHORITY"
+    },
+    {
+      "case": "early-fail-rollback",
+      "guard": {
+        "nonce": "5b8e765e944a41308b9efca5d617d096",
+        "mode": "FAIL",
+        "pid": 34308,
+        "tid": 15548,
+        "hInstall": 7,
+        "productRc": 0,
+        "productValid": true,
+        "createdRecord": 8,
+        "formatRc": 0,
+        "fieldRc": 0,
+        "messageAttempted": true,
+        "messageReturn": 1,
+        "recordCloseAttempted": true,
+        "recordCloseReturn": 0,
+        "intendedReturn": 1603,
+        "authority": "NONE"
+      },
+      "infoSequence": 24,
+      "callbackThreadIds": [
+        34144
+      ],
+      "successorSequences": [],
+      "callbackCount": 128,
+      "scope": "API_FACTS_ONLY_NOT_PERMISSION_OR_PRODUCTION_AUTHORITY"
+    }
+  ],
+  "derivedExactSystemPaths": [
+    {
+      "path": "C:\\Windows\\Installer\\354aa6bc.msi",
+      "basis": [
+        "healthy-rollback-msi.log:cache"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\354aa6c1.msi",
+      "basis": [
+        "early-fail-rollback-msi.log:cache"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIA7D6.tmp",
+      "basis": [
+        "healthy-rollback-msi.log:dll"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIA825.tmp",
+      "basis": [
+        "healthy-rollback-msi.log:script"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIAD85.tmp",
+      "basis": [
+        "early-fail-rollback-msi.log:dll"
+      ]
+    }
+  ],
+  "finalReadOnly": {
+    "effect": {
+      "path": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096\\effect",
+      "status": "KNOWN_ABSENT",
+      "attributes": 4294967295,
+      "lastError": 2
+    },
+    "product": {
+      "registrations": [],
+      "enumerationReturns": [
+        259
+      ],
+      "related": [],
+      "localPackageRc": 1605,
+      "localPackage": null
+    },
+    "markerKnownAbsent": true,
+    "msiExecuted": false,
+    "fixtureKnownAbsent": true,
+    "components": {
+      "rows": [
+        {
+          "context": 1,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        },
+        {
+          "context": 2,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        },
+        {
+          "context": 4,
+          "state": -1,
+          "path": "",
+          "returnedLength": 32768
+        }
+      ],
+      "allUnknownStates": true
+    },
+    "registryParent": {
+      "status": "KNOWN_ABSENT",
+      "key": "Software\\FutureClassroomTest",
+      "view": "Registry32"
+    },
+    "status": "ACTUAL_READONLY_FIXTURE_AND_EXACT_SYSTEM_PATH_FACTS",
+    "sharedServiceKilled": false,
+    "paths": [
+      {
+        "path": "C:\\Windows\\Installer\\354aa6bc.msi",
+        "fact": {
+          "path": "C:\\Windows\\Installer\\354aa6bc.msi",
+          "status": "KNOWN_ABSENT",
+          "attributes": 4294967295,
+          "lastError": 2
+        }
+      },
+      {
+        "path": "C:\\Windows\\Installer\\354aa6c1.msi",
+        "fact": {
+          "path": "C:\\Windows\\Installer\\354aa6c1.msi",
+          "status": "KNOWN_ABSENT",
+          "attributes": 4294967295,
+          "lastError": 2
+        }
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIA7D6.tmp",
+        "fact": {
+          "path": "C:\\Windows\\Installer\\MSIA7D6.tmp",
+          "status": "KNOWN_ABSENT",
+          "attributes": 4294967295,
+          "lastError": 2
+        }
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIA825.tmp",
+        "fact": {
+          "path": "C:\\Windows\\Installer\\MSIA825.tmp",
+          "status": "KNOWN_ABSENT",
+          "attributes": 4294967295,
+          "lastError": 2
+        }
+      },
+      {
+        "path": "C:\\Windows\\Installer\\MSIAD85.tmp",
+        "fact": {
+          "path": "C:\\Windows\\Installer\\MSIAD85.tmp",
+          "status": "KNOWN_ABSENT",
+          "attributes": 4294967295,
+          "lastError": 2
+        }
+      }
+    ]
+  },
+  "zeroOwnProcesses": {
+    "foreignIgnored": 0,
+    "status": "ACTUAL_ZERO_OWN_PROCESSES",
+    "ownCount": 0,
+    "sharedKilled": false
+  },
+  "finalInventory": {
+    "directories": [
+      "compiler-temp",
+      "readback-compiler-temp"
+    ],
+    "files": [
+      {
+        "path": ".owner",
+        "sha256": "9246f5672b7ef6ec21f87b3d62e70baad75baf3a4f542ebc5ec3374087b78709",
+        "bytes": 46
+      },
+      {
+        "path": "build-report.json",
+        "sha256": "b9ce6fb68af13209a625afce5256a358ece12ec7099583523bc2d216b6945375",
+        "bytes": 66688
+      },
+      {
+        "path": "Capture.cs",
+        "sha256": "cd2f47598504deef0a2721a6d61d3cf95a8e93aa6146e4fadeb8744f4e924580",
+        "bytes": 11335
+      },
+      {
+        "path": "early-fail-rollback-case.json",
+        "sha256": "dff3c6192bd3c1c3420bc2b39f727173f0b094991f9f0ff93b003ecf030f8dd2",
+        "bytes": 16452
+      },
+      {
+        "path": "early-fail-rollback-msi.log",
+        "sha256": "1663f8dfca8a4fbc5dcfb7d3fbc540828a07845ff9beb96825025c8696d78d51",
+        "bytes": 131476
+      },
+      {
+        "path": "early-fail-rollback.callbacks.jsonl",
+        "sha256": "bd7ea7b0c84ecfde03e223b2d9390e35e5bbe1680c2c207ceba6b0b799fd9823",
+        "bytes": 78911
+      },
+      {
+        "path": "early-fail-rollback.capture-ack",
+        "sha256": "19258cb3bac4f58351e337a24b56c180749624b41eb42e2d8d1e421709cd9d5a",
+        "bytes": 32
+      },
+      {
+        "path": "early-fail-rollback.guard.json",
+        "sha256": "6d1806d6e34c07367ac05f665a6c584bba9951dc9dacd24761403f9eab459a99",
+        "bytes": 306
+      },
+      {
+        "path": "early-fail-rollback.jsonl",
+        "sha256": "397f9c6e7e41617c5336fc776d7fc7f9cd8a7b8ba059866343afa1ce1963f19a",
+        "bytes": 3868
+      },
+      {
+        "path": "early-fail.msi",
+        "sha256": "7f66d546a234413cf2e5fe4bcac6c95b3f769871fb6ee7765234fce761afef0d",
+        "bytes": 280576
+      },
+      {
+        "path": "Guard.dll",
+        "sha256": "520a9c281ea39068a1fcc66de456af58a4cdb59e64e3767cc2a071b84d27cac4",
+        "bytes": 266300
+      },
+      {
+        "path": "healthy-rollback-case.json",
+        "sha256": "19373d9c70c0c2f5f52f976265de1bb5d63c01e6122224b27692dfdcf8a3d834",
+        "bytes": 16447
+      },
+      {
+        "path": "healthy-rollback-msi.log",
+        "sha256": "b7653e9f3c198a0e59373698507083e30815a9216b1e0eee57add9ef44810b2b",
+        "bytes": 235808
+      },
+      {
+        "path": "healthy-rollback.callbacks.jsonl",
+        "sha256": "245dd36f47cfe20b912ce507ff77c89cb437385a3ac878b1ee1b7536ee17c420",
+        "bytes": 111804
+      },
+      {
+        "path": "healthy-rollback.capture-ack",
+        "sha256": "19258cb3bac4f58351e337a24b56c180749624b41eb42e2d8d1e421709cd9d5a",
+        "bytes": 32
+      },
+      {
+        "path": "healthy-rollback.guard.json",
+        "sha256": "4de17bdb7e89b395923bf9a90155c0631adb6fe6d33cfd86934d3fdce37a3ef0",
+        "bytes": 300
+      },
+      {
+        "path": "healthy-rollback.jsonl",
+        "sha256": "ab893b370b32dda9cd4fd00c266a5701332fc4e8f53ee8cedf79f031e8094881",
+        "bytes": 3865
+      },
+      {
+        "path": "healthy.msi",
+        "sha256": "1c105482c7fdf6e60e55e7fda6ff863a47999632228f7a9c0f7fbacbc733ead4",
+        "bytes": 280576
+      },
+      {
+        "path": "Invoke-Probe.ps1",
+        "sha256": "72b1e83c7cb3a0c61f558fc8788e0d273b153148ce87c69c39cf43b289090442",
+        "bytes": 10888
+      },
+      {
+        "path": "Owner.exe",
+        "sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca",
+        "bytes": 300027
+      },
+      {
+        "path": "payload.txt",
+        "sha256": "7c820c67b81d58159dc64b674f31cf74296b9adaec5612a1cffd48dc523a585d",
+        "bytes": 75
+      },
+      {
+        "path": "probe-result.json",
+        "sha256": "41f82d2a3d668bc592a36e8ad232ad262a3ed5ef5f753f4309e06271608d53ee",
+        "bytes": 60639
+      },
+      {
+        "path": "runtime-inputs.json",
+        "sha256": "fac37d0612d2be9951e3ef9fbaea3c5aa8687c37e203a5dd446da5b285edf6de",
+        "bytes": 1704
+      },
+      {
+        "path": "spec.json",
+        "sha256": "fbca3a0b29ba867a1a22487ace91607cd51b7e9adfebb49c5bdc29881401b4a3",
+        "bytes": 1999
+      }
+    ]
+  },
+  "elapsedSeconds": 15.437630456002807,
+  "originalPhaseNaturalReturn": true
+}

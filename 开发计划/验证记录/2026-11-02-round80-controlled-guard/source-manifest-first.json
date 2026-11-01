@@ -1,0 +1,845 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_ROOT_DESIGNATED_GUARD_COMPONENT_EVIDENCE",
+  "candidateCommit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "parentCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "selectedDirectories": [
+    "guard-contract-implementation-first",
+    "guard-native-preparation-first",
+    "guard-native-preparation-second",
+    "guard-native-runtime-first",
+    "guard-build-first",
+    "guard-build-second",
+    "guard-build-third",
+    "guard-clippy-first",
+    "guard-clippy-second",
+    "guard-library-first",
+    "guard-revision-first",
+    "guard-revision-second",
+    "guard-revision-third",
+    "guard-helper-first",
+    "guard-source-preservation-first"
+  ],
+  "selectedFiles": [
+    "guard-inputs-first.json",
+    "guard-inputs-second.json",
+    "guard-inputs-third.json",
+    "check-guard-candidate.py",
+    "windows-readonly-guard-first.json",
+    "root-guard-native-ps-parse-first.json",
+    "root-guard-native-ps-parse-first.stderr.log",
+    "root-guard-native-ps-parse-first.stdin.ps1",
+    "root-guard-native-ps-parse-first.stdout.log",
+    "root-guard-native-runtime-operation-first.json",
+    "root-guard-native-runtime-operation-first.stderr.log",
+    "root-guard-native-runtime-operation-first.stdout.log",
+    "guard-candidate-sync-first.json",
+    "guard-candidate-sync-first.stdout.log",
+    "guard-candidate-sync-first.stderr.log"
+  ],
+  "originals": [
+    {
+      "path": "check-guard-candidate.py",
+      "bytes": 5022,
+      "sha256": "2f0658355632ee0eded8da88047b098b13383c55ec601da761ed405369248055"
+    },
+    {
+      "path": "guard-build-first/cargo.stderr.log",
+      "bytes": 1487,
+      "sha256": "85d1cf4a931b51dd90228822d52dd2b4a920b60f939ffd38e86189878b421f28"
+    },
+    {
+      "path": "guard-build-first/cargo.stdout.jsonl",
+      "bytes": 39266,
+      "sha256": "76f4f3606bd574e6f9327d0bdcdd602a4c8dcf4909fe705858df76d3c7e6b90c"
+    },
+    {
+      "path": "guard-build-first/report.json",
+      "bytes": 168401,
+      "sha256": "7d03cec95aedd6dd8da66bffa8c222a3346502b2fe82d7c87d536b8e13f92ee0"
+    },
+    {
+      "path": "guard-build-second/cargo.stderr.log",
+      "bytes": 1096,
+      "sha256": "28965547a699e81afaed1971aed98714290f06b7a960228bc908c6ae2035fd29"
+    },
+    {
+      "path": "guard-build-second/cargo.stdout.jsonl",
+      "bytes": 40136,
+      "sha256": "55d4f1e5c6952d5b6a01acc292d91737ea520cacd2f03e34bf93ef1d5c750646"
+    },
+    {
+      "path": "guard-build-second/report.json",
+      "bytes": 169102,
+      "sha256": "f3eac006ebfd197482ba2e9907d1ced183b2cd9364b9d3fe0f755dae7780ca3a"
+    },
+    {
+      "path": "guard-build-third/cargo.stderr.log",
+      "bytes": 171,
+      "sha256": "90fb47582f8981037937f25bc5b3b26682d5bc8ddf47694196ee43ac8899a0a9"
+    },
+    {
+      "path": "guard-build-third/cargo.stdout.jsonl",
+      "bytes": 40136,
+      "sha256": "ae09743e4348be6c43947ca7b6f8232201ddced0a0446e15f27d2a166492ec0d"
+    },
+    {
+      "path": "guard-build-third/report.json",
+      "bytes": 169100,
+      "sha256": "ec43bce439da564b4592615a4df00a4dea3237071484ac6ae184472061190568"
+    },
+    {
+      "path": "guard-candidate-sync-first.json",
+      "bytes": 407,
+      "sha256": "c10cfb4d299d08e734abbf290cb04fc1dd30a8af5e41ea4c400ffa58a9d24a3c"
+    },
+    {
+      "path": "guard-candidate-sync-first.stderr.log",
+      "bytes": 152,
+      "sha256": "98ba2f350883480e8040671655de1d7728272908b73e709cbdda40089f215fc6"
+    },
+    {
+      "path": "guard-candidate-sync-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-clippy-first/cargo.stderr.log",
+      "bytes": 2811,
+      "sha256": "d1908660a04d7d31bac93190b6210119ac3c0362fefcc58a8a3d183e5e225864"
+    },
+    {
+      "path": "guard-clippy-first/cargo.stdout.jsonl",
+      "bytes": 35867,
+      "sha256": "999ea9e44af4ca74f2a6efab66913f063a9f1ce896b13c2f3f5c9073c3ddfaa7"
+    },
+    {
+      "path": "guard-clippy-first/report.json",
+      "bytes": 168424,
+      "sha256": "3640e71cac9c32d96a7ddf634d0d431296dd21adcde3a3d2423742ade2f52d0d"
+    },
+    {
+      "path": "guard-clippy-second/cargo.stderr.log",
+      "bytes": 171,
+      "sha256": "fb00e9e779b6e3c2fab12144f557c269f9643d71971f10da22fef8ffa3dfdec4"
+    },
+    {
+      "path": "guard-clippy-second/cargo.stdout.jsonl",
+      "bytes": 37372,
+      "sha256": "6fbefb177dd19c8f1be2b3e6a4e58b19730b80ded08829c702a57f50264ff73c"
+    },
+    {
+      "path": "guard-clippy-second/report.json",
+      "bytes": 168454,
+      "sha256": "3b665590a8d46b1bbfdb2e3fc9e46849e4b8b3eade728225e5d5875b8e85c1bb"
+    },
+    {
+      "path": "guard-contract-implementation-first/.owner",
+      "bytes": 60,
+      "sha256": "a334cff54428ee867dfcdc2a63701fa331f9d21e0a4622aa12ebaff6554d7df1"
+    },
+    {
+      "path": "guard-contract-implementation-first/freeze-first.json",
+      "bytes": 4859,
+      "sha256": "f3a8b855edf37f434db5dec0e57f69e61e53d357100c70a7dee84af43de2a3ae"
+    },
+    {
+      "path": "guard-contract-implementation-first/implementation-first.json",
+      "bytes": 7168,
+      "sha256": "4b881d347651bb10693523fcd0e46b54f8439835d24ac16488711a4ed6e84207"
+    },
+    {
+      "path": "guard-contract-implementation-first/new-contract-diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/new-contract-diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/new-contract-first.patch",
+      "bytes": 10625,
+      "sha256": "47efe70a7901f027ca3739576383ba4f32e4f4eef43ef873fc1044eb31e719e8"
+    },
+    {
+      "path": "guard-contract-implementation-first/python-format-syntax-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/python-format-syntax-first.stdout.log",
+      "bytes": 43,
+      "sha256": "e40ea4e41cba1041d9dd4019aa50675ce5a4b4f2a84bd441447a20d57c97cf39"
+    },
+    {
+      "path": "guard-contract-implementation-first/python-tests-first-operation.json",
+      "bytes": 511,
+      "sha256": "d9cbec1899124f2bff1ecac9873da2dd8db2b1e3a6c8a09fb061200f886bea20"
+    },
+    {
+      "path": "guard-contract-implementation-first/python-tests-first.stderr.log",
+      "bytes": 1972,
+      "sha256": "d55639936b4c0379c15b1fa2c50376361d04804865aed6f3f40148299a7e6db4"
+    },
+    {
+      "path": "guard-contract-implementation-first/python-tests-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/rust-host-compile-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/rust-host-compile-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/rust-host-tests-first-operation.json",
+      "bytes": 2442,
+      "sha256": "f01c806ee2fa1e3b14bda356345dcff236146d43cb61d72c8321551584c67b8e"
+    },
+    {
+      "path": "guard-contract-implementation-first/rust-host-tests-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/rust-host-tests-first.stdout.log",
+      "bytes": 390,
+      "sha256": "b9574df7c94c46e27ead9006db7b97dc73fe892a98430e0d597825e632c54dac"
+    },
+    {
+      "path": "guard-contract-implementation-first/rustfmt-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/rustfmt-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/source/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 10054,
+      "sha256": "ac8b37d79106f4ed50c60589b4d9ad6acebab99f73b66921ae0287ac1a399fe8"
+    },
+    {
+      "path": "guard-contract-implementation-first/source/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10937,
+      "sha256": "a799d33c61004845ed6f5dbf43ef2cd59b1df3ad36f3d6c65babd8a76af04be9"
+    },
+    {
+      "path": "guard-contract-implementation-first/source/scripts/controlled-setup-seal.py",
+      "bytes": 6501,
+      "sha256": "935d679cbb0704ab079eddcc38581dd9e01e6eb02e8f2d7f596204fb8ff0aaae"
+    },
+    {
+      "path": "guard-contract-implementation-first/source/scripts/test-controlled-setup-seal.py",
+      "bytes": 10967,
+      "sha256": "6fbaea942c0a4026c5d9a9654f7892c13575c073f6432abe9bd5025b0afafdd6"
+    },
+    {
+      "path": "guard-contract-implementation-first/tracked-changes-first.patch",
+      "bytes": 10063,
+      "sha256": "e74aea6962e8126abadfbb9ef4365225ad56944c82c91de5569b9a9099d5b85a"
+    },
+    {
+      "path": "guard-contract-implementation-first/tracked-diff-check-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-contract-implementation-first/tracked-diff-check-first.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-helper-first/cargo.stderr.log",
+      "bytes": 2570,
+      "sha256": "ae3ef9ce29f824404b5d3545c1b3fb8b939a12432f83cc2e77f77db61ea306a1"
+    },
+    {
+      "path": "guard-helper-first/cargo.stdout.jsonl",
+      "bytes": 86182,
+      "sha256": "7ec8965d65bfbd18534088a3c781c4cdf78cbd545d12a18543b980e4a8c6393d"
+    },
+    {
+      "path": "guard-helper-first/report.json",
+      "bytes": 169748,
+      "sha256": "72da155c97cc129cedd300231f3ded8d680c7b8b0ef4767303d6cc15ebfa144b"
+    },
+    {
+      "path": "guard-inputs-first.json",
+      "bytes": 83881,
+      "sha256": "c8ee80ca54a5b5285b7700c1f0b70e647b497f2a86b48c59d8171ecf1de159d4"
+    },
+    {
+      "path": "guard-inputs-second.json",
+      "bytes": 83881,
+      "sha256": "70c9c8b97b3c0891805969500b11551a0b1eb5265a5c0a6489cade8881272183"
+    },
+    {
+      "path": "guard-inputs-third.json",
+      "bytes": 83880,
+      "sha256": "e10f6e4cf10d4ccb12b470fa37eaa340c747276af8e4e47f578763151a4535b1"
+    },
+    {
+      "path": "guard-library-first/cargo.stderr.log",
+      "bytes": 1835,
+      "sha256": "7bd33e188f66285c7caaf23920d4071c672e819f5d39e2fe811a3e546a070f48"
+    },
+    {
+      "path": "guard-library-first/cargo.stdout.jsonl",
+      "bytes": 40228,
+      "sha256": "9ae7a86b219a85d3177c2b1d278e45f22971c9ecb05606cd05b533216329721a"
+    },
+    {
+      "path": "guard-library-first/export-check-first.json",
+      "bytes": 916,
+      "sha256": "36c17917b07462864669d6af2f6f3a7c9f90eb4f8171c3b05b23aa3132ca4c6e"
+    },
+    {
+      "path": "guard-library-first/objdump.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-library-first/objdump.stdout.log",
+      "bytes": 1261014,
+      "sha256": "14e9a94ea32c8904c62d578d172dfadc6b715d2228f9a1d79b18ee714112bf95"
+    },
+    {
+      "path": "guard-library-first/report.json",
+      "bytes": 169058,
+      "sha256": "ffb97060fa5fa5cf1dc65e6a185f5c79833f8436e83ad7e0662a708149775fe8"
+    },
+    {
+      "path": "guard-native-preparation-first/.owner",
+      "bytes": 55,
+      "sha256": "baa3686eeb7958faf314ac10da3df4224b38426c21b443eca98179402dcca8ad"
+    },
+    {
+      "path": "guard-native-preparation-first/README.md",
+      "bytes": 906,
+      "sha256": "acf7f382ba44f1f9f5ac3ff05b884fe2cf8ae0a935da93c8ad00deca5fb980e0"
+    },
+    {
+      "path": "guard-native-preparation-first/boot.ps1",
+      "bytes": 110,
+      "sha256": "a4719f122291dbcbfa4ecc029ef701fa98e7a150203c134a6810ed61880fd247"
+    },
+    {
+      "path": "guard-native-preparation-first/check-qualification.py",
+      "bytes": 2421,
+      "sha256": "01038541e9d92950cda65926a726054ae3f13d01eedbe4332cee3439fe6bce5b"
+    },
+    {
+      "path": "guard-native-preparation-first/create.ps1",
+      "bytes": 3312,
+      "sha256": "93ffa4b07919a133a65e4dca565dffe894662cdba6fe6cea7c2ef850af513f8b"
+    },
+    {
+      "path": "guard-native-preparation-first/delete.ps1",
+      "bytes": 3266,
+      "sha256": "c0bb5075cf1184cda12987535581c58042c23a34947b7b458a2618b27588e60f"
+    },
+    {
+      "path": "guard-native-preparation-first/freeze-first.json",
+      "bytes": 2911,
+      "sha256": "f680940d03e844424c5ede7a9a8170aec30f13859d9b866b9a1315c10cbea7ab"
+    },
+    {
+      "path": "guard-native-preparation-first/run-native.py",
+      "bytes": 18277,
+      "sha256": "f70e2642722d56aff2a4378a79411a4848e1f93d5c2f47194f763069f0b964bb"
+    },
+    {
+      "path": "guard-native-preparation-first/run.ps1",
+      "bytes": 6001,
+      "sha256": "ba92e7fa72f4a9f13b46b48e5e13b2a2ceffa2eeff57a43606ec81e965e5f46b"
+    },
+    {
+      "path": "guard-native-preparation-second/.owner",
+      "bytes": 55,
+      "sha256": "baa3686eeb7958faf314ac10da3df4224b38426c21b443eca98179402dcca8ad"
+    },
+    {
+      "path": "guard-native-preparation-second/README.md",
+      "bytes": 1115,
+      "sha256": "b94a8ec7b7c24afd967340178ba1cfee61b4ff1c681d1db03ee43a3587ac35df"
+    },
+    {
+      "path": "guard-native-preparation-second/boot.ps1",
+      "bytes": 110,
+      "sha256": "a4719f122291dbcbfa4ecc029ef701fa98e7a150203c134a6810ed61880fd247"
+    },
+    {
+      "path": "guard-native-preparation-second/check-qualification.py",
+      "bytes": 2421,
+      "sha256": "01038541e9d92950cda65926a726054ae3f13d01eedbe4332cee3439fe6bce5b"
+    },
+    {
+      "path": "guard-native-preparation-second/create.ps1",
+      "bytes": 3312,
+      "sha256": "93ffa4b07919a133a65e4dca565dffe894662cdba6fe6cea7c2ef850af513f8b"
+    },
+    {
+      "path": "guard-native-preparation-second/delete.ps1",
+      "bytes": 3266,
+      "sha256": "c0bb5075cf1184cda12987535581c58042c23a34947b7b458a2618b27588e60f"
+    },
+    {
+      "path": "guard-native-preparation-second/freeze-second.json",
+      "bytes": 3170,
+      "sha256": "9f818e9d42486bdcacae52d3377cee9e1a7698a3c9b799fc6681915b169bb56f"
+    },
+    {
+      "path": "guard-native-preparation-second/run-native.py",
+      "bytes": 19220,
+      "sha256": "728f55865ad09359658a95e4ab6c643d4661f468b4650a7f97d9cdaf364c28df"
+    },
+    {
+      "path": "guard-native-preparation-second/run.ps1",
+      "bytes": 6001,
+      "sha256": "ba92e7fa72f4a9f13b46b48e5e13b2a2ceffa2eeff57a43606ec81e965e5f46b"
+    },
+    {
+      "path": "guard-native-runtime-first/.owner",
+      "bytes": 49,
+      "sha256": "19b4761ca92a504522d07229d15511e9bc9472b039a8363dc63e9a72344ed6b0"
+    },
+    {
+      "path": "guard-native-runtime-first/create.stderr.log",
+      "bytes": 596,
+      "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+    },
+    {
+      "path": "guard-native-runtime-first/create.stdout.log",
+      "bytes": 137,
+      "sha256": "1807da77b819c20c1ce2fdf3bf94e9d37f4fcdda52f8716efb0ce46edf8169a5"
+    },
+    {
+      "path": "guard-native-runtime-first/delete.stderr.log",
+      "bytes": 596,
+      "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+    },
+    {
+      "path": "guard-native-runtime-first/delete.stdout.log",
+      "bytes": 117,
+      "sha256": "54dca47cfa8487f7d1482c214f24c26a2039f81faf832f918d6dd775b7db52d5"
+    },
+    {
+      "path": "guard-native-runtime-first/download/FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a/.owner",
+      "bytes": 51,
+      "sha256": "83ad04773f231fba2f4bb0cce153a9569357ec280be8337f2c3084067b5470ff"
+    },
+    {
+      "path": "guard-native-runtime-first/download/FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a/Capture.cs",
+      "bytes": 9814,
+      "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+    },
+    {
+      "path": "guard-native-runtime-first/download/FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a/native-result.json",
+      "bytes": 14643,
+      "sha256": "af6d442353a60aa1b89d6861e0c7ce16d501989a2289d5958eae24da66844e94"
+    },
+    {
+      "path": "guard-native-runtime-first/download.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-native-runtime-first/download.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-native-runtime-first/inventory.stderr.log",
+      "bytes": 596,
+      "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+    },
+    {
+      "path": "guard-native-runtime-first/inventory.stdout.log",
+      "bytes": 516,
+      "sha256": "6a8e8d20996819990b3b8325e3c7d6e62444118e07119201a9e53563f961c0cd"
+    },
+    {
+      "path": "guard-native-runtime-first/owned-processes.stderr.log",
+      "bytes": 596,
+      "sha256": "be2a813c5e264e6e4b05c9816b17dc6eb039a1cc247767c8927d259fa5541e12"
+    },
+    {
+      "path": "guard-native-runtime-first/owned-processes.stdout.log",
+      "bytes": 13,
+      "sha256": "7886222597aa503c7fcb97ba200bf66c918aaf8bb08b6c702386457d30bdf0d7"
+    },
+    {
+      "path": "guard-native-runtime-first/report.json",
+      "bytes": 109493,
+      "sha256": "a9f30d709bd4fd7041d6de269c8c9f8fc2ec74df2b9a50339dacd0fe67089e5f"
+    },
+    {
+      "path": "guard-native-runtime-first/run.stderr.log",
+      "bytes": 596,
+      "sha256": "a03db210e76f1d6497b00218bc8d5147c786332dc3bc42a2befc72c1d8ba5a5a"
+    },
+    {
+      "path": "guard-native-runtime-first/run.stdout.log",
+      "bytes": 11509,
+      "sha256": "55c3ee425176949489ad0a9ff3d78efae189e07901ca374557f714e0fd686745"
+    },
+    {
+      "path": "guard-native-runtime-first/upload/Capture.cs",
+      "bytes": 9814,
+      "sha256": "e74300d27694e46fde2e8113cfeee47ffd3f11f9172f01c5621fa2ba5fdcab5a"
+    },
+    {
+      "path": "guard-native-runtime-first/upload-Capture.cs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-native-runtime-first/upload-Capture.cs.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-native-runtime-first/upload-candidate-tests.exe.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-native-runtime-first/upload-candidate-tests.exe.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/Cargo.toml",
+      "bytes": 1684,
+      "sha256": "0b90e0adc96caaba8f3ca404fa0b596922a1389ce463859654e4f90d2d615a5c"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 10054,
+      "sha256": "ac8b37d79106f4ed50c60589b4d9ad6acebab99f73b66921ae0287ac1a399fe8"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+      "bytes": 21101,
+      "sha256": "1d5488750295fd3d5fa697873ba1f86f3457b83e641bd458fb05e83ae5214756"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 28091,
+      "sha256": "717cd284dba1ff735c5e74adfdf6a1d8fb82bd3cdd9c32064f2d26507aa087a4"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+      "bytes": 25379,
+      "sha256": "99cb3ac3fa6c3906a53ceec1a811b7bbf3909c64273b436e11d20f79f783895a"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 42776,
+      "sha256": "740d2a6491545ee6123ed30c8b21a2ea474242203df98d7e96145616599bf498"
+    },
+    {
+      "path": "guard-revision-first/before/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10937,
+      "sha256": "a799d33c61004845ed6f5dbf43ef2cd59b1df3ad36f3d6c65babd8a76af04be9"
+    },
+    {
+      "path": "guard-revision-first/before/scripts/controlled-setup-seal.py",
+      "bytes": 6501,
+      "sha256": "935d679cbb0704ab079eddcc38581dd9e01e6eb02e8f2d7f596204fb8ff0aaae"
+    },
+    {
+      "path": "guard-revision-first/before/scripts/test-controlled-setup-seal.py",
+      "bytes": 10967,
+      "sha256": "6fbaea942c0a4026c5d9a9654f7892c13575c073f6432abe9bd5025b0afafdd6"
+    },
+    {
+      "path": "guard-revision-first/before.json",
+      "bytes": 1613,
+      "sha256": "318fdbd18d33a51d5a59c8128283f0932c871511702e8a240c14250549c3ec29"
+    },
+    {
+      "path": "guard-revision-first/checks-second.json",
+      "bytes": 163,
+      "sha256": "7f1fb10ff4e0130c9357c426d3ccb68bbeda67c3798d095fc6ca08e65bfe56c0"
+    },
+    {
+      "path": "guard-revision-first/diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/format.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/format.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-first/tracked-before.patch",
+      "bytes": 21529,
+      "sha256": "c8f10e089e67656c200f6312e52268aec35b3870671ab93e4c20e8c3e470bce0"
+    },
+    {
+      "path": "guard-revision-second/architecture.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-second/architecture.stdout.log",
+      "bytes": 71,
+      "sha256": "9b0dc92621c10128154274f93dd11463d800eca10fed7e6aa74e727646138e36"
+    },
+    {
+      "path": "guard-revision-second/before/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 10054,
+      "sha256": "ac8b37d79106f4ed50c60589b4d9ad6acebab99f73b66921ae0287ac1a399fe8"
+    },
+    {
+      "path": "guard-revision-second/before/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 27941,
+      "sha256": "4446cec5881a43f160055dfbe5a7a308cb14b89964e8b13196e0a872c6153c46"
+    },
+    {
+      "path": "guard-revision-second/before/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 49962,
+      "sha256": "a031c4565a4fdf5be90477d8fa8427dfbc2593e81a9b1a9e9c0f0950a73da302"
+    },
+    {
+      "path": "guard-revision-second/before.json",
+      "bytes": 581,
+      "sha256": "5b0c6b6de663fcc0391a142874fd56175efab92d19ee034fbc00c574d0b67d22"
+    },
+    {
+      "path": "guard-revision-second/checks-third.json",
+      "bytes": 163,
+      "sha256": "7f1fb10ff4e0130c9357c426d3ccb68bbeda67c3798d095fc6ca08e65bfe56c0"
+    },
+    {
+      "path": "guard-revision-second/diff.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-second/diff.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-second/format.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-second/format.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-revision-third/inner_guard.before.rs",
+      "bytes": 25380,
+      "sha256": "bf8da7f02cbcb1c6985a8d3905eab2b95b70f53827b8a83bd79f597f269919c5"
+    },
+    {
+      "path": "guard-revision-third/status.json",
+      "bytes": 434,
+      "sha256": "54577bcd7bc8ed3a2b0b47b9a8756520ea6bc6d27f493ca93d0c58261b3bdcd8"
+    },
+    {
+      "path": "guard-source-preservation-first/candidate.patch",
+      "bytes": 83159,
+      "sha256": "fd924ced13174420d2f9d6935f581eb6c20961df2aa9f7070d4aa58fdd207a93"
+    },
+    {
+      "path": "guard-source-preservation-first/commit.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "guard-source-preservation-first/commit.stdout.log",
+      "bytes": 438,
+      "sha256": "a071a622eb4fbb3b3733ab9c808833e653751975f26d624ca3656c94f5def347"
+    },
+    {
+      "path": "guard-source-preservation-first/source-preservation-first.json",
+      "bytes": 2290,
+      "sha256": "66ab82cdf48981f60b6f120ba0d919ec6226d6d04a666229bd8491661bd23ba0"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/Cargo.toml",
+      "bytes": 1684,
+      "sha256": "0b90e0adc96caaba8f3ca404fa0b596922a1389ce463859654e4f90d2d615a5c"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 9656,
+      "sha256": "1d65553194a2d0d294ff5f484cc9c6b49b51fab75df234a9781e18936ba6744d"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+      "bytes": 21125,
+      "sha256": "d9dba37d88ffb3e00b8ea6aaf531d4dfc20128c122ee75a221067c1d99cd46b9"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 27949,
+      "sha256": "a48b33456b68c2ded3237a82c3b1ad6fe7e627668351443b4c9f14dee5e93e88"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 51936,
+      "sha256": "da2b2b9429cfe73ee89fb195d0577a5ce2815c8a90520397faa52eddb24f9117"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+      "bytes": 25380,
+      "sha256": "bf8da7f02cbcb1c6985a8d3905eab2b95b70f53827b8a83bd79f597f269919c5"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 42776,
+      "sha256": "740d2a6491545ee6123ed30c8b21a2ea474242203df98d7e96145616599bf498"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10937,
+      "sha256": "a799d33c61004845ed6f5dbf43ef2cd59b1df3ad36f3d6c65babd8a76af04be9"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/scripts/controlled-setup-seal.py",
+      "bytes": 6501,
+      "sha256": "935d679cbb0704ab079eddcc38581dd9e01e6eb02e8f2d7f596204fb8ff0aaae"
+    },
+    {
+      "path": "guard-source-preservation-first/sources/scripts/test-controlled-setup-seal.py",
+      "bytes": 10967,
+      "sha256": "6fbaea942c0a4026c5d9a9654f7892c13575c073f6432abe9bd5025b0afafdd6"
+    },
+    {
+      "path": "root-guard-native-ps-parse-first.json",
+      "bytes": 1062,
+      "sha256": "f6031fce669dd61c04b1a0f39c5125ef2139433bb2e95596816682f6d81dc7cf"
+    },
+    {
+      "path": "root-guard-native-ps-parse-first.stderr.log",
+      "bytes": 393,
+      "sha256": "3b3bb0e26a8ed84cc061107dcbd8fe050bd0c551afc94478665a674375c5a8ae"
+    },
+    {
+      "path": "root-guard-native-ps-parse-first.stdin.ps1",
+      "bytes": 13464,
+      "sha256": "11452cb9d726b39e4a136d461d449b68785593e9c63f091b3bb8c613b56e8e66"
+    },
+    {
+      "path": "root-guard-native-ps-parse-first.stdout.log",
+      "bytes": 194,
+      "sha256": "efdc94346193ae1b2ddef5db30ab99102b293651a9ac0f0021c42c9744703c8c"
+    },
+    {
+      "path": "root-guard-native-runtime-operation-first.json",
+      "bytes": 589,
+      "sha256": "fb60713c0f4562fcf8e0ec7c3cf320f37e309eb0e67a07e6811e44bdb8557196"
+    },
+    {
+      "path": "root-guard-native-runtime-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "root-guard-native-runtime-operation-first.stdout.log",
+      "bytes": 249,
+      "sha256": "13fb82f27beba7b9f45cc3202ce5be49a1bae5f17e861570c89f32f27221276d"
+    },
+    {
+      "path": "windows-readonly-guard-first.json",
+      "bytes": 17045,
+      "sha256": "feb1e8bb73f6ce7582af7cebaae55145008dda21ba201c4d9ca9a31a265e73ff"
+    }
+  ],
+  "originalCount": 149,
+  "originalBytes": 3965671,
+  "excludedBinaryIdentities": [
+    {
+      "path": "guard-native-runtime-first/download/FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a/candidate-tests.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "guard-native-runtime-first/upload/candidate-tests.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "producerArtifactIdentitiesFromReportsOnly": [
+    {
+      "producerReport": "guard-build-second/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4174526,
+      "sha256": "4b62439f5f8550aacba89950c6946a3e20970cf84152fc39e519e01e0559df95",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-build-third/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-library-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc_windows.dll",
+      "bytes": 4866478,
+      "sha256": "e8bc2e4964bea210caf9f7a70a5c8f91800d3e963e6e8d1df6887194ce9bccd3",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows.dll",
+      "bytes": 4866397,
+      "sha256": "41eb605c37455e6bbe574da4ab6774fe89ad4e6b7d90d51e1a3210c8bbd43f77",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 794021,
+      "sha256": "17cda50fe9989e14893d5dfd7f5292a3241e0e1431dbc9918eeb9026ec8d2504",
+      "originalReadByArchiver": false
+    }
+  ],
+  "sourcePreservation": "guard-source-preservation-first/source-preservation-first.json",
+  "scope": "Private Rust inner guard and bridge components, pure seal template and Win11 lifecycle regression; no production coupled MSI exercise or release approval",
+  "originalFailuresPreserved": true,
+  "Windows7Runtime": "NOT_RUN",
+  "Windows10Runtime": "NOT_RUN"
+}

@@ -1,0 +1,91 @@
+{
+  "status": "FAIL_STATIC_ONLY",
+  "windows": "NOT_RUN",
+  "spec": {
+    "bytes": 1999,
+    "sha256": "56745e812296b545574ff2cb5ec4d611964ce871eadbebb648300d691c09c3e7"
+  },
+  "commands": [
+    {
+      "label": "01-gcc-owner",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc-posix",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-municode",
+        "-mwindows",
+        "-Wl,--subsystem,windows:6.1",
+        "-o",
+        "Owner.exe",
+        "Owner.c",
+        "-lmsi",
+        "-lshell32"
+      ],
+      "actualExit": 1,
+      "parentReaped": true,
+      "seconds": 0.6792335619975347,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "ba6970558d3f5f0bf4bb0caac214fceae0eef6fc82fb3bcacdd6eda26906c950"
+    }
+  ],
+  "cases": {},
+  "sourceOriginalGenerator": {
+    "bytes": 24097,
+    "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+  },
+  "toolPreparation": {
+    "original": {
+      "bytes": 15832,
+      "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+    },
+    "originalStatus": "FAIL_RETAIN_ORIGINALS",
+    "recovery": {
+      "bytes": 1142,
+      "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+    },
+    "recoveryStatus": "PASS_PRIVATE_TOOL_WRAPPER_RECOVERY",
+    "inputs": {
+      "/tmp/fc-round80-controlled-repair/recover-inner-guard-tools-first.py": {
+        "bytes": 4055,
+        "sha256": "ca1825881e9b36edda11fb9c7a0522445b6ec38171f264a382eda40b05bf5764"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools-report.json": {
+        "bytes": 15832,
+        "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools-recovery-first.json": {
+        "bytes": 1142,
+        "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools.json": {
+        "bytes": 1110,
+        "sha256": "d82866321cc565890c38b494f7dd2ae6afa2fed8d4ae55270d7c4e931562099d"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/child-environment.json": {
+        "bytes": 197,
+        "sha256": "d0b2d946aba5c21d94713c6e17cfa90a5c85c74dfa00d2336d4cbf88f05b37a0"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second": {
+        "bytes": 561,
+        "sha256": "714bf91398b4312f5a57878708a75b0591c5fa91224dc1eac02d8b0201a8574e"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrapper-version-second.stdout": {
+        "bytes": 6,
+        "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrapper-version-second.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "changesFromOriginalGenerator": [
+    "fresh independent Round80 nonce/product/component/upgrade and payload",
+    "one Type1 guard1499 only; two target entrypoints",
+    "quiet original G record handler before Begin; actual self-record close journal",
+    "both cases EndRollback; no commit/uninstall scenario"
+  ]
+}

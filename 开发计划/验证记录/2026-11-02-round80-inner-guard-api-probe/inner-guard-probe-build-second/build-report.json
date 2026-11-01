@@ -1,0 +1,2068 @@
+{
+  "status": "PASS_STATIC_ONLY_WINDOWS_NOT_RUN",
+  "windows": "NOT_RUN",
+  "spec": {
+    "bytes": 1999,
+    "sha256": "fbca3a0b29ba867a1a22487ace91607cd51b7e9adfebb49c5bdc29881401b4a3"
+  },
+  "commands": [
+    {
+      "label": "01-gcc-owner",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc-posix",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-municode",
+        "-mwindows",
+        "-Wl,--subsystem,windows:6.1",
+        "-o",
+        "Owner.exe",
+        "Owner.c",
+        "-lmsi",
+        "-lshell32"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.6500842810019094,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "02-gcc-observer",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-gcc-posix",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-shared",
+        "-Wl,--kill-at",
+        "-o",
+        "Guard.dll",
+        "Guard.c",
+        "-lmsi",
+        "-ladvapi32"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.5338628250028705,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "03-observer-exports",
+      "argv": [
+        "/usr/bin/i686-w64-mingw32-objdump",
+        "-p",
+        "Guard.dll"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003209731003153138,
+      "stdoutSha256": "793b1471f11c8d7cebf92d6eac6a2d80fa62e0c544a91d7d73a901f62f6e9293",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-wixl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second",
+        "-a",
+        "x86",
+        "-o",
+        "healthy.msi",
+        "healthy.wxs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.063709491998452,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-base-sequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.009057639999809908,
+      "stdoutSha256": "bb1af87bc932a0ab44d367ee8877fd918e83e82c6fc57a0f6ad380a561394c86",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-import",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "healthy.msi",
+        "-q",
+        "DROP TABLE `CustomAction`",
+        "-q",
+        "DROP TABLE `InstallExecuteSequence`",
+        "-i",
+        "CustomAction.idt",
+        "-i",
+        "InstallExecuteSequence.idt"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.016103357000247343,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-summary-write",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "healthy.msi",
+        "-s",
+        "FC R80 UI record API probe",
+        "FutureClassroomTest",
+        "Intel;1033",
+        "{DA1FEA63-B715-57CB-BD91-F3F52197A8C2}"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.015716510999482125,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-summary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "healthy.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007254737000039313,
+      "stdoutSha256": "f1732a39e9700ddd0d08f2247dce92f43ce38156b071744c65708ed6ff98fd94",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-tables",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "tables",
+        "healthy.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.009380742998473579,
+      "stdoutSha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-AdminUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "AdminUISequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007567869000922656,
+      "stdoutSha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Media",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Media"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007632492000993807,
+      "stdoutSha256": "63310edf9c6cd81c96a4b842bebc94f4db75a4b28469f81403874c150d413f29",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Error",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Error"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008876222997059813,
+      "stdoutSha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-ServiceInstall",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "ServiceInstall"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.012066832998243626,
+      "stdoutSha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-AppSearch",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "AppSearch"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008342401000845712,
+      "stdoutSha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Property",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Property"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.013039812998613343,
+      "stdoutSha256": "4891c2b3cb12793b774240248dd256ed66b45a631231913e1f377c0ad04aecd7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Upgrade",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Upgrade"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004814716001419583,
+      "stdoutSha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Shortcut",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Shortcut"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008254336997197242,
+      "stdoutSha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-InstallExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006009484997775871,
+      "stdoutSha256": "173827c01b9b664a72e0f65055b04aabaef68889696946f8f1ef9ad127bed316",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Registry",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Registry"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.013381576998654054,
+      "stdoutSha256": "f3cc53611ab50a8d73687d4977288a008ae92e0272c21c5801d923b1e79d6c86",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-AdvtExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "AdvtExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006443603000661824,
+      "stdoutSha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-ActionText",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "ActionText"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0059934550008620135,
+      "stdoutSha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-FeatureComponents",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "FeatureComponents"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008425005002209218,
+      "stdoutSha256": "e3748180acdf9a78bc8bf84a26d56221410b017c969b5a1e702963a35ed3c4cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-File",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "File"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.016463571999338455,
+      "stdoutSha256": "22a0ed33e3f1e23285e7f6d89592b5fbbad3977ee25429037b599b08f8f6a368",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Directory",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Directory"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.015726491998066194,
+      "stdoutSha256": "5ca6749ba1fd7594df0d81ee0a7028570dd49cfe82c49b3f71ab95f1f6dd8df6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-IniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "IniFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.017264195001189364,
+      "stdoutSha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-RemoveFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "RemoveFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.01577571500092745,
+      "stdoutSha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-RemoveIniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "RemoveIniFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006025705999491038,
+      "stdoutSha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-LaunchCondition",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "LaunchCondition"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011942496999836294,
+      "stdoutSha256": "3ec6b9a121b252acd368136e468d75131f05dd980e0f48dc07f25779dfd6bdc4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Signature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Signature"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.01098213799923542,
+      "stdoutSha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-InstallUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "InstallUISequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008363300999917556,
+      "stdoutSha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Component",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Component"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011975379999057623,
+      "stdoutSha256": "ecbe163bb92871e22c130c1b350992cf1d44c70268f2f4d73fb107e86e66e888",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-ServiceControl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "ServiceControl"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008038038002268877,
+      "stdoutSha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Feature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Feature"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008570179998059757,
+      "stdoutSha256": "23db5fd03f45234bf0f7d2e29b0641b254e6cc3f7eb9cdc0b8c3374180a00e88",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Binary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Binary"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008870402998581994,
+      "stdoutSha256": "d6785b272c890948b56c5743d607b1ef4d582ba8f85c3b3ddd7eec423244b6db",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-CustomAction",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "CustomAction"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008278127999801654,
+      "stdoutSha256": "1f973bed16929ec87696f043b785f2c1b1a4ef0ef197060164e358cdf7788924",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-RegLocator",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "RegLocator"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007917324001027737,
+      "stdoutSha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-MsiFileHash",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "MsiFileHash"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008207786002458306,
+      "stdoutSha256": "f4cb9102549e56d24e58a0ca789a8cd253af3134d839630e296d3b8c85adfd5d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-Icon",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "Icon"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008078280003246618,
+      "stdoutSha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-AdminExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "AdminExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008371102001547115,
+      "stdoutSha256": "e1aaa637f5f193084fa7733f11616d19ac61441b31bc7c9775f58d12aff4c364",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-table-CreateFolder",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "healthy.msi",
+        "CreateFolder"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008364031000382965,
+      "stdoutSha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-binary-readback",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "healthy.msi",
+        "Binary.ObserverDll"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011240748997806804,
+      "stdoutSha256": "520a9c281ea39068a1fcc66de456af58a4cdb59e64e3767cc2a071b84d27cac4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "healthy-extract",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+        "-C",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/healthy-extracted",
+        "healthy.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008668793998367619,
+      "stdoutSha256": "c1222b9cb292f33e1b0a3493c4141b27c5ae109779941dbe85aefcf9f823cee6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-wixl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second",
+        "-a",
+        "x86",
+        "-o",
+        "early-fail.msi",
+        "early-fail.wxs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.07198016000256757,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-base-sequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.013087873998301802,
+      "stdoutSha256": "bb1af87bc932a0ab44d367ee8877fd918e83e82c6fc57a0f6ad380a561394c86",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-import",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "early-fail.msi",
+        "-q",
+        "DROP TABLE `CustomAction`",
+        "-q",
+        "DROP TABLE `InstallExecuteSequence`",
+        "-i",
+        "CustomAction.idt",
+        "-i",
+        "InstallExecuteSequence.idt"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.018601979998493334,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-summary-write",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msibuild",
+        "early-fail.msi",
+        "-s",
+        "FC R80 UI record API probe",
+        "FutureClassroomTest",
+        "Intel;1033",
+        "{E9FC1F94-79C9-5F83-A4C0-CE42A4A134E1}"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.013657788000273285,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-summary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "suminfo",
+        "early-fail.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006375879998813616,
+      "stdoutSha256": "3cc20e365efffaad569a24b3b3c8830c077bbce2144c063290848ddfefe05366",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-tables",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "tables",
+        "early-fail.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006987306001974503,
+      "stdoutSha256": "8f0a9337f8a8277a362d5d41c81ade3b54fb4739b44e52531f6327c73eb8bbc6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-AdminUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "AdminUISequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008556659999158,
+      "stdoutSha256": "566f9c9710b1f128f4ff183d756546e5a78a7ac3ee66f8c3836876e0d2fe52e8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Media",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Media"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008999308000056772,
+      "stdoutSha256": "63310edf9c6cd81c96a4b842bebc94f4db75a4b28469f81403874c150d413f29",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Error",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Error"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.009486147999268724,
+      "stdoutSha256": "5e2d23423ce8d0ddd97885c69b67b6d208a6604a18551bfa0f5dd68b36ff7f67",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-ServiceInstall",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "ServiceInstall"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006942014002561336,
+      "stdoutSha256": "c670cac89a83f12e389df2383266b357f016d3c57557d403e2b66bab33153b39",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-AppSearch",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "AppSearch"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006767966999177588,
+      "stdoutSha256": "440f3a84ea50cc08e880a610578ec22dd5cbca6e2bea6bd2c59b8fabeb36628f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Property",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Property"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008414793999691028,
+      "stdoutSha256": "4891c2b3cb12793b774240248dd256ed66b45a631231913e1f377c0ad04aecd7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Upgrade",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Upgrade"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.010482157998922048,
+      "stdoutSha256": "15c8dada7914dbfbd1aaa781c290689a5ad16c7adbf8cbe11f42547792b0eca4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Shortcut",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Shortcut"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007043468001938891,
+      "stdoutSha256": "e98f0b688f165a1e2bc10eff5d59d5d460a78ed83731a328ed71ecaa3e762da5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-InstallExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "InstallExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.00916719499946339,
+      "stdoutSha256": "173827c01b9b664a72e0f65055b04aabaef68889696946f8f1ef9ad127bed316",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Registry",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Registry"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008497106999129755,
+      "stdoutSha256": "f3cc53611ab50a8d73687d4977288a008ae92e0272c21c5801d923b1e79d6c86",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-AdvtExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "AdvtExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007064558998536086,
+      "stdoutSha256": "c1986ae62815d6be46e6f3e314c0a803dac5bb01633af74a5f67f8dfc37b679d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-ActionText",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "ActionText"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.01018295600079,
+      "stdoutSha256": "08aff05632a6967c81c3af4c3ac120a0cff73275d34478cfd3c964a558962874",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-FeatureComponents",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "FeatureComponents"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.01260373500190326,
+      "stdoutSha256": "e3748180acdf9a78bc8bf84a26d56221410b017c969b5a1e702963a35ed3c4cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-File",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "File"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.018720205000136048,
+      "stdoutSha256": "22a0ed33e3f1e23285e7f6d89592b5fbbad3977ee25429037b599b08f8f6a368",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Directory",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Directory"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007835380001779413,
+      "stdoutSha256": "5ca6749ba1fd7594df0d81ee0a7028570dd49cfe82c49b3f71ab95f1f6dd8df6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-IniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "IniFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.014266463000240037,
+      "stdoutSha256": "fe76abf8bd3b2a54dba225277a2ff4f34ffe425e6367cf793897bd00badff6f0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-RemoveFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "RemoveFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006631811000261223,
+      "stdoutSha256": "d90ecfe3d78913ff1b163333a94d2bed996ba67d78c834b133c985f8f46fe052",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-RemoveIniFile",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "RemoveIniFile"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006818639001721749,
+      "stdoutSha256": "ff177cadc75a688723586ecc4c499415728cec8e80df7855c8d880a9fc0fcb06",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-LaunchCondition",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "LaunchCondition"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.008587131000240333,
+      "stdoutSha256": "3ec6b9a121b252acd368136e468d75131f05dd980e0f48dc07f25779dfd6bdc4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Signature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Signature"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.012330533998465398,
+      "stdoutSha256": "6e67486347b1205abb48db183d8ace73c4514504aad2cd4507a5c3658b04db18",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-InstallUISequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "InstallUISequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.019584599998779595,
+      "stdoutSha256": "6addaff4c25d625c879c9c4d26da415fcf5e6c01fe27a507af48656f50c31b92",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Component",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Component"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011737348999304231,
+      "stdoutSha256": "ecbe163bb92871e22c130c1b350992cf1d44c70268f2f4d73fb107e86e66e888",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-ServiceControl",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "ServiceControl"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011250679002841935,
+      "stdoutSha256": "f3bbb88ea9d0f04a2de7f53bc27ca9da881eeaea1a3b75a25b1d6cf7ef3d3fa8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Feature",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Feature"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.01115285500054597,
+      "stdoutSha256": "23db5fd03f45234bf0f7d2e29b0641b254e6cc3f7eb9cdc0b8c3374180a00e88",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Binary",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Binary"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.07277762299781898,
+      "stdoutSha256": "d6785b272c890948b56c5743d607b1ef4d582ba8f85c3b3ddd7eec423244b6db",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-CustomAction",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "CustomAction"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011169166002218844,
+      "stdoutSha256": "d6e3bcec6f38cd1ab4eb06b47c7a14eeba87f3659888f9fcad3b81edf7ab5856",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-RegLocator",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "RegLocator"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.03672011899834615,
+      "stdoutSha256": "2176ed2976acf3a3c96198c5d568ab76827d026312af71c1011139c5ba2a6e9e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-MsiFileHash",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "MsiFileHash"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.027488513002026593,
+      "stdoutSha256": "f4cb9102549e56d24e58a0ca789a8cd253af3134d839630e296d3b8c85adfd5d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-Icon",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "Icon"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.010500418997253291,
+      "stdoutSha256": "a411636ecdd7c866a6b8c46387d24cf8471c47743fa51e2eebb018a3af5cc30c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-AdminExecuteSequence",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "AdminExecuteSequence"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.011721418999513844,
+      "stdoutSha256": "e1aaa637f5f193084fa7733f11616d19ac61441b31bc7c9775f58d12aff4c364",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-table-CreateFolder",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "export",
+        "early-fail.msi",
+        "CreateFolder"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.02150516900292132,
+      "stdoutSha256": "2c4f273b7dd1bf912dab3c47e5e9daa944c1d163b6c92403d6ed167e42560b4e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-binary-readback",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiinfo",
+        "extract",
+        "early-fail.msi",
+        "Binary.ObserverDll"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.014623587001551641,
+      "stdoutSha256": "520a9c281ea39068a1fcc66de456af58a4cdb59e64e3767cc2a071b84d27cac4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "early-fail-extract",
+      "argv": [
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/root/usr/bin/msiextract",
+        "-C",
+        "/tmp/fc-round80-controlled-repair/inner-guard-probe-build-second/early-fail-extracted",
+        "early-fail.msi"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.012106105001294054,
+      "stdoutSha256": "c1222b9cb292f33e1b0a3493c4141b27c5ae109779941dbe85aefcf9f823cee6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "cases": {
+    "healthy": {
+      "msi": {
+        "bytes": 280576,
+        "sha256": "1c105482c7fdf6e60e55e7fda6ff863a47999632228f7a9c0f7fbacbc733ead4"
+      },
+      "packageCode": "{DA1FEA63-B715-57CB-BD91-F3F52197A8C2}",
+      "tables": {
+        "AdminUISequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "ExecuteAction",
+            "Condition": "",
+            "Sequence": "1300"
+          }
+        ],
+        "Media": [
+          {
+            "DiskId": "1",
+            "LastSequence": "1",
+            "DiskPrompt": "",
+            "Cabinet": "#fixture.cab",
+            "VolumeLabel": "",
+            "Source": ""
+          }
+        ],
+        "Error": [],
+        "ServiceInstall": [],
+        "AppSearch": [],
+        "Property": [
+          {
+            "Property": "UpgradeCode",
+            "Value": "{9E0B9A57-6CAE-4598-B3F2-19C728B7CE1A}"
+          },
+          {
+            "Property": "MSIRESTARTMANAGERCONTROL",
+            "Value": "DisableShutdown"
+          },
+          {
+            "Property": "Manufacturer",
+            "Value": "FutureClassroomTest"
+          },
+          {
+            "Property": "ProductLanguage",
+            "Value": "1033"
+          },
+          {
+            "Property": "ProductCode",
+            "Value": "{D650EB28-2D9A-4D8A-A071-3E172A9C40E5}"
+          },
+          {
+            "Property": "ProductName",
+            "Value": "FC R80 isolated UI record API probe"
+          },
+          {
+            "Property": "ProductVersion",
+            "Value": "0.0.1"
+          }
+        ],
+        "Upgrade": [],
+        "Shortcut": [],
+        "InstallExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "LaunchConditions",
+            "Condition": "",
+            "Sequence": "100"
+          },
+          {
+            "Action": "ValidateProductID",
+            "Condition": "",
+            "Sequence": "700"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "ProcessComponents",
+            "Condition": "",
+            "Sequence": "1600"
+          },
+          {
+            "Action": "UnpublishFeatures",
+            "Condition": "",
+            "Sequence": "1800"
+          },
+          {
+            "Action": "RemoveRegistryValues",
+            "Condition": "",
+            "Sequence": "2600"
+          },
+          {
+            "Action": "RemoveFiles",
+            "Condition": "",
+            "Sequence": "3500"
+          },
+          {
+            "Action": "InstallFiles",
+            "Condition": "",
+            "Sequence": "4000"
+          },
+          {
+            "Action": "WriteRegistryValues",
+            "Condition": "",
+            "Sequence": "5000"
+          },
+          {
+            "Action": "RegisterUser",
+            "Condition": "",
+            "Sequence": "6000"
+          },
+          {
+            "Action": "RegisterProduct",
+            "Condition": "",
+            "Sequence": "6100"
+          },
+          {
+            "Action": "PublishFeatures",
+            "Condition": "",
+            "Sequence": "6300"
+          },
+          {
+            "Action": "PublishProduct",
+            "Condition": "",
+            "Sequence": "6400"
+          },
+          {
+            "Action": "InstallExecute",
+            "Condition": "",
+            "Sequence": "6500"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          },
+          {
+            "Action": "ProbeGuard",
+            "Condition": "NOT Installed",
+            "Sequence": "1499"
+          }
+        ],
+        "Registry": [
+          {
+            "Registry": "FixtureMarker",
+            "Root": "1",
+            "Key": "Software\\FutureClassroomTest\\Round80-Probe-5b8e765e944a41308b9efca5d617d096",
+            "Name": "Marker",
+            "Value": "#1",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "AdvtExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "PublishFeatures",
+            "Condition": "",
+            "Sequence": "6300"
+          },
+          {
+            "Action": "PublishProduct",
+            "Condition": "",
+            "Sequence": "6400"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          }
+        ],
+        "ActionText": [],
+        "FeatureComponents": [
+          {
+            "Feature_": "FixtureFeature",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "File": [
+          {
+            "File": "FixtureFile",
+            "Component_": "FixtureComponent",
+            "FileName": "payload.txt",
+            "FileSize": "75",
+            "Version": "",
+            "Language": "",
+            "Attributes": "512",
+            "Sequence": "1"
+          }
+        ],
+        "Directory": [
+          {
+            "Directory": "EffectDir",
+            "Directory_Parent": "FixtureRoot",
+            "DefaultDir": "effect"
+          },
+          {
+            "Directory": "FixtureRoot",
+            "Directory_Parent": "TempFolder",
+            "DefaultDir": "FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096"
+          },
+          {
+            "Directory": "TempFolder",
+            "Directory_Parent": "TARGETDIR",
+            "DefaultDir": "."
+          },
+          {
+            "Directory": "TARGETDIR",
+            "Directory_Parent": "",
+            "DefaultDir": "SourceDir"
+          }
+        ],
+        "IniFile": [],
+        "RemoveFile": [],
+        "RemoveIniFile": [],
+        "LaunchCondition": [
+          {
+            "Condition": "NOT ALLUSERS",
+            "Description": "Per user only"
+          },
+          {
+            "Condition": "NOT RollbackDisabled AND NOT DISABLEROLLBACK",
+            "Description": "Rollback required"
+          },
+          {
+            "Condition": "MSIRESTARTMANAGERCONTROL = \"DisableShutdown\"",
+            "Description": "No shutdown"
+          }
+        ],
+        "Signature": [],
+        "InstallUISequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "ExecuteAction",
+            "Condition": "",
+            "Sequence": "1300"
+          },
+          {
+            "Action": "LaunchConditions",
+            "Condition": "",
+            "Sequence": "100"
+          },
+          {
+            "Action": "ValidateProductID",
+            "Condition": "",
+            "Sequence": "700"
+          }
+        ],
+        "Component": [
+          {
+            "Component": "FixtureComponent",
+            "ComponentId": "{AB3AA019-2EC1-4A80-A29A-090C6E47DBF7}",
+            "Directory_": "EffectDir",
+            "Attributes": "4",
+            "Condition": "",
+            "KeyPath": "FixtureMarker"
+          }
+        ],
+        "ServiceControl": [],
+        "Feature": [
+          {
+            "Feature": "FixtureFeature",
+            "Feature_Parent": "",
+            "Title": "Fixture",
+            "Description": "",
+            "Display": "2",
+            "Level": "1",
+            "Directory_": "",
+            "Attributes": "0"
+          }
+        ],
+        "Binary": [
+          {
+            "Name": "ObserverDll",
+            "Data": "Binary.ObserverDll"
+          }
+        ],
+        "CustomAction": [
+          {
+            "Action": "ProbeGuard",
+            "Type": "1",
+            "Source": "ObserverDll",
+            "Target": "Fc80GuardOk"
+          }
+        ],
+        "RegLocator": [],
+        "MsiFileHash": [
+          {
+            "File_": "FixtureFile",
+            "Options": "0",
+            "HashPart1": "-2007249457",
+            "HashPart2": "1941220916",
+            "HashPart3": "-626268555",
+            "HashPart4": "-1702656318"
+          }
+        ],
+        "Icon": [],
+        "AdminExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "InstallFiles",
+            "Condition": "",
+            "Sequence": "4000"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          },
+          {
+            "Action": "InstallAdminPackage",
+            "Condition": "",
+            "Sequence": "3900"
+          }
+        ],
+        "CreateFolder": []
+      }
+    },
+    "early-fail": {
+      "msi": {
+        "bytes": 280576,
+        "sha256": "7f66d546a234413cf2e5fe4bcac6c95b3f769871fb6ee7765234fce761afef0d"
+      },
+      "packageCode": "{E9FC1F94-79C9-5F83-A4C0-CE42A4A134E1}",
+      "tables": {
+        "AdminUISequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "ExecuteAction",
+            "Condition": "",
+            "Sequence": "1300"
+          }
+        ],
+        "Media": [
+          {
+            "DiskId": "1",
+            "LastSequence": "1",
+            "DiskPrompt": "",
+            "Cabinet": "#fixture.cab",
+            "VolumeLabel": "",
+            "Source": ""
+          }
+        ],
+        "Error": [],
+        "ServiceInstall": [],
+        "AppSearch": [],
+        "Property": [
+          {
+            "Property": "UpgradeCode",
+            "Value": "{9E0B9A57-6CAE-4598-B3F2-19C728B7CE1A}"
+          },
+          {
+            "Property": "MSIRESTARTMANAGERCONTROL",
+            "Value": "DisableShutdown"
+          },
+          {
+            "Property": "Manufacturer",
+            "Value": "FutureClassroomTest"
+          },
+          {
+            "Property": "ProductLanguage",
+            "Value": "1033"
+          },
+          {
+            "Property": "ProductCode",
+            "Value": "{D650EB28-2D9A-4D8A-A071-3E172A9C40E5}"
+          },
+          {
+            "Property": "ProductName",
+            "Value": "FC R80 isolated UI record API probe"
+          },
+          {
+            "Property": "ProductVersion",
+            "Value": "0.0.1"
+          }
+        ],
+        "Upgrade": [],
+        "Shortcut": [],
+        "InstallExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "LaunchConditions",
+            "Condition": "",
+            "Sequence": "100"
+          },
+          {
+            "Action": "ValidateProductID",
+            "Condition": "",
+            "Sequence": "700"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "ProcessComponents",
+            "Condition": "",
+            "Sequence": "1600"
+          },
+          {
+            "Action": "UnpublishFeatures",
+            "Condition": "",
+            "Sequence": "1800"
+          },
+          {
+            "Action": "RemoveRegistryValues",
+            "Condition": "",
+            "Sequence": "2600"
+          },
+          {
+            "Action": "RemoveFiles",
+            "Condition": "",
+            "Sequence": "3500"
+          },
+          {
+            "Action": "InstallFiles",
+            "Condition": "",
+            "Sequence": "4000"
+          },
+          {
+            "Action": "WriteRegistryValues",
+            "Condition": "",
+            "Sequence": "5000"
+          },
+          {
+            "Action": "RegisterUser",
+            "Condition": "",
+            "Sequence": "6000"
+          },
+          {
+            "Action": "RegisterProduct",
+            "Condition": "",
+            "Sequence": "6100"
+          },
+          {
+            "Action": "PublishFeatures",
+            "Condition": "",
+            "Sequence": "6300"
+          },
+          {
+            "Action": "PublishProduct",
+            "Condition": "",
+            "Sequence": "6400"
+          },
+          {
+            "Action": "InstallExecute",
+            "Condition": "",
+            "Sequence": "6500"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          },
+          {
+            "Action": "ProbeGuard",
+            "Condition": "NOT Installed",
+            "Sequence": "1499"
+          }
+        ],
+        "Registry": [
+          {
+            "Registry": "FixtureMarker",
+            "Root": "1",
+            "Key": "Software\\FutureClassroomTest\\Round80-Probe-5b8e765e944a41308b9efca5d617d096",
+            "Name": "Marker",
+            "Value": "#1",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "AdvtExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "PublishFeatures",
+            "Condition": "",
+            "Sequence": "6300"
+          },
+          {
+            "Action": "PublishProduct",
+            "Condition": "",
+            "Sequence": "6400"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          }
+        ],
+        "ActionText": [],
+        "FeatureComponents": [
+          {
+            "Feature_": "FixtureFeature",
+            "Component_": "FixtureComponent"
+          }
+        ],
+        "File": [
+          {
+            "File": "FixtureFile",
+            "Component_": "FixtureComponent",
+            "FileName": "payload.txt",
+            "FileSize": "75",
+            "Version": "",
+            "Language": "",
+            "Attributes": "512",
+            "Sequence": "1"
+          }
+        ],
+        "Directory": [
+          {
+            "Directory": "EffectDir",
+            "Directory_Parent": "FixtureRoot",
+            "DefaultDir": "effect"
+          },
+          {
+            "Directory": "FixtureRoot",
+            "Directory_Parent": "TempFolder",
+            "DefaultDir": "FutureClassroom-r80-ui-record-probe-5b8e765e944a41308b9efca5d617d096"
+          },
+          {
+            "Directory": "TempFolder",
+            "Directory_Parent": "TARGETDIR",
+            "DefaultDir": "."
+          },
+          {
+            "Directory": "TARGETDIR",
+            "Directory_Parent": "",
+            "DefaultDir": "SourceDir"
+          }
+        ],
+        "IniFile": [],
+        "RemoveFile": [],
+        "RemoveIniFile": [],
+        "LaunchCondition": [
+          {
+            "Condition": "NOT ALLUSERS",
+            "Description": "Per user only"
+          },
+          {
+            "Condition": "NOT RollbackDisabled AND NOT DISABLEROLLBACK",
+            "Description": "Rollback required"
+          },
+          {
+            "Condition": "MSIRESTARTMANAGERCONTROL = \"DisableShutdown\"",
+            "Description": "No shutdown"
+          }
+        ],
+        "Signature": [],
+        "InstallUISequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "ExecuteAction",
+            "Condition": "",
+            "Sequence": "1300"
+          },
+          {
+            "Action": "LaunchConditions",
+            "Condition": "",
+            "Sequence": "100"
+          },
+          {
+            "Action": "ValidateProductID",
+            "Condition": "",
+            "Sequence": "700"
+          }
+        ],
+        "Component": [
+          {
+            "Component": "FixtureComponent",
+            "ComponentId": "{AB3AA019-2EC1-4A80-A29A-090C6E47DBF7}",
+            "Directory_": "EffectDir",
+            "Attributes": "4",
+            "Condition": "",
+            "KeyPath": "FixtureMarker"
+          }
+        ],
+        "ServiceControl": [],
+        "Feature": [
+          {
+            "Feature": "FixtureFeature",
+            "Feature_Parent": "",
+            "Title": "Fixture",
+            "Description": "",
+            "Display": "2",
+            "Level": "1",
+            "Directory_": "",
+            "Attributes": "0"
+          }
+        ],
+        "Binary": [
+          {
+            "Name": "ObserverDll",
+            "Data": "Binary.ObserverDll"
+          }
+        ],
+        "CustomAction": [
+          {
+            "Action": "ProbeGuard",
+            "Type": "1",
+            "Source": "ObserverDll",
+            "Target": "Fc80GuardFail"
+          }
+        ],
+        "RegLocator": [],
+        "MsiFileHash": [
+          {
+            "File_": "FixtureFile",
+            "Options": "0",
+            "HashPart1": "-2007249457",
+            "HashPart2": "1941220916",
+            "HashPart3": "-626268555",
+            "HashPart4": "-1702656318"
+          }
+        ],
+        "Icon": [],
+        "AdminExecuteSequence": [
+          {
+            "Action": "CostInitialize",
+            "Condition": "",
+            "Sequence": "800"
+          },
+          {
+            "Action": "FileCost",
+            "Condition": "",
+            "Sequence": "900"
+          },
+          {
+            "Action": "CostFinalize",
+            "Condition": "",
+            "Sequence": "1000"
+          },
+          {
+            "Action": "InstallValidate",
+            "Condition": "",
+            "Sequence": "1400"
+          },
+          {
+            "Action": "InstallInitialize",
+            "Condition": "",
+            "Sequence": "1500"
+          },
+          {
+            "Action": "InstallFiles",
+            "Condition": "",
+            "Sequence": "4000"
+          },
+          {
+            "Action": "InstallFinalize",
+            "Condition": "",
+            "Sequence": "6600"
+          },
+          {
+            "Action": "InstallAdminPackage",
+            "Condition": "",
+            "Sequence": "3900"
+          }
+        ],
+        "CreateFolder": []
+      }
+    }
+  },
+  "sourceOriginalGenerator": {
+    "bytes": 24097,
+    "sha256": "6e1c8520ac799af57ed0b9a440cb3e855c6629cead01a4a6d18b1279a438360a"
+  },
+  "toolPreparation": {
+    "original": {
+      "bytes": 15832,
+      "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+    },
+    "originalStatus": "FAIL_RETAIN_ORIGINALS",
+    "recovery": {
+      "bytes": 1142,
+      "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+    },
+    "recoveryStatus": "PASS_PRIVATE_TOOL_WRAPPER_RECOVERY",
+    "inputs": {
+      "/tmp/fc-round80-controlled-repair/recover-inner-guard-tools-first.py": {
+        "bytes": 4055,
+        "sha256": "ca1825881e9b36edda11fb9c7a0522445b6ec38171f264a382eda40b05bf5764"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools-report.json": {
+        "bytes": 15832,
+        "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools-recovery-first.json": {
+        "bytes": 1142,
+        "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/tools.json": {
+        "bytes": 1110,
+        "sha256": "d82866321cc565890c38b494f7dd2ae6afa2fed8d4ae55270d7c4e931562099d"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/child-environment.json": {
+        "bytes": 197,
+        "sha256": "d0b2d946aba5c21d94713c6e17cfa90a5c85c74dfa00d2336d4cbf88f05b37a0"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrappers/wixl-second": {
+        "bytes": 561,
+        "sha256": "714bf91398b4312f5a57878708a75b0591c5fa91224dc1eac02d8b0201a8574e"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrapper-version-second.stdout": {
+        "bytes": 6,
+        "sha256": "29a5c9876291dc46d045df4bb186fc84c6ac92dae2112c05d0881c9480f4c2d2"
+      },
+      "/tmp/fc-round80-controlled-repair/inner-guard-probe-tools-first/wrapper-version-second.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "changesFromOriginalGenerator": [
+    "fresh independent Round80 nonce/product/component/upgrade and payload",
+    "one Type1 guard1499 only; two target entrypoints",
+    "quiet original G record handler before Begin; actual self-record close journal",
+    "both cases EndRollback; no commit/uninstall scenario"
+  ],
+  "owner": {
+    "bytes": 300027,
+    "sha256": "375f3ce00a6d3d13670479aa4217f8c8a954487269af83e2472e699fdff0a0ca"
+  },
+  "observer": {
+    "bytes": 266300,
+    "sha256": "520a9c281ea39068a1fcc66de456af58a4cdb59e64e3767cc2a071b84d27cac4"
+  },
+  "payload": {
+    "bytes": 75,
+    "sha256": "7c820c67b81d58159dc64b674f31cf74296b9adaec5612a1cffd48dc523a585d"
+  },
+  "sourcesUnchanged": true,
+  "toolsUnchanged": true
+}

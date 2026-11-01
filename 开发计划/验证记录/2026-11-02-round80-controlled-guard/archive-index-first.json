@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_GUARD_COMPONENT_ORIGINALS_ARCHIVED",
+  "candidateCommit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 888848,
+    "sha256": "447dd80bebd30fa9368ed4760fb8f3797100374cd57a3fe20a78bc6688c249fa",
+    "memberCount": 149
+  },
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "bytes": 32236,
+    "sha256": "166f3b88f0bd7dd013c5d73fa71761aa9f9af0a85bdd231e017299515a39fde5"
+  },
+  "facts": {
+    "path": "batch-facts-first.json",
+    "bytes": 8160,
+    "sha256": "c07b1ae5536e06368d75e67518d0ea4278d449a37fc8089bc85b9021e8218f54"
+  },
+  "originalCount": 149,
+  "originalBytes": 3965671,
+  "promoted": [
+    {
+      "path": "guard-native-runtime-first/report.json",
+      "bytes": 109493,
+      "sha256": "a9f30d709bd4fd7041d6de269c8c9f8fc2ec74df2b9a50339dacd0fe67089e5f"
+    },
+    {
+      "path": "guard-build-third/report.json",
+      "bytes": 169100,
+      "sha256": "ec43bce439da564b4592615a4df00a4dea3237071484ac6ae184472061190568"
+    },
+    {
+      "path": "guard-clippy-second/report.json",
+      "bytes": 168454,
+      "sha256": "3b665590a8d46b1bbfdb2e3fc9e46849e4b8b3eade728225e5d5875b8e85c1bb"
+    },
+    {
+      "path": "guard-library-first/report.json",
+      "bytes": 169058,
+      "sha256": "ffb97060fa5fa5cf1dc65e6a185f5c79833f8436e83ad7e0662a708149775fe8"
+    },
+    {
+      "path": "guard-library-first/export-check-first.json",
+      "bytes": 916,
+      "sha256": "36c17917b07462864669d6af2f6f3a7c9f90eb4f8171c3b05b23aa3132ca4c6e"
+    },
+    {
+      "path": "guard-helper-first/report.json",
+      "bytes": 169748,
+      "sha256": "72da155c97cc129cedd300231f3ded8d680c7b8b0ef4767303d6cc15ebfa144b"
+    },
+    {
+      "path": "guard-source-preservation-first/source-preservation-first.json",
+      "bytes": 2290,
+      "sha256": "66ab82cdf48981f60b6f120ba0d919ec6226d6d04a666229bd8491661bd23ba0"
+    },
+    {
+      "path": "guard-candidate-sync-first.json",
+      "bytes": 407,
+      "sha256": "c10cfb4d299d08e734abbf290cb04fc1dd30a8af5e41ea4c400ffa58a9d24a3c"
+    },
+    {
+      "path": "windows-readonly-guard-first.json",
+      "bytes": 17045,
+      "sha256": "feb1e8bb73f6ce7582af7cebaae55145008dda21ba201c4d9ca9a31a265e73ff"
+    }
+  ],
+  "excludedBinaryIdentities": [
+    {
+      "path": "guard-native-runtime-first/download/FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a/candidate-tests.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    },
+    {
+      "path": "guard-native-runtime-first/upload/candidate-tests.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "kind": "PE_EXECUTABLE_OR_EMBEDDED_BINARY_LOG"
+    }
+  ],
+  "producerArtifactsFromReportOnly": [
+    {
+      "producerReport": "guard-build-second/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4174526,
+      "sha256": "4b62439f5f8550aacba89950c6946a3e20970cf84152fc39e519e01e0559df95",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-build-third/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-library-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc_windows.dll",
+      "bytes": 4866478,
+      "sha256": "e8bc2e4964bea210caf9f7a70a5c8f91800d3e963e6e8d1df6887194ce9bccd3",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows.dll",
+      "bytes": 4866397,
+      "sha256": "41eb605c37455e6bbe574da4ab6774fe89ad4e6b7d90d51e1a3210c8bbd43f77",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 794021,
+      "sha256": "17cda50fe9989e14893d5dfd7f5292a3241e0e1431dbc9918eeb9026ec8d2504",
+      "originalReadByArchiver": false
+    }
+  ],
+  "allMembersReplayed": true,
+  "sourceDeleted": false,
+  "WindowsContacted": false,
+  "worktreeOrTargetRead": false,
+  "productionMsiAdapter": "NOT_EXERCISED"
+}

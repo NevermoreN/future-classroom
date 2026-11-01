@@ -1,0 +1,32 @@
+{
+  "status": "PASS_GNU_X86_UNDECORATED_TYPE1_EXPORT_ONLY",
+  "dll": {
+    "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc_windows.dll",
+    "bytes": 4866478,
+    "sha256": "e8bc2e4964bea210caf9f7a70a5c8f91800d3e963e6e8d1df6887194ce9bccd3",
+    "test": false,
+    "target": {
+      "kind": [
+        "rlib",
+        "cdylib"
+      ],
+      "crate_types": [
+        "rlib",
+        "cdylib"
+      ],
+      "name": "fc_windows",
+      "src_path": "/tmp/fc-round80-controlled-repair/checkout-52d6392-first/crates/fc-windows/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    }
+  },
+  "libraryReportSha256": "ffb97060fa5fa5cf1dc65e6a185f5c79833f8436e83ad7e0662a708149775fe8",
+  "objdumpActualExit": 0,
+  "matchingExportRows": [
+    "\t[   0] FcControlledInnerGuard"
+  ],
+  "runtime": "NOT_RUN",
+  "msvcExport": "NOT_VALIDATED"
+}

@@ -1,0 +1,63 @@
+{
+  "status": "PASS_EXACT_TESTED_CANDIDATE_COMMIT_NOT_PRODUCTION_INTEGRATION",
+  "base": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "commit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "paths": [
+    {
+      "path": "crates/fc-windows/Cargo.toml",
+      "bytes": 1684,
+      "sha256": "0b90e0adc96caaba8f3ca404fa0b596922a1389ce463859654e4f90d2d615a5c"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle.rs",
+      "bytes": 10937,
+      "sha256": "a799d33c61004845ed6f5dbf43ef2cd59b1df3ad36f3d6c65babd8a76af04be9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native.rs",
+      "bytes": 42776,
+      "sha256": "740d2a6491545ee6123ed30c8b21a2ea474242203df98d7e96145616599bf498"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/guard_contract.rs",
+      "bytes": 9656,
+      "sha256": "1d65553194a2d0d294ff5f484cc9c6b49b51fab75df234a9781e18936ba6744d"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/inner_guard.rs",
+      "bytes": 25380,
+      "sha256": "bf8da7f02cbcb1c6985a8d3905eab2b95b70f53827b8a83bd79f597f269919c5"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner.rs",
+      "bytes": 27949,
+      "sha256": "a48b33456b68c2ded3237a82c3b1ad6fe7e627668351443b4c9f14dee5e93e88"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/controlled_owner/guard_context.rs",
+      "bytes": 21125,
+      "sha256": "d9dba37d88ffb3e00b8ea6aaf531d4dfc20128c122ee75a221067c1d99cd46b9"
+    },
+    {
+      "path": "crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs",
+      "bytes": 51936,
+      "sha256": "da2b2b9429cfe73ee89fb195d0577a5ce2815c8a90520397faa52eddb24f9117"
+    },
+    {
+      "path": "scripts/controlled-setup-seal.py",
+      "bytes": 6501,
+      "sha256": "935d679cbb0704ab079eddcc38581dd9e01e6eb02e8f2d7f596204fb8ff0aaae"
+    },
+    {
+      "path": "scripts/test-controlled-setup-seal.py",
+      "bytes": 10967,
+      "sha256": "6fbaea942c0a4026c5d9a9654f7892c13575c073f6432abe9bd5025b0afafdd6"
+    }
+  ],
+  "actualCommitExit": 0,
+  "gitBlobsMatch": true,
+  "worktreeClean": true,
+  "productionMsiBridge": "NOT_EXERCISED",
+  "windows7Runtime": "NOT_RUN",
+  "windows10Runtime": "NOT_RUN"
+}

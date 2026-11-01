@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_API_PROBE_ONLY_NOT_PRODUCTION_AUTHORITY",
+  "productionAuthority": "NONE",
+  "runtimeOriginal": {
+    "path": "inner-guard-probe-runtime-first/runtime-operation.json",
+    "bytes": 82501,
+    "sha256": "7e1771a067414ad8accf86c53523dd59d3fcfc2bd98f3dcbc8e06c95c0330354"
+  },
+  "finalReadOnlyAudit": {
+    "path": "windows-readonly-inner-guard-first.json",
+    "bytes": 17049,
+    "sha256": "379945c00ae8e0205ecd6161e7dc4aa02ca15373b77485e6123d5849335b4f45"
+  },
+  "cases": [
+    {
+      "name": "healthy-rollback",
+      "Begin": 0,
+      "Install": 0,
+      "EndRollback": 0,
+      "changeEventCheckedClose": 0
+    },
+    {
+      "name": "early-fail-rollback",
+      "Begin": 0,
+      "Install": 1603,
+      "EndRollback": 0,
+      "changeEventCheckedClose": 0
+    }
+  ],
+  "originalProcessAndThreadControls": "Each original G process and original native thread actually exited0 and had checked close; original change-event close0. No kill of shared service, no manual registry/cache deletion.",
+  "apiProbeFacts": [
+    {
+      "case": "healthy-rollback",
+      "guard": {
+        "nonce": "5b8e765e944a41308b9efca5d617d096",
+        "mode": "OK",
+        "pid": 8780,
+        "tid": 38224,
+        "hInstall": 3,
+        "productRc": 0,
+        "productValid": true,
+        "createdRecord": 4,
+        "formatRc": 0,
+        "fieldRc": 0,
+        "messageAttempted": true,
+        "messageReturn": 1,
+        "recordCloseAttempted": true,
+        "recordCloseReturn": 0,
+        "intendedReturn": 0,
+        "authority": "NONE"
+      },
+      "infoSequence": 24,
+      "callbackThreadIds": [
+        11408
+      ],
+      "successorSequences": [
+        26
+      ],
+      "callbackCount": 178,
+      "scope": "API_FACTS_ONLY_NOT_PERMISSION_OR_PRODUCTION_AUTHORITY"
+    },
+    {
+      "case": "early-fail-rollback",
+      "guard": {
+        "nonce": "5b8e765e944a41308b9efca5d617d096",
+        "mode": "FAIL",
+        "pid": 34308,
+        "tid": 15548,
+        "hInstall": 7,
+        "productRc": 0,
+        "productValid": true,
+        "createdRecord": 8,
+        "formatRc": 0,
+        "fieldRc": 0,
+        "messageAttempted": true,
+        "messageReturn": 1,
+        "recordCloseAttempted": true,
+        "recordCloseReturn": 0,
+        "intendedReturn": 1603,
+        "authority": "NONE"
+      },
+      "infoSequence": 24,
+      "callbackThreadIds": [
+        34144
+      ],
+      "successorSequences": [],
+      "callbackCount": 128,
+      "scope": "API_FACTS_ONLY_NOT_PERMISSION_OR_PRODUCTION_AUTHORITY"
+    }
+  ],
+  "nativePhaseMilliseconds": 2726,
+  "transportSeconds": 15.437630456002807,
+  "downloadFiles": 24,
+  "downloadAllHashesVerified": true,
+  "ownedProcessesAfter": 0,
+  "derivedExactSystemPaths": [
+    {
+      "path": "C:\\Windows\\Installer\\354aa6bc.msi",
+      "basis": [
+        "healthy-rollback-msi.log:cache"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\354aa6c1.msi",
+      "basis": [
+        "early-fail-rollback-msi.log:cache"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIA7D6.tmp",
+      "basis": [
+        "healthy-rollback-msi.log:dll"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIA825.tmp",
+      "basis": [
+        "healthy-rollback-msi.log:script"
+      ]
+    },
+    {
+      "path": "C:\\Windows\\Installer\\MSIAD85.tmp",
+      "basis": [
+        "early-fail-rollback-msi.log:dll"
+      ]
+    }
+  ],
+  "scratchRemoved": true,
+  "preservedFailures": [
+    "Original private-tool preparation FAIL_RETAIN_ORIGINALS; fixed private wixl wrapper recovery retained separately.",
+    "First C build FAIL_STATIC_ONLY: MSIHANDLE printf diagnostic type mismatch under -Werror; minimal format/cast correction retained, API calls unchanged.",
+    "Original pending/NOT_RUN snapshots remain unchanged."
+  ],
+  "limits": [
+    "Only quiet-mode Type1 borrowed-hInstall INFO, own-record close and successor API observation on Win11.",
+    "Healthy case next InstallInitialize observed; early-fail case absent. Both end rollback, no product commit/uninstall coverage.",
+    "No production permit/session binding proof, no newly integrated Rust guard or public Setup entry proof.",
+    "New Rust guard implementation remains outside this archive; no current production linkage or release approval.",
+    "Win7 SP1 x86 and Win10 true-machine runs NOT_RUN."
+  ],
+  "actions": {
+    "WindowsContacted": false,
+    "Cargo": false,
+    "worktreeOrTargetRead": false,
+    "privateKeyContentRead": false,
+    "sourceDeletion": false,
+    "commitPush": false
+  }
+}

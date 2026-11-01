@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FIXED_PROBE_ARCHIVED",
+  "archive": {
+    "path": "evidence-originals-first.tar.gz",
+    "bytes": 365391,
+    "sha256": "138abb098c989d3071e37b1c57e71370a6e255049efec2d1f7edd19462634276",
+    "memberCount": 451
+  },
+  "manifest": {
+    "path": "source-manifest-first.json",
+    "bytes": 140984,
+    "sha256": "6d598386830b83b6fe883792b5b51ce818273052f8304aab86ac8ed385823579"
+  },
+  "facts": {
+    "path": "probe-facts-first.json",
+    "bytes": 4578,
+    "sha256": "1bf0fdb9abd9c420e7dfebb5e336542bb6e8cfc52229be40419a2edba671e4d1"
+  },
+  "promoted": [
+    {
+      "path": "inner-guard-probe-runtime-first/runtime-operation.json",
+      "bytes": 82501,
+      "sha256": "7e1771a067414ad8accf86c53523dd59d3fcfc2bd98f3dcbc8e06c95c0330354"
+    },
+    {
+      "path": "inner-guard-probe-build-first/build-report.json",
+      "bytes": 3420,
+      "sha256": "edd66dcbae31f4c01bd7a36f4e53488ff795caa896f7b5a15a48a57f665d4cf0"
+    },
+    {
+      "path": "inner-guard-probe-build-second/build-report.json",
+      "bytes": 66688,
+      "sha256": "b9ce6fb68af13209a625afce5256a358ece12ec7099583523bc2d216b6945375"
+    },
+    {
+      "path": "inner-guard-probe-tools-first/tools-report.json",
+      "bytes": 15832,
+      "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+    },
+    {
+      "path": "inner-guard-probe-tools-first/tools-recovery-first.json",
+      "bytes": 1142,
+      "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+    },
+    {
+      "path": "windows-readonly-inner-guard-first.json",
+      "bytes": 17049,
+      "sha256": "379945c00ae8e0205ecd6161e7dc4aa02ca15373b77485e6123d5849335b4f45"
+    }
+  ],
+  "binaryIdentitiesOnly": 22,
+  "extractedToolIdentitiesOnly": 179,
+  "symlinksNotFollowed": 5,
+  "allTextMembersReplayed": true,
+  "productionAuthority": "NONE",
+  "sourceDeleted": false
+}

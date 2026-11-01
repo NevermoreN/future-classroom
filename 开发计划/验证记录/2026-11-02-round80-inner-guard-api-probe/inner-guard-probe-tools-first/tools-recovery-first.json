@@ -1,0 +1,32 @@
+{
+  "status": "PASS_PRIVATE_TOOL_WRAPPER_RECOVERY",
+  "originalPreparationStatusUnchanged": "FAIL_RETAIN_ORIGINALS",
+  "reason": "wixl --wxidir/--extdir are directory display switches, not input directory arguments; use existing -I for private includes.",
+  "fixedPackagesReverified": 7,
+  "fixedToolsReverified": 4,
+  "wrapperVersionActualExit": 0,
+  "parentReaped": true,
+  "canonicalGlobalTools": [
+    {
+      "name": "gcc",
+      "selectedPath": "/usr/bin/i686-w64-mingw32-gcc",
+      "canonicalPath": "/usr/bin/i686-w64-mingw32-gcc-posix",
+      "bytes": 1594728,
+      "sha256": "930dd5af68d2f6eb17f0cb95a72f23c3059fb08152a80f898fc6b5020a2d047f"
+    },
+    {
+      "name": "objdump",
+      "selectedPath": "/usr/bin/i686-w64-mingw32-objdump",
+      "canonicalPath": "/usr/bin/i686-w64-mingw32-objdump",
+      "bytes": 2642464,
+      "sha256": "521df27111c0ac3c8f6b6498505cbd35e8f087551418f4e084055f8ac308379a"
+    }
+  ],
+  "tools": {
+    "bytes": 1110,
+    "sha256": "d82866321cc565890c38b494f7dd2ae6afa2fed8d4ae55270d7c4e931562099d"
+  },
+  "seconds": 0.09896254200066323,
+  "globalInstallation": false,
+  "Windows": "NOT_CONTACTED"
+}

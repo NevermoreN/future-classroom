@@ -1,0 +1,14 @@
+{
+  "status": "FAIL_LOCAL_ARCHIVE_PREPARATION_NO_PAYLOAD_CREATED",
+  "actualExit": 1,
+  "controller": {
+    "path": "archive-controller-second.py",
+    "bytes": 16170,
+    "sha256": "6762c0593faf9ad7864ebd86b9098a6c727f43285b5edd599c2b5558c1e0ab34"
+  },
+  "assertion": "COMPLETE_DOWNLOAD_LEDGER",
+  "cause": "Overbroad whole-inventory equality included directory metadata: original compiler-temp versus final compiler-temp plus empty readback-compiler-temp. Both exact24 file identity lists are equal.",
+  "correction": "Assert equality of all24 files; separately assert both exact original/final directory lists, preserving compiler-readback metadata rather than normalizing it away.",
+  "WindowsContacted": false,
+  "sourceDeleted": false
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FULL_TAR_REPLAY_AND_BOUNDED_DECODED_CREDENTIAL_SCAN",
+  "candidateCommit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "archiveSha256": "447dd80bebd30fa9368ed4760fb8f3797100374cd57a3fe20a78bc6688c249fa",
+  "archiveBytes": 888848,
+  "indexSha256": "6a0bb68a7f9954739a7cbd30c80ec25453d296e733d448a3f2018a9eb05e4509",
+  "originalCount": 149,
+  "originalBytes": 3965671,
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 54784,
+      "utf16Views": 84,
+      "cp936Views": 20,
+      "clixmlDecodedViews": 18,
+      "decodedBase64Views": 60,
+      "jsonContainers": 2387,
+      "decodedJsonStringViews": 53523
+    },
+    "jsonlRecordsAlsoDecoded": 830,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All selected text raw bytes, full stored-tar byte replay, nine promoted core reports, manifest/controller/facts/index. Strict UTF8/UTF16/CP936; CLIXML parsed text; JSON and JSONL strings; nested canonical generic/declared base64. Unknown controls rejected with no exceptions. Decoder depth12, JSON250000, decoded64MiB per original.",
+    "controlExceptions": []
+  },
+  "scope": "Guard component build/export/helper and Win11 lifecycle60 includes controlled6. Real production B/G/CA coupled MSI NOT_EXERCISED; Win7/Win10 true runtime NOT_RUN. All original FAIL, pending NOT_RUN and duplicate patch NO_SOURCE_CHANGE retained.",
+  "sourceDeleted": false,
+  "WindowsContacted": false,
+  "Cargo": false,
+  "worktreeOrTargetRead": false,
+  "producerTargetBinariesRead": false,
+  "privateKeyContentRead": false,
+  "commitPush": false
+}

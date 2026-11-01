@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_FINITE_TYPE1_API_PROBE_ARCHIVE_AND_PROGRESS_UPDATE",
+  "scope": "API probe only, production authority NONE; no new Rust guard source or active W/target read",
+  "filesExcludingThisFreeze": [
+    {
+      "path": "README.md",
+      "bytes": 1626,
+      "sha256": "3131f5dffddb7593019eb726ae812110300f72d89b486f34f54703291c64e3c6"
+    },
+    {
+      "path": "archive-controller-first.py",
+      "bytes": 15873,
+      "sha256": "cf13a3b5d59152ad3a163d662731f9240a94f5a016d0779e12177f25bd0e0cfb"
+    },
+    {
+      "path": "archive-controller-second.py",
+      "bytes": 16170,
+      "sha256": "6762c0593faf9ad7864ebd86b9098a6c727f43285b5edd599c2b5558c1e0ab34"
+    },
+    {
+      "path": "archive-controller-third.py",
+      "bytes": 16540,
+      "sha256": "0ad61c8185c02b630a597ad7c14390c705590fd6e9a2dd1925d41f5feeac81ca"
+    },
+    {
+      "path": "archive-index-first.json",
+      "bytes": 1893,
+      "sha256": "0c187dcf59a6dd2291be2d1e8df8d5d2d7c80bb069880f6f4ea1556385ed0a38"
+    },
+    {
+      "path": "archive-operation-first.json",
+      "bytes": 1005,
+      "sha256": "831f0e7a7abf548c99ec5e72492625defa2cbb065df7a61a6301577e69d23435"
+    },
+    {
+      "path": "archive-preparation-first-failure.json",
+      "bytes": 607,
+      "sha256": "5281aa477b70e667c45a6460a6c8e7d4336c2baa703012f72df8fceb811b5d71"
+    },
+    {
+      "path": "archive-preparation-second-failure.json",
+      "bytes": 743,
+      "sha256": "9139044e522ef66246cdc6dc8a4b813ee70a5a01171b1fc757f054ca4ce96652"
+    },
+    {
+      "path": "archive-verification-first.json",
+      "bytes": 1743,
+      "sha256": "5780d3c20f43f0af31ebe08f7dee852c67989dbc3d2a52034da6f213af220702"
+    },
+    {
+      "path": "evidence-originals-first.tar.gz",
+      "bytes": 365391,
+      "sha256": "138abb098c989d3071e37b1c57e71370a6e255049efec2d1f7edd19462634276"
+    },
+    {
+      "path": "inner-guard-probe-build-first/build-report.json",
+      "bytes": 3420,
+      "sha256": "edd66dcbae31f4c01bd7a36f4e53488ff795caa896f7b5a15a48a57f665d4cf0"
+    },
+    {
+      "path": "inner-guard-probe-build-second/build-report.json",
+      "bytes": 66688,
+      "sha256": "b9ce6fb68af13209a625afce5256a358ece12ec7099583523bc2d216b6945375"
+    },
+    {
+      "path": "inner-guard-probe-runtime-first/runtime-operation.json",
+      "bytes": 82501,
+      "sha256": "7e1771a067414ad8accf86c53523dd59d3fcfc2bd98f3dcbc8e06c95c0330354"
+    },
+    {
+      "path": "inner-guard-probe-tools-first/tools-recovery-first.json",
+      "bytes": 1142,
+      "sha256": "e4db9992fcbdfb8d7713d051de4242c54cbeef358fc1dc09463a1b118409f375"
+    },
+    {
+      "path": "inner-guard-probe-tools-first/tools-report.json",
+      "bytes": 15832,
+      "sha256": "c3aeaaa047929ad41053deeaf875ec214dee23ba7575773e820d7b3841cfa9dd"
+    },
+    {
+      "path": "probe-facts-first.json",
+      "bytes": 4578,
+      "sha256": "1bf0fdb9abd9c420e7dfebb5e336542bb6e8cfc52229be40419a2edba671e4d1"
+    },
+    {
+      "path": "source-manifest-first.json",
+      "bytes": 140984,
+      "sha256": "6d598386830b83b6fe883792b5b51ce818273052f8304aab86ac8ed385823579"
+    },
+    {
+      "path": "windows-readonly-inner-guard-first.json",
+      "bytes": 17049,
+      "sha256": "379945c00ae8e0205ecd6161e7dc4aa02ca15373b77485e6123d5849335b4f45"
+    }
+  ],
+  "destinationFileCountIncludingThisFreeze": 19,
+  "progressDocumentAtHandoff": {
+    "path": "开发计划/10-实施进度与验证记录.md",
+    "bytes": 585452,
+    "sha256": "e1bdd3c52e9742a2c660b3c3e3cde40f3cc608179801efc6d2e98dbdd730ccd5",
+    "changeScope": "Only first four summary paragraphs and appended Type1 API probe section; historical body unchanged."
+  },
+  "actualArchiveExit": 0,
+  "originalProcessThreadAndNativeCloseFactsVerified": true,
+  "originalFailureAndNotRunRetained": true,
+  "closingMetadataCredentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "scope": "README, actual archive operation receipt, full progress document, and this freeze metadata",
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "statisticsBeforeFreezeScan": {
+      "textViews": 14,
+      "utf16Views": 0,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 0,
+      "decodedBase64Views": 0,
+      "jsonContainers": 1,
+      "decodedJsonStringViews": 11
+    },
+    "findings": []
+  },
+  "checks": {
+    "archiveAllMembersReplayed": true,
+    "allThreeControllersPythonAst": true,
+    "gitDiffCheck": true
+  },
+  "actions": {
+    "WindowsContacted": false,
+    "Cargo": false,
+    "privateKeyContentRead": false,
+    "worktreeOrTargetRead": false,
+    "sourceDeletion": false,
+    "toolsDeleted": false,
+    "commitPush": false
+  },
+  "writerState": "This agent stops writing after this freeze."
+}

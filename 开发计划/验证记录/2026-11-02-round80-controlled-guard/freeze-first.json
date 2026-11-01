@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "status": "FROZEN_FINITE_RUST_GUARD_COMPONENT_ARCHIVE",
+  "candidateCommit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "parentCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "filesExcludingThisFreeze": [
+    {
+      "path": "README.md",
+      "bytes": 1409,
+      "sha256": "3f7e539d3361d4295da1f55880f44e8e28bc2fc6ccef5051ab9d218058aeebd2"
+    },
+    {
+      "path": "archive-controller-first.py",
+      "bytes": 14910,
+      "sha256": "0f6fc4ac1e5afabcc1198ec32d14c1e787014871755f73c47f3154550183e415"
+    },
+    {
+      "path": "archive-index-first.json",
+      "bytes": 4767,
+      "sha256": "6a0bb68a7f9954739a7cbd30c80ec25453d296e733d448a3f2018a9eb05e4509"
+    },
+    {
+      "path": "archive-operation-first.json",
+      "bytes": 1060,
+      "sha256": "b303c5e2daf596753e6eeb34b8eee31d202ccd527c70ffe56b4ac11ad0a74f66"
+    },
+    {
+      "path": "archive-verification-first.json",
+      "bytes": 1923,
+      "sha256": "8809a78738fae862cb79a2cc661c85a72f72b57e5ef1c36612d7a1b1d42940f1"
+    },
+    {
+      "path": "batch-facts-first.json",
+      "bytes": 8160,
+      "sha256": "c07b1ae5536e06368d75e67518d0ea4278d449a37fc8089bc85b9021e8218f54"
+    },
+    {
+      "path": "evidence-originals-first.tar.gz",
+      "bytes": 888848,
+      "sha256": "447dd80bebd30fa9368ed4760fb8f3797100374cd57a3fe20a78bc6688c249fa"
+    },
+    {
+      "path": "guard-build-third/report.json",
+      "bytes": 169100,
+      "sha256": "ec43bce439da564b4592615a4df00a4dea3237071484ac6ae184472061190568"
+    },
+    {
+      "path": "guard-candidate-sync-first.json",
+      "bytes": 407,
+      "sha256": "c10cfb4d299d08e734abbf290cb04fc1dd30a8af5e41ea4c400ffa58a9d24a3c"
+    },
+    {
+      "path": "guard-clippy-second/report.json",
+      "bytes": 168454,
+      "sha256": "3b665590a8d46b1bbfdb2e3fc9e46849e4b8b3eade728225e5d5875b8e85c1bb"
+    },
+    {
+      "path": "guard-helper-first/report.json",
+      "bytes": 169748,
+      "sha256": "72da155c97cc129cedd300231f3ded8d680c7b8b0ef4767303d6cc15ebfa144b"
+    },
+    {
+      "path": "guard-library-first/export-check-first.json",
+      "bytes": 916,
+      "sha256": "36c17917b07462864669d6af2f6f3a7c9f90eb4f8171c3b05b23aa3132ca4c6e"
+    },
+    {
+      "path": "guard-library-first/report.json",
+      "bytes": 169058,
+      "sha256": "ffb97060fa5fa5cf1dc65e6a185f5c79833f8436e83ad7e0662a708149775fe8"
+    },
+    {
+      "path": "guard-native-runtime-first/report.json",
+      "bytes": 109493,
+      "sha256": "a9f30d709bd4fd7041d6de269c8c9f8fc2ec74df2b9a50339dacd0fe67089e5f"
+    },
+    {
+      "path": "guard-source-preservation-first/source-preservation-first.json",
+      "bytes": 2290,
+      "sha256": "66ab82cdf48981f60b6f120ba0d919ec6226d6d04a666229bd8491661bd23ba0"
+    },
+    {
+      "path": "source-manifest-first.json",
+      "bytes": 32236,
+      "sha256": "166f3b88f0bd7dd013c5d73fa71761aa9f9af0a85bdd231e017299515a39fde5"
+    },
+    {
+      "path": "windows-readonly-guard-first.json",
+      "bytes": 17045,
+      "sha256": "feb1e8bb73f6ce7582af7cebaae55145008dda21ba201c4d9ca9a31a265e73ff"
+    }
+  ],
+  "destinationFileCountIncludingThisFreeze": 18,
+  "progressDocumentAtHandoff": {
+    "path": "开发计划/10-实施进度与验证记录.md",
+    "bytes": 590742,
+    "sha256": "62a6545fe39176e5e40a437c711f36316f4c1f1fd041169296fe1e25f3e66019",
+    "changeScope": "Third current-summary paragraph updated; private guard component section appended. Historical API probe/failures retained."
+  },
+  "actualArchiveExit": 0,
+  "all149TextMembersReplayed": true,
+  "coreReportsPromoted": 9,
+  "binaryIdentitiesOnly": 2,
+  "producerArtifactIdentitiesFromReportsOnly": 5,
+  "originalFailuresRetained": true,
+  "duplicatePatchStatus": "NO_SOURCE_CHANGE_ALREADY_FIXED_BEFORE_FREEZE",
+  "realProductionMsiBridge": "NOT_EXERCISED",
+  "Windows7Runtime": "NOT_RUN",
+  "Windows10Runtime": "NOT_RUN",
+  "closingMetadataCredentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "scope": "README, actual archive operation receipt, full progress document and this freeze",
+    "statisticsBeforeFreezeScan": {
+      "textViews": 14,
+      "utf16Views": 0,
+      "cp936Views": 0,
+      "clixmlDecodedViews": 0,
+      "decodedBase64Views": 0,
+      "jsonContainers": 1,
+      "decodedJsonStringViews": 11
+    },
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "unknownControls": "REJECTED_NO_EXCEPTIONS"
+  },
+  "checks": {
+    "controllerPythonAst": true,
+    "gitDiffCheck": true,
+    "allDestinationJsonParsed": true
+  },
+  "actions": {
+    "WindowsContacted": false,
+    "Cargo": false,
+    "worktreeOrTargetRead": false,
+    "producerTargetBinariesRead": false,
+    "privateKeyContentRead": false,
+    "sourceDeletion": false,
+    "commitPush": false
+  },
+  "writerState": "This agent stops writing after this freeze; root may review and commit."
+}

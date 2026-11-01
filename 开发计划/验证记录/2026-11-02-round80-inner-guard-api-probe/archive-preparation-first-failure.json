@@ -1,0 +1,14 @@
+{
+  "status": "FAIL_LOCAL_ARCHIVE_PREPARATION_NO_PAYLOAD_CREATED",
+  "actualExit": 1,
+  "controller": {
+    "path": "archive-controller-first.py",
+    "bytes": 15873,
+    "sha256": "cf13a3b5d59152ad3a163d662731f9240a94f5a016d0779e12177f25bd0e0cfb"
+  },
+  "assertion": "EXACT_FIFTEEN_ROOT_RECEIPTS_AND_STREAMS",
+  "cause": "Manual root stream count expected15, actual fixed set16 (PowerShell parse includes stdin).",
+  "correction": "Only count15\u219216 plus preserved-failure destination bookkeeping; evidence selection or scanner scope unchanged.",
+  "WindowsContacted": false,
+  "sourceDeleted": false
+}

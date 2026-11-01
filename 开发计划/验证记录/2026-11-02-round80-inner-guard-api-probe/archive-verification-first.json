@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FULL_TAR_REPLAY_AND_BOUNDED_DECODED_CREDENTIAL_SCAN",
+  "archiveSha256": "138abb098c989d3071e37b1c57e71370a6e255049efec2d1f7edd19462634276",
+  "archiveBytes": 365391,
+  "indexSha256": "0c187dcf59a6dd2291be2d1e8df8d5d2d7c80bb069880f6f4ea1556385ed0a38",
+  "originalCount": 451,
+  "originalBytes": 1957969,
+  "credentialScan": {
+    "status": "PASS_NO_MATCHES",
+    "statistics": {
+      "textViews": 19901,
+      "utf16Views": 144,
+      "cp936Views": 12,
+      "clixmlDecodedViews": 26,
+      "decodedBase64Views": 96,
+      "jsonContainers": 1762,
+      "decodedJsonStringViews": 18109
+    },
+    "jsonlRecordsAlsoDecoded": 680,
+    "patterns": [
+      "private-key-pem",
+      "github-token",
+      "openai-secret",
+      "aws-access-key",
+      "bearer-secret",
+      "basic-secret",
+      "signed-download-url",
+      "session-cookie-bearer",
+      "json-issued-web-secret",
+      "json-password-value",
+      "potential-pairing-short-code"
+    ],
+    "findings": [],
+    "coverage": "All selected text raw bytes, strict UTF8/UTF16/CP936, CLIXML parsed text, JSON and JSONL strings, nested canonical generic/declared base64, full tar replay, six promoted core reports, manifest/facts/controller/index. Unknown controls rejected; exactly two path/size/SHA-bound UTF16 MSI stream notes scanned in raw/visible/concatenated forms. Decoder depth12; JSON250000; decoded64MiB per original.",
+    "exactControlFormCount": 2
+  },
+  "scope": "API probe evidence only; production authority NONE. Historical original FAIL/NOT_RUN preserved.",
+  "sourceDeletion": false,
+  "toolsDeleted": false,
+  "WindowsContacted": false,
+  "Cargo": false,
+  "worktreeOrTargetRead": false,
+  "privateKeyContentRead": false
+}

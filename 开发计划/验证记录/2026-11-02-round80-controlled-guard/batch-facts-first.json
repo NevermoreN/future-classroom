@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_FINITE_RUST_GUARD_COMPONENT_BATCH_NOT_PRODUCTION_MSI_LINKAGE",
+  "candidateCommit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+  "parentCommit": "b7e4c938ab8ff391e2ad6c1d681e074881118c0a",
+  "candidateSync": {
+    "argv": [
+      "git",
+      "push",
+      "origin",
+      "implementation/r80-controlled-repair"
+    ],
+    "actualExit": 0,
+    "originalParentReaped": true,
+    "seconds": 3.1154455469986715,
+    "commit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+    "remoteReadback": {
+      "actualExit": 0,
+      "commit": "d2dd16bb25ce5d9a8b7e61546a167a1dd61e5e96",
+      "ref": "refs/heads/implementation/r80-controlled-repair"
+    }
+  },
+  "compileFacts": [
+    {
+      "path": "guard-build-first/report.json",
+      "status": "FAIL",
+      "actualExit": 101,
+      "seconds": 8.765126400001463,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-build-second/report.json",
+      "status": "PASS_FROZEN_LOCAL_COMPILER_CHECK_ONLY",
+      "actualExit": 0,
+      "seconds": 71.23454439399939,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-build-third/report.json",
+      "status": "PASS_FROZEN_LOCAL_COMPILER_CHECK_ONLY",
+      "actualExit": 0,
+      "seconds": 66.19902373200239,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-clippy-first/report.json",
+      "status": "FAIL",
+      "actualExit": 101,
+      "seconds": 73.09548642499794,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-clippy-second/report.json",
+      "status": "PASS_FROZEN_LOCAL_COMPILER_CHECK_ONLY",
+      "actualExit": 0,
+      "seconds": 11.914205837001646,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-library-first/report.json",
+      "status": "PASS_FROZEN_LOCAL_COMPILER_CHECK_ONLY",
+      "actualExit": 0,
+      "seconds": 113.8198116809981,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    },
+    {
+      "path": "guard-helper-first/report.json",
+      "status": "PASS_FROZEN_LOCAL_COMPILER_CHECK_ONLY",
+      "actualExit": 0,
+      "seconds": 139.0236207309972,
+      "inputs": 459,
+      "runtime": "NOT_RUN",
+      "productionAdmission": false
+    }
+  ],
+  "sourceFiles": 10,
+  "sourceCopiesMatchOriginalCommitReceipt": true,
+  "libraryExport": {
+    "status": "PASS_GNU_X86_UNDECORATED_TYPE1_EXPORT_ONLY",
+    "dll": {
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc_windows.dll",
+      "bytes": 4866478,
+      "sha256": "e8bc2e4964bea210caf9f7a70a5c8f91800d3e963e6e8d1df6887194ce9bccd3",
+      "test": false,
+      "target": {
+        "kind": [
+          "rlib",
+          "cdylib"
+        ],
+        "crate_types": [
+          "rlib",
+          "cdylib"
+        ],
+        "name": "fc_windows",
+        "src_path": "/tmp/fc-round80-controlled-repair/checkout-52d6392-first/crates/fc-windows/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      }
+    },
+    "libraryReportSha256": "ffb97060fa5fa5cf1dc65e6a185f5c79833f8436e83ad7e0662a708149775fe8",
+    "objdumpActualExit": 0,
+    "matchingExportRows": [
+      "\t[   0] FcControlledInnerGuard"
+    ],
+    "runtime": "NOT_RUN",
+    "msvcExport": "NOT_VALIDATED"
+  },
+  "producerArtifactIdentitiesFromReportsOnly": [
+    {
+      "producerReport": "guard-build-second/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4174526,
+      "sha256": "4b62439f5f8550aacba89950c6946a3e20970cf84152fc39e519e01e0559df95",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-build-third/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows-c44c2cfd6a872903.exe",
+      "bytes": 4175038,
+      "sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-library-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc_windows.dll",
+      "bytes": 4866478,
+      "sha256": "e8bc2e4964bea210caf9f7a70a5c8f91800d3e963e6e8d1df6887194ce9bccd3",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/deps/fc_windows.dll",
+      "bytes": 4866397,
+      "sha256": "41eb605c37455e6bbe574da4ab6774fe89ad4e6b7d90d51e1a3210c8bbd43f77",
+      "originalReadByArchiver": false
+    },
+    {
+      "producerReport": "guard-helper-first/report.json",
+      "path": "/tmp/fc-round80-controlled-repair/target-first/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe",
+      "bytes": 794021,
+      "sha256": "17cda50fe9989e14893d5dfd7f5292a3241e0e1431dbc9918eeb9026ec8d2504",
+      "originalReadByArchiver": false
+    }
+  ],
+  "win11": {
+    "runtimeReport": {
+      "path": "guard-native-runtime-first/report.json",
+      "bytes": 109493,
+      "sha256": "a9f30d709bd4fd7041d6de269c8c9f8fc2ec74df2b9a50339dacd0fe67089e5f"
+    },
+    "scopes": {
+      "controlled": 6,
+      "lifecycle": 60
+    },
+    "overlap": "60 includes controlled6; nested child summaries are not added to parent totals",
+    "originalParents": [
+      {
+        "Pid": 25024,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380437145509640,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a\\candidate-tests.exe",
+        "Sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      },
+      {
+        "Pid": 28556,
+        "Tid": 0,
+        "Wait": 0,
+        "ExitCode": 0,
+        "Creation": 134380437147640856,
+        "Image": "C:\\Users\\Elior\\AppData\\Local\\Temp\\FutureClassroom-r80-guard-native-712b5a74043ca14d29735a7dbcedb65a\\candidate-tests.exe",
+        "Sha256": "ac65f6ca31c47cfac5f8a249d763660e1c1dafcd5172fe9731cffa961322f48c",
+        "Sid": "S-1-5-21-3896111207-1867804362-1971593122-1001",
+        "Kind": "process",
+        "Status": "HELD_ORIGINAL_IDENTITY",
+        "Error": null,
+        "ExitKnown": true,
+        "CheckedClose": true
+      }
+    ],
+    "completeDownloadFiles": 4,
+    "ownedProcessesAfter": 0,
+    "scratchDeleted": true,
+    "nativeMilliseconds": 1217,
+    "outerTransportSeconds": 4.881371658000717,
+    "audit": {
+      "path": "windows-readonly-guard-first.json",
+      "bytes": 17045,
+      "sha256": "feb1e8bb73f6ce7582af7cebaae55145008dda21ba201c4d9ca9a31a265e73ff"
+    }
+  },
+  "preservedHistory": [
+    "First compiler101: called unavailable Error::from_win32; retained with pre-fix source.",
+    "First strict Clippy101: unused diagnostic, retained with pre-fix source.",
+    "Original unexecuted preparation/NOT_RUN states remain unchanged.",
+    "Third revision rejected duplicate stale patch: NO_SOURCE_CHANGE_ALREADY_FIXED_BEFORE_FREEZE, not an additional compiler failure."
+  ],
+  "scope": "Private Rust Type1 guard, B/G bridge and zero-slot template components compiled, with pure parser and component runtime checks; normal helper compiled only. No real B/G/CA coupled MSI flow or public Setup route exercised.",
+  "productionMsiAdapter": "NOT_EXERCISED",
+  "windows7Runtime": "NOT_RUN",
+  "windows10Runtime": "NOT_RUN",
+  "actions": {
+    "WindowsContacted": false,
+    "Cargo": false,
+    "worktreeOrTargetRead": false,
+    "privateKeyContentRead": false,
+    "sourceDeletion": false,
+    "commitPush": false
+  }
+}
