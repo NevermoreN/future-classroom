@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_R73_TERMINAL_OWNED_ROOTS_REMOVED_AFTER_EXACT_COMMITTED_PROOF",
+  "atUtc": "2026-11-01T11:51:23.470407+00:00",
+  "commit": "9dc05366ba4bbcecb6921894c43841041aba33b4",
+  "planSha256": "1d0c61f1f76c886cb1cdefef69b5c6cc15cf5b60b860d6bd1eb212c0412c155c",
+  "committedProofSha256": "246e2a0f2045a0825d3b7cf88dc9dc8c212a1a9d5853043692d12c88f9be8607",
+  "archiveOriginalsReplayed": 297,
+  "excludedOriginalPeIdentitiesVerified": 24,
+  "integratedSourcesVerified": 15,
+  "buildInputsVerified": 548,
+  "actions": [
+    {
+      "command": [
+        "git",
+        "worktree",
+        "remove",
+        "--force",
+        "/tmp/fc-round73-installer-broker/worktree"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "-D",
+        "codex/installer-broker"
+      ],
+      "exitCode": 0,
+      "stdout": "Deleted branch codex/installer-broker (was 00120a0).\n",
+      "stderr": ""
+    },
+    {
+      "removedRoot": "/tmp/fc-round73-installer-broker"
+    },
+    {
+      "removedRoot": "/tmp/fc-round73-archive-controller"
+    },
+    {
+      "removedRoot": "/tmp/fc-round73-cleanup-controller"
+    }
+  ],
+  "preserved": "Main target/global caches/three development ZIPs/Windows SSH service and authorization/external private key; no key content read.",
+  "physicalDiskFreed": "NOT_MEASURED"
+}
