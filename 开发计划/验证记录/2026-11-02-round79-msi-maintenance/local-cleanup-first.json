@@ -1,0 +1,2931 @@
+{
+  "status": "PASS_EXACT_COMMITTED_R79_EVIDENCE_AND_OWNED_LOCAL_CLEANUP",
+  "sourceCommit": "7837e90bd114af82987b0b6e4b4dc519de7ec6ab",
+  "sourceSha": "c44906517fbc62233dca755d7225cea375264cbc",
+  "candidateSha": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+  "sourceDeletionStarted": true,
+  "removedFiles": 18235,
+  "removedSymlinks": 12,
+  "removedDirectories": 1319,
+  "logicalRegularBytesRemovedDirectly": 6733100596,
+  "logicalRegularBytesRemovedByGit": 3269662632,
+  "Windows": "NOT_CONTACTED",
+  "R80SourceContents": "NOT_READ_OR_HASHED",
+  "privateKeyContentsRead": false,
+  "physicalReclaimedBytes": "NOT_MEASURED_LOGICAL_COUNTS_ONLY",
+  "worktreeRemovals": [
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+      "head": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+      "status": "ACTUAL_NORMAL_GIT_REMOVE_EXIT0",
+      "forceUsed": false
+    },
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+      "head": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+      "status": "ACTUAL_NORMAL_GIT_REMOVE_EXIT0",
+      "forceUsed": false
+    }
+  ],
+  "mountBefore": {
+    "status": "PASS_NO_MOUNT_UNDER_E",
+    "count": 0
+  },
+  "processBefore": {
+    "status": "PASS_NO_OTHER_LIVE_E_PROCESS_REFERENCE",
+    "count": 0,
+    "signalsSent": 0
+  },
+  "protectedBefore": {
+    "key": {
+      "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "mode": "0o600",
+      "device": 36,
+      "inode": 350322122,
+      "bytes": 444,
+      "mtimeNs": 1793310593546722934,
+      "ctimeNs": 1793310593547722973,
+      "uid": 1026,
+      "gid": 100,
+      "regular": true,
+      "directory": false,
+      "symlink": false
+    },
+    "protected": [
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1134885,
+        "bytes": 6115463,
+        "mtimeNs": 1793475492612463271,
+        "ctimeNs": 1793475492612463271,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1085309,
+        "bytes": 5968710,
+        "mtimeNs": 1793466278236251459,
+        "ctimeNs": 1793466278236251459,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1234558,
+        "bytes": 5203704,
+        "mtimeNs": 1793484787780062195,
+        "ctimeNs": 1793484787780062195,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target",
+        "mode": "0o755",
+        "device": 150,
+        "inode": 45511040,
+        "bytes": 66,
+        "mtimeNs": 1793386269213181416,
+        "ctimeNs": 1793386269213181416,
+        "uid": 1026,
+        "gid": 100,
+        "regular": false,
+        "directory": true,
+        "symlink": false
+      }
+    ]
+  },
+  "remoteProof": {
+    "status": "PASS_ACTUAL_READONLY_LS_REMOTE",
+    "refs": {
+      "refs/heads/candidate/r79-damaged-install-preimage": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+      "refs/heads/main": "7837e90bd114af82987b0b6e4b4dc519de7ec6ab"
+    }
+  },
+  "committedDestinationProof": [
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-index-first.json",
+      "bytes": 737545,
+      "sha256": "6a843f8ea6d8e5e1e73f130859f37b11f28fee14711c8a39c059cd90ac1406d7",
+      "blob": "f9dc629ed452060f663703e34c8f6c2d2c297d6a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-preparation-second/cleanup-plan-second.json",
+      "bytes": 2212,
+      "sha256": "cf5074ce15c076b2dcbc269c0803aa436c4e2f09335b29e98e9040ff80a404aa",
+      "blob": "a1c672ec4e63bbe32c1bcd8b383e6a4f7e4e7d0b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-verification-first.json",
+      "bytes": 4517,
+      "sha256": "87f691578b1a1ed6468de07cb5a768ce9f853a9abeec354dd37b9ec43886406c",
+      "blob": "b34bc9557159b682fe035f67abb6c29c6c46daa5"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-first/cleanup-operation.json",
+      "bytes": 18996,
+      "sha256": "b90854ab44f0163d5db59d1dda09dc19536bb2d347512b1314b7c2dd86dc3784",
+      "blob": "5e254e95ea529a645f0882f6f42489bbf60004d4"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-second/cleanup-operation.json",
+      "bytes": 19067,
+      "sha256": "af3a0e1f018ebb3d5c5e306cb282afcd5c3b99b813508dc37f4c38b19346968e",
+      "blob": "2b37e4998e8846953be72c0e1cce06cd4844fb69"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-first/runtime-operation.json",
+      "bytes": 40354,
+      "sha256": "82569f2897bb0e7da0587de83b48ff174e56718a3f495a82f99acb32320c5ae8",
+      "blob": "f795eee47ed15c5b1a0b6eba71cd4a2e18982e56"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-second/runtime-operation.json",
+      "bytes": 41380,
+      "sha256": "088aa27057c4367b27339e27d74143bdfb802148a423aefb4b051c02d852c54e",
+      "blob": "96c3ce64de75ac1733fac4d6651086a9d62a478d"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-third/runtime-operation.json",
+      "bytes": 130240,
+      "sha256": "44a72e1c869f843d45a385f24cdbffb92f369890cb7f1892295993baf4c70c6a",
+      "blob": "b603e69ad946425fbde9429fa4db96230a143f7a"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-first/runtime-operation.json",
+      "bytes": 131966,
+      "sha256": "d8893598f781188b0b8b3e2655ecaf90dd8fc5b1317f6e46980e1bd2d20f9bdb",
+      "blob": "57cf6198d64490e99bc9e93b8ab1ec84f07a7ca9"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-independent-review-first/review-first.json",
+      "bytes": 94606,
+      "sha256": "937559ac030946bbd0b6366a6f91b75dd325628f5db698c9f9553edd6e2f07ac",
+      "blob": "2db708916d008af6d5f9273f516fe91fb016f4a3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz",
+      "bytes": 21388816,
+      "sha256": "941e0f4c0793f10b5098b793ccf1571934628c81f1faab45129f0308d398d706",
+      "blob": "ecb79afa2a3e543deb4008952948f0830b8fac98"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/independent-finite-acceptance-first/acceptance-first.json",
+      "bytes": 196322,
+      "sha256": "9d62afea11216b365e50f04cab3fed4cc44b9d70335887107ac2f8a9f377fdd2",
+      "blob": "2d735a64e13fb2e418ae48c56d3d363f927cdb95"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py",
+      "bytes": 25349,
+      "sha256": "52bb66bc5ae388f738fb431d2da2cfc5c230045645b1032d5f3d0d18a5d112b9",
+      "blob": "dddafd76122bbf97b21e8df70a25132506bd04af"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-index-first.json",
+      "bytes": 6523,
+      "sha256": "31aa81de3b92fcd0c795569187a5ac6db5daebcafef48329e5ed483a7c9182cb",
+      "blob": "f861af78e91d5322b6526481e0465d8f8d547e37"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-originals-first.tar.gz",
+      "bytes": 25681,
+      "sha256": "130b8ed6944a2826fc30ee1539bce1b07187020aec50c1b140c759d2d006cc4b",
+      "blob": "358287be522b915294bef457305f7e45946722c7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-supplement-scan-first.json",
+      "bytes": 892,
+      "sha256": "9bd21a9b34421418e6580f3c63e15f6dd50b504a83f76de0d0758bee3bcfd369",
+      "blob": "e44be24d12d9ecf102f51d3ce856793ae6920349"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/product-negative-runtime-first/report.json",
+      "bytes": 438526,
+      "sha256": "0e4a2f4b24d594690e5f6278e1e622dee1c1d1f47bd633e9aa5954e6b16f637b",
+      "blob": "16045c72d8d9f342f73e5adbc9156780a84e8388"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-clippy-first/report.json",
+      "bytes": 1759,
+      "sha256": "8d50b818b4194776668ee9bd9e9d54aa7f29f0547ce48f2a55eced4de6450d9b",
+      "blob": "476016b12fb1e2e0e08af0ecbb3056ed28830767"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-first/report.json",
+      "bytes": 5577,
+      "sha256": "24d7bbdffbce3d8406cc33c89cfc0f0d93cce054b0e0b5cdb4dac82e8f7022f8",
+      "blob": "a65009ed93e5fcc6c3aca99e4580e8dfc3b9dc41"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-first/report.json",
+      "bytes": 22535,
+      "sha256": "9fff7918b6cb7ef0a50969e988f9620101c458fc6e61cef38d7f07d169c87010",
+      "blob": "199c0fd48fa5aae5f58db9e7b3ff7bfc83205b96"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-second/report.json",
+      "bytes": 23102,
+      "sha256": "b7736c2044d2e61b6a50acd275be306f98d261921a66c824a232ee8c5e9c0f81",
+      "blob": "294a66f0137003ce5985322e120e46d319688ab6"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-first/report.json",
+      "bytes": 1734,
+      "sha256": "246adda56be407632e24df08b0d07cdbe3697cd2051225c29941cdeddabf003f",
+      "blob": "be136653dffc86eab5d11124f467114d5217ab07"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-second/report.json",
+      "bytes": 1741,
+      "sha256": "bbd1635f399846da56dc14788885dd41693c3804ca8c5578d68571858d916acb",
+      "blob": "735de91c094fa404b4d8bd3dc0dfd32215589906"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-semantic-review-first/review-second.json",
+      "bytes": 24687,
+      "sha256": "e2ebe2a4531434328f3326f5038da8b4497ded233fb5703a5db2875e75fd6351",
+      "blob": "9558fd2312c1dda93980d526fd6f87c78cb13c4b"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-source-preservation-first/preservation-first.json",
+      "bytes": 3039,
+      "sha256": "064dbb16cb709a6e752534994dbdfe28a0ba80ecdd628bda9d55c14b2b50a62f",
+      "blob": "7740990134b447a1602fe1f76c9dfcfb87bcdad3"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-native-failure-cleanup-first/report.json",
+      "bytes": 7179,
+      "sha256": "88d09ba1ddd819a22669388bf9e4aced3dfa58ef7bcdfe0a4366cb58024deeaa",
+      "blob": "5829f5165985a27fb353157cc38bc52ae7fbe169"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json",
+      "bytes": 3022,
+      "sha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30",
+      "blob": "a2ce32d0ee0e84994fd1b91fe7789e48c357c467"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-negative-exact-system-paths-second.json",
+      "bytes": 74175,
+      "sha256": "fa9c947f2f45c3eed32a5d95556f805082f01632c778c9a61ba628b7a29bb3c8",
+      "blob": "faa8c313e328999e3b9afc136f4a32e0f808a3e7"
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/windows-readonly-final-second.json",
+      "bytes": 17039,
+      "sha256": "66bcac658e0a144af244a613702c8d8f37c6aab407fc39e3d19f4b71a85be4ad",
+      "blob": "bf66553a89463ba47b4a566902e2c593daa1d53e"
+    }
+  ],
+  "lateSupplementProof": [
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json",
+      "bytes": 3022,
+      "sha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30",
+      "blob": "a2ce32d0ee0e84994fd1b91fe7789e48c357c467",
+      "lateSource": {
+        "path": "root-archive-operation-first.json",
+        "bytes": 3022,
+        "sha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30",
+        "authority": "EXACT_COMMITTED_SUPPLEMENT_NOT_TAR_MEMBER"
+      }
+    },
+    {
+      "path": "开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py",
+      "bytes": 25349,
+      "sha256": "52bb66bc5ae388f738fb431d2da2cfc5c230045645b1032d5f3d0d18a5d112b9",
+      "blob": "dddafd76122bbf97b21e8df70a25132506bd04af",
+      "lateSource": "KNOWN_ABSENT_NO_EXTRA_E_PATH_ADMITTED"
+    }
+  ],
+  "lateSourceAllowed": {
+    "root-archive-operation-first.json": {
+      "bytes": 3022,
+      "sha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30"
+    }
+  },
+  "registeredWorktreePathsBefore": [
+    "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+    "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+    "/tmp/fc-round80-controlled-repair/checkout-52d6392-first",
+    "/workspace/共享/Eliora/未来教室计划"
+  ],
+  "archiveProof": {
+    "status": "PASS_FULL_COMMITTED_TAR_CURRENT_ORIGINAL_AND_BINARY_REPLAY",
+    "originals": 3121,
+    "excludedBinaries": 185,
+    "logicalOriginalBytes": 161164158,
+    "finiteAcceptance": "PASS_R79_FINITE_LOCAL_EVIDENCE_ACCEPTANCE_WIN11_ONLY_NOT_PRODUCTION_INTEGRATION"
+  },
+  "worktreeProof": [
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+      "head": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+      "clean": true,
+      "forceAllowed": false
+    },
+    {
+      "path": "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+      "head": "52d6392552679e7cedb564cd52db08e6e2ebc04b",
+      "clean": true,
+      "forceAllowed": false
+    }
+  ],
+  "plannedEntries": 62038,
+  "plannedLogicalRegularBytes": 10002763228,
+  "processImmediatelyBeforeMutation": {
+    "status": "PASS_NO_OTHER_LIVE_E_PROCESS_REFERENCE",
+    "count": 0,
+    "signalsSent": 0
+  },
+  "hardlinkAccounting": [
+    {
+      "device": 4194542,
+      "inode": 2140378,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082369626080,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/ahash-88d98a8fb899062c/build-script-build",
+          "repair-candidate-target-first/debug/build/ahash-88d98a8fb899062c/build_script_build-88d98a8fb899062c"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082369626080
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140699,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082369626080,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/crc32fast-a05867a97ec1d4d9/build-script-build",
+          "repair-candidate-target-first/debug/build/crc32fast-a05867a97ec1d4d9/build_script_build-a05867a97ec1d4d9"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082369626080
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140760,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082369626080,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/encoding_rs-6b8b724347b5a393/build-script-build",
+          "repair-candidate-target-first/debug/build/encoding_rs-6b8b724347b5a393/build_script_build-6b8b724347b5a393"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082369626080
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141662,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082370626116,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/fc-bootstrap-005b78cd45eb217d/build-script-build",
+          "repair-candidate-target-first/debug/build/fc-bootstrap-005b78cd45eb217d/build_script_build-005b78cd45eb217d"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082370626116
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2139568,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082370626116,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/generic-array-5ee74e218b553be3/build-script-build",
+          "repair-candidate-target-first/debug/build/generic-array-5ee74e218b553be3/build_script_build-5ee74e218b553be3"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082370626116
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140752,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082370626116,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/libsqlite3-sys-9de8405c61ecdfdc/build-script-build",
+          "repair-candidate-target-first/debug/build/libsqlite3-sys-9de8405c61ecdfdc/build_script_build-9de8405c61ecdfdc"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082370626116
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2139634,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082370626116,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/proc-macro2-01501fd49f9ea077/build-script-build",
+          "repair-candidate-target-first/debug/build/proc-macro2-01501fd49f9ea077/build_script_build-01501fd49f9ea077"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082370626116
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2139667,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082372626187,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/quote-e7a35a192f622666/build-script-build",
+          "repair-candidate-target-first/debug/build/quote-e7a35a192f622666/build_script_build-e7a35a192f622666"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082372626187
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140194,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082372626187,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/rustversion-1218268bd94f1c10/build-script-build",
+          "repair-candidate-target-first/debug/build/rustversion-1218268bd94f1c10/build_script_build-1218268bd94f1c10"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082372626187
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140157,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082373626223,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/serde-5cd66808ba6d93e0/build-script-build",
+          "repair-candidate-target-first/debug/build/serde-5cd66808ba6d93e0/build_script_build-5cd66808ba6d93e0"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082373626223
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140103,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082373626223,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/serde_core-40dca36baebfa72f/build-script-build",
+          "repair-candidate-target-first/debug/build/serde_core-40dca36baebfa72f/build_script_build-40dca36baebfa72f"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082373626223
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140139,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082373626223,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/serde_json-1865df0c808b1c48/build-script-build",
+          "repair-candidate-target-first/debug/build/serde_json-1865df0c808b1c48/build_script_build-1865df0c808b1c48"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082373626223
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2140175,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082374626259,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/debug/build/zerocopy-a13999b64b534205/build-script-build",
+          "repair-candidate-target-first/debug/build/zerocopy-a13999b64b534205/build_script_build-a13999b64b534205"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082374626259
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2152260,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082498630711,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/fc_bootstrap-e9fc53b57b9830f4.exe",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/fc-bootstrap.exe"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082498630711
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2152337,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082853643454,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/fc_installer_lifecycle-3f102730f6bec8d6.exe",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/fc-installer-lifecycle.exe"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082853643454
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2142193,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082963647403,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_application-499fa77397872a11.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_application-1fj0as5ryroos/s-hnricgtos1-18cdmfg-1plnvygzstqf99wndlzvs2a4o/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082963647403
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2142144,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082963647403,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_audio-45ffc691e4be6926.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_audio-1vl90xibtjnjd/s-hnricglo5h-04wxpf9-3a5y47310rnx2bjh446hxphmz/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082963647403
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2150815,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082987648265,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_bootstrap-d6ab7dd6afb50260.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_bootstrap-32rbtlimuez73/s-hnrid89d7s-0rdyq24-a0d3j98bl7t3waebfq1qxef5n/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082987648265
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2139695,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082990648372,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_domain-242ad75eb92fb78e.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_domain-2gxkp4rrhkzce/s-hnribgdenb-0n550ha-6sbh6c759hevphsc2emobm4or/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082990648372
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141679,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082991648408,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_materials-8a46b09732ab2aea.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_materials-0nkcxk8qwjby0/s-hnric7p8ln-1kx8dyr-63xynphkllimp6k4ob52o8gc5/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082991648408
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2139872,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082993648480,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_ports-ade87af103933246.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_ports-3r7gx6k5pku4k/s-hnribm3g6j-1cb5yxr-dl2s3ekihqmj9t7n7rx9bzwtu/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082993648480
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141297,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082993648480,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_presentation-7be8a680105c6b99.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_presentation-19yjj3px896dq/s-hnric3vuc2-199mlxp-28ylzm3afyms1ldzuq1ktiqo1/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082993648480
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141427,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082994648516,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_protocol-90f45b02a10be67f.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_protocol-3jglml1uqq5hr/s-hnric519sn-0hju2wi-beqppa7borpqdnx0vqs4jo56c/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082994648516
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141586,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082995648552,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_runtime-21648186e8df0529.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_runtime-1hg9csnbivlf3/s-hnric7az1z-0w1pra2-8lpjhvxfumhtnhm3yoydoez5a/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082995648552
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141791,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082997648624,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_security-45a98925edbc368d.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_security-13vi6z168z2l2/s-hnric8k601-09b2h26-cvvfk8zfm8jhce3lco29jnwol/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082997648624
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2141869,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566082998648660,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_storage-969382ba24f3301f.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_storage-2piw75aqond44/s-hnric8y4u0-0futyvs-3wz9l0qq8fief315r22ujs849/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566082998648660
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2150511,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566083000648731,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/deps/libfc_windows-0e7ca0005f642314.rmeta",
+          "repair-candidate-target-first/i686-pc-windows-gnu/debug/incremental/fc_windows-0xnr92srmq8x0/s-hnrid0g1y8-0lsigbw-d58f17q7l5dx3nfun6lqoi3ve/metadata.rmeta"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566083000648731
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2164994,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085021721281,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/release/deps/fc_bootstrap-37ad247073a15d47.exe",
+          "repair-candidate-target-first/i686-pc-windows-gnu/release/fc-bootstrap.exe"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085021721281
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2165150,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085022721317,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/i686-pc-windows-gnu/release/deps/fc_installer_lifecycle-c5cacaad8d846540.exe",
+          "repair-candidate-target-first/i686-pc-windows-gnu/release/fc-installer-lifecycle.exe"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085022721317
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155544,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085128725123,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/ahash-1ac9d485ecef9e10/build-script-build",
+          "repair-candidate-target-first/release/build/ahash-1ac9d485ecef9e10/build_script_build-1ac9d485ecef9e10"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085128725123
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155864,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085128725123,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/crc32fast-96637fdf87d2264c/build-script-build",
+          "repair-candidate-target-first/release/build/crc32fast-96637fdf87d2264c/build_script_build-96637fdf87d2264c"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085128725123
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155904,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085129725159,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/encoding_rs-ed431e1a8d949ce9/build-script-build",
+          "repair-candidate-target-first/release/build/encoding_rs-ed431e1a8d949ce9/build_script_build-ed431e1a8d949ce9"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085129725159
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2164122,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085129725159,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/fc-bootstrap-b3be215d804de00d/build-script-build",
+          "repair-candidate-target-first/release/build/fc-bootstrap-b3be215d804de00d/build_script_build-b3be215d804de00d"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085129725159
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2154981,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085129725159,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/generic-array-57990b37178276f9/build-script-build",
+          "repair-candidate-target-first/release/build/generic-array-57990b37178276f9/build_script_build-57990b37178276f9"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085129725159
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155887,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085130725195,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/libsqlite3-sys-696d653f45f37193/build-script-build",
+          "repair-candidate-target-first/release/build/libsqlite3-sys-696d653f45f37193/build_script_build-696d653f45f37193"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085130725195
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155030,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085130725195,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/proc-macro2-0020fa94a4a7a44f/build-script-build",
+          "repair-candidate-target-first/release/build/proc-macro2-0020fa94a4a7a44f/build_script_build-0020fa94a4a7a44f"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085130725195
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155076,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085131725230,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/quote-97810d43d1cf375d/build-script-build",
+          "repair-candidate-target-first/release/build/quote-97810d43d1cf375d/build_script_build-97810d43d1cf375d"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085131725230
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155398,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085131725230,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/rustversion-55675794d70bb926/build-script-build",
+          "repair-candidate-target-first/release/build/rustversion-55675794d70bb926/build_script_build-55675794d70bb926"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085131725230
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155355,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085132725266,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/serde-a7ea31b52bbc37aa/build-script-build",
+          "repair-candidate-target-first/release/build/serde-a7ea31b52bbc37aa/build_script_build-a7ea31b52bbc37aa"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085132725266
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155277,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085132725266,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/serde_core-bf1ee157cb2e6efb/build-script-build",
+          "repair-candidate-target-first/release/build/serde_core-bf1ee157cb2e6efb/build_script_build-bf1ee157cb2e6efb"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085132725266
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155327,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085132725266,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/serde_json-9196a3e3e4f20275/build-script-build",
+          "repair-candidate-target-first/release/build/serde_json-9196a3e3e4f20275/build_script_build-9196a3e3e4f20275"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085132725266
+          }
+        ]
+      }
+    },
+    {
+      "device": 4194542,
+      "inode": 2155354,
+      "progress": {
+        "unlinked": 2,
+        "initialNlink": 2,
+        "expectedCtimeNs": 1793566085133725302,
+        "allowOwnedCtime": true,
+        "paths": [
+          "repair-candidate-target-first/release/build/zerocopy-fc1f0af8193dd430/build-script-build",
+          "repair-candidate-target-first/release/build/zerocopy-fc1f0af8193dd430/build_script_build-fc1f0af8193dd430"
+        ],
+        "ctimeAdjustments": 1,
+        "observations": [
+          {
+            "afterOwnedUnlinkCount": 1,
+            "actualRemainingNlink": 1,
+            "actualRemainingCtimeNs": 1793566085133725302
+          }
+        ]
+      }
+    }
+  ],
+  "ownedHardlinkUnlinkCount": 84,
+  "expectedOwnedHardlinkCtimeAdjustments": 42,
+  "registeredWorktreePathsAfter": [
+    "/tmp/fc-round80-controlled-repair/checkout-52d6392-first",
+    "/workspace/共享/Eliora/未来教室计划"
+  ],
+  "protectedAfter": {
+    "key": {
+      "path": "/config/.local/share/future-classroom-test-access/win11-192.168.10.212",
+      "mode": "0o600",
+      "device": 36,
+      "inode": 350322122,
+      "bytes": 444,
+      "mtimeNs": 1793310593546722934,
+      "ctimeNs": 1793310593547722973,
+      "uid": 1026,
+      "gid": 100,
+      "regular": true,
+      "directory": false,
+      "symlink": false
+    },
+    "protected": [
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1134885,
+        "bytes": 6115463,
+        "mtimeNs": 1793475492612463271,
+        "ctimeNs": 1793475492612463271,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1085309,
+        "bytes": 5968710,
+        "mtimeNs": 1793466278236251459,
+        "ctimeNs": 1793466278236251459,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+        "mode": "0o644",
+        "device": 4194542,
+        "inode": 1234558,
+        "bytes": 5203704,
+        "mtimeNs": 1793484787780062195,
+        "ctimeNs": 1793484787780062195,
+        "uid": 1026,
+        "gid": 100,
+        "regular": true,
+        "directory": false,
+        "symlink": false
+      },
+      {
+        "path": "/workspace/共享/Eliora/未来教室计划/target",
+        "mode": "0o755",
+        "device": 150,
+        "inode": 45511040,
+        "bytes": 66,
+        "mtimeNs": 1793386269213181416,
+        "ctimeNs": 1793386269213181416,
+        "uid": 1026,
+        "gid": 100,
+        "regular": false,
+        "directory": true,
+        "symlink": false
+      }
+    ]
+  },
+  "ownedRootKnownAbsent": true,
+  "processesTerminated": 0,
+  "globalCachesTouched": false,
+  "R80WorktreeTouched": false,
+  "gitOperations": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.001810613999623456,
+      "stdoutBytes": 41,
+      "stdoutSha256": "498a6f2aedc8132d9ec47051c8a24ea5f0a5b1105421aea2b5acc2f470086871",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0904811599993991,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "config",
+        "--get",
+        "remote.origin.url"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0016786680007498944,
+      "stdoutBytes": 51,
+      "stdoutSha256": "1be573d1bc2515cd03ff8ed6a7ddb08633d40aec8df2008cdecdddb63716fb44",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "ls-remote",
+        "--heads",
+        "origin",
+        "refs/heads/main",
+        "refs/heads/candidate/r79-damaged-install-preimage"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.6963146119996964,
+      "stdoutBytes": 148,
+      "stdoutSha256": "3b2e872a69f75d55353742a18e2eeda5282190aa72cf819852b468d6fe3d7108",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "ls-tree",
+        "-r",
+        "--name-only",
+        "-z",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab",
+        "--",
+        "开发计划/验证记录/2026-11-02-round79-msi-maintenance"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004036833999634837,
+      "stdoutBytes": 3144,
+      "stdoutSha256": "99e848bde651ec3196d96ccac00a40f666d76b469d082f22bb9cbbeb197081a5",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-index-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006094528000176069,
+      "stdoutBytes": 737545,
+      "stdoutSha256": "6a843f8ea6d8e5e1e73f130859f37b11f28fee14711c8a39c059cd90ac1406d7",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-index-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004507992998696864,
+      "stdoutBytes": 41,
+      "stdoutSha256": "45c9bef5d4911a45d9cbe392abb173fd9b51002c7f61f71dbac37dce3b4ca337",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-preparation-second/cleanup-plan-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003690670000651153,
+      "stdoutBytes": 2212,
+      "stdoutSha256": "cf5074ce15c076b2dcbc269c0803aa436c4e2f09335b29e98e9040ff80a404aa",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-preparation-second/cleanup-plan-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0028395360004651593,
+      "stdoutBytes": 41,
+      "stdoutSha256": "00746b8b2d8392c714e4f6403ec09cee678516495377abb3af89b8e8588f5b87",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-verification-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003660918999230489,
+      "stdoutBytes": 4517,
+      "stdoutSha256": "87f691578b1a1ed6468de07cb5a768ce9f853a9abeec354dd37b9ec43886406c",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/archive-verification-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.021842789001311758,
+      "stdoutBytes": 41,
+      "stdoutSha256": "9fc69ff959d3ad711aa381eb7b94d62d2b355de8c8d32be7da768423e57c952f",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-first/cleanup-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004096437000043807,
+      "stdoutBytes": 18996,
+      "stdoutSha256": "b90854ab44f0163d5db59d1dda09dc19536bb2d347512b1314b7c2dd86dc3784",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-first/cleanup-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004029584000818431,
+      "stdoutBytes": 41,
+      "stdoutSha256": "fb8584dd52e367de8eff15bd076bb91bef7ee8fe2d08f51dcffd432f2f1f32b2",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-second/cleanup-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.005442542000309913,
+      "stdoutBytes": 19067,
+      "stdoutSha256": "af3a0e1f018ebb3d5c5e306cb282afcd5c3b99b813508dc37f4c38b19346968e",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-failure-cleanup-second/cleanup-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0038735179987270385,
+      "stdoutBytes": 41,
+      "stdoutSha256": "cc6be5a4d1d161ec8131c4700d2dbac357533fa8bcdb466ee5d9214707289a25",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-first/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004110216999833938,
+      "stdoutBytes": 40354,
+      "stdoutSha256": "82569f2897bb0e7da0587de83b48ff174e56718a3f495a82f99acb32320c5ae8",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-first/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003699419999975362,
+      "stdoutBytes": 41,
+      "stdoutSha256": "0bd6ba06860c225df3c98fe318e0c1767a65b867b44e7dfdd5b4251ade753f63",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-second/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0064950750002026325,
+      "stdoutBytes": 41380,
+      "stdoutSha256": "088aa27057c4367b27339e27d74143bdfb802148a423aefb4b051c02d852c54e",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-second/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006816146998971817,
+      "stdoutBytes": 41,
+      "stdoutSha256": "450721802368cd1fa9718c3f07fbb38b4af093ef9433481608f60dd9b352d87b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-third/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004292345000067144,
+      "stdoutBytes": 130240,
+      "stdoutSha256": "44a72e1c869f843d45a385f24cdbffb92f369890cb7f1892295993baf4c70c6a",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/controlled-owner-runtime-third/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.013677045999429538,
+      "stdoutBytes": 41,
+      "stdoutSha256": "28e3f1eadafca8f75d56193939348508a377b1620e2ea05ff87b74f76100ed89",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-first/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.007853609000449069,
+      "stdoutBytes": 131966,
+      "stdoutSha256": "d8893598f781188b0b8b3e2655ecaf90dd8fc5b1317f6e46980e1bd2d20f9bdb",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-first/runtime-operation.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0032821129989315523,
+      "stdoutBytes": 41,
+      "stdoutSha256": "83d8845ea1ca39d38381cc2078a78e4e4910142ce5748f27ad7b769fd63d3418",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-independent-review-first/review-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003174098999807029,
+      "stdoutBytes": 94606,
+      "stdoutSha256": "937559ac030946bbd0b6366a6f91b75dd325628f5db698c9f9553edd6e2f07ac",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/early-terminal-runtime-independent-review-first/review-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003195070001311251,
+      "stdoutBytes": 41,
+      "stdoutSha256": "071b9d2369769ee156428f44a7eb1f02e88511206649865d53894ac508008261",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.09164135799983342,
+      "stdoutBytes": 21388816,
+      "stdoutSha256": "941e0f4c0793f10b5098b793ccf1571934628c81f1faab45129f0308d398d706",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/evidence-originals-first.tar.gz"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002663268000105745,
+      "stdoutBytes": 41,
+      "stdoutSha256": "3c69ff36b0af1ae79e9a2bd0700dca50939180e52c49fb0c3f2073626dc75b09",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/independent-finite-acceptance-first/acceptance-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0037021400003141025,
+      "stdoutBytes": 196322,
+      "stdoutSha256": "9d62afea11216b365e50f04cab3fed4cc44b9d70335887107ac2f8a9f377fdd2",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/independent-finite-acceptance-first/acceptance-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002667179000127362,
+      "stdoutBytes": 41,
+      "stdoutSha256": "783797b583322c2b3c79a8b63a4ba46be158af5eba9e448628c14c63e1f38d97",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004985273000784218,
+      "stdoutBytes": 25349,
+      "stdoutSha256": "52bb66bc5ae388f738fb431d2da2cfc5c230045645b1032d5f3d0d18a5d112b9",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0031000859999039676,
+      "stdoutBytes": 41,
+      "stdoutSha256": "3ed48131d468615ac01c9d48b4818af3ae5c917358180ee6c7be6d7225036ac5",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-index-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0030405540001083864,
+      "stdoutBytes": 6523,
+      "stdoutSha256": "31aa81de3b92fcd0c795569187a5ac6db5daebcafef48329e5ed483a7c9182cb",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-index-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003470741999990423,
+      "stdoutBytes": 41,
+      "stdoutSha256": "401b8767fe5dd9b30e36c4d7fce4e75a22e1a34a488cb68cc9380bf7bd849790",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-originals-first.tar.gz"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006149560000267229,
+      "stdoutBytes": 25681,
+      "stdoutSha256": "130b8ed6944a2826fc30ee1539bce1b07187020aec50c1b140c759d2d006cc4b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-preparation-originals-first.tar.gz"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003974910998294945,
+      "stdoutBytes": 41,
+      "stdoutSha256": "c10bcb898503ea4b3ec40b5df4f47eb83178e5db1a68fb1b031f0e9b5a90d10b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-supplement-scan-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0035580650001065806,
+      "stdoutBytes": 892,
+      "stdoutSha256": "9bd21a9b34421418e6580f3c63e15f6dd50b504a83f76de0d0758bee3bcfd369",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-supplement-scan-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0029588300003524637,
+      "stdoutBytes": 41,
+      "stdoutSha256": "30a18f70890e930725a375b216b7d2d225fe2ec6069bbdae83ca120920248850",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/product-negative-runtime-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004204441000183579,
+      "stdoutBytes": 438526,
+      "stdoutSha256": "0e4a2f4b24d594690e5f6278e1e622dee1c1d1f47bd633e9aa5954e6b16f637b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/product-negative-runtime-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0026584579991322244,
+      "stdoutBytes": 41,
+      "stdoutSha256": "d420a8f440e95be7eca4a80b2900f5ad1e8be9c96817143eb3ad4b263ec09c00",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-clippy-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002689639000891475,
+      "stdoutBytes": 1759,
+      "stdoutSha256": "8d50b818b4194776668ee9bd9e9d54aa7f29f0547ce48f2a55eced4de6450d9b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-clippy-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0026406470005895244,
+      "stdoutBytes": 41,
+      "stdoutSha256": "570f3ce050e11927f295bc6602331f40cc8d1e0e6d8741b67d404e1d4b0567c8",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.00335254600031476,
+      "stdoutBytes": 5577,
+      "stdoutSha256": "24d7bbdffbce3d8406cc33c89cfc0f0d93cce054b0e0b5cdb4dac82e8f7022f8",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003851917001156835,
+      "stdoutBytes": 41,
+      "stdoutSha256": "df051a850447b04ccbc7fd062b3cc9c3d88f35a2e486da8ffe2b099d898b79be",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003146248000120977,
+      "stdoutBytes": 22535,
+      "stdoutSha256": "9fff7918b6cb7ef0a50969e988f9620101c458fc6e61cef38d7f07d169c87010",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0025886450002872152,
+      "stdoutBytes": 41,
+      "stdoutSha256": "8557d7428147231ff7a19b46dbc664f10cdee659b50e8ff8d5ec6cb671d73a8d",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-second/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002796843999021803,
+      "stdoutBytes": 23102,
+      "stdoutSha256": "b7736c2044d2e61b6a50acd275be306f98d261921a66c824a232ee8c5e9c0f81",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-native-release-second/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004062805001012748,
+      "stdoutBytes": 41,
+      "stdoutSha256": "1fbbfcc028c3fbc83b1a2a1efd7485e077f93f3bd9071a1f79d5bd63a213c8b6",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0029111580006428994,
+      "stdoutBytes": 1734,
+      "stdoutSha256": "246adda56be407632e24df08b0d07cdbe3697cd2051225c29941cdeddabf003f",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.00264706699999806,
+      "stdoutBytes": 41,
+      "stdoutSha256": "1654acaa048e11372e5eff3c5b8ae4bf7a33ee5becde65d583c2f21e9b4c77f1",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-second/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0030446540004049893,
+      "stdoutBytes": 1741,
+      "stdoutSha256": "bbd1635f399846da56dc14788885dd41693c3804ca8c5578d68571858d916acb",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-release-build-second/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0029490999986592215,
+      "stdoutBytes": 41,
+      "stdoutSha256": "69fe5707fc6b3a71ce16a8dc8e0388d9a6610151a8ca0891fbde118e25b6ff51",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-semantic-review-first/review-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003501212000628584,
+      "stdoutBytes": 24687,
+      "stdoutSha256": "e2ebe2a4531434328f3326f5038da8b4497ded233fb5703a5db2875e75fd6351",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-semantic-review-first/review-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003250162999393069,
+      "stdoutBytes": 41,
+      "stdoutSha256": "f2e44c0255b8f0b277c4eb91517e7d62d4c89dd3079badfb4270a906eb9cc314",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-source-preservation-first/preservation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0034076680003636284,
+      "stdoutBytes": 3039,
+      "stdoutSha256": "064dbb16cb709a6e752534994dbdfe28a0ba80ecdd628bda9d55c14b2b50a62f",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-candidate-source-preservation-first/preservation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0026597880005283514,
+      "stdoutBytes": 41,
+      "stdoutSha256": "146843ddfb1bfb58144983338a287c43a426cb62359794c29f41b0aae1994a90",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-native-failure-cleanup-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0028130340015195543,
+      "stdoutBytes": 7179,
+      "stdoutSha256": "88d09ba1ddd819a22669388bf9e4aced3dfa58ef7bcdfe0a4366cb58024deeaa",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/repair-native-failure-cleanup-first/report.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.00428969499989762,
+      "stdoutBytes": 41,
+      "stdoutSha256": "aa3a94f895305577be5da18e1b83976138a72812bdf8e77cf5b6c744725846bf",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003145488000882324,
+      "stdoutBytes": 3022,
+      "stdoutSha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0025480339991190704,
+      "stdoutBytes": 41,
+      "stdoutSha256": "fee59e642ac1e34ba7e87589f97c4c0757e827769449c338ce6e178c71cd370f",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-negative-exact-system-paths-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0030463740004051942,
+      "stdoutBytes": 74175,
+      "stdoutSha256": "fa9c947f2f45c3eed32a5d95556f805082f01632c778c9a61ba628b7a29bb3c8",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-negative-exact-system-paths-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.004268594000677695,
+      "stdoutBytes": 41,
+      "stdoutSha256": "7f8e1e691956d6e2f01132b36918329efcf207be6962d489d0cb925f349c25d7",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/windows-readonly-final-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0029536999991250923,
+      "stdoutBytes": 17039,
+      "stdoutSha256": "66bcac658e0a144af244a613702c8d8f37c6aab407fc39e3d19f4b71a85be4ad",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/windows-readonly-final-second.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002592505001302925,
+      "stdoutBytes": 41,
+      "stdoutSha256": "866f56a75ccfaf5eb3d6fc962ce42e71aecce36e3868dbb381f13ccd32d00425",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0028893369999423157,
+      "stdoutBytes": 3022,
+      "stdoutSha256": "3ce2a4b88cc06a01e5daf0174b9a7b344ff5961aa8ef1f8369404a40974b9c30",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/root-archive-operation-first.json"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002564334999988205,
+      "stdoutBytes": 41,
+      "stdoutSha256": "fee59e642ac1e34ba7e87589f97c4c0757e827769449c338ce6e178c71cd370f",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.00400945299952582,
+      "stdoutBytes": 25349,
+      "stdoutSha256": "52bb66bc5ae388f738fb431d2da2cfc5c230045645b1032d5f3d0d18a5d112b9",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "7837e90bd114af82987b0b6e4b4dc519de7ec6ab:开发计划/验证记录/2026-11-02-round79-msi-maintenance/local-cleanup-first.py"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0031963399997039232,
+      "stdoutBytes": 41,
+      "stdoutSha256": "3ed48131d468615ac01c9d48b4818af3ae5c917358180ee6c7be6d7225036ac5",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "worktree",
+        "list",
+        "--porcelain",
+        "-z"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0018489949998183874,
+      "stdoutBytes": 630,
+      "stdoutSha256": "c74788883d40a57831cf8a2fd4dffb2c1202f0b6977a537164be9a9514c1eddc",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "52d6392552679e7cedb564cd52db08e6e2ebc04b:crates/fc-windows/src/installer_lifecycle/native/broker.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003096106000157306,
+      "stdoutBytes": 50152,
+      "stdoutSha256": "8303bd999264c6b78d057dc71920058c9b3ff8be931664e35ac2f1bbab87359c",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "52d6392552679e7cedb564cd52db08e6e2ebc04b:crates/fc-windows/src/installer_lifecycle/native/broker/effects.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.003357596000569174,
+      "stdoutBytes": 49786,
+      "stdoutSha256": "91d850385afd5ac721f2c5b46cb33667bddb532cf9c1a06527e2502eb2fddbf4",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "show",
+        "52d6392552679e7cedb564cd52db08e6e2ebc04b:crates/fc-windows/src/installer_lifecycle/native/broker/effects/preimage.rs"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002512122000553063,
+      "stdoutBytes": 10869,
+      "stdoutSha256": "233a3752bd5baed898d421301597fa8c468d013467c316d2b70a18b1e3a18555",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "worktree",
+        "list",
+        "--porcelain",
+        "-z"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0022985239993431605,
+      "stdoutBytes": 630,
+      "stdoutSha256": "c74788883d40a57831cf8a2fd4dffb2c1202f0b6977a537164be9a9514c1eddc",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0019284279987914488,
+      "stdoutBytes": 41,
+      "stdoutSha256": "6f94eb83e90c9b35918ef2f3710e4d5513b1c46015afd11866de467808e9175e",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.214906980001615,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.006938462000107393,
+      "stdoutBytes": 41,
+      "stdoutSha256": "3550133987cf696ad4f412389544f2e6ad6b4b2a73cbf3df2424349af303768b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.19456410400016466,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.001993922000110615,
+      "stdoutBytes": 41,
+      "stdoutSha256": "6f94eb83e90c9b35918ef2f3710e4d5513b1c46015afd11866de467808e9175e",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0826907239988941,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "worktree",
+        "remove",
+        "/tmp/fc-round79-msi-maintenance/package-preparation-first/checkout-261c58a-first"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 2.140472850000151,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.002320644000064931,
+      "stdoutBytes": 41,
+      "stdoutSha256": "3550133987cf696ad4f412389544f2e6ad6b4b2a73cbf3df2424349af303768b",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.10313937499995518,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "worktree",
+        "remove",
+        "/tmp/fc-round79-msi-maintenance/repair-implementation-first/checkout-c449-first"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 3.5791181130007317,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "worktree",
+        "list",
+        "--porcelain",
+        "-z"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0019500890011840966,
+      "stdoutBytes": 291,
+      "stdoutSha256": "d6f99f7a16f47fa0eb66d3bd0940b459d0db71334cc07dcfef6588f6516e1a88",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.0016617780001979554,
+      "stdoutBytes": 41,
+      "stdoutSha256": "498a6f2aedc8132d9ec47051c8a24ea5f0a5b1105421aea2b5acc2f470086871",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/共享/Eliora/未来教室计划",
+        "-c",
+        "core.autocrlf=true",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=all"
+      ],
+      "actualExit": 0,
+      "parentReaped": true,
+      "seconds": 0.17178772700026457,
+      "stdoutBytes": 0,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "completedUtc": "2026-11-01T20:48:05.339531+00:00"
+}
