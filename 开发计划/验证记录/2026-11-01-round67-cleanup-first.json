@@ -1,0 +1,25 @@
+{
+  "status": "PASS_OWNED_COMPLETED_LOCAL_ROOT_REMOVED",
+  "recordedUtc": "2026-11-01T07:53:42.785876+00:00",
+  "proof": {
+    "path": "开发计划/验证记录/2026-11-01-round67-committed-bytes-first.json",
+    "sha256": "2c403a45b8a09f655b9bfaa72004c6ceab5dffd921e1b149a3395b630c002bc1",
+    "verifiedCommit": "b7b0d9654c49466632bc059c2f4b033110a791d5"
+  },
+  "removedRoot": "/tmp/fc-round67-ci-evidence",
+  "fileCount": 569,
+  "logicalFileBytes": 401927925,
+  "physicalDiskRelease": "NOT_MEASURED",
+  "originalFilesArchived": 523,
+  "excludedCompiledPayloadIdentities": 46,
+  "activeOwnedProcesses": [],
+  "scope": "Exact completed R67 root only; every original/excluded payload checked before removal. Windows cleanup was independently PASS before archive; no Windows mutation performed here.",
+  "preserved": [
+    "Windows SSH service and public authorization",
+    "Persistent private key outside repository (never read here)",
+    "R68 active worktree/evidence/target and original build controller",
+    "Main target/debug and global caches",
+    "Three intentionally retained development ZIPs",
+    "Other unfinished development fixtures"
+  ]
+}
