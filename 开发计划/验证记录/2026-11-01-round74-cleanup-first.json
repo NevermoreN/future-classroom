@@ -1,0 +1,70 @@
+{
+  "status": "PASS_OWNED_R74_LOCAL_CLEANUP",
+  "recordedUtc": "2026-11-01T12:52:30.217301+00:00",
+  "verifiedCommit": "3e7061e5ed36ab84035ad59745d4b2e58ad110e1",
+  "committedFiles": 846,
+  "committedBytes": 133547865,
+  "sourceOriginalFiles": 839,
+  "excludedPayloadIdentities": 76,
+  "archiveIndexSha256": "0358a3906abc2866a28cbe13d3298f8b747b89cda7f00a3e718c44ab2f69b5a6",
+  "removedRoots": [
+    "/tmp/fc-round74-ci-evidence",
+    "/tmp/fc-round74-archive-controller"
+  ],
+  "removedRegularFiles": 921,
+  "removedLogicalBytes": 633407388,
+  "physicalDiskReleased": "NOT_MEASURED",
+  "controllerFiles": [
+    {
+      "path": "/tmp/fc-round74-archive-controller/.owner",
+      "bytes": 49,
+      "sha256": "3849e7b2f9d51d058b5c6e165216fe4dfb1b4d69a78cb8b51975f868a67075f7",
+      "archivedAt": "Exact owner bytes identified by marker contract"
+    },
+    {
+      "path": "/tmp/fc-round74-archive-controller/archive-evidence-first.py",
+      "bytes": 21927,
+      "sha256": "b99753e6c1cfcf1272b5c61e6896608750dede81312aef322a37c02e6c25354d",
+      "archivedAt": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-ci/archive-controller-preparation-first/archive-evidence-first.py"
+    },
+    {
+      "path": "/tmp/fc-round74-archive-controller/archive-evidence-second.py",
+      "bytes": 21899,
+      "sha256": "241286bb5ad4da8a425d194e2023b2f694a409eddc3e5fee93dc3e795871b4fc",
+      "archivedAt": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-ci/archive-controller-preparation-first/archive-evidence-second.py"
+    },
+    {
+      "path": "/tmp/fc-round74-archive-controller/archive-operation-first.json",
+      "bytes": 1122,
+      "sha256": "16e4cb555ca9376bee3c150140f28a9376c0d65940f46a0941426e11354ff199",
+      "archivedAt": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-archive-operation-first.json"
+    },
+    {
+      "path": "/tmp/fc-round74-archive-controller/archive-operation-first.stdout.log",
+      "bytes": 441,
+      "sha256": "df903e3818fd8068b86aa03ca1cc1535028fc7ce6aa93e4ba25b9f6d09f22340",
+      "archivedAt": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-archive-operation-first.stdout.log"
+    },
+    {
+      "path": "/tmp/fc-round74-archive-controller/archive-operation-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedAt": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round74-archive-operation-first.stderr.log"
+    }
+  ],
+  "activeProcessesBefore": [],
+  "processesTerminated": 0,
+  "windowsMutation": "NONE",
+  "preservedExistence": {
+    "/tmp/fc-round75-installer-maintenance": true,
+    "/workspace/共享/Eliora/未来教室计划/target": true,
+    "/mnt/data/future-classroom-public-desktop-dev.zip": false,
+    "/mnt/data/future-classroom-continuous-accept-dev.zip": false,
+    "/mnt/data/future-classroom-voice-capability-dev.zip": false
+  },
+  "persistentPrivateKey": {
+    "contentsRead": false,
+    "modeOnly": "0600"
+  },
+  "scope": "Exact owned ended R74 CI evidence/outer archive roots only after full committed blob and source/archive/gzip/excluded identities replay. Active R75 worktree/target and persistent SSH retained."
+}
