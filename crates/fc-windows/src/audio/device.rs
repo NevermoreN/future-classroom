@@ -16,6 +16,15 @@ use windows::{
         System::Com::*,
     },
 };
+// The same COM task allocator is available through Ole32 on the Win7 baseline.
+// The generated binding targets combase.dll; keep this import narrow as in the
+// native KnownFolder and file-picker adapters without changing ownership.
+#[link(name = "ole32")]
+unsafe extern "system" {
+    #[link_name = "CoTaskMemFree"]
+    fn free_task_memory(memory: *const core::ffi::c_void);
+}
+
 static ACTIVE: AtomicBool = AtomicBool::new(false);
 static POISONED: AtomicBool = AtomicBool::new(false);
 const MAX_ID_UNITS: usize = 32_768;
@@ -278,7 +287,7 @@ fn endpoint_id(enumerator: &IMMDeviceEnumerator, role: ERole) -> Result<Option<V
     }
     // SAFETY: GetId transfers CoTaskMem ownership, including an empty/null result.
     unsafe {
-        CoTaskMemFree(Some(id.0.cast()));
+        free_task_memory(id.0.cast());
     }
     result
 }

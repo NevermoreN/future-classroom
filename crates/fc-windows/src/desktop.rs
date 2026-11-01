@@ -1693,10 +1693,7 @@ fn prepare_content_with_note(
                 .len()
                 > limit)
     {
-        return Err(Error::new(
-            E_BOUNDS,
-            "Read-only classroom content does not fit its complete display area",
-        ));
+        return Err(Error::from_hresult(E_BOUNDS));
     }
     let mut starts = Vec::new();
     for b in &blocks {
@@ -1752,10 +1749,7 @@ fn prepare_content_with_note(
     }
 
     if read_only_classroom(c) && pages.len() > 1 {
-        return Err(Error::new(
-            E_BOUNDS,
-            "Read-only classroom content does not fit its complete display area",
-        ));
+        return Err(Error::from_hresult(E_BOUNDS));
     }
     Ok(ContentLayout {
         top_inset,

@@ -182,3 +182,8 @@ R39最终本地矩阵以[第五次原报告](验证记录/2026-11-01-round39-voi
 代码提交 `b9c24b62…` 精确包含33Rust+3测试观测文件，429份已知Rust/构建输入逐字节绑定最终候选。GNU完整测试编译/正常构建/stable及固定nightly严格Clippy均PASS，Host独立完整21组973/0/0/0与strict PASS；原编译加测试900秒超时保留，缓存编译后完整测试819.79秒仍使用原900秒、jobs2/threads2。实际授权Win11同GNU正常程序21EXE1481/0/0/0、公开20步/配色22步、证书配置22步及完整默认浏览器流程分别PASS/cleanup PASS。构建时HEAD与工作树改动通过精确字节映射到后续代码提交，不宣称该提交已完成Hosted CI或动态build.rs全沙箱。
 
 22份GNU PE32/x86/CUI全部原objdump保留，系统msvcrt.dll与现代/update风险不隐去，不等于Win7兼容。证书四项检查时Satisfied不授予监听或信任许可；缓存/名称/链逐项如实报告。R51二版有限失败诊断保留原立即FAIL、实际exit0、原期限和物理清理门槛；首次浏览器真实中断仍根因未知。新源码完整MSVC、三系统实机及生产发布门槛单独验收，详见[实施记录](10-实施进度与验证记录.md)与[最终本地整批证明](验证记录/2026-11-01-round50-https-integration/final-local-batch-first.json)。
+
+
+## 第五十三轮 MSI 候选门槛
+
+[MSI构建器](../scripts/package-msi-candidate.py)当前只准入真实Win7目标MSVC开发ZIP及完整Web资源/许可，用固定wixl 0.103生成每用户x86候选。输入CRC/逐文件SHA、实际安装表/私有固定目录/HKCU组件KeyPath、事务内旧版删除顺序及14件完整解包已取证，见[实施记录](10-实施进度与验证记录.md)。该路径用于实现和检查安装格式，未改变P5依赖：P5-01/02/06、运行中升级拒绝、Run归属清理、实际三系统安装/修复/升级回滚/卸载与完整ICE审查仍须单独完成。候选工具不得在打包时调用Windows Installer、启动产品或写业务/系统配置；不把Linux构建或静态导入报告升格为Win7加载或安装通过。

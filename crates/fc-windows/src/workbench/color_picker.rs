@@ -44,10 +44,7 @@ pub(super) fn choose(owner: HWND, initial: Rgb) -> Result<Option<Rgb>> {
     if error == 0 {
         Ok(None)
     } else {
-        Err(Error::new(
-            HRESULT(0x80004005u32 as i32),
-            "system colour dialog failed",
-        ))
+        Err(Error::from_hresult(HRESULT(0x80004005u32 as i32)))
     }
 }
 #[cfg(test)]

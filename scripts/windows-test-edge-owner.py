@@ -32,8 +32,8 @@ import uuid
 
 sys.dont_write_bytecode = True
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-EDGE_SHA = "f87d927bed3597f19c70af67bc786dd22e4eca3b5c7cc050336a016bb42f7fda"
-EDGE_VERSION = "156.0.4314.50"
+EDGE_SHA = "d35d48b11f0439eeeddbbff0bf54856e922f5e1506a2f3098b5a808fcec4068b"
+EDGE_VERSION = "156.0.4314.58"
 TESTED_PROTOTYPE_SHA256 = "fa6a06d8d81869151cef54f8d12e7b0d9cea8749fcd8f17b7eb8a96533daf2e0"
 RAW_NAMES = ("edge.stdout", "edge.stderr", ".edge-process.json", ".edge-assigned.json",
              ".edge-supervisor.json", ".edge-ready.json", "edge-devtools.raw", ".edge-outcome.json")
