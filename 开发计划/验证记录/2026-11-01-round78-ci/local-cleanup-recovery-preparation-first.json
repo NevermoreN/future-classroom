@@ -1,0 +1,74 @@
+{
+  "status": "PREPARED_SECOND_CLEANUP_CORRECT_PROTECTED_FILENAMES_NOT_EXECUTED",
+  "sourceBaseGit": "261c58aca8b0f63ff2cfb4dbd5e85c0d17770005",
+  "firstCleanupSourceCommit": "33e41b6ae63541f766d11305fc966cbd9f9f33f3",
+  "originalControllerSha256": "5aa9888c6a1b12adcabbf0e9e68ec5bf7062f8f99ccc47303aa8f318d3eabb68",
+  "firstFailureSha256": "4d8ad878e26d1c978f64c0e2a7f29b6f72e5c82266d2d1ac3d5bcf6168e4d1fb",
+  "firstFailureHadAnyDeletion": false,
+  "newControllerPath": "/workspace/共享/Eliora/未来教室计划/开发计划/验证记录/2026-11-01-round78-ci/local-cleanup-second.py",
+  "newControllerSha256": "f53b2202f46bacf216730bfb7bff73efcc83d8510fb767bd9a8b151cf33e91a8",
+  "preparationObservedAtUtc": "2026-11-01T18:38:31.303536+00:00",
+  "changes": [
+    "Exact three intended protected ZIP basenames corrected to original versioned case-sensitive filenames",
+    "New second receipt, first failure kept",
+    "Controller location bound to this committed main evidence directory; original E controller and first failure SHA pinned; all archive/source/process/owner/deletion guards unchanged"
+  ],
+  "actualProtectedZips": [
+    {
+      "path": "/mnt/data/FutureClassroom-0.1.0-public-desktop-dev.zip",
+      "bytes": 6115463,
+      "sha256": "9428e3d7cdcaedc92801f360c4f5209575af56b779cfa31dd6860326475d0582"
+    },
+    {
+      "path": "/mnt/data/FutureClassroom-0.1.0-continuous-accept-dev.zip",
+      "bytes": 5968710,
+      "sha256": "8e2a125c3b4a11c413618d123ad73984267f616d0b95398da043bd95886323f1"
+    },
+    {
+      "path": "/mnt/data/FutureClassroom-0.1.0-voice-capability-dev.zip",
+      "bytes": 5203704,
+      "sha256": "5e280a84e726f0366db3e0ea1bd704158e26ac1b3fdb4e542f397b48fc1706c0"
+    }
+  ],
+  "originalWrongNamesKnownAbsent": true,
+  "AST": "PASS",
+  "defaultActualExitCode": 0,
+  "defaultOriginalStdout": "{\"status\": \"NOT_RUN_PREPARATION_ONLY\", \"sourceRoot\": \"/tmp/fc-round78-ci-evidence\", \"receipt\": \"/workspace/\\u5171\\u4eab/Eliora/\\u672a\\u6765\\u6559\\u5ba4\\u8ba1\\u5212/\\u5f00\\u53d1\\u8ba1\\u5212/\\u9a8c\\u8bc1\\u8bb0\\u5f55/2026-11-01-round78-ci/local-cleanup-second.json\", \"sourceDeletion\": false, \"Windows\": \"NOT_CONNECTED\"}\n",
+  "defaultOriginalStderr": "",
+  "execution": "NOT_RUN",
+  "windowsContacted": false,
+  "privateKeyContentsRead": false,
+  "diff": [
+    "--- archived cleanup-first.py\n",
+    "+++ committed cleanup-second.py\n",
+    "@@ -1,5 +1,5 @@\n",
+    " #!/usr/bin/env python3\n",
+    "-\"\"\"R78 exact committed evidence proof then owned local cleanup; default NOT_RUN.\n",
+    "+\"\"\"R78 second committed cleanup: correct three protected ZIP names; default NOT_RUN.\n",
+    " No Windows/network call, process termination, sudo, global Git setting or key read.\n",
+    " \"\"\"\n",
+    " from pathlib import Path\n",
+    "@@ -9,8 +9,8 @@\n",
+    " WT=E/'package-source-preparation-first/checkout-261c58a-first'\n",
+    " SOURCE='261c58aca8b0f63ff2cfb4dbd5e85c0d17770005'\n",
+    " KEY=Path('/config/.local/share/future-classroom-test-access/win11-192.168.10.212')\n",
+    "-ZIP_PATHS=[Path('/mnt/data')/n for n in ('future-classroom-public-desktop-dev.zip','future-classroom-continuous-accept-dev.zip','future-classroom-voice-capability-dev.zip')]\n",
+    "-RESULT=DEST/'local-cleanup-first.json'\n",
+    "+ZIP_PATHS=[Path('/mnt/data')/n for n in ('FutureClassroom-0.1.0-public-desktop-dev.zip','FutureClassroom-0.1.0-continuous-accept-dev.zip','FutureClassroom-0.1.0-voice-capability-dev.zip')]\n",
+    "+RESULT=DEST/'local-cleanup-second.json'\n",
+    " SUCCESS='product-msi-runtime-second/report.json';FIRST='product-msi-runtime-first/report.json';FIRST_CLEANUP='root-first-product-scratch-cleanup-first.json'\n",
+    " SUCCESS_SHA='a636d1cc6a3f3f91a8c21d0aaf0dac43cbe93e856e9a66e5926af1ee3437d1f7'\n",
+    " FIRST_SHA='5126fb9b3c20f861ce7b3cf1f5ba7024508dfb17d827430e5da3cc33afd9545e'\n",
+    "@@ -138,7 +138,9 @@\n",
+    "  value=dict(status='RUNNING',sourceCommit=a.source_commit,originalCompiledSourceSha=SOURCE,startedUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),scope='Only owned R78 local worktree/tests/build/cache after exact committed archive/source proof; no Windows/network call, process termination, global install/cache or private-key contents.',removedFiles=0,removedSymlinks=0,removedDirectories=0,logicalRegularFileBytesRemoved=0,sourceDeletionStarted=False,worktreeRemoval=None)\n",
+    "  try:\n",
+    "   need(re.fullmatch('[0-9a-f]{40}',a.source_commit or ''),'FULL_C1_GIT_SHA');need(E.is_dir() and not E.is_symlink() and (E/'.owner').read_bytes()==b'future-classroom-owned-r78-ci-evidence/v1\\n','EXACT_R78_OWNER')\n",
+    "-  need((D/'.owner').read_bytes()==b'future-classroom-owned-r78-local-cleanup-preparation/v1\\n' and Path(__file__).resolve().parent==D,'EXACT_CLEANUP_CONTROLLER_OWNER')\n",
+    "+  need((D/'.owner').read_bytes()==b'future-classroom-owned-r78-local-cleanup-preparation/v1\\n' and Path(__file__).resolve()==DEST/'local-cleanup-second.py','EXACT_COMMITTED_RECOVERY_CONTROLLER_LOCATION')\n",
+    "+  need(sha((D/'cleanup-first.py').read_bytes())=='5aa9888c6a1b12adcabbf0e9e68ec5bf7062f8f99ccc47303aa8f318d3eabb68','ORIGINAL_ARCHIVED_CONTROLLER_UNCHANGED')\n",
+    "+  need(sha((DEST/'local-cleanup-first.json').read_bytes())=='4d8ad878e26d1c978f64c0e2a7f29b6f72e5c82266d2d1ac3d5bcf6168e4d1fb','ORIGINAL_FIRST_CLEANUP_FAILURE_UNCHANGED')\n",
+    "   need(git('rev-parse','HEAD').decode().strip()==a.source_commit and git('status','--porcelain','-z','--untracked-files=all')==b'','CURRENT_C1_HEAD_AND_CLEAN_MAIN')\n",
+    "   key_before=key_metadata();protected_before=[metadata(q) for q in ZIP_PATHS]+[metadata(MAIN/'target')];value['persistentKeyMetadataBefore']=key_before;value['protectedLocalMetadataBefore']=protected_before\n",
+    "   value['changedGitBlobProof']=changed_blob_proof(a.source_commit);index,originals,excluded,archive=archive_proof(a.source_commit);value['archiveProof']=archive;value['worktreeProof']=worktree_proof(a.source_commit,index,originals);value['processBefore']=process_gate();tree=plan_tree(originals,excluded,index['prunedGeneratedTrees']);value['plannedOwnedEntries']=len(tree);value['plannedLogicalRegularBytes']=sum(r['bytes'] for r in tree if r['kind']=='file')\n"
+  ]
+}
